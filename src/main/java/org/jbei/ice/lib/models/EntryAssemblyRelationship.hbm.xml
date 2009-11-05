@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.jbei.ice.lib.models">
+    <class name="EntryAssemblyRelationship" table="entry_entry_assembly_relationship">
+        <id name="id" column="id" type="int">
+            <generator class="sequence">
+                <param name="sequence">entry_entry_assembly_relationship_id_seq</param>
+            </generator>
+        </id>
+        <many-to-one name="subject" column="subject" class="Entry" />
+        <many-to-one name="object" column="object" class="Entry" />
+        <many-to-one name="relationship" column="relationship" 
+            class="AssemblyRelationship" />
+    </class>
+</hibernate-mapping>

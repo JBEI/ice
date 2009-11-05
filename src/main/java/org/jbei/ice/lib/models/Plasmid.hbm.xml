@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.jbei.ice.lib.models">
+	<joined-subclass name="Plasmid" extends="Entry" table="plasmids">
+		<key column="entries_id" />
+
+		<property name="backbone" column="backbone" type="string" length="127" />
+		<property name="originOfReplication" column="origin_of_replication" type="string" length="127" />
+		<property name="promoters" column="promoters" type="string" length="512" />
+		<property name="circular" column="circular" type="boolean" />
+	</joined-subclass>
+</hibernate-mapping>

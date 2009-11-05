@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.jbei.ice.lib.models">
+    <class name="EntryLabel" table="entry_labels">
+        <id name="id" column="id" type="int">
+            <generator class="sequence">
+                <param name="sequence">entry_labels_id_seq</param>
+            </generator>
+        </id>
+        <many-to-one name="label" column="labels_id" class="Label"></many-to-one>
+        <many-to-one name="entry" column="entries_id" class="Entry"></many-to-one>        
+    </class>
+</hibernate-mapping>

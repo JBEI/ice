@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.jbei.ice.lib.models">
+	<joined-subclass name="Part" extends="Entry" table="parts">
+		<key column="entries_id" />
+
+		<property name="packageFormat" column="package_format" type="string" length="255" />
+		<property name="pkgdDnaFwdHash" column="pkgd_dna_fwd_hash" type="string" length="40" />
+		<property name="pkgdDnaRevHash" column="pkgd_dna_rev_hash" type="string" length="40" />
+	</joined-subclass>
+</hibernate-mapping>

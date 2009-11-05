@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.jbei.ice.lib.models">
+	<joined-subclass name="Strain" extends="Entry" table="strains">
+		<key column="entries_id" />
+
+		<property name="host" column="host" type="string" length="255" />
+		<property name="genotypePhenotype" column="genotype_phenotype" type="string" length="255" />
+		<property name="plasmids" column="plasmids" type="string" length="512" />
+	</joined-subclass>
+</hibernate-mapping>

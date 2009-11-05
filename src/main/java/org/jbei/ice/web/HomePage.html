@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd" >
+    <head> 
+        <meta name="author" content="JBEI" />
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+        <title wicket:id="title">My Parts - JBEI Registry</title>
+        
+        <link wicket:id="stylesheet"></link>
+    </head>
+    <body>
+        <strong>Wicket Quickstart Archetype Homepage</strong>
+        <br/><br/>
+        <span wicket:id="message">message will be here</span><br/>
+        
+        <a href="#" wicket:id="link">This link</a> has been clicked
+        <span wicket:id="label">123</span> times.<br/>
+       
+        <table border="0" cellpadding="0" cellspacing="0" class="main_table">
+    <tr>
+        <td valign="top"><!-- Header Begin --> <table border="0" cellpadding="0" cellspacing="0" style="width: 100%; height: 60px">
+
+    <tr>
+        <td style="padding-left: 0px; width: 10px">
+            <img src="/static/images/logo.gif" alt="" style="width: 136px; height: 60px" />
+        </td>
+        
+        <td align="right" style="padding-right: 0px; width: 100%">
+        <table border="0" cellpadding="0" cellspacing="0" style="width: 100%; height: 60px">
+            <tr>
+                <td>
+                <div class="header_info">
+
+                <div wicket:id="loginPanel" class="header_info_right">This will be replaced</div>
+                
+                <div class="header_info_left">
+                <p>As of <b>Friday 9th October 2009</b><br />
+                there are 3940 Parts available</p>
+
+                </div>
+                </div>
+                </td>
+            </tr>
+        </table>
+        </td>
+    </tr>
+</table>
+
+ <!-- Header End --></td>
+
+    </tr>
+    <tr>
+        <td align="center" style="width: 100%; height: 100%">
+        <table border="0" cellpadding="0" cellspacing="0" class="main_table">
+            <tr>
+    <td align="center">
+    <table border="0" cellspacing="0" cellpadding="1"
+        style="width: 100%; height: 2px">
+        <tr>
+            <td style="background-color: #6C95C9;"></td>
+
+        </tr>
+    </table>
+    </td>
+</tr>
+<tr>
+    <td align="center" valign="top" style="height: 20px"><!-- Search Bar Begin -->
+    
+<form action="/search" method="get">
+<table border="0" cellspacing="0" style="width: 500; height: 20px">
+    <tr>
+        <td style="padding: 5px; width: 400"><input type="text" name="search" value="" style="width: 400px;" class="inputbox" /></td>
+
+        <td style="padding: 5px;"><input type="submit" name="Submit" value="search" class="button" /></td>
+        <td style="padding: 5px;">|</td> 
+        <td style="padding: 5px;"><a href="/query/">Advanced Search</a></td>
+        <td style="padding: 5px;">|</td> 
+        <td style="padding: 5px;"><a href="/blast/">Blast</a></td>
+    </tr>
+</table>
+</form>
+ <!-- Search Bar End --></td>
+
+</tr>
+<tr>
+    <td align="center" valign="top">
+    <table border="0" cellspacing="0" cellpadding="1"
+        style="width: 100%; height: 2px">
+        <tr>
+            <td style="background-color: #CCCC99"></td>
+        </tr>
+    </table>
+    </td>
+</tr>
+
+            <tr>
+                <td valign="top">
+                <table border="0" cellpadding="0" cellspacing="0" style="margin-top: 10px; height: 100%; width: 100%">
+                    <tr>
+                        <td valign="top" style="width: 180px"><!-- Menu Begin -->               <script type="text/javascript">
+                    $(document).ready(function() {
+                        var tips = new Array();
+                        tips.push("Enter [[jbei:JBn_nnnnnnnn]] to make a link.");
+                        tips.push("Try appending a * to your searches, e.g. pbad*");
+                        //tips.push("Second tip of the day");
+                        //tips.push("Third Long-long very long tip of the day");
+                        
+                        var randomIndex = Math.floor(Math.random() * tips.length);
+                        $('#tipOfTheDay').html(tips[randomIndex]);
+                    });
+                </script>
+                <div wicket:id="menuPanel" id="menu">This will be replaced</div>
+                
+</td>
+
+
+                        <td style="width: 10px">&nbsp;</td>
+                        <td valign="top" style="height: 100%">
+                        <!--  Center Box -->
+                        <wicket:child />                                    
+                        
+                        <!--  End Center Box -->
+                        </td>
+                        <td style="width: 10px">&nbsp;</td>
+                        
+                    </tr>
+                </table>
+                </td>
+
+            </tr>
+            <tr>
+                <td align="center">
+                <table border="0" cellspacing="0" cellpadding="0" style="width: 100%; height: 2px">
+                    <tr>
+                        <td style="background-color: #CCCC99"></td>
+                    </tr>
+                </table>
+                </td>
+
+            </tr>
+
+        </table>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" valign="bottom" style="height: 60px"><!-- Footer Begin --> <table border="0" cellpadding="0" cellspacing="0" style="width: 100%; height: 60px">
+    <tr>
+        <td>
+
+        <table border="0" cellspacing="0" cellpadding="0" style="width: 10%">
+            <tr>
+                <td><a href="http://genomicsgtl.energy.gov/centers/" title="DOE BioEnergy Research Centers"><img src="/static/images/doe-bioenergy-research-cent.gif" alt="" style="width: 89px; height: 79px" /></a></td>
+                <td><a href="http://www.lbnl.gov" title="Lawrence Berkeley National Laboratory"><img src="/static/images/lbnl-logo.gif" alt="" style="width: 89px; height: 79px" /></a></td>
+                <td><a href="http://www.sandia.gov" title="Sandia National Laboratories"><img src="/static/images/sandia-lab-logo.gif" alt="" style="width: 114px; height: 79px" /></a></td>
+                <td><a href="http://www.berkeley.edu" title="University of California, Berkeley"><img src="/static/images/ucb-logo.gif" alt="" style="width: 76px; height: 79px" /></a></td>
+                <td><a href="http://www.ucdavis.edu" title="Inoversity of California, Davis"><img src="/static/images/ucdavis-logo.gif" alt="" style="width: 117px; height: 79px" /></a></td>
+                <td><a href="http://www.ciw.edu" title="Carnegie Institution for Science"><img src="/static/images/carnegie-insitution-logo.gif" alt="" style="width: 115px; height: 79px" /></a></td>
+                <td><a href="http://www.llnl.gov" title="Lawrence Livermore National Laboratory"><img src="/static/images/llnl-logo.gif" alt="" style="width: 176px; height: 79px" /></a></td>
+
+            </tr>
+        </table>
+        </td>
+        <td align="right">
+        <div>&copy; <a href="/">JBEI Registry</a><br />
+        All rights reserved.<br />
+        <a href="https://support.jbei.org:8443/browse/REGISTRY">&nbsp;&nbsp;&nbsp;Bugs/Feature request</a> | <a href="/feedback/">Feedback</a> | Phone +1 510 486 5380</div>
+
+        </td>
+    </tr>
+<!--    <tr>
+        <td colspan="2">
+<pre>
+
+</pre>
+        </td>
+    </tr>-->
+</table>
+
+ <!-- Footer End --></td>
+    </tr>
+</table>
+        
+    </body>
+</html>
+

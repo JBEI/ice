@@ -1,0 +1,22 @@
+<html xmlns:wicket>
+<wicket:panel>
+    <div wicket:id="loginPanel">Login Panel (Will be removed)</div>
+    
+    <wicket:fragment wicket:id="preLogin">
+    <p>
+        <b>You are not logged in!</b><br/>
+        Do you want to <a href="/login">Log in</a> or 
+        <a href="/register">Register</a>?
+    </p>            
+    </wicket:fragment>
+        
+    <wicket:fragment wicket:id="postLogin">
+    <p>Welcome,
+        <b><a href="#" wicket:link="userProfile">Joe User</a>.</b> 
+        <a href="#" wicket:link="logOut">Log Out</a><br/>
+    </p>
+    </wicket:fragment>
+    
+    </wicket:panel>
+</html>
+  

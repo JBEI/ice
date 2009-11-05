@@ -1,0 +1,17 @@
+1. Install maven2 (via apt-get or download), hibernate3
+
+2. create a temp dir (/tmp/maventemp), and go there.
+3. run:
+    mvn archetype:create -DarchetypeGroupId=org.apache.wicket -DarchetypeArtifactId=wicket-archetype-quickstart -DarchetypeVersion=1.4.1 -DgroupId=org.jbei.elais -DartifactId=elais
+4. cd elais
+5. run:
+    mvn eclipse:eclipse -DdownloadSources=true
+ 
+ Now all maven dependencies should have been downloaded.
+ 
+ 
+ If M2_REPO is not defined,
+ In project properties->java build path->Libraries, set variable M2_REPO to maven's repository,
+ likely to be in $HOME/.m2/repository
+ 
+ 

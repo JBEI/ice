@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.jbei.ice.lib.models">
+    <class name="Sample" table="samples">
+        <id name="id" column="id" type="int">
+            <generator class="sequence">
+                <param name="sequence">samples_id_seq</param>
+            </generator>
+        </id>
+        <property name="uuid" column="uuid" type="string" length="36" />
+        <property name="depositor" column="depositor" type="string" length="127" />
+        <property name="label" column="label" type="string" length="127" />
+        <property name="notes" column="notes" type="text" />
+        <property name="creationTime" column="creation_time" type="timestamp" />
+        <property name="modificationTime" column="modification_time" type="timestamp" />
+        <many-to-one name="entry" column="entries_id" class="Entry"
+            not-null="true" unique="true"/>
+    </class>
+</hibernate-mapping>

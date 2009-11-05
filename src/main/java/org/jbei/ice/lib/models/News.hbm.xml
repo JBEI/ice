@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.jbei.ice.lib.models">
+    <class name="News" table="news">
+        <id name="id" column="id" type="int">
+            <generator class="sequence">
+                <param name="sequence">news_id_seq</param>
+            </generator>
+        </id>
+        <property name="isPublished" column="is_published" type="int" not-null="true" />
+        <property name="title" column="title" type="string" length="255" not-null="true" />
+        <property name="body" column="body" type="text" not-null="true" />
+        <property name="creationTime" column="creation_time" type="timestamp" />
+        <property name="modificationTime" column="modification_time" type="timestamp" />
+        <property name="publicationTime" column="publication_time" type="timestamp" />
+    </class>
+</hibernate-mapping>

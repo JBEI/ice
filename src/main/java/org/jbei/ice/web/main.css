@@ -1,0 +1,399 @@
+/* Global */
+html {
+	height: 98%;
+}
+
+body {
+	padding: 0;
+	font: 0.8em Arial, sans-serif;
+	line-height: 1.5em;
+	background: #ffffff;
+	color: #454545;
+	margin-top: 5;
+	margin-bottom: 5;
+	margin-left: 5;
+	margin-right: 5;
+	height: 100%;
+}
+
+img {
+	border-style: none;
+	display: block;
+}
+
+tr {
+	text-align: left;
+}
+
+.main_table {
+	width: 100%;
+	height: 100%;
+}
+
+.title_column {
+	vertical-align: top;
+	font-weight: bold;
+	width: 100px;
+	white-space: nowrap; 
+}
+
+.title_row_header {
+	background-color:#F0F0F0;
+	font-family:Arial,Helvetica,sans-serif;
+	font-size:12px;
+	white-space:nowrap;
+}
+
+.entry_table {
+	background-color:#BBBBBB;
+	width: 800px;
+}
+
+.data_table {
+	background-color:#BBBBBB;
+	width: 100%;
+}
+
+/* TIP DOESN'T WORK WHEN THIS IS SET*/
+.value_column {  
+	width: 300px; 
+	vertical-align: top;
+}
+
+.data_table th {
+	font-weight: bold;
+	font-family: Arial,Helvetica,sans-serif;
+	font-size: 12px;
+	white-space: nowrap; 
+}
+
+a {
+	color: #185DA0;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #9EC068;
+}
+
+a.title {
+	color: #FE6700;
+	background: #FFF;
+}
+
+.odd_row {
+	background-color:#FFFFFF;
+}
+
+.even_row {
+	background-color:#FAFAFA;
+}
+
+h1 {
+	font: bold 2em Arial, Sans-Serif;
+	letter-spacing: -1px;
+	padding: 7px 0 0 8px;
+	margin: 0;
+}
+
+h1 a,h2 a {
+	text-decoration: none;
+}
+
+h1 a:hover,h2 a:hover {
+	color: #9EC068;
+	background: #FFF;
+}
+
+h2 {
+	margin: 0;
+	padding: 0;
+	font: bold 1.7em Arial, Sans-Serif;
+	letter-spacing: -1px;
+}
+
+h2 {
+	font-size: 16px;
+	margin-bottom: 5px;
+	color: #000;
+	background: inherit;
+}
+
+p {
+	margin: 0 0 5px 0;
+}
+
+.rowHover {
+	background-color:#F0F0F0;
+	cursor:pointer;
+}
+
+/* Header */
+.header_info {
+	float: right;
+	width: 570px;
+	padding: 0 0 4px 0;
+}
+
+.header_info_left {
+	width: 240px;
+	float: left;
+}
+
+.header_info_right {
+	float: right;
+	width: 290px;
+	padding: 0 0 0 35px;
+	border-left: 1px solid #eee;
+}
+
+/* Form */
+form {
+	margin: 0;
+}
+
+.inputbox {
+	background: #FFFFFF;
+	border: 1px solid #BBBBBB;
+}
+
+.inputarea {
+	background: #FFFFFF;
+	border: 1px solid #BBBBBB;
+}
+
+.radioselect ul {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+	padding-left: 0px;
+}
+
+.button {
+	margin-left:2px;
+	margin-right:2px;
+}
+
+.errorlist {
+	margin: 0;
+	padding-left: 0;
+	color: #cc3333
+}
+
+.required {
+	color: #cc3333
+}
+
+.error {
+	color: #cc3333
+}
+
+.queryButton {
+	width : 35px;
+}
+
+.entry_tip {
+	
+}
+
+/**** Sidebar ***/
+
+
+#errorbox {
+	width: 98%;
+	float: center;
+	display: block;
+	margin-top: 10px;
+}
+
+#errorbox .box {
+	width: 100%;
+	background: #F6F9FB;
+	border: 1px solid #E1E1E1;
+	padding:10px 10px 15px 10px;
+	float: center;
+}
+
+#errorbox .descriptionbox {
+	width: 98%;
+	background: #FFFFFF;
+	border: 1px solid #E1E1E1;
+	padding: 0px 0px 0px 10px;
+	float: center;
+}
+
+
+/***************************************
+   =cluetipClass: 'jbeiregistry'
+-------------------------------------- */
+.cluetip-jbeiregistry {
+  background-color: transparent;
+}
+.cluetip-jbeiregistry #cluetip-outer {
+  border: 0px solid #ccc;
+  position: relative;
+  background-color: #fff;
+}
+
+.cluetip-jbeiregistry h3#cluetip-title {
+  margin: 0 0 0px;
+  padding: 0px 0px;
+  font-size: 12px;
+  font-weight: normal;
+  background-color: #ccc;
+  color: #333;
+}
+
+.cluetip-jbeiregistry #cluetip-inner {
+  padding: 0px 0px 0px 0px;
+  display: inline-block;
+}
+.cluetip-jbeiregistry div#cluetip-close { 
+  text-align: right;
+  margin: 0px 0px 0px 0px;
+  color: #900;
+}
+
+/* jbeiregistry arrows */
+
+.clue-right-jbeiregistry .cluetip-arrows {
+  background-image: url(/static/images/arrowleft.gif);
+}
+.clue-left-jbeiregistry .cluetip-arrows {
+  background-image: url(/static/images/arrowright.gif);
+  left: 100%;
+  margin-right: -11px;
+}
+.clue-top-jbeiregistry .cluetip-arrows {
+  background-image: url(/static/images/arrowdown.gif);
+  top: 100%;
+  left: 50%;
+  margin-left: -11px;
+  height: 11px;
+  width: 22px;  
+}  
+.clue-bottom-jbeiregistry .cluetip-arrows {
+  background-image: url(/static/images/arrowup.gif);
+  top: -11px;
+  left: 50%;
+  margin-left: -11px;
+  height: 11px;
+  width: 22px;
+}
+
+/* stupid IE6 HasLayout hack */
+.cluetip-rounded #cluetip-title,
+.cluetip-rounded #cluetip-inner {
+  zoom: 1;
+}
+
+#menu ul {
+	margin-left: 0;
+	padding-left: 0;
+	list-style-type: none;
+	float: left;
+	width: 140px;
+}
+
+#menu a {
+	display: block;
+	padding: 3px;
+	width: 120px;
+	/*border-bottom: 1px dotted #CCC;*/
+}
+
+#menu a:link,#menulist a:visited {
+	background: #FFFFFF url(/static/images/point.gif) 0% 50% no-repeat;
+	text-decoration: none;
+}
+
+#menu a:hover {
+	background: #FFFFFF url(/static/images/point-blue.gif) 0% 50% no-repeat;
+}
+
+#menu p {
+	width: 140px;
+	margin-top: 40px;
+	padding: 5px;
+	border-bottom: 1px dotted #CCC;
+	border-top: 1px dotted #CCC;
+}
+
+span.form_help_text {
+	color:#777777;
+	font-size: 9px;
+}
+
+#tabs ul {
+	display: inline;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+#tabs li { float: left; }
+
+#tabs span {
+	position: relative;
+	top: 0;
+	margin: 0 2px 0 0;
+	float: left;
+	background: #FFFFFF;
+	border-right: 1px solid #666;
+	border-top: 1px solid #666;
+	border-left: 1px solid #666;
+	padding: 3px 10px 3px 10px;
+	text-decoration: none;
+	color: #333;
+}
+
+#tabs a {
+	position: relative;
+	top: 0;
+	margin: 2px 2px 0 0;
+	float: left;
+	background: #F0F0F0;
+	border-right: 1px solid #AAA;
+	border-top: 1px solid #AAA;
+	border-left: 1px solid #AAA;
+	padding: 2px 10px 2px 10px;
+	text-decoration: none;
+	color: #333;
+}
+
+#tabs a:hover {
+	background: #F0F0F0;
+	margin: 2px 2px 0 0;
+	position: relative;
+	top: 0;
+	padding: 3px 10px 3px 10px;
+	margin-top: 0px;
+}
+
+#tabs a.active {
+	position: relative;
+	top: 0;
+	margin: 0 2px 0 0;
+	float: left;
+	background: #F0F0F0;
+	border-right: 1px solid #666;
+	border-top: 1px solid #666;
+	border-left: 1px solid #666;
+	padding: 3px 10px 2px 10px;
+	text-decoration: none;
+	color: #333;
+}
+
+#tabs a.active:hover {
+	position: relative;
+	top: 0;
+	margin: 0 2px 0 0;
+	float: left;
+	background: #F0F0F0;
+	border-right: 1px solid #666;
+	border-top: 1px solid #666;
+	border-left: 1px solid #666;
+	padding: 3px 10px 2px 10px;
+	text-decoration: none;
+	color: #333;
+}

@@ -1,0 +1,67 @@
+<html>
+<body>
+<wicket:extend>
+<span wicket:id="loginText">to be replaced</span>
+                        <form wicket:id="loginForm">
+                        Login: <input type="text" wicket:id="loginName" /><br/>
+                        Password: <input type="password" wicket:id="loginPassword" /><br/>
+                        <input type="submit" wicket:id="logInButton" />
+                        </form>
+                        
+                        <form action="/login/" method="post">
+                        <table border="0" cellpadding="3" cellspacing="1" class="entry_table">
+                            <tr class="title_row_header"><td><h2>Login</h2></td></tr>
+                            <tr>
+                                <td bgcolor="#ffffff">
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="2">
+                                    <tr>
+                                        <td style="width: 150px">&nbsp;</td>
+
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                    
+                                    
+                                    <tr>
+                                        <td style="width: 150px"><label for="id_login">Login</label>: <span class="error">*</span></td>
+                                        <td><input style="width: 200px;" name="login" maxlength="100" type="text" class="inputbox" id="id_login" /> </td>
+                                    </tr>
+                                    
+                                    <tr>
+
+                                        <td style="width: 150px"><label for="id_password">Password</label>: <span class="error">*</span></td>
+                                        <td><input style="width: 200px;" name="password" maxlength="32" type="password" class="inputbox" id="id_password" /> </td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td style="width: 150px">&nbsp;</td>
+                                        <td><input type="checkbox" name="remember" id="remember"><label for="remember">Remember me on this computer</label></td>
+
+                                    </tr>
+                                    <tr>
+                                        <td>&nbsp;</td>
+                                        <td><input type="submit" name="submit" value="Log In" class="button" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>&nbsp;</td>
+                                        <td><a href="/registration/">Registration</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td>&nbsp;</td>
+                                        <td><a href="/reminder/">Forgot your password?</a></td>
+                                    </tr>
+
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                        </form>
+
+</wicket:extend>
+</body>
+</html>
+  
