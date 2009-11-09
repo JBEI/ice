@@ -1,6 +1,8 @@
 package org.jbei.ice.lib.models;
 
-public class EntryAssemblyRelationship {
+import java.io.Serializable;
+
+public class EntryAssemblyRelationship implements Serializable {
 	private int id;
 	private Entry subject;
 	private Entry object;

@@ -1,5 +1,6 @@
 package org.jbei.ice.web.forms;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -21,8 +22,9 @@ import org.jbei.ice.lib.utils.Utils;
  * @param <T>
  *
  */
-public class CommaSeparatedField<T> {
+public class CommaSeparatedField<T> implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	protected ArrayList<T> items = null; 
 	protected Class klass = null;
 	protected String getterName = null;

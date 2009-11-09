@@ -1,6 +1,8 @@
 package org.jbei.ice.lib.models;
 
-public class FeatureDNA {
+import java.io.Serializable;
+
+public class FeatureDNA implements Serializable {
 	private int id;
 	private String hash;
 	private String sequence;

@@ -1,11 +1,11 @@
 package org.jbei.ice.web.forms;
 
-import java.util.LinkedHashMap;
+import java.io.Serializable;
 
 import org.apache.wicket.markup.html.form.FormComponent;
-import org.apache.wicket.markup.html.panel.Panel;
 
-public class FormPanelHelper {
+public class FormPanelHelper implements Serializable {
+	private static final long serialVersionUID = 1L;
 	protected String name;
 	protected FormPanel panel;
 	

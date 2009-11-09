@@ -1,8 +1,10 @@
 package org.jbei.ice.lib.models;
 
+import java.io.Serializable;
+
 import org.jbei.ice.lib.value_objects.PartNumberValueObject;
 
-public class PartNumber implements PartNumberValueObject {
+public class PartNumber implements PartNumberValueObject, Serializable {
 	private int id;
 	private String partNumber;
 	private Entry entry;

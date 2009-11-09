@@ -1,11 +1,12 @@
 package org.jbei.ice.lib.models;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.jbei.ice.lib.value_objects.SequenceValueObject;
 
-public class Sequence implements SequenceValueObject {
+public class Sequence implements SequenceValueObject, Serializable {
 	private int id;
 	private String sequence;
 	private String sequenceUser;

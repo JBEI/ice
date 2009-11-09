@@ -1,6 +1,8 @@
 package org.jbei.ice.lib.models;
 
-public class FeatureFeatureRelationship {
+import java.io.Serializable;
+
+public class FeatureFeatureRelationship implements Serializable {
 	private int id;
 	private Feature subject;
 	private Feature object;

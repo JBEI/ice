@@ -1,12 +1,13 @@
 package org.jbei.ice.lib.models;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.jbei.ice.lib.value_objects.EntryValueObject;
 
-public class Entry implements EntryValueObject {
+public class Entry implements EntryValueObject, Serializable {
 	private int id;
 	private String recordId;
 	private String versionId;

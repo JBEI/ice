@@ -1,6 +1,8 @@
 package org.jbei.ice.lib.models;
 
-public class AccountEntryRelationship {
+import java.io.Serializable;
+
+public class AccountEntryRelationship implements Serializable {
 	private int id;
 	private Account account;
 	private Entry entry;

@@ -1,10 +1,11 @@
 package org.jbei.ice.lib.models;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import org.jbei.ice.lib.value_objects.StrainValueObject;
 
-public class Strain extends Entry implements StrainValueObject {
+public class Strain extends Entry implements StrainValueObject, Serializable {
 	private String host;
 	private String genotypePhenotype;
 	private String plasmids;

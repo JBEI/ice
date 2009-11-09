@@ -1,9 +1,10 @@
 package org.jbei.ice.lib.models;
 
+import java.io.Serializable;
 import java.util.Date;
 
 // TODO: use annotations for models. 
-public class Account {
+public class Account implements Serializable {
 	private int id;
 	private String password;
 	private String firstName;

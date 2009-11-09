@@ -1,10 +1,11 @@
 package org.jbei.ice.lib.models;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import org.jbei.ice.lib.value_objects.LocationValueObject;
 
-public class Location implements LocationValueObject {
+public class Location implements LocationValueObject, Serializable {
 	
 	private int id;
 	private Sample sample;

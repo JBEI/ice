@@ -1,6 +1,8 @@
 package org.jbei.ice.lib.models;
 
-public class AssemblyRelationship {
+import java.io.Serializable;
+
+public class AssemblyRelationship implements Serializable {
 	private int id;
 	private String name;
 	private String description;

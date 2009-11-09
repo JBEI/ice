@@ -1,9 +1,10 @@
 package org.jbei.ice.lib.models;
 
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 
-public class Vote {
+public class Vote implements Serializable {
 	
 	private int id;
 	private Account account;

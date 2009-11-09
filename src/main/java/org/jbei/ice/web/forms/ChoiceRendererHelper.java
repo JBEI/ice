@@ -1,5 +1,6 @@
 package org.jbei.ice.web.forms;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
@@ -14,7 +15,7 @@ import org.apache.wicket.markup.html.form.IChoiceRenderer;
  * @param <T>
  * 
  */
-public class ChoiceRendererHelper<T> {
+public class ChoiceRendererHelper<T> implements Serializable {
 	
 	public class CustomChoiceRenderer implements IChoiceRenderer {
 		protected LinkedHashMap<T, T> hashMap;

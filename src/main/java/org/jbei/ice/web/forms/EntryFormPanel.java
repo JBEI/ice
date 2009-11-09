@@ -20,7 +20,7 @@ import org.jbei.ice.lib.models.SelectionMarker;
 public class EntryFormPanel extends Panel {
 	static int SHORT_FIELD_MAX_LENGTH = 127;
 	ArrayList<FormPanelHelper> elements = null;
-	Entry entry = null;
+	transient Entry entry = null;
 	
 	CommaSeparatedField<Name> names = null;
 	CommaSeparatedField<Link> links = null;

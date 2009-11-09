@@ -1,8 +1,9 @@
 package org.jbei.ice.lib.models;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class News {
+public class News implements Serializable {
 	private int id;
 	private int isPublished;
 	private String title;

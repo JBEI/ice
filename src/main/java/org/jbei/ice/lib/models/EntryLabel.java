@@ -1,6 +1,8 @@
 package org.jbei.ice.lib.models;
 
-public class EntryLabel {
+import java.io.Serializable;
+
+public class EntryLabel implements Serializable {
 	private int id;
 	private Label label;
 	private Entry entry;

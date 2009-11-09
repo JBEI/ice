@@ -1,10 +1,11 @@
 package org.jbei.ice.lib.models;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import org.jbei.ice.lib.value_objects.SampleValueObject;
 
-public class Sample implements SampleValueObject {
+public class Sample implements SampleValueObject, Serializable {
 	private int id;
 	private String uuid;
 	private String depositor;

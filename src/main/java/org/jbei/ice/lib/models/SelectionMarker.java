@@ -1,8 +1,10 @@
 package org.jbei.ice.lib.models;
 
+import java.io.Serializable;
+
 import org.jbei.ice.lib.value_objects.SelectionMarkerValueObject;
 
-public class SelectionMarker implements SelectionMarkerValueObject {
+public class SelectionMarker implements SelectionMarkerValueObject, Serializable {
 	private int id;
 	private String name;
 	private Entry entry;
