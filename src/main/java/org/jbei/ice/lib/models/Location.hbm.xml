@@ -3,8 +3,7 @@
 <hibernate-mapping package="org.jbei.ice.lib.models">
     <class name="Location" table="locations">
         <id name="id" column="id" type="int">
-            <generator class="sequence">
-                <param name="sequence">locations_id_seq</param>
+            <generator class="native">
             </generator>
         </id>
         <many-to-one name="sample" column="samples" class="Sample"

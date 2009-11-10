@@ -3,8 +3,7 @@
 <hibernate-mapping package="org.jbei.ice.lib.models">
     <class name="Comment" table="comments">
         <id name="id" column="id" type="int">
-            <generator class="sequence">
-                <param name="sequence">comments_id_seq</param>
+            <generator class="native">
             </generator>
         </id>
         <many-to-one name="account" column="accounts_id" class="Account" not-null="true" />

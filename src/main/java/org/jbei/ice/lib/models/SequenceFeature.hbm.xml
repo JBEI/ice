@@ -3,12 +3,11 @@
 <hibernate-mapping package="org.jbei.ice.lib.models">
     <class name="SequenceFeature" table="sequence_feature">
         <id name="id" column="id" type="int">
-            <generator class="sequence">
-                <param name="sequence">sequence_features_id_seq</param>
+            <generator class="native">
             </generator>
         </id>
-        <property name="start" column="start" type="int" />
-        <property name="end" column="end" type="int" />
+        <property name="start" column="feature_start" type="int" />
+        <property name="end" column="feature_end" type="int" />
         <property name="strand" column="strand" type="int" />
         <property name="name" column="name" type="string" length="127" />
         <many-to-one name="sequence" column="sequence_id" class="Sequence"></many-to-one>

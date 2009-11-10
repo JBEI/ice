@@ -3,8 +3,8 @@
 <hibernate-mapping package="org.jbei.ice.lib.models">
 	<class name="Entry" table="entries">
 		<id name="id" column="id" type="int">
-			<generator class="sequence">
-				<param name="sequence">entries_id_seq</param>
+			<generator class="native">
+				
 			</generator>
 		</id>
 		<property name="recordId" column="record_id" type="string"
@@ -29,7 +29,7 @@
 			type="text" />
 		<property name="longDescription" column="long_description"
 			type="text" />
-		<property name="references" column="references" type="text" />
+		<property name="references" column="literature_references" type="text" />
 		<property name="creationTime" column="creation_time" type="timestamp" />
 		<property name="modificationTime" column="modification_time"
 			type="timestamp" />

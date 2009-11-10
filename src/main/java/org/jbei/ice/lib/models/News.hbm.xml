@@ -3,8 +3,7 @@
 <hibernate-mapping package="org.jbei.ice.lib.models">
     <class name="News" table="news">
         <id name="id" column="id" type="int">
-            <generator class="sequence">
-                <param name="sequence">news_id_seq</param>
+            <generator class="native">
             </generator>
         </id>
         <property name="isPublished" column="is_published" type="int" not-null="true" />

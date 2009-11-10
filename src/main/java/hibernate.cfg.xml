@@ -7,6 +7,8 @@
 	<property name="hibernate.connection.username">test_user</property>
 	<property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
 	<property name="hibernate.connection.password">t@stuz@r</property>
+	<!-- use below when table rearrangement is needed. "create" or "update" -->
+	<!-- <property name="hbm2ddl.auto">update</property> -->
 	<!-- this will show us all sql statements -->
     <property name="hibernate.show_sql">true</property>
 	<!-- mapping files -->
