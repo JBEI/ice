@@ -50,6 +50,7 @@ public class MenuPanel extends Panel {
 		addPageLinkMenuItem(LoginPage.class, "Login");
 		addPageLinkMenuItem(HomePage.class, "Home");
 		addPageLinkMenuItem(EntryFormPage.class, "Entry Form");
+		addPageLinkMenuItem(EntriesTablePage.class, "List View");
 		
 		ListView menuList = new ListView ("menuList", menuItems) {
 			protected void populateItem(ListItem item) {
