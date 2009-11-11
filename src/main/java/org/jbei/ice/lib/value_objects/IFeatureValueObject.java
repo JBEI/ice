@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.value_objects;
 
-public interface FeatureValueObject {
+public interface IFeatureValueObject {
 
 	public abstract String getName();
 

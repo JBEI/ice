@@ -3,9 +3,9 @@ package org.jbei.ice.lib.models;
 import java.io.Serializable;
 import java.util.Date;
 
-import org.jbei.ice.lib.value_objects.StrainValueObject;
+import org.jbei.ice.lib.value_objects.IStrainValueObject;
 
-public class Strain extends Entry implements StrainValueObject, Serializable {
+public class Strain extends Entry implements IStrainValueObject, Serializable {
 	private String host;
 	private String genotypePhenotype;
 	private String plasmids;

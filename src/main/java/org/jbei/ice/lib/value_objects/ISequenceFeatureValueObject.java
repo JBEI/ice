@@ -3,13 +3,13 @@ package org.jbei.ice.lib.value_objects;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Sequence;
 
-public interface SequenceFeatureValueObject {
+public interface ISequenceFeatureValueObject {
 
 	public abstract void setId(int id);
 
 	public abstract int getId();
 
-	public abstract SequenceValueObject getSequence();
+	public abstract ISequenceValueObject getSequence();
 
 	public abstract void setSequence(Sequence sequence);
 

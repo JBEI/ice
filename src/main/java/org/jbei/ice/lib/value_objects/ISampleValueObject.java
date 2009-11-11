@@ -4,7 +4,7 @@ import java.util.Date;
 
 import org.jbei.ice.lib.models.Entry;
 
-public interface SampleValueObject {
+public interface ISampleValueObject {
 
 	public abstract int getId();
 

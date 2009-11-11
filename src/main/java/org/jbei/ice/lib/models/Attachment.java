@@ -3,9 +3,9 @@ package org.jbei.ice.lib.models;
 import java.io.Serializable;
 
 import org.jbei.ice.lib.utils.Base64String;
-import org.jbei.ice.lib.value_objects.AttachmentValueObject;
+import org.jbei.ice.lib.value_objects.IAttachmentValueObject;
 
-public class Attachment implements AttachmentValueObject, Serializable {
+public class Attachment implements IAttachmentValueObject, Serializable {
 	private int id;
 	private String description;
 	private String fileName;

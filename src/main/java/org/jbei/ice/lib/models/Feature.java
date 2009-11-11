@@ -3,9 +3,9 @@ package org.jbei.ice.lib.models;
 import java.io.Serializable;
 import java.util.Set;
 
-import org.jbei.ice.lib.value_objects.FeatureValueObject;
+import org.jbei.ice.lib.value_objects.IFeatureValueObject;
 
-public class Feature implements FeatureValueObject, Serializable {
+public class Feature implements IFeatureValueObject, Serializable {
 	private int id;
 	private String name;
 	private String description;

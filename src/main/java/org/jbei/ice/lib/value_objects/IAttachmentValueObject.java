@@ -3,7 +3,7 @@ package org.jbei.ice.lib.value_objects;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.utils.Base64String;
 
-public interface AttachmentValueObject {
+public interface IAttachmentValueObject {
 
 	public abstract int getId();
 

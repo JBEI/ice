@@ -4,7 +4,7 @@ import java.util.Date;
 
 import org.jbei.ice.lib.models.Sample;
 
-public interface LocationValueObject {
+public interface ILocationValueObject {
 
 	public abstract int getId();
 

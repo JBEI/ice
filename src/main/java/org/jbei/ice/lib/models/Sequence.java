@@ -4,9 +4,9 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jbei.ice.lib.value_objects.SequenceValueObject;
+import org.jbei.ice.lib.value_objects.ISequenceValueObject;
 
-public class Sequence implements SequenceValueObject, Serializable {
+public class Sequence implements ISequenceValueObject, Serializable {
 	private int id;
 	private String sequence;
 	private String sequenceUser;

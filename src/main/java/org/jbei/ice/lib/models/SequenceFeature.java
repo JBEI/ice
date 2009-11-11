@@ -2,9 +2,9 @@ package org.jbei.ice.lib.models;
 
 import java.io.Serializable;
 
-import org.jbei.ice.lib.value_objects.SequenceFeatureValueObject;
+import org.jbei.ice.lib.value_objects.ISequenceFeatureValueObject;
 
-public class SequenceFeature implements SequenceFeatureValueObject, Serializable {
+public class SequenceFeature implements ISequenceFeatureValueObject, Serializable {
 	private int id;
 	private Sequence sequence;
 	private Feature feature;

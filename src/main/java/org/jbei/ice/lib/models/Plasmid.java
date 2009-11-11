@@ -3,9 +3,9 @@ package org.jbei.ice.lib.models;
 import java.io.Serializable;
 import java.util.Date;
 
-import org.jbei.ice.lib.value_objects.PlasmidValueObject;
+import org.jbei.ice.lib.value_objects.IPlasmidValueObject;
 
-public class Plasmid extends Entry implements PlasmidValueObject, Serializable {
+public class Plasmid extends Entry implements IPlasmidValueObject, Serializable {
 	private String backbone;
 	private String originOfReplication;
 	private String promoters;

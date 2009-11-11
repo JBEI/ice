@@ -5,7 +5,7 @@ import java.util.Set;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.SequenceFeature;
 
-public interface SequenceValueObject {
+public interface ISequenceValueObject {
 
 	public abstract int getId();
 

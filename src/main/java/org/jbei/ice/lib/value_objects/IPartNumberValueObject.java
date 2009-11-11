@@ -2,19 +2,15 @@ package org.jbei.ice.lib.value_objects;
 
 import org.jbei.ice.lib.models.Entry;
 
-public interface LinkValueObject {
+public interface IPartNumberValueObject {
 
 	public abstract int getId();
 
 	public abstract void setId(int id);
 
-	public abstract String getLink();
+	public abstract String getPartNumber();
 
-	public abstract void setLink(String link);
-
-	public abstract String getUrl();
-
-	public abstract void setUrl(String url);
+	public abstract void setPartNumber(String partNumber);
 
 	public abstract Entry getEntry();
 

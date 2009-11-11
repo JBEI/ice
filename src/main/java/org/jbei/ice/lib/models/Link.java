@@ -2,9 +2,9 @@ package org.jbei.ice.lib.models;
 
 import java.io.Serializable;
 
-import org.jbei.ice.lib.value_objects.LinkValueObject;
+import org.jbei.ice.lib.value_objects.ILinkValueObject;
 
-public class Link implements LinkValueObject, Serializable {
+public class Link implements ILinkValueObject, Serializable {
 	private int id;
 	private String link;
 	private String url;

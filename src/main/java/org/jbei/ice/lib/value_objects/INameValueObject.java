@@ -2,11 +2,11 @@ package org.jbei.ice.lib.value_objects;
 
 import org.jbei.ice.lib.models.Entry;
 
-public interface SelectionMarkerValueObject {
-
-	public abstract int getId();
+public interface INameValueObject {
 
 	public abstract void setId(int id);
+
+	public abstract int getId();
 
 	public abstract String getName();
 

@@ -2,9 +2,9 @@ package org.jbei.ice.lib.models;
 
 import java.io.Serializable;
 
-import org.jbei.ice.lib.value_objects.NameValueObject;
+import org.jbei.ice.lib.value_objects.INameValueObject;
 
-public class Name implements NameValueObject, Serializable {
+public class Name implements INameValueObject, Serializable {
 	private int id;
 	private String name;
 	private Entry entry;
