@@ -3,9 +3,9 @@ package org.jbei.ice.lib.models;
 import java.io.Serializable;
 import java.util.Date;
 
-import org.jbei.ice.lib.value_objects.PartValueObject;
+import org.jbei.ice.lib.value_objects.IPartValueObject;
 
-public class Part extends Entry implements PartValueObject, Serializable {
+public class Part extends Entry implements IPartValueObject, Serializable {
 	private String packageFormat;
 	private String pkgdDnaFwdHash;
 	private String pkgdDnaRevHash;

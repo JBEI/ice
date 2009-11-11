@@ -11,8 +11,10 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.jbei.ice.web.EntriesTablePage;
 import org.jbei.ice.web.HomePage;
 import org.jbei.ice.web.LoginPage;
+import org.jbei.ice.web.PlasmidPage;
 import org.jbei.ice.web.forms.EntryFormPage;
 import org.jbei.ice.web.forms.EntryFormPanel;
 import org.jbei.ice.web.forms.PlasmidForm;
@@ -51,6 +53,8 @@ public class MenuPanel extends Panel {
 		addPageLinkMenuItem(HomePage.class, "Home");
 		addPageLinkMenuItem(EntryFormPage.class, "Entry Form");
 		addPageLinkMenuItem(EntriesTablePage.class, "List View");
+		addPageLinkMenuItem(PlasmidPage.class, "Plasmid Page");
+		
 		
 		ListView menuList = new ListView ("menuList", menuItems) {
 			protected void populateItem(ListItem item) {

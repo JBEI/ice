@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.value_objects;
 
-public interface PartValueObject extends EntryValueObject {
+public interface IPartValueObject extends IEntryValueObject {
 
 	public abstract String getPackageFormat();
 

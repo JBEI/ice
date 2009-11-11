@@ -1,4 +1,4 @@
-package org.jbei.ice.web.panels;
+package org.jbei.ice.web;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -8,7 +8,7 @@ import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.query.Query;
-import org.jbei.ice.web.HomePage;
+import org.jbei.ice.web.panels.EntriesTablePanel;
 
 public class EntriesTablePage extends HomePage {
 	public EntriesTablePage(PageParameters parameters) {

@@ -1,13 +1,15 @@
 package org.jbei.ice.lib.models;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.jbei.ice.lib.value_objects.EntryValueObject;
+import org.jbei.ice.lib.value_objects.IEntryValueObject;
 
-public class Entry implements EntryValueObject, Serializable {
+public class Entry implements IEntryValueObject, Serializable {
 	private int id;
 	private String recordId;
 	private String versionId;
@@ -28,10 +30,10 @@ public class Entry implements EntryValueObject, Serializable {
 	
 	private Sequence sequence;
 	
-	private Set<SelectionMarker> selectionMarkers = new HashSet<SelectionMarker>();
-	private Set<Link> links = new HashSet<Link>();
-	private Set<Name> names = new HashSet<Name>();
-	private Set<PartNumber> partNumbers = new HashSet<PartNumber>();
+	private Set<SelectionMarker> selectionMarkers = new LinkedHashSet<SelectionMarker>();
+	private Set<Link> links = new LinkedHashSet<Link>();
+	private Set<Name> names = new LinkedHashSet<Name>();
+	private Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
 	
 	public Entry() {
 	}
@@ -95,6 +97,26 @@ public class Entry implements EntryValueObject, Serializable {
 		return names;
 	}
 
+	public Name getOneName() {
+		Name result = null;
+		if (names.size() > 0) {
+			result = (Name) names.toArray()[0];
+		}
+		return result;
+	}
+	
+	public String getNamesAsString() {
+		String result = "";
+		ArrayList<String> names = new ArrayList<String>();
+		for (Name name : this.names) {
+			names.add(name.getName());
+		}
+		result = org.jbei.ice.lib.utils.Utils.join(", ", names);
+		
+		return result;
+	}	
+	
+	
 	public void setNames(Set<Name> names) {
 		this.names = names;
 	}
@@ -103,6 +125,26 @@ public class Entry implements EntryValueObject, Serializable {
 		return partNumbers;
 	}
 
+	public String getPartNumbersAsString() {
+		String result = "";
+		ArrayList<String> numbers = new ArrayList<String>();
+		for (PartNumber number : partNumbers) {
+			numbers.add(number.getPartNumber());
+		}
+		result = org.jbei.ice.lib.utils.Utils.join(", ", numbers);
+		
+		return result;
+	}
+	
+	public PartNumber getOnePartNumber() {
+		PartNumber result = null;
+		
+		if (partNumbers.size() > 0) {
+			result = (PartNumber) partNumbers.toArray()[0];
+		}
+		return result;
+	}
+	
 	public void setPartNumbers(Set<PartNumber> partNumbers) {
 		this.partNumbers = partNumbers;
 	}
@@ -167,6 +209,17 @@ public class Entry implements EntryValueObject, Serializable {
 		return selectionMarkers;
 	}
 
+	public String getSelectionMarkersAsString() {
+		String result = "";
+		ArrayList<String> markers = new ArrayList<String>();
+		for (SelectionMarker marker : selectionMarkers) {
+			markers.add(marker.getName());
+		}
+		result = org.jbei.ice.lib.utils.Utils.join(", ", markers);
+		
+		return result;
+	}
+	
 	public void setSelectionMarkers(Set<SelectionMarker> selectionMarkers) {
 		this.selectionMarkers = selectionMarkers;
 	}
@@ -175,6 +228,17 @@ public class Entry implements EntryValueObject, Serializable {
 		return links;
 	}
 
+	public String getLinksAsString() {
+		String result = "";
+		ArrayList<String> links = new ArrayList<String>();
+		for (Link link : this.links) {
+			links.add(link.getLink());
+		}
+		result = org.jbei.ice.lib.utils.Utils.join(", ", links);
+		
+		return result;
+	}
+	
 	public void setLinks(Set<Link> links) {
 		this.links = links;
 	}

@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.value_objects;
 
-public interface PlasmidValueObject extends EntryValueObject{
+public interface PlasmidValueObject extends IEntryValueObject{
 
 	public abstract String getBackbone();
 

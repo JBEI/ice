@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.value_objects;
 
-public interface StrainValueObject extends EntryValueObject {
+public interface StrainValueObject extends IEntryValueObject {
 
 	public abstract String getHost();
 

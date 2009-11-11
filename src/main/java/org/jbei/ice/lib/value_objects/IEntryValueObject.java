@@ -9,7 +9,7 @@ import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
 
-public interface EntryValueObject {
+public interface IEntryValueObject {
 
 	public abstract int getId();
 
