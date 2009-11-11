@@ -61,9 +61,28 @@ public class EntryManager extends Manager {
 					creatorEmail, visibility, status, alias, keywords,
 					shortDescription, longDescription, references, new Date(),
 					null, backbone, originOfReplication, promoters, circular);
-
+			
+			try {
+				dbSave(plasmid);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new ManagerException("Could not save Plasmid to db: " + e.toString());
+			}
+			
+			for (Name name : names) {
+				name.setEntry(plasmid);
+			}
 			plasmid.setNames(names);
+			
+			for (Link link : links) {
+				link.setEntry(plasmid);
+			}
 			plasmid.setLinks(links);
+			
+			for (SelectionMarker marker: selectionMarkers) {
+				marker.setEntry(plasmid);
+			}
 			plasmid.setSelectionMarkers(selectionMarkers);
 
 			try {

@@ -20,17 +20,19 @@ public abstract class Manager {
 		
 	}
 
-	public static Object dbSave(Object obj) throws Exception {
+	public static Object dbSave(Object obj) throws ManagerException {
 		Object result = null;
 		try {
 			Transaction tx = session.beginTransaction();
 			Serializable generatedId = session.save(obj);
 			tx.commit();
 			result = session.load(obj.getClass(), generatedId);
-			return result;	
-		} catch (Exception e) {
-			
 		}
+		catch (Exception e) {
+			e.printStackTrace();
+			throw new ManagerException("dbSave exception", e);
+		}
+	
 		return result;
 	}
 	
