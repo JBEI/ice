@@ -1,0 +1,13 @@
+<hibernate-mapping package="org.jbei.ice.lib.models">
+	<class name="AccountPreferences" table="account_preferences">
+		<id name="id" column="id" type="int">
+			<generator class="native">
+			</generator>
+		</id>
+		<property name="preferences" column="preferences" type="text" />
+		<property name="restrictionEnzymes" column="restriction_enzymes"
+			type="text" />
+		<many-to-one name="account" column="accounts_id" class="Account"
+			not-null="true" unique="true" />
+	</class>
+</hibernate-mapping>

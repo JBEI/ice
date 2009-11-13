@@ -2,7 +2,7 @@ package org.jbei;
 
 import junit.framework.TestCase;
 import org.apache.wicket.util.tester.WicketTester;
-import org.jbei.ice.web.HomePage;
+import org.jbei.ice.web.pages.HomePage;
 import org.jbei.ice.web.WicketApplication;
 
 /**

@@ -36,5 +36,6 @@
 	<mapping resource="org/jbei/ice/lib/models/Location.hbm.xml" />
 	<mapping resource="org/jbei/ice/lib/models/Label.hbm.xml" />
 	<mapping resource="org/jbei/ice/lib/models/EntryLabel.hbm.xml" />
+	<mapping resource="org/jbei/ice/lib/models/AccountPreferences.hbm.xml"/>
 </session-factory>
 </hibernate-configuration>

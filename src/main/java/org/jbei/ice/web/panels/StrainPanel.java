@@ -1,16 +1,11 @@
 package org.jbei.ice.web.panels;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.lib.models.PartNumber;
-import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
 
 public class StrainPanel extends Panel {
