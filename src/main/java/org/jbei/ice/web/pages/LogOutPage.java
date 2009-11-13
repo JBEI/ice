@@ -1,13 +1,18 @@
 package org.jbei.ice.web.pages;
 
-import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.PageParameters;
+import org.jbei.ice.web.IceSession;
 
 /**
  * @author tham
  */
-public class LogOutPage extends Panel {
-	public LogOutPage(String id) {
-		super(id);
+public class LogOutPage extends HomePage {
+	public LogOutPage(PageParameters parameters) {
+		super(parameters);
+		
+		IceSession.get().deAuthenticateUser();
+		IceSession.get().invalidateNow();
+		setResponsePage(HomePage.class);		
 	}
 }
 

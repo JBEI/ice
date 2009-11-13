@@ -1,11 +1,13 @@
 package org.jbei.ice.web;
 
 import org.apache.wicket.IRequestTarget;
+import org.apache.wicket.Request;
+import org.apache.wicket.Response;
+import org.apache.wicket.Session;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.protocol.http.request.WebExternalResourceRequestTarget;
 import org.apache.wicket.request.RequestParameters;
 import org.apache.wicket.request.target.basic.URIRequestTargetUrlCodingStrategy;
-import org.jbei.Start;
 import org.jbei.ice.web.pages.HomePage;
 import org.jbei.ice.web.pages.LoginPage;
 import org.jbei.ice.web.pages.RegisterPage;
@@ -17,6 +19,8 @@ import org.jbei.ice.web.pages.RegisterPage;
  */
 public class WicketApplication extends WebApplication
 {    
+	
+	private Authenticator authenticator = null;
     /**
      * Constructor
      */
@@ -24,7 +28,11 @@ public class WicketApplication extends WebApplication
 	{
 	}
 	
+	
 	protected void init() {
+		authenticator = new NullAuthenticator();
+		//authenticator = new LblLdapAuthenticator();
+		
 		mountBookmarkablePage("/login", LoginPage.class);
 		mountBookmarkablePage("/register", RegisterPage.class);
 		mount(new URIRequestTargetUrlCodingStrategy("/static")
@@ -37,6 +45,16 @@ public class WicketApplication extends WebApplication
             }
         });
 	}
+	
+	
+	@Override
+	public Session newSession(Request request, Response response) {
+		
+		IceSession s = new IceSession(request, authenticator);
+		
+		return s;
+	}
+	
 	
 	/**
 	 * @see org.apache.wicket.Application#getHomePage()

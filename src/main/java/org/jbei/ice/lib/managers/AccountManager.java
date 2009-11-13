@@ -2,6 +2,7 @@ package org.jbei.ice.lib.managers;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountPreferences;
 
@@ -64,10 +65,28 @@ public class AccountManager extends Manager {
 
 			account = (Account) query.uniqueResult();
 		} catch (HibernateException e) {
+			Logger.warn("Couldn't retrieve Account by id");
 			throw new ManagerException("Couldn't retrieve Account by id: "
 					+ String.valueOf(id), e);
 		}
 
+		return account;
+	}
+	
+	public static Account getByLogin(String login) throws ManagerException {
+		Account account = null;
+		try {
+			Query query = HibernateHelper.getSession().createQuery(
+					"from Account where email = :email");
+			query.setParameter("email", login);
+			account = (Account) query.uniqueResult();
+				
+		} catch (HibernateException e) {
+			Logger.warn("Couldn't retrieve Account by email");
+			throw new ManagerException("Couldn't retrieve Account by email: "
+					+ login);
+		}
+		
 		return account;
 	}
 }
