@@ -37,8 +37,7 @@ public class StrainPanel extends Panel {
 		//TODO:Capitalize correctly
 		elements.add(new Label("status", 
 				strain.getStatus()));
-		//TODO: link to strains
-		elements.add(new Label("linksToStrains", ""));
+		
 		elements.add(new Label("linkToOwner", strain.getOwner()));
 		String time = "";
 		 Date cTime = strain.getCreationTime();

@@ -32,6 +32,7 @@ public class HomePage extends WebPage {
 	 *            Page parameters
 	 */
     public HomePage(final PageParameters parameters) {
+    	//TODO: move css to someplace logical
     	add(new StyleSheetReference("stylesheet", HomePage.class, "main.css"));
 
         // Add the simplest type of label
