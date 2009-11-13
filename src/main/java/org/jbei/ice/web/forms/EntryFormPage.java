@@ -3,7 +3,7 @@ package org.jbei.ice.web.forms;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;
 //TODO: This is only for testing
-import org.jbei.ice.web.HomePage;
+import org.jbei.ice.web.pages.HomePage;
 
 public class EntryFormPage extends HomePage {
 	public EntryFormPage(PageParameters parameters) {

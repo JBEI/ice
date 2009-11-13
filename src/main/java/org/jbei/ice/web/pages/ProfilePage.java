@@ -1,4 +1,4 @@
-package org.jbei.ice.web;
+package org.jbei.ice.web.pages;
 
 import org.apache.wicket.markup.html.panel.Panel;
 

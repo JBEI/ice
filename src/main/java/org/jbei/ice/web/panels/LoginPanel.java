@@ -4,8 +4,8 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.web.LogOutPage;
-import org.jbei.ice.web.ProfilePage;
+import org.jbei.ice.web.pages.LogOutPage;
+import org.jbei.ice.web.pages.ProfilePage;
 
 /**
  * @author tham

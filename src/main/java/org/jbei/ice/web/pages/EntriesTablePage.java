@@ -1,4 +1,4 @@
-package org.jbei.ice.web;
+package org.jbei.ice.web.pages;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
