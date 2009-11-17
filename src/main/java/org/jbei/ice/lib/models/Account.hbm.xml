@@ -3,7 +3,8 @@
 <hibernate-mapping package="org.jbei.ice.lib.models">
     <class name="Account" table="accounts">
         <id name="id" column="id" type="int">
-            <generator class="native">
+            <generator class="sequence">
+                <param name="sequence">accounts_id_seq</param>
             </generator>
         </id>
         <property name="password" column="password" type="string" length="32" not-null="true" />

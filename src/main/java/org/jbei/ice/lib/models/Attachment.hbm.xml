@@ -3,8 +3,9 @@
 <hibernate-mapping package="org.jbei.ice.lib.models">
 	<class name="Attachment" table="attachments">
 		<id name="id" column="id" type="int">
-			<generator class="native">
-			</generator>
+            <generator class="sequence">
+                <param name="sequence">attachments_id_seq</param>
+            </generator>
 		</id>
 		<property name="description" column="description" type="text" not-null="true" />
 		<property name="fileName" column="filename" type="string" length="255" not-null="true" />

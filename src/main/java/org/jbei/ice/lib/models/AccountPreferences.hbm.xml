@@ -3,8 +3,9 @@
 <hibernate-mapping package="org.jbei.ice.lib.models">
 	<class name="AccountPreferences" table="account_preferences">
 		<id name="id" column="id" type="int">
-			<generator class="native">
-			</generator>
+	       <generator class="sequence">
+                <param name="sequence">accounts_preferences_id_seq</param>
+            </generator>
 		</id>
 		<property name="preferences" column="preferences" type="text" />
 		<property name="restrictionEnzymes" column="restriction_enzymes"

@@ -3,7 +3,8 @@
 <hibernate-mapping package="org.jbei.ice.lib.models">
     <class name="Vote" table="votes">
         <id name="id" column="id" type="int">
-            <generator class="native">
+            <generator class="sequence">
+                <param name="sequence">votes_id_seq</param>
             </generator>
         </id>
         <many-to-one name="account" column="accounts_id" class="Account" not-null="true" />

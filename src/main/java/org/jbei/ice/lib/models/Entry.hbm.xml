@@ -3,9 +3,9 @@
 <hibernate-mapping package="org.jbei.ice.lib.models">
 	<class name="Entry" table="entries">
 		<id name="id" column="id" type="int">
-			<generator class="native">
-				
-			</generator>
+            <generator class="sequence">
+                <param name="sequence">entries_id_seq</param>
+            </generator>
 		</id>
 		<property name="recordId" column="record_id" type="string"
 			length="36" not-null="true" />
