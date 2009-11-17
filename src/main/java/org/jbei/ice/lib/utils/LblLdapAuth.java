@@ -13,6 +13,8 @@ import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
+import org.jbei.ice.lib.logging.Logger;
+
 /** 
  * Little wrapper for lbl ldap.
  * 
@@ -31,7 +33,7 @@ import javax.naming.directory.SearchResult;
  *
  */
 public class LblLdapAuth {
-	protected DirContext dirContext = null;
+	//protected DirContext dirContext = null;
 	protected String ldapURL =null; 
 	protected boolean initialized = false;
 
@@ -42,7 +44,7 @@ public class LblLdapAuth {
 	public String org = null;
 	public String description = null;
 	
-	public boolean authenticate(String userName, String passWord) throws NamingException, AuthenticationException {
+	public synchronized boolean authenticate(String userName, String passWord) throws NamingException, AuthenticationException {
 		authenticated = false;
 		String employeeNumber = "";
 		
@@ -50,14 +52,16 @@ public class LblLdapAuth {
 			throw new AuthenticationException("No password received.");
 		}
 		
-		//look up employee number
+		//has to look up employee number for binding
 		String query = "o=Lawrence Berkeley Laboratory,c=US";
 		String filter = "(uid=" + userName + ")";
 		SearchControls cons = new SearchControls();
 		cons.setSearchScope(SearchControls.SUBTREE_SCOPE);
 		cons.setCountLimit(0);
 		
-		SearchResult searchResult = this.dirContext.search(query, filter, cons).nextElement();
+		DirContext context = getContext();
+		SearchResult searchResult = context.search(query, filter, cons).nextElement();
+		context.close();
 		Attributes attributes = searchResult.getAttributes();
 		employeeNumber = (String) attributes.get("lblempnum").get();
 		
@@ -68,7 +72,9 @@ public class LblLdapAuth {
 		this.org = (String) attributes.get("o").get();
 		this.description = (String) attributes.get("description").get();
 		
-		dirContext = getAuthenticatedContext(employeeNumber, passWord);
+		DirContext authContext = getAuthenticatedContext(employeeNumber, passWord);
+
+		authContext.close();
 		
 		authenticated = true;
 		return authenticated;
@@ -77,25 +83,31 @@ public class LblLdapAuth {
 	public void initialize(String serviceURL) throws NamingException {
 		if (this.initialized == false) {
 			this.ldapURL = serviceURL;
-			this.dirContext = getContext();
 			this.initialized = true;
 		} 	
 	}	
 	
-	public boolean isWikiUser(String loginName) {
+	public synchronized boolean isWikiUser(String loginName) {
 		boolean result = false;
 		
-		String query = "cn=Wiki Users,ou=JBEI-Groups,ou=Groups,o=Lawrence Berkeley Laboratory,c=US";
+		//Use "JBEI Employees" and "Keasling Lab" as whitelist
+		String query = "cn=JBEI Employees,ou=JBEI-Groups,ou=Groups,o=Lawrence Berkeley Laboratory,c=US";
+		String query2 = "cn=Keasling Lab,ou=JBEI-Groups,ou=Groups,o=Lawrence Berkeley Laboratory,c=US";
 		String filter = "(objectClass=*)";
 		SearchControls cons = new SearchControls();
 		cons.setSearchScope(SearchControls.SUBTREE_SCOPE);
 		cons.setCountLimit(0);
 		
 		try {
-			
-			SearchResult searchResult = this.dirContext.search(query, filter, cons).nextElement();
+			DirContext context = getContext();
+			SearchResult searchResult = context.search(query, filter, cons).nextElement();
 			NamingEnumeration<?> uniqueMembers = searchResult.getAttributes().get("uniquemember").getAll();
-
+			
+			SearchResult searchResult2 = context.search(query2, filter, cons).nextElement();
+			NamingEnumeration<?> uniqueMembers2 = searchResult2.getAttributes().get("uniquemember").getAll();
+			
+			context.close();
+			
 			ArrayList<String> whiteList = new ArrayList<String>();
 			while (uniqueMembers.hasMore()) {
 				String temp = (String) uniqueMembers.next();
@@ -103,12 +115,23 @@ public class LblLdapAuth {
 				whiteList.add(temp.toLowerCase()); 
 			}
 			
+			while (uniqueMembers2.hasMore()) {
+				String temp = (String) uniqueMembers2.next();
+				
+				whiteList.add(temp.toLowerCase()); 
+			}
+			
 			if (whiteList.contains(loginName.toLowerCase())) {
 				result = true;
 			}
+			
+			uniqueMembers.close();
+			uniqueMembers2.close();
+			
 		} catch (NamingException e) {
 			
 			e.printStackTrace();
+			Logger.error("ldap auth failure: " + e.toString());
 		}
 		
 		return result;
@@ -142,9 +165,10 @@ public class LblLdapAuth {
 		Hashtable<String, String> env = new Hashtable<String, String>();
 		env.put(Context.INITIAL_CONTEXT_FACTORY,
 				"com.sun.jndi.ldap.LdapCtxFactory");
-		env.put("com.sun.jndi.ldap.connect.pool", "true"); // Enable connection
-															// pooling
-		env.put("com.sun.jndi.ldap.connect.pool.timeout", "30");
+		env.put("com.sun.jndi.ldap.connect.pool", "false"); 
+		env.put("com.sun.jndi.ldap.read.timeout", "2000");
+		env.put("com.sun.jndi.ldap.connect.timeout", "2000");
+		
 		env.put(Context.PROVIDER_URL, this.ldapURL);
 		env.put(Context.SECURITY_AUTHENTICATION, "none");
 		return new InitialDirContext(env);
@@ -157,9 +181,10 @@ public class LblLdapAuth {
 		Hashtable<String, String> env = new Hashtable<String, String>();
 		env.put(Context.INITIAL_CONTEXT_FACTORY,
 				"com.sun.jndi.ldap.LdapCtxFactory");
-		env.put("com.sun.jndi.ldap.connect.pool", "true"); // Enable connection
-															// pooling
-		env.put("com.sun.jndi.ldap.connect.pool.timeout", "30");
+		env.put("com.sun.jndi.ldap.connect.pool", "false"); 
+		env.put("com.sun.jndi.ldap.read.timeout", "2000");
+		env.put("com.sun.jndi.ldap.connect.timeout", "2000");
+		
 		env.put(Context.PROVIDER_URL, this.ldapURL);
 		env.put(Context.SECURITY_AUTHENTICATION, "simple");
 		env.put(Context.SECURITY_PRINCIPAL, "lblempnum=" + lblEmployeeNumber
@@ -174,7 +199,6 @@ public class LblLdapAuth {
 		try {
 			l.initialize("ldaps://ldapauth.lbl.gov");
 		} catch (NamingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		boolean result = l.isWikiUser("tsham");
@@ -183,7 +207,6 @@ public class LblLdapAuth {
 		try {
 			l.authenticate("tsham", "");
 		} catch (NamingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

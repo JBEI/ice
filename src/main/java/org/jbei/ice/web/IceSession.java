@@ -3,6 +3,7 @@ package org.jbei.ice.web;
 import org.apache.wicket.Request;
 import org.apache.wicket.Session;
 import org.apache.wicket.protocol.http.WebSession;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 
 public class IceSession extends WebSession {
@@ -33,13 +34,14 @@ public class IceSession extends WebSession {
 		Account account = null;
 		boolean result = false;
 		try {
-			account = this.authenticator.authenticate("test", "test");
+			account = this.authenticator.authenticate(login, password);
 			if (account != null) {
 				result = true;
 				setAccount(account);
 				this.authenticated = true;
 			}
 		} catch (Exception e) {
+			Logger.warn("Could not authenticate user " + login + ": " + e.toString());
 			e.printStackTrace();
 		}
 		return result; 

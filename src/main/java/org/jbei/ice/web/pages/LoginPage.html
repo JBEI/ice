@@ -1,4 +1,4 @@
-<html>
+<html xmlns:wicket>
 <body>
 <wicket:extend>
 <span wicket:id="loginText">to be replaced</span>
@@ -8,6 +8,7 @@
                         <input type="submit" wicket:id="logInButton" />
                         </form>
                         
+                        <div wicket:id="feedback"></div>
                         <form action="/login/" method="post">
                         <table border="0" cellpadding="3" cellspacing="1" class="entry_table">
                             <tr class="title_row_header"><td><h2>Login</h2></td></tr>

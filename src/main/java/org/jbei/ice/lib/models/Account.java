@@ -13,6 +13,7 @@ public class Account implements Serializable {
 	private String email;
 	private String institution;
 	private int isSubscribed;
+	private String description;
 	private String ip;
 	private Date creationTime;
 	private Date modificationTime;
@@ -89,6 +90,12 @@ public class Account implements Serializable {
 	}
 	public void setLastLoginTime(Date lastLoginTime) {
 		this.lastLoginTime = lastLoginTime;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	public String getDescription() {
+		return description;
 	}
 	
 	

@@ -27,11 +27,11 @@ public class LoginPanel extends Panel {
 		add(postLoginFragment);
 	}
 	
-	private String getDisplayedName() {
+	private String getEmail() {
 		String result = null;
 		IceSession s = IceSession.get();
 		if (s.isAuthenticated()) {
-			result = s.getAccount().getFirstName();
+			result = s.getAccount().getEmail();
 		} else {
 			result = "";
 		}
@@ -62,7 +62,7 @@ public class LoginPanel extends Panel {
 			}
 		};
 		postLogin.add(new BookmarkablePageLink("userProfile", PlasmidPage.class)
-			.add(new Label("userName", getDisplayedName())));
+			.add(new Label("userName", getEmail())));
 		postLogin.add(new BookmarkablePageLink("logOut", LogOutPage.class));
 		
 

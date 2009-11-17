@@ -13,6 +13,7 @@
         <property name="email" column="email" type="string" length="100" not-null="true" />
         <property name="institution" column="institution" type="string" length="255" not-null="true" />
         <property name="isSubscribed" column="is_subscribed" type="int" not-null="true" />
+        <property name="description" column="description" type="text" not-null="true" />
         <property name="ip" column="ip" type="string" length="20" not-null="true" />
         <property name="creationTime" column="creation_time" type="timestamp" />
         <property name="modificationTime" column="modification_time" type="timestamp" />

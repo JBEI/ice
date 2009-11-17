@@ -8,8 +8,10 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.web.IceSession;
 
 
@@ -23,15 +25,17 @@ public class LoginPage extends HomePage {
 		
 		add(new Label("loginText", "This is some text"));
 		
-		class LoginForm extends StatelessForm {
+		class LoginForm extends StatelessForm<Object> {
+			private static final long serialVersionUID = 1L;
 			private String loginName;
 			private String loginPassword;
 			
 			public LoginForm(String id) {
 				super(id);
-				setModel(new CompoundPropertyModel(this));
-				add(new TextField<String>("loginName").setRequired(true));
-				add(new PasswordTextField("loginPassword").setRequired(true));
+				setModel(new CompoundPropertyModel<Object>(this));
+				add(new TextField<String>("loginName").setRequired(true)
+						.setLabel(new Model<String>("Login")));
+				add(new PasswordTextField("loginPassword").setRequired(true).setLabel(new Model<String>("Password")));
 			}
 			
 			public String getLogin() {
@@ -42,26 +46,24 @@ public class LoginPage extends HomePage {
 			}
 		}
 		
-		Form loginForm = new LoginForm("loginForm") {
+		Form<?> loginForm = new LoginForm("loginForm") {
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void onSubmit() {
-				System.out.println("User: " + getLogin());
-				System.out.println("Pass: " + getPassword());
-				
 				if (authenticate(getLogin(), getPassword())) {
 					if (!continueToOriginalDestination()) {
 						setResponsePage(getApplication().getHomePage());
 					}
 				} else {
-					error("unknown username / password");
+					Logger.info("Login failed for user " + getLogin());
+					error("Unknown username / password combination");
 				}
 			}
 			
 			@Override
 			protected void onError() {
-				System.out.println("Oops, error");
+				
 			}
 			
 			protected boolean authenticate(String username, String password) {
@@ -70,25 +72,16 @@ public class LoginPage extends HomePage {
 			}
 		};
 		
-		/*
-		loginForm.add(new TextField("loginName", new Model(""))
-			.setRequired(true));
-		loginForm.add(new PasswordTextField("loginPassword", new Model(""))
-			.setRequired(true));
-		*/
-		
 		loginForm.add(new Button("logInButton", new Model<String>("Log In")) {
 			/**
 			 * 
 			 */
 			private static final long serialVersionUID = 1L;
 
-			public void onClick() {
-				//button was pushed
-			}
 		});
 		
 		add(loginForm);
+		add(new FeedbackPanel("feedback"));
 		
 	}
 }
