@@ -13,9 +13,9 @@ public class IceSession extends WebSession {
 	private Authenticator authenticator = null;
 	private boolean authenticated = false;
 	
-	public IceSession(Request request, Authenticator authenticator) {
+	public IceSession(Request request, Authenticator authenticator2) {
 		super(request);
-		this.authenticator = authenticator;
+		this.authenticator = authenticator2;
 	}
 
 	public static IceSession get() {
@@ -34,7 +34,8 @@ public class IceSession extends WebSession {
 		Account account = null;
 		boolean result = false;
 		try {
-			account = this.authenticator.authenticate(login, password);
+			account = authenticator.authenticate(login, password);
+			
 			if (account != null) {
 				result = true;
 				setAccount(account);

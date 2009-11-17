@@ -28,11 +28,10 @@ public class WicketApplication extends WebApplication
 	{
 	}
 	
-	
 	protected void init() {
-		authenticator = new NullAuthenticator();
-		//authenticator = new LblLdapAuthenticator();
-		
+		//authenticator = new NullAuthenticator();
+		authenticator = new LblLdapAuthenticator();
+				
 		mountBookmarkablePage("/login", LoginPage.class);
 		mountBookmarkablePage("/register", RegisterPage.class);
 		mount(new URIRequestTargetUrlCodingStrategy("/static")

@@ -6,7 +6,6 @@ import org.jbei.ice.lib.models.Account;
 
 public class NullAuthenticator extends Authenticator {
 
-	@Override
 	public Account authenticate(String userId, String password) {
 		Account account = null;
 		try {

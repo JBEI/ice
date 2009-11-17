@@ -2,6 +2,8 @@ package org.jbei.ice.web;
 
 import java.util.Calendar;
 
+import javax.naming.NamingException;
+
 import org.apache.wicket.protocol.http.request.WebClientInfo;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.utils.LblLdapAuth;
@@ -12,9 +14,14 @@ public class LblLdapAuthenticator extends Authenticator{
 
 		public Account authenticate(String loginId, String password) {
 			Account account = null;
-			LblLdapAuth l = new LblLdapAuth();
+			LblLdapAuth l = null;
 			try {
-				l.initialize("ldaps://ldapauth.lbl.gov:636");
+				l = new LblLdapAuth();
+			} catch (NamingException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			try {
 				loginId = loginId.toLowerCase();
 				
 				if (l.isWikiUser(loginId)) {
@@ -38,7 +45,7 @@ public class LblLdapAuthenticator extends Authenticator{
 					
 					account.setLastLoginTime(Calendar.getInstance().getTime());
 					
-					AccountManager.dbSave(account);
+					//AccountManager.dbSave(account);
 					
 					Logger.info("User " + loginId + " authenticated via lbl-ldap.");
 
