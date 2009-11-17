@@ -8,7 +8,7 @@
 	<property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
 	<property name="hibernate.connection.password">t@stuz@r</property>
 	<!-- use below when table rearrangement is needed. "create" or "update" -->
-	<!-- <property name="hbm2ddl.auto">update</property> -->
+	 <property name="hbm2ddl.auto">update</property> 
 	<!-- this will show us all sql statements -->
     <property name="hibernate.show_sql">true</property>
 	<!-- mapping files -->
@@ -37,5 +37,6 @@
 	<mapping resource="org/jbei/ice/lib/models/Label.hbm.xml" />
 	<mapping resource="org/jbei/ice/lib/models/EntryLabel.hbm.xml" />
 	<mapping resource="org/jbei/ice/lib/models/AccountPreferences.hbm.xml"/>
+	<mapping resource="org/jbei/ice/lib/permissions/Group.hbm.xml"/>
 </session-factory>
 </hibernate-configuration>

@@ -8,14 +8,15 @@ import org.hibernate.Transaction;
 public abstract class Manager {
 	protected static Session session = HibernateHelper.getSession();
 	
-	public static void dbDelete(Object obj) throws Exception {
+	public static void dbDelete(Object obj) throws ManagerException {
 		
 		try {
 			Transaction tx = session.beginTransaction();
 			session.delete(obj);
 			tx.commit();
 		} catch(Exception e) {
-			throw e;
+			e.printStackTrace();
+			throw new ManagerException("dbDelete exception", e);
 		}
 		
 	}
@@ -36,7 +37,7 @@ public abstract class Manager {
 		return result;
 	}
 	
-	public static Object dbGet(Class theClass, int id) throws Exception {
+	public static Object dbGet(Class<? extends Object> theClass, int id) throws Exception {
 		Object result = null;
 		try {
 			result = session.load(theClass, id);

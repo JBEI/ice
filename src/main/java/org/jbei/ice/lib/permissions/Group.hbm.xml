@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.jbei.ice.lib.permissions">
+    <class name="Group" table="groups">
+        <id name="id" column="id" type="int">
+            <generator class="sequence">
+                <param name="sequence">groups_id_seq</param>
+            </generator>
+        </id>
+        <property name="uuid" column="uuid" type="string" length="36" not-null="true" />
+        <property name="label" column="label" type="string" length="127" not-null="true" />
+        <property name="description" column="description" type="string" length="255" not-null="true" />
+        <property name="serializedCache" column="serialized_cache" type="serializable"/>
+        <many-to-one name="parent" column="parent" class="Group"/>
+    </class>
+</hibernate-mapping>
