@@ -1,12 +1,7 @@
 package org.jbei.ice.lib.managers;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.hibernate.Query;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Feature;
-import org.jbei.ice.lib.models.FeatureDNA;
 import org.jbei.ice.lib.models.Sequence;
 
 public class SequenceManager extends Manager {
@@ -25,7 +20,6 @@ public class SequenceManager extends Manager {
 		try {
 				dbDelete(sequence);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				throw new ManagerException("Could not delete attachment in db: " + e.toString());
 			}
