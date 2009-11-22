@@ -1,18 +1,13 @@
 package org.jbei.ice.lib.managers;
 
-import java.util.HashSet;
-
 import org.hibernate.Query;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.permissions.Group;
-import org.jbei.ice.lib.permissions.ReadUser;
-import org.jbei.ice.lib.permissions.WriteUser;
 
 public class GroupManager extends Manager{
 	
-	public static Group getGroup(String uuid) throws ManagerException {
+	public static Group get(String uuid) throws ManagerException {
 		Group result = null;
 		try {
 			Query query = HibernateHelper.getSession().createQuery(
@@ -28,7 +23,7 @@ public class GroupManager extends Manager{
 		return result;
 	}
 	
-	public static Group getGroup(int id) throws ManagerException {
+	public static Group get(int id) throws ManagerException {
 		Group result = null;
 		try {
 			Query query = HibernateHelper.getSession().createQuery(
@@ -98,29 +93,7 @@ public class GroupManager extends Manager{
 	
 	public static void main(String[] args) {
 		try {
-			HashSet<Account> users = new HashSet<Account>();
 
-			users.add(AccountManager.getById(1));
-			users.add(AccountManager.getById(2));
-			users.add(AccountManager.getById(3));
-			
-			Entry entry = EntryManager.get(1);
-			
-			for (Account user: users) {
-				ReadUser readUsers = new ReadUser(entry, user);
-				dbSave(readUsers);
-			}
-			
-			users = new HashSet<Account>();
-			users.add(AccountManager.getById(1));
-			users.add(AccountManager.getById(2));
-			users.add(AccountManager.getById(4));
-			
-			for (Account user: users) {
-				WriteUser writeUsers = new WriteUser(entry, user);
-				dbSave(writeUsers);
-			}
-			
 			/*
 			Group g = create("Test", "test group", null);
 			String uuid = g.getUuid();
@@ -138,8 +111,13 @@ public class GroupManager extends Manager{
 			if (deletedGroup == null) {
 				System.out.println("OK!");
 			}
-
+			 */
+			
+			/*
+			Group jbeiGroup = create("JBEI", "JBEI root group", null);
+			Group fuelSynthesis = create("Fuel Synthesis", "Fuel Synthesis group", jbeiGroup);
 			*/
+			get(1);
 			
 		} catch (ManagerException e) {
 			e.printStackTrace();

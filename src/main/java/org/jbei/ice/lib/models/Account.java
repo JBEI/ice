@@ -2,22 +2,68 @@ package org.jbei.ice.lib.models;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Set;
 
-// TODO: use annotations for models. 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import org.jbei.ice.lib.permissions.Group;
+
+@Entity
+@Table(name = "accounts")
+@SequenceGenerator(name = "sequence", sequenceName = "accounts_id_seq",
+		allocationSize = 1)
 public class Account implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
 	private int id;
+	
+	@Column(name = "password", length = 32, nullable = false)
 	private String password;
+	@Column(name = "firstname", length = 50, nullable = false)
 	private String firstName;
+	@Column(name = "lastname", length = 50, nullable = false)
 	private String lastName;
+	@Column(name = "initials", length = 10, nullable = false)
 	private String initials;
+	@Column(name = "email", length = 100, nullable = false)
 	private String email;
+	@Column(name = "institution", length = 255, nullable = false)
 	private String institution;
+	@Column(name = "is_subscribed", nullable = false)
 	private int isSubscribed;
+	@Column(name = "description", nullable = false)
 	private String description;
+	@Column(name = "ip", length = 20, nullable = false)
 	private String ip;
+	@Column(name = "creation_time")
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date creationTime;
+	@Column(name = "modification_time")
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date modificationTime;
+	@Column(name = "lastlogin_time")
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date lastLoginTime;
+
+	
+	@ManyToMany
+	@JoinTable(name="account_group", joinColumns=@JoinColumn(name="account_id"), 
+			inverseJoinColumns=@JoinColumn(name="group_id"))
+	private Set<Group> groups;
 	
 	public int getId() {
 		return id;
@@ -96,6 +142,12 @@ public class Account implements Serializable {
 	}
 	public String getDescription() {
 		return description;
+	}
+	public void setGroups(Set<Group> groups) {
+		this.groups = groups;
+	}
+	public Set<Group> getGroups() {
+		return groups;
 	}
 	
 	

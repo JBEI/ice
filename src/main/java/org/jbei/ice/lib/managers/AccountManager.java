@@ -89,4 +89,17 @@ public class AccountManager extends Manager {
 		
 		return account;
 	}
+	
+	public static Account save(Account account) throws ManagerException {
+		try {
+			Account result = (Account) dbSave(account);
+			return result;
+			
+		} catch (Exception e) {
+			String msg = "Could not save account " + account.getEmail();
+			Logger.error(msg);
+			throw new ManagerException(msg);
+		}
+	}
+		
 }

@@ -16,13 +16,14 @@ import org.jbei.ice.lib.models.Entry;
 
 @Entity
 @Table(name="permission_read_groups")
-@SequenceGenerator(name = "permission_read_groups_sequence", sequenceName = "permission_read_groups_id_seq")
+@SequenceGenerator(name = "sequence", sequenceName = "permission_read_groups_id_seq",
+		allocationSize = 1)
 public class ReadGroup implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "permission_read_groups_sequence")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
 	private int id;
 	
 	@ManyToOne
@@ -31,11 +32,11 @@ public class ReadGroup implements Serializable {
 	
 	@ManyToOne
 	@JoinColumn(name = "group_id")
-	private Group readGroup;
+	private Group group;
 
 	public ReadGroup(Entry entry, Group group) {
 		setEntry(entry);
-		setReadGroup(group);
+		setGroup(group);
 	}
 	
 	//getters and setters
@@ -55,12 +56,12 @@ public class ReadGroup implements Serializable {
 		this.entry = entry;
 	}
 
-	public Group getReadGroup() {
-		return readGroup;
+	public Group getGroup() {
+		return group;
 	}
 
-	public void setReadGroup(Group readGroup) {
-		this.readGroup = readGroup;
+	public void setGroup(Group group) {
+		this.group = group;
 	}
 
 

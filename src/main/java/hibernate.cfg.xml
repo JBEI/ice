@@ -29,7 +29,7 @@
 	<mapping resource="org/jbei/ice/lib/models/Comment.hbm.xml" />
 	<mapping resource="org/jbei/ice/lib/models/Vote.hbm.xml" />
 	<mapping resource="org/jbei/ice/lib/models/News.hbm.xml" />
-	<mapping resource="org/jbei/ice/lib/models/Account.hbm.xml" />
+	<mapping class = "org.jbei.ice.lib.models.Account"/>
 	<mapping resource="org/jbei/ice/lib/models/AccountEntryRelationship.hbm.xml" />
 	<mapping resource="org/jbei/ice/lib/models/Attachment.hbm.xml" />
 	<mapping resource="org/jbei/ice/lib/models/Sample.hbm.xml" />

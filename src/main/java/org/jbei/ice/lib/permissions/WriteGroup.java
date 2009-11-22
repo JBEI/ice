@@ -16,13 +16,14 @@ import org.jbei.ice.lib.models.Entry;
 
 @Entity
 @Table(name="permission_write_groups")
-@SequenceGenerator(name = "permission_write_groups_sequence", sequenceName = "permission_write_groups_id_seq")
+@SequenceGenerator(name = "sequence", sequenceName = "permission_write_groups_id_seq",
+		allocationSize = 1)
 public class WriteGroup implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "permission_write_groups_sequence")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
 	private int id;
 	
 	@ManyToOne
@@ -31,11 +32,11 @@ public class WriteGroup implements Serializable {
 	
 	@ManyToOne
 	@JoinColumn(name = "group_id")
-	private Group writeGroup;
+	private Group group;
 
 	public WriteGroup(Entry entry, Group group) {
 		setEntry(entry);
-		setWriteGroup(group);
+		setGroup(group);
 	}
 	
 	//getters and setters
@@ -55,12 +56,12 @@ public class WriteGroup implements Serializable {
 		this.entry = entry;
 	}
 
-	public Group getWriteGroup() {
-		return writeGroup;
+	public Group getGroup() {
+		return group;
 	}
 
-	public void setWriteGroup(Group writeGroup) {
-		this.writeGroup = writeGroup;
+	public void setGroup(Group group) {
+		this.group = group;
 	}
 
 }

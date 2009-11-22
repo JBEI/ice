@@ -16,13 +16,14 @@ import org.jbei.ice.lib.models.Entry;
 
 @Entity
 @Table(name="permission_write_users")
-@SequenceGenerator(name = "permission_write_users_sequence", sequenceName = "permission_write_users_id_seq")
+@SequenceGenerator(name = "sequence", sequenceName = "permission_write_users_id_seq",
+		allocationSize = 1)
 public class WriteUser implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "permission_write_users_sequence")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
 	private int id;
 	
 	@ManyToOne

@@ -1,15 +1,17 @@
 package org.jbei.ice.lib.models;
 
 import java.io.Serializable;
+
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.jbei.ice.lib.value_objects.IEntryValueObject;
 
 public class Entry implements IEntryValueObject, Serializable {
+
+	private static final long serialVersionUID = 1L;
 	private int id;
 	private String recordId;
 	private String versionId;

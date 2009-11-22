@@ -20,13 +20,14 @@ import org.jbei.ice.lib.models.Account;
 
 @Entity
 @Table(name="groups")
-@SequenceGenerator(name = "group_sequence", sequenceName = "groups_id_seq")
+@SequenceGenerator(name = "sequence", sequenceName = "groups_id_seq",
+		allocationSize = 1)
 public class Group implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "group_sequence")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
 	protected int id;
 	
 	@Column(name = "uuid", length = 36, nullable=false)
@@ -38,16 +39,16 @@ public class Group implements Serializable {
 	@Column(name = "description", length = 255, nullable=false)
 	protected String description;
 	
-	@Transient
-	protected TreeSet<Integer> cache;
-	
-	@Column(name = "serialized_cache")
-	protected Serializable serializedCache;
-	
 	@ManyToOne()
 	@JoinColumn(name = "parent")
 	protected Group parent;
 
+	@Column(name = "serialized_cache")
+	protected Serializable serializedCache;
+
+	@Transient
+	protected TreeSet<Integer> cache;		
+	
 	public Set<Account> getUsers() {
 		return null;
 	
