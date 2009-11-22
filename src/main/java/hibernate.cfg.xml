@@ -37,6 +37,11 @@
 	<mapping resource="org/jbei/ice/lib/models/Label.hbm.xml" />
 	<mapping resource="org/jbei/ice/lib/models/EntryLabel.hbm.xml" />
 	<mapping resource="org/jbei/ice/lib/models/AccountPreferences.hbm.xml"/>
-	<mapping resource="org/jbei/ice/lib/permissions/Group.hbm.xml"/>
+	<mapping class="org.jbei.ice.lib.permissions.Group"/>
+	<mapping class="org.jbei.ice.lib.permissions.ReadUser"/>
+	<mapping class="org.jbei.ice.lib.permissions.WriteUser"/>
+	<mapping class="org.jbei.ice.lib.permissions.ReadGroup"/>
+	<mapping class="org.jbei.ice.lib.permissions.WriteGroup"/>
+	
 </session-factory>
 </hibernate-configuration>

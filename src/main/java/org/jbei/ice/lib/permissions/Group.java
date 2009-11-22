@@ -4,15 +4,48 @@ import java.io.Serializable;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+
 import org.jbei.ice.lib.models.Account;
 
-public class Group {
+@Entity
+@Table(name="groups")
+@SequenceGenerator(name = "group_sequence", sequenceName = "groups_id_seq")
+public class Group implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "group_sequence")
 	protected int id;
+	
+	@Column(name = "uuid", length = 36, nullable=false)
 	protected String uuid;
+	
+	@Column(name = "label", length = 127, nullable=false)
 	protected String label;
+	
+	@Column(name = "description", length = 255, nullable=false)
 	protected String description;
+	
+	@Transient
 	protected TreeSet<Integer> cache;
+	
+	@Column(name = "serialized_cache")
 	protected Serializable serializedCache;
+	
+	@ManyToOne()
+	@JoinColumn(name = "parent")
 	protected Group parent;
 
 	public Set<Account> getUsers() {

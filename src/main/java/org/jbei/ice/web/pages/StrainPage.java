@@ -16,7 +16,7 @@ public class StrainPage extends HomePage {
 			StrainPanel strainPanel = new StrainPanel("strain", entry);
 			add(strainPanel);
 		} catch (ManagerException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
 		

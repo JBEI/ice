@@ -1,8 +1,14 @@
 package org.jbei.ice.lib.managers;
 
+import java.util.HashSet;
+
 import org.hibernate.Query;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.models.Account;
+import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.permissions.Group;
+import org.jbei.ice.lib.permissions.ReadUser;
+import org.jbei.ice.lib.permissions.WriteUser;
 
 public class GroupManager extends Manager{
 	
@@ -92,9 +98,33 @@ public class GroupManager extends Manager{
 	
 	public static void main(String[] args) {
 		try {
+			HashSet<Account> users = new HashSet<Account>();
+
+			users.add(AccountManager.getById(1));
+			users.add(AccountManager.getById(2));
+			users.add(AccountManager.getById(3));
+			
+			Entry entry = EntryManager.get(1);
+			
+			for (Account user: users) {
+				ReadUser readUsers = new ReadUser(entry, user);
+				dbSave(readUsers);
+			}
+			
+			users = new HashSet<Account>();
+			users.add(AccountManager.getById(1));
+			users.add(AccountManager.getById(2));
+			users.add(AccountManager.getById(4));
+			
+			for (Account user: users) {
+				WriteUser writeUsers = new WriteUser(entry, user);
+				dbSave(writeUsers);
+			}
+			
+			/*
 			Group g = create("Test", "test group", null);
 			String uuid = g.getUuid();
-
+			int id = g.getId();
 			Group gotById = getGroup(g.getId());
 			Group gotByUuid = getGroup(g.getUuid());
 			if (gotById != gotByUuid) {
@@ -104,18 +134,16 @@ public class GroupManager extends Manager{
 			Group updatedGroup = update(gotByUuid);
 			System.out.println("" + g.getId() + "=?" + updatedGroup.getId());
 			delete(g);
-			Group deletedGroup = getGroup(uuid);
+			Group deletedGroup = getGroup(id);
 			if (deletedGroup == null) {
-				Thread.sleep(10);
+				System.out.println("OK!");
 			}
+
+			*/
 			
 		} catch (ManagerException e) {
 			e.printStackTrace();
-		} catch (InterruptedException e) {
-			
-			e.printStackTrace();
 		}
-		
 		
 	}
 	
