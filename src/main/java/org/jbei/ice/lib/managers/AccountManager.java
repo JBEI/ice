@@ -16,7 +16,9 @@ public class AccountManager extends Manager {
 
 			accountPreferences = (AccountPreferences) query.uniqueResult();
 		} catch (Exception e) {
-			throw new ManagerException("Could not get AccountPreferences by id");
+			String msg = "Could not get AccountPreferences by id";
+			Logger.error(msg);
+			throw new ManagerException(msg);
 		}
 
 		return accountPreferences;

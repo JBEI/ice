@@ -12,6 +12,7 @@ public class IceSession extends WebSession {
 	private Account account = null;
 	private Authenticator authenticator = null;
 	private boolean authenticated = false;
+	private SessionData sessionData;
 	
 	public IceSession(Request request, Authenticator authenticator2) {
 		super(request);
@@ -20,6 +21,14 @@ public class IceSession extends WebSession {
 
 	public static IceSession get() {
 		return (IceSession) Session.get();
+	}
+	
+	public void setSessionData(SessionData sessionData) {
+		this.sessionData = sessionData;
+	}
+
+	public SessionData getSessionData() {
+		return sessionData;
 	}
 
 	private void setAccount(Account account) {
