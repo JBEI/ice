@@ -1,11 +1,40 @@
 package org.jbei.ice.lib.models;
 
-public class AccountPreferences {
-	private int id;
-	private String preferences;
-	private String restrictionEnzymes;
-	private Account account;
+import java.io.Serializable;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+
+import org.jbei.ice.lib.permissions.WorkSpace;
+
+@Entity
+@Table(name = "account_preferences")
+@SequenceGenerator(name = "sequence", sequenceName = "account_preferences_id_seq",
+		allocationSize = 1)
+public class AccountPreferences implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+	private int id;
+	
+	@Column(name = "preferences")
+	private String preferences;
+	@Column(name = "restriction_enzymes")
+	private String restrictionEnzymes;
+	@ManyToOne()
+	@JoinColumn(name = "accounts_id", unique=true, nullable = false)
+	private Account account;
+	@Column(name = "work_space", nullable = true)
+	private WorkSpace workSpace;
+	
 	public AccountPreferences() {
 		super();
 	}
@@ -48,6 +77,14 @@ public class AccountPreferences {
 
 	public void setAccount(Account account) {
 		this.account = account;
+	}
+
+	public void setWorkSpace(WorkSpace workSpace) {
+		this.workSpace = workSpace;
+	}
+
+	public WorkSpace getWorkSpace() {
+		return workSpace;
 	}
 
 }
