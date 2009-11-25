@@ -1,5 +1,6 @@
 package org.jbei.ice.web;
 
+import java.util.Calendar;
 import java.util.HashMap;
 
 import javax.servlet.http.Cookie;
@@ -24,7 +25,7 @@ public class IceSession extends WebSession {
 	private Authenticator authenticator = null;
 	private boolean authenticated = false;
 	private SessionData sessionData = null;
-	private String COOKIE_NAME = "gd-ice";
+	private String COOKIE_NAME = JbeirSettings.getSetting("COOKIE_NAME");
 	
 	public IceSession(Request request, Response response, Authenticator authenticator2) {
 		super(request);
@@ -55,42 +56,29 @@ public class IceSession extends WebSession {
 		
 	}
 
-	public SessionData getSavedSession(Request request) {
-		SessionData sessionData = null;
-		
-		Cookie userCookie = ((WebRequest) request).getCookie(COOKIE_NAME);
-		
-		if (userCookie != null) {
-			try {
-				String sessionKey = userCookie.getValue();
-				sessionData = SessionManager.get(sessionKey);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		
-		return sessionData;
-	}
-	
-	public SessionData createNewSavedSession(Request request, Response response) {
-		String host = ((WebRequest)request).getHttpServletRequest().getRemoteAddr();
-		SessionData sessionData = null;
-		try {
-			sessionData = new SessionData(host,JbeirSettings.getSetting("SITE_SECRET"));
-			Cookie cookie = new Cookie(COOKIE_NAME, sessionData.getSessionKey());
-			((WebResponse)response).addCookie(cookie);
-						
-		} catch (ManagerException e) {
-						
-						e.printStackTrace();
-		}
-		return sessionData;
-	}
-	
-	public void clearSavedSession() {
+	/**
+	 * Save account id into SessionData, and save into db for persistent
+	 * token based authentication.
+	 */
+	public void makeSessionPersistent() {
 		SessionData savedSession = getSessionData();
-		savedSession.delete();
+		HashMap<String, Object> data = savedSession.getData();
+		if (data == null) {
+			data = new HashMap<String, Object> () ;
+		}
+		data.put("accountId", (Integer) getAccount().getId());
+		savedSession.setData(data);
 		
+		long currentTime = Calendar.getInstance().getTimeInMillis();
+		long expireDate = currentTime + 7776000000L; //30 days
+					 
+		savedSession.setExpireDate(expireDate);
+		try {
+			savedSession.persist();
+		} catch (ManagerException e) {
+			e.printStackTrace();
+		}
+
 	}
 	
 	public boolean authenticateUser(String login, String password) {
@@ -112,9 +100,9 @@ public class IceSession extends WebSession {
 	}
 	
 	public void deAuthenticateUser() {
+		clearSavedSession();
 		account = null;
 		authenticated = false;
-		sessionData.delete();
 	}
 	
 	public boolean isAuthenticated() {
@@ -141,4 +129,42 @@ public class IceSession extends WebSession {
 	public Account getAccount() {
 		return account;
 	}
+	
+	//private methods
+	private SessionData getSavedSession(Request request) {
+		SessionData sessionData = null;
+		
+		Cookie userCookie = ((WebRequest) request).getCookie(COOKIE_NAME);
+		
+		if (userCookie != null) {
+			try {
+				String sessionKey = userCookie.getValue();
+				sessionData = SessionManager.get(sessionKey);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return sessionData;
+	}
+	
+	private SessionData createNewSavedSession(Request request, Response response) {
+		String host = ((WebRequest)request).getHttpServletRequest().getRemoteAddr();
+		SessionData sessionData = null;
+		try {
+			sessionData = new SessionData(host,JbeirSettings.getSetting("SITE_SECRET"));
+			Cookie cookie = new Cookie(COOKIE_NAME, sessionData.getSessionKey());
+			((WebResponse)response).addCookie(cookie);
+						
+		} catch (ManagerException e) {
+						
+						e.printStackTrace();
+		}
+		return sessionData;
+	}
+	
+	private void clearSavedSession() {
+		sessionData.delete();
+	}
+	
 }

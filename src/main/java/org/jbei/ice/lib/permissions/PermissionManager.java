@@ -9,7 +9,6 @@ import org.hibernate.Transaction;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.EntryManager;
-import org.jbei.ice.lib.managers.GroupManager;
 import org.jbei.ice.lib.managers.HibernateHelper;
 import org.jbei.ice.lib.managers.Manager;
 import org.jbei.ice.lib.managers.ManagerException;
@@ -424,7 +423,7 @@ public class PermissionManager extends Manager{
 			Account u3 = AccountManager.get(3);
 			Account u4 = AccountManager.get(4);
 			
-			Entry entry3 = EntryManager.get(3);
+			//Entry entry3 = EntryManager.get(3);
 			Entry entry4 = EntryManager.get(4);
 			/*
 			System.out.println("u1 can read e3: " + hasReadPermission(entry3, u1));

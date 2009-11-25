@@ -102,5 +102,5 @@ public class SessionData implements Serializable {
 	public SessionData persist() throws ManagerException {
 		return SessionManager.save(this);
 	}
-	
+
 }

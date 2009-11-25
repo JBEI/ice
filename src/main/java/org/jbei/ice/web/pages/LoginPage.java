@@ -1,11 +1,5 @@
 package org.jbei.ice.web.pages;
 
-
-import java.util.Calendar;
-import java.util.HashMap;
-
-import javax.servlet.http.Cookie;
-
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
@@ -17,14 +11,8 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.protocol.http.WebRequest;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SessionManager;
-import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.web.IceSession;
-import org.jbei.ice.web.SessionData;
-
 
 /**
  * @author tham
@@ -70,30 +58,9 @@ public class LoginPage extends HomePage {
 				boolean authenticated = authenticate(getLogin(), getPassword()); 
 				if (authenticated) {
 					if (getKeepSignedIn()) {
-						SessionData sessionData = IceSession.get().getSessionData();
-						
-						long currentTime = Calendar.getInstance().getTimeInMillis();
-						long expireDate = currentTime + 7776000000L; //30 days
-					 
-						sessionData.setExpireDate(expireDate);
-						
-						HashMap<String, Object> data = sessionData.getData();
-						if (data == null) {
-							data = new HashMap<String, Object> () ;
-						}
-						data.put("accountId", (Integer) IceSession.get().getAccount().getId());
-						sessionData.setData(data);
-						
-						try {
-							sessionData.persist();
-						} catch (ManagerException e) {
-							e.printStackTrace();
-						}
-						
-						
+						IceSession.get().makeSessionPersistent();
 					}
 					
-					System.out.println("check my session data here");	
 					if (!continueToOriginalDestination()) {
 						setResponsePage(getApplication().getHomePage());
 					}

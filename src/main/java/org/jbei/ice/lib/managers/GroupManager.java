@@ -2,7 +2,6 @@ package org.jbei.ice.lib.managers;
 
 import org.hibernate.Query;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.permissions.Group;
 
 public class GroupManager extends Manager{
