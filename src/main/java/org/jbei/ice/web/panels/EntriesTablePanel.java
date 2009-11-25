@@ -16,14 +16,15 @@ import org.jbei.ice.lib.models.PartNumber;
 
 public class EntriesTablePanel extends Panel {
 
+	private static final long serialVersionUID = 1L;
+
 	public EntriesTablePanel(String id) {
 		super(id);
-		// TODO Auto-generated constructor stub
 	}
 	
 	public EntriesTablePanel(String id, ArrayList<Entry> entries, int limit) {
 		super(id);
-		
+		@SuppressWarnings({ "unchecked", "serial" })
 		PageableListView listView = new PageableListView("itemRows", entries, limit) {
 
 			@Override
@@ -32,7 +33,6 @@ public class EntriesTablePanel extends Panel {
 				item.add(new CheckBox("checkBox", new Model(false)));
 				Set<Name> nameSet = entry.getNames();
 				Set<PartNumber> partNumberSet = entry.getPartNumbers();
-				
 				
 				PartNumber temp = (PartNumber) partNumberSet.toArray()[0];
 				item.add(new Label("partNumber", temp.getPartNumber()));

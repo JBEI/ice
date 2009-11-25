@@ -1,6 +1,8 @@
 package org.jbei.ice.web.pages;
 
 
+import javax.servlet.http.HttpSession;
+
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
@@ -11,6 +13,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.protocol.http.WebRequest;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.web.IceSession;
 
@@ -52,6 +55,8 @@ public class LoginPage extends HomePage {
 			@Override
 			protected void onSubmit() {
 				if (authenticate(getLogin(), getPassword())) {
+					IceSession iceSession = IceSession.get();
+					
 					if (!continueToOriginalDestination()) {
 						setResponsePage(getApplication().getHomePage());
 					}
