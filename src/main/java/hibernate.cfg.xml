@@ -42,6 +42,7 @@
 	<mapping class="org.jbei.ice.lib.permissions.WriteUser"/>
 	<mapping class="org.jbei.ice.lib.permissions.ReadGroup"/>
 	<mapping class="org.jbei.ice.lib.permissions.WriteGroup"/>
+	<mapping class="org.jbei.ice.web.SessionData"/>
 	
 </session-factory>
 </hibernate-configuration>

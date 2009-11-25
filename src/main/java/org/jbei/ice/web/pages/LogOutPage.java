@@ -11,6 +11,7 @@ public class LogOutPage extends HomePage {
 		super(parameters);
 		
 		IceSession.get().deAuthenticateUser();
+		IceSession.get().clearSavedSession();
 		IceSession.get().invalidateNow();
 		setResponsePage(HomePage.class);		
 	}

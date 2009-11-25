@@ -6,7 +6,7 @@ public class JbeirSettings {
 	
 	public String TEST_VARIABLE = "this is a test variable";
 	
-	public final static HashMap<String, Object> settings = new HashMap();
+	public final static HashMap<String, String> settings = new HashMap<String, String>();
 	static {
 		//settings.put("TEST_VARIABLE", "test_variable");
 		settings.put("DATA_DIRECTORY", "/var/lib/jbeiregistry");
@@ -14,12 +14,13 @@ public class JbeirSettings {
 		settings.put("LOGS_DIRECTORY", settings.get("DATA_DIRECTORY") + "/logs");
 		settings.put("LUCENE_DIRECTORY", settings.get("DATA_DIRECTORY"));
 		settings.put("BLAST_DIRECTORY", settings.get("DATA_DIRECTORY"));
+		settings.put("SITE_SECRET", "Secret Sauce");
 		
 	}
 		
 	
-	public static Object getSetting(String key) {
-		Object result = null;
+	public static String getSetting(String key) {
+		String result = null;
 		if (settings.containsKey(key)) {
 			result = settings.get(key);
 		} else {

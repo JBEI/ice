@@ -419,10 +419,10 @@ public class PermissionManager extends Manager{
 			*/
 			
 			//test user permission via groups
-			Account u1 = AccountManager.getById(1);
-			Account u2 = AccountManager.getById(2);
-			Account u3 = AccountManager.getById(3);
-			Account u4 = AccountManager.getById(4);
+			Account u1 = AccountManager.get(1);
+			Account u2 = AccountManager.get(2);
+			Account u3 = AccountManager.get(3);
+			Account u4 = AccountManager.get(4);
 			
 			Entry entry3 = EntryManager.get(3);
 			Entry entry4 = EntryManager.get(4);

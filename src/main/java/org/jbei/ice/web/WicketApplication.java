@@ -49,7 +49,7 @@ public class WicketApplication extends WebApplication
 	@Override
 	public Session newSession(Request request, Response response) {
 		
-		IceSession s = new IceSession(request, authenticator);
+		IceSession s = new IceSession(request, response, authenticator);
 		
 		return s;
 	}

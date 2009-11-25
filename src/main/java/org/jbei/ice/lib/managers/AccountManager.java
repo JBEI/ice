@@ -7,7 +7,7 @@ import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountPreferences;
 
 public class AccountManager extends Manager {
-	public static AccountPreferences get(int id) throws ManagerException {
+	public static AccountPreferences getAccountPreferences(int id) throws ManagerException {
 		AccountPreferences accountPreferences = null;
 		try {
 			Query query = HibernateHelper.getSession().createQuery(
@@ -55,10 +55,10 @@ public class AccountManager extends Manager {
 
 	public static Account getAccountByAuthToken(String authToken)
 			throws ManagerException {
-		return getById(7);
+		return get(7);
 	}
 
-	public static Account getById(int id) throws ManagerException {
+	public static Account get(int id) throws ManagerException {
 		Account account = null;
 		try {
 			Query query = HibernateHelper.getSession().createQuery(

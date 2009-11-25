@@ -3,11 +3,22 @@
 <wicket:extend>
 <span wicket:id="loginText">to be replaced</span>
                         <form wicket:id="loginForm">
-                        Login: <input type="text" wicket:id="loginName" /><br/>
-                        Password: <input type="password" wicket:id="loginPassword" /><br/>
-                        <input type="submit" wicket:id="logInButton" />
+                            <table>
+                                <tr>
+                                    <td>Login:</td><td><input type="text" wicket:id="loginName" /><br/></td>                                    
+                                </tr>
+                                <tr>
+                                    <td>Password: </td><td><input type="password" wicket:id="loginPassword" /><br/></td>
+                                </tr>
+                                <tr>                       
+                                    <td></td><td><input type=checkbox" wicket:id="keepSignedIn" />Remember me on this computer<br/></td>
+                                </tr>                        
+                            <tr>
+                                <td></td><td><input type="submit" wicket:id="logInButton" /></td>
+                            </tr>
+                            </table>
                         </form>
-                        
+                        <br/><br></br>
                         <div wicket:id="feedback"></div>
                         <form action="/login/" method="post">
                         <table border="0" cellpadding="3" cellspacing="1" class="entry_table">

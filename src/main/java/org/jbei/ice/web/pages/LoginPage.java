@@ -1,11 +1,15 @@
 package org.jbei.ice.web.pages;
 
 
-import javax.servlet.http.HttpSession;
+import java.util.Calendar;
+import java.util.HashMap;
+
+import javax.servlet.http.Cookie;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.StatelessForm;
@@ -15,7 +19,11 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.protocol.http.WebRequest;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.managers.SessionManager;
+import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.SessionData;
 
 
 /**
@@ -32,6 +40,7 @@ public class LoginPage extends HomePage {
 			private static final long serialVersionUID = 1L;
 			private String loginName;
 			private String loginPassword;
+			private boolean keepSignedIn;
 			
 			public LoginForm(String id) {
 				super(id);
@@ -39,6 +48,7 @@ public class LoginPage extends HomePage {
 				add(new TextField<String>("loginName").setRequired(true)
 						.setLabel(new Model<String>("Login")));
 				add(new PasswordTextField("loginPassword").setRequired(true).setLabel(new Model<String>("Password")));
+				add(new CheckBox("keepSignedIn").setLabel(new Model<String>("Keep me signed in")));
 			}
 			
 			public String getLogin() {
@@ -47,6 +57,9 @@ public class LoginPage extends HomePage {
 			public String getPassword() {
 				return loginPassword;
 			}
+			public boolean getKeepSignedIn() {
+				return keepSignedIn;
+			}
 		}
 		
 		Form<?> loginForm = new LoginForm("loginForm") {
@@ -54,9 +67,33 @@ public class LoginPage extends HomePage {
 
 			@Override
 			protected void onSubmit() {
-				if (authenticate(getLogin(), getPassword())) {
-					IceSession iceSession = IceSession.get();
+				boolean authenticated = authenticate(getLogin(), getPassword()); 
+				if (authenticated) {
+					if (getKeepSignedIn()) {
+						SessionData sessionData = IceSession.get().getSessionData();
+						
+						long currentTime = Calendar.getInstance().getTimeInMillis();
+						long expireDate = currentTime + 7776000000L; //30 days
+					 
+						sessionData.setExpireDate(expireDate);
+						
+						HashMap<String, Object> data = sessionData.getData();
+						if (data == null) {
+							data = new HashMap<String, Object> () ;
+						}
+						data.put("accountId", (Integer) IceSession.get().getAccount().getId());
+						sessionData.setData(data);
+						
+						try {
+							sessionData.persist();
+						} catch (ManagerException e) {
+							e.printStackTrace();
+						}
+						
+						
+					}
 					
+					System.out.println("check my session data here");	
 					if (!continueToOriginalDestination()) {
 						setResponsePage(getApplication().getHomePage());
 					}
@@ -78,9 +115,6 @@ public class LoginPage extends HomePage {
 		};
 		
 		loginForm.add(new Button("logInButton", new Model<String>("Log In")) {
-			/**
-			 * 
-			 */
 			private static final long serialVersionUID = 1L;
 
 		});
