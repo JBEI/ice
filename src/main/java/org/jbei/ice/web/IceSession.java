@@ -32,28 +32,43 @@ public class IceSession extends WebSession {
 		this.authenticator = authenticator2;
 		
 		SessionData sessionData = getSavedSession(request);
-		if (sessionData != null) {
-			HashMap<String, Object> data = sessionData.getData();
-			if (data != null) {
-				if (data.containsKey("accountId")) {
-					Integer accountId = (Integer) data.get("accountId"); 
-					try {
-						setAccount(AccountManager.get(accountId));
-						authenticated = true;
-						setSessionData(sessionData);
-					} catch (ManagerException e) {
-						e.printStackTrace();
-					}
-				}
-			} else {
-				sessionData.delete();
-				sessionData = createNewSavedSession(request, response);
-			}
+		if (sessionData == null) {
+			//
+		} else if (sessionData.getData() == null) {
+			sessionData.delete();
+			sessionData = null;
+		} else if (!sessionData.getData().containsKey("clientIp")) {
+			sessionData.delete();
+			sessionData = null;
 		} else {
+			HashMap<String, Object> data = sessionData.getData();
+			String savedClientIp = (String) data.get("clientIp");
+			String clientIp = ((WebRequest)request).getHttpServletRequest().getRemoteAddr();
+			if (!clientIp.equals(savedClientIp)) {
+				sessionData.delete();
+				sessionData = null;
+			} else if (!data.containsKey("accountId")) {
+				sessionData.delete();
+				sessionData = null;
+			} else{
+				Integer accountId = (Integer) data.get("accountId"); 
+				try {
+					setAccount(AccountManager.get(accountId));
+					authenticated = true;
+					
+				} catch (ManagerException e) {
+					e.printStackTrace();
+					sessionData = null;
+				}
+			}
+			
+		}
+		
+		if (sessionData == null) {
 			sessionData = createNewSavedSession(request, response);
 		}
-		setSessionData(sessionData);
 		
+		setSessionData(sessionData);		
 	}
 
 	/**
@@ -149,10 +164,13 @@ public class IceSession extends WebSession {
 	}
 	
 	private SessionData createNewSavedSession(Request request, Response response) {
-		String host = ((WebRequest)request).getHttpServletRequest().getRemoteAddr();
+		String clientIp = ((WebRequest)request).getHttpServletRequest().getRemoteAddr();
 		SessionData sessionData = null;
 		try {
-			sessionData = new SessionData(host,JbeirSettings.getSetting("SITE_SECRET"));
+			sessionData = new SessionData(clientIp,JbeirSettings.getSetting("SITE_SECRET"));
+			HashMap<String, Object> data = new HashMap<String, Object>();
+			data.put("clientIp", clientIp);
+			sessionData.setData(data);
 			Cookie cookie = new Cookie(COOKIE_NAME, sessionData.getSessionKey());
 			((WebResponse)response).addCookie(cookie);
 						
