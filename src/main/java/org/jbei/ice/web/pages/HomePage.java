@@ -10,7 +10,7 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.model.PropertyModel;
 
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.web.panels.LoginPanel;
+import org.jbei.ice.web.panels.LoginStatusPanel;
 import org.jbei.ice.web.panels.MenuPanel;
 
 /**
@@ -56,7 +56,7 @@ public class HomePage extends WebPage {
         
         add(new Label("title", "Home - JBEI Registry"));
 
-        add(new LoginPanel("loginPanel"));
+        add(new LoginStatusPanel("loginPanel"));
         add(new MenuPanel("menuPanel"));
     }
 }

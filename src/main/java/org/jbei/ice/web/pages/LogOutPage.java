@@ -12,7 +12,7 @@ public class LogOutPage extends HomePage {
 		
 		IceSession.get().deAuthenticateUser();
 		IceSession.get().invalidateNow();
-		setResponsePage(HomePage.class);		
+		setResponsePage(WelcomePage.class);		
 	}
 }
 

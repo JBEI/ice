@@ -47,10 +47,7 @@ public class IceSession extends WebSession {
 			if (!clientIp.equals(savedClientIp)) {
 				sessionData.delete();
 				sessionData = null;
-			} else if (!data.containsKey("accountId")) {
-				sessionData.delete();
-				sessionData = null;
-			} else{
+			} else if (data.containsKey("accountId")) {
 				Integer accountId = (Integer) data.get("accountId"); 
 				try {
 					setAccount(AccountManager.get(accountId));
@@ -66,6 +63,17 @@ public class IceSession extends WebSession {
 		
 		if (sessionData == null) {
 			sessionData = createNewSavedSession(request, response);
+			Cookie cookie = new Cookie(COOKIE_NAME, sessionData.getSessionKey());
+			cookie.setPath("/");
+			cookie.setMaxAge(-1);
+			
+			((WebResponse)response).addCookie(cookie);
+			
+			try {
+				sessionData.persist();
+			} catch (ManagerException e) {
+				e.printStackTrace();
+			}
 		}
 		
 		setSessionData(sessionData);		
@@ -75,7 +83,7 @@ public class IceSession extends WebSession {
 	 * Save account id into SessionData, and save into db for persistent
 	 * token based authentication.
 	 */
-	public void makeSessionPersistent() {
+	public void makeSessionPersistent(WebResponse response) {
 		SessionData savedSession = getSessionData();
 		HashMap<String, Object> data = savedSession.getData();
 		if (data == null) {
@@ -86,8 +94,14 @@ public class IceSession extends WebSession {
 		
 		long currentTime = Calendar.getInstance().getTimeInMillis();
 		long expireDate = currentTime + 7776000000L; //30 days
-					 
+		
 		savedSession.setExpireDate(expireDate);
+		
+		Cookie cookie = new Cookie(COOKIE_NAME, savedSession.getSessionKey());
+		cookie.setPath("/");
+		cookie.setMaxAge(7776000);
+		response.addCookie(cookie);
+		
 		try {
 			savedSession.persist();
 		} catch (ManagerException e) {
@@ -105,6 +119,7 @@ public class IceSession extends WebSession {
 			if (account != null) {
 				result = true;
 				setAccount(account);
+				getSessionData().getData().put("accountId", account.getId());
 				this.authenticated = true;
 			}
 		} catch (Exception e) {
@@ -171,9 +186,10 @@ public class IceSession extends WebSession {
 			HashMap<String, Object> data = new HashMap<String, Object>();
 			data.put("clientIp", clientIp);
 			sessionData.setData(data);
-			Cookie cookie = new Cookie(COOKIE_NAME, sessionData.getSessionKey());
-			((WebResponse)response).addCookie(cookie);
-						
+			
+			long currentTime = Calendar.getInstance().getTimeInMillis();
+			long expireDate = currentTime + 259200000L; //3 days 
+			sessionData.setExpireDate(expireDate);
 		} catch (ManagerException e) {
 						
 						e.printStackTrace();
@@ -181,6 +197,7 @@ public class IceSession extends WebSession {
 		return sessionData;
 	}
 	
+
 	private void clearSavedSession() {
 		sessionData.delete();
 	}

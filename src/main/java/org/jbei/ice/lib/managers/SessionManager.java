@@ -20,7 +20,7 @@ public class SessionManager extends Manager {
 			
 			//stop expired sessions right here
 			if (sessionData != null){ 
-				if (sessionData.getExpireDate() > 1 & sessionData.getExpireDate() < Calendar.getInstance().getTimeInMillis()) {
+				if (sessionData.getExpireDate() < Calendar.getInstance().getTimeInMillis()) {
 					delete(sessionData);
 					sessionData = null;
 				}

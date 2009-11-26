@@ -1,72 +1,96 @@
 package org.jbei.ice.web.panels;
 
-import org.apache.wicket.Session;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.web.IceSession;
-import org.jbei.ice.web.pages.LogOutPage;
-import org.jbei.ice.web.pages.LoginPage;
-import org.jbei.ice.web.pages.PlasmidPage;
-import org.jbei.ice.web.pages.ProfilePage;
-import org.jbei.ice.web.pages.RegisterPage;
+import javax.servlet.http.Cookie;
 
-/**
- * @author tham
- */
+import org.apache.wicket.markup.html.form.Button;
+import org.apache.wicket.markup.html.form.CheckBox;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.PasswordTextField;
+import org.apache.wicket.markup.html.form.StatelessForm;
+import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.protocol.http.WebResponse;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.pages.HomePage;
+
 public class LoginPanel extends Panel {
-	private Fragment preLoginFragment, postLoginFragment;
+
+	private static final long serialVersionUID = 1L;
 	
+
 	public LoginPanel(String id) {
 		super(id);
-		preLoginFragment = createPreLoginFragment();
-		add(preLoginFragment);
-		postLoginFragment = createPostLoginFragment();
-		add(postLoginFragment);
-	}
-	
-	private String getEmail() {
-		String result = null;
-		IceSession s = IceSession.get();
-		if (s.isAuthenticated()) {
-			result = s.getAccount().getEmail();
-		} else {
-			result = "";
-		}
-		return result;
-	}
-	
-	private Fragment createPreLoginFragment () {
-		Fragment preLogin = new Fragment("preLoginPanel", "preLogin", this) {
+		
+		class LoginForm extends StatelessForm<Object> {
+			private static final long serialVersionUID = 1L;
+			private String loginName;
+			private String loginPassword;
+			private boolean keepSignedIn;
 			
-			public boolean isVisible() {
-				IceSession s = IceSession.get();
-				return !s.isAuthenticated();
+			public LoginForm(String id) {
+				super(id);
+				setModel(new CompoundPropertyModel<Object>(this));
+				add(new TextField<String>("loginName").setRequired(true)
+						.setLabel(new Model<String>("Login")));
+				add(new PasswordTextField("loginPassword").setRequired(true).setLabel(new Model<String>("Password")));
+				add(new CheckBox("keepSignedIn").setLabel(new Model<String>("Keep me signed in")));
+			}
+			
+			public String getLogin() {
+				return loginName;
+			}
+			public String getPassword() {
+				return loginPassword;
+			}
+			public boolean getKeepSignedIn() {
+				return keepSignedIn;
+			}
+		}
+		
+		Form<?> loginForm = new LoginForm("loginForm") {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void onSubmit() {
+				boolean authenticated = authenticate(getLogin(), getPassword()); 
+				if (authenticated) {
+					if (getKeepSignedIn()) {
+						IceSession iceSession = IceSession.get();
+						iceSession.makeSessionPersistent(((WebResponse)getResponse()));
+						
+					}
+					
+					setResponsePage(HomePage.class);
+					
+				} else {
+					Logger.info("Login failed for user " + getLogin());
+					error("Unknown username / password combination");
+				}
+			}
+			
+			@Override
+			protected void onError() {
 				
 			}
-		};
-		
-		preLogin.add(new BookmarkablePageLink("logIn", LoginPage.class));
-		preLogin.add(new BookmarkablePageLink("register", RegisterPage.class));
-		return preLogin;
-	}
-	
-	private Fragment createPostLoginFragment() {
-		Fragment postLogin = new Fragment("postLoginPanel", "postLogin", LoginPanel.this) {
 			
-			public boolean isVisible() {
-				IceSession s = IceSession.get();
-				return s.isAuthenticated();
+			protected boolean authenticate(String username, String password) {
+				IceSession session = IceSession.get();
+				return session.authenticateUser(username, password);
 			}
 		};
-		postLogin.add(new BookmarkablePageLink("userProfile", PlasmidPage.class)
-			.add(new Label("userName", getEmail())));
-		postLogin.add(new BookmarkablePageLink("logOut", LogOutPage.class));
 		
+		loginForm.add(new Button("logInButton", new Model<String>("Log In")) {
+			private static final long serialVersionUID = 1L;
 
-		return postLogin;
+		});
+		
+		add(loginForm);
+		add(new FeedbackPanel("feedback"));
+		
 	}
-}
 
+}

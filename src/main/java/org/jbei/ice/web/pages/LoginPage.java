@@ -11,6 +11,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.protocol.http.WebResponse;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.web.IceSession;
 
@@ -58,7 +59,7 @@ public class LoginPage extends HomePage {
 				boolean authenticated = authenticate(getLogin(), getPassword()); 
 				if (authenticated) {
 					if (getKeepSignedIn()) {
-						IceSession.get().makeSessionPersistent();
+						IceSession.get().makeSessionPersistent(((WebResponse)getResponse()));
 					}
 					
 					if (!continueToOriginalDestination()) {

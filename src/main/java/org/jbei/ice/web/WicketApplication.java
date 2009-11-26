@@ -8,9 +8,9 @@ import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.protocol.http.request.WebExternalResourceRequestTarget;
 import org.apache.wicket.request.RequestParameters;
 import org.apache.wicket.request.target.basic.URIRequestTargetUrlCodingStrategy;
-import org.jbei.ice.web.pages.HomePage;
 import org.jbei.ice.web.pages.LoginPage;
 import org.jbei.ice.web.pages.RegisterPage;
+import org.jbei.ice.web.pages.WelcomePage;
 
 /**
  * Application object for your web application. If you want to run this application without deploying, run the Start class.
@@ -58,9 +58,9 @@ public class WicketApplication extends WebApplication
 	/**
 	 * @see org.apache.wicket.Application#getHomePage()
 	 */
-	public Class<HomePage> getHomePage()
+	public Class<WelcomePage> getHomePage()
 	{
-		return HomePage.class;
+		return WelcomePage.class;
 	}
 
 }
