@@ -10,8 +10,8 @@ public class LogOutPage extends HomePage {
 	public LogOutPage(PageParameters parameters) {
 		super(parameters);
 		
-		IceSession.get().deAuthenticateUser();
-		IceSession.get().invalidateNow();
+		((IceSession)getSession()).deAuthenticateUser();
+		((IceSession)getSession()).invalidateNow();
 		setResponsePage(WelcomePage.class);		
 	}
 }

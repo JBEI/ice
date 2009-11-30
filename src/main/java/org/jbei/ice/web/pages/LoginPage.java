@@ -59,7 +59,8 @@ public class LoginPage extends HomePage {
 				boolean authenticated = authenticate(getLogin(), getPassword()); 
 				if (authenticated) {
 					if (getKeepSignedIn()) {
-						IceSession.get().makeSessionPersistent(((WebResponse)getResponse()));
+						
+						((IceSession)getSession()).makeSessionPersistent(((WebResponse)getResponse()));
 					}
 					
 					if (!continueToOriginalDestination()) {
@@ -77,7 +78,7 @@ public class LoginPage extends HomePage {
 			}
 			
 			protected boolean authenticate(String username, String password) {
-				IceSession session = IceSession.get();
+				IceSession session = (IceSession) getSession();
 				return session.authenticateUser(username, password);
 			}
 		};

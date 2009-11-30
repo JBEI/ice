@@ -59,7 +59,7 @@ public class LoginPanel extends Panel {
 				boolean authenticated = authenticate(getLogin(), getPassword()); 
 				if (authenticated) {
 					if (getKeepSignedIn()) {
-						IceSession iceSession = IceSession.get();
+						IceSession iceSession = (IceSession) getSession();
 						iceSession.makeSessionPersistent(((WebResponse)getResponse()));
 						
 					}
@@ -78,8 +78,8 @@ public class LoginPanel extends Panel {
 			}
 			
 			protected boolean authenticate(String username, String password) {
-				IceSession session = IceSession.get();
-				return session.authenticateUser(username, password);
+				IceSession icesession = (IceSession) getSession();
+				return icesession.authenticateUser(username, password);
 			}
 		};
 		

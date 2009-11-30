@@ -24,7 +24,7 @@ public class AccountManager extends Manager {
 		return accountPreferences;
 	}
 
-	public static AccountPreferences getByAccount(Account account)
+	public static AccountPreferences getAccountPreferences(Account account)
 			throws ManagerException {
 		AccountPreferences accountPreferences = null;
 		try {
