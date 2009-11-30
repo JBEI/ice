@@ -1,27 +1,14 @@
 package org.jbei.ice.lib.permissions;
 
-import java.io.Serializable;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-public class WorkSpace implements Serializable {
+public class WorkSpace extends LinkedHashMap<String, WorkSpaceItem>  {
 
 	private static final long serialVersionUID = 1L;
 
-	private LinkedHashMap<String, HashMap<String, Object>> entries;
-	/* This linked hashmap uses recordId as keys.
-	 * 
-	 * Currently known hashmap fields:
-	 * "starred": Boolean
-	 */
-
-	public void setEntriesMap(LinkedHashMap<String, HashMap<String, Object>> entriesMap) {
-		this.entries = entriesMap;
+	public ArrayList<WorkSpaceItem> toArrayList() {
+		return new ArrayList<WorkSpaceItem>(this.values());
+		
 	}
-
-	public LinkedHashMap<String, HashMap<String, Object>> getEntriesMap() {
-		return entries;
-	}
-	
-	
 }

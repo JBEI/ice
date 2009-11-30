@@ -19,22 +19,30 @@ import org.jbei.ice.web.pages.UnprotectedPage;
 import org.jbei.ice.web.pages.LoginPage;
 import org.jbei.ice.web.pages.PlasmidPage;
 import org.jbei.ice.web.pages.StrainPage;
+import org.jbei.ice.web.pages.WorkSpacePage;
 
 public class MenuPanel extends Panel {
 	
+	private static final long serialVersionUID = 1L;
+
 	public class MenuItem implements Serializable {
-		
+
+		private static final long serialVersionUID = 1L;	
+		@SuppressWarnings("unchecked")
 		protected BookmarkablePageLink pageLink = null;
 		protected Label label = null;
 		
 		public MenuItem() {
 			
 		}
+		
+		@SuppressWarnings("unchecked")
 		public MenuItem(BookmarkablePageLink pageLink, Label label) {
 			this.pageLink = pageLink;
 			this.label = label;
 		}
 		
+		@SuppressWarnings("unchecked")
 		public BookmarkablePageLink getPageLink() {
 			return this.pageLink;
 		}
@@ -51,14 +59,16 @@ public class MenuPanel extends Panel {
 		super(id);
 		addPageLinkMenuItem(UnprotectedPage.class, "Home");
 		addPageLinkMenuItem(LoginPage.class, "Login");
-		addPageLinkMenuItem(UnprotectedPage.class, "Home");
+		addPageLinkMenuItem(WorkSpacePage.class, "WorkSpace");
 		addPageLinkMenuItem(EntryFormPage.class, "Entry Form");
 		addPageLinkMenuItem(EntriesTablePage.class, "List View");
 		addPageLinkMenuItem(PlasmidPage.class, "Plasmid Page");
 		addPageLinkMenuItem(StrainPage.class, "Strain Page");
 		
-		
+		@SuppressWarnings("unchecked")
 		ListView menuList = new ListView ("menuList", menuItems) {
+			private static final long serialVersionUID = 1L;
+
 			protected void populateItem(ListItem item) {
 				
 				MenuItem menuItem = (MenuItem) item.getModelObject();
@@ -71,11 +81,14 @@ public class MenuPanel extends Panel {
 	
 	}
 	
+	/*
 	private void addPanelLinkMenuItem(Class<EntryFormPanel> c, String label) {
 		//MenuItem menuItem = new MenuItem(stuff, new Label("label", label));
 		
 	}
-
+	 */
+	
+	@SuppressWarnings("unchecked")
 	public void addPageLinkMenuItem(Class c, String label) {
 		MenuItem menuItem = new MenuItem(new BookmarkablePageLink("menuItem", c), 
 				new Label("label", label));
