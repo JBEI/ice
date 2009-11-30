@@ -1,7 +1,5 @@
 package org.jbei.ice.web.panels;
 
-import javax.servlet.http.Cookie;
-
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;

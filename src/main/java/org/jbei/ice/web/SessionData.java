@@ -23,13 +23,23 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SessionManager;
 import org.jbei.ice.lib.utils.JbeirSettings;
 
+/**
+ * SessionData keeps a cache in memory to prevent getting of multiple instances from
+ * hibernate, creating a race condition. Instead of keeping a dynamically sized cache, consider using a 
+ * fix sized cache for performance, at the risk of using a too small of a cache which 
+ * will result in strange session data errors.
+ * 
+ * @author tham
+ *
+ */
 @Entity
 @Table(name = "session_data")
 public class SessionData implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private static String COOKIE_NAME = JbeirSettings.getSetting("COOKIE_NAME");
-	private static Long DEFAULT_EXPIRATION = 259200000L; //3 days 
+	private static Long DEFAULT_EXPIRATION = 259200000L; //3 days = 259200000 ms
+	private static Long CACHE_TIMEOUT = 60000L; // 1 minute = 60000 ms
 	
 	@Id
 	@Column(name = "session_key", length = 40) 
@@ -43,13 +53,14 @@ public class SessionData implements Serializable {
 
 	@Transient
 	private static HashMap<String, SessionData> sessionDataCache = new HashMap<String, SessionData>();
+	private static HashMap<String, Long> sessionDataCacheTimeStamp = new HashMap<String, Long>();
 	
 	//needed for hibernate. use getInstance instead
 	public SessionData() {
 		
 	}
 	
-	public static synchronized SessionData getInstance(Request request, Response response) {
+	public static SessionData getInstance(Request request, Response response) {
 		SessionData sessionData = null;
 		
 		Cookie userCookie = ((WebRequest) request).getCookie(COOKIE_NAME);
@@ -76,6 +87,7 @@ public class SessionData implements Serializable {
 	
 	public void delete() {
 		getSessionDataCache().remove(this.getSessionKey());
+		
 		try {
 			SessionManager.delete(this);
 		} catch (ManagerException e) {
@@ -112,14 +124,19 @@ public class SessionData implements Serializable {
 		return sessionDataCache;
 	}
 
+	public static HashMap<String, Long> getSessionDataCacheTimeStamp() {
+		return sessionDataCacheTimeStamp;
+	}
+
 	public Object clone() throws CloneNotSupportedException {
 		throw new CloneNotSupportedException(); 
     }
 	
 	//private methods
 		
-	private static SessionData getCachedInstance (String sessionKey) {
+	private static synchronized SessionData getCachedInstance (String sessionKey) {
 		SessionData sessionData = getSessionDataCache().get(sessionKey);
+		
 		if (sessionData == null) {
 			try {
 				sessionData = SessionManager.get(sessionKey);
@@ -127,17 +144,24 @@ public class SessionData implements Serializable {
 				e.printStackTrace();
 				sessionData = null;
 			}
+		} else {
+			Long time = getSessionDataCacheTimeStamp().get(sessionKey) + CACHE_TIMEOUT;
+			getSessionDataCacheTimeStamp().put(sessionKey, time);
+			
 		}
 		return sessionData;
 	}
 	
 	private static SessionData getNewInstance(Request request, Response response) {
+		pruneCache();
 		String clientIp = ((WebRequest)request).getHttpServletRequest().getRemoteAddr();
 		
 		SessionData sessionData = new SessionData(clientIp, JbeirSettings.getSetting("SITE_SECRET"));
 		sessionData.getData().put("clientIp", clientIp);
 		
 		getSessionDataCache().put(sessionData.getSessionKey(), sessionData);
+		Long expirationTime = Calendar.getInstance().getTimeInMillis() + CACHE_TIMEOUT;
+		getSessionDataCacheTimeStamp().put(sessionData.getSessionKey(), expirationTime);
 		Cookie cookie = new Cookie(COOKIE_NAME, sessionData.getSessionKey());
 		cookie.setPath("/");
 		cookie.setMaxAge(-1);
@@ -187,6 +211,17 @@ public class SessionData implements Serializable {
 		}
 		
 		return result;
+	}
+	
+	private static void pruneCache() {
+		int before = getSessionDataCache().size();
+		for (String sessionKey: getSessionDataCacheTimeStamp().keySet()) {
+			long now = Calendar.getInstance().getTimeInMillis(); 
+			if (now > getSessionDataCacheTimeStamp().get(sessionKey)) {
+				getSessionDataCache().remove(sessionKey);
+			}
+		}
+		Logger.info("SessionData cache went from " + before + " to " + getSessionDataCache().size() + " elements");
 	}
 	
 }
