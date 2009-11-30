@@ -41,7 +41,7 @@ public class AccountManager extends Manager {
 		return accountPreferences;
 	}
 
-	public static AccountPreferences create(
+	public static AccountPreferences save(
 			AccountPreferences accountPreferences) throws ManagerException {
 		AccountPreferences result;
 		try {

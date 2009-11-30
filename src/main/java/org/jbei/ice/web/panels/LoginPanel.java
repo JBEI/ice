@@ -14,6 +14,7 @@ import org.apache.wicket.protocol.http.WebResponse;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.UnprotectedPage;
+import org.jbei.ice.web.pages.WorkSpacePage;
 
 public class LoginPanel extends Panel {
 
@@ -62,7 +63,7 @@ public class LoginPanel extends Panel {
 						
 					}
 					if (!continueToOriginalDestination()) {
-						setResponsePage(UnprotectedPage.class);
+						setResponsePage(WorkSpacePage.class);
 					}
 					
 				} else {

@@ -4,7 +4,6 @@ import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.resources.StyleSheetReference;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.model.PropertyModel;
@@ -31,7 +30,9 @@ public class UnprotectedPage extends WebPage {
 	 * @param parameters
 	 *            Page parameters
 	 */
-    public UnprotectedPage(final PageParameters parameters) {
+    
+	@SuppressWarnings("unchecked")
+	public UnprotectedPage(final PageParameters parameters) {
     	//TODO: move css to someplace logical
     	add(new StyleSheetReference("stylesheet", UnprotectedPage.class, "main.css"));
 
@@ -39,8 +40,12 @@ public class UnprotectedPage extends WebPage {
         add(new Label("message", "If you see this message wicket is properly configured and running"));
 
         // TODO Add your page's components here
+
         add(new AjaxFallbackLink("link") {
-        	@Override
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
         	public void onClick(AjaxRequestTarget target) {
         		System.out.println("Clicked");
         		counter++;

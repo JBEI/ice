@@ -24,7 +24,6 @@ public class IceSession extends WebSession {
 	private Account account = null;
 	private AuthenticationBackend authenticator = null;
 	private SessionData sessionData = null;
-	private AccountPreferences accountPreferences = null;
 	private String COOKIE_NAME = JbeirSettings.getSetting("COOKIE_NAME");
 	
 	public IceSession(Request request, Response response, AuthenticationBackend authenticator2) {
@@ -38,7 +37,7 @@ public class IceSession extends WebSession {
 			Integer accountId = (Integer) data.get("accountId"); 
 			try {
 				setAccount(AccountManager.get(accountId));
-				setAccountPreferences(AccountManager.getAccountPreferences(account));
+				setAccountPreferences(getAccountPreferences());
 				
 			} catch (ManagerException e) {
 				e.printStackTrace();
@@ -87,7 +86,12 @@ public class IceSession extends WebSession {
 			
 			if (account != null) {
 				setAccount(account);
-				setAccountPreferences(AccountManager.getAccountPreferences(account));
+				AccountPreferences accountPreferences = AccountManager.getAccountPreferences(account); 
+				if (accountPreferences == null) {
+					accountPreferences = new AccountPreferences();
+					accountPreferences.setAccount(account);
+				}
+				setAccountPreferences(accountPreferences);
 				SessionData sessionData = getSessionData();				
 				sessionData.getData().put("accountId", account.getId());
 				sessionData.persist();
@@ -131,11 +135,23 @@ public class IceSession extends WebSession {
 	}
 	
 	public void setAccountPreferences(AccountPreferences accountPreferences) {
-		this.accountPreferences = accountPreferences;
+		try {
+			AccountManager.save(accountPreferences);
+		} catch (ManagerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public AccountPreferences getAccountPreferences() {
-		return accountPreferences;
+		AccountPreferences result = null;
+		try {
+			result = AccountManager.getAccountPreferences(getAccount());
+		} catch (ManagerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return result;
 	}
 
 	//private methods
