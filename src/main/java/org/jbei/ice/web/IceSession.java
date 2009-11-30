@@ -11,6 +11,7 @@ import org.apache.wicket.Session;
 import org.apache.wicket.protocol.http.WebRequest;
 import org.apache.wicket.protocol.http.WebResponse;
 import org.apache.wicket.protocol.http.WebSession;
+import org.jbei.ice.lib.authentication.AuthenticationBackend;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.ManagerException;
@@ -22,12 +23,12 @@ public class IceSession extends WebSession {
 
 	private static final long serialVersionUID = 1L;
 	private Account account = null;
-	private Authenticator authenticator = null;
+	private AuthenticationBackend authenticator = null;
 	private boolean authenticated = false;
 	private SessionData sessionData = null;
 	private String COOKIE_NAME = JbeirSettings.getSetting("COOKIE_NAME");
 	
-	public IceSession(Request request, Response response, Authenticator authenticator2) {
+	public IceSession(Request request, Response response, AuthenticationBackend authenticator2) {
 		super(request);
 		this.authenticator = authenticator2;
 		
@@ -93,7 +94,7 @@ public class IceSession extends WebSession {
 		savedSession.setData(data);
 		
 		long currentTime = Calendar.getInstance().getTimeInMillis();
-		long expireDate = currentTime + 7776000000L; //30 days
+		long expireDate = currentTime + 7776000000L; //90 days
 		
 		savedSession.setExpireDate(expireDate);
 		

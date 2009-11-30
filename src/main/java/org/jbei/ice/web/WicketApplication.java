@@ -8,6 +8,8 @@ import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.protocol.http.request.WebExternalResourceRequestTarget;
 import org.apache.wicket.request.RequestParameters;
 import org.apache.wicket.request.target.basic.URIRequestTargetUrlCodingStrategy;
+import org.jbei.ice.lib.authentication.AuthenticationBackend;
+import org.jbei.ice.lib.authentication.NullAuthenticationBackend;
 import org.jbei.ice.web.pages.LoginPage;
 import org.jbei.ice.web.pages.RegisterPage;
 import org.jbei.ice.web.pages.WelcomePage;
@@ -20,7 +22,7 @@ import org.jbei.ice.web.pages.WelcomePage;
 public class WicketApplication extends WebApplication
 {    
 	
-	private Authenticator authenticator = null;
+	private AuthenticationBackend authenticator = null;
     /**
      * Constructor
      */

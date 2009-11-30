@@ -1,10 +1,10 @@
-package org.jbei.ice.web;
+package org.jbei.ice.lib.authentication;
 
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.models.Account;
 
-public class NullAuthenticator extends Authenticator {
+public class NullAuthenticationBackend extends AuthenticationBackend {
 
 	public Account authenticate(String userId, String password) {
 		Account account = null;

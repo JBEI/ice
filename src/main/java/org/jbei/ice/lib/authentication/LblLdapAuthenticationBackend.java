@@ -1,4 +1,4 @@
-package org.jbei.ice.web;
+package org.jbei.ice.lib.authentication;
 
 import java.util.Calendar;
 
@@ -9,8 +9,9 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.utils.LblLdapAuth;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.models.Account;
+import org.jbei.ice.web.IceSession;
 
-public class LblLdapAuthenticator extends Authenticator{
+public class LblLdapAuthenticationBackend extends AuthenticationBackend{
 
 		public Account authenticate(String loginId, String password) {
 			Account account = null;
