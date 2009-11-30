@@ -16,7 +16,7 @@ import org.jbei.ice.web.panels.MenuPanel;
 /**
  * Homepage
  */
-public class HomePage extends WebPage {
+public class UnprotectedPage extends WebPage {
 	
 
 	protected static final long serialVersionUID = 1L;
@@ -31,9 +31,9 @@ public class HomePage extends WebPage {
 	 * @param parameters
 	 *            Page parameters
 	 */
-    public HomePage(final PageParameters parameters) {
+    public UnprotectedPage(final PageParameters parameters) {
     	//TODO: move css to someplace logical
-    	add(new StyleSheetReference("stylesheet", HomePage.class, "main.css"));
+    	add(new StyleSheetReference("stylesheet", UnprotectedPage.class, "main.css"));
 
         // Add the simplest type of label
         add(new Label("message", "If you see this message wicket is properly configured and running"));

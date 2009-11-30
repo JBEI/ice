@@ -6,7 +6,7 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.web.panels.PlasmidPanel;
 import org.jbei.ice.lib.models.Plasmid;
 
-public class PlasmidPage extends HomePage {
+public class PlasmidPage extends UnprotectedPage {
 	public PlasmidPage(PageParameters parameters) {
 		super(parameters);
 		

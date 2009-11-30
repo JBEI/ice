@@ -10,7 +10,7 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.query.Query;
 import org.jbei.ice.web.panels.EntriesTablePanel;
 
-public class EntriesTablePage extends HomePage {
+public class EntriesTablePage extends UnprotectedPage {
 	public EntriesTablePage(PageParameters parameters) {
 		super(parameters);
 		ArrayList entries = new ArrayList<Entry>();

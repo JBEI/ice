@@ -8,8 +8,10 @@ import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.protocol.http.request.WebExternalResourceRequestTarget;
 import org.apache.wicket.request.RequestParameters;
 import org.apache.wicket.request.target.basic.URIRequestTargetUrlCodingStrategy;
+import org.apache.wicket.settings.ISecuritySettings;
 import org.jbei.ice.lib.authentication.AuthenticationBackend;
 import org.jbei.ice.lib.authentication.NullAuthenticationBackend;
+import org.jbei.ice.lib.permissions.IceAuthorizationStrategy;
 import org.jbei.ice.web.pages.LoginPage;
 import org.jbei.ice.web.pages.RegisterPage;
 import org.jbei.ice.web.pages.WelcomePage;
@@ -36,15 +38,20 @@ public class WicketApplication extends WebApplication
 				
 		mountBookmarkablePage("/login", LoginPage.class);
 		mountBookmarkablePage("/register", RegisterPage.class);
-		mount(new URIRequestTargetUrlCodingStrategy("/static")
-        {
+		mount(new URIRequestTargetUrlCodingStrategy("/static") {
 			@Override
-            public IRequestTarget decode(RequestParameters requestParameters)
-            {
-                String path = "/static/" + getURI(requestParameters);
-                return new WebExternalResourceRequestTarget(path);
-            }
-        });
+			public IRequestTarget decode(RequestParameters requestParameters) {
+	                String path = "/static/" + getURI(requestParameters);
+	                return new WebExternalResourceRequestTarget(path);
+	           }
+		});
+		
+		//settings
+		ISecuritySettings securitySettings = getSecuritySettings();
+		IceAuthorizationStrategy authorizationStrategy = new IceAuthorizationStrategy();
+		securitySettings.setAuthorizationStrategy(authorizationStrategy);
+		securitySettings.setUnauthorizedComponentInstantiationListener(authorizationStrategy);
+		
 	}
 	
 	
@@ -56,7 +63,7 @@ public class WicketApplication extends WebApplication
 		return s;
 	}
 	
-	
+		
 	/**
 	 * @see org.apache.wicket.Application#getHomePage()
 	 */

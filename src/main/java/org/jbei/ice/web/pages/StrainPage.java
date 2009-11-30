@@ -6,7 +6,7 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.web.panels.StrainPanel;
 import org.jbei.ice.lib.models.Strain;
 
-public class StrainPage extends HomePage {
+public class StrainPage extends ProtectedPage {
 	public StrainPage(PageParameters parameters) {
 		super(parameters);
 		

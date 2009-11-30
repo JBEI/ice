@@ -18,7 +18,7 @@ import org.jbei.ice.web.IceSession;
 /**
  * @author tham
  */
-public class LoginPage extends HomePage {
+public class LoginPage extends UnprotectedPage {
 	public LoginPage(PageParameters parameters) {
 		super(parameters);
 		get("title").replaceWith(new Label("title", "Login - JBEI Registry"));

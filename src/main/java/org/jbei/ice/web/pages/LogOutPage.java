@@ -6,7 +6,7 @@ import org.jbei.ice.web.IceSession;
 /**
  * @author tham
  */
-public class LogOutPage extends HomePage {
+public class LogOutPage extends UnprotectedPage {
 	public LogOutPage(PageParameters parameters) {
 		super(parameters);
 		

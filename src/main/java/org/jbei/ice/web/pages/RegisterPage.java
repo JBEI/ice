@@ -8,7 +8,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 /**
  * @author tham
  */
-public class RegisterPage extends HomePage {
+public class RegisterPage extends UnprotectedPage {
 	public RegisterPage (PageParameters parameters) {
 		super(parameters);
 		add(new Label("registerText", "This is some text"));

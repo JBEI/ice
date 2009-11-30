@@ -13,7 +13,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.protocol.http.WebResponse;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.web.IceSession;
-import org.jbei.ice.web.pages.HomePage;
+import org.jbei.ice.web.pages.UnprotectedPage;
 
 public class LoginPanel extends Panel {
 
@@ -61,8 +61,9 @@ public class LoginPanel extends Panel {
 						iceSession.makeSessionPersistent(((WebResponse)getResponse()));
 						
 					}
-					
-					setResponsePage(HomePage.class);
+					if (!continueToOriginalDestination()) {
+						setResponsePage(UnprotectedPage.class);
+					}
 					
 				} else {
 					Logger.info("Login failed for user " + getLogin());

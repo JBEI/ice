@@ -16,7 +16,6 @@ public class WelcomePage extends WebPage{
 		add(new Label("title", "Welcome - JBEI Registry"));
 		add(new LoginPanel("loginPanel"));
 		
-		
 	}
 
 }
