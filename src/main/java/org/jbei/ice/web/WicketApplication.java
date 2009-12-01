@@ -10,6 +10,7 @@ import org.apache.wicket.request.RequestParameters;
 import org.apache.wicket.request.target.basic.URIRequestTargetUrlCodingStrategy;
 import org.apache.wicket.settings.ISecuritySettings;
 import org.jbei.ice.lib.authentication.AuthenticationBackend;
+import org.jbei.ice.lib.authentication.LblLdapAuthenticationBackend;
 import org.jbei.ice.lib.authentication.NullAuthenticationBackend;
 import org.jbei.ice.lib.permissions.IceAuthorizationStrategy;
 import org.jbei.ice.web.pages.LoginPage;
@@ -34,7 +35,7 @@ public class WicketApplication extends WebApplication
 	
 	protected void init() {
 		//authenticator = new NullAuthenticator();
-		authenticator = new LblLdapAuthenticator();
+		authenticator = new LblLdapAuthenticationBackend();
 				
 		mountBookmarkablePage("/login", LoginPage.class);
 		mountBookmarkablePage("/register", RegisterPage.class);

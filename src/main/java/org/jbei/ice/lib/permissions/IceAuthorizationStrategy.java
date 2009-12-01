@@ -12,13 +12,11 @@ import org.jbei.ice.web.pages.WelcomePage;
 public class IceAuthorizationStrategy implements IAuthorizationStrategy, 
 	IUnauthorizedComponentInstantiationListener {
 
-	@Override
 	public boolean isActionAuthorized(Component component, Action action) {
 		//TODO 
 		return true;
 	}
 
-	@Override
 	public <T extends Component> boolean isInstantiationAuthorized(
 			Class<T> componentClass) {
 		if (ProtectedPage.class.isAssignableFrom(componentClass)) {
@@ -27,7 +25,6 @@ public class IceAuthorizationStrategy implements IAuthorizationStrategy,
 		return true;
 	}
 	
-	@Override
 	public void onUnauthorizedInstantiation(Component component) {
 		  throw new RestartResponseAtInterceptPageException(
 		      WelcomePage.class);
