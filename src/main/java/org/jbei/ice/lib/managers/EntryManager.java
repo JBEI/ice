@@ -175,7 +175,7 @@ public class EntryManager extends Manager {
 
 	public static Entry get(int id) throws ManagerException {
 		try {
-			Query query = HibernateHelper.getSession().createQuery(
+			Query query = session.createQuery(
 					"from " + Entry.class.getName() + " where id = :id");
 			query.setParameter("id", id);
 			Entry entry = (Entry) query.uniqueResult();
@@ -189,7 +189,7 @@ public class EntryManager extends Manager {
 
 	public static Entry getByRecordId(String recordId) throws ManagerException {
 		try {
-			Query query = HibernateHelper.getSession().createQuery(
+			Query query = session.createQuery(
 					"from " + Entry.class.getName()
 							+ " where recordId = :recordId");
 			query.setParameter("recordId", recordId);
@@ -206,7 +206,7 @@ public class EntryManager extends Manager {
 	public static Entry getByPartNumber(String partNumber)
 			throws ManagerException {
 		try {
-			Query query = HibernateHelper.getSession().createQuery(
+			Query query = session.createQuery(
 					"from " + PartNumber.class.getName()
 							+ " where partNumber = :partNumber");
 			query.setParameter("partNumber", partNumber);
@@ -229,7 +229,7 @@ public class EntryManager extends Manager {
 
 	public static Entry getByName(String name) throws ManagerException {
 		try {
-			Query query = HibernateHelper.getSession().createQuery(
+			Query query = session.createQuery(
 					"from " + Name.class.getName() + " where name = :name");
 			query.setParameter("name", name);
 
@@ -253,6 +253,14 @@ public class EntryManager extends Manager {
 
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static Set<Entry> getAll() {
+		String queryString = "from Entry";
+		Query query = session.createQuery(queryString);
+		LinkedHashSet<Entry> result = new LinkedHashSet<Entry>(query.list());
+		return result;
+	}
+	
 	public static String generateUUID() {
 		return UUID.randomUUID().toString();
 	}
@@ -260,8 +268,7 @@ public class EntryManager extends Manager {
 	public static String generateNextPartNumber(String prefix, String delimiter,
 			String suffix) throws ManagerException {
 		try {
-			Query query = HibernateHelper
-					.getSession()
+			Query query = session
 					.createQuery(
 							"from "
 									+ PartNumber.class.getName()

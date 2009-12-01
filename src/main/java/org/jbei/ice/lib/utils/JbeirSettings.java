@@ -16,7 +16,7 @@ public class JbeirSettings {
 		settings.put("BLAST_DIRECTORY", settings.get("DATA_DIRECTORY"));
 		settings.put("SITE_SECRET", "Secret Sauce");
 		settings.put("COOKIE_NAME", "gd-ice");
-		
+		settings.put("SEARCH_INDEX_FILE", "/tmp/lucene_search_index");
 	}
 		
 	

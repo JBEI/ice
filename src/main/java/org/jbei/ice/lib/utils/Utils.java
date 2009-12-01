@@ -1,9 +1,16 @@
 package org.jbei.ice.lib.utils;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Set;
+
+import org.jbei.ice.lib.models.Link;
+import org.jbei.ice.lib.models.Name;
+import org.jbei.ice.lib.models.PartNumber;
+import org.jbei.ice.lib.models.SelectionMarker;
 
 public class Utils {
 	public final static LinkedHashSet<String> toHashSetFromCommaSeparatedString(String data) {
@@ -22,6 +29,47 @@ public class Utils {
 		
 	}
 	
+	public final static String toCommaSeparatedStringFromSelectionMarkers(Set<SelectionMarker> hashSet) {
+		String result = null;
+		ArrayList<String> temp = new ArrayList<String>();
+		for (SelectionMarker selectionMarker : hashSet) {
+			temp.add(selectionMarker.getName());
+		}
+		result = join(", ", temp);
+		return result;
+	}
+	
+	public final static String toCommaSeparatedStringFromLinks(Set<Link> hashSet) {
+		String result = null;
+		ArrayList<String> temp = new ArrayList<String>();
+		for (Link link : hashSet) {
+			temp.add(link.getLink());
+		}
+		result = join(", ", temp);
+		return result;
+	}
+	
+	public final static String toCommaSeparatedStringFromNames(Set<Name> hashSet) {
+		String result = null;
+		ArrayList<String> temp = new ArrayList<String>();
+		for (Name name: hashSet) {
+			temp.add(name.getName());
+		}
+		result = join(", ", temp);
+		return result;
+	}
+	
+	public final static String toCommaSeparatedStringFromPartNumbers(Set<PartNumber> hashSet) {
+		String result = null;
+		ArrayList<String> temp = new ArrayList<String>();
+		for (PartNumber partNumber: hashSet) {
+			temp.add(partNumber.getPartNumber());
+		}
+		result = join(", ", temp);
+
+		return result;
+	}
+	
 	/**
 	 * Analogous to python's string.join method
 	 * @param s Collection to work on
@@ -32,10 +80,14 @@ public class Utils {
         StringBuffer buffer = new StringBuffer();
         Iterator<?> iter = s.iterator();
         while (iter.hasNext()) {
-            buffer.append(iter.next());
-            if (iter.hasNext()) {
-                buffer.append(delimiter);
-            }
+        	Object item = iter.next();
+        	if (item != null) {
+        		buffer.append(item);
+	        	if (iter.hasNext()) {
+	                buffer.append(delimiter);
+	            }
+	        }
+            
         }
         return buffer.toString();
     }

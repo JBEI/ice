@@ -6,6 +6,8 @@ import java.util.Date;
 import org.jbei.ice.lib.value_objects.IPlasmidValueObject;
 
 public class Plasmid extends Entry implements IPlasmidValueObject, Serializable {
+
+	private static final long serialVersionUID = 1L;
 	private String backbone;
 	private String originOfReplication;
 	private String promoters;

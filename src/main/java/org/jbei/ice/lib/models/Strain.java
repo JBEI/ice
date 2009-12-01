@@ -6,6 +6,8 @@ import java.util.Date;
 import org.jbei.ice.lib.value_objects.IStrainValueObject;
 
 public class Strain extends Entry implements IStrainValueObject, Serializable {
+
+	private static final long serialVersionUID = 1L;
 	private String host;
 	private String genotypePhenotype;
 	private String plasmids;

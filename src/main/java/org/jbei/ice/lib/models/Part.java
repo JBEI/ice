@@ -6,6 +6,8 @@ import java.util.Date;
 import org.jbei.ice.lib.value_objects.IPartValueObject;
 
 public class Part extends Entry implements IPartValueObject, Serializable {
+
+	private static final long serialVersionUID = 1L;
 	private String packageFormat;
 	private String pkgdDnaFwdHash;
 	private String pkgdDnaRevHash;
