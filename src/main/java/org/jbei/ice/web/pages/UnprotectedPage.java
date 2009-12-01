@@ -11,6 +11,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.web.panels.LoginStatusPanel;
 import org.jbei.ice.web.panels.MenuPanel;
+import org.jbei.ice.web.panels.SearchBarFormPanel;
 
 /**
  * Homepage
@@ -63,5 +64,8 @@ public class UnprotectedPage extends WebPage {
 
         add(new LoginStatusPanel("loginPanel"));
         add(new MenuPanel("menuPanel"));
+        
+        add(new SearchBarFormPanel("searchBarPanel"));
+        
     }
 }

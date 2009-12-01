@@ -39,20 +39,7 @@ public class LoginPanel extends Panel {
 				add(new CheckBox("keepSignedIn").setLabel(new Model<String>("Keep me signed in")));
 			}
 			
-			public String getLogin() {
-				return loginName;
-			}
-			public String getPassword() {
-				return loginPassword;
-			}
-			public boolean getKeepSignedIn() {
-				return keepSignedIn;
-			}
-		}
-		
-		Form<?> loginForm = new LoginForm("loginForm") {
-			private static final long serialVersionUID = 1L;
-
+			//overridden methods
 			@Override
 			protected void onSubmit() {
 				boolean authenticated = authenticate(getLogin(), getPassword()); 
@@ -71,18 +58,30 @@ public class LoginPanel extends Panel {
 					error("Unknown username / password combination");
 				}
 			}
-			
 			@Override
 			protected void onError() {
 				
 			}
 			
+			//specific method
 			protected boolean authenticate(String username, String password) {
 				IceSession icesession = (IceSession) getSession();
 				return icesession.authenticateUser(username, password);
 			}
-		};
+			
+			//setters and getters
+			public String getLogin() {
+				return loginName;
+			}
+			public String getPassword() {
+				return loginPassword;
+			}
+			public boolean getKeepSignedIn() {
+				return keepSignedIn;
+			}
+		}
 		
+		Form<?> loginForm = new LoginForm("loginForm");
 		loginForm.add(new Button("logInButton", new Model<String>("Log In")) {
 			private static final long serialVersionUID = 1L;
 
