@@ -31,11 +31,12 @@ import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Job;
 import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.lib.utils.Utils;
+
 /**
  * Full text search of the registry.
  * It uses a single instance of the IndexSearcher for efficiency, and
  * most importantly to be able to update the underlying index transparently.
- * When rebuildIndex() is called, the index is rebuilt, afterwhich a new
+ * When rebuildIndex() is called, the index is rebuilt, after which a new
  * IndexSearcher is instantiated with the updated index.
  * 
  * @author tham
@@ -278,20 +279,6 @@ public class Search {
 			Entry entry = EntryManager.getByRecordId(recordId);
 			result.add(entry);
 		}
-			
-		/*	
-		} catch (IOException e) {
-			String msg = "Search could not open index file";
-			Logger.error(msg);
-			e.printStackTrace();
-			throw new Exception(msg, e);
-		} catch (ParseException e) {
-			String msg = "Search could not parse query: " + queryString;
-			Logger.error(msg);
-			e.printStackTrace();
-			throw new Exception(msg, e);
-		}
-		*/
 		
 		return result;
 	}
@@ -299,7 +286,7 @@ public class Search {
 	public static void main(String[] args) {
 		
 		try {
-			//IndexWriter indexWriter = createIndex();
+			//Search.getInstance().rebuildIndex();
 			Search searcher = Search.getInstance();
 			ArrayList<Entry> result = searcher.query("thesis");
 			for (Entry entry : result) {

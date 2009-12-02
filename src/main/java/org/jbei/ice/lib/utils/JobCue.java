@@ -32,13 +32,6 @@ public class JobCue implements Runnable {
 		//TODO use reflection or something
 		Set<Integer> processedJobs = cue.keySet();
 		Logger.info("Proccesing jobs. There are " + processedJobs.size() + " jobs.");
-		try {
-			Search s = Search.getInstance();
-			s.rebuildIndex();
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}		
 		for (Integer jobType : processedJobs) {
 			if (jobType == 1) {
 				Logger.info("Rebuilding search index");
