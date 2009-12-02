@@ -4,23 +4,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.search.Hits;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 import org.jbei.ice.lib.logging.Logger;
@@ -33,25 +28,107 @@ import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.lib.utils.Job;
+import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.lib.utils.Utils;
-
+/**
+ * Full text search of the registry.
+ * It uses a single instance of the IndexSearcher for efficiency, and
+ * most importantly to be able to update the underlying index transparently.
+ * When rebuildIndex() is called, the index is rebuilt, afterwhich a new
+ * IndexSearcher is instantiated with the updated index.
+ * 
+ * @author tham
+ *
+ */
 public class Search {
+
+	private IndexSearcher indexSearcher = null;
+	File indexFile = null;
+		
+	private static class SingletonHolder {
+		private static final Search INSTANCE = new Search();
+	}
 	
-	public static IndexWriter createIndex() throws Exception {
+	public static Search getInstance() {
+		return SingletonHolder.INSTANCE;
+	}
+	
+	public IndexSearcher getIndexSearcher() throws SearchException {
+		if (indexSearcher == null) {
+			try {
+				createEmptyIndex();
+			} catch (Exception e) {
+			String msg = "Could not initiate search. Is the search index directory writable?";
+			Logger.error(msg);
+			throw new SearchException(msg);
+			}
+		}
+		return indexSearcher;
+	}
+	
+	private Search() {
+		indexFile = new File(JbeirSettings.getSetting("SEARCH_INDEX_FILE"));
+		if (!indexFile.canWrite()) {
+			String msg = "Search index is not writable! Is the directory " +
+				JbeirSettings.getSetting("SEARCH_INDEX_FILE") + " writable?";
+			Logger.error(msg);
+			throw new NullPointerException(msg);
+		}
+		
+		FSDirectory directory;
+		try {
+			directory = FSDirectory.open(indexFile);
+			indexSearcher = new IndexSearcher(directory, true);
+			
+		} catch(IOException e) {
+			try {
+				createEmptyIndex();
+				directory = FSDirectory.open(indexFile);	
+				indexSearcher = new IndexSearcher(directory, true);
+			} catch (IOException e1) {
+				String msg = "Directory exists, but could not create empty index. Stopping";
+				e.printStackTrace();
+				e1.printStackTrace();
+				throw new NullPointerException(msg);
+			}
+		} 
+		
+	}
+	
+	public void createEmptyIndex() throws IOException {
+		FSDirectory directory = null;
+		try {
+			directory = FSDirectory.open(indexFile);
+		} catch (IOException e) {
+			String msg = "Could not create Empty Index";
+			Logger.error(msg);
+			throw e;
+		}
+		
+		IndexWriter indexWriter = new IndexWriter(directory, 
+			new StandardAnalyzer(Version.LUCENE_CURRENT), 
+			true, IndexWriter.MaxFieldLength.UNLIMITED);
+		
+		indexWriter.commit();
+		indexWriter.close();
+		Logger.info("Created empty Index");
+		JobCue jobCue = JobCue.getInstance();
+		jobCue.addJob(Job.REBUILD_SEARCH_INDEX);
+	}
+	
+	public void rebuildIndex() throws Exception {
 		File indexFile = new File(JbeirSettings.getSetting("SEARCH_INDEX_FILE"));
 		FSDirectory directory = null;
 		try {
 			directory = FSDirectory.open(indexFile);
 		} catch (IOException e) {
-			String msg = "Could not open index file as a lucene directory";
-			Logger.error(msg);
-			e.printStackTrace();
-			throw new Exception(msg, e);
+			throw e;
 		}
 		
 		IndexWriter indexWriter = new IndexWriter(directory, 
-				new StandardAnalyzer(Version.LUCENE_CURRENT), 
-				true, IndexWriter.MaxFieldLength.UNLIMITED);
+			new StandardAnalyzer(Version.LUCENE_CURRENT), 
+			true, IndexWriter.MaxFieldLength.UNLIMITED);
 		
 		Set<Entry> entries = EntryManager.getAll();
 		for (Entry entry: entries) {
@@ -59,8 +136,11 @@ public class Search {
 			indexWriter.addDocument(document);
 		}
 		
+		Logger.info("Creating new Search Index");
 		indexWriter.commit();
-		return indexWriter;
+		indexWriter.close();
+		
+		indexSearcher = new IndexSearcher(directory, true);
 	}
 	
 	
@@ -178,31 +258,28 @@ public class Search {
 		
 	}
 	
-	public static ArrayList<Entry> query(String queryString) throws Exception {
+	public ArrayList<Entry> query(String queryString) throws Exception {
 		ArrayList<Entry> result = new ArrayList<Entry>();
 		Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
-		File indexFile = new File(JbeirSettings.getSetting("SEARCH_INDEX_FILE"));
-		Directory directory;
-		try {
-			directory = FSDirectory.open(indexFile);
-			IndexSearcher indexSearcher = new IndexSearcher(directory, true);
+
+		QueryParser parser = new QueryParser(Version.LUCENE_CURRENT, "content", analyzer);
+		Query query = parser.parse(queryString);
+		IndexSearcher searcher = getIndexSearcher();
+		TopDocs hits = searcher.search(query, 1000);
+		Logger.info("" + hits.totalHits + " results found");
+		
+		ArrayList<ScoreDoc> hitsArray = new ArrayList<ScoreDoc>(Arrays.asList(hits.scoreDocs));
+		
+		for (ScoreDoc scoreDoc : hitsArray) {
+			String score = "" + scoreDoc.score;
+			int docId = scoreDoc.doc;
+			Document doc = indexSearcher.doc(docId);
+			String recordId = doc.get("Record ID");
+			Entry entry = EntryManager.getByRecordId(recordId);
+			result.add(entry);
+		}
 			
-			QueryParser parser = new QueryParser(Version.LUCENE_CURRENT, "content", analyzer);
-			Query query = parser.parse(queryString);
-			TopDocs hits = indexSearcher.search(query, 1000);
-			Logger.info("" + hits.totalHits + " results found");
-			
-			ArrayList<ScoreDoc> hitsArray = new ArrayList<ScoreDoc>(Arrays.asList(hits.scoreDocs));
-			
-			for (ScoreDoc scoreDoc : hitsArray) {
-				String score = "" + scoreDoc.score;
-				int docId = scoreDoc.doc;
-				Document doc = indexSearcher.doc(docId);
-				String recordId = doc.get("Record ID");
-				Entry entry = EntryManager.getByRecordId(recordId);
-				result.add(entry);
-			}
-			
+		/*	
 		} catch (IOException e) {
 			String msg = "Search could not open index file";
 			Logger.error(msg);
@@ -214,6 +291,7 @@ public class Search {
 			e.printStackTrace();
 			throw new Exception(msg, e);
 		}
+		*/
 		
 		return result;
 	}
@@ -222,8 +300,8 @@ public class Search {
 		
 		try {
 			//IndexWriter indexWriter = createIndex();
-			
-			ArrayList<Entry> result = query("thesis");
+			Search searcher = Search.getInstance();
+			ArrayList<Entry> result = searcher.query("thesis");
 			for (Entry entry : result) {
 				System.out.println("RecordId " + entry.getRecordId());
 			}

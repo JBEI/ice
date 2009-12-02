@@ -48,6 +48,7 @@ public class WicketApplication extends WebApplication
 	           }
 		});
 		
+		//job cue
 		JobCue jobCue = JobCue.getInstance();
 		Thread jobThread = new Thread(jobCue);
 		jobThread.start();
