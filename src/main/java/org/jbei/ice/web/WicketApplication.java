@@ -13,6 +13,7 @@ import org.jbei.ice.lib.authentication.AuthenticationBackend;
 import org.jbei.ice.lib.authentication.LblLdapAuthenticationBackend;
 import org.jbei.ice.lib.authentication.NullAuthenticationBackend;
 import org.jbei.ice.lib.permissions.IceAuthorizationStrategy;
+import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.web.pages.LoginPage;
 import org.jbei.ice.web.pages.RegisterPage;
 import org.jbei.ice.web.pages.WelcomePage;
@@ -46,6 +47,10 @@ public class WicketApplication extends WebApplication
 	                return new WebExternalResourceRequestTarget(path);
 	           }
 		});
+		
+		JobCue jobCue = JobCue.getInstance();
+		Thread jobThread = new Thread(jobCue);
+		jobThread.start();
 		
 		//settings
 		ISecuritySettings securitySettings = getSecuritySettings();
