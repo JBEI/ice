@@ -35,7 +35,7 @@ import org.jbei.ice.lib.utils.Utils;
 /**
  * Full text search of the registry.
  * It uses a single instance of the IndexSearcher for efficiency, and
- * most importantly to be able to update the underlying index transparently.
+ * most importantly to be able to rebuild the underlying index transparently.
  * When rebuildIndex() is called, the index is rebuilt, after which a new
  * IndexSearcher is instantiated with the updated index.
  * 
@@ -259,8 +259,8 @@ public class Search {
 		
 	}
 	
-	public ArrayList<Entry> query(String queryString) throws Exception {
-		ArrayList<Entry> result = new ArrayList<Entry>();
+	public ArrayList<SearchResult> query(String queryString) throws Exception {
+		ArrayList<SearchResult> result = new ArrayList<SearchResult>();
 		Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
 
 		QueryParser parser = new QueryParser(Version.LUCENE_CURRENT, "content", analyzer);
@@ -272,12 +272,12 @@ public class Search {
 		ArrayList<ScoreDoc> hitsArray = new ArrayList<ScoreDoc>(Arrays.asList(hits.scoreDocs));
 		
 		for (ScoreDoc scoreDoc : hitsArray) {
-			String score = "" + scoreDoc.score;
+			float score = scoreDoc.score;
 			int docId = scoreDoc.doc;
 			Document doc = indexSearcher.doc(docId);
 			String recordId = doc.get("Record ID");
 			Entry entry = EntryManager.getByRecordId(recordId);
-			result.add(entry);
+			result.add(new SearchResult(entry, score));
 		}
 		
 		return result;
@@ -288,11 +288,11 @@ public class Search {
 		try {
 			//Search.getInstance().rebuildIndex();
 			Search searcher = Search.getInstance();
-			ArrayList<Entry> result = searcher.query("thesis");
-			for (Entry entry : result) {
-				System.out.println("RecordId " + entry.getRecordId());
+			ArrayList<SearchResult> results = searcher.query("thesis");
+			for (SearchResult result : results) {
+				System.out.println("Score " + result.getScore() + " RecordId " + Utils.toCommaSeparatedStringFromNames(result.getEntry().getNames()));
 			}
-			System.out.println("" + result.size());
+			System.out.println("" + results.size());
 		} catch (Exception e) {
 			
 			e.printStackTrace();
