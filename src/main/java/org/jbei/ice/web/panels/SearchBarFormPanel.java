@@ -1,6 +1,9 @@
 package org.jbei.ice.web.panels;
 
-import org.apache.wicket.markup.html.form.Button;
+import java.util.ArrayList;
+
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextField;
@@ -8,6 +11,9 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.search.Search;
+import org.jbei.ice.lib.search.SearchResult;
 import org.jbei.ice.web.pages.PlasmidPage;
 
 public class SearchBarFormPanel extends Panel {
@@ -32,7 +38,7 @@ public class SearchBarFormPanel extends Panel {
 			//overridden methods
 			@Override
 			protected void onSubmit() {
-				System.out.println(getSearchQuery());
+				//submit handled by ajax button
 			}
 			
 			//setters and getters
@@ -51,9 +57,35 @@ public class SearchBarFormPanel extends Panel {
 		searchBarForm.	add(new BookmarkablePageLink("advancedSearchLink", PlasmidPage.class));
 		//TODO blast search
 		searchBarForm.	add(new BookmarkablePageLink("blastSearchLink", PlasmidPage.class));
-		searchBarForm.add(new Button("submitButton", new Model<String>("Search")) {
-			private static final long serialVersionUID = 1L; 
-			});
+		AjaxButton ajaxButton = new AjaxButton("submitButton", new Model<String>("Search"), searchBarForm) {
+
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				
+				Logger.info("Search query: " + ((SearchBarForm)form).getSearchQuery());
+				ArrayList<SearchResult> searchResults = null;
+				Panel searchResultPanel = null;
+				try {
+					searchResults = Search.getInstance().query(((SearchBarForm)form).getSearchQuery());
+					if (searchResults.size() == 0) {
+						searchResultPanel = new EmptySearchResultPanel("workSpacePanel");
+					} else {
+						searchResultPanel = new SearchResultPanel("workSpacePanel", searchResults, 10);
+					}
+
+					searchResultPanel.setOutputMarkupId(true);
+					form.getPage().replace(searchResultPanel);
+					target.addComponent(searchResultPanel);
+					
+				} catch (Exception e) {
+
+					e.printStackTrace();
+				}
+
+			}
+			
+		};
+		searchBarForm.add(ajaxButton);
 		add(searchBarForm);
 	}
 	

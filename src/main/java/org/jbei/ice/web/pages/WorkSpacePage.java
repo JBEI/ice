@@ -17,7 +17,7 @@ public class WorkSpacePage extends ProtectedPage {
 		} else {
 			workSpaceTablePanel = new WorkSpaceTablePanel("workSpacePanel", workSpace, 50);
 		}
-		
+		workSpaceTablePanel.setOutputMarkupId(true);
 		add(workSpaceTablePanel);
 		
 	}
