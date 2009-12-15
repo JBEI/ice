@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
+import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Link;
 import org.jbei.ice.lib.models.Name;
@@ -251,6 +252,15 @@ public class EntryManager extends Manager {
 		LinkedHashSet<Entry> result = q.query(data, offset, limit);
 		return result;
 
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static LinkedHashSet<Entry> getByAccount(Account account, int offset, int limit) {
+		String queryString = "from Entry where ownerEmail = :ownerEmail";
+		Query query = session.createQuery(queryString);
+		query.setParameter("ownerEmail", account.getEmail());
+		LinkedHashSet<Entry> result = new LinkedHashSet<Entry>(query.list());
+		return result;
 	}
 	
 	@SuppressWarnings("unchecked")

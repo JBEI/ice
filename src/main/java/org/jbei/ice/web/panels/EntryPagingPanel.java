@@ -14,15 +14,15 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.PartNumber;
 
-public class EntriesTablePanel extends Panel {
+public class EntryPagingPanel extends Panel {
 
 	private static final long serialVersionUID = 1L;
 
-	public EntriesTablePanel(String id) {
+	public EntryPagingPanel(String id) {
 		super(id);
 	}
 	
-	public EntriesTablePanel(String id, ArrayList<Entry> entries, int limit) {
+	public EntryPagingPanel(String id, ArrayList<Entry> entries, int limit) {
 		super(id);
 		@SuppressWarnings({ "unchecked", "serial" })
 		PageableListView listView = new PageableListView("itemRows", entries, limit) {

@@ -8,7 +8,7 @@ import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.query.Query;
-import org.jbei.ice.web.panels.EntriesTablePanel;
+import org.jbei.ice.web.panels.EntryPagingPanel;
 
 public class EntriesTablePage extends UnprotectedPage {
 	public EntriesTablePage(PageParameters parameters) {
@@ -35,7 +35,7 @@ public class EntriesTablePage extends UnprotectedPage {
 			entries.add(entry);
 		}
 		
-		EntriesTablePanel entriesTablePanel = new EntriesTablePanel("entriesTable", entries, 20);
+		EntryPagingPanel entriesTablePanel = new EntryPagingPanel("entriesTable", entries, 20);
 		add(entriesTablePanel);
 	}
 }

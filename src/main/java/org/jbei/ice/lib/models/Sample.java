@@ -6,6 +6,8 @@ import java.util.Date;
 import org.jbei.ice.lib.value_objects.ISampleValueObject;
 
 public class Sample implements ISampleValueObject, Serializable {
+
+	private static final long serialVersionUID = 1L;
 	private int id;
 	private String uuid;
 	private String depositor;

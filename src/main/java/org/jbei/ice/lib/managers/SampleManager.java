@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.hibernate.Query;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sample;
 
@@ -24,18 +25,35 @@ public class SampleManager extends Manager{
 		return result;
 	}
 	
-	
 	@SuppressWarnings("unchecked")
 	public static Set<Sample> get(Entry entry) throws ManagerException {
 		LinkedHashSet<Sample> result = null;
 		try {
 			String queryString = "from Sample as sample where sample.entry = :entry";
-			Query query = HibernateHelper.getSession().createQuery(queryString);
+			Query query = session.createQuery(queryString);
 			query.setEntity("entry", entry);
 			result = new LinkedHashSet<Sample>(query.list());
 			
 		} catch (Exception e) {
 			String msg = "Could not get Sample by Entry " + entry.getRecordId();
+			Logger.error(msg);
+			throw new ManagerException(msg, e);
+		}
+		
+		return result;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Set<Sample> getByAccount(Account account) 
+		throws	ManagerException {
+		LinkedHashSet<Sample> result = null;
+		try {
+			String queryString = "from Sample as sample where sample.depositor = :depositor";
+			Query query = session.createQuery(queryString);
+			query.setParameter("depositor", account.getEmail());
+			result = new LinkedHashSet<Sample>(query.list());
+		} catch (Exception e) {
+			String msg = "Could not retrieve samples by account " + account.getEmail();
 			Logger.error(msg);
 			throw new ManagerException(msg, e);
 		}
