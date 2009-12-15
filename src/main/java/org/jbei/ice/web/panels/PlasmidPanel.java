@@ -1,18 +1,19 @@
 package org.jbei.ice.web.panels;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.models.Plasmid;
 
 public class PlasmidPanel extends Panel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public PlasmidPanel(String id, Plasmid plasmid) {
 		super(id);
 		
@@ -34,18 +35,17 @@ public class PlasmidPanel extends Panel {
 				plasmid.getCreator()));
 		elements.add(new Label("promoters", 
 				plasmid.getPromoters()));
-		//TODO:Capitalize correctly
 		elements.add(new Label("status", 
-				plasmid.getStatus()));
+				org.jbei.ice.lib.utils.JbeiConstants.getStatus(plasmid.getStatus())));
 		//TODO: link to strains
 		elements.add(new Label("linksToStrains", ""));
 		elements.add(new Label("linkToOwner", plasmid.getOwner()));
 		String time = "";
-		 Date cTime = plasmid.getCreationTime();
-		 if (cTime != null) {
-			 time = cTime.toString();
-		 } 
-		
+		Date cTime = plasmid.getCreationTime();
+		if (cTime != null) {
+			time = cTime.toString();
+		} 
+
 		elements.add(new Label("creationTime", time));
 		elements.add(new Label("links", plasmid.getLinksAsString()));
 		

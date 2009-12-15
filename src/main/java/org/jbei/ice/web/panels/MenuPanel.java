@@ -17,8 +17,6 @@ import org.jbei.ice.web.forms.PlasmidForm;
 import org.jbei.ice.web.pages.EntriesTablePage;
 import org.jbei.ice.web.pages.UnprotectedPage;
 import org.jbei.ice.web.pages.LoginPage;
-import org.jbei.ice.web.pages.PlasmidPage;
-import org.jbei.ice.web.pages.StrainPage;
 import org.jbei.ice.web.pages.UserEntryPage;
 import org.jbei.ice.web.pages.WorkSpacePage;
 
@@ -64,9 +62,6 @@ public class MenuPanel extends Panel {
 		//addPageLinkMenuItem(WorkSpacePage.class, "WorkSpace");
 		addPageLinkMenuItem(EntryFormPage.class, "Entry Form");
 		addPageLinkMenuItem(EntriesTablePage.class, "List View");
-		addPageLinkMenuItem(PlasmidPage.class, "Plasmid Page");
-		addPageLinkMenuItem(StrainPage.class, "Strain Page");
-		
 		
 		
 		@SuppressWarnings("unchecked")

@@ -29,9 +29,8 @@ public class StrainPanel extends Panel {
 		elements.add(new Label("creator", 
 				strain.getCreator()));
 		elements.add(new Label("plasmids", "plasmids?"));
-		//TODO:Capitalize correctly
 		elements.add(new Label("status", 
-				strain.getStatus()));
+				org.jbei.ice.lib.utils.JbeiConstants.getStatus(strain.getStatus())));
 		
 		elements.add(new Label("linkToOwner", strain.getOwner()));
 		String time = "";

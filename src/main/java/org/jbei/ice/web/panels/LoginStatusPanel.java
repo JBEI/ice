@@ -7,8 +7,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.LogOutPage;
 import org.jbei.ice.web.pages.LoginPage;
-import org.jbei.ice.web.pages.PlasmidPage;
 import org.jbei.ice.web.pages.RegisterPage;
+import org.jbei.ice.web.pages.UserEntryPage;
 
 /**
  * @author tham
@@ -65,7 +65,7 @@ public class LoginStatusPanel extends Panel {
 				return s.isAuthenticated();
 			}
 		};
-		postLogin.add(new BookmarkablePageLink("userProfile", PlasmidPage.class)
+		postLogin.add(new BookmarkablePageLink("userProfile", UserEntryPage.class)
 			.add(new Label("userName", getEmail())));
 		postLogin.add(new BookmarkablePageLink("logOut", LogOutPage.class));
 		

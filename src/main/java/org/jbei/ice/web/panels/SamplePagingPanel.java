@@ -3,8 +3,10 @@ package org.jbei.ice.web.panels;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
@@ -14,6 +16,7 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.models.Sample;
+import org.jbei.ice.web.pages.EntryViewPage;
 
 public class SamplePagingPanel extends Panel {
 	private static final long serialVersionUID = 1L;
@@ -43,7 +46,9 @@ public class SamplePagingPanel extends Panel {
 				Name temp = (Name) entry.getNames().toArray()[0];
 				item.add(new Label("name", temp.getName()));
 				PartNumber temp2 = (PartNumber) entry.getPartNumbers().toArray()[0];
-				item.add(new Label("partNumber", temp2.getPartNumber()));
+				item.add(new BookmarkablePageLink("partIdLink", EntryViewPage.class, 
+						new PageParameters("0=" + entry.getId())).
+						add(new Label("partNumber", entry.getOnePartNumber().getPartNumber())));
 				
 				SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
 				String dateString = dateFormat.format(entry.getCreationTime());

@@ -24,4 +24,16 @@ public class JbeiConstants {
 		}
 		return result;
 	}
+	
+	public final static String getPackageFormat(String key) {
+		String result = "";
+		if (key.equals("biobricka")) {
+			result = "Biobrick A";
+		} else if (key.equals("biobrickb")) {
+			result = "BioBrick Berkeley";
+		} else {
+			result = "Unrecognized Format";
+		}
+		return result;
+	}
 }

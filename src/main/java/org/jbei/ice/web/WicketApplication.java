@@ -8,14 +8,17 @@ import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.protocol.http.request.WebExternalResourceRequestTarget;
 import org.apache.wicket.request.RequestParameters;
 import org.apache.wicket.request.target.basic.URIRequestTargetUrlCodingStrategy;
+import org.apache.wicket.request.target.coding.IndexedParamUrlCodingStrategy;
 import org.apache.wicket.settings.ISecuritySettings;
 import org.jbei.ice.lib.authentication.AuthenticationBackend;
 import org.jbei.ice.lib.authentication.LblLdapAuthenticationBackend;
 import org.jbei.ice.lib.authentication.NullAuthenticationBackend;
 import org.jbei.ice.lib.permissions.IceAuthorizationStrategy;
 import org.jbei.ice.lib.utils.JobCue;
+import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.LoginPage;
 import org.jbei.ice.web.pages.RegisterPage;
+import org.jbei.ice.web.pages.UserEntryPage;
 import org.jbei.ice.web.pages.WelcomePage;
 import org.odlabs.wiquery.core.commons.WiQueryInstantiationListener;
 
@@ -41,6 +44,9 @@ public class WicketApplication extends WebApplication
 				
 		mountBookmarkablePage("/login", LoginPage.class);
 		mountBookmarkablePage("/register", RegisterPage.class);
+		mount(new IndexedParamUrlCodingStrategy("/entry/view", EntryViewPage.class));
+		mountBookmarkablePage("/user/entries", UserEntryPage.class);
+		
 		mount(new URIRequestTargetUrlCodingStrategy("/static") {
 			@Override
 			public IRequestTarget decode(RequestParameters requestParameters) {
@@ -48,6 +54,7 @@ public class WicketApplication extends WebApplication
 	                return new WebExternalResourceRequestTarget(path);
 	           }
 		});
+		
 		
 		//job cue
 		JobCue jobCue = JobCue.getInstance();

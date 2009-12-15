@@ -2,23 +2,22 @@ package org.jbei.ice.web.panels;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Set;
 
+import org.apache.wicket.PageParameters;
+import org.apache.wicket.ResourceReference;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.CheckBox;
+import org.apache.wicket.markup.html.image.Image;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.Model;
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Name;
-import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.utils.JbeiConstants;
+import org.jbei.ice.web.pages.EntryViewPage;
 
 public class EntryPagingPanel extends Panel {
 
@@ -41,26 +40,32 @@ public class EntryPagingPanel extends Panel {
 				item.add(new Label("index", "" + (item.getIndex() + 1)));
 				item.add(new Label("recordType", entry.getRecordType()));
 				
-				Set<Name> nameSet = entry.getNames();
-				Set<PartNumber> partNumberSet = entry.getPartNumbers();
-				PartNumber temp = (PartNumber) partNumberSet.toArray()[0];
-				item.add(new Label("partNumber", temp.getPartNumber()));
-				
-				Name temp2 = (Name) nameSet.toArray()[0];
-				item.add(new Label("name", temp2.getName()));
+				item.add(new BookmarkablePageLink("partIdLink", EntryViewPage.class, 
+						new PageParameters("0=" + entry.getId())).
+						add(new Label("partNumber", entry.getOnePartNumber().getPartNumber())));
+								
+				item.add(new Label("name", entry.getOneName().getName()));
 				
 				item.add(new Label("description", entry.getShortDescription()));
 				item.add(new Label("status", JbeiConstants.getStatus(entry.getStatus())));
 				item.add(new Label("visibility", JbeiConstants.getVisibility(entry.getVisibility())));
 				
-				String hasAttachment = (AttachmentManager.hasAttachment(entry)) ? "Y" : "N";
-				item.add(new Label("hasAttachment", hasAttachment));
+				ResourceReference blankImage = new ResourceReference(EntryPagingPanel.class, "blank.png");
+				ResourceReference hasAttachmentImage = new ResourceReference(EntryPagingPanel.class, "attachment.gif");
+				ResourceReference hasSequenceImage = new ResourceReference(EntryPagingPanel.class, "sequence.gif");
+				ResourceReference hasSampleImage = new ResourceReference(EntryPagingPanel.class, "sample.png");
 				
-				String hasSequence = (SequenceManager.hasSequence(entry)) ? "Y": "N";
-				item.add(new Label("hasSequence", hasSequence));
+				ResourceReference hasAttachment = (AttachmentManager.hasAttachment(entry)) ? 
+						hasAttachmentImage : blankImage;
+				item.add(new Image("hasAttachment", hasAttachment));
+
+				ResourceReference hasSequence = (SequenceManager.hasSequence(entry)) ? 
+						hasSequenceImage: blankImage;
+				item.add(new Image("hasSequence", hasSequence));
 				
-				String hasSample = (SampleManager.hasSample(entry)) ? "Y" : "N";
-				item.add(new Label("hasSample", hasSample));
+				ResourceReference hasSample= (SampleManager.hasSample(entry)) ? 
+						hasSampleImage : blankImage;
+				item.add(new Image("hasSample", hasSample));
 				
 				SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
 				String dateString = dateFormat.format(entry.getCreationTime());

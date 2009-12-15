@@ -14,7 +14,7 @@ import org.apache.wicket.model.Model;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.search.Search;
 import org.jbei.ice.lib.search.SearchResult;
-import org.jbei.ice.web.pages.PlasmidPage;
+import org.jbei.ice.web.pages.UserEntryPage;
 
 public class SearchBarFormPanel extends Panel {
 	
@@ -54,9 +54,9 @@ public class SearchBarFormPanel extends Panel {
 		
 		Form<?> searchBarForm = new SearchBarForm("searchBarForm");
 		//TODO advanced search
-		searchBarForm.	add(new BookmarkablePageLink("advancedSearchLink", PlasmidPage.class));
+		searchBarForm.	add(new BookmarkablePageLink("advancedSearchLink", UserEntryPage.class));
 		//TODO blast search
-		searchBarForm.	add(new BookmarkablePageLink("blastSearchLink", PlasmidPage.class));
+		searchBarForm.	add(new BookmarkablePageLink("blastSearchLink", UserEntryPage.class));
 		AjaxButton ajaxButton = new AjaxButton("submitButton", new Model<String>("Search"), searchBarForm) {
 
 			@Override
