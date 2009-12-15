@@ -1,5 +1,6 @@
 package org.jbei.ice.web.panels;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import org.apache.wicket.markup.html.basic.Label;
@@ -32,7 +33,8 @@ public class SamplePagingPanel extends Panel {
 				Sample sample = (Sample) item.getModelObject();
 				Entry entry = sample.getEntry();
 				
-				item.add(new CheckBox("checkBox", new Model(false)));
+				//item.add(new CheckBox("checkBox", new Model(false)));
+				item.add(new Label("index", "" + (item.getIndex() + 1)));
 				item.add(new Label("label", sample.getLabel()));
 				item.add(new Label("notes", sample.getNotes()));
 				
@@ -42,7 +44,10 @@ public class SamplePagingPanel extends Panel {
 				item.add(new Label("name", temp.getName()));
 				PartNumber temp2 = (PartNumber) entry.getPartNumbers().toArray()[0];
 				item.add(new Label("partNumber", temp2.getPartNumber()));
-				item.add(new Label("date", sample.getCreationTime().toLocaleString()));
+				
+				SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
+				String dateString = dateFormat.format(entry.getCreationTime());
+				item.add(new Label("date", dateString));
 				
 			}
 		};

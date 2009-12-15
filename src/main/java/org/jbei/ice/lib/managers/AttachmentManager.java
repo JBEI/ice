@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -16,6 +16,7 @@ import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.utils.Base64String;
 import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.lib.logging.Logger;
 
 public class AttachmentManager extends Manager {
 	public static String attachmentDirectory = (String) JbeirSettings
@@ -59,14 +60,12 @@ public class AttachmentManager extends Manager {
 			}
 
 		} catch (IOException e) {
-			Logger.getAnonymousLogger().log(Level.SEVERE,
-					"Could not delete file " + attachment.getFileName() + ".");
-
+			String msg = "Could not delete file: " + attachment.getFileName();
+			Logger.error(msg);
 		} catch (HibernateException e) {
-			Logger.getAnonymousLogger().log(
-					Level.SEVERE,
-					"Could not remove entry from database."
-							+ attachment.getFileName());
+			String msg = "Could not remove entry from database."
+							+ attachment.getFileName();
+			Logger.error(msg);
 		}
 	}
 
@@ -85,7 +84,7 @@ public class AttachmentManager extends Manager {
 	}
 
 	public static Attachment getByFileId(String fileId) throws ManagerException {
-		Query query = HibernateHelper.getSession().createQuery(
+		Query query = session.createQuery(
 				"from " + Attachment.class.getName()
 						+ " where file_id = :fileId");
 		query.setString("fileId", fileId);
@@ -110,9 +109,10 @@ public class AttachmentManager extends Manager {
 		return attachment;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static ArrayList<Attachment> getByEntry(Entry entry) throws ManagerException {
 		ArrayList<Attachment> attachments;
-		Query query = HibernateHelper.getSession().createQuery(
+		Query query = session.createQuery(
 				"from " + Attachment.class.getName() + " where entries_id = :entryId");
 		query.setInteger("entryId", entry.getId());
 		attachments = (ArrayList<Attachment>) query.list();
@@ -128,6 +128,25 @@ public class AttachmentManager extends Manager {
 		return attachments;
 	}
 
+	@SuppressWarnings("unchecked")
+	public static boolean hasAttachment(Entry entry) {
+		boolean result = false;
+		try {
+			String queryString = "from " + Attachment.class.getName() + " where entry = :entry";
+			Query query = session.createQuery(queryString);
+			query.setParameter("entry", entry);
+			List attachments = query.list();
+			if (attachments.size() > 0) {
+				result = true;
+			}
+		} catch (Exception e) {
+			String msg = "Could not determine if entry has attachments: " + entry.getRecordId();
+			Logger.error(msg);
+			
+		}
+		return result;
+	}
+	
 	public static void main(String[] args) throws IOException, ManagerException {
 
 	}

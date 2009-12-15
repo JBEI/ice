@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.managers;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.hibernate.Query;
@@ -58,6 +59,24 @@ public class SampleManager extends Manager{
 			throw new ManagerException(msg, e);
 		}
 		
+		return result;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static boolean hasSample(Entry entry) {
+		boolean result = false;
+		try {
+			String queryString = "from " + Sample.class.getName() + " where entry = :entry";
+			Query query = session.createQuery(queryString);
+			query.setParameter("entry", entry);
+			List samples = query.list();
+			if (samples.size() > 0) {
+				result = true;
+			}
+		} catch (Exception e) {
+			String msg = "Could not determine if entry has Sample: " + entry.getRecordId();
+			Logger.error(msg);
+		}
 		return result;
 	}
 	

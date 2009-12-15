@@ -37,14 +37,14 @@ public class SequenceManager extends Manager {
 	}
 	
 	public static Sequence get(int id) throws ManagerException {
-		Sequence sequence = (Sequence) HibernateHelper.getSession().load(
+		Sequence sequence = (Sequence) session.load(
 				Sequence.class, id);
 		return sequence;
 	}
 	
 	
 	public static Sequence getByUuid(String uuid) throws ManagerException {
-		Query query = HibernateHelper.getSession().createQuery(
+		Query query = session.createQuery(
 				"from " + Sequence.class.getName()
 				+ " where uuid = :uuid");
 				query.setString("uuid", uuid);
@@ -59,12 +59,36 @@ public class SequenceManager extends Manager {
 	
 	public static Sequence getByEntry(Entry entry) throws ManagerException {
 		Sequence sequence;
-		Query query = HibernateHelper.getSession().createQuery(
+		Query query = session.createQuery(
 				"from " + Sequence.class.getName() + " where entries_id = :entryId");
 		query.setInteger("entryId", entry.getId());
 		sequence = (Sequence) query.uniqueResult();
 		
 		return sequence;
+	}
+	
+	public static boolean hasSequence(Entry entry) {
+		boolean result = false;
+		try {
+			String queryString = "from " + Sequence.class.getName() + 
+				" where entry = :entry";
+			Query query = session.createQuery(queryString);
+			query.setParameter("entry", entry);
+			Sequence sequence = (Sequence) query.uniqueResult();
+			if (sequence == null) {
+
+			} else if (sequence.getSequence() == null) {
+			
+			} else if (sequence.getSequence().isEmpty()) {
+				
+			} else {
+				result = true;
+			}
+
+		} catch (Exception e) {
+			
+		}
+		return result;
 	}
 	/* These methods doesn't seem to be used by any python code, so it's not 
 	 * implemented in java.

@@ -1,9 +1,34 @@
 <html xmlns:wicket>
     <wicket:panel>
-        <table>
-            <tr wicket:id="itemRows">
-	            <td>
+        <table class="data_table" border="0" cellpadding="3" cellspacing="1">
+            <tr bgcolor="#F0F0F0">
+                <th>#</th>
+                <th>Type</th>
+                <th>Part Number</th>
+                <th>Name</th>                
+                <th>Label</th>
+                <th>Notes</th>
+                <th>Location</th>
+                <th>Created</th>
+            
+            </tr>
+            <tr wicket:id="itemRows" class="odd_row">
+            
+	            <!-- <td>
 	                <input type="checkbox" wicket:id="checkBox"></input>
+	            </td>
+	            -->
+	            <td>
+	               <span wicket:id="index"></span>.
+	            </td>
+	            <td>
+	                <span wicket:id="type"></span>
+	            </td>
+	            <td>
+	                <span wicket:id="partNumber"></span>
+	            </td>
+	            <td>
+	                <span wicket:id="name"></span>
 	            </td>
 	            <td>
 	               <span wicket:id="label"></span>
@@ -15,16 +40,7 @@
 	                <span wicket:id="location"></span>
 	            </td>
 	            <td>
-	                <span wicket:id="type"></span>
-	            </td>
-	            <td>
-	                <span wicket:id="name"></span>
-	            </td>
-	            <td>
-	                <span wicket:id="partNumber"></span>
-	            </td>
-	            <td>
-	                <span wicket:id="date"></span>
+	                <nobr><span wicket:id="date"></span></nobr>
 	            </td>
             </tr>
         </table>
