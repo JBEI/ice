@@ -7,34 +7,108 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+
 import org.jbei.ice.lib.value_objects.IEntryValueObject;
 
+@Entity
+@Table(name = "entries")
+@SequenceGenerator(name = "sequence", sequenceName = "entries_id_seq",
+		allocationSize = 1)
 public class Entry implements IEntryValueObject, Serializable {
 
 	private static final long serialVersionUID = 1L;
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
 	private int id;
+	
+	@Column(name = "record_id", length = 36, nullable = false)
 	private String recordId;
+	
+	@Column(name = "version_id", length = 36, nullable = false)
 	private String versionId;
+	
+	@Column(name = "record_type", length = 10, nullable = false)
 	private String recordType;
+	
+	@Column(name = "owner", length = 127)
 	private String owner;
+	
+	@Column(name = "owner_email", length = 127)
 	private String ownerEmail;
+	
+	@Column(name = "creator", length = 127)
 	private String creator;
+	
+	@Column(name = "creator_email", length = 127)
 	private String creatorEmail;
+	
+	@Column(name = "alias", length = 127)
 	private String alias;
+	
+	@Column(name = "keywords", length = 127)
 	private String keywords;
+	
+	@Column(name = "visibility")
 	private int visibility;
+	
+	@Column(name = "status", length = 127)
 	private String status;
+	
+	@Column(name = "short_description")
 	private String shortDescription;
+	
+	@Column(name = "long_description")
 	private String longDescription;
+	
+	@Column(name = "literature_references")
 	private String references;
+	
+	@Column(name = "creation_time")
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date creationTime;
+	
+	@Column(name = "modification_time")
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date modificationTime;
 	
+	@OneToOne(mappedBy = "entry")
 	private Sequence sequence;
-	
+
+	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
+	@JoinColumn(name = "entries_id")
+	@OrderBy("id")	
 	private Set<SelectionMarker> selectionMarkers = new LinkedHashSet<SelectionMarker>();
+
+	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
+	@JoinColumn(name = "entries_id")
+	@OrderBy("id")
 	private Set<Link> links = new LinkedHashSet<Link>();
+	
+	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
+	@JoinColumn(name = "entries_id")
+	@OrderBy("id")
 	private Set<Name> names = new LinkedHashSet<Name>();
+	
+	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
+	@JoinColumn(name = "entries_id")
+	@OrderBy("id")	
 	private Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
 	
 	public Entry() {

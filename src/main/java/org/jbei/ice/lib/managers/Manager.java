@@ -25,9 +25,9 @@ public abstract class Manager {
 		Object result = null;
 		try {
 			Transaction tx = session.beginTransaction();
-			Serializable generatedId = session.save(obj);
+			session.saveOrUpdate(obj);
 			tx.commit();
-			result = session.load(obj.getClass(), generatedId);
+			result = obj;
 		}
 		catch (Exception e) {
 			e.printStackTrace();

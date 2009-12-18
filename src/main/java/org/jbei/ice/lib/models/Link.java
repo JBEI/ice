@@ -2,12 +2,40 @@ package org.jbei.ice.lib.models;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+
 import org.jbei.ice.lib.value_objects.ILinkValueObject;
 
+@Entity
+@Table(name = "links")
+@SequenceGenerator(name = "sequence", sequenceName = "links_id_seq",
+		allocationSize = 1)
 public class Link implements ILinkValueObject, Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
 	private int id;
+	
+	@Column(name = "link", length = 40)
 	private String link;
+	
+	@Column(name = "url", length = 255)
 	private String url;
+	
+	@ManyToOne
+	@JoinColumn(name = "entries_id", nullable = false)
 	private Entry entry;
 
 	public Link() {

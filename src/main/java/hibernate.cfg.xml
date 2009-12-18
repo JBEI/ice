@@ -8,21 +8,21 @@
 	<property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
 	<property name="hibernate.connection.password">t@stuz@r</property>
 	<!-- use below when table rearrangement is needed. "create" or "update" -->
-	 <property name="hbm2ddl.auto">update</property> 
+	 <property name="hbm2ddl.auto">validate</property> 
 	<!-- this will show us all sql statements -->
     <property name="hibernate.show_sql">true</property>
 	<!-- mapping files -->
-	<mapping resource="org/jbei/ice/lib/models/Entry.hbm.xml" />
+	<mapping class="org.jbei.ice.lib.models.Entry" />
 	<mapping resource="org/jbei/ice/lib/models/Plasmid.hbm.xml" />
 	<mapping resource="org/jbei/ice/lib/models/Strain.hbm.xml" />
 	<mapping resource="org/jbei/ice/lib/models/Part.hbm.xml" />
 	<mapping class="org.jbei.ice.lib.models.Name" />
-	<mapping resource="org/jbei/ice/lib/models/PartNumber.hbm.xml" />	
-	<mapping resource="org/jbei/ice/lib/models/Link.hbm.xml" />
+	<mapping class="org.jbei.ice.lib.models.PartNumber" />	
+	<mapping class="org.jbei.ice.lib.models.Link" />
 	<mapping resource="org/jbei/ice/lib/models/SelectionMarker.hbm.xml" />
-	<mapping resource="org/jbei/ice/lib/models/Sequence.hbm.xml" />
+	<mapping class="org.jbei.ice.lib.models.Sequence" />
 	<mapping resource="org/jbei/ice/lib/models/Feature.hbm.xml" />
-	<mapping resource="org/jbei/ice/lib/models/SequenceFeature.hbm.xml" />
+	<mapping class="org.jbei.ice.lib.models.SequenceFeature" />
 	<mapping resource="org/jbei/ice/lib/models/AssemblyRelationship.hbm.xml" />
 	<mapping resource="org/jbei/ice/lib/models/EntryAssemblyRelationship.hbm.xml" />
 	<mapping resource="org/jbei/ice/lib/models/FeatureDNA.hbm.xml" />

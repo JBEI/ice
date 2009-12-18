@@ -326,6 +326,47 @@ public class EntryManager extends Manager {
 				DEFAULT_PART_NUMBER_DIGITAL_SUFFIX);
 	}
 
+	public static Entry save(Entry entry) throws ManagerException {
+		Entry result = null;
+		//deal with associated objects here instead of making individual forms
+		//deal with foreign key checks.
+		
+		Entry oldEntry = get(entry.getId());
+		for (Name name: oldEntry.getNames()) {
+			System.out.println(""+name.getId());
+			dbDelete(name);
+		}
+		for (SelectionMarker selectionMarker : oldEntry.getSelectionMarkers()) {
+			dbDelete(selectionMarker);
+		}
+		for (Link link : oldEntry.getLinks()){
+			dbDelete(link);
+		}
+		
+		for (PartNumber partNumber : oldEntry.getPartNumbers()) {
+			dbDelete(partNumber);
+		}
+		
+		
+		for (SelectionMarker selectionMarker : entry.getSelectionMarkers()) {
+			selectionMarker.setEntry(entry);
+		}
+		for (Link link : entry.getLinks()){
+			link.setEntry(entry);
+		}
+		for (Name name: entry.getNames()) {
+			name.setEntry(entry);
+		}
+		for (PartNumber partNumber : entry.getPartNumbers()) {
+			partNumber.setEntry(entry);
+		}
+		
+		
+		result = (Entry) dbSave(entry);
+		return result;
+		
+	}
+	
 	public static void main(String[] args) {
 		int offset = 0;
 		int limit = 30;
@@ -337,4 +378,6 @@ public class EntryManager extends Manager {
 			System.out.println("" + entry.getId());
 		}
 	}
+	
+	
 }

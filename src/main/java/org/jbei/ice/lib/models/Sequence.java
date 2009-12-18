@@ -4,16 +4,53 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import org.jbei.ice.lib.value_objects.ISequenceValueObject;
 
+@Entity
+@Table(name = "sequences")
+@SequenceGenerator(name = "sequence", sequenceName = "sequences_id_seq",
+		allocationSize = 1)
 public class Sequence implements ISequenceValueObject, Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
 	private int id;
+	
+	@Column(name = "sequence")
 	private String sequence;
+	
+	@Column(name = "sequence_user")
 	private String sequenceUser;
+	
+	@Column(name = "fwd_hash", length = 40)
 	private String fwdHash;
+	
+	@Column(name = "rev_hash", length = 40)
 	private String revHash;
+	
+	@OneToOne
+	@JoinColumn(name = "entries_id", nullable=false)
 	private Entry entry;
 
+	@OneToMany
+	@JoinColumn(name = "sequence_id")
+	@OrderBy("id")
 	private Set<SequenceFeature> sequenceFeatures = new HashSet<SequenceFeature> ();
 	
 	public Sequence() {
