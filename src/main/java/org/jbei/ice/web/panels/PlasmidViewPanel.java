@@ -8,13 +8,13 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.models.Plasmid;
 
-public class PlasmidPanel extends Panel {
+public class PlasmidViewPanel extends Panel {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public PlasmidPanel(String id, Plasmid plasmid) {
+	public PlasmidViewPanel(String id, Plasmid plasmid) {
 		super(id);
 		
 		ArrayList<Component> elements = new ArrayList<Component>();

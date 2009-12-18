@@ -15,7 +15,9 @@ import org.jbei.ice.lib.authentication.LblLdapAuthenticationBackend;
 import org.jbei.ice.lib.authentication.NullAuthenticationBackend;
 import org.jbei.ice.lib.permissions.IceAuthorizationStrategy;
 import org.jbei.ice.lib.utils.JobCue;
+import org.jbei.ice.web.pages.EntryUpdatePage;
 import org.jbei.ice.web.pages.EntryViewPage;
+import org.jbei.ice.web.pages.LogOutPage;
 import org.jbei.ice.web.pages.LoginPage;
 import org.jbei.ice.web.pages.RegisterPage;
 import org.jbei.ice.web.pages.UserEntryPage;
@@ -43,10 +45,11 @@ public class WicketApplication extends WebApplication
 		authenticator = new LblLdapAuthenticationBackend();
 				
 		mountBookmarkablePage("/login", LoginPage.class);
+		mountBookmarkablePage("/logout", LogOutPage.class);
 		mountBookmarkablePage("/register", RegisterPage.class);
 		mount(new IndexedParamUrlCodingStrategy("/entry/view", EntryViewPage.class));
 		mountBookmarkablePage("/user/entries", UserEntryPage.class);
-		
+		mountBookmarkablePage("/entry/update", EntryUpdatePage.class);
 		mount(new URIRequestTargetUrlCodingStrategy("/static") {
 			@Override
 			public IRequestTarget decode(RequestParameters requestParameters) {

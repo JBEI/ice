@@ -8,8 +8,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.models.Strain;
 
-public class StrainPanel extends Panel {
-	public StrainPanel(String id, Strain strain) {
+public class StrainViewPanel extends Panel {
+	public StrainViewPanel(String id, Strain strain) {
 		super(id);
 		
 		ArrayList<Component> elements = new ArrayList<Component>();

@@ -9,13 +9,13 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.utils.JbeiConstants;
 
-public class PartPanel extends Panel {
+public class PartViewPanel extends Panel {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public PartPanel(String id, Part part) {
+	public PartViewPanel(String id, Part part) {
 		super(id);
 		
 		ArrayList<Component> elements = new ArrayList<Component>();

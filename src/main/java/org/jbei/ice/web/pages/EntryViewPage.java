@@ -3,15 +3,15 @@ package org.jbei.ice.web.pages;
 import org.apache.wicket.PageParameters;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.web.panels.PartPanel;
-import org.jbei.ice.web.panels.PlasmidPanel;
-import org.jbei.ice.web.panels.StrainPanel;
+import org.jbei.ice.web.panels.PartViewPanel;
+import org.jbei.ice.web.panels.PlasmidViewPanel;
+import org.jbei.ice.web.panels.StrainViewPanel;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
 
-public class EntryViewPage extends UnprotectedPage {
+public class EntryViewPage extends ProtectedPage {
 	public EntryViewPage(PageParameters parameters) {
 		super(parameters);
 		int entryId = parameters.getInt("0");
@@ -20,15 +20,14 @@ public class EntryViewPage extends UnprotectedPage {
 			entry = EntryManager.get(entryId);
 			String recordType = entry.getRecordType();
 			if (recordType.equals("strain")) {
-				StrainPanel panel = new StrainPanel("entry", (Strain) entry);
+				StrainViewPanel panel = new StrainViewPanel("entry", (Strain) entry);
 				add (panel);
 			} else if (recordType.equals("plasmid")) {
-				PlasmidPanel panel = new PlasmidPanel("entry", (Plasmid) entry);
+				PlasmidViewPanel panel = new PlasmidViewPanel("entry", (Plasmid) entry);
 				add (panel);
 			} else if (recordType.equals("part")) {
-				PartPanel panel = new PartPanel("entry", (Part) entry);
+				PartViewPanel panel = new PartViewPanel("entry", (Part) entry);
 				add(panel);
-				//PartPanel panel = new PartPanel("entry", (Part) entry);
 			}
 			
 		} catch (ManagerException e) {
