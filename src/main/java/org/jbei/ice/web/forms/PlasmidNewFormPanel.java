@@ -19,7 +19,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Link;
@@ -27,19 +26,29 @@ import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
 
-public class PlasmidUpdateFormPanel extends Panel {
+public class PlasmidNewFormPanel extends Panel {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private Plasmid plasmid = null;
-	
-	public PlasmidUpdateFormPanel(String id, Plasmid plasmid) {
+
+	public PlasmidNewFormPanel(String id) {
 		super(id);
-		this.setPlasmid(plasmid);
+		
+		Plasmid entry = new Plasmid();
 		populateElements();
+		
+		
 	}
+
+	public PlasmidNewFormPanel(String id, Plasmid plasmid) {
+		super(id);
+		Plasmid entry = plasmid;
+		populateElements();
+		
+	}
+
 
 	private void populateElements() {
 		class PlasmidForm extends StatelessForm<Object> {
@@ -50,6 +59,7 @@ public class PlasmidUpdateFormPanel extends Panel {
 			private String links;
 			private String names;
 			private String selectionMarkers;
+			
 			private String alias;
 			private String creator;
 			private String creatorEmail;
@@ -69,24 +79,6 @@ public class PlasmidUpdateFormPanel extends Panel {
 			public PlasmidForm(String id) {
 				
 				super(id);
-				
-				setLinks(plasmid.getLinksAsString());
-				setNames(plasmid.getNamesAsString());
-				setSelectionMarkers(plasmid.getSelectionMarkersAsString());
-				setAlias(plasmid.getAlias());
-				setCreator(plasmid.getCreator());
-				setCreatorEmail(plasmid.getCreatorEmail());
-				setStatus(plasmid.getStatus());
-				setVisibility("" + plasmid.getVisibility());
-				setKeywords(plasmid.getKeywords());
-				setSummary(plasmid.getShortDescription());
-				setNotes(plasmid.getLongDescription());
-				setReferences(plasmid.getReferences());
-				
-				setBackbone(plasmid.getBackbone());
-				setOriginOfReplication(plasmid.getOriginOfReplication());
-				setPromoters(plasmid.getPromoters());
-				setCircular(plasmid.getCircular());
 				
 				setModel(new CompoundPropertyModel<Object>(this));
 				add(new TextField<String>("names")
@@ -128,51 +120,11 @@ public class PlasmidUpdateFormPanel extends Panel {
 			}
 			
 			protected void onSubmit() {
-				try {
-					CommaSeparatedField<Link> linksField = new CommaSeparatedField<Link>(Link.class, "getLink", "setLink");
-					linksField.setString(getLinks());
-					plasmid.setLinks(linksField.getItemsAsSet());
-				
-					CommaSeparatedField<Name> namesField = new CommaSeparatedField<Name>(Name.class, "getName", "setName");
-					namesField.setString(getNames());
-					plasmid.setNames(namesField.getItemsAsSet());
-					
-					CommaSeparatedField<SelectionMarker> selectionMarkersField = new CommaSeparatedField<SelectionMarker>(SelectionMarker.class, "getName", "setName");
-					selectionMarkersField.setString(getSelectionMarkers());
-					plasmid.setSelectionMarkers(selectionMarkersField.getItemsAsSet());
-				
-				} catch (FormException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-				plasmid.setAlias(getAlias());
-				plasmid.setStatus(getStatus());
-				plasmid.setVisibility(Integer.parseInt(getVisibility()));
-				plasmid.setKeywords(getKeywords());
-				plasmid.setShortDescription(getSummary());
-				plasmid.setLongDescription(getNotes());
-				plasmid.setReferences(getReferences());
-				
-				plasmid.setBackbone(getBackbone());
-				plasmid.setOriginOfReplication(getOriginOfReplication());
-				plasmid.setPromoters(getPromoters());
-				plasmid.setCircular(getCircular());
-				
-				try {
-					EntryManager.save(plasmid);
-				} catch (ManagerException e) {
-					// TODO Auto-generated catch block
-					String msg = "System Error: Could not save! ";
-					Logger.error(msg + e.getMessage());
-					error(msg);
-					e.printStackTrace();
-				}
 				
 			}
 			
 			protected void onError() {
-				
+				error("Missing required fields");
 			}
 			
 			// Getters and setters for PlasmidForm
@@ -180,57 +132,75 @@ public class PlasmidUpdateFormPanel extends Panel {
 			public void setLinks(String links) {
 				this.links = links;
 			}
+
 			public String getLinks() {
 				return links;
 			}
+
 			public void setNames(String names) {
 				this.names = names;
 			}
+
 			public String getNames() {
 				return names;
 			}
+
 			public void setSelectionMarkers(String selectionMarkers) {
 				this.selectionMarkers = selectionMarkers;
 			}
+
 			public String getSelectionMarkers() {
 				return selectionMarkers;
 			}
+
 			public String getAlias() {
 				return alias;
 			}
+
 			public void setAlias(String alias) {
 				this.alias = alias;
 			}
+
 			public String getCreator() {
 				return creator;
 			}
+
 			public void setCreator(String creator) {
 				this.creator = creator;
 			}
+
 			public String getCreatorEmail() {
 				return creatorEmail;
 			}
+
 			public void setCreatorEmail(String creatorEmail) {
 				this.creatorEmail = creatorEmail;
 			}
+
 			public String getStatus() {
 				return status;
 			}
+
 			public void setStatus(String status) {
 				this.status = status;
 			}
+
 			public String getVisibility() {
 				return visibility;
 			}
+
 			public void setVisibility(String visibility) {
 				this.visibility = visibility;
 			}
+
 			public String getKeywords() {
 				return keywords;
 			}
+
 			public void setKeywords(String keywords) {
 				this.keywords = keywords;
 			}
+
 			public String getSummary() {
 				return summary;
 			}
@@ -238,27 +208,35 @@ public class PlasmidUpdateFormPanel extends Panel {
 			public void setSummary(String summary) {
 				this.summary = summary;
 			}
+
 			public String getNotes() {
 				return notes;
 			}
+
 			public void setNotes(String notes) {
 				this.notes = notes;
 			}
+
 			public String getReferences() {
 				return references;
 			}
+
 			public void setReferences(String references) {
 				this.references = references;
 			}
+
 			public String getBackbone() {
 				return backbone;
 			}
+
 			public void setBackbone(String backbone) {
 				this.backbone = backbone;
 			}
+
 			public String getOriginOfReplication() {
 				return originOfReplication;
 			}
+
 			public void setOriginOfReplication(String originOfReplication) {
 				this.originOfReplication = originOfReplication;
 			}
@@ -266,10 +244,12 @@ public class PlasmidUpdateFormPanel extends Panel {
 			public String getPromoters() {
 				return promoters;
 			}
+
 			public void setPromoters(String promoters) {
 				this.promoters = promoters;
 			}
-			public boolean getCircular() {
+
+			public boolean isCircular() {
 				return circular;
 			}
 
@@ -277,20 +257,94 @@ public class PlasmidUpdateFormPanel extends Panel {
 				this.circular = circular;
 			}
 		}
-
+		
 		PlasmidForm form = new PlasmidForm("plasmidForm");
 		form.add(new Button("submitButton"));
 		add(form);
-
+		
+	}
+	/*
+	@SuppressWarnings("unchecked")
+	private void populateElementsOld() {
+		FormPanelHelper backbonePanel = new FormPanelHelper("Backbone", new TextFieldPanel("itemPanel", 
+				new PropertyModel(entry, "backbone")));
+		backbonePanel.getFormComponent().add(new SimpleAttributeModifier("class", "inputbox"));
+		backbonePanel.getFormComponent().add(new SimpleAttributeModifier("maxlength", ""+ SHORT_FIELD_MAX_LENGTH));
+		elements.put("backbonePanel", backbonePanel);
+		
+		FormPanelHelper originPanel = new FormPanelHelper("Origin of Replication", new TextFieldPanel("itemPanel", 
+				new PropertyModel(entry, "originOfReplication")));
+		originPanel.getFormComponent().add(new SimpleAttributeModifier("class", "inputbox originOfReplicationsInput"));
+		originPanel.getFormComponent().add(new SimpleAttributeModifier("maxlength", ""+ SHORT_FIELD_MAX_LENGTH));
+		elements.put("originPanel", originPanel);
+		
+		FormPanelHelper promotersPanel = new FormPanelHelper("Promoters", new TextFieldPanel("itemPanel", 
+				new PropertyModel(entry, "promoters")));
+		promotersPanel.getFormComponent().add(new SimpleAttributeModifier("maxlength", ""+ SHORT_FIELD_MAX_LENGTH));
+		promotersPanel.getFormComponent().add(new SimpleAttributeModifier("class", "inputbox promotersInput"));
+		elements.put("promotersPanel", promotersPanel);
+		
+		LinkedHashMap circularChoices = new LinkedHashMap<String, String> ();
+		circularChoices.put("1", "True");
+		circularChoices.put("0", "False");
+		ChoiceRendererHelper circularChoicesHelper= new ChoiceRendererHelper(circularChoices);
+		//TODO: Handle default value
+		((Plasmid) entry).setCircular(true);
+		FormPanelHelper circularPanel = new FormPanelHelper("Circular", 
+				new DropDownChoicePanel("itemPanel", 
+				new PropertyModel(entry, "circular"), circularChoicesHelper));
+		circularPanel.getFormComponent().add(new SimpleAttributeModifier("class", "inputbox"));
+		elements.put("circularPanel", circularPanel);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	protected void renderForm() {
+		Form plasmidForm = new Form("plasmidForm") {
+		
+			private static final long serialVersionUID = 1L;
+			@Override
+			protected void onSubmit() {
+				entry.setNames(names.getItemsAsSet());
+				entry.setLinks(links.getItemsAsSet());
+				entry.setSelectionMarkers(selectionMarkers.getItemsAsSet());
+				
+				try {
+					Plasmid temp = (Plasmid) entry;
+					Plasmid newEntry = EntryManager.createPlasmid(temp);
+					
+					System.out.println("created new plasmid" + newEntry.getId());
+				} catch (ManagerException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			@Override
+			protected void onError() {
+				System.out.println("error");
+			}
+		};
+		
+		
+		ListView listView = new ListView("itemPanels", sortedElements) {
+			
+			private static final long serialVersionUID = 1L;
 
-	public void setPlasmid(Plasmid plasmid) {
-		this.plasmid = plasmid;
+			@Override
+			protected void populateItem(ListItem item) {
+				FormPanelHelper helper = (FormPanelHelper) item.getModelObject();
+				
+				item.add(new Label("itemLabel", helper.getName()));
+				item.add(helper.getPanel());
+			}
+		};
+		listView.setReuseItems(true);
+		
+		plasmidForm.add(listView);
+		plasmidForm.add(new Button("submitButton", new Model("submmited")));
+		
+		this.add(plasmidForm);
 	}
-
-	public Plasmid getPlasmid() {
-		return plasmid;
-	}
+	*/
 
 }
