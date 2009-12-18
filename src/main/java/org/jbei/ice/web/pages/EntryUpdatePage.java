@@ -5,7 +5,7 @@ import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Plasmid;
-import org.jbei.ice.web.forms.PlasmidFormPanel;
+import org.jbei.ice.web.forms.PlasmidUpdateFormPanel;
 
 public class EntryUpdatePage extends ProtectedPage {
 	public EntryUpdatePage(PageParameters parameters) {
@@ -19,7 +19,7 @@ public class EntryUpdatePage extends ProtectedPage {
 				//StrainUpdatePanel panel = new StrainUpdatePanel("entry", (Strain) entry);
 				//add (panel);
 			} else if (recordType.equals("plasmid")) {
-				PlasmidFormPanel panel = new PlasmidFormPanel("entry", (Plasmid) entry);
+				PlasmidUpdateFormPanel panel = new PlasmidUpdateFormPanel("entry", (Plasmid) entry);
 				add (panel);
 			} else if (recordType.equals("part")) {
 				//PartViewPanel panel = new PartViewPanel("entry", (Part) entry);

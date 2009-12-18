@@ -11,8 +11,6 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.web.forms.EntryFormPanel;
-import org.jbei.ice.web.forms.PlasmidForm;
 import org.jbei.ice.web.pages.EntriesTablePage;
 import org.jbei.ice.web.pages.UnprotectedPage;
 import org.jbei.ice.web.pages.LoginPage;
