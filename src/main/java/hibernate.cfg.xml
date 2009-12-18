@@ -16,7 +16,7 @@
 	<mapping resource="org/jbei/ice/lib/models/Plasmid.hbm.xml" />
 	<mapping resource="org/jbei/ice/lib/models/Strain.hbm.xml" />
 	<mapping resource="org/jbei/ice/lib/models/Part.hbm.xml" />
-	<mapping resource="org/jbei/ice/lib/models/Name.hbm.xml" />
+	<mapping class="org.jbei.ice.lib.models.Name" />
 	<mapping resource="org/jbei/ice/lib/models/PartNumber.hbm.xml" />	
 	<mapping resource="org/jbei/ice/lib/models/Link.hbm.xml" />
 	<mapping resource="org/jbei/ice/lib/models/SelectionMarker.hbm.xml" />
