@@ -1,43 +1,52 @@
 <html xmlns:wicket>
 <wicket:panel>
-	<table>
+	<table width="800" border="0" cellpadding="0" cellspacing="0">
 		<tr>
-			<td>Part: <span wicket:id="titleName">part's Title</span>
+			<td valign="top" colspan="2"><span style="font-size: 12px; font-weight: bold;">Plasmid: <span wicket:id="titleName">plasmid's Title</span></span>
 			</td>
 		</tr>
 	</table>
 	<table>
 		<tr>
 			<td>
-			<table>
-				<tr>
+			<table border="0" cellpadding="3" cellspacing="1" class="entry_table">
+				<tr class="title_row_header">
 					<td>General Information | <a
-						href="/entry/update/plasmid/3965/">Edit</a></td>
+						href="#" wicket:id="updateLink">Edit</a></td>
 				</tr>
 				<tr>
-					<td >
+					<td bgcolor="#FFFFFF">
 					<table width="100%" border="0" cellpadding="0" cellspacing="2">
 						<tr>
 							<td class="title_column">ID</td>
 							<td class="value_column"><span wicket:id="partNumber">JBx_000256</span></td>
-							<td class="title_column">Packaging Format</td>
-							<td class="value_column"><span wicket:id="packageFormat">BioBrick X</span></td>
+							<td class="title_column">Markers</td>
+							<td class="value_column"><span wicket:id="selectionMarkers">Ampicillin</span></td>
 						</tr>
 						<tr>
 							<td class="title_column">Name</td>
 							<td class="value_column"><span wicket:id="names">pREDI</span></td>
+							<td class="title_column">Backbone</td>
+							<td class="value_column"><span wicket:id="backbone">Backbone</span></td>
 						</tr>
 						<tr>
 							<td class="title_column">Alias</td>
 							<td class="value_column"><span wicket:id="alias">pNJH-0001</span></td>
+							<td class="title_column">Origin of Replication</td>
+							<td class="value_column"><span wicket:id="originOfReplication">pSC101ts</span></td>
 						</tr>
 						<tr>
 							<td class="title_column">Creator</td>
 							<td class="value_column"><span wicket:id="creator">Nathan Hillson</span></td>
+							<td class="title_column">Promoters</td>
+							<td class="value_column"><span wicket:id="promoters">Arabinose, Rhamnose</span></td>
 						</tr>
 						<tr>
 							<td class="title_column">Status</td>
 							<td class="value_column"><span wicket:id="status">Complete</span></td>
+							<td class="title_column">Strains</td>
+							<td class="value_column"><span wicket:id="linksToStrains"><a href="/entry/view/JBx_000257/"
+								rel="/entry/tip/JBx_000257/" class="entry_tip">JBx_000257</a></span></td>
 						</tr>
 						<tr>
 							<td class="title_column">Owner</td>

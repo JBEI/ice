@@ -1,5 +1,6 @@
 package org.jbei.ice.web.panels;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -35,22 +36,14 @@ public class PartViewPanel extends Panel {
 				org.jbei.ice.lib.utils.JbeiConstants.getStatus(part.getStatus())));
 		
 		elements.add(new Label("linkToOwner", part.getOwner()));
-		String time = "";
-		 Date cTime = part.getCreationTime();
-		 if (cTime != null) {
-			 time = cTime.toString();
-		 } 
-		
-		elements.add(new Label("creationTime", time));
 		elements.add(new Label("links", part.getLinksAsString()));
-		
-		time = "";
-		Date modTime = part.getModificationTime();
-		if (modTime != null) {
-			time = modTime.toString();
-		} 
-		
-		elements.add(new Label("modificationTime", time));
+
+		SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
+		String creationTime = dateFormat.format(part.getCreationTime());
+		elements.add(new Label("creationTime", creationTime));
+				
+		String modificationTime = dateFormat.format(part.getModificationTime());
+		elements.add(new Label("modificationTime", modificationTime));
 		
 		elements.add(new Label("keywords", part.getKeywords()));
 		elements.add(new Label("shortDescription", part.getShortDescription()));

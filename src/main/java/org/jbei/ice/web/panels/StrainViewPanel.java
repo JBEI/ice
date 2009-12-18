@@ -1,5 +1,6 @@
 package org.jbei.ice.web.panels;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -33,22 +34,14 @@ public class StrainViewPanel extends Panel {
 				org.jbei.ice.lib.utils.JbeiConstants.getStatus(strain.getStatus())));
 		
 		elements.add(new Label("linkToOwner", strain.getOwner()));
-		String time = "";
-		 Date cTime = strain.getCreationTime();
-		 if (cTime != null) {
-			 time = cTime.toString();
-		 } 
-		
-		elements.add(new Label("creationTime", time));
 		elements.add(new Label("links", strain.getLinksAsString()));
-		
-		time = "";
-		 Date modTime = strain.getModificationTime();
-		 if (modTime != null) {
-			 time = modTime.toString();
-		 } 
-		
-		elements.add(new Label("modificationTime", time));
+
+		SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
+		String creationTime = dateFormat.format(strain.getCreationTime());
+		elements.add(new Label("creationTime", creationTime));
+
+		String modificationTime = dateFormat.format(strain.getModificationTime());
+		elements.add(new Label("modificationTime", modificationTime));
 		
 		elements.add(new Label("keywords", strain.getKeywords()));
 		elements.add(new Label("shortDescription", strain.getShortDescription()));

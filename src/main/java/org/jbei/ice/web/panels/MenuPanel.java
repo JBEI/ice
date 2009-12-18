@@ -11,7 +11,6 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.web.forms.EntryFormPage;
 import org.jbei.ice.web.forms.EntryFormPanel;
 import org.jbei.ice.web.forms.PlasmidForm;
 import org.jbei.ice.web.pages.EntriesTablePage;
@@ -60,7 +59,6 @@ public class MenuPanel extends Panel {
 		addPageLinkMenuItem(LoginPage.class, "Login");
 		addPageLinkMenuItem(UserEntryPage.class, "My Entries");
 		//addPageLinkMenuItem(WorkSpacePage.class, "WorkSpace");
-		addPageLinkMenuItem(EntryFormPage.class, "Entry Form");
 		addPageLinkMenuItem(EntriesTablePage.class, "List View");
 		
 		

@@ -1,13 +1,21 @@
 <html xmlns:wicket>
 <wicket:panel>
     <form wicket:id="plasmidForm">
-        <table>
-		    <wicket:component wicket:id="itemPanels">
-			    <tr>
-				    <td><span wicket:id="itemLabel"></span></td>
-				    <td><div wicket:id="itemPanel"></div></td>
-			     </tr>
-		    </wicket:component>
+        <table border="0" cellpadding="3" cellspacing="1" class="entry_table">
+            <tr class="title_row_header"><td><h2>Update Plasmid</h2></td></tr>
+            <tr>
+                <td bgcolor="#ffffff">
+			        <table width="100%" border="0" cellpadding="0" cellspacing="2">
+					    <wicket:component wicket:id="itemPanels">
+						    <tr>
+							    <td style="width: 150px"><span wicket:id="itemLabel"></span></td>
+							    <td><div wicket:id="itemPanel"></div></td>
+						     </tr>
+					    </wicket:component>
+			        </table>
+		        </td>
+            </tr>
+			        
         </table>
         <button wicket:id="submitButton" type="submit">Save</button>
         

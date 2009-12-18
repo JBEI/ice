@@ -1,12 +1,16 @@
 package org.jbei.ice.web.panels;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.models.Plasmid;
+import org.jbei.ice.web.pages.EntryUpdatePage;
 
 public class PlasmidViewPanel extends Panel {
 	/**
@@ -14,6 +18,7 @@ public class PlasmidViewPanel extends Panel {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	@SuppressWarnings("unchecked")
 	public PlasmidViewPanel(String id, Plasmid plasmid) {
 		super(id);
 		
@@ -40,22 +45,14 @@ public class PlasmidViewPanel extends Panel {
 		//TODO: link to strains
 		elements.add(new Label("linksToStrains", ""));
 		elements.add(new Label("linkToOwner", plasmid.getOwner()));
-		String time = "";
-		Date cTime = plasmid.getCreationTime();
-		if (cTime != null) {
-			time = cTime.toString();
-		} 
-
-		elements.add(new Label("creationTime", time));
 		elements.add(new Label("links", plasmid.getLinksAsString()));
 		
-		time = "";
-		 Date modTime = plasmid.getModificationTime();
-		 if (modTime != null) {
-			 time = modTime.toString();
-		 } 
-		
-		elements.add(new Label("modificationTime", time));
+		SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
+		String creationTime = dateFormat.format(plasmid.getCreationTime());
+		elements.add(new Label("creationTime", creationTime));
+
+		String modificationTime = dateFormat.format(plasmid.getModificationTime());
+		elements.add(new Label("modificationTime", modificationTime));
 		
 		elements.add(new Label("keywords", plasmid.getKeywords()));
 		elements.add(new Label("shortDescription", plasmid.getShortDescription()));
@@ -67,11 +64,13 @@ public class PlasmidViewPanel extends Panel {
 		
 		elements.add(new Label("references", plasmid.getReferences()));
 		elements.add(new Label("longDescription", plasmid.getLongDescription()));
-		
+		elements.add(new BookmarkablePageLink("updateLink", EntryUpdatePage.class,
+				new PageParameters("0=" + plasmid.getId())));
 		
 		for (Component item : elements) {
 			add(item);
 		}
+		
 		
 	}
 }
