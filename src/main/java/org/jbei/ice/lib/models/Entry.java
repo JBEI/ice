@@ -24,6 +24,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.value_objects.IEntryValueObject;
 
 @Entity
@@ -91,22 +92,26 @@ public class Entry implements IEntryValueObject, Serializable {
 	@OneToOne(mappedBy = "entry")
 	private Sequence sequence;
 
-	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
+	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, mappedBy = "entry")
+	@Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
 	@JoinColumn(name = "entries_id")
 	@OrderBy("id")	
 	private Set<SelectionMarker> selectionMarkers = new LinkedHashSet<SelectionMarker>();
 
-	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
+	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, mappedBy = "entry")
+	@Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
 	@JoinColumn(name = "entries_id")
 	@OrderBy("id")
 	private Set<Link> links = new LinkedHashSet<Link>();
 	
-	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
+	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, mappedBy = "entry")
+	@Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
 	@JoinColumn(name = "entries_id")
 	@OrderBy("id")
 	private Set<Name> names = new LinkedHashSet<Name>();
 	
-	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
+	@OneToMany(cascade={CascadeType.ALL}, fetch=FetchType.EAGER, mappedBy = "entry")
+	@Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
 	@JoinColumn(name = "entries_id")
 	@OrderBy("id")	
 	private Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
@@ -194,7 +199,10 @@ public class Entry implements IEntryValueObject, Serializable {
 	
 	
 	public void setNames(Set<Name> names) {
-		this.names = names;
+		this.names.clear();
+		for (Name name : names) {
+			this.names.add(name);
+		}
 	}
 
 	public Set<PartNumber> getPartNumbers() {
@@ -222,7 +230,10 @@ public class Entry implements IEntryValueObject, Serializable {
 	}
 	
 	public void setPartNumbers(Set<PartNumber> partNumbers) {
-		this.partNumbers = partNumbers;
+		this.partNumbers.clear();
+		for (PartNumber partNumber : partNumbers) {
+			this.partNumbers.add(partNumber);
+		}
 	}
 
 	public String getOwner() {
@@ -297,7 +308,10 @@ public class Entry implements IEntryValueObject, Serializable {
 	}
 	
 	public void setSelectionMarkers(Set<SelectionMarker> selectionMarkers) {
-		this.selectionMarkers = selectionMarkers;
+		this.selectionMarkers.clear(); 
+		for (SelectionMarker selectionMarker : selectionMarkers) {
+			this.selectionMarkers.add(selectionMarker);
+		}
 	}
 
 	public Set<Link> getLinks() {
@@ -316,7 +330,10 @@ public class Entry implements IEntryValueObject, Serializable {
 	}
 	
 	public void setLinks(Set<Link> links) {
-		this.links = links;
+		this.links.clear(); //This way lets Hibernate know the set has been updated
+		for (Link link : links) {
+			this.links.add(link);
+		}
 	}
 
 	public String getKeywords() {

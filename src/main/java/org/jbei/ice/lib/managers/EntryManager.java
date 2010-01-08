@@ -329,24 +329,10 @@ public class EntryManager extends Manager {
 	public static Entry save(Entry entry) throws ManagerException {
 		Entry result = null;
 		//deal with associated objects here instead of making individual forms
-		//deal with foreign key checks.
+		//deal with foreign key checks. Deletion of old values happen through Set.clear() and 
+		//hibernate cascade delete-orphaned in the model.Entry
 		
-		Entry oldEntry = get(entry.getId());
-		for (Name name: oldEntry.getNames()) {
-			System.out.println(""+name.getId());
-			dbDelete(name);
-		}
-		for (SelectionMarker selectionMarker : oldEntry.getSelectionMarkers()) {
-			dbDelete(selectionMarker);
-		}
-		for (Link link : oldEntry.getLinks()){
-			dbDelete(link);
-		}
-		
-		for (PartNumber partNumber : oldEntry.getPartNumbers()) {
-			dbDelete(partNumber);
-		}
-		
+		Set<Name> temp = entry.getNames();
 		
 		for (SelectionMarker selectionMarker : entry.getSelectionMarkers()) {
 			selectionMarker.setEntry(entry);
@@ -361,10 +347,9 @@ public class EntryManager extends Manager {
 			partNumber.setEntry(entry);
 		}
 		
-		
 		result = (Entry) dbSave(entry);
-		return result;
 		
+		return result;
 	}
 	
 	public static void main(String[] args) {

@@ -50,7 +50,6 @@ public class WicketApplication extends WebApplication
 		mount(new IndexedParamUrlCodingStrategy("/entry/view", EntryViewPage.class));
 		mount(new IndexedParamUrlCodingStrategy("/entry/update", EntryUpdatePage.class));
 		mountBookmarkablePage("/user/entries", UserEntryPage.class);
-		mountBookmarkablePage("/entry/update", EntryUpdatePage.class);
 		mount(new URIRequestTargetUrlCodingStrategy("/static") {
 			@Override
 			public IRequestTarget decode(RequestParameters requestParameters) {
