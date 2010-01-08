@@ -6,9 +6,9 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.LogOutPage;
-import org.jbei.ice.web.pages.LoginPage;
 import org.jbei.ice.web.pages.RegisterPage;
 import org.jbei.ice.web.pages.UserEntryPage;
+import org.jbei.ice.web.pages.WelcomePage;
 
 /**
  * @author tham
@@ -49,7 +49,7 @@ public class LoginStatusPanel extends Panel {
 			}
 		};
 		
-		preLogin.add(new BookmarkablePageLink("logIn", LoginPage.class));
+		preLogin.add(new BookmarkablePageLink("logIn", WelcomePage.class));
 		
 		preLogin.add(new BookmarkablePageLink("register", RegisterPage.class));
 		return preLogin;

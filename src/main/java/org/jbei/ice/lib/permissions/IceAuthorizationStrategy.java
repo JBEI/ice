@@ -9,11 +9,10 @@ import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.ProtectedPage;
 import org.jbei.ice.web.pages.WelcomePage;
 
-public class IceAuthorizationStrategy implements IAuthorizationStrategy, 
-	IUnauthorizedComponentInstantiationListener {
+public class IceAuthorizationStrategy implements IAuthorizationStrategy,
+		IUnauthorizedComponentInstantiationListener {
 
 	public boolean isActionAuthorized(Component component, Action action) {
-		//TODO 
 		return true;
 	}
 
@@ -22,12 +21,11 @@ public class IceAuthorizationStrategy implements IAuthorizationStrategy,
 		if (ProtectedPage.class.isAssignableFrom(componentClass)) {
 			return IceSession.get().isAuthenticated();
 		}
+		
 		return true;
 	}
-	
-	public void onUnauthorizedInstantiation(Component component) {
-		  throw new RestartResponseAtInterceptPageException(
-		      WelcomePage.class);
-		}
 
+	public void onUnauthorizedInstantiation(Component component) {
+		throw new RestartResponseAtInterceptPageException(WelcomePage.class);
+	}
 }

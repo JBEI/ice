@@ -13,7 +13,6 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.web.pages.EntriesTablePage;
 import org.jbei.ice.web.pages.UnprotectedPage;
-import org.jbei.ice.web.pages.LoginPage;
 import org.jbei.ice.web.pages.UserEntryPage;
 import org.jbei.ice.web.pages.WorkSpacePage;
 
@@ -54,7 +53,6 @@ public class MenuPanel extends Panel {
 	public MenuPanel(String id) {
 		super(id);
 		addPageLinkMenuItem(UnprotectedPage.class, "Home");
-		addPageLinkMenuItem(LoginPage.class, "Login");
 		addPageLinkMenuItem(UserEntryPage.class, "My Entries");
 		//addPageLinkMenuItem(WorkSpacePage.class, "WorkSpace");
 		addPageLinkMenuItem(EntriesTablePage.class, "List View");
@@ -90,5 +88,4 @@ public class MenuPanel extends Panel {
 		menuItems.add(menuItem);
 		
 	}
-
 }
