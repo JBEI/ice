@@ -1831,9 +1831,6 @@ h3 {
 <xsl:template match="ws:operation/ws:input[@message] | ws:operation/ws:output[@message] | ws:operation/ws:fault[@message] | soap:header[ancestor::ws:operation and @message]" mode="src.link">
 	<xsl:apply-templates select="$consolidated-wsdl/ws:message[@name = substring-after( current()/@message, ':' )]" mode="src.link-attribute"/>
 </xsl:template>
-<xsl:template match="ws:operation/ws:input[@message] | ws:operation/ws:output[@message] | ws:operation/ws:fault[@message] | soap:header[ancestor::ws:operation and @message]" mode="src.link">
-	<xsl:apply-templates select="$consolidated-wsdl/ws:message[@name = substring-after( current()/@message, ':' )]" mode="src.link-attribute"/>
-</xsl:template>
 <xsl:template match="ws:message/ws:part[@element or @type]" mode="src.link">
 	<xsl:variable name="elem-local-name" select="substring-after(@element, ':')"/>
 	<xsl:variable name="type-local-name" select="substring-after(@type, ':')"/>
