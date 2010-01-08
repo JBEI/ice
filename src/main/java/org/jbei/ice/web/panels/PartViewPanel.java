@@ -16,45 +16,49 @@ public class PartViewPanel extends Panel {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public PartViewPanel(String id, Part part) {
+	public PartViewPanel(String id, Part entry) {
 		super(id);
 		
 		ArrayList<Component> elements = new ArrayList<Component>();
 		
 		elements.add(new Label("titleName", 
-				part.getOneName().getName()));
+				entry.getOneName().getName()));
 		elements.add(new Label("partNumber", 
-				part.getOnePartNumber().getPartNumber()));
+				entry.getOnePartNumber().getPartNumber()));
 		elements.add(new Label("names", 
-				part.getNamesAsString()));
-		elements.add(new Label("alias", part.getAlias()));
+				entry.getNamesAsString()));
+		elements.add(new Label("alias", entry.getAlias()));
 		elements.add(new Label("packageFormat", 
-				JbeiConstants.getPackageFormat(part.getPackageFormat())));
+				JbeiConstants.getPackageFormat(entry.getPackageFormat())));
 		elements.add(new Label("creator", 
-				part.getCreator()));
+				entry.getCreator()));
 		elements.add(new Label("status", 
-				org.jbei.ice.lib.utils.JbeiConstants.getStatus(part.getStatus())));
+				org.jbei.ice.lib.utils.JbeiConstants.getStatus(entry.getStatus())));
 		
-		elements.add(new Label("linkToOwner", part.getOwner()));
-		elements.add(new Label("links", part.getLinksAsString()));
+		elements.add(new Label("linkToOwner", entry.getOwner()));
+		elements.add(new Label("links", entry.getLinksAsString()));
 
 		SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
-		String creationTime = dateFormat.format(part.getCreationTime());
+		String creationTime = dateFormat.format(entry.getCreationTime());
 		elements.add(new Label("creationTime", creationTime));
 				
-		String modificationTime = dateFormat.format(part.getModificationTime());
+		String modificationTime = "";
+		Date modificationTimeStamp = entry.getModificationTime();
+		if (modificationTimeStamp != null) {
+			 modificationTime = dateFormat.format(entry.getModificationTime());
+		}
 		elements.add(new Label("modificationTime", modificationTime));
 		
-		elements.add(new Label("keywords", part.getKeywords()));
-		elements.add(new Label("shortDescription", part.getShortDescription()));
+		elements.add(new Label("keywords", entry.getKeywords()));
+		elements.add(new Label("shortDescription", entry.getShortDescription()));
 		
 		//TODO
 		elements.add(new Label("attachments", "attachment?"));
 		elements.add(new Label("samples", "spmales?"));
 		elements.add(new Label("sequence", "sequence?"));
 		
-		elements.add(new Label("references", part.getReferences()));
-		elements.add(new Label("longDescription", part.getLongDescription()));
+		elements.add(new Label("references", entry.getReferences()));
+		elements.add(new Label("longDescription", entry.getLongDescription()));
 		
 		
 		for (Component item : elements) {
