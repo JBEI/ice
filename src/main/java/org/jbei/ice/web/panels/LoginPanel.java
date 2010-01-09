@@ -29,11 +29,13 @@ public class LoginPanel extends Panel {
 
 			public LoginForm(String id) {
 				super(id);
-				
+
 				setModel(new CompoundPropertyModel<Object>(this));
-				
-				add(new TextField<String>("loginName").setRequired(true));
-				add(new PasswordTextField("loginPassword").setRequired(true));
+
+				add(new TextField<String>("loginName").setRequired(true)
+						.setLabel(new Model<String>("Login")));
+				add(new PasswordTextField("loginPassword").setRequired(true)
+						.setLabel(new Model<String>("Password")));
 				add(new CheckBox("keepSignedIn"));
 			}
 
@@ -47,7 +49,7 @@ public class LoginPanel extends Panel {
 						iceSession
 								.makeSessionPersistent(((WebResponse) getResponse()));
 					}
-					
+
 					if (!continueToOriginalDestination()) {
 						setResponsePage(WorkSpacePage.class);
 					}
@@ -65,7 +67,7 @@ public class LoginPanel extends Panel {
 			// specific method
 			protected boolean authenticate(String username, String password) {
 				IceSession icesession = (IceSession) getSession();
-				
+
 				return icesession.authenticateUser(username, password);
 			}
 
