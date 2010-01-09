@@ -17,7 +17,7 @@ import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.web.pages.EntryUpdatePage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.LogOutPage;
-import org.jbei.ice.web.pages.RegisterPage;
+import org.jbei.ice.web.pages.RegistrationPage;
 import org.jbei.ice.web.pages.UserEntryPage;
 import org.jbei.ice.web.pages.WelcomePage;
 
@@ -30,20 +30,20 @@ import org.jbei.ice.web.pages.WelcomePage;
  */
 public class WicketApplication extends WebApplication {
 	private AuthenticationBackend authenticator = null;
-
+	
 	/**
 	 * Constructor
 	 */
 	public WicketApplication() {
 	}
-
+	
 	protected void init() {
 		// authenticator = new NullAuthenticator();
 		authenticator = new LblLdapAuthenticationBackend();
-
+		
 		mountBookmarkablePage("/login", WelcomePage.class);
 		mountBookmarkablePage("/logout", LogOutPage.class);
-		mountBookmarkablePage("/register", RegisterPage.class);
+		mountBookmarkablePage("/registration", RegistrationPage.class);
 		mount(new IndexedParamUrlCodingStrategy("/entry/view",
 				EntryViewPage.class));
 		mount(new IndexedParamUrlCodingStrategy("/entry/update",
@@ -56,32 +56,32 @@ public class WicketApplication extends WebApplication {
 				return new WebExternalResourceRequestTarget(path);
 			}
 		});
-
+		
 		// job cue
 		JobCue jobCue = JobCue.getInstance();
 		Thread jobThread = new Thread(jobCue);
 		jobThread.start();
-
+		
 		// settings
 		ISecuritySettings securitySettings = getSecuritySettings();
 		IceAuthorizationStrategy authorizationStrategy = new IceAuthorizationStrategy();
 		securitySettings.setAuthorizationStrategy(authorizationStrategy);
 		securitySettings
 				.setUnauthorizedComponentInstantiationListener(authorizationStrategy);
-
+		
 		// wiquery
 		/*
 		 * WiQueryInstantiationListener wiQueryInstantiationListener = new WiQueryInstantiationListener(); addComponentInstantiationListener(wiQueryInstantiationListener);
 		 */
 	}
-
+	
 	@Override
 	public Session newSession(Request request, Response response) {
 		IceSession s = new IceSession(request, response, authenticator);
-
+		
 		return s;
 	}
-
+	
 	/**
 	 * @see org.apache.wicket.Application#getHomePage()
 	 */
