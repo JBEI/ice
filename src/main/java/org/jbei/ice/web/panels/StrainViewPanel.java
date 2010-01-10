@@ -3,11 +3,16 @@ package org.jbei.ice.web.panels;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Set;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.web.pages.EntryUpdatePage;
 
 public class StrainViewPanel extends Panel {
 	public StrainViewPanel(String id, Strain entry) {
@@ -57,6 +62,43 @@ public class StrainViewPanel extends Panel {
 		
 		elements.add(new Label("references", entry.getReferences()));
 		elements.add(new Label("longDescription", entry.getLongDescription()));
+		elements.add(new BookmarkablePageLink("updateLink", EntryUpdatePage.class,
+				new PageParameters("0=" + entry.getId())));
+		
+		String bioSafetyLevel = "";
+		if (entry.getBioSafetyLevel() != null) {
+			bioSafetyLevel = entry.getBioSafetyLevel().toString();
+		} 
+		elements.add(new Label("bioSafety", bioSafetyLevel));
+
+		String intellectualProperty = "";
+		if (entry.getIntellectualProperty() != null) {
+			intellectualProperty = entry.getIntellectualProperty();
+		}
+		elements.add(new Label("intellectualProperty", intellectualProperty));
+
+		Set<EntryFundingSource> entryFundingSources = entry
+				.getEntryFundingSources();
+
+		String principalInvestigator = null;
+		String fundingSource = null;
+		// TODO: handle multiple funding sources
+		for (EntryFundingSource entryFundingSource : entryFundingSources) {
+			principalInvestigator = entryFundingSource.getFundingSource()
+					.getFundingSource();
+			fundingSource = entryFundingSource.getFundingSource()
+					.getPrincipalInvestigator();
+		}
+
+		if (principalInvestigator == null) {
+			principalInvestigator = "";
+		}
+		if (fundingSource == null) {
+			fundingSource = "";
+		}
+
+		elements.add(new Label("principalInvestigator", principalInvestigator));
+		elements.add(new Label("fundingSource", fundingSource));
 		
 		for (Component item : elements) {
 			add(item);
