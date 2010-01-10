@@ -89,6 +89,12 @@ public class Entry implements IEntryValueObject, Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date modificationTime;
 	
+	@Column(name = "bio_safety_level")
+	private Integer bioSafetyLevel;
+	
+	@Column(name = "intellectual_property")
+	private String intellectualProperty;
+	
 	@OneToOne(mappedBy = "entry")
 	private Sequence sequence;
 
@@ -115,6 +121,12 @@ public class Entry implements IEntryValueObject, Serializable {
 	@JoinColumn(name = "entries_id")
 	@OrderBy("id")	
 	private Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
+	
+	@OneToMany(fetch=FetchType.LAZY, mappedBy = "entry")
+	@JoinColumn(name = "entries_id")
+	@OrderBy("id")
+	private Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
+	
 	
 	public Entry() {
 	}
@@ -384,12 +396,36 @@ public class Entry implements IEntryValueObject, Serializable {
 		this.modificationTime = modificationTime;
 	}
 
+	public void setBioSafetyLevel(Integer bioSafetyLevel) {
+		this.bioSafetyLevel = bioSafetyLevel;
+	}
+
+	public Integer getBioSafetyLevel() {
+		return bioSafetyLevel;
+	}
+
+	public void setIntellectualProperty(String intellectualProperty) {
+		this.intellectualProperty = intellectualProperty;
+	}
+
+	public String getIntellectualProperty() {
+		return intellectualProperty;
+	}
+
 	public void setSequence(Sequence sequence) {
 		this.sequence = sequence;
 	}
 
 	public Sequence getSequence() {
 		return sequence;
+	}
+
+	public void setEntryFundingSources(Set<EntryFundingSource> entryFundingSources) {
+		this.entryFundingSources = entryFundingSources;
+	}
+
+	public Set<EntryFundingSource> getEntryFundingSources() {
+		return entryFundingSources;
 	}
 
 }

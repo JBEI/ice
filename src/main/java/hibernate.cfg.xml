@@ -42,6 +42,9 @@
 	<mapping class="org.jbei.ice.lib.permissions.WriteUser"/>
 	<mapping class="org.jbei.ice.lib.permissions.ReadGroup"/>
 	<mapping class="org.jbei.ice.lib.permissions.WriteGroup"/>
+	<mapping class="org.jbei.ice.lib.models.FundingSource"/>
+	<mapping class="org.jbei.ice.lib.models.EntryFundingSource"/>
+	<mapping class="org.jbei.ice.lib.models.AccountFundingSource"/>
 	<mapping class="org.jbei.ice.web.SessionData"/>
 	
 </session-factory>
