@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.jbei.ice.lib.models.EntryFundingSource;
+import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.Link;
 import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.PartNumber;
@@ -69,6 +71,19 @@ public class Utils {
 
 		return result;
 	}
+	
+	public final static String toCommaSeparatedStringFromEntryFundingSources(Set<EntryFundingSource> hashSet) {
+		String result = null;
+		ArrayList<String> temp = new ArrayList<String>();
+		for (EntryFundingSource entryFundingSource: hashSet) {
+			FundingSource fundingSource = entryFundingSource.getFundingSource();
+			temp.add(fundingSource.getFundingSource());
+			temp.add(fundingSource.getPrincipalInvestigator());
+		}
+		result = join(", ", temp);
+		return result;
+	}
+	
 	
 	/**
 	 * Analogous to python's string.join method

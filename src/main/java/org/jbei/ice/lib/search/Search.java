@@ -164,6 +164,8 @@ public class Search {
 		String links = Utils.toCommaSeparatedStringFromLinks(entry.getLinks());
 		String names = Utils.toCommaSeparatedStringFromNames(entry.getNames());
 		String partNumbers = Utils.toCommaSeparatedStringFromPartNumbers(entry.getPartNumbers());
+		String intellectualProperty = (entry.getIntellectualProperty() != null) ? entry.getIntellectualProperty() : "";
+		String fundingSources = Utils.toCommaSeparatedStringFromEntryFundingSources(entry.getEntryFundingSources());
 		
 		document.add(new Field("Record ID", recordId, Field.Store.YES, Field.Index.ANALYZED));
 		content = content + recordId + " ";
@@ -197,8 +199,14 @@ public class Search {
 		document.add(new Field("Names", names, Field.Store.YES, Field.Index.ANALYZED));
 		content = content + names + " ";
 		
-		document.add(new Field("Selection Markers", partNumbers, Field.Store.YES, Field.Index.ANALYZED));
+		document.add(new Field("Part Number", partNumbers, Field.Store.YES, Field.Index.ANALYZED));
 		content = content + partNumbers + " ";
+
+		document.add(new Field("Intellectual Property", intellectualProperty, Field.Store.YES, Field.Index.ANALYZED));
+		content = content + intellectualProperty + " ";
+
+		document.add(new Field("Funding Source", fundingSources, Field.Store.YES, Field.Index.ANALYZED));
+		content = content + fundingSources + " ";
 
 		Set<Sample> samples = null;
 		try {
