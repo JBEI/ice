@@ -1,10 +1,10 @@
 <html xmlns:wicket>
 <wicket:panel>
-	<form wicket:id="plasmidForm">
+	<form wicket:id="strainForm">
 	<table border="0" cellpadding="3" cellspacing="1" class="entry_table">
 		<tr class="title_row_header">
 			<td>
-			<h2>Update Plasmid</h2>
+			<h2>Update Strain</h2>
 			</td>
 		</tr>
 		<tr>
@@ -40,24 +40,20 @@
 					<td><input wicket:id="links" class="inputbox" maxlength="127" style="width: 300px;"></input><span class="form_help_text">Comma Separated</span></td>
 				</tr>
 				<tr>
-					<td style="width: 150px">Circular</td>
-					<td><input type=checkbox wicket:id="circular" class="inputbox"></input></td>
-				</tr>
-				<tr>
-					<td style="width: 150px">Backbone</td>
-					<td><input wicket:id="backbone" class="inputbox" maxlength="127" style="width: 300px;"></input></td>
+					<td style="width: 150px">Host Strain</td>
+					<td><input wicket:id="host" class="inputbox" maxlength="127" style="width: 300px;"></input></td>
 				</tr>
 				<tr>
 					<td style="width: 150px">Selection Markers</td>
 					<td><input wicket:id="selectionMarkers" style="width: 300px;" maxlength="127" class="inputbox selectionMarkersInput"></input><span class="form_help_text">Comma Separated</span></td>
 				</tr>
 				<tr>
-					<td style="width: 150px">Origin of Replication</td>
-					<td><input wicket:id="originOfReplication" style="width: 300px;" class="inputbox originOfReplicationInput" maxlength="127"></input><span class="form_help_text">Comma Separated</span></td>
+					<td style="width: 150px">Genotype/Phenotype</td>
+					<td><input wicket:id="genotypePhenotype" style="width: 300px;" class="inputbox originOfReplicationInput" maxlength="127"></input><span class="form_help_text">Comma Separated</span></td>
 				</tr>
 				<tr>
-					<td style="width: 150px">Promoters</td>
-					<td><input wicket:id="promoters" style="width: 300px;" class="inputbox promotersInput" maxlength="127"></input><span class="form_help_text">Comma Separated</span></td>
+					<td style="width: 150px">Plasmids</td>
+					<td><input wicket:id="plasmids" style="width: 300px;" class="inputbox promotersInput" maxlength="127"></input><span class="form_help_text">Comma Separated</span></td>
 				</tr>
 				<tr>
 					<td style="width: 150px">Keywords</td>

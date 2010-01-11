@@ -7,7 +7,7 @@ public class JbeiConstants {
 			result = "Public";
 		} else if (id > 4 ) {
 			result = "Hidden";
-		} else if (id > 1 ) {
+		} else if (id >= 0 ) {
 			result = "Private";
 		}
 		return result;
@@ -31,6 +31,8 @@ public class JbeiConstants {
 			result = "Biobrick A";
 		} else if (key.equals("biobrickb")) {
 			result = "BioBrick Berkeley";
+		} else if (key.equals("")) {
+			result = "None";
 		} else {
 			result = "Unrecognized Format";
 		}

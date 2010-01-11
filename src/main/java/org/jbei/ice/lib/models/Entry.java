@@ -122,7 +122,8 @@ public class Entry implements IEntryValueObject, Serializable {
 	@OrderBy("id")	
 	private Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
 	
-	@OneToMany(fetch=FetchType.LAZY, mappedBy = "entry")
+	@OneToMany(cascade = {CascadeType.ALL}, fetch=FetchType.LAZY, mappedBy = "entry")
+	@Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
 	@JoinColumn(name = "entries_id")
 	@OrderBy("id")
 	private Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
@@ -212,9 +213,7 @@ public class Entry implements IEntryValueObject, Serializable {
 	
 	public void setNames(Set<Name> names) {
 		this.names.clear();
-		for (Name name : names) {
-			this.names.add(name);
-		}
+		this.names.addAll(names);
 	}
 
 	public Set<PartNumber> getPartNumbers() {
@@ -243,9 +242,7 @@ public class Entry implements IEntryValueObject, Serializable {
 	
 	public void setPartNumbers(Set<PartNumber> partNumbers) {
 		this.partNumbers.clear();
-		for (PartNumber partNumber : partNumbers) {
-			this.partNumbers.add(partNumber);
-		}
+		this.partNumbers.addAll(partNumbers);
 	}
 
 	public String getOwner() {
@@ -321,9 +318,7 @@ public class Entry implements IEntryValueObject, Serializable {
 	
 	public void setSelectionMarkers(Set<SelectionMarker> selectionMarkers) {
 		this.selectionMarkers.clear(); 
-		for (SelectionMarker selectionMarker : selectionMarkers) {
-			this.selectionMarkers.add(selectionMarker);
-		}
+		this.selectionMarkers.addAll(selectionMarkers);
 	}
 
 	public Set<Link> getLinks() {
@@ -343,9 +338,7 @@ public class Entry implements IEntryValueObject, Serializable {
 	
 	public void setLinks(Set<Link> links) {
 		this.links.clear(); //This way lets Hibernate know the set has been updated
-		for (Link link : links) {
-			this.links.add(link);
-		}
+		this.links.addAll(links);
 	}
 
 	public String getKeywords() {
@@ -421,7 +414,8 @@ public class Entry implements IEntryValueObject, Serializable {
 	}
 
 	public void setEntryFundingSources(Set<EntryFundingSource> entryFundingSources) {
-		this.entryFundingSources = entryFundingSources;
+		this.entryFundingSources.clear();
+		this.entryFundingSources.addAll(entryFundingSources);
 	}
 
 	public Set<EntryFundingSource> getEntryFundingSources() {

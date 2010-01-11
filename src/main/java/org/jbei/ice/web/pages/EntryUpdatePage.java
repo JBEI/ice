@@ -4,8 +4,12 @@ import org.apache.wicket.PageParameters;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
+import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.web.forms.PartUpdateFormPanel;
 import org.jbei.ice.web.forms.PlasmidUpdateFormPanel;
+import org.jbei.ice.web.forms.StrainUpdateFormPanel;
 
 public class EntryUpdatePage extends ProtectedPage {
 	public EntryUpdatePage(PageParameters parameters) {
@@ -16,14 +20,14 @@ public class EntryUpdatePage extends ProtectedPage {
 			entry = EntryManager.get(entryId);
 			String recordType = entry.getRecordType();
 			if (recordType.equals("strain")) {
-				//StrainUpdatePanel panel = new StrainUpdatePanel("entry", (Strain) entry);
-				//add (panel);
+				StrainUpdateFormPanel panel = new StrainUpdateFormPanel("entry", (Strain) entry);
+				add (panel);
 			} else if (recordType.equals("plasmid")) {
 				PlasmidUpdateFormPanel panel = new PlasmidUpdateFormPanel("entry", (Plasmid) entry);
 				add (panel);
 			} else if (recordType.equals("part")) {
-				//PartViewPanel panel = new PartViewPanel("entry", (Part) entry);
-				//add(panel);
+				PartUpdateFormPanel panel = new PartUpdateFormPanel("entry", (Part) entry);
+				add(panel);
 			}
 			
 		} catch (ManagerException e) {

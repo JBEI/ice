@@ -11,6 +11,8 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.EntryFundingSource;
+import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.Link;
 import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Part;
@@ -327,6 +329,35 @@ public class EntryManager extends Manager {
 				DEFAULT_PART_NUMBER_DIGITAL_SUFFIX);
 	}
 
+	/**
+	 * Updates or Inserts unique funding source and returns the result
+	 */
+	public static FundingSource saveFundingSource(FundingSource fundingSource) throws ManagerException {
+		FundingSource result;
+		try {
+			String queryString = "from " + FundingSource.class.getName()
+									+ " where fundingSource=:fundingSource AND"
+									+ " principalInvestigator=:principalInvestigator";
+			Query query = session.createQuery(queryString);
+			query.setParameter("fundingSource", fundingSource.getFundingSource());
+			query.setParameter("principalInvestigator", fundingSource.getPrincipalInvestigator());
+			
+			FundingSource existingFundingSource = (FundingSource) query.uniqueResult();
+			if (existingFundingSource == null) {
+				result = (FundingSource) dbSave(fundingSource);
+			} else {
+				result = existingFundingSource;
+			}
+		
+		} catch (Exception e) {
+			String msg = "Could not save unique funding source";
+			throw new ManagerException(msg, e);
+		}
+		
+		return result;
+		
+	}
+	
 	public static Entry save(Entry entry) throws ManagerException {
 		Entry result = null;
 		//deal with associated objects here instead of making individual forms
@@ -347,6 +378,13 @@ public class EntryManager extends Manager {
 		for (PartNumber partNumber : entry.getPartNumbers()) {
 			partNumber.setEntry(entry);
 		}
+	
+		// Manual cascade of EntryFundingSource. Guarantees unique FundingSource
+		for (EntryFundingSource entryFundingSource : entry.getEntryFundingSources()) {
+			FundingSource tempFundingSource = entryFundingSource.getFundingSource();
+			entryFundingSource.setFundingSource(saveFundingSource(tempFundingSource));
+			dbSave(entryFundingSource.getFundingSource());
+		}
 		
 		result = (Entry) dbSave(entry);
 		
@@ -354,6 +392,7 @@ public class EntryManager extends Manager {
 	}
 	
 	public static void main(String[] args) {
+		
 		int offset = 0;
 		int limit = 30;
 		ArrayList<String[]> data = new ArrayList<String[]> () ;
@@ -364,6 +403,5 @@ public class EntryManager extends Manager {
 			System.out.println("" + entry.getId());
 		}
 	}
-	
 	
 }

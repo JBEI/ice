@@ -34,7 +34,7 @@ public class StrainViewPanel extends Panel {
 				entry.getGenotypePhenotype()));
 		elements.add(new Label("creator", 
 				entry.getCreator()));
-		elements.add(new Label("plasmids", "plasmids?"));
+		elements.add(new Label("plasmids", entry.getPlasmids()));
 		elements.add(new Label("status", 
 				org.jbei.ice.lib.utils.JbeiConstants.getStatus(entry.getStatus())));
 		

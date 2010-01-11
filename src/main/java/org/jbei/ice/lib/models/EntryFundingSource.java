@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.models;
 
+import java.io.Serializable;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -13,7 +15,7 @@ import javax.persistence.Table;
 @Table(name = "entries_funding_source")
 @SequenceGenerator(name = "sequence", sequenceName = "entries_funding_source_id_seq",
 		allocationSize = 1)
-public class EntryFundingSource {
+public class EntryFundingSource implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	@Id

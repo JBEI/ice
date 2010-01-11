@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.form.Button;
-import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.ChoiceRenderer;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.StatelessForm;
@@ -23,27 +22,27 @@ import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.Link;
 import org.jbei.ice.lib.models.Name;
-import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
+import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.web.pages.EntryViewPage;
 
-public class PlasmidUpdateFormPanel extends Panel {
+public class StrainUpdateFormPanel extends Panel {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private Plasmid plasmid = null;
+	private Strain strain = null;
 	
-	public PlasmidUpdateFormPanel(String id, Plasmid plasmid) {
+	public StrainUpdateFormPanel(String id, Strain strain) {
 		super(id);
-		this.setPlasmid(plasmid);
+		setStrain(strain);
 		populateElements();
 	}
 
 	private void populateElements() {
-		class PlasmidForm extends StatelessForm<Object> {
+		class StrainForm extends StatelessForm<Object> {
 
 			private static final long serialVersionUID = 1L;
 			
@@ -65,32 +64,31 @@ public class PlasmidUpdateFormPanel extends Panel {
 			private String FundingSource;
 			private String PrincipalInvestigator;
 			
-			//plasmid only fields
-			private String backbone;
-			private String originOfReplication;
-			private String promoters;
-			private boolean circular = true;
+			//strain only fields
+			private String host;
+			private String genotypePhenotype;
+			private String plasmids;
 			
-			public PlasmidForm(String id) {
+			public StrainForm(String id) {
 				
 				super(id);
 				
-				setLinks(plasmid.getLinksAsString());
-				setNames(plasmid.getNamesAsString());
-				setSelectionMarkers(plasmid.getSelectionMarkersAsString());
-				setAlias(plasmid.getAlias());
-				setCreator(plasmid.getCreator());
-				setCreatorEmail(plasmid.getCreatorEmail());
-				setStatus(new CustomChoice("", plasmid.getStatus()));
-				setVisibility(new CustomChoice("","" + plasmid.getVisibility()));
-				setKeywords(plasmid.getKeywords());
-				setSummary(plasmid.getShortDescription());
-				setNotes(plasmid.getLongDescription());
-				setReferences(plasmid.getReferences());
+				setLinks(strain.getLinksAsString());
+				setNames(strain.getNamesAsString());
+				setSelectionMarkers(strain.getSelectionMarkersAsString());
+				setAlias(strain.getAlias());
+				setCreator(strain.getCreator());
+				setCreatorEmail(strain.getCreatorEmail());
+				setStatus(new CustomChoice("", strain.getStatus()));
+				setVisibility(new CustomChoice("","" + strain.getVisibility()));
+				setKeywords(strain.getKeywords());
+				setSummary(strain.getShortDescription());
+				setNotes(strain.getLongDescription());
+				setReferences(strain.getReferences());
 
-				setIntellectualProperty((plasmid.getIntellectualProperty() != null) ? plasmid.getIntellectualProperty() : "");
+				setIntellectualProperty((strain.getIntellectualProperty() != null) ? strain.getIntellectualProperty() : "");
 				
-				Set<EntryFundingSource> entryFundingSources = plasmid.getEntryFundingSources();
+				Set<EntryFundingSource> entryFundingSources = strain.getEntryFundingSources();
 				// TODO: handle multiple funding sources
 				for (EntryFundingSource entryFundingSource : entryFundingSources) {
 					FundingSource fundingSource = entryFundingSource.getFundingSource();
@@ -98,10 +96,9 @@ public class PlasmidUpdateFormPanel extends Panel {
 					setPrincipalInvestigator(fundingSource.getPrincipalInvestigator());
 				}
 				
-				setBackbone(plasmid.getBackbone());
-				setOriginOfReplication(plasmid.getOriginOfReplication());
-				setPromoters(plasmid.getPromoters());
-				setCircular(plasmid.getCircular());
+				setHost(strain.getHost());
+				setGenotypePhenotype(strain.getGenotypePhenotype());
+				setPlasmids(strain.getPlasmids());
 				
 				setModel(new CompoundPropertyModel<Object>(this));
 				add(new TextField<String>("names")
@@ -121,11 +118,11 @@ public class PlasmidUpdateFormPanel extends Panel {
 				statusChoices.add(complete);
 				statusChoices.add(inProgress);
 				
-				if (plasmid.getStatus().equals("planned")) {
+				if (strain.getStatus().equals("planned")) {
 					this.status = planned;
-				} else if (plasmid.getStatus().equals("complete")) {
+				} else if (strain.getStatus().equals("complete")) {
 					this.status = complete;
-				} else if (plasmid.getStatus().equals("in progress")) {
+				} else if (strain.getStatus().equals("in progress")) {
 					this.status = inProgress;
 				}
 				
@@ -142,11 +139,11 @@ public class PlasmidUpdateFormPanel extends Panel {
 				visibilityChoices.add(visible5);
 				visibilityChoices.add(visible0);
 				
-				if (plasmid.getVisibility() == 9) {
+				if (strain.getVisibility() == 9) {
 					this.visibility = visible9;
-				} else if (plasmid.getVisibility() == 5) {
+				} else if (strain.getVisibility() == 5) {
 					this.visibility = visible5;
-				} else if (plasmid.getVisibility() == 0) {
+				} else if (strain.getVisibility() == 0) {
 					this.visibility = visible0;
 				}
 				
@@ -161,11 +158,11 @@ public class PlasmidUpdateFormPanel extends Panel {
 				
 				CustomChoice level1 = new CustomChoice("Level 1", "1");
 				CustomChoice level2 = new CustomChoice("Level 2", "2");
-				if (plasmid.getBioSafetyLevel() == null) {
+				if (strain.getBioSafetyLevel() == null) {
 					this.bioSafetyLevel = level1;
-				} else if (plasmid.getBioSafetyLevel() == 1) {
+				} else if (strain.getBioSafetyLevel() == 1) {
 					this.bioSafetyLevel = level1;
-				} else if (plasmid.getBioSafetyLevel() == 2) {
+				} else if (strain.getBioSafetyLevel() == 2) {
 					this.bioSafetyLevel = level2;
 				}
 				
@@ -179,11 +176,9 @@ public class PlasmidUpdateFormPanel extends Panel {
 				add(new TextArea<String>("intellectualProperty"));
 				add(new TextField<String>("fundingSource"));
 				add(new TextField<String>("principalInvestigator").setRequired(true).setLabel(new Model<String>("Principal Investigator")));
-				add(new TextField<String>("backbone"));
-				add(new TextField<String>("originOfReplication"));
-				add(new TextField<String>("promoters"));
-				
-				add(new CheckBox("circular"));
+				add(new TextField<String>("host"));
+				add(new TextField<String>("genotypePhenotype"));
+				add(new TextField<String>("plasmids"));
 				
 			}
 			
@@ -191,50 +186,49 @@ public class PlasmidUpdateFormPanel extends Panel {
 				try {
 					CommaSeparatedField<Link> linksField = new CommaSeparatedField<Link>(Link.class, "getLink", "setLink");
 					linksField.setString(getLinks());
-					plasmid.setLinks(linksField.getItemsAsSet());
+					strain.setLinks(linksField.getItemsAsSet());
 				
 					CommaSeparatedField<Name> namesField = new CommaSeparatedField<Name>(Name.class, "getName", "setName");
 					namesField.setString(getNames());
-					plasmid.setNames(namesField.getItemsAsSet());
+					strain.setNames(namesField.getItemsAsSet());
 					
 					CommaSeparatedField<SelectionMarker> selectionMarkersField = new CommaSeparatedField<SelectionMarker>(SelectionMarker.class, "getName", "setName");
 					selectionMarkersField.setString(getSelectionMarkers());
-					plasmid.setSelectionMarkers(selectionMarkersField.getItemsAsSet());
+					strain.setSelectionMarkers(selectionMarkersField.getItemsAsSet());
 				
 				} catch (FormException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				
-				plasmid.setAlias(getAlias());
-				plasmid.setStatus(getStatus().getValue());
-				plasmid.setVisibility(Integer.parseInt(getVisibility().getValue()));
-				plasmid.setKeywords(getKeywords());
-				plasmid.setShortDescription(getSummary());
-				plasmid.setLongDescription(getNotes());
-				plasmid.setReferences(getReferences());
-				plasmid.setBioSafetyLevel(Integer.parseInt(getBioSafetyLevel().getValue()));
-				plasmid.setIntellectualProperty(getIntellectualProperty());
+				strain.setAlias(getAlias());
+				strain.setStatus(getStatus().getValue());
+				strain.setVisibility(Integer.parseInt(getVisibility().getValue()));
+				strain.setKeywords(getKeywords());
+				strain.setShortDescription(getSummary());
+				strain.setLongDescription(getNotes());
+				strain.setReferences(getReferences());
+				strain.setBioSafetyLevel(Integer.parseInt(getBioSafetyLevel().getValue()));
+				strain.setIntellectualProperty(getIntellectualProperty());
 
 				FundingSource fundingSource = new FundingSource();
 				fundingSource.setFundingSource(getFundingSource());
 				fundingSource.setPrincipalInvestigator(getPrincipalInvestigator());
 				EntryFundingSource newEntryFundingSource = new EntryFundingSource();
-				newEntryFundingSource.setEntry(plasmid);
+				newEntryFundingSource.setEntry(strain);
 				newEntryFundingSource.setFundingSource(fundingSource);
 				// TODO: Handle multiple funding sources
 				LinkedHashSet<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
 				entryFundingSources.add(newEntryFundingSource);
-				plasmid.setEntryFundingSources(entryFundingSources);
+				strain.setEntryFundingSources(entryFundingSources);
 				
-				plasmid.setBackbone(getBackbone());
-				plasmid.setOriginOfReplication(getOriginOfReplication());
-				plasmid.setPromoters(getPromoters());
-				plasmid.setCircular(getCircular());
-				
+				strain.setHost(getHost());
+				strain.setGenotypePhenotype(getGenotypePhenotype());
+				strain.setPlasmids(getPlasmids());
+								
 				try {
-					EntryManager.save(plasmid);
-					setResponsePage(EntryViewPage.class, new PageParameters("0=" + plasmid.getId()));
+					EntryManager.save(strain);
+					setResponsePage(EntryViewPage.class, new PageParameters("0=" + strain.getId()));
 				} catch (ManagerException e) {
 					// TODO Auto-generated catch block
 					String msg = "System Error: Could not save! ";
@@ -249,7 +243,7 @@ public class PlasmidUpdateFormPanel extends Panel {
 				
 			}
 			
-			// Getters and setters for PlasmidForm
+			// Getters and setters for StrainForm
 			
 			public void setLinks(String links) {
 				this.links = links;
@@ -356,47 +350,40 @@ public class PlasmidUpdateFormPanel extends Panel {
 				return PrincipalInvestigator;
 			}
 
-			public String getBackbone() {
-				return backbone;
+			public String getHost() {
+				return host;
 			}
-			public void setBackbone(String backbone) {
-				this.backbone = backbone;
+			public void setHost(String host) {
+				this.host = host;
 			}
-			public String getOriginOfReplication() {
-				return originOfReplication;
+			public String getGenotypePhenotype() {
+				return genotypePhenotype;
 			}
-			public void setOriginOfReplication(String originOfReplication) {
-				this.originOfReplication = originOfReplication;
-			}
-
-			public String getPromoters() {
-				return promoters;
-			}
-			public void setPromoters(String promoters) {
-				this.promoters = promoters;
-			}
-			public boolean getCircular() {
-				return circular;
+			public void setGenotypePhenotype(String genotypePhenotype) {
+				this.genotypePhenotype = genotypePhenotype;
 			}
 
-			public void setCircular(boolean circular) {
-				this.circular = circular;
+			public String getPlasmids() {
+				return plasmids;
+			}
+			public void setPlasmids(String plasmids) {
+				this.plasmids = plasmids;
 			}
 		}
 
-		PlasmidForm form = new PlasmidForm("plasmidForm");
+		StrainForm form = new StrainForm("strainForm");
 		form.add(new Button("submitButton"));
 		add(form);
 
 	}
 
 
-	public void setPlasmid(Plasmid plasmid) {
-		this.plasmid = plasmid;
+	public void setStrain(Strain strain) {
+		this.strain = strain;
 	}
 
-	public Plasmid getPlasmid() {
-		return plasmid;
+	public Strain getStrain() {
+		return strain;
 	}
 
 }

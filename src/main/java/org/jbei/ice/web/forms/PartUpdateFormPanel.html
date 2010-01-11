@@ -1,10 +1,10 @@
 <html xmlns:wicket>
 <wicket:panel>
-	<form wicket:id="plasmidForm">
+	<form wicket:id="partForm">
 	<table border="0" cellpadding="3" cellspacing="1" class="entry_table">
 		<tr class="title_row_header">
 			<td>
-			<h2>Update Plasmid</h2>
+			<h2>Update Part</h2>
 			</td>
 		</tr>
 		<tr>
@@ -39,26 +39,10 @@
 					<td style="width: 150px">Links</td>
 					<td><input wicket:id="links" class="inputbox" maxlength="127" style="width: 300px;"></input><span class="form_help_text">Comma Separated</span></td>
 				</tr>
-				<tr>
-					<td style="width: 150px">Circular</td>
-					<td><input type=checkbox wicket:id="circular" class="inputbox"></input></td>
-				</tr>
-				<tr>
-					<td style="width: 150px">Backbone</td>
-					<td><input wicket:id="backbone" class="inputbox" maxlength="127" style="width: 300px;"></input></td>
-				</tr>
-				<tr>
-					<td style="width: 150px">Selection Markers</td>
-					<td><input wicket:id="selectionMarkers" style="width: 300px;" maxlength="127" class="inputbox selectionMarkersInput"></input><span class="form_help_text">Comma Separated</span></td>
-				</tr>
-				<tr>
-					<td style="width: 150px">Origin of Replication</td>
-					<td><input wicket:id="originOfReplication" style="width: 300px;" class="inputbox originOfReplicationInput" maxlength="127"></input><span class="form_help_text">Comma Separated</span></td>
-				</tr>
-				<tr>
-					<td style="width: 150px">Promoters</td>
-					<td><input wicket:id="promoters" style="width: 300px;" class="inputbox promotersInput" maxlength="127"></input><span class="form_help_text">Comma Separated</span></td>
-				</tr>
+                <tr>
+                    <td style="width: 150px">Package Format</td>
+                    <td><select wicket:id="packageFormat" style="width: 300px;" class="inputbox"></select></td>
+                </tr>
 				<tr>
 					<td style="width: 150px">Keywords</td>
 					<td><input wicket:id="keywords" class="inputbox" maxlength="127" style="width: 640px;"></input></td>

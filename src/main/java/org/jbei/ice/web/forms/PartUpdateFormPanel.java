@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.form.Button;
-import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.ChoiceRenderer;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.StatelessForm;
@@ -23,27 +22,27 @@ import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.Link;
 import org.jbei.ice.lib.models.Name;
-import org.jbei.ice.lib.models.Plasmid;
+import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.web.pages.EntryViewPage;
 
-public class PlasmidUpdateFormPanel extends Panel {
+public class PartUpdateFormPanel extends Panel {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private Plasmid plasmid = null;
+	private Part part = null;
 	
-	public PlasmidUpdateFormPanel(String id, Plasmid plasmid) {
+	public PartUpdateFormPanel(String id, Part part) {
 		super(id);
-		this.setPlasmid(plasmid);
+		setPart(part);
 		populateElements();
 	}
 
 	private void populateElements() {
-		class PlasmidForm extends StatelessForm<Object> {
+		class PartForm extends StatelessForm<Object> {
 
 			private static final long serialVersionUID = 1L;
 			
@@ -65,32 +64,29 @@ public class PlasmidUpdateFormPanel extends Panel {
 			private String FundingSource;
 			private String PrincipalInvestigator;
 			
-			//plasmid only fields
-			private String backbone;
-			private String originOfReplication;
-			private String promoters;
-			private boolean circular = true;
+			//part only fields
+			private CustomChoice packageFormat;
 			
-			public PlasmidForm(String id) {
+			public PartForm(String id) {
 				
 				super(id);
 				
-				setLinks(plasmid.getLinksAsString());
-				setNames(plasmid.getNamesAsString());
-				setSelectionMarkers(plasmid.getSelectionMarkersAsString());
-				setAlias(plasmid.getAlias());
-				setCreator(plasmid.getCreator());
-				setCreatorEmail(plasmid.getCreatorEmail());
-				setStatus(new CustomChoice("", plasmid.getStatus()));
-				setVisibility(new CustomChoice("","" + plasmid.getVisibility()));
-				setKeywords(plasmid.getKeywords());
-				setSummary(plasmid.getShortDescription());
-				setNotes(plasmid.getLongDescription());
-				setReferences(plasmid.getReferences());
+				setLinks(part.getLinksAsString());
+				setNames(part.getNamesAsString());
+				setAlias(part.getAlias());
+				setCreator(part.getCreator());
+				setCreatorEmail(part.getCreatorEmail());
+				setStatus(new CustomChoice("", part.getStatus()));
+				setVisibility(new CustomChoice("","" + part.getVisibility()));
+				setPackageFormat(new CustomChoice("", ""));
+				setKeywords(part.getKeywords());
+				setSummary(part.getShortDescription());
+				setNotes(part.getLongDescription());
+				setReferences(part.getReferences());
 
-				setIntellectualProperty((plasmid.getIntellectualProperty() != null) ? plasmid.getIntellectualProperty() : "");
+				setIntellectualProperty((part.getIntellectualProperty() != null) ? part.getIntellectualProperty() : "");
 				
-				Set<EntryFundingSource> entryFundingSources = plasmid.getEntryFundingSources();
+				Set<EntryFundingSource> entryFundingSources = part.getEntryFundingSources();
 				// TODO: handle multiple funding sources
 				for (EntryFundingSource entryFundingSource : entryFundingSources) {
 					FundingSource fundingSource = entryFundingSource.getFundingSource();
@@ -98,16 +94,33 @@ public class PlasmidUpdateFormPanel extends Panel {
 					setPrincipalInvestigator(fundingSource.getPrincipalInvestigator());
 				}
 				
-				setBackbone(plasmid.getBackbone());
-				setOriginOfReplication(plasmid.getOriginOfReplication());
-				setPromoters(plasmid.getPromoters());
-				setCircular(plasmid.getCircular());
+				CustomChoice nonePackage = new CustomChoice(JbeiConstants.getPackageFormat(""), "");
+				CustomChoice bioBrickA = new CustomChoice(JbeiConstants.getPackageFormat("biobricka"), "biobricka");
+				CustomChoice bioBrickB = new CustomChoice(JbeiConstants.getPackageFormat("biobrickb"), "biobrickb");
+				
+				ArrayList<CustomChoice> packageFormatChoices = new ArrayList<CustomChoice>();
+				packageFormatChoices.add(nonePackage);
+				packageFormatChoices.add(bioBrickA);
+				packageFormatChoices.add(bioBrickB);
+				
+				if (part.getPackageFormat().equals("")) {
+					this.packageFormat = nonePackage;
+				} else if (part.getPackageFormat() == null) {
+					this.packageFormat = nonePackage;
+				} else if (part.getPackageFormat() == "biobricka") {
+					this.packageFormat = bioBrickA;
+				} else if (part.getPackageFormat() == "biobrickb") {
+					this.packageFormat = bioBrickB;
+				}
+				
+				add(new DropDownChoice<CustomChoice>("packageFormat",
+						new PropertyModel<CustomChoice>(this, "packageFormat"), packageFormatChoices,
+						new ChoiceRenderer<CustomChoice>("name", "value")));
 				
 				setModel(new CompoundPropertyModel<Object>(this));
 				add(new TextField<String>("names")
 						.setRequired(true));
 				add(new TextField<String>("links"));
-				add(new TextField<String>("selectionMarkers"));
 				add(new TextField<String>("alias"));
 				add(new TextField<String>("creator"));
 				add(new TextField<String>("creatorEmail"));
@@ -121,11 +134,11 @@ public class PlasmidUpdateFormPanel extends Panel {
 				statusChoices.add(complete);
 				statusChoices.add(inProgress);
 				
-				if (plasmid.getStatus().equals("planned")) {
+				if (part.getStatus().equals("planned")) {
 					this.status = planned;
-				} else if (plasmid.getStatus().equals("complete")) {
+				} else if (part.getStatus().equals("complete")) {
 					this.status = complete;
-				} else if (plasmid.getStatus().equals("in progress")) {
+				} else if (part.getStatus().equals("in progress")) {
 					this.status = inProgress;
 				}
 				
@@ -142,11 +155,11 @@ public class PlasmidUpdateFormPanel extends Panel {
 				visibilityChoices.add(visible5);
 				visibilityChoices.add(visible0);
 				
-				if (plasmid.getVisibility() == 9) {
+				if (part.getVisibility() == 9) {
 					this.visibility = visible9;
-				} else if (plasmid.getVisibility() == 5) {
+				} else if (part.getVisibility() == 5) {
 					this.visibility = visible5;
-				} else if (plasmid.getVisibility() == 0) {
+				} else if (part.getVisibility() == 0) {
 					this.visibility = visible0;
 				}
 				
@@ -161,11 +174,11 @@ public class PlasmidUpdateFormPanel extends Panel {
 				
 				CustomChoice level1 = new CustomChoice("Level 1", "1");
 				CustomChoice level2 = new CustomChoice("Level 2", "2");
-				if (plasmid.getBioSafetyLevel() == null) {
+				if (part.getBioSafetyLevel() == null) {
 					this.bioSafetyLevel = level1;
-				} else if (plasmid.getBioSafetyLevel() == 1) {
+				} else if (part.getBioSafetyLevel() == 1) {
 					this.bioSafetyLevel = level1;
-				} else if (plasmid.getBioSafetyLevel() == 2) {
+				} else if (part.getBioSafetyLevel() == 2) {
 					this.bioSafetyLevel = level2;
 				}
 				
@@ -179,11 +192,6 @@ public class PlasmidUpdateFormPanel extends Panel {
 				add(new TextArea<String>("intellectualProperty"));
 				add(new TextField<String>("fundingSource"));
 				add(new TextField<String>("principalInvestigator").setRequired(true).setLabel(new Model<String>("Principal Investigator")));
-				add(new TextField<String>("backbone"));
-				add(new TextField<String>("originOfReplication"));
-				add(new TextField<String>("promoters"));
-				
-				add(new CheckBox("circular"));
 				
 			}
 			
@@ -191,50 +199,46 @@ public class PlasmidUpdateFormPanel extends Panel {
 				try {
 					CommaSeparatedField<Link> linksField = new CommaSeparatedField<Link>(Link.class, "getLink", "setLink");
 					linksField.setString(getLinks());
-					plasmid.setLinks(linksField.getItemsAsSet());
+					part.setLinks(linksField.getItemsAsSet());
 				
 					CommaSeparatedField<Name> namesField = new CommaSeparatedField<Name>(Name.class, "getName", "setName");
 					namesField.setString(getNames());
-					plasmid.setNames(namesField.getItemsAsSet());
+					part.setNames(namesField.getItemsAsSet());
 					
 					CommaSeparatedField<SelectionMarker> selectionMarkersField = new CommaSeparatedField<SelectionMarker>(SelectionMarker.class, "getName", "setName");
-					selectionMarkersField.setString(getSelectionMarkers());
-					plasmid.setSelectionMarkers(selectionMarkersField.getItemsAsSet());
+					part.setSelectionMarkers(selectionMarkersField.getItemsAsSet());
 				
 				} catch (FormException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				
-				plasmid.setAlias(getAlias());
-				plasmid.setStatus(getStatus().getValue());
-				plasmid.setVisibility(Integer.parseInt(getVisibility().getValue()));
-				plasmid.setKeywords(getKeywords());
-				plasmid.setShortDescription(getSummary());
-				plasmid.setLongDescription(getNotes());
-				plasmid.setReferences(getReferences());
-				plasmid.setBioSafetyLevel(Integer.parseInt(getBioSafetyLevel().getValue()));
-				plasmid.setIntellectualProperty(getIntellectualProperty());
+				part.setAlias(getAlias());
+				part.setStatus(getStatus().getValue());
+				part.setVisibility(Integer.parseInt(getVisibility().getValue()));
+				part.setKeywords(getKeywords());
+				part.setShortDescription(getSummary());
+				part.setLongDescription(getNotes());
+				part.setReferences(getReferences());
+				part.setBioSafetyLevel(Integer.parseInt(getBioSafetyLevel().getValue()));
+				part.setIntellectualProperty(getIntellectualProperty());
 
 				FundingSource fundingSource = new FundingSource();
 				fundingSource.setFundingSource(getFundingSource());
 				fundingSource.setPrincipalInvestigator(getPrincipalInvestigator());
 				EntryFundingSource newEntryFundingSource = new EntryFundingSource();
-				newEntryFundingSource.setEntry(plasmid);
+				newEntryFundingSource.setEntry(part);
 				newEntryFundingSource.setFundingSource(fundingSource);
 				// TODO: Handle multiple funding sources
 				LinkedHashSet<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
 				entryFundingSources.add(newEntryFundingSource);
-				plasmid.setEntryFundingSources(entryFundingSources);
+				part.setEntryFundingSources(entryFundingSources);
 				
-				plasmid.setBackbone(getBackbone());
-				plasmid.setOriginOfReplication(getOriginOfReplication());
-				plasmid.setPromoters(getPromoters());
-				plasmid.setCircular(getCircular());
-				
+				part.setPackageFormat(getPackageFormat().getValue());
+												
 				try {
-					EntryManager.save(plasmid);
-					setResponsePage(EntryViewPage.class, new PageParameters("0=" + plasmid.getId()));
+					EntryManager.save(part);
+					setResponsePage(EntryViewPage.class, new PageParameters("0=" + part.getId()));
 				} catch (ManagerException e) {
 					// TODO Auto-generated catch block
 					String msg = "System Error: Could not save! ";
@@ -249,7 +253,7 @@ public class PlasmidUpdateFormPanel extends Panel {
 				
 			}
 			
-			// Getters and setters for PlasmidForm
+			// Getters and setters for PartForm
 			
 			public void setLinks(String links) {
 				this.links = links;
@@ -262,12 +266,6 @@ public class PlasmidUpdateFormPanel extends Panel {
 			}
 			public String getNames() {
 				return names;
-			}
-			public void setSelectionMarkers(String selectionMarkers) {
-				this.selectionMarkers = selectionMarkers;
-			}
-			public String getSelectionMarkers() {
-				return selectionMarkers;
 			}
 			public String getAlias() {
 				return alias;
@@ -356,47 +354,27 @@ public class PlasmidUpdateFormPanel extends Panel {
 				return PrincipalInvestigator;
 			}
 
-			public String getBackbone() {
-				return backbone;
+			public CustomChoice getPackageFormat() {
+				return this.packageFormat;
 			}
-			public void setBackbone(String backbone) {
-				this.backbone = backbone;
-			}
-			public String getOriginOfReplication() {
-				return originOfReplication;
-			}
-			public void setOriginOfReplication(String originOfReplication) {
-				this.originOfReplication = originOfReplication;
-			}
-
-			public String getPromoters() {
-				return promoters;
-			}
-			public void setPromoters(String promoters) {
-				this.promoters = promoters;
-			}
-			public boolean getCircular() {
-				return circular;
-			}
-
-			public void setCircular(boolean circular) {
-				this.circular = circular;
+			public void setPackageFormat(CustomChoice packageFormat) {
+				this.packageFormat = packageFormat;
 			}
 		}
 
-		PlasmidForm form = new PlasmidForm("plasmidForm");
+		PartForm form = new PartForm("partForm");
 		form.add(new Button("submitButton"));
 		add(form);
 
 	}
 
 
-	public void setPlasmid(Plasmid plasmid) {
-		this.plasmid = plasmid;
+	public void setPart(Part part) {
+		this.part = part;
 	}
 
-	public Plasmid getPlasmid() {
-		return plasmid;
+	public Part getPart() {
+		return part;
 	}
 
 }
