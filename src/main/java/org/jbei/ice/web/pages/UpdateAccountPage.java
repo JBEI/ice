@@ -3,7 +3,6 @@ package org.jbei.ice.web.pages;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
@@ -16,37 +15,45 @@ import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.utils.Emailer;
-import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.web.IceSession;
 
-public class RegistrationPage extends UnprotectedPage {
-	public RegistrationPage(PageParameters parameters) {
+public class UpdateAccountPage extends ProtectedPage {
+	public UpdateAccountPage(PageParameters parameters) {
 		super(parameters);
 
-		class RegistrationForm extends StatelessForm<Object> {
-			private static final long serialVersionUID = 3046351143658783110L;
+		class UpdateAccountForm extends StatelessForm<Object> {
+			private static final long serialVersionUID = 3046351143658183110L;
 
 			private String firstName;
 			private String lastName;
 			private String initials;
 			private String email;
-			private String password;
-			private String confirmPassword;
 			private String institution;
 			private String description;
 
-			public RegistrationForm(String id) {
+			Account account;
+
+			public UpdateAccountForm(String id) {
 				super(id);
 
 				IceSession session = IceSession.get();
 
-				if (session.isAuthenticated()) {
+				if (!session.isAuthenticated()) {
 					setResponsePage(WelcomePage.class);
 
 					return;
 				}
 
+				account = session.getAccount();
+
 				setModel(new CompoundPropertyModel<Object>(this));
+
+				firstName = account.getFirstName();
+				lastName = account.getLastName();
+				initials = account.getInitials();
+				email = account.getEmail();
+				institution = account.getInstitution();
+				description = account.getDescription();
 
 				add(new TextField<String>("firstName").setRequired(true)
 						.setLabel(new Model<String>("Given name")).add(
@@ -61,12 +68,6 @@ public class RegistrationPage extends UnprotectedPage {
 						new Model<String>("Email")).add(
 						new StringValidator.MaximumLengthValidator(100)).add(
 						EmailAddressValidator.getInstance()));
-				add(new PasswordTextField("password").setRequired(true)
-						.setLabel(new Model<String>("Password")).add(
-								new StringValidator.MinimumLengthValidator(6)));
-				add(new PasswordTextField("confirmPassword").setRequired(true)
-						.setLabel(new Model<String>("Confirm")).add(
-								new StringValidator.MinimumLengthValidator(6)));
 				add(new TextField<String>("institution")
 						.setLabel(new Model<String>("Institution")));
 				add(new TextArea<String>("description")
@@ -75,32 +76,35 @@ public class RegistrationPage extends UnprotectedPage {
 
 			@Override
 			protected void onSubmit() {
-				if (!password.equals(confirmPassword)) {
-					error("Password and Confirm doesn't much");
-				}
-
 				try {
-					Account account = AccountManager.getByEmail(email);
+					assert (account != null);
 
-					if (account != null) {
-						error("Account with this email address already registered");
+					if (!email.equals(account.getEmail())) {
+						Account testAccount = AccountManager.getByEmail(email);
 
-						return;
+						if (testAccount != null) {
+							error("Account with this email address already registered");
+
+							return;
+						}
 					}
 
-					account = new Account(firstName, lastName, initials, email,
-							AccountManager.encryptPassword(password),
-							institution, description);
+					account.setFirstName(firstName);
+					account.setLastName(lastName);
+					account.setInitials(initials);
+					account.setEmail(email);
+					account.setInstitution(institution);
+					account.setDescription(description);
 
 					AccountManager.save(account);
 
-					setResponsePage(RegistrationSuccessfulPage.class);
+					setResponsePage(UpdateAccountSuccessfulPage.class);
 
-					Emailer.send(email, "Account created successfully", "Dear "
-							+ firstName + " " + lastName
-							+ ",\n\nThank you for creating "
-							+ JbeirSettings.getSetting("PROJECT_NAME")
-							+ " account.\n\nBest regards,\nRegistry Team");
+					Emailer
+							.send(
+									email,
+									"Your account information has been updated",
+									"Your account information has been updated.\n\nBest regards,\nRegistry Team");
 				} catch (ManagerException e) {
 					handleException(e);
 				} catch (Exception e) {
@@ -109,11 +113,11 @@ public class RegistrationPage extends UnprotectedPage {
 			}
 		}
 
-		Form<?> registrationForm = new RegistrationForm("registrationForm");
-		registrationForm.add(new Button("submitButton", new Model<String>(
-				"Submit")));
+		Form<?> updateAccountForm = new UpdateAccountForm("updateAccountForm");
+		updateAccountForm.add(new Button("submitButton", new Model<String>(
+				"Update")));
 
-		add(registrationForm);
-		registrationForm.add(new FeedbackPanel("feedback"));
+		add(updateAccountForm);
+		updateAccountForm.add(new FeedbackPanel("feedback"));
 	}
 }

@@ -3,12 +3,9 @@ package org.jbei.ice.lib.utils;
 import java.util.HashMap;
 
 public class JbeirSettings {
-
-	public String TEST_VARIABLE = "this is a test variable";
-
 	public final static HashMap<String, String> settings = new HashMap<String, String>();
+
 	static {
-		// settings.put("TEST_VARIABLE", "test_variable");
 		settings.put("DATA_DIRECTORY", "/var/lib/jbeiregistry");
 		settings.put("ATTACHMENTS_DIRECTORY", settings.get("DATA_DIRECTORY")
 				+ "/attachments");
@@ -19,11 +16,23 @@ public class JbeirSettings {
 		settings.put("SITE_SECRET", "Secret Sauce");
 		settings.put("COOKIE_NAME", "gd-ice");
 		settings.put("SEARCH_INDEX_FILE", "/tmp/ice_search_index");
+		settings.put("ADMIN_EMAIL", "zdmytriv@lbl.gov");
+		settings.put("MODERATOR_EMAIL", "zdmytriv@lbl.gov");
+		settings.put("SMTP_HOST", "baracuda.dhcp.lbl.gov");
+		settings.put("ERROR_EMAIL_EXCEPTION_PREFIX", "[ERROR]");
+		settings.put("PROJECT_NAME", "JBEI Registry");
+		settings.put("SECRET_KEY",
+				"o6-v(yay5w@0!64e6-+ylbhcd9g03rv#@ezqh7axchds=q=$n+");
 		settings.put("PART_NUMBER_PREFIX", "TEST");
+
+		// LocalBackend, NullAuthenticationBackend, LblLdapAuthenticationBackend are built-in
+		settings.put("AUTHENTICATION_BACKEND",
+				"org.jbei.ice.lib.authentication.LblLdapAuthenticationBackend");
 	}
 
 	public static String getSetting(String key) {
 		String result = null;
+
 		if (settings.containsKey(key)) {
 			result = settings.get(key);
 		} else {
@@ -31,7 +40,5 @@ public class JbeirSettings {
 		}
 
 		return result;
-
 	}
-
 }

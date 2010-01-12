@@ -10,7 +10,7 @@ import org.apache.wicket.Response;
 import org.apache.wicket.Session;
 import org.apache.wicket.protocol.http.WebResponse;
 import org.apache.wicket.protocol.http.WebSession;
-import org.jbei.ice.lib.authentication.AuthenticationBackend;
+import org.jbei.ice.lib.authentication.IAuthenticationBackend;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.ManagerException;
@@ -22,30 +22,31 @@ public class IceSession extends WebSession {
 
 	private static final long serialVersionUID = 1L;
 	private Account account = null;
-	private AuthenticationBackend authenticator = null;
+	private IAuthenticationBackend authenticator = null;
 	private SessionData sessionData = null;
 	private String COOKIE_NAME = JbeirSettings.getSetting("COOKIE_NAME");
-	
-	public IceSession(Request request, Response response, AuthenticationBackend authenticator2) {
+
+	public IceSession(Request request, Response response,
+			IAuthenticationBackend authenticator2) {
 		super(request);
 		this.authenticator = authenticator2;
-		
+
 		SessionData sessionData = SessionData.getInstance(request, response);
 		setSessionData(sessionData);
 		HashMap<String, Object> data = sessionData.getData();
 		if (data.containsKey("accountId")) {
-			Integer accountId = (Integer) data.get("accountId"); 
+			Integer accountId = (Integer) data.get("accountId");
 			try {
 				setAccount(AccountManager.get(accountId));
 				setAccountPreferences(getAccountPreferences());
-				
+
 			} catch (ManagerException e) {
 				e.printStackTrace();
 				sessionData = null;
 			}
 		}
-		
-		setSessionData(sessionData);		
+
+		setSessionData(sessionData);
 	}
 
 	/**
@@ -56,19 +57,19 @@ public class IceSession extends WebSession {
 		SessionData savedSession = getSessionData();
 		HashMap<String, Object> data = savedSession.getData();
 		if (data == null) {
-			data = new HashMap<String, Object> () ;
+			data = new HashMap<String, Object>();
 		}
 		data.put("accountId", (Integer) getAccount().getId());
 		savedSession.setData(data);
-		
+
 		long currentTime = Calendar.getInstance().getTimeInMillis();
 		long expireDate = currentTime + 7776000000L; //90 days
-		
+
 		Cookie cookie = new Cookie(COOKIE_NAME, savedSession.getSessionKey());
 		cookie.setPath("/");
 		cookie.setMaxAge(7776000);
 		response.addCookie(cookie);
-		
+
 		savedSession.setExpireDate(expireDate);
 		try {
 			savedSession.persist();
@@ -77,47 +78,49 @@ public class IceSession extends WebSession {
 		}
 
 	}
-	
+
 	public boolean authenticateUser(String login, String password) {
 		Account account = null;
 		boolean result = false;
 		try {
 			account = authenticator.authenticate(login, password);
-			
+
 			if (account != null) {
 				setAccount(account);
-				AccountPreferences accountPreferences = AccountManager.getAccountPreferences(account); 
+				AccountPreferences accountPreferences = AccountManager
+						.getAccountPreferences(account);
 				if (accountPreferences == null) {
 					accountPreferences = new AccountPreferences();
 					accountPreferences.setAccount(account);
 				}
 				setAccountPreferences(accountPreferences);
-				SessionData sessionData = getSessionData();				
+				SessionData sessionData = getSessionData();
 				sessionData.getData().put("accountId", account.getId());
 				sessionData.persist();
 				result = true;
 			}
 		} catch (Exception e) {
-			Logger.warn("Could not authenticate user " + login + ": " + e.toString());
+			Logger.warn("Could not authenticate user " + login + ": "
+					+ e.toString());
 			e.printStackTrace();
 		}
-		return result; 
+		return result;
 	}
-	
+
 	public void deAuthenticateUser() {
 		clearSavedSession();
 		account = null;
 	}
-	
+
 	public boolean isAuthenticated() {
 		return (account == null) ? false : true;
 	}
-	
+
 	//getters and setters
 	public static IceSession get() {
 		return (IceSession) Session.get();
 	}
-	
+
 	public void setSessionData(SessionData sessionData) {
 		this.sessionData = sessionData;
 	}
@@ -133,7 +136,7 @@ public class IceSession extends WebSession {
 	public Account getAccount() {
 		return account;
 	}
-	
+
 	public void setAccountPreferences(AccountPreferences accountPreferences) {
 		try {
 			AccountManager.save(accountPreferences);

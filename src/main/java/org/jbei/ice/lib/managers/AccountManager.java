@@ -5,9 +5,12 @@ import org.hibernate.Query;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountPreferences;
+import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.lib.utils.Utils;
 
 public class AccountManager extends Manager {
-	public static AccountPreferences getAccountPreferences(int id) throws ManagerException {
+	public static AccountPreferences getAccountPreferences(int id)
+			throws ManagerException {
 		AccountPreferences accountPreferences = null;
 		try {
 			Query query = HibernateHelper.getSession().createQuery(
@@ -41,8 +44,8 @@ public class AccountManager extends Manager {
 		return accountPreferences;
 	}
 
-	public static AccountPreferences save(
-			AccountPreferences accountPreferences) throws ManagerException {
+	public static AccountPreferences save(AccountPreferences accountPreferences)
+			throws ManagerException {
 		AccountPreferences result;
 		try {
 			result = (AccountPreferences) dbSave(accountPreferences);
@@ -74,34 +77,41 @@ public class AccountManager extends Manager {
 
 		return account;
 	}
-	
-	public static Account getByLogin(String login) throws ManagerException {
+
+	public static Account getByEmail(String email) throws ManagerException {
 		Account account = null;
 		try {
 			Query query = HibernateHelper.getSession().createQuery(
 					"from Account where email = :email");
-			query.setParameter("email", login);
+			query.setParameter("email", email);
 			account = (Account) query.uniqueResult();
-				
 		} catch (HibernateException e) {
 			Logger.warn("Couldn't retrieve Account by email");
 			throw new ManagerException("Couldn't retrieve Account by email: "
-					+ login);
+					+ email);
 		}
-		
+
 		return account;
 	}
-	
+
 	public static Account save(Account account) throws ManagerException {
 		try {
 			Account result = (Account) dbSave(account);
+
 			return result;
-			
 		} catch (Exception e) {
 			String msg = "Could not save account " + account.getEmail();
+
 			Logger.error(msg);
+
 			throw new ManagerException(msg);
 		}
 	}
-		
+
+	public static String encryptPassword(String password) {
+		String md5key = Utils.encryptMD5(JbeirSettings.getSetting("SECRET_KEY")
+				+ password);
+
+		return md5key;
+	}
 }

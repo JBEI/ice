@@ -13,13 +13,12 @@ import org.jbei.ice.web.panels.EntryPagingPanel;
 public class EntriesTablePage extends UnprotectedPage {
 	public EntriesTablePage(PageParameters parameters) {
 		super(parameters);
-		ArrayList entries = new ArrayList<Entry>();
+		ArrayList<Entry> entries = new ArrayList<Entry>();
 		
 		try {
 			entries.add(EntryManager.get(300));
 			entries.add(EntryManager.get(301));
 		} catch (ManagerException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

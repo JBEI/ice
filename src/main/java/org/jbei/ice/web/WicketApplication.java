@@ -10,8 +10,8 @@ import org.apache.wicket.request.RequestParameters;
 import org.apache.wicket.request.target.basic.URIRequestTargetUrlCodingStrategy;
 import org.apache.wicket.request.target.coding.IndexedParamUrlCodingStrategy;
 import org.apache.wicket.settings.ISecuritySettings;
-import org.jbei.ice.lib.authentication.AuthenticationBackend;
-import org.jbei.ice.lib.authentication.LblLdapAuthenticationBackend;
+import org.jbei.ice.lib.authentication.AuthenticationBackendManager;
+import org.jbei.ice.lib.authentication.IAuthenticationBackend;
 import org.jbei.ice.lib.permissions.IceAuthorizationStrategy;
 import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.web.pages.EntryNewPage;
@@ -19,6 +19,8 @@ import org.jbei.ice.web.pages.EntryUpdatePage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.LogOutPage;
 import org.jbei.ice.web.pages.RegistrationPage;
+import org.jbei.ice.web.pages.UpdateAccountPage;
+import org.jbei.ice.web.pages.UpdatePasswordPage;
 import org.jbei.ice.web.pages.UserEntryPage;
 import org.jbei.ice.web.pages.WelcomePage;
 
@@ -31,7 +33,7 @@ import org.jbei.ice.web.pages.WelcomePage;
  * @see org.jbei.Start#main(String[])
  */
 public class WicketApplication extends WebApplication {
-	private AuthenticationBackend authenticator = null;
+	private IAuthenticationBackend authenticator = null;
 
 	/**
 	 * Constructor
@@ -40,12 +42,18 @@ public class WicketApplication extends WebApplication {
 	}
 
 	protected void init() {
-		// authenticator = new NullAuthenticator();
-		authenticator = new LblLdapAuthenticationBackend();
-		
+		try {
+			authenticator = AuthenticationBackendManager
+					.loadAuthenticationBackend();
+		} catch (AuthenticationBackendManager.AuthenticationBackendManagerException e) {
+			e.printStackTrace();
+		}
+
 		mountBookmarkablePage("/login", WelcomePage.class);
 		mountBookmarkablePage("/logout", LogOutPage.class);
 		mountBookmarkablePage("/registration", RegistrationPage.class);
+		mountBookmarkablePage("/update-account", UpdateAccountPage.class);
+		mountBookmarkablePage("/update-password", UpdatePasswordPage.class);
 		mount(new IndexedParamUrlCodingStrategy("/entry/view",
 				EntryViewPage.class));
 		mount(new IndexedParamUrlCodingStrategy("/entry/update",

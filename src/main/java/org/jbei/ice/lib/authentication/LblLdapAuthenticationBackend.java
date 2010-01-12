@@ -11,52 +11,53 @@ import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.web.IceSession;
 
-public class LblLdapAuthenticationBackend extends AuthenticationBackend{
+public class LblLdapAuthenticationBackend implements IAuthenticationBackend {
+	public Account authenticate(String loginId, String password) {
+		Account account = null;
+		LblLdapAuth l = null;
 
-		public Account authenticate(String loginId, String password) {
-			Account account = null;
-			LblLdapAuth l = null;
-			try {
-				l = new LblLdapAuth();
-			} catch (NamingException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			try {
-				loginId = loginId.toLowerCase();
-				
-				if (l.isWikiUser(loginId)) {
-					l.authenticate(loginId, password);
-					account = AccountManager.getByLogin(loginId + "@lbl.gov");
-					
-					if (account == null) {
-						account = new Account();
-					}
-					
-					account.setEmail(l.geteMail());
-					account.setFirstName(l.getGivenName());
-					account.setLastName(l.getSirName());
-					account.setInstitution(l.getOrg());
-					account.setDescription(l.getDescription());
-					
-					WebClientInfo temp = (WebClientInfo) IceSession.get().getClientInfo();
-					String ip = temp.getProperties().getRemoteAddress();
-										
-					account.setIp(ip);
-					
-					account.setLastLoginTime(Calendar.getInstance().getTime());
-					
-					//AccountManager.dbSave(account);
-					
-					Logger.info("User " + loginId + " authenticated via lbl-ldap.");
+		try {
+			l = new LblLdapAuth();
+		} catch (NamingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
+		try {
+			loginId = loginId.toLowerCase();
+
+			if (l.isWikiUser(loginId)) {
+				l.authenticate(loginId, password);
+				account = AccountManager.getByEmail(loginId + "@lbl.gov");
+
+				if (account == null) {
+					account = new Account();
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				Logger.warn("authentication failed for " + loginId + " with "+ e.toString());
-			}
-			
-			return account;
-	}
 
+				account.setEmail(l.geteMail());
+				account.setFirstName(l.getGivenName());
+				account.setLastName(l.getSirName());
+				account.setInstitution(l.getOrg());
+				account.setDescription(l.getDescription());
+
+				WebClientInfo temp = (WebClientInfo) IceSession.get()
+						.getClientInfo();
+				String ip = temp.getProperties().getRemoteAddress();
+
+				account.setIp(ip);
+
+				account.setLastLoginTime(Calendar.getInstance().getTime());
+
+				// AccountManager.dbSave(account);
+
+				Logger.info("User " + loginId + " authenticated via lbl-ldap.");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			Logger.warn("authentication failed for " + loginId + " with "
+					+ e.toString());
+		}
+
+		return account;
+	}
 }
