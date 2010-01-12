@@ -10,6 +10,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
 import org.jbei.ice.web.forms.PartNewFormPanel;
 import org.jbei.ice.web.forms.PlasmidNewFormPanel;
+import org.jbei.ice.web.forms.PlasmidStrainNewFormPanel;
 import org.jbei.ice.web.forms.StrainNewFormPanel;
 
 public class SelectNewEntryTypePanel extends Panel {
@@ -45,12 +46,10 @@ public class SelectNewEntryTypePanel extends Panel {
 				} else if (getTypeSelection().equals("Part")) {
 					formPanel = new PartNewFormPanel("formPanel");
 				} else if (getTypeSelection().equals("Strain with One Plasmid")) {
-					formPanel = null;
+					formPanel = new PlasmidStrainNewFormPanel("formPanel");
 				}
 
-				// TODO
 				formPanel.setOutputMarkupId(true);
-				Page tempPage = target.getPage();
 				target.getPage().replace(formPanel);
 				target.addComponent(formPanel);
 
