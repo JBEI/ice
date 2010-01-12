@@ -1,16 +1,16 @@
 <html xmlns:wicket>
 <wicket:panel>
-	<form wicket:id="strainForm">
+	<div wicket:id="feedback"></div>
+	<form wicket:id="partForm">
 	<table border="0" cellpadding="3" cellspacing="1" class="entry_table">
 		<tr class="title_row_header">
 			<td>
-			<h2>Update Strain</h2>
+			<h2>New Part</h2>
 			</td>
 		</tr>
 		<tr>
 			<td bgcolor="#ffffff">
 			<table width="100%" border="0" cellpadding="0" cellspacing="2">
-
 				<tr>
 					<td style="width: 150px">Name</td>
 					<td><input wicket:id="names" class="inputbox" maxlength="127"></input></td>
@@ -42,27 +42,9 @@
 					Separated</span></td>
 				</tr>
 				<tr>
-					<td style="width: 150px">Host Strain</td>
-					<td><input wicket:id="host" class="inputbox" maxlength="127"
-						style="width: 300px;"></input></td>
-				</tr>
-				<tr>
-					<td style="width: 150px">Selection Markers</td>
-					<td><input wicket:id="selectionMarkers" style="width: 300px;"
-						maxlength="127" class="inputbox selectionMarkersInput"></input><span
-						class="form_help_text">Comma Separated</span></td>
-				</tr>
-				<tr>
-					<td style="width: 150px">Genotype/Phenotype</td>
-					<td><input wicket:id="genotypePhenotype" style="width: 300px;"
-						class="inputbox originOfReplicationInput" maxlength="127"></input><span
-						class="form_help_text">Comma Separated</span></td>
-				</tr>
-				<tr>
-					<td style="width: 150px">Plasmids</td>
-					<td><input wicket:id="plasmids" style="width: 300px;"
-						class="inputbox promotersInput" maxlength="127"></input><span
-						class="form_help_text">Comma Separated</span></td>
+					<td style="width: 150px">Package Format</td>
+					<td><select wicket:id="packageFormat" style="width: 300px;"
+						class="inputbox"></select></td>
 				</tr>
 				<tr>
 					<td style="width: 150px">Keywords</td>
@@ -99,7 +81,6 @@
 						style="width: 640px; height: 50px" rows="3"
 						name="intellectual_property" cols="20" class="inputarea"></textarea></td>
 				</tr>
-
 				<tr>
 					<td style="width: 150px">Funding Source</td>
 					<td><input wicket:id="fundingSource" type="text"
@@ -112,12 +93,8 @@
 			</table>
 			</td>
 		</tr>
-
 	</table>
 	<button wicket:id="submitButton" type="submit">Save</button>
-
 	</form>
-
-
 </wicket:panel>
 </html>

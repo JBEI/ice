@@ -1,134 +1,266 @@
 package org.jbei.ice.web.forms;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
-import org.apache.wicket.behavior.SimpleAttributeModifier;
-import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.ChoiceRenderer;
 import org.apache.wicket.markup.html.form.DropDownChoice;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.models.EntryFundingSource;
+import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.Link;
 import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
+import org.jbei.ice.lib.utils.JbeiConstants;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.pages.EntryViewPage;
 
 public class PlasmidNewFormPanel extends Panel {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
+
+	private Plasmid plasmid = null;
 
 	public PlasmidNewFormPanel(String id) {
 		super(id);
-		
-		Plasmid entry = new Plasmid();
+		plasmid = new Plasmid();
+		this.setPlasmid(plasmid);
 		populateElements();
-		
-		
 	}
-
-	public PlasmidNewFormPanel(String id, Plasmid plasmid) {
-		super(id);
-		Plasmid entry = plasmid;
-		populateElements();
-		
-	}
-
 
 	private void populateElements() {
 		class PlasmidForm extends StatelessForm<Object> {
-
 			private static final long serialVersionUID = 1L;
-			
-			//entry fields
+
+			// entry fields
 			private String links;
 			private String names;
 			private String selectionMarkers;
-			
 			private String alias;
 			private String creator;
 			private String creatorEmail;
-			private String status;
-			private String visibility;
+			private CustomChoice status;
+			private CustomChoice visibility;
 			private String keywords;
 			private String summary;
 			private String notes;
 			private String references;
-			
-			//plasmid only fields
+			private CustomChoice bioSafetyLevel;
+			private String intellectualProperty;
+			private String FundingSource;
+			private String PrincipalInvestigator;
+
+			// plasmid only fields
 			private String backbone;
 			private String originOfReplication;
 			private String promoters;
 			private boolean circular = true;
-			
+
 			public PlasmidForm(String id) {
-				
+
 				super(id);
-				
+
+				setLinks(plasmid.getLinksAsString());
+				setNames(plasmid.getNamesAsString());
+				setSelectionMarkers(plasmid.getSelectionMarkersAsString());
+				setAlias(plasmid.getAlias());
+				String creatorName = IceSession.get().getAccount()
+						.getFirstName()
+						+ " " + IceSession.get().getAccount().getLastName();
+				setCreator(creatorName);
+				setCreatorEmail(IceSession.get().getAccount().getEmail());
+				setStatus(new CustomChoice("", plasmid.getStatus()));
+				setVisibility(new CustomChoice("", "" + plasmid.getVisibility()));
+				setKeywords(plasmid.getKeywords());
+				setSummary(plasmid.getShortDescription());
+				setNotes(plasmid.getLongDescription());
+				setReferences(plasmid.getReferences());
+				setIntellectualProperty((plasmid.getIntellectualProperty() != null) ? plasmid
+						.getIntellectualProperty()
+						: "");
+
+				Set<EntryFundingSource> entryFundingSources = plasmid
+						.getEntryFundingSources();
+				// TODO: handle multiple funding sources
+				for (EntryFundingSource entryFundingSource : entryFundingSources) {
+					FundingSource fundingSource = entryFundingSource
+							.getFundingSource();
+					setFundingSource(fundingSource.getFundingSource());
+					setPrincipalInvestigator(fundingSource
+							.getPrincipalInvestigator());
+				}
+
+				setBackbone(plasmid.getBackbone());
+				setOriginOfReplication(plasmid.getOriginOfReplication());
+				setPromoters(plasmid.getPromoters());
+				setCircular(true);
+
 				setModel(new CompoundPropertyModel<Object>(this));
-				add(new TextField<String>("names")
-						.setRequired(true));
+				add(new TextField<String>("names").setRequired(true).setLabel(
+						new Model<String>("Name")));
 				add(new TextField<String>("links"));
 				add(new TextField<String>("selectionMarkers"));
 				add(new TextField<String>("alias"));
 				add(new TextField<String>("creator"));
 				add(new TextField<String>("creatorEmail"));
-				
+
+				CustomChoice planned = new CustomChoice(JbeiConstants
+						.getStatus("planned"), "planned");
+				CustomChoice complete = new CustomChoice(JbeiConstants
+						.getStatus("complete"), "complete");
+				CustomChoice inProgress = new CustomChoice(JbeiConstants
+						.getStatus("in progress"), "in progress");
+
 				ArrayList<CustomChoice> statusChoices = new ArrayList<CustomChoice>();
-				CustomChoice defaultStatus = new CustomChoice("Planned", "planned" ); 
-				statusChoices.add(defaultStatus);
-				statusChoices.add(new CustomChoice("Complete", "complete" ));
-				statusChoices.add(new CustomChoice("In Progress", "in progress" ));
-				add(new DropDownChoice<CustomChoice>("status", 
-						new Model<CustomChoice>(defaultStatus), statusChoices,
-						new ChoiceRenderer<CustomChoice>("getName", "getValue")));
-				
+				statusChoices.add(planned);
+				statusChoices.add(complete);
+				statusChoices.add(inProgress);
+				setStatus(complete);
+				add(new DropDownChoice<CustomChoice>("status",
+						new PropertyModel<CustomChoice>(this, "status"),
+						statusChoices, new ChoiceRenderer<CustomChoice>("name",
+								"value")));
+
+				CustomChoice visible9 = new CustomChoice(JbeiConstants
+						.getVisibility(9), "9");
+				CustomChoice visible5 = new CustomChoice(JbeiConstants
+						.getVisibility(5), "5");
+				CustomChoice visible0 = new CustomChoice(JbeiConstants
+						.getVisibility(0), "0");
 				ArrayList<CustomChoice> visibilityChoices = new ArrayList<CustomChoice>();
-				CustomChoice defaultVisibility = new CustomChoice("Public", "9" ); 
-				visibilityChoices.add(defaultVisibility);
-				visibilityChoices.add(new CustomChoice("Hidden", "5" ));
-				visibilityChoices.add(new CustomChoice("Private", "0" ));
-				add(new DropDownChoice<CustomChoice>("visibility", 
-						new Model<CustomChoice>(defaultVisibility), visibilityChoices,
-						new ChoiceRenderer<CustomChoice>("getName", "getValue")));
-				
+				visibilityChoices.add(visible9);
+				visibilityChoices.add(visible5);
+				visibilityChoices.add(visible0);
+				setVisibility(visible9);
+				add(new DropDownChoice<CustomChoice>("visibility",
+						new PropertyModel<CustomChoice>(this, "visibility"),
+						visibilityChoices, new ChoiceRenderer<CustomChoice>(
+								"name", "value")));
+
 				add(new TextField<String>("keywords"));
-				add(new TextArea<String>("summary").setRequired(true));
+				add(new TextArea<String>("summary").setRequired(true).setLabel(
+						new Model<String>("Summary")));
 				add(new TextArea<String>("notes"));
 				add(new TextArea<String>("references"));
+
+				CustomChoice level1 = new CustomChoice("Level 1", "1");
+				CustomChoice level2 = new CustomChoice("Level 2", "2");
+				setBioSafetyLevel(level1);
+				ArrayList<CustomChoice> bioSafetyChoices = new ArrayList<CustomChoice>();
+				bioSafetyChoices.add(level1);
+				bioSafetyChoices.add(level2);
+				add(new DropDownChoice<CustomChoice>(
+						"bioSafetyLevel",
+						new PropertyModel<CustomChoice>(this, "bioSafetyLevel"),
+						bioSafetyChoices, new ChoiceRenderer<CustomChoice>(
+								"name", "value")));
+
+				add(new TextArea<String>("intellectualProperty"));
+				add(new TextField<String>("fundingSource"));
+				add(new TextField<String>("principalInvestigator").setRequired(
+						true).setLabel(
+						new Model<String>("Principal Investigator")));
 				add(new TextField<String>("backbone"));
 				add(new TextField<String>("originOfReplication"));
 				add(new TextField<String>("promoters"));
-				
+
 				add(new CheckBox("circular"));
-				
+
 			}
-			
+
 			protected void onSubmit() {
-				
+				try {
+					CommaSeparatedField<Link> linksField = new CommaSeparatedField<Link>(
+							Link.class, "getLink", "setLink");
+					linksField.setString(getLinks());
+					plasmid.setLinks(linksField.getItemsAsSet());
+
+					CommaSeparatedField<Name> namesField = new CommaSeparatedField<Name>(
+							Name.class, "getName", "setName");
+					namesField.setString(getNames());
+					plasmid.setNames(namesField.getItemsAsSet());
+
+					CommaSeparatedField<SelectionMarker> selectionMarkersField = new CommaSeparatedField<SelectionMarker>(
+							SelectionMarker.class, "getName", "setName");
+					selectionMarkersField.setString(getSelectionMarkers());
+					plasmid.setSelectionMarkers(selectionMarkersField
+							.getItemsAsSet());
+
+				} catch (FormException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				plasmid.setCreator(getCreator());
+				plasmid.setCreatorEmail(getCreatorEmail());
+				plasmid.setOwner(IceSession.get().getAccount().getFirstName()
+						+ " " + IceSession.get().getAccount().getLastName());
+				plasmid.setOwnerEmail(IceSession.get().getAccount().getEmail());
+				plasmid.setAlias(getAlias());
+				plasmid.setStatus(getStatus().getValue());
+				plasmid.setVisibility(Integer.parseInt(getVisibility()
+						.getValue()));
+				plasmid.setKeywords(getKeywords());
+				plasmid.setShortDescription(getSummary());
+				plasmid.setLongDescription(getNotes());
+				plasmid.setReferences(getReferences());
+				plasmid.setBioSafetyLevel(Integer.parseInt(getBioSafetyLevel()
+						.getValue()));
+				plasmid.setIntellectualProperty(getIntellectualProperty());
+				FundingSource fundingSource = new FundingSource();
+				fundingSource
+						.setFundingSource((getFundingSource() != null) ? getFundingSource()
+								: "");
+				fundingSource
+						.setPrincipalInvestigator(getPrincipalInvestigator());
+				EntryFundingSource newEntryFundingSource = new EntryFundingSource();
+				newEntryFundingSource.setEntry(plasmid);
+				newEntryFundingSource.setFundingSource(fundingSource);
+				// TODO: Handle multiple funding sources
+				LinkedHashSet<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
+				entryFundingSources.add(newEntryFundingSource);
+				plasmid.setEntryFundingSources(entryFundingSources);
+
+				plasmid.setBackbone(getBackbone());
+				plasmid.setOriginOfReplication(getOriginOfReplication());
+				plasmid.setPromoters(getPromoters());
+				plasmid.setCircular(getCircular());
+
+				try {
+					Plasmid newPlasmid = EntryManager.createPlasmid(plasmid);
+					setResponsePage(EntryViewPage.class, new PageParameters(
+							"0=" + newPlasmid.getId()));
+				} catch (ManagerException e) {
+					// TODO Auto-generated catch block
+					String msg = "System Error: Could not save! ";
+					Logger.error(msg + e.getMessage());
+					error(msg);
+					e.printStackTrace();
+				}
+
 			}
-			
+
 			protected void onError() {
-				error("Missing required fields");
+
 			}
-			
+
 			// Getters and setters for PlasmidForm
-			
+
 			public void setLinks(String links) {
 				this.links = links;
 			}
@@ -177,19 +309,19 @@ public class PlasmidNewFormPanel extends Panel {
 				this.creatorEmail = creatorEmail;
 			}
 
-			public String getStatus() {
+			public CustomChoice getStatus() {
 				return status;
 			}
 
-			public void setStatus(String status) {
+			public void setStatus(CustomChoice status) {
 				this.status = status;
 			}
 
-			public String getVisibility() {
+			public CustomChoice getVisibility() {
 				return visibility;
 			}
 
-			public void setVisibility(String visibility) {
+			public void setVisibility(CustomChoice visibility) {
 				this.visibility = visibility;
 			}
 
@@ -225,6 +357,38 @@ public class PlasmidNewFormPanel extends Panel {
 				this.references = references;
 			}
 
+			public void setBioSafetyLevel(CustomChoice bioSafetyLevel) {
+				this.bioSafetyLevel = bioSafetyLevel;
+			}
+
+			public CustomChoice getBioSafetyLevel() {
+				return bioSafetyLevel;
+			}
+
+			public void setIntellectualProperty(String intellectualProperty) {
+				this.intellectualProperty = intellectualProperty;
+			}
+
+			public String getIntellectualProperty() {
+				return intellectualProperty;
+			}
+
+			public void setFundingSource(String fundingSource) {
+				FundingSource = fundingSource;
+			}
+
+			public String getFundingSource() {
+				return FundingSource;
+			}
+
+			public void setPrincipalInvestigator(String principalInvestigator) {
+				PrincipalInvestigator = principalInvestigator;
+			}
+
+			public String getPrincipalInvestigator() {
+				return PrincipalInvestigator;
+			}
+
 			public String getBackbone() {
 				return backbone;
 			}
@@ -249,7 +413,7 @@ public class PlasmidNewFormPanel extends Panel {
 				this.promoters = promoters;
 			}
 
-			public boolean isCircular() {
+			public boolean getCircular() {
 				return circular;
 			}
 
@@ -257,94 +421,18 @@ public class PlasmidNewFormPanel extends Panel {
 				this.circular = circular;
 			}
 		}
-		
 		PlasmidForm form = new PlasmidForm("plasmidForm");
 		form.add(new Button("submitButton"));
 		add(form);
-		
-	}
-	/*
-	@SuppressWarnings("unchecked")
-	private void populateElementsOld() {
-		FormPanelHelper backbonePanel = new FormPanelHelper("Backbone", new TextFieldPanel("itemPanel", 
-				new PropertyModel(entry, "backbone")));
-		backbonePanel.getFormComponent().add(new SimpleAttributeModifier("class", "inputbox"));
-		backbonePanel.getFormComponent().add(new SimpleAttributeModifier("maxlength", ""+ SHORT_FIELD_MAX_LENGTH));
-		elements.put("backbonePanel", backbonePanel);
-		
-		FormPanelHelper originPanel = new FormPanelHelper("Origin of Replication", new TextFieldPanel("itemPanel", 
-				new PropertyModel(entry, "originOfReplication")));
-		originPanel.getFormComponent().add(new SimpleAttributeModifier("class", "inputbox originOfReplicationsInput"));
-		originPanel.getFormComponent().add(new SimpleAttributeModifier("maxlength", ""+ SHORT_FIELD_MAX_LENGTH));
-		elements.put("originPanel", originPanel);
-		
-		FormPanelHelper promotersPanel = new FormPanelHelper("Promoters", new TextFieldPanel("itemPanel", 
-				new PropertyModel(entry, "promoters")));
-		promotersPanel.getFormComponent().add(new SimpleAttributeModifier("maxlength", ""+ SHORT_FIELD_MAX_LENGTH));
-		promotersPanel.getFormComponent().add(new SimpleAttributeModifier("class", "inputbox promotersInput"));
-		elements.put("promotersPanel", promotersPanel);
-		
-		LinkedHashMap circularChoices = new LinkedHashMap<String, String> ();
-		circularChoices.put("1", "True");
-		circularChoices.put("0", "False");
-		ChoiceRendererHelper circularChoicesHelper= new ChoiceRendererHelper(circularChoices);
-		//TODO: Handle default value
-		((Plasmid) entry).setCircular(true);
-		FormPanelHelper circularPanel = new FormPanelHelper("Circular", 
-				new DropDownChoicePanel("itemPanel", 
-				new PropertyModel(entry, "circular"), circularChoicesHelper));
-		circularPanel.getFormComponent().add(new SimpleAttributeModifier("class", "inputbox"));
-		elements.put("circularPanel", circularPanel);
+		add(new FeedbackPanel("feedback"));
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	protected void renderForm() {
-		Form plasmidForm = new Form("plasmidForm") {
-		
-			private static final long serialVersionUID = 1L;
-			@Override
-			protected void onSubmit() {
-				entry.setNames(names.getItemsAsSet());
-				entry.setLinks(links.getItemsAsSet());
-				entry.setSelectionMarkers(selectionMarkers.getItemsAsSet());
-				
-				try {
-					Plasmid temp = (Plasmid) entry;
-					Plasmid newEntry = EntryManager.createPlasmid(temp);
-					
-					System.out.println("created new plasmid" + newEntry.getId());
-				} catch (ManagerException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			@Override
-			protected void onError() {
-				System.out.println("error");
-			}
-		};
-		
-		
-		ListView listView = new ListView("itemPanels", sortedElements) {
-			
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void populateItem(ListItem item) {
-				FormPanelHelper helper = (FormPanelHelper) item.getModelObject();
-				
-				item.add(new Label("itemLabel", helper.getName()));
-				item.add(helper.getPanel());
-			}
-		};
-		listView.setReuseItems(true);
-		
-		plasmidForm.add(listView);
-		plasmidForm.add(new Button("submitButton", new Model("submmited")));
-		
-		this.add(plasmidForm);
+	public Plasmid getPlasmid() {
+		return plasmid;
 	}
-	*/
+
+	public void setPlasmid(Plasmid plasmid) {
+		this.plasmid = plasmid;
+	}
 
 }

@@ -105,7 +105,7 @@ public class PlasmidUpdateFormPanel extends Panel {
 				
 				setModel(new CompoundPropertyModel<Object>(this));
 				add(new TextField<String>("names")
-						.setRequired(true));
+						.setRequired(true).setLabel(new Model<String>("Name")));
 				add(new TextField<String>("links"));
 				add(new TextField<String>("selectionMarkers"));
 				add(new TextField<String>("alias"));
@@ -155,7 +155,7 @@ public class PlasmidUpdateFormPanel extends Panel {
 						new ChoiceRenderer<CustomChoice>("name", "value")));
 				
 				add(new TextField<String>("keywords"));
-				add(new TextArea<String>("summary").setRequired(true));
+				add(new TextArea<String>("summary").setRequired(true).setLabel(new Model<String>("Summary")));
 				add(new TextArea<String>("notes"));
 				add(new TextArea<String>("references"));
 				
@@ -217,7 +217,7 @@ public class PlasmidUpdateFormPanel extends Panel {
 				plasmid.setIntellectualProperty(getIntellectualProperty());
 
 				FundingSource fundingSource = new FundingSource();
-				fundingSource.setFundingSource(getFundingSource());
+				fundingSource.setFundingSource((getFundingSource() != null) ? getFundingSource() : "");
 				fundingSource.setPrincipalInvestigator(getPrincipalInvestigator());
 				EntryFundingSource newEntryFundingSource = new EntryFundingSource();
 				newEntryFundingSource.setEntry(plasmid);

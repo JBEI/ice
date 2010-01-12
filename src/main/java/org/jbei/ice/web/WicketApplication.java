@@ -14,6 +14,7 @@ import org.jbei.ice.lib.authentication.AuthenticationBackend;
 import org.jbei.ice.lib.authentication.LblLdapAuthenticationBackend;
 import org.jbei.ice.lib.permissions.IceAuthorizationStrategy;
 import org.jbei.ice.lib.utils.JobCue;
+import org.jbei.ice.web.pages.EntryNewPage;
 import org.jbei.ice.web.pages.EntryUpdatePage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.LogOutPage;
@@ -24,19 +25,20 @@ import org.jbei.ice.web.pages.WelcomePage;
 //import org.odlabs.wiquery.core.commons.WiQueryInstantiationListener;
 
 /**
- * Application object for your web application. If you want to run this application without deploying, run the Start class.
+ * Application object for your web application. If you want to run this
+ * application without deploying, run the Start class.
  * 
  * @see org.jbei.Start#main(String[])
  */
 public class WicketApplication extends WebApplication {
 	private AuthenticationBackend authenticator = null;
-	
+
 	/**
 	 * Constructor
 	 */
 	public WicketApplication() {
 	}
-	
+
 	protected void init() {
 		// authenticator = new NullAuthenticator();
 		authenticator = new LblLdapAuthenticationBackend();
@@ -48,6 +50,7 @@ public class WicketApplication extends WebApplication {
 				EntryViewPage.class));
 		mount(new IndexedParamUrlCodingStrategy("/entry/update",
 				EntryUpdatePage.class));
+		mountBookmarkablePage("/entry/new", EntryNewPage.class);
 		mountBookmarkablePage("/user/entries", UserEntryPage.class);
 		mount(new URIRequestTargetUrlCodingStrategy("/static") {
 			@Override
@@ -56,32 +59,32 @@ public class WicketApplication extends WebApplication {
 				return new WebExternalResourceRequestTarget(path);
 			}
 		});
-		
+
 		// job cue
 		JobCue jobCue = JobCue.getInstance();
 		Thread jobThread = new Thread(jobCue);
 		jobThread.start();
-		
+
 		// settings
 		ISecuritySettings securitySettings = getSecuritySettings();
 		IceAuthorizationStrategy authorizationStrategy = new IceAuthorizationStrategy();
 		securitySettings.setAuthorizationStrategy(authorizationStrategy);
 		securitySettings
 				.setUnauthorizedComponentInstantiationListener(authorizationStrategy);
-		
+
 		// wiquery
 		/*
 		 * WiQueryInstantiationListener wiQueryInstantiationListener = new WiQueryInstantiationListener(); addComponentInstantiationListener(wiQueryInstantiationListener);
 		 */
 	}
-	
+
 	@Override
 	public Session newSession(Request request, Response response) {
 		IceSession s = new IceSession(request, response, authenticator);
-		
+
 		return s;
 	}
-	
+
 	/**
 	 * @see org.apache.wicket.Application#getHomePage()
 	 */

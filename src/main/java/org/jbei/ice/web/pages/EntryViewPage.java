@@ -20,20 +20,22 @@ public class EntryViewPage extends ProtectedPage {
 			entry = EntryManager.get(entryId);
 			String recordType = entry.getRecordType();
 			if (recordType.equals("strain")) {
-				StrainViewPanel panel = new StrainViewPanel("entry", (Strain) entry);
-				add (panel);
+				StrainViewPanel panel = new StrainViewPanel("entry",
+						(Strain) entry);
+				add(panel);
 			} else if (recordType.equals("plasmid")) {
-				PlasmidViewPanel panel = new PlasmidViewPanel("entry", (Plasmid) entry);
-				add (panel);
+				PlasmidViewPanel panel = new PlasmidViewPanel("entry",
+						(Plasmid) entry);
+				add(panel);
 			} else if (recordType.equals("part")) {
 				PartViewPanel panel = new PartViewPanel("entry", (Part) entry);
 				add(panel);
 			}
-			
+
 		} catch (ManagerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
 }
