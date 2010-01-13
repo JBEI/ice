@@ -1,28 +1,49 @@
 <html xmlns:wicket>
 <wicket:panel>
-	<form wicket:id="loginForm">
-	<table>
-		<tr>
-			<td>Login:</td>
-			<td><input type="text" wicket:id="loginName" /><br />
+	<table border="0" cellpadding="3" cellspacing="1" class="entry_table">
+		<tr class="title_row_header">
+			<td>
+			<h2>Login</h2>
 			</td>
 		</tr>
 		<tr>
-			<td>Password:</td>
-			<td><input type="password" wicket:id="loginPassword" /><br />
+			<td bgcolor="#ffffff">
+			<form wicket:id="loginForm">
+			<table width="100%" border="0" cellpadding="0" cellspacing="2">
+				<tr>
+					<td style="width: 150px">Login: <span class="error">*</span></td>
+					<td><input type="text" class="inputbox" wicket:id="loginName" /></td>
+				</tr>
+				<tr>
+					<td style="width: 150px">Password: <span class="error">*</span></td>
+					<td><input type="password" class="inputbox" wicket:id="loginPassword" /></td>
+				</tr>
+				<tr>
+					<td style="width: 150px"></td>
+					<td><input type="checkbox" wicket:id="keepSignedIn" id="keepSignedIn" /><label for="keepSignedIn">Remember me on this computer</label></td>
+				</tr>
+				<tr>
+					<td style="width: 150px"></td>
+					<td><input type="submit" class="button" wicket:id="logInButton" /></td>
+				</tr>
+				<tr>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+				</tr>
+
+				<tr>
+					<td>&nbsp;</td>
+					<td><a wicket:id="registrationLink" href="#">Registration</a></td>
+				</tr>
+				<tr>
+					<td>&nbsp;</td>
+					<td><a wicket:id="forgotPasswordLink" href="#">Forgot your password?</a></td>
+				</tr>
+			</table>
+			</form>
+			<div wicket:id="feedback"></div>
 			</td>
-		</tr>
-		<tr>
-			<td align=right><input type=checkbox " wicket:id="keepSignedIn" id="keepSignedIn" /></td>
-			<td><label for="keepSignedIn">Remember me on this computer</label><br />
-			</td>
-		</tr>
-		<tr>
-			<td></td>
-			<td><input type="submit" wicket:id="logInButton" /></td>
 		</tr>
 	</table>
-	</form>
-	<div wicket:id="feedback"></div>
 </wicket:panel>
 </html>

@@ -10,15 +10,18 @@ import org.jbei.ice.web.panels.WorkSpaceTablePanel;
 public class WorkSpacePage extends ProtectedPage {
 	public WorkSpacePage(PageParameters parameters) {
 		super(parameters);
+
 		Component workSpaceTablePanel;
-		WorkSpace workSpace = ((IceSession)getSession()).getAccountPreferences().getWorkSpace();
+
+		WorkSpace workSpace = ((IceSession) getSession()).getAccountPreferences().getWorkSpace();
 		if (workSpace == null) {
 			workSpaceTablePanel = new EmptyWorkSpaceTablePanel("workSpacePanel");
 		} else {
 			workSpaceTablePanel = new WorkSpaceTablePanel("workSpacePanel", workSpace, 50);
 		}
+
 		workSpaceTablePanel.setOutputMarkupId(true);
+
 		add(workSpaceTablePanel);
-		
 	}
 }

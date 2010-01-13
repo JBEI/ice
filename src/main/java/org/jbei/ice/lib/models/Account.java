@@ -222,4 +222,8 @@ public class Account implements Serializable {
 	public Set<Group> getGroups() {
 		return groups;
 	}
+	
+	public String getFullName() {
+		return firstName + " " + lastName;
+	}
 }

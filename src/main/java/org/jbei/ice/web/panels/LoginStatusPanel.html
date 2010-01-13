@@ -1,28 +1,18 @@
 <html xmlns:wicket>
 <wicket:panel>
-    <span wicket:id="preLoginPanel">Login Panel (Will be removed)</span>
-    <span wicket:id="postLoginPanel">Post Login Panel</span>
-    
-    <wicket:fragment wicket:id="preLogin">
-	    <p>
-	        <b>You are not logged in!</b><br/>
-	        
-	        Do you want to <a href="#" wicket:id="logIn">Log in</a> or 
-	        <a href="#" wicket:id="register">Register</a>?
-	        
-	    </p>            
-    </wicket:fragment>
-        
-    <wicket:fragment wicket:id="postLogin">
-	    <p>Welcome,
-	        <b><a href="#" wicket:id="userProfile">
-	           <span wicket:id="userName">
-	           </span></a>
-	        </b> 
-	         &nbsp; | &nbsp; <a href="#" wicket:id="logOut">Log Out</a><br/>
-	    </p>
-    </wicket:fragment>
-    
-    </wicket:panel>
+	<span wicket:id="preLoginPanel">Login Panel (Will be removed)</span>
+	<span wicket:id="postLoginPanel">Post Login Panel</span>
+
+	<wicket:fragment wicket:id="preLogin">
+		<p><b>You are not logged in!</b><br />
+
+		Do you want to <a href="#" wicket:id="logIn">Log in</a> or <a href="#" wicket:id="register">Register</a>?</p>
+	</wicket:fragment>
+
+	<wicket:fragment wicket:id="postLogin">
+		<p>Welcome, <b><a href="#" wicket:id="userProfile"> <span wicket:id="userName"> </span></a> </b> &nbsp; | &nbsp; <a href="#" wicket:id="logOut">Log Out</a><br />
+		</p>
+	</wicket:fragment>
+
+</wicket:panel>
 </html>
-  

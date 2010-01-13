@@ -26,17 +26,14 @@ public class EntryManager extends Manager {
 	public static final String PLASMID_ENTRY_TYPE = "plasmid";
 	public static final String PART_ENTRY_TYPE = "part";
 
-	// TODO: This should be moved to Settings file
-	public static final String DEFAULT_PART_NUMBER_PREFIX = (String) JbeirSettings
-			.getSetting("PART_NUMBER_PREFIX");
-	public static final String DEFAULT_PART_NUMBER_DIGITAL_SUFFIX = "000001";
-	public static final String DEFAULT_PART_NUMBER_DELIMITER = "_";
+	public static final int VISIBILITY_PUBLIC = 9;
+	public static final int VISIBILITY_SHARED = 5;
+	public static final int VISIBILITY_PRIVATE = 0;
 
 	public EntryManager() {
 	}
 
-	public static Plasmid createPlasmid(Plasmid newPlasmid)
-			throws ManagerException {
+	public static Plasmid createPlasmid(Plasmid newPlasmid) throws ManagerException {
 		Plasmid savedPlasmid = null;
 
 		String number = getNextPartNumber();
@@ -53,10 +50,8 @@ public class EntryManager extends Manager {
 		try {
 			savedPlasmid = (Plasmid) save(newPlasmid);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-			throw new ManagerException("Could not save Plasmid to db: "
-					+ e.toString());
+			throw new ManagerException("Could not save Plasmid to db: " + e.toString());
 		}
 		return savedPlasmid;
 
@@ -79,8 +74,7 @@ public class EntryManager extends Manager {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			throw new ManagerException("Could not save Plasmid to db: "
-					+ e.toString());
+			throw new ManagerException("Could not save Plasmid to db: " + e.toString());
 		}
 		return savedStrain;
 
@@ -103,8 +97,7 @@ public class EntryManager extends Manager {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			throw new ManagerException("Could not save Plasmid to db: "
-					+ e.toString());
+			throw new ManagerException("Could not save Plasmid to db: " + e.toString());
 		}
 		return savedStrain;
 	}
@@ -119,15 +112,13 @@ public class EntryManager extends Manager {
 
 	public static Entry get(int id) throws ManagerException {
 		try {
-			Query query = session.createQuery("from " + Entry.class.getName()
-					+ " where id = :id");
+			Query query = session.createQuery("from " + Entry.class.getName() + " where id = :id");
 			query.setParameter("id", id);
 			Entry entry = (Entry) query.uniqueResult();
 			return entry;
 
 		} catch (HibernateException e) {
-			throw new ManagerException("Couldn't retrieve Entry by id: "
-					+ String.valueOf(id), e);
+			throw new ManagerException("Couldn't retrieve Entry by id: " + String.valueOf(id), e);
 		}
 	}
 
@@ -141,16 +132,13 @@ public class EntryManager extends Manager {
 
 			return entry;
 		} catch (HibernateException e) {
-			throw new ManagerException("Couldn't retrieve Entry by recordId: "
-					+ recordId, e);
+			throw new ManagerException("Couldn't retrieve Entry by recordId: " + recordId, e);
 		}
 	}
 
-	public static Entry getByPartNumber(String partNumber)
-			throws ManagerException {
+	public static Entry getByPartNumber(String partNumber) throws ManagerException {
 		try {
-			Query query = session.createQuery("from "
-					+ PartNumber.class.getName()
+			Query query = session.createQuery("from " + PartNumber.class.getName()
 					+ " where partNumber = :partNumber");
 			query.setParameter("partNumber", partNumber);
 
@@ -165,8 +153,7 @@ public class EntryManager extends Manager {
 
 			return entry;
 		} catch (HibernateException e) {
-			throw new ManagerException(
-					"Couldn't retrieve Entry by partNumber: " + partNumber, e);
+			throw new ManagerException("Couldn't retrieve Entry by partNumber: " + partNumber, e);
 		}
 	}
 
@@ -184,13 +171,11 @@ public class EntryManager extends Manager {
 
 			return entryName.getEntry();
 		} catch (HibernateException e) {
-			throw new ManagerException("Couldn't retrieve Entry by name: "
-					+ name, e);
+			throw new ManagerException("Couldn't retrieve Entry by name: " + name, e);
 		}
 	}
 
-	public static Set<Entry> getByFilter(ArrayList<String[]> data, int offset,
-			int limit) {
+	public static Set<Entry> getByFilter(ArrayList<String[]> data, int offset, int limit) {
 		org.jbei.ice.lib.query.Query q = new org.jbei.ice.lib.query.Query();
 		LinkedHashSet<Entry> result = q.query(data, offset, limit);
 		return result;
@@ -198,21 +183,44 @@ public class EntryManager extends Manager {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static LinkedHashSet<Entry> getByAccount(Account account,
-			int offset, int limit) {
+	public static LinkedHashSet<Entry> getByAccount(Account account, int offset, int limit) {
 		String queryString = "from Entry where ownerEmail = :ownerEmail";
+
 		Query query = session.createQuery(queryString);
+
 		query.setParameter("ownerEmail", account.getEmail());
-		LinkedHashSet<Entry> result = new LinkedHashSet<Entry>(query.list());
-		return result;
+
+		return new LinkedHashSet<Entry>(query.list());
 	}
 
 	@SuppressWarnings("unchecked")
 	public static Set<Entry> getAll() {
 		String queryString = "from Entry";
+
 		Query query = session.createQuery(queryString);
-		LinkedHashSet<Entry> result = new LinkedHashSet<Entry>(query.list());
-		return result;
+
+		return new LinkedHashSet<Entry>(query.list());
+	}
+
+	public static int getNumberOfPublicEntries() {
+		return getNumberOfEntriesByVisibility(VISIBILITY_PUBLIC);
+	}
+
+	public static int getNumberOfEntries() {
+		String queryString = "select id from Entry";
+
+		Query query = session.createQuery(queryString);
+
+		return query.list().size();
+	}
+
+	public static int getNumberOfEntriesByVisibility(int visibility) {
+		String queryString = "select id from Entry where visibility = "
+				+ String.valueOf(visibility);
+
+		Query query = session.createQuery(queryString);
+
+		return query.list().size();
 	}
 
 	public static String generateUUID() {
@@ -220,16 +228,14 @@ public class EntryManager extends Manager {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static String generateNextPartNumber(String prefix,
-			String delimiter, String suffix) throws ManagerException {
+	public static String generateNextPartNumber(String prefix, String delimiter, String suffix)
+			throws ManagerException {
 		try {
-			String queryString = "from " + PartNumber.class.getName()
-					+ " where partNumber LIKE '" + prefix
-					+ "%' ORDER BY partNumber DESC";
+			String queryString = "from " + PartNumber.class.getName() + " where partNumber LIKE '"
+					+ prefix + "%' ORDER BY partNumber DESC";
 			Query query = session.createQuery(queryString);
 
-			ArrayList<PartNumber> tempList = new ArrayList<PartNumber>(query
-					.list());
+			ArrayList<PartNumber> tempList = new ArrayList<PartNumber>(query.list());
 			PartNumber entryPartNumber = null;
 			if (tempList.size() > 0) {
 				entryPartNumber = (PartNumber) tempList.get(0);
@@ -239,8 +245,7 @@ public class EntryManager extends Manager {
 			if (entryPartNumber == null) {
 				nextPartNumber = prefix + delimiter + suffix;
 			} else {
-				String[] parts = entryPartNumber.getPartNumber().split(
-						prefix + delimiter);
+				String[] parts = entryPartNumber.getPartNumber().split(prefix + delimiter);
 
 				if (parts != null && parts.length == 2) {
 					try {
@@ -248,13 +253,10 @@ public class EntryManager extends Manager {
 
 						value++;
 
-						nextPartNumber = prefix
-								+ delimiter
-								+ String.format("%0" + suffix.length() + "d",
-										value);
+						nextPartNumber = prefix + delimiter
+								+ String.format("%0" + suffix.length() + "d", value);
 					} catch (Exception e) {
-						throw new ManagerException("Couldn't parse partNumber",
-								e);
+						throw new ManagerException("Couldn't parse partNumber", e);
 					}
 				} else {
 					throw new ManagerException("Couldn't parse partNumber");
@@ -263,15 +265,14 @@ public class EntryManager extends Manager {
 
 			return nextPartNumber;
 		} catch (HibernateException e) {
-			throw new ManagerException("Couldn't retrieve Entry by partNumber",
-					e);
+			throw new ManagerException("Couldn't retrieve Entry by partNumber", e);
 		}
 	}
 
 	public static String getNextPartNumber() throws ManagerException {
-		return generateNextPartNumber(DEFAULT_PART_NUMBER_PREFIX,
-				DEFAULT_PART_NUMBER_DELIMITER,
-				DEFAULT_PART_NUMBER_DIGITAL_SUFFIX);
+		return generateNextPartNumber(JbeirSettings.getSetting("PART_NUMBER_PREFIX"), JbeirSettings
+				.getSetting("PART_NUMBER_DELIMITER"), JbeirSettings
+				.getSetting("PART_NUMBER_DIGITAL_SUFFIX"));
 	}
 
 	/**
@@ -285,13 +286,10 @@ public class EntryManager extends Manager {
 					+ " where fundingSource=:fundingSource AND"
 					+ " principalInvestigator=:principalInvestigator";
 			Query query = session.createQuery(queryString);
-			query.setParameter("fundingSource", fundingSource
-					.getFundingSource());
-			query.setParameter("principalInvestigator", fundingSource
-					.getPrincipalInvestigator());
+			query.setParameter("fundingSource", fundingSource.getFundingSource());
+			query.setParameter("principalInvestigator", fundingSource.getPrincipalInvestigator());
 
-			FundingSource existingFundingSource = (FundingSource) query
-					.uniqueResult();
+			FundingSource existingFundingSource = (FundingSource) query.uniqueResult();
 			if (existingFundingSource == null) {
 				result = (FundingSource) dbSave(fundingSource);
 			} else {
@@ -330,12 +328,9 @@ public class EntryManager extends Manager {
 		entry.setModificationTime(Calendar.getInstance().getTime());
 
 		// Manual cascade of EntryFundingSource. Guarantees unique FundingSource
-		for (EntryFundingSource entryFundingSource : entry
-				.getEntryFundingSources()) {
-			FundingSource tempFundingSource = entryFundingSource
-					.getFundingSource();
-			entryFundingSource
-					.setFundingSource(saveFundingSource(tempFundingSource));
+		for (EntryFundingSource entryFundingSource : entry.getEntryFundingSources()) {
+			FundingSource tempFundingSource = entryFundingSource.getFundingSource();
+			entryFundingSource.setFundingSource(saveFundingSource(tempFundingSource));
 			dbSave(entryFundingSource.getFundingSource());
 		}
 

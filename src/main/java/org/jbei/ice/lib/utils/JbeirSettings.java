@@ -21,6 +21,8 @@ public class JbeirSettings {
 		settings.put("PROJECT_NAME", "JBEI Registry");
 		settings.put("SECRET_KEY", "o6-v(yay5w@0!64e6-+ylbhcd9g03rv#@ezqh7axchds=q=$n+");
 		settings.put("PART_NUMBER_PREFIX", "TEST");
+		settings.put("PART_NUMBER_DIGITAL_SUFFIX", "000001");
+		settings.put("PART_NUMBER_DELIMITER", "_");
 
 		// LocalBackend, NullAuthenticationBackend, LblLdapAuthenticationBackend are built-in
 		settings.put("AUTHENTICATION_BACKEND",

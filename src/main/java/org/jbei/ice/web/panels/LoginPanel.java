@@ -6,6 +6,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
@@ -13,6 +14,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.protocol.http.WebResponse;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.pages.RegistrationPage;
+import org.jbei.ice.web.pages.WelcomePage;
 import org.jbei.ice.web.pages.WorkSpacePage;
 
 public class LoginPanel extends Panel {
@@ -32,11 +35,15 @@ public class LoginPanel extends Panel {
 
 				setModel(new CompoundPropertyModel<Object>(this));
 
-				add(new TextField<String>("loginName").setRequired(true)
-						.setLabel(new Model<String>("Login")));
-				add(new PasswordTextField("loginPassword").setRequired(true)
-						.setLabel(new Model<String>("Password")));
+				add(new TextField<String>("loginName").setRequired(true).setLabel(
+						new Model<String>("Login")));
+				add(new PasswordTextField("loginPassword").setRequired(true).setLabel(
+						new Model<String>("Password")));
 				add(new CheckBox("keepSignedIn"));
+				add(new BookmarkablePageLink<RegistrationPage>("registrationLink",
+						RegistrationPage.class));
+				add(new BookmarkablePageLink<RegistrationPage>("forgotPasswordLink",
+						WelcomePage.class));
 			}
 
 			// overridden methods
@@ -46,8 +53,7 @@ public class LoginPanel extends Panel {
 				if (authenticated) {
 					if (getKeepSignedIn()) {
 						IceSession iceSession = (IceSession) getSession();
-						iceSession
-								.makeSessionPersistent(((WebResponse) getResponse()));
+						iceSession.makeSessionPersistent(((WebResponse) getResponse()));
 					}
 
 					if (!continueToOriginalDestination()) {

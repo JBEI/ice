@@ -22,6 +22,7 @@ import org.jbei.ice.web.pages.EntryUpdatePage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.FeedbackPage;
 import org.jbei.ice.web.pages.LogOutPage;
+import org.jbei.ice.web.pages.LoginPage;
 import org.jbei.ice.web.pages.RegistrationPage;
 import org.jbei.ice.web.pages.UpdateAccountPage;
 import org.jbei.ice.web.pages.UpdatePasswordPage;
@@ -52,7 +53,7 @@ public class WicketApplication extends WebApplication {
 			e.printStackTrace();
 		}
 
-		mountBookmarkablePage("/login", WelcomePage.class);
+		mountBookmarkablePage("/login", LoginPage.class);
 		mountBookmarkablePage("/logout", LogOutPage.class);
 		mountBookmarkablePage("/registration", RegistrationPage.class);
 		mountBookmarkablePage("/update-account", UpdateAccountPage.class);
@@ -63,6 +64,7 @@ public class WicketApplication extends WebApplication {
 		mountBookmarkablePage("/entry/new", EntryNewPage.class);
 		mountBookmarkablePage("/entries", EntriesPage.class);
 		mountBookmarkablePage("/user/entries", UserEntryPage.class);
+
 		mount(new URIRequestTargetUrlCodingStrategy("/static") {
 			@Override
 			public IRequestTarget decode(RequestParameters requestParameters) {

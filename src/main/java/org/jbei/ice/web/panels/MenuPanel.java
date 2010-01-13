@@ -2,90 +2,73 @@ package org.jbei.ice.web.panels;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.web.pages.EntriesTablePage;
+import org.jbei.ice.web.pages.EntryNewPage;
+import org.jbei.ice.web.pages.FeedbackPage;
 import org.jbei.ice.web.pages.UnprotectedPage;
 import org.jbei.ice.web.pages.UserEntryPage;
-import org.jbei.ice.web.pages.WorkSpacePage;
 
 public class MenuPanel extends Panel {
-	
 	private static final long serialVersionUID = 1L;
 
 	public class MenuItem implements Serializable {
+		private static final long serialVersionUID = 1L;
 
-		private static final long serialVersionUID = 1L;	
-		@SuppressWarnings("unchecked")
-		protected BookmarkablePageLink pageLink = null;
+		protected BookmarkablePageLink<WebPage> pageLink = null;
 		protected Label label = null;
-		
-		public MenuItem() {
-			
-		}
-		
-		@SuppressWarnings("unchecked")
-		public MenuItem(BookmarkablePageLink pageLink, Label label) {
+
+		public MenuItem(BookmarkablePageLink<WebPage> pageLink, Label label) {
 			this.pageLink = pageLink;
 			this.label = label;
 		}
-		
-		@SuppressWarnings("unchecked")
-		public BookmarkablePageLink getPageLink() {
+
+		public BookmarkablePageLink<WebPage> getPageLink() {
 			return this.pageLink;
 		}
-		
+
 		public Label getLabel() {
 			return this.label;
 		}
-		
 	}
-	
+
 	private List<MenuItem> menuItems = new ArrayList<MenuItem>();
-		
+
 	public MenuPanel(String id) {
 		super(id);
+
 		addPageLinkMenuItem(UnprotectedPage.class, "Home");
-		addPageLinkMenuItem(UserEntryPage.class, "My Entries");
-		//addPageLinkMenuItem(WorkSpacePage.class, "WorkSpace");
+		addPageLinkMenuItem(UnprotectedPage.class, "News");
 		addPageLinkMenuItem(EntriesTablePage.class, "List View");
-		
-		
-		@SuppressWarnings("unchecked")
-		ListView menuList = new ListView ("menuList", menuItems) {
+		addPageLinkMenuItem(UserEntryPage.class, "My Entries");
+		addPageLinkMenuItem(EntryNewPage.class, "Add new entry");
+		addPageLinkMenuItem(FeedbackPage.class, "Feedback");
+
+		ListView<MenuItem> menuList = new ListView<MenuItem>("menuList", menuItems) {
 			private static final long serialVersionUID = 1L;
 
-			protected void populateItem(ListItem item) {
-				
+			protected void populateItem(ListItem<MenuItem> item) {
 				MenuItem menuItem = (MenuItem) item.getModelObject();
-				BookmarkablePageLink link = menuItem.getPageLink();
+				BookmarkablePageLink<WebPage> link = menuItem.getPageLink();
 				link.add(menuItem.getLabel());
 				item.add(link);
 			}
 		};
+
 		add(menuList);
-	
 	}
-	
-	/*
-	private void addPanelLinkMenuItem(Class<EntryFormPanel> c, String label) {
-		//MenuItem menuItem = new MenuItem(stuff, new Label("label", label));
-		
-	}
-	 */
-	
+
 	@SuppressWarnings("unchecked")
-	public void addPageLinkMenuItem(Class c, String label) {
-		MenuItem menuItem = new MenuItem(new BookmarkablePageLink("menuItem", c), 
+	public void addPageLinkMenuItem(Class webPage, String label) {
+		MenuItem menuItem = new MenuItem(new BookmarkablePageLink<WebPage>("menuItem", webPage),
 				new Label("label", label));
 		menuItems.add(menuItem);
-		
 	}
 }
