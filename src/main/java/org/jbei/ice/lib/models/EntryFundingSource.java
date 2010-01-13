@@ -13,15 +13,14 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "entries_funding_source")
-@SequenceGenerator(name = "sequence", sequenceName = "entries_funding_source_id_seq",
-		allocationSize = 1)
+@SequenceGenerator(name = "sequence", sequenceName = "entries_funding_source_id_seq", allocationSize = 1)
 public class EntryFundingSource implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
 	private int id;
-	
+
 	@OneToOne
 	@JoinColumn(name = "funding_source_id", nullable = false)
 	private FundingSource fundingSource;
@@ -53,6 +52,4 @@ public class EntryFundingSource implements Serializable {
 	public void setEntry(Entry entry) {
 		this.entry = entry;
 	}
-	
-	
 }

@@ -2,7 +2,6 @@ package org.jbei.ice.web.pages;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.form.Button;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
@@ -44,15 +43,19 @@ public class UpdatePasswordPage extends ProtectedPage {
 
 				setModel(new CompoundPropertyModel<Object>(this));
 
-				add(new PasswordTextField("oldPassword").setRequired(true)
-						.setLabel(new Model<String>("Old Password")).add(
-								new StringValidator.MinimumLengthValidator(6)));
-				add(new PasswordTextField("newPassword").setRequired(true)
-						.setLabel(new Model<String>("New Password")).add(
-								new StringValidator.MinimumLengthValidator(6)));
-				add(new PasswordTextField("confirm").setRequired(true)
-						.setLabel(new Model<String>("Confirm")).add(
-								new StringValidator.MinimumLengthValidator(6)));
+				add(new PasswordTextField("oldPassword").setRequired(true).setLabel(
+						new Model<String>("Old Password")).add(
+						new StringValidator.MinimumLengthValidator(6)));
+				add(new PasswordTextField("newPassword").setRequired(true).setLabel(
+						new Model<String>("New Password")).add(
+						new StringValidator.MinimumLengthValidator(6)));
+				add(new PasswordTextField("confirm").setRequired(true).setLabel(
+						new Model<String>("Confirm")).add(
+						new StringValidator.MinimumLengthValidator(6)));
+
+				add(new Button("submitButton", new Model<String>("Update")));
+
+				add(new FeedbackPanel("feedback"));
 			}
 
 			@Override
@@ -60,8 +63,7 @@ public class UpdatePasswordPage extends ProtectedPage {
 				try {
 					assert (account != null);
 
-					if (!AccountManager.encryptPassword(oldPassword).equals(
-							account.getPassword())) {
+					if (!AccountManager.encryptPassword(oldPassword).equals(account.getPassword())) {
 						error("Invalid Old Password");
 
 						return;
@@ -78,9 +80,7 @@ public class UpdatePasswordPage extends ProtectedPage {
 					setResponsePage(UpdatePasswordSuccessfulPage.class);
 
 					Emailer
-							.send(
-									account.getEmail(),
-									"Your password information has been updated",
+							.send(account.getEmail(), "Your password information has been updated",
 									"Your password information has been updated.\n\nBest regards,\nRegistry Team");
 				} catch (ManagerException e) {
 					handleException(e);
@@ -90,12 +90,6 @@ public class UpdatePasswordPage extends ProtectedPage {
 			}
 		}
 
-		Form<?> updatePasswordForm = new UpdatePasswordForm(
-				"updatePasswordForm");
-		updatePasswordForm.add(new Button("submitButton", new Model<String>(
-				"Update")));
-
-		add(updatePasswordForm);
-		updatePasswordForm.add(new FeedbackPanel("feedback"));
+		add(new UpdatePasswordForm("updatePasswordForm"));
 	}
 }

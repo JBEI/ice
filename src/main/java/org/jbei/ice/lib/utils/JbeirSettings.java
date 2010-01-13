@@ -7,10 +7,8 @@ public class JbeirSettings {
 
 	static {
 		settings.put("DATA_DIRECTORY", "/var/lib/jbeiregistry");
-		settings.put("ATTACHMENTS_DIRECTORY", settings.get("DATA_DIRECTORY")
-				+ "/attachments");
-		settings
-				.put("LOGS_DIRECTORY", settings.get("DATA_DIRECTORY") + "/logs");
+		settings.put("ATTACHMENTS_DIRECTORY", settings.get("DATA_DIRECTORY") + "/attachments");
+		settings.put("LOGS_DIRECTORY", settings.get("DATA_DIRECTORY") + "/logs");
 		settings.put("LUCENE_DIRECTORY", settings.get("DATA_DIRECTORY"));
 		settings.put("BLAST_DIRECTORY", settings.get("DATA_DIRECTORY"));
 		settings.put("SITE_SECRET", "Secret Sauce");
@@ -19,10 +17,9 @@ public class JbeirSettings {
 		settings.put("ADMIN_EMAIL", "zdmytriv@lbl.gov");
 		settings.put("MODERATOR_EMAIL", "zdmytriv@lbl.gov");
 		settings.put("SMTP_HOST", "baracuda.dhcp.lbl.gov");
-		settings.put("ERROR_EMAIL_EXCEPTION_PREFIX", "[ERROR]");
+		settings.put("ERROR_EMAIL_EXCEPTION_PREFIX", "[ERROR] ");
 		settings.put("PROJECT_NAME", "JBEI Registry");
-		settings.put("SECRET_KEY",
-				"o6-v(yay5w@0!64e6-+ylbhcd9g03rv#@ezqh7axchds=q=$n+");
+		settings.put("SECRET_KEY", "o6-v(yay5w@0!64e6-+ylbhcd9g03rv#@ezqh7axchds=q=$n+");
 		settings.put("PART_NUMBER_PREFIX", "TEST");
 
 		// LocalBackend, NullAuthenticationBackend, LblLdapAuthenticationBackend are built-in

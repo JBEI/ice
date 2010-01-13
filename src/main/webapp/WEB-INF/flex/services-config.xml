@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
+<services-config>
+	<services>
+		<service-include file-path="remoting-config.xml" />
+	</services>
+
+	<security>
+		<login-command class="flex.messaging.security.TomcatLoginCommand"
+			server="Tomcat" />
+	</security>
+
+	<channels>
+		<channel-definition id="VectorEditorAMFChannel"
+			class="mx.messaging.channels.AMFChannel">
+			<endpoint
+				url="http://{server.name}:{server.port}/{context.root}/messagebroker/amf"
+				class="flex.messaging.endpoints.AMFEndpoint" />
+			<properties>
+				<polling-enabled>false</polling-enabled>
+			</properties>
+		</channel-definition>
+	</channels>
+
+	<logging>
+		<target class="flex.messaging.log.ConsoleTarget" level="Error">
+			<properties>
+				<prefix>[BlazeDS] </prefix>
+				<includeDate>false</includeDate>
+				<includeTime>false</includeTime>
+				<includeLevel>false</includeLevel>
+				<includeCategory>false</includeCategory>
+			</properties>
+			<filters>
+				<pattern>Endpoint.*</pattern>
+				<pattern>Service.*</pattern>
+				<pattern>Configuration</pattern>
+			</filters>
+		</target>
+	</logging>
+
+	<system>
+		<redeploy>
+			<enabled>false</enabled>
+		</redeploy>
+		<manageable>
+			<enabled>false</enabled>
+		</manageable>
+	</system>
+</services-config>

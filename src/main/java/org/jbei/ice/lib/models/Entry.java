@@ -22,120 +22,115 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 
 import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.value_objects.IEntryValueObject;
 
 @Entity
 @Table(name = "entries")
-@SequenceGenerator(name = "sequence", sequenceName = "entries_id_seq",
-		allocationSize = 1)
+@SequenceGenerator(name = "sequence", sequenceName = "entries_id_seq", allocationSize = 1)
 public class Entry implements IEntryValueObject, Serializable {
-
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
 	private int id;
-	
+
 	@Column(name = "record_id", length = 36, nullable = false)
 	private String recordId;
-	
+
 	@Column(name = "version_id", length = 36, nullable = false)
 	private String versionId;
-	
+
 	@Column(name = "record_type", length = 10, nullable = false)
 	private String recordType;
-	
+
 	@Column(name = "owner", length = 127)
 	private String owner;
-	
+
 	@Column(name = "owner_email", length = 127)
 	private String ownerEmail;
-	
+
 	@Column(name = "creator", length = 127)
 	private String creator;
-	
+
 	@Column(name = "creator_email", length = 127)
 	private String creatorEmail;
-	
+
 	@Column(name = "alias", length = 127)
 	private String alias;
-	
+
 	@Column(name = "keywords", length = 127)
 	private String keywords;
-	
+
 	@Column(name = "visibility")
 	private int visibility;
-	
+
 	@Column(name = "status", length = 127)
 	private String status;
-	
+
 	@Column(name = "short_description")
 	private String shortDescription;
-	
+
 	@Column(name = "long_description")
 	private String longDescription;
-	
+
 	@Column(name = "literature_references")
 	private String references;
-	
+
 	@Column(name = "creation_time")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date creationTime;
-	
+
 	@Column(name = "modification_time")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date modificationTime;
-	
+
 	@Column(name = "bio_safety_level")
 	private Integer bioSafetyLevel;
-	
+
 	@Column(name = "intellectual_property")
 	private String intellectualProperty;
-	
+
 	@OneToOne(mappedBy = "entry")
 	private Sequence sequence;
 
-	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, mappedBy = "entry")
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry")
 	@Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
 	@JoinColumn(name = "entries_id")
-	@OrderBy("id")	
+	@OrderBy("id")
 	private Set<SelectionMarker> selectionMarkers = new LinkedHashSet<SelectionMarker>();
 
-	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, mappedBy = "entry")
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry")
 	@Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
 	@JoinColumn(name = "entries_id")
 	@OrderBy("id")
 	private Set<Link> links = new LinkedHashSet<Link>();
-	
-	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, mappedBy = "entry")
+
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry")
 	@Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
 	@JoinColumn(name = "entries_id")
 	@OrderBy("id")
 	private Set<Name> names = new LinkedHashSet<Name>();
-	
-	@OneToMany(cascade={CascadeType.ALL}, fetch=FetchType.EAGER, mappedBy = "entry")
+
+	@OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER, mappedBy = "entry")
 	@Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
 	@JoinColumn(name = "entries_id")
-	@OrderBy("id")	
+	@OrderBy("id")
 	private Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
-	
-	@OneToMany(cascade = {CascadeType.ALL}, fetch=FetchType.LAZY, mappedBy = "entry")
+
+	@OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY, mappedBy = "entry")
 	@Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
 	@JoinColumn(name = "entries_id")
 	@OrderBy("id")
 	private Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
-	
-	
+
 	public Entry() {
 	}
 
-	public Entry(String recordId, String versionId, String recordType,
-			String owner, String ownerEmail, String creator,
-			String creatorEmail, int visibility, String status, String alias,
-			String keywords, String shortDescription, String longDescription,
+	public Entry(String recordId, String versionId, String recordType, String owner,
+			String ownerEmail, String creator, String creatorEmail, int visibility, String status,
+			String alias, String keywords, String shortDescription, String longDescription,
 			String references, Date creationTime, Date modificationTime) {
 		this.recordId = recordId;
 		this.versionId = versionId;
@@ -198,7 +193,7 @@ public class Entry implements IEntryValueObject, Serializable {
 		}
 		return result;
 	}
-	
+
 	public String getNamesAsString() {
 		String result = "";
 		ArrayList<String> names = new ArrayList<String>();
@@ -206,11 +201,10 @@ public class Entry implements IEntryValueObject, Serializable {
 			names.add(name.getName());
 		}
 		result = org.jbei.ice.lib.utils.Utils.join(", ", names);
-		
+
 		return result;
-	}	
-	
-	
+	}
+
 	public void setNames(Set<Name> names) {
 		this.names.clear();
 		this.names.addAll(names);
@@ -227,19 +221,19 @@ public class Entry implements IEntryValueObject, Serializable {
 			numbers.add(number.getPartNumber());
 		}
 		result = org.jbei.ice.lib.utils.Utils.join(", ", numbers);
-		
+
 		return result;
 	}
-	
+
 	public PartNumber getOnePartNumber() {
 		PartNumber result = null;
-		
+
 		if (partNumbers.size() > 0) {
 			result = (PartNumber) partNumbers.toArray()[0];
 		}
 		return result;
 	}
-	
+
 	public void setPartNumbers(Set<PartNumber> partNumbers) {
 		this.partNumbers.clear();
 		this.partNumbers.addAll(partNumbers);
@@ -312,12 +306,12 @@ public class Entry implements IEntryValueObject, Serializable {
 			markers.add(marker.getName());
 		}
 		result = org.jbei.ice.lib.utils.Utils.join(", ", markers);
-		
+
 		return result;
 	}
-	
+
 	public void setSelectionMarkers(Set<SelectionMarker> selectionMarkers) {
-		this.selectionMarkers.clear(); 
+		this.selectionMarkers.clear();
 		this.selectionMarkers.addAll(selectionMarkers);
 	}
 
@@ -332,10 +326,10 @@ public class Entry implements IEntryValueObject, Serializable {
 			links.add(link.getLink());
 		}
 		result = org.jbei.ice.lib.utils.Utils.join(", ", links);
-		
+
 		return result;
 	}
-	
+
 	public void setLinks(Set<Link> links) {
 		this.links.clear(); //This way lets Hibernate know the set has been updated
 		this.links.addAll(links);

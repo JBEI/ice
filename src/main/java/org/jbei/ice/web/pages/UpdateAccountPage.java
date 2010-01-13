@@ -2,7 +2,6 @@ package org.jbei.ice.web.pages;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.form.Button;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
@@ -55,23 +54,24 @@ public class UpdateAccountPage extends ProtectedPage {
 				institution = account.getInstitution();
 				description = account.getDescription();
 
-				add(new TextField<String>("firstName").setRequired(true)
-						.setLabel(new Model<String>("Given name")).add(
-								new StringValidator.MaximumLengthValidator(50)));
-				add(new TextField<String>("lastName").setRequired(true)
-						.setLabel(new Model<String>("Family name")).add(
-								new StringValidator.MaximumLengthValidator(50)));
-				add(new TextField<String>("initials").setLabel(
-						new Model<String>("Initials")).add(
+				add(new TextField<String>("firstName").setRequired(true).setLabel(
+						new Model<String>("Given name")).add(
+						new StringValidator.MaximumLengthValidator(50)));
+				add(new TextField<String>("lastName").setRequired(true).setLabel(
+						new Model<String>("Family name")).add(
+						new StringValidator.MaximumLengthValidator(50)));
+				add(new TextField<String>("initials").setLabel(new Model<String>("Initials")).add(
 						new StringValidator.MaximumLengthValidator(10)));
 				add(new TextField<String>("email").setRequired(true).setLabel(
 						new Model<String>("Email")).add(
 						new StringValidator.MaximumLengthValidator(100)).add(
 						EmailAddressValidator.getInstance()));
-				add(new TextField<String>("institution")
-						.setLabel(new Model<String>("Institution")));
-				add(new TextArea<String>("description")
-						.setLabel(new Model<String>("Description")));
+				add(new TextField<String>("institution").setLabel(new Model<String>("Institution")));
+				add(new TextArea<String>("description").setLabel(new Model<String>("Description")));
+
+				add(new Button("submitButton", new Model<String>("Update")));
+
+				add(new FeedbackPanel("feedback"));
 			}
 
 			@Override
@@ -101,9 +101,7 @@ public class UpdateAccountPage extends ProtectedPage {
 					setResponsePage(UpdateAccountSuccessfulPage.class);
 
 					Emailer
-							.send(
-									email,
-									"Your account information has been updated",
+							.send(email, "Your account information has been updated",
 									"Your account information has been updated.\n\nBest regards,\nRegistry Team");
 				} catch (ManagerException e) {
 					handleException(e);
@@ -113,11 +111,6 @@ public class UpdateAccountPage extends ProtectedPage {
 			}
 		}
 
-		Form<?> updateAccountForm = new UpdateAccountForm("updateAccountForm");
-		updateAccountForm.add(new Button("submitButton", new Model<String>(
-				"Update")));
-
-		add(updateAccountForm);
-		updateAccountForm.add(new FeedbackPanel("feedback"));
+		add(new UpdateAccountForm("updateAccountForm"));
 	}
 }

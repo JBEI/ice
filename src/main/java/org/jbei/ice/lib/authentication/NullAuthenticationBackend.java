@@ -14,8 +14,7 @@ public class NullAuthenticationBackend implements IAuthenticationBackend {
 		} catch (Exception e) {
 			e.printStackTrace();
 
-			Logger.warn("null authentication failed with "
-					+ Utils.stackTraceToString(e));
+			Logger.warn("null authentication failed with " + Utils.stackTraceToString(e));
 		}
 
 		return account;

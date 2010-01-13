@@ -12,8 +12,7 @@ public class LocalBackend implements IAuthenticationBackend {
 			account = AccountManager.getByEmail(userId);
 
 			if ((account == null)
-					|| (!account.getPassword().equals(
-							AccountManager.encryptPassword(password)))) {
+					|| (!account.getPassword().equals(AccountManager.encryptPassword(password)))) {
 				return null;
 			}
 		} catch (ManagerException e) {

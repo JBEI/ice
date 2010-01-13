@@ -8,11 +8,9 @@ public class AuthenticationBackendManager {
 		String backendName = JbeirSettings.getSetting("AUTHENTICATION_BACKEND");
 
 		try {
-			final Class<?> authenticationBackendClass = Class
-					.forName(backendName);
+			final Class<?> authenticationBackendClass = Class.forName(backendName);
 
-			return (IAuthenticationBackend) authenticationBackendClass
-					.newInstance();
+			return (IAuthenticationBackend) authenticationBackendClass.newInstance();
 		} catch (ClassNotFoundException e) {
 			throw new AuthenticationBackendManagerException(e);
 		} catch (InstantiationException e) {

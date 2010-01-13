@@ -2,7 +2,6 @@ package org.jbei.ice.web.pages;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.form.Button;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextArea;
@@ -48,29 +47,30 @@ public class RegistrationPage extends UnprotectedPage {
 
 				setModel(new CompoundPropertyModel<Object>(this));
 
-				add(new TextField<String>("firstName").setRequired(true)
-						.setLabel(new Model<String>("Given name")).add(
-								new StringValidator.MaximumLengthValidator(50)));
-				add(new TextField<String>("lastName").setRequired(true)
-						.setLabel(new Model<String>("Family name")).add(
-								new StringValidator.MaximumLengthValidator(50)));
-				add(new TextField<String>("initials").setLabel(
-						new Model<String>("Initials")).add(
+				add(new TextField<String>("firstName").setRequired(true).setLabel(
+						new Model<String>("Given name")).add(
+						new StringValidator.MaximumLengthValidator(50)));
+				add(new TextField<String>("lastName").setRequired(true).setLabel(
+						new Model<String>("Family name")).add(
+						new StringValidator.MaximumLengthValidator(50)));
+				add(new TextField<String>("initials").setLabel(new Model<String>("Initials")).add(
 						new StringValidator.MaximumLengthValidator(10)));
 				add(new TextField<String>("email").setRequired(true).setLabel(
 						new Model<String>("Email")).add(
 						new StringValidator.MaximumLengthValidator(100)).add(
 						EmailAddressValidator.getInstance()));
-				add(new PasswordTextField("password").setRequired(true)
-						.setLabel(new Model<String>("Password")).add(
-								new StringValidator.MinimumLengthValidator(6)));
-				add(new PasswordTextField("confirmPassword").setRequired(true)
-						.setLabel(new Model<String>("Confirm")).add(
-								new StringValidator.MinimumLengthValidator(6)));
-				add(new TextField<String>("institution")
-						.setLabel(new Model<String>("Institution")));
-				add(new TextArea<String>("description")
-						.setLabel(new Model<String>("Description")));
+				add(new PasswordTextField("password").setRequired(true).setLabel(
+						new Model<String>("Password")).add(
+						new StringValidator.MinimumLengthValidator(6)));
+				add(new PasswordTextField("confirmPassword").setRequired(true).setLabel(
+						new Model<String>("Confirm")).add(
+						new StringValidator.MinimumLengthValidator(6)));
+				add(new TextField<String>("institution").setLabel(new Model<String>("Institution")));
+				add(new TextArea<String>("description").setLabel(new Model<String>("Description")));
+
+				add(new Button("submitButton", new Model<String>("Submit")));
+
+				add(new FeedbackPanel("feedback"));
 			}
 
 			@Override
@@ -88,17 +88,15 @@ public class RegistrationPage extends UnprotectedPage {
 						return;
 					}
 
-					account = new Account(firstName, lastName, initials, email,
-							AccountManager.encryptPassword(password),
-							institution, description);
+					account = new Account(firstName, lastName, initials, email, AccountManager
+							.encryptPassword(password), institution, description);
 
 					AccountManager.save(account);
 
 					setResponsePage(RegistrationSuccessfulPage.class);
 
-					Emailer.send(email, "Account created successfully", "Dear "
-							+ firstName + " " + lastName
-							+ ",\n\nThank you for creating "
+					Emailer.send(email, "Account created successfully", "Dear " + firstName + " "
+							+ lastName + ",\n\nThank you for creating "
 							+ JbeirSettings.getSetting("PROJECT_NAME")
 							+ " account.\n\nBest regards,\nRegistry Team");
 				} catch (ManagerException e) {
@@ -109,11 +107,6 @@ public class RegistrationPage extends UnprotectedPage {
 			}
 		}
 
-		Form<?> registrationForm = new RegistrationForm("registrationForm");
-		registrationForm.add(new Button("submitButton", new Model<String>(
-				"Submit")));
-
-		add(registrationForm);
-		registrationForm.add(new FeedbackPanel("feedback"));
+		add(new RegistrationForm("registrationForm"));
 	}
 }

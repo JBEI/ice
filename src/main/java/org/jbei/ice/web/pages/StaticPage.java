@@ -1,5 +1,7 @@
 package org.jbei.ice.web.pages;
 
-public class StaticPage {
+import org.apache.wicket.markup.html.WebPage;
+
+public class StaticPage extends WebPage {
 	
 }

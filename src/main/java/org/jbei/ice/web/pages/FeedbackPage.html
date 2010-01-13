@@ -1,0 +1,40 @@
+<html xmlns:wicket>
+<body>
+<wicket:extend>
+	<form wicket:id="feedbackForm">
+	<table border="0" cellpadding="3" cellspacing="1" class="entry_table">
+		<tr class="title_row_header">
+			<td>
+			<h2>Feedback</h2>
+			</td>
+		</tr>
+		<tr>
+			<td bgcolor="#ffffff">
+			<table width="100%" border="0" cellpadding="0" cellspacing="2">
+				<tr>
+					<td colspan="2"><span wicket:id="feedback"></span></td>
+				</tr>
+				<tr>
+					<td style="width: 150px">Email: <span class="error">*</span></td>
+					<td><input type="text" wicket:id="email" class="inputbox" maxlength="100" /></td>
+				</tr>
+				<tr>
+					<td style="width: 150px">Subject: <span class="error">*</span></td>
+					<td><input type="text" wicket:id="subject" class="inputbox" /></td>
+				</tr>
+				<tr>
+					<td style="width: 150px">Message:</td>
+					<td><textarea style="width: 400px; height: 150px" rows="10" name="message" id="message" wicket:id="message" cols="20" class="inputarea"></textarea></td>
+				</tr>
+				<tr>
+					<td style="width: 150px"></td>
+					<td><input type="submit" wicket:id="submitButton" class="button" /></td>
+				</tr>
+			</table>
+			</td>
+		</tr>
+	</table>
+	</form>
+</wicket:extend>
+</body>
+</html>

@@ -20,8 +20,7 @@ public class UnprotectedPage extends WebPage {
 	 */
 	public UnprotectedPage(final PageParameters parameters) {
 		// TODO: move css to someplace logical
-		add(new StyleSheetReference("stylesheet", UnprotectedPage.class,
-				"main.css"));
+		add(new StyleSheetReference("stylesheet", UnprotectedPage.class, "main.css"));
 
 		// TODO Add your page's components here
 		add(new Label("title", "Home - JBEI Registry"));
@@ -30,13 +29,14 @@ public class UnprotectedPage extends WebPage {
 		add(new SearchBarFormPanel("searchBarPanel"));
 	}
 
-	public void handleException(Throwable e) {
-		String body = Utils.stackTraceToString(e);
+	public void handleException(Throwable throwable) {
+		String body = Utils.stackTraceToString(throwable);
+		String subject = (throwable.getMessage().length() > 50) ? (throwable.getMessage()
+				.substring(0, 50) + "...") : throwable.getMessage();
 
-		Emailer.error(JbeirSettings.getSetting("ERROR_EMAIL_EXCEPTION_PREFIX")
-				+ " " + e.getMessage(), e.getMessage() + "\n\n" + body);
+		Emailer.error(JbeirSettings.getSetting("ERROR_EMAIL_EXCEPTION_PREFIX") + subject, body);
 
-		Logger.error(e.getMessage());
+		Logger.error(throwable.getMessage());
 		Logger.error(body);
 	}
 }

@@ -40,8 +40,7 @@ public class LblLdapAuthenticationBackend implements IAuthenticationBackend {
 				account.setInstitution(l.getOrg());
 				account.setDescription(l.getDescription());
 
-				WebClientInfo temp = (WebClientInfo) IceSession.get()
-						.getClientInfo();
+				WebClientInfo temp = (WebClientInfo) IceSession.get().getClientInfo();
 				String ip = temp.getProperties().getRemoteAddress();
 
 				account.setIp(ip);
@@ -54,8 +53,7 @@ public class LblLdapAuthenticationBackend implements IAuthenticationBackend {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			Logger.warn("authentication failed for " + loginId + " with "
-					+ e.toString());
+			Logger.warn("authentication failed for " + loginId + " with " + e.toString());
 		}
 
 		return account;

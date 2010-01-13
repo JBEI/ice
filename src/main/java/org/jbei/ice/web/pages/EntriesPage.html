@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd" xml:lang="en" lang="en">
+
+<head>
+<style type="text/css">
+body {
+	padding: 0;
+	font: 0.8em Arial, sans-serif;
+	line-height: 1.5em;
+	background: #ffffff;
+	color: #454545;
+	margin-top: 5;
+	margin-bottom: 5;
+	margin-left: 5;
+	margin-right: 5;
+	height: 100%;
+}
+
+.data_table {
+	background-color: #BBBBBB;
+}
+
+.data_table th {
+	style ="font-weight: bold;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	white-space: nowrap;
+	"
+}
+
+a {
+	color: #185DA0;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #9EC068;
+}
+</style>
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>
+		<table width="100%" border="0" cellpadding="3" cellspacing="1" class="data_table">
+			<tr bgcolor="#F0F0F0">
+				<th>#</th>
+				<th>ID</th>
+				<th>Name</th>
+				<th>Type</th>
+				<th>Owner</th>
+				<th>Summary</th>
+				<th>Created</th>
+				<th>Sequence</th>
+			</tr>
+			<tbody wicket:id="entriesTable">
+				<tr style="background-color: #FFFFFF;">
+					<td wicket:id="id">Id here</td>
+					<td wicket:id="partNumber">PartNumber here</td>
+					<td wicket:id="name">Name here</td>
+					<td wicket:id="type">Type here</td>
+					<td wicket:id="owner">Owner here</td>
+					<td wicket:id="summary">Summary here</td>
+					<td wicket:id="created" style="white-space: nowrap">Creation Time here</td>
+					<td><a wicket:id="viewLink" href="#">View &gt;&gt;</a></td>
+				</tr>
+			</tbody>
+		</table>
+		</td>
+	</tr>
+</table>
+</body>
+</html>
