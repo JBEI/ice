@@ -8,9 +8,11 @@ import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.SimpleAttributeModifier;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.WebComponent;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.Model;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
@@ -23,59 +25,95 @@ import org.jbei.ice.web.panels.SamplePagingPanel;
 
 public class UserEntryPage extends ProtectedPage {
 	Panel userPanel;
+	Component entriesLink;
+	Component samplesLink;
+
+	@SuppressWarnings("unchecked")
 	public UserEntryPage(PageParameters parameters) {
 		super(parameters);
 
 		Account account = IceSession.get().getAccount();
-		LinkedHashSet<Entry> entries = EntryManager.getByAccount(account, 0, 1000);
-		ArrayList<Entry> entriesList = new ArrayList<Entry> (entries);
+		LinkedHashSet<Entry> entries = EntryManager.getByAccount(account, 0,
+				1000);
+		ArrayList<Entry> entriesList = new ArrayList<Entry>(entries);
 		userPanel = new EntryPagingPanel("userPanel", entriesList, 50);
 		userPanel.setOutputMarkupId(true);
-		
-		AjaxFallbackLink entriesLink = new AjaxFallbackLink("userEntriesLink") {
-			
+
+		class UserEntriesLink extends AjaxFallbackLink {
+
 			private static final long serialVersionUID = 1L;
 
+			public UserEntriesLink(String id) {
+				super(id);
+			}
+
+			@Override
 			public void onClick(AjaxRequestTarget target) {
-				System.out.println("I'm in entries");
 				Account account = IceSession.get().getAccount();
-				LinkedHashSet<Entry> entries = EntryManager.getByAccount(account, 0, 1000);
-				ArrayList<Entry> entriesList = new ArrayList<Entry> (entries);
+				LinkedHashSet<Entry> entries = EntryManager.getByAccount(
+						account, 0, 1000);
+				ArrayList<Entry> entriesList = new ArrayList<Entry>(entries);
 				userPanel = new EntryPagingPanel("userPanel", entriesList, 50);
 				userPanel.setOutputMarkupId(true);
 				getPage().replace(userPanel);
 				target.addComponent(userPanel);
-				
+				samplesLink.add(new SimpleAttributeModifier("class", "inactive"))
+						.setOutputMarkupId(true);
+				entriesLink.add(new SimpleAttributeModifier("class", "active"))
+						.setOutputMarkupId(true);
+
+				getPage().replace(samplesLink);
+				target.addComponent(samplesLink);
+				getPage().replace(entriesLink);
+				target.addComponent(entriesLink);
+
 			}
 		};
-	
-		AjaxFallbackLink samplesLink = new AjaxFallbackLink("userSamplesLink") {
-			
+
+		class UserSamplesLink extends AjaxFallbackLink {
 			private static final long serialVersionUID = 1L;
+
+			public UserSamplesLink(String id) {
+				super(id);
+			}
+
+			@Override
 			public void onClick(AjaxRequestTarget target) {
-				System.out.println("I'm in samples");
 				Account account = IceSession.get().getAccount();
-				Set<Sample> samples;
+				Set<Sample> samples = null;
+
 				try {
 					samples = SampleManager.getByAccount(account);
-					ArrayList<Sample> samplesList = new ArrayList<Sample> (samples);
-					userPanel = new SamplePagingPanel("userPanel", samplesList, 50);
-					userPanel.setOutputMarkupId(true);
-					getPage().replace(userPanel);
-					target.addComponent(userPanel);
-					
 				} catch (ManagerException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
-				
-				
+				ArrayList<Sample> samplesList = new ArrayList<Sample>(samples);
+				userPanel = new SamplePagingPanel("userPanel", samplesList, 50);
+				userPanel.setOutputMarkupId(true);
+				getPage().replace(userPanel);
+				target.addComponent(userPanel);
+
+				samplesLink.add(new SimpleAttributeModifier("class", "active"))
+						.setOutputMarkupId(true);
+				getPage().replace(samplesLink);
+				target.addComponent(samplesLink);
+				entriesLink.add(new SimpleAttributeModifier("class", "inactive"))
+						.setOutputMarkupId(true);
+				getPage().replace(entriesLink);
+				target.addComponent(entriesLink);
 			}
-		};
-		
-		
-		add(entriesLink);		
+		}
+		;
+
+		entriesLink = new UserEntriesLink("userEntriesLink").add(
+				new SimpleAttributeModifier("class", "active"))
+				.setOutputMarkupId(true);
+		samplesLink = new UserSamplesLink("userSamplesLink").add(
+				new SimpleAttributeModifier("class", "inactive"))
+				.setOutputMarkupId(true);
+
+		add(entriesLink);
 		add(samplesLink);
 		add(userPanel);
 	}

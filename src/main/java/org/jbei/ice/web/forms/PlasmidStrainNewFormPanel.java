@@ -247,7 +247,7 @@ public class PlasmidStrainNewFormPanel extends Panel {
 				plasmid.setBackbone(getPlasmidBackbone());
 				plasmid.setOriginOfReplication(getPlasmidOriginOfReplication());
 				plasmid.setPromoters(getPlasmidPromoters());
-				plasmid.setCircular(isPlasmidCircular());
+				plasmid.setCircular(getPlasmidCircular());
 
 				// simplified strain form processing
 				try {
@@ -481,7 +481,7 @@ public class PlasmidStrainNewFormPanel extends Panel {
 				this.plasmidPromoters = plasmidPromoters;
 			}
 
-			public boolean isPlasmidCircular() {
+			public boolean getPlasmidCircular() {
 				return plasmidCircular;
 			}
 

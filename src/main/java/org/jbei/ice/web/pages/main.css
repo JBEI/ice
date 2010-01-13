@@ -362,7 +362,7 @@ span.form_help_text {
 }
 
 #tabs a:hover {
-	background: #F0F0F0;
+	background: #F0F0G0;
 	margin: 2px 2px 0 0;
 	position: relative;
 	top: 0;
@@ -379,7 +379,7 @@ span.form_help_text {
 	border-right: 1px solid #666;
 	border-top: 1px solid #666;
 	border-left: 1px solid #666;
-	padding: 3px 10px 2px 10px;
+	padding: 3px 10px 3px 10px;
 	text-decoration: none;
 	color: #333;
 }
@@ -393,7 +393,31 @@ span.form_help_text {
 	border-right: 1px solid #666;
 	border-top: 1px solid #666;
 	border-left: 1px solid #666;
-	padding: 3px 10px 2px 10px;
+	padding: 3px 10px 3px 10px;
 	text-decoration: none;
 	color: #333;
+}
+
+
+#tabs a.inactive {
+	position: relative;
+	top: 0;
+	margin: 2px 2px 0 0;
+	float: left;
+	background: #FFFFFF;
+	border-right: 1px solid #aaa;
+	border-top: 1px solid #aaa;
+	border-left: 1px solid #aaa;
+	padding: 2px 10px 2px 10px;
+	text-decoration: none;
+	color: #333;
+}
+
+#tabs a.inactive:hover {
+	background: #FFFFF0;
+	margin: 2px 2px 0 0;
+	position: relative;
+	top: 0;
+	padding: 3px 10px 3px 10px;
+	margin-top: 0px;
 }
