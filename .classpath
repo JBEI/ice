@@ -3,5 +3,11 @@
 	<classpathentry kind="src" output="target/test-classes" path="src/test/java"/>
 	<classpathentry kind="con" path="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/backport-util-concurrent.jar"/>
+	<classpathentry kind="lib" path="lib/flex-messaging-common.jar"/>
+	<classpathentry kind="lib" path="lib/flex-messaging-core.jar"/>
+	<classpathentry kind="lib" path="lib/flex-messaging-opt.jar"/>
+	<classpathentry kind="lib" path="lib/flex-messaging-proxy.jar"/>
+	<classpathentry kind="lib" path="lib/flex-messaging-remoting.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
