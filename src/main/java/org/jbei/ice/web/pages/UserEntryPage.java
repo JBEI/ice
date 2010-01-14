@@ -9,9 +9,6 @@ import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
-import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.html.WebComponent;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
@@ -103,8 +100,7 @@ public class UserEntryPage extends ProtectedPage {
 				getPage().replace(entriesLink);
 				target.addComponent(entriesLink);
 			}
-		}
-		;
+		};
 
 		entriesLink = new UserEntriesLink("userEntriesLink").add(
 				new SimpleAttributeModifier("class", "active"))

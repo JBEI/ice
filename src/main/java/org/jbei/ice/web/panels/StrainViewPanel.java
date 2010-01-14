@@ -20,8 +20,6 @@ public class StrainViewPanel extends Panel {
 		
 		ArrayList<Component> elements = new ArrayList<Component>();
 		
-		elements.add(new Label("titleName", 
-				entry.getOneName().getName()));
 		elements.add(new Label("partNumber", 
 				entry.getOnePartNumber().getPartNumber()));
 		elements.add(new Label("selectionMarkers", 

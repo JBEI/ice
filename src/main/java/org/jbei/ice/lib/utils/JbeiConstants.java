@@ -38,4 +38,16 @@ public class JbeiConstants {
 		}
 		return result;
 	}
+	
+	public final static String getRecordType(String key) {
+		String result = "";
+		if (key.equals("part")) {
+			result = "Part";
+		} else if (key.equals("plasmid")) {
+			result = "Plasmid";
+		} else if (key.equals("strain")) {
+			result = "Strain";
+		}
+		return result;
+	}
 }

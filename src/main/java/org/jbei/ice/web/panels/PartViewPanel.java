@@ -26,9 +26,7 @@ public class PartViewPanel extends Panel {
 		super(id);
 		
 		ArrayList<Component> elements = new ArrayList<Component>();
-		
-		elements.add(new Label("titleName", 
-				entry.getOneName().getName()));
+
 		elements.add(new Label("partNumber", 
 				entry.getOnePartNumber().getPartNumber()));
 		elements.add(new Label("names", 
