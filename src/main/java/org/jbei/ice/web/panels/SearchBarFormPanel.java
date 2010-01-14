@@ -21,6 +21,7 @@ public class SearchBarFormPanel extends Panel {
 	private static final long serialVersionUID = 1L;
 	
 	
+	@SuppressWarnings("unchecked")
 	public SearchBarFormPanel(String id) {
 		super(id);
 
@@ -58,6 +59,8 @@ public class SearchBarFormPanel extends Panel {
 		//TODO blast search
 		searchBarForm.	add(new BookmarkablePageLink("blastSearchLink", UserEntryPage.class));
 		AjaxButton ajaxButton = new AjaxButton("submitButton", new Model<String>("Search"), searchBarForm) {
+
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

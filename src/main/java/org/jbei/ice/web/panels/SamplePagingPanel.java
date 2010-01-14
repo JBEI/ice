@@ -5,16 +5,13 @@ import java.util.ArrayList;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.Model;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Name;
-import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.web.pages.EntryViewPage;
 
@@ -45,7 +42,6 @@ public class SamplePagingPanel extends Panel {
 				item.add(new Label("type", entry.getRecordType()));
 				Name temp = (Name) entry.getNames().toArray()[0];
 				item.add(new Label("name", temp.getName()));
-				PartNumber temp2 = (PartNumber) entry.getPartNumbers().toArray()[0];
 				item.add(new BookmarkablePageLink("partIdLink", EntryViewPage.class, 
 						new PageParameters("0=" + entry.getId())).
 						add(new Label("partNumber", entry.getOnePartNumber().getPartNumber())));

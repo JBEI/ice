@@ -7,6 +7,7 @@ import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
+@SuppressWarnings("serial")
 public class RowItemPanel extends Panel {
 	protected String name;
 	protected String description;
@@ -17,6 +18,7 @@ public class RowItemPanel extends Panel {
 		super(id);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public RowItemPanel(String id, String name, String description, 
 			boolean checkBox, Date date) {
 		

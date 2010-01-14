@@ -15,6 +15,10 @@ import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.web.pages.EntryUpdatePage;
 
 public class StrainViewPanel extends Panel {
+
+	private static final long serialVersionUID = 1L;
+
+	@SuppressWarnings("unchecked")
 	public StrainViewPanel(String id, Strain entry) {
 		super(id);
 		

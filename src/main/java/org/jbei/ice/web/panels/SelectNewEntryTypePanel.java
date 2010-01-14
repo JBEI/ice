@@ -2,7 +2,6 @@ package org.jbei.ice.web.panels;
 
 import java.util.ArrayList;
 
-import org.apache.wicket.Page;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormChoiceComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.form.RadioChoice;
