@@ -7,6 +7,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
@@ -32,11 +33,13 @@ public class EntryViewPage extends ProtectedPage {
 	public Component attachmentsPanel;
 	public Component sequencePanel;
 
-	public Component generalLink;
-	public Component samplesLink;
-	public Component attachmentsLink;
-	public Component sequenceLink;
+	@SuppressWarnings("unchecked")
+	public BookmarkablePageLink generalLink;
+	public AjaxFallbackLink<?> samplesLink;
+	public AjaxFallbackLink<?> attachmentsLink;
+	public AjaxFallbackLink<?> sequenceLink;
 
+	@SuppressWarnings("unchecked")
 	public EntryViewPage(PageParameters parameters) {
 		super(parameters);
 
@@ -47,37 +50,7 @@ public class EntryViewPage extends ProtectedPage {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		@SuppressWarnings( { "unchecked" })
-		class GeneralLink extends AjaxFallbackLink {
-			private static final long serialVersionUID = 1L;
 
-			public GeneralLink(String id) {
-				super(id);
-			}
-
-			public void onClick(AjaxRequestTarget target) {
-				generalLink.add(new SimpleAttributeModifier("class", "active"))
-						.setOutputMarkupId(true);
-				samplesLink.add(
-						new SimpleAttributeModifier("class", "inactive"))
-						.setOutputMarkupId(true);
-				attachmentsLink.add(
-						new SimpleAttributeModifier("class", "inactive"))
-						.setOutputMarkupId(true);
-				sequenceLink.add(
-						new SimpleAttributeModifier("class", "inactive"))
-						.setOutputMarkupId(true);
-
-				refreshTabLinks(getPage(), target);
-
-				displayPanel = generalPanel;
-				getPage().replace(displayPanel);
-				target.addComponent(displayPanel);
-			}
-		}
-
-		@SuppressWarnings("unchecked")
 		class SamplesLink extends AjaxFallbackLink {
 			private static final long serialVersionUID = 1L;
 
@@ -109,7 +82,6 @@ public class EntryViewPage extends ProtectedPage {
 			}
 		}
 
-		@SuppressWarnings("unchecked")
 		class AttachmentsLink extends AjaxFallbackLink {
 			private static final long serialVersionUID = 1L;
 
@@ -142,7 +114,6 @@ public class EntryViewPage extends ProtectedPage {
 			}
 		}
 
-		@SuppressWarnings("unchecked")
 		class SequenceLink extends AjaxFallbackLink {
 			private static final long serialVersionUID = 1L;
 
@@ -166,36 +137,35 @@ public class EntryViewPage extends ProtectedPage {
 
 				refreshTabLinks(getPage(), target);
 
-				if (samplesPanel == null) {
-					samplesPanel = makeSamplesPanel(entry);
+				if (sequencePanel == null) {
+					sequencePanel = makeSequencePanel(entry);
 				}
-				displayPanel = samplesPanel;
+				displayPanel = sequencePanel;
 				getPage().replace(displayPanel);
 				target.addComponent(displayPanel);
 			}
 		}
 
-		String recordType =  JbeiConstants.getRecordType(entry.getRecordType());
+		String recordType = JbeiConstants.getRecordType(entry.getRecordType());
 		add(new Label("titleName", recordType + ": " + entry.getNamesAsString()));
 		
-		generalLink = new GeneralLink("generalLink").add(
-				new SimpleAttributeModifier("class", "active"))
+		generalLink = new BookmarkablePageLink("generalLink",	EntryViewPage.class, 
+						new PageParameters("0=" + entry.getId()));
+		generalLink.setOutputMarkupId(true);
+		samplesLink = new SamplesLink("samplesLink");
+		samplesLink.add(new SimpleAttributeModifier("class", "inactive"))
 				.setOutputMarkupId(true);
-		samplesLink = new SamplesLink("samplesLink").add(
-				new SimpleAttributeModifier("class", "inactive"))
+		attachmentsLink = new AttachmentsLink("attachmentsLink");
+		attachmentsLink.add(new SimpleAttributeModifier("class", "inactive"))
 				.setOutputMarkupId(true);
-		attachmentsLink = new AttachmentsLink("attachmentsLink").add(
-				new SimpleAttributeModifier("class", "inactive"))
-				.setOutputMarkupId(true);
-		sequenceLink = new SequenceLink("sequenceLink").add(
-				new SimpleAttributeModifier("class", "inactive"))
+		sequenceLink = new SequenceLink("sequenceLink");
+		sequenceLink.add(new SimpleAttributeModifier("class", "inactive"))
 				.setOutputMarkupId(true);
 
 		add(generalLink);
 		add(samplesLink);
 		add(attachmentsLink);
 		add(sequenceLink);
-
 
 		generalPanel = makeGeneralPanel(entry).setOutputMarkupId(true);
 		displayPanel = generalPanel;
@@ -231,7 +201,7 @@ public class EntryViewPage extends ProtectedPage {
 		return panel;
 	}
 
-	public Panel makeSequencPanel(Entry entry) {
+	public Panel makeSequencePanel(Entry entry) {
 		Panel panel = new SequenceViewPanel("centerPanel", entry);
 		panel.setOutputMarkupId(true);
 		return panel;

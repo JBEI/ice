@@ -1,6 +1,15 @@
 <html xmlns:wicket>
 <wicket:panel>
- <span wicket:id="test"></span>
+	<table border="0" cellpadding="3" cellspacing="1" class="entry_table">
+		<tr class="title_row_header">
+			<td>Samples | 
+			<a href="#" wicket:id="addSampleLink">Add sample</a></td>
+		</tr>
+		<tr wicket:id="samplesListView">
+			<td bgcolor="#ffffff">
+            <div wicket:id="sampleItemPanel"></div>
+		</td>
+		</tr>
+	</table>
 </wicket:panel>
 </html>
-  

@@ -9,7 +9,7 @@ public abstract class Manager {
 	public static void dbDelete(Object obj) throws ManagerException {
 		try {
 			Transaction tx = session.beginTransaction();
-			
+			obj = session.merge(obj);
 			session.delete(obj);
 			
 			tx.commit();

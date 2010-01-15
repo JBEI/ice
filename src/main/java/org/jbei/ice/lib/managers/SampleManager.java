@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.managers;
 
+import java.util.Calendar;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -80,14 +81,27 @@ public class SampleManager extends Manager{
 		return result;
 	}
 	
+	public static Sample create(Sample sample) throws ManagerException {
+		
+		sample.setCreationTime(Calendar.getInstance().getTime());
+		sample.setUuid(EntryManager.generateUUID());
+		return save(sample);
+		
+	}
+	
 	public static Sample save(Sample sample) throws ManagerException {
 		Sample result = null;
-		try {
-			result = (Sample) dbSave(sample);
-		} catch (Exception e) {
-			String msg = "Could not save sample " + sample.getLabel();
-			Logger.error(msg);
-			throw new ManagerException(msg, e);
+		sample.setModificationTime(Calendar.getInstance().getTime());
+		if (sample.getUuid() == null || sample.getUuid().equals("")) {
+			result = create(sample);
+		} else {
+			try {
+				result = (Sample) dbSave(sample);
+			} catch (Exception e) {
+				String msg = "Could not save sample " + sample.getLabel();
+				Logger.error(msg);
+				throw new ManagerException(msg, e);
+			}
 		}
 		return result;
 	}

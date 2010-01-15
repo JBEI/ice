@@ -35,15 +35,18 @@ public class LoginPanel extends Panel {
 
 				setModel(new CompoundPropertyModel<Object>(this));
 
-				add(new TextField<String>("loginName").setRequired(true).setLabel(
-						new Model<String>("Login")));
-				add(new PasswordTextField("loginPassword").setRequired(true).setLabel(
-						new Model<String>("Password")));
+				add(new TextField<String>("loginName").setRequired(true)
+						.setLabel(new Model<String>("Login")));
+				add(new PasswordTextField("loginPassword").setRequired(true)
+						.setLabel(new Model<String>("Password")));
 				add(new CheckBox("keepSignedIn"));
-				add(new BookmarkablePageLink<RegistrationPage>("registrationLink",
-						RegistrationPage.class));
-				add(new BookmarkablePageLink<RegistrationPage>("forgotPasswordLink",
-						WelcomePage.class));
+				add(new BookmarkablePageLink<RegistrationPage>(
+						"registrationLink", RegistrationPage.class));
+				add(new BookmarkablePageLink<RegistrationPage>(
+						"forgotPasswordLink", WelcomePage.class));
+				add(new Button("logInButton", new Model<String>(
+						"Log In")));
+
 			}
 
 			// overridden methods
@@ -53,7 +56,8 @@ public class LoginPanel extends Panel {
 				if (authenticated) {
 					if (getKeepSignedIn()) {
 						IceSession iceSession = (IceSession) getSession();
-						iceSession.makeSessionPersistent(((WebResponse) getResponse()));
+						iceSession
+								.makeSessionPersistent(((WebResponse) getResponse()));
 					}
 
 					if (!continueToOriginalDestination()) {
@@ -92,7 +96,6 @@ public class LoginPanel extends Panel {
 		}
 
 		Form<?> loginForm = new LoginForm("loginForm");
-		loginForm.add(new Button("logInButton", new Model<String>("Log In")));
 
 		add(loginForm);
 		add(new FeedbackPanel("feedback"));

@@ -71,7 +71,7 @@ public class SearchBarFormPanel extends Panel {
 				try {
 					searchResults = Search.getInstance().query(((SearchBarForm)form).getSearchQuery());
 					if (searchResults.size() == 0) {
-						searchResultPanel = new EmptySearchResultPanel("workSpacePanel");
+						searchResultPanel = new EmptyMessagePanel("workSpacePanel", "No results found");
 					} else {
 						searchResultPanel = new SearchResultPanel("workSpacePanel", searchResults, 10);
 					}
