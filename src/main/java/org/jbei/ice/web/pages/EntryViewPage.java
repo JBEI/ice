@@ -33,17 +33,19 @@ public class EntryViewPage extends ProtectedPage {
 	public Component attachmentsPanel;
 	public Component sequencePanel;
 
-	@SuppressWarnings("unchecked")
-	public BookmarkablePageLink generalLink;
-	public AjaxFallbackLink<?> samplesLink;
-	public AjaxFallbackLink<?> attachmentsLink;
-	public AjaxFallbackLink<?> sequenceLink;
+	public BookmarkablePageLink<Object> generalLink;
+	public BookmarkablePageLink<Object> samplesLink;
+	public BookmarkablePageLink<Object> attachmentsLink;
+	public BookmarkablePageLink<Object> sequenceLink;
+	public String subPage = null;
 
 	@SuppressWarnings("unchecked")
 	public EntryViewPage(PageParameters parameters) {
 		super(parameters);
 
 		int entryId = parameters.getInt("0");
+		subPage = parameters.getString("1");
+
 		try {
 			entry = EntryManager.get(entryId);
 		} catch (ManagerException e) {
@@ -51,126 +53,75 @@ public class EntryViewPage extends ProtectedPage {
 			e.printStackTrace();
 		}
 
-		class SamplesLink extends AjaxFallbackLink {
-			private static final long serialVersionUID = 1L;
-
-			public SamplesLink(String id) {
-				super(id);
-			}
-
-			public void onClick(AjaxRequestTarget target) {
-				generalLink.add(
-						new SimpleAttributeModifier("class", "inactive"))
-						.setOutputMarkupId(true);
-				samplesLink.add(new SimpleAttributeModifier("class", "active"))
-						.setOutputMarkupId(true);
-				attachmentsLink.add(
-						new SimpleAttributeModifier("class", "inactive"))
-						.setOutputMarkupId(true);
-				sequenceLink.add(
-						new SimpleAttributeModifier("class", "inactive"))
-						.setOutputMarkupId(true);
-
-				refreshTabLinks(getPage(), target);
-
-				if (samplesPanel == null) {
-					samplesPanel = makeSamplesPanel(entry);
-				}
-				displayPanel = samplesPanel;
-				getPage().replace(displayPanel);
-				target.addComponent(displayPanel);
-			}
-		}
-
-		class AttachmentsLink extends AjaxFallbackLink {
-			private static final long serialVersionUID = 1L;
-
-			public AttachmentsLink(String id) {
-				super(id);
-			}
-
-			public void onClick(AjaxRequestTarget target) {
-				generalLink.add(
-						new SimpleAttributeModifier("class", "inactive"))
-						.setOutputMarkupId(true);
-				samplesLink.add(
-						new SimpleAttributeModifier("class", "inactive"))
-						.setOutputMarkupId(true);
-				attachmentsLink.add(
-						new SimpleAttributeModifier("class", "active"))
-						.setOutputMarkupId(true);
-				sequenceLink.add(
-						new SimpleAttributeModifier("class", "inactive"))
-						.setOutputMarkupId(true);
-
-				refreshTabLinks(getPage(), target);
-
-				if (attachmentsPanel == null) {
-					attachmentsPanel = makeAttachmentsPanel(entry);
-				}
-				displayPanel = attachmentsPanel;
-				getPage().replace(displayPanel);
-				target.addComponent(displayPanel);
-			}
-		}
-
-		class SequenceLink extends AjaxFallbackLink {
-			private static final long serialVersionUID = 1L;
-
-			public SequenceLink(String id) {
-				super(id);
-			}
-
-			public void onClick(AjaxRequestTarget target) {
-				generalLink.add(
-						new SimpleAttributeModifier("class", "inactive"))
-						.setOutputMarkupId(true);
-				samplesLink.add(
-						new SimpleAttributeModifier("class", "inactive"))
-						.setOutputMarkupId(true);
-				attachmentsLink.add(
-						new SimpleAttributeModifier("class", "inactive"))
-						.setOutputMarkupId(true);
-				sequenceLink
-						.add(new SimpleAttributeModifier("class", "active"))
-						.setOutputMarkupId(true);
-
-				refreshTabLinks(getPage(), target);
-
-				if (sequencePanel == null) {
-					sequencePanel = makeSequencePanel(entry);
-				}
-				displayPanel = sequencePanel;
-				getPage().replace(displayPanel);
-				target.addComponent(displayPanel);
-			}
-		}
-
 		String recordType = JbeiConstants.getRecordType(entry.getRecordType());
 		add(new Label("titleName", recordType + ": " + entry.getNamesAsString()));
-		
-		generalLink = new BookmarkablePageLink("generalLink",	EntryViewPage.class, 
-						new PageParameters("0=" + entry.getId()));
+
+		generalLink = new BookmarkablePageLink("generalLink",
+				EntryViewPage.class, new PageParameters("0=" + entry.getId()));
 		generalLink.setOutputMarkupId(true);
-		samplesLink = new SamplesLink("samplesLink");
-		samplesLink.add(new SimpleAttributeModifier("class", "inactive"))
-				.setOutputMarkupId(true);
-		attachmentsLink = new AttachmentsLink("attachmentsLink");
-		attachmentsLink.add(new SimpleAttributeModifier("class", "inactive"))
-				.setOutputMarkupId(true);
-		sequenceLink = new SequenceLink("sequenceLink");
-		sequenceLink.add(new SimpleAttributeModifier("class", "inactive"))
-				.setOutputMarkupId(true);
+		samplesLink = new BookmarkablePageLink("samplesLink",
+				EntryViewPage.class, new PageParameters("0=" + entry.getId()
+						+ ",1=samples"));
+		samplesLink.setOutputMarkupId(true);
+		attachmentsLink = new BookmarkablePageLink("attachmentsLink",
+				EntryViewPage.class, new PageParameters("0=" + entry.getId()
+						+ ",1=attachments"));
+		attachmentsLink.setOutputMarkupId(true);
+		sequenceLink = new BookmarkablePageLink("sequenceLink",
+				EntryViewPage.class, new PageParameters("0=" + entry.getId()
+						+ ",1=sequence"));
+		sequenceLink.setOutputMarkupId(true);
+
+		setActiveLink();
 
 		add(generalLink);
 		add(samplesLink);
 		add(attachmentsLink);
 		add(sequenceLink);
 
-		generalPanel = makeGeneralPanel(entry).setOutputMarkupId(true);
+		generalPanel = makeSubPagePanel(entry);
 		displayPanel = generalPanel;
 		add(displayPanel);
 
+	}
+
+	public void setActiveLink() {
+		generalLink.add(new SimpleAttributeModifier("class", "inactive"))
+				.setOutputMarkupId(true);
+		samplesLink.add(new SimpleAttributeModifier("class", "inactive"))
+				.setOutputMarkupId(true);
+		attachmentsLink.add(new SimpleAttributeModifier("class", "inactive"))
+				.setOutputMarkupId(true);
+		sequenceLink.add(new SimpleAttributeModifier("class", "inactive"))
+				.setOutputMarkupId(true);
+		if (subPage == null) {
+			generalLink.add(new SimpleAttributeModifier("class", "active"))
+					.setOutputMarkupId(true);
+		} else if (subPage.equals("samples")) {
+			samplesLink.add(new SimpleAttributeModifier("class", "active"))
+					.setOutputMarkupId(true);
+		} else if (subPage.equals("attachments")) {
+			attachmentsLink.add(new SimpleAttributeModifier("class", "active"))
+					.setOutputMarkupId(true);
+		} else if (subPage.equals("attachments")) {
+			sequenceLink.add(new SimpleAttributeModifier("class", "active"))
+					.setOutputMarkupId(true);
+		}
+
+	}
+
+	public Panel makeSubPagePanel(Entry entry) {
+		if (subPage == null) {
+			return makeGeneralPanel(entry);
+		} else if (subPage.equals("samples")) {
+			return makeSamplesPanel(entry);
+		} else if (subPage.equals("attachments")) {
+			return makeAttachmentsPanel(entry);
+		} else if (subPage.equals("sequence")) {
+			return makeSequencePanel(entry);
+		} else {
+			return makeGeneralPanel(entry);
+		}
 	}
 
 	public Panel makeGeneralPanel(Entry entry) {

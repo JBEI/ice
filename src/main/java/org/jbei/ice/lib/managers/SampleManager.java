@@ -31,7 +31,7 @@ public class SampleManager extends Manager{
 	public static Set<Sample> get(Entry entry) throws ManagerException {
 		LinkedHashSet<Sample> result = null;
 		try {
-			String queryString = "from Sample as sample where sample.entry = :entry";
+			String queryString = "from Sample as sample where sample.entry = :entry order by sample.id desc";
 			Query query = session.createQuery(queryString);
 			query.setEntity("entry", entry);
 			result = new LinkedHashSet<Sample>(query.list());

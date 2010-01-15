@@ -1,5 +1,6 @@
 package org.jbei.ice.web.panels;
 
+import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextArea;
@@ -10,6 +11,7 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.models.Sample;
+import org.jbei.ice.web.pages.EntryViewPage;
 
 public class SampleItemEditPanel extends Panel {
 
@@ -22,7 +24,7 @@ public class SampleItemEditPanel extends Panel {
 		class SampleEditForm extends StatelessForm<Object> {
 
 			private static final long serialVersionUID = 1L;
-			
+
 			private String label;
 			private String depositor;
 			private String notes;
@@ -33,7 +35,7 @@ public class SampleItemEditPanel extends Panel {
 				setLabel(sample.getLabel());
 				setDepositor(sample.getDepositor());
 				setNotes(sample.getNotes());
-				
+
 				setModel(new CompoundPropertyModel<Object>(this));
 
 				Button cancelButton = new Button("cancelButton",
@@ -42,17 +44,11 @@ public class SampleItemEditPanel extends Panel {
 					private static final long serialVersionUID = 1L;
 
 					public void onSubmit() {
-						System.out.println("Cancel pushed");
-						SampleItemEditPanel temp = (SampleItemEditPanel) getParent()
-								.getParent();
-						// This edit panel is usually inside ListView inside
-						// SampleListView inside SampleViewPanel.
-						// Is there a better way to get the parent sample view
-						// panel?
-						SampleViewPanel sampleViewPanel = (SampleViewPanel) temp
-								.getParent().getParent().getParent();
-						sampleViewPanel.populatePanels();
-						getPage().replace(sampleViewPanel);
+						setRedirect(true);
+						setResponsePage(EntryViewPage.class,
+								new PageParameters("0="
+										+ sample.getEntry().getId()
+										+ ",1=samples"));
 					}
 				};
 
@@ -64,14 +60,7 @@ public class SampleItemEditPanel extends Panel {
 				add(new TextField<String>("depositor").setRequired(true)
 						.setLabel(new Model<String>("Depositor")));
 				add(new TextArea<String>("notes"));
-				add(new Button("saveSampleButton", new Model<String>("Save")) {
-					private static final long serialVersionUID = 1L;
-
-					public void onSubmit() {
-						System.out.println("Save was pushed");
-					};
-				});
-
+				add(new Button("saveSampleButton", new Model<String>("Save")));
 			}
 
 			protected void onSubmit() {
@@ -80,33 +69,23 @@ public class SampleItemEditPanel extends Panel {
 				sample.setLabel(getLabel());
 				sample.setDepositor(getDepositor());
 				sample.setNotes(getNotes());
-				boolean newPanel = false;
-				if (sample.getUuid() == null || sample.getUuid().equals("")) {
-					newPanel = true;
-				}
-				
+
 				try {
 					SampleManager.save(sampleItemEditPanel.getSample());
-					
+
 				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {
-					SampleViewPanel sampleViewPanel = (SampleViewPanel) sampleItemEditPanel
-							.getParent().getParent().getParent();
-					if (newPanel) {
-						sampleViewPanel.getSamples().add(0, sampleItemEditPanel.getSample());
-					}
-					sampleViewPanel.populatePanels();
-					getPage().replace(sampleViewPanel);
+					setRedirect(true);
+					setResponsePage(EntryViewPage.class, new PageParameters(
+							"0=" + sample.getEntry().getId() + ",1=samples"));
 				}
-
 			}
 
 			public String getLabel() {
 				return label;
 			}
 
-			@SuppressWarnings("unused")
 			public void setLabel(String label) {
 				this.label = label;
 			}
@@ -115,7 +94,6 @@ public class SampleItemEditPanel extends Panel {
 				return depositor;
 			}
 
-			@SuppressWarnings("unused")
 			public void setDepositor(String depositor) {
 				this.depositor = depositor;
 			}
@@ -124,7 +102,6 @@ public class SampleItemEditPanel extends Panel {
 				return notes;
 			}
 
-			@SuppressWarnings("unused")
 			public void setNotes(String notes) {
 				this.notes = notes;
 			}

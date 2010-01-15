@@ -33,10 +33,10 @@ public class SampleViewPanel extends Panel {
 			}
 
 			public void onClick(AjaxRequestTarget target) {
-				// if first item is already an edit form, do nothing				
 				SampleViewPanel temp = (SampleViewPanel) getParent();
 				ArrayList<Panel> tempPanels = temp.getPanels();
 				if (tempPanels.size() > 0 && tempPanels.get(0) instanceof SampleItemEditPanel) { 
+					// if first item is already an edit form, do nothing				
 				} else {
 					Sample newSample = new Sample();
 					SampleViewPanel sampleViewPanel = (SampleViewPanel) getParent();
