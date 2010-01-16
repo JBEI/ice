@@ -6,7 +6,7 @@ public class JbeirSettings {
 	public final static HashMap<String, String> settings = new HashMap<String, String>();
 
 	static {
-		settings.put("DATA_DIRECTORY", "/var/lib/jbeiregistry");
+		settings.put("DATA_DIRECTORY", "/tmp");
 		settings.put("ATTACHMENTS_DIRECTORY", settings.get("DATA_DIRECTORY") + "/attachments");
 		settings.put("LOGS_DIRECTORY", settings.get("DATA_DIRECTORY") + "/logs");
 		settings.put("LUCENE_DIRECTORY", settings.get("DATA_DIRECTORY"));

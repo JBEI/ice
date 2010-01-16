@@ -4,7 +4,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -103,7 +102,7 @@ public class EntryViewPage extends ProtectedPage {
 		} else if (subPage.equals("attachments")) {
 			attachmentsLink.add(new SimpleAttributeModifier("class", "active"))
 					.setOutputMarkupId(true);
-		} else if (subPage.equals("attachments")) {
+		} else if (subPage.equals("sequence")) {
 			sequenceLink.add(new SimpleAttributeModifier("class", "active"))
 					.setOutputMarkupId(true);
 		}

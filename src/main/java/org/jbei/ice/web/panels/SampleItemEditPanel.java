@@ -21,6 +21,7 @@ public class SampleItemEditPanel extends Panel {
 	public SampleItemEditPanel(String id, Sample passedSample) {
 		super(id);
 		sample = passedSample;
+		
 		class SampleEditForm extends StatelessForm<Object> {
 
 			private static final long serialVersionUID = 1L;
@@ -33,7 +34,12 @@ public class SampleItemEditPanel extends Panel {
 				super(id);
 
 				setLabel(sample.getLabel());
-				setDepositor(sample.getDepositor());
+				if (sample.getDepositor() == null
+						|| sample.getDepositor().equals("")) {
+					setDepositor(sample.getEntry().getOwnerEmail());
+				} else {
+					setDepositor(sample.getDepositor());
+				}
 				setNotes(sample.getNotes());
 
 				setModel(new CompoundPropertyModel<Object>(this));

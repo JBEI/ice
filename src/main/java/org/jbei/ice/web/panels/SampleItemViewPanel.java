@@ -28,21 +28,21 @@ public class SampleItemViewPanel extends Panel {
 		add(new Label("depositor", sample.getDepositor()));
 		add(new Label("notes", sample.getNotes()));
 
-		class RemoveSampleLink extends AjaxFallbackLink {
+		class DeleteSampleLink extends AjaxFallbackLink {
 			private static final long serialVersionUID = 1L;
 
-			public RemoveSampleLink(String id) {
+			public DeleteSampleLink(String id) {
 				super(id);
 				this.add(new SimpleAttributeModifier("onclick",
-						"return confirm('Remove this sample?');"));
+						"return confirm('Delete this sample?');"));
 			}
 
 			public void onClick(AjaxRequestTarget target) {
-				SampleItemViewPanel sampleItemViewPanel = (SampleItemViewPanel) getParent();
-				Sample sample = sampleItemViewPanel.getSample();
+				SampleItemViewPanel thisPanel = (SampleItemViewPanel) getParent();
+				Sample sample = thisPanel.getSample();
 
 				try {
-					SampleManager.delete(sample);
+					SampleManager.delete(sample); 
 				} catch (ManagerException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -64,9 +64,9 @@ public class SampleItemViewPanel extends Panel {
 
 			public void onClick(AjaxRequestTarget target) {
 				boolean edit = true;
-				SampleItemViewPanel sampleItemViewPanel = (SampleItemViewPanel) getParent();
+				SampleItemViewPanel thisPanel = (SampleItemViewPanel) getParent();
 
-				SampleViewPanel sampleViewPanel = (SampleViewPanel) sampleItemViewPanel
+				SampleViewPanel sampleViewPanel = (SampleViewPanel) thisPanel
 						.getParent().getParent().getParent();
 				for (Panel panel : sampleViewPanel.getPanels()) {
 					if (panel instanceof SampleItemEditPanel) {
@@ -75,9 +75,9 @@ public class SampleItemViewPanel extends Panel {
 					}
 				}
 				if (edit) {
-					Sample sample = sampleItemViewPanel.getSample();
+					Sample sample = thisPanel.getSample();
 					int myIndex = sampleViewPanel.getPanels().indexOf(
-							sampleItemViewPanel);
+							thisPanel);
 					Panel newSampleEditPanel = new SampleItemEditPanel(
 							"sampleItemPanel", sample);
 					sampleViewPanel.getPanels().remove(myIndex);
@@ -89,10 +89,10 @@ public class SampleItemViewPanel extends Panel {
 			}
 		}
 
-		AjaxFallbackLink removeSampleLink = new RemoveSampleLink(
-				"removeSampleLink");
-		removeSampleLink.setOutputMarkupId(true);
-		add(removeSampleLink);
+		AjaxFallbackLink deleteSampleLink = new DeleteSampleLink(
+				"deleteSampleLink");
+		deleteSampleLink.setOutputMarkupId(true);
+		add(deleteSampleLink);
 
 		AjaxFallbackLink editSampleLink = new EditSampleLink("editSampleLink");
 		editSampleLink.setOutputMarkupId(true);

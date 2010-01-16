@@ -5,58 +5,59 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.utils.Base64String;
 import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.lib.logging.Logger;
 
 public class AttachmentManager extends Manager {
 	public static String attachmentDirectory = (String) JbeirSettings
 			.getSetting("ATTACHMENTS_DIRECTORY")
 			+ "/";
 
-	public static Attachment create(Attachment attachment) throws ManagerException {
+	public static Attachment create(Attachment attachment)
+			throws ManagerException {
 		attachment.setFileId(EntryManager.generateUUID());
 		Attachment result = null;
 		try {
 			writeFileData(attachment);
 
 			result = (Attachment) dbSave(attachment);
-			
+
 		} catch (IOException e) {
-			
+
 			throw new ManagerException("Could not write file: " + e.toString());
 		} catch (Exception e) {
 			System.out.println(e.toString());
 			try {
-			deleteFile(attachment);
+				deleteFile(attachment);
 			} catch (IOException e1) {
-				throw new ManagerException("Could not delete file: " + e1.toString());
+				throw new ManagerException("Could not delete file: "
+						+ e1.toString());
 			}
 			throw new ManagerException("Could not create Attachment in db");
 		}
-		
+
 		return result;
 	}
 
 	public static void delete(Attachment attachment) throws ManagerException {
 		try {
-	
+
 			deleteFile(attachment);
 			try {
 				dbDelete(attachment);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				throw new ManagerException("Could not delete attachment in db: " + e.toString());
+				throw new ManagerException(
+						"Could not delete attachment in db: " + e.toString());
 			}
 
 		} catch (IOException e) {
@@ -64,7 +65,7 @@ public class AttachmentManager extends Manager {
 			Logger.error(msg);
 		} catch (HibernateException e) {
 			String msg = "Could not remove entry from database."
-							+ attachment.getFileName();
+					+ attachment.getFileName();
 			Logger.error(msg);
 		}
 	}
@@ -78,42 +79,45 @@ public class AttachmentManager extends Manager {
 			e.printStackTrace();
 			throw new ManagerException("Error reading file: " + e.toString());
 		} catch (Exception e) {
-			throw new ManagerException("Failed loading attachment from db: " + e.toString());
+			throw new ManagerException("Failed loading attachment from db: "
+					+ e.toString());
 		}
 		return attachment;
 	}
 
 	public static Attachment getByFileId(String fileId) throws ManagerException {
-		Query query = session.createQuery(
-				"from " + Attachment.class.getName()
-						+ " where file_id = :fileId");
+		Query query = session.createQuery("from " + Attachment.class.getName()
+				+ " where file_id = :fileId");
 		query.setString("fileId", fileId);
 		Attachment attachment = null;
 		try {
 			attachment = (Attachment) query.uniqueResult();
 		} catch (Exception e) {
-			throw new ManagerException("Could not retrieve Attachment by FileId");
+			throw new ManagerException(
+					"Could not retrieve Attachment by FileId");
 		}
 		if (attachment == null) {
 			throw new ManagerException("No such fileId found");
 		} else {
-			
+
 			try {
 				attachment = readFileData(attachment);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				throw new ManagerException("Could not read file: " + e.toString());
+				throw new ManagerException("Could not read file: "
+						+ e.toString());
 			}
 		}
 		return attachment;
 	}
 
 	@SuppressWarnings("unchecked")
-	public static ArrayList<Attachment> getByEntry(Entry entry) throws ManagerException {
+	public static ArrayList<Attachment> getByEntry(Entry entry)
+			throws ManagerException {
 		ArrayList<Attachment> attachments;
-		Query query = session.createQuery(
-				"from " + Attachment.class.getName() + " where entries_id = :entryId");
+		Query query = session.createQuery("from " + Attachment.class.getName()
+				+ " where entries_id = :entryId");
 		query.setInteger("entryId", entry.getId());
 		attachments = (ArrayList<Attachment>) query.list();
 		for (Attachment at : attachments) {
@@ -121,10 +125,11 @@ public class AttachmentManager extends Manager {
 				readFileData(at);
 			} catch (IOException e) {
 				e.printStackTrace();
-				throw new ManagerException("Error reading file " + at.getFileId());
+				throw new ManagerException("Error reading file "
+						+ at.getFileId());
 			}
 		}
-		
+
 		return attachments;
 	}
 
@@ -132,7 +137,8 @@ public class AttachmentManager extends Manager {
 	public static boolean hasAttachment(Entry entry) {
 		boolean result = false;
 		try {
-			String queryString = "from " + Attachment.class.getName() + " where entry = :entry";
+			String queryString = "from " + Attachment.class.getName()
+					+ " where entry = :entry";
 			Query query = session.createQuery(queryString);
 			query.setParameter("entry", entry);
 			List attachments = query.list();
@@ -140,15 +146,27 @@ public class AttachmentManager extends Manager {
 				result = true;
 			}
 		} catch (Exception e) {
-			String msg = "Could not determine if entry has attachments: " + entry.getRecordId();
+			String msg = "Could not determine if entry has attachments: "
+					+ entry.getRecordId();
 			Logger.error(msg);
-			
+
 		}
 		return result;
 	}
-	
+
 	public static void main(String[] args) throws IOException, ManagerException {
 
+	}
+
+	public static File readFile(Attachment attachment) throws IOException {
+		File file = new File(attachmentDirectory + attachment.getFileId());
+		if (file.canRead()) {
+
+		} else {
+			throw new IOException("could not read file: "
+					+ attachment.getFileId());
+		}
+		return file;
 	}
 
 	protected static Attachment readFileData(Attachment attachment)
@@ -186,7 +204,10 @@ public class AttachmentManager extends Manager {
 	protected static Attachment writeFileData(Attachment attachment)
 			throws IOException {
 		File file = new File(attachmentDirectory + attachment.getFileId());
-		OutputStream outputStream = new FileOutputStream(file);
+		if (!file.exists()) {
+			file.createNewFile();
+		}
+		FileOutputStream outputStream = new FileOutputStream(file);
 		byte[] bytes = attachment.getData().getBytes();
 
 		if (bytes.length > 524288000) {
@@ -200,9 +221,10 @@ public class AttachmentManager extends Manager {
 		return attachment;
 
 	}
+
 	protected static void deleteFile(Attachment attachment) throws IOException {
 		File file = new File(attachmentDirectory + attachment.getFileId());
 		file.delete();
-		
+
 	}
 }
