@@ -25,7 +25,7 @@ public class UnprotectedPage extends WebPage {
 		add(new Label("title", "JBEI Registry"));
 		add(new HeaderPanel("headerPanel"));
 		add(new MenuPanel("menuPanel"));
-		add(new SearchBarFormPanel("searchBarPanel"));
+		add(new SearchBarFormPanel("searchBarPanel", parameters.getString("search")));
 		add(new FooterPanel("footerPanel"));
 	}
 

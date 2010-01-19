@@ -2,7 +2,6 @@ package org.jbei.ice.web.pages;
 
 import java.util.ArrayList;
 
-import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.logging.Logger;
@@ -28,8 +27,6 @@ public class SearchResultPage extends ProtectedPage {
 
 		Logger.info("Search query: " + getQueryString());
 
-		MarkupContainer temp = getParent();
-		
 		ArrayList<SearchResult> searchResults = null;
 		Panel searchResultPanel = null;
 		try {

@@ -15,19 +15,23 @@ public class SearchBarFormPanel extends Panel {
 
 	private static final long serialVersionUID = 1L;
 
-	@SuppressWarnings("unchecked")
 	public SearchBarFormPanel(String id) {
+		this(id, "");
+	}
+	
+	@SuppressWarnings("unchecked")
+	public SearchBarFormPanel(String id, String queryString) {
 		super(id);
-
+		
 		class SearchBarForm extends StatelessForm<Object> {
-
+						
 			private static final long serialVersionUID = 1L;
 			private String searchQuery;
-
-			public SearchBarForm(String id) {
+			
+			public SearchBarForm(String id, String formQueryString) {
 				super(id);
+				setSearchQuery(formQueryString);
 				setModel(new CompoundPropertyModel<Object>(this));
-
 				add(new TextField<String>("searchQuery"));
 			}
 
@@ -40,7 +44,6 @@ public class SearchBarFormPanel extends Panel {
 				System.out.println("submmited: " + getSearchQuery());
 			}
 
-			@SuppressWarnings("unused")
 			public void setSearchQuery(String searchQuery) {
 				this.searchQuery = searchQuery;
 			}
@@ -50,7 +53,7 @@ public class SearchBarFormPanel extends Panel {
 			}
 		}
 
-		Form<?> searchBarForm = new SearchBarForm("searchBarForm");
+		Form<?> searchBarForm = new SearchBarForm("searchBarForm", queryString);
 		// TODO advanced search
 		searchBarForm.add(new BookmarkablePageLink("advancedSearchLink",
 				UserEntryPage.class));
@@ -62,4 +65,5 @@ public class SearchBarFormPanel extends Panel {
 		add(searchBarForm);
 	}
 
+	
 }
