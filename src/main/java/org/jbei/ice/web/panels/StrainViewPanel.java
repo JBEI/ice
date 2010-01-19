@@ -10,6 +10,9 @@ import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.jbei.ice.lib.managers.AttachmentManager;
+import org.jbei.ice.lib.managers.SampleManager;
+import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.web.pages.EntryUpdatePage;
@@ -58,9 +61,28 @@ public class StrainViewPanel extends Panel {
 		elements.add(new Label("shortDescription", entry.getShortDescription()));
 		
 		//TODO
-		elements.add(new Label("attachments", "attachment?"));
-		elements.add(new Label("samples", "spmales?"));
-		elements.add(new Label("sequence", "sequence?"));
+		int numAttachments = AttachmentManager.getNumberOfAttachments(entry);
+		String attachmentText = "";
+		if (numAttachments == 0) {
+			attachmentText = "No attachments provided";
+		} else if (numAttachments == 1) {
+			attachmentText = "One attachment provided";
+		} else {
+			attachmentText = String.valueOf(numAttachments) + " attachments provided";
+		}
+		elements.add(new Label("attachments", attachmentText));
+		int numSamples = SampleManager.getNumberOfSamples(entry);
+		String samplesText = "";
+		if (numSamples == 0) {
+			samplesText = "No samples provided";
+		} else if (numSamples == 1) {
+			samplesText = "One sample provided";
+		} else {
+			samplesText = String.valueOf(numSamples) + " samples provided";
+		}
+		elements.add(new Label("samples", samplesText));		
+		String sequenceText = (SequenceManager.hasSequence(entry)) ? "Sequence Provided" : "No sequence provided";
+		elements.add(new Label("sequence", sequenceText));
 		
 		elements.add(new Label("references", entry.getReferences()));
 		elements.add(new Label("longDescription", entry.getLongDescription()));

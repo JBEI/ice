@@ -81,6 +81,22 @@ public class SampleManager extends Manager{
 		return result;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static int getNumberOfSamples(Entry entry) {
+		int result = 0;
+		try {
+			String queryString = "from " + Sample.class.getName() + " where entry = :entry";
+			Query query = session.createQuery(queryString);
+			query.setParameter("entry", entry);
+			List samples = query.list();
+			result = samples.size();
+		} catch (Exception e) {
+			String msg = "Could not determine if entry has Sample: " + entry.getRecordId();
+			Logger.error(msg);
+		}
+		return result;
+	}
+	
 	public static Sample create(Sample sample) throws ManagerException {
 		
 		sample.setCreationTime(Calendar.getInstance().getTime());

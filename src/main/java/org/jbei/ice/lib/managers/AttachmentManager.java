@@ -153,6 +153,24 @@ public class AttachmentManager extends Manager {
 		}
 		return result;
 	}
+	
+	@SuppressWarnings("unchecked")
+	public static int getNumberOfAttachments(Entry entry) {
+		int result = 0;
+		try {
+			String queryString = "from " + Attachment.class.getName()
+					+ " where entry = :entry";
+			Query query = session.createQuery(queryString);
+			query.setParameter("entry", entry);
+			List attachments = query.list();
+			result = attachments.size();
+		} catch (Exception e) {
+			String msg = "Could not determine if entry has attachments: "
+					+ entry.getRecordId();
+			Logger.error(msg);
+		}
+		return result;
+	}
 
 	public static void main(String[] args) throws IOException, ManagerException {
 
