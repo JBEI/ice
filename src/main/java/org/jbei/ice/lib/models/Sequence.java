@@ -10,116 +10,113 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import org.jbei.ice.lib.value_objects.ISequenceValueObject;
 
 @Entity
 @Table(name = "sequences")
-@SequenceGenerator(name = "sequence", sequenceName = "sequences_id_seq",
-		allocationSize = 1)
+@SequenceGenerator(name = "sequence", sequenceName = "sequences_id_seq", allocationSize = 1)
 public class Sequence implements ISequenceValueObject, Serializable {
+    private static final long serialVersionUID = 1L;
 
-	private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    private int id;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-	private int id;
-	
-	@Column(name = "sequence")
-	private String sequence;
-	
-	@Column(name = "sequence_user")
-	private String sequenceUser;
-	
-	@Column(name = "fwd_hash", length = 40)
-	private String fwdHash;
-	
-	@Column(name = "rev_hash", length = 40)
-	private String revHash;
-	
-	@OneToOne
-	@JoinColumn(name = "entries_id", nullable=false)
-	private Entry entry;
+    @Column(name = "sequence")
+    private String sequence;
 
-	@OneToMany
-	@JoinColumn(name = "sequence_id")
-	@OrderBy("id")
-	private Set<SequenceFeature> sequenceFeatures = new HashSet<SequenceFeature> ();
-	
-	public Sequence() {
-	}
+    @Column(name = "sequence_user")
+    private String sequenceUser;
 
-	public Sequence(String sequence, String sequenceUser, String fwdHash,
-			String revHash, Entry entry) {
-		super();
-		this.sequence = sequence;
-		this.sequenceUser = sequenceUser;
-		this.fwdHash = fwdHash;
-		this.revHash = revHash;
-		this.entry = entry;
-	}
+    @Column(name = "fwd_hash", length = 40)
+    private String fwdHash;
 
-	public int getId() {
-		return id;
-	}
+    @Column(name = "rev_hash", length = 40)
+    private String revHash;
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    @OneToOne
+    @JoinColumn(name = "entries_id", nullable = false)
+    private Entry entry;
 
-	public String getSequence() {
-		return sequence;
-	}
+    @OneToMany
+    @JoinColumn(name = "sequence_id")
+    @OrderBy("id")
+    private Set<SequenceFeature> sequenceFeatures = new HashSet<SequenceFeature>();
 
-	public void setSequence(String sequence) {
-		this.sequence = sequence;
-	}
+    public Sequence() {
+    }
 
-	public String getSequenceUser() {
-		return sequenceUser;
-	}
+    public Sequence(String sequence, String sequenceUser, String fwdHash, String revHash, Entry entry,
+            Set<SequenceFeature> sequenceFeatures) {
+        super();
 
-	public void setSequenceUser(String sequenceUser) {
-		this.sequenceUser = sequenceUser;
-	}
+        this.sequence = sequence;
+        this.sequenceUser = sequenceUser;
+        this.fwdHash = fwdHash;
+        this.revHash = revHash;
+        this.entry = entry;
+        this.sequenceFeatures = sequenceFeatures;
+    }
 
-	public String getFwdHash() {
-		return fwdHash;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public void setFwdHash(String fwdHash) {
-		this.fwdHash = fwdHash;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public String getRevHash() {
-		return revHash;
-	}
+    public String getSequence() {
+        return sequence;
+    }
 
-	public void setRevHash(String revHash) {
-		this.revHash = revHash;
-	}
+    public void setSequence(String sequence) {
+        this.sequence = sequence;
+    }
 
-	public void setEntry(Entry entry) {
-		this.entry = entry;
-	}
+    public String getSequenceUser() {
+        return sequenceUser;
+    }
 
-	public Entry getEntry() {
-		return entry;
-	}
+    public void setSequenceUser(String sequenceUser) {
+        this.sequenceUser = sequenceUser;
+    }
 
-	public void setSequenceFeatures(Set<SequenceFeature> sequenceFeatures) {
-		this.sequenceFeatures = sequenceFeatures;
-	}
+    public String getFwdHash() {
+        return fwdHash;
+    }
 
-	public Set<SequenceFeature> getSequenceFeatures() {
-		return sequenceFeatures;
-	}
+    public void setFwdHash(String fwdHash) {
+        this.fwdHash = fwdHash;
+    }
 
+    public String getRevHash() {
+        return revHash;
+    }
+
+    public void setRevHash(String revHash) {
+        this.revHash = revHash;
+    }
+
+    public void setEntry(Entry entry) {
+        this.entry = entry;
+    }
+
+    public Entry getEntry() {
+        return entry;
+    }
+
+    public void setSequenceFeatures(Set<SequenceFeature> sequenceFeatures) {
+        this.sequenceFeatures = sequenceFeatures;
+    }
+
+    public Set<SequenceFeature> getSequenceFeatures() {
+        return sequenceFeatures;
+    }
 }

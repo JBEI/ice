@@ -22,7 +22,7 @@ public class HeaderPanel extends Panel {
 		add(new LoginStatusPanel("loginStatusPanel"));
 		add(new Label("numberOfPartsLabel", new Model<String>(String.valueOf(EntryManager
 				.getNumberOfPublicEntries()))));
-		DateFormat dateFormat = new SimpleDateFormat("EEEE F MMMMM yyyy");
+		DateFormat dateFormat = new SimpleDateFormat("EEEE d MMMMM yyyy");
 		add(new Label("dateLabel", new Model<String>(dateFormat.format(new Date()))));
 	}
 }

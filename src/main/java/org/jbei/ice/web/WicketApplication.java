@@ -31,7 +31,7 @@ import org.jbei.ice.web.pages.UpdatePasswordPage;
 import org.jbei.ice.web.pages.UserEntryPage;
 import org.jbei.ice.web.pages.WelcomePage;
 
-//import org.odlabs.wiquery.core.commons.WiQueryInstantiationListener;
+import org.odlabs.wiquery.core.commons.WiQueryInstantiationListener;
 
 /**
  * Application object for your web application. If you want to run this
@@ -48,6 +48,7 @@ public class WicketApplication extends WebApplication {
 	public WicketApplication() {
 	}
 
+	@Override
 	protected void init() {
 		try {
 			authenticator = AuthenticationBackendManager.loadAuthenticationBackend();
@@ -67,7 +68,7 @@ public class WicketApplication extends WebApplication {
 		mountBookmarkablePage("/entries", EntriesPage.class);
 		mountBookmarkablePage("/user/entries", UserEntryPage.class);
 		mount(new QueryStringUrlCodingStrategy("/search", SearchResultPage.class));
-		
+
 		mount(new URIRequestTargetUrlCodingStrategy("/static") {
 			@Override
 			public IRequestTarget decode(RequestParameters requestParameters) {
@@ -89,9 +90,9 @@ public class WicketApplication extends WebApplication {
 		securitySettings.setUnauthorizedComponentInstantiationListener(authorizationStrategy);
 
 		// wiquery
-		/*
-		 * WiQueryInstantiationListener wiQueryInstantiationListener = new WiQueryInstantiationListener(); addComponentInstantiationListener(wiQueryInstantiationListener);
-		 */
+		WiQueryInstantiationListener wiQueryInstantiationListener = new WiQueryInstantiationListener();
+		addComponentInstantiationListener(wiQueryInstantiationListener);
+		super.init();
 	}
 
 	@Override
