@@ -38,8 +38,6 @@ public class IceSession extends WebSession {
 			Integer accountId = (Integer) data.get("accountId");
 			try {
 				setAccount(AccountManager.get(accountId));
-				setAccountPreferences(getAccountPreferences());
-
 			} catch (ManagerException e) {
 				e.printStackTrace();
 				sessionData = null;

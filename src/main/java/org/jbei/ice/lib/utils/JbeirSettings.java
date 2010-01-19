@@ -23,7 +23,7 @@ public class JbeirSettings {
 		settings.put("PART_NUMBER_PREFIX", "TEST");
 		settings.put("PART_NUMBER_DIGITAL_SUFFIX", "000001");
 		settings.put("PART_NUMBER_DELIMITER", "_");
-
+		settings.put("JOB_CUE_DELAY", "300000"); // 300000ms = 5 minutes"
 		// LocalBackend, NullAuthenticationBackend, LblLdapAuthenticationBackend are built-in
 		settings.put("AUTHENTICATION_BACKEND",
 				"org.jbei.ice.lib.authentication.LblLdapAuthenticationBackend");

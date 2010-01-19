@@ -11,6 +11,7 @@ import org.apache.wicket.protocol.http.request.WebExternalResourceRequestTarget;
 import org.apache.wicket.request.RequestParameters;
 import org.apache.wicket.request.target.basic.URIRequestTargetUrlCodingStrategy;
 import org.apache.wicket.request.target.coding.IndexedParamUrlCodingStrategy;
+import org.apache.wicket.request.target.coding.QueryStringUrlCodingStrategy;
 import org.apache.wicket.settings.ISecuritySettings;
 import org.jbei.ice.lib.authentication.AuthenticationBackendManager;
 import org.jbei.ice.lib.authentication.IAuthenticationBackend;
@@ -24,6 +25,7 @@ import org.jbei.ice.web.pages.FeedbackPage;
 import org.jbei.ice.web.pages.LogOutPage;
 import org.jbei.ice.web.pages.LoginPage;
 import org.jbei.ice.web.pages.RegistrationPage;
+import org.jbei.ice.web.pages.SearchResultPage;
 import org.jbei.ice.web.pages.UpdateAccountPage;
 import org.jbei.ice.web.pages.UpdatePasswordPage;
 import org.jbei.ice.web.pages.UserEntryPage;
@@ -64,7 +66,8 @@ public class WicketApplication extends WebApplication {
 		mountBookmarkablePage("/entry/new", EntryNewPage.class);
 		mountBookmarkablePage("/entries", EntriesPage.class);
 		mountBookmarkablePage("/user/entries", UserEntryPage.class);
-
+		mount(new QueryStringUrlCodingStrategy("/search", SearchResultPage.class));
+		
 		mount(new URIRequestTargetUrlCodingStrategy("/static") {
 			@Override
 			public IRequestTarget decode(RequestParameters requestParameters) {
@@ -76,6 +79,7 @@ public class WicketApplication extends WebApplication {
 		// job cue
 		JobCue jobCue = JobCue.getInstance();
 		Thread jobThread = new Thread(jobCue);
+		jobThread.setPriority(Thread.MIN_PRIORITY);
 		jobThread.start();
 
 		// settings

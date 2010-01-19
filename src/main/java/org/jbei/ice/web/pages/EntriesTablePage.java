@@ -10,7 +10,7 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.query.Query;
 import org.jbei.ice.web.panels.EntryPagingPanel;
 
-public class EntriesTablePage extends UnprotectedPage {
+public class EntriesTablePage extends ProtectedPage {
 	public EntriesTablePage(PageParameters parameters) {
 		super(parameters);
 		ArrayList<Entry> entries = new ArrayList<Entry>();

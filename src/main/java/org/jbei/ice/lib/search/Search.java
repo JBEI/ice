@@ -43,9 +43,9 @@ import org.jbei.ice.lib.utils.Utils;
  *
  */
 public class Search {
-
 	private IndexSearcher indexSearcher = null;
-	File indexFile = null;
+	private File indexFile = null;
+	private boolean newIndex = false;
 		
 	private static class SingletonHolder {
 		private static final Search INSTANCE = new Search();
@@ -69,32 +69,41 @@ public class Search {
 	}
 	
 	private Search() {
+		initializeIndexSearcher(); 
+	}
+
+	private void initializeIndexSearcher() {
 		indexFile = new File(JbeirSettings.getSetting("SEARCH_INDEX_FILE"));
 		if (!indexFile.canWrite()) {
-			String msg = "Search index is not writable! Is the directory " +
-				JbeirSettings.getSetting("SEARCH_INDEX_FILE") + " writable?";
+			String msg = "Search index " +
+				JbeirSettings.getSetting("SEARCH_INDEX_FILE") + " is not writable.";
 			Logger.error(msg);
-			throw new NullPointerException(msg);
 		}
-		
 		FSDirectory directory;
 		try {
 			directory = FSDirectory.open(indexFile);
 			indexSearcher = new IndexSearcher(directory, true);
 			
 		} catch(IOException e) {
+			String msg = "Could not open index file";
+			Logger.error(msg);
 			try {
+				msg = "Trying to create index file " + indexFile.getAbsolutePath();
+				Logger.error(msg);
 				createEmptyIndex();
 				directory = FSDirectory.open(indexFile);	
 				indexSearcher = new IndexSearcher(directory, true);
+				newIndex = true;
 			} catch (IOException e1) {
-				String msg = "Directory exists, but could not create empty index. Stopping";
+				msg = "Directory exists, but could not create empty index.";
+				Logger.error(msg);
 				e.printStackTrace();
 				e1.printStackTrace();
-				throw new NullPointerException(msg);
+				
+				indexFile = null;
+				indexSearcher = null;
 			}
-		} 
-		
+		}
 	}
 	
 	public void createEmptyIndex() throws IOException {
@@ -114,13 +123,13 @@ public class Search {
 		indexWriter.commit();
 		indexWriter.close();
 		Logger.info("Created empty Index");
-		JobCue jobCue = JobCue.getInstance();
-		jobCue.addJob(Job.REBUILD_SEARCH_INDEX);
 	}
 	
 	public void rebuildIndex() throws Exception {
 		File indexFile = new File(JbeirSettings.getSetting("SEARCH_INDEX_FILE"));
 		FSDirectory directory = null;
+		Logger.info("Rebuilding Search Index");
+		
 		try {
 			directory = FSDirectory.open(indexFile);
 		} catch (IOException e) {
@@ -137,7 +146,6 @@ public class Search {
 			indexWriter.addDocument(document);
 		}
 		
-		Logger.info("Creating new Search Index");
 		indexWriter.commit();
 		indexWriter.close();
 		
@@ -267,25 +275,41 @@ public class Search {
 		
 	}
 	
-	public ArrayList<SearchResult> query(String queryString) throws Exception {
+	public ArrayList<SearchResult> query(String queryString) {
 		ArrayList<SearchResult> result = new ArrayList<SearchResult>();
 		Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
 
-		QueryParser parser = new QueryParser(Version.LUCENE_CURRENT, "content", analyzer);
-		Query query = parser.parse(queryString);
-		IndexSearcher searcher = getIndexSearcher();
-		TopDocs hits = searcher.search(query, 1000);
-		Logger.info("" + hits.totalHits + " results found");
+		if (newIndex == true) {
+			newIndex = false;
+			Logger.info("Creating search index for the first time");
+			JobCue jobCue = JobCue.getInstance();
+			jobCue.addJob(Job.REBUILD_SEARCH_INDEX);
+			jobCue.processIn(5000);
+		} else if (indexSearcher == null) { 
+			
+		} else {
 		
-		ArrayList<ScoreDoc> hitsArray = new ArrayList<ScoreDoc>(Arrays.asList(hits.scoreDocs));
-		
-		for (ScoreDoc scoreDoc : hitsArray) {
-			float score = scoreDoc.score;
-			int docId = scoreDoc.doc;
-			Document doc = indexSearcher.doc(docId);
-			String recordId = doc.get("Record ID");
-			Entry entry = EntryManager.getByRecordId(recordId);
-			result.add(new SearchResult(entry, score));
+			try {
+				QueryParser parser = new QueryParser(Version.LUCENE_CURRENT, "content", analyzer);
+				Query query = parser.parse(queryString);
+				IndexSearcher searcher = getIndexSearcher();
+				TopDocs hits = searcher.search(query, 1000);
+				Logger.info("" + hits.totalHits + " results found");
+				
+				ArrayList<ScoreDoc> hitsArray = new ArrayList<ScoreDoc>(Arrays.asList(hits.scoreDocs));
+				
+				for (ScoreDoc scoreDoc : hitsArray) {
+					float score = scoreDoc.score;
+					int docId = scoreDoc.doc;
+					Document doc = indexSearcher.doc(docId);
+					String recordId = doc.get("Record ID");
+					Entry entry = EntryManager.getByRecordId(recordId);
+					result.add(new SearchResult(entry, score));
+				}
+			} catch (Exception e) {
+				String msg = "Could not run query: " + e.toString();
+				Logger.error(msg);
+			}
 		}
 		
 		return result;
