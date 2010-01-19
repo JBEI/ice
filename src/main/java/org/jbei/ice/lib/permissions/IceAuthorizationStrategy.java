@@ -7,7 +7,7 @@ import org.apache.wicket.authorization.IAuthorizationStrategy;
 import org.apache.wicket.authorization.IUnauthorizedComponentInstantiationListener;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.ProtectedPage;
-import org.jbei.ice.web.pages.WelcomePage;
+import org.jbei.ice.web.pages.UnprotectedPage;
 
 public class IceAuthorizationStrategy implements IAuthorizationStrategy,
 		IUnauthorizedComponentInstantiationListener {
@@ -16,16 +16,15 @@ public class IceAuthorizationStrategy implements IAuthorizationStrategy,
 		return true;
 	}
 
-	public <T extends Component> boolean isInstantiationAuthorized(
-			Class<T> componentClass) {
+	public <T extends Component> boolean isInstantiationAuthorized(Class<T> componentClass) {
 		if (ProtectedPage.class.isAssignableFrom(componentClass)) {
 			return IceSession.get().isAuthenticated();
 		}
-		
+
 		return true;
 	}
 
 	public void onUnauthorizedInstantiation(Component component) {
-		throw new RestartResponseAtInterceptPageException(WelcomePage.class);
+		throw new RestartResponseAtInterceptPageException(UnprotectedPage.class);
 	}
 }
