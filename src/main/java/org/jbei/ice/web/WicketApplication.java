@@ -22,6 +22,7 @@ import org.jbei.ice.web.pages.EntryNewPage;
 import org.jbei.ice.web.pages.EntryUpdatePage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.FeedbackPage;
+import org.jbei.ice.web.pages.HomePage;
 import org.jbei.ice.web.pages.LogOutPage;
 import org.jbei.ice.web.pages.LoginPage;
 import org.jbei.ice.web.pages.RegistrationPage;
@@ -108,7 +109,7 @@ public class WicketApplication extends WebApplication {
 	/**
 	 * @see org.apache.wicket.Application#getHomePage()
 	 */
-	public Class<WelcomePage> getHomePage() {
-		return WelcomePage.class;
+	public Class<HomePage> getHomePage() {
+		return HomePage.class;
 	}
 }

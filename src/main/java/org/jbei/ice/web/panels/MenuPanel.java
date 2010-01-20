@@ -13,7 +13,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.web.pages.EntriesTablePage;
 import org.jbei.ice.web.pages.EntryNewPage;
 import org.jbei.ice.web.pages.FeedbackPage;
-import org.jbei.ice.web.pages.UnprotectedPage;
+import org.jbei.ice.web.pages.HomePage;
+import org.jbei.ice.web.pages.ProtectedPage;
 import org.jbei.ice.web.pages.UserEntryPage;
 
 public class MenuPanel extends Panel {
@@ -44,8 +45,8 @@ public class MenuPanel extends Panel {
 	public MenuPanel(String id) {
 		super(id);
 
-		addPageLinkMenuItem(UnprotectedPage.class, "Home");
-		addPageLinkMenuItem(UnprotectedPage.class, "News");
+		addPageLinkMenuItem(HomePage.class, "Home");
+		addPageLinkMenuItem(HomePage.class, "News");
 		addPageLinkMenuItem(EntriesTablePage.class, "List View");
 		addPageLinkMenuItem(UserEntryPage.class, "My Entries");
 		addPageLinkMenuItem(EntryNewPage.class, "Add new entry");

@@ -6,8 +6,8 @@ import org.apache.wicket.authorization.Action;
 import org.apache.wicket.authorization.IAuthorizationStrategy;
 import org.apache.wicket.authorization.IUnauthorizedComponentInstantiationListener;
 import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.pages.LoginPage;
 import org.jbei.ice.web.pages.ProtectedPage;
-import org.jbei.ice.web.pages.UnprotectedPage;
 
 public class IceAuthorizationStrategy implements IAuthorizationStrategy,
 		IUnauthorizedComponentInstantiationListener {
@@ -25,6 +25,6 @@ public class IceAuthorizationStrategy implements IAuthorizationStrategy,
 	}
 
 	public void onUnauthorizedInstantiation(Component component) {
-		throw new RestartResponseAtInterceptPageException(UnprotectedPage.class);
+		throw new RestartResponseAtInterceptPageException(LoginPage.class);
 	}
 }
