@@ -423,3 +423,14 @@ span.form_help_text {
 	padding: 3px 10px 3px 10px;
 	margin-top: 0px;
 }
+
+#paging span {
+	border:5px solid #CCCCCC;
+	color:#808185;
+	margin-right:3px;
+	padding:4px 4px 3px;
+	text-decoration:none;
+}
+#paging a {
+	border: 5px solid #333333;
+}

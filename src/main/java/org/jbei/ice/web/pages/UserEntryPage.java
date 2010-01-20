@@ -33,7 +33,7 @@ public class UserEntryPage extends ProtectedPage {
 		LinkedHashSet<Entry> entries = EntryManager.getByAccount(account, 0,
 				1000);
 		ArrayList<Entry> entriesList = new ArrayList<Entry>(entries);
-		userPanel = new EntryPagingPanel("userPanel", entriesList, 50);
+		userPanel = new EntryPagingPanel("userPanel", entriesList, 20);
 		userPanel.setOutputMarkupId(true);
 
 		class UserEntriesLink extends AjaxFallbackLink {

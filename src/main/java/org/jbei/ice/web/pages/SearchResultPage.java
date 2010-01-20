@@ -36,7 +36,7 @@ public class SearchResultPage extends ProtectedPage {
 						"No results found");
 			} else {
 				searchResultPanel = new SearchResultPanel("searchResultPanel",
-						searchResults, 10);
+						searchResults, 20);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
