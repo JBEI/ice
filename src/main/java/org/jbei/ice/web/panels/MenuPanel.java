@@ -14,7 +14,6 @@ import org.jbei.ice.web.pages.EntriesTablePage;
 import org.jbei.ice.web.pages.EntryNewPage;
 import org.jbei.ice.web.pages.FeedbackPage;
 import org.jbei.ice.web.pages.HomePage;
-import org.jbei.ice.web.pages.ProtectedPage;
 import org.jbei.ice.web.pages.UserEntryPage;
 
 public class MenuPanel extends Panel {

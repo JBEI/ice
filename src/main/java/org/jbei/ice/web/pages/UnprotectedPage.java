@@ -14,29 +14,37 @@ import org.jbei.ice.web.panels.MenuPanel;
 import org.jbei.ice.web.panels.SearchBarFormPanel;
 
 public class UnprotectedPage extends WebPage {
-	protected static final long serialVersionUID = 1L;
+    protected static final long serialVersionUID = 1L;
 
-	/**
-	 * Constructor that is invoked when page is invoked without a session.
-	 */
-	public UnprotectedPage(final PageParameters parameters) {
-		add(new StyleSheetReference("stylesheet", UnprotectedPage.class, "main.css"));
+    private String searchParameters = "";
 
-		add(new Label("title", "JBEI Registry"));
-		add(new HeaderPanel("headerPanel"));
-		add(new MenuPanel("menuPanel"));
-		add(new SearchBarFormPanel("searchBarPanel", parameters.getString("search")));
-		add(new FooterPanel("footerPanel"));
-	}
+    /**
+     * Constructor that is invoked when page is invoked without a session.
+     */
+    public UnprotectedPage(final PageParameters parameters) {
+        add(new StyleSheetReference("stylesheet", UnprotectedPage.class, "main.css"));
 
-	public void handleException(Throwable throwable) {
-		String body = Utils.stackTraceToString(throwable);
-		String subject = (throwable.getMessage().length() > 50) ? (throwable.getMessage()
-				.substring(0, 50) + "...") : throwable.getMessage();
+        searchParameters = parameters.getString("search");
 
-		Emailer.error(JbeirSettings.getSetting("ERROR_EMAIL_EXCEPTION_PREFIX") + subject, body);
+        initializeComponents();
+    }
 
-		Logger.error(throwable.getMessage());
-		Logger.error(body);
-	}
+    protected void initializeComponents() {
+        add(new Label("title", "JBEI Registry"));
+        add(new HeaderPanel("headerPanel"));
+        add(new MenuPanel("menuPanel"));
+        add(new SearchBarFormPanel("searchBarPanel", searchParameters));
+        add(new FooterPanel("footerPanel"));
+    }
+
+    public void handleException(Throwable throwable) {
+        String body = Utils.stackTraceToString(throwable);
+        String subject = (throwable.getMessage().length() > 50) ? (throwable.getMessage()
+                .substring(0, 50) + "...") : throwable.getMessage();
+
+        Emailer.error(JbeirSettings.getSetting("ERROR_EMAIL_EXCEPTION_PREFIX") + subject, body);
+
+        Logger.error(throwable.getMessage());
+        Logger.error(body);
+    }
 }

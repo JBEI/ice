@@ -19,6 +19,7 @@ import org.jbei.ice.lib.permissions.IceAuthorizationStrategy;
 import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.web.pages.EntriesPage;
 import org.jbei.ice.web.pages.EntryNewPage;
+import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryUpdatePage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.FeedbackPage;
@@ -63,6 +64,7 @@ public class WicketApplication extends WebApplication {
         mount(new IndexedParamUrlCodingStrategy("/entry/view", EntryViewPage.class));
         mount(new IndexedParamUrlCodingStrategy("/entry/update", EntryUpdatePage.class));
         mountBookmarkablePage("/entry/new", EntryNewPage.class);
+        mount(new IndexedParamUrlCodingStrategy("/entry/tip", EntryTipPage.class));
         mountBookmarkablePage("/entries", EntriesPage.class);
         mountBookmarkablePage("/user/entries", UserEntryPage.class);
         mount(new QueryStringUrlCodingStrategy("/search", SearchResultPage.class));
@@ -98,10 +100,10 @@ public class WicketApplication extends WebApplication {
         return new IceSession(request, response, authenticator);
     }
 
-	/**
-	 * @see org.apache.wicket.Application#getHomePage()
-	 */
-	public Class<HomePage> getHomePage() {
-		return HomePage.class;
-	}
+    /**
+     * @see org.apache.wicket.Application#getHomePage()
+     */
+    public Class<HomePage> getHomePage() {
+        return HomePage.class;
+    }
 }

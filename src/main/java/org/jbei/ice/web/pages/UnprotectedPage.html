@@ -6,6 +6,20 @@
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <title wicket:id="title">JBEI Registry</title>
 <link wicket:id="stylesheet"></link>
+<script type="text/javascript">
+	function assignClueTips() {
+		$('.entry_tip').cluetip( {
+			width : '800px',
+			showTitle : false,
+			arrows : false,
+			topOffset : 15,
+			leftOffset : 15,
+			positionBy : 'auto',
+			cursor : 'pointer',
+			cluetipClass : 'jbeiregistry'
+		});
+	}
+</script>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" class="main_table">
@@ -82,6 +96,6 @@
 		<td align="center" valign="bottom" style="height: 60px"><!-- Footer Begin --> <span wicket:id="footerPanel">Footer Panel</span> <!-- Footer End --></td>
 	</tr>
 </table>
+<script type="text/javascript">assignClueTips();</script>
 </body>
 </html>
-
