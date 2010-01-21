@@ -45,9 +45,14 @@ public class SequenceFeature implements ISequenceFeatureValueObject, Serializabl
     @Column(name = "name")
     private String name;
 
-    public SequenceFeature(Sequence sequence, Feature feature, int start, int end, int strand, String name) {
+    public SequenceFeature() {
         super();
-        
+    }
+
+    public SequenceFeature(Sequence sequence, Feature feature, int start, int end, int strand,
+            String name) {
+        super();
+
         this.sequence = sequence;
         this.feature = feature;
         this.start = start;

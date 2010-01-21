@@ -15,9 +15,14 @@ public class Feature implements IFeatureValueObject, Serializable {
     private int autoFind;
     private String genbankType;
 
-    public Feature(String name, String description, String identification, String uuid, int autoFind, String genbankType) {
+    public Feature() {
         super();
-        
+    }
+
+    public Feature(String name, String description, String identification, String uuid,
+            int autoFind, String genbankType) {
+        super();
+
         this.name = name;
         this.description = description;
         this.identification = identification;
