@@ -5,7 +5,9 @@ import java.io.Serializable;
 import org.jbei.ice.lib.value_objects.ISelectionMarkerValueObject;
 
 public class SelectionMarker implements ISelectionMarkerValueObject, Serializable {
-	private int id;
+    private static final long serialVersionUID = 1L;
+    
+    private int id;
 	private String name;
 	private Entry entry;
 

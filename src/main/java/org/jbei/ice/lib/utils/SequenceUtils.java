@@ -6,7 +6,7 @@ import org.biojava.bio.symbol.SymbolList;
 
 public class SequenceUtils {
     public static String calculateSequenceHash(String sequence) {
-        return Utils.encryptMD5(sequence);
+        return Utils.encryptSHA(sequence.toLowerCase());
     }
 
     public static String reverseComplement(String sequence) throws Exception {

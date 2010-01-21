@@ -13,7 +13,7 @@
 
 				<tr>
 					<td style="width: 150px">Name</td>
-					<td><input wicket:id="names" class="inputbox" maxlength="127" ></input></td>
+					<td><input wicket:id="names" class="inputbox" maxlength="127"></input></td>
 				</tr>
 				<tr>
 					<td style="width: 150px">Creator</td>
@@ -39,10 +39,10 @@
 					<td style="width: 150px">Links</td>
 					<td><input wicket:id="links" class="inputbox" maxlength="127" style="width: 300px;"></input><span class="form_help_text">Comma Separated</span></td>
 				</tr>
-                <tr>
-                    <td style="width: 150px">Package Format</td>
-                    <td><select wicket:id="packageFormat" style="width: 300px;" class="inputbox"></select></td>
-                </tr>
+				<tr>
+					<td style="width: 150px">Package Format</td>
+					<td><select wicket:id="packageFormat" style="width: 300px;" class="inputbox"></select></td>
+				</tr>
 				<tr>
 					<td style="width: 150px">Keywords</td>
 					<td><input wicket:id="keywords" class="inputbox" maxlength="127" style="width: 640px;"></input></td>
@@ -65,14 +65,12 @@
 				</tr>
 				<tr>
 					<td style="width: 150px">Intellectual Property</td>
-					<td><textarea wicket:id="intellectualProperty" style="width: 640px; height: 50px" rows="3" 
-					   name="intellectual_property" cols="20" class="inputarea"></textarea></td>
+					<td><textarea wicket:id="intellectualProperty" style="width: 640px; height: 50px" rows="3" name="intellectual_property" cols="20" class="inputarea"></textarea></td>
 				</tr>
 
 				<tr>
 					<td style="width: 150px">Funding Source</td>
-					<td><input wicket:id="fundingSource" type="text" class="inputbox"
-						/></td>
+					<td><input wicket:id="fundingSource" type="text" class="inputbox" /></td>
 				</tr>
 				<tr>
 					<td style="width: 150px">Principal Investigator</td>
@@ -84,9 +82,6 @@
 
 	</table>
 	<button wicket:id="submitButton" type="submit">Save</button>
-
-	</form>
-
-
+	<script type="text/javascript" wicket:id="initializeCollectionsScript">/* script will be rendered here */</script></form>
 </wicket:panel>
 </html>

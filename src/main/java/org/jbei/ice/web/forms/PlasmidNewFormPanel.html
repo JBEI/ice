@@ -53,16 +53,15 @@
 				</tr>
 				<tr>
 					<td style="width: 150px">Selection Markers</td>
-					<td><input wicket:id="selectionMarkers" style="width: 300px;"
+					<td><input wicket:id="selectionMarkers" id="selectionMarkers" style="width: 300px;"
 						maxlength="127" class="inputbox selectionMarkersInput"></input><span
 						class="form_help_text">Comma Separated</span></td>
 				</tr>
 				<tr>
 					<td style="width: 150px">Origin of Replication</td>
-					<td><input wicket:id="originOfReplication"
-						style="width: 300px;" class="inputbox originOfReplicationInput"
-						maxlength="127"></input><span class="form_help_text">Comma
-					Separated</span></td>
+					<td><input class="inputbox originOfReplicationInput" wicket:id="originOfReplication" 
+						id="originOfReplication" style="width: 300px;" maxlength="127"></input><span 
+						class="form_help_text">Comma Separated</span></td>
 				</tr>
 				<tr>
 					<td style="width: 150px">Promoters</td>
@@ -119,6 +118,7 @@
 		</tr>
 	</table>
 	<button wicket:id="submitButton" type="submit">Save</button>
+	<script type="text/javascript" wicket:id="initializeCollectionsScript">/* script will be rendered here */</script>
 	</form>
 </wicket:panel>
 </html>
