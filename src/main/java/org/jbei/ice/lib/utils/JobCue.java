@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Set;
 
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.search.Blast;
 import org.jbei.ice.lib.search.Search;
 
 public class JobCue implements Runnable {
@@ -56,8 +57,9 @@ public class JobCue implements Runnable {
 				}
 
 			} else if (jobType == 2) {
-				Logger.info("Rebuilding blast index");
-				// TODO: rebuild blast index
+				Logger.info("Rebuilding blast database");
+				Blast blast = new Blast();
+				blast.rebuildDatabase();
 			}
 			cue.remove(jobType);
 

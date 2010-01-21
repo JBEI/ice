@@ -1,0 +1,32 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<table class="data_table" border="0" cellpadding="3" cellspacing="1">
+		<tr bgcolor="#F0F0F0">
+			<th>#</th>
+			<th>Type</th>
+			<th>Part Number</th>
+			<th>Name</th>
+			<th>Aligned (BP)</th>
+			<th>Aligned % Identity</th>
+			<th>Bit Score</th>
+			<th>E-Value</th>
+		</tr>
+		<tr wicket:id="itemRows" class="odd_row">
+			<!--  	            <td>
+	                <input type="checkbox" wicket:id="checkBox"></input>
+	            </td>
+-->
+			<td><span wicket:id="index"></span>.</td>
+			<td><span wicket:id="recordType"></span></td>
+			<td><a href wicket:id="partIdLink"><span
+				wicket:id="partNumber"></span></a></td>
+			<td><span wicket:id="name"></span></td>
+			<td><span wicket:id="alignedBp"></span></td>
+			<td><span wicket:id="alignedPercent"></span></td>
+			<td><span wicket:id="bitScore"></span></td>
+			<td><img wicket:id="eValue"></img></td>
+		</tr>
+	</table>
+	<div wicket:id="navigator"></div>
+</wicket:panel>
+</html>

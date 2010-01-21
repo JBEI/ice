@@ -8,6 +8,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
+import org.jbei.ice.web.pages.BlastPage;
 import org.jbei.ice.web.pages.SearchResultPage;
 import org.jbei.ice.web.pages.UserEntryPage;
 
@@ -59,7 +60,7 @@ public class SearchBarFormPanel extends Panel {
 				UserEntryPage.class));
 		// TODO blast search
 		searchBarForm.add(new BookmarkablePageLink("blastSearchLink",
-				UserEntryPage.class));
+				BlastPage.class));
 		searchBarForm.add(new Button("submitButton"));
 
 		add(searchBarForm);
