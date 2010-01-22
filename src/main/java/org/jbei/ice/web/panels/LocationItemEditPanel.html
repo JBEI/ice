@@ -1,0 +1,49 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<div wicket:id="feedback"></div>
+	<form wicket:id="locationEditForm">
+	<table width="100%" border="0" cellpadding="0" cellspacing="3">
+		<tr>
+			<td valign="top" width="10">&nbsp;</td>
+			<td>
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td class="title_column">Location:</td>
+					<td style="width: 150px"><input type="text" class="inputbox"
+						wicket:id="locationString" /></td>
+				</tr>
+				<tr>
+					<td class="title_column">Barcode:</td>
+					<td style="width: 150px"><input type="text" class="inputbox"
+						wicket:id="barcode" /></td>
+				</tr>
+				<tr>
+					<td class="title_column">Notes:</td>
+					<td style="width: 150px"><input type="text" class="inputbox"
+						wicket:id="notes" /></td>
+				</tr>
+				<tr>
+					<td class="title_column">Num Columns:</td>
+					<td style="width: 150px"><input type="text" class="inputbox"
+						wicket:id="nColumns" /></td>
+				</tr>
+				<tr>
+					<td class="title_column">num Rows:</td>
+					<td style="width: 150px"><input type="text" class="inputbox"
+						wicket:id="nRows" /></td>
+				</tr>
+				<tr>
+					<td class="title_column">Wells:</td>
+					<td style="width: 150px"><input type="text" class="inputbox"
+						wicket:id="wells" /></td>
+				</tr>
+			</table>
+			</td>
+			<td width="150px" align="right" valign="top"><nobr> <input
+				type="submit" class="button" wicket:id="saveLocationButton" /> <input
+				type="submit" class="button" wicket:id="cancelButton" /> </nobr></td>
+		</tr>
+	</table>
+	</form>
+</wicket:panel>
+</html>

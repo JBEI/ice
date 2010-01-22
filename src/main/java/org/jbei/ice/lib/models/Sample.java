@@ -62,9 +62,9 @@ public class Sample implements ISampleValueObject, Serializable {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "sample")
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @JoinColumn(name = "samples_id")
-    @OrderBy("id")
+    @OrderBy("id DESC")
     private Set<Location> locations = new LinkedHashSet<Location>();
-    
+
     public int getId() {
         return id;
     }

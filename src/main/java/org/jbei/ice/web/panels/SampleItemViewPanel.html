@@ -7,7 +7,7 @@
 			<table width="100%" border="0" cellpadding="0" cellspacing="0">
 				<tr>
 					<td class="title_column">Label</td>
-					<td class="value_column"><span wicket:id="label"></span></td>
+					<td class="value_column" style="";><span wicket:id="label"></span></td>
 				</tr>
 				<tr>
 					<td class="title_column">Depositor</td>
@@ -20,21 +20,14 @@
 				<tr>
 					<td valign="top" class="title_column">Locations</td>
 					<td colspan="3">
-					<table border="0" cellpadding="3" cellspacing="1"
-						style="background-color: #BBBBBB;" width="100%">
-						<tr>
-							<td bgcolor="#ffffff"><span style="color: red">No
-							Dummy location Provided</span> <br>
-							<a href="/sample/location/new/1971/">+ Dummy Add Location</a></td>
-						</tr>
-					</table>
+					<div wicket:id="locationPanel"></div>
 					</td>
 				</tr>
 			</table>
 			</td>
-			<td width="150px" align="right" valign="top"><nobr>
-			<a href="#" wicket:id="editSampleLink">Edit</a> | 
-				<a href="#" wicket:id="deleteSampleLink" >Delete </a></nobr></td>
+			<td width="150px" align="right" valign="top"><nobr> <a
+				href="#" wicket:id="editSampleLink">Edit</a> | <a href="#"
+				wicket:id="deleteSampleLink">Delete </a></nobr></td>
 		</tr>
 	</table>
 

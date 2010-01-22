@@ -131,4 +131,5 @@ public class SampleManager extends Manager {
             throw new ManagerException(msg, e);
         }
     }
+
 }
