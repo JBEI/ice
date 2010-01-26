@@ -12,6 +12,7 @@ import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
@@ -411,6 +412,7 @@ public class StrainUpdateFormPanel extends Panel {
         StrainForm form = new StrainForm("strainForm");
         form.add(new Button("submitButton"));
         add(form);
+        add(new FeedbackPanel("feedback"));
 
     }
 

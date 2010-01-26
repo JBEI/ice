@@ -13,6 +13,7 @@ import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
@@ -423,6 +424,7 @@ public class PlasmidUpdateFormPanel extends Panel {
         PlasmidForm form = new PlasmidForm("plasmidForm");
         form.add(new Button("submitButton"));
         add(form);
+        add(new FeedbackPanel("feedback"));
     }
 
     public void setPlasmid(Plasmid plasmid) {
