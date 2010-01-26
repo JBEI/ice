@@ -10,12 +10,12 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sample;
+import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.panels.EntryPagingPanel;
 import org.jbei.ice.web.panels.SamplePagingPanel;
@@ -30,7 +30,14 @@ public class UserEntryPage extends ProtectedPage {
         super(parameters);
 
         Account account = IceSession.get().getAccount();
-        LinkedHashSet<Entry> entries = EntryManager.getByAccount(account, 0, 1000);
+        LinkedHashSet<Entry> entries = null;
+        try {
+            entries = AuthenticatedEntryManager.getByAccount(account, 0, 1000, IceSession.get()
+                    .getSessionKey());
+        } catch (ManagerException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         ArrayList<Entry> entriesList = new ArrayList<Entry>(entries);
         userPanel = new EntryPagingPanel("userPanel", entriesList, 20);
         userPanel.setOutputMarkupId(true);
@@ -45,7 +52,14 @@ public class UserEntryPage extends ProtectedPage {
             @Override
             public void onClick(AjaxRequestTarget target) {
                 Account account = IceSession.get().getAccount();
-                LinkedHashSet<Entry> entries = EntryManager.getByAccount(account, 0, 1000);
+                LinkedHashSet<Entry> entries = null;
+                try {
+                    entries = AuthenticatedEntryManager.getByAccount(account, 0, 1000, IceSession
+                            .get().getSessionKey());
+                } catch (ManagerException e) {
+
+                    e.printStackTrace();
+                }
                 ArrayList<Entry> entriesList = new ArrayList<Entry>(entries);
                 userPanel = new EntryPagingPanel("userPanel", entriesList, 50);
                 userPanel.setOutputMarkupId(true);

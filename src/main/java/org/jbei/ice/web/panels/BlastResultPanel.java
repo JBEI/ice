@@ -9,10 +9,12 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.search.BlastResult;
+import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class BlastResultPanel extends Panel {
@@ -35,10 +37,13 @@ public class BlastResultPanel extends Panel {
                 BlastResult blastResult = (BlastResult) item.getModelObject();
                 Entry entry = null;
                 try {
-                    entry = EntryManager.getByRecordId(blastResult.getSubjectId());
+                    entry = AuthenticatedEntryManager.getByRecordId(blastResult.getSubjectId(),
+                            IceSession.get().getSessionKey());
                 } catch (ManagerException e) {
                     String msg = "Could not get entry from manager with: " + e.toString();
                     Logger.error(msg);
+                } catch (PermissionException e) {
+                    // no permission
                 }
                 if (entry != null) {
                     item.add(new Label("index", "" + (item.getIndex() + 1)));
@@ -50,7 +55,7 @@ public class BlastResultPanel extends Panel {
 
                     item.add(new Label("name", entry.getOneName().getName()));
                     BlastResultPanel thisPanel = (BlastResultPanel) getParent();
-                    
+
                     String maxAlignmentLength = "" + thisPanel.getBlastQuery().length();
                     item.add(new Label("alignedBp", "" + blastResult.getAlignmentLength() + " / "
                             + maxAlignmentLength));

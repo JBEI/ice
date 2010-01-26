@@ -10,18 +10,22 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.collections.MiniMap;
 import org.apache.wicket.util.template.TextTemplateHeaderContributor;
-import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
+import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.forms.PartUpdateFormPanel;
 import org.jbei.ice.web.forms.PlasmidUpdateFormPanel;
 import org.jbei.ice.web.forms.StrainUpdateFormPanel;
 
 public class EntryUpdatePage extends ProtectedPage {
+
+    private Entry entry;
+
     public EntryUpdatePage(PageParameters parameters) {
         super(parameters);
 
@@ -81,9 +85,9 @@ public class EntryUpdatePage extends ProtectedPage {
                 "autocompleteDataTemplate.js", autocompleteDataMap));
 
         int entryId = parameters.getInt("0");
-        Entry entry;
+
         try {
-            entry = EntryManager.get(entryId);
+            entry = AuthenticatedEntryManager.get(entryId, IceSession.get().getSessionKey());
             String recordType = entry.getRecordType();
             if (recordType.equals("strain")) {
                 StrainUpdateFormPanel panel = new StrainUpdateFormPanel("entry", (Strain) entry);

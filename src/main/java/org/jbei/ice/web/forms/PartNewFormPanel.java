@@ -18,7 +18,6 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
@@ -26,6 +25,7 @@ import org.jbei.ice.lib.models.Link;
 import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.SelectionMarker;
+import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryViewPage;
@@ -171,6 +171,7 @@ public class PartNewFormPanel extends Panel {
                         .setEscapeModelStrings(false));
             }
 
+            @Override
             protected void onSubmit() {
                 try {
                     CommaSeparatedField<Link> linksField = new CommaSeparatedField<Link>(
@@ -220,7 +221,8 @@ public class PartNewFormPanel extends Panel {
                 part.setPackageFormat(getPackageFormat().getValue());
 
                 try {
-                    Part newPart = EntryManager.createPart(part);
+                    Part newPart = AuthenticatedEntryManager.createPart(part, IceSession.get()
+                            .getSessionKey());
                     setResponsePage(EntryViewPage.class, new PageParameters("0=" + newPart.getId()));
                 } catch (ManagerException e) {
                     String msg = "System Error: Could not save! ";

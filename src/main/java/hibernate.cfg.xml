@@ -37,7 +37,7 @@
 	<mapping resource="org/jbei/ice/lib/models/Label.hbm.xml" />
 	<mapping resource="org/jbei/ice/lib/models/EntryLabel.hbm.xml" />
 	<mapping class="org.jbei.ice.lib.models.AccountPreferences"/>
-	<mapping class="org.jbei.ice.lib.permissions.Group"/>
+	<mapping class="org.jbei.ice.lib.models.Group"/>
 	<mapping class="org.jbei.ice.lib.permissions.ReadUser"/>
 	<mapping class="org.jbei.ice.lib.permissions.WriteUser"/>
 	<mapping class="org.jbei.ice.lib.permissions.ReadGroup"/>
@@ -45,7 +45,7 @@
 	<mapping class="org.jbei.ice.lib.models.FundingSource"/>
 	<mapping class="org.jbei.ice.lib.models.EntryFundingSource"/>
 	<mapping class="org.jbei.ice.lib.models.AccountFundingSource"/>
-	<mapping class="org.jbei.ice.web.SessionData"/>
+	<mapping class="org.jbei.ice.lib.models.SessionData"/>
 	
 </session-factory>
 </hibernate-configuration>

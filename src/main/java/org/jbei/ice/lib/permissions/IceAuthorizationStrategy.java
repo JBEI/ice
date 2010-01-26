@@ -10,21 +10,20 @@ import org.jbei.ice.web.pages.LoginPage;
 import org.jbei.ice.web.pages.ProtectedPage;
 
 public class IceAuthorizationStrategy implements IAuthorizationStrategy,
-		IUnauthorizedComponentInstantiationListener {
+        IUnauthorizedComponentInstantiationListener {
 
-	public boolean isActionAuthorized(Component component, Action action) {
-		return true;
-	}
+    public boolean isActionAuthorized(Component component, Action action) {
+        return true;
+    }
 
-	public <T extends Component> boolean isInstantiationAuthorized(Class<T> componentClass) {
-		if (ProtectedPage.class.isAssignableFrom(componentClass)) {
-			return IceSession.get().isAuthenticated();
-		}
+    public <T extends Component> boolean isInstantiationAuthorized(Class<T> componentClass) {
+        if (ProtectedPage.class.isAssignableFrom(componentClass)) {
+            return IceSession.get().isAuthenticated();
+        }
+        return true;
+    }
 
-		return true;
-	}
-
-	public void onUnauthorizedInstantiation(Component component) {
-		throw new RestartResponseAtInterceptPageException(LoginPage.class);
-	}
+    public void onUnauthorizedInstantiation(Component component) {
+        throw new RestartResponseAtInterceptPageException(LoginPage.class);
+    }
 }

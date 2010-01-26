@@ -11,8 +11,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import org.jbei.ice.lib.permissions.Group;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.Group;
 
 @Entity
 @Table(name="permission_write_groups")

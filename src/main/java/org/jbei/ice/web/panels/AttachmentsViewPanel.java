@@ -11,113 +11,119 @@ import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.permissions.PermissionManager;
+import org.jbei.ice.web.IceSession;
 
 public class AttachmentsViewPanel extends Panel {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	Entry entry = null;
-	ArrayList<Attachment> attachments = new ArrayList<Attachment>();
-	ArrayList<Panel> panels = new ArrayList<Panel>();
+    Entry entry = null;
+    ArrayList<Attachment> attachments = new ArrayList<Attachment>();
+    ArrayList<Panel> panels = new ArrayList<Panel>();
 
-	@SuppressWarnings("unchecked")
-	public AttachmentsViewPanel(String id, Entry entry) {
-		super(id);
+    @SuppressWarnings("unchecked")
+    public AttachmentsViewPanel(String id, Entry entry) {
+        super(id);
 
-		this.entry = entry;
+        this.entry = entry;
 
-		class AddAttachmentLink extends AjaxFallbackLink {
+        class AddAttachmentLink extends AjaxFallbackLink {
 
-			private static final long serialVersionUID = 1L;
+            private static final long serialVersionUID = 1L;
 
-			public AddAttachmentLink(String id) {
-				super(id);
-			}
+            public AddAttachmentLink(String id) {
+                super(id);
+            }
 
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				AttachmentsViewPanel thisPanel = (AttachmentsViewPanel) getParent();
-				ArrayList<Panel> thisPanelsPanels = thisPanel.getPanels();
-				if (thisPanelsPanels.size() > 0
-						&& thisPanelsPanels.get(0) instanceof AttachmentItemEditPanel) {
-					// If the first item is already an edit form, do nothing.
-				} else {
-					Attachment newAttachment = new Attachment();
-					newAttachment.setEntry(thisPanel.getEntry());
-					Panel newAttachmentEditPanel = new AttachmentItemEditPanel(
-							"attachmentItemPanel", newAttachment);
-					newAttachmentEditPanel.setOutputMarkupId(true);
+            @Override
+            public void onClick(AjaxRequestTarget target) {
+                AttachmentsViewPanel thisPanel = (AttachmentsViewPanel) getParent();
+                ArrayList<Panel> thisPanelsPanels = thisPanel.getPanels();
+                if (thisPanelsPanels.size() > 0
+                        && thisPanelsPanels.get(0) instanceof AttachmentItemEditPanel) {
+                    // If the first item is already an edit form, do nothing.
+                } else {
+                    Attachment newAttachment = new Attachment();
+                    newAttachment.setEntry(thisPanel.getEntry());
+                    Panel newAttachmentEditPanel = new AttachmentItemEditPanel(
+                            "attachmentItemPanel", newAttachment);
+                    newAttachmentEditPanel.setOutputMarkupId(true);
 
-					panels.add(0, newAttachmentEditPanel);
+                    panels.add(0, newAttachmentEditPanel);
 
-					target.getPage().replace(getParent());
-					target.addComponent(getParent());
-				}
-			}
-		}
+                    target.getPage().replace(getParent());
+                    target.addComponent(getParent());
+                }
+            }
+        }
 
-		add(new AddAttachmentLink("addAttachmentLink"));
+        AddAttachmentLink addAttachmentLink = new AddAttachmentLink("addAttachmentLink");
+        addAttachmentLink.setVisible(PermissionManager.hasWritePermission(entry.getId(), IceSession
+                .get().getSessionKey()));
+        add(addAttachmentLink);
 
-		try {
-			attachments.addAll(AttachmentManager.getByEntry(entry));
-		} catch (ManagerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        try {
+            attachments.addAll(AttachmentManager.getByEntry(entry));
+        } catch (ManagerException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
-		Object[] temp = attachments.toArray();
-		if (temp.length == 0) {
-			Panel attachmentItemPanel = new EmptyMessagePanel(
-					"attachmentItemPanel", "No Attachments");
-			attachmentItemPanel.setOutputMarkupId(true);
-			panels.add(attachmentItemPanel);
-		} else {
-			populatePanels();
-		}
+        Object[] temp = attachments.toArray();
+        if (temp.length == 0) {
+            Panel attachmentItemPanel = new EmptyMessagePanel("attachmentItemPanel",
+                    "No Attachments");
+            attachmentItemPanel.setOutputMarkupId(true);
+            panels.add(attachmentItemPanel);
+        } else {
+            populatePanels();
+        }
 
-		ListView attachmentsList = generateAttachmentsList("attachmentsListView");
-		attachmentsList.setOutputMarkupId(true);
-		add(attachmentsList);
-	}
+        ListView attachmentsList = generateAttachmentsList("attachmentsListView");
+        attachmentsList.setOutputMarkupId(true);
+        add(attachmentsList);
+    }
 
-	public void populatePanels() {
-		int counter = 1;
-		panels.clear();
-		for (Attachment attachment : attachments) {
-			Panel attachmentItemPanel = new AttachmentItemViewPanel(
-					"attachmentItemPanel", counter, attachment);
-			attachmentItemPanel.setOutputMarkupId(true);
-			panels.add(attachmentItemPanel);
-			counter = counter + 1;
-		}
-	}
+    public void populatePanels() {
+        int counter = 1;
+        panels.clear();
+        for (Attachment attachment : attachments) {
+            Panel attachmentItemPanel = new AttachmentItemViewPanel("attachmentItemPanel", counter,
+                    attachment);
+            attachmentItemPanel.setOutputMarkupId(true);
+            panels.add(attachmentItemPanel);
+            counter = counter + 1;
+        }
+    }
 
-	@SuppressWarnings("unchecked")
-	public ListView generateAttachmentsList(String id) {
+    @SuppressWarnings("unchecked")
+    public ListView generateAttachmentsList(String id) {
 
-		ListView attachmentsListView = new ListView(id, panels) {
+        ListView attachmentsListView = new ListView(id, panels) {
 
-			private static final long serialVersionUID = 1L;
+            private static final long serialVersionUID = 1L;
 
-			protected void populateItem(ListItem item) {
-				Panel panel = (Panel) item.getModelObject();
-				item.add(panel);
-			}
-		};
+            @Override
+            protected void populateItem(ListItem item) {
+                Panel panel = (Panel) item.getModelObject();
+                item.add(panel);
+            }
+        };
 
-		return attachmentsListView;
-	}
+        return attachmentsListView;
+    }
 
-	public Entry getEntry() {
-		return entry;
-	}
+    public Entry getEntry() {
+        return entry;
+    }
 
-	public void setEntry(Entry entry) {
-		this.entry = entry;
-	}
+    public void setEntry(Entry entry) {
+        this.entry = entry;
+    }
 
-	public ArrayList<Panel> getPanels() {
-		return panels;
-	}
+    public ArrayList<Panel> getPanels() {
+        return panels;
+    }
 
 }

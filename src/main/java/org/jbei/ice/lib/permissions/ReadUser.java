@@ -15,49 +15,52 @@ import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 
 @Entity
-@Table(name="permission_read_users")
-@SequenceGenerator(name = "sequence", sequenceName = "permission_read_users_id_seq",
-		allocationSize = 1)
+@Table(name = "permission_read_users")
+@SequenceGenerator(name = "sequence", sequenceName = "permission_read_users_id_seq", allocationSize = 1)
 public class ReadUser implements Serializable {
-	
-	private static final long serialVersionUID = 1L;
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-	private int id;
-	
-	@ManyToOne
-	@JoinColumn(name="entry_id")
-	private Entry entry;
-	
-	@ManyToOne
-	@JoinColumn(name = "account_id")
-	private Account readUser;
-	
-	public ReadUser(Entry entry, Account account) {
-		setEntry(entry);
-		setReadUser(account);
-	}
-	
-	//getters and setters
-	public int getId() {
-		return id;
-	}
-	public void setId(int id) {
-		this.id = id;
-	}
-	public Entry getEntry() {
-		return entry;
-	}
-	public void setEntry(Entry entry) {
-		this.entry = entry;
-	}
-	public Account getReadUser() {
-		return readUser;
-	}
-	public void setReadUser(Account readUser) {
-		this.readUser = readUser;
-	}
 
-	
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    private int id;
+
+    @ManyToOne
+    @JoinColumn(name = "entry_id")
+    private Entry entry;
+
+    @ManyToOne
+    @JoinColumn(name = "account_id")
+    private Account account;
+
+    public ReadUser(Entry entry, Account account) {
+        setEntry(entry);
+        setAccount(account);
+    }
+
+    //getters and setters
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Entry getEntry() {
+        return entry;
+    }
+
+    public void setEntry(Entry entry) {
+        this.entry = entry;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account readUser) {
+        this.account = readUser;
+    }
+
 }

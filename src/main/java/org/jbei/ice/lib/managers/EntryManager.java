@@ -122,7 +122,8 @@ public class EntryManager extends Manager {
 
     public static Entry getByRecordId(String recordId) throws ManagerException {
         try {
-            Query query = session.createQuery("from " + Entry.class.getName() + " where recordId = :recordId");
+            Query query = session.createQuery("from " + Entry.class.getName()
+                    + " where recordId = :recordId");
             query.setParameter("recordId", recordId);
 
             Entry entry = (Entry) query.uniqueResult();
@@ -135,7 +136,8 @@ public class EntryManager extends Manager {
 
     public static Entry getByPartNumber(String partNumber) throws ManagerException {
         try {
-            Query query = session.createQuery("from " + PartNumber.class.getName() + " where partNumber = :partNumber");
+            Query query = session.createQuery("from " + PartNumber.class.getName()
+                    + " where partNumber = :partNumber");
             query.setParameter("partNumber", partNumber);
 
             PartNumber entryPartNumber = (PartNumber) query.uniqueResult();
@@ -155,7 +157,8 @@ public class EntryManager extends Manager {
 
     public static Entry getByName(String name) throws ManagerException {
         try {
-            Query query = session.createQuery("from " + Name.class.getName() + " where name = :name");
+            Query query = session.createQuery("from " + Name.class.getName()
+                    + " where name = :name");
             query.setParameter("name", name);
 
             Name entryName = (Name) query.uniqueResult();
@@ -210,7 +213,8 @@ public class EntryManager extends Manager {
     }
 
     public static int getNumberOfEntriesByVisibility(int visibility) {
-        String queryString = "select id from Entry where visibility = " + String.valueOf(visibility);
+        String queryString = "select id from Entry where visibility = "
+                + String.valueOf(visibility);
 
         Query query = session.createQuery(queryString);
 
@@ -218,16 +222,17 @@ public class EntryManager extends Manager {
     }
 
     @SuppressWarnings("unchecked")
-    public static String generateNextPartNumber(String prefix, String delimiter, String suffix) throws ManagerException {
+    private static String generateNextPartNumber(String prefix, String delimiter, String suffix)
+            throws ManagerException {
         try {
-            String queryString = "from " + PartNumber.class.getName() + " where partNumber LIKE '" + prefix
-                    + "%' ORDER BY partNumber DESC";
+            String queryString = "from " + PartNumber.class.getName() + " where partNumber LIKE '"
+                    + prefix + "%' ORDER BY partNumber DESC";
             Query query = session.createQuery(queryString);
 
             ArrayList<PartNumber> tempList = new ArrayList<PartNumber>(query.list());
             PartNumber entryPartNumber = null;
             if (tempList.size() > 0) {
-                entryPartNumber = (PartNumber) tempList.get(0);
+                entryPartNumber = tempList.get(0);
             }
 
             String nextPartNumber = null;
@@ -242,7 +247,8 @@ public class EntryManager extends Manager {
 
                         value++;
 
-                        nextPartNumber = prefix + delimiter + String.format("%0" + suffix.length() + "d", value);
+                        nextPartNumber = prefix + delimiter
+                                + String.format("%0" + suffix.length() + "d", value);
                     } catch (Exception e) {
                         throw new ManagerException("Couldn't parse partNumber", e);
                     }
@@ -257,18 +263,21 @@ public class EntryManager extends Manager {
         }
     }
 
-    public static String getNextPartNumber() throws ManagerException {
+    private static String getNextPartNumber() throws ManagerException {
         return generateNextPartNumber(JbeirSettings.getSetting("PART_NUMBER_PREFIX"), JbeirSettings
-                .getSetting("PART_NUMBER_DELIMITER"), JbeirSettings.getSetting("PART_NUMBER_DIGITAL_SUFFIX"));
+                .getSetting("PART_NUMBER_DELIMITER"), JbeirSettings
+                .getSetting("PART_NUMBER_DIGITAL_SUFFIX"));
     }
 
     /**
      * Updates or Inserts unique funding source and returns the result
      */
-    public static FundingSource saveFundingSource(FundingSource fundingSource) throws ManagerException {
+    private static FundingSource saveFundingSource(FundingSource fundingSource)
+            throws ManagerException {
         FundingSource result;
         try {
-            String queryString = "from " + FundingSource.class.getName() + " where fundingSource=:fundingSource AND"
+            String queryString = "from " + FundingSource.class.getName()
+                    + " where fundingSource=:fundingSource AND"
                     + " principalInvestigator=:principalInvestigator";
             Query query = session.createQuery(queryString);
             query.setParameter("fundingSource", fundingSource.getFundingSource());

@@ -4,15 +4,17 @@ import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.web.panels.PartViewPanel;
-import org.jbei.ice.web.panels.PlasmidViewPanel;
-import org.jbei.ice.web.panels.StrainViewPanel;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
+import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.panels.PartViewPanel;
+import org.jbei.ice.web.panels.PlasmidViewPanel;
+import org.jbei.ice.web.panels.StrainViewPanel;
 
 public class EntryTipPage extends ProtectedPage {
     public Entry entry;
@@ -30,9 +32,11 @@ public class EntryTipPage extends ProtectedPage {
         subPage = parameters.getString("1");
 
         try {
-            entry = EntryManager.get(entryId);
+            entry = AuthenticatedEntryManager.get(entryId, IceSession.get().getSessionKey());
         } catch (ManagerException e) {
             e.printStackTrace();
+        } catch (PermissionException e) {
+            // do nothing
         }
 
         generalPanel = makeGeneralPanel(entry);

@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.permissions;
+package org.jbei.ice.lib.models;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -16,7 +16,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 
-import org.jbei.ice.lib.models.Account;
 
 @Entity
 @Table(name="groups")

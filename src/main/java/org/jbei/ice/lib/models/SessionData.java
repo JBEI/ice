@@ -1,4 +1,4 @@
-package org.jbei.ice.web;
+package org.jbei.ice.lib.models;
 
 import java.io.Serializable;
 import java.util.Calendar;

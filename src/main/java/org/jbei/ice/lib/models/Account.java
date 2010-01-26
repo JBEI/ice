@@ -17,7 +17,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.jbei.ice.lib.permissions.Group;
 
 @Entity
 @Table(name = "accounts")

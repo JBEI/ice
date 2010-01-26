@@ -18,7 +18,6 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
@@ -26,6 +25,7 @@ import org.jbei.ice.lib.models.Link;
 import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryViewPage;
@@ -165,6 +165,7 @@ public class StrainNewFormPanel extends Panel {
                         .setEscapeModelStrings(false));
             }
 
+            @Override
             protected void onSubmit() {
                 try {
                     CommaSeparatedField<Link> linksField = new CommaSeparatedField<Link>(
@@ -218,7 +219,8 @@ public class StrainNewFormPanel extends Panel {
                 strain.setPlasmids(getPlasmids());
 
                 try {
-                    Strain newStrain = EntryManager.createStrain(strain);
+                    Strain newStrain = AuthenticatedEntryManager.createStrain(strain, IceSession
+                            .get().getSessionKey());
                     setResponsePage(EntryViewPage.class, new PageParameters("0="
                             + newStrain.getId()));
                 } catch (ManagerException e) {
@@ -231,6 +233,7 @@ public class StrainNewFormPanel extends Panel {
 
             }
 
+            @Override
             protected void onError() {
 
             }

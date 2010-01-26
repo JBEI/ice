@@ -15,54 +15,52 @@ import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 
 @Entity
-@Table(name="permission_write_users")
-@SequenceGenerator(name = "sequence", sequenceName = "permission_write_users_id_seq",
-		allocationSize = 1)
+@Table(name = "permission_write_users")
+@SequenceGenerator(name = "sequence", sequenceName = "permission_write_users_id_seq", allocationSize = 1)
 public class WriteUser implements Serializable {
-	
-	private static final long serialVersionUID = 1L;
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-	private int id;
-	
-	@ManyToOne
-	@JoinColumn(name="entry_id")
-	private Entry entry;
-	
-	@ManyToOne
-	@JoinColumn(name = "account_id")
-	private Account writeUser;
 
-	public WriteUser(Entry entry, Account account) {
-		setEntry(entry);
-		setWriteUser(account);
-	}
-	
-	//getters and setters
-	public int getId() {
-		return id;
-	}
+    private static final long serialVersionUID = 1L;
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    private int id;
 
-	public Entry getEntry() {
-		return entry;
-	}
+    @ManyToOne
+    @JoinColumn(name = "entry_id")
+    private Entry entry;
 
-	public void setEntry(Entry entry) {
-		this.entry = entry;
-	}
+    @ManyToOne
+    @JoinColumn(name = "account_id")
+    private Account account;
 
-	public Account getWriteUser() {
-		return writeUser;
-	}
+    public WriteUser(Entry entry, Account account) {
+        setEntry(entry);
+        setAccount(account);
+    }
 
-	public void setWriteUser(Account writeUser) {
-		this.writeUser = writeUser;
-	}
-	
+    //getters and setters
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Entry getEntry() {
+        return entry;
+    }
+
+    public void setEntry(Entry entry) {
+        this.entry = entry;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
 
 }

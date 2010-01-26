@@ -11,113 +11,118 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sample;
+import org.jbei.ice.lib.permissions.PermissionManager;
+import org.jbei.ice.web.IceSession;
 
 public class SampleViewPanel extends Panel {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	Entry entry = null;
-	ArrayList<Sample> samples = new ArrayList<Sample>();
-	ArrayList<Panel> panels = new ArrayList<Panel>();
+    Entry entry = null;
+    ArrayList<Sample> samples = new ArrayList<Sample>();
+    ArrayList<Panel> panels = new ArrayList<Panel>();
 
-	@SuppressWarnings("unchecked")
-	public SampleViewPanel(String id, Entry entry) {
-		super(id);
-		
-		this.entry = entry;
-		class AddSampleLink extends AjaxFallbackLink {
-			private static final long serialVersionUID = 1L;
+    @SuppressWarnings("unchecked")
+    public SampleViewPanel(String id, Entry entry) {
+        super(id);
 
-			public AddSampleLink(String id) {
-				super(id);
-			}
+        this.entry = entry;
+        class AddSampleLink extends AjaxFallbackLink {
+            private static final long serialVersionUID = 1L;
 
-			public void onClick(AjaxRequestTarget target) {
-				SampleViewPanel thisPanel = (SampleViewPanel) getParent();
-				ArrayList<Panel> thisPanelsPanels = thisPanel.getPanels();
-				if (thisPanelsPanels.size() > 0 && thisPanelsPanels.get(0) instanceof SampleItemEditPanel) { 
-					// If the first item is already an edit form, do nothing.		
-				} else {
-					Sample newSample = new Sample();
-					newSample.setEntry(thisPanel.getEntry());
-					Panel newSampleEditPanel = new SampleItemEditPanel(
-							"sampleItemPanel", newSample);
-					newSampleEditPanel.setOutputMarkupId(true);
-					
-					panels.add(0, newSampleEditPanel);
-					
-					target.getPage().replace(getParent());
-					target.addComponent(getParent());
-				}
-			}
-		}
+            public AddSampleLink(String id) {
+                super(id);
+            }
 
-		add(new AddSampleLink("addSampleLink"));
+            @Override
+            public void onClick(AjaxRequestTarget target) {
+                SampleViewPanel thisPanel = (SampleViewPanel) getParent();
+                ArrayList<Panel> thisPanelsPanels = thisPanel.getPanels();
+                if (thisPanelsPanels.size() > 0
+                        && thisPanelsPanels.get(0) instanceof SampleItemEditPanel) {
+                    // If the first item is already an edit form, do nothing.		
+                } else {
+                    Sample newSample = new Sample();
+                    newSample.setEntry(thisPanel.getEntry());
+                    Panel newSampleEditPanel = new SampleItemEditPanel("sampleItemPanel", newSample);
+                    newSampleEditPanel.setOutputMarkupId(true);
 
-		try {
-			samples.addAll(SampleManager.get(entry));
-		} catch (ManagerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		Object[] temp = samples.toArray();
-		if (temp.length == 0) {
-			Panel sampleItemPanel = new EmptyMessagePanel("sampleItemPanel", "No sample provided");
-			sampleItemPanel.setOutputMarkupId(true);
-			panels.add(sampleItemPanel);
-		} else {
-			populatePanels();
-		}
-		
-		ListView samplesList = generateSamplesList("samplesListView");
-		samplesList.setOutputMarkupId(true);
-		add(samplesList);
-	}
-	
-	public void populatePanels() {
-		Integer counter = 1;
-		panels.clear();
-		for (Sample sample : samples) {
-			Panel sampleItemPanel = new SampleItemViewPanel(
-					"sampleItemPanel", counter, sample);
-			sampleItemPanel.setOutputMarkupId(true);
-			panels.add(sampleItemPanel);
-			counter = counter + 1;
-		}
-	}
+                    panels.add(0, newSampleEditPanel);
 
-	@SuppressWarnings("unchecked")
-	public ListView generateSamplesList(String id) {
+                    target.getPage().replace(getParent());
+                    target.addComponent(getParent());
+                }
+            }
+        }
 
-		ListView samplesListView = new ListView(id, panels) {
+        AddSampleLink addSampleLink = new AddSampleLink("addSampleLink");
+        addSampleLink.setVisible(PermissionManager.hasWritePermission(entry.getId(), IceSession
+                .get().getSessionKey()));
+        add(addSampleLink);
 
-			private static final long serialVersionUID = 1L;
+        try {
+            samples.addAll(SampleManager.get(entry));
+        } catch (ManagerException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
-			@Override
-			protected void populateItem(ListItem item) {
-				Panel panel = (Panel) item.getModelObject();
-				item.add(panel);
-			}
-		};
+        Object[] temp = samples.toArray();
+        if (temp.length == 0) {
+            Panel sampleItemPanel = new EmptyMessagePanel("sampleItemPanel", "No sample provided");
+            sampleItemPanel.setOutputMarkupId(true);
+            panels.add(sampleItemPanel);
+        } else {
+            populatePanels();
+        }
 
-		return samplesListView;
-	}
+        ListView samplesList = generateSamplesList("samplesListView");
+        samplesList.setOutputMarkupId(true);
+        add(samplesList);
+    }
 
-	public Entry getEntry() {
-		return entry;
-	}
+    public void populatePanels() {
+        Integer counter = 1;
+        panels.clear();
+        for (Sample sample : samples) {
+            Panel sampleItemPanel = new SampleItemViewPanel("sampleItemPanel", counter, sample);
+            sampleItemPanel.setOutputMarkupId(true);
+            panels.add(sampleItemPanel);
+            counter = counter + 1;
+        }
+    }
 
-	public void setEntry(Entry entry) {
-		this.entry = entry;
-	}
+    @SuppressWarnings("unchecked")
+    public ListView generateSamplesList(String id) {
 
-	public ArrayList<Panel> getPanels() {
-		return panels;
-	}
+        ListView samplesListView = new ListView(id, panels) {
 
-	public ArrayList<Sample> getSamples() {
-		return samples;
-	}
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected void populateItem(ListItem item) {
+                Panel panel = (Panel) item.getModelObject();
+                item.add(panel);
+            }
+        };
+
+        return samplesListView;
+    }
+
+    public Entry getEntry() {
+        return entry;
+    }
+
+    public void setEntry(Entry entry) {
+        this.entry = entry;
+    }
+
+    public ArrayList<Panel> getPanels() {
+        return panels;
+    }
+
+    public ArrayList<Sample> getSamples() {
+        return samples;
+    }
 
 }

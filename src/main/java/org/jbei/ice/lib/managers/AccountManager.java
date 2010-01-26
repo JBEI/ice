@@ -54,6 +54,7 @@ public class AccountManager extends Manager {
         return result;
     }
 
+    @SuppressWarnings("unchecked")
     public static Account getAccountByAuthToken(String authToken) {
         Account account = null;
         String queryString = "select data from SessionData sessionData where sessionData.sessionKey = :sessionKey";

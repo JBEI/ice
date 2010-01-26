@@ -4,8 +4,8 @@ import java.util.Calendar;
 
 import org.hibernate.Query;
 import org.hibernate.Transaction;
-import org.jbei.ice.web.SessionData;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.models.SessionData;
 
 public class SessionManager extends Manager {
 	

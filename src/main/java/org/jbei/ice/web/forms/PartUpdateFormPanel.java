@@ -17,7 +17,6 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
@@ -25,9 +24,11 @@ import org.jbei.ice.lib.models.Link;
 import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.SelectionMarker;
+import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.lib.utils.Job;
 import org.jbei.ice.lib.utils.JobCue;
+import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 @SuppressWarnings("unused")
@@ -251,7 +252,7 @@ public class PartUpdateFormPanel extends Panel {
                 part.setPackageFormat(getPackageFormat().getValue());
 
                 try {
-                    EntryManager.save(part);
+                    AuthenticatedEntryManager.save(part, IceSession.get().getSessionKey());
                     JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
                     JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);
                     setResponsePage(EntryViewPage.class, new PageParameters("0=" + part.getId()));

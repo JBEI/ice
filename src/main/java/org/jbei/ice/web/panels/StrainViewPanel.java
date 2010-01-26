@@ -15,118 +15,116 @@ import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.lib.permissions.PermissionManager;
+import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryUpdatePage;
 
 public class StrainViewPanel extends Panel {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	@SuppressWarnings("unchecked")
-	public StrainViewPanel(String id, Strain entry) {
-		super(id);
-		
-		ArrayList<Component> elements = new ArrayList<Component>();
-		
-		elements.add(new Label("partNumber", 
-				entry.getOnePartNumber().getPartNumber()));
-		elements.add(new Label("selectionMarkers", 
-				entry.getSelectionMarkersAsString()));
-		elements.add(new Label("names", 
-				entry.getNamesAsString()));
-		elements.add(new Label("host", entry.getHost()));
-		elements.add(new Label("alias", entry.getAlias()));
-		elements.add(new Label("genotypePhenotype", 
-				entry.getGenotypePhenotype()));
-		elements.add(new Label("creator", 
-				entry.getCreator()));
-		elements.add(new Label("plasmids", entry.getPlasmids()));
-		elements.add(new Label("status", 
-				org.jbei.ice.lib.utils.JbeiConstants.getStatus(entry.getStatus())));
-		
-		elements.add(new Label("linkToOwner", entry.getOwner()));
-		elements.add(new Label("links", entry.getLinksAsString()));
+    @SuppressWarnings("unchecked")
+    public StrainViewPanel(String id, Strain entry) {
+        super(id);
 
-		SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
-		String creationTime = dateFormat.format(entry.getCreationTime());
-		elements.add(new Label("creationTime", creationTime));
+        ArrayList<Component> elements = new ArrayList<Component>();
 
-		String modificationTime = "";
-		Date modificationTimeStamp = entry.getModificationTime();
-		if (modificationTimeStamp != null) {
-			 modificationTime = dateFormat.format(entry.getModificationTime());
-		}
-		elements.add(new Label("modificationTime", modificationTime));
-		
-		elements.add(new Label("keywords", entry.getKeywords()));
-		elements.add(new Label("shortDescription", entry.getShortDescription()));
-		
-		//TODO
-		int numAttachments = AttachmentManager.getNumberOfAttachments(entry);
-		String attachmentText = "";
-		if (numAttachments == 0) {
-			attachmentText = "No attachments provided";
-		} else if (numAttachments == 1) {
-			attachmentText = "One attachment provided";
-		} else {
-			attachmentText = String.valueOf(numAttachments) + " attachments provided";
-		}
-		elements.add(new Label("attachments", attachmentText));
-		int numSamples = SampleManager.getNumberOfSamples(entry);
-		String samplesText = "";
-		if (numSamples == 0) {
-			samplesText = "No samples provided";
-		} else if (numSamples == 1) {
-			samplesText = "One sample provided";
-		} else {
-			samplesText = String.valueOf(numSamples) + " samples provided";
-		}
-		elements.add(new Label("samples", samplesText));		
-		String sequenceText = (SequenceManager.hasSequence(entry)) ? "Sequence Provided" : "No sequence provided";
-		elements.add(new Label("sequence", sequenceText));
-		
-		elements.add(new Label("references", entry.getReferences()));
-		elements.add(new Label("longDescription", entry.getLongDescription()));
-		elements.add(new BookmarkablePageLink("updateLink", EntryUpdatePage.class,
-				new PageParameters("0=" + entry.getId())));
-		
-		String bioSafetyLevel = "";
-		if (entry.getBioSafetyLevel() != null) {
-			bioSafetyLevel = entry.getBioSafetyLevel().toString();
-		} 
-		elements.add(new Label("bioSafety", bioSafetyLevel));
+        elements.add(new Label("partNumber", entry.getOnePartNumber().getPartNumber()));
+        elements.add(new Label("selectionMarkers", entry.getSelectionMarkersAsString()));
+        elements.add(new Label("names", entry.getNamesAsString()));
+        elements.add(new Label("host", entry.getHost()));
+        elements.add(new Label("alias", entry.getAlias()));
+        elements.add(new Label("genotypePhenotype", entry.getGenotypePhenotype()));
+        elements.add(new Label("creator", entry.getCreator()));
+        elements.add(new Label("plasmids", entry.getPlasmids()));
+        elements.add(new Label("status", org.jbei.ice.lib.utils.JbeiConstants.getStatus(entry
+                .getStatus())));
 
-		String intellectualProperty = "";
-		if (entry.getIntellectualProperty() != null) {
-			intellectualProperty = entry.getIntellectualProperty();
-		}
-		elements.add(new Label("intellectualProperty", intellectualProperty));
+        elements.add(new Label("linkToOwner", entry.getOwner()));
+        elements.add(new Label("links", entry.getLinksAsString()));
 
-		Set<EntryFundingSource> entryFundingSources = entry
-				.getEntryFundingSources();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
+        String creationTime = dateFormat.format(entry.getCreationTime());
+        elements.add(new Label("creationTime", creationTime));
 
-		String principalInvestigator = null;
-		String fundingSource = null;
-		// TODO: handle multiple funding sources
-		for (EntryFundingSource entryFundingSource : entryFundingSources) {
-			principalInvestigator = entryFundingSource.getFundingSource()
-					.getFundingSource();
-			fundingSource = entryFundingSource.getFundingSource()
-					.getPrincipalInvestigator();
-		}
+        String modificationTime = "";
+        Date modificationTimeStamp = entry.getModificationTime();
+        if (modificationTimeStamp != null) {
+            modificationTime = dateFormat.format(entry.getModificationTime());
+        }
+        elements.add(new Label("modificationTime", modificationTime));
 
-		if (principalInvestigator == null) {
-			principalInvestigator = "";
-		}
-		if (fundingSource == null) {
-			fundingSource = "";
-		}
+        elements.add(new Label("keywords", entry.getKeywords()));
+        elements.add(new Label("shortDescription", entry.getShortDescription()));
 
-		elements.add(new Label("principalInvestigator", principalInvestigator));
-		elements.add(new Label("fundingSource", fundingSource));
-		
-		for (Component item : elements) {
-			add(item);
-		}
-		
-	}
+        //TODO
+        int numAttachments = AttachmentManager.getNumberOfAttachments(entry);
+        String attachmentText = "";
+        if (numAttachments == 0) {
+            attachmentText = "No attachments provided";
+        } else if (numAttachments == 1) {
+            attachmentText = "One attachment provided";
+        } else {
+            attachmentText = String.valueOf(numAttachments) + " attachments provided";
+        }
+        elements.add(new Label("attachments", attachmentText));
+        int numSamples = SampleManager.getNumberOfSamples(entry);
+        String samplesText = "";
+        if (numSamples == 0) {
+            samplesText = "No samples provided";
+        } else if (numSamples == 1) {
+            samplesText = "One sample provided";
+        } else {
+            samplesText = String.valueOf(numSamples) + " samples provided";
+        }
+        elements.add(new Label("samples", samplesText));
+        String sequenceText = (SequenceManager.hasSequence(entry)) ? "Sequence Provided"
+                : "No sequence provided";
+        elements.add(new Label("sequence", sequenceText));
+
+        elements.add(new Label("references", entry.getReferences()));
+        elements.add(new Label("longDescription", entry.getLongDescription()));
+        BookmarkablePageLink updateLink = new BookmarkablePageLink("updateLink",
+                EntryUpdatePage.class, new PageParameters("0=" + entry.getId()));
+        updateLink.setVisible(PermissionManager.hasWritePermission(entry.getId(), IceSession.get()
+                .getSessionKey()));
+        elements.add(updateLink);
+
+        String bioSafetyLevel = "";
+        if (entry.getBioSafetyLevel() != null) {
+            bioSafetyLevel = entry.getBioSafetyLevel().toString();
+        }
+        elements.add(new Label("bioSafety", bioSafetyLevel));
+
+        String intellectualProperty = "";
+        if (entry.getIntellectualProperty() != null) {
+            intellectualProperty = entry.getIntellectualProperty();
+        }
+        elements.add(new Label("intellectualProperty", intellectualProperty));
+
+        Set<EntryFundingSource> entryFundingSources = entry.getEntryFundingSources();
+
+        String principalInvestigator = null;
+        String fundingSource = null;
+        // TODO: handle multiple funding sources
+        for (EntryFundingSource entryFundingSource : entryFundingSources) {
+            principalInvestigator = entryFundingSource.getFundingSource().getFundingSource();
+            fundingSource = entryFundingSource.getFundingSource().getPrincipalInvestigator();
+        }
+
+        if (principalInvestigator == null) {
+            principalInvestigator = "";
+        }
+        if (fundingSource == null) {
+            fundingSource = "";
+        }
+
+        elements.add(new Label("principalInvestigator", principalInvestigator));
+        elements.add(new Label("fundingSource", fundingSource));
+
+        for (Component item : elements) {
+            add(item);
+        }
+
+    }
 }
