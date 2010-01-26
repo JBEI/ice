@@ -26,6 +26,8 @@ import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.utils.JbeiConstants;
+import org.jbei.ice.lib.utils.Job;
+import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 @SuppressWarnings("unused")
@@ -203,6 +205,7 @@ public class PartUpdateFormPanel extends Panel {
                         .setEscapeModelStrings(false));
             }
 
+            @Override
             protected void onSubmit() {
                 try {
                     CommaSeparatedField<Link> linksField = new CommaSeparatedField<Link>(
@@ -249,6 +252,8 @@ public class PartUpdateFormPanel extends Panel {
 
                 try {
                     EntryManager.save(part);
+                    JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
+                    JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);
                     setResponsePage(EntryViewPage.class, new PageParameters("0=" + part.getId()));
                 } catch (ManagerException e) {
                     String msg = "System Error: Could not save! ";

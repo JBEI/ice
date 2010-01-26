@@ -10,6 +10,8 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Location;
+import org.jbei.ice.lib.utils.Job;
+import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class LocationItemViewPanel extends Panel {
@@ -53,6 +55,8 @@ public class LocationItemViewPanel extends Panel {
                 location.getSample().getLocations().remove(location);
                 try {
                     SampleManager.save(location.getSample());
+                    JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
+                    JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);
                 } catch (ManagerException e) {
                     e.printStackTrace();
                 }
@@ -70,6 +74,7 @@ public class LocationItemViewPanel extends Panel {
                 super(id);
             }
 
+            @Override
             public void onClick(AjaxRequestTarget target) {
                 boolean edit = true;
                 LocationItemViewPanel thisPanel = (LocationItemViewPanel) getParent();

@@ -26,6 +26,8 @@ import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.utils.JbeiConstants;
+import org.jbei.ice.lib.utils.Job;
+import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 @SuppressWarnings("unused")
@@ -188,6 +190,7 @@ public class StrainUpdateFormPanel extends Panel {
                         .setEscapeModelStrings(false));
             }
 
+            @Override
             protected void onSubmit() {
                 try {
                     CommaSeparatedField<Link> linksField = new CommaSeparatedField<Link>(
@@ -237,6 +240,8 @@ public class StrainUpdateFormPanel extends Panel {
 
                 try {
                     EntryManager.save(strain);
+                    JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
+                    JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);
                     setResponsePage(EntryViewPage.class, new PageParameters("0=" + strain.getId()));
                 } catch (ManagerException e) {
                     // TODO Auto-generated catch block

@@ -14,6 +14,8 @@ import org.apache.wicket.model.Model;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.models.Location;
 import org.jbei.ice.lib.models.Sample;
+import org.jbei.ice.lib.utils.Job;
+import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -58,6 +60,7 @@ public class LocationItemEditPanel extends Panel {
                 Button cancelButton = new Button("cancelButton", new Model<String>("Cancel")) {
                     private static final long serialVersionUID = 1L;
 
+                    @Override
                     public void onSubmit() {
 
                         setRedirect(true);
@@ -78,6 +81,7 @@ public class LocationItemEditPanel extends Panel {
                 add(new Button("saveLocationButton", new Model<String>("Save")));
             }
 
+            @Override
             protected void onSubmit() {
                 LocationItemEditPanel thisPanel = (LocationItemEditPanel) getParent();
                 Location location = thisPanel.getLocation();
@@ -94,6 +98,8 @@ public class LocationItemEditPanel extends Panel {
 
                 try {
                     sample = SampleManager.save(sample);
+                    JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
+                    JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);
 
                     /* Inserting into a LinkedHashSet puts the last entered location
                      * at the bottom, which is undesirable for displaying the locations by reverse 
