@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.managers;
 
+import java.util.HashMap;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.jbei.ice.lib.logging.Logger;
@@ -9,109 +11,114 @@ import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 
 public class AccountManager extends Manager {
-	public static AccountPreferences getAccountPreferences(int id)
-			throws ManagerException {
-		AccountPreferences accountPreferences = null;
-		try {
-			Query query = HibernateHelper.getSession().createQuery(
-					"from AccountPreferences where id = :id");
-			query.setEntity("id", id);
+    public static AccountPreferences getAccountPreferences(int id) throws ManagerException {
+        AccountPreferences accountPreferences = null;
+        try {
+            Query query = HibernateHelper.getSession().createQuery(
+                    "from AccountPreferences where id = :id");
+            query.setEntity("id", id);
 
-			accountPreferences = (AccountPreferences) query.uniqueResult();
-		} catch (Exception e) {
-			String msg = "Could not get AccountPreferences by id";
-			Logger.error(msg);
-			throw new ManagerException(msg);
-		}
+            accountPreferences = (AccountPreferences) query.uniqueResult();
+        } catch (Exception e) {
+            String msg = "Could not get AccountPreferences by id";
+            Logger.error(msg);
+            throw new ManagerException(msg);
+        }
 
-		return accountPreferences;
-	}
+        return accountPreferences;
+    }
 
-	public static AccountPreferences getAccountPreferences(Account account)
-			throws ManagerException {
-		AccountPreferences accountPreferences = null;
-		try {
-			Query query = HibernateHelper.getSession().createQuery(
-					"from AccountPreferences where account = :account");
-			query.setParameter("account", account);
+    public static AccountPreferences getAccountPreferences(Account account) throws ManagerException {
+        AccountPreferences accountPreferences = null;
+        try {
+            Query query = HibernateHelper.getSession().createQuery(
+                    "from AccountPreferences where account = :account");
+            query.setParameter("account", account);
 
-			accountPreferences = (AccountPreferences) query.uniqueResult();
-		} catch (Exception e) {
-			throw new ManagerException(
-					"Could not get AccountPreferences by account");
-		}
+            accountPreferences = (AccountPreferences) query.uniqueResult();
+        } catch (Exception e) {
+            throw new ManagerException("Could not get AccountPreferences by account");
+        }
 
-		return accountPreferences;
-	}
+        return accountPreferences;
+    }
 
-	public static AccountPreferences save(AccountPreferences accountPreferences)
-			throws ManagerException {
-		AccountPreferences result;
-		try {
-			result = (AccountPreferences) dbSave(accountPreferences);
-		} catch (Exception e) {
-			throw new ManagerException(
-					"Could not create AccountPreferences in db");
-		}
-		return result;
-	}
+    public static AccountPreferences save(AccountPreferences accountPreferences)
+            throws ManagerException {
+        AccountPreferences result;
+        try {
+            result = (AccountPreferences) dbSave(accountPreferences);
+        } catch (Exception e) {
+            throw new ManagerException("Could not create AccountPreferences in db");
+        }
+        return result;
+    }
 
-	public static Account getAccountByAuthToken(String authToken)
-			throws ManagerException {
-		return get(7);
-	}
+    public static Account getAccountByAuthToken(String authToken) {
+        Account account = null;
+        String queryString = "select data from SessionData sessionData where sessionData.sessionKey = :sessionKey";
+        try {
+            Query query = session.createQuery(queryString);
+            query.setString("sessionKey", authToken);
+            HashMap<String, Object> sessionData = (HashMap<String, Object>) query.uniqueResult();
+            account = get((Integer) sessionData.get("accountId"));
 
-	public static Account get(int id) throws ManagerException {
-		Account account = null;
-		try {
-			Query query = HibernateHelper.getSession().createQuery(
-					"from Account where id = :id");
-			query.setParameter("id", id);
+        } catch (HibernateException e) {
+            Logger.info("Could not retrieve account by sessionKey");
+        } catch (ManagerException e) {
+            Logger.info("Could not retrieve account by sessionKey");
+            e.printStackTrace();
+        }
+        return account;
+    }
 
-			account = (Account) query.uniqueResult();
-		} catch (HibernateException e) {
-			Logger.warn("Couldn't retrieve Account by id");
-			throw new ManagerException("Couldn't retrieve Account by id: "
-					+ String.valueOf(id), e);
-		}
+    public static Account get(int id) throws ManagerException {
+        Account account = null;
+        try {
+            Query query = HibernateHelper.getSession().createQuery("from Account where id = :id");
+            query.setParameter("id", id);
 
-		return account;
-	}
+            account = (Account) query.uniqueResult();
+        } catch (HibernateException e) {
+            Logger.warn("Couldn't retrieve Account by id");
+            throw new ManagerException("Couldn't retrieve Account by id: " + String.valueOf(id), e);
+        }
 
-	public static Account getByEmail(String email) throws ManagerException {
-		Account account = null;
-		try {
-			Query query = HibernateHelper.getSession().createQuery(
-					"from Account where email = :email");
-			query.setParameter("email", email);
-			account = (Account) query.uniqueResult();
-		} catch (HibernateException e) {
-			Logger.warn("Couldn't retrieve Account by email");
-			throw new ManagerException("Couldn't retrieve Account by email: "
-					+ email);
-		}
+        return account;
+    }
 
-		return account;
-	}
+    public static Account getByEmail(String email) throws ManagerException {
+        Account account = null;
+        try {
+            Query query = HibernateHelper.getSession().createQuery(
+                    "from Account where email = :email");
+            query.setParameter("email", email);
+            account = (Account) query.uniqueResult();
+        } catch (HibernateException e) {
+            Logger.warn("Couldn't retrieve Account by email");
+            throw new ManagerException("Couldn't retrieve Account by email: " + email);
+        }
 
-	public static Account save(Account account) throws ManagerException {
-		try {
-			Account result = (Account) dbSave(account);
+        return account;
+    }
 
-			return result;
-		} catch (Exception e) {
-			String msg = "Could not save account " + account.getEmail();
+    public static Account save(Account account) throws ManagerException {
+        try {
+            Account result = (Account) dbSave(account);
 
-			Logger.error(msg);
+            return result;
+        } catch (Exception e) {
+            String msg = "Could not save account " + account.getEmail();
 
-			throw new ManagerException(msg);
-		}
-	}
+            Logger.error(msg);
 
-	public static String encryptPassword(String password) {
-		String md5key = Utils.encryptMD5(JbeirSettings.getSetting("SECRET_KEY")
-				+ password);
+            throw new ManagerException(msg);
+        }
+    }
 
-		return md5key;
-	}
+    public static String encryptPassword(String password) {
+        String md5key = Utils.encryptMD5(JbeirSettings.getSetting("SECRET_KEY") + password);
+
+        return md5key;
+    }
 }
