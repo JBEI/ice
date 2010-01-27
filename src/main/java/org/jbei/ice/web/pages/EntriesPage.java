@@ -18,64 +18,64 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sequence;
 
 public class EntriesPage extends WebPage {
-	// Constructor
-	public EntriesPage() {
-		try {
-			add(new ListView<Entry>("entriesTable", retrieveEntries()) {
-				private static final long serialVersionUID = -3505764282126141702L;
+    // Constructor
+    public EntriesPage() {
+        try {
+            add(new ListView<Entry>("entriesTable", retrieveEntries()) {
+                private static final long serialVersionUID = -3505764282126141702L;
 
-				@Override
-				protected void populateItem(ListItem<Entry> item) {
-					Entry entry = (Entry) item.getModelObject();
+                @Override
+                protected void populateItem(ListItem<Entry> item) {
+                    Entry entry = (Entry) item.getModelObject();
 
-					item.add(new Label("id", String.valueOf(entry.getId())));
-					item.add(new Label("partNumber",
-							entry.getPartNumbers().iterator().hasNext() ? entry.getPartNumbers()
-									.iterator().next().getPartNumber() : ""));
-					item.add(new Label("name", entry.getNames().iterator().hasNext() ? entry
-							.getNames().iterator().next().getName() : ""));
-					item.add(new Label("owner", entry.getOwner()));
-					item.add(new Label("type", entry.getRecordType()));
-					item.add(new Label("summary", entry.getShortDescription()));
+                    item.add(new Label("id", String.valueOf(entry.getId())));
+                    item.add(new Label("partNumber",
+                            entry.getPartNumbers().iterator().hasNext() ? entry.getPartNumbers()
+                                    .iterator().next().getPartNumber() : ""));
+                    item.add(new Label("name", entry.getNames().iterator().hasNext() ? entry
+                            .getNames().iterator().next().getName() : ""));
+                    item.add(new Label("owner", entry.getOwner()));
+                    item.add(new Label("type", entry.getRecordType()));
+                    item.add(new Label("summary", entry.getShortDescription()));
 
-					Format dateFormatter = new SimpleDateFormat("dd MMM yyyy");
-					String created = entry.getCreationTime() == null ? "" : dateFormatter
-							.format(entry.getCreationTime());
-					item.add(new Label("created", created));
+                    Format dateFormatter = new SimpleDateFormat("dd MMM yyyy");
+                    String created = entry.getCreationTime() == null ? "" : dateFormatter
+                            .format(entry.getCreationTime());
+                    item.add(new Label("created", created));
 
-					PageParameters parameters = new PageParameters();
-					parameters.add("entryId", entry.getRecordId());
+                    PageParameters parameters = new PageParameters();
+                    parameters.add("entryId", entry.getRecordId());
 
-					item.add(new BookmarkablePageLink<VectorEditorPage>("viewLink",
-							VectorEditorPage.class, parameters));
-				}
-			});
-		} catch (Exception e) {
-			System.out.print(e.toString());
-		}
-	}
+                    item.add(new BookmarkablePageLink<VectorEditorPage>("viewLink",
+                            VectorEditorPage.class, parameters));
+                }
+            });
+        } catch (Exception e) {
+            System.out.print(e.toString());
+        }
+    }
 
-	// Private Methods
-	private List<Entry> retrieveEntries() throws Exception {
-		try {
-			List<Sequence> sequences = null;
+    // Private Methods
+    private List<Entry> retrieveEntries() throws Exception {
+        try {
+            List<Sequence> sequences = null;
 
-			sequences = SequenceManager.getAll();
+            sequences = SequenceManager.getAll();
 
-			List<Entry> entries = new ArrayList<Entry>();
+            List<Entry> entries = new ArrayList<Entry>();
 
-			Iterator<Sequence> sequenceIterator = sequences.iterator();
+            Iterator<Sequence> sequenceIterator = sequences.iterator();
 
-			while (sequenceIterator.hasNext()) {
-				entries.add(sequenceIterator.next().getEntry());
-			}
+            while (sequenceIterator.hasNext()) {
+                entries.add(sequenceIterator.next().getEntry());
+            }
 
-			return entries;
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			System.out.println(e.getStackTrace());
+            return entries;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println(e.getStackTrace());
 
-			throw new Exception(e);
-		}
-	}
+            throw new Exception(e);
+        }
+    }
 }

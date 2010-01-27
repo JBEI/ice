@@ -22,7 +22,7 @@ public class EntriesTablePage extends ProtectedPage {
 			e.printStackTrace();
 		}
 
-		Query q = new Query();
+		Query q = Query.getInstance();
 		//HashSet<Integer> results = q.filterName("!~Keasling");
 		//HashSet<Integer> results = q.filterSelectionMarker("*");
 

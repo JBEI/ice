@@ -19,6 +19,18 @@ public class EntryNewPage extends ProtectedPage {
     public EntryNewPage(PageParameters parameters) {
         super(parameters);
 
+        initializeResources();
+
+        SelectNewEntryTypePanel selectNewEntryTypePanel = new SelectNewEntryTypePanel(
+                "selectNewEntryTypePanel");
+        add(selectNewEntryTypePanel);
+
+        Panel formPanel = new EmptyMessagePanel("formPanel", "");
+        formPanel.setOutputMarkupId(true);
+        add(formPanel);
+    }
+
+    private void initializeResources() {
         IModel<Map<String, Object>> autocompleteDataMap = new AbstractReadOnlyModel<Map<String, Object>>() {
             private static final long serialVersionUID = 1L;
 
@@ -73,13 +85,5 @@ public class EntryNewPage extends ProtectedPage {
 
         add(TextTemplateHeaderContributor.forJavaScript(EntryNewPage.class,
                 "autocompleteDataTemplate.js", autocompleteDataMap));
-
-        SelectNewEntryTypePanel selectNewEntryTypePanel = new SelectNewEntryTypePanel(
-                "selectNewEntryTypePanel");
-        add(selectNewEntryTypePanel);
-
-        Panel formPanel = new EmptyMessagePanel("formPanel", "");
-        formPanel.setOutputMarkupId(true);
-        add(formPanel);
     }
 }

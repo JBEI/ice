@@ -5,68 +5,50 @@ import java.util.ArrayList;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ResourceReference;
-import org.apache.wicket.behavior.SimpleAttributeModifier;
-import org.apache.wicket.markup.html.CSSPackageResource;
-import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.PropertyModel;
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.utils.JbeiConstants;
-import org.jbei.ice.web.pages.EntryNewPage;
-import org.jbei.ice.web.pages.EntryTipPage;
+import org.jbei.ice.lib.search.SearchResult;
 import org.jbei.ice.web.pages.EntryViewPage;
 
-public class EntryPagingPanel extends Panel {
+public class QueryResultPanel extends Panel {
     private static final long serialVersionUID = 1L;
 
-    public EntryPagingPanel(String id) {
-        super(id);
-    }
+    private ArrayList<SearchResult> queryResults = null;
 
-    public EntryPagingPanel(String id, ArrayList<Entry> entries, int limit) {
+    public QueryResultPanel(String id, int limit) {
         super(id);
 
-        @SuppressWarnings( { "unchecked" })
-        PageableListView listView = new PageableListView("itemRows", entries, limit) {
+        @SuppressWarnings("unchecked")
+        PageableListView listView = new PageableListView("itemRows",
+                new PropertyModel<SearchResult>(this, "queryResults"), limit) {
             private static final long serialVersionUID = 1L;
 
+            @SuppressWarnings("unchecked")
             @Override
             protected void populateItem(ListItem item) {
-                Entry entry = (Entry) item.getModelObject();
+                SearchResult searchResult = (SearchResult) item.getModelObject();
+                Entry entry = searchResult.getEntry();
 
                 item.add(new Label("index", "" + (item.getIndex() + 1)));
                 item.add(new Label("recordType", entry.getRecordType()));
-
-                BookmarkablePageLink entryLink = new BookmarkablePageLink("partIdLink",
-                        EntryViewPage.class, new PageParameters("0=" + entry.getId()));
-                entryLink.add(new Label("partNumber", entry.getOnePartNumber().getPartNumber()));
-                String tipUrl = (String) urlFor(EntryTipPage.class, new PageParameters());
-                entryLink.add(new SimpleAttributeModifier("rel", tipUrl + "/" + entry.getId()));
-                item.add(entryLink);
+                item.add(new BookmarkablePageLink("partIdLink", EntryViewPage.class,
+                        new PageParameters("0=" + entry.getId())).add(new Label("partNumber", entry
+                        .getOnePartNumber().getPartNumber())));
 
                 item.add(new Label("name", entry.getOneName().getName()));
 
                 item.add(new Label("description", entry.getShortDescription()));
-                item.add(new Label("status", JbeiConstants.getStatus(entry.getStatus())));
-                item
-                        .add(new Label("visibility", JbeiConstants.getVisibility(entry
-                                .getVisibility())));
-
-                add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
-                        "jquery-1.3.2.js"));
-                add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
-                        "jquery-ui-1.7.2.custom.min.js"));
-                add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
-                        "jquery.cluetip.js"));
-                add(CSSPackageResource.getHeaderContribution(EntryNewPage.class,
-                        "jquery.cluetip.css"));
+                item.add(new Label("owner", (entry.getOwner() != null) ? entry.getOwner() : entry
+                        .getOwnerEmail()));
 
                 ResourceReference blankImage = new ResourceReference(EntryPagingPanel.class,
                         "blank.png");
@@ -80,11 +62,9 @@ public class EntryPagingPanel extends Panel {
                 ResourceReference hasAttachment = (AttachmentManager.hasAttachment(entry)) ? hasAttachmentImage
                         : blankImage;
                 item.add(new Image("hasAttachment", hasAttachment));
-
                 ResourceReference hasSequence = (SequenceManager.hasSequence(entry)) ? hasSequenceImage
                         : blankImage;
                 item.add(new Image("hasSequence", hasSequence));
-
                 ResourceReference hasSample = (SampleManager.hasSample(entry)) ? hasSampleImage
                         : blankImage;
                 item.add(new Image("hasSample", hasSample));
@@ -97,5 +77,13 @@ public class EntryPagingPanel extends Panel {
 
         add(listView);
         add(new JbeiPagingNavigator("navigator", listView));
+    }
+
+    public ArrayList<SearchResult> getQueryResults() {
+        return queryResults;
+    }
+
+    public void setQueryResults(ArrayList<SearchResult> queryResults) {
+        this.queryResults = queryResults;
     }
 }

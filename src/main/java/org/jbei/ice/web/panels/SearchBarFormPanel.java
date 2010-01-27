@@ -11,11 +11,10 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.jbei.ice.web.pages.BlastPage;
+import org.jbei.ice.web.pages.QueryPage;
 import org.jbei.ice.web.pages.SearchResultPage;
-import org.jbei.ice.web.pages.UserEntryPage;
 
 public class SearchBarFormPanel extends Panel {
-
     private static final long serialVersionUID = 1L;
 
     public SearchBarFormPanel(String id) {
@@ -33,19 +32,18 @@ public class SearchBarFormPanel extends Panel {
 
             public SearchBarForm(String id, String formQueryString) {
                 super(id);
+
                 setSearchQuery(formQueryString);
                 setModel(new CompoundPropertyModel<Object>(this));
+
                 add(new TextField<String>("searchQuery"));
             }
 
             @Override
             protected void onSubmit() {
-
                 setRedirect(true);
                 setResponsePage(SearchResultPage.class, new PageParameters("search="
                         + getSearchQuery()));
-
-                System.out.println("submmited: " + getSearchQuery());
             }
 
             public void setSearchQuery(String searchQuery) {
@@ -58,13 +56,11 @@ public class SearchBarFormPanel extends Panel {
         }
 
         Form<?> searchBarForm = new SearchBarForm("searchBarForm", queryString);
-        // TODO advanced search
-        searchBarForm.add(new BookmarkablePageLink("advancedSearchLink", UserEntryPage.class));
+        searchBarForm.add(new BookmarkablePageLink("advancedSearchLink", QueryPage.class));
         searchBarForm.add(new BookmarkablePageLink("blastSearchLink", BlastPage.class));
 
         AjaxButton ajaxButton = new AjaxButton("submitButton", new Model<String>("Search"),
                 searchBarForm) {
-
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -79,5 +75,4 @@ public class SearchBarFormPanel extends Panel {
         searchBarForm.add(ajaxButton);
         add(searchBarForm);
     }
-
 }

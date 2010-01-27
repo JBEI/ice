@@ -174,7 +174,7 @@ public class EntryManager extends Manager {
     }
 
     public static Set<Entry> getByFilter(ArrayList<String[]> data, int offset, int limit) {
-        org.jbei.ice.lib.query.Query q = new org.jbei.ice.lib.query.Query();
+        org.jbei.ice.lib.query.Query q = org.jbei.ice.lib.query.Query.getInstance();
         LinkedHashSet<Entry> result = q.query(data, offset, limit);
         return result;
 

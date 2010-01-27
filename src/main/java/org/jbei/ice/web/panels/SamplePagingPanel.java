@@ -16,8 +16,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Sample;
-import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.web.pages.EntryNewPage;
+import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class SamplePagingPanel extends Panel {
@@ -48,9 +48,8 @@ public class SamplePagingPanel extends Panel {
                 BookmarkablePageLink entryLink = new BookmarkablePageLink("partIdLink",
                         EntryViewPage.class, new PageParameters("0=" + entry.getId()));
                 entryLink.add(new Label("partNumber", entry.getOnePartNumber().getPartNumber()));
-                entryLink.add(new SimpleAttributeModifier("rel", JbeirSettings
-                        .getSetting("SERVER_SUBDIR")
-                        + "entry/tip/" + entry.getId()));
+                String tipUrl = (String) urlFor(EntryTipPage.class, new PageParameters());
+                entryLink.add(new SimpleAttributeModifier("rel", tipUrl + "/" + entry.getId()));
                 item.add(entryLink);
 
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
@@ -63,11 +62,6 @@ public class SamplePagingPanel extends Panel {
                         "jquery-ui-1.7.2.custom.min.js"));
                 add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
                         "jquery.cluetip.js"));
-                add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
-                        "ui/ui.core.js"));
-                add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
-                        "ui/effects.core.js"));
-                add(CSSPackageResource.getHeaderContribution(EntryNewPage.class, "ui/ui.all.css"));
                 add(CSSPackageResource.getHeaderContribution(EntryNewPage.class,
                         "jquery.cluetip.css"));
             }
