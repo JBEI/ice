@@ -5,7 +5,9 @@
 		<key column="entries_id" />
 
 		<property name="host" column="host" type="string" length="255" />
-		<property name="genotypePhenotype" column="genotype_phenotype" type="string" length="255" />
-		<property name="plasmids" column="plasmids" type="string" length="512" />
+		<property name="genotypePhenotype" column="genotype_phenotype"
+			type="string" length="255" />
+		<property name="plasmids" column="plasmids" type="string"
+			length="512" />
 	</joined-subclass>
 </hibernate-mapping>

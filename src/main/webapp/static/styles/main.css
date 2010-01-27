@@ -34,37 +34,37 @@ tr {
 	vertical-align: top;
 	font-weight: bold;
 	width: 100px;
-	white-space: nowrap; 
+	white-space: nowrap;
 }
 
 .title_row_header {
-	background-color:#F0F0F0;
-	font-family:Arial,Helvetica,sans-serif;
-	font-size:12px;
-	white-space:nowrap;
+	background-color: #F0F0F0;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	white-space: nowrap;
 }
 
 .entry_table {
-	background-color:#BBBBBB;
+	background-color: #BBBBBB;
 	width: 800px;
 }
 
 .data_table {
-	background-color:#BBBBBB;
+	background-color: #BBBBBB;
 	width: 100%;
 }
 
 /* TIP DOESN'T WORK WHEN THIS IS SET*/
-.value_column {  
-	width: 300px; 
+.value_column {
+	width: 300px;
 	vertical-align: top;
 }
 
 .data_table th {
 	font-weight: bold;
-	font-family: Arial,Helvetica,sans-serif;
+	font-family: Arial, Helvetica, sans-serif;
 	font-size: 12px;
-	white-space: nowrap; 
+	white-space: nowrap;
 }
 
 a {
@@ -82,11 +82,11 @@ a.title {
 }
 
 .odd_row {
-	background-color:#FFFFFF;
+	background-color: #FFFFFF;
 }
 
 .even_row {
-	background-color:#FAFAFA;
+	background-color: #FAFAFA;
 }
 
 h1 {
@@ -124,8 +124,8 @@ p {
 }
 
 .rowHover {
-	background-color:#F0F0F0;
-	cursor:pointer;
+	background-color: #F0F0F0;
+	cursor: pointer;
 }
 
 /* Header */
@@ -170,8 +170,8 @@ form {
 }
 
 .button {
-	margin-left:2px;
-	margin-right:2px;
+	margin-left: 2px;
+	margin-right: 2px;
 }
 
 .errorlist {
@@ -189,7 +189,7 @@ form {
 }
 
 .queryButton {
-	width : 35px;
+	width: 35px;
 }
 
 .entry_tip {
@@ -197,8 +197,6 @@ form {
 }
 
 /**** Sidebar ***/
-
-
 #errorbox {
 	width: 98%;
 	float: center;
@@ -210,7 +208,7 @@ form {
 	width: 100%;
 	background: #F6F9FB;
 	border: 1px solid #E1E1E1;
-	padding:10px 10px 15px 10px;
+	padding: 10px 10px 15px 10px;
 	float: center;
 }
 
@@ -222,69 +220,71 @@ form {
 	float: center;
 }
 
-
 /***************************************
    =cluetipClass: 'jbeiregistry'
 -------------------------------------- */
 .cluetip-jbeiregistry {
-  background-color: transparent;
+	background-color: transparent;
 }
+
 .cluetip-jbeiregistry #cluetip-outer {
-  border: 0px solid #ccc;
-  position: relative;
-  background-color: #fff;
+	border: 0px solid #ccc;
+	position: relative;
+	background-color: #fff;
 }
 
 .cluetip-jbeiregistry h3#cluetip-title {
-  margin: 0 0 0px;
-  padding: 0px 0px;
-  font-size: 12px;
-  font-weight: normal;
-  background-color: #ccc;
-  color: #333;
+	margin: 0 0 0px;
+	padding: 0px 0px;
+	font-size: 12px;
+	font-weight: normal;
+	background-color: #ccc;
+	color: #333;
 }
 
 .cluetip-jbeiregistry #cluetip-inner {
-  padding: 0px 0px 0px 0px;
-  display: inline-block;
+	padding: 0px 0px 0px 0px;
+	display: inline-block;
 }
-.cluetip-jbeiregistry div#cluetip-close { 
-  text-align: right;
-  margin: 0px 0px 0px 0px;
-  color: #900;
+
+.cluetip-jbeiregistry div#cluetip-close {
+	text-align: right;
+	margin: 0px 0px 0px 0px;
+	color: #900;
 }
 
 /* jbeiregistry arrows */
-
 .clue-right-jbeiregistry .cluetip-arrows {
-  background-image: url(/static/images/arrowleft.gif);
+	background-image: url(/static/images/arrowleft.gif);
 }
+
 .clue-left-jbeiregistry .cluetip-arrows {
-  background-image: url(/static/images/arrowright.gif);
-  left: 100%;
-  margin-right: -11px;
+	background-image: url(/static/images/arrowright.gif);
+	left: 100%;
+	margin-right: -11px;
 }
+
 .clue-top-jbeiregistry .cluetip-arrows {
-  background-image: url(/static/images/arrowdown.gif);
-  top: 100%;
-  left: 50%;
-  margin-left: -11px;
-  height: 11px;
-  width: 22px;  
-}  
+	background-image: url(/static/images/arrowdown.gif);
+	top: 100%;
+	left: 50%;
+	margin-left: -11px;
+	height: 11px;
+	width: 22px;
+}
+
 .clue-bottom-jbeiregistry .cluetip-arrows {
-  background-image: url(/static/images/arrowup.gif);
-  top: -11px;
-  left: 50%;
-  margin-left: -11px;
-  height: 11px;
-  width: 22px;
+	background-image: url(/static/images/arrowup.gif);
+	top: -11px;
+	left: 50%;
+	margin-left: -11px;
+	height: 11px;
+	width: 22px;
 }
 
 /* stupid IE6 HasLayout hack */
-.cluetip-rounded #cluetip-title,
-.cluetip-rounded #cluetip-inner {
-  zoom: 1;
+.cluetip-rounded #cluetip-title,.cluetip-rounded #cluetip-inner {
+	zoom: 1;
 }
 
 #menu ul {
@@ -320,7 +320,7 @@ form {
 }
 
 span.form_help_text {
-	color:#777777;
+	color: #777777;
 	font-size: 9px;
 }
 
@@ -331,7 +331,9 @@ span.form_help_text {
 	padding: 0;
 }
 
-#tabs li { float: left; }
+#tabs li {
+	float: left;
+}
 
 #tabs span {
 	position: relative;

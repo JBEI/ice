@@ -1,15 +1,17 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping package="org.jbei.ice.lib.models">
-    <class name="Comment" table="comments">
-        <id name="id" column="id" type="int">
-            <generator class="sequence">
-                <param name="sequence">comments_id_seq</param>
-            </generator>
-        </id>
-        <many-to-one name="account" column="accounts_id" class="Account" not-null="true" />
-        <many-to-one name="entry" column="entries_id" class="Entry" not-null="true" />
-        <property name="body" column="body" type="text" not-null="true" />
-        <property name="creationTime" column="creation_time" type="timestamp" />
-    </class>
+	<class name="Comment" table="comments">
+		<id name="id" column="id" type="int">
+			<generator class="sequence">
+				<param name="sequence">comments_id_seq</param>
+			</generator>
+		</id>
+		<many-to-one name="account" column="accounts_id" class="Account"
+			not-null="true" />
+		<many-to-one name="entry" column="entries_id" class="Entry"
+			not-null="true" />
+		<property name="body" column="body" type="text" not-null="true" />
+		<property name="creationTime" column="creation_time" type="timestamp" />
+	</class>
 </hibernate-mapping>

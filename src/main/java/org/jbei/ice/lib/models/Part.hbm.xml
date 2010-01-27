@@ -4,8 +4,11 @@
 	<joined-subclass name="Part" extends="Entry" table="parts">
 		<key column="entries_id" />
 
-		<property name="packageFormat" column="package_format" type="string" length="255" />
-		<property name="pkgdDnaFwdHash" column="pkgd_dna_fwd_hash" type="string" length="40" />
-		<property name="pkgdDnaRevHash" column="pkgd_dna_rev_hash" type="string" length="40" />
+		<property name="packageFormat" column="package_format" type="string"
+			length="255" />
+		<property name="pkgdDnaFwdHash" column="pkgd_dna_fwd_hash"
+			type="string" length="40" />
+		<property name="pkgdDnaRevHash" column="pkgd_dna_rev_hash"
+			type="string" length="40" />
 	</joined-subclass>
 </hibernate-mapping>
