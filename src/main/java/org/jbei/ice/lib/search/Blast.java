@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -23,10 +25,6 @@ import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Job;
 import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.lib.utils.Utils;
-
-import java.util.Collections;
-
-import java.util.Arrays;
 
 public class Blast {
 

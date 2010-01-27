@@ -38,13 +38,13 @@ public class FileUtils {
         return contents.toString();
     }
 
-    public static void writeStringToFile(String path, String content) throws FileNotFoundException, IOException,
-            IllegalArgumentException {
+    public static void writeStringToFile(String path, String content) throws FileNotFoundException,
+            IOException, IllegalArgumentException {
         writeStringToFile(new File(path), content);
     }
 
-    public static void writeStringToFile(File file, String content) throws FileNotFoundException, IOException,
-            IllegalArgumentException {
+    public static void writeStringToFile(File file, String content) throws FileNotFoundException,
+            IOException, IllegalArgumentException {
         if (file == null) {
             throw new IllegalArgumentException("File should not be null.");
         }

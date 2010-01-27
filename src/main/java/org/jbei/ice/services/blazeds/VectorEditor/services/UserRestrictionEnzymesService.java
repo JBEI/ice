@@ -8,63 +8,66 @@ import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.services.blazeds.VectorEditor.vo.UserRestrictionEnzymes;
 
 public class UserRestrictionEnzymesService {
-	public UserRestrictionEnzymes fetchUserRestrictionEnzymes(String authToken) {
-		UserRestrictionEnzymes userRestrictionEnzymes = null;
-		try {
-			Account account = AccountManager.getAccountByAuthToken(authToken);
+    public UserRestrictionEnzymes fetchUserRestrictionEnzymes(String authToken) {
+        UserRestrictionEnzymes userRestrictionEnzymes = null;
+        try {
+            Account account = AccountManager.getAccountByAuthToken(authToken);
 
-			if (account == null) {
-				return null;
-			}
+            if (account == null) {
+                return null;
+            }
 
-			AccountPreferences accountPreferences = AccountManager.getAccountPreferences(account);
+            AccountPreferences accountPreferences = AccountManager.getAccountPreferences(account);
 
-			if (accountPreferences != null && accountPreferences.getRestrictionEnzymes() != null
-					&& !accountPreferences.getRestrictionEnzymes().isEmpty()) {
-				try {
-					System.out.println(accountPreferences.getRestrictionEnzymes());
+            if (accountPreferences != null && accountPreferences.getRestrictionEnzymes() != null
+                    && !accountPreferences.getRestrictionEnzymes().isEmpty()) {
+                try {
+                    System.out.println(accountPreferences.getRestrictionEnzymes());
 
-					userRestrictionEnzymes = (UserRestrictionEnzymes) SerializationUtils
-							.deserializeFromString(accountPreferences.getRestrictionEnzymes());
-				} catch (SerializationUtils.SerializationUtilsException e) {
-					e.printStackTrace();
-				}
-			} else {
-				userRestrictionEnzymes = new UserRestrictionEnzymes();
-			}
-		} catch (ManagerException e) {
-			e.printStackTrace();
-		}
+                    userRestrictionEnzymes = (UserRestrictionEnzymes) SerializationUtils
+                            .deserializeFromString(accountPreferences.getRestrictionEnzymes());
+                } catch (SerializationUtils.SerializationUtilsException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                userRestrictionEnzymes = new UserRestrictionEnzymes();
+            }
+        } catch (ManagerException e) {
+            e.printStackTrace();
+        }
 
-		return userRestrictionEnzymes;
-	}
+        return userRestrictionEnzymes;
+    }
 
-	public void saveUserRestrictionEnzymes(String authToken, UserRestrictionEnzymes userRestrictionEnzymes) {
-		try {
-			Account account = AccountManager.getAccountByAuthToken(authToken);
+    public void saveUserRestrictionEnzymes(String authToken,
+            UserRestrictionEnzymes userRestrictionEnzymes) {
+        try {
+            Account account = AccountManager.getAccountByAuthToken(authToken);
 
-			if (account == null) {
-				return;
-			}
+            if (account == null) {
+                return;
+            }
 
-			AccountPreferences accountPreferences = AccountManager.getAccountPreferences(account);
+            AccountPreferences accountPreferences = AccountManager.getAccountPreferences(account);
 
-			String serializedUserRestrictionEnzymes = "";
-			try {
-				serializedUserRestrictionEnzymes = SerializationUtils.serializeToString(userRestrictionEnzymes);
-			} catch (SerializationUtils.SerializationUtilsException e) {
-				e.printStackTrace();
-			}
+            String serializedUserRestrictionEnzymes = "";
+            try {
+                serializedUserRestrictionEnzymes = SerializationUtils
+                        .serializeToString(userRestrictionEnzymes);
+            } catch (SerializationUtils.SerializationUtilsException e) {
+                e.printStackTrace();
+            }
 
-			if (accountPreferences != null) {
-				accountPreferences.setRestrictionEnzymes(serializedUserRestrictionEnzymes);
+            if (accountPreferences != null) {
+                accountPreferences.setRestrictionEnzymes(serializedUserRestrictionEnzymes);
 
-				AccountManager.save(accountPreferences);
-			} else {
-				AccountManager.save(new AccountPreferences(account, "", serializedUserRestrictionEnzymes));
-			}
-		} catch (ManagerException e) {
-			e.printStackTrace();
-		}
-	}
+                AccountManager.save(accountPreferences);
+            } else {
+                AccountManager.save(new AccountPreferences(account, "",
+                        serializedUserRestrictionEnzymes));
+            }
+        } catch (ManagerException e) {
+            e.printStackTrace();
+        }
+    }
 }

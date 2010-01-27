@@ -18,71 +18,71 @@ import org.jbei.ice.lib.permissions.WorkSpaceItem;
 
 public class WorkSpaceTablePanel extends Panel {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public WorkSpaceTablePanel(String id) {
-		super(id);
-	}
-	
-	
-	public WorkSpaceTablePanel(String id, WorkSpace workSpace, int limit) {
-		super(id);
-		@SuppressWarnings("unchecked")
-		PageableListView workSpaceView = new PageableListView("itemRow", workSpace.toArrayList(), limit) {
+    public WorkSpaceTablePanel(String id) {
+        super(id);
+    }
 
-			private static final long serialVersionUID = 1L;
+    public WorkSpaceTablePanel(String id, WorkSpace workSpace, int limit) {
+        super(id);
+        @SuppressWarnings("unchecked")
+        PageableListView workSpaceView = new PageableListView("itemRow", workSpace.toArrayList(),
+                limit) {
 
-			@Override
-			protected void populateItem(ListItem panelItem) {
-				// TODO Auto-generated method stub
-				WorkSpaceItem workSpaceItem = (WorkSpaceItem) panelItem.getModelObject();
-				panelItem.add(new CheckBox("checkBox", new Model<Boolean>(false)));
-				Entry entry = workSpaceItem.getEntry();
-				
-				Set<Name> nameSet = entry.getNames();
-				Set<PartNumber> partNumberSet = entry.getPartNumbers();
-				
-				PartNumber temp = (PartNumber) partNumberSet.toArray()[0];
-				panelItem.add(new Label("partNumber", temp.getPartNumber()));
-				
-				Name temp2 = (Name) nameSet.toArray()[0];
-				panelItem.add(new Label("name", temp2.getName()));
-				
-				panelItem.add(new Label("description", entry.getShortDescription()));
-				panelItem.add(new Label("date", entry.getCreationTime().toString()));
-			}
-			
-		};
-		add(workSpaceView);
-		add(new PagingNavigator("navigator", workSpaceView));
-	}
-	
-	public WorkSpaceTablePanel(String id, ArrayList<Entry> entries, int limit) {
-		super(id);
-		@SuppressWarnings({ "unchecked", "serial" })
-		PageableListView<?> listView = new PageableListView("itemRows", entries, limit) {
-			@Override
-			protected void populateItem(ListItem item) {
-				Entry entry = (Entry) item.getModelObject();
-				item.add(new CheckBox("checkBox", new Model<Boolean>(false)));
-				Set<Name> nameSet = entry.getNames();
-				Set<PartNumber> partNumberSet = entry.getPartNumbers();
-				
-				PartNumber temp = (PartNumber) partNumberSet.toArray()[0];
-				item.add(new Label("partNumber", temp.getPartNumber()));
-				
-				Name temp2 = (Name) nameSet.toArray()[0];
-				item.add(new Label("name", temp2.getName()));
-				
-				item.add(new Label("description", entry.getShortDescription()));
-		
-				item.add(new Label("date", entry.getCreationTime().toString()));
-			}
+            private static final long serialVersionUID = 1L;
 
-		};
-		add(listView);
-		add(new PagingNavigator("navigator", listView));
-		
-	}
+            @Override
+            protected void populateItem(ListItem panelItem) {
+                // TODO Auto-generated method stub
+                WorkSpaceItem workSpaceItem = (WorkSpaceItem) panelItem.getModelObject();
+                panelItem.add(new CheckBox("checkBox", new Model<Boolean>(false)));
+                Entry entry = workSpaceItem.getEntry();
+
+                Set<Name> nameSet = entry.getNames();
+                Set<PartNumber> partNumberSet = entry.getPartNumbers();
+
+                PartNumber temp = (PartNumber) partNumberSet.toArray()[0];
+                panelItem.add(new Label("partNumber", temp.getPartNumber()));
+
+                Name temp2 = (Name) nameSet.toArray()[0];
+                panelItem.add(new Label("name", temp2.getName()));
+
+                panelItem.add(new Label("description", entry.getShortDescription()));
+                panelItem.add(new Label("date", entry.getCreationTime().toString()));
+            }
+
+        };
+        add(workSpaceView);
+        add(new PagingNavigator("navigator", workSpaceView));
+    }
+
+    public WorkSpaceTablePanel(String id, ArrayList<Entry> entries, int limit) {
+        super(id);
+        @SuppressWarnings( { "unchecked", "serial" })
+        PageableListView<?> listView = new PageableListView("itemRows", entries, limit) {
+            @Override
+            protected void populateItem(ListItem item) {
+                Entry entry = (Entry) item.getModelObject();
+                item.add(new CheckBox("checkBox", new Model<Boolean>(false)));
+                Set<Name> nameSet = entry.getNames();
+                Set<PartNumber> partNumberSet = entry.getPartNumbers();
+
+                PartNumber temp = (PartNumber) partNumberSet.toArray()[0];
+                item.add(new Label("partNumber", temp.getPartNumber()));
+
+                Name temp2 = (Name) nameSet.toArray()[0];
+                item.add(new Label("name", temp2.getName()));
+
+                item.add(new Label("description", entry.getShortDescription()));
+
+                item.add(new Label("date", entry.getCreationTime().toString()));
+            }
+
+        };
+        add(listView);
+        add(new PagingNavigator("navigator", listView));
+
+    }
 
 }

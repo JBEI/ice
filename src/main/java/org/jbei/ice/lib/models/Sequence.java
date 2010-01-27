@@ -52,8 +52,8 @@ public class Sequence implements ISequenceValueObject, Serializable {
     public Sequence() {
     }
 
-    public Sequence(String sequence, String sequenceUser, String fwdHash, String revHash, Entry entry,
-            Set<SequenceFeature> sequenceFeatures) {
+    public Sequence(String sequence, String sequenceUser, String fwdHash, String revHash,
+            Entry entry, Set<SequenceFeature> sequenceFeatures) {
         super();
 
         this.sequence = sequence;

@@ -15,81 +15,80 @@ import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class AttachmentItemViewPanel extends Panel {
-	private static final long serialVersionUID = 1L;
-	private Integer index = null;
-	private Attachment attachment = null;
+    private static final long serialVersionUID = 1L;
+    private Integer index = null;
+    private Attachment attachment = null;
 
-	@SuppressWarnings("unchecked")
-	public AttachmentItemViewPanel(String id, Integer counter,
-			Attachment attachment) {
-		super(id);
-		this.setAttachment(attachment);
-		this.setIndex(counter);
+    @SuppressWarnings("unchecked")
+    public AttachmentItemViewPanel(String id, Integer counter, Attachment attachment) {
+        super(id);
+        this.setAttachment(attachment);
+        this.setIndex(counter);
 
-		add(new Label("counter", counter.toString()));
-		String descriptionString = attachment.getDescription();
-		if (descriptionString.length() > 70) {
-			descriptionString = descriptionString.substring(0, 69) + "...";
-		}
-		
-		add(new Label("description", descriptionString));
-				
-		class DeleteAttachmentLink extends AjaxFallbackLink {
-			private static final long serialVersionUID = 1L;
+        add(new Label("counter", counter.toString()));
+        String descriptionString = attachment.getDescription();
+        if (descriptionString.length() > 70) {
+            descriptionString = descriptionString.substring(0, 69) + "...";
+        }
 
-			public DeleteAttachmentLink(String id) {
-				super(id);
-				this.add(new SimpleAttributeModifier("onclick",
-						"return confirm('Delete this attachment?');"));
-			}
+        add(new Label("description", descriptionString));
 
-			public void onClick(AjaxRequestTarget target) {
-				AttachmentItemViewPanel thisPanel = (AttachmentItemViewPanel) getParent();
-				Attachment attachment = thisPanel.getAttachment();
+        class DeleteAttachmentLink extends AjaxFallbackLink {
+            private static final long serialVersionUID = 1L;
 
-				try {
-					AttachmentManager.delete(attachment);
-				} catch (ManagerException e) {
-					e.printStackTrace();
-				}
+            public DeleteAttachmentLink(String id) {
+                super(id);
+                this.add(new SimpleAttributeModifier("onclick",
+                        "return confirm('Delete this attachment?');"));
+            }
 
-				setRedirect(true);
-				setResponsePage(EntryViewPage.class, new PageParameters("0="
-						+ attachment.getEntry().getId() + ",1=attachments"));
-			}
-		}
+            public void onClick(AjaxRequestTarget target) {
+                AttachmentItemViewPanel thisPanel = (AttachmentItemViewPanel) getParent();
+                Attachment attachment = thisPanel.getAttachment();
 
-		AjaxFallbackLink deleteAttachmentLink = new DeleteAttachmentLink(
-				"deleteAttachmentLink");
-		deleteAttachmentLink.setOutputMarkupId(true);
-		add(deleteAttachmentLink);
-		
-		//BookmarkablePageLink downloadLink = new BookmarkablePageLink("downloadAttachmentLink", WorkSpacePage.class);
-		DownloadLink downloadLink = null;
-		try {
-			downloadLink = new DownloadLink("downloadAttachmentLink", AttachmentManager.readFile(attachment), attachment.getFileName());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		downloadLink.add(new Label("fileName", attachment.getFileName()));
-		add(downloadLink);
-	}
+                try {
+                    AttachmentManager.delete(attachment);
+                } catch (ManagerException e) {
+                    e.printStackTrace();
+                }
 
-	public void setAttachment(Attachment attachment) {
-		this.attachment = attachment;
-	}
+                setRedirect(true);
+                setResponsePage(EntryViewPage.class, new PageParameters("0="
+                        + attachment.getEntry().getId() + ",1=attachments"));
+            }
+        }
 
-	public Attachment getAttachment() {
-		return attachment;
-	}
+        AjaxFallbackLink deleteAttachmentLink = new DeleteAttachmentLink("deleteAttachmentLink");
+        deleteAttachmentLink.setOutputMarkupId(true);
+        add(deleteAttachmentLink);
 
-	public void setIndex(Integer index) {
-		this.index = index;
-	}
+        //BookmarkablePageLink downloadLink = new BookmarkablePageLink("downloadAttachmentLink", WorkSpacePage.class);
+        DownloadLink downloadLink = null;
+        try {
+            downloadLink = new DownloadLink("downloadAttachmentLink", AttachmentManager
+                    .readFile(attachment), attachment.getFileName());
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
-	public Integer getIndex() {
-		return index;
-	}
+        downloadLink.add(new Label("fileName", attachment.getFileName()));
+        add(downloadLink);
+    }
+
+    public void setAttachment(Attachment attachment) {
+        this.attachment = attachment;
+    }
+
+    public Attachment getAttachment() {
+        return attachment;
+    }
+
+    public void setIndex(Integer index) {
+        this.index = index;
+    }
+
+    public Integer getIndex() {
+        return index;
+    }
 }

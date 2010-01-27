@@ -52,14 +52,15 @@ public class GenbankParser {
                     int end = featureLocation.getMax();
 
                     SequenceFeature sequenceFeature = new SequenceFeature(sequence,
-                            new org.jbei.ice.lib.models.Feature(featureName, featureDescription, "", Utils
-                                    .generateUUID(), 0, genbankType), start, end, featureLocation.getStrand()
-                                    .intValue(), featureName);
+                            new org.jbei.ice.lib.models.Feature(featureName, featureDescription,
+                                    "", Utils.generateUUID(), 0, genbankType), start, end,
+                            featureLocation.getStrand().intValue(), featureName);
 
                     sequenceFeatureSet.add(sequenceFeature);
                 }
 
-                sequence = new Sequence(richSequence.seqString(), "", "", "", null, sequenceFeatureSet);
+                sequence = new Sequence(richSequence.seqString(), "", "", "", null,
+                        sequenceFeatureSet);
             }
         } catch (BioException e) {
             throw new ParserException("BioJava Exception. ", e);

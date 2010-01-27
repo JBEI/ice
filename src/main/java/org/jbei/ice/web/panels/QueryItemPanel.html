@@ -11,12 +11,15 @@
 		</tr>
 	</table>
 
-	<wicket:fragment wicket:id="emptyFilterFragment"><input type="hidden" wicket:id="fragmentType" value="empty"></wicket:fragment>
+	<wicket:fragment wicket:id="emptyFilterFragment">
+		<input type="hidden" wicket:id="fragmentType" value="empty">
+	</wicket:fragment>
 
 	<wicket:fragment wicket:id="stringFilterFragment">
 		<table border="0" cellpadding="0" cellspacing="1">
 			<tr>
-				<td><input type="hidden" wicket:id="fragmentType" value="string"><select wicket:id="stringFilterPrefixSelect"></select></td>
+				<td><input type="hidden" wicket:id="fragmentType" value="string"><select
+					wicket:id="stringFilterPrefixSelect"></select></td>
 				<td><input type="text" wicket:id="stringFilterInput" class="inputbox"></td>
 			</tr>
 		</table>
@@ -25,7 +28,8 @@
 	<wicket:fragment wicket:id="selectionFilterFragment">
 		<table border="0" cellpadding="0" cellspacing="1">
 			<tr>
-				<td><input type="hidden" wicket:id="fragmentType" value="selection"><select wicket:id="selectionFilterPrefixSelect"></select></td>
+				<td><input type="hidden" wicket:id="fragmentType" value="selection"><select
+					wicket:id="selectionFilterPrefixSelect"></select></td>
 				<td><select wicket:id="selectionFilterValues"></select></td>
 			</tr>
 		</table>
@@ -34,7 +38,8 @@
 	<wicket:fragment wicket:id="radioFilterFragment">
 		<table border="0" cellpadding="0" cellspacing="1">
 			<tr>
-				<td style="white-space: nowrap;"><input type="hidden" wicket:id="fragmentType" value="radio"><span wicket:id="radioFilter"></span></td>
+				<td style="white-space: nowrap;"><input type="hidden" wicket:id="fragmentType"
+					value="radio"><span wicket:id="radioFilter"></span></td>
 			</tr>
 		</table>
 	</wicket:fragment>

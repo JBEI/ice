@@ -1,8 +1,7 @@
 package org.jbei.ice.lib.utils;
 
-import java.util.HashMap;
-
 import java.io.File;
+import java.util.HashMap;
 
 public class JbeirSettings {
     public final static HashMap<String, String> settings = new HashMap<String, String>();

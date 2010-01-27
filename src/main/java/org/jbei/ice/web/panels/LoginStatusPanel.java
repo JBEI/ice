@@ -12,54 +12,54 @@ import org.jbei.ice.web.pages.RegistrationPage;
 import org.jbei.ice.web.pages.UserEntryPage;
 
 public class LoginStatusPanel extends Panel {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private Fragment preLoginFragment, postLoginFragment;
+    private Fragment preLoginFragment, postLoginFragment;
 
-	private Account account = null;
+    private Account account = null;
 
-	public LoginStatusPanel(String id) {
-		super(id);
+    public LoginStatusPanel(String id) {
+        super(id);
 
-		account = IceSession.get().getAccount();
+        account = IceSession.get().getAccount();
 
-		preLoginFragment = createPreLoginFragment();
-		add(preLoginFragment);
+        preLoginFragment = createPreLoginFragment();
+        add(preLoginFragment);
 
-		postLoginFragment = createPostLoginFragment();
-		add(postLoginFragment);
-	}
+        postLoginFragment = createPostLoginFragment();
+        add(postLoginFragment);
+    }
 
-	@SuppressWarnings("unchecked")
-	private Fragment createPreLoginFragment() {
-		Fragment preLogin = new Fragment("preLoginPanel", "preLogin", this) {
-			private static final long serialVersionUID = 1L;
+    @SuppressWarnings("unchecked")
+    private Fragment createPreLoginFragment() {
+        Fragment preLogin = new Fragment("preLoginPanel", "preLogin", this) {
+            private static final long serialVersionUID = 1L;
 
-			public boolean isVisible() {
-				return !IceSession.get().isAuthenticated();
-			}
-		};
+            public boolean isVisible() {
+                return !IceSession.get().isAuthenticated();
+            }
+        };
 
-		preLogin.add(new BookmarkablePageLink("logIn", LoginPage.class));
-		preLogin.add(new BookmarkablePageLink("register", RegistrationPage.class));
+        preLogin.add(new BookmarkablePageLink("logIn", LoginPage.class));
+        preLogin.add(new BookmarkablePageLink("register", RegistrationPage.class));
 
-		return preLogin;
-	}
+        return preLogin;
+    }
 
-	@SuppressWarnings("unchecked")
-	private Fragment createPostLoginFragment() {
-		Fragment postLogin = new Fragment("postLoginPanel", "postLogin", LoginStatusPanel.this) {
-			private static final long serialVersionUID = 1L;
+    @SuppressWarnings("unchecked")
+    private Fragment createPostLoginFragment() {
+        Fragment postLogin = new Fragment("postLoginPanel", "postLogin", LoginStatusPanel.this) {
+            private static final long serialVersionUID = 1L;
 
-			public boolean isVisible() {
-				return IceSession.get().isAuthenticated();
-			}
-		};
+            public boolean isVisible() {
+                return IceSession.get().isAuthenticated();
+            }
+        };
 
-		postLogin.add(new BookmarkablePageLink("userProfile", UserEntryPage.class).add(new Label(
-				"userName", IceSession.get().isAuthenticated() ? account.getFullName() : "")));
-		postLogin.add(new BookmarkablePageLink("logOut", LogOutPage.class));
+        postLogin.add(new BookmarkablePageLink("userProfile", UserEntryPage.class).add(new Label(
+                "userName", IceSession.get().isAuthenticated() ? account.getFullName() : "")));
+        postLogin.add(new BookmarkablePageLink("logOut", LogOutPage.class));
 
-		return postLogin;
-	}
+        return postLogin;
+    }
 }

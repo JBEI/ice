@@ -33,12 +33,13 @@ public class Parser {
         Sequence sequence = null;
 
         try {
-            sequence = GenbankParser.parseGenbankDNAFile(new BufferedReader(new StringReader(genbankSequence)));
+            sequence = GenbankParser.parseGenbankDNAFile(new BufferedReader(new StringReader(
+                    genbankSequence)));
 
             sequence.setSequenceUser(genbankSequence);
             sequence.setFwdHash(SequenceUtils.calculateSequenceHash(sequence.getSequence()));
-            sequence.setRevHash(SequenceUtils.calculateSequenceHash(SequenceUtils.reverseComplement(sequence
-                    .getSequence())));
+            sequence.setRevHash(SequenceUtils.calculateSequenceHash(SequenceUtils
+                    .reverseComplement(sequence.getSequence())));
         } catch (Exception e) {
             throw new ParserException(e);
         }

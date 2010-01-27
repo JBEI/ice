@@ -15,41 +15,41 @@ import javax.persistence.Table;
 @Table(name = "entries_funding_source")
 @SequenceGenerator(name = "sequence", sequenceName = "entries_funding_source_id_seq", allocationSize = 1)
 public class EntryFundingSource implements Serializable {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-	private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    private int id;
 
-	@OneToOne
-	@JoinColumn(name = "funding_source_id", nullable = false)
-	private FundingSource fundingSource;
+    @OneToOne
+    @JoinColumn(name = "funding_source_id", nullable = false)
+    private FundingSource fundingSource;
 
-	@OneToOne
-	@JoinColumn(name = "entries_id", nullable = false)
-	private Entry entry;
+    @OneToOne
+    @JoinColumn(name = "entries_id", nullable = false)
+    private Entry entry;
 
-	public int getId() {
-		return id;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public FundingSource getFundingSource() {
-		return fundingSource;
-	}
+    public FundingSource getFundingSource() {
+        return fundingSource;
+    }
 
-	public void setFundingSource(FundingSource fundingSource) {
-		this.fundingSource = fundingSource;
-	}
+    public void setFundingSource(FundingSource fundingSource) {
+        this.fundingSource = fundingSource;
+    }
 
-	public Entry getEntry() {
-		return entry;
-	}
+    public Entry getEntry() {
+        return entry;
+    }
 
-	public void setEntry(Entry entry) {
-		this.entry = entry;
-	}
+    public void setEntry(Entry entry) {
+        this.entry = entry;
+    }
 }

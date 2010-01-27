@@ -2,7 +2,6 @@ package org.jbei.ice.web.panels;
 
 import java.util.ArrayList;
 
-import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.markup.html.list.ListItem;

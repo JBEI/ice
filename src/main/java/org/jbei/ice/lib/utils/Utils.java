@@ -36,7 +36,8 @@ public class Utils {
         return result;
     }
 
-    public final static String toCommaSeparatedStringFromSelectionMarkers(Set<SelectionMarker> hashSet) {
+    public final static String toCommaSeparatedStringFromSelectionMarkers(
+            Set<SelectionMarker> hashSet) {
         String result = null;
         ArrayList<String> temp = new ArrayList<String>();
         for (SelectionMarker selectionMarker : hashSet) {
@@ -77,7 +78,8 @@ public class Utils {
         return result;
     }
 
-    public final static String toCommaSeparatedStringFromEntryFundingSources(Set<EntryFundingSource> hashSet) {
+    public final static String toCommaSeparatedStringFromEntryFundingSources(
+            Set<EntryFundingSource> hashSet) {
         String result = null;
         ArrayList<String> temp = new ArrayList<String>();
         for (EntryFundingSource entryFundingSource : hashSet) {
@@ -123,9 +125,9 @@ public class Utils {
      */
     public static String getHexString(byte[] bytes) throws UnsupportedEncodingException {
 
-        byte[] HEX_CHAR_TABLE = { (byte) '0', (byte) '1', (byte) '2', (byte) '3', (byte) '4', (byte) '5', (byte) '6',
-                (byte) '7', (byte) '8', (byte) '9', (byte) 'a', (byte) 'b', (byte) 'c', (byte) 'd', (byte) 'e',
-                (byte) 'f' };
+        byte[] HEX_CHAR_TABLE = { (byte) '0', (byte) '1', (byte) '2', (byte) '3', (byte) '4',
+                (byte) '5', (byte) '6', (byte) '7', (byte) '8', (byte) '9', (byte) 'a', (byte) 'b',
+                (byte) 'c', (byte) 'd', (byte) 'e', (byte) 'f' };
         {
             byte[] hex = new byte[2 * bytes.length];
             int index = 0;

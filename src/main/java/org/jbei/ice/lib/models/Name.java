@@ -16,52 +16,51 @@ import org.jbei.ice.lib.value_objects.INameValueObject;
 
 @Entity
 @Table(name = "names")
-@SequenceGenerator(name = "sequence", sequenceName = "names_id_seq",
-		allocationSize = 1)
+@SequenceGenerator(name = "sequence", sequenceName = "names_id_seq", allocationSize = 1)
 public class Name implements INameValueObject, Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-	private int id;
-	
-	@Column(name = "name", length = 127, nullable = false)
-	private String name;
-	
-	@ManyToOne
-	@JoinColumn(name = "entries_id", nullable = false, unique=false)
-	private Entry entry;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    private int id;
 
-	public Name() {
-	}
+    @Column(name = "name", length = 127, nullable = false)
+    private String name;
 
-	public Name(String name, Entry entry) {
-		this.name = name;
-		this.entry = entry;
-	}
+    @ManyToOne
+    @JoinColumn(name = "entries_id", nullable = false, unique = false)
+    private Entry entry;
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public Name() {
+    }
 
-	public int getId() {
-		return id;
-	}
+    public Name(String name, Entry entry) {
+        this.name = name;
+        this.entry = entry;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public Entry getEntry() {
-		return entry;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setEntry(Entry entry) {
-		this.entry = entry;
-	}	
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Entry getEntry() {
+        return entry;
+    }
+
+    public void setEntry(Entry entry) {
+        this.entry = entry;
+    }
 }

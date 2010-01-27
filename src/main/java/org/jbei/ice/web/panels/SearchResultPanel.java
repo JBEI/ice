@@ -39,30 +39,38 @@ public class SearchResultPanel extends Panel {
 
                 item.add(new Label("index", "" + (item.getIndex() + 1)));
                 item.add(new Label("recordType", entry.getRecordType()));
-                item.add(new BookmarkablePageLink("partIdLink", EntryViewPage.class, new PageParameters("0="
-                        + entry.getId())).add(new Label("partNumber", entry.getOnePartNumber().getPartNumber())));
+                item.add(new BookmarkablePageLink("partIdLink", EntryViewPage.class,
+                        new PageParameters("0=" + entry.getId())).add(new Label("partNumber", entry
+                        .getOnePartNumber().getPartNumber())));
 
                 item.add(new Label("name", entry.getOneName().getName()));
 
                 item.add(new Label("description", entry.getShortDescription()));
-                item.add(new Label("owner", (entry.getOwner() != null) ? entry.getOwner() : entry.getOwnerEmail()));
+                item.add(new Label("owner", (entry.getOwner() != null) ? entry.getOwner() : entry
+                        .getOwnerEmail()));
 
                 NumberFormat formatter = new DecimalFormat("##");
                 String scoreString = formatter.format(searchResult.getScore() * 100);
                 item.add(new Label("score", scoreString));
 
-                ResourceReference blankImage = new ResourceReference(EntryPagingPanel.class, "blank.png");
-                ResourceReference hasAttachmentImage = new ResourceReference(EntryPagingPanel.class, "attachment.gif");
-                ResourceReference hasSequenceImage = new ResourceReference(EntryPagingPanel.class, "sequence.gif");
-                ResourceReference hasSampleImage = new ResourceReference(EntryPagingPanel.class, "sample.png");
+                ResourceReference blankImage = new ResourceReference(EntryPagingPanel.class,
+                        "blank.png");
+                ResourceReference hasAttachmentImage = new ResourceReference(
+                        EntryPagingPanel.class, "attachment.gif");
+                ResourceReference hasSequenceImage = new ResourceReference(EntryPagingPanel.class,
+                        "sequence.gif");
+                ResourceReference hasSampleImage = new ResourceReference(EntryPagingPanel.class,
+                        "sample.png");
 
                 ResourceReference hasAttachment = (AttachmentManager.hasAttachment(entry)) ? hasAttachmentImage
                         : blankImage;
                 item.add(new Image("hasAttachment", hasAttachment));
-                ResourceReference hasSequence = (SequenceManager.hasSequence(entry)) ? hasSequenceImage : blankImage;
+                ResourceReference hasSequence = (SequenceManager.hasSequence(entry)) ? hasSequenceImage
+                        : blankImage;
                 item.add(new Image("hasSequence", hasSequence));
 
-                ResourceReference hasSample = (SampleManager.hasSample(entry)) ? hasSampleImage : blankImage;
+                ResourceReference hasSample = (SampleManager.hasSample(entry)) ? hasSampleImage
+                        : blankImage;
                 item.add(new Image("hasSample", hasSample));
 
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");

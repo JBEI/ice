@@ -5,16 +5,16 @@ import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.panels.LoginPanel;
 
 public class LoginPage extends UnprotectedPage {
-	public LoginPage(PageParameters parameters) {
-		super(parameters);
+    public LoginPage(PageParameters parameters) {
+        super(parameters);
 
-		if (IceSession.get().isAuthenticated()) {
-		    setRedirect(true);
-			setResponsePage(HomePage.class);
+        if (IceSession.get().isAuthenticated()) {
+            setRedirect(true);
+            setResponsePage(HomePage.class);
 
-			return;
-		}
+            return;
+        }
 
-		add(new LoginPanel("loginPanel"));
-	}
+        add(new LoginPanel("loginPanel"));
+    }
 }

@@ -16,75 +16,73 @@ import org.jbei.ice.lib.permissions.WorkSpace;
 
 @Entity
 @Table(name = "account_preferences")
-@SequenceGenerator(name = "sequence", sequenceName = "account_preferences_id_seq",
-		allocationSize = 1)
+@SequenceGenerator(name = "sequence", sequenceName = "account_preferences_id_seq", allocationSize = 1)
 public class AccountPreferences implements Serializable {
-	private static final long serialVersionUID = 1L;
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-	private int id;
-	
-	@Column(name = "preferences")
-	private String preferences;
-	@Column(name = "restriction_enzymes")
-	private String restrictionEnzymes;
-	@ManyToOne()
-	@JoinColumn(name = "accounts_id", unique=true, nullable = false)
-	private Account account;
-	@Column(name = "work_space", nullable = true)
-	private WorkSpace workSpace;
-	
-	public AccountPreferences() {
-		super();
-	}
+    private static final long serialVersionUID = 1L;
 
-	public AccountPreferences(Account account, String preferences,
-			String restrictionEnzymes) {
-		super();
-		this.preferences = preferences;
-		this.restrictionEnzymes = restrictionEnzymes;
-		this.account = account;
-	}
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    private int id;
 
-	public int getId() {
-		return id;
-	}
+    @Column(name = "preferences")
+    private String preferences;
+    @Column(name = "restriction_enzymes")
+    private String restrictionEnzymes;
+    @ManyToOne()
+    @JoinColumn(name = "accounts_id", unique = true, nullable = false)
+    private Account account;
+    @Column(name = "work_space", nullable = true)
+    private WorkSpace workSpace;
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public AccountPreferences() {
+        super();
+    }
 
-	public String getPreferences() {
-		return preferences;
-	}
+    public AccountPreferences(Account account, String preferences, String restrictionEnzymes) {
+        super();
+        this.preferences = preferences;
+        this.restrictionEnzymes = restrictionEnzymes;
+        this.account = account;
+    }
 
-	public void setPreferences(String preferences) {
-		this.preferences = preferences;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public String getRestrictionEnzymes() {
-		return restrictionEnzymes;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public void setRestrictionEnzymes(String restrictionEnzymes) {
-		this.restrictionEnzymes = restrictionEnzymes;
-	}
+    public String getPreferences() {
+        return preferences;
+    }
 
-	public Account getAccount() {
-		return account;
-	}
+    public void setPreferences(String preferences) {
+        this.preferences = preferences;
+    }
 
-	public void setAccount(Account account) {
-		this.account = account;
-	}
+    public String getRestrictionEnzymes() {
+        return restrictionEnzymes;
+    }
 
-	public void setWorkSpace(WorkSpace workSpace) {
-		this.workSpace = workSpace;
-	}
+    public void setRestrictionEnzymes(String restrictionEnzymes) {
+        this.restrictionEnzymes = restrictionEnzymes;
+    }
 
-	public WorkSpace getWorkSpace() {
-		return workSpace;
-	}
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    public void setWorkSpace(WorkSpace workSpace) {
+        this.workSpace = workSpace;
+    }
+
+    public WorkSpace getWorkSpace() {
+        return workSpace;
+    }
 
 }

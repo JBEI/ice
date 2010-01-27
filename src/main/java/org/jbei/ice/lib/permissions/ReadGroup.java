@@ -15,54 +15,52 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Group;
 
 @Entity
-@Table(name="permission_read_groups")
-@SequenceGenerator(name = "sequence", sequenceName = "permission_read_groups_id_seq",
-		allocationSize = 1)
+@Table(name = "permission_read_groups")
+@SequenceGenerator(name = "sequence", sequenceName = "permission_read_groups_id_seq", allocationSize = 1)
 public class ReadGroup implements Serializable {
-	
-	private static final long serialVersionUID = 1L;
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-	private int id;
-	
-	@ManyToOne
-	@JoinColumn(name = "entry_id")
-	private Entry entry;
-	
-	@ManyToOne
-	@JoinColumn(name = "group_id")
-	private Group group;
 
-	public ReadGroup(Entry entry, Group group) {
-		setEntry(entry);
-		setGroup(group);
-	}
-	
-	//getters and setters
-	public int getId() {
-		return id;
-	}
+    private static final long serialVersionUID = 1L;
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    private int id;
 
-	public Entry getEntry() {
-		return entry;
-	}
+    @ManyToOne
+    @JoinColumn(name = "entry_id")
+    private Entry entry;
 
-	public void setEntry(Entry entry) {
-		this.entry = entry;
-	}
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private Group group;
 
-	public Group getGroup() {
-		return group;
-	}
+    public ReadGroup(Entry entry, Group group) {
+        setEntry(entry);
+        setGroup(group);
+    }
 
-	public void setGroup(Group group) {
-		this.group = group;
-	}
+    //getters and setters
+    public int getId() {
+        return id;
+    }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Entry getEntry() {
+        return entry;
+    }
+
+    public void setEntry(Entry entry) {
+        this.entry = entry;
+    }
+
+    public Group getGroup() {
+        return group;
+    }
+
+    public void setGroup(Group group) {
+        this.group = group;
+    }
 
 }

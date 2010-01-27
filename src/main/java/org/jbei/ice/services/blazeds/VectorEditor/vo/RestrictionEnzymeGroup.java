@@ -5,49 +5,49 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class RestrictionEnzymeGroup implements Serializable {
-	private static final long serialVersionUID = 2321365485733702387L;
-	
-	private String name;
-	private Set<RestrictionEnzyme> enzymes;
+    private static final long serialVersionUID = 2321365485733702387L;
 
-	// Constructors
-	public RestrictionEnzymeGroup() {
-		enzymes = new HashSet<RestrictionEnzyme>();
-	}
+    private String name;
+    private Set<RestrictionEnzyme> enzymes;
 
-	public RestrictionEnzymeGroup(String name, Set<RestrictionEnzyme> enzymes) {
-		super();
-		this.name = name;
-		this.enzymes = enzymes;
-	}
+    // Constructors
+    public RestrictionEnzymeGroup() {
+        enzymes = new HashSet<RestrictionEnzyme>();
+    }
 
-	// Properties
-	public String getName() {
-		return name;
-	}
+    public RestrictionEnzymeGroup(String name, Set<RestrictionEnzyme> enzymes) {
+        super();
+        this.name = name;
+        this.enzymes = enzymes;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    // Properties
+    public String getName() {
+        return name;
+    }
 
-	public Set<RestrictionEnzyme> getEnzymes() {
-		return enzymes;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setEnzymes(Set<RestrictionEnzyme> enzymes) {
-		this.enzymes = enzymes;
-	}
+    public Set<RestrictionEnzyme> getEnzymes() {
+        return enzymes;
+    }
 
-	// Public Methods
-	public void addEnzyme(RestrictionEnzyme enzyme) {
-		enzymes.add(enzyme);
-	}
+    public void setEnzymes(Set<RestrictionEnzyme> enzymes) {
+        this.enzymes = enzymes;
+    }
 
-	public void removeEnzyme(RestrictionEnzyme enzyme) {
-		enzymes.remove(enzyme);
-	}
+    // Public Methods
+    public void addEnzyme(RestrictionEnzyme enzyme) {
+        enzymes.add(enzyme);
+    }
 
-	public boolean hasEnzyme(RestrictionEnzyme enzyme) {
-		return enzymes.contains(enzyme);
-	}
+    public void removeEnzyme(RestrictionEnzyme enzyme) {
+        enzymes.remove(enzyme);
+    }
+
+    public boolean hasEnzyme(RestrictionEnzyme enzyme) {
+        return enzymes.contains(enzyme);
+    }
 }

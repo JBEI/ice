@@ -9,28 +9,24 @@ import org.apache.wicket.model.Model;
 
 @SuppressWarnings("serial")
 public class RowItemPanel extends Panel {
-	protected String name;
-	protected String description;
-	protected boolean checkBox;
-	protected Date date;
-	
-	public RowItemPanel(String id) {
-		super(id);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public RowItemPanel(String id, String name, String description, 
-			boolean checkBox, Date date) {
-		
-		super(id);
-		add(new CheckBox("checkBox", new Model(checkBox)));
-		add(new Label("name", name));
-		add(new Label("description", description));
-		
-		add(new Label("date", date.toString()));
-	}
-	
-	
-	
+    protected String name;
+    protected String description;
+    protected boolean checkBox;
+    protected Date date;
+
+    public RowItemPanel(String id) {
+        super(id);
+    }
+
+    @SuppressWarnings("unchecked")
+    public RowItemPanel(String id, String name, String description, boolean checkBox, Date date) {
+
+        super(id);
+        add(new CheckBox("checkBox", new Model(checkBox)));
+        add(new Label("name", name));
+        add(new Label("description", description));
+
+        add(new Label("date", date.toString()));
+    }
 
 }

@@ -16,67 +16,66 @@ import org.jbei.ice.lib.value_objects.ILinkValueObject;
 
 @Entity
 @Table(name = "links")
-@SequenceGenerator(name = "sequence", sequenceName = "links_id_seq",
-		allocationSize = 1)
+@SequenceGenerator(name = "sequence", sequenceName = "links_id_seq", allocationSize = 1)
 public class Link implements ILinkValueObject, Serializable {
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-	private int id;
-	
-	@Column(name = "link", length = 40)
-	private String link;
-	
-	@Column(name = "url", length = 255)
-	private String url;
-	
-	@ManyToOne
-	@JoinColumn(name = "entries_id", nullable = false)
-	private Entry entry;
+    private static final long serialVersionUID = 1L;
 
-	public Link() {
-	}
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    private int id;
 
-	public Link(int id, String link, String url, Entry entry) {
-			this.id = id;
-			this.link = link;
-			this.url = url;
-			this.entry = entry;
-	}
+    @Column(name = "link", length = 40)
+    private String link;
 
-	public int getId() {
-		return id;
-	}
+    @Column(name = "url", length = 255)
+    private String url;
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    @ManyToOne
+    @JoinColumn(name = "entries_id", nullable = false)
+    private Entry entry;
 
-	public String getLink() {
-		return link;
-	}
+    public Link() {
+    }
 
-	public void setLink(String link) {
-		this.link = link;
-	}
+    public Link(int id, String link, String url, Entry entry) {
+        this.id = id;
+        this.link = link;
+        this.url = url;
+        this.entry = entry;
+    }
 
-	public String getUrl() {
-		return url;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public void setUrl(String url) {
-		this.url = url;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public Entry getEntry() {
-		return entry;
-	}
+    public String getLink() {
+        return link;
+    }
 
-	public void setEntry(Entry entry) {
-		this.entry = entry;
-	}
+    public void setLink(String link) {
+        this.link = link;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public Entry getEntry() {
+        return entry;
+    }
+
+    public void setEntry(Entry entry) {
+        this.entry = entry;
+    }
 }

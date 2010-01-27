@@ -4,12 +4,12 @@ import org.apache.wicket.PageParameters;
 import org.jbei.ice.web.IceSession;
 
 public class LogOutPage extends UnprotectedPage {
-	public LogOutPage(PageParameters parameters) {
-		super(parameters);
+    public LogOutPage(PageParameters parameters) {
+        super(parameters);
 
-		((IceSession) getSession()).deAuthenticateUser();
-		((IceSession) getSession()).invalidateNow();
+        ((IceSession) getSession()).deAuthenticateUser();
+        ((IceSession) getSession()).invalidateNow();
 
-		setResponsePage(UnprotectedPage.class);
-	}
+        setResponsePage(UnprotectedPage.class);
+    }
 }

@@ -17,100 +17,100 @@ import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.web.IceSession;
 
 public class UpdateAccountPage extends ProtectedPage {
-	public UpdateAccountPage(PageParameters parameters) {
-		super(parameters);
+    public UpdateAccountPage(PageParameters parameters) {
+        super(parameters);
 
-		class UpdateAccountForm extends StatelessForm<Object> {
-			private static final long serialVersionUID = 3046351143658183110L;
+        class UpdateAccountForm extends StatelessForm<Object> {
+            private static final long serialVersionUID = 3046351143658183110L;
 
-			private String firstName;
-			private String lastName;
-			private String initials;
-			private String email;
-			private String institution;
-			private String description;
+            private String firstName;
+            private String lastName;
+            private String initials;
+            private String email;
+            private String institution;
+            private String description;
 
-			Account account;
+            Account account;
 
-			public UpdateAccountForm(String id) {
-				super(id);
+            public UpdateAccountForm(String id) {
+                super(id);
 
-				IceSession session = IceSession.get();
+                IceSession session = IceSession.get();
 
-				if (!session.isAuthenticated()) {
-					setResponsePage(WelcomePage.class);
+                if (!session.isAuthenticated()) {
+                    setResponsePage(WelcomePage.class);
 
-					return;
-				}
+                    return;
+                }
 
-				account = session.getAccount();
+                account = session.getAccount();
 
-				setModel(new CompoundPropertyModel<Object>(this));
+                setModel(new CompoundPropertyModel<Object>(this));
 
-				firstName = account.getFirstName();
-				lastName = account.getLastName();
-				initials = account.getInitials();
-				email = account.getEmail();
-				institution = account.getInstitution();
-				description = account.getDescription();
+                firstName = account.getFirstName();
+                lastName = account.getLastName();
+                initials = account.getInitials();
+                email = account.getEmail();
+                institution = account.getInstitution();
+                description = account.getDescription();
 
-				add(new TextField<String>("firstName").setRequired(true).setLabel(
-						new Model<String>("Given name")).add(
-						new StringValidator.MaximumLengthValidator(50)));
-				add(new TextField<String>("lastName").setRequired(true).setLabel(
-						new Model<String>("Family name")).add(
-						new StringValidator.MaximumLengthValidator(50)));
-				add(new TextField<String>("initials").setLabel(new Model<String>("Initials")).add(
-						new StringValidator.MaximumLengthValidator(10)));
-				add(new TextField<String>("email").setRequired(true).setLabel(
-						new Model<String>("Email")).add(
-						new StringValidator.MaximumLengthValidator(100)).add(
-						EmailAddressValidator.getInstance()));
-				add(new TextField<String>("institution").setLabel(new Model<String>("Institution")));
-				add(new TextArea<String>("description").setLabel(new Model<String>("Description")));
+                add(new TextField<String>("firstName").setRequired(true).setLabel(
+                        new Model<String>("Given name")).add(
+                        new StringValidator.MaximumLengthValidator(50)));
+                add(new TextField<String>("lastName").setRequired(true).setLabel(
+                        new Model<String>("Family name")).add(
+                        new StringValidator.MaximumLengthValidator(50)));
+                add(new TextField<String>("initials").setLabel(new Model<String>("Initials")).add(
+                        new StringValidator.MaximumLengthValidator(10)));
+                add(new TextField<String>("email").setRequired(true).setLabel(
+                        new Model<String>("Email")).add(
+                        new StringValidator.MaximumLengthValidator(100)).add(
+                        EmailAddressValidator.getInstance()));
+                add(new TextField<String>("institution").setLabel(new Model<String>("Institution")));
+                add(new TextArea<String>("description").setLabel(new Model<String>("Description")));
 
-				add(new Button("submitButton", new Model<String>("Update")));
+                add(new Button("submitButton", new Model<String>("Update")));
 
-				add(new FeedbackPanel("feedback"));
-			}
+                add(new FeedbackPanel("feedback"));
+            }
 
-			@Override
-			protected void onSubmit() {
-				try {
-					assert (account != null);
+            @Override
+            protected void onSubmit() {
+                try {
+                    assert (account != null);
 
-					if (!email.equals(account.getEmail())) {
-						Account testAccount = AccountManager.getByEmail(email);
+                    if (!email.equals(account.getEmail())) {
+                        Account testAccount = AccountManager.getByEmail(email);
 
-						if (testAccount != null) {
-							error("Account with this email address already registered");
+                        if (testAccount != null) {
+                            error("Account with this email address already registered");
 
-							return;
-						}
-					}
+                            return;
+                        }
+                    }
 
-					account.setFirstName(firstName);
-					account.setLastName(lastName);
-					account.setInitials(initials);
-					account.setEmail(email);
-					account.setInstitution(institution);
-					account.setDescription(description);
+                    account.setFirstName(firstName);
+                    account.setLastName(lastName);
+                    account.setInitials(initials);
+                    account.setEmail(email);
+                    account.setInstitution(institution);
+                    account.setDescription(description);
 
-					AccountManager.save(account);
+                    AccountManager.save(account);
 
-					setResponsePage(UpdateAccountSuccessfulPage.class);
+                    setResponsePage(UpdateAccountSuccessfulPage.class);
 
-					Emailer
-							.send(email, "Your account information has been updated",
-									"Your account information has been updated.\n\nBest regards,\nRegistry Team");
-				} catch (ManagerException e) {
-					handleException(e);
-				} catch (Exception e) {
-					handleException(e);
-				}
-			}
-		}
+                    Emailer
+                            .send(email, "Your account information has been updated",
+                                    "Your account information has been updated.\n\nBest regards,\nRegistry Team");
+                } catch (ManagerException e) {
+                    handleException(e);
+                } catch (Exception e) {
+                    handleException(e);
+                }
+            }
+        }
 
-		add(new UpdateAccountForm("updateAccountForm"));
-	}
+        add(new UpdateAccountForm("updateAccountForm"));
+    }
 }

@@ -11,36 +11,34 @@ import org.jbei.ice.web.panels.EmptyMessagePanel;
 import org.jbei.ice.web.panels.SearchResultPanel;
 
 public class SearchResultPage extends ProtectedPage {
-	String queryString = null;
-	
-	public String getQueryString() {
-		return queryString;
-	}
+    String queryString = null;
 
-	public void setQueryString(String queryString) {
-		this.queryString = queryString;
-	}
+    public String getQueryString() {
+        return queryString;
+    }
 
-	public SearchResultPage(PageParameters parameters) {
-		super(parameters);
-		setQueryString(parameters.getString("search"));
+    public void setQueryString(String queryString) {
+        this.queryString = queryString;
+    }
 
-		Logger.info("Search query: " + getQueryString());
+    public SearchResultPage(PageParameters parameters) {
+        super(parameters);
+        setQueryString(parameters.getString("search"));
 
-		ArrayList<SearchResult> searchResults = null;
-		Panel searchResultPanel = null;
-		try {
-			searchResults = Search.getInstance().query(getQueryString());
-			if (searchResults.size() == 0) {
-				searchResultPanel = new EmptyMessagePanel("searchResultPanel",
-						"No results found");
-			} else {
-				searchResultPanel = new SearchResultPanel("searchResultPanel",
-						searchResults, 20);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		add(searchResultPanel);
-	}
+        Logger.info("Search query: " + getQueryString());
+
+        ArrayList<SearchResult> searchResults = null;
+        Panel searchResultPanel = null;
+        try {
+            searchResults = Search.getInstance().query(getQueryString());
+            if (searchResults.size() == 0) {
+                searchResultPanel = new EmptyMessagePanel("searchResultPanel", "No results found");
+            } else {
+                searchResultPanel = new SearchResultPanel("searchResultPanel", searchResults, 20);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        add(searchResultPanel);
+    }
 }

@@ -20,13 +20,13 @@ public class SequenceUtils {
 
         return symL.seqString();
     }
-    
+
     public static String translateToProtein(String dnaSequence) throws Exception {
         SymbolList symL = null;
         try {
             symL = DNATools.createDNA(dnaSequence);
             symL = DNATools.toProtein(symL);
-            
+
         } catch (BioException e) {
             throw e;
         }

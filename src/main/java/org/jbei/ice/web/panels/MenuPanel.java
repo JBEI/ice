@@ -17,58 +17,58 @@ import org.jbei.ice.web.pages.HomePage;
 import org.jbei.ice.web.pages.UserEntryPage;
 
 public class MenuPanel extends Panel {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public class MenuItem implements Serializable {
-		private static final long serialVersionUID = 1L;
+    public class MenuItem implements Serializable {
+        private static final long serialVersionUID = 1L;
 
-		protected BookmarkablePageLink<WebPage> pageLink = null;
-		protected Label label = null;
+        protected BookmarkablePageLink<WebPage> pageLink = null;
+        protected Label label = null;
 
-		public MenuItem(BookmarkablePageLink<WebPage> pageLink, Label label) {
-			this.pageLink = pageLink;
-			this.label = label;
-		}
+        public MenuItem(BookmarkablePageLink<WebPage> pageLink, Label label) {
+            this.pageLink = pageLink;
+            this.label = label;
+        }
 
-		public BookmarkablePageLink<WebPage> getPageLink() {
-			return this.pageLink;
-		}
+        public BookmarkablePageLink<WebPage> getPageLink() {
+            return this.pageLink;
+        }
 
-		public Label getLabel() {
-			return this.label;
-		}
-	}
+        public Label getLabel() {
+            return this.label;
+        }
+    }
 
-	private List<MenuItem> menuItems = new ArrayList<MenuItem>();
+    private List<MenuItem> menuItems = new ArrayList<MenuItem>();
 
-	public MenuPanel(String id) {
-		super(id);
+    public MenuPanel(String id) {
+        super(id);
 
-		addPageLinkMenuItem(HomePage.class, "Home");
-		addPageLinkMenuItem(HomePage.class, "News");
-		addPageLinkMenuItem(EntriesTablePage.class, "List View");
-		addPageLinkMenuItem(UserEntryPage.class, "My Entries");
-		addPageLinkMenuItem(EntryNewPage.class, "Add new entry");
-		addPageLinkMenuItem(FeedbackPage.class, "Feedback");
+        addPageLinkMenuItem(HomePage.class, "Home");
+        addPageLinkMenuItem(HomePage.class, "News");
+        addPageLinkMenuItem(EntriesTablePage.class, "List View");
+        addPageLinkMenuItem(UserEntryPage.class, "My Entries");
+        addPageLinkMenuItem(EntryNewPage.class, "Add new entry");
+        addPageLinkMenuItem(FeedbackPage.class, "Feedback");
 
-		ListView<MenuItem> menuList = new ListView<MenuItem>("menuList", menuItems) {
-			private static final long serialVersionUID = 1L;
+        ListView<MenuItem> menuList = new ListView<MenuItem>("menuList", menuItems) {
+            private static final long serialVersionUID = 1L;
 
-			protected void populateItem(ListItem<MenuItem> item) {
-				MenuItem menuItem = (MenuItem) item.getModelObject();
-				BookmarkablePageLink<WebPage> link = menuItem.getPageLink();
-				link.add(menuItem.getLabel());
-				item.add(link);
-			}
-		};
+            protected void populateItem(ListItem<MenuItem> item) {
+                MenuItem menuItem = (MenuItem) item.getModelObject();
+                BookmarkablePageLink<WebPage> link = menuItem.getPageLink();
+                link.add(menuItem.getLabel());
+                item.add(link);
+            }
+        };
 
-		add(menuList);
-	}
+        add(menuList);
+    }
 
-	@SuppressWarnings("unchecked")
-	public void addPageLinkMenuItem(Class webPage, String label) {
-		MenuItem menuItem = new MenuItem(new BookmarkablePageLink<WebPage>("menuItem", webPage),
-				new Label("label", label));
-		menuItems.add(menuItem);
-	}
+    @SuppressWarnings("unchecked")
+    public void addPageLinkMenuItem(Class webPage, String label) {
+        MenuItem menuItem = new MenuItem(new BookmarkablePageLink<WebPage>("menuItem", webPage),
+                new Label("label", label));
+        menuItems.add(menuItem);
+    }
 }

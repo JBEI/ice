@@ -6,17 +6,17 @@ import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.utils.Utils;
 
 public class NullAuthenticationBackend implements IAuthenticationBackend {
-	public Account authenticate(String userId, String password) {
-		Account account = null;
+    public Account authenticate(String userId, String password) {
+        Account account = null;
 
-		try {
-			account = AccountManager.getByEmail(userId);
-		} catch (Exception e) {
-			e.printStackTrace();
+        try {
+            account = AccountManager.getByEmail(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
 
-			Logger.warn("null authentication failed with " + Utils.stackTraceToString(e));
-		}
+            Logger.warn("null authentication failed with " + Utils.stackTraceToString(e));
+        }
 
-		return account;
-	}
+        return account;
+    }
 }

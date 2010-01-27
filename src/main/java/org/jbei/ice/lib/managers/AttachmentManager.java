@@ -18,7 +18,9 @@ import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 
 public class AttachmentManager extends Manager {
-    public static String attachmentDirectory = (String) JbeirSettings.getSetting("ATTACHMENTS_DIRECTORY") + "/";
+    public static String attachmentDirectory = (String) JbeirSettings
+            .getSetting("ATTACHMENTS_DIRECTORY")
+            + "/";
 
     public static Attachment create(Attachment attachment) throws ManagerException {
         attachment.setFileId(Utils.generateUUID());
@@ -80,7 +82,8 @@ public class AttachmentManager extends Manager {
     }
 
     public static Attachment getByFileId(String fileId) throws ManagerException {
-        Query query = session.createQuery("from " + Attachment.class.getName() + " where file_id = :fileId");
+        Query query = session.createQuery("from " + Attachment.class.getName()
+                + " where file_id = :fileId");
         query.setString("fileId", fileId);
         Attachment attachment = null;
         try {
@@ -105,7 +108,8 @@ public class AttachmentManager extends Manager {
     @SuppressWarnings("unchecked")
     public static ArrayList<Attachment> getByEntry(Entry entry) throws ManagerException {
         ArrayList<Attachment> attachments;
-        Query query = session.createQuery("from " + Attachment.class.getName() + " where entries_id = :entryId");
+        Query query = session.createQuery("from " + Attachment.class.getName()
+                + " where entries_id = :entryId");
         query.setInteger("entryId", entry.getId());
         attachments = (ArrayList<Attachment>) query.list();
         for (Attachment at : attachments) {
@@ -180,7 +184,8 @@ public class AttachmentManager extends Manager {
             byte[] bytes = new byte[(int) fileLength];
             int offset = 0;
             int numRead = 0;
-            while (offset < bytes.length && (numRead = inputStream.read(bytes, offset, bytes.length - offset)) >= 0) {
+            while (offset < bytes.length
+                    && (numRead = inputStream.read(bytes, offset, bytes.length - offset)) >= 0) {
                 offset += numRead;
             }
 

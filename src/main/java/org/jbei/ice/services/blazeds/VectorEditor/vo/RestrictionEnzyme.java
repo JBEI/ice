@@ -3,107 +3,106 @@ package org.jbei.ice.services.blazeds.VectorEditor.vo;
 import java.io.Serializable;
 
 public class RestrictionEnzyme implements Serializable {
-	private static final long serialVersionUID = 5641976664745014957L;
-	
-	private String name;
-	private String site;
-	private int cutType;
-	private String forwardRegex;
-	private String reverseRegex;
-	private int dsForward;
-	private int dsReverse;
-	private int usForward;
-	private int usReverse;
+    private static final long serialVersionUID = 5641976664745014957L;
 
-	// Constructors
-	public RestrictionEnzyme() {
-	}
+    private String name;
+    private String site;
+    private int cutType;
+    private String forwardRegex;
+    private String reverseRegex;
+    private int dsForward;
+    private int dsReverse;
+    private int usForward;
+    private int usReverse;
 
-	public RestrictionEnzyme(String name, String site, int cutType,
-			String forwardRegex, String reverseRegex, int dsForward,
-			int dsReverse, int usForward, int usReverse) {
-		super();
-		this.name = name;
-		this.site = site;
-		this.cutType = cutType;
-		this.forwardRegex = forwardRegex;
-		this.reverseRegex = reverseRegex;
-		this.dsForward = dsForward;
-		this.dsReverse = dsReverse;
-		this.usForward = usForward;
-		this.usReverse = usReverse;
-	}
+    // Constructors
+    public RestrictionEnzyme() {
+    }
 
-	// Properties
-	public String getName() {
-		return name;
-	}
+    public RestrictionEnzyme(String name, String site, int cutType, String forwardRegex,
+            String reverseRegex, int dsForward, int dsReverse, int usForward, int usReverse) {
+        super();
+        this.name = name;
+        this.site = site;
+        this.cutType = cutType;
+        this.forwardRegex = forwardRegex;
+        this.reverseRegex = reverseRegex;
+        this.dsForward = dsForward;
+        this.dsReverse = dsReverse;
+        this.usForward = usForward;
+        this.usReverse = usReverse;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    // Properties
+    public String getName() {
+        return name;
+    }
 
-	public String getSite() {
-		return site;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setSite(String site) {
-		this.site = site;
-	}
+    public String getSite() {
+        return site;
+    }
 
-	public int getCutType() {
-		return cutType;
-	}
+    public void setSite(String site) {
+        this.site = site;
+    }
 
-	public void setCutType(int cutType) {
-		this.cutType = cutType;
-	}
+    public int getCutType() {
+        return cutType;
+    }
 
-	public String getForwardRegex() {
-		return forwardRegex;
-	}
+    public void setCutType(int cutType) {
+        this.cutType = cutType;
+    }
 
-	public void setForwardRegex(String forwardRegex) {
-		this.forwardRegex = forwardRegex;
-	}
+    public String getForwardRegex() {
+        return forwardRegex;
+    }
 
-	public String getReverseRegex() {
-		return reverseRegex;
-	}
+    public void setForwardRegex(String forwardRegex) {
+        this.forwardRegex = forwardRegex;
+    }
 
-	public void setReverseRegex(String reverseRegex) {
-		this.reverseRegex = reverseRegex;
-	}
+    public String getReverseRegex() {
+        return reverseRegex;
+    }
 
-	public int getDsForward() {
-		return dsForward;
-	}
+    public void setReverseRegex(String reverseRegex) {
+        this.reverseRegex = reverseRegex;
+    }
 
-	public void setDsForward(int dsForward) {
-		this.dsForward = dsForward;
-	}
+    public int getDsForward() {
+        return dsForward;
+    }
 
-	public int getDsReverse() {
-		return dsReverse;
-	}
+    public void setDsForward(int dsForward) {
+        this.dsForward = dsForward;
+    }
 
-	public void setDsReverse(int dsReverse) {
-		this.dsReverse = dsReverse;
-	}
+    public int getDsReverse() {
+        return dsReverse;
+    }
 
-	public int getUsForward() {
-		return usForward;
-	}
+    public void setDsReverse(int dsReverse) {
+        this.dsReverse = dsReverse;
+    }
 
-	public void setUsForward(int usForward) {
-		this.usForward = usForward;
-	}
+    public int getUsForward() {
+        return usForward;
+    }
 
-	public int getUsReverse() {
-		return usReverse;
-	}
+    public void setUsForward(int usForward) {
+        this.usForward = usForward;
+    }
 
-	public void setUsReverse(int usReverse) {
-		this.usReverse = usReverse;
-	}
+    public int getUsReverse() {
+        return usReverse;
+    }
+
+    public void setUsReverse(int usReverse) {
+        this.usReverse = usReverse;
+    }
 }

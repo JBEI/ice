@@ -16,54 +16,53 @@ import org.jbei.ice.lib.value_objects.IPartNumberValueObject;
 
 @Entity
 @Table(name = "part_numbers")
-@SequenceGenerator(name = "sequence", sequenceName = "part_numbers_id_seq",
-		allocationSize = 1)
+@SequenceGenerator(name = "sequence", sequenceName = "part_numbers_id_seq", allocationSize = 1)
 public class PartNumber implements IPartNumberValueObject, Serializable {
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-	private int id;
-	
-	@Column(name = "part_number", length = 127, nullable = false)
-	private String partNumber;
-	
-	@ManyToOne
-	@JoinColumn(name = "entries_id", nullable = false)
-	private Entry entry;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    private int id;
 
-	public PartNumber() {
-	}
+    @Column(name = "part_number", length = 127, nullable = false)
+    private String partNumber;
 
-	public PartNumber(String partNumber, Entry entry) {
-		this.partNumber = partNumber;
-		this.entry = entry;
-	}
+    @ManyToOne
+    @JoinColumn(name = "entries_id", nullable = false)
+    private Entry entry;
 
-	public int getId() {
-		return id;
-	}
+    public PartNumber() {
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public PartNumber(String partNumber, Entry entry) {
+        this.partNumber = partNumber;
+        this.entry = entry;
+    }
 
-	public String getPartNumber() {
-		return partNumber;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public void setPartNumber(String partNumber) {
-		this.partNumber = partNumber;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public Entry getEntry() {
-		return entry;
-	}
+    public String getPartNumber() {
+        return partNumber;
+    }
 
-	public void setEntry(Entry entry) {
-		this.entry = entry;
-	}
+    public void setPartNumber(String partNumber) {
+        this.partNumber = partNumber;
+    }
+
+    public Entry getEntry() {
+        return entry;
+    }
+
+    public void setEntry(Entry entry) {
+        this.entry = entry;
+    }
 }

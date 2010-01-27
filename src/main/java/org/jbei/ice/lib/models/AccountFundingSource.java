@@ -13,46 +13,45 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "accounts_funding_source")
-@SequenceGenerator(name = "sequence", sequenceName = "accounts_funding_source_id_seq",
-		allocationSize = 1)
+@SequenceGenerator(name = "sequence", sequenceName = "accounts_funding_source_id_seq", allocationSize = 1)
 public class AccountFundingSource implements Serializable {
 
-		private static final long serialVersionUID = 1L;
-		
-		@Id
-		@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-		private int id;
-		
-		@OneToOne
-		@JoinColumn(name = "funding_source_id", nullable = false)
-		private FundingSource fundingSource;
-		
-		@OneToOne
-		@JoinColumn(name = "accounts_id", nullable = false)
-		private Account account;
+    private static final long serialVersionUID = 1L;
 
-		public int getId() {
-			return id;
-		}
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    private int id;
 
-		public void setId(int id) {
-			this.id = id;
-		}
+    @OneToOne
+    @JoinColumn(name = "funding_source_id", nullable = false)
+    private FundingSource fundingSource;
 
-		public FundingSource getFundingSource() {
-			return fundingSource;
-		}
+    @OneToOne
+    @JoinColumn(name = "accounts_id", nullable = false)
+    private Account account;
 
-		public void setFundingSource(FundingSource fundingSource) {
-			this.fundingSource = fundingSource;
-		}
+    public int getId() {
+        return id;
+    }
 
-		public Account getAccount() {
-			return account;
-		}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-		public void setAccount(Account account) {
-			this.account = account;
-		}
-	
+    public FundingSource getFundingSource() {
+        return fundingSource;
+    }
+
+    public void setFundingSource(FundingSource fundingSource) {
+        this.fundingSource = fundingSource;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
 }

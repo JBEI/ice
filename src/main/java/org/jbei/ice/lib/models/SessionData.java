@@ -37,190 +37,183 @@ import org.jbei.ice.lib.utils.Utils;
 @Table(name = "session_data")
 public class SessionData implements Serializable {
 
-	private static final long serialVersionUID = 1L;
-	private static String COOKIE_NAME = JbeirSettings.getSetting("COOKIE_NAME");
-	private static Long DEFAULT_EXPIRATION = 259200000L; // 3 days = 259200000
-	// ms
-	private static Long CACHE_TIMEOUT = 60000L; // 1 minute = 60000 ms
+    private static final long serialVersionUID = 1L;
+    private static String COOKIE_NAME = JbeirSettings.getSetting("COOKIE_NAME");
+    private static Long DEFAULT_EXPIRATION = 259200000L; // 3 days = 259200000
+    // ms
+    private static Long CACHE_TIMEOUT = 60000L; // 1 minute = 60000 ms
 
-	@Id
-	@Column(name = "session_key", length = 40)
-	private String sessionKey;
+    @Id
+    @Column(name = "session_key", length = 40)
+    private String sessionKey;
 
-	@Column(name = "session_data")
-	private HashMap<String, Object> data;
+    @Column(name = "session_data")
+    private HashMap<String, Object> data;
 
-	@Column(name = "expire_date")
-	private long expireDate;
+    @Column(name = "expire_date")
+    private long expireDate;
 
-	@Transient
-	private static HashMap<String, SessionData> sessionDataCache = new HashMap<String, SessionData>();
-	private static HashMap<String, Long> sessionDataCacheTimeStamp = new HashMap<String, Long>();
+    @Transient
+    private static HashMap<String, SessionData> sessionDataCache = new HashMap<String, SessionData>();
+    private static HashMap<String, Long> sessionDataCacheTimeStamp = new HashMap<String, Long>();
 
-	// needed for hibernate. use getInstance instead
-	public SessionData() {
+    // needed for hibernate. use getInstance instead
+    public SessionData() {
 
-	}
+    }
 
-	public static SessionData getInstance(Request request, Response response) {
-		SessionData sessionData = null;
+    public static SessionData getInstance(Request request, Response response) {
+        SessionData sessionData = null;
 
-		Cookie userCookie = ((WebRequest) request).getCookie(COOKIE_NAME);
+        Cookie userCookie = ((WebRequest) request).getCookie(COOKIE_NAME);
 
-		if (userCookie != null) {
-			String sessionKey = userCookie.getValue();
-			sessionData = getCachedInstance(sessionKey);
-			if (sessionData != null) {
-				String savedClientIp = (String) sessionData.getData().get(
-						"clientIp");
-				String clientIp = ((WebRequest) request)
-						.getHttpServletRequest().getRemoteAddr();
-				if (!clientIp.equals(savedClientIp)) {
-					sessionData.delete();
-					sessionData = null;
-				}
-			}
-		}
+        if (userCookie != null) {
+            String sessionKey = userCookie.getValue();
+            sessionData = getCachedInstance(sessionKey);
+            if (sessionData != null) {
+                String savedClientIp = (String) sessionData.getData().get("clientIp");
+                String clientIp = ((WebRequest) request).getHttpServletRequest().getRemoteAddr();
+                if (!clientIp.equals(savedClientIp)) {
+                    sessionData.delete();
+                    sessionData = null;
+                }
+            }
+        }
 
-		if (sessionData == null) {
-			sessionData = getNewInstance(request, response);
-		}
+        if (sessionData == null) {
+            sessionData = getNewInstance(request, response);
+        }
 
-		return sessionData;
-	}
+        return sessionData;
+    }
 
-	public void delete() {
-		getSessionDataCache().remove(this.getSessionKey());
+    public void delete() {
+        getSessionDataCache().remove(this.getSessionKey());
 
-		try {
-			SessionManager.delete(this);
-		} catch (ManagerException e) {
+        try {
+            SessionManager.delete(this);
+        } catch (ManagerException e) {
 
-			e.printStackTrace();
-		}
-	}
+            e.printStackTrace();
+        }
+    }
 
-	// getters and setters
-	public String getSessionKey() {
-		return sessionKey;
-	}
+    // getters and setters
+    public String getSessionKey() {
+        return sessionKey;
+    }
 
-	public void setSessionKey(String sessionKey) {
-		this.sessionKey = sessionKey;
-	}
+    public void setSessionKey(String sessionKey) {
+        this.sessionKey = sessionKey;
+    }
 
-	public HashMap<String, Object> getData() {
-		return data;
-	}
+    public HashMap<String, Object> getData() {
+        return data;
+    }
 
-	public void setData(HashMap<String, Object> data) {
-		this.data = data;
-	}
+    public void setData(HashMap<String, Object> data) {
+        this.data = data;
+    }
 
-	public void setExpireDate(long expireDate) {
-		this.expireDate = expireDate;
-	}
+    public void setExpireDate(long expireDate) {
+        this.expireDate = expireDate;
+    }
 
-	public long getExpireDate() {
-		return expireDate;
-	}
+    public long getExpireDate() {
+        return expireDate;
+    }
 
-	public SessionData persist() throws ManagerException {
-		return SessionManager.save(this);
-	}
+    public SessionData persist() throws ManagerException {
+        return SessionManager.save(this);
+    }
 
-	private static HashMap<String, SessionData> getSessionDataCache() {
-		return sessionDataCache;
-	}
+    private static HashMap<String, SessionData> getSessionDataCache() {
+        return sessionDataCache;
+    }
 
-	public static HashMap<String, Long> getSessionDataCacheTimeStamp() {
-		return sessionDataCacheTimeStamp;
-	}
+    public static HashMap<String, Long> getSessionDataCacheTimeStamp() {
+        return sessionDataCacheTimeStamp;
+    }
 
-	public Object clone() throws CloneNotSupportedException {
-		throw new CloneNotSupportedException();
-	}
+    public Object clone() throws CloneNotSupportedException {
+        throw new CloneNotSupportedException();
+    }
 
-	// private methods
+    // private methods
 
-	private static synchronized SessionData getCachedInstance(String sessionKey) {
-		SessionData sessionData = getSessionDataCache().get(sessionKey);
+    private static synchronized SessionData getCachedInstance(String sessionKey) {
+        SessionData sessionData = getSessionDataCache().get(sessionKey);
 
-		if (sessionData == null) {
-			try {
-				sessionData = SessionManager.get(sessionKey);
-			} catch (ManagerException e) {
-				e.printStackTrace();
-				sessionData = null;
-			}
-		} else {
-			Long time = getSessionDataCacheTimeStamp().get(sessionKey)
-					+ CACHE_TIMEOUT;
-			getSessionDataCacheTimeStamp().put(sessionKey, time);
+        if (sessionData == null) {
+            try {
+                sessionData = SessionManager.get(sessionKey);
+            } catch (ManagerException e) {
+                e.printStackTrace();
+                sessionData = null;
+            }
+        } else {
+            Long time = getSessionDataCacheTimeStamp().get(sessionKey) + CACHE_TIMEOUT;
+            getSessionDataCacheTimeStamp().put(sessionKey, time);
 
-		}
-		return sessionData;
-	}
+        }
+        return sessionData;
+    }
 
-	private static SessionData getNewInstance(Request request, Response response) {
-		pruneCache();
-		String clientIp = ((WebRequest) request).getHttpServletRequest()
-				.getRemoteAddr();
+    private static SessionData getNewInstance(Request request, Response response) {
+        pruneCache();
+        String clientIp = ((WebRequest) request).getHttpServletRequest().getRemoteAddr();
 
-		SessionData sessionData = new SessionData(clientIp, JbeirSettings
-				.getSetting("SITE_SECRET"));
-		sessionData.getData().put("clientIp", clientIp);
+        SessionData sessionData = new SessionData(clientIp, JbeirSettings.getSetting("SITE_SECRET"));
+        sessionData.getData().put("clientIp", clientIp);
 
-		getSessionDataCache().put(sessionData.getSessionKey(), sessionData);
-		Long expirationTime = Calendar.getInstance().getTimeInMillis()
-				+ CACHE_TIMEOUT;
-		getSessionDataCacheTimeStamp().put(sessionData.getSessionKey(),
-				expirationTime);
-		Cookie cookie = new Cookie(COOKIE_NAME, sessionData.getSessionKey());
-		cookie.setPath("/");
-		cookie.setMaxAge(-1);
+        getSessionDataCache().put(sessionData.getSessionKey(), sessionData);
+        Long expirationTime = Calendar.getInstance().getTimeInMillis() + CACHE_TIMEOUT;
+        getSessionDataCacheTimeStamp().put(sessionData.getSessionKey(), expirationTime);
+        Cookie cookie = new Cookie(COOKIE_NAME, sessionData.getSessionKey());
+        cookie.setPath("/");
+        cookie.setMaxAge(-1);
 
-		((WebResponse) response).addCookie(cookie);
+        ((WebResponse) response).addCookie(cookie);
 
-		try {
-			sessionData.persist();
-		} catch (ManagerException e) {
-			e.printStackTrace();
-		}
-		return sessionData;
-	}
+        try {
+            sessionData.persist();
+        } catch (ManagerException e) {
+            e.printStackTrace();
+        }
+        return sessionData;
+    }
 
-	/**
-	 * @param clientIp
-	 * @param secret
-	 * @param keepSignedIn
-	 * @throws ManagerException
-	 */
-	private SessionData(String clientIp, String secret) {
-		String sha = generateSessionKey(clientIp, secret);
-		setSessionKey(sha);
-		long currentTime = Calendar.getInstance().getTimeInMillis();
-		long expireDate = currentTime + DEFAULT_EXPIRATION;
-		setExpireDate(expireDate);
-		setData(new HashMap<String, Object>());
-	}
+    /**
+     * @param clientIp
+     * @param secret
+     * @param keepSignedIn
+     * @throws ManagerException
+     */
+    private SessionData(String clientIp, String secret) {
+        String sha = generateSessionKey(clientIp, secret);
+        setSessionKey(sha);
+        long currentTime = Calendar.getInstance().getTimeInMillis();
+        long expireDate = currentTime + DEFAULT_EXPIRATION;
+        setExpireDate(expireDate);
+        setData(new HashMap<String, Object>());
+    }
 
-	private static String generateSessionKey(String clientIp, String secret) {
-		String temp = java.util.UUID.randomUUID().toString() + clientIp
-				+ secret + "" + Calendar.getInstance().getTimeInMillis();
+    private static String generateSessionKey(String clientIp, String secret) {
+        String temp = java.util.UUID.randomUUID().toString() + clientIp + secret + ""
+                + Calendar.getInstance().getTimeInMillis();
 
-		return Utils.encryptSHA(temp);
-	}
+        return Utils.encryptSHA(temp);
+    }
 
-	private static void pruneCache() {
-		int before = getSessionDataCache().size();
-		for (String sessionKey : getSessionDataCacheTimeStamp().keySet()) {
-			long now = Calendar.getInstance().getTimeInMillis();
-			if (now > getSessionDataCacheTimeStamp().get(sessionKey)) {
-				getSessionDataCache().remove(sessionKey);
-			}
-		}
-		Logger.info("SessionData cache went from " + before + " to "
-				+ getSessionDataCache().size() + " elements");
-	}
+    private static void pruneCache() {
+        int before = getSessionDataCache().size();
+        for (String sessionKey : getSessionDataCacheTimeStamp().keySet()) {
+            long now = Calendar.getInstance().getTimeInMillis();
+            if (now > getSessionDataCacheTimeStamp().get(sessionKey)) {
+                getSessionDataCache().remove(sessionKey);
+            }
+        }
+        Logger.info("SessionData cache went from " + before + " to " + getSessionDataCache().size()
+                + " elements");
+    }
 }

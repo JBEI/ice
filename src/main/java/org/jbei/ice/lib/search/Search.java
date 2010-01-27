@@ -40,294 +40,309 @@ import org.jbei.ice.lib.utils.Utils;
  * IndexSearcher is instantiated with the updated index.
  * 
  * @author tham
- *
+ * 
  */
 public class Search {
-	private IndexSearcher indexSearcher = null;
-	private File indexFile = null;
-	private boolean newIndex = false;
-		
-	private static class SingletonHolder {
-		private static final Search INSTANCE = new Search();
-	}
-	
-	public static Search getInstance() {
-		return SingletonHolder.INSTANCE;
-	}
-	
-	public IndexSearcher getIndexSearcher() throws SearchException {
-		if (indexSearcher == null) {
-			try {
-				createEmptyIndex();
-			} catch (Exception e) {
-			String msg = "Could not initiate search. Is the search index directory writable?";
-			Logger.error(msg);
-			throw new SearchException(msg);
-			}
-		}
-		return indexSearcher;
-	}
-	
-	private Search() {
-		initializeIndexSearcher(); 
-	}
+    private IndexSearcher indexSearcher = null;
+    private File indexFile = null;
+    private boolean newIndex = false;
 
-	private void initializeIndexSearcher() {
-		indexFile = new File(JbeirSettings.getSetting("SEARCH_INDEX_FILE"));
-		if (!indexFile.canWrite()) {
-			String msg = "Search index " +
-				JbeirSettings.getSetting("SEARCH_INDEX_FILE") + " is not writable.";
-			Logger.error(msg);
-		}
-		FSDirectory directory;
-		try {
-			directory = FSDirectory.open(indexFile);
-			indexSearcher = new IndexSearcher(directory, true);
-			
-		} catch(IOException e) {
-			String msg = "Could not open index file";
-			Logger.error(msg);
-			try {
-				msg = "Trying to create index file " + indexFile.getAbsolutePath();
-				Logger.error(msg);
-				createEmptyIndex();
-				directory = FSDirectory.open(indexFile);	
-				indexSearcher = new IndexSearcher(directory, true);
-				newIndex = true;
-			} catch (IOException e1) {
-				msg = "Directory exists, but could not create empty index.";
-				Logger.error(msg);
-				e.printStackTrace();
-				e1.printStackTrace();
-				
-				indexFile = null;
-				indexSearcher = null;
-			}
-		}
-	}
-	
-	public void createEmptyIndex() throws IOException {
-		FSDirectory directory = null;
-		try {
-			directory = FSDirectory.open(indexFile);
-		} catch (IOException e) {
-			String msg = "Could not create Empty Index";
-			Logger.error(msg);
-			throw e;
-		}
-		
-		IndexWriter indexWriter = new IndexWriter(directory, 
-			new StandardAnalyzer(Version.LUCENE_CURRENT), 
-			true, IndexWriter.MaxFieldLength.UNLIMITED);
-		
-		indexWriter.commit();
-		indexWriter.close();
-		Logger.info("Created empty Index");
-	}
-	
-	public void rebuildIndex() throws Exception {
-		File indexFile = new File(JbeirSettings.getSetting("SEARCH_INDEX_FILE"));
-		FSDirectory directory = null;
-		Logger.info("Rebuilding Search Index");
-		
-		try {
-			directory = FSDirectory.open(indexFile);
-		} catch (IOException e) {
-			throw e;
-		}
-		
-		IndexWriter indexWriter = new IndexWriter(directory, 
-			new StandardAnalyzer(Version.LUCENE_CURRENT), 
-			true, IndexWriter.MaxFieldLength.UNLIMITED);
-		
-		Set<Entry> entries = EntryManager.getAll();
-		for (Entry entry: entries) {
-			Document document = createDocument(entry);
-			indexWriter.addDocument(document);
-		}
-		
-		indexWriter.commit();
-		indexWriter.close();
-		
-		indexSearcher = new IndexSearcher(directory, true);
-	}
-	
-	
-	protected static Document createDocument(Entry entry) {
-		Document document = new Document();
-		String content = "";
-		
-		String recordId = (entry.getRecordId() != null) ? entry.getRecordId() : "";
-		String recordType = (entry.getRecordType() != null) ? entry.getRecordType() : "";
-		String owner = (entry.getOwner() != null) ? entry.getOwner() : "";
-		String ownerEmail = (entry.getOwnerEmail() != null) ? entry.getOwnerEmail() : "";
-		String creator = (entry.getCreator() != null) ? entry.getCreator() : "";
-		String creatorEmail = (entry.getCreatorEmail() != null) ? entry.getCreatorEmail() : "";
-		String alias = (entry.getAlias() != null) ? entry.getAlias() : "";
-		String keywords = (entry.getKeywords() != null) ? entry.getKeywords() : "";
-		String shortDescription = (entry.getShortDescription() != null) ? entry.getShortDescription() : "";
-		String longDescription = (entry.getLongDescription() != null) ? entry.getLongDescription() : "";
-		String references = (entry.getReferences() != null) ? entry.getReferences() : "";
-		String selectionMarkers = Utils.toCommaSeparatedStringFromSelectionMarkers(entry.getSelectionMarkers());
-		String links = Utils.toCommaSeparatedStringFromLinks(entry.getLinks());
-		String names = Utils.toCommaSeparatedStringFromNames(entry.getNames());
-		String partNumbers = Utils.toCommaSeparatedStringFromPartNumbers(entry.getPartNumbers());
-		String intellectualProperty = (entry.getIntellectualProperty() != null) ? entry.getIntellectualProperty() : "";
-		String fundingSources = Utils.toCommaSeparatedStringFromEntryFundingSources(entry.getEntryFundingSources());
-		
-		document.add(new Field("Record ID", recordId, Field.Store.YES, Field.Index.ANALYZED));
-		content = content + recordId + " ";
-		document.add(new Field("Record Type", recordType, Field.Store.YES, Field.Index.ANALYZED));
-		content = content + recordType + " ";
-		document.add(new Field("Owner", owner, Field.Store.YES, Field.Index.ANALYZED));
-		content = content + owner + " ";
-		document.add(new Field("Owner Email", ownerEmail, Field.Store.YES, Field.Index.ANALYZED));
-		content = content + ownerEmail + " ";
-		document.add(new Field("Creator", creator, Field.Store.YES, Field.Index.ANALYZED));
-		content = content + creator + " ";
-		document.add(new Field("Creator Email", creatorEmail, Field.Store.YES, Field.Index.ANALYZED));
-		content = content + creatorEmail + " ";
-		document.add(new Field("Alias", alias, Field.Store.YES, Field.Index.ANALYZED));
-		content = content + alias + " ";
-		document.add(new Field("Keywords", keywords, Field.Store.YES, Field.Index.ANALYZED));
-		content = content + keywords + " ";
-		document.add(new Field("Summary", shortDescription, Field.Store.YES, Field.Index.ANALYZED));
-		content = content + shortDescription + " ";
-		document.add(new Field("Notes", longDescription, Field.Store.YES, Field.Index.ANALYZED));
-		content = content + longDescription + " ";
-		document.add(new Field("References", references, Field.Store.YES, Field.Index.ANALYZED));
-		content = content + references + " ";
-		
-		document.add(new Field("Selection Markers", selectionMarkers, Field.Store.YES, Field.Index.ANALYZED));
-		content = content + selectionMarkers + " ";
-		
-		document.add(new Field("Links", links, Field.Store.YES, Field.Index.ANALYZED));
-		content = content + links + " ";
-		
-		document.add(new Field("Names", names, Field.Store.YES, Field.Index.ANALYZED));
-		content = content + names + " ";
-		
-		document.add(new Field("Part Number", partNumbers, Field.Store.YES, Field.Index.ANALYZED));
-		content = content + partNumbers + " ";
+    private static class SingletonHolder {
+        private static final Search INSTANCE = new Search();
+    }
 
-		document.add(new Field("Intellectual Property", intellectualProperty, Field.Store.YES, Field.Index.ANALYZED));
-		content = content + intellectualProperty + " ";
+    public static Search getInstance() {
+        return SingletonHolder.INSTANCE;
+    }
 
-		document.add(new Field("Funding Source", fundingSources, Field.Store.YES, Field.Index.ANALYZED));
-		content = content + fundingSources + " ";
+    public IndexSearcher getIndexSearcher() throws SearchException {
+        if (indexSearcher == null) {
+            try {
+                createEmptyIndex();
+            } catch (Exception e) {
+                String msg = "Could not initiate search. Is the search index directory writable?";
+                Logger.error(msg);
+                throw new SearchException(msg);
+            }
+        }
+        return indexSearcher;
+    }
 
-		Set<Sample> samples = null;
-		try {
-			samples = SampleManager.get(entry);
-		} catch (ManagerException e) {
-			e.printStackTrace();
-		}
-		if (samples != null) {
-			ArrayList<String> samplesArray = new ArrayList<String>();
-			for (Sample sample: samples) {
-				ArrayList<String> temp = new ArrayList<String>();
-				temp.add(sample.getLabel());
-				temp.add(sample.getDepositor());
-				temp.add(sample.getNotes());
-				temp.add(sample.getUuid());
-				samplesArray.add(Utils.join(", ", temp));
-			}
-			String samplesString = Utils.join("; ", samplesArray);
-			document.add(new Field("Samples", samplesString, Field.Store.YES, Field.Index.ANALYZED));
-			content = content + samplesString + " ";
-		}
-		
-		if (entry.getClass().isInstance(Plasmid.class)) {
-			Plasmid plasmid = (Plasmid) entry;
-			String backbone = (plasmid.getBackbone() != null) ? plasmid.getBackbone() : "";
-			String origin = (plasmid.getOriginOfReplication() != null) ? plasmid.getOriginOfReplication() : "";
-			String promoters = (plasmid.getPromoters() != null) ? plasmid.getOriginOfReplication() : "";
-			
-			document.add(new Field("Backbone", backbone, Field.Store.YES, Field.Index.ANALYZED));
-			content = content + backbone + " ";
-			document.add(new Field("Origin of Replication", origin, Field.Store.YES, Field.Index.ANALYZED));
-			content = content + origin + " ";
-			document.add(new Field("Promoters", promoters, Field.Store.YES, Field.Index.ANALYZED));
-			content = content + promoters + " ";
-			
-		} else if (entry.getClass().isInstance(Strain.class)) {
-			Strain strain = (Strain) entry;
-			String host = (strain.getHost() != null) ? strain.getHost() : "";
-			String genotype = (strain.getGenotypePhenotype() != null) ? strain.getGenotypePhenotype() : "";
-			String plasmids = (strain.getPlasmids() != null) ? strain.getPlasmids() : "";
-			
-			document.add(new Field("Host", host, Field.Store.YES, Field.Index.ANALYZED));
-			content = content + host + " ";
-			document.add(new Field("Genotype Phenotype", genotype, Field.Store.YES, Field.Index.ANALYZED));
-			content = content + genotype + " ";
-			document.add(new Field("Plasmids", plasmids, Field.Store.YES, Field.Index.ANALYZED));
-			content = content + plasmids + " ";
-			
-		} else if (entry.getClass().isInstance(Part.class)) {
-			Part part = (Part) entry;
-			String format = (part.getPackageFormat() != null) ? part.getPackageFormat() : "" ;
-			document.add(new Field("Package Format", format, Field.Store.YES, Field.Index.ANALYZED));
-			content = content + format + " ";
-		}
-		
-		document.add(new Field("content", content, Field.Store.NO, Field.Index.ANALYZED));
-		return document;
-		
-	}
-	
-	public ArrayList<SearchResult> query(String queryString) {
-		ArrayList<SearchResult> result = new ArrayList<SearchResult>();
-		Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
+    private Search() {
+        initializeIndexSearcher();
+    }
 
-		if (newIndex == true) {
-			newIndex = false;
-			Logger.info("Creating search index for the first time");
-			JobCue jobCue = JobCue.getInstance();
-			jobCue.addJob(Job.REBUILD_SEARCH_INDEX);
-			jobCue.processIn(5000);
-		} else if (indexSearcher == null) { 
-			
-		} else {
-		
-			try {
-				QueryParser parser = new QueryParser(Version.LUCENE_CURRENT, "content", analyzer);
-				Query query = parser.parse(queryString);
-				IndexSearcher searcher = getIndexSearcher();
-				TopDocs hits = searcher.search(query, 1000);
-				Logger.info("" + hits.totalHits + " results found");
-				
-				ArrayList<ScoreDoc> hitsArray = new ArrayList<ScoreDoc>(Arrays.asList(hits.scoreDocs));
-				
-				for (ScoreDoc scoreDoc : hitsArray) {
-					float score = scoreDoc.score;
-					int docId = scoreDoc.doc;
-					Document doc = indexSearcher.doc(docId);
-					String recordId = doc.get("Record ID");
-					Entry entry = EntryManager.getByRecordId(recordId);
-					result.add(new SearchResult(entry, score));
-				}
-			} catch (Exception e) {
-				String msg = "Could not run query: " + e.toString();
-				Logger.error(msg);
-			}
-		}
-		
-		return result;
-	}
-	
-	public static void main(String[] args) {
-		
-		try {
-			//Search.getInstance().rebuildIndex();
-			Search searcher = Search.getInstance();
-			ArrayList<SearchResult> results = searcher.query("thesis");
-			for (SearchResult result : results) {
-				System.out.println("Score " + result.getScore() + " RecordId " + Utils.toCommaSeparatedStringFromNames(result.getEntry().getNames()));
-			}
-			System.out.println("" + results.size());
-		} catch (Exception e) {
-			
-			e.printStackTrace();
-		}
-	}
+    private void initializeIndexSearcher() {
+        indexFile = new File(JbeirSettings.getSetting("SEARCH_INDEX_FILE"));
+        if (!indexFile.canWrite()) {
+            String msg = "Search index " + JbeirSettings.getSetting("SEARCH_INDEX_FILE")
+                    + " is not writable.";
+            Logger.error(msg);
+        }
+        FSDirectory directory;
+        try {
+            directory = FSDirectory.open(indexFile);
+            indexSearcher = new IndexSearcher(directory, true);
+
+        } catch (IOException e) {
+            String msg = "Could not open index file";
+            Logger.error(msg);
+            try {
+                msg = "Trying to create index file " + indexFile.getAbsolutePath();
+                Logger.error(msg);
+                createEmptyIndex();
+                directory = FSDirectory.open(indexFile);
+                indexSearcher = new IndexSearcher(directory, true);
+                newIndex = true;
+            } catch (IOException e1) {
+                msg = "Directory exists, but could not create empty index.";
+                Logger.error(msg);
+                e.printStackTrace();
+                e1.printStackTrace();
+
+                indexFile = null;
+                indexSearcher = null;
+            }
+        }
+    }
+
+    public void createEmptyIndex() throws IOException {
+        FSDirectory directory = null;
+        try {
+            directory = FSDirectory.open(indexFile);
+        } catch (IOException e) {
+            String msg = "Could not create Empty Index";
+            Logger.error(msg);
+            throw e;
+        }
+
+        IndexWriter indexWriter = new IndexWriter(directory, new StandardAnalyzer(
+                Version.LUCENE_CURRENT), true, IndexWriter.MaxFieldLength.UNLIMITED);
+
+        indexWriter.commit();
+        indexWriter.close();
+        Logger.info("Created empty Index");
+    }
+
+    public void rebuildIndex() throws Exception {
+        File indexFile = new File(JbeirSettings.getSetting("SEARCH_INDEX_FILE"));
+        FSDirectory directory = null;
+        Logger.info("Rebuilding Search Index");
+
+        try {
+            directory = FSDirectory.open(indexFile);
+        } catch (IOException e) {
+            throw e;
+        }
+
+        IndexWriter indexWriter = new IndexWriter(directory, new StandardAnalyzer(
+                Version.LUCENE_CURRENT), true, IndexWriter.MaxFieldLength.UNLIMITED);
+
+        Set<Entry> entries = EntryManager.getAll();
+        for (Entry entry : entries) {
+            Document document = createDocument(entry);
+            indexWriter.addDocument(document);
+        }
+
+        indexWriter.commit();
+        indexWriter.close();
+
+        indexSearcher = new IndexSearcher(directory, true);
+    }
+
+    protected static Document createDocument(Entry entry) {
+        Document document = new Document();
+        String content = "";
+
+        String recordId = (entry.getRecordId() != null) ? entry.getRecordId() : "";
+        String recordType = (entry.getRecordType() != null) ? entry.getRecordType() : "";
+        String owner = (entry.getOwner() != null) ? entry.getOwner() : "";
+        String ownerEmail = (entry.getOwnerEmail() != null) ? entry.getOwnerEmail() : "";
+        String creator = (entry.getCreator() != null) ? entry.getCreator() : "";
+        String creatorEmail = (entry.getCreatorEmail() != null) ? entry.getCreatorEmail() : "";
+        String alias = (entry.getAlias() != null) ? entry.getAlias() : "";
+        String keywords = (entry.getKeywords() != null) ? entry.getKeywords() : "";
+        String shortDescription = (entry.getShortDescription() != null) ? entry
+                .getShortDescription() : "";
+        String longDescription = (entry.getLongDescription() != null) ? entry.getLongDescription()
+                : "";
+        String references = (entry.getReferences() != null) ? entry.getReferences() : "";
+        String selectionMarkers = Utils.toCommaSeparatedStringFromSelectionMarkers(entry
+                .getSelectionMarkers());
+        String links = Utils.toCommaSeparatedStringFromLinks(entry.getLinks());
+        String names = Utils.toCommaSeparatedStringFromNames(entry.getNames());
+        String partNumbers = Utils.toCommaSeparatedStringFromPartNumbers(entry.getPartNumbers());
+        String intellectualProperty = (entry.getIntellectualProperty() != null) ? entry
+                .getIntellectualProperty() : "";
+        String fundingSources = Utils.toCommaSeparatedStringFromEntryFundingSources(entry
+                .getEntryFundingSources());
+
+        document.add(new Field("Record ID", recordId, Field.Store.YES, Field.Index.ANALYZED));
+        content = content + recordId + " ";
+        document.add(new Field("Record Type", recordType, Field.Store.YES, Field.Index.ANALYZED));
+        content = content + recordType + " ";
+        document.add(new Field("Owner", owner, Field.Store.YES, Field.Index.ANALYZED));
+        content = content + owner + " ";
+        document.add(new Field("Owner Email", ownerEmail, Field.Store.YES, Field.Index.ANALYZED));
+        content = content + ownerEmail + " ";
+        document.add(new Field("Creator", creator, Field.Store.YES, Field.Index.ANALYZED));
+        content = content + creator + " ";
+        document
+                .add(new Field("Creator Email", creatorEmail, Field.Store.YES, Field.Index.ANALYZED));
+        content = content + creatorEmail + " ";
+        document.add(new Field("Alias", alias, Field.Store.YES, Field.Index.ANALYZED));
+        content = content + alias + " ";
+        document.add(new Field("Keywords", keywords, Field.Store.YES, Field.Index.ANALYZED));
+        content = content + keywords + " ";
+        document.add(new Field("Summary", shortDescription, Field.Store.YES, Field.Index.ANALYZED));
+        content = content + shortDescription + " ";
+        document.add(new Field("Notes", longDescription, Field.Store.YES, Field.Index.ANALYZED));
+        content = content + longDescription + " ";
+        document.add(new Field("References", references, Field.Store.YES, Field.Index.ANALYZED));
+        content = content + references + " ";
+
+        document.add(new Field("Selection Markers", selectionMarkers, Field.Store.YES,
+                Field.Index.ANALYZED));
+        content = content + selectionMarkers + " ";
+
+        document.add(new Field("Links", links, Field.Store.YES, Field.Index.ANALYZED));
+        content = content + links + " ";
+
+        document.add(new Field("Names", names, Field.Store.YES, Field.Index.ANALYZED));
+        content = content + names + " ";
+
+        document.add(new Field("Part Number", partNumbers, Field.Store.YES, Field.Index.ANALYZED));
+        content = content + partNumbers + " ";
+
+        document.add(new Field("Intellectual Property", intellectualProperty, Field.Store.YES,
+                Field.Index.ANALYZED));
+        content = content + intellectualProperty + " ";
+
+        document.add(new Field("Funding Source", fundingSources, Field.Store.YES,
+                Field.Index.ANALYZED));
+        content = content + fundingSources + " ";
+
+        Set<Sample> samples = null;
+        try {
+            samples = SampleManager.get(entry);
+        } catch (ManagerException e) {
+            e.printStackTrace();
+        }
+        if (samples != null) {
+            ArrayList<String> samplesArray = new ArrayList<String>();
+            for (Sample sample : samples) {
+                ArrayList<String> temp = new ArrayList<String>();
+                temp.add(sample.getLabel());
+                temp.add(sample.getDepositor());
+                temp.add(sample.getNotes());
+                temp.add(sample.getUuid());
+                samplesArray.add(Utils.join(", ", temp));
+            }
+            String samplesString = Utils.join("; ", samplesArray);
+            document
+                    .add(new Field("Samples", samplesString, Field.Store.YES, Field.Index.ANALYZED));
+            content = content + samplesString + " ";
+        }
+
+        if (entry.getClass().isInstance(Plasmid.class)) {
+            Plasmid plasmid = (Plasmid) entry;
+            String backbone = (plasmid.getBackbone() != null) ? plasmid.getBackbone() : "";
+            String origin = (plasmid.getOriginOfReplication() != null) ? plasmid
+                    .getOriginOfReplication() : "";
+            String promoters = (plasmid.getPromoters() != null) ? plasmid.getOriginOfReplication()
+                    : "";
+
+            document.add(new Field("Backbone", backbone, Field.Store.YES, Field.Index.ANALYZED));
+            content = content + backbone + " ";
+            document.add(new Field("Origin of Replication", origin, Field.Store.YES,
+                    Field.Index.ANALYZED));
+            content = content + origin + " ";
+            document.add(new Field("Promoters", promoters, Field.Store.YES, Field.Index.ANALYZED));
+            content = content + promoters + " ";
+
+        } else if (entry.getClass().isInstance(Strain.class)) {
+            Strain strain = (Strain) entry;
+            String host = (strain.getHost() != null) ? strain.getHost() : "";
+            String genotype = (strain.getGenotypePhenotype() != null) ? strain
+                    .getGenotypePhenotype() : "";
+            String plasmids = (strain.getPlasmids() != null) ? strain.getPlasmids() : "";
+
+            document.add(new Field("Host", host, Field.Store.YES, Field.Index.ANALYZED));
+            content = content + host + " ";
+            document.add(new Field("Genotype Phenotype", genotype, Field.Store.YES,
+                    Field.Index.ANALYZED));
+            content = content + genotype + " ";
+            document.add(new Field("Plasmids", plasmids, Field.Store.YES, Field.Index.ANALYZED));
+            content = content + plasmids + " ";
+
+        } else if (entry.getClass().isInstance(Part.class)) {
+            Part part = (Part) entry;
+            String format = (part.getPackageFormat() != null) ? part.getPackageFormat() : "";
+            document
+                    .add(new Field("Package Format", format, Field.Store.YES, Field.Index.ANALYZED));
+            content = content + format + " ";
+        }
+
+        document.add(new Field("content", content, Field.Store.NO, Field.Index.ANALYZED));
+        return document;
+
+    }
+
+    public ArrayList<SearchResult> query(String queryString) {
+        ArrayList<SearchResult> result = new ArrayList<SearchResult>();
+        Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
+
+        if (newIndex == true) {
+            newIndex = false;
+            Logger.info("Creating search index for the first time");
+            JobCue jobCue = JobCue.getInstance();
+            jobCue.addJob(Job.REBUILD_SEARCH_INDEX);
+            jobCue.processIn(5000);
+        } else if (indexSearcher == null) {
+
+        } else {
+
+            try {
+                QueryParser parser = new QueryParser(Version.LUCENE_CURRENT, "content", analyzer);
+                Query query = parser.parse(queryString);
+                IndexSearcher searcher = getIndexSearcher();
+                TopDocs hits = searcher.search(query, 1000);
+                Logger.info("" + hits.totalHits + " results found");
+
+                ArrayList<ScoreDoc> hitsArray = new ArrayList<ScoreDoc>(Arrays
+                        .asList(hits.scoreDocs));
+
+                for (ScoreDoc scoreDoc : hitsArray) {
+                    float score = scoreDoc.score;
+                    int docId = scoreDoc.doc;
+                    Document doc = indexSearcher.doc(docId);
+                    String recordId = doc.get("Record ID");
+                    Entry entry = EntryManager.getByRecordId(recordId);
+                    result.add(new SearchResult(entry, score));
+                }
+            } catch (Exception e) {
+                String msg = "Could not run query: " + e.toString();
+                Logger.error(msg);
+            }
+        }
+
+        return result;
+    }
+
+    public static void main(String[] args) {
+
+        try {
+            //Search.getInstance().rebuildIndex();
+            Search searcher = Search.getInstance();
+            ArrayList<SearchResult> results = searcher.query("thesis");
+            for (SearchResult result : results) {
+                System.out.println("Score " + result.getScore() + " RecordId "
+                        + Utils.toCommaSeparatedStringFromNames(result.getEntry().getNames()));
+            }
+            System.out.println("" + results.size());
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+    }
 }

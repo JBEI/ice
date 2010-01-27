@@ -17,75 +17,72 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "funding_source")
-@SequenceGenerator(name = "sequence", sequenceName = "funding_source_id_seq",
-		allocationSize = 1)
+@SequenceGenerator(name = "sequence", sequenceName = "funding_source_id_seq", allocationSize = 1)
 public class FundingSource implements Serializable {
 
-	private static final long serialVersionUID = 1L;
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-	private int id;
-	
-	@Column(name = "funding_source", length = 255, nullable = false)
-	private String fundingSource;
-	
-	@Column(name = "principal_investigator", length = 255, nullable = false)
-	private String principalInvestigator;
+    private static final long serialVersionUID = 1L;
 
-	@OneToMany
-	@JoinColumn(name = "funding_source_id")
-	@OrderBy("id")
-	private Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
-	
-	@OneToMany
-	@JoinColumn(name = "funding_source_id")
-	@OrderBy("id")
-	private Set<AccountFundingSource> accountFundingSources = new LinkedHashSet<AccountFundingSource>();
-	
-	//getters and setters
-	public int getId() {
-		return id;
-	}
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    private int id;
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    @Column(name = "funding_source", length = 255, nullable = false)
+    private String fundingSource;
 
-	public String getFundingSource() {
-		return fundingSource;
-	}
+    @Column(name = "principal_investigator", length = 255, nullable = false)
+    private String principalInvestigator;
 
-	public void setFundingSource(String fundingSource) {
-		this.fundingSource = fundingSource;
-	}
+    @OneToMany
+    @JoinColumn(name = "funding_source_id")
+    @OrderBy("id")
+    private Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
 
-	public String getPrincipalInvestigator() {
-		return principalInvestigator;
-	}
+    @OneToMany
+    @JoinColumn(name = "funding_source_id")
+    @OrderBy("id")
+    private Set<AccountFundingSource> accountFundingSources = new LinkedHashSet<AccountFundingSource>();
 
-	public void setPrincipalInvestigator(String principalInvestigator) {
-		this.principalInvestigator = principalInvestigator;
-	}
+    //getters and setters
+    public int getId() {
+        return id;
+    }
 
-	public void setEntryFundingSources(Set<EntryFundingSource> entryFundingSources) {
-		//TODO
-		//this.entryFundingSources = entryFundingSources;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public Set<EntryFundingSource> getEntryFundingSources() {
-		return entryFundingSources;
-	}
+    public String getFundingSource() {
+        return fundingSource;
+    }
 
-	public void setAccountFundingSources(Set<AccountFundingSource> accountFundingSources) {
-		//TODO
-		//this.accountFundingSources = accountFundingSources;
-	}
+    public void setFundingSource(String fundingSource) {
+        this.fundingSource = fundingSource;
+    }
 
-	public Set<AccountFundingSource> getAccountFundingSources() {
-		return accountFundingSources;
-	}
-	
-	
+    public String getPrincipalInvestigator() {
+        return principalInvestigator;
+    }
+
+    public void setPrincipalInvestigator(String principalInvestigator) {
+        this.principalInvestigator = principalInvestigator;
+    }
+
+    public void setEntryFundingSources(Set<EntryFundingSource> entryFundingSources) {
+        //TODO
+        //this.entryFundingSources = entryFundingSources;
+    }
+
+    public Set<EntryFundingSource> getEntryFundingSources() {
+        return entryFundingSources;
+    }
+
+    public void setAccountFundingSources(Set<AccountFundingSource> accountFundingSources) {
+        //TODO
+        //this.accountFundingSources = accountFundingSources;
+    }
+
+    public Set<AccountFundingSource> getAccountFundingSources() {
+        return accountFundingSources;
+    }
+
 }
-

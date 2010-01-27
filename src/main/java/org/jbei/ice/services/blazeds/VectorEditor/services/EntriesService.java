@@ -5,16 +5,16 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Entry;
 
 public class EntriesService {
-	public Entry getEntry(String entryId) {
-		Entry entry = null;
-		try {
-			entry = EntryManager.getByRecordId(entryId);
-		} catch (ManagerException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+    public Entry getEntry(String entryId) {
+        Entry entry = null;
+        try {
+            entry = EntryManager.getByRecordId(entryId);
+        } catch (ManagerException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-		return entry;
-	}
+        return entry;
+    }
 }
