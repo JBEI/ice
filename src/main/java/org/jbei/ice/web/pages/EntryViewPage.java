@@ -14,6 +14,7 @@ import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
+import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.panels.AttachmentsViewPanel;
@@ -83,7 +84,9 @@ public class EntryViewPage extends ProtectedPage {
         add(attachmentsLink);
         add(sequenceLink);
         add(permissionLink);
-
+        if (!PermissionManager.hasWritePermission(entry.getId(), IceSession.get().getSessionKey())) {
+            permissionLink.setVisible(false);
+        }
         generalPanel = makeSubPagePanel(entry);
         displayPanel = generalPanel;
         add(displayPanel);
