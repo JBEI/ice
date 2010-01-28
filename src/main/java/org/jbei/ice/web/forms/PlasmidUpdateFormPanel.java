@@ -27,6 +27,7 @@ import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.lib.utils.Job;
 import org.jbei.ice.lib.utils.JobCue;
@@ -256,6 +257,8 @@ public class PlasmidUpdateFormPanel extends Panel {
                     Logger.error(msg + e.getMessage());
                     error(msg);
                     e.printStackTrace();
+                } catch (PermissionException e) {
+                    error(e.getMessage());
                 }
             }
 

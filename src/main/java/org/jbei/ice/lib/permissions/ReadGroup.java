@@ -33,6 +33,10 @@ public class ReadGroup implements Serializable {
     @JoinColumn(name = "group_id")
     private Group group;
 
+    public ReadGroup() {
+
+    }
+
     public ReadGroup(Entry entry, Group group) {
         setEntry(entry);
         setGroup(group);

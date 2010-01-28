@@ -33,6 +33,10 @@ public class WriteUser implements Serializable {
     @JoinColumn(name = "account_id")
     private Account account;
 
+    public WriteUser() {
+
+    }
+
     public WriteUser(Entry entry, Account account) {
         setEntry(entry);
         setAccount(account);

@@ -1,6 +1,8 @@
 package org.jbei.ice.lib.managers;
 
 import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -86,6 +88,38 @@ public class AccountManager extends Manager {
         }
 
         return account;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Set<Account> getAll() throws ManagerException {
+        LinkedHashSet<Account> accounts = new LinkedHashSet<Account>();
+        try {
+            String queryString = "from Account";
+            Query query = session.createQuery(queryString);
+            accounts.addAll(query.list());
+        } catch (HibernateException e) {
+            String msg = "Could not retrieve all accounts " + e.toString();
+            Logger.warn(msg);
+            throw new ManagerException(msg);
+        }
+
+        return accounts;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Set<Account> getAllByFirstName() throws ManagerException {
+        LinkedHashSet<Account> accounts = new LinkedHashSet<Account>();
+        try {
+            String queryString = "from Account order by firstName";
+            Query query = session.createQuery(queryString);
+            accounts.addAll(query.list());
+        } catch (HibernateException e) {
+            String msg = "Could not retrieve all accounts " + e.toString();
+            Logger.warn(msg);
+            throw new ManagerException(msg);
+        }
+
+        return accounts;
     }
 
     public static Account getByEmail(String email) throws ManagerException {

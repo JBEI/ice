@@ -103,7 +103,7 @@ public class AuthenticatedEntryManager {
         if (PermissionManager.hasWritePermission(entry.getId(), sessionKey)) {
             result = EntryManager.save(entry);
         } else {
-            throw new PermissionException("Get not permitted");
+            throw new PermissionException("Save not permitted");
         }
         return result;
     }

@@ -33,6 +33,10 @@ public class WriteGroup implements Serializable {
     @JoinColumn(name = "group_id")
     private Group group;
 
+    public WriteGroup() {
+
+    }
+
     public WriteGroup(Entry entry, Group group) {
         setEntry(entry);
         setGroup(group);

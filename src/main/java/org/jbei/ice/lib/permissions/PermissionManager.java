@@ -94,7 +94,7 @@ public class PermissionManager extends Manager {
 
     public static Set<Account> getReadUser(Entry entry) throws ManagerException {
         try {
-            String queryString = "ReadUser as readUser where readUser.entry = :entry";
+            String queryString = "select readUser.account from ReadUser readUser where readUser.entry = :entry";
 
             Query query = session.createQuery(queryString);
             query.setEntity("entry", entry);
@@ -133,7 +133,7 @@ public class PermissionManager extends Manager {
 
     public static Set<Group> getReadGroup(Entry entry) throws ManagerException {
         try {
-            String queryString = "ReadGroup as readGroup where readGroup.entry = :entry";
+            String queryString = "select readGroup.group from ReadGroup readGroup where readGroup.entry = :entry";
             Query query = session.createQuery(queryString);
             query.setEntity("entry", entry);
 
@@ -171,7 +171,7 @@ public class PermissionManager extends Manager {
 
     public static Set<Account> getWriteUser(Entry entry) throws ManagerException {
         try {
-            String queryString = "WriteUser as writeUser where writeUser.entry = :entry";
+            String queryString = "select writeUser.account from WriteUser writeUser where writeUser.entry = :entry";
             Query query = session.createQuery(queryString);
             query.setEntity("entry", entry);
 
@@ -209,7 +209,7 @@ public class PermissionManager extends Manager {
 
     public static Set<Group> getWriteGroup(Entry entry) throws ManagerException {
         try {
-            String queryString = "WriteGroup as writeGroup where writeGroup.entry = :entry";
+            String queryString = "select writeGroup.group from WriteGroup writeGroup where writeGroup.entry = :entry";
 
             Query query = session.createQuery(queryString);
             query.setEntity("entry", entry);

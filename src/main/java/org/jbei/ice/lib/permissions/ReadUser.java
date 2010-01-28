@@ -38,6 +38,9 @@ public class ReadUser implements Serializable {
         setAccount(account);
     }
 
+    public ReadUser() {
+    }
+
     //getters and setters
     public int getId() {
         return id;

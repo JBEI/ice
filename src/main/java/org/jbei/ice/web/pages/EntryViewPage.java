@@ -18,6 +18,7 @@ import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.panels.AttachmentsViewPanel;
 import org.jbei.ice.web.panels.PartViewPanel;
+import org.jbei.ice.web.panels.PermissionEditPanel;
 import org.jbei.ice.web.panels.PlasmidViewPanel;
 import org.jbei.ice.web.panels.SampleViewPanel;
 import org.jbei.ice.web.panels.SequenceViewPanel;
@@ -32,11 +33,14 @@ public class EntryViewPage extends ProtectedPage {
     public Component samplesPanel;
     public Component attachmentsPanel;
     public Component sequencePanel;
+    public Component permissionPanel;
 
     public BookmarkablePageLink<Object> generalLink;
     public BookmarkablePageLink<Object> samplesLink;
     public BookmarkablePageLink<Object> attachmentsLink;
     public BookmarkablePageLink<Object> sequenceLink;
+    public BookmarkablePageLink<Object> permissionLink;
+
     public String subPage = null;
 
     @SuppressWarnings("unchecked")
@@ -68,6 +72,9 @@ public class EntryViewPage extends ProtectedPage {
         sequenceLink = new BookmarkablePageLink("sequenceLink", EntryViewPage.class,
                 new PageParameters("0=" + entry.getId() + ",1=sequence"));
         sequenceLink.setOutputMarkupId(true);
+        permissionLink = new BookmarkablePageLink("permissionLink", EntryViewPage.class,
+                new PageParameters("0=" + entry.getId() + ",1=permission"));
+        permissionLink.setOutputMarkupId(true);
 
         setActiveLink();
 
@@ -75,11 +82,11 @@ public class EntryViewPage extends ProtectedPage {
         add(samplesLink);
         add(attachmentsLink);
         add(sequenceLink);
+        add(permissionLink);
 
         generalPanel = makeSubPagePanel(entry);
         displayPanel = generalPanel;
         add(displayPanel);
-
     }
 
     public void setActiveLink() {
@@ -88,6 +95,9 @@ public class EntryViewPage extends ProtectedPage {
         attachmentsLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(
                 true);
         sequenceLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(true);
+        permissionLink.add(new SimpleAttributeModifier("class", "inactive"))
+                .setOutputMarkupId(true);
+
         if (subPage == null) {
             generalLink.add(new SimpleAttributeModifier("class", "active")).setOutputMarkupId(true);
         } else if (subPage.equals("samples")) {
@@ -98,6 +108,9 @@ public class EntryViewPage extends ProtectedPage {
         } else if (subPage.equals("sequence")) {
             sequenceLink.add(new SimpleAttributeModifier("class", "active"))
                     .setOutputMarkupId(true);
+        } else if (subPage.equals("permission")) {
+            permissionLink.add(new SimpleAttributeModifier("class", "active")).setOutputMarkupId(
+                    true);
         }
 
     }
@@ -111,6 +124,8 @@ public class EntryViewPage extends ProtectedPage {
             return makeAttachmentsPanel(entry);
         } else if (subPage.equals("sequence")) {
             return makeSequencePanel(entry);
+        } else if (subPage.equals("permission")) {
+            return makePermissionPanel(entry);
         } else {
             return makeGeneralPanel(entry);
         }
@@ -150,15 +165,23 @@ public class EntryViewPage extends ProtectedPage {
         return panel;
     }
 
+    public Panel makePermissionPanel(Entry entry) {
+        Panel panel = new PermissionEditPanel("centerPanel", entry);
+        panel.setOutputMarkupId(true);
+        return panel;
+    }
+
     public void refreshTabLinks(Page page, AjaxRequestTarget target) {
         page.replace(generalLink);
         page.replace(samplesLink);
         page.replace(attachmentsLink);
         page.replace(sequenceLink);
+        page.replace(permissionLink);
         target.addComponent(generalLink);
         target.addComponent(samplesLink);
         target.addComponent(attachmentsLink);
         target.addComponent(sequenceLink);
+        target.addComponent(permissionLink);
     }
 
 }

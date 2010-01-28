@@ -1,5 +1,9 @@
 package org.jbei.ice.lib.managers;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Group;
@@ -35,6 +39,21 @@ public class GroupManager extends Manager {
         }
 
         return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Set<Group> getAll() throws ManagerException {
+        LinkedHashSet<Group> groups = new LinkedHashSet<Group>();
+        try {
+            String queryString = "from Group";
+            Query query = session.createQuery(queryString);
+            groups.addAll(query.list());
+        } catch (HibernateException e) {
+            String msg = "Could not retrieve all groups: " + e.toString();
+            Logger.warn(msg);
+            throw new ManagerException(msg);
+        }
+        return groups;
     }
 
     public static Group create(String uuid, String label, String description, Group parent)
