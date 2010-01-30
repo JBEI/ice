@@ -1,5 +1,6 @@
 package org.jbei.ice.web;
 
+import org.apache.wicket.Application;
 import org.apache.wicket.IRequestTarget;
 import org.apache.wicket.Request;
 import org.apache.wicket.RequestCycle;
@@ -91,6 +92,8 @@ public class WicketApplication extends WebApplication {
         IceAuthorizationStrategy authorizationStrategy = new IceAuthorizationStrategy();
         securitySettings.setAuthorizationStrategy(authorizationStrategy);
         securitySettings.setUnauthorizedComponentInstantiationListener(authorizationStrategy);
+        Application.get().getRequestLoggerSettings().setRequestLoggerEnabled(true);
+
     }
 
     @Override
@@ -106,6 +109,7 @@ public class WicketApplication extends WebApplication {
     /**
      * @see org.apache.wicket.Application#getHomePage()
      */
+    @Override
     public Class<HomePage> getHomePage() {
         return HomePage.class;
     }
