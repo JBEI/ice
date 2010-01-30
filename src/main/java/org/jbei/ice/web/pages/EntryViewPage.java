@@ -3,6 +3,7 @@ package org.jbei.ice.web.pages;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.PageParameters;
+import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
@@ -14,6 +15,7 @@ import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.web.IceSession;
@@ -27,7 +29,7 @@ import org.jbei.ice.web.panels.StrainViewPanel;
 
 public class EntryViewPage extends ProtectedPage {
 
-    public Entry entry;
+    public Entry entry = null;
 
     public Component displayPanel;
     public Component generalPanel;
@@ -56,6 +58,8 @@ public class EntryViewPage extends ProtectedPage {
         } catch (ManagerException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        } catch (PermissionException e) {
+            throw new RestartResponseAtInterceptPageException(PermissionDeniedPage.class);
         }
 
         String recordType = JbeiConstants.getRecordType(entry.getRecordType());

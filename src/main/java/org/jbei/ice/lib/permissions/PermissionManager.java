@@ -24,13 +24,14 @@ public class PermissionManager extends Manager {
         Account account;
         try {
             entry = EntryManager.get(entryId);
-            account = AccountManager.getAccountByAuthToken(sessionKey);
-            result = hasReadPermission(entry, account);
+            if (entry != null) {
+                account = AccountManager.getAccountByAuthToken(sessionKey);
+                result = hasReadPermission(entry, account);
+            }
         } catch (ManagerException e) {
             // if lookup fails, doesn't have permission
             e.printStackTrace();
         }
-
         return result;
     }
 
@@ -40,14 +41,15 @@ public class PermissionManager extends Manager {
         Account account;
         try {
             entry = EntryManager.get(entryId);
-            account = AccountManager.getAccountByAuthToken(sessionKey);
-            result = hasWritePermission(entry, account);
+            if (entry != null) {
+                account = AccountManager.getAccountByAuthToken(sessionKey);
+                result = hasWritePermission(entry, account);
+            }
         } catch (ManagerException e) {
             // if lookup fails, doesn't have permission
             e.printStackTrace();
         }
         return result;
-
     }
 
     public static boolean hasReadPermission(Entry entry, Account account) {
