@@ -9,6 +9,8 @@ import java.util.List;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.markup.html.CSSPackageResource;
+import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.RadioChoice;
@@ -142,6 +144,12 @@ public class QueryPage extends ProtectedPage {
             }
         }.setDefaultFormProcessing(false));
 
+        add(JavascriptPackageResource.getHeaderContribution(UserEntryPage.class, "jquery-1.3.2.js"));
+        add(JavascriptPackageResource.getHeaderContribution(UserEntryPage.class,
+                "jquery-ui-1.7.2.custom.min.js"));
+        add(JavascriptPackageResource.getHeaderContribution(UserEntryPage.class,
+                "jquery.cluetip.js"));
+        add(CSSPackageResource.getHeaderContribution(UserEntryPage.class, "jquery.cluetip.css"));
         add(new QueryResultPanel("queryResultPanel", 15).setOutputMarkupId(true));
     }
 

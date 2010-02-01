@@ -3,6 +3,9 @@ package org.jbei.ice.web.panels;
 import java.util.ArrayList;
 
 import org.apache.wicket.PageParameters;
+import org.apache.wicket.behavior.SimpleAttributeModifier;
+import org.apache.wicket.markup.html.CSSPackageResource;
+import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -15,6 +18,8 @@ import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.search.BlastResult;
 import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.pages.EntryNewPage;
+import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class BlastResultPanel extends Panel {
@@ -49,9 +54,14 @@ public class BlastResultPanel extends Panel {
                     item.add(new Label("index", "" + (item.getIndex() + 1)));
                     item.add(new Label("recordType", entry.getRecordType()));
 
-                    item.add(new BookmarkablePageLink("partIdLink", EntryViewPage.class,
-                            new PageParameters("0=" + entry.getId())).add(new Label("partNumber",
-                            entry.getOnePartNumber().getPartNumber())));
+                    BookmarkablePageLink partIdLink = new BookmarkablePageLink("partIdLink",
+                            EntryViewPage.class, new PageParameters("0=" + entry.getId()));
+                    partIdLink
+                            .add(new Label("partNumber", entry.getOnePartNumber().getPartNumber()));
+                    String tipUrl = (String) urlFor(EntryTipPage.class, new PageParameters());
+                    partIdLink
+                            .add(new SimpleAttributeModifier("rel", tipUrl + "/" + entry.getId()));
+                    item.add(partIdLink);
 
                     item.add(new Label("name", entry.getOneName().getName()));
                     BlastResultPanel thisPanel = (BlastResultPanel) getParent();
@@ -80,7 +90,17 @@ public class BlastResultPanel extends Panel {
                     item.add(new Label("alignedPercent", ""));
                     item.add(new Label("bitScore", ""));
                     item.add(new Label("eValue", ""));
+
                 }
+                add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
+                        "jquery-1.3.2.js"));
+                add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
+                        "jquery-ui-1.7.2.custom.min.js"));
+                add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
+                        "jquery.cluetip.js"));
+                add(CSSPackageResource.getHeaderContribution(EntryNewPage.class,
+                        "jquery.cluetip.css"));
+
             }
         };
         add(listView);

@@ -7,6 +7,9 @@ import java.util.ArrayList;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ResourceReference;
+import org.apache.wicket.behavior.SimpleAttributeModifier;
+import org.apache.wicket.markup.html.CSSPackageResource;
+import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -18,7 +21,9 @@ import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.search.SearchResult;
+import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
+import org.jbei.ice.web.pages.UserEntryPage;
 
 public class SearchResultPanel extends Panel {
 
@@ -39,12 +44,13 @@ public class SearchResultPanel extends Panel {
 
                 item.add(new Label("index", "" + (item.getIndex() + 1)));
                 item.add(new Label("recordType", entry.getRecordType()));
-                item.add(new BookmarkablePageLink("partIdLink", EntryViewPage.class,
-                        new PageParameters("0=" + entry.getId())).add(new Label("partNumber", entry
-                        .getOnePartNumber().getPartNumber())));
-
+                BookmarkablePageLink partIdLink = new BookmarkablePageLink("partIdLink",
+                        EntryViewPage.class, new PageParameters("0=" + entry.getId()));
+                partIdLink.add(new Label("partNumber", entry.getOnePartNumber().getPartNumber()));
+                String tipUrl = (String) urlFor(EntryTipPage.class, new PageParameters());
+                partIdLink.add(new SimpleAttributeModifier("rel", tipUrl + "/" + entry.getId()));
+                item.add(partIdLink);
                 item.add(new Label("name", entry.getOneName().getName()));
-
                 item.add(new Label("description", entry.getShortDescription()));
                 item.add(new Label("owner", (entry.getOwner() != null) ? entry.getOwner() : entry
                         .getOwnerEmail()));
@@ -76,12 +82,17 @@ public class SearchResultPanel extends Panel {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
                 String dateString = dateFormat.format(entry.getCreationTime());
                 item.add(new Label("date", dateString));
-
+                add(JavascriptPackageResource.getHeaderContribution(UserEntryPage.class,
+                        "jquery-1.3.2.js"));
+                add(JavascriptPackageResource.getHeaderContribution(UserEntryPage.class,
+                        "jquery-ui-1.7.2.custom.min.js"));
+                add(JavascriptPackageResource.getHeaderContribution(UserEntryPage.class,
+                        "jquery.cluetip.js"));
+                add(CSSPackageResource.getHeaderContribution(UserEntryPage.class,
+                        "jquery.cluetip.css"));
             }
-
         };
         add(listView);
         add(new JbeiPagingNavigator("navigator", listView));
-
     }
 }
