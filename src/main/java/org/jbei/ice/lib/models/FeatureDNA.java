@@ -8,7 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -29,7 +29,7 @@ public class FeatureDNA implements Serializable {
     @Column(name = "sequence", nullable = false)
     private String sequence;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "feature_id", nullable = false, unique = true)
     private Feature feature;
 

@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -39,6 +40,9 @@ public class Feature implements IFeatureValueObject, Serializable {
 
     @Column(name = "genbank_type", length = 127)
     private String genbankType;
+
+    @OneToOne(mappedBy = "feature")
+    private FeatureDNA featureDna;
 
     public Feature() {
         super();
@@ -110,5 +114,13 @@ public class Feature implements IFeatureValueObject, Serializable {
 
     public int getId() {
         return id;
+    }
+
+    public void setFeatureDna(FeatureDNA featureDna) {
+        this.featureDna = featureDna;
+    }
+
+    public FeatureDNA getFeatureDna() {
+        return featureDna;
     }
 }
