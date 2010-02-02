@@ -3,14 +3,30 @@ package org.jbei.ice.lib.models;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
+
 import org.jbei.ice.lib.value_objects.IPlasmidValueObject;
 
+@Entity
+@PrimaryKeyJoinColumn(name = "entries_id")
+@Table(name = "plasmids")
 public class Plasmid extends Entry implements IPlasmidValueObject, Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    @Column(name = "backbone", length = 127)
     private String backbone;
+
+    @Column(name = "origin_of_replication", length = 127)
     private String originOfReplication;
+
+    @Column(name = "promoters", length = 512)
     private String promoters;
+
+    @Column(name = "circular")
     private boolean circular;
 
     public Plasmid() {

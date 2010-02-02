@@ -13,6 +13,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -28,6 +30,7 @@ import org.jbei.ice.lib.value_objects.IEntryValueObject;
 @Entity
 @Table(name = "entries")
 @SequenceGenerator(name = "sequence", sequenceName = "entries_id_seq", allocationSize = 1)
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Entry implements IEntryValueObject, Serializable {
     private static final long serialVersionUID = 1L;
 

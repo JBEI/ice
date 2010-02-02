@@ -4,8 +4,10 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -16,6 +18,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.value_objects.ISequenceValueObject;
 
 @Entity
@@ -44,7 +47,8 @@ public class Sequence implements ISequenceValueObject, Serializable {
     @JoinColumn(name = "entries_id", nullable = false)
     private Entry entry;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "sequence")
+    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @JoinColumn(name = "sequence_id")
     @OrderBy("id")
     private Set<SequenceFeature> sequenceFeatures = new HashSet<SequenceFeature>();

@@ -2,10 +2,36 @@ package org.jbei.ice.lib.models;
 
 import java.io.Serializable;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "entry_entry_assembly_relationship")
+@SequenceGenerator(name = "sequence", sequenceName = "entry_entry_assembly_relationship_id_seq", allocationSize = 1)
 public class EntryAssemblyRelationship implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
     private int id;
+
+    @ManyToOne
+    @JoinColumn(name = "subject")
     private Entry subject;
+
+    @ManyToOne
+    @JoinColumn(name = "object")
     private Entry object;
+
+    @ManyToOne
+    @JoinColumn(name = "relationship")
     private AssemblyRelationship relationship;
 
     public int getId() {
