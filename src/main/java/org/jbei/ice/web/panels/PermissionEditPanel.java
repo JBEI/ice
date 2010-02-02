@@ -2,6 +2,7 @@ package org.jbei.ice.web.panels;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
@@ -30,8 +31,6 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.forms.CustomChoice;
 import org.jbei.ice.web.pages.EntryViewPage;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class PermissionEditPanel extends Panel {
 

@@ -66,8 +66,8 @@ public class QueryPage extends ProtectedPage {
 
                 ArrayList<String[]> queries = new ArrayList<String[]>();
 
-                for (Iterator<ListItem> iterator = (Iterator<ListItem>) formListView.iterator(); iterator
-                        .hasNext();) {
+                for (Iterator<ListItem<QueryItemPanel>> iterator = (Iterator<ListItem<QueryItemPanel>>) formListView
+                        .iterator(); iterator.hasNext();) {
 
                     QueryItemPanel queryItemPanel = (QueryItemPanel) iterator.next().get(0);
 

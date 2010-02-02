@@ -7,8 +7,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
-import com.sun.org.apache.xml.internal.security.utils.Base64;
+import org.apache.commons.codec.binary.Base64;
+
+//import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
+//import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 public class SerializationUtils {
     public static class SerializationUtilsException extends Exception {
@@ -26,7 +28,7 @@ public class SerializationUtils {
     public static Serializable deserializeFromString(String serializedObject)
             throws SerializationUtilsException {
         try {
-            byte[] data = Base64.decode(serializedObject);
+            byte[] data = new Base64().decode(serializedObject);
 
             ObjectInputStream objectInputStream;
             objectInputStream = new ObjectInputStream(new ByteArrayInputStream(data));
@@ -36,9 +38,6 @@ public class SerializationUtils {
             return result;
         } catch (IOException e) {
             throw new SerializationUtilsException("Deserialization failed! IOException", e);
-        } catch (Base64DecodingException e) {
-            throw new SerializationUtilsException(
-                    "Deserialization failed! Base64DecodingException", e);
         } catch (ClassNotFoundException e) {
             throw new SerializationUtilsException("Deserialization failed! ClassNotFoundException",
                     e);
@@ -56,6 +55,6 @@ public class SerializationUtils {
             throw new SerializationUtilsException("Serialization failed! IOException", e);
         }
 
-        return new String(Base64.encode(byteArrayOutputStream.toByteArray()));
+        return new Base64().encodeToString(byteArrayOutputStream.toByteArray());
     }
 }

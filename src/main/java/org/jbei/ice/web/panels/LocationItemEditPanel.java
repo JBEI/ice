@@ -1,6 +1,7 @@
 package org.jbei.ice.web.panels;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 
 import org.apache.wicket.PageParameters;
@@ -17,8 +18,6 @@ import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.utils.Job;
 import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.web.pages.EntryViewPage;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class LocationItemEditPanel extends Panel {
 
