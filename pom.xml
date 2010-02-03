@@ -134,28 +134,52 @@
 		<dependency>
 			<groupId>org.jbei.ice</groupId>
 			<artifactId>biojava-all</artifactId>
-			<version>1.7</version>
-			<scope>system</scope>
-			<systemPath>/tmp/lib/biojava-1.7-all.jar</systemPath>
+			<version>SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jbei.ice</groupId>
 			<artifactId>biojava</artifactId>
-			<version>{biojava.version}</version>
-			<scope>system</scope>
-			<systemPath>/tmp/lib/biojava.jar</systemPath>
+			<version>SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jbei.ice</groupId>
 			<artifactId>bytecode</artifactId>
-			<version>{bytecode.version}</version>
-			<scope>system</scope>
-			<systemPath>/tmp/lib/bytecode.jar</systemPath>
+			<version>SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 			<version>1.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jbei.ice</groupId>
+			<artifactId>backport-util-concurrent</artifactId>
+			<version>SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jbei.ice</groupId>
+			<artifactId>flex-messaging-common</artifactId>
+			<version>SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jbei.ice</groupId>
+			<artifactId>flex-messaging-core</artifactId>
+			<version>SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jbei.ice</groupId>
+			<artifactId>flex-messaging-opt</artifactId>
+			<version>SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jbei.ice</groupId>
+			<artifactId>flex-messaging-proxy</artifactId>
+			<version>SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jbei.ice</groupId>
+			<artifactId>flex-messaging-remoting</artifactId>
+			<version>SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>
