@@ -134,22 +134,18 @@ public class UtilsManager extends Manager {
     }
 
     @SuppressWarnings("unchecked")
-    public static LinkedHashSet<Strain> getStrainsForPlasmid(Entry entry) throws ManagerException {
+    public static LinkedHashSet<Strain> getStrainsForPlasmid(Plasmid plasmid)
+            throws ManagerException {
         LinkedHashSet<Strain> resultStrains = new LinkedHashSet<Strain>();
         HashSet<Integer> strainIds = new HashSet<Integer>();
 
-        Plasmid plasmid = (Plasmid) entry;
         Set<PartNumber> partNumbers = plasmid.getPartNumbers();
 
-        if (entry.getRecordType().equals("plasmid")) {
-            for (PartNumber partNumber : partNumbers) {
-                Query query = HibernateHelper
-                        .getSession()
-                        .createQuery(
-                                "select strain.id from Strain strain where strain.plasmids like :partNumber");
-                query.setString("partNumber", "%" + partNumber.getPartNumber() + "%");
-                strainIds.addAll(query.list());
-            }
+        for (PartNumber partNumber : partNumbers) {
+            Query query = HibernateHelper.getSession().createQuery(
+                    "select strain.id from Strain strain where strain.plasmids like :partNumber");
+            query.setString("partNumber", "%" + partNumber.getPartNumber() + "%");
+            strainIds.addAll(query.list());
         }
 
         Pattern jbei = Pattern.compile("\\[\\[jbei:.*\\|.*\\]\\]");

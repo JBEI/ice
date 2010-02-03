@@ -3,6 +3,7 @@ package org.jbei.ice.web.panels;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.wicket.Component;
@@ -11,13 +12,17 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.managers.AttachmentManager;
+import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
+import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.Plasmid;
+import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryUpdatePage;
+import org.jbei.ice.web.utils.WebUtils;
 
 public class PlasmidViewPanel extends Panel {
 
@@ -40,7 +45,15 @@ public class PlasmidViewPanel extends Panel {
         elements.add(new Label("status", org.jbei.ice.lib.utils.JbeiConstants.getStatus(entry
                 .getStatus())));
         // TODO: link to strains
-        elements.add(new Label("linksToStrains", ""));
+        LinkedHashSet<Strain> temp = null;
+        try {
+            temp = UtilsManager.getStrainsForPlasmid(entry);
+        } catch (ManagerException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        elements.add(new Label("linksToStrains", WebUtils.makeEntryLinks(temp))
+                .setEscapeModelStrings(false));
         elements.add(new Label("linkToOwner", entry.getOwner()));
         elements.add(new Label("links", entry.getLinksAsString()));
 

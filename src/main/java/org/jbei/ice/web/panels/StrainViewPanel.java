@@ -18,6 +18,7 @@ import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryUpdatePage;
+import org.jbei.ice.web.utils.WebUtils;
 
 public class StrainViewPanel extends Panel {
 
@@ -36,7 +37,8 @@ public class StrainViewPanel extends Panel {
         elements.add(new Label("alias", entry.getAlias()));
         elements.add(new Label("genotypePhenotype", entry.getGenotypePhenotype()));
         elements.add(new Label("creator", entry.getCreator()));
-        elements.add(new Label("plasmids", entry.getPlasmids()));
+        elements.add(new Label("plasmids", WebUtils.jbeiLinkifyText(entry.getPlasmids()))
+                .setEscapeModelStrings(false));
         elements.add(new Label("status", org.jbei.ice.lib.utils.JbeiConstants.getStatus(entry
                 .getStatus())));
 
