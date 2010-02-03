@@ -15,8 +15,8 @@ import org.apache.wicket.protocol.http.WebResponse;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.RegistrationPage;
+import org.jbei.ice.web.pages.UserPage;
 import org.jbei.ice.web.pages.WelcomePage;
-import org.jbei.ice.web.pages.WorkSpacePage;
 
 public class LoginPanel extends Panel {
     private static final long serialVersionUID = -3410412725639985716L;
@@ -59,7 +59,7 @@ public class LoginPanel extends Panel {
                     }
 
                     if (!continueToOriginalDestination()) {
-                        setResponsePage(WorkSpacePage.class);
+                        setResponsePage(UserPage.class);
                     }
 
                 } else {
