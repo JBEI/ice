@@ -15,9 +15,12 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.data.DataView;
+import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.AttachmentManager;
+import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
+import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.web.dataProviders.EntriesQueryDataProvider;
 import org.jbei.ice.web.pages.EntryAllExcelExportPage;
@@ -27,6 +30,7 @@ import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.EntryXMLExportPage;
 import org.jbei.ice.web.pages.PrintableEntryPage;
 import org.jbei.ice.web.pages.PrintableTablePage;
+import org.jbei.ice.web.pages.ProfilePage;
 
 public class QueryResultPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -164,8 +168,25 @@ public class QueryResultPanel extends Panel {
                 item.add(new Label("name", entry.getOneName().getName()));
 
                 item.add(new Label("description", entry.getShortDescription()));
-                item.add(new Label("owner", (entry.getOwner() != null) ? entry.getOwner() : entry
-                        .getOwnerEmail()));
+                BookmarkablePageLink<ProfilePage> ownerProfileLink = new BookmarkablePageLink<ProfilePage>(
+                        "ownerProfileLink", ProfilePage.class, new PageParameters("0=about,1="
+                                + entry.getOwnerEmail()));
+
+                Account ownerAccount = null;
+
+                try {
+                    ownerAccount = AccountManager.getByEmail(entry.getOwnerEmail());
+                } catch (ManagerException e) {
+                    e.printStackTrace();
+                }
+
+                ownerProfileLink.add(new Label("owner", (ownerAccount != null) ? ownerAccount
+                        .getFullName() : entry.getOwner()));
+                String ownerAltText = "Profile "
+                        + ((ownerAccount == null) ? entry.getOwner() : ownerAccount.getFullName());
+                ownerProfileLink.add(new SimpleAttributeModifier("title", ownerAltText));
+                ownerProfileLink.add(new SimpleAttributeModifier("alt", ownerAltText));
+                item.add(ownerProfileLink);
                 item.add(new Label("status", entry.getStatus()));
 
                 ResourceReference blankImage = new ResourceReference(QueryResultPanel.class,

@@ -1,5 +1,24 @@
 <html xmlns:wicket>
-<wicket:panel>
-
-</wicket:panel>
+<body>
+<wicket:extend>
+	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td>
+			<div id="tabs">
+			<ul>
+				<li><a wicket:id="aboutLink">About</a></li>
+				<li><a wicket:id="entriesLink">Entries</a></li>
+				<li><a wicket:id="samplesLink">Samples</a></li>
+			</ul>
+			</div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<div wicket:id="centerPanel">Entries/Samples Table Panel (Will be removed)</div>
+			</td>
+		</tr>
+	</table>
+</wicket:extend>
+</body>
 </html>

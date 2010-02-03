@@ -24,7 +24,7 @@ import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.utils.JbeiConstants;
-import org.jbei.ice.web.dataProviders.EntriesDataProvider;
+import org.jbei.ice.web.dataProviders.UserEntriesDataProvider;
 import org.jbei.ice.web.pages.EntryAllExcelExportPage;
 import org.jbei.ice.web.pages.EntryExcelExportPage;
 import org.jbei.ice.web.pages.EntryNewPage;
@@ -33,19 +33,24 @@ import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.EntryXMLExportPage;
 import org.jbei.ice.web.pages.PrintableEntryPage;
 import org.jbei.ice.web.pages.PrintableTablePage;
-import org.jbei.ice.web.pages.ProfilePage;
 
-public class MostRecentEntriesPanel extends Panel {
+public class ProfileEntriesPanel extends Panel {
     private static final long serialVersionUID = 1L;
 
-    private EntriesDataProvider sortableDataProvider;
+    private UserEntriesDataProvider sortableDataProvider;
     private DataView<Entry> dataView;
 
-    public MostRecentEntriesPanel(String id) {
+    public ProfileEntriesPanel(String id, String accountEmail) {
         super(id);
 
-        sortableDataProvider = new EntriesDataProvider();
-        sortableDataProvider.setSort("created", false);
+        Account account = null;
+        try {
+            account = AccountManager.getByEmail(accountEmail);
+        } catch (ManagerException e) {
+            e.printStackTrace();
+        }
+
+        sortableDataProvider = new UserEntriesDataProvider(account);
 
         dataView = new DataView<Entry>("entriesDataView", sortableDataProvider, 15) {
             private static final long serialVersionUID = 1L;
@@ -66,25 +71,6 @@ public class MostRecentEntriesPanel extends Panel {
                 item.add(entryLink);
 
                 item.add(new Label("name", entry.getOneName().getName()));
-
-                Account ownerAccount = null;
-
-                try {
-                    ownerAccount = AccountManager.getByEmail(entry.getOwnerEmail());
-                } catch (ManagerException e) {
-                    e.printStackTrace();
-                }
-
-                BookmarkablePageLink<ProfilePage> ownerProfileLink = new BookmarkablePageLink<ProfilePage>(
-                        "ownerProfileLink", ProfilePage.class, new PageParameters("0=about,1="
-                                + entry.getOwnerEmail()));
-                ownerProfileLink.add(new Label("owner", (ownerAccount != null) ? ownerAccount
-                        .getFullName() : entry.getOwner()));
-                String ownerAltText = "Profile "
-                        + ((ownerAccount == null) ? entry.getOwner() : ownerAccount.getFullName());
-                ownerProfileLink.add(new SimpleAttributeModifier("title", ownerAltText));
-                ownerProfileLink.add(new SimpleAttributeModifier("alt", ownerAltText));
-                item.add(ownerProfileLink);
                 item.add(new Label("description", entry.getShortDescription()));
                 item.add(new Label("status", JbeiConstants.getStatus(entry.getStatus())));
 
@@ -95,14 +81,14 @@ public class MostRecentEntriesPanel extends Panel {
                 add(CSSPackageResource.getHeaderContribution(EntryNewPage.class,
                         "jquery.cluetip.css"));
 
-                ResourceReference blankImage = new ResourceReference(MostRecentEntriesPanel.class,
+                ResourceReference blankImage = new ResourceReference(UserEntriesViewPanel.class,
                         "blank.png");
                 ResourceReference hasAttachmentImage = new ResourceReference(
-                        MostRecentEntriesPanel.class, "attachment.gif");
+                        UserEntriesViewPanel.class, "attachment.gif");
                 ResourceReference hasSequenceImage = new ResourceReference(
-                        MostRecentEntriesPanel.class, "sequence.gif");
+                        UserEntriesViewPanel.class, "sequence.gif");
                 ResourceReference hasSampleImage = new ResourceReference(
-                        MostRecentEntriesPanel.class, "sample.png");
+                        UserEntriesViewPanel.class, "sample.png");
 
                 ResourceReference hasAttachment = (AttachmentManager.hasAttachment(entry)) ? hasAttachmentImage
                         : blankImage;
@@ -136,15 +122,6 @@ public class MostRecentEntriesPanel extends Panel {
         });
 
         add(new OrderByBorder("orderBySummary", "summary", sortableDataProvider) {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected void onSortChanged() {
-                dataView.setCurrentPage(0);
-            }
-        });
-
-        add(new OrderByBorder("orderByOwner", "owner", sortableDataProvider) {
             private static final long serialVersionUID = 1L;
 
             @Override

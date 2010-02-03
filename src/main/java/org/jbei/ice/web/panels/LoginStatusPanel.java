@@ -1,5 +1,6 @@
 package org.jbei.ice.web.panels;
 
+import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -8,8 +9,8 @@ import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.LogOutPage;
 import org.jbei.ice.web.pages.LoginPage;
+import org.jbei.ice.web.pages.ProfilePage;
 import org.jbei.ice.web.pages.RegistrationPage;
-import org.jbei.ice.web.pages.UserPage;
 
 public class LoginStatusPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -56,8 +57,9 @@ public class LoginStatusPanel extends Panel {
             }
         };
 
-        postLogin.add(new BookmarkablePageLink("userProfile", UserPage.class).add(new Label(
-                "userName", IceSession.get().isAuthenticated() ? account.getFullName() : "")));
+        postLogin.add(new BookmarkablePageLink("userProfile", ProfilePage.class,
+                new PageParameters("0=about,1=" + account.getEmail())).add(new Label("userName",
+                IceSession.get().isAuthenticated() ? account.getFullName() : "")));
         postLogin.add(new BookmarkablePageLink("logOut", LogOutPage.class));
 
         return postLogin;

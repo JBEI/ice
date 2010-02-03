@@ -16,13 +16,17 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.AttachmentManager;
+import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
+import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.search.SearchResult;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
+import org.jbei.ice.web.pages.ProfilePage;
 import org.jbei.ice.web.pages.UserPage;
 
 public class SearchResultPanel extends Panel {
@@ -51,8 +55,24 @@ public class SearchResultPanel extends Panel {
                 item.add(partIdLink);
                 item.add(new Label("name", entry.getOneName().getName()));
                 item.add(new Label("description", entry.getShortDescription()));
-                item.add(new Label("owner", (entry.getOwner() != null) ? entry.getOwner() : entry
-                        .getOwnerEmail()));
+                Account ownerAccount = null;
+
+                try {
+                    ownerAccount = AccountManager.getByEmail(entry.getOwnerEmail());
+                } catch (ManagerException e) {
+                    e.printStackTrace();
+                }
+
+                BookmarkablePageLink<ProfilePage> ownerProfileLink = new BookmarkablePageLink<ProfilePage>(
+                        "ownerProfileLink", ProfilePage.class, new PageParameters("0=about,1="
+                                + entry.getOwnerEmail()));
+                ownerProfileLink.add(new Label("owner", (ownerAccount != null) ? ownerAccount
+                        .getFullName() : entry.getOwner()));
+                String ownerAltText = "Profile "
+                        + ((ownerAccount == null) ? entry.getOwner() : ownerAccount.getFullName());
+                ownerProfileLink.add(new SimpleAttributeModifier("title", ownerAltText));
+                ownerProfileLink.add(new SimpleAttributeModifier("alt", ownerAltText));
+                item.add(ownerProfileLink);
 
                 NumberFormat formatter = new DecimalFormat("##");
                 String scoreString = formatter.format(searchResult.getScore() * 100);

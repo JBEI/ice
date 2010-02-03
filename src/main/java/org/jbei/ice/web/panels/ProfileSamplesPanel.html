@@ -1,0 +1,46 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<table class="data_table" border="0" cellpadding="3" cellspacing="1">
+		<thead>
+			<tr bgcolor="#F0F0F0">
+				<th>#</th>
+				<th>Type</th>
+				<th>Part Number</th>
+				<th>Name</th>
+				<th>Label</th>
+				<th>Notes</th>
+				<th>Location</th>
+				<th>Created</th>
+
+			</tr>
+		</thead>
+		<tbody>
+			<tr wicket:id="samplesDataView" class="odd_row">
+				<td><span wicket:id="index"></span>.</td>
+				<td><span wicket:id="type"></span></td>
+				<td><a href="#" wicket:id="partIdLink" class="entry_tip"><span wicket:id="partNumber"></span></a></td>
+				<td><span wicket:id="name"></span></td>
+				<td><span wicket:id="label"></span></td>
+				<td><span wicket:id="notes"></span></td>
+				<td><span wicket:id="location"></span></td>
+				<td><nobr><span wicket:id="date"></span></nobr></td>
+			</tr>
+			<tr bgcolor="#F0F0F0">
+				<td align="center" valign="bottom" style="height: 25px" colspan="20">
+				<table border="0" cellpadding="0" cellspacing="0" style="width: 100%; height: 25px"
+					class="paging">
+					<tr>
+						<td>
+						<div wicket:id="navigator"></div>
+						</td>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	<script type="text/javascript">
+	assignClueTips();
+</script>
+</wicket:panel>
+</html>

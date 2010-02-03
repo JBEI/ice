@@ -23,7 +23,7 @@ public class UserPage extends ProtectedPage {
 
         currentPage = parameters.getString("0");
 
-        entriesLink = new BookmarkablePageLink<Object>("generalLink", UserPage.class,
+        entriesLink = new BookmarkablePageLink<Object>("entriesLink", UserPage.class,
                 new PageParameters("0=entries"));
         entriesLink.setOutputMarkupId(true);
         samplesLink = new BookmarkablePageLink<Object>("samplesLink", UserPage.class,

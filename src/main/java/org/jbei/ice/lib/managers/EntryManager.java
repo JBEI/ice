@@ -196,6 +196,10 @@ public class EntryManager extends Manager {
     }
 
     public static int getByAccountCount(Account account) {
+        if (account == null) {
+            return 0;
+        }
+
         String queryString = "from Entry where ownerEmail = :ownerEmail";
 
         Query query = session.createQuery(queryString);
