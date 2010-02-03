@@ -8,6 +8,7 @@ import java.util.Set;
 import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.managers.AttachmentManager;
@@ -21,7 +22,6 @@ import org.jbei.ice.web.pages.EntryUpdatePage;
 import org.jbei.ice.web.utils.WebUtils;
 
 public class StrainViewPanel extends Panel {
-
     private static final long serialVersionUID = 1L;
 
     @SuppressWarnings("unchecked")
@@ -57,9 +57,8 @@ public class StrainViewPanel extends Panel {
         elements.add(new Label("modificationTime", modificationTime));
 
         elements.add(new Label("keywords", entry.getKeywords()));
-        elements.add(new Label("shortDescription", entry.getShortDescription()));
+        elements.add(new MultiLineLabel("shortDescription", entry.getShortDescription()));
 
-        //TODO
         int numAttachments = AttachmentManager.getNumberOfAttachments(entry);
         String attachmentText = "";
         if (numAttachments == 0) {
@@ -84,8 +83,8 @@ public class StrainViewPanel extends Panel {
                 : "No sequence provided";
         elements.add(new Label("sequence", sequenceText));
 
-        elements.add(new Label("references", entry.getReferences()));
-        elements.add(new Label("longDescription", entry.getLongDescription()));
+        elements.add(new MultiLineLabel("references", entry.getReferences()));
+        elements.add(new MultiLineLabel("longDescription", entry.getLongDescription()));
         BookmarkablePageLink updateLink = new BookmarkablePageLink("updateLink",
                 EntryUpdatePage.class, new PageParameters("0=" + entry.getId()));
         updateLink.setVisible(PermissionManager.hasWritePermission(entry.getId(), IceSession.get()
@@ -127,6 +126,5 @@ public class StrainViewPanel extends Panel {
         for (Component item : elements) {
             add(item);
         }
-
     }
 }

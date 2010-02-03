@@ -28,8 +28,8 @@ import org.jbei.ice.web.pages.EntryExcelExportPage;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.EntryXMLExportPage;
-import org.jbei.ice.web.pages.PrintableEntryPage;
-import org.jbei.ice.web.pages.PrintableTablePage;
+import org.jbei.ice.web.pages.PrintableEntriesFullContentPage;
+import org.jbei.ice.web.pages.PrintableEntriesTablePage;
 import org.jbei.ice.web.pages.ProfilePage;
 
 public class QueryResultPanel extends Panel {
@@ -103,7 +103,8 @@ public class QueryResultPanel extends Panel {
 
             @Override
             public void onClick() {
-                setResponsePage(new PrintableTablePage(sortableDataProvider.getEntries()));
+                setResponsePage(new PrintableEntriesTablePage(sortableDataProvider.getEntries(),
+                        true));
             }
         });
 
@@ -112,7 +113,8 @@ public class QueryResultPanel extends Panel {
 
             @Override
             public void onClick() {
-                setResponsePage(new PrintableEntryPage(sortableDataProvider.getEntries()));
+                setResponsePage(new PrintableEntriesFullContentPage(sortableDataProvider
+                        .getEntries()));
             }
         });
 

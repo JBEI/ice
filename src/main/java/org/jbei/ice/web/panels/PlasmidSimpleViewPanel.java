@@ -7,10 +7,10 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.PageParameters;
+import org.apache.wicket.ResourceReference;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.ManagerException;
@@ -20,16 +20,13 @@ import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
-import org.jbei.ice.lib.permissions.PermissionManager;
-import org.jbei.ice.web.IceSession;
-import org.jbei.ice.web.pages.EntryUpdatePage;
 import org.jbei.ice.web.utils.WebUtils;
 
-public class PlasmidViewPanel extends Panel {
+public class PlasmidSimpleViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
+    private static final int MAX_LONG_FIELD_LENGTH = 200;
 
-    @SuppressWarnings("unchecked")
-    public PlasmidViewPanel(String id, Plasmid entry) {
+    public PlasmidSimpleViewPanel(String id, Plasmid entry, boolean trimLongText) {
         super(id);
 
         ArrayList<Component> elements = new ArrayList<Component>();
@@ -44,13 +41,14 @@ public class PlasmidViewPanel extends Panel {
         elements.add(new Label("promoters", entry.getPromoters()));
         elements.add(new Label("status", org.jbei.ice.lib.utils.JbeiConstants.getStatus(entry
                 .getStatus())));
-        // TODO: link to strains
+
         LinkedHashSet<Strain> temp = null;
         try {
             temp = UtilsManager.getStrainsForPlasmid(entry);
         } catch (ManagerException e) {
             e.printStackTrace();
         }
+
         elements.add(new Label("linksToStrains", WebUtils.makeEntryLinks(temp))
                 .setEscapeModelStrings(false));
         elements.add(new Label("linkToOwner", entry.getOwner()));
@@ -67,39 +65,26 @@ public class PlasmidViewPanel extends Panel {
         elements.add(new Label("modificationTime", modificationTime));
 
         elements.add(new Label("keywords", entry.getKeywords()));
-        elements.add(new MultiLineLabel("shortDescription", entry.getShortDescription()));
 
-        int numAttachments = AttachmentManager.getNumberOfAttachments(entry);
-        String attachmentText = "";
-        if (numAttachments == 0) {
-            attachmentText = "No attachments provided";
-        } else if (numAttachments == 1) {
-            attachmentText = "One attachment provided";
-        } else {
-            attachmentText = String.valueOf(numAttachments) + " attachments provided";
-        }
-        elements.add(new Label("attachments", attachmentText));
-        int numSamples = SampleManager.getNumberOfSamples(entry);
-        String samplesText = "";
-        if (numSamples == 0) {
-            samplesText = "No samples provided";
-        } else if (numSamples == 1) {
-            samplesText = "One sample provided";
-        } else {
-            samplesText = String.valueOf(numSamples) + " samples provided";
-        }
-        elements.add(new Label("samples", samplesText));
-        String sequenceText = (SequenceManager.hasSequence(entry)) ? "Sequence Provided"
-                : "No sequence provided";
-        elements.add(new Label("sequence", sequenceText));
+        elements.add(new MultiLineLabel("shortDescription", trimLongText ? trimLongField(entry
+                .getShortDescription(), MAX_LONG_FIELD_LENGTH) : entry.getShortDescription()));
+        elements.add(new MultiLineLabel("references", trimLongText ? trimLongField(entry
+                .getReferences(), MAX_LONG_FIELD_LENGTH) : entry.getReferences()));
+        elements.add(new MultiLineLabel("longDescription", trimLongText ? trimLongField(entry
+                .getLongDescription(), MAX_LONG_FIELD_LENGTH) : entry.getLongDescription()));
 
-        elements.add(new MultiLineLabel("references", entry.getReferences()));
-        elements.add(new MultiLineLabel("longDescription", entry.getLongDescription()));
-        BookmarkablePageLink updateLink = new BookmarkablePageLink("updateLink",
-                EntryUpdatePage.class, new PageParameters("0=" + entry.getId()));
-        updateLink.setVisible(PermissionManager.hasWritePermission(entry.getId(), IceSession.get()
-                .getSessionKey()));
-        elements.add(updateLink);
+        ResourceReference hasAttachmentImage = new ResourceReference(UserEntriesViewPanel.class,
+                "attachment.gif");
+        ResourceReference hasSequenceImage = new ResourceReference(UserEntriesViewPanel.class,
+                "sequence.gif");
+        ResourceReference hasSampleImage = new ResourceReference(UserEntriesViewPanel.class,
+                "sample.png");
+        elements.add(new Image("hasAttachment", hasAttachmentImage).setVisible(AttachmentManager
+                .hasAttachment(entry)));
+        elements.add(new Image("hasSequence", hasSequenceImage).setVisible(SequenceManager
+                .hasSequence(entry)));
+        elements.add(new Image("hasSample", hasSampleImage).setVisible(SampleManager
+                .hasSample(entry)));
 
         String bioSafetyLevel = "";
         if (entry.getBioSafetyLevel() != null) {
@@ -117,7 +102,7 @@ public class PlasmidViewPanel extends Panel {
 
         String principalInvestigator = null;
         String fundingSource = null;
-        // TODO: handle multiple funding sources
+
         for (EntryFundingSource entryFundingSource : entryFundingSources) {
             principalInvestigator = entryFundingSource.getFundingSource().getFundingSource();
             fundingSource = entryFundingSource.getFundingSource().getPrincipalInvestigator();
@@ -135,6 +120,18 @@ public class PlasmidViewPanel extends Panel {
 
         for (Component item : elements) {
             add(item);
+        }
+    }
+
+    private String trimLongField(String value, int maxLength) {
+        if (value == null || value.isEmpty()) {
+            return "";
+        }
+
+        if (value.length() > maxLength) {
+            return value.substring(0, maxLength);
+        } else {
+            return value;
         }
     }
 }

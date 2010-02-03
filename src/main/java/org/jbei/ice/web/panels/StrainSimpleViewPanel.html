@@ -5,10 +5,19 @@
 			<td>
 			<table border="0" cellpadding="3" cellspacing="1" class="entry_table">
 				<tr class="title_row_header">
-					<td>General Information | <a href="#" wicket:id="updateLink">Edit</a></td>
+					<td width="100%">General Information</td>
+					<td align="right">
+					<table border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td><img wicket:id="hasAttachment"></img></td>
+							<td><img wicket:id="hasSample"></img></td>
+							<td><img wicket:id="hasSequence"></img></td>
+						</tr>
+					</table>
+					</td>
 				</tr>
 				<tr>
-					<td bgcolor="#FFFFFF">
+					<td bgcolor="#FFFFFF" colspan="2">
 					<table width="100%" border="0" cellpadding="0" cellspacing="2">
 						<tr>
 							<td class="title_column">Part ID</td>
@@ -65,19 +74,6 @@
 							temperature-curing of the plasmid.</span></td>
 						</tr>
 						<tr>
-							<td class="title_column">Attachments</td>
-							<td colspan="3"><b><span wicket:id="attachments"></span></b></td>
-						</tr>
-						<tr>
-							<td class="title_column">Samples</td>
-							<td colspan="3"><b><span wicket:id="samples"></span></b></td>
-						</tr>
-						<tr>
-							<td class="title_column">Sequence</td>
-							<td colspan="3"><b><span wicket:id="sequence"></span></b></td>
-
-						</tr>
-						<tr>
 							<td class="title_column">References</td>
 							<td colspan="3"><span wicket:id="references">Rapid and efficient construction of
 							markerless deletions in the Escherichia coli genome. Yu BJ, Kang KH, Lee JH, Sung BH, Kim MS,
@@ -107,7 +103,6 @@
 					</td>
 				</tr>
 			</table>
-
 			</td>
 		</tr>
 	</table>

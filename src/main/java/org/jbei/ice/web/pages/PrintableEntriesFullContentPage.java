@@ -9,12 +9,12 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
-import org.jbei.ice.web.panels.PartViewPanel;
-import org.jbei.ice.web.panels.PlasmidViewPanel;
-import org.jbei.ice.web.panels.StrainViewPanel;
+import org.jbei.ice.web.panels.PartSimpleViewPanel;
+import org.jbei.ice.web.panels.PlasmidSimpleViewPanel;
+import org.jbei.ice.web.panels.StrainSimpleViewPanel;
 
-public class PrintableEntryPage extends ProtectedPage {
-    public PrintableEntryPage(ArrayList<Entry> entries) {
+public class PrintableEntriesFullContentPage extends ProtectedPage {
+    public PrintableEntriesFullContentPage(ArrayList<Entry> entries) {
         super();
 
         RepeatingView repeatingView = new RepeatingView("entriesRepeatingView");
@@ -25,11 +25,14 @@ public class PrintableEntryPage extends ProtectedPage {
             Entry entry = iterator.next();
 
             if (entry instanceof Plasmid) {
-                repeatingView.add(new PlasmidViewPanel(String.valueOf(index), (Plasmid) entry));
+                repeatingView.add(new PlasmidSimpleViewPanel(String.valueOf(index),
+                        (Plasmid) entry, false));
             } else if (entry instanceof Strain) {
-                repeatingView.add(new StrainViewPanel(String.valueOf(index), (Strain) entry));
+                repeatingView.add(new StrainSimpleViewPanel(String.valueOf(index), (Strain) entry,
+                        false));
             } else if (entry instanceof Part) {
-                repeatingView.add(new PartViewPanel(String.valueOf(index), (Part) entry));
+                repeatingView.add(new PartSimpleViewPanel(String.valueOf(index), (Part) entry,
+                        false));
             }
 
             index++;

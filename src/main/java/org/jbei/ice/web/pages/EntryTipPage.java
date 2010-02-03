@@ -12,9 +12,9 @@ import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.web.IceSession;
-import org.jbei.ice.web.panels.PartViewPanel;
-import org.jbei.ice.web.panels.PlasmidViewPanel;
-import org.jbei.ice.web.panels.StrainViewPanel;
+import org.jbei.ice.web.panels.PartSimpleViewPanel;
+import org.jbei.ice.web.panels.PlasmidSimpleViewPanel;
+import org.jbei.ice.web.panels.StrainSimpleViewPanel;
 
 public class EntryTipPage extends ProtectedPage {
     public Entry entry;
@@ -54,11 +54,11 @@ public class EntryTipPage extends ProtectedPage {
 
         Panel panel = null;
         if (recordType.equals("strain")) {
-            panel = new StrainViewPanel("centerPanel", (Strain) entry);
+            panel = new StrainSimpleViewPanel("centerPanel", (Strain) entry, true);
         } else if (recordType.equals("plasmid")) {
-            panel = new PlasmidViewPanel("centerPanel", (Plasmid) entry);
+            panel = new PlasmidSimpleViewPanel("centerPanel", (Plasmid) entry, true);
         } else if (recordType.equals("part")) {
-            panel = new PartViewPanel("centerPanel", (Part) entry);
+            panel = new PartSimpleViewPanel("centerPanel", (Part) entry, true);
         }
 
         panel.setOutputMarkupId(true);

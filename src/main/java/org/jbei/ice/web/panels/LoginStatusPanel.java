@@ -58,8 +58,10 @@ public class LoginStatusPanel extends Panel {
         };
 
         postLogin.add(new BookmarkablePageLink("userProfile", ProfilePage.class,
-                new PageParameters("0=about,1=" + account.getEmail())).add(new Label("userName",
-                IceSession.get().isAuthenticated() ? account.getFullName() : "")));
+                new PageParameters("0=about,1=" + ((account != null) ? account.getEmail() : "")))
+                .add(new Label("userName", IceSession.get().isAuthenticated() ? account
+                        .getFullName() : "")));
+
         postLogin.add(new BookmarkablePageLink("logOut", LogOutPage.class));
 
         return postLogin;

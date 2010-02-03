@@ -31,8 +31,8 @@ import org.jbei.ice.web.pages.EntryNewPage;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.EntryXMLExportPage;
-import org.jbei.ice.web.pages.PrintableEntryPage;
-import org.jbei.ice.web.pages.PrintableTablePage;
+import org.jbei.ice.web.pages.PrintableEntriesFullContentPage;
+import org.jbei.ice.web.pages.PrintableEntriesTablePage;
 
 public class ProfileEntriesPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -153,7 +153,8 @@ public class ProfileEntriesPanel extends Panel {
 
             @Override
             public void onClick() {
-                setResponsePage(new PrintableTablePage(sortableDataProvider.getEntries()));
+                setResponsePage(new PrintableEntriesTablePage(sortableDataProvider.getEntries(),
+                        true));
             }
         });
 
@@ -162,7 +163,8 @@ public class ProfileEntriesPanel extends Panel {
 
             @Override
             public void onClick() {
-                setResponsePage(new PrintableEntryPage(sortableDataProvider.getEntries()));
+                setResponsePage(new PrintableEntriesFullContentPage(sortableDataProvider
+                        .getEntries()));
             }
         });
 

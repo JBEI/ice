@@ -8,6 +8,7 @@ import java.util.Set;
 import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.managers.AttachmentManager;
@@ -54,7 +55,7 @@ public class PartViewPanel extends Panel {
         elements.add(new Label("modificationTime", modificationTime));
 
         elements.add(new Label("keywords", entry.getKeywords()));
-        elements.add(new Label("shortDescription", entry.getShortDescription()));
+        elements.add(new MultiLineLabel("shortDescription", entry.getShortDescription()));
 
         int numAttachments = AttachmentManager.getNumberOfAttachments(entry);
         String attachmentText = "";
@@ -80,8 +81,8 @@ public class PartViewPanel extends Panel {
                 : "No sequence provided";
         elements.add(new Label("sequence", sequenceText));
 
-        elements.add(new Label("references", entry.getReferences()));
-        elements.add(new Label("longDescription", entry.getLongDescription()));
+        elements.add(new MultiLineLabel("references", entry.getReferences()));
+        elements.add(new MultiLineLabel("longDescription", entry.getLongDescription()));
         BookmarkablePageLink updateLink = new BookmarkablePageLink("updateLink",
                 EntryUpdatePage.class, new PageParameters("0=" + entry.getId()));
         updateLink.setVisible(PermissionManager.hasWritePermission(entry.getId(), IceSession.get()

@@ -13,17 +13,59 @@ import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.AttachmentManager;
+import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
+import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.utils.JbeiConstants;
+import org.jbei.ice.web.panels.UserEntriesViewPanel;
 
-public class PrintableTablePage extends ProtectedPage {
-    public PrintableTablePage(ArrayList<Entry> entries) {
+public class PrintableEntriesTablePage extends ProtectedPage {
+    private ArrayList<Entry> entries;
+
+    public PrintableEntriesTablePage(ArrayList<Entry> entries, boolean displayOwner) {
         super();
 
-        add(new ListView<Entry>("entriesDataView", entries) {
+        this.entries = entries;
+
+        if (displayOwner) {
+            add(createWithOwnerTableFragment(displayOwner));
+        } else {
+            add(createWithoutOwnerTableFragment(displayOwner));
+        }
+    }
+
+    @Override
+    protected void initializeComponents() {
+        add(new Label("title", "Printable"));
+    }
+
+    private Fragment createWithOwnerTableFragment(boolean displayOwner) {
+        Fragment fragment = new Fragment("entriesFragmentPanel", "withOwnerFragment", this);
+
+        fragment.setOutputMarkupPlaceholderTag(true);
+        fragment.setOutputMarkupId(true);
+        fragment.add(initializeDataView(displayOwner));
+
+        return fragment;
+    }
+
+    private Fragment createWithoutOwnerTableFragment(boolean displayOwner) {
+        Fragment fragment = new Fragment("entriesFragmentPanel", "withoutOwnerFragment", this);
+
+        fragment.setOutputMarkupPlaceholderTag(true);
+        fragment.setOutputMarkupId(true);
+        fragment.add(initializeDataView(displayOwner));
+
+        return fragment;
+    }
+
+    private ListView<Entry> initializeDataView(final boolean displayOwner) {
+        ListView<Entry> entriesDataView = new ListView<Entry>("entriesDataView", entries) {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -43,6 +85,29 @@ public class PrintableTablePage extends ProtectedPage {
                 item.add(new Label("name", entry.getOneName().getName()));
 
                 item.add(new Label("description", entry.getShortDescription()));
+
+                if (displayOwner) {
+                    Account ownerAccount = null;
+
+                    try {
+                        ownerAccount = AccountManager.getByEmail(entry.getOwnerEmail());
+                    } catch (ManagerException e) {
+                        e.printStackTrace();
+                    }
+
+                    BookmarkablePageLink<ProfilePage> ownerProfileLink = new BookmarkablePageLink<ProfilePage>(
+                            "ownerProfileLink", ProfilePage.class, new PageParameters("0=about,1="
+                                    + entry.getOwnerEmail()));
+                    ownerProfileLink.add(new Label("owner", (ownerAccount != null) ? ownerAccount
+                            .getFullName() : entry.getOwner()));
+                    String ownerAltText = "Profile "
+                            + ((ownerAccount == null) ? entry.getOwner() : ownerAccount
+                                    .getFullName());
+                    ownerProfileLink.add(new SimpleAttributeModifier("title", ownerAltText));
+                    ownerProfileLink.add(new SimpleAttributeModifier("alt", ownerAltText));
+                    item.add(ownerProfileLink);
+                }
+
                 item.add(new Label("status", JbeiConstants.getStatus(entry.getStatus())));
 
                 add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
@@ -52,14 +117,14 @@ public class PrintableTablePage extends ProtectedPage {
                 add(CSSPackageResource.getHeaderContribution(EntryNewPage.class,
                         "jquery.cluetip.css"));
 
-                ResourceReference blankImage = new ResourceReference(PrintableTablePage.class,
-                        "blank.png");
+                ResourceReference blankImage = new ResourceReference(
+                        PrintableEntriesTablePage.class, "blank.png");
                 ResourceReference hasAttachmentImage = new ResourceReference(
-                        PrintableTablePage.class, "attachment.gif");
+                        UserEntriesViewPanel.class, "attachment.gif");
                 ResourceReference hasSequenceImage = new ResourceReference(
-                        PrintableTablePage.class, "sequence.gif");
-                ResourceReference hasSampleImage = new ResourceReference(PrintableTablePage.class,
-                        "sample.png");
+                        UserEntriesViewPanel.class, "sequence.gif");
+                ResourceReference hasSampleImage = new ResourceReference(
+                        UserEntriesViewPanel.class, "sample.png");
 
                 ResourceReference hasAttachment = (AttachmentManager.hasAttachment(entry)) ? hasAttachmentImage
                         : blankImage;
@@ -77,11 +142,8 @@ public class PrintableTablePage extends ProtectedPage {
                 String dateString = dateFormat.format(entry.getCreationTime());
                 item.add(new Label("date", dateString));
             }
-        });
-    }
+        };
 
-    @Override
-    protected void initializeComponents() {
-        add(new Label("title", "Printable"));
+        return entriesDataView;
     }
 }

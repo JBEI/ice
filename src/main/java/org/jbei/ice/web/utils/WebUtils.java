@@ -22,11 +22,18 @@ public class WebUtils {
 
         int id = 0;
         try {
-            id = EntryManager.getByPartNumber(jbeiLink.getPartNumber()).getId();
+
+            // BUG fails on 4008! 
+
+            Entry entry = EntryManager.getByPartNumber(jbeiLink.getPartNumber());
+
+            if (entry != null) {
+                id = entry.getId();
+            }
         } catch (ManagerException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
         String descriptiveLabel = "";
         if (jbeiLink.getDescriptiveLabel() == null) {
 
@@ -140,7 +147,5 @@ public class WebUtils {
         public String getPartNumber() {
             return partNumber;
         }
-
     }
-
 }

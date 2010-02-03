@@ -72,7 +72,7 @@ public class Query {
 
         filters.add(new StringFilter("name_or_alias", "Name Or Alias", "filterNameOrAlias"));
         filters.add(new StringFilter("name", "Name", "filterName"));
-        filters.add(new StringFilter("part_number", "Part Number", "filterPartNumber"));
+        filters.add(new StringFilter("part_number", "Part ID", "filterPartNumber"));
         filters.add(new SelectionFilter("type", "Type", "filterType", entryTypesFilterMap));
         filters.add(new SelectionFilter("status", "Status", "filterStatus", statusMap));
         filters.add(new StringFilter("owner", "Owner", "filterOwner"));

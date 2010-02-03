@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"
+	xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd">
+<head>
+<meta name="author" content="JBEI" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link wicket:id="stylesheet"></link>
+<title wicket:id="title">JBEI Registry</title>
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td style="vertical-align: top">
+		<table border="0" cellpadding="0" cellspacing="0" style="vertical-align: top">
+			<tr valign="top">
+				<td align="left">
+				
+				<span wicket:id="entriesFragmentPanel">Add/Edit form panel</span>
+				
+				<wicket:fragment wicket:id="withOwnerFragment">
+				<table border="0" cellpadding="3" cellspacing="1" class="data_table">
+					<thead>
+						<tr style="background-color: #F0F0F0">
+							<th>#</th>
+							<th>Type</th>
+							<th>Part ID</th>
+							<th>Name</th>
+							<th>Summary</th>
+							<th>Owner</th>
+							<th>Status</th>
+							<th><img src="/static/images/paper_clip.gif" title="Has Attachments"
+								alt="Has Attachments" /></th>
+							<th><img src="/static/images/samples.png" title="Has Samples" alt="Has Samples" /></th>
+							<th><img src="/static/images/sequence.gif" title="Has Sequence" alt="Has Sequence" /></th>
+							<th>Created</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr wicket:id="entriesDataView" class="odd_row">
+							<td><span wicket:id="index"></span>.</td>
+							<td><span wicket:id="recordType"></span></td>
+							<td><a href wicket:id="partIdLink" class="entry_tip"><span wicket:id="partNumber"></span></a></td>
+							<td><span wicket:id="name"></span></td>
+							<td><span wicket:id="description"></span></td>
+							<td><a href="#" wicket:id="ownerProfileLink"> <span wicket:id="owner"></span></a></td>
+							<td><span wicket:id="status"></span></td>
+							<td><img wicket:id="hasAttachment"></img></td>
+							<td><img wicket:id="hasSample"></img></td>
+							<td><img wicket:id="hasSequence"></img></td>
+							<td style="white-space: nowrap"><span wicket:id="date"></span></td>
+						</tr>
+					</tbody>
+				</table>
+				</wicket:fragment>
+				
+				<wicket:fragment wicket:id="withoutOwnerFragment">
+				<table border="0" cellpadding="3" cellspacing="1" class="data_table">
+					<thead>
+						<tr style="background-color: #F0F0F0">
+							<th>#</th>
+							<th>Type</th>
+							<th>Part ID</th>
+							<th>Name</th>
+							<th>Summary</th>
+							<th>Status</th>
+							<th><img src="/static/images/paper_clip.gif" title="Has Attachments"
+								alt="Has Attachments" /></th>
+							<th><img src="/static/images/samples.png" title="Has Samples" alt="Has Samples" /></th>
+							<th><img src="/static/images/sequence.gif" title="Has Sequence" alt="Has Sequence" /></th>
+							<th>Created</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr wicket:id="entriesDataView" class="odd_row">
+							<td><span wicket:id="index"></span>.</td>
+							<td><span wicket:id="recordType"></span></td>
+							<td><a href wicket:id="partIdLink" class="entry_tip"><span wicket:id="partNumber"></span></a></td>
+							<td><span wicket:id="name"></span></td>
+							<td><span wicket:id="description"></span></td>
+							<td><span wicket:id="status"></span></td>
+							<td><img wicket:id="hasAttachment"></img></td>
+							<td><img wicket:id="hasSample"></img></td>
+							<td><img wicket:id="hasSequence"></img></td>
+							<td style="white-space: nowrap"><span wicket:id="date"></span></td>
+						</tr>
+					</tbody>
+				</table>
+				</wicket:fragment>
+				</td>
+			</tr>
+		</table>
+		</td>
+	</tr>
+</table>
+</body>
+</html>
