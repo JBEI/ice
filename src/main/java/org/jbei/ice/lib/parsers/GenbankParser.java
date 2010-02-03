@@ -12,8 +12,10 @@ import org.biojavax.bio.seq.RichLocation;
 import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.seq.RichSequenceIterator;
 import org.biojavax.bio.seq.RichSequence.IOTools;
+import org.jbei.ice.lib.models.FeatureDNA;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
+import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.Utils;
 
 public class GenbankParser {
@@ -30,6 +32,10 @@ public class GenbankParser {
                 Set<Feature> featureSet = richSequence.getFeatureSet();
 
                 Set<SequenceFeature> sequenceFeatureSet = new HashSet<SequenceFeature>();
+
+                sequence = new Sequence(richSequence.seqString(), "", "", "", null,
+                        sequenceFeatureSet);
+
                 for (Feature feature : featureSet) {
                     RichFeature richFeature = (RichFeature) feature;
 
@@ -51,17 +57,31 @@ public class GenbankParser {
                     int start = featureLocation.getMin();
                     int end = featureLocation.getMax();
 
-                    SequenceFeature sequenceFeature = new SequenceFeature(sequence,
-                            new org.jbei.ice.lib.models.Feature(featureName, featureDescription,
-                                    "", Utils.generateUUID(), 0, genbankType), start, end,
-                            featureLocation.getStrand().intValue(), featureName);
+                    String featureDNASequence = sequence.getSequence()
+                            .substring(start - 1, end - 1);
+
+                    String featureDNASequenceHash = SequenceUtils
+                            .calculateSequenceHash(featureDNASequence);
+
+                    org.jbei.ice.lib.models.Feature ourFeature = new org.jbei.ice.lib.models.Feature(
+                            featureName, featureDescription, "", Utils.generateUUID(), 0,
+                            genbankType);
+
+                    FeatureDNA featureDNA = new FeatureDNA(featureDNASequenceHash,
+                            featureDNASequence, ourFeature);
+
+                    ourFeature.setFeatureDna(featureDNA);
+
+                    SequenceFeature sequenceFeature = new SequenceFeature(sequence, ourFeature,
+                            start, end, featureLocation.getStrand().intValue(), featureName);
 
                     sequenceFeatureSet.add(sequenceFeature);
                 }
-
-                sequence = new Sequence(richSequence.seqString(), "", "", "", null,
-                        sequenceFeatureSet);
             }
+
+            sequence.setFwdHash(SequenceUtils.calculateSequenceHash(sequence.getSequence()));
+            sequence.setRevHash(SequenceUtils.calculateSequenceHash(SequenceUtils
+                    .reverseComplement(sequence.getSequence())));
         } catch (BioException e) {
             throw new ParserException("BioJava Exception. ", e);
         } catch (Exception e) {

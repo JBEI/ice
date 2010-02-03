@@ -20,6 +20,18 @@
 			cluetipClass : 'jbeiregistry'
 		});
 	}
+
+	$(document).ready(function() {
+		var tips = new Array();
+		tips.push("Enter [[jbei:JBn_nnnnnnnn]] to make a link.");
+		tips.push("Try appending a * to your searches, e.g. pbad*");
+		alert(1);
+		//tips.push("Second tip of the day");
+			//tips.push("Third Long-long very long tip of the day");
+
+			var randomIndex = Math.floor(Math.random() * tips.length);
+			$('#tipOfTheDay').html(tips[randomIndex]);
+		});
 </script>
 </head>
 <body>
@@ -99,6 +111,8 @@
 			wicket:id="footerPanel">Footer Panel</span> <!-- Footer End --></td>
 	</tr>
 </table>
-<script type="text/javascript">assignClueTips();</script>
+<script type="text/javascript">
+	assignClueTips();
+</script>
 </body>
 </html>

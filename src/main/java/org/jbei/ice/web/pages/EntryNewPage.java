@@ -72,7 +72,6 @@ public class EntryNewPage extends ProtectedPage {
             }
         };
 
-        add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class, "jquery-1.3.2.js"));
         add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
                 "jquery-ui-1.7.2.custom.min.js"));
         add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,

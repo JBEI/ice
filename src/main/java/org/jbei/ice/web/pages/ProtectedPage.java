@@ -12,4 +12,8 @@ public class ProtectedPage extends UnprotectedPage {
     public ProtectedPage(PageParameters parameters) {
         super(parameters);
     }
+
+    public ProtectedPage() {
+        super();
+    }
 }

@@ -23,7 +23,6 @@ import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class BlastResultPanel extends Panel {
-
     private static final long serialVersionUID = 1L;
     private String blastQuery = null;
 
@@ -31,10 +30,10 @@ public class BlastResultPanel extends Panel {
     public BlastResultPanel(String id, String blastQuery, ArrayList<BlastResult> blastResults,
             int limit) {
         super(id);
+
         setBlastQuery(blastQuery);
 
         PageableListView listView = new PageableListView("itemRows", blastResults, limit) {
-
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -92,17 +91,16 @@ public class BlastResultPanel extends Panel {
                     item.add(new Label("eValue", ""));
 
                 }
-                add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
-                        "jquery-1.3.2.js"));
+
                 add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
                         "jquery-ui-1.7.2.custom.min.js"));
                 add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
                         "jquery.cluetip.js"));
                 add(CSSPackageResource.getHeaderContribution(EntryNewPage.class,
                         "jquery.cluetip.css"));
-
             }
         };
+
         add(listView);
         add(new JbeiPagingNavigator("navigator", listView));
     }
@@ -114,5 +112,4 @@ public class BlastResultPanel extends Panel {
     public String getBlastQuery() {
         return blastQuery;
     }
-
 }

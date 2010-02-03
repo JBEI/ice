@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd" xml:lang="en"
+	lang="en">
+<meta http-equiv="Expires" content="-1" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Cache-Control" content="no-cache" />
+<head>
+</head>
+<body>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>
+		<table width="100%" border="0" cellpadding="3" cellspacing="1">
+			<thead wicket:id="entriesHeader">
+				<tr>
+					<th>#</th>
+					<th>ID</th>
+					<th>Name</th>
+					<th>Type</th>
+					<th wicket:id="owner" class="sortable">Owner</th>
+					<th>Summary</th>
+					<th wicket:id="created" class="sortable">Created</th>
+					<th>Sequence</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr wicket:id="itemRows" class="even">
+					<td wicket:id="id">Id here</td>
+					<td wicket:id="partNumber">PartNumber here</td>
+					<td wicket:id="name">Name here</td>
+					<td wicket:id="type">Type here</td>
+					<td wicket:id="owner">Owner here</td>
+					<td wicket:id="summary">Summary here</td>
+					<td wicket:id="created" style="white-space: nowrap">Creation Time here</td>
+					<td><a wicket:id="viewLink" href="#">View &gt;&gt;</a></td>
+				</tr>
+			</tbody>
+		</table>
+		</td>
+	</tr>
+</table>
+</body>
+</html>

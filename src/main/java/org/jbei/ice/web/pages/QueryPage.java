@@ -2,7 +2,6 @@ package org.jbei.ice.web.pages;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -20,10 +19,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
-import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.query.Filter;
-import org.jbei.ice.lib.query.Query;
-import org.jbei.ice.lib.search.SearchResult;
 import org.jbei.ice.web.forms.CustomChoice;
 import org.jbei.ice.web.panels.QueryItemPanel;
 import org.jbei.ice.web.panels.QueryResultPanel;
@@ -127,30 +123,23 @@ public class QueryPage extends ProtectedPage {
                     }
                 }
 
-                LinkedHashSet<Entry> queryResultSet = Query.getInstance().query(queries);
-
-                ArrayList<SearchResult> queryTableResults = new ArrayList<SearchResult>();
-
-                for (Iterator<Entry> iterator = queryResultSet.iterator(); iterator.hasNext();) {
-                    queryTableResults.add(new SearchResult(iterator.next(), 0));
-                }
-
                 QueryResultPanel queryResultPanel = (QueryResultPanel) getPage().get(
                         "queryResultPanel");
 
-                queryResultPanel.setQueryResults(queryTableResults);
+                queryResultPanel.updateView(queries);
 
                 target.addComponent(queryResultPanel);
             }
         }.setDefaultFormProcessing(false));
 
-        add(JavascriptPackageResource.getHeaderContribution(UserEntryPage.class, "jquery-1.3.2.js"));
-        add(JavascriptPackageResource.getHeaderContribution(UserEntryPage.class,
+        add(JavascriptPackageResource.getHeaderContribution(QueryPage.class, "jquery-1.3.2.js"));
+        add(JavascriptPackageResource.getHeaderContribution(QueryPage.class,
                 "jquery-ui-1.7.2.custom.min.js"));
-        add(JavascriptPackageResource.getHeaderContribution(UserEntryPage.class,
+        add(JavascriptPackageResource.getHeaderContribution(QueryPage.class,
                 "jquery.cluetip.js"));
-        add(CSSPackageResource.getHeaderContribution(UserEntryPage.class, "jquery.cluetip.css"));
-        add(new QueryResultPanel("queryResultPanel", 15).setOutputMarkupId(true));
+        add(CSSPackageResource.getHeaderContribution(QueryPage.class, "jquery.cluetip.css"));
+        add(new QueryResultPanel("queryResultPanel", new ArrayList<String[]>())
+                .setOutputMarkupId(true));
     }
 
     public List<QueryItemPanel> getFilterPanels() {

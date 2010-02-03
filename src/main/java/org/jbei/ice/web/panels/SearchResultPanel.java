@@ -23,17 +23,16 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.search.SearchResult;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
-import org.jbei.ice.web.pages.UserEntryPage;
+import org.jbei.ice.web.pages.UserPage;
 
 public class SearchResultPanel extends Panel {
-
     private static final long serialVersionUID = 1L;
 
     public SearchResultPanel(String id, ArrayList<SearchResult> searchResults, int limit) {
         super(id);
+
         @SuppressWarnings("unchecked")
         PageableListView listView = new PageableListView("itemRows", searchResults, limit) {
-
             private static final long serialVersionUID = 1L;
 
             @SuppressWarnings("unchecked")
@@ -59,13 +58,13 @@ public class SearchResultPanel extends Panel {
                 String scoreString = formatter.format(searchResult.getScore() * 100);
                 item.add(new Label("score", scoreString));
 
-                ResourceReference blankImage = new ResourceReference(EntryPagingPanel.class,
+                ResourceReference blankImage = new ResourceReference(SearchResultPanel.class,
                         "blank.png");
                 ResourceReference hasAttachmentImage = new ResourceReference(
-                        EntryPagingPanel.class, "attachment.gif");
-                ResourceReference hasSequenceImage = new ResourceReference(EntryPagingPanel.class,
+                        SearchResultPanel.class, "attachment.gif");
+                ResourceReference hasSequenceImage = new ResourceReference(SearchResultPanel.class,
                         "sequence.gif");
-                ResourceReference hasSampleImage = new ResourceReference(EntryPagingPanel.class,
+                ResourceReference hasSampleImage = new ResourceReference(SearchResultPanel.class,
                         "sample.png");
 
                 ResourceReference hasAttachment = (AttachmentManager.hasAttachment(entry)) ? hasAttachmentImage
@@ -82,16 +81,15 @@ public class SearchResultPanel extends Panel {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
                 String dateString = dateFormat.format(entry.getCreationTime());
                 item.add(new Label("date", dateString));
-                add(JavascriptPackageResource.getHeaderContribution(UserEntryPage.class,
-                        "jquery-1.3.2.js"));
-                add(JavascriptPackageResource.getHeaderContribution(UserEntryPage.class,
+
+                add(JavascriptPackageResource.getHeaderContribution(UserPage.class,
                         "jquery-ui-1.7.2.custom.min.js"));
-                add(JavascriptPackageResource.getHeaderContribution(UserEntryPage.class,
+                add(JavascriptPackageResource.getHeaderContribution(UserPage.class,
                         "jquery.cluetip.js"));
-                add(CSSPackageResource.getHeaderContribution(UserEntryPage.class,
-                        "jquery.cluetip.css"));
+                add(CSSPackageResource.getHeaderContribution(UserPage.class, "jquery.cluetip.css"));
             }
         };
+
         add(listView);
         add(new JbeiPagingNavigator("navigator", listView));
     }

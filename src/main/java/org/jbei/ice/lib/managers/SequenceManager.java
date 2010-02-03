@@ -5,7 +5,11 @@ import java.util.List;
 
 import org.hibernate.Query;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.Feature;
+import org.jbei.ice.lib.models.FeatureDNA;
 import org.jbei.ice.lib.models.Sequence;
+import org.jbei.ice.lib.models.SequenceFeature;
+import org.jbei.ice.lib.utils.SequenceUtils;
 
 public class SequenceManager extends Manager {
     public static Sequence create(Sequence sequence) throws ManagerException {
@@ -24,7 +28,7 @@ public class SequenceManager extends Manager {
             dbDelete(sequence);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ManagerException("Could not delete attachment in db: " + e.toString());
+            throw new ManagerException("Could not delete sequence in db: " + e.toString());
         }
     }
 
@@ -103,5 +107,65 @@ public class SequenceManager extends Manager {
     // restruction enzymes. 
     public static Sequence getCompositeByEntry(Sequence sequence) throws ManagerException {
         return sequence;
+    }
+
+    public static Sequence save(Sequence sequence) throws ManagerException {
+        Sequence result = null;
+
+        result = (Sequence) dbSave(sequence);
+
+        return result;
+    }
+
+    public static SequenceFeature save(SequenceFeature sequenceFeature) throws ManagerException {
+        SequenceFeature result = null;
+
+        result = (SequenceFeature) dbSave(sequenceFeature);
+
+        return result;
+    }
+
+    public static Feature save(Feature feature) throws ManagerException {
+        Feature result = null;
+
+        Feature existingFeature = getExistingFeature(feature);
+
+        if (existingFeature == null) {
+            result = (Feature) dbSave(feature);
+        } else {
+            result = existingFeature;
+        }
+
+        return result;
+    }
+
+    public static Feature getExistingFeature(Feature feature) {
+        Feature result = null;
+
+        try {
+            FeatureDNA featureDNA = feature.getFeatureDna();
+
+            String queryString = "from " + FeatureDNA.class.getName() + " where hash = :hash";
+            Query query = session.createQuery(queryString);
+            query.setParameter("hash", SequenceUtils
+                    .calculateSequenceHash(featureDNA.getSequence()));
+
+            FeatureDNA resultFeatureDNA = (FeatureDNA) query.uniqueResult();
+
+            if (resultFeatureDNA == null) {
+                query.setParameter("hash", SequenceUtils.calculateSequenceHash(SequenceUtils
+                        .reverseComplement(featureDNA.getSequence())));
+
+                resultFeatureDNA = (FeatureDNA) query.uniqueResult();
+
+                result = (resultFeatureDNA != null) ? resultFeatureDNA.getFeature() : null;
+            } else {
+                result = resultFeatureDNA.getFeature();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 }

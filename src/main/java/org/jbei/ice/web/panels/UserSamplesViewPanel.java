@@ -20,18 +20,17 @@ import org.jbei.ice.web.pages.EntryNewPage;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
 
-public class SamplePagingPanel extends Panel {
+public class UserSamplesViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
 
     private UserSamplesDataProvider sortableDataProvider;
     private DataView<Sample> dataView;
 
-    public SamplePagingPanel(String id) {
+    public UserSamplesViewPanel(String id) {
         super(id);
-
         sortableDataProvider = new UserSamplesDataProvider(IceSession.get().getAccount());
 
-        dataView = new DataView<Sample>("samplesDataView", sortableDataProvider, 20) {
+        dataView = new DataView<Sample>("samplesDataView", sortableDataProvider, 15) {
             private static final long serialVersionUID = 1L;
 
             @Override

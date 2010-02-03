@@ -2,6 +2,7 @@ package org.jbei.ice.lib.models;
 
 import java.io.Serializable;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,6 +12,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.value_objects.IFeatureValueObject;
 
 @Entity
@@ -41,7 +43,8 @@ public class Feature implements IFeatureValueObject, Serializable {
     @Column(name = "genbank_type", length = 127)
     private String genbankType;
 
-    @OneToOne(mappedBy = "feature")
+    @OneToOne(mappedBy = "feature", cascade = CascadeType.ALL)
+    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     private FeatureDNA featureDna;
 
     public Feature() {

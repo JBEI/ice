@@ -33,7 +33,8 @@ import org.jbei.ice.web.pages.RegistrationPage;
 import org.jbei.ice.web.pages.SearchResultPage;
 import org.jbei.ice.web.pages.UpdateAccountPage;
 import org.jbei.ice.web.pages.UpdatePasswordPage;
-import org.jbei.ice.web.pages.UserEntryPage;
+import org.jbei.ice.web.pages.UserPage;
+import org.jbei.ice.web.pages.VectorEditorEntriesPage;
 
 /**
  * Application object for your web application. If you want to run this
@@ -68,8 +69,9 @@ public class WicketApplication extends WebApplication {
         mount(new IndexedParamUrlCodingStrategy("/entry/update", EntryUpdatePage.class));
         mountBookmarkablePage("/entry/new", EntryNewPage.class);
         mount(new IndexedParamUrlCodingStrategy("/entry/tip", EntryTipPage.class));
-        mountBookmarkablePage("/entries", EntriesPage.class);
-        mountBookmarkablePage("/user/entries", UserEntryPage.class);
+        mount(new IndexedParamUrlCodingStrategy("/entries", EntriesPage.class));
+        mountBookmarkablePage("/ventries", VectorEditorEntriesPage.class);
+        mount(new IndexedParamUrlCodingStrategy("/user", UserPage.class));
         mount(new QueryStringUrlCodingStrategy("/search", SearchResultPage.class));
         mountBookmarkablePage("/blast", BlastPage.class);
         mountBookmarkablePage("/query", QueryPage.class);

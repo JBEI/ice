@@ -1,14 +1,13 @@
 <html xmlns:wicket>
 <wicket:panel>
-	<table class="data_table" border="0" cellpadding="3" cellspacing="1">
+	<table border="0" cellpadding="3" cellspacing="1" class="data_table">
 		<thead>
 			<tr bgcolor="#F0F0F0">
 				<th>#</th>
 				<th wicket:id="orderByType">Type</th>
-				<th>Part Number</th>
+				<th>Part ID</th>
 				<th>Name</th>
 				<th wicket:id="orderBySummary">Summary</th>
-				<th wicket:id="orderByOwner">Owner</th>
 				<th wicket:id="orderByStatus">Status</th>
 				<th><img src="/static/images/paper_clip.gif" title="Has Attachments" alt="Has Attachments"></th>
 				<th><img src="/static/images/samples.png" title="Has Samples" alt="Has Samples"></th>
@@ -23,7 +22,6 @@
 				<td><a href wicket:id="partIdLink" class="entry_tip"><span wicket:id="partNumber"></span></a></td>
 				<td><span wicket:id="name"></span></td>
 				<td><span wicket:id="description"></span></td>
-				<td><span wicket:id="owner"></span></td>
 				<td><span wicket:id="status"></span></td>
 				<td><img wicket:id="hasAttachment"></img></td>
 				<td><img wicket:id="hasSample"></img></td>

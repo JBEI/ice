@@ -1,5 +1,24 @@
 <html xmlns:wicket>
 <wicket:panel>
-	<span wicket:id="test"></span>
+	<table border="0" cellpadding="3" cellspacing="1" class="entry_table">
+		<tr class="title_row_header">
+			<td>Sequence | <a href="#" wicket:id="actionSequenceLink"><span
+				wicket:id="actionLinkLabel"></span></a></td>
+		</tr>
+		<tr>
+			<td bgcolor="#ffffff"><span wicket:id="sequenceFormPanel">Add/Edit form panel</span><span wicket:id="sequenceDataPanel">Data Panel</span></td>
+		</tr>
+	</table>
+
+	<wicket:fragment wicket:id="sequenceFragment">
+		<table border="0" cellpadding="2" cellspacing="2" width="100%">
+		<tr><td>Download: <a href="#" wicket:id="downloadLink"><span wicket:id="sequenceDownloadFileName"></span></a></td><td align="right"><a href="#" wicket:id="deleteLink">Delete</a></td></tr>
+		<tr width="100%"><td colspan="2"><textarea wicket:id="sequenceTextArea" readonly="readonly" rows="10" cols="20"
+			style="width: 100%; height: 400px" class="inputarea"></textarea>
+		</td></tr>
+		</table>
+	</wicket:fragment>
+
+	<wicket:fragment wicket:id="noSequenceFragment">No sequence</wicket:fragment>
 </wicket:panel>
 </html>

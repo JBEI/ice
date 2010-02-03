@@ -1,4 +1,4 @@
-package org.jbei.ice.web.panels;
+package org.jbei.ice.web.pages;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -12,40 +12,29 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.PageableListView;
-import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.html.list.ListView;
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.utils.JbeiConstants;
-import org.jbei.ice.web.pages.EntryNewPage;
-import org.jbei.ice.web.pages.EntryTipPage;
-import org.jbei.ice.web.pages.EntryViewPage;
 
-public class EntryPagingPanel extends Panel {
-    private static final long serialVersionUID = 1L;
+public class PrintableTablePage extends ProtectedPage {
+    public PrintableTablePage(ArrayList<Entry> entries) {
+        super();
 
-    public EntryPagingPanel(String id) {
-        super(id);
-    }
-
-    public EntryPagingPanel(String id, ArrayList<Entry> entries, int limit) {
-        super(id);
-
-        @SuppressWarnings( { "unchecked" })
-        PageableListView listView = new PageableListView("itemRows", entries, limit) {
+        add(new ListView<Entry>("entriesDataView", entries) {
             private static final long serialVersionUID = 1L;
 
             @Override
-            protected void populateItem(ListItem item) {
+            protected void populateItem(ListItem<Entry> item) {
                 Entry entry = (Entry) item.getModelObject();
 
-                item.add(new Label("index", "" + (item.getIndex() + 1)));
+                item.add(new Label("index", String.valueOf(item.getIndex() + 1)));
                 item.add(new Label("recordType", entry.getRecordType()));
 
-                BookmarkablePageLink entryLink = new BookmarkablePageLink("partIdLink",
-                        EntryViewPage.class, new PageParameters("0=" + entry.getId()));
+                BookmarkablePageLink<String> entryLink = new BookmarkablePageLink<String>(
+                        "partIdLink", EntryViewPage.class, new PageParameters("0=" + entry.getId()));
                 entryLink.add(new Label("partNumber", entry.getOnePartNumber().getPartNumber()));
                 String tipUrl = (String) urlFor(EntryTipPage.class, new PageParameters());
                 entryLink.add(new SimpleAttributeModifier("rel", tipUrl + "/" + entry.getId()));
@@ -55,12 +44,7 @@ public class EntryPagingPanel extends Panel {
 
                 item.add(new Label("description", entry.getShortDescription()));
                 item.add(new Label("status", JbeiConstants.getStatus(entry.getStatus())));
-                item
-                        .add(new Label("visibility", JbeiConstants.getVisibility(entry
-                                .getVisibility())));
 
-                add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
-                        "jquery-1.3.2.js"));
                 add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
                         "jquery-ui-1.7.2.custom.min.js"));
                 add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
@@ -68,13 +52,13 @@ public class EntryPagingPanel extends Panel {
                 add(CSSPackageResource.getHeaderContribution(EntryNewPage.class,
                         "jquery.cluetip.css"));
 
-                ResourceReference blankImage = new ResourceReference(EntryPagingPanel.class,
+                ResourceReference blankImage = new ResourceReference(PrintableTablePage.class,
                         "blank.png");
                 ResourceReference hasAttachmentImage = new ResourceReference(
-                        EntryPagingPanel.class, "attachment.gif");
-                ResourceReference hasSequenceImage = new ResourceReference(EntryPagingPanel.class,
-                        "sequence.gif");
-                ResourceReference hasSampleImage = new ResourceReference(EntryPagingPanel.class,
+                        PrintableTablePage.class, "attachment.gif");
+                ResourceReference hasSequenceImage = new ResourceReference(
+                        PrintableTablePage.class, "sequence.gif");
+                ResourceReference hasSampleImage = new ResourceReference(PrintableTablePage.class,
                         "sample.png");
 
                 ResourceReference hasAttachment = (AttachmentManager.hasAttachment(entry)) ? hasAttachmentImage
@@ -93,9 +77,11 @@ public class EntryPagingPanel extends Panel {
                 String dateString = dateFormat.format(entry.getCreationTime());
                 item.add(new Label("date", dateString));
             }
-        };
+        });
+    }
 
-        add(listView);
-        add(new JbeiPagingNavigator("navigator", listView));
+    @Override
+    protected void initializeComponents() {
+        add(new Label("title", "Printable"));
     }
 }

@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.managers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -18,6 +19,7 @@ import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.lib.query.SortField;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 
@@ -174,10 +176,10 @@ public class EntryManager extends Manager {
     }
 
     public static Set<Entry> getByFilter(ArrayList<String[]> data, int offset, int limit) {
-        org.jbei.ice.lib.query.Query q = org.jbei.ice.lib.query.Query.getInstance();
-        LinkedHashSet<Entry> result = q.query(data, offset, limit);
-        return result;
+        LinkedHashSet<Entry> result = org.jbei.ice.lib.query.Query.getInstance().query(data,
+                offset, limit);
 
+        return result;
     }
 
     @SuppressWarnings("unchecked")
@@ -187,8 +189,20 @@ public class EntryManager extends Manager {
         Query query = session.createQuery(queryString);
 
         query.setParameter("ownerEmail", account.getEmail());
+        query.setFirstResult(offset);
+        query.setMaxResults(limit);
 
         return new LinkedHashSet<Entry>(query.list());
+    }
+
+    public static int getByAccountCount(Account account) {
+        String queryString = "from Entry where ownerEmail = :ownerEmail";
+
+        Query query = session.createQuery(queryString);
+
+        query.setParameter("ownerEmail", account.getEmail());
+
+        return query.list().size();
     }
 
     @SuppressWarnings("unchecked")
@@ -196,6 +210,24 @@ public class EntryManager extends Manager {
         String queryString = "from Entry";
 
         Query query = session.createQuery(queryString);
+
+        return new LinkedHashSet<Entry>(query.list());
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Set<Entry> getAll(int offset, int limit, SortField[] sortFields) {
+        String sortQuerySuffix = "";
+
+        if (sortFields != null && sortFields.length > 0) {
+            sortQuerySuffix = Utils.join(", ", Arrays.asList(sortFields));
+        }
+
+        String queryString = "from Entry"
+                + (!sortQuerySuffix.isEmpty() ? (" ORDER BY " + sortQuerySuffix) : "");
+
+        Query query = session.createQuery(queryString);
+        query.setFirstResult(offset);
+        query.setMaxResults(limit);
 
         return new LinkedHashSet<Entry>(query.list());
     }

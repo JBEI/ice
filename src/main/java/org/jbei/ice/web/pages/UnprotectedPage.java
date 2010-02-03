@@ -1,6 +1,7 @@
 package org.jbei.ice.web.pages;
 
 import org.apache.wicket.PageParameters;
+import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.resources.StyleSheetReference;
@@ -22,11 +23,19 @@ public class UnprotectedPage extends WebPage {
      * Constructor that is invoked when page is invoked without a session.
      */
     public UnprotectedPage(final PageParameters parameters) {
+        super(parameters);
+
         add(new StyleSheetReference("stylesheet", UnprotectedPage.class, "main.css"));
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                "jquery-1.3.2.js"));
 
         searchParameters = parameters.getString("search");
 
         initializeComponents();
+    }
+
+    public UnprotectedPage() {
+        this(new PageParameters());
     }
 
     protected void initializeComponents() {

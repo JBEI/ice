@@ -3,7 +3,6 @@ package org.jbei.ice.lib.managers;
 import java.util.Calendar;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.hibernate.Query;
 import org.jbei.ice.lib.logging.Logger;
@@ -29,14 +28,15 @@ public class SampleManager extends Manager {
     }
 
     @SuppressWarnings("unchecked")
-    public static Set<Sample> get(Entry entry) throws ManagerException {
+    public static LinkedHashSet<Sample> get(Entry entry) throws ManagerException {
         LinkedHashSet<Sample> result = null;
         try {
             String queryString = "from Sample as sample where sample.entry = :entry order by sample.id desc";
             Query query = session.createQuery(queryString);
-            query.setEntity("entry", entry);
-            result = new LinkedHashSet<Sample>(query.list());
 
+            query.setEntity("entry", entry);
+
+            result = new LinkedHashSet<Sample>(query.list());
         } catch (Exception e) {
             String msg = "Could not get Sample by Entry " + entry.getRecordId();
             Logger.error(msg);
@@ -47,12 +47,18 @@ public class SampleManager extends Manager {
     }
 
     @SuppressWarnings("unchecked")
-    public static Set<Sample> getByAccount(Account account) throws ManagerException {
+    public static LinkedHashSet<Sample> getByAccount(Account account, int offset, int limit)
+            throws ManagerException {
         LinkedHashSet<Sample> result = null;
         try {
             String queryString = "from Sample as sample where sample.depositor = :depositor";
+
             Query query = session.createQuery(queryString);
+
             query.setParameter("depositor", account.getEmail());
+            query.setFirstResult(offset);
+            query.setMaxResults(limit);
+
             result = new LinkedHashSet<Sample>(query.list());
         } catch (Exception e) {
             String msg = "Could not retrieve samples by account " + account.getEmail();
@@ -61,6 +67,22 @@ public class SampleManager extends Manager {
         }
 
         return result;
+    }
+
+    public static int getByAccountCount(Account account) throws ManagerException {
+        try {
+            String queryString = "from Sample as sample where sample.depositor = :depositor";
+
+            Query query = session.createQuery(queryString);
+
+            query.setParameter("depositor", account.getEmail());
+
+            return query.list().size();
+        } catch (Exception e) {
+            String msg = "Could not retrieve samples by account " + account.getEmail();
+            Logger.error(msg);
+            throw new ManagerException(msg, e);
+        }
     }
 
     @SuppressWarnings("unchecked")

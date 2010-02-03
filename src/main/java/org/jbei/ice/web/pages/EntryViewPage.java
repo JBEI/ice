@@ -28,7 +28,6 @@ import org.jbei.ice.web.panels.SequenceViewPanel;
 import org.jbei.ice.web.panels.StrainViewPanel;
 
 public class EntryViewPage extends ProtectedPage {
-
     public Entry entry = null;
 
     public Component displayPanel;
@@ -56,7 +55,6 @@ public class EntryViewPage extends ProtectedPage {
         try {
             entry = AuthenticatedEntryManager.get(entryId, IceSession.get().getSessionKey());
         } catch (ManagerException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (PermissionException e) {
             throw new RestartResponseAtInterceptPageException(PermissionDeniedPage.class);
@@ -119,7 +117,6 @@ public class EntryViewPage extends ProtectedPage {
             permissionLink.add(new SimpleAttributeModifier("class", "active")).setOutputMarkupId(
                     true);
         }
-
     }
 
     public Panel makeSubPagePanel(Entry entry) {
@@ -140,6 +137,7 @@ public class EntryViewPage extends ProtectedPage {
 
     public Panel makeGeneralPanel(Entry entry) {
         String recordType = entry.getRecordType();
+
         Panel panel = null;
         if (recordType.equals("strain")) {
             panel = new StrainViewPanel("centerPanel", (Strain) entry);
@@ -150,8 +148,8 @@ public class EntryViewPage extends ProtectedPage {
         }
 
         panel.setOutputMarkupId(true);
-        return panel;
 
+        return panel;
     }
 
     public Panel makeSamplesPanel(Entry entry) {
@@ -184,11 +182,11 @@ public class EntryViewPage extends ProtectedPage {
         page.replace(attachmentsLink);
         page.replace(sequenceLink);
         page.replace(permissionLink);
+
         target.addComponent(generalLink);
         target.addComponent(samplesLink);
         target.addComponent(attachmentsLink);
         target.addComponent(sequenceLink);
         target.addComponent(permissionLink);
     }
-
 }

@@ -14,20 +14,33 @@
 			<th><img src="/static/images/sequence.gif" title="Has Sequence" alt="Has Sequence"></th>
 			<th>Created</th>
 		</tr>
-		<tr wicket:id="itemRows" class="odd_row">
-			<td><span wicket:id="index"></span>.</td>
-			<td><b><span wicket:id="score"></span></b></td>
-			<td><span wicket:id="recordType"></span></td>
-			<td><a href wicket:id="partIdLink" class="entry_tip"><span wicket:id="partNumber"></span></a></td>
-			<td><span wicket:id="name"></span></td>
-			<td><span wicket:id="description"></span></td>
-			<td><span wicket:id="owner"></span></td>
-			<td><img wicket:id="hasAttachment"></img></td>
-			<td><img wicket:id="hasSample"></img></td>
-			<td><img wicket:id="hasSequence"></img></td>
-			<td><nobr><span wicket:id="date"></span></nobr></td>
-		</tr>
+		<tbody>
+			<tr wicket:id="itemRows" class="odd_row">
+				<td><span wicket:id="index"></span>.</td>
+				<td><b><span wicket:id="score"></span></b></td>
+				<td><span wicket:id="recordType"></span></td>
+				<td><a href wicket:id="partIdLink" class="entry_tip"><span wicket:id="partNumber"></span></a></td>
+				<td><span wicket:id="name"></span></td>
+				<td><span wicket:id="description"></span></td>
+				<td><span wicket:id="owner"></span></td>
+				<td><img wicket:id="hasAttachment"></img></td>
+				<td><img wicket:id="hasSample"></img></td>
+				<td><img wicket:id="hasSequence"></img></td>
+				<td><nobr><span wicket:id="date"></span></nobr></td>
+			</tr>
+			<tr bgcolor="#F0F0F0">
+				<td align="center" valign="bottom" style="height: 25px" colspan="20">
+				<table border="0" cellpadding="0" cellspacing="0" style="width: 100%; height: 25px"
+					class="paging">
+					<tr>
+						<td>
+						<div wicket:id="navigator"></div>
+						</td>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</tbody>
 	</table>
-	<div wicket:id="navigator"></div>
 </wicket:panel>
 </html>

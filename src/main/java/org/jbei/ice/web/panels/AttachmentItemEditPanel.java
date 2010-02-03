@@ -60,8 +60,6 @@ public class AttachmentItemEditPanel extends Panel {
             }
 
             protected void onSubmit() {
-                System.out.println("form submitted");
-
                 FileUpload fileUpload = getFileInput();
                 AttachmentItemEditPanel thisPanel = (AttachmentItemEditPanel) getParent();
                 Attachment attachment = thisPanel.getAttachment();

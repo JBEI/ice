@@ -8,7 +8,6 @@ import java.io.StringReader;
 
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.utils.FileUtils;
-import org.jbei.ice.lib.utils.SequenceUtils;
 
 public class Parser {
     public static Sequence parseGenbank(File file) throws ParserException {
@@ -37,9 +36,6 @@ public class Parser {
                     genbankSequence)));
 
             sequence.setSequenceUser(genbankSequence);
-            sequence.setFwdHash(SequenceUtils.calculateSequenceHash(sequence.getSequence()));
-            sequence.setRevHash(SequenceUtils.calculateSequenceHash(SequenceUtils
-                    .reverseComplement(sequence.getSequence())));
         } catch (Exception e) {
             throw new ParserException(e);
         }
