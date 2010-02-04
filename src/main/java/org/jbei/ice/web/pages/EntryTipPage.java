@@ -59,6 +59,10 @@ public class EntryTipPage extends ProtectedPage {
         // keep it empty on purpose
     }
 
+    protected void initializeStyles() {
+        // keep it empty on purpose
+    }
+
     protected void initializeJavascript() {
         // keep it empty on purpose
     }

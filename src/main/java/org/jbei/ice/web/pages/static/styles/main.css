@@ -256,17 +256,17 @@ form {
 
 /* jbeiregistry arrows */
 .clue-right-jbeiregistry .cluetip-arrows {
-	background-image: url(/static/images/arrowleft.gif);
+	background-image: url(../images/arrowleft.gif);
 }
 
 .clue-left-jbeiregistry .cluetip-arrows {
-	background-image: url(/static/images/arrowright.gif);
+	background-image: url(../images/arrowright.gif);
 	left: 100%;
 	margin-right: -11px;
 }
 
 .clue-top-jbeiregistry .cluetip-arrows {
-	background-image: url(/static/images/arrowdown.gif);
+	background-image: url(../images/arrowdown.gif);
 	top: 100%;
 	left: 50%;
 	margin-left: -11px;
@@ -275,7 +275,7 @@ form {
 }
 
 .clue-bottom-jbeiregistry .cluetip-arrows {
-	background-image: url(/static/images/arrowup.gif);
+	background-image: url(../images/arrowup.gif);
 	top: -11px;
 	left: 50%;
 	margin-left: -11px;
@@ -304,12 +304,12 @@ form {
 }
 
 #menu a:link,#menulist a:visited {
-	background: #FFFFFF url(/static/images/point.gif) 0% 50% no-repeat;
+	background: #FFFFFF url(../images/point.gif) 0% 50% no-repeat;
 	text-decoration: none;
 }
 
 #menu a:hover {
-	background: #FFFFFF url(/static/images/point-blue.gif) 0% 50% no-repeat;
+	background: #FFFFFF url(../images/point-blue.gif) 0% 50% no-repeat;
 }
 
 #menu p {

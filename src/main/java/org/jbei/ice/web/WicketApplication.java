@@ -1,16 +1,12 @@
 package org.jbei.ice.web;
 
 import org.apache.wicket.Application;
-import org.apache.wicket.IRequestTarget;
 import org.apache.wicket.Request;
 import org.apache.wicket.RequestCycle;
 import org.apache.wicket.Response;
 import org.apache.wicket.Session;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.protocol.http.WebRequest;
-import org.apache.wicket.protocol.http.request.WebExternalResourceRequestTarget;
-import org.apache.wicket.request.RequestParameters;
-import org.apache.wicket.request.target.basic.URIRequestTargetUrlCodingStrategy;
 import org.apache.wicket.request.target.coding.IndexedParamUrlCodingStrategy;
 import org.apache.wicket.request.target.coding.QueryStringUrlCodingStrategy;
 import org.apache.wicket.settings.ISecuritySettings;
@@ -77,13 +73,6 @@ public class WicketApplication extends WebApplication {
         mount(new QueryStringUrlCodingStrategy("/search", SearchResultPage.class));
         mountBookmarkablePage("/blast", BlastPage.class);
         mountBookmarkablePage("/query", QueryPage.class);
-        mount(new URIRequestTargetUrlCodingStrategy("/static") {
-            @Override
-            public IRequestTarget decode(RequestParameters requestParameters) {
-                String path = "/static/" + getURI(requestParameters);
-                return new WebExternalResourceRequestTarget(path);
-            }
-        });
 
         // job cue
         JobCue jobCue = JobCue.getInstance();
@@ -97,7 +86,6 @@ public class WicketApplication extends WebApplication {
         securitySettings.setAuthorizationStrategy(authorizationStrategy);
         securitySettings.setUnauthorizedComponentInstantiationListener(authorizationStrategy);
         Application.get().getRequestLoggerSettings().setRequestLoggerEnabled(true);
-
     }
 
     @Override

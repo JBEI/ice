@@ -88,7 +88,8 @@ public class EntryUpdatePage extends ProtectedPage {
         add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
                 UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.autocomplete.css"));
         add(TextTemplateHeaderContributor.forJavaScript(UnprotectedPage.class,
-                "autocompleteDataTemplate.js", autocompleteDataMap));
+                UnprotectedPage.JS_RESOURCE_LOCATION + "autocompleteDataTemplate.js",
+                autocompleteDataMap));
 
         int entryId = parameters.getInt("0");
 
