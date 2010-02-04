@@ -40,6 +40,11 @@ public class ProfileSamplesPanel extends Panel {
 
         sortableDataProvider = new UserSamplesDataProvider(account);
 
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
+        add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
+
         dataView = new DataView<Sample>("samplesDataView", sortableDataProvider, 15) {
             private static final long serialVersionUID = 1L;
 
@@ -67,13 +72,6 @@ public class ProfileSamplesPanel extends Panel {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
                 String dateString = dateFormat.format(entry.getCreationTime());
                 item.add(new Label("date", dateString));
-
-                add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-                        UnprotectedPage.JS_RESOURCE_LOCATION + "jquery-ui-1.7.2.custom.min.js"));
-                add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-                        UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
-                add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
-                        UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
             }
         };
 

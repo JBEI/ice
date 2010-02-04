@@ -30,7 +30,6 @@ import org.jbei.ice.web.dataProviders.EntriesQueryDataProvider;
 import org.jbei.ice.web.dataProviders.UserEntriesDataProvider;
 import org.jbei.ice.web.pages.EntryAllExcelExportPage;
 import org.jbei.ice.web.pages.EntryExcelExportPage;
-import org.jbei.ice.web.pages.EntryNewPage;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.EntryXMLExportPage;
@@ -78,8 +77,6 @@ public class ProfileEntriesPanel extends Panel {
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sample.png");
 
         add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery-ui-1.7.2.custom.min.js"));
-        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
                 UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
         add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
                 UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
@@ -109,13 +106,6 @@ public class ProfileEntriesPanel extends Panel {
                 item.add(new Label("name", entry.getOneName().getName()));
                 item.add(new Label("description", entry.getShortDescription()));
                 item.add(new Label("status", JbeiConstants.getStatus(entry.getStatus())));
-
-                add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
-                        "jquery-ui-1.7.2.custom.min.js"));
-                add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
-                        "jquery.cluetip.js"));
-                add(CSSPackageResource.getHeaderContribution(EntryNewPage.class,
-                        "jquery.cluetip.css"));
 
                 item
                         .add(new Image("hasAttachment",

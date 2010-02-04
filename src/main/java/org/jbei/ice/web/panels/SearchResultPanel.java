@@ -28,7 +28,6 @@ import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.ProfilePage;
 import org.jbei.ice.web.pages.UnprotectedPage;
-import org.jbei.ice.web.pages.UserPage;
 
 public class SearchResultPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -50,8 +49,6 @@ public class SearchResultPanel extends Panel {
         hasSampleImage = new ResourceReference(UnprotectedPage.class,
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sample.png");
 
-        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery-ui-1.7.2.custom.min.js"));
         add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
                 UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
         add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
@@ -116,12 +113,6 @@ public class SearchResultPanel extends Panel {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
                 String dateString = dateFormat.format(entry.getCreationTime());
                 item.add(new Label("date", dateString));
-
-                add(JavascriptPackageResource.getHeaderContribution(UserPage.class,
-                        "jquery-ui-1.7.2.custom.min.js"));
-                add(JavascriptPackageResource.getHeaderContribution(UserPage.class,
-                        "jquery.cluetip.js"));
-                add(CSSPackageResource.getHeaderContribution(UserPage.class, "jquery.cluetip.css"));
             }
         };
 
