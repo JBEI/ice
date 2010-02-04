@@ -84,6 +84,9 @@ public class WebUtils {
         Pattern partNumberPattern = Pattern.compile("\\[\\[jbei:(.*)\\]\\]");
         Pattern descriptivePattern = Pattern.compile("\\[\\[jbei:(.*)\\|(.*)\\]\\]");
 
+        if (text == null) {
+            return text;
+        }
         Matcher basicJbeiMatcher = basicJbeiPattern.matcher(text);
 
         ArrayList<JbeiLink> jbeiLinks = new ArrayList<JbeiLink>();
@@ -107,9 +110,18 @@ public class WebUtils {
             }
 
             if (partNumber != null) {
-                jbeiLinks.add(new JbeiLink(partNumber, descriptive));
-                starts.add(basicJbeiMatcher.start());
-                ends.add(basicJbeiMatcher.end());
+                Entry entry = null;
+                try {
+                    entry = EntryManager.getByPartNumber(partNumber);
+                } catch (ManagerException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                if (entry != null) {
+                    jbeiLinks.add(new JbeiLink(partNumber, descriptive));
+                    starts.add(basicJbeiMatcher.start());
+                    ends.add(basicJbeiMatcher.end());
+                }
             }
         }
 
