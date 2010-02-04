@@ -132,12 +132,14 @@ public class QueryPage extends ProtectedPage {
             }
         }.setDefaultFormProcessing(false));
 
-        add(JavascriptPackageResource.getHeaderContribution(QueryPage.class, "jquery-1.3.2.js"));
-        add(JavascriptPackageResource.getHeaderContribution(QueryPage.class,
-                "jquery-ui-1.7.2.custom.min.js"));
-        add(JavascriptPackageResource.getHeaderContribution(QueryPage.class,
-                "jquery.cluetip.js"));
-        add(CSSPackageResource.getHeaderContribution(QueryPage.class, "jquery.cluetip.css"));
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery-1.3.2.js"));
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery-ui-1.7.2.custom.min.js"));
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
+        add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
         add(new QueryResultPanel("queryResultPanel", new ArrayList<String[]>())
                 .setOutputMarkupId(true));
     }

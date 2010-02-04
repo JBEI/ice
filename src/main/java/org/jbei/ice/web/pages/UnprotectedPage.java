@@ -1,10 +1,11 @@
 package org.jbei.ice.web.pages;
 
 import org.apache.wicket.PageParameters;
+import org.apache.wicket.markup.html.CSSPackageResource;
 import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.resources.StyleSheetReference;
+import org.apache.wicket.markup.html.resources.CompressedResourceReference;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.JbeirSettings;
@@ -15,6 +16,10 @@ import org.jbei.ice.web.panels.MenuPanel;
 import org.jbei.ice.web.panels.SearchBarFormPanel;
 
 public class UnprotectedPage extends WebPage {
+    public static final String IMAGES_RESOURCE_LOCATION = "static/images/";
+    public static final String STYLES_RESOURCE_LOCATION = "static/styles/";
+    public static final String JS_RESOURCE_LOCATION = "static/scripts/";
+
     protected static final long serialVersionUID = 1L;
 
     private String searchParameters = "";
@@ -25,9 +30,11 @@ public class UnprotectedPage extends WebPage {
     public UnprotectedPage(final PageParameters parameters) {
         super(parameters);
 
-        add(new StyleSheetReference("stylesheet", UnprotectedPage.class, "main.css"));
+        add(CSSPackageResource.getHeaderContribution(new CompressedResourceReference(
+                UnprotectedPage.class, STYLES_RESOURCE_LOCATION + "main.css")));
+
         add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-                "jquery-1.3.2.js"));
+                JS_RESOURCE_LOCATION + "jquery-1.3.2.js"));
 
         searchParameters = parameters.getString("search");
 

@@ -72,17 +72,13 @@ public class EntryNewPage extends ProtectedPage {
             }
         };
 
-        add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
-                "jquery-ui-1.7.2.custom.min.js"));
-        add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
-                "jquery.autocomplete.js"));
-        add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class, "ui/ui.core.js"));
-        add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
-                "ui/effects.core.js"));
-        add(CSSPackageResource.getHeaderContribution(EntryNewPage.class, "ui/ui.all.css"));
-        add(CSSPackageResource.getHeaderContribution(EntryNewPage.class, "jquery.autocomplete.css"));
-
-        add(TextTemplateHeaderContributor.forJavaScript(EntryNewPage.class,
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery-ui-1.7.2.custom.min.js"));
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.autocomplete.js"));
+        add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.autocomplete.css"));
+        add(TextTemplateHeaderContributor.forJavaScript(UnprotectedPage.class,
                 "autocompleteDataTemplate.js", autocompleteDataMap));
     }
 }

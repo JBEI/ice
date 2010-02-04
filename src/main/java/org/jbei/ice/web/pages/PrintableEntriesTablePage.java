@@ -22,15 +22,35 @@ import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.utils.JbeiConstants;
-import org.jbei.ice.web.panels.UserEntriesViewPanel;
 
 public class PrintableEntriesTablePage extends ProtectedPage {
     private ArrayList<Entry> entries;
+
+    ResourceReference blankImage;
+    ResourceReference attachmentImage;
+    ResourceReference sequenceImage;
+    ResourceReference sampleImage;
 
     public PrintableEntriesTablePage(ArrayList<Entry> entries, boolean displayOwner) {
         super();
 
         this.entries = entries;
+
+        blankImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "blank.png");
+        attachmentImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "attachment.gif");
+        sequenceImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sequence.gif");
+        sampleImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sample.png");
+
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                JS_RESOURCE_LOCATION + "jquery-ui-1.7.2.custom.min.js"));
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
+        add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
+                STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
 
         if (displayOwner) {
             add(createWithOwnerTableFragment(displayOwner));
@@ -47,6 +67,10 @@ public class PrintableEntriesTablePage extends ProtectedPage {
     private Fragment createWithOwnerTableFragment(boolean displayOwner) {
         Fragment fragment = new Fragment("entriesFragmentPanel", "withOwnerFragment", this);
 
+        fragment.add(new Image("attachmentHeaderImage", attachmentImage));
+        fragment.add(new Image("sequenceHeaderImage", sequenceImage));
+        fragment.add(new Image("sampleHeaderImage", sampleImage));
+
         fragment.setOutputMarkupPlaceholderTag(true);
         fragment.setOutputMarkupId(true);
         fragment.add(initializeDataView(displayOwner));
@@ -56,6 +80,10 @@ public class PrintableEntriesTablePage extends ProtectedPage {
 
     private Fragment createWithoutOwnerTableFragment(boolean displayOwner) {
         Fragment fragment = new Fragment("entriesFragmentPanel", "withoutOwnerFragment", this);
+
+        fragment.add(new Image("attachmentHeaderImage", attachmentImage));
+        fragment.add(new Image("sequenceHeaderImage", sequenceImage));
+        fragment.add(new Image("sampleHeaderImage", sampleImage));
 
         fragment.setOutputMarkupPlaceholderTag(true);
         fragment.setOutputMarkupId(true);
@@ -110,33 +138,12 @@ public class PrintableEntriesTablePage extends ProtectedPage {
 
                 item.add(new Label("status", JbeiConstants.getStatus(entry.getStatus())));
 
-                add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
-                        "jquery-ui-1.7.2.custom.min.js"));
-                add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
-                        "jquery.cluetip.js"));
-                add(CSSPackageResource.getHeaderContribution(EntryNewPage.class,
-                        "jquery.cluetip.css"));
-
-                ResourceReference blankImage = new ResourceReference(
-                        PrintableEntriesTablePage.class, "blank.png");
-                ResourceReference hasAttachmentImage = new ResourceReference(
-                        UserEntriesViewPanel.class, "attachment.gif");
-                ResourceReference hasSequenceImage = new ResourceReference(
-                        UserEntriesViewPanel.class, "sequence.gif");
-                ResourceReference hasSampleImage = new ResourceReference(
-                        UserEntriesViewPanel.class, "sample.png");
-
-                ResourceReference hasAttachment = (AttachmentManager.hasAttachment(entry)) ? hasAttachmentImage
-                        : blankImage;
-                item.add(new Image("hasAttachment", hasAttachment));
-
-                ResourceReference hasSequence = (SequenceManager.hasSequence(entry)) ? hasSequenceImage
-                        : blankImage;
-                item.add(new Image("hasSequence", hasSequence));
-
-                ResourceReference hasSample = (SampleManager.hasSample(entry)) ? hasSampleImage
-                        : blankImage;
-                item.add(new Image("hasSample", hasSample));
+                item.add(new Image("hasAttachment",
+                        (AttachmentManager.hasAttachment(entry)) ? attachmentImage : blankImage));
+                item.add(new Image("hasSequence",
+                        (SequenceManager.hasSequence(entry)) ? sequenceImage : blankImage));
+                item.add(new Image("hasSample", (SampleManager.hasSample(entry)) ? sampleImage
+                        : blankImage));
 
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
                 String dateString = dateFormat.format(entry.getCreationTime());
