@@ -119,8 +119,9 @@ public class UtilsManager extends Manager {
             strainIds.addAll(query.list());
         }
 
-        Pattern jbei = Pattern.compile("\\[\\[jbei:.*\\|.*\\]\\]");
-        Pattern partNumberPattern = Pattern.compile("\\[\\[jbei:(.*)\\|.*\\]\\]");
+        Pattern basicJbeiPattern = Pattern.compile("\\[\\[jbei:.*?\\]\\]");
+        Pattern partNumberPattern = Pattern.compile("\\[\\[jbei:(.*)\\]\\]");
+        Pattern descriptivePattern = Pattern.compile("\\[\\[jbei:(.*)\\|(.*)\\]\\]");
 
         for (int strainId : strainIds) {
             Strain strain;
@@ -133,21 +134,23 @@ public class UtilsManager extends Manager {
             String[] strainPlasmids = strain.getPlasmids().split(",");
             for (String strainPlasmid : strainPlasmids) {
                 strainPlasmid = strainPlasmid.trim();
-                Matcher jbeiLinkMatcher = jbei.matcher(strainPlasmid);
-                if (jbeiLinkMatcher.matches()) {
+                //Matcher jbeiLinkMatcher = basicJbeiPattern.matcher(strainPlasmid);
+                Matcher basicJbeiMatcher = basicJbeiPattern.matcher(strainPlasmid);
+                String strainNumber = null;
+                if (basicJbeiMatcher.matches()) {
+                    Matcher partNumberMatcher = partNumberPattern.matcher(basicJbeiMatcher.group());
+                    Matcher descriptivePatternMatcher = descriptivePattern.matcher(basicJbeiMatcher
+                            .group());
 
-                    Matcher partNumberMatcher = partNumberPattern.matcher(strainPlasmid);
-                    partNumberMatcher.matches();
-                    String partNumber = partNumberMatcher.group(1).trim();
-                    Set<PartNumber> plasmidPartNumbersSet = plasmid.getPartNumbers();
-                    HashSet<String> plasmidPartNumbers = new HashSet<String>();
-                    for (PartNumber tempPartNumber : plasmidPartNumbersSet) {
-                        plasmidPartNumbers.add(tempPartNumber.getPartNumber());
+                    if (descriptivePatternMatcher.find()) {
+                        strainNumber = descriptivePatternMatcher.group(1).trim();
+                    } else if (partNumberMatcher.find()) {
+                        strainNumber = partNumberMatcher.group(1).trim();
                     }
-
-                    if (plasmidPartNumbers.contains(partNumber)) {
+                    if (strainNumber != null) {
                         resultStrains.add(strain);
                     }
+
                 } else {
                     if (plasmid.getPartNumbers().contains(strainPlasmid)) {
                         resultStrains.add(strain);

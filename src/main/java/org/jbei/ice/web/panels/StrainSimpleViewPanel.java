@@ -40,8 +40,6 @@ public class StrainSimpleViewPanel extends Panel {
         try {
             plasmids = WebUtils.jbeiLinkifyText(entry.getPlasmids());
         } catch (Exception e) {
-            System.out.println("TIM FIX THIS!");
-
             e.printStackTrace();
         }
 

@@ -36,9 +36,9 @@ public class WebUtils {
 
         String descriptiveLabel = "";
         if (jbeiLink.getDescriptiveLabel() == null) {
-
+            descriptiveLabel = jbeiLink.getPartNumber();
         } else if (jbeiLink.getDescriptiveLabel().equals("")) {
-
+            descriptiveLabel = jbeiLink.getPartNumber();
         } else {
             descriptiveLabel = jbeiLink.getDescriptiveLabel();
         }
