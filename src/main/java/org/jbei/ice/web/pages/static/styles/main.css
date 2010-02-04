@@ -218,6 +218,7 @@ form {
 	border: 1px solid #E1E1E1;
 	padding: 0px 0px 0px 10px;
 	float: center;
+	font-size: 8px;
 }
 
 /***************************************
@@ -255,17 +256,17 @@ form {
 
 /* jbeiregistry arrows */
 .clue-right-jbeiregistry .cluetip-arrows {
-	background-image: url(../images/arrowleft.gif);
+	background-image: url(/static/images/arrowleft.gif);
 }
 
 .clue-left-jbeiregistry .cluetip-arrows {
-	background-image: url(../images/arrowright.gif);
+	background-image: url(/static/images/arrowright.gif);
 	left: 100%;
 	margin-right: -11px;
 }
 
 .clue-top-jbeiregistry .cluetip-arrows {
-	background-image: url(../images/arrowdown.gif);
+	background-image: url(/static/images/arrowdown.gif);
 	top: 100%;
 	left: 50%;
 	margin-left: -11px;
@@ -274,7 +275,7 @@ form {
 }
 
 .clue-bottom-jbeiregistry .cluetip-arrows {
-	background-image: url(../images/arrowup.gif);
+	background-image: url(/static/images/arrowup.gif);
 	top: -11px;
 	left: 50%;
 	margin-left: -11px;
@@ -303,12 +304,12 @@ form {
 }
 
 #menu a:link,#menulist a:visited {
-	background: #FFFFFF url(../images/point.gif) 0% 50% no-repeat;
+	background: #FFFFFF url(/static/images/point.gif) 0% 50% no-repeat;
 	text-decoration: none;
 }
 
 #menu a:hover {
-	background: #FFFFFF url(../images/point-blue.gif) 0% 50% no-repeat;
+	background: #FFFFFF url(/static/images/point-blue.gif) 0% 50% no-repeat;
 }
 
 #menu p {
@@ -341,9 +342,9 @@ span.form_help_text {
 	margin: 0 2px 0 0;
 	float: left;
 	background: #FFFFFF;
-	border-right: 1px solid #666;
-	border-top: 1px solid #666;
-	border-left: 1px solid #666;
+	border-right: 1px solid #aaa;
+	border-top: 1px solid #aaa;
+	border-left: 1px solid #aaa;
 	padding: 3px 10px 3px 10px;
 	text-decoration: none;
 	color: #333;
@@ -378,10 +379,10 @@ span.form_help_text {
 	margin: 0 2px 0 0;
 	float: left;
 	background: #F0F0F0;
-	border-right: 1px solid #666;
-	border-top: 1px solid #666;
-	border-left: 1px solid #666;
-	padding: 3px 10px 2px 10px;
+	border-right: 1px solid #aaa;
+	border-top: 1px solid #aaa;
+	border-left: 1px solid #aaa;
+	padding: 3px 10px 3px 10px;
 	text-decoration: none;
 	color: #333;
 }
@@ -392,10 +393,45 @@ span.form_help_text {
 	margin: 0 2px 0 0;
 	float: left;
 	background: #F0F0F0;
-	border-right: 1px solid #666;
-	border-top: 1px solid #666;
-	border-left: 1px solid #666;
-	padding: 3px 10px 2px 10px;
+	border-right: 1px solid #aaa;
+	border-top: 1px solid #aaa;
+	border-left: 1px solid #aaa;
+	padding: 3px 10px 3px 10px;
 	text-decoration: none;
 	color: #333;
+}
+
+#tabs a.inactive {
+	position: relative;
+	top: 0;
+	margin: 2px 2px 0 0;
+	float: left;
+	background: #FFFFFF;
+	border-right: 1px solid #aaa;
+	border-top: 1px solid #aaa;
+	border-left: 1px solid #aaa;
+	padding: 2px 10px 2px 10px;
+	text-decoration: none;
+	color: #333;
+}
+
+#tabs a.inactive:hover {
+	background: #FFFFF0;
+	margin: 2px 2px 0 0;
+	position: relative;
+	top: 0;
+	padding: 3px 10px 3px 10px;
+	margin-top: 0px;
+}
+
+#paging span {
+	border: 5px solid #CCCCCC;
+	color: #808185;
+	margin-right: 3px;
+	padding: 4px 4px 3px;
+	text-decoration: none;
+}
+
+#paging a {
+	border: 5px solid #333333;
 }
