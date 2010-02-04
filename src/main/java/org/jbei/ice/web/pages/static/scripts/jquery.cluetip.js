@@ -220,9 +220,8 @@
 /***************************************
 * load an element from the same page
 ***************************************/
-      } else if (opts.local) {
-        
-        var $localContent = $(tipAttribute + (/#\w+$/.test(tipAttribute) ? '' : ':eq(' + index + ')')).clone(true).show();
+      } else if (opts.local){
+        var $localContent = $(tipAttribute + ':eq(' + index + ')').clone(true).show();
         $cluetipInner.html($localContent);
         cluetipShow(pY);
       }
@@ -476,7 +475,8 @@ clearTimeout(closeOnDelay);
 
     // process data retrieved via xhr before it's displayed
     ajaxProcess:      function(data) {
-                        data = data.replace(/<s(cript|tyle)(.|\s)*?\/s(cript|tyle)>/g, '').replace(/<(link|title)(.|\s)*?\/(link|title)>/g,'');
+    					// Commented because this like makes zero sense!
+                        //data = data.replace(/<s(cript|tyle)(.|\s)*?\/s(cript|tyle)>/g, '').replace(/<(link|title)(.|\s)*?\/(link|title)>/g,'');
                         return data;
     },                
 
