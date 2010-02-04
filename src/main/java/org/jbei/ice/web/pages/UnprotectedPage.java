@@ -27,22 +27,30 @@ public class UnprotectedPage extends WebPage {
     /**
      * Constructor that is invoked when page is invoked without a session.
      */
+    public UnprotectedPage() {
+        this(new PageParameters());
+    }
+
     public UnprotectedPage(final PageParameters parameters) {
         super(parameters);
 
-        add(CSSPackageResource.getHeaderContribution(new CompressedResourceReference(
-                UnprotectedPage.class, STYLES_RESOURCE_LOCATION + "main.css")));
+        initializeStyles();
 
-        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-                JS_RESOURCE_LOCATION + "jquery-1.3.2.js"));
-
-        searchParameters = parameters.getString("search");
+        initializeJavascript();
 
         initializeComponents();
+
+        searchParameters = parameters.getString("search");
     }
 
-    public UnprotectedPage() {
-        this(new PageParameters());
+    protected void initializeStyles() {
+        add(CSSPackageResource.getHeaderContribution(new CompressedResourceReference(
+                UnprotectedPage.class, STYLES_RESOURCE_LOCATION + "main.css")));
+    }
+
+    protected void initializeJavascript() {
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                JS_RESOURCE_LOCATION + "jquery-1.3.2.js"));
     }
 
     protected void initializeComponents() {

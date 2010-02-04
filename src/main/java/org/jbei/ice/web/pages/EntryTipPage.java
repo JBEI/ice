@@ -1,8 +1,7 @@
 package org.jbei.ice.web.pages;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Entry;
@@ -19,17 +18,10 @@ import org.jbei.ice.web.panels.StrainSimpleViewPanel;
 public class EntryTipPage extends ProtectedPage {
     public Entry entry;
 
-    public Component displayPanel;
-    public Component generalPanel;
-
-    public BookmarkablePageLink<Object> generalLink;
-    public String subPage = null;
-
     public EntryTipPage(PageParameters parameters) {
         super(parameters);
 
         int entryId = parameters.getInt("0");
-        subPage = parameters.getString("1");
 
         try {
             entry = AuthenticatedEntryManager.get(entryId, IceSession.get().getSessionKey());
@@ -39,9 +31,27 @@ public class EntryTipPage extends ProtectedPage {
             // do nothing
         }
 
-        generalPanel = makeGeneralPanel(entry);
-        displayPanel = generalPanel;
-        add(displayPanel);
+        String recordType = entry.getRecordType();
+
+        Panel panel = null;
+
+        try {
+            if (recordType.equals("strain")) {
+                panel = new StrainSimpleViewPanel("centerPanel", (Strain) entry, true);
+            } else if (recordType.equals("plasmid")) {
+                panel = new PlasmidSimpleViewPanel("centerPanel", (Plasmid) entry, true);
+            } else if (recordType.equals("part")) {
+                panel = new PartSimpleViewPanel("centerPanel", (Part) entry, true);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            panel = new EmptyPanel("centerPanel");
+        }
+
+        panel.setOutputMarkupId(true);
+
+        add(panel);
     }
 
     @Override
@@ -49,20 +59,7 @@ public class EntryTipPage extends ProtectedPage {
         // keep it empty on purpose
     }
 
-    public Panel makeGeneralPanel(Entry entry) {
-        String recordType = entry.getRecordType();
-
-        Panel panel = null;
-        if (recordType.equals("strain")) {
-            panel = new StrainSimpleViewPanel("centerPanel", (Strain) entry, true);
-        } else if (recordType.equals("plasmid")) {
-            panel = new PlasmidSimpleViewPanel("centerPanel", (Plasmid) entry, true);
-        } else if (recordType.equals("part")) {
-            panel = new PartSimpleViewPanel("centerPanel", (Part) entry, true);
-        }
-
-        panel.setOutputMarkupId(true);
-
-        return panel;
+    protected void initializeJavascript() {
+        // keep it empty on purpose
     }
 }

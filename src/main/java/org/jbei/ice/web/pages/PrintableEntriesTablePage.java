@@ -46,8 +46,6 @@ public class PrintableEntriesTablePage extends ProtectedPage {
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sample.png");
 
         add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-                JS_RESOURCE_LOCATION + "jquery-ui-1.7.2.custom.min.js"));
-        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
                 JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
         add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
                 STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));

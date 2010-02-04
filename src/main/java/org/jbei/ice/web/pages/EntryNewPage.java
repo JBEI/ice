@@ -73,8 +73,6 @@ public class EntryNewPage extends ProtectedPage {
         };
 
         add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery-ui-1.7.2.custom.min.js"));
-        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
                 UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.autocomplete.js"));
         add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
                 UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.autocomplete.css"));
