@@ -18,28 +18,8 @@ import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.models.Vote;
 import org.jbei.ice.lib.utils.Utils;
 
+@SuppressWarnings("unchecked")
 public class UtilsManager extends Manager {
-    public static void getCompositeByEntry(Entry entry) {
-
-    }
-
-    public static void search(String query, int offset, int limit) {
-
-    }
-
-    public static void search(String query) {
-        search(query, 0, 15);
-    }
-
-    public static void query(String query, int offset, int limit) {
-        //org.jbei.ice.lib.query.Query q = new org.jbei.ice.lib.query.Query();
-    }
-
-    public static void query(String query) {
-        query(query, 0, 15);
-    }
-
-    @SuppressWarnings("unchecked")
     public static TreeSet<String> getUniqueSelectionMarkers() {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
         Query query = HibernateHelper.getSession().createQuery(
@@ -62,29 +42,22 @@ public class UtilsManager extends Manager {
         return results;
     }
 
-    public static TreeSet<String> getUniquePlasmidNames() {
-        // This method is broken
-
-        /*TreeSet<String> results = new TreeSet<String>();
+    public static TreeSet<String> getUniquePublicPlasmidNames() {
+        TreeSet<String> results = new TreeSet<String>();
 
         Query query = HibernateHelper
                 .getSession()
                 .createQuery(
-                        "select distinct name.name from Plasmid plasmid inner join plasmid.names as name where name.name <> '' order by name.name asc");
+                        "select distinct name.name from Plasmid plasmid inner join plasmid.names as name where name.name <> '' and plasmid.visibility > 8 order by name.name asc");
         HashSet<String> names = new HashSet<String>(query.list());
-        // Plasmid names are comma separated lists, so must parse them getting from the database
 
-        for (String item : names) {
-            //LinkedHashSet<String> promoters = Utils.toHashSetFromCommaSeparatedString(item);
-            for (String name : names) {
-                results.add(name);
-            }
-        }*/
+        for (String name : names) {
+            results.add(name);
+        }
 
-        return null;
+        return results;
     }
 
-    @SuppressWarnings("unchecked")
     public static TreeSet<String> getUniquePromoters() {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
 
@@ -108,7 +81,6 @@ public class UtilsManager extends Manager {
         return results;
     }
 
-    @SuppressWarnings("unchecked")
     public static TreeSet<String> getUniqueOriginOfReplications() {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
 
@@ -133,7 +105,6 @@ public class UtilsManager extends Manager {
         return results;
     }
 
-    @SuppressWarnings("unchecked")
     public static LinkedHashSet<Strain> getStrainsForPlasmid(Plasmid plasmid)
             throws ManagerException {
         LinkedHashSet<Strain> resultStrains = new LinkedHashSet<Strain>();
@@ -272,7 +243,6 @@ public class UtilsManager extends Manager {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
     public static LinkedHashSet<Comment> getComments(Entry entry) throws ManagerException {
         LinkedHashSet<Comment> result = null;
         try {
@@ -290,7 +260,6 @@ public class UtilsManager extends Manager {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
     public static LinkedHashSet<Comment> getComments(Account account) throws ManagerException {
         LinkedHashSet<Comment> result = null;
         try {
@@ -308,7 +277,6 @@ public class UtilsManager extends Manager {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
     public static LinkedHashSet<Vote> getVotes(Entry entry) throws ManagerException {
         LinkedHashSet<Vote> result = null;
         try {
@@ -327,7 +295,6 @@ public class UtilsManager extends Manager {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
     public static LinkedHashSet<Vote> getVotes(Account account) throws ManagerException {
         LinkedHashSet<Vote> result = null;
         try {
@@ -386,7 +353,6 @@ public class UtilsManager extends Manager {
         return vote;
     }
 
-    @SuppressWarnings("unchecked")
     public static LinkedHashSet<Entry> getMostVoted() throws ManagerException {
         LinkedHashSet<Entry> result = new LinkedHashSet<Entry>();
         try {
@@ -409,7 +375,6 @@ public class UtilsManager extends Manager {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
     public static LinkedHashSet<Entry> getMostCommented() throws ManagerException {
         LinkedHashSet<Entry> result = new LinkedHashSet<Entry>();
         try {

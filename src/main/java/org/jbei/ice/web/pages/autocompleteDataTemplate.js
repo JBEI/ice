@@ -19,4 +19,11 @@ function initializeCollections() {
 				multiple: true, 
 				autoFill: true
 			});
+	
+	var plasmidsCollection = [ ${plasmidsCollection} ];
+	$(".plasmidsInput").autocomplete(
+			plasmidsCollection, { 
+				multiple: true, 
+				autoFill: true
+			});
 }

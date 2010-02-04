@@ -13,6 +13,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.Link;
@@ -180,5 +181,17 @@ public class Utils {
 
     public static String generateUUID() {
         return UUID.randomUUID().toString();
+    }
+
+    public static String escapeSpecialJavascriptCharacters(String stringValue) {
+        String result = "";
+
+        if (!StringUtils.containsNone(stringValue, new char[] { '\'' })) {
+            result = StringUtils.replace(stringValue, "'", "\\'");
+        } else {
+            result = stringValue;
+        }
+
+        return result;
     }
 }

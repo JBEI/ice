@@ -13,12 +13,11 @@ import org.jbei.ice.web.forms.PlasmidStrainNewFormPanel;
 import org.jbei.ice.web.forms.StrainNewFormPanel;
 
 public class SelectNewEntryTypePanel extends Panel {
-
     private static final long serialVersionUID = 1L;
+
     private String typeSelection;
 
     public SelectNewEntryTypePanel(String id) {
-
         super(id);
 
         ArrayList<String> partTypes = new ArrayList<String>();
@@ -35,8 +34,6 @@ public class SelectNewEntryTypePanel extends Panel {
             Panel formPanel = null;
 
             public void onUpdate(AjaxRequestTarget target) {
-                System.out.println("I'm here with " + getTypeSelection());
-
                 if (getTypeSelection().equals("Plasmid")) {
                     formPanel = new PlasmidNewFormPanel("formPanel");
                 } else if (getTypeSelection().equals("Strain")) {
@@ -50,12 +47,10 @@ public class SelectNewEntryTypePanel extends Panel {
                 formPanel.setOutputMarkupId(true);
                 target.getPage().replace(formPanel);
                 target.addComponent(formPanel);
-
             }
         });
 
         add(partTypeChoice);
-
     }
 
     public void setTypeSelection(String typeSelection) {
@@ -65,5 +60,4 @@ public class SelectNewEntryTypePanel extends Panel {
     public String getTypeSelection() {
         return typeSelection;
     }
-
 }

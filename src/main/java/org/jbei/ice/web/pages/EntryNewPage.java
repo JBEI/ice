@@ -12,6 +12,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.collections.MiniMap;
 import org.apache.wicket.util.template.TextTemplateHeaderContributor;
 import org.jbei.ice.lib.managers.UtilsManager;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.panels.EmptyMessagePanel;
 import org.jbei.ice.web.panels.SelectNewEntryTypePanel;
 
@@ -44,28 +45,40 @@ public class EntryNewPage extends ProtectedPage {
                     TreeSet<String> uniquePromoters = UtilsManager.getUniquePromoters();
                     TreeSet<String> uniqueOriginOfReplications = UtilsManager
                             .getUniqueOriginOfReplications();
+                    TreeSet<String> uniquePlasmids = UtilsManager.getUniquePublicPlasmidNames();
 
-                    dataMap = new MiniMap<String, Object>(3);
+                    dataMap = new MiniMap<String, Object>(4);
 
                     String selectionMarkersCollection = "";
                     String promotersCollection = "";
                     String originOfReplicationsCollection = "";
+                    String plasmidsCollection = "";
 
                     for (String selectionMarker : uniqueSelectionMarkers) {
-                        selectionMarkersCollection += "'" + selectionMarker + "', ";
+                        selectionMarkersCollection += "'"
+                                + Utils.escapeSpecialJavascriptCharacters(selectionMarker) + "', ";
                     }
 
                     for (String promoter : uniquePromoters) {
-                        promotersCollection += "'" + promoter + "', ";
+                        promotersCollection += "'"
+                                + Utils.escapeSpecialJavascriptCharacters(promoter) + "', ";
                     }
 
                     for (String originOfReplication : uniqueOriginOfReplications) {
-                        originOfReplicationsCollection += "'" + originOfReplication + "', ";
+                        originOfReplicationsCollection += "'"
+                                + Utils.escapeSpecialJavascriptCharacters(originOfReplication)
+                                + "', ";
+                    }
+
+                    for (String plasmid : uniquePlasmids) {
+                        plasmidsCollection += "'"
+                                + Utils.escapeSpecialJavascriptCharacters(plasmid) + "', ";
                     }
 
                     dataMap.put("selectionMarkersCollection", selectionMarkersCollection);
                     dataMap.put("promotersCollection", promotersCollection);
                     dataMap.put("originOfReplicationsCollection", originOfReplicationsCollection);
+                    dataMap.put("plasmidsCollection", plasmidsCollection);
                 }
 
                 return dataMap;
