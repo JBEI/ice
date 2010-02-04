@@ -1,6 +1,7 @@
 package org.jbei.ice.web.panels;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 import org.apache.wicket.Page;
 import org.apache.wicket.PageParameters;
@@ -24,6 +25,8 @@ import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.utils.JbeiConstants;
+import org.jbei.ice.web.dataProviders.AbstractEntriesDataProvider;
+import org.jbei.ice.web.dataProviders.EntriesQueryDataProvider;
 import org.jbei.ice.web.dataProviders.UserEntriesDataProvider;
 import org.jbei.ice.web.pages.EntryAllExcelExportPage;
 import org.jbei.ice.web.pages.EntryExcelExportPage;
@@ -33,12 +36,18 @@ import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.EntryXMLExportPage;
 import org.jbei.ice.web.pages.PrintableEntriesFullContentPage;
 import org.jbei.ice.web.pages.PrintableEntriesTablePage;
+import org.jbei.ice.web.pages.UnprotectedPage;
 
 public class ProfileEntriesPanel extends Panel {
     private static final long serialVersionUID = 1L;
 
-    private UserEntriesDataProvider sortableDataProvider;
+    private AbstractEntriesDataProvider sortableDataProvider;
     private DataView<Entry> dataView;
+
+    ResourceReference blankImage;
+    ResourceReference hasAttachmentImage;
+    ResourceReference hasSequenceImage;
+    ResourceReference hasSampleImage;
 
     public ProfileEntriesPanel(String id, String accountEmail) {
         super(id);
@@ -50,7 +59,34 @@ public class ProfileEntriesPanel extends Panel {
             e.printStackTrace();
         }
 
-        sortableDataProvider = new UserEntriesDataProvider(account);
+        if (account != null) {
+            sortableDataProvider = new UserEntriesDataProvider(account);
+        } else {
+            ArrayList<String[]> queries = new ArrayList<String[]>();
+            queries.add(new String[] { "owner", "~" + accountEmail });
+
+            sortableDataProvider = new EntriesQueryDataProvider(queries);
+        }
+
+        blankImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "blank.png");
+        hasAttachmentImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "attachment.gif");
+        hasSequenceImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sequence.gif");
+        hasSampleImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sample.png");
+
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery-ui-1.7.2.custom.min.js"));
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
+        add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
+
+        add(new Image("attachmentHeaderImage", hasAttachmentImage));
+        add(new Image("sequenceHeaderImage", hasSequenceImage));
+        add(new Image("sampleHeaderImage", hasSampleImage));
 
         dataView = new DataView<Entry>("entriesDataView", sortableDataProvider, 15) {
             private static final long serialVersionUID = 1L;
@@ -81,26 +117,14 @@ public class ProfileEntriesPanel extends Panel {
                 add(CSSPackageResource.getHeaderContribution(EntryNewPage.class,
                         "jquery.cluetip.css"));
 
-                ResourceReference blankImage = new ResourceReference(UserEntriesViewPanel.class,
-                        "blank.png");
-                ResourceReference hasAttachmentImage = new ResourceReference(
-                        UserEntriesViewPanel.class, "attachment.gif");
-                ResourceReference hasSequenceImage = new ResourceReference(
-                        UserEntriesViewPanel.class, "sequence.gif");
-                ResourceReference hasSampleImage = new ResourceReference(
-                        UserEntriesViewPanel.class, "sample.png");
-
-                ResourceReference hasAttachment = (AttachmentManager.hasAttachment(entry)) ? hasAttachmentImage
-                        : blankImage;
-                item.add(new Image("hasAttachment", hasAttachment));
-
-                ResourceReference hasSequence = (SequenceManager.hasSequence(entry)) ? hasSequenceImage
-                        : blankImage;
-                item.add(new Image("hasSequence", hasSequence));
-
-                ResourceReference hasSample = (SampleManager.hasSample(entry)) ? hasSampleImage
-                        : blankImage;
-                item.add(new Image("hasSample", hasSample));
+                item
+                        .add(new Image("hasAttachment",
+                                (AttachmentManager.hasAttachment(entry)) ? hasAttachmentImage
+                                        : blankImage));
+                item.add(new Image("hasSequence",
+                        (SequenceManager.hasSequence(entry)) ? hasSequenceImage : blankImage));
+                item.add(new Image("hasSample", (SampleManager.hasSample(entry)) ? hasSampleImage
+                        : blankImage));
 
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
                 String dateString = dateFormat.format(entry.getCreationTime());

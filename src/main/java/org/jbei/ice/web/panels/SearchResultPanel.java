@@ -27,13 +27,39 @@ import org.jbei.ice.lib.search.SearchResult;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.ProfilePage;
+import org.jbei.ice.web.pages.UnprotectedPage;
 import org.jbei.ice.web.pages.UserPage;
 
 public class SearchResultPanel extends Panel {
     private static final long serialVersionUID = 1L;
 
+    ResourceReference blankImage;
+    ResourceReference hasAttachmentImage;
+    ResourceReference hasSequenceImage;
+    ResourceReference hasSampleImage;
+
     public SearchResultPanel(String id, ArrayList<SearchResult> searchResults, int limit) {
         super(id);
+
+        blankImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "blank.png");
+        hasAttachmentImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "attachment.gif");
+        hasSequenceImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sequence.gif");
+        hasSampleImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sample.png");
+
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery-ui-1.7.2.custom.min.js"));
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
+        add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.css"));
+
+        add(new Image("attachmentHeaderImage", hasAttachmentImage));
+        add(new Image("sequenceHeaderImage", hasSequenceImage));
+        add(new Image("sampleHeaderImage", hasSampleImage));
 
         @SuppressWarnings("unchecked")
         PageableListView listView = new PageableListView("itemRows", searchResults, limit) {
@@ -78,25 +104,14 @@ public class SearchResultPanel extends Panel {
                 String scoreString = formatter.format(searchResult.getScore() * 100);
                 item.add(new Label("score", scoreString));
 
-                ResourceReference blankImage = new ResourceReference(SearchResultPanel.class,
-                        "blank.png");
-                ResourceReference hasAttachmentImage = new ResourceReference(
-                        SearchResultPanel.class, "attachment.gif");
-                ResourceReference hasSequenceImage = new ResourceReference(SearchResultPanel.class,
-                        "sequence.gif");
-                ResourceReference hasSampleImage = new ResourceReference(SearchResultPanel.class,
-                        "sample.png");
-
-                ResourceReference hasAttachment = (AttachmentManager.hasAttachment(entry)) ? hasAttachmentImage
-                        : blankImage;
-                item.add(new Image("hasAttachment", hasAttachment));
-                ResourceReference hasSequence = (SequenceManager.hasSequence(entry)) ? hasSequenceImage
-                        : blankImage;
-                item.add(new Image("hasSequence", hasSequence));
-
-                ResourceReference hasSample = (SampleManager.hasSample(entry)) ? hasSampleImage
-                        : blankImage;
-                item.add(new Image("hasSample", hasSample));
+                item
+                        .add(new Image("hasAttachment",
+                                (AttachmentManager.hasAttachment(entry)) ? hasAttachmentImage
+                                        : blankImage));
+                item.add(new Image("hasSequence",
+                        (SequenceManager.hasSequence(entry)) ? hasSequenceImage : blankImage));
+                item.add(new Image("hasSample", (SampleManager.hasSample(entry)) ? hasSampleImage
+                        : blankImage));
 
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
                 String dateString = dateFormat.format(entry.getCreationTime());

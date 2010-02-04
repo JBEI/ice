@@ -25,12 +25,12 @@ import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.dataProviders.UserEntriesDataProvider;
 import org.jbei.ice.web.pages.EntryAllExcelExportPage;
 import org.jbei.ice.web.pages.EntryExcelExportPage;
-import org.jbei.ice.web.pages.EntryNewPage;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.EntryXMLExportPage;
 import org.jbei.ice.web.pages.PrintableEntriesFullContentPage;
 import org.jbei.ice.web.pages.PrintableEntriesTablePage;
+import org.jbei.ice.web.pages.UnprotectedPage;
 
 public class UserEntriesViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -38,10 +38,35 @@ public class UserEntriesViewPanel extends Panel {
     private UserEntriesDataProvider sortableDataProvider;
     private DataView<Entry> dataView;
 
+    ResourceReference blankImage;
+    ResourceReference hasAttachmentImage;
+    ResourceReference hasSequenceImage;
+    ResourceReference hasSampleImage;
+
     public UserEntriesViewPanel(String id) {
         super(id);
 
         sortableDataProvider = new UserEntriesDataProvider(IceSession.get().getAccount());
+
+        blankImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "blank.png");
+        hasAttachmentImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "attachment.gif");
+        hasSequenceImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sequence.gif");
+        hasSampleImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sample.png");
+
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery-ui-1.7.2.custom.min.js"));
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
+        add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
+
+        add(new Image("attachmentHeaderImage", hasAttachmentImage));
+        add(new Image("sequenceHeaderImage", hasSequenceImage));
+        add(new Image("sampleHeaderImage", hasSampleImage));
 
         dataView = new DataView<Entry>("entriesDataView", sortableDataProvider, 15) {
             private static final long serialVersionUID = 1L;
@@ -65,33 +90,14 @@ public class UserEntriesViewPanel extends Panel {
                 item.add(new Label("description", entry.getShortDescription()));
                 item.add(new Label("status", JbeiConstants.getStatus(entry.getStatus())));
 
-                add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
-                        "jquery-ui-1.7.2.custom.min.js"));
-                add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
-                        "jquery.cluetip.js"));
-                add(CSSPackageResource.getHeaderContribution(EntryNewPage.class,
-                        "jquery.cluetip.css"));
-
-                ResourceReference blankImage = new ResourceReference(UserEntriesViewPanel.class,
-                        "blank.png");
-                ResourceReference hasAttachmentImage = new ResourceReference(
-                        UserEntriesViewPanel.class, "attachment.gif");
-                ResourceReference hasSequenceImage = new ResourceReference(
-                        UserEntriesViewPanel.class, "sequence.gif");
-                ResourceReference hasSampleImage = new ResourceReference(
-                        UserEntriesViewPanel.class, "sample.png");
-
-                ResourceReference hasAttachment = (AttachmentManager.hasAttachment(entry)) ? hasAttachmentImage
-                        : blankImage;
-                item.add(new Image("hasAttachment", hasAttachment));
-
-                ResourceReference hasSequence = (SequenceManager.hasSequence(entry)) ? hasSequenceImage
-                        : blankImage;
-                item.add(new Image("hasSequence", hasSequence));
-
-                ResourceReference hasSample = (SampleManager.hasSample(entry)) ? hasSampleImage
-                        : blankImage;
-                item.add(new Image("hasSample", hasSample));
+                item
+                        .add(new Image("hasAttachment",
+                                (AttachmentManager.hasAttachment(entry)) ? hasAttachmentImage
+                                        : blankImage));
+                item.add(new Image("hasSequence",
+                        (SequenceManager.hasSequence(entry)) ? hasSequenceImage : blankImage));
+                item.add(new Image("hasSample", (SampleManager.hasSample(entry)) ? hasSampleImage
+                        : blankImage));
 
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
                 String dateString = dateFormat.format(entry.getCreationTime());

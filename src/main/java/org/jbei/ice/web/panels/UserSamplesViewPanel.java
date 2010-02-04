@@ -16,9 +16,9 @@ import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.dataProviders.UserSamplesDataProvider;
-import org.jbei.ice.web.pages.EntryNewPage;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
+import org.jbei.ice.web.pages.UnprotectedPage;
 
 public class UserSamplesViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -58,12 +58,12 @@ public class UserSamplesViewPanel extends Panel {
                 String dateString = dateFormat.format(entry.getCreationTime());
                 item.add(new Label("date", dateString));
 
-                add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
-                        "jquery-ui-1.7.2.custom.min.js"));
-                add(JavascriptPackageResource.getHeaderContribution(EntryNewPage.class,
-                        "jquery.cluetip.js"));
-                add(CSSPackageResource.getHeaderContribution(EntryNewPage.class,
-                        "jquery.cluetip.css"));
+                add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                        UnprotectedPage.JS_RESOURCE_LOCATION + "jquery-ui-1.7.2.custom.min.js"));
+                add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                        UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
+                add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
+                        UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
             }
         };
 

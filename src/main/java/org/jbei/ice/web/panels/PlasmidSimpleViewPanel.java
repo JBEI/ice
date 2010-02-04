@@ -20,11 +20,12 @@ import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.web.pages.UnprotectedPage;
 import org.jbei.ice.web.utils.WebUtils;
 
 public class PlasmidSimpleViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
-    private static final int MAX_LONG_FIELD_LENGTH = 200;
+    private static final int MAX_LONG_FIELD_LENGTH = 100;
 
     public PlasmidSimpleViewPanel(String id, Plasmid entry, boolean trimLongText) {
         super(id);
@@ -73,12 +74,12 @@ public class PlasmidSimpleViewPanel extends Panel {
         elements.add(new MultiLineLabel("longDescription", trimLongText ? trimLongField(entry
                 .getLongDescription(), MAX_LONG_FIELD_LENGTH) : entry.getLongDescription()));
 
-        ResourceReference hasAttachmentImage = new ResourceReference(UserEntriesViewPanel.class,
-                "attachment.gif");
-        ResourceReference hasSequenceImage = new ResourceReference(UserEntriesViewPanel.class,
-                "sequence.gif");
-        ResourceReference hasSampleImage = new ResourceReference(UserEntriesViewPanel.class,
-                "sample.png");
+        ResourceReference hasAttachmentImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "attachment.gif");
+        ResourceReference hasSequenceImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sequence.gif");
+        ResourceReference hasSampleImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sample.png");
         elements.add(new Image("hasAttachment", hasAttachmentImage).setVisible(AttachmentManager
                 .hasAttachment(entry)));
         elements.add(new Image("hasSequence", hasSequenceImage).setVisible(SequenceManager
@@ -129,7 +130,7 @@ public class PlasmidSimpleViewPanel extends Panel {
         }
 
         if (value.length() > maxLength) {
-            return value.substring(0, maxLength);
+            return value.substring(0, maxLength) + "...";
         } else {
             return value;
         }

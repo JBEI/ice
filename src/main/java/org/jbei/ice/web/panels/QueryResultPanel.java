@@ -31,6 +31,7 @@ import org.jbei.ice.web.pages.EntryXMLExportPage;
 import org.jbei.ice.web.pages.PrintableEntriesFullContentPage;
 import org.jbei.ice.web.pages.PrintableEntriesTablePage;
 import org.jbei.ice.web.pages.ProfilePage;
+import org.jbei.ice.web.pages.UnprotectedPage;
 
 public class QueryResultPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -38,10 +39,28 @@ public class QueryResultPanel extends Panel {
     private DataView<Entry> dataView;
     private EntriesQueryDataProvider sortableDataProvider;
 
+    ResourceReference blankImage;
+    ResourceReference hasAttachmentImage;
+    ResourceReference hasSequenceImage;
+    ResourceReference hasSampleImage;
+
     public QueryResultPanel(String id, ArrayList<String[]> queries) {
         super(id);
 
         updateView(queries);
+
+        blankImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "blank.png");
+        hasAttachmentImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "attachment.gif");
+        hasSequenceImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sequence.gif");
+        hasSampleImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sample.png");
+
+        add(new Image("attachmentHeaderImage", hasAttachmentImage));
+        add(new Image("sequenceHeaderImage", hasSequenceImage));
+        add(new Image("sampleHeaderImage", hasSampleImage));
     }
 
     public void updateView(ArrayList<String[]> queries) {
@@ -191,24 +210,14 @@ public class QueryResultPanel extends Panel {
                 item.add(ownerProfileLink);
                 item.add(new Label("status", entry.getStatus()));
 
-                ResourceReference blankImage = new ResourceReference(QueryResultPanel.class,
-                        "blank.png");
-                ResourceReference hasAttachmentImage = new ResourceReference(
-                        QueryResultPanel.class, "attachment.gif");
-                ResourceReference hasSequenceImage = new ResourceReference(QueryResultPanel.class,
-                        "sequence.gif");
-                ResourceReference hasSampleImage = new ResourceReference(QueryResultPanel.class,
-                        "sample.png");
-
-                ResourceReference hasAttachment = (AttachmentManager.hasAttachment(entry)) ? hasAttachmentImage
-                        : blankImage;
-                item.add(new Image("hasAttachment", hasAttachment));
-                ResourceReference hasSequence = (SequenceManager.hasSequence(entry)) ? hasSequenceImage
-                        : blankImage;
-                item.add(new Image("hasSequence", hasSequence));
-                ResourceReference hasSample = (SampleManager.hasSample(entry)) ? hasSampleImage
-                        : blankImage;
-                item.add(new Image("hasSample", hasSample));
+                item
+                        .add(new Image("hasAttachment",
+                                (AttachmentManager.hasAttachment(entry)) ? hasAttachmentImage
+                                        : blankImage));
+                item.add(new Image("hasSequence",
+                        (SequenceManager.hasSequence(entry)) ? hasSequenceImage : blankImage));
+                item.add(new Image("hasSample", (SampleManager.hasSample(entry)) ? hasSampleImage
+                        : blankImage));
 
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
                 String dateString = dateFormat.format(entry.getCreationTime());
