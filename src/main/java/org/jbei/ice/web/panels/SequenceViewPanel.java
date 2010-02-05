@@ -5,12 +5,14 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextArea;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.DownloadLink;
 import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -24,6 +26,7 @@ import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.forms.SequenceNewFormPanel;
 import org.jbei.ice.web.forms.SequenceUpdateFormPanel;
+import org.jbei.ice.web.pages.VectorEditorPage;
 
 public class SequenceViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -143,6 +146,11 @@ public class SequenceViewPanel extends Panel {
 
                 fragment.add(new DeleteSequenceLink("deleteLink").setVisible(PermissionManager
                         .hasWritePermission(entry.getId(), IceSession.get().getSessionKey())));
+
+                PageParameters parameters = new PageParameters();
+                parameters.add("entryId", entry.getRecordId());
+                fragment.add(new BookmarkablePageLink<VectorEditorPage>("viewInVectorEditorLink",
+                        VectorEditorPage.class, parameters));
             } catch (IOException e) {
                 e.printStackTrace();
             }

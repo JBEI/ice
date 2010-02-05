@@ -1,6 +1,8 @@
 There are some libraries that ice depends on that are not in any public maven 
 servers, namely biojava and flex components.
 
+mvn has to be installed http://maven.apache.org/download.html
+
 In order to build your ice via maven, you need to add them to your local
 repo by running the following inside the lib directory.
 

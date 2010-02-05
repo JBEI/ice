@@ -1,17 +1,25 @@
 package org.jbei.ice.web.pages;
 
 import org.apache.wicket.PageParameters;
+import org.apache.wicket.ResourceReference;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.markup.html.WebPage;
+import org.jbei.ice.web.IceSession;
 
 public class VectorEditorPage extends WebPage {
     // Constructor
     public VectorEditorPage(PageParameters parameters) {
         WebComponent flashComponent = new WebComponent("flashComponent");
 
-        flashComponent.add(new SimpleAttributeModifier("src",
-                "/static/ve/VectorEditor.swf?entryId=" + parameters.getString("entryId")));
+        ResourceReference veResourceReference = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.VE_RESOURCE_LOCATION + "VectorEditor.swf?entryId="
+                        + parameters.getString("entryId") + "&sessionId="
+                        + IceSession.get().getSessionKey());
+
+        System.out.println(urlFor(veResourceReference));
+
+        flashComponent.add(new SimpleAttributeModifier("src", urlFor(veResourceReference)));
         flashComponent.add(new SimpleAttributeModifier("quality", "high"));
         flashComponent.add(new SimpleAttributeModifier("bgcolor", "#869ca7"));
         flashComponent.add(new SimpleAttributeModifier("width", "100%"));

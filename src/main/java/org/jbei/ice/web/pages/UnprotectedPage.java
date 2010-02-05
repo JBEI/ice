@@ -19,6 +19,7 @@ public class UnprotectedPage extends WebPage {
     public static final String IMAGES_RESOURCE_LOCATION = "static/images/";
     public static final String STYLES_RESOURCE_LOCATION = "static/styles/";
     public static final String JS_RESOURCE_LOCATION = "static/scripts/";
+    public static final String VE_RESOURCE_LOCATION = "static/ve/";
 
     protected static final long serialVersionUID = 1L;
 
