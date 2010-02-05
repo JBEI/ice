@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.authentication;
 
+import java.io.Serializable;
 import java.util.Calendar;
 
 import javax.naming.NamingException;
@@ -11,7 +12,9 @@ import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.utils.LblLdapAuth;
 import org.jbei.ice.web.IceSession;
 
-public class LblLdapAuthenticationBackend implements IAuthenticationBackend {
+public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Serializable {
+    private static final long serialVersionUID = 1L;
+
     public Account authenticate(String loginId, String password) {
         Account account = null;
         LblLdapAuth l = null;
