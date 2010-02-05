@@ -22,10 +22,10 @@ import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
 import org.jbei.ice.lib.search.SearchResult;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.web.dataProviders.SearchDataProvider;
@@ -78,7 +78,7 @@ public class SearchResultPanel extends Panel {
 
             @Override
             protected void populateItem(Item<SearchResult> item) {
-                SearchResult searchResult = (SearchResult) item.getModelObject();
+                SearchResult searchResult = item.getModelObject();
                 Entry entry = null;
                 try {
                     entry = EntryManager.getByRecordId(searchResult.getRecordId());
@@ -133,8 +133,10 @@ public class SearchResultPanel extends Panel {
                                         : blankImage));
                 item.add(new Image("hasSequence",
                         (SequenceManager.hasSequence(entry)) ? hasSequenceImage : blankImage));
-                item.add(new Image("hasSample", (SampleManager.hasSample(entry)) ? hasSampleImage
-                        : blankImage));
+                item
+                        .add(new Image("hasSample",
+                                (AuthenticatedSampleManager.hasSample(entry)) ? hasSampleImage
+                                        : blankImage));
 
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
                 String dateString = dateFormat.format(entry.getCreationTime());

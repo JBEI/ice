@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.jbei.ice.lib.managers.AttachmentManager;
-import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
 import org.jbei.ice.lib.utils.JbeiConstants;
 
 public class EntriesCurrentFieldsExcelExportPage extends ExcelExportPage {
@@ -19,6 +19,7 @@ public class EntriesCurrentFieldsExcelExportPage extends ExcelExportPage {
         this.entries = entries;
     }
 
+    @Override
     public String getFileName() {
         return "data.xls";
     }
@@ -37,15 +38,16 @@ public class EntriesCurrentFieldsExcelExportPage extends ExcelExportPage {
 
             stringBuilder.append(index).append("\t");
             stringBuilder.append(escapeCSVValue(entry.getRecordType())).append("\t");
-            stringBuilder.append(escapeCSVValue(entry.getOnePartNumber().getPartNumber()))
-                    .append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getOnePartNumber().getPartNumber())).append(
+                    "\t");
             stringBuilder.append(escapeCSVValue(entry.getOneName().getName())).append("\t");
             stringBuilder.append(escapeCSVValue(entry.getShortDescription())).append("\t");
             stringBuilder.append(escapeCSVValue(entry.getOwner())).append("\t");
             stringBuilder.append(JbeiConstants.getStatus(entry.getStatus())).append("\t");
             stringBuilder.append((AttachmentManager.hasAttachment(entry)) ? "Yes" : "No").append(
                     "\t");
-            stringBuilder.append((SampleManager.hasSample(entry)) ? "Yes" : "No").append("\t");
+            stringBuilder.append((AuthenticatedSampleManager.hasSample(entry)) ? "Yes" : "No")
+                    .append("\t");
             stringBuilder.append((SequenceManager.hasSequence(entry)) ? "Yes" : "No").append("\t");
             SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
             String dateString = dateFormat.format(entry.getCreationTime());

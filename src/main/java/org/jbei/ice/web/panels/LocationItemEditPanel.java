@@ -12,11 +12,13 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
-import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.models.Location;
 import org.jbei.ice.lib.models.Sample;
+import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Job;
 import org.jbei.ice.lib.utils.JobCue;
+import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class LocationItemEditPanel extends Panel {
@@ -96,7 +98,8 @@ public class LocationItemEditPanel extends Panel {
                 sample.getLocations().add(location);
 
                 try {
-                    sample = SampleManager.save(sample);
+                    sample = AuthenticatedSampleManager.save(sample, IceSession.get()
+                            .getSessionKey());
                     JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
                     JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);
 
@@ -122,6 +125,8 @@ public class LocationItemEditPanel extends Panel {
 
                     /* end brute force sort */
 
+                } catch (PermissionException e) {
+                    error("Permission Denied");
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {

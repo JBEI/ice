@@ -17,10 +17,10 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
 import org.jbei.ice.lib.utils.JbeiConstants;
 
 public class PrintableEntriesTablePage extends ProtectedPage {
@@ -96,7 +96,7 @@ public class PrintableEntriesTablePage extends ProtectedPage {
 
             @Override
             protected void populateItem(ListItem<Entry> item) {
-                Entry entry = (Entry) item.getModelObject();
+                Entry entry = item.getModelObject();
 
                 item.add(new Label("index", String.valueOf(item.getIndex() + 1)));
                 item.add(new Label("recordType", entry.getRecordType()));
@@ -140,8 +140,8 @@ public class PrintableEntriesTablePage extends ProtectedPage {
                         (AttachmentManager.hasAttachment(entry)) ? attachmentImage : blankImage));
                 item.add(new Image("hasSequence",
                         (SequenceManager.hasSequence(entry)) ? sequenceImage : blankImage));
-                item.add(new Image("hasSample", (SampleManager.hasSample(entry)) ? sampleImage
-                        : blankImage));
+                item.add(new Image("hasSample",
+                        (AuthenticatedSampleManager.hasSample(entry)) ? sampleImage : blankImage));
 
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
                 String dateString = dateFormat.format(entry.getCreationTime());

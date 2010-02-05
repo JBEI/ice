@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.jbei.ice.lib.managers.AttachmentManager;
-import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
 
 public class EntriesAllFieldsExcelExportPage extends ExcelExportPage {
     private ArrayList<Entry> entries;
@@ -21,6 +21,7 @@ public class EntriesAllFieldsExcelExportPage extends ExcelExportPage {
         this.entries = entries;
     }
 
+    @Override
     public String getFileName() {
         return "data.xls";
     }
@@ -92,8 +93,8 @@ public class EntriesAllFieldsExcelExportPage extends ExcelExportPage {
             } else if (entry instanceof Strain) {
                 Strain strain = (Strain) entry;
 
-                stringBuilder.append(escapeCSVValue(strain.getSelectionMarkersAsString()))
-                        .append("\t");
+                stringBuilder.append(escapeCSVValue(strain.getSelectionMarkersAsString())).append(
+                        "\t");
                 stringBuilder.append("\t");
                 stringBuilder.append("\t");
                 stringBuilder.append("\t");
@@ -118,7 +119,8 @@ public class EntriesAllFieldsExcelExportPage extends ExcelExportPage {
 
             stringBuilder.append((AttachmentManager.hasAttachment(entry)) ? "Yes" : "No").append(
                     "\t");
-            stringBuilder.append((SampleManager.hasSample(entry)) ? "Yes" : "No").append("\t");
+            stringBuilder.append((AuthenticatedSampleManager.hasSample(entry)) ? "Yes" : "No")
+                    .append("\t");
             stringBuilder.append((SequenceManager.hasSequence(entry)) ? "Yes" : "No").append("\t");
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");

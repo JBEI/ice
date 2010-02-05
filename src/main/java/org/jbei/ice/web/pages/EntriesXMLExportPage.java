@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.jbei.ice.lib.managers.AttachmentManager;
-import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Link;
@@ -13,6 +12,7 @@ import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
 
 public class EntriesXMLExportPage extends XMLExportPage {
     private ArrayList<Entry> entries;
@@ -128,7 +128,8 @@ public class EntriesXMLExportPage extends XMLExportPage {
                     (AttachmentManager.hasAttachment(entry)) ? "Yes" : "No").append(
                     "</hasAttachments>");
             stringBuilder.append("<hasSamples>").append(
-                    (SampleManager.hasSample(entry)) ? "Yes" : "No").append("</hasSamples>");
+                    (AuthenticatedSampleManager.hasSample(entry)) ? "Yes" : "No").append(
+                    "</hasSamples>");
             stringBuilder.append("<hasSequence>").append(
                     (SequenceManager.hasSequence(entry)) ? "Yes" : "No").append("</hasSequence>");
 

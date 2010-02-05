@@ -8,9 +8,9 @@ import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvid
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Sample;
+import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
 
 public class UserSamplesDataProvider extends SortableDataProvider<Sample> {
     private static final long serialVersionUID = 1L;
@@ -28,7 +28,8 @@ public class UserSamplesDataProvider extends SortableDataProvider<Sample> {
         samples.clear();
 
         try {
-            LinkedHashSet<Sample> results = SampleManager.getByAccount(account, first, count);
+            LinkedHashSet<Sample> results = AuthenticatedSampleManager.getByAccount(account, first,
+                    count);
 
             for (Sample sample : results) {
                 samples.add(sample);
@@ -46,7 +47,7 @@ public class UserSamplesDataProvider extends SortableDataProvider<Sample> {
 
     public int size() {
         try {
-            return SampleManager.getByAccountCount(account);
+            return AuthenticatedSampleManager.getByAccountCount(account);
         } catch (ManagerException e) {
             return 0;
         }

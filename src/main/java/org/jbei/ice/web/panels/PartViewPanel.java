@@ -15,11 +15,11 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.Part;
+import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
 import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.web.IceSession;
@@ -132,7 +132,7 @@ public class PartViewPanel extends Panel {
             attachmentText = String.valueOf(numAttachments) + " attachments provided";
         }
         elements.add(new Label("attachments", attachmentText));
-        int numSamples = SampleManager.getNumberOfSamples(entry);
+        int numSamples = AuthenticatedSampleManager.getNumberOfSamples(entry);
         String samplesText = "";
         if (numSamples == 0) {
             samplesText = "No samples provided";

@@ -7,8 +7,10 @@ import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.models.Sample;
+import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
+import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class SampleItemViewPanel extends Panel {
@@ -37,12 +39,15 @@ public class SampleItemViewPanel extends Panel {
                         "return confirm('Delete this sample?');"));
             }
 
+            @Override
             public void onClick(AjaxRequestTarget target) {
                 SampleItemViewPanel thisPanel = (SampleItemViewPanel) getParent();
                 Sample sample = thisPanel.getSample();
 
                 try {
-                    SampleManager.delete(sample);
+                    AuthenticatedSampleManager.delete(sample, IceSession.get().getSessionKey());
+                } catch (PermissionException e) {
+                    error("delete not permitted");
                 } catch (ManagerException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -62,6 +67,7 @@ public class SampleItemViewPanel extends Panel {
 
             }
 
+            @Override
             public void onClick(AjaxRequestTarget target) {
                 boolean edit = true;
                 SampleItemViewPanel thisPanel = (SampleItemViewPanel) getParent();

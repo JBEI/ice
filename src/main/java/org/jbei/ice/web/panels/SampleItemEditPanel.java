@@ -9,10 +9,12 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
-import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.models.Sample;
+import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Job;
 import org.jbei.ice.lib.utils.JobCue;
+import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class SampleItemEditPanel extends Panel {
@@ -77,9 +79,12 @@ public class SampleItemEditPanel extends Panel {
                 sample.setNotes(getNotes());
 
                 try {
-                    SampleManager.save(sampleItemEditPanel.getSample());
+                    AuthenticatedSampleManager.save(sampleItemEditPanel.getSample(), IceSession
+                            .get().getSessionKey());
                     JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
                     JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);
+                } catch (PermissionException e) {
+                    error("Save not permitted");
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {

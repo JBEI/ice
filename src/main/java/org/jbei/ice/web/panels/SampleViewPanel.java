@@ -8,9 +8,9 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sample;
+import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
 import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.web.IceSession;
 
@@ -61,7 +61,7 @@ public class SampleViewPanel extends Panel {
         add(addSampleLink);
 
         try {
-            samples.addAll(SampleManager.get(entry));
+            samples.addAll(AuthenticatedSampleManager.get(entry));
         } catch (ManagerException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

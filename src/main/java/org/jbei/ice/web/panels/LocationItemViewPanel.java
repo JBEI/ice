@@ -7,11 +7,13 @@ import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Location;
+import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Job;
 import org.jbei.ice.lib.utils.JobCue;
+import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class LocationItemViewPanel extends Panel {
@@ -54,9 +56,12 @@ public class LocationItemViewPanel extends Panel {
 
                 location.getSample().getLocations().remove(location);
                 try {
-                    SampleManager.save(location.getSample());
+                    AuthenticatedSampleManager.save(location.getSample(), IceSession.get()
+                            .getSessionKey());
                     JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
                     JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);
+                } catch (PermissionException e) {
+                    error("Save not permitted");
                 } catch (ManagerException e) {
                     e.printStackTrace();
                 }

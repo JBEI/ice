@@ -19,17 +19,17 @@ import org.apache.wicket.markup.repeater.data.DataView;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.web.dataProviders.EntriesDataProvider;
 import org.jbei.ice.web.pages.EntriesAllFieldsExcelExportPage;
 import org.jbei.ice.web.pages.EntriesCurrentFieldsExcelExportPage;
+import org.jbei.ice.web.pages.EntriesXMLExportPage;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
-import org.jbei.ice.web.pages.EntriesXMLExportPage;
 import org.jbei.ice.web.pages.PrintableEntriesFullContentPage;
 import org.jbei.ice.web.pages.PrintableEntriesTablePage;
 import org.jbei.ice.web.pages.ProfilePage;
@@ -75,7 +75,7 @@ public class MostRecentEntriesPanel extends Panel {
 
             @Override
             protected void populateItem(Item<Entry> item) {
-                Entry entry = (Entry) item.getModelObject();
+                Entry entry = item.getModelObject();
 
                 item.add(new Label("index", ""
                         + (getItemsPerPage() * getCurrentPage() + item.getIndex() + 1)));
@@ -117,8 +117,10 @@ public class MostRecentEntriesPanel extends Panel {
                                         : blankImage));
                 item.add(new Image("hasSequence",
                         (SequenceManager.hasSequence(entry)) ? hasSequenceImage : blankImage));
-                item.add(new Image("hasSample", (SampleManager.hasSample(entry)) ? hasSampleImage
-                        : blankImage));
+                item
+                        .add(new Image("hasSample",
+                                (AuthenticatedSampleManager.hasSample(entry)) ? hasSampleImage
+                                        : blankImage));
 
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
                 String dateString = dateFormat.format(entry.getCreationTime());
@@ -200,7 +202,8 @@ public class MostRecentEntriesPanel extends Panel {
 
             @Override
             public void onClick() {
-                setResponsePage(new EntriesCurrentFieldsExcelExportPage(sortableDataProvider.getEntries()));
+                setResponsePage(new EntriesCurrentFieldsExcelExportPage(sortableDataProvider
+                        .getEntries()));
             }
         });
 
@@ -209,7 +212,8 @@ public class MostRecentEntriesPanel extends Panel {
 
             @Override
             public void onClick() {
-                setResponsePage(new EntriesAllFieldsExcelExportPage(sortableDataProvider.getEntries()));
+                setResponsePage(new EntriesAllFieldsExcelExportPage(sortableDataProvider
+                        .getEntries()));
             }
         });
 
