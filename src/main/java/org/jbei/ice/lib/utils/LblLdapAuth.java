@@ -55,8 +55,7 @@ public class LblLdapAuth {
         this.initialize("ldap://ldap.lbl.gov", "ldaps://ldapauth.lbl.gov:636");
     }
 
-    public boolean authenticate(String userName, String passWord) throws NamingException,
-            AuthenticationException {
+    public boolean authenticate(String userName, String passWord) throws Exception {
         DirContext authContext = null;
         try {
 
@@ -96,7 +95,7 @@ public class LblLdapAuth {
             authenticated = true;
 
         } catch (Exception e) {
-            e.printStackTrace();
+            throw e;
 
         } finally {
             try {
@@ -249,30 +248,6 @@ public class LblLdapAuth {
             e.printStackTrace();
             throw e;
         }
-
         return result;
-
     }
-
-    public static void main(String[] args) {
-
-        LblLdapAuth l = null;
-        try {
-            l = new LblLdapAuth();
-        } catch (NamingException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-
-        boolean result = l.isWikiUser("tsham");
-        System.out.println(result);
-
-        try {
-            l.authenticate("tsham", "");
-        } catch (NamingException e) {
-            e.printStackTrace();
-        }
-
-    }
-
 }
