@@ -22,9 +22,6 @@ public class WebUtils {
 
         int id = 0;
         try {
-
-            // BUG fails on 4008! 
-
             Entry entry = EntryManager.getByPartNumber(jbeiLink.getPartNumber());
 
             if (entry != null) {

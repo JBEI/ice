@@ -7,7 +7,7 @@ import java.util.LinkedHashSet;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.jbei.ice.lib.managers.EntryManager;
+import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Sample;
@@ -45,7 +45,11 @@ public class UserSamplesDataProvider extends SortableDataProvider<Sample> {
     }
 
     public int size() {
-        return EntryManager.getByAccountCount(account);
+        try {
+            return SampleManager.getByAccountCount(account);
+        } catch (ManagerException e) {
+            return 0;
+        }
     }
 
     public ArrayList<Sample> getSamples() {

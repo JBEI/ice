@@ -18,8 +18,7 @@ import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 
 public class AttachmentManager extends Manager {
-    public static String attachmentDirectory = (String) JbeirSettings
-            .getSetting("ATTACHMENTS_DIRECTORY")
+    public static String attachmentDirectory = JbeirSettings.getSetting("ATTACHMENTS_DIRECTORY")
             + "/";
 
     public static Attachment create(Attachment attachment) throws ManagerException {
@@ -204,6 +203,10 @@ public class AttachmentManager extends Manager {
 
     protected static Attachment writeFileData(Attachment attachment) throws IOException {
         File file = new File(attachmentDirectory + attachment.getFileId());
+        File fileDir = file.getParentFile();
+        if (!fileDir.exists()) {
+            fileDir.mkdirs();
+        }
         if (!file.exists()) {
             file.createNewFile();
         }
