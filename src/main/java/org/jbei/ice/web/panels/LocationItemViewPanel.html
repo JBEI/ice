@@ -15,22 +15,21 @@
 				</tr>
 				<tr>
 					<td valign="top" class="title_column">Wells</td>
-					<td"><span wicket:id="wells"></span></td>
+					<td><span wicket:id="wells"></span></td>
+				</tr>
+				<tr>
+					<td valign="top" class="title_column">Plate</td>
+					<td><span wicket:id="nColumns"></span>x<span wicket:id="nRows"></span></td>
 				</tr>
 				<tr>
 					<td valign="top" class="title_column">Notes</td>
 					<td><span wicket:id="notes"></span></td>
 				</tr>
-				<tr>
-					<td><span wicket:id="nColumns"></span></td>
-					<td><span wicket:id="nRows"></span></td>
-				</tr>
 			</table>
 			</td>
-			<td width="150px" align="right" valign="top"><nobr> <a href="#"
-				wicket:id="editLocationLink">Edit</a> | <a href="#" wicket:id="deleteLocationLink">Delete </a></nobr></td>
+			<td width="150px" align="right" valign="top"><span wicket:id="locationEditDeleteContainer"><nobr><a
+				href="#" wicket:id="editLocationLink">Edit</a> | <a href="#" wicket:id="deleteLocationLink">Delete</a></nobr></span></td>
 		</tr>
 	</table>
-
 </wicket:panel>
 </html>

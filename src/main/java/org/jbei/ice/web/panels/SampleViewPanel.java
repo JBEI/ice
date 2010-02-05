@@ -11,23 +11,19 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
-import org.jbei.ice.lib.permissions.PermissionManager;
-import org.jbei.ice.web.IceSession;
 
 public class SampleViewPanel extends Panel {
-
     private static final long serialVersionUID = 1L;
 
     Entry entry = null;
     ArrayList<Sample> samples = new ArrayList<Sample>();
     ArrayList<Panel> panels = new ArrayList<Panel>();
 
-    @SuppressWarnings("unchecked")
     public SampleViewPanel(String id, Entry entry) {
         super(id);
 
         this.entry = entry;
-        class AddSampleLink extends AjaxFallbackLink {
+        class AddSampleLink extends AjaxFallbackLink<Object> {
             private static final long serialVersionUID = 1L;
 
             public AddSampleLink(String id) {
@@ -40,43 +36,40 @@ public class SampleViewPanel extends Panel {
                 ArrayList<Panel> thisPanelsPanels = thisPanel.getPanels();
                 if (thisPanelsPanels.size() > 0
                         && thisPanelsPanels.get(0) instanceof SampleItemEditPanel) {
-                    // If the first item is already an edit form, do nothing.		
+                    // If the first item is already an edit form, do nothing.
                 } else {
                     Sample newSample = new Sample();
                     newSample.setEntry(thisPanel.getEntry());
-                    Panel newSampleEditPanel = new SampleItemEditPanel("sampleItemPanel", newSample);
+                    Panel newSampleEditPanel = new SampleItemEditPanel("sampleItemPanel",
+                            newSample, false);
                     newSampleEditPanel.setOutputMarkupId(true);
 
                     panels.add(0, newSampleEditPanel);
 
-                    target.getPage().replace(getParent());
-                    target.addComponent(getParent());
+                    target.getPage().replace(thisPanel);
+                    target.addComponent(thisPanel);
                 }
             }
         }
 
-        AddSampleLink addSampleLink = new AddSampleLink("addSampleLink");
-        addSampleLink.setVisible(PermissionManager.hasWritePermission(entry.getId(), IceSession
-                .get().getSessionKey()));
-        add(addSampleLink);
+        add(new AddSampleLink("addSampleLink"));
 
         try {
             samples.addAll(AuthenticatedSampleManager.get(entry));
         } catch (ManagerException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
         Object[] temp = samples.toArray();
         if (temp.length == 0) {
-            Panel sampleItemPanel = new EmptyMessagePanel("sampleItemPanel", "No sample provided");
+            Panel sampleItemPanel = new EmptyMessagePanel("sampleItemPanel", "No samples provided");
             sampleItemPanel.setOutputMarkupId(true);
             panels.add(sampleItemPanel);
         } else {
             populatePanels();
         }
 
-        ListView samplesList = generateSamplesList("samplesListView");
+        ListView<Object> samplesList = generateSamplesList("samplesListView");
         samplesList.setOutputMarkupId(true);
         add(samplesList);
     }
@@ -92,15 +85,13 @@ public class SampleViewPanel extends Panel {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public ListView generateSamplesList(String id) {
-
-        ListView samplesListView = new ListView(id, panels) {
+    public ListView<Object> generateSamplesList(String id) {
+        ListView<Object> samplesListView = new ListView<Object>(id, panels) {
 
             private static final long serialVersionUID = 1L;
 
             @Override
-            protected void populateItem(ListItem item) {
+            protected void populateItem(ListItem<Object> item) {
                 Panel panel = (Panel) item.getModelObject();
                 item.add(panel);
             }
@@ -124,5 +115,4 @@ public class SampleViewPanel extends Panel {
     public ArrayList<Sample> getSamples() {
         return samples;
     }
-
 }

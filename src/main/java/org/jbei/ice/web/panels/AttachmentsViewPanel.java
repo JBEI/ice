@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -15,21 +16,18 @@ import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.web.IceSession;
 
 public class AttachmentsViewPanel extends Panel {
-
     private static final long serialVersionUID = 1L;
 
     Entry entry = null;
     ArrayList<Attachment> attachments = new ArrayList<Attachment>();
     ArrayList<Panel> panels = new ArrayList<Panel>();
 
-    @SuppressWarnings("unchecked")
     public AttachmentsViewPanel(String id, Entry entry) {
         super(id);
 
         this.entry = entry;
 
-        class AddAttachmentLink extends AjaxFallbackLink {
-
+        class AddAttachmentLink extends AjaxFallbackLink<Object> {
             private static final long serialVersionUID = 1L;
 
             public AddAttachmentLink(String id) {
@@ -38,7 +36,7 @@ public class AttachmentsViewPanel extends Panel {
 
             @Override
             public void onClick(AjaxRequestTarget target) {
-                AttachmentsViewPanel thisPanel = (AttachmentsViewPanel) getParent();
+                AttachmentsViewPanel thisPanel = (AttachmentsViewPanel) getParent().getParent();
                 ArrayList<Panel> thisPanelsPanels = thisPanel.getPanels();
                 if (thisPanelsPanels.size() > 0
                         && thisPanelsPanels.get(0) instanceof AttachmentItemEditPanel) {
@@ -52,35 +50,35 @@ public class AttachmentsViewPanel extends Panel {
 
                     panels.add(0, newAttachmentEditPanel);
 
-                    target.getPage().replace(getParent());
-                    target.addComponent(getParent());
+                    target.getPage().replace(thisPanel);
+                    target.addComponent(thisPanel);
                 }
             }
         }
 
-        AddAttachmentLink addAttachmentLink = new AddAttachmentLink("addAttachmentLink");
-        addAttachmentLink.setVisible(PermissionManager.hasWritePermission(entry.getId(), IceSession
+        WebMarkupContainer topLinkContainer = new WebMarkupContainer("topLink");
+        topLinkContainer.setVisible(PermissionManager.hasWritePermission(entry.getId(), IceSession
                 .get().getSessionKey()));
-        add(addAttachmentLink);
+        topLinkContainer.add(new AddAttachmentLink("addAttachmentLink"));
+        add(topLinkContainer);
 
         try {
             attachments.addAll(AttachmentManager.getByEntry(entry));
         } catch (ManagerException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
         Object[] temp = attachments.toArray();
         if (temp.length == 0) {
             Panel attachmentItemPanel = new EmptyMessagePanel("attachmentItemPanel",
-                    "No Attachments");
+                    "No attachments provided");
             attachmentItemPanel.setOutputMarkupId(true);
             panels.add(attachmentItemPanel);
         } else {
             populatePanels();
         }
 
-        ListView attachmentsList = generateAttachmentsList("attachmentsListView");
+        ListView<Object> attachmentsList = generateAttachmentsList("attachmentsListView");
         attachmentsList.setOutputMarkupId(true);
         add(attachmentsList);
     }
@@ -97,15 +95,12 @@ public class AttachmentsViewPanel extends Panel {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public ListView generateAttachmentsList(String id) {
-
-        ListView attachmentsListView = new ListView(id, panels) {
-
+    public ListView<Object> generateAttachmentsList(String id) {
+        ListView<Object> attachmentsListView = new ListView<Object>(id, panels) {
             private static final long serialVersionUID = 1L;
 
             @Override
-            protected void populateItem(ListItem item) {
+            protected void populateItem(ListItem<Object> item) {
                 Panel panel = (Panel) item.getModelObject();
                 item.add(panel);
             }
@@ -125,5 +120,4 @@ public class AttachmentsViewPanel extends Panel {
     public ArrayList<Panel> getPanels() {
         return panels;
     }
-
 }

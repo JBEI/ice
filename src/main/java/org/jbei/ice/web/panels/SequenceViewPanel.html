@@ -2,8 +2,7 @@
 <wicket:panel>
 	<table border="0" cellpadding="3" cellspacing="1" class="entry_table">
 		<tr class="title_row_header">
-			<td>Sequence | <a href="#" wicket:id="actionSequenceLink"><span
-				wicket:id="actionLinkLabel"></span></a></td>
+			<td>Sequence <span wicket:id="topLink">| <a href="#" wicket:id="actionSequenceLink"><span wicket:id="actionLinkLabel"></span></a></span></td>
 		</tr>
 		<tr>
 			<td bgcolor="#ffffff"><span wicket:id="sequenceFormPanel">Add/Edit form panel</span><span wicket:id="sequenceDataPanel">Data Panel</span></td>
@@ -19,6 +18,6 @@
 		</table>
 	</wicket:fragment>
 
-	<wicket:fragment wicket:id="noSequenceFragment">No sequence</wicket:fragment>
+	<wicket:fragment wicket:id="noSequenceFragment">No sequence provided</wicket:fragment>
 </wicket:panel>
 </html>

@@ -18,30 +18,34 @@ import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class SampleItemEditPanel extends Panel {
-
     private static final long serialVersionUID = 1L;
+
     private Sample sample = null;
 
-    public SampleItemEditPanel(String id, Sample passedSample) {
+    public SampleItemEditPanel(String id, Sample passedSample, boolean isEditAction) {
         super(id);
+
         sample = passedSample;
 
         class SampleEditForm extends StatelessForm<Object> {
-
             private static final long serialVersionUID = 1L;
 
             private String label;
             private String depositor;
             private String notes;
 
-            public SampleEditForm(String id) {
+            public SampleEditForm(String id, boolean isEditAction) {
                 super(id);
 
                 setLabel(sample.getLabel());
-                if (sample.getDepositor() == null || sample.getDepositor().equals("")) {
-                    setDepositor(sample.getEntry().getOwnerEmail());
+                if (isEditAction) {
+                    if (sample.getDepositor() == null || sample.getDepositor().isEmpty()) {
+                        setDepositor(sample.getEntry().getOwnerEmail());
+                    } else {
+                        setDepositor(sample.getDepositor());
+                    }
                 } else {
-                    setDepositor(sample.getDepositor());
+                    setDepositor(IceSession.get().getAccount().getEmail());
                 }
                 setNotes(sample.getNotes());
 
@@ -119,7 +123,7 @@ public class SampleItemEditPanel extends Panel {
             }
 
         }
-        add(new SampleEditForm("sampleEditForm"));
+        add(new SampleEditForm("sampleEditForm", isEditAction));
         add(new FeedbackPanel("feedback"));
     }
 
@@ -130,5 +134,4 @@ public class SampleItemEditPanel extends Panel {
     public Sample getSample() {
         return sample;
     }
-
 }

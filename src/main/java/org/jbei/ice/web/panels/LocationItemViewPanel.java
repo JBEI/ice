@@ -4,6 +4,7 @@ import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.managers.ManagerException;
@@ -17,12 +18,11 @@ import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class LocationItemViewPanel extends Panel {
-
     private static final long serialVersionUID = 1L;
+
     private Integer index = null;
     private Location location = null;
 
-    @SuppressWarnings("unchecked")
     public LocationItemViewPanel(String id, Integer counter, Location location) {
         super(id);
 
@@ -38,8 +38,7 @@ public class LocationItemViewPanel extends Panel {
         add(new Label("nColumns", "" + location.getnColumns()));
         add(new Label("nRows", "" + location.getnRows()));
 
-        class DeleteLocationLink extends AjaxFallbackLink {
-
+        class DeleteLocationLink extends AjaxFallbackLink<Object> {
             private static final long serialVersionUID = 1L;
 
             public DeleteLocationLink(String id) {
@@ -50,7 +49,7 @@ public class LocationItemViewPanel extends Panel {
 
             @Override
             public void onClick(AjaxRequestTarget target) {
-                LocationItemViewPanel thisPanel = (LocationItemViewPanel) getParent();
+                LocationItemViewPanel thisPanel = (LocationItemViewPanel) getParent().getParent();
                 Location location = thisPanel.getLocation();
                 Entry entry = location.getSample().getEntry();
 
@@ -72,7 +71,7 @@ public class LocationItemViewPanel extends Panel {
             }
         }
 
-        class EditLocationLink extends AjaxFallbackLink {
+        class EditLocationLink extends AjaxFallbackLink<Object> {
             private static final long serialVersionUID = 1L;
 
             public EditLocationLink(String id) {
@@ -82,7 +81,7 @@ public class LocationItemViewPanel extends Panel {
             @Override
             public void onClick(AjaxRequestTarget target) {
                 boolean edit = true;
-                LocationItemViewPanel thisPanel = (LocationItemViewPanel) getParent();
+                LocationItemViewPanel thisPanel = (LocationItemViewPanel) getParent().getParent();
 
                 LocationViewPanel locationViewPanel = (LocationViewPanel) thisPanel.getParent()
                         .getParent().getParent();
@@ -107,13 +106,19 @@ public class LocationItemViewPanel extends Panel {
             }
         }
 
-        AjaxFallbackLink deleteLocationLink = new DeleteLocationLink("deleteLocationLink");
-        deleteLocationLink.setOutputMarkupId(true);
-        add(deleteLocationLink);
+        WebMarkupContainer locationEditDeleteContainer = new WebMarkupContainer(
+                "locationEditDeleteContainer");
+        locationEditDeleteContainer.setVisible(IceSession.get().getAccount().getEmail().equals(
+                location.getSample().getDepositor()));
+        add(locationEditDeleteContainer);
 
-        AjaxFallbackLink editLocationLink = new EditLocationLink("editLocationLink");
+        AjaxFallbackLink<Object> deleteLocationLink = new DeleteLocationLink("deleteLocationLink");
+        deleteLocationLink.setOutputMarkupId(true);
+        locationEditDeleteContainer.add(deleteLocationLink);
+
+        AjaxFallbackLink<Object> editLocationLink = new EditLocationLink("editLocationLink");
         editLocationLink.setOutputMarkupId(true);
-        add(editLocationLink);
+        locationEditDeleteContainer.add(editLocationLink);
     }
 
     public void setIndex(Integer index) {
@@ -131,5 +136,4 @@ public class LocationItemViewPanel extends Panel {
     public Location getLocation() {
         return location;
     }
-
 }

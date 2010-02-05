@@ -4,6 +4,7 @@ import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.managers.ManagerException;
@@ -14,8 +15,8 @@ import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class SampleItemViewPanel extends Panel {
-
     private static final long serialVersionUID = 1L;
+
     private Integer index = null;
     private Sample sample = null;
 
@@ -41,7 +42,7 @@ public class SampleItemViewPanel extends Panel {
 
             @Override
             public void onClick(AjaxRequestTarget target) {
-                SampleItemViewPanel thisPanel = (SampleItemViewPanel) getParent();
+                SampleItemViewPanel thisPanel = (SampleItemViewPanel) getParent().getParent();
                 Sample sample = thisPanel.getSample();
 
                 try {
@@ -49,7 +50,6 @@ public class SampleItemViewPanel extends Panel {
                 } catch (PermissionException e) {
                     error("delete not permitted");
                 } catch (ManagerException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
 
@@ -64,13 +64,12 @@ public class SampleItemViewPanel extends Panel {
 
             public EditSampleLink(String id) {
                 super(id);
-
             }
 
             @Override
             public void onClick(AjaxRequestTarget target) {
                 boolean edit = true;
-                SampleItemViewPanel thisPanel = (SampleItemViewPanel) getParent();
+                SampleItemViewPanel thisPanel = (SampleItemViewPanel) getParent().getParent();
 
                 SampleViewPanel sampleViewPanel = (SampleViewPanel) thisPanel.getParent()
                         .getParent().getParent();
@@ -80,10 +79,12 @@ public class SampleItemViewPanel extends Panel {
                         // if an edit panel is already open, do nothing
                     }
                 }
+
                 if (edit) {
                     Sample sample = thisPanel.getSample();
                     int myIndex = sampleViewPanel.getPanels().indexOf(thisPanel);
-                    Panel newSampleEditPanel = new SampleItemEditPanel("sampleItemPanel", sample);
+                    Panel newSampleEditPanel = new SampleItemEditPanel("sampleItemPanel", sample,
+                            true);
                     sampleViewPanel.getPanels().remove(myIndex);
                     sampleViewPanel.getPanels().add(myIndex, newSampleEditPanel);
                     getPage().replace(sampleViewPanel);
@@ -92,25 +93,31 @@ public class SampleItemViewPanel extends Panel {
             }
         }
 
+        WebMarkupContainer sampleEditDeleteContainer = new WebMarkupContainer(
+                "sampleEditDeleteContainer");
+
+        sampleEditDeleteContainer.setVisible(IceSession.get().getAccount().getEmail().equals(
+                sample.getDepositor()));
+
         AjaxFallbackLink deleteSampleLink = new DeleteSampleLink("deleteSampleLink");
         deleteSampleLink.setOutputMarkupId(true);
-        add(deleteSampleLink);
+        sampleEditDeleteContainer.add(deleteSampleLink);
+        add(sampleEditDeleteContainer);
 
         AjaxFallbackLink editSampleLink = new EditSampleLink("editSampleLink");
         editSampleLink.setOutputMarkupId(true);
-        add(editSampleLink);
+        sampleEditDeleteContainer.add(editSampleLink);
 
         LocationViewPanel locationViewPanel = new LocationViewPanel("locationPanel", sample);
         locationViewPanel.setOutputMarkupId(true);
         add(locationViewPanel);
-
     }
 
     public void setIndex(Integer index) {
         this.index = index;
     }
 
-    public Integer getIndexr() {
+    public Integer getIndex() {
         return index;
     }
 
@@ -121,5 +128,4 @@ public class SampleItemViewPanel extends Panel {
     public Sample getSample() {
         return sample;
     }
-
 }

@@ -4,11 +4,13 @@ import java.util.ArrayList;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.models.Location;
 import org.jbei.ice.lib.models.Sample;
+import org.jbei.ice.web.IceSession;
 
 public class LocationViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -17,14 +19,12 @@ public class LocationViewPanel extends Panel {
     ArrayList<Location> locations = new ArrayList<Location>();
     ArrayList<Panel> panels = new ArrayList<Panel>();
 
-    @SuppressWarnings("unchecked")
     public LocationViewPanel(String id, Sample sample) {
         super(id);
 
         this.sample = sample;
 
-        class AddLocationLink extends AjaxFallbackLink {
-
+        class AddLocationLink extends AjaxFallbackLink<Object> {
             private static final long serialVersionUID = 1L;
 
             public AddLocationLink(String id) {
@@ -33,7 +33,7 @@ public class LocationViewPanel extends Panel {
 
             @Override
             public void onClick(AjaxRequestTarget target) {
-                LocationViewPanel thisPanel = (LocationViewPanel) getParent();
+                LocationViewPanel thisPanel = (LocationViewPanel) getParent().getParent();
                 ArrayList<Panel> thisPanelsPanels = thisPanel.getPanels();
                 if (thisPanelsPanels.size() > 0
                         && thisPanelsPanels.get(0) instanceof LocationItemEditPanel) {
@@ -56,7 +56,11 @@ public class LocationViewPanel extends Panel {
 
         }
 
-        add(new AddLocationLink("addLocationLink"));
+        WebMarkupContainer topLinkContainer = new WebMarkupContainer("topLinkContainer");
+        topLinkContainer.setVisible(IceSession.get().getAccount().getEmail().equals(
+                sample.getDepositor()));
+        topLinkContainer.add(new AddLocationLink("addLocationLink"));
+        add(topLinkContainer);
 
         locations.addAll(sample.getLocations());
 
@@ -70,7 +74,7 @@ public class LocationViewPanel extends Panel {
             populatePanels();
         }
 
-        ListView locationsList = generateLocationsList("locationsListView");
+        ListView<Object> locationsList = generateLocationsList("locationsListView");
         locationsList.setOutputMarkupId(true);
         add(locationsList);
     }
@@ -87,12 +91,11 @@ public class LocationViewPanel extends Panel {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public ListView generateLocationsList(String id) {
-        ListView locationsListView = new ListView(id, panels) {
+    public ListView<Object> generateLocationsList(String id) {
+        ListView<Object> locationsListView = new ListView<Object>(id, panels) {
             private static final long serialVersionUID = 1L;
 
-            protected void populateItem(ListItem item) {
+            protected void populateItem(ListItem<Object> item) {
                 Panel panel = (Panel) item.getModelObject();
                 item.add(panel);
             }
@@ -124,5 +127,4 @@ public class LocationViewPanel extends Panel {
     public void setPanels(ArrayList<Panel> panels) {
         this.panels = panels;
     }
-
 }

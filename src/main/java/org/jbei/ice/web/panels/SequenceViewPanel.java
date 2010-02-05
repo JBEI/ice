@@ -8,6 +8,7 @@ import java.io.IOException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.link.DownloadLink;
@@ -19,6 +20,8 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sequence;
+import org.jbei.ice.lib.permissions.PermissionManager;
+import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.forms.SequenceNewFormPanel;
 import org.jbei.ice.web.forms.SequenceUpdateFormPanel;
 
@@ -32,6 +35,7 @@ public class SequenceViewPanel extends Panel {
     private AjaxFallbackLink<Object> editSequenceLink;
     private String sequenceUser;
     private EmptyPanel emptySequenceFormPanel;
+    private WebMarkupContainer topLinkContainer;
 
     public SequenceViewPanel(String id, Entry entry) {
         super(id);
@@ -52,16 +56,21 @@ public class SequenceViewPanel extends Panel {
     }
 
     private void initializeControls() {
+        topLinkContainer = new WebMarkupContainer("topLink");
+        topLinkContainer.setVisible(PermissionManager.hasWritePermission(entry.getId(), IceSession
+                .get().getSessionKey()));
+        add(topLinkContainer);
+
         addSequenceLink = new AjaxFallbackLink<Object>("actionSequenceLink") {
             private static final long serialVersionUID = 1L;
 
             @Override
             public void onClick(AjaxRequestTarget target) {
                 SequenceNewFormPanel addNewSequence = new SequenceNewFormPanel("sequenceFormPanel",
-                        (SequenceViewPanel) getParent(), entry);
+                        (SequenceViewPanel) getParent().getParent(), entry);
                 addNewSequence.setOutputMarkupId(true);
 
-                getParent().addOrReplace(addNewSequence);
+                getParent().getParent().addOrReplace(addNewSequence);
                 target.addComponent(addNewSequence);
             }
         };
@@ -73,10 +82,10 @@ public class SequenceViewPanel extends Panel {
             @Override
             public void onClick(AjaxRequestTarget target) {
                 SequenceUpdateFormPanel updateSequence = new SequenceUpdateFormPanel(
-                        "sequenceFormPanel", (SequenceViewPanel) getParent(), entry);
+                        "sequenceFormPanel", (SequenceViewPanel) getParent().getParent(), entry);
                 updateSequence.setOutputMarkupId(true);
 
-                getParent().addOrReplace(updateSequence);
+                getParent().getParent().addOrReplace(updateSequence);
                 target.addComponent(updateSequence);
             }
         };
@@ -89,11 +98,11 @@ public class SequenceViewPanel extends Panel {
 
     private void updateStatus(Sequence sequence) {
         if (sequence == null) {
-            addOrReplace(addSequenceLink);
+            topLinkContainer.addOrReplace(addSequenceLink);
             addOrReplace(createNoSequenceFragment());
         } else {
             this.sequence = sequence;
-            addOrReplace(editSequenceLink);
+            topLinkContainer.addOrReplace(editSequenceLink);
             addOrReplace(createSequenceFragment());
             sequenceUser = sequence.getSequenceUser();
         }
@@ -132,7 +141,8 @@ public class SequenceViewPanel extends Panel {
                 fragment.setOutputMarkupPlaceholderTag(true);
                 fragment.setOutputMarkupId(true);
 
-                fragment.add(new DeleteSequenceLink("deleteLink"));
+                fragment.add(new DeleteSequenceLink("deleteLink").setVisible(PermissionManager
+                        .hasWritePermission(entry.getId(), IceSession.get().getSessionKey())));
             } catch (IOException e) {
                 e.printStackTrace();
             }

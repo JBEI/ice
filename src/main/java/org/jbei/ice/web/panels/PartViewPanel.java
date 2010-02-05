@@ -8,6 +8,7 @@ import java.util.Set;
 import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -27,7 +28,6 @@ import org.jbei.ice.web.pages.EntryUpdatePage;
 import org.jbei.ice.web.pages.ProfilePage;
 
 public class PartViewPanel extends Panel {
-
     private static final long serialVersionUID = 1L;
 
     @SuppressWarnings("unchecked")
@@ -148,11 +148,13 @@ public class PartViewPanel extends Panel {
 
         elements.add(new MultiLineLabel("references", entry.getReferences()));
         elements.add(new MultiLineLabel("longDescription", entry.getLongDescription()));
-        BookmarkablePageLink updateLink = new BookmarkablePageLink("updateLink",
-                EntryUpdatePage.class, new PageParameters("0=" + entry.getId()));
-        updateLink.setVisible(PermissionManager.hasWritePermission(entry.getId(), IceSession.get()
-                .getSessionKey()));
-        elements.add(updateLink);
+
+        WebMarkupContainer topLinkContainer = new WebMarkupContainer("topLink");
+        topLinkContainer.setVisible(PermissionManager.hasWritePermission(entry.getId(), IceSession
+                .get().getSessionKey()));
+        topLinkContainer.add(new BookmarkablePageLink("updateLink", EntryUpdatePage.class,
+                new PageParameters("0=" + entry.getId())));
+        elements.add(topLinkContainer);
 
         String bioSafetyLevel = "";
         if (entry.getBioSafetyLevel() != null) {

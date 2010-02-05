@@ -150,8 +150,6 @@ public class PermissionEditPanel extends Panel {
 
             @Override
             public void onClick(AjaxRequestTarget target) {
-                System.out.println("users link clicked");
-
                 PermissionEditPanel thisPanel = (PermissionEditPanel) getParent().getParent();
                 thisPanel.usersLink.add(new SimpleAttributeModifier("class", "active"))
                         .setOutputMarkupId(true);
@@ -176,7 +174,6 @@ public class PermissionEditPanel extends Panel {
 
             @Override
             public void onClick(AjaxRequestTarget target) {
-                System.out.println("groups link clicked");
                 PermissionEditPanel thisPanel = (PermissionEditPanel) getParent().getParent();
                 thisPanel.usersLink.add(new SimpleAttributeModifier("class", "inactive"))
                         .setOutputMarkupId(true);
