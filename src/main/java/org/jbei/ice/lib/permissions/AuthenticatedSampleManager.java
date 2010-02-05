@@ -2,6 +2,7 @@ package org.jbei.ice.lib.permissions;
 
 import java.util.LinkedHashSet;
 
+import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.models.Account;
@@ -48,7 +49,9 @@ public class AuthenticatedSampleManager {
     }
 
     public static Sample save(Sample sample, String sessionKey) throws ManagerException {
-        if (PermissionManager.hasWritePermission(sample.getEntry().getId(), sessionKey)) {
+        Sample oldSample = SampleManager.get(sample.getId());
+        Account user = AccountManager.getAccountByAuthToken(sessionKey);
+        if (oldSample.getDepositor().equals(user.getEmail())) {
             return SampleManager.save(sample);
         } else {
             throw new PermissionException("save not permitted");
@@ -56,7 +59,9 @@ public class AuthenticatedSampleManager {
     }
 
     public static void delete(Sample sample, String sessionKey) throws ManagerException {
-        if (PermissionManager.hasWritePermission(sample.getEntry().getId(), sessionKey)) {
+        Sample oldSample = SampleManager.get(sample.getId());
+        Account user = AccountManager.getAccountByAuthToken(sessionKey);
+        if (oldSample.getDepositor().equals(user.getEmail())) {
             SampleManager.delete(sample);
         } else {
             throw new PermissionException("save not permitted");
