@@ -82,8 +82,8 @@ public class SearchResultPanel extends Panel {
                 Entry entry = null;
                 try {
                     entry = EntryManager.getByRecordId(searchResult.getRecordId());
-                } catch (ManagerException e1) {
-                    e1.printStackTrace();
+                } catch (ManagerException e) {
+                    e.printStackTrace();
 
                     return;
                 }

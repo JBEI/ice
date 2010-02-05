@@ -8,21 +8,25 @@ import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
+import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.managers.UtilsManager;
+import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryUpdatePage;
+import org.jbei.ice.web.pages.ProfilePage;
 import org.jbei.ice.web.utils.WebUtils;
 
 public class PlasmidViewPanel extends Panel {
@@ -40,7 +44,37 @@ public class PlasmidViewPanel extends Panel {
         elements.add(new Label("backbone", entry.getBackbone()));
         elements.add(new Label("alias", entry.getAlias()));
         elements.add(new Label("originOfReplication", entry.getOriginOfReplication()));
-        elements.add(new Label("creator", entry.getCreator()));
+
+        if (entry.getCreatorEmail() == null || entry.getCreatorEmail().isEmpty()) {
+            BookmarkablePageLink<ProfilePage> creatorProfileLink = new BookmarkablePageLink<ProfilePage>(
+                    "creatorProfileLink", ProfilePage.class, new PageParameters("0=about,1="
+                            + entry.getCreatorEmail()));
+            creatorProfileLink.add(new Label("creatorLinked", ""));
+            elements.add(creatorProfileLink.setVisible(false));
+
+            elements.add(new Label("creator", entry.getCreator()));
+        } else {
+            Account creatorAccount = null;
+            try {
+                creatorAccount = AccountManager.getByEmail(entry.getCreatorEmail());
+            } catch (ManagerException e) {
+                e.printStackTrace();
+            }
+
+            BookmarkablePageLink<ProfilePage> creatorProfileLink = new BookmarkablePageLink<ProfilePage>(
+                    "creatorProfileLink", ProfilePage.class, new PageParameters("0=about,1="
+                            + entry.getCreatorEmail()));
+            String creatorAltText = "Profile "
+                    + ((creatorAccount == null) ? entry.getCreator() : creatorAccount.getFullName());
+            creatorProfileLink.add(new SimpleAttributeModifier("title", creatorAltText));
+            creatorProfileLink.add(new SimpleAttributeModifier("alt", creatorAltText));
+            creatorProfileLink.add(new Label("creatorLinked", ((creatorAccount == null) ? entry
+                    .getCreator() : creatorAccount.getFullName())));
+            elements.add(creatorProfileLink);
+
+            elements.add(new Label("creator", "").setVisible(false));
+        }
+
         elements.add(new Label("promoters", entry.getPromoters()));
         elements.add(new Label("status", org.jbei.ice.lib.utils.JbeiConstants.getStatus(entry
                 .getStatus())));
@@ -53,7 +87,38 @@ public class PlasmidViewPanel extends Panel {
         }
         elements.add(new Label("linksToStrains", WebUtils.makeEntryLinks(temp))
                 .setEscapeModelStrings(false));
-        elements.add(new Label("linkToOwner", entry.getOwner()));
+
+        if (entry.getOwnerEmail() == null || entry.getOwnerEmail().isEmpty()) {
+            BookmarkablePageLink<ProfilePage> ownerProfileLink = new BookmarkablePageLink<ProfilePage>(
+                    "ownerProfileLink", ProfilePage.class, new PageParameters("0=about,1="
+                            + entry.getOwnerEmail()));
+
+            ownerProfileLink.add(new Label("ownerLinked", ""));
+            elements.add(ownerProfileLink.setVisible(false));
+
+            elements.add(new Label("owner", entry.getOwner()));
+        } else {
+            Account ownerAccount = null;
+            try {
+                ownerAccount = AccountManager.getByEmail(entry.getOwnerEmail());
+            } catch (ManagerException e) {
+                e.printStackTrace();
+            }
+
+            BookmarkablePageLink<ProfilePage> ownerProfileLink = new BookmarkablePageLink<ProfilePage>(
+                    "ownerProfileLink", ProfilePage.class, new PageParameters("0=about,1="
+                            + entry.getOwnerEmail()));
+            String ownerAltText = "Profile "
+                    + ((ownerAccount == null) ? entry.getOwner() : ownerAccount.getFullName());
+            ownerProfileLink.add(new SimpleAttributeModifier("title", ownerAltText));
+            ownerProfileLink.add(new SimpleAttributeModifier("alt", ownerAltText));
+            ownerProfileLink.add(new Label("ownerLinked", ((ownerAccount == null) ? entry
+                    .getOwner() : ownerAccount.getFullName())));
+            elements.add(ownerProfileLink);
+
+            elements.add(new Label("owner", "").setVisible(false));
+        }
+
         elements.add(new Label("links", entry.getLinksAsString()));
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
