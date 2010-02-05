@@ -5,6 +5,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+import org.apache.wicket.Page;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ResourceReference;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
@@ -13,24 +14,35 @@ import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.PageableListView;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.repeater.data.DataView;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.AttachmentManager;
+import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.search.SearchResult;
+import org.jbei.ice.lib.utils.JbeiConstants;
+import org.jbei.ice.web.dataProviders.SearchDataProvider;
+import org.jbei.ice.web.pages.EntriesAllFieldsExcelExportPage;
+import org.jbei.ice.web.pages.EntriesCurrentFieldsExcelExportPage;
+import org.jbei.ice.web.pages.EntriesXMLExportPage;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
+import org.jbei.ice.web.pages.PrintableEntriesFullContentPage;
+import org.jbei.ice.web.pages.PrintableEntriesTablePage;
 import org.jbei.ice.web.pages.ProfilePage;
 import org.jbei.ice.web.pages.UnprotectedPage;
 
 public class SearchResultPanel extends Panel {
     private static final long serialVersionUID = 1L;
+
+    private SearchDataProvider searchDataProvider;
 
     ResourceReference blankImage;
     ResourceReference hasAttachmentImage;
@@ -58,25 +70,41 @@ public class SearchResultPanel extends Panel {
         add(new Image("sequenceHeaderImage", hasSequenceImage));
         add(new Image("sampleHeaderImage", hasSampleImage));
 
-        @SuppressWarnings("unchecked")
-        PageableListView listView = new PageableListView("itemRows", searchResults, limit) {
+        searchDataProvider = new SearchDataProvider(searchResults);
+
+        DataView<SearchResult> dataView = new DataView<SearchResult>("entriesDataView",
+                searchDataProvider, limit) {
             private static final long serialVersionUID = 1L;
 
-            @SuppressWarnings("unchecked")
             @Override
-            protected void populateItem(ListItem item) {
+            protected void populateItem(Item<SearchResult> item) {
                 SearchResult searchResult = (SearchResult) item.getModelObject();
-                Entry entry = searchResult.getEntry();
+                Entry entry = null;
+                try {
+                    entry = EntryManager.getByRecordId(searchResult.getRecordId());
+                } catch (ManagerException e1) {
+                    e1.printStackTrace();
 
-                item.add(new Label("index", "" + (item.getIndex() + 1)));
+                    return;
+                }
+
+                item.add(new Label("index", ""
+                        + (getItemsPerPage() * getCurrentPage() + item.getIndex() + 1)));
                 item.add(new Label("recordType", entry.getRecordType()));
-                BookmarkablePageLink partIdLink = new BookmarkablePageLink("partIdLink",
-                        EntryViewPage.class, new PageParameters("0=" + entry.getId()));
-                partIdLink.add(new Label("partNumber", entry.getOnePartNumber().getPartNumber()));
+
+                BookmarkablePageLink<String> entryLink = new BookmarkablePageLink<String>(
+                        "partIdLink", EntryViewPage.class, new PageParameters("0=" + entry.getId()));
+                entryLink.add(new Label("partNumber", entry.getOnePartNumber().getPartNumber()));
                 String tipUrl = (String) urlFor(EntryTipPage.class, new PageParameters());
-                partIdLink.add(new SimpleAttributeModifier("rel", tipUrl + "/" + entry.getId()));
-                item.add(partIdLink);
+                entryLink.add(new SimpleAttributeModifier("rel", tipUrl + "/" + entry.getId()));
+                item.add(entryLink);
+
                 item.add(new Label("name", entry.getOneName().getName()));
+
+                NumberFormat formatter = new DecimalFormat("##");
+                String scoreString = formatter.format(searchResult.getScore() * 100);
+                item.add(new Label("score", scoreString));
+
                 item.add(new Label("description", entry.getShortDescription()));
                 Account ownerAccount = null;
 
@@ -97,9 +125,7 @@ public class SearchResultPanel extends Panel {
                 ownerProfileLink.add(new SimpleAttributeModifier("alt", ownerAltText));
                 item.add(ownerProfileLink);
 
-                NumberFormat formatter = new DecimalFormat("##");
-                String scoreString = formatter.format(searchResult.getScore() * 100);
-                item.add(new Label("score", scoreString));
+                item.add(new Label("status", JbeiConstants.getStatus(entry.getStatus())));
 
                 item
                         .add(new Image("hasAttachment",
@@ -116,7 +142,54 @@ public class SearchResultPanel extends Panel {
             }
         };
 
-        add(listView);
-        add(new JbeiPagingNavigator("navigator", listView));
+        add(dataView);
+
+        add(new JbeiPagingNavigator("navigator", dataView));
+
+        add(new Link<Page>("printableCurrentLink") {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void onClick() {
+                setResponsePage(new PrintableEntriesTablePage(searchDataProvider.getEntries(), true));
+            }
+        });
+
+        add(new Link<Page>("printableAllLink") {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void onClick() {
+                setResponsePage(new PrintableEntriesFullContentPage(searchDataProvider.getEntries()));
+            }
+        });
+
+        add(new Link<Page>("excelCurrentLink") {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void onClick() {
+                setResponsePage(new EntriesCurrentFieldsExcelExportPage(searchDataProvider
+                        .getEntries()));
+            }
+        });
+
+        add(new Link<Page>("excelAllLink") {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void onClick() {
+                setResponsePage(new EntriesAllFieldsExcelExportPage(searchDataProvider.getEntries()));
+            }
+        });
+
+        add(new Link<Page>("xmlLink") {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void onClick() {
+                setResponsePage(new EntriesXMLExportPage(searchDataProvider.getEntries()));
+            }
+        });
     }
 }

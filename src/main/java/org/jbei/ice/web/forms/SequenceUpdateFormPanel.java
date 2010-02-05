@@ -92,6 +92,7 @@ public class SequenceUpdateFormPanel extends Panel {
 
             try {
                 Sequence currentSequence = entry.getSequence();
+                entry.setSequence(null);
 
                 SequenceManager.delete(currentSequence);
 
@@ -105,7 +106,6 @@ public class SequenceUpdateFormPanel extends Panel {
                     }
                 }
 
-                SequenceManager.create(sequence);
                 entry.setSequence(sequence);
                 EntryManager.save(entry);
             } catch (ManagerException e) {

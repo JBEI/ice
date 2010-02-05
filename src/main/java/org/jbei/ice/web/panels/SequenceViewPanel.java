@@ -168,6 +168,8 @@ public class SequenceViewPanel extends Panel {
 
         public void onClick(AjaxRequestTarget target) {
             try {
+                entry.setSequence(null);
+
                 SequenceManager.delete(sequence);
 
                 updateView(null);

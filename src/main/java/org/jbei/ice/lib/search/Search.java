@@ -46,6 +46,7 @@ public class Search {
     private IndexSearcher indexSearcher = null;
     private File indexFile = null;
     private boolean newIndex = false;
+    private final int SEARCH_MAX_RESULT = 1000;
 
     private static class SingletonHolder {
         private static final Search INSTANCE = new Search();
@@ -228,6 +229,7 @@ public class Search {
         } catch (ManagerException e) {
             e.printStackTrace();
         }
+
         if (samples != null) {
             ArrayList<String> samplesArray = new ArrayList<String>();
             for (Sample sample : samples) {
@@ -284,8 +286,8 @@ public class Search {
         }
 
         document.add(new Field("content", content, Field.Store.NO, Field.Index.ANALYZED));
-        return document;
 
+        return document;
     }
 
     public ArrayList<SearchResult> query(String queryString) {
@@ -294,6 +296,7 @@ public class Search {
 
         if (newIndex == true) {
             newIndex = false;
+
             Logger.info("Creating search index for the first time");
             JobCue jobCue = JobCue.getInstance();
             jobCue.addJob(Job.REBUILD_SEARCH_INDEX);
@@ -301,12 +304,11 @@ public class Search {
         } else if (indexSearcher == null) {
 
         } else {
-
             try {
                 QueryParser parser = new QueryParser(Version.LUCENE_CURRENT, "content", analyzer);
                 Query query = parser.parse(queryString);
                 IndexSearcher searcher = getIndexSearcher();
-                TopDocs hits = searcher.search(query, 1000);
+                TopDocs hits = searcher.search(query, SEARCH_MAX_RESULT);
                 Logger.info("" + hits.totalHits + " results found");
 
                 ArrayList<ScoreDoc> hitsArray = new ArrayList<ScoreDoc>(Arrays
@@ -317,11 +319,11 @@ public class Search {
                     int docId = scoreDoc.doc;
                     Document doc = indexSearcher.doc(docId);
                     String recordId = doc.get("Record ID");
-                    Entry entry = EntryManager.getByRecordId(recordId);
-                    result.add(new SearchResult(entry, score));
+                    result.add(new SearchResult(recordId, score));
                 }
             } catch (Exception e) {
                 String msg = "Could not run query: " + e.toString();
+
                 Logger.error(msg);
             }
         }
@@ -330,8 +332,7 @@ public class Search {
     }
 
     public static void main(String[] args) {
-
-        try {
+        /*try {
             //Search.getInstance().rebuildIndex();
             Search searcher = Search.getInstance();
             ArrayList<SearchResult> results = searcher.query("thesis");
@@ -341,8 +342,7 @@ public class Search {
             }
             System.out.println("" + results.size());
         } catch (Exception e) {
-
             e.printStackTrace();
-        }
+        }*/
     }
 }

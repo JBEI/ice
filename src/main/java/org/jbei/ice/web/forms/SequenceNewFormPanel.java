@@ -96,7 +96,6 @@ public class SequenceNewFormPanel extends Panel {
                     }
                 }
 
-                SequenceManager.create(sequence);
                 entry.setSequence(sequence);
                 EntryManager.save(entry);
             } catch (ManagerException e) {

@@ -9,13 +9,14 @@
 			<th>Name</th>
 			<th>Summary</th>
 			<th>Owner</th>
+			<th>Status</th>
 			<th><img wicket:id="attachmentHeaderImage" title="Has Attachments" alt="Has Attachments"></th>
 			<th><img wicket:id="sampleHeaderImage" title="Has Samples" alt="Has Samples"></th>
 			<th><img wicket:id="sequenceHeaderImage" title="Has Sequence" alt="Has Sequence"></th>
 			<th>Created</th>
 		</tr>
 		<tbody>
-			<tr wicket:id="itemRows" class="odd_row">
+			<tr wicket:id="entriesDataView" class="odd_row">
 				<td><span wicket:id="index"></span>.</td>
 				<td><b><span wicket:id="score"></span></b></td>
 				<td><span wicket:id="recordType"></span></td>
@@ -23,6 +24,7 @@
 				<td><span wicket:id="name"></span></td>
 				<td><span wicket:id="description"></span></td>
 				<td><a href="#" wicket:id="ownerProfileLink"> <span wicket:id="owner"></span></a></td>
+				<td><span wicket:id="status"></span></td>
 				<td><img wicket:id="hasAttachment"></img></td>
 				<td><img wicket:id="hasSample"></img></td>
 				<td><img wicket:id="hasSequence"></img></td>
@@ -41,6 +43,14 @@
 				</td>
 			</tr>
 		</tbody>
+	</table>
+	<table width="100%">
+		<tr bgcolor="#FFFFFF">
+			<td colspan="20" align="center"><b>Export as:</b> Printable: (<a href="#"
+				wicket:id="printableCurrentLink">Current content</a> | <a href="#" wicket:id="printableAllLink">Full
+			content</a>) | Excel (<a href="#" wicket:id="excelCurrentLink">Current fields</a> | <a href="#"
+				wicket:id="excelAllLink">All fields</a>) | <a href="#" wicket:id="xmlLink">XML</a></td>
+		</tr>
 	</table>
 	<script type="text/javascript">
 	assignClueTips();

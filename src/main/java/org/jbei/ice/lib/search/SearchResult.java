@@ -2,21 +2,18 @@ package org.jbei.ice.lib.search;
 
 import java.io.Serializable;
 
-import org.jbei.ice.lib.models.Entry;
-
 public class SearchResult implements Serializable {
-
     private static final long serialVersionUID = 1L;
 
-    private Entry entry;
+    private String recordId;
     private float score;
 
-    public void setEntry(Entry entry) {
-        this.entry = entry;
+    public void setRecordId(String recordId) {
+        this.recordId = recordId;
     }
 
-    public Entry getEntry() {
-        return entry;
+    public String getRecordId() {
+        return recordId;
     }
 
     public void setScore(float score) {
@@ -27,8 +24,8 @@ public class SearchResult implements Serializable {
         return score;
     }
 
-    public SearchResult(Entry entry, float score) {
-        setEntry(entry);
+    public SearchResult(String recordId, float score) {
+        setRecordId(recordId);
         setScore(score);
     }
 }

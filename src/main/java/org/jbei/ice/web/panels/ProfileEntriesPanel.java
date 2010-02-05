@@ -28,11 +28,11 @@ import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.web.dataProviders.AbstractEntriesDataProvider;
 import org.jbei.ice.web.dataProviders.EntriesQueryDataProvider;
 import org.jbei.ice.web.dataProviders.UserEntriesDataProvider;
-import org.jbei.ice.web.pages.EntryAllExcelExportPage;
-import org.jbei.ice.web.pages.EntryExcelExportPage;
+import org.jbei.ice.web.pages.EntriesAllFieldsExcelExportPage;
+import org.jbei.ice.web.pages.EntriesCurrentFieldsExcelExportPage;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
-import org.jbei.ice.web.pages.EntryXMLExportPage;
+import org.jbei.ice.web.pages.EntriesXMLExportPage;
 import org.jbei.ice.web.pages.PrintableEntriesFullContentPage;
 import org.jbei.ice.web.pages.PrintableEntriesTablePage;
 import org.jbei.ice.web.pages.UnprotectedPage;
@@ -187,7 +187,7 @@ public class ProfileEntriesPanel extends Panel {
 
             @Override
             public void onClick() {
-                setResponsePage(new EntryExcelExportPage(sortableDataProvider.getEntries()));
+                setResponsePage(new EntriesCurrentFieldsExcelExportPage(sortableDataProvider.getEntries()));
             }
         });
 
@@ -196,7 +196,7 @@ public class ProfileEntriesPanel extends Panel {
 
             @Override
             public void onClick() {
-                setResponsePage(new EntryAllExcelExportPage(sortableDataProvider.getEntries()));
+                setResponsePage(new EntriesAllFieldsExcelExportPage(sortableDataProvider.getEntries()));
             }
         });
 
@@ -205,7 +205,7 @@ public class ProfileEntriesPanel extends Panel {
 
             @Override
             public void onClick() {
-                setResponsePage(new EntryXMLExportPage(sortableDataProvider.getEntries()));
+                setResponsePage(new EntriesXMLExportPage(sortableDataProvider.getEntries()));
             }
         });
     }

@@ -8,7 +8,7 @@ public abstract class ExcelExportPage extends ExportPage {
         return "application/vnd.ms-excel";
     }
 
-    protected Object escapeValue(Object value) {
+    protected Object escapeCSVValue(Object value) {
         if (value != null) {
             String stringValue = StringUtils.trim(value.toString());
             if (!StringUtils.containsNone(stringValue, new char[] { '\n', ',', '\t' })) {
@@ -18,6 +18,6 @@ public abstract class ExcelExportPage extends ExportPage {
             return stringValue;
         }
 
-        return null;
+        return "";
     }
 }

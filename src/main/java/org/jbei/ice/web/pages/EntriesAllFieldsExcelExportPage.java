@@ -12,10 +12,10 @@ import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
 
-public class EntryAllExcelExportPage extends ExcelExportPage {
+public class EntriesAllFieldsExcelExportPage extends ExcelExportPage {
     private ArrayList<Entry> entries;
 
-    public EntryAllExcelExportPage(ArrayList<Entry> entries) {
+    public EntriesAllFieldsExcelExportPage(ArrayList<Entry> entries) {
         super();
 
         this.entries = entries;
@@ -63,28 +63,27 @@ public class EntryAllExcelExportPage extends ExcelExportPage {
             Entry entry = iterator.next();
 
             stringBuilder.append(index).append("\t");
-            stringBuilder.append(escapeValue(entry.getRecordType())).append("\t");
-            stringBuilder.append(escapeValue(entry.getOnePartNumber().getPartNumber()))
-                    .append("\t");
-            stringBuilder.append(escapeValue(entry.getOneName().getName())).append("\t");
-            stringBuilder.append(escapeValue(entry.getOwner())).append("\t");
-            stringBuilder.append(escapeValue(entry.getCreator())).append("\t");
-            stringBuilder.append(escapeValue(entry.getAlias())).append("\t");
-            stringBuilder.append(escapeValue(entry.getKeywords())).append("\t");
-            stringBuilder.append(escapeValue(entry.getLinks())).append("\t");
-            stringBuilder.append(escapeValue(entry.getStatus())).append("\t");
-            stringBuilder.append(escapeValue(entry.getShortDescription())).append("\t");
-            stringBuilder.append(escapeValue(entry.getLongDescription())).append("\t");
-            stringBuilder.append(escapeValue(entry.getReferences())).append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getRecordType())).append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getPartNumbersAsString())).append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getNamesAsString())).append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getOwner())).append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getCreator())).append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getAlias())).append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getKeywords())).append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getLinksAsString())).append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getStatus())).append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getShortDescription())).append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getLongDescription())).append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getReferences())).append("\t");
 
             if (entry instanceof Plasmid) {
                 Plasmid plasmid = (Plasmid) entry;
 
-                stringBuilder.append(escapeValue(plasmid.getSelectionMarkersAsString())).append(
+                stringBuilder.append(escapeCSVValue(plasmid.getSelectionMarkersAsString())).append(
                         "\t");
-                stringBuilder.append(escapeValue(plasmid.getBackbone())).append("\t");
-                stringBuilder.append(escapeValue(plasmid.getOriginOfReplication())).append("\t");
-                stringBuilder.append(escapeValue(plasmid.getPromoters())).append("\t");
+                stringBuilder.append(escapeCSVValue(plasmid.getBackbone())).append("\t");
+                stringBuilder.append(escapeCSVValue(plasmid.getOriginOfReplication())).append("\t");
+                stringBuilder.append(escapeCSVValue(plasmid.getPromoters())).append("\t");
                 stringBuilder.append(plasmid.getCircular() ? "Yes" : "No").append("\t");
                 stringBuilder.append("\t");
                 stringBuilder.append("\t");
@@ -93,15 +92,15 @@ public class EntryAllExcelExportPage extends ExcelExportPage {
             } else if (entry instanceof Strain) {
                 Strain strain = (Strain) entry;
 
-                stringBuilder.append(escapeValue(strain.getSelectionMarkersAsString()))
+                stringBuilder.append(escapeCSVValue(strain.getSelectionMarkersAsString()))
                         .append("\t");
                 stringBuilder.append("\t");
                 stringBuilder.append("\t");
                 stringBuilder.append("\t");
                 stringBuilder.append("\t");
-                stringBuilder.append(escapeValue(strain.getHost())).append("\t");
-                stringBuilder.append(escapeValue(strain.getGenotypePhenotype())).append("\t");
-                stringBuilder.append(escapeValue(strain.getPlasmids())).append("\t");
+                stringBuilder.append(escapeCSVValue(strain.getHost())).append("\t");
+                stringBuilder.append(escapeCSVValue(strain.getGenotypePhenotype())).append("\t");
+                stringBuilder.append(escapeCSVValue(strain.getPlasmids())).append("\t");
                 stringBuilder.append("\t");
             } else if (entry instanceof Part) {
                 Part part = (Part) entry;
@@ -114,7 +113,7 @@ public class EntryAllExcelExportPage extends ExcelExportPage {
                 stringBuilder.append("\t");
                 stringBuilder.append("\t");
                 stringBuilder.append("\t");
-                stringBuilder.append(escapeValue(part.getPackageFormat())).append("\t");
+                stringBuilder.append(escapeCSVValue(part.getPackageFormat())).append("\t");
             }
 
             stringBuilder.append((AttachmentManager.hasAttachment(entry)) ? "Yes" : "No").append(

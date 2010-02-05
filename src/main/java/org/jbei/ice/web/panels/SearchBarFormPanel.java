@@ -21,13 +21,12 @@ public class SearchBarFormPanel extends Panel {
         this(id, "");
     }
 
-    @SuppressWarnings("unchecked")
     public SearchBarFormPanel(String id, String queryString) {
         super(id);
 
         class SearchBarForm extends StatelessForm<Object> {
-
             private static final long serialVersionUID = 1L;
+
             private String searchQuery;
 
             public SearchBarForm(String id, String formQueryString) {
@@ -56,8 +55,9 @@ public class SearchBarFormPanel extends Panel {
         }
 
         Form<?> searchBarForm = new SearchBarForm("searchBarForm", queryString);
-        searchBarForm.add(new BookmarkablePageLink("advancedSearchLink", QueryPage.class));
-        searchBarForm.add(new BookmarkablePageLink("blastSearchLink", BlastPage.class));
+        searchBarForm
+                .add(new BookmarkablePageLink<QueryPage>("advancedSearchLink", QueryPage.class));
+        searchBarForm.add(new BookmarkablePageLink<BlastPage>("blastSearchLink", BlastPage.class));
 
         AjaxButton ajaxButton = new AjaxButton("submitButton", new Model<String>("Search"),
                 searchBarForm) {

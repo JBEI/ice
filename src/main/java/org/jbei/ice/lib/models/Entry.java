@@ -94,7 +94,8 @@ public class Entry implements IEntryValueObject, Serializable {
     @Column(name = "intellectual_property")
     private String intellectualProperty;
 
-    @OneToOne(mappedBy = "entry")
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "entry")
+    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     private Sequence sequence;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry")
@@ -121,7 +122,7 @@ public class Entry implements IEntryValueObject, Serializable {
     @OrderBy("id")
     private Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
 
-    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY, mappedBy = "entry")
+    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER, mappedBy = "entry")
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @JoinColumn(name = "entries_id")
     @OrderBy("id")

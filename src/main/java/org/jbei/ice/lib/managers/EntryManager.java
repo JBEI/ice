@@ -359,8 +359,8 @@ public class EntryManager extends Manager {
 
         // Manual cascade of EntryFundingSource. Guarantees unique FundingSource
         for (EntryFundingSource entryFundingSource : entry.getEntryFundingSources()) {
-            FundingSource tempFundingSource = entryFundingSource.getFundingSource();
-            entryFundingSource.setFundingSource(saveFundingSource(tempFundingSource));
+            entryFundingSource.setFundingSource(saveFundingSource(entryFundingSource
+                    .getFundingSource()));
             dbSave(entryFundingSource.getFundingSource());
         }
 

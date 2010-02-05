@@ -12,11 +12,11 @@ public abstract class XMLExportPage extends ExportPage {
         return "<?xml version=\"1.0\"?>";
     }
 
-    protected Object escapeValue(Object value) {
+    protected Object escapeXMLValue(Object value) {
         if (value != null) {
             return StringEscapeUtils.escapeXml(value.toString());
         }
 
-        return null;
+        return "";
     }
 }

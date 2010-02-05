@@ -34,13 +34,13 @@ public class UnprotectedPage extends WebPage {
     public UnprotectedPage(final PageParameters parameters) {
         super(parameters);
 
+        searchParameters = parameters.getString("search");
+
         initializeStyles();
 
         initializeJavascript();
 
         initializeComponents();
-
-        searchParameters = parameters.getString("search");
     }
 
     protected void initializeStyles() {

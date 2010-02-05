@@ -31,6 +31,7 @@ public class SearchResultPage extends ProtectedPage {
         Panel searchResultPanel = null;
         try {
             searchResults = Search.getInstance().query(getQueryString());
+
             if (searchResults.size() == 0) {
                 searchResultPanel = new EmptyMessagePanel("searchResultPanel", "No results found");
             } else {
