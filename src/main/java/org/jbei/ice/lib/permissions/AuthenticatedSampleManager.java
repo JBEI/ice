@@ -49,12 +49,21 @@ public class AuthenticatedSampleManager {
     }
 
     public static Sample save(Sample sample, String sessionKey) throws ManagerException {
-        Sample oldSample = SampleManager.get(sample.getId());
-        Account user = AccountManager.getAccountByAuthToken(sessionKey);
-        if (oldSample.getDepositor().equals(user.getEmail())) {
+        if (sample.getId() == 0) {
+            // This is a new sample, which means anyone is allowed to create.
             return SampleManager.save(sample);
         } else {
-            throw new PermissionException("save not permitted");
+            try {
+                Sample oldSample = SampleManager.get(sample.getId());
+                Account user = AccountManager.getAccountByAuthToken(sessionKey);
+                if (oldSample.getDepositor().equals(user.getEmail())) {
+                    return SampleManager.save(sample);
+                } else {
+                    throw new PermissionException("save not permitted");
+                }
+            } catch (ManagerException e) {
+                throw new PermissionException("save failed");
+            }
         }
     }
 
