@@ -15,6 +15,7 @@ import org.hibernate.Session;
 import org.jbei.ice.lib.managers.HibernateHelper;
 import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.lib.utils.Utils;
 
@@ -66,6 +67,10 @@ public class Query {
             originOfReplicationsMap.put(originOfReplication, originOfReplication);
         }
 
+        Map<String, String> bioSafetyLevelMap = new LinkedHashMap<String, String>();
+        bioSafetyLevelMap.put("1", "Level 1");
+        bioSafetyLevelMap.put("2", "Level 2");
+
         Map<String, String> yesNoMap = new LinkedHashMap<String, String>();
         yesNoMap.put("yes", "Yes");
         yesNoMap.put("no", "No");
@@ -77,15 +82,22 @@ public class Query {
         filters.add(new SelectionFilter("status", "Status", "filterStatus", statusMap));
         filters.add(new StringFilter("owner", "Owner", "filterOwner"));
         filters.add(new StringFilter("creator", "Creator", "filterCreator"));
-        filters.add(new SelectionFilter("selection_marker",
-                "Selection Marker (Strains and Plasmids)", "filterSelectionMarker",
-                selectionMarkersMap));
         filters.add(new StringFilter("strain_plasmids", "Strain Plasmids", "filterStrainPlasmids"));
         filters.add(new StringFilter("alias", "Alias", "filterAlias"));
         filters.add(new StringFilter("keywords", "Keywords", "filterKeywords"));
         filters.add(new StringFilter("short_description", "Summary", "filterShortDescription"));
         filters.add(new StringFilter("long_description", "Notes", "filterLongDescription"));
         filters.add(new StringFilter("references", "References", "filterReferences"));
+        filters.add(new StringFilter("principal_investigator", "Principal Investigator",
+                "filterPrincipalInvestigator"));
+        filters.add(new StringFilter("fundingSource", "Funding Source", "filterFundingSource"));
+        filters.add(new StringFilter("intelectualProperty", "Intelectual Property",
+                "filterIntelectualProperty"));
+        filters.add(new SelectionFilter("bioSafetyLevel", "Bio Safety Level",
+                "filterBioSafetyLevel", bioSafetyLevelMap));
+        filters.add(new SelectionFilter("selection_marker",
+                "Selection Marker (Strains and Plasmids)", "filterSelectionMarker",
+                selectionMarkersMap));
         filters.add(new StringFilter("backbone", "Backbone (Plasmids only)", "filterBackbone"));
         filters.add(new SelectionFilter("promoters", "Promoters (Plasmids only)",
                 "filterPromoters", promotersMap));
@@ -102,8 +114,6 @@ public class Query {
         filters.add(new RadioFilter("has_sequence", "Has Sequence", "filterHasSequence", yesNoMap));
         filters.add(new RadioFilter("has_sample", "Has Sample", "filterHasSample", yesNoMap));
         filters.add(new StringFilter("record_id", "Record Id", "filterRecordId"));
-
-        // TODO: implement principal investigator filter
     }
 
     private Filter filterByKey(String key) {
@@ -593,6 +603,63 @@ public class Query {
         nameResults.addAll(aliasResults);
 
         return nameResults;
+    }
+
+    protected HashSet<Integer> filterPrincipalInvestigator(String queryString) {
+        HashMap<String, String> parsedQuery = parseQuery(queryString);
+
+        String criteria = makeCriterion(
+                "lower(entryFundingSource.fundingSource.principalInvestigator)", parsedQuery
+                        .get("operator"), parsedQuery.get("value"));
+        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
+                "select distinct entry.id from " + EntryFundingSource.class.getName()
+                        + " entryFundingSource where " + criteria);
+
+        return new HashSet<Integer>(query.list());
+    }
+
+    protected HashSet<Integer> filterFundingSource(String queryString) {
+        HashMap<String, String> parsedQuery = parseQuery(queryString);
+
+        String criteria = makeCriterion("lower(entryFundingSource.fundingSource.fundingSource)",
+                parsedQuery.get("operator"), parsedQuery.get("value"));
+        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
+                "select distinct entry.id from " + EntryFundingSource.class.getName()
+                        + " entryFundingSource where " + criteria);
+
+        return new HashSet<Integer>(query.list());
+    }
+
+    protected HashSet<Integer> filterIntelectualProperty(String queryString) {
+        HashMap<String, String> parsedQuery = parseQuery(queryString);
+
+        String criteria = makeCriterion("lower(entry.intellectualProperty)", parsedQuery
+                .get("operator"), parsedQuery.get("value"));
+        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
+                "select distinct entry.id from " + Entry.class.getName() + " entry where "
+                        + criteria);
+
+        return new HashSet<Integer>(query.list());
+    }
+
+    protected HashSet<Integer> filterBioSafetyLevel(String queryString) {
+        HashMap<String, String> parsedQuery = parseQuery(queryString);
+
+        String operator = parsedQuery.get("operator");
+
+        String criteria = null;
+
+        if (operator.equals("=")) {
+            criteria = "entry.bioSafetyLevel = " + parsedQuery.get("value");
+        } else if (operator.equals("!")) {
+            criteria = "entry.bioSafetyLevel != " + parsedQuery.get("value");
+        }
+
+        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
+                "select distinct entry.id from " + Entry.class.getName() + " entry where "
+                        + criteria);
+
+        return new HashSet<Integer>(query.list());
     }
 
     public static void main(String[] args) {
