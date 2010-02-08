@@ -9,27 +9,21 @@ public class SequenceUtils {
         return Utils.encryptSHA(sequence.toLowerCase());
     }
 
-    public static String reverseComplement(String sequence) throws Exception {
+    public static String reverseComplement(String sequence) throws BioException {
         SymbolList symL = null;
-        try {
-            symL = DNATools.createDNA(sequence);
-            symL = DNATools.reverseComplement(symL);
-        } catch (BioException e) {
-            throw new Exception(e);
-        }
+
+        symL = DNATools.createDNA(sequence);
+        symL = DNATools.reverseComplement(symL);
 
         return symL.seqString();
     }
 
-    public static String translateToProtein(String dnaSequence) throws Exception {
+    public static String translateToProtein(String dnaSequence) throws BioException {
         SymbolList symL = null;
-        try {
-            symL = DNATools.createDNA(dnaSequence);
-            symL = DNATools.toProtein(symL);
 
-        } catch (BioException e) {
-            throw e;
-        }
+        symL = DNATools.createDNA(dnaSequence);
+        symL = DNATools.toProtein(symL);
+
         return symL.seqString();
     }
 }

@@ -18,9 +18,9 @@ import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.Utils;
 
-public class GenbankParser {
+public class GenbankParser extends AbstractParser {
     @SuppressWarnings("unchecked")
-    public static Sequence parseGenbankDNAFile(BufferedReader br) throws ParserException {
+    public Sequence parse(BufferedReader br) {
         Sequence sequence = null;
 
         try {
@@ -83,9 +83,7 @@ public class GenbankParser {
             sequence.setRevHash(SequenceUtils.calculateSequenceHash(SequenceUtils
                     .reverseComplement(sequence.getSequence())));
         } catch (BioException e) {
-            throw new ParserException("BioJava Exception. ", e);
-        } catch (Exception e) {
-            throw new ParserException(e);
+            return null;
         }
 
         return sequence;
