@@ -17,8 +17,9 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
-import org.jbei.ice.lib.parsers.Parser;
-import org.jbei.ice.lib.parsers.ParserException;
+import org.jbei.ice.lib.parsers.AbstractParser;
+import org.jbei.ice.lib.parsers.FastaParser;
+import org.jbei.ice.lib.parsers.GenbankParser;
 import org.jbei.ice.web.panels.SequenceViewPanel;
 
 public class SequenceUpdateFormPanel extends Panel {
@@ -40,7 +41,6 @@ public class SequenceUpdateFormPanel extends Panel {
 
             this.setModel(new CompoundPropertyModel<Object>(this));
 
-            // Always needed for upload forms
             setMultiPart(true);
 
             Button cancelButton = new Button("cancelButton", new Model<String>("Cancel")) {
@@ -79,13 +79,18 @@ public class SequenceUpdateFormPanel extends Panel {
                 sequenceUser = new String(fileUpload.getBytes());
             }
 
-            Sequence sequence;
-            try {
-                sequence = Parser.parseGenbank(sequenceUser);
-            } catch (ParserException e) {
-                error("Couldn't parse GenBank file!");
+            AbstractParser parser = new GenbankParser();
+            Sequence sequence = parser.parse(sequenceUser);
 
-                return;
+            if (sequence == null) {
+                parser = new FastaParser();
+                sequence = parser.parse(sequenceUser);
+
+                if (sequence == null) {
+                    error("Couldn't parse sequence file! Sequence should be either in FASTA or GenBank formats.");
+
+                    return;
+                }
             }
 
             sequence.setEntry(entry);
@@ -96,13 +101,15 @@ public class SequenceUpdateFormPanel extends Panel {
 
                 SequenceManager.delete(currentSequence);
 
-                for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
-                    Feature feature = sequenceFeature.getFeature();
+                if (sequence.getSequenceFeatures() != null) {
+                    for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
+                        Feature feature = sequenceFeature.getFeature();
 
-                    Feature saveResultFeature = SequenceManager.save(feature);
+                        Feature saveResultFeature = SequenceManager.save(feature);
 
-                    if (saveResultFeature != feature) {
-                        sequenceFeature.setFeature(saveResultFeature);
+                        if (saveResultFeature != feature) {
+                            sequenceFeature.setFeature(saveResultFeature);
+                        }
                     }
                 }
 
