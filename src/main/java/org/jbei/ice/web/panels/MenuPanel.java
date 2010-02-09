@@ -45,7 +45,6 @@ public class MenuPanel extends Panel {
         super(id);
 
         addPageLinkMenuItem(HomePage.class, "Home");
-        addPageLinkMenuItem(HomePage.class, "News");
         addPageLinkMenuItem(EntriesPage.class, "Entries");
         addPageLinkMenuItem(UserPage.class, "My Entries");
         addPageLinkMenuItem(EntryNewPage.class, "Add new entry");
