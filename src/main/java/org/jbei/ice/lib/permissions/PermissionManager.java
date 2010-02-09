@@ -9,15 +9,18 @@ import org.hibernate.Transaction;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.EntryManager;
+import org.jbei.ice.lib.managers.GroupManager;
 import org.jbei.ice.lib.managers.HibernateHelper;
 import org.jbei.ice.lib.managers.Manager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Group;
+import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 
 public class PermissionManager extends Manager {
 
+    // convenience method that wraps actual method
     public static boolean hasReadPermission(int entryId, String sessionKey) {
         boolean result = false;
         Entry entry;
@@ -30,11 +33,13 @@ public class PermissionManager extends Manager {
             }
         } catch (ManagerException e) {
             // if lookup fails, doesn't have permission
-            e.printStackTrace();
+            String msg = "manager exception during permission lookup: " + e.toString();
+            Logger.warn(msg);
         }
         return result;
     }
 
+    // convenience method that wraps actual method
     public static boolean hasWritePermission(int entryId, String sessionKey) {
         boolean result = false;
         Entry entry;
@@ -46,8 +51,8 @@ public class PermissionManager extends Manager {
                 result = hasWritePermission(entry, account);
             }
         } catch (ManagerException e) {
-            // if lookup fails, doesn't have permission
-            e.printStackTrace();
+            String msg = "manager exception during permission lookup: " + e.toString();
+            Logger.warn(msg);
         }
         return result;
     }
@@ -71,7 +76,6 @@ public class PermissionManager extends Manager {
         boolean result = userHasWritePermission(entry, account)
                 | groupHasWritePermission(entry, account);
         return result;
-
     }
 
     public static void setReadUser(Entry entry, Set<Account> accounts) throws ManagerException {
@@ -332,6 +336,7 @@ public class PermissionManager extends Manager {
      * 
      * @param entry
      * @return
+     * @throws ManagerException
      */
     protected static boolean entryNeedsDefaultPermission(Entry entry) {
 
@@ -350,9 +355,21 @@ public class PermissionManager extends Manager {
 
         if (entriesUser == 0 && entriesGroup == 0) {
             result = true;
+
+            try {
+                Group defaultGroup = GroupManager.get(PopulateInitialDatabase.everyoneGroup);
+                if (defaultGroup == null) {
+                    defaultGroup = PopulateInitialDatabase.createFirstGroup();
+                }
+                HashSet<Group> tempGroups = new HashSet<Group>();
+                tempGroups.add(defaultGroup);
+                PermissionManager.setReadGroup(entry, tempGroups);
+            } catch (ManagerException e) {
+                String msg = "Could not get default everyone group: " + e.toString();
+                Logger.error(msg);
+            }
             Logger.info("Default Permission supplied");
         }
-
         return result;
     }
 
