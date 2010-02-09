@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.jbei.ice.lib.models.Name;
-import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.utils.Utils;
 
 /**
@@ -24,19 +22,21 @@ public class CommaSeparatedField<T> implements Serializable {
 
     private static final long serialVersionUID = 1L;
     protected ArrayList<T> items = null;
-    protected Class klass = null;
+    protected Class<T> klass = null;
     protected String getterName = null;
     protected String setterName = null;
 
-    public CommaSeparatedField(Class c, String getterName, String setterName) {
+    public CommaSeparatedField(Class<T> c, String getterName, String setterName) {
         items = new ArrayList<T>();
         klass = c;
         this.getterName = getterName;
         this.setterName = setterName;
     }
 
-    public CommaSeparatedField(Class k, Collection c, String getterName, String setterName) {
-        items = new ArrayList<T>(c);
+    @SuppressWarnings("unchecked")
+    public CommaSeparatedField(Class<T> k, Collection<Object> c, String getterName,
+            String setterName) {
+        items = new ArrayList(c);
         klass = k;
         this.getterName = getterName;
         this.setterName = setterName;
@@ -100,7 +100,7 @@ public class CommaSeparatedField<T> implements Serializable {
             String currentItem = itemsAsString[i];
 
             try {
-                T instance = (T) klass.newInstance();
+                T instance = klass.newInstance();
                 Method setMethod = klass
                         .getDeclaredMethod(setterName, new Class[] { String.class });
                 setMethod.invoke(instance, currentItem);
@@ -136,55 +136,6 @@ public class CommaSeparatedField<T> implements Serializable {
     }
 
     public static void main(String[] args) {
-        //Names
-        CommaSeparatedField<Name> csf = new CommaSeparatedField<Name>(Name.class, "getName",
-                "setName");
-        ArrayList<Name> result = null;
-        try {
-            result = csf.setString("this, is,  a, different,name");
-        } catch (FormException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
 
-        System.out.println(result.size());
-        for (Name item : result) {
-            System.out.println(item.toString() + ":" + item.getName());
-
-        }
-
-        csf = new CommaSeparatedField<Name>(Name.class, result, "getName", "setName");
-        try {
-            System.out.println(csf.getString());
-        } catch (FormException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-
-        //PartNumbers
-        CommaSeparatedField<PartNumber> csf2 = new CommaSeparatedField<PartNumber>(
-                PartNumber.class, "getPartNumber", "setPartNumber");
-        ArrayList<PartNumber> result2 = null;
-        try {
-            result2 = csf2.setString("this, is,  a, different,part number");
-        } catch (FormException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        System.out.println(result2.size());
-        for (PartNumber item : result2) {
-            System.out.println(item.toString() + ":" + item.getPartNumber());
-
-        }
-
-        csf2 = new CommaSeparatedField<PartNumber>(PartNumber.class, result2, "getPartNumber",
-                "setPartNumber");
-        try {
-            System.out.println(csf2.getString());
-        } catch (FormException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
     }
 }

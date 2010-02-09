@@ -1157,6 +1157,7 @@
 
 				<xsl:call-template name="render-type">
 					<xsl:with-param name="type-local-name" select="$type-name" />
+					<xsl:with-param name="anti.recursion" select="$anti.recursion" />
 				</xsl:call-template>
 
 				<xsl:call-template name="render.source-code-link" />
@@ -1376,6 +1377,7 @@
 
 					<xsl:call-template name="render-type">
 						<xsl:with-param name="type-local-name" select="$type-name" />
+						<xsl:with-param name="anti.recursion" select="$anti.recursion" />
 					</xsl:call-template>
 
 					<xsl:variable name="part-type"
@@ -1555,6 +1557,7 @@
 
 			<xsl:call-template name="render-type">
 				<xsl:with-param name="type-local-name" select="$type-name" />
+				<xsl:with-param name="anti.recursion" select="$anti.recursion" />
 			</xsl:call-template>
 
 			<xsl:call-template name="process-union">
@@ -1618,6 +1621,7 @@
 					<xsl:if test="not($elem-type)">
 						<xsl:call-template name="render-type">
 							<xsl:with-param name="type-local-name" select="$type-name" />
+							<xsl:with-param name="anti.recursion" select="$anti.recursion" />
 						</xsl:call-template>
 					</xsl:if>
 
@@ -1669,6 +1673,7 @@
 
 			<xsl:call-template name="render-type">
 				<xsl:with-param name="type-local-name" select="$type-name" />
+				<xsl:with-param name="anti.recursion" select="$anti.recursion" />
 			</xsl:call-template>
 
 			<xsl:variable name="elem-type"
@@ -2051,6 +2056,10 @@
 	</xsl:template>
 	<xsl:template match="*" mode="src.start-tag">
 		<xsl:call-template name="src.elem">
+			<xsl:with-param name="src.elem.start-slash">
+				/
+			</xsl:with-param>
+		
 			<xsl:with-param name="src.elem.end-slash">
 				/
 			</xsl:with-param>
@@ -2059,13 +2068,26 @@
 	<xsl:template
 		match="*[*|comment()|processing-instruction()|text()[string-length(normalize-space(.)) &gt; 0]]"
 		mode="src.start-tag">
-		<xsl:call-template name="src.elem" />
+		<xsl:call-template name="src.elem">
+		        <xsl:with-param name="src.elem.end-slash">
+				/
+			</xsl:with-param>
+		
+			<xsl:with-param name="src.elem.start-slash">
+				/
+			</xsl:with-param>
+		
+		</xsl:call-template>
 	</xsl:template>
 	<xsl:template match="*" mode="src.end-tag" />
 	<xsl:template
 		match="*[*|comment()|processing-instruction()|text()[string-length(normalize-space(.)) &gt; 0]]"
 		mode="src.end-tag">
 		<xsl:call-template name="src.elem">
+		      <xsl:with-param name="src.elem.end-slash">
+				/
+			</xsl:with-param>
+		
 			<xsl:with-param name="src.elem.start-slash">
 				/
 			</xsl:with-param>

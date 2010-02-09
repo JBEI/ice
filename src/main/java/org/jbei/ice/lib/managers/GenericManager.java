@@ -8,6 +8,7 @@ import org.hibernate.Query;
 import org.jbei.ice.lib.models.News;
 
 public class GenericManager extends Manager {
+    @SuppressWarnings("unchecked")
     public static Set<News> getNewses() throws ManagerException {
         LinkedHashSet<News> newses = null;
         try {
@@ -20,6 +21,7 @@ public class GenericManager extends Manager {
 
     }
 
+    @SuppressWarnings("unchecked")
     public static Set<News> getPublishedNewses(int offset, int limit) throws ManagerException {
         LinkedHashSet<News> newses = null;
         try {
@@ -35,6 +37,7 @@ public class GenericManager extends Manager {
 
     }
 
+    @SuppressWarnings("unchecked")
     public static Set<News> getAllPublishedNewses() throws ManagerException {
         LinkedHashSet<News> newses = null;
         try {

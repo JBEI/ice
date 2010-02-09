@@ -2,7 +2,6 @@ package org.jbei.ice.lib.models;
 
 import java.io.Serializable;
 import java.util.Set;
-import java.util.TreeSet;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,7 +12,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 @Entity
 @Table(name = "groups")
@@ -39,12 +37,6 @@ public class Group implements Serializable {
     @JoinColumn(name = "parent")
     protected Group parent;
 
-    @Column(name = "serialized_cache")
-    protected Serializable serializedCache;
-
-    @Transient
-    protected TreeSet<Integer> cache;
-
     public Set<Account> getUsers() {
         return null;
 
@@ -52,14 +44,6 @@ public class Group implements Serializable {
 
     public void updateUsers() {
 
-    }
-
-    private String serializeCache() {
-        return null;
-    }
-
-    private String deserializeCache() {
-        return null;
     }
 
     // Getters and setters
@@ -101,14 +85,6 @@ public class Group implements Serializable {
 
     public void setParent(Group parent) {
         this.parent = parent;
-    }
-
-    public Serializable getSerializedCache() {
-        return serializedCache;
-    }
-
-    public void setSerializedCache(Serializable serializedCache) {
-        this.serializedCache = serializedCache;
     }
 
 }

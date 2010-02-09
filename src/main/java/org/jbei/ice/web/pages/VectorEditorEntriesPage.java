@@ -18,6 +18,7 @@ import org.jbei.ice.lib.models.Sequence;
 
 public class VectorEditorEntriesPage extends WebPage {
     // Constructor
+    @SuppressWarnings("unchecked")
     public VectorEditorEntriesPage() {
         super();
 

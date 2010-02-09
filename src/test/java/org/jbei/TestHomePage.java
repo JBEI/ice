@@ -9,6 +9,7 @@ import org.jbei.ice.web.WicketApplication;
  * Simple test using the WicketTester
  */
 public class TestHomePage extends TestCase {
+    @SuppressWarnings("unused")
     private WicketTester tester;
 
     @Override
