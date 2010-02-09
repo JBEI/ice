@@ -65,9 +65,6 @@ public class Entry implements IEntryValueObject, Serializable {
     @Column(name = "keywords", length = 127)
     private String keywords;
 
-    @Column(name = "visibility")
-    private int visibility;
-
     @Column(name = "status", length = 127)
     private String status;
 
@@ -132,9 +129,9 @@ public class Entry implements IEntryValueObject, Serializable {
     }
 
     public Entry(String recordId, String versionId, String recordType, String owner,
-            String ownerEmail, String creator, String creatorEmail, int visibility, String status,
-            String alias, String keywords, String shortDescription, String longDescription,
-            String references, Date creationTime, Date modificationTime) {
+            String ownerEmail, String creator, String creatorEmail, String status, String alias,
+            String keywords, String shortDescription, String longDescription, String references,
+            Date creationTime, Date modificationTime) {
         this.recordId = recordId;
         this.versionId = versionId;
         this.recordType = recordType;
@@ -142,7 +139,6 @@ public class Entry implements IEntryValueObject, Serializable {
         this.ownerEmail = ownerEmail;
         this.creator = creator;
         this.creatorEmail = creatorEmail;
-        this.visibility = visibility;
         this.status = status;
         this.alias = alias;
         this.keywords = keywords;
@@ -272,14 +268,6 @@ public class Entry implements IEntryValueObject, Serializable {
 
     public void setCreatorEmail(String creatorEmail) {
         this.creatorEmail = creatorEmail;
-    }
-
-    public int getVisibility() {
-        return visibility;
-    }
-
-    public void setVisibility(int visibility) {
-        this.visibility = visibility;
     }
 
     public String getStatus() {

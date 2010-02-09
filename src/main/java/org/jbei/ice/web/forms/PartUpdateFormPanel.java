@@ -58,7 +58,6 @@ public class PartUpdateFormPanel extends Panel {
             private String creator;
             private String creatorEmail;
             private CustomChoice status;
-            private CustomChoice visibility;
             private String keywords;
             private String summary;
             private String notes;
@@ -81,7 +80,6 @@ public class PartUpdateFormPanel extends Panel {
                 setCreator(part.getCreator());
                 setCreatorEmail(part.getCreatorEmail());
                 setStatus(new CustomChoice("", part.getStatus()));
-                setVisibility(new CustomChoice("", "" + part.getVisibility()));
                 setPackageFormat(new CustomChoice("", ""));
                 setKeywords(part.getKeywords());
                 setSummary(part.getShortDescription());
@@ -156,27 +154,6 @@ public class PartUpdateFormPanel extends Panel {
                         this, "status"), statusChoices, new ChoiceRenderer<CustomChoice>("name",
                         "value")));
 
-                CustomChoice visible9 = new CustomChoice(JbeiConstants.getVisibility(9), "9");
-                CustomChoice visible5 = new CustomChoice(JbeiConstants.getVisibility(5), "5");
-                CustomChoice visible0 = new CustomChoice(JbeiConstants.getVisibility(0), "0");
-
-                ArrayList<CustomChoice> visibilityChoices = new ArrayList<CustomChoice>();
-                visibilityChoices.add(visible9);
-                visibilityChoices.add(visible5);
-                visibilityChoices.add(visible0);
-
-                if (part.getVisibility() == 9) {
-                    this.visibility = visible9;
-                } else if (part.getVisibility() == 5) {
-                    this.visibility = visible5;
-                } else if (part.getVisibility() == 0) {
-                    this.visibility = visible0;
-                }
-
-                add(new DropDownChoice<CustomChoice>("visibility", new PropertyModel<CustomChoice>(
-                        this, "visibility"), visibilityChoices, new ChoiceRenderer<CustomChoice>(
-                        "name", "value")));
-
                 add(new TextField<String>("keywords"));
                 add(new TextArea<String>("summary").setRequired(true).setLabel(
                         new Model<String>("Summary")));
@@ -231,7 +208,6 @@ public class PartUpdateFormPanel extends Panel {
 
                 part.setAlias(getAlias());
                 part.setStatus(getStatus().getValue());
-                part.setVisibility(Integer.parseInt(getVisibility().getValue()));
                 part.setKeywords(getKeywords());
                 part.setShortDescription(getSummary());
                 part.setLongDescription(getNotes());
@@ -315,14 +291,6 @@ public class PartUpdateFormPanel extends Panel {
 
             public void setStatus(CustomChoice status) {
                 this.status = status;
-            }
-
-            public CustomChoice getVisibility() {
-                return visibility;
-            }
-
-            public void setVisibility(CustomChoice visibility) {
-                this.visibility = visibility;
             }
 
             public String getKeywords() {

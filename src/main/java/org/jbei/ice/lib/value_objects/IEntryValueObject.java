@@ -51,10 +51,6 @@ public interface IEntryValueObject {
 
     public abstract void setCreatorEmail(String creatorEmail);
 
-    public abstract int getVisibility();
-
-    public abstract void setVisibility(int visibility);
-
     public abstract String getStatus();
 
     public abstract void setStatus(String status);

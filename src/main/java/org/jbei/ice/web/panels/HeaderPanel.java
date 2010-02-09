@@ -25,7 +25,7 @@ public class HeaderPanel extends Panel {
                         UnprotectedPage.IMAGES_RESOURCE_LOCATION + "logo.gif"))));
         add(new LoginStatusPanel("loginStatusPanel"));
         add(new Label("numberOfPartsLabel", new Model<String>(String.valueOf(EntryManager
-                .getNumberOfPublicEntries()))));
+                .getNumberOfEntries()))));
         DateFormat dateFormat = new SimpleDateFormat("EEEE, MMMMM d, yyyy");
         add(new Label("dateLabel", new Model<String>(dateFormat.format(new Date()))));
     }

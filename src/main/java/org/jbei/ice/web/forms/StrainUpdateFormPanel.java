@@ -58,7 +58,6 @@ public class StrainUpdateFormPanel extends Panel {
             private String creator;
             private String creatorEmail;
             private CustomChoice status;
-            private CustomChoice visibility;
             private String keywords;
             private String summary;
             private String notes;
@@ -84,7 +83,6 @@ public class StrainUpdateFormPanel extends Panel {
                 setCreator(strain.getCreator());
                 setCreatorEmail(strain.getCreatorEmail());
                 setStatus(new CustomChoice("", strain.getStatus()));
-                setVisibility(new CustomChoice("", "" + strain.getVisibility()));
                 setKeywords(strain.getKeywords());
                 setSummary(strain.getShortDescription());
                 setNotes(strain.getLongDescription());
@@ -137,27 +135,6 @@ public class StrainUpdateFormPanel extends Panel {
                 add(new DropDownChoice<CustomChoice>("status", new PropertyModel<CustomChoice>(
                         this, "status"), statusChoices, new ChoiceRenderer<CustomChoice>("name",
                         "value")));
-
-                CustomChoice visible9 = new CustomChoice(JbeiConstants.getVisibility(9), "9");
-                CustomChoice visible5 = new CustomChoice(JbeiConstants.getVisibility(5), "5");
-                CustomChoice visible0 = new CustomChoice(JbeiConstants.getVisibility(0), "0");
-
-                ArrayList<CustomChoice> visibilityChoices = new ArrayList<CustomChoice>();
-                visibilityChoices.add(visible9);
-                visibilityChoices.add(visible5);
-                visibilityChoices.add(visible0);
-
-                if (strain.getVisibility() == 9) {
-                    this.visibility = visible9;
-                } else if (strain.getVisibility() == 5) {
-                    this.visibility = visible5;
-                } else if (strain.getVisibility() == 0) {
-                    this.visibility = visible0;
-                }
-
-                add(new DropDownChoice<CustomChoice>("visibility", new PropertyModel<CustomChoice>(
-                        this, "visibility"), visibilityChoices, new ChoiceRenderer<CustomChoice>(
-                        "name", "value")));
 
                 add(new TextField<String>("keywords"));
                 add(new TextArea<String>("summary").setRequired(true).setLabel(
@@ -217,7 +194,6 @@ public class StrainUpdateFormPanel extends Panel {
 
                 strain.setAlias(getAlias());
                 strain.setStatus(getStatus().getValue());
-                strain.setVisibility(Integer.parseInt(getVisibility().getValue()));
                 strain.setKeywords(getKeywords());
                 strain.setShortDescription(getSummary());
                 strain.setLongDescription(getNotes());
@@ -313,14 +289,6 @@ public class StrainUpdateFormPanel extends Panel {
 
             public void setStatus(CustomChoice status) {
                 this.status = status;
-            }
-
-            public CustomChoice getVisibility() {
-                return visibility;
-            }
-
-            public void setVisibility(CustomChoice visibility) {
-                this.visibility = visibility;
             }
 
             public String getKeywords() {

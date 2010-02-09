@@ -48,7 +48,7 @@ public class UtilsManager extends Manager {
         Query query = HibernateHelper
                 .getSession()
                 .createQuery(
-                        "select distinct name.name from Plasmid plasmid inner join plasmid.names as name where name.name <> '' and plasmid.visibility > 8 order by name.name asc");
+                        "select distinct name.name from Plasmid plasmid inner join plasmid.names as name where name.name <> '' order by name.name asc");
         HashSet<String> names = new HashSet<String>(query.list());
 
         for (String name : names) {

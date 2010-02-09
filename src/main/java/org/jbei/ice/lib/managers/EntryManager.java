@@ -28,10 +28,6 @@ public class EntryManager extends Manager {
     public static final String PLASMID_ENTRY_TYPE = "plasmid";
     public static final String PART_ENTRY_TYPE = "part";
 
-    public static final int VISIBILITY_PUBLIC = 9;
-    public static final int VISIBILITY_SHARED = 5;
-    public static final int VISIBILITY_PRIVATE = 0;
-
     public EntryManager() {
     }
 
@@ -236,21 +232,8 @@ public class EntryManager extends Manager {
         return new LinkedHashSet<Entry>(query.list());
     }
 
-    public static int getNumberOfPublicEntries() {
-        return getNumberOfEntriesByVisibility(VISIBILITY_PUBLIC);
-    }
-
     public static int getNumberOfEntries() {
         String queryString = "select id from Entry";
-
-        Query query = session.createQuery(queryString);
-
-        return query.list().size();
-    }
-
-    public static int getNumberOfEntriesByVisibility(int visibility) {
-        String queryString = "select id from Entry where visibility = "
-                + String.valueOf(visibility);
 
         Query query = session.createQuery(queryString);
 

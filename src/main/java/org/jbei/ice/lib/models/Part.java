@@ -30,13 +30,13 @@ public class Part extends Entry implements IPartValueObject, Serializable {
     }
 
     public Part(String recordId, String versionId, String recordType, String owner,
-            String ownerEmail, String creator, String creatorEmail, int visibility, String status,
-            String alias, String keywords, String shortDescription, String longDescription,
-            String references, Date creationTime, Date modificationTime, String packageFormat,
-            String pkgdDnaFwdHash, String pkgdDnaRevHash) {
-        super(recordId, versionId, recordType, owner, ownerEmail, creator, creatorEmail,
-                visibility, status, alias, keywords, shortDescription, longDescription, references,
-                creationTime, modificationTime);
+            String ownerEmail, String creator, String creatorEmail, String status, String alias,
+            String keywords, String shortDescription, String longDescription, String references,
+            Date creationTime, Date modificationTime, String packageFormat, String pkgdDnaFwdHash,
+            String pkgdDnaRevHash) {
+        super(recordId, versionId, recordType, owner, ownerEmail, creator, creatorEmail, status,
+                alias, keywords, shortDescription, longDescription, references, creationTime,
+                modificationTime);
         this.packageFormat = packageFormat;
         this.pkgdDnaFwdHash = pkgdDnaFwdHash;
         this.pkgdDnaRevHash = pkgdDnaRevHash;

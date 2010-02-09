@@ -63,9 +63,9 @@ public class Main {
             String versionId = recordId;
 
             Plasmid plasmid = new Plasmid(recordId, versionId, "plasmid", "test", "test@gmail.com",
-                    "createor", "createfff@asdasd.com", 0, "complete", "alias1", "kwyrod1",
-                    "descr1", "descr2", "references", new Date(812736817), new Date(132134), "bb",
-                    "ori", "prmo1", true);
+                    "createor", "createfff@asdasd.com", "complete", "alias1", "kwyrod1", "descr1",
+                    "descr2", "references", new Date(812736817), new Date(132134), "bb", "ori",
+                    "prmo1", true);
 
             plasmid.getNames().add(new Name("first name", plasmid));
             plasmid.getNames().add(new Name("second name", plasmid));

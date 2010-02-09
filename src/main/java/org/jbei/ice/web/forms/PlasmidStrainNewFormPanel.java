@@ -57,7 +57,6 @@ public class PlasmidStrainNewFormPanel extends Panel {
             private String plasmidCreator;
             private String plasmidCreatorEmail;
             private CustomChoice plasmidStatus;
-            private CustomChoice plasmidVisibility;
             private String plasmidKeywords;
             private String plasmidSummary;
             private String plasmidNotes;
@@ -80,7 +79,6 @@ public class PlasmidStrainNewFormPanel extends Panel {
             private String strainCreator;
             private String strainCreatorEmail;
             private CustomChoice strainStatus;
-            private CustomChoice strainVisibility;
             private String strainKeywords;
             private String strainSummary;
             private String strainNotes;
@@ -129,18 +127,6 @@ public class PlasmidStrainNewFormPanel extends Panel {
                 add(new DropDownChoice<CustomChoice>("plasmidStatus",
                         new PropertyModel<CustomChoice>(this, "plasmidStatus"), statusChoices,
                         new ChoiceRenderer<CustomChoice>("name", "value")));
-
-                CustomChoice visible9 = new CustomChoice(JbeiConstants.getVisibility(9), "9");
-                CustomChoice visible5 = new CustomChoice(JbeiConstants.getVisibility(5), "5");
-                CustomChoice visible0 = new CustomChoice(JbeiConstants.getVisibility(0), "0");
-                ArrayList<CustomChoice> visibilityChoices = new ArrayList<CustomChoice>();
-                visibilityChoices.add(visible9);
-                visibilityChoices.add(visible5);
-                visibilityChoices.add(visible0);
-                setPlasmidVisibility(visible9);
-                add(new DropDownChoice<CustomChoice>("plasmidVisibility",
-                        new PropertyModel<CustomChoice>(this, "plasmidVisibility"),
-                        visibilityChoices, new ChoiceRenderer<CustomChoice>("name", "value")));
 
                 add(new TextField<String>("plasmidKeywords"));
                 add(new TextArea<String>("plasmidSummary").setRequired(true).setLabel(
@@ -213,7 +199,6 @@ public class PlasmidStrainNewFormPanel extends Panel {
                 plasmid.setOwnerEmail(IceSession.get().getAccount().getEmail());
                 plasmid.setAlias(getPlasmidAlias());
                 plasmid.setStatus(getPlasmidStatus().getValue());
-                plasmid.setVisibility(Integer.parseInt(getPlasmidVisibility().getValue()));
                 plasmid.setKeywords(getPlasmidKeywords());
                 plasmid.setShortDescription(getPlasmidSummary());
                 plasmid.setLongDescription(getPlasmidNotes());
@@ -261,7 +246,6 @@ public class PlasmidStrainNewFormPanel extends Panel {
                 strain.setOwnerEmail(IceSession.get().getAccount().getEmail());
                 strain.setAlias(getStrainAlias());
                 strain.setStatus(getPlasmidStatus().getValue());
-                strain.setVisibility(Integer.parseInt(getPlasmidVisibility().getValue()));
                 strain.setKeywords(getStrainKeywords());
                 strain.setShortDescription(getStrainSummary());
                 strain.setLongDescription(getStrainNotes());
@@ -360,14 +344,6 @@ public class PlasmidStrainNewFormPanel extends Panel {
 
             public void setPlasmidStatus(CustomChoice plasmidStatus) {
                 this.plasmidStatus = plasmidStatus;
-            }
-
-            public CustomChoice getPlasmidVisibility() {
-                return plasmidVisibility;
-            }
-
-            public void setPlasmidVisibility(CustomChoice plasmidVisibility) {
-                this.plasmidVisibility = plasmidVisibility;
             }
 
             public String getPlasmidKeywords() {
@@ -520,14 +496,6 @@ public class PlasmidStrainNewFormPanel extends Panel {
 
             public void setStrainStatus(CustomChoice strainStatus) {
                 this.strainStatus = strainStatus;
-            }
-
-            public CustomChoice getStrainVisibility() {
-                return strainVisibility;
-            }
-
-            public void setStrainVisibility(CustomChoice strainVisibility) {
-                this.strainVisibility = strainVisibility;
             }
 
             public String getStrainKeywords() {

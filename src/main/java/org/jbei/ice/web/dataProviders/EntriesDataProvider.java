@@ -70,7 +70,7 @@ public class EntriesDataProvider extends SortableDataProvider<Entry> {
     }
 
     public int size() {
-        return EntryManager.getNumberOfPublicEntries();
+        return EntryManager.getNumberOfEntries();
     }
 
     public ArrayList<Entry> getEntries() {

@@ -1,17 +1,6 @@
 package org.jbei.ice.lib.utils;
 
 public class JbeiConstants {
-    public final static String getVisibility(Integer id) {
-        String result = "";
-        if (id > 8) {
-            result = "Public";
-        } else if (id > 4) {
-            result = "Hidden";
-        } else if (id >= 0) {
-            result = "Private";
-        }
-        return result;
-    }
 
     public final static String getStatus(String key) {
         String result = "";
