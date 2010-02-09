@@ -14,7 +14,6 @@ import org.jbei.ice.web.pages.EntriesPage;
 import org.jbei.ice.web.pages.EntryNewPage;
 import org.jbei.ice.web.pages.FeedbackPage;
 import org.jbei.ice.web.pages.HomePage;
-import org.jbei.ice.web.pages.LogOutPage;
 import org.jbei.ice.web.pages.UserPage;
 
 public class MenuPanel extends Panel {
@@ -55,8 +54,9 @@ public class MenuPanel extends Panel {
         ListView<MenuItem> menuList = new ListView<MenuItem>("menuList", menuItems) {
             private static final long serialVersionUID = 1L;
 
+            @Override
             protected void populateItem(ListItem<MenuItem> item) {
-                MenuItem menuItem = (MenuItem) item.getModelObject();
+                MenuItem menuItem = item.getModelObject();
                 BookmarkablePageLink<WebPage> link = menuItem.getPageLink();
                 link.add(menuItem.getLabel());
                 item.add(link);

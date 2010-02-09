@@ -14,9 +14,9 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.protocol.http.WebResponse;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.pages.ForgotPasswordPage;
 import org.jbei.ice.web.pages.RegistrationPage;
 import org.jbei.ice.web.pages.UserPage;
-import org.jbei.ice.web.pages.WelcomePage;
 
 public class LoginPanel extends Panel {
     private static final long serialVersionUID = -3410412725639985716L;
@@ -42,8 +42,8 @@ public class LoginPanel extends Panel {
                 add(new CheckBox("keepSignedIn"));
                 add(new BookmarkablePageLink<RegistrationPage>("registrationLink",
                         RegistrationPage.class));
-                add(new BookmarkablePageLink<RegistrationPage>("forgotPasswordLink",
-                        WelcomePage.class));
+                add(new BookmarkablePageLink<ForgotPasswordPage>("forgotPasswordLink",
+                        ForgotPasswordPage.class));
                 add(new Button("logInButton", new Model<String>("Log In")));
 
             }

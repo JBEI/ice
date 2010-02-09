@@ -12,7 +12,6 @@ import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.utils.Emailer;
-import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.IceSession;
 
 public class UpdatePasswordPage extends ProtectedPage {
@@ -73,7 +72,7 @@ public class UpdatePasswordPage extends ProtectedPage {
                         return;
                     }
 
-                    account.setPassword(Utils.encryptMD5(oldPassword));
+                    account.setPassword(AccountManager.encryptPassword(oldPassword));
 
                     AccountManager.save(account);
 

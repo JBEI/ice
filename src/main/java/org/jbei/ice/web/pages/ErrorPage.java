@@ -1,6 +1,5 @@
 package org.jbei.ice.web.pages;
 
-import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.resources.StyleSheetReference;
 import org.apache.wicket.model.Model;
@@ -9,7 +8,7 @@ import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 
-public class ErrorPage extends WebPage {
+public class ErrorPage extends UnprotectedPage {
     protected static final long serialVersionUID = 1L;
 
     public ErrorPage(Throwable throwable) {
