@@ -46,7 +46,7 @@ public class MostRecentEntriesPanel extends Panel {
     ResourceReference hasSequenceImage;
     ResourceReference hasSampleImage;
 
-    public MostRecentEntriesPanel(String id) {
+    public MostRecentEntriesPanel(String id, int perPage) {
         super(id);
 
         sortableDataProvider = new EntriesDataProvider();
@@ -70,7 +70,7 @@ public class MostRecentEntriesPanel extends Panel {
         add(new Image("sequenceHeaderImage", hasSequenceImage));
         add(new Image("sampleHeaderImage", hasSampleImage));
 
-        dataView = new DataView<Entry>("entriesDataView", sortableDataProvider, 15) {
+        dataView = new DataView<Entry>("entriesDataView", sortableDataProvider, perPage) {
             private static final long serialVersionUID = 1L;
 
             @Override

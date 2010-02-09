@@ -13,12 +13,12 @@ public class EntriesPage extends ProtectedPage {
 
     public BookmarkablePageLink<Object> recentEntriesLink;
 
-    public String currentPage = null;
+    private int perPage = 15;
 
     public EntriesPage(PageParameters parameters) {
         super(parameters);
 
-        currentPage = parameters.getString("0");
+        perPage = (parameters.size() > 1) ? parameters.getInt("1") : perPage;
 
         recentEntriesLink = new BookmarkablePageLink<Object>("recentEntriesLink",
                 EntriesPage.class, new PageParameters("0=recent"));
@@ -39,7 +39,8 @@ public class EntriesPage extends ProtectedPage {
     }
 
     private Panel createRecentEntriesPanel() {
-        MostRecentEntriesPanel mostRecentEntriesPanel = new MostRecentEntriesPanel("centerPanel");
+        MostRecentEntriesPanel mostRecentEntriesPanel = new MostRecentEntriesPanel("centerPanel",
+                perPage);
 
         mostRecentEntriesPanel.setOutputMarkupId(true);
 

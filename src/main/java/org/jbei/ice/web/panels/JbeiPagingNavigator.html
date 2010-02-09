@@ -1,9 +1,69 @@
 <html xmlns:wicket>
-<body>
-<div id="paging"><wicket:panel>
-	<b> <a wicket:id="first">First</a>&nbsp;| <a wicket:id="prev">Previous</a>&nbsp;|&nbsp; <span
-		wicket:id="navigation"> <a wicket:id="pageLink" href="#"> <span wicket:id="pageNumber">5</span>
-	</a> </span> &nbsp;|&nbsp;<a wicket:id="next">Next</a>&nbsp;| <a wicket:id="last">Last</a> </b>
-</wicket:panel></div>
-</body>
+<wicket:panel>
+	<style>
+.pagingControls {
+	list-style-type: none;
+	text-align: left;
+	white-space: nowrap;
+	padding: 0px;
+	margin: 0px;
+}
+
+.pagingControls li {
+	display: inline;
+	margin: 0px;
+}
+
+.pagingControls a:hover {
+	text-decoration: none;
+}
+
+.pagingControls .disabled,.pagingControls a {
+	background-color: white;
+	border: 1px solid #CCCCCC;
+	padding: 2px 6px;
+}
+
+.pagingControls .currPage {
+	font-size: 13px;
+	font-weight: bold;
+	padding: 2px 6px;
+}
+
+.pagingControls .prevBtn,.pagingControls .nextBtn {
+	white-space: nowrap;
+}
+
+.pagingControls .disabled {
+	color: #999999;
+}
+</style>
+	<table width="100%" cellpadding="0" cellspacing="0" border="0">
+		<tr>
+			<td style="white-space: nowrap">
+			<ul class="pagingControls">
+				<li class="prevBtn"><a wicket:id="first">&laquo;&laquo; First</a></li>
+				<li class="prevBtn"><a wicket:id="prev">&laquo; Prev</a></li>
+
+				<li><span wicket:id="navigation"><a wicket:id="pageLink" href="#"><span
+					wicket:id="pageNumber">5</span></a></span></li>
+
+				<li class="nextBtn"><a wicket:id="next">Next &raquo;</a></li>
+				<li class="nextBtn"><a wicket:id="last">Last &raquo;&raquo;</a></li>
+			</ul>
+			</td>
+			
+			<td style="white-space: nowrap"><b>Displaying <span wicket:id="displayingFromLabel"></span> - <span
+				wicket:id="displayingToLabel"></span> of <span wicket:id="totalLabel"></span></b></td>
+			
+			<td align="right">
+			<ul class="pagingControls" style="text-align: right; white-space: nowrap">
+				<li><a wicket:id="firstPerPageLink">15</a></li>
+				<li><a wicket:id="secondPerPageLink">50</a></li>
+				<li><a wicket:id="allPerPageLink">All</a></li>
+			</ul>
+			</td>
+		</tr>
+	</table>
+</wicket:panel>
 </html>

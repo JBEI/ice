@@ -35,7 +35,7 @@ public class SearchResultPage extends ProtectedPage {
             if (searchResults.size() == 0) {
                 searchResultPanel = new EmptyMessagePanel("searchResultPanel", "No results found");
             } else {
-                searchResultPanel = new SearchResultPanel("searchResultPanel", searchResults, 20);
+                searchResultPanel = new SearchResultPanel("searchResultPanel", searchResults, 15);
             }
         } catch (Exception e) {
             e.printStackTrace();

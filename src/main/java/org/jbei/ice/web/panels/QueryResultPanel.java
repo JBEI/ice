@@ -180,7 +180,8 @@ public class QueryResultPanel extends Panel {
             protected void populateItem(Item<Entry> item) {
                 Entry entry = item.getModelObject();
 
-                item.add(new Label("index", "" + (item.getIndex() + 1)));
+                item.add(new Label("index", ""
+                        + (getItemsPerPage() * getCurrentPage() + item.getIndex() + 1)));
                 item.add(new Label("recordType", entry.getRecordType()));
                 BookmarkablePageLink partIdLink = new BookmarkablePageLink("partIdLink",
                         EntryViewPage.class, new PageParameters("0=" + entry.getId()));
