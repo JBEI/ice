@@ -33,6 +33,7 @@ public class JbeirSettings {
         // LocalBackend, NullAuthenticationBackend, LblLdapAuthenticationBackend are built-in
         settings.put("AUTHENTICATION_BACKEND",
                 "org.jbei.ice.lib.authentication.LblLdapAuthenticationBackend");
+        settings.put("NEW_REGISTRATION_ALLOWED", "no");
     }
 
     public static String getSetting(String key) {
