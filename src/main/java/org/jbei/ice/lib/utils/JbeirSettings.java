@@ -17,9 +17,9 @@ public class JbeirSettings {
         settings.put("COOKIE_NAME", "gd-ice");
         settings.put("SEARCH_INDEX_FILE", settings.get("DATA_DIRECTORY") + File.separator
                 + "ice_search_index");
-        settings.put("ADMIN_EMAIL", "zdmytriv@lbl.gov");
-        settings.put("MODERATOR_EMAIL", "zdmytriv@lbl.gov");
-        settings.put("SMTP_HOST", "baracuda.dhcp.lbl.gov");
+        settings.put("ADMIN_EMAIL", "tsham@lbl.gov");
+        settings.put("MODERATOR_EMAIL", "tsham@lbl.gov");
+        settings.put("SMTP_HOST", "smtp.lbl.gov");
         settings.put("ERROR_EMAIL_EXCEPTION_PREFIX", "[ERROR] ");
         settings.put("PROJECT_NAME", "JBEI Registry");
         settings.put("SECRET_KEY", "o6-v(yay5w@0!64e6-+ylbhcd9g03rv#@ezqh7axchds=q=$n+");

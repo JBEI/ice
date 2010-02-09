@@ -15,7 +15,7 @@ import org.jbei.ice.lib.logging.Logger;
 public class Emailer {
     public static void send(String receiverEmail, String subject, String body) {
         Properties props = new Properties();
-        props.put(JbeirSettings.getSetting("SMTP_HOST"), "DEFAULT SMTP HOST");
+        props.put("mail.smtp.host", JbeirSettings.getSetting("SMTP_HOST"));
         // props.put("mail.debug", "true");
 
         Session session = Session.getInstance(props);
@@ -43,7 +43,7 @@ public class Emailer {
 
     public static void error(String subject, String body) {
         Properties props = new Properties();
-        props.put(JbeirSettings.getSetting("SMTP_HOST"), "DEFAULT SMTP HOST");
+        props.put("mail.smtp.host", JbeirSettings.getSetting("SMTP_HOST"));
         // props.put("mail.debug", "true");
 
         Session session = Session.getInstance(props);
