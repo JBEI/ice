@@ -51,7 +51,6 @@ public class MenuPanel extends Panel {
         addPageLinkMenuItem(UserPage.class, "My Entries");
         addPageLinkMenuItem(EntryNewPage.class, "Add new entry");
         addPageLinkMenuItem(FeedbackPage.class, "Feedback");
-        addPageLinkMenuItem(LogOutPage.class, "Log Out");
 
         ListView<MenuItem> menuList = new ListView<MenuItem>("menuList", menuItems) {
             private static final long serialVersionUID = 1L;
