@@ -18,6 +18,7 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.GroupManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
@@ -26,6 +27,7 @@ import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
+import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryViewPage;
@@ -208,6 +210,7 @@ public class PartNewFormPanel extends Panel {
                 try {
                     Part newPart = AuthenticatedEntryManager.createPart(part, IceSession.get()
                             .getSessionKey());
+                    PermissionManager.addReadGroup(part, GroupManager.getEverybodyGroup());
                     setResponsePage(EntryViewPage.class, new PageParameters("0=" + newPart.getId()));
                 } catch (ManagerException e) {
                     String msg = "System Error: Could not save! ";

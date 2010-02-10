@@ -98,6 +98,21 @@ public class PermissionManager extends Manager {
         }
     }
 
+    public static void addReadUser(Entry entry, Account account) throws ManagerException {
+        Set<Account> accounts = getReadUser(entry);
+        boolean alreadyAdded = false;
+        for (Account oldAccount : accounts) {
+            if (oldAccount.getId() == account.getId()) {
+                alreadyAdded = true;
+                break;
+            }
+        }
+        if (alreadyAdded == false) {
+            accounts.add(account);
+            setReadUser(entry, accounts);
+        }
+    }
+
     public static Set<Account> getReadUser(Entry entry) throws ManagerException {
         try {
             String queryString = "select readUser.account from ReadUser readUser where readUser.entry = :entry";
@@ -134,6 +149,21 @@ public class PermissionManager extends Manager {
             String msg = "Could not set Read Group of " + entry.getRecordId();
             Logger.error(msg);
             throw new ManagerException(msg, e);
+        }
+    }
+
+    public static void addReadGroup(Entry entry, Group group) throws ManagerException {
+        Set<Group> groups = getReadGroup(entry);
+        boolean alreadyAdded = false;
+        for (Group existingGroup : groups) {
+            if (existingGroup.getId() == group.getId()) {
+                alreadyAdded = true;
+                break;
+            }
+        }
+        if (alreadyAdded == false) {
+            groups.add(group);
+            setReadGroup(entry, groups);
         }
     }
 
@@ -175,6 +205,21 @@ public class PermissionManager extends Manager {
         }
     }
 
+    public static void addWriteUser(Entry entry, Account account) throws ManagerException {
+        Set<Account> accounts = getWriteUser(entry);
+        boolean alreadyAdded = false;
+        for (Account existingAccount : accounts) {
+            if (existingAccount.getId() == account.getId()) {
+                alreadyAdded = true;
+                break;
+            }
+        }
+        if (alreadyAdded == false) {
+            accounts.add(account);
+            setWriteUser(entry, accounts);
+        }
+    }
+
     public static Set<Account> getWriteUser(Entry entry) throws ManagerException {
         try {
             String queryString = "select writeUser.account from WriteUser writeUser where writeUser.entry = :entry";
@@ -210,6 +255,21 @@ public class PermissionManager extends Manager {
             String msg = "Could not set WriteGroup of " + entry.getRecordId();
             Logger.error(msg);
             throw new ManagerException(msg, e);
+        }
+    }
+
+    public static void addWriteGroup(Entry entry, Group group) throws ManagerException {
+        Set<Group> groups = getWriteGroup(entry);
+        boolean alreadyAdded = false;
+        for (Group existingGroup : groups) {
+            if (existingGroup.getId() == group.getId()) {
+                alreadyAdded = true;
+                break;
+            }
+        }
+        if (alreadyAdded == false) {
+            groups.add(group);
+            setWriteGroup(entry, groups);
         }
     }
 
@@ -383,169 +443,6 @@ public class PermissionManager extends Manager {
     }
 
     public static void main(String[] args) {
-        try {
-            /*
-            HashSet<Account> users = new HashSet<Account>();
-
-            users.add(AccountManager.getById(1));
-            users.add(AccountManager.getById(2));
-            users.add(AccountManager.getById(3));
-            
-            Entry entry = EntryManager.get(1);
-            
-            for (Account user: users) {
-            	ReadUser readUsers = new ReadUser(entry, user);
-            	dbSave(readUsers);
-            }
-            
-            users = new HashSet<Account>();
-            users.add(AccountManager.getById(1));
-            users.add(AccountManager.getById(2));
-            users.add(AccountManager.getById(4));
-            
-            for (Account user: users) {
-            	WriteUser writeUsers = new WriteUser(entry, user);
-            	dbSave(writeUsers);
-            }
-            
-            */
-
-            /*
-            Entry entry = EntryManager.get(1);
-            Account account = AccountManager.getById(3);
-            Boolean result = hasReadPermission(entry, account);
-            System.out.println("Has read permission: " + result.toString());
-            
-            result = hasWritePermission(entry, account);
-            System.out.println("Has write permission: " + result.toString());
-            */
-
-            /*
-            Entry entry2 = EntryManager.get(2);
-            Group group = GroupManager.get(551);
-            
-            ReadGroup readGroup = new ReadGroup(entry2, group);
-            readGroup = (ReadGroup) dbSave(readGroup);
-            
-            WriteGroup writeGroup = new WriteGroup(entry2, group);
-            writeGroup = (WriteGroup) dbSave(writeGroup);
-            */
-
-            /*
-            Account account = AccountManager.getById(2);
-            Group group = GroupManager.get(551);
-            HashSet<Group> groups = new HashSet<Group>();
-            groups.add(group);
-            
-            account.setGroups(groups);
-            account = (Account) AccountManager.save(account);
-            */
-            /*
-            Entry entry = EntryManager.get(2);
-            Account account = AccountManager.getById(2);
-            Boolean result = groupHasReadPermission(entry, account);
-            System.out.println("account has group read permission: " + result.toString());
-
-            result = groupHasWritePermission(entry, account);
-            System.out.println("account has group write permission: " + result.toString());
-            */
-
-            // create some dummy groups for testing
-            // g1 -- G2 -- G4
-            //				 -- G5
-            //		-- G3 -- G6
-            /*
-            Group g1 = GroupManager.create("dummy1", "Group 1", "dummy group 1", null);
-            Group g2 = GroupManager.create("dummy2", "Group 2", "dummy group 2", g1);
-            Group g3 = GroupManager.create("dummy3", "Group 3", "dummy group 3", g1);
-            Group g4 = GroupManager.create("dummy4", "Group 4", "dummy group 4", g2);
-            Group g5 = GroupManager.create("dummy5", "Group 5", "dummy group 5", g2);
-            Group g6 = GroupManager.create("dummy6", "Group 6", "dummy group 6", g3);
-            */
-
-            // set some users to groups
-            /*
-            Account u1 = AccountManager.getById(1);
-            Account u2 = AccountManager.getById(2);
-            Account u3 = AccountManager.getById(3);
-            Account u4 = AccountManager.getById(4);
-            
-            HashSet<Group> groups = new HashSet<Group>();
-            groups.add(GroupManager.get(15)); //g4
-            u1.setGroups(groups);
-            AccountManager.save(u1);
-            
-            groups = new HashSet<Group>();
-            groups.add(GroupManager.get(15)); //g4
-            u2.setGroups(groups);
-            AccountManager.save(u2);
-            
-            groups = new HashSet<Group>();
-            groups.add(GroupManager.get(17)); //g6
-            u3.setGroups(groups);
-            AccountManager.save(u3);
-            
-            groups = new HashSet<Group>();
-            groups.add(GroupManager.get(16)); //g5
-            groups.add(GroupManager.get(14)); //g3
-            u4.setGroups(groups);
-            AccountManager.save(u4);
-            */
-
-            //test group hierarchy
-            /*
-            Account u1 = AccountManager.getById(1);
-            Account u2 = AccountManager.getById(2);
-            Account u3 = AccountManager.getById(3);
-            Account u4 = AccountManager.getById(4);
-            
-            System.out.println("u1: " + getAllAccountGroups(u1).toString());
-            System.out.println("u2: " + getAllAccountGroups(u2).toString());
-            System.out.println("u3: " + getAllAccountGroups(u3).toString());
-            System.out.println("u4: " + getAllAccountGroups(u4).toString());
-            */
-
-            //set groups to entry3
-            /*
-            Entry entry3 = EntryManager.get(3);
-            
-            HashSet<Group> groups = new HashSet<Group>();
-            groups.add(GroupManager.get(15));
-            groups.add(GroupManager.get(14));
-            setReadGroup(entry3, groups);
-            */
-
-            //set groups to entry4
-            /*
-            Entry entry4 = EntryManager.get(4);
-            HashSet<Group> groups = new HashSet<Group>();
-            groups.add(GroupManager.get(14));
-            setReadGroup(entry4, groups);
-            */
-
-            //test user permission via groups
-            Account u1 = AccountManager.get(1);
-            Account u2 = AccountManager.get(2);
-            Account u3 = AccountManager.get(3);
-            Account u4 = AccountManager.get(4);
-
-            //Entry entry3 = EntryManager.get(3);
-            Entry entry4 = EntryManager.get(4);
-            /*
-            System.out.println("u1 can read e3: " + hasReadPermission(entry3, u1));
-            System.out.println("u2 can read e3: " + hasReadPermission(entry3, u2));
-            System.out.println("u3 can read e3: " + hasReadPermission(entry3, u3));
-            System.out.println("u4 can read e3: " + hasReadPermission(entry3, u4));
-            */
-            System.out.println("u1 can read e4: " + hasReadPermission(entry4, u1));
-            System.out.println("u2 can read e4: " + hasReadPermission(entry4, u2));
-            System.out.println("u3 can read e4: " + hasReadPermission(entry4, u3));
-            System.out.println("u4 can read e4: " + hasReadPermission(entry4, u4));
-
-        } catch (ManagerException e) {
-            e.printStackTrace();
-        }
 
     }
-
 }

@@ -19,6 +19,7 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.GroupManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
@@ -27,6 +28,7 @@ import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
+import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryViewPage;
@@ -219,6 +221,7 @@ public class PlasmidNewFormPanel extends Panel {
                 try {
                     Plasmid newPlasmid = AuthenticatedEntryManager.createPlasmid(plasmid,
                             IceSession.get().getSessionKey());
+                    PermissionManager.addReadGroup(plasmid, GroupManager.getEverybodyGroup());
                     setResponsePage(EntryViewPage.class, new PageParameters("0="
                             + newPlasmid.getId()));
                 } catch (ManagerException e) {
