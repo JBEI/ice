@@ -21,7 +21,6 @@ import org.jbei.ice.lib.value_objects.ILocationValueObject;
 @Table(name = "locations")
 @SequenceGenerator(name = "sequence", sequenceName = "locations_id_seq", allocationSize = 1)
 public class Location implements ILocationValueObject, Serializable {
-
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -138,4 +137,14 @@ public class Location implements ILocationValueObject, Serializable {
         this.modificationTime = modificationTime;
     }
 
+    public String toOneLineString() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(getLocation()).append(",");
+        sb.append(getnColumns()).append("x").append(getnRows()).append(",");
+        sb.append(getWells()).append(",");
+        sb.append(getNotes());
+
+        return sb.toString();
+    }
 }

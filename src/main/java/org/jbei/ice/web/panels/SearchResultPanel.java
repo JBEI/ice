@@ -88,6 +88,8 @@ public class SearchResultPanel extends Panel {
                     return;
                 }
 
+                item.add(new SimpleAttributeModifier("class", item.getIndex() % 2 == 0 ? "odd_row"
+                        : "even_row"));
                 item.add(new Label("index", ""
                         + (getItemsPerPage() * getCurrentPage() + item.getIndex() + 1)));
                 item.add(new Label("recordType", entry.getRecordType()));

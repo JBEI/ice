@@ -92,6 +92,8 @@ public class ProfileEntriesPanel extends Panel {
             protected void populateItem(Item<Entry> item) {
                 Entry entry = item.getModelObject();
 
+                item.add(new SimpleAttributeModifier("class", item.getIndex() % 2 == 0 ? "odd_row"
+                        : "even_row"));
                 item.add(new Label("index", ""
                         + (getItemsPerPage() * getCurrentPage() + item.getIndex() + 1)));
                 item.add(new Label("recordType", entry.getRecordType()));

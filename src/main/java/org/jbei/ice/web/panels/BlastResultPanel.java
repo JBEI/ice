@@ -49,6 +49,9 @@ public class BlastResultPanel extends Panel {
                 } catch (PermissionException e) {
                     // no permission
                 }
+
+                item.add(new SimpleAttributeModifier("class", item.getIndex() % 2 == 0 ? "odd_row"
+                        : "even_row"));
                 if (entry != null) {
                     item.add(new Label("index", "" + (item.getIndex() + 1)));
                     item.add(new Label("recordType", entry.getRecordType()));

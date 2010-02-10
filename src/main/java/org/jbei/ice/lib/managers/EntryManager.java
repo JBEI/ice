@@ -191,6 +191,28 @@ public class EntryManager extends Manager {
         return new LinkedHashSet<Entry>(query.list());
     }
 
+    @SuppressWarnings("unchecked")
+    public static LinkedHashSet<Entry> getByAccount(Account account, int offset, int limit,
+            SortField[] sortFields) {
+
+        String sortQuerySuffix = "";
+
+        if (sortFields != null && sortFields.length > 0) {
+            sortQuerySuffix = Utils.join(", ", Arrays.asList(sortFields));
+        }
+
+        String queryString = "from Entry where ownerEmail = :ownerEmail"
+                + (!sortQuerySuffix.isEmpty() ? (" ORDER BY " + sortQuerySuffix) : "");
+
+        Query query = session.createQuery(queryString);
+
+        query.setParameter("ownerEmail", account.getEmail());
+        query.setFirstResult(offset);
+        query.setMaxResults(limit);
+
+        return new LinkedHashSet<Entry>(query.list());
+    }
+
     public static int getByAccountCount(Account account) {
         if (account == null) {
             return 0;

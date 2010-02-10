@@ -98,6 +98,8 @@ public class PrintableEntriesTablePage extends ProtectedPage {
             protected void populateItem(ListItem<Entry> item) {
                 Entry entry = item.getModelObject();
 
+                item.add(new SimpleAttributeModifier("class", item.getIndex() % 2 == 0 ? "odd_row"
+                        : "even_row"));
                 item.add(new Label("index", String.valueOf(item.getIndex() + 1)));
                 item.add(new Label("recordType", entry.getRecordType()));
 

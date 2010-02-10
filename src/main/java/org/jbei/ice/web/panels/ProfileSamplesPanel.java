@@ -7,6 +7,7 @@ import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.CSSPackageResource;
 import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
@@ -15,6 +16,7 @@ import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.Location;
 import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.web.dataProviders.UserSamplesDataProvider;
@@ -53,12 +55,21 @@ public class ProfileSamplesPanel extends Panel {
                 Sample sample = (Sample) item.getModelObject();
                 Entry entry = sample.getEntry();
 
+                item.add(new SimpleAttributeModifier("class", item.getIndex() % 2 == 0 ? "odd_row"
+                        : "even_row"));
                 item.add(new Label("index", ""
                         + (getItemsPerPage() * getCurrentPage() + item.getIndex() + 1)));
                 item.add(new Label("label", sample.getLabel()));
                 item.add(new Label("notes", sample.getNotes()));
 
-                item.add(new Label("location", "TODO GET LOCATION"));
+                String locations = "";
+                if (sample.getLocations() != null && sample.getLocations().size() > 0) {
+                    for (Location location : sample.getLocations()) {
+                        locations += location.toOneLineString() + "\n";
+                    }
+                }
+
+                item.add(new MultiLineLabel("location", locations));
                 item.add(new Label("type", entry.getRecordType()));
                 Name temp = (Name) entry.getNames().toArray()[0];
                 item.add(new Label("name", temp.getName()));
