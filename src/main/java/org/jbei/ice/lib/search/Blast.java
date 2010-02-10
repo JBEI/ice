@@ -155,7 +155,7 @@ public class Blast {
     }
 
     private void writeBigFastaFile(FileWriter bigFastaWriter) throws IOException {
-        List<Sequence> sequencesList = SequenceManager.getAll();
+        List<Sequence> sequencesList = SequenceManager.getAllVisible();
         for (Sequence sequence : sequencesList) {
             String recordId = sequence.getEntry().getRecordId();
             String sequenceString = "";

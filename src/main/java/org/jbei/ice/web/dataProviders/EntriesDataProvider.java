@@ -9,6 +9,7 @@ import org.apache.wicket.extensions.markup.html.repeater.util.SortParam;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.query.SortField;
@@ -52,14 +53,14 @@ public class EntriesDataProvider extends SortableDataProvider<Entry> {
 
             String field = getSortableField(sp.getProperty());
 
-            Set<Entry> results = EntryManager.getAll(first, count, new SortField[] { new SortField(
-                    field, sp.isAscending()) });
+            Set<Entry> results = EntryManager.getAllVisible(first, count,
+                    new SortField[] { new SortField(field, sp.isAscending()) });
 
             for (Entry entry : results) {
                 entries.add(entry);
             }
         } catch (Exception e) {
-            System.out.println(e.toString());
+            Logger.error("EntriesDataProvider.iterator: " + e.toString());
         }
 
         return entries.iterator();
@@ -70,7 +71,7 @@ public class EntriesDataProvider extends SortableDataProvider<Entry> {
     }
 
     public int size() {
-        return EntryManager.getNumberOfEntries();
+        return EntryManager.getNumberOfVisibleEntries();
     }
 
     public ArrayList<Entry> getEntries() {

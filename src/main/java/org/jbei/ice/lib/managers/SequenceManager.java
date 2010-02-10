@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Query;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.FeatureDNA;
+import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.utils.SequenceUtils;
@@ -50,6 +52,24 @@ public class SequenceManager extends Manager {
         Query query = session.createQuery(queryString);
 
         return new ArrayList<Sequence>(query.list());
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<Sequence> getAllVisible() {
+        Group everybodyGroup = null;
+        List<Sequence> result = null;
+
+        try {
+            everybodyGroup = GroupManager.getEverybodyGroup();
+            String queryString = "select entry.sequence from Entry entry, ReadGroup readGroup where readGroup.group = :group and readGroup.entry = entry";
+            Query query = session.createQuery(queryString);
+            query.setParameter("group", everybodyGroup);
+            result = new ArrayList<Sequence>(query.list());
+
+        } catch (ManagerException e) {
+            Logger.error("getAllVisible: " + e.toString());
+        }
+        return result;
     }
 
     public static Sequence get(int id) throws ManagerException {

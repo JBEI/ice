@@ -64,7 +64,7 @@ public class VectorEditorEntriesPage extends WebPage {
         try {
             List<Sequence> sequences = null;
 
-            sequences = SequenceManager.getAll();
+            sequences = SequenceManager.getAllVisible();
 
             List<Entry> entries = new ArrayList<Entry>();
 

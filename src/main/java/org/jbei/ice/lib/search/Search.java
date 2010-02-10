@@ -139,7 +139,7 @@ public class Search {
         IndexWriter indexWriter = new IndexWriter(directory, new StandardAnalyzer(
                 Version.LUCENE_CURRENT), true, IndexWriter.MaxFieldLength.UNLIMITED);
 
-        Set<Entry> entries = EntryManager.getAll();
+        Set<Entry> entries = EntryManager.getAllVisible();
         for (Entry entry : entries) {
             Document document = createDocument(entry);
             indexWriter.addDocument(document);

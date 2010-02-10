@@ -8,10 +8,12 @@ import java.util.Set;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
+import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.models.Link;
 import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Part;
@@ -237,6 +239,22 @@ public class EntryManager extends Manager {
     }
 
     @SuppressWarnings("unchecked")
+    public static Set<Entry> getAllVisible() {
+        Set<Entry> result = null;
+        Group everybodyGroup = null;
+        try {
+            everybodyGroup = GroupManager.getEverybodyGroup();
+            String queryString = "select entry from Entry entry, ReadGroup readGroup where readGroup.group = :group and readGroup.entry = entry";
+            Query query = session.createQuery(queryString);
+            query.setParameter("group", everybodyGroup);
+            result = new LinkedHashSet<Entry>(query.list());
+        } catch (ManagerException e) {
+            Logger.error("getAllVisible: " + e.toString());
+        }
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
     public static Set<Entry> getAll(int offset, int limit, SortField[] sortFields) {
         String sortQuerySuffix = "";
 
@@ -254,12 +272,56 @@ public class EntryManager extends Manager {
         return new LinkedHashSet<Entry>(query.list());
     }
 
+    @SuppressWarnings("unchecked")
+    public static Set<Entry> getAllVisible(int offset, int limit, SortField[] sortFields) {
+        String sortQuerySuffix = "";
+        Group everybodyGroup;
+        LinkedHashSet<Entry> result = null;
+        try {
+            everybodyGroup = GroupManager.getEverybodyGroup();
+            if (sortFields != null && sortFields.length > 0) {
+                sortQuerySuffix = Utils.join(", ", Arrays.asList(sortFields));
+            }
+            String queryString = "select entry from Entry entry, ReadGroup readGroup where readGroup.group = :group and readGroup.entry = entry"
+                    + (!sortQuerySuffix.isEmpty() ? (" ORDER BY " + "entry." + sortQuerySuffix)
+                            : "");
+            Query query = session.createQuery(queryString);
+            query.setParameter("group", everybodyGroup);
+            query.setFirstResult(offset);
+            query.setMaxResults(limit);
+            result = new LinkedHashSet<Entry>(query.list());
+
+        } catch (ManagerException e) {
+            Logger.error("getAllVisible: " + e.toString());
+        } catch (Exception e) {
+            Logger.error("getAllVisible: " + e.toString());
+        }
+
+        return result;
+    }
+
     public static int getNumberOfEntries() {
         String queryString = "select id from Entry";
 
         Query query = session.createQuery(queryString);
 
         return query.list().size();
+    }
+
+    public static int getNumberOfVisibleEntries() {
+        Group everybodyGroup;
+        int result = 0;
+        try {
+            everybodyGroup = GroupManager.getEverybodyGroup();
+            String queryString = "select id from ReadGroup readGroup where readGroup.group = :group";
+            Query query = session.createQuery(queryString);
+            query.setParameter("group", everybodyGroup);
+            result = query.list().size();
+
+        } catch (ManagerException e) {
+            Logger.error("getNumberOfVisibleEntries: " + e.toString());
+        }
+        return result;
     }
 
     @SuppressWarnings("unchecked")
@@ -376,15 +438,7 @@ public class EntryManager extends Manager {
 
     public static void main(String[] args) {
 
-        int offset = 0;
-        int limit = 30;
-        ArrayList<String[]> data = new ArrayList<String[]>();
-        data.add(new String[] { "owner_email", "tsham@lbl.gov" });
-        Set<Entry> temp = EntryManager.getByFilter(data, offset, limit);
-
-        for (Entry entry : temp) {
-            System.out.println("" + entry.getId());
-        }
+        System.out.println("" + getNumberOfVisibleEntries());
     }
 
 }
