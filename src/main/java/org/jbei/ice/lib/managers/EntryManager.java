@@ -344,7 +344,7 @@ public class EntryManager extends Manager {
         for (EntryFundingSource entryFundingSource : entry.getEntryFundingSources()) {
             entryFundingSource.setFundingSource(saveFundingSource(entryFundingSource
                     .getFundingSource()));
-            dbSave(entryFundingSource.getFundingSource());
+            dbSave(entryFundingSource);
         }
 
         result = (Entry) dbSave(entry);

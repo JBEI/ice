@@ -24,7 +24,8 @@ public abstract class Manager {
         Object result = null;
         try {
             Transaction tx = session.beginTransaction();
-            obj = session.merge(obj);
+            // never do below
+            // obj = session.merge(obj);
             session.saveOrUpdate(obj);
 
             tx.commit();
