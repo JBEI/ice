@@ -37,13 +37,13 @@ public class PartNewFormPanel extends Panel {
 
     public PartNewFormPanel(String id) {
         super(id);
+
         part = new Part();
         populateElements();
     }
 
     private void populateElements() {
         class PartForm extends StatelessForm<Object> {
-
             private static final long serialVersionUID = 1L;
 
             // entry fields
@@ -66,7 +66,6 @@ public class PartNewFormPanel extends Panel {
             private CustomChoice packageFormat;
 
             public PartForm(String id) {
-
                 super(id);
 
                 setLinks(part.getLinksAsString());
@@ -112,8 +111,10 @@ public class PartNewFormPanel extends Panel {
                         new Model<String>("Name")));
                 add(new TextField<String>("links"));
                 add(new TextField<String>("alias"));
-                add(new TextField<String>("creator"));
-                add(new TextField<String>("creatorEmail"));
+                add(new TextField<String>("creator").setRequired(true).setLabel(
+                        new Model<String>("Creator")));
+                add(new TextField<String>("creatorEmail").setRequired(true).setLabel(
+                        new Model<String>("Creator's Email")));
 
                 CustomChoice planned = new CustomChoice(JbeiConstants.getStatus("planned"),
                         "planned");

@@ -112,8 +112,10 @@ public class PlasmidNewFormPanel extends Panel {
 
                 add(new TextField<String>("selectionMarkers"));
                 add(new TextField<String>("alias"));
-                add(new TextField<String>("creator"));
-                add(new TextField<String>("creatorEmail"));
+                add(new TextField<String>("creator").setRequired(true).setLabel(
+                        new Model<String>("Creator")));
+                add(new TextField<String>("creatorEmail").setRequired(true).setLabel(
+                        new Model<String>("Creator's Email")));
 
                 CustomChoice planned = new CustomChoice(JbeiConstants.getStatus("planned"),
                         "planned");

@@ -21,6 +21,11 @@ img {
 	display: block;
 }
 
+.panel_header {
+	font-size: 14px;
+	font-weight: bold;
+}
+
 tr {
 	text-align: left;
 }
@@ -185,6 +190,10 @@ form {
 }
 
 .error {
+	color: #cc3333
+}
+
+.required {
 	color: #cc3333
 }
 

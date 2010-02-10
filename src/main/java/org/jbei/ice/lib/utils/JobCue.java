@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.utils;
 
 import java.util.Calendar;
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Set;
 
 import org.jbei.ice.lib.logging.Logger;
@@ -10,7 +10,7 @@ import org.jbei.ice.lib.search.Search;
 
 public class JobCue implements Runnable {
 
-    private static HashMap<Integer, Long> cue = new HashMap<Integer, Long>();
+    private static Hashtable<Integer, Long> cue = new Hashtable<Integer, Long>();
     private long counter = 0L;
     private static long wakeupInterval = 1000L;
 
@@ -35,13 +35,16 @@ public class JobCue implements Runnable {
         getCue().put(job.getJob(), Calendar.getInstance().getTimeInMillis());
     }
 
-    public HashMap<Integer, Long> getCue() {
+    public Hashtable<Integer, Long> getCue() {
         return cue;
     }
 
+    @SuppressWarnings("unchecked")
     private synchronized void processCue() {
         // TODO use reflection or something
-        Set<Integer> processedJobs = cue.keySet();
+        Hashtable<Integer, Long> newCue = (Hashtable<Integer, Long>) cue.clone();
+
+        Set<Integer> processedJobs = newCue.keySet();
         Logger.info("Proccesing jobs. There are " + processedJobs.size() + " jobs.");
         for (Integer jobType : processedJobs) {
             if (jobType == 1) {
