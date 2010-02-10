@@ -24,7 +24,6 @@ import org.jbei.ice.web.forms.PlasmidUpdateFormPanel;
 import org.jbei.ice.web.forms.StrainUpdateFormPanel;
 
 public class EntryUpdatePage extends ProtectedPage {
-
     private Entry entry;
 
     public EntryUpdatePage(PageParameters parameters) {
@@ -109,5 +108,10 @@ public class EntryUpdatePage extends ProtectedPage {
         } catch (ManagerException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected String getTitle() {
+        return "Update Entry - " + super.getTitle();
     }
 }

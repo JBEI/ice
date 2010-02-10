@@ -91,4 +91,9 @@ public class UpdatePasswordPage extends ProtectedPage {
 
         add(new UpdatePasswordForm("updatePasswordForm"));
     }
+
+    @Override
+    protected String getTitle() {
+        return "Update Password - " + super.getTitle();
+    }
 }

@@ -16,4 +16,9 @@ public class RegistrationPage extends UnprotectedPage {
             add(new EmptyMessagePanel("registrationPanel", msg));
         }
     }
+
+    @Override
+    protected String getTitle() {
+        return "Registration - " + super.getTitle();
+    }
 }

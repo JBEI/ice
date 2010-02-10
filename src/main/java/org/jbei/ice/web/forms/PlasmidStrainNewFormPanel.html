@@ -48,7 +48,7 @@
 				</tr>
 				<tr>
 					<td style="width: 150px">Links</td>
-					<td><input wicket:id="plasmidLinks" class="inputbox" maxlength="127" style="width: 300px;"></input><span
+					<td><input wicket:id="plasmidLinks" class="inputbox" maxlength="127" style="width: 300px;"></input>&nbsp;<span
 						class="form_help_text">Comma Separated</span></td>
 				</tr>
 				<tr>
@@ -63,19 +63,19 @@
 				<tr>
 					<td style="width: 150px">Selection Markers</td>
 					<td><input wicket:id="plasmidSelectionMarkers" style="width: 300px;" maxlength="127"
-						class="inputbox selectionMarkersInput"></input><span class="form_help_text">Comma
+						class="inputbox selectionMarkersInput"></input>&nbsp;<span class="form_help_text">Comma
 					Separated</span></td>
 				</tr>
 				<tr>
 					<td style="width: 150px">Origin of Replication</td>
 					<td><input wicket:id="plasmidOriginOfReplication" style="width: 300px;"
-						class="inputbox originOfReplicationInput" maxlength="127"></input><span class="form_help_text">Comma
-					Separated</span></td>
+						class="inputbox originOfReplicationInput" maxlength="127"></input>&nbsp;<span
+						class="form_help_text">Comma Separated</span></td>
 				</tr>
 				<tr>
 					<td style="width: 150px">Promoters</td>
 					<td><input wicket:id="plasmidPromoters" style="width: 300px;"
-						class="inputbox promotersInput" maxlength="127"></input><span class="form_help_text">Comma
+						class="inputbox promotersInput" maxlength="127"></input>&nbsp;<span class="form_help_text">Comma
 					Separated</span></td>
 				</tr>
 				<tr>
@@ -134,7 +134,7 @@
 				</tr>
 				<tr>
 					<td style="width: 150px">Links</td>
-					<td><input wicket:id="strainLinks" class="inputbox" maxlength="127" style="width: 300px;"></input><span
+					<td><input wicket:id="strainLinks" class="inputbox" maxlength="127" style="width: 300px;"></input>&nbsp;<span
 						class="form_help_text">Comma Separated</span></td>
 				</tr>
 				<tr>
@@ -144,14 +144,13 @@
 				<tr>
 					<td style="width: 150px">Selection Markers</td>
 					<td><input wicket:id="strainSelectionMarkers" style="width: 300px;" maxlength="127"
-						class="inputbox selectionMarkersInput"></input><span class="form_help_text">Comma
+						class="inputbox selectionMarkersInput"></input>&nbsp;<span class="form_help_text">Comma
 					Separated</span></td>
 				</tr>
 				<tr>
 					<td style="width: 150px">Genotype/Phenotype</td>
-					<td><input wicket:id="strainGenotypePhenotype" style="width: 300px;"
-						class="inputbox" maxlength="127"></input><span class="form_help_text">Comma
-					Separated</span></td>
+					<td><input wicket:id="strainGenotypePhenotype" style="width: 300px;" class="inputbox"
+						maxlength="127"></input>&nbsp;<span class="form_help_text">Comma Separated</span></td>
 				</tr>
 				<tr>
 					<td style="width: 150px">Keywords</td>
@@ -178,12 +177,18 @@
 					<td><textarea wicket:id="strainIntellectualProperty" style="width: 640px; height: 50px"
 						rows="3" name="intellectual_property" cols="20" class="inputarea"></textarea></td>
 				</tr>
+				<tr>
+					<td style="width: 150px">&nbsp;</td>
+					<td>
+					<button wicket:id="submitButton" type="submit">Save</button>
+					</td>
+				</tr>
 			</table>
 			</td>
 		</tr>
 	</table>
-	<button wicket:id="submitButton" type="submit">Save</button>
-	<script type="text/javascript" wicket:id="initializeCollectionsScript">/* script will be rendered here */</script>
-	</form>
+	<script type="text/javascript" wicket:id="initializeCollectionsScript">
+	/* script will be rendered here */
+</script></form>
 </wicket:panel>
 </html>

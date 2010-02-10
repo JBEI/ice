@@ -66,4 +66,9 @@ public class FeedbackPage extends UnprotectedPage {
 
         add(new FeedbackForm("feedbackForm"));
     }
+
+    @Override
+    protected String getTitle() {
+        return "Feedback - " + super.getTitle();
+    }
 }

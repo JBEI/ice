@@ -6,6 +6,7 @@ import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.resources.CompressedResourceReference;
+import org.apache.wicket.model.Model;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.JbeirSettings;
@@ -23,7 +24,7 @@ public class UnprotectedPage extends WebPage {
 
     protected static final long serialVersionUID = 1L;
 
-    private String searchParameters = "";
+    private boolean isPageRendered = false;
 
     /**
      * Constructor that is invoked when page is invoked without a session.
@@ -32,16 +33,8 @@ public class UnprotectedPage extends WebPage {
         this(new PageParameters());
     }
 
-    public UnprotectedPage(final PageParameters parameters) {
+    public UnprotectedPage(PageParameters parameters) {
         super(parameters);
-
-        searchParameters = parameters.getString("search");
-
-        initializeStyles();
-
-        initializeJavascript();
-
-        initializeComponents();
     }
 
     protected void initializeStyles() {
@@ -55,10 +48,10 @@ public class UnprotectedPage extends WebPage {
     }
 
     protected void initializeComponents() {
-        add(new Label("title", "JBEI Registry"));
+        add(new Label("title", new Model<String>(getTitle())));
         add(new HeaderPanel("headerPanel"));
         add(new MenuPanel("menuPanel"));
-        add(new SearchBarFormPanel("searchBarPanel", searchParameters));
+        add(new SearchBarFormPanel("searchBarPanel"));
         add(new FooterPanel("footerPanel"));
     }
 
@@ -71,5 +64,24 @@ public class UnprotectedPage extends WebPage {
 
         Logger.error(throwable.getMessage());
         Logger.error(body);
+    }
+
+    @Override
+    protected void onBeforeRender() {
+        if (!isPageRendered) {
+            initializeStyles();
+
+            initializeJavascript();
+
+            initializeComponents();
+
+            isPageRendered = true;
+        }
+
+        super.onBeforeRender();
+    }
+
+    protected String getTitle() {
+        return JbeirSettings.getSetting("PROJECT_NAME");
     }
 }

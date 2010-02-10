@@ -70,4 +70,9 @@ public class UserPage extends ProtectedPage {
 
         return userSamplesViewPanel;
     }
+
+    @Override
+    protected String getTitle() {
+        return "My Entries - " + super.getTitle();
+    }
 }

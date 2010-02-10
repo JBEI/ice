@@ -7,6 +7,10 @@ public class ForgotPasswordPage extends UnprotectedPage {
     public ForgotPasswordPage(PageParameters parameters) {
         super(parameters);
         add(new ForgotPasswordPanel("forgotPasswordPanel").setOutputMarkupId(true));
+    }
 
+    @Override
+    protected String getTitle() {
+        return "Password Reminder - " + super.getTitle();
     }
 }

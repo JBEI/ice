@@ -97,4 +97,9 @@ public class ProfilePage extends ProtectedPage {
 
         return profileSamplesPanel;
     }
+
+    @Override
+    protected String getTitle() {
+        return "Profile - " + super.getTitle();
+    }
 }

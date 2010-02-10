@@ -46,4 +46,9 @@ public class EntriesPage extends ProtectedPage {
 
         return mostRecentEntriesPanel;
     }
+
+    @Override
+    protected String getTitle() {
+        return "Entries - " + super.getTitle();
+    }
 }

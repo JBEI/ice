@@ -42,4 +42,9 @@ public class SearchResultPage extends ProtectedPage {
         }
         add(searchResultPanel);
     }
+
+    @Override
+    protected String getTitle() {
+        return "Search - " + super.getTitle();
+    }
 }

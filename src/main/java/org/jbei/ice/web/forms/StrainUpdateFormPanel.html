@@ -34,7 +34,7 @@
 				</tr>
 				<tr>
 					<td style="width: 150px">Links</td>
-					<td><input wicket:id="links" class="inputbox" maxlength="127" style="width: 300px;"></input><span
+					<td><input wicket:id="links" class="inputbox" maxlength="127" style="width: 300px;"></input>&nbsp;<span
 						class="form_help_text">Comma Separated</span></td>
 				</tr>
 				<tr>
@@ -44,19 +44,18 @@
 				<tr>
 					<td style="width: 150px">Selection Markers</td>
 					<td><input wicket:id="selectionMarkers" style="width: 300px;" maxlength="127"
-						class="inputbox selectionMarkersInput"></input><span class="form_help_text">Comma
+						class="inputbox selectionMarkersInput"></input>&nbsp;<span class="form_help_text">Comma
 					Separated</span></td>
 				</tr>
 				<tr>
 					<td style="width: 150px">Genotype/Phenotype</td>
-					<td><input wicket:id="genotypePhenotype" style="width: 300px;"
-						class="inputbox" maxlength="127"></input><span class="form_help_text">Comma
-					Separated</span></td>
+					<td><input wicket:id="genotypePhenotype" style="width: 300px;" class="inputbox"
+						maxlength="127"></input>&nbsp;<span class="form_help_text">Comma Separated</span></td>
 				</tr>
 				<tr>
 					<td style="width: 150px">Plasmids</td>
 					<td><input wicket:id="plasmids" style="width: 300px;" class="inputbox plasmidsInput"
-						maxlength="127"></input><span class="form_help_text">Comma Separated</span></td>
+						maxlength="127"></input>&nbsp;<span class="form_help_text">Comma Separated</span></td>
 				</tr>
 				<tr>
 					<td style="width: 150px">Keywords</td>
@@ -95,12 +94,18 @@
 					<td style="width: 150px">Principal Investigator</td>
 					<td><input wicket:id="principalInvestigator" class="inputbox" /></td>
 				</tr>
+				<tr>
+					<td style="width: 150px">&nbsp;</td>
+					<td>
+					<button wicket:id="submitButton" type="submit">Save</button>
+					</td>
+				</tr>
 			</table>
 			</td>
 		</tr>
-
 	</table>
-	<button wicket:id="submitButton" type="submit">Save</button>
-	<script type="text/javascript" wicket:id="initializeCollectionsScript">/* script will be rendered here */</script></form>
+	<script type="text/javascript" wicket:id="initializeCollectionsScript">
+	/* script will be rendered here */
+</script></form>
 </wicket:panel>
 </html>

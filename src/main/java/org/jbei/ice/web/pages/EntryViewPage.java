@@ -44,6 +44,7 @@ public class EntryViewPage extends ProtectedPage {
     public BookmarkablePageLink<Object> permissionLink;
 
     public String subPage = null;
+    public String entryTitle = "";
 
     @SuppressWarnings("unchecked")
     public EntryViewPage(PageParameters parameters) {
@@ -61,7 +62,9 @@ public class EntryViewPage extends ProtectedPage {
         }
 
         String recordType = JbeiConstants.getRecordType(entry.getRecordType());
-        add(new Label("titleName", recordType + ": " + entry.getNamesAsString()));
+
+        entryTitle = recordType + ": " + entry.getNamesAsString();
+        add(new Label("titleName", entryTitle));
 
         generalLink = new BookmarkablePageLink("generalLink", EntryViewPage.class,
                 new PageParameters("0=" + entry.getId()));
@@ -188,5 +191,10 @@ public class EntryViewPage extends ProtectedPage {
         target.addComponent(attachmentsLink);
         target.addComponent(sequenceLink);
         target.addComponent(permissionLink);
+    }
+
+    @Override
+    protected String getTitle() {
+        return entryTitle + " - " + super.getTitle();
     }
 }

@@ -93,4 +93,9 @@ public class EntryNewPage extends ProtectedPage {
                 UnprotectedPage.JS_RESOURCE_LOCATION + "autocompleteDataTemplate.js",
                 autocompleteDataMap));
     }
+
+    @Override
+    protected String getTitle() {
+        return "New Entry - " + super.getTitle();
+    }
 }

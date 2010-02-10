@@ -143,4 +143,9 @@ public class QueryPage extends ProtectedPage {
     public List<QueryItemPanel> getFilterPanels() {
         return filterPanels;
     }
+
+    @Override
+    protected String getTitle() {
+        return "Advanced Search - " + super.getTitle();
+    }
 }

@@ -105,8 +105,9 @@ public class PlasmidSimpleViewPanel extends Panel {
         String fundingSource = null;
 
         for (EntryFundingSource entryFundingSource : entryFundingSources) {
-            principalInvestigator = entryFundingSource.getFundingSource().getFundingSource();
-            fundingSource = entryFundingSource.getFundingSource().getPrincipalInvestigator();
+            principalInvestigator = entryFundingSource.getFundingSource()
+                    .getPrincipalInvestigator();
+            fundingSource = entryFundingSource.getFundingSource().getFundingSource();
         }
 
         if (principalInvestigator == null) {
