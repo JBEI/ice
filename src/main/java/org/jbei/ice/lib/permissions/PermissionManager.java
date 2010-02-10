@@ -324,10 +324,18 @@ public class PermissionManager extends Manager {
 
     protected static Set<Integer> getAllAccountGroups(Account account) {
         HashSet<Integer> accountGroups = new HashSet<Integer>();
+
         for (Group group : account.getGroups()) {
             accountGroups = getParentGroups(group, accountGroups);
         }
 
+        // Everyone belongs to the everyone group
+        try {
+            Group everybodyGroup = GroupManager.getEverybodyGroup();
+            accountGroups.add(everybodyGroup.getId());
+        } catch (ManagerException e) {
+            Logger.warn("could not get everybody group: " + e.toString());
+        }
         return accountGroups;
     }
 
@@ -345,11 +353,12 @@ public class PermissionManager extends Manager {
         int entriesGroup;
         int entriesUser;
 
-        String queryString = "from ReadUser readUser where readUser.entry = :entry";
+        String queryString = "from ReadUser as readUser where readUser.entry = :entry";
         Query query = session.createQuery(queryString);
         query.setEntity("entry", entry);
         entriesUser = query.list().size();
-        queryString = "from ReadGroup readGroup where readGroup.entry = :entry";
+        queryString = "from ReadGroup as readGroup where readGroup.entry = :entry";
+        query = session.createQuery(queryString);
         query.setEntity("entry", entry);
         entriesGroup = query.list().size();
 

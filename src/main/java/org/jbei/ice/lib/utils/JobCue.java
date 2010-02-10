@@ -45,7 +45,11 @@ public class JobCue implements Runnable {
         Hashtable<Integer, Long> newCue = (Hashtable<Integer, Long>) cue.clone();
 
         Set<Integer> processedJobs = newCue.keySet();
-        Logger.info("Proccesing jobs. There are " + processedJobs.size() + " jobs.");
+        Logger.debug("Proccesing jobs. There are " + processedJobs.size() + " jobs.");
+        if (processedJobs.size() > 0) {
+            Logger.info("Processing jobs: " + processedJobs.toString());
+        }
+
         for (Integer jobType : processedJobs) {
             if (jobType == 1) {
                 Logger.info("Running rebuildIndex");

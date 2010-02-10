@@ -7,6 +7,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Group;
+import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 
 public class GroupManager extends Manager {
 
@@ -38,6 +39,19 @@ public class GroupManager extends Manager {
             throw new ManagerException(msg);
         }
 
+        return result;
+    }
+
+    public static Group getEverybodyGroup() throws ManagerException {
+        Group result = null;
+        try {
+            result = get(PopulateInitialDatabase.everyoneGroup);
+            if (result == null) {
+                result = PopulateInitialDatabase.createFirstGroup();
+            }
+        } catch (Exception e) {
+            Logger.warn("populating everyoneGroup failed");
+        }
         return result;
     }
 
