@@ -24,6 +24,7 @@ import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryUpdatePage;
 import org.jbei.ice.web.pages.ProfilePage;
+import org.jbei.ice.web.utils.WebUtils;
 
 public class AbstractEntryViewPanel<T extends Entry> extends Panel {
     private static final long serialVersionUID = 1L;
@@ -140,7 +141,8 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
     }
 
     protected void renderLinks() {
-        add(new Label("links", getEntry().getLinksAsString()));
+        add(new Label("links", WebUtils.jbeiLinkifyText(getEntry().getLinksAsString()))
+                .setEscapeModelStrings(false));
     }
 
     protected void renderCreationTime() {
@@ -168,7 +170,8 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
     }
 
     protected void renderSummary() {
-        add(new MultiLineLabel("shortDescription", getEntry().getShortDescription()));
+        add(new MultiLineLabel("shortDescription", WebUtils.jbeiLinkifyText(getEntry()
+                .getShortDescription())).setEscapeModelStrings(false));
     }
 
     protected void renderAttachments() {
@@ -209,11 +212,13 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
     }
 
     protected void renderNotes() {
-        add(new MultiLineLabel("longDescription", getEntry().getLongDescription()));
+        add(new MultiLineLabel("longDescription", WebUtils.jbeiLinkifyText(getEntry()
+                .getLongDescription())).setEscapeModelStrings(false));
     }
 
     protected void renderReferences() {
-        add(new MultiLineLabel("references", getEntry().getReferences()));
+        add(new MultiLineLabel("references", WebUtils.jbeiLinkifyText(getEntry().getReferences()))
+                .setEscapeModelStrings(false));
     }
 
     protected void renderBioSafetyLevel() {
