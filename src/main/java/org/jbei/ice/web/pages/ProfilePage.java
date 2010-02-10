@@ -5,6 +5,10 @@ import org.apache.wicket.PageParameters;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.jbei.ice.lib.managers.AccountManager;
+import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.models.Account;
+import org.jbei.ice.web.panels.EmptyMessagePanel;
 import org.jbei.ice.web.panels.ProfileAboutUserPanel;
 import org.jbei.ice.web.panels.ProfileEntriesPanel;
 import org.jbei.ice.web.panels.ProfileSamplesPanel;
@@ -23,12 +27,19 @@ public class ProfilePage extends ProtectedPage {
 
     public String currentPage = null;
     public String accountEmail = null;
+    private Account account;
 
     public ProfilePage(PageParameters parameters) {
         super(parameters);
 
         currentPage = parameters.getString("0");
         accountEmail = parameters.getString("1");
+
+        try {
+            account = AccountManager.getByEmail(accountEmail);
+        } catch (ManagerException e) {
+            account = null;
+        }
 
         aboutLink = new BookmarkablePageLink<Object>("aboutLink", ProfilePage.class,
                 new PageParameters("0=about,1=" + accountEmail));
@@ -72,8 +83,14 @@ public class ProfilePage extends ProtectedPage {
     }
 
     private Panel createAboutPanel() {
-        ProfileAboutUserPanel profileAboutUserPanel = new ProfileAboutUserPanel("centerPanel",
-                accountEmail);
+        Panel profileAboutUserPanel;
+
+        if (account == null) {
+            profileAboutUserPanel = new EmptyMessagePanel("centerPanel",
+                    "Account is not registered.");
+        } else {
+            profileAboutUserPanel = new ProfileAboutUserPanel("centerPanel", accountEmail);
+        }
 
         profileAboutUserPanel.setOutputMarkupId(true);
 
@@ -81,8 +98,14 @@ public class ProfilePage extends ProtectedPage {
     }
 
     private Panel createEntriesPanel() {
-        ProfileEntriesPanel profileEntriesPanel = new ProfileEntriesPanel("centerPanel",
-                accountEmail);
+        Panel profileEntriesPanel;
+
+        if (account == null) {
+            profileEntriesPanel = new EmptyMessagePanel("centerPanel",
+                    "Couldn't lookup entries for account. Account isn't registered.");
+        } else {
+            profileEntriesPanel = new ProfileEntriesPanel("centerPanel", account);
+        }
 
         profileEntriesPanel.setOutputMarkupId(true);
 
@@ -90,8 +113,14 @@ public class ProfilePage extends ProtectedPage {
     }
 
     private Panel createSamplesPanel() {
-        ProfileSamplesPanel profileSamplesPanel = new ProfileSamplesPanel("centerPanel",
-                accountEmail);
+        Panel profileSamplesPanel;
+
+        if (account == null) {
+            profileSamplesPanel = new EmptyMessagePanel("centerPanel",
+                    "Couldn't lookup samples for account. Account isn't registered.");
+        } else {
+            profileSamplesPanel = new ProfileSamplesPanel("centerPanel", accountEmail);
+        }
 
         profileSamplesPanel.setOutputMarkupId(true);
 

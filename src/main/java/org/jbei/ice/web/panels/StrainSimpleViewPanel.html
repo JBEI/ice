@@ -9,9 +9,9 @@
 					<td align="right">
 					<table border="0" cellpadding="0" cellspacing="0">
 						<tr>
-							<td><img wicket:id="hasAttachment"></img></td>
-							<td><img wicket:id="hasSample"></img></td>
-							<td><img wicket:id="hasSequence"></img></td>
+							<td><img wicket:id="attachments"></img></td>
+							<td><img wicket:id="samples"></img></td>
+							<td><img wicket:id="sequence"></img></td>
 						</tr>
 					</table>
 					</td>
@@ -39,7 +39,8 @@
 						</tr>
 						<tr>
 							<td class="title_column">Creator:</td>
-							<td class="value_column"><span wicket:id="creator">Nathan Hillson</span></td>
+							<td class="value_column"><a href="#" wicket:id="creatorProfileLink"><span
+								wicket:id="creator"></span></a></td>
 							<td class="title_column">Plasmids:</td>
 							<td class="value_column"><span wicket:id="plasmids">Plasmid1, plasmid2</span></td>
 						</tr>
@@ -51,8 +52,8 @@
 						</tr>
 						<tr>
 							<td class="title_column">Owner:</td>
-							<td class="value_column"><span wicket:id="linkToOwner"><a
-								href="/profile/njhillson@lbl.gov/">Nathan Hillson</a></span></td>
+							<td class="value_column"><a href="#" wicket:id="ownerProfileLink"><span
+								wicket:id="owner"></span></a></td>
 							<td class="title_column">Created:</td>
 							<td class="value_column"><span wicket:id="creationTime">12 Oct 2009 7:15 PM</span></td>
 						</tr>

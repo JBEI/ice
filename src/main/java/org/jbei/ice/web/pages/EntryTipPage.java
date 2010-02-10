@@ -37,11 +37,11 @@ public class EntryTipPage extends ProtectedPage {
 
         try {
             if (recordType.equals("strain")) {
-                panel = new StrainSimpleViewPanel("centerPanel", (Strain) entry, true);
+                panel = new StrainSimpleViewPanel("centerPanel", (Strain) entry);
             } else if (recordType.equals("plasmid")) {
-                panel = new PlasmidSimpleViewPanel("centerPanel", (Plasmid) entry, true);
+                panel = new PlasmidSimpleViewPanel("centerPanel", (Plasmid) entry);
             } else if (recordType.equals("part")) {
-                panel = new PartSimpleViewPanel("centerPanel", (Part) entry, true);
+                panel = new PartSimpleViewPanel("centerPanel", (Part) entry);
             }
         } catch (Exception e) {
             e.printStackTrace();

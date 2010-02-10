@@ -111,7 +111,6 @@ public class PrintableEntriesTablePage extends ProtectedPage {
                 item.add(entryLink);
 
                 item.add(new Label("name", entry.getOneName().getName()));
-
                 item.add(new Label("description", entry.getShortDescription()));
 
                 if (displayOwner) {

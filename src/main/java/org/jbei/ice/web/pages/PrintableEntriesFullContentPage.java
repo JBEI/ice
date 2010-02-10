@@ -25,14 +25,12 @@ public class PrintableEntriesFullContentPage extends ProtectedPage {
             Entry entry = iterator.next();
 
             if (entry instanceof Plasmid) {
-                repeatingView.add(new PlasmidSimpleViewPanel(String.valueOf(index),
-                        (Plasmid) entry, false));
+                repeatingView
+                        .add(new PlasmidSimpleViewPanel(String.valueOf(index), (Plasmid) entry));
             } else if (entry instanceof Strain) {
-                repeatingView.add(new StrainSimpleViewPanel(String.valueOf(index), (Strain) entry,
-                        false));
+                repeatingView.add(new StrainSimpleViewPanel(String.valueOf(index), (Strain) entry));
             } else if (entry instanceof Part) {
-                repeatingView.add(new PartSimpleViewPanel(String.valueOf(index), (Part) entry,
-                        false));
+                repeatingView.add(new PartSimpleViewPanel(String.valueOf(index), (Part) entry));
             }
 
             index++;
