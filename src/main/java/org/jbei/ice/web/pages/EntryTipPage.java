@@ -3,6 +3,7 @@ package org.jbei.ice.web.pages;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
@@ -22,35 +23,32 @@ public class EntryTipPage extends ProtectedPage {
         super(parameters);
 
         int entryId = parameters.getInt("0");
-
-        try {
-            entry = AuthenticatedEntryManager.get(entryId, IceSession.get().getSessionKey());
-        } catch (ManagerException e) {
-            e.printStackTrace();
-        } catch (PermissionException e) {
-            // do nothing
-        }
-
-        String recordType = entry.getRecordType();
-
+        String recordType = null;
         Panel panel = null;
 
         try {
-            if (recordType.equals("strain")) {
-                panel = new StrainSimpleViewPanel("centerPanel", (Strain) entry);
-            } else if (recordType.equals("plasmid")) {
-                panel = new PlasmidSimpleViewPanel("centerPanel", (Plasmid) entry);
-            } else if (recordType.equals("part")) {
-                panel = new PartSimpleViewPanel("centerPanel", (Part) entry);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            entry = AuthenticatedEntryManager.get(entryId, IceSession.get().getSessionKey());
+            recordType = entry.getRecordType();
+        } catch (ManagerException e) {
+            // recordType is still null
+            Logger.warn("EntryTipPage: " + e.toString());
+        } catch (PermissionException e) {
+            // recordType is still null
+        }
 
+        if (recordType == null) {
+            panel = new EmptyPanel("centerPanel");
+        } else if (recordType.equals("strain")) {
+            panel = new StrainSimpleViewPanel("centerPanel", (Strain) entry);
+        } else if (recordType.equals("plasmid")) {
+            panel = new PlasmidSimpleViewPanel("centerPanel", (Plasmid) entry);
+        } else if (recordType.equals("part")) {
+            panel = new PartSimpleViewPanel("centerPanel", (Part) entry);
+        } else {
             panel = new EmptyPanel("centerPanel");
         }
 
         panel.setOutputMarkupId(true);
-
         add(panel);
     }
 
@@ -59,10 +57,12 @@ public class EntryTipPage extends ProtectedPage {
         // keep it empty on purpose
     }
 
+    @Override
     protected void initializeStyles() {
         // keep it empty on purpose
     }
 
+    @Override
     protected void initializeJavascript() {
         // keep it empty on purpose
     }

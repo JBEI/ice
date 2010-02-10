@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import org.apache.wicket.PageParameters;
+import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.markup.html.CSSPackageResource;
 import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -17,6 +18,8 @@ import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
+import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.forms.PartUpdateFormPanel;
@@ -28,6 +31,11 @@ public class EntryUpdatePage extends ProtectedPage {
 
     public EntryUpdatePage(PageParameters parameters) {
         super(parameters);
+        int entryId = parameters.getInt("0");
+
+        if (!PermissionManager.hasWritePermission(entryId, IceSession.get().getSessionKey())) {
+            throw new RestartResponseAtInterceptPageException(PermissionDeniedPage.class);
+        }
 
         IModel<Map<String, Object>> autocompleteDataMap = new AbstractReadOnlyModel<Map<String, Object>>() {
             private static final long serialVersionUID = 1L;
@@ -90,8 +98,6 @@ public class EntryUpdatePage extends ProtectedPage {
                 UnprotectedPage.JS_RESOURCE_LOCATION + "autocompleteDataTemplate.js",
                 autocompleteDataMap));
 
-        int entryId = parameters.getInt("0");
-
         try {
             entry = AuthenticatedEntryManager.get(entryId, IceSession.get().getSessionKey());
             String recordType = entry.getRecordType();
@@ -107,6 +113,8 @@ public class EntryUpdatePage extends ProtectedPage {
             }
         } catch (ManagerException e) {
             e.printStackTrace();
+        } catch (PermissionException e) {
+            throw new RestartResponseAtInterceptPageException(PermissionDeniedPage.class);
         }
     }
 
