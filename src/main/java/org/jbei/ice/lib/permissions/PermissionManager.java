@@ -16,7 +16,6 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Group;
-import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 
 public class PermissionManager extends Manager {
 
@@ -59,16 +58,7 @@ public class PermissionManager extends Manager {
 
     public static boolean hasReadPermission(Entry entry, Account account) {
         boolean result = false;
-        /* If entry has no group or user read permissions, that is, nobody has 
-         * read permissions because permissions are never set, the default 
-         * is to allow read for everyone. 
-         */
-
-        if (entryNeedsDefaultPermission(entry)) {
-            result = true;
-        } else {
-            result = userHasReadPermission(entry, account) | groupHasReadPermission(entry, account);
-        }
+        result = userHasReadPermission(entry, account) | groupHasReadPermission(entry, account);
         return result;
     }
 
@@ -397,49 +387,6 @@ public class PermissionManager extends Manager {
             Logger.warn("could not get everybody group: " + e.toString());
         }
         return accountGroups;
-    }
-
-    /**
-     * Determines if any sort of permission was set for entry
-     * 
-     * @param entry
-     * @return
-     * @throws ManagerException
-     */
-    protected static boolean entryNeedsDefaultPermission(Entry entry) {
-
-        boolean result = false;
-
-        int entriesGroup;
-        int entriesUser;
-
-        String queryString = "from ReadUser as readUser where readUser.entry = :entry";
-        Query query = session.createQuery(queryString);
-        query.setEntity("entry", entry);
-        entriesUser = query.list().size();
-        queryString = "from ReadGroup as readGroup where readGroup.entry = :entry";
-        query = session.createQuery(queryString);
-        query.setEntity("entry", entry);
-        entriesGroup = query.list().size();
-
-        if (entriesUser == 0 && entriesGroup == 0) {
-            result = true;
-
-            try {
-                Group defaultGroup = GroupManager.get(PopulateInitialDatabase.everyoneGroup);
-                if (defaultGroup == null) {
-                    defaultGroup = PopulateInitialDatabase.createFirstGroup();
-                }
-                HashSet<Group> tempGroups = new HashSet<Group>();
-                tempGroups.add(defaultGroup);
-                PermissionManager.setReadGroup(entry, tempGroups);
-            } catch (ManagerException e) {
-                String msg = "Could not get default everyone group: " + e.toString();
-                Logger.error(msg);
-            }
-            Logger.info("Default Permission supplied");
-        }
-        return result;
     }
 
     public static void main(String[] args) {
