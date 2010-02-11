@@ -51,10 +51,8 @@ public class AuthenticatedEntryManager {
 
     public static Entry getByRecordId(String recordId, String sessionKey)
             throws PermissionException, ManagerException {
-        Entry result = null;
-        result = EntryManager.getByRecordId(recordId);
-        if (PermissionManager.hasReadPermission(result.getId(), sessionKey)) {
-        } else {
+        Entry result = EntryManager.getByRecordId(recordId);
+        if (result == null || !PermissionManager.hasReadPermission(result.getId(), sessionKey)) {
             throw new PermissionException("Get not permitted");
         }
         return result;
@@ -62,10 +60,8 @@ public class AuthenticatedEntryManager {
 
     public static Entry getByPartNumber(String partNumber, String sessionKey)
             throws PermissionException, ManagerException {
-        Entry result = null;
-        result = EntryManager.getByPartNumber(partNumber);
-        if (PermissionManager.hasReadPermission(result.getId(), sessionKey)) {
-        } else {
+        Entry result = EntryManager.getByPartNumber(partNumber);
+        if (result == null || !PermissionManager.hasReadPermission(result.getId(), sessionKey)) {
             throw new PermissionException("Get not permitted");
         }
         return result;
@@ -73,10 +69,8 @@ public class AuthenticatedEntryManager {
 
     public static Entry getByName(String name, String sessionKey) throws PermissionException,
             ManagerException {
-        Entry result = null;
-        result = EntryManager.getByName(name);
-        if (PermissionManager.hasReadPermission(result.getId(), sessionKey)) {
-        } else {
+        Entry result = EntryManager.getByName(name);
+        if (result == null || !PermissionManager.hasReadPermission(result.getId(), sessionKey)) {
             throw new PermissionException("Get not permitted");
         }
         return result;

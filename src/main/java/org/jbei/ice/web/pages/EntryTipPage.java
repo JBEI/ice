@@ -22,27 +22,49 @@ public class EntryTipPage extends ProtectedPage {
     public EntryTipPage(PageParameters parameters) {
         super(parameters);
 
-        int entryId = parameters.getInt("0");
-        String recordType = null;
-        Panel panel = null;
+        int entryId = 0;
+        String identifier = parameters.getString("0");
 
         try {
+            entryId = Integer.parseInt(identifier);
             entry = AuthenticatedEntryManager.get(entryId, IceSession.get().getSessionKey());
-            recordType = entry.getRecordType();
-        } catch (ManagerException e) {
-            // recordType is still null
-            Logger.warn("EntryTipPage: " + e.toString());
+        } catch (NumberFormatException e) {
+            // Not a number. Perhaps it's a part number or recordId?
+            try {
+                entry = AuthenticatedEntryManager.getByPartNumber(identifier, IceSession.get()
+                        .getSessionKey());
+                entryId = entry.getId();
+            } catch (PermissionException e1) {
+                // entryId is still 0
+            } catch (ManagerException e1) {
+                Logger.warn("EntryTipPage: " + e1.toString());
+            }
+
+            if (entryId == 0) {
+                try {
+                    entry = AuthenticatedEntryManager.getByRecordId(identifier, IceSession.get()
+                            .getSessionKey());
+                    entryId = entry.getId();
+                } catch (PermissionException e1) {
+                    // entryId is still 0
+                } catch (ManagerException e1) {
+                    Logger.warn("EntryTipPage: " + e1.toString());
+                }
+            }
         } catch (PermissionException e) {
-            // recordType is still null
+            entryId = 0;
+        } catch (ManagerException e) {
+            Logger.warn("EntryTipPage: " + e.toString());
         }
 
-        if (recordType == null) {
+        Panel panel = null;
+        if (entryId == 0) {
             panel = new EmptyPanel("centerPanel");
-        } else if (recordType.equals("strain")) {
+        } else if (entry instanceof Strain) {
             panel = new StrainSimpleViewPanel("centerPanel", (Strain) entry);
-        } else if (recordType.equals("plasmid")) {
+        } else if (entry instanceof Plasmid) {
             panel = new PlasmidSimpleViewPanel("centerPanel", (Plasmid) entry);
-        } else if (recordType.equals("part")) {
+        } else if (entry instanceof Part) {
             panel = new PartSimpleViewPanel("centerPanel", (Part) entry);
         } else {
             panel = new EmptyPanel("centerPanel");

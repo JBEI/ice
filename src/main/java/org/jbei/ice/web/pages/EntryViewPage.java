@@ -51,17 +51,47 @@ public class EntryViewPage extends ProtectedPage {
     public EntryViewPage(PageParameters parameters) {
         super(parameters);
 
-        int entryId = parameters.getInt("0");
-        subPage = parameters.getString("1");
+        int entryId = 0;
+        String identifier = parameters.getString("0");
 
         try {
+            entryId = Integer.parseInt(identifier);
             entry = AuthenticatedEntryManager.get(entryId, IceSession.get().getSessionKey());
+        } catch (NumberFormatException e) {
+            // Not a number. Perhaps it's a part number or recordId?
+            try {
+                entry = AuthenticatedEntryManager.getByPartNumber(identifier, IceSession.get()
+                        .getSessionKey());
+                entryId = entry.getId();
+            } catch (PermissionException e1) {
+                // entryId is still 0
+            } catch (ManagerException e1) {
+                Logger.error(e.toString());
+                throw new RuntimeException(e);
+            }
+            if (entryId == 0) {
+                try {
+                    entry = AuthenticatedEntryManager.getByRecordId(identifier, IceSession.get()
+                            .getSessionKey());
+                    entryId = entry.getId();
+                } catch (PermissionException e1) {
+                    // entryId is still 0
+                } catch (ManagerException e1) {
+                    Logger.error(e.toString());
+                    throw new RuntimeException(e);
+                }
+            }
+        } catch (PermissionException e) {
+            entryId = 0;
         } catch (ManagerException e) {
             Logger.error(e.toString());
             throw new RuntimeException(e);
-        } catch (PermissionException e) {
+        }
+        if (entryId == 0) {
             throw new RestartResponseAtInterceptPageException(PermissionDeniedPage.class);
         }
+
+        subPage = parameters.getString("1");
 
         String recordType = JbeiConstants.getRecordType(entry.getRecordType());
 
