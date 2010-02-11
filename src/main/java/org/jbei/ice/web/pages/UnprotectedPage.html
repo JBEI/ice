@@ -6,20 +6,6 @@
 <meta name="author" content="JBEI" />
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <title wicket:id="title">JBEI Registry</title>
-<script type="text/javascript">
-	function assignClueTips() {
-		$('.entry_tip').cluetip( {
-			width : '800px',
-			showTitle : false,
-			arrows : false,
-			topOffset : 15,
-			leftOffset : 15,
-			positionBy : 'auto',
-			cursor : 'pointer',
-			cluetipClass : 'jbeiregistry'
-		});
-	}
-</script>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" class="main_table">
@@ -59,19 +45,7 @@
 				<table border="0" cellpadding="0" cellspacing="0"
 					style="margin-top: 10px; height: 100%; width: 100%">
 					<tr>
-						<td valign="top" style="width: 180px"><!-- Menu Begin --> <script type="text/javascript">
-	$(document).ready(function() {
-		var tips = new Array();
-		tips.push("Enter [[jbei:JBn_nnnnnnnn]] to make a link.");
-		tips.push("Try appending a * to your searches, e.g. pbad*");
-		//tips.push("Second tip of the day");
-			//tips.push("Third Long-long very long tip of the day");
-
-			var randomIndex = Math.floor(Math.random() * tips.length);
-			$('#tipOfTheDay').html(tips[randomIndex]);
-		});
-</script>
-						<div wicket:id="menuPanel" id="menu">This will be replaced</div>
+						<td valign="top" style="width: 180px"><!-- Menu Begin --><div wicket:id="menuPanel" id="menu">This will be replaced</div>
 						</td>
 						<td style="width: 10px">&nbsp;</td>
 						<td valign="top" style="height: 100%"><!--  Center Box --> <wicket:child /> <!--  End Center Box --></td>
@@ -97,5 +71,31 @@
 			wicket:id="footerPanel">Footer Panel</span> <!-- Footer End --></td>
 	</tr>
 </table>
+<script type="text/javascript">
+function assignClueTips() {
+	$('.entry_tip').cluetip( {
+		width : '800px',
+		showTitle : false,
+		arrows : false,
+		topOffset : 15,
+		leftOffset : 15,
+		positionBy : 'auto',
+		cursor : 'pointer',
+		cluetipClass : 'jbeiregistry'
+	});
+}
+	$(document).ready(function() {
+		var tips = new Array();
+		tips.push("Enter [[jbei:JBn_nnnnnnnn]] to make a link.");
+		tips.push("Try appending a * to your searches, e.g. pbad*");
+		//tips.push("Second tip of the day");
+			//tips.push("Third Long-long very long tip of the day");
+
+			var randomIndex = Math.floor(Math.random() * tips.length);
+			$('#tipOfTheDay').html(tips[randomIndex]);
+
+			assignClueTips();
+		});
+</script>
 </body>
 </html>
