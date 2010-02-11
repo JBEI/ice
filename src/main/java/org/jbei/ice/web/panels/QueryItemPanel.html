@@ -20,7 +20,15 @@
 			<tr>
 				<td><input type="hidden" wicket:id="fragmentType" value="string"><select
 					wicket:id="stringFilterPrefixSelect"></select></td>
-				<td><input type="text" wicket:id="stringFilterInput" class="inputbox"></td>
+				<td><input type="text" wicket:id="stringFilterInput" class="inputbox"
+					onkeydown="
+	// prevent enter key
+	if (event.keyCode == 13) {
+		event.cancelBubble = true;
+		event.returnValue = false;
+		return false;
+	};"
+></td>
 			</tr>
 		</table>
 	</wicket:fragment>

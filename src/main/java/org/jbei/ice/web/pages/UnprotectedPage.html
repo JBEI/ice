@@ -16,22 +16,9 @@
 			leftOffset : 15,
 			positionBy : 'auto',
 			cursor : 'pointer',
-			cluetipClass : 'jbeiregistry',
-			dataType: 'html'
+			cluetipClass : 'jbeiregistry'
 		});
 	}
-
-	$(document).ready(function() {
-		var tips = new Array();
-		tips.push("Enter [[jbei:JBn_nnnnnnnn]] to make a link.");
-		tips.push("Try appending a * to your searches, e.g. pbad*");
-		alert(1);
-		//tips.push("Second tip of the day");
-			//tips.push("Third Long-long very long tip of the day");
-
-			var randomIndex = Math.floor(Math.random() * tips.length);
-			$('#tipOfTheDay').html(tips[randomIndex]);
-		});
 </script>
 </head>
 <body>
@@ -52,7 +39,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td align="center" valign="top" style="height:20px"><!-- Search Bar Begin -->
+				<td align="center" valign="top" style="height: 20px"><!-- Search Bar Begin -->
 				<div wicket:id="searchBarPanel"></div>
 				<form action="/search" method="get">
 				</form>

@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import org.apache.wicket.Page;
 import org.apache.wicket.ResourceReference;
 import org.apache.wicket.extensions.markup.html.repeater.data.sort.OrderByBorder;
+import org.apache.wicket.markup.html.CSSPackageResource;
+import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -34,6 +36,11 @@ public class QueryResultPanel extends Panel {
         super(id);
 
         updateView(queries);
+
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
+        add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
 
         blankImage = new ResourceReference(UnprotectedPage.class,
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "blank.png");
