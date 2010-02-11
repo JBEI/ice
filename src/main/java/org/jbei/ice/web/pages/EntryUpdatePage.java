@@ -54,36 +54,40 @@ public class EntryUpdatePage extends ProtectedPage {
 
                     dataMap = new MiniMap<String, Object>(4);
 
-                    String selectionMarkersCollection = "";
-                    String promotersCollection = "";
-                    String originOfReplicationsCollection = "";
-                    String plasmidsCollection = "";
+                    StringBuilder selectionMarkersCollection = new StringBuilder();
+                    StringBuilder promotersCollection = new StringBuilder();
+                    StringBuilder originOfReplicationsCollection = new StringBuilder();
+                    StringBuilder plasmidsCollection = new StringBuilder();
 
                     for (String selectionMarker : uniqueSelectionMarkers) {
-                        selectionMarkersCollection += "'"
-                                + Utils.escapeSpecialJavascriptCharacters(selectionMarker) + "', ";
+                        selectionMarkersCollection.append(
+                                Utils.escapeSpecialJavascriptCharacters(selectionMarker)).append(
+                                "', ");
                     }
 
                     for (String promoter : uniquePromoters) {
-                        promotersCollection += "'"
-                                + Utils.escapeSpecialJavascriptCharacters(promoter) + "', ";
+                        promotersCollection.append(
+                                Utils.escapeSpecialJavascriptCharacters(promoter)).append("', ");
                     }
 
                     for (String originOfReplication : uniqueOriginOfReplications) {
-                        originOfReplicationsCollection += "'"
-                                + Utils.escapeSpecialJavascriptCharacters(originOfReplication)
-                                + "', ";
+                        originOfReplicationsCollection.append(
+                                Utils.escapeSpecialJavascriptCharacters(originOfReplication))
+                                .append("', ");
                     }
 
                     for (String plasmid : uniquePlasmids) {
-                        plasmidsCollection += "'"
-                                + Utils.escapeSpecialJavascriptCharacters(plasmid) + "', ";
+                        plasmidsCollection.append(Utils.escapeSpecialJavascriptCharacters(plasmid))
+                                .append("', ");
                     }
 
-                    dataMap.put("selectionMarkersCollection", selectionMarkersCollection);
-                    dataMap.put("promotersCollection", promotersCollection);
-                    dataMap.put("originOfReplicationsCollection", originOfReplicationsCollection);
-                    dataMap.put("plasmidsCollection", plasmidsCollection);
+                    dataMap
+                            .put("selectionMarkersCollection", selectionMarkersCollection
+                                    .toString());
+                    dataMap.put("promotersCollection", promotersCollection.toString());
+                    dataMap.put("originOfReplicationsCollection", originOfReplicationsCollection
+                            .toString());
+                    dataMap.put("plasmidsCollection", plasmidsCollection.toString());
                 }
 
                 return dataMap;

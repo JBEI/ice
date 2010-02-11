@@ -68,12 +68,13 @@ public class WebUtils {
     }
 
     public static String makeEntryLinks(Collection<? extends Entry> entries) {
-        String result = "";
+        StringBuilder result = new StringBuilder();
 
         for (Entry entry : entries) {
-            result = result + makeEntryLink(entry.getId()) + " ";
+            result.append(makeEntryLink(entry.getId()));
+            result.append(" ");
         }
-        return result;
+        return result.toString();
     }
 
     public static String jbeiLinkifyText(String text) {
@@ -82,7 +83,7 @@ public class WebUtils {
         Pattern descriptivePattern = Pattern.compile("\\[\\[jbei:(.*)\\|(.*)\\]\\]");
 
         if (text == null) {
-            return text;
+            return "";
         }
         Matcher basicJbeiMatcher = basicJbeiPattern.matcher(text);
 

@@ -10,8 +10,9 @@ import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.utils.SequenceUtils;
 
 public class FastaParser extends AbstractParser {
+    @Override
     public Sequence parse(BufferedReader br) {
-        Sequence sequence = null;
+        Sequence sequence = new Sequence();
 
         try {
             RichSequenceIterator richSequences = IOTools.readFastaDNA(br, null);

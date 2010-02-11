@@ -42,6 +42,7 @@ public class SequenceNewFormPanel extends Panel {
             Button cancelButton = new Button("cancelButton", new Model<String>("Cancel")) {
                 private static final long serialVersionUID = 1L;
 
+                @Override
                 public void onSubmit() {
                     sequenceViewPanel.clearForm();
                 }
@@ -55,6 +56,7 @@ public class SequenceNewFormPanel extends Panel {
             add(new FileUploadField("sequenceFileInput").setLabel(new Model<String>("File")));
         }
 
+        @Override
         protected void onSubmit() {
             FileUpload fileUpload = getSequenceFileInput();
 

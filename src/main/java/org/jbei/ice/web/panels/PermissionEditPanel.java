@@ -20,6 +20,7 @@ import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.util.CollectionModel;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.GroupManager;
 import org.jbei.ice.lib.managers.ManagerException;
@@ -72,12 +73,14 @@ public class PermissionEditPanel extends Panel {
         try {
             accounts = AccountManager.getAllByFirstName();
         } catch (ManagerException e) {
-            e.printStackTrace();
+            Logger.warn(e.toString());
+            accounts = new HashSet<Account>();
         }
         try {
             groups = GroupManager.getAll();
         } catch (ManagerException e) {
-            e.printStackTrace();
+            Logger.warn(e.toString());
+            groups = new HashSet<Group>();
         }
 
         for (Account account : accounts) {
@@ -443,12 +446,25 @@ public class PermissionEditPanel extends Panel {
 
         @Override
         public boolean equals(Object item) {
+            if (item == null) {
+                return false;
+            }
+            if (item instanceof ChoiceItem) {
+                return false;
+            }
             ChoiceItem temp = (ChoiceItem) item;
             if (getKey().equals(temp.getKey()) && getId().equals(temp.getId())) {
                 return true;
             } else {
                 return false;
             }
+        }
+
+        @Override
+        public int hashCode() {
+            int id = 1;
+            id = id + getKey().hashCode() / 2 + getId().hashCode() / 2;
+            return id;
         }
 
         public void setKey(java.lang.String key) {

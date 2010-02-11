@@ -59,8 +59,8 @@ public class TestAttachmentManager {
         assertArrayEquals(createdAttachment2.getData().getBytes(), gotAttachment2.getData()
                 .getBytes());
 
-        gotAttachment1 = AttachmentManager.getByFileId(createdAttachment1.getFileId());
-        gotAttachment2 = AttachmentManager.getByFileId(createdAttachment2.getFileId());
+        AttachmentManager.getByFileId(createdAttachment1.getFileId());
+        AttachmentManager.getByFileId(createdAttachment2.getFileId());
 
         AttachmentManager.delete(createdAttachment1);
         AttachmentManager.delete(createdAttachment2);

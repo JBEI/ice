@@ -34,7 +34,7 @@ public class PlasmidViewPanel extends AbstractEntryViewPanel<Plasmid> {
     }
 
     protected void renderLinksToStrain() {
-        LinkedHashSet<Strain> temp = null;
+        LinkedHashSet<Strain> temp = new LinkedHashSet<Strain>();
 
         try {
             temp = UtilsManager.getStrainsForPlasmid(getEntry());

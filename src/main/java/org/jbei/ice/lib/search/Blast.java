@@ -56,22 +56,22 @@ public class Blast {
     }
 
     private String breakUpLines(String input) {
-        String result = "";
-
+        // String result = "";
+        StringBuilder result = new StringBuilder();
         int counter = 0;
         int index = 0;
         int end = input.length();
         while (index < end) {
-            result = result + input.substring(index, index + 1);
+            result = result.append(input.substring(index, index + 1));
             counter = counter + 1;
             index = index + 1;
 
             if (counter == 59) {
-                result = result + "\n";
+                result = result.append("\n");
                 counter = 0;
             }
         }
-        return result;
+        return result.toString();
     }
 
     public void rebuildDatabase() {
@@ -89,12 +89,15 @@ public class Blast {
                 renameBlastDb(newbigFastaFileDir);
                 setRebuilding(false);
             }
-
         } catch (IOException e1) {
-            e1.printStackTrace();
+            String msg = "Rebuild blast database failed: ";
+            Logger.error(msg + e1.toString());
+        } catch (SecurityException e) {
+            String msg = "Rebuild blast database failed: ";
+            Logger.error(msg + e.toString());
         } catch (Exception e) {
-
-            e.printStackTrace();
+            String msg = "Rebuild blast database failed: ";
+            Logger.error(msg + e.toString());
         }
 
     }
@@ -109,7 +112,15 @@ public class Blast {
         currentBlastDir.renameTo(oldBlastDir);
         currentBlastDir = new File(JbeirSettings.getSetting("BLAST_DIRECTORY"));
         File newBlastDir = new File(JbeirSettings.getSetting("BLAST_DIRECTORY") + ".new");
-        newBlastDir.renameTo(currentBlastDir);
+        try {
+            newBlastDir.renameTo(currentBlastDir);
+        } catch (SecurityException e) {
+            String msg = "Could not rename Blast db" + e.toString();
+            Logger.error(msg);
+        } catch (NullPointerException e) {
+            String msg = "Could not rename Blast db" + e.toString();
+            Logger.error(msg);
+        }
     }
 
     private void formatBlastDb(File bigFastaFileDir) throws IOException {

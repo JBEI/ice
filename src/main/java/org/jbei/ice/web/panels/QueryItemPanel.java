@@ -30,8 +30,8 @@ import org.jbei.ice.web.pages.QueryPage;
 public class QueryItemPanel extends Panel {
     private static final long serialVersionUID = 1L;
 
-    public Fragment visibleFilterFragment;
-    public Filter currentFilter;
+    public Fragment visibleFilterFragment = null;
+    public Filter currentFilter = null;
 
     public QueryItemPanel(String id) {
         super(id);
@@ -43,6 +43,7 @@ public class QueryItemPanel extends Panel {
                 .add(new AjaxFormComponentUpdatingBehavior("onchange") {
                     private static final long serialVersionUID = 1L;
 
+                    @Override
                     protected void onUpdate(AjaxRequestTarget target) {
                         QueryItemPanel queryItemPanel = (QueryItemPanel) getParent().get(0);
 

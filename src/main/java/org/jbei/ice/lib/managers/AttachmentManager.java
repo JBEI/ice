@@ -52,9 +52,9 @@ public class AttachmentManager extends Manager {
             try {
                 dbDelete(attachment);
             } catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                throw new ManagerException("Could not delete attachment in db: " + e.toString());
+                String msg = "Could not delete attachment in db: ";
+                Logger.error(msg + e.toString());
+                throw new ManagerException(msg + e.toString());
             }
 
         } catch (IOException e) {
@@ -204,29 +204,37 @@ public class AttachmentManager extends Manager {
     protected static Attachment writeFileData(Attachment attachment) throws IOException {
         File file = new File(attachmentDirectory + attachment.getFileId());
         File fileDir = file.getParentFile();
-        if (!fileDir.exists()) {
-            fileDir.mkdirs();
-        }
-        if (!file.exists()) {
-            file.createNewFile();
-        }
-        FileOutputStream outputStream = new FileOutputStream(file);
-        byte[] bytes = attachment.getData().getBytes();
+        try {
+            if (!fileDir.exists()) {
+                fileDir.mkdirs();
+            }
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            FileOutputStream outputStream = new FileOutputStream(file);
+            byte[] bytes = attachment.getData().getBytes();
 
-        if (bytes.length > 524288000) {
-            throw new IOException("File size limit reached (500MB)");
-        } else {
-            outputStream.write(bytes);
+            if (bytes.length > 524288000) {
+                throw new IOException("File size limit reached (500MB)");
+            } else {
+                outputStream.write(bytes);
+            }
+
+            outputStream.close();
+        } catch (SecurityException e) {
+            Logger.warn(e.toString());
         }
-
-        outputStream.close();
-
         return attachment;
 
     }
 
     protected static void deleteFile(Attachment attachment) throws IOException {
-        File file = new File(attachmentDirectory + attachment.getFileId());
-        file.delete();
+        try {
+            File file = new File(attachmentDirectory + attachment.getFileId());
+            file.delete();
+        } catch (SecurityException e) {
+            String msg = "Could not delete attachment file: ";
+            Logger.error(msg + e.toString());
+        }
     }
 }

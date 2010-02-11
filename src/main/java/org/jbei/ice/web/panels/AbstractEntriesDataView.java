@@ -82,8 +82,7 @@ public abstract class AbstractEntriesDataView<T> extends DataView<T> {
                 : entry.getOwner()));
 
         if (ownerAccount != null) {
-            String ownerAltText = "Profile "
-                    + ((ownerAccount == null) ? entry.getOwner() : ownerAccount.getFullName());
+            String ownerAltText = "Profile " + ownerAccount.getFullName();
             ownerProfileLink.add(new SimpleAttributeModifier("title", ownerAltText));
             ownerProfileLink.add(new SimpleAttributeModifier("alt", ownerAltText));
         } else {

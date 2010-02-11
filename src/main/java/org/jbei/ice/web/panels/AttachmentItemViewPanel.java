@@ -9,6 +9,7 @@ import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.DownloadLink;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Attachment;
@@ -42,6 +43,7 @@ public class AttachmentItemViewPanel extends Panel {
                         "return confirm('Delete this attachment?');"));
             }
 
+            @Override
             public void onClick(AjaxRequestTarget target) {
                 AttachmentItemViewPanel thisPanel = (AttachmentItemViewPanel) getParent();
                 Attachment attachment = thisPanel.getAttachment();
@@ -68,12 +70,12 @@ public class AttachmentItemViewPanel extends Panel {
             downloadLink = new DownloadLink("downloadAttachmentLink", AttachmentManager
                     .readFile(attachment), attachment.getFileName());
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Logger.warn(e.toString());
         }
-
-        downloadLink.add(new Label("fileName", attachment.getFileName()));
-        add(downloadLink);
+        if (downloadLink != null) {
+            downloadLink.add(new Label("fileName", attachment.getFileName()));
+            add(downloadLink);
+        }
     }
 
     public void setAttachment(Attachment attachment) {

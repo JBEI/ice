@@ -305,18 +305,19 @@ public class PermissionManager extends Manager {
         try {
             query = HibernateHelper.getSession().createQuery(queryString);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.warn(e.toString());
         }
-        query.setEntity("entry", entry);
+        if (query != null) {
+            query.setEntity("entry", entry);
 
-        @SuppressWarnings("unchecked")
-        List<Integer> accounts = query.list();
-        if (account.getEmail().equals(entry.getOwnerEmail())) {
-            result = true;
-        } else if (accounts.contains(account.getId())) {
-            result = true;
+            @SuppressWarnings("unchecked")
+            List<Integer> accounts = query.list();
+            if (account.getEmail().equals(entry.getOwnerEmail())) {
+                result = true;
+            } else if (accounts.contains(account.getId())) {
+                result = true;
+            }
         }
-
         return result;
     }
 

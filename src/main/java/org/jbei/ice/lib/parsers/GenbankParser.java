@@ -19,9 +19,10 @@ import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.Utils;
 
 public class GenbankParser extends AbstractParser {
+    @Override
     @SuppressWarnings("unchecked")
     public Sequence parse(BufferedReader br) {
-        Sequence sequence = null;
+        Sequence sequence = new Sequence();
 
         try {
             RichSequenceIterator richSequences = IOTools.readGenbankDNA(br, null);
@@ -42,7 +43,7 @@ public class GenbankParser extends AbstractParser {
                     String featureDescription = "";
                     String featureName = "";
 
-                    Set<Note> notes = (Set<Note>) richFeature.getNoteSet();
+                    Set<Note> notes = richFeature.getNoteSet();
                     for (Note note : notes) {
                         featureDescription = note.getTerm().getName() + "=" + note.getValue();
 

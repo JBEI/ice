@@ -22,14 +22,14 @@ public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Ser
         try {
             l = new LblLdapAuth();
         } catch (NamingException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            Logger.debug("Could not initialize ldap auth");
         }
 
         try {
             loginId = loginId.toLowerCase();
-
-            if (l.isWikiUser(loginId)) {
+            if (l == null) {
+                throw new Exception("Could not initialize ldap auth object");
+            } else if (l.isWikiUser(loginId)) {
                 l.authenticate(loginId, password);
                 account = AccountManager.getByEmail(loginId + "@lbl.gov");
 

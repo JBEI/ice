@@ -9,6 +9,7 @@ import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
@@ -56,7 +57,8 @@ public class EntryViewPage extends ProtectedPage {
         try {
             entry = AuthenticatedEntryManager.get(entryId, IceSession.get().getSessionKey());
         } catch (ManagerException e) {
-            e.printStackTrace();
+            Logger.error(e.toString());
+            throw new RuntimeException(e);
         } catch (PermissionException e) {
             throw new RestartResponseAtInterceptPageException(PermissionDeniedPage.class);
         }
@@ -139,19 +141,19 @@ public class EntryViewPage extends ProtectedPage {
     }
 
     public Panel makeGeneralPanel(Entry entry) {
-        String recordType = entry.getRecordType();
 
         Panel panel = null;
-        if (recordType.equals("strain")) {
+        if (entry instanceof Strain) {
             panel = new StrainViewPanel("centerPanel", (Strain) entry);
-        } else if (recordType.equals("plasmid")) {
+        } else if (entry instanceof Plasmid) {
             panel = new PlasmidViewPanel("centerPanel", (Plasmid) entry);
-        } else if (recordType.equals("part")) {
+        } else if (entry instanceof Part) {
             panel = new PartViewPanel("centerPanel", (Part) entry);
         }
 
-        panel.setOutputMarkupId(true);
-
+        if (panel != null) {
+            panel.setOutputMarkupId(true);
+        }
         return panel;
     }
 

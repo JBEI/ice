@@ -52,7 +52,7 @@ public class ProfileSamplesPanel extends Panel {
 
             @Override
             protected void populateItem(Item<Sample> item) {
-                Sample sample = (Sample) item.getModelObject();
+                Sample sample = item.getModelObject();
                 Entry entry = sample.getEntry();
 
                 item.add(new SimpleAttributeModifier("class", item.getIndex() % 2 == 0 ? "odd_row"
@@ -62,14 +62,14 @@ public class ProfileSamplesPanel extends Panel {
                 item.add(new Label("label", sample.getLabel()));
                 item.add(new Label("notes", sample.getNotes()));
 
-                String locations = "";
+                StringBuilder locations = new StringBuilder();
                 if (sample.getLocations() != null && sample.getLocations().size() > 0) {
                     for (Location location : sample.getLocations()) {
-                        locations += location.toOneLineString() + "\n";
+                        locations.append(location.toOneLineString()).append("\n");
                     }
                 }
 
-                item.add(new MultiLineLabel("location", locations));
+                item.add(new MultiLineLabel("location", locations.toString()));
                 item.add(new Label("type", entry.getRecordType()));
                 Name temp = (Name) entry.getNames().toArray()[0];
                 item.add(new Label("name", temp.getName()));

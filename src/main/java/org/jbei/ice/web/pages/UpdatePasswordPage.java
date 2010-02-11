@@ -22,7 +22,7 @@ public class UpdatePasswordPage extends ProtectedPage {
             private static final long serialVersionUID = 3046351843658183110L;
 
             private String oldPassword;
-            private String newPassword;
+            private String newPassword = "";
             private String confirm;
 
             Account account;

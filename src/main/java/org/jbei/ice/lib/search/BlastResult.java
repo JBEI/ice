@@ -145,8 +145,10 @@ public class BlastResult implements Serializable, Comparable<BlastResult> {
     }
 
     public int compareTo(BlastResult o) {
+        // FindBugs recommend that compareTo(...) return zero iff equals(...) return true.
+        // However, in this particular case we are only sorting by relativeScore, so this method is 
+        // acceptable. 
         Float temp = o.relativeScore - this.getRelativeScore();
         return temp.intValue();
     }
-
 }
