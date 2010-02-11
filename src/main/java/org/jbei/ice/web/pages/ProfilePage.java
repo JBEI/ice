@@ -3,6 +3,7 @@ package org.jbei.ice.web.pages;
 import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.managers.AccountManager;
@@ -52,6 +53,9 @@ public class ProfilePage extends ProtectedPage {
         samplesLink.setOutputMarkupId(true);
 
         updateTab();
+
+        add(new Label("username", "Profile for "
+                + (account == null ? accountEmail : account.getFullName())));
 
         add(aboutLink);
         add(entriesLink);

@@ -8,7 +8,6 @@ import org.apache.wicket.markup.html.WebPage;
 import org.jbei.ice.web.IceSession;
 
 public class VectorEditorPage extends WebPage {
-    // Constructor
     public VectorEditorPage(PageParameters parameters) {
         WebComponent flashComponent = new WebComponent("flashComponent");
 
