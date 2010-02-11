@@ -13,7 +13,8 @@
 		(reloading when templates change) or "deployment". If no configuration
 		is found, "development" is the default.
 	-->
-
+	
+	<!-- Wicket Application -->
 	<filter>
 		<filter-name>wicket.ice</filter-name>
 		<filter-class>org.apache.wicket.protocol.http.WicketFilter</filter-class>
@@ -28,6 +29,8 @@
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
+
+	<!-- BlazeDS bridge -->
 	<servlet>
 		<servlet-name>MessageBrokerServlet</servlet-name>
 		<servlet-class>flex.messaging.MessageBrokerServlet</servlet-class>
@@ -42,4 +45,8 @@
 		<servlet-name>MessageBrokerServlet</servlet-name>
 		<url-pattern>/messagebroker/*</url-pattern>
 	</servlet-mapping>
+
+
+	<!-- WSDL WebServices -->
+	<!-- TODO -->
 </web-app>

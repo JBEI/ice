@@ -2,30 +2,34 @@
 <!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
 <service id="remoting-service" class="flex.messaging.services.RemotingService">
 	<adapters>
-		<adapter-definition id="java-object"
-			class="flex.messaging.services.remoting.adapters.JavaAdapter"
+		<adapter-definition id="java-object" class="flex.messaging.services.remoting.adapters.JavaAdapter"
 			default="true" />
 	</adapters>
 
-	<destination id="AuthorizationService" channels="VectorEditorAMFChannel">
+	<default-channels>
+		<channel ref="VectorEditorAMFChannel" />
+		<channel ref="SecureVectorEditorAMFChannel" />
+	</default-channels>
+
+	<destination id="AuthorizationService">
 		<properties>
 			<source>org.jbei.ice.services.blazeds.VectorEditor.services.AuthorizationService</source>
 		</properties>
 	</destination>
 
-	<destination id="UserPreferencesService" channels="VectorEditorAMFChannel">
+	<destination id="UserPreferencesService">
 		<properties>
 			<source>org.jbei.ice.services.blazeds.VectorEditor.services.UserPreferencesService</source>
 		</properties>
 	</destination>
 
-	<destination id="UserRestrictionEnzymesService" channels="VectorEditorAMFChannel">
+	<destination id="UserRestrictionEnzymesService">
 		<properties>
 			<source>org.jbei.ice.services.blazeds.VectorEditor.services.UserRestrictionEnzymesService</source>
 		</properties>
 	</destination>
 
-	<destination id="EntriesService" channels="VectorEditorAMFChannel">
+	<destination id="EntriesService">
 		<properties>
 			<source>org.jbei.ice.services.blazeds.VectorEditor.services.EntriesService</source>
 		</properties>
