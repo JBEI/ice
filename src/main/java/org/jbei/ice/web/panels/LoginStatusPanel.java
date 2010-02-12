@@ -17,12 +17,8 @@ public class LoginStatusPanel extends Panel {
 
     private Fragment preLoginFragment, postLoginFragment;
 
-    private Account account = null;
-
     public LoginStatusPanel(String id) {
         super(id);
-
-        account = IceSession.get().getAccount();
 
         preLoginFragment = createPreLoginFragment();
         add(preLoginFragment);
@@ -36,6 +32,7 @@ public class LoginStatusPanel extends Panel {
         Fragment preLogin = new Fragment("preLoginPanel", "preLogin", this) {
             private static final long serialVersionUID = 1L;
 
+            @Override
             public boolean isVisible() {
                 return !IceSession.get().isAuthenticated();
             }
@@ -52,18 +49,24 @@ public class LoginStatusPanel extends Panel {
         Fragment postLogin = new Fragment("postLoginPanel", "postLogin", LoginStatusPanel.this) {
             private static final long serialVersionUID = 1L;
 
+            @Override
             public boolean isVisible() {
                 return IceSession.get().isAuthenticated();
             }
         };
 
         postLogin.add(new BookmarkablePageLink("userProfile", ProfilePage.class,
-                new PageParameters("0=about,1=" + ((account != null) ? account.getEmail() : "")))
-                .add(new Label("userName", IceSession.get().isAuthenticated() ? account
-                        .getFullName() : "")));
+                new PageParameters("0=about,1="
+                        + ((getAccount() != null) ? getAccount().getEmail() : ""))).add(new Label(
+                "userName", IceSession.get().isAuthenticated() ? getAccount().getFullName() : "")));
 
         postLogin.add(new BookmarkablePageLink("logOut", LogOutPage.class));
 
         return postLogin;
+    }
+
+    private Account getAccount() {
+        return IceSession.get().getAccount();
+
     }
 }
