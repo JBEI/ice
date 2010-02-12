@@ -1,5 +1,6 @@
 package org.jbei.ice.web.panels;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.apache.wicket.PageParameters;
@@ -31,8 +32,8 @@ public class AttachmentItemViewPanel extends Panel {
         if (descriptionString.length() > 70) {
             descriptionString = descriptionString.substring(0, 69) + "...";
         }
-
-        add(new Label("description", descriptionString));
+        Label description = new Label("description", descriptionString);
+        add(description);
 
         class DeleteAttachmentLink extends AjaxFallbackLink {
             private static final long serialVersionUID = 1L;
@@ -64,13 +65,19 @@ public class AttachmentItemViewPanel extends Panel {
         deleteAttachmentLink.setOutputMarkupId(true);
         add(deleteAttachmentLink);
 
-        //BookmarkablePageLink downloadLink = new BookmarkablePageLink("downloadAttachmentLink", WorkSpacePage.class);
         DownloadLink downloadLink = null;
         try {
             downloadLink = new DownloadLink("downloadAttachmentLink", AttachmentManager
                     .readFile(attachment), attachment.getFileName());
         } catch (IOException e) {
-            Logger.warn(e.toString());
+            String msg = "File not found on disk: " + e.toString();
+            Logger.error(msg);
+            File file = new File("");
+            downloadLink = new DownloadLink("downloadAttachmentLink", file, attachment
+                    .getFileName());
+            deleteAttachmentLink.setVisible(false);
+            remove(description);
+            add(new Label("description", "File not found on server!"));
         }
         if (downloadLink != null) {
             downloadLink.add(new Label("fileName", attachment.getFileName()));

@@ -81,8 +81,8 @@ public class AttachmentManager extends Manager {
     }
 
     public static Attachment getByFileId(String fileId) throws ManagerException {
-        Query query = getSession().createQuery("from " + Attachment.class.getName()
-                + " where file_id = :fileId");
+        Query query = getSession().createQuery(
+                "from " + Attachment.class.getName() + " where file_id = :fileId");
         query.setString("fileId", fileId);
         Attachment attachment = null;
         try {
@@ -107,18 +107,10 @@ public class AttachmentManager extends Manager {
     @SuppressWarnings("unchecked")
     public static ArrayList<Attachment> getByEntry(Entry entry) throws ManagerException {
         ArrayList<Attachment> attachments;
-        Query query = getSession().createQuery("from " + Attachment.class.getName()
-                + " where entries_id = :entryId");
+        Query query = getSession().createQuery(
+                "from " + Attachment.class.getName() + " where entries_id = :entryId");
         query.setInteger("entryId", entry.getId());
         attachments = (ArrayList<Attachment>) query.list();
-        for (Attachment at : attachments) {
-            try {
-                readFileData(at);
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new ManagerException("Error reading file " + at.getFileId());
-            }
-        }
 
         return attachments;
     }
