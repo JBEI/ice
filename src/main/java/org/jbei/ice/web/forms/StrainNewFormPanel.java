@@ -119,9 +119,10 @@ public class StrainNewFormPanel extends Panel {
                         "in progress");
 
                 ArrayList<CustomChoice> statusChoices = new ArrayList<CustomChoice>();
-                statusChoices.add(planned);
                 statusChoices.add(complete);
                 statusChoices.add(inProgress);
+                statusChoices.add(planned);
+
                 setStatus(complete);
                 add(new DropDownChoice<CustomChoice>("status", new PropertyModel<CustomChoice>(
                         this, "status"), statusChoices, new ChoiceRenderer<CustomChoice>("name",

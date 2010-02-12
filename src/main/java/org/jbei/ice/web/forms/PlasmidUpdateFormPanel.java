@@ -125,9 +125,9 @@ public class PlasmidUpdateFormPanel extends Panel {
                         "in progress");
 
                 ArrayList<CustomChoice> statusChoices = new ArrayList<CustomChoice>();
-                statusChoices.add(planned);
                 statusChoices.add(complete);
                 statusChoices.add(inProgress);
+                statusChoices.add(planned);
 
                 if (plasmid.getStatus().equals("planned")) {
                     this.status = planned;

@@ -122,9 +122,10 @@ public class PlasmidStrainNewFormPanel extends Panel {
                 CustomChoice inProgress = new CustomChoice(JbeiConstants.getStatus("in progress"),
                         "in progress");
                 ArrayList<CustomChoice> statusChoices = new ArrayList<CustomChoice>();
-                statusChoices.add(planned);
                 statusChoices.add(complete);
                 statusChoices.add(inProgress);
+                statusChoices.add(planned);
+
                 setPlasmidStatus(complete);
                 add(new DropDownChoice<CustomChoice>("plasmidStatus",
                         new PropertyModel<CustomChoice>(this, "plasmidStatus"), statusChoices,
