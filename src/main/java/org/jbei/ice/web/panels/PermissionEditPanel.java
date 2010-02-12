@@ -449,7 +449,7 @@ public class PermissionEditPanel extends Panel {
             if (item == null) {
                 return false;
             }
-            if (item instanceof ChoiceItem) {
+            if (!(item instanceof ChoiceItem)) {
                 return false;
             }
             ChoiceItem temp = (ChoiceItem) item;
