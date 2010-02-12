@@ -57,6 +57,10 @@ public class EntriesAllFieldsExcelExportPage extends ExcelExportPage {
         stringBuilder.append("Has Attachment").append("\t");
         stringBuilder.append("Has Samples").append("\t");
         stringBuilder.append("Has Sequence").append("\t");
+        stringBuilder.append("Bio Safety").append("\t");
+        stringBuilder.append("IP Information").append("\t");
+        stringBuilder.append("Principal Investigator").append("\t");
+        stringBuilder.append("Funding Source").append("\t");
         stringBuilder.append("Created").append("\t");
         stringBuilder.append("Updated").append("\n");
 
@@ -122,6 +126,11 @@ public class EntriesAllFieldsExcelExportPage extends ExcelExportPage {
             stringBuilder.append((AuthenticatedSampleManager.hasSample(entry)) ? "Yes" : "No")
                     .append("\t");
             stringBuilder.append((SequenceManager.hasSequence(entry)) ? "Yes" : "No").append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getBioSafetyLevel())).append("\t");
+            stringBuilder.append(escapeCSVValue(entry.getIntellectualProperty())).append("\t");
+            stringBuilder.append(escapeCSVValue(entry.principalInvestigatorToString()))
+                    .append("\t");
+            stringBuilder.append(escapeCSVValue(entry.fundingSourceToString())).append("\t");
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
 

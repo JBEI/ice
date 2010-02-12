@@ -407,4 +407,32 @@ public class Entry implements IEntryValueObject, Serializable {
         return entryFundingSources;
     }
 
+    public String principalInvestigatorToString() {
+        String principalInvestigator = "";
+
+        for (EntryFundingSource entryFundingSource : entryFundingSources) {
+            principalInvestigator = entryFundingSource.getFundingSource()
+                    .getPrincipalInvestigator();
+        }
+
+        if (principalInvestigator == null) {
+            principalInvestigator = "";
+        }
+
+        return principalInvestigator;
+    }
+
+    public String fundingSourceToString() {
+        String fundingSource = "";
+
+        for (EntryFundingSource entryFundingSource : entryFundingSources) {
+            fundingSource = entryFundingSource.getFundingSource().getFundingSource();
+        }
+
+        if (fundingSource == null) {
+            fundingSource = "";
+        }
+
+        return fundingSource;
+    }
 }

@@ -8,6 +8,7 @@ import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Link;
+import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.models.Plasmid;
@@ -48,9 +49,9 @@ public class EntriesXMLExportPage extends XMLExportPage {
             stringBuilder.append("</partIds>");
 
             stringBuilder.append("<names>");
-            for (PartNumber partNumber : entry.getPartNumbers()) {
-                stringBuilder.append("<name>").append(escapeXMLValue(partNumber.getPartNumber()))
-                        .append("</name>");
+            for (Name name : entry.getNames()) {
+                stringBuilder.append("<name>").append(escapeXMLValue(name.getName())).append(
+                        "</name>");
             }
             stringBuilder.append("</names>");
             stringBuilder.append("<owner>");
@@ -123,6 +124,17 @@ public class EntriesXMLExportPage extends XMLExportPage {
                 stringBuilder.append("<packageFormat>").append(
                         escapeXMLValue(part.getPackageFormat())).append("</packageFormat>");
             }
+
+            stringBuilder.append("<bioSafetyLevel>").append(
+                    escapeXMLValue(entry.getBioSafetyLevel())).append("</bioSafetyLevel>");
+            stringBuilder.append("<intellectualProperty>").append(
+                    escapeXMLValue(entry.getIntellectualProperty())).append(
+                    "</intellectualProperty>");
+            stringBuilder.append("<principalInvestigator>").append(
+                    escapeXMLValue(entry.principalInvestigatorToString())).append(
+                    "</principalInvestigator>");
+            stringBuilder.append("<fundingSource>").append(
+                    escapeXMLValue(entry.fundingSourceToString())).append("</fundingSource>");
 
             stringBuilder.append("<hasAttachments>").append(
                     (AttachmentManager.hasAttachment(entry)) ? "Yes" : "No").append(

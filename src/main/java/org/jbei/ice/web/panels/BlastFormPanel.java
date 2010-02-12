@@ -21,6 +21,7 @@ public class BlastFormPanel extends Panel {
 
     public BlastFormPanel(String id) {
         super(id);
+
         class BlastForm extends StatelessForm<Object> {
 
             private static final long serialVersionUID = 1L;
@@ -29,6 +30,7 @@ public class BlastFormPanel extends Panel {
 
             public BlastForm(String id) {
                 super(id);
+
                 setModel(new CompoundPropertyModel<Object>(this));
                 add(new TextArea<String>("query"));
 
@@ -39,6 +41,7 @@ public class BlastFormPanel extends Panel {
                 blastProgramChoices.add(blastn);
                 blastProgramChoices.add(tblastx);
                 setBlastProgram(blastn);
+
                 add(new DropDownChoice<CustomChoice>("blastProgram",
                         new PropertyModel<CustomChoice>(this, "blastProgram"), blastProgramChoices,
                         new ChoiceRenderer<CustomChoice>("name", "value")));
@@ -49,30 +52,37 @@ public class BlastFormPanel extends Panel {
             public void onSubmit() {
                 ArrayList<BlastResult> blastResults = new ArrayList<BlastResult>();
                 BlastFormPanel thisPanel = (BlastFormPanel) getParent();
+
                 if (getQuery() != null) {
                     blastResults = new Blast().queryDistinct(getQuery(), getBlastProgram()
                             .getValue());
                 }
+
                 if (blastResults.size() > 0) {
                     Panel resultPanel;
+
                     if (getBlastProgram().getValue().equals("tblastx")) {
                         String proteinQuery;
+
                         try {
                             proteinQuery = SequenceUtils.translateToProtein(getQuery());
                         } catch (Exception e) {
                             proteinQuery = "";
                             e.printStackTrace();
                         }
+
                         resultPanel = new BlastResultPanel("blastResultPanel", proteinQuery,
-                                blastResults, 20);
+                                blastResults, 15);
                     } else {
                         resultPanel = new BlastResultPanel("blastResultPanel", getQuery(),
-                                blastResults, 20);
+                                blastResults, 15);
                     }
+
                     thisPanel.replace(resultPanel);
                 } else {
                     Panel resultPanel = new EmptyMessagePanel("blastResultPanel",
                             "No matches found");
+
                     thisPanel.replace(resultPanel);
                 }
             }
@@ -106,5 +116,4 @@ public class BlastFormPanel extends Panel {
     public String getBlastQuery() {
         return blastQuery;
     }
-
 }

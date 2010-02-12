@@ -8,101 +8,112 @@ import org.apache.wicket.markup.html.CSSPackageResource;
 import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.repeater.Item;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
-import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.search.BlastResult;
-import org.jbei.ice.web.IceSession;
-import org.jbei.ice.web.pages.EntryTipPage;
+import org.jbei.ice.web.dataProviders.BlastDataProvider;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.UnprotectedPage;
 
 public class BlastResultPanel extends Panel {
     private static final long serialVersionUID = 1L;
     private String blastQuery = null;
+    private BlastDataProvider blastDataProvider;
+    private AbstractEntriesDataView<BlastResult> blastDataView;
 
-    @SuppressWarnings("unchecked")
     public BlastResultPanel(String id, String blastQuery, ArrayList<BlastResult> blastResults,
             int limit) {
         super(id);
 
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
+        add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.css"));
+
         setBlastQuery(blastQuery);
 
-        PageableListView listView = new PageableListView("itemRows", blastResults, limit) {
+        blastDataProvider = new BlastDataProvider(blastResults);
+
+        blastDataView = new AbstractEntriesDataView<BlastResult>("blastDataView",
+                blastDataProvider, limit) {
             private static final long serialVersionUID = 1L;
 
             @Override
-            protected void populateItem(ListItem item) {
-                BlastResult blastResult = (BlastResult) item.getModelObject();
+            protected Entry getEntry(Item<BlastResult> item) {
                 Entry entry = null;
                 try {
-                    entry = AuthenticatedEntryManager.getByRecordId(blastResult.getSubjectId(),
-                            IceSession.get().getSessionKey());
+                    entry = EntryManager.getByRecordId(item.getModelObject().getSubjectId());
                 } catch (ManagerException e) {
-                    String msg = "Could not get entry from manager with: " + e.toString();
-                    Logger.error(msg);
-                } catch (PermissionException e) {
-                    // no permission
+                    e.printStackTrace();
                 }
 
-                item.add(new SimpleAttributeModifier("class", item.getIndex() % 2 == 0 ? "odd_row"
-                        : "even_row"));
-                if (entry != null) {
-                    item.add(new Label("index", "" + (item.getIndex() + 1)));
-                    item.add(new Label("recordType", entry.getRecordType()));
+                return entry;
+            }
 
-                    BookmarkablePageLink partIdLink = new BookmarkablePageLink("partIdLink",
-                            EntryViewPage.class, new PageParameters("0=" + entry.getId()));
-                    partIdLink
-                            .add(new Label("partNumber", entry.getOnePartNumber().getPartNumber()));
-                    String tipUrl = (String) urlFor(EntryTipPage.class, new PageParameters());
-                    partIdLink
-                            .add(new SimpleAttributeModifier("rel", tipUrl + "/" + entry.getId()));
-                    item.add(partIdLink);
+            @Override
+            protected void populateItem(Item<BlastResult> item) {
+                if (getEntry(item) != null) {
+                    item.add(new SimpleAttributeModifier("class",
+                            item.getIndex() % 2 == 0 ? "odd_row" : "even_row"));
 
-                    item.add(new Label("name", entry.getOneName().getName()));
-                    BlastResultPanel thisPanel = (BlastResultPanel) getParent();
-
-                    String maxAlignmentLength = "" + thisPanel.getBlastQuery().length();
-                    item.add(new Label("alignedBp", "" + blastResult.getAlignmentLength() + " / "
-                            + maxAlignmentLength));
-
-                    item.add(new Label("alignedPercent", String.format("%.1f", blastResult
-                            .getPercentId())));
-                    item
-                            .add(new Label("bitScore", String.format("%.1f", blastResult
-                                    .getBitScore())));
-                    item.add(new Label("eValue", String.format("%.1e", blastResult.geteValue())));
+                    renderIndex(item);
+                    renderEntryType(item);
+                    renderEntryName(item);
+                    renderEntryLink(item);
+                    renderAlignedBp(item);
+                    renderAlignedPercent(item);
+                    renderBitScore(item);
+                    renderEValue(item);
                 } else {
-                    String msg = "Blast db has record: " + blastResult.getSubjectId()
+                    String msg = "Blast db has record: " + item.getModelObject().getSubjectId()
                             + " which does not exist in database. Try rebuilding blast db";
                     Logger.error(msg);
 
-                    item.add(new Label("index", "" + (item.getIndex() + 1)));
-                    item.add(new Label("recordType", ""));
-                    item.add(new BookmarkablePageLink("partIdLink", EntryViewPage.class,
-                            new PageParameters("")).add(new Label("partNumber", "?")));
-                    item.add(new Label("name", ""));
-                    item.add(new Label("alignedBp", ""));
-                    item.add(new Label("alignedPercent", ""));
-                    item.add(new Label("bitScore", ""));
-                    item.add(new Label("eValue", ""));
+                    renderEmptyRow(item);
                 }
+            }
 
-                add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-                        UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
-                add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
-                        UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
+            private void renderAlignedBp(Item<BlastResult> item) {
+                item.add(new Label("alignedBp", item.getModelObject().getAlignmentLength() + " / "
+                        + getBlastQuery().length()));
+            }
+
+            private void renderAlignedPercent(Item<BlastResult> item) {
+                item.add(new Label("alignedPercent", String.format("%.1f", item.getModelObject()
+                        .getPercentId())));
+            }
+
+            private void renderBitScore(Item<BlastResult> item) {
+                BlastResult blastResult = item.getModelObject();
+
+                item.add(new Label("bitScore", String.format("%.1f", blastResult.getBitScore())));
+            }
+
+            private void renderEValue(Item<BlastResult> item) {
+                item.add(new Label("eValue", String.format("%.1e", item.getModelObject()
+                        .geteValue())));
+            }
+
+            private void renderEmptyRow(Item<BlastResult> item) {
+                item.add(new Label("index", "" + (item.getIndex() + 1)));
+                item.add(new Label("recordType", ""));
+                item.add(new BookmarkablePageLink<EntryViewPage>("partIdLink", EntryViewPage.class,
+                        new PageParameters("")).add(new Label("partNumber", "?")));
+                item.add(new Label("name", ""));
+                item.add(new Label("alignedBp", ""));
+                item.add(new Label("alignedPercent", ""));
+                item.add(new Label("bitScore", ""));
+                item.add(new Label("eValue", ""));
             }
         };
 
-        add(listView);
-        add(new JbeiPagingNavigator("navigator", listView));
+        add(blastDataView);
+
+        add(new JbeiPagingNavigator("navigator", blastDataView));
     }
 
     public void setBlastQuery(String blastQuery) {

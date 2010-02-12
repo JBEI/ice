@@ -2,7 +2,6 @@ package org.jbei.ice.web.panels;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Set;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -18,7 +17,6 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
 import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.web.IceSession;
@@ -54,7 +52,8 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
         renderReferences();
         renderBioSafetyLevel();
         renderIntellectualProperty();
-        renderFundingSourceAndPrincipalInvestigator();
+        renderFundingSource();
+        renderPrincipalInvestigator();
     }
 
     protected T getEntry() {
@@ -241,27 +240,12 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
         add(new Label("intellectualProperty", intellectualProperty));
     }
 
-    protected void renderFundingSourceAndPrincipalInvestigator() {
-        Set<EntryFundingSource> entryFundingSources = getEntry().getEntryFundingSources();
+    protected void renderPrincipalInvestigator() {
+        add(new Label("principalInvestigator", getEntry().principalInvestigatorToString()));
+    }
 
-        String principalInvestigator = null;
-        String fundingSource = null;
-
-        for (EntryFundingSource entryFundingSource : entryFundingSources) {
-            principalInvestigator = entryFundingSource.getFundingSource()
-                    .getPrincipalInvestigator();
-            fundingSource = entryFundingSource.getFundingSource().getFundingSource();
-        }
-
-        if (principalInvestigator == null) {
-            principalInvestigator = "";
-        }
-        if (fundingSource == null) {
-            fundingSource = "";
-        }
-
-        add(new Label("principalInvestigator", principalInvestigator));
-        add(new Label("fundingSource", fundingSource));
+    protected void renderFundingSource() {
+        add(new Label("fundingSource", getEntry().fundingSourceToString()));
     }
 
     protected String trimLongField(String value, int maxLength) {
