@@ -303,10 +303,23 @@ public class Query {
 
     protected HashSet<Integer> filterName(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
+
         String criteria = makeCriterion("lower(name.name)", parsedQuery.get("operator"),
                 parsedQuery.get("value"));
         org.hibernate.Query query = HibernateHelper.getSession().createQuery(
                 "select distinct name.entry.id from Name name where " + criteria);
+        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+
+        return rawResults;
+    }
+
+    protected HashSet<Integer> filterStrainPlasmids(String queryString) {
+        HashMap<String, String> parsedQuery = parseQuery(queryString);
+
+        String criteria = makeCriterion("lower(strain.plasmids)", parsedQuery.get("operator"),
+                parsedQuery.get("value"));
+        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
+                "select distinct strain.id from Strain strain where " + criteria);
         HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
 
         return rawResults;
