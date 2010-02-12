@@ -76,25 +76,31 @@ public class Query {
         yesNoMap.put("no", "No");
 
         filters.add(new StringFilter("name_or_alias", "Name Or Alias", "filterNameOrAlias"));
-        filters.add(new StringFilter("name", "Name", "filterName"));
+        //filters.add(new StringFilter("name", "Name", "filterName"));
         filters.add(new StringFilter("part_number", "Part ID", "filterPartNumber"));
         filters.add(new SelectionFilter("type", "Type", "filterType", entryTypesFilterMap));
         filters.add(new SelectionFilter("status", "Status", "filterStatus", statusMap));
-        filters.add(new StringFilter("owner", "Owner", "filterOwner"));
-        filters.add(new StringFilter("creator", "Creator", "filterCreator"));
+        filters.add(new StringFilter("owner", "Owner", "filterOwnerCombined"));
+        filters.add(new StringFilter("creator", "Creator", "filterCreatorCombined"));
         filters.add(new StringFilter("strain_plasmids", "Strain Plasmids", "filterStrainPlasmids"));
-        filters.add(new StringFilter("alias", "Alias", "filterAlias"));
+        //filters.add(new StringFilter("alias", "Alias", "filterAlias"));
         filters.add(new StringFilter("keywords", "Keywords", "filterKeywords"));
-        filters.add(new StringFilter("short_description", "Summary", "filterShortDescription"));
-        filters.add(new StringFilter("long_description", "Notes", "filterLongDescription"));
-        filters.add(new StringFilter("references", "References", "filterReferences"));
+        filters.add(new StringFilter("description", "Description (Summary/Notes/References)",
+                "filterSummaryNotesReferences"));
+        filters.add(new RadioFilter("has_attachment", "Has Attachment", "filterHasAttachment",
+                yesNoMap));
+        filters.add(new RadioFilter("has_sequence", "Has Sequence", "filterHasSequence", yesNoMap));
+        filters.add(new RadioFilter("has_sample", "Has Sample", "filterHasSample", yesNoMap));
+        //filters.add(new StringFilter("short_description", "Summary", "filterShortDescription"));
+        //filters.add(new StringFilter("long_description", "Notes", "filterLongDescription"));
+        //filters.add(new StringFilter("references", "References", "filterReferences"));
+        filters.add(new SelectionFilter("bioSafetyLevel", "Bio Safety Level",
+                "filterBioSafetyLevel", bioSafetyLevelMap));
+        filters.add(new StringFilter("intelectualProperty", "Intelectual Property",
+                "filterIntelectualProperty"));
         filters.add(new StringFilter("principal_investigator", "Principal Investigator",
                 "filterPrincipalInvestigator"));
         filters.add(new StringFilter("fundingSource", "Funding Source", "filterFundingSource"));
-        filters.add(new StringFilter("intelectualProperty", "Intelectual Property",
-                "filterIntelectualProperty"));
-        filters.add(new SelectionFilter("bioSafetyLevel", "Bio Safety Level",
-                "filterBioSafetyLevel", bioSafetyLevelMap));
         filters.add(new SelectionFilter("selection_marker",
                 "Selection Marker (Strains and Plasmids)", "filterSelectionMarker",
                 selectionMarkersMap));
@@ -109,10 +115,6 @@ public class Query {
                 "filterGenotypePhenotype"));
         filters.add(new StringFilter("package_format", "Package Format (Parts only)",
                 "filterPackageFormat"));
-        filters.add(new RadioFilter("has_attachment", "Has Attachment", "filterHasAttachment",
-                yesNoMap));
-        filters.add(new RadioFilter("has_sequence", "Has Sequence", "filterHasSequence", yesNoMap));
-        filters.add(new RadioFilter("has_sample", "Has Sample", "filterHasSample", yesNoMap));
         filters.add(new StringFilter("record_id", "Record Id", "filterRecordId"));
     }
 
@@ -420,6 +422,15 @@ public class Query {
         return rawResults;
     }
 
+    protected HashSet<Integer> filterOwnerCombined(String queryString) {
+        HashSet<Integer> ownerResults = filterOwner(queryString);
+        HashSet<Integer> ownerEmailResults = filterOwnerEmail(queryString);
+
+        ownerResults.addAll(ownerEmailResults);
+
+        return ownerResults;
+    }
+
     protected HashSet<Integer> filterOwner(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.owner) ", parsedQuery.get("operator"),
@@ -442,9 +453,30 @@ public class Query {
         return rawResults;
     }
 
+    protected HashSet<Integer> filterCreatorCombined(String queryString) {
+        HashSet<Integer> creatorResults = filterCreator(queryString);
+        HashSet<Integer> creatorEmailResults = filterCreatorEmail(queryString);
+
+        creatorResults.addAll(creatorEmailResults);
+
+        return creatorResults;
+    }
+
     protected HashSet<Integer> filterCreator(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.creator) ", parsedQuery.get("operator"),
+                parsedQuery.get("value"));
+        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
+                "select distinct entry.id from Entry entry where " + criteria);
+        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+
+        return rawResults;
+    }
+
+    protected HashSet<Integer> filterCreatorEmail(String queryString) {
+        HashMap<String, String> parsedQuery = parseQuery(queryString);
+
+        String criteria = makeCriterion("lower(entry.creatorEmail) ", parsedQuery.get("operator"),
                 parsedQuery.get("value"));
         org.hibernate.Query query = HibernateHelper.getSession().createQuery(
                 "select distinct entry.id from Entry entry where " + criteria);
@@ -462,6 +494,17 @@ public class Query {
         HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
 
         return rawResults;
+    }
+
+    protected HashSet<Integer> filterSummaryNotesReferences(String queryString) {
+        HashSet<Integer> summaryResults = filterShortDescription(queryString);
+        HashSet<Integer> notesResults = filterLongDescription(queryString);
+        HashSet<Integer> referencesResults = filterReferences(queryString);
+
+        summaryResults.addAll(notesResults);
+        summaryResults.addAll(referencesResults);
+
+        return summaryResults;
     }
 
     protected HashSet<Integer> filterShortDescription(String queryString) {

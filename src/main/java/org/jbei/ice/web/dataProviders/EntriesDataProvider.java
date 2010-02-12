@@ -28,7 +28,7 @@ public class EntriesDataProvider extends SortableDataProvider<Entry> {
         sortableFieldsMap.put("type", "recordType");
         sortableFieldsMap.put("created", "creationTime");
         sortableFieldsMap.put("status", "status");
-        sortableFieldsMap.put("summary", "short_description");
+        sortableFieldsMap.put("summary", "shortDescription");
 
         setSort("id", true);
     }
