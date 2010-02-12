@@ -81,7 +81,7 @@ public class AttachmentManager extends Manager {
     }
 
     public static Attachment getByFileId(String fileId) throws ManagerException {
-        Query query = session.createQuery("from " + Attachment.class.getName()
+        Query query = getSession().createQuery("from " + Attachment.class.getName()
                 + " where file_id = :fileId");
         query.setString("fileId", fileId);
         Attachment attachment = null;
@@ -107,7 +107,7 @@ public class AttachmentManager extends Manager {
     @SuppressWarnings("unchecked")
     public static ArrayList<Attachment> getByEntry(Entry entry) throws ManagerException {
         ArrayList<Attachment> attachments;
-        Query query = session.createQuery("from " + Attachment.class.getName()
+        Query query = getSession().createQuery("from " + Attachment.class.getName()
                 + " where entries_id = :entryId");
         query.setInteger("entryId", entry.getId());
         attachments = (ArrayList<Attachment>) query.list();
@@ -128,7 +128,7 @@ public class AttachmentManager extends Manager {
         boolean result = false;
         try {
             String queryString = "from " + Attachment.class.getName() + " where entry = :entry";
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
             query.setParameter("entry", entry);
             List attachments = query.list();
             if (attachments.size() > 0) {
@@ -147,7 +147,7 @@ public class AttachmentManager extends Manager {
         int result = 0;
         try {
             String queryString = "from " + Attachment.class.getName() + " where entry = :entry";
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
             query.setParameter("entry", entry);
             List attachments = query.list();
             result = attachments.size();

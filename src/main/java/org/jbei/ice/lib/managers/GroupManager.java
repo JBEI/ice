@@ -60,7 +60,7 @@ public class GroupManager extends Manager {
         LinkedHashSet<Group> groups = new LinkedHashSet<Group>();
         try {
             String queryString = "from Group";
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
             groups.addAll(query.list());
         } catch (HibernateException e) {
             String msg = "Could not retrieve all groups: " + e.toString();

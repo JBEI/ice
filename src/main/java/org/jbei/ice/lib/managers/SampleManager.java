@@ -32,7 +32,7 @@ public class SampleManager extends Manager {
         LinkedHashSet<Sample> result = null;
         try {
             String queryString = "from Sample as sample where sample.entry = :entry order by sample.id desc";
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
 
             query.setEntity("entry", entry);
 
@@ -53,7 +53,7 @@ public class SampleManager extends Manager {
         try {
             String queryString = "from Sample as sample where sample.depositor = :depositor";
 
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
 
             query.setParameter("depositor", account.getEmail());
             query.setFirstResult(offset);
@@ -73,7 +73,7 @@ public class SampleManager extends Manager {
         try {
             String queryString = "from Sample as sample where sample.depositor = :depositor";
 
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
 
             query.setParameter("depositor", account.getEmail());
 
@@ -90,7 +90,7 @@ public class SampleManager extends Manager {
         boolean result = false;
         try {
             String queryString = "from " + Sample.class.getName() + " where entry = :entry";
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
             query.setParameter("entry", entry);
             List samples = query.list();
             if (samples.size() > 0) {
@@ -108,7 +108,7 @@ public class SampleManager extends Manager {
         int result = 0;
         try {
             String queryString = "from " + Sample.class.getName() + " where entry = :entry";
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
             query.setParameter("entry", entry);
             List samples = query.list();
             result = samples.size();

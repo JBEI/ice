@@ -69,8 +69,8 @@ public class SessionManager extends Manager {
 
         try {
             String queryString = "delete SessionData sessionData where sessionData.expireDate < :now";
-            Transaction tx = session.beginTransaction();
-            Query query = session.createQuery(queryString);
+            Transaction tx = getSession().beginTransaction();
+            Query query = getSession().createQuery(queryString);
             query.setLong("now", Calendar.getInstance().getTimeInMillis());
             query.executeUpdate();
             tx.commit();

@@ -70,8 +70,8 @@ public class PermissionManager extends Manager {
 
     public static void setReadUser(Entry entry, Set<Account> accounts) throws ManagerException {
         String queryString = "delete  ReadUser readUser where readUser.entry = :entry";
-        Transaction tx = session.beginTransaction();
-        Query query = session.createQuery(queryString);
+        Transaction tx = getSession().beginTransaction();
+        Query query = getSession().createQuery(queryString);
         query.setEntity("entry", entry);
         query.executeUpdate();
         tx.commit();
@@ -107,7 +107,7 @@ public class PermissionManager extends Manager {
         try {
             String queryString = "select readUser.account from ReadUser readUser where readUser.entry = :entry";
 
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
             query.setEntity("entry", entry);
 
             @SuppressWarnings("unchecked")
@@ -124,8 +124,8 @@ public class PermissionManager extends Manager {
 
     public static void setReadGroup(Entry entry, Set<Group> groups) throws ManagerException {
         String queryString = "delete  ReadGroup readGroup where readGroup.entry = :entry";
-        Transaction tx = session.beginTransaction();
-        Query query = session.createQuery(queryString);
+        Transaction tx = getSession().beginTransaction();
+        Query query = getSession().createQuery(queryString);
         query.setEntity("entry", entry);
         query.executeUpdate();
         tx.commit();
@@ -160,7 +160,7 @@ public class PermissionManager extends Manager {
     public static Set<Group> getReadGroup(Entry entry) throws ManagerException {
         try {
             String queryString = "select readGroup.group from ReadGroup readGroup where readGroup.entry = :entry";
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
             query.setEntity("entry", entry);
 
             @SuppressWarnings("unchecked")
@@ -177,8 +177,8 @@ public class PermissionManager extends Manager {
 
     public static void setWriteUser(Entry entry, Set<Account> accounts) throws ManagerException {
         String queryString = "delete  WriteUser writeUser where writeUser.entry = :entry";
-        Transaction tx = session.beginTransaction();
-        Query query = session.createQuery(queryString);
+        Transaction tx = getSession().beginTransaction();
+        Query query = getSession().createQuery(queryString);
         query.setEntity("entry", entry);
         query.executeUpdate();
         tx.commit();
@@ -213,7 +213,7 @@ public class PermissionManager extends Manager {
     public static Set<Account> getWriteUser(Entry entry) throws ManagerException {
         try {
             String queryString = "select writeUser.account from WriteUser writeUser where writeUser.entry = :entry";
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
             query.setEntity("entry", entry);
 
             @SuppressWarnings("unchecked")
@@ -230,8 +230,8 @@ public class PermissionManager extends Manager {
 
     public static void setWriteGroup(Entry entry, Set<Group> groups) throws ManagerException {
         String queryString = "delete  WriteGroup writeGroup where writeGroup.entry = :entry";
-        Transaction tx = session.beginTransaction();
-        Query query = session.createQuery(queryString);
+        Transaction tx = getSession().beginTransaction();
+        Query query = getSession().createQuery(queryString);
         query.setEntity("entry", entry);
         query.executeUpdate();
         tx.commit();
@@ -267,7 +267,7 @@ public class PermissionManager extends Manager {
         try {
             String queryString = "select writeGroup.group from WriteGroup writeGroup where writeGroup.entry = :entry";
 
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
             query.setEntity("entry", entry);
 
             @SuppressWarnings("unchecked")

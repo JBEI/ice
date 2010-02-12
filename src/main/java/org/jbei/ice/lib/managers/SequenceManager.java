@@ -49,7 +49,7 @@ public class SequenceManager extends Manager {
     public static List<Sequence> getAll() {
         String queryString = "from Sequence";
 
-        Query query = session.createQuery(queryString);
+        Query query = getSession().createQuery(queryString);
 
         return new ArrayList<Sequence>(query.list());
     }
@@ -62,7 +62,7 @@ public class SequenceManager extends Manager {
         try {
             everybodyGroup = GroupManager.getEverybodyGroup();
             String queryString = "select entry.sequence from Entry entry, ReadGroup readGroup where readGroup.group = :group and readGroup.entry = entry";
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
             query.setParameter("group", everybodyGroup);
             result = new ArrayList<Sequence>(query.list());
 
@@ -73,12 +73,12 @@ public class SequenceManager extends Manager {
     }
 
     public static Sequence get(int id) throws ManagerException {
-        Sequence sequence = (Sequence) session.load(Sequence.class, id);
+        Sequence sequence = (Sequence) getSession().load(Sequence.class, id);
         return sequence;
     }
 
     public static Sequence getByUuid(String uuid) throws ManagerException {
-        Query query = session.createQuery("from " + Sequence.class.getName()
+        Query query = getSession().createQuery("from " + Sequence.class.getName()
                 + " where uuid = :uuid");
         query.setString("uuid", uuid);
         Sequence sequence;
@@ -92,7 +92,7 @@ public class SequenceManager extends Manager {
 
     public static Sequence getByEntry(Entry entry) throws ManagerException {
         Sequence sequence;
-        Query query = session.createQuery("from " + Sequence.class.getName()
+        Query query = getSession().createQuery("from " + Sequence.class.getName()
                 + " where entries_id = :entryId");
         query.setInteger("entryId", entry.getId());
         sequence = (Sequence) query.uniqueResult();
@@ -104,7 +104,7 @@ public class SequenceManager extends Manager {
         boolean result = false;
         try {
             String queryString = "from " + Sequence.class.getName() + " where entry = :entry";
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
             query.setParameter("entry", entry);
             Sequence sequence = (Sequence) query.uniqueResult();
             if (sequence == null) {
@@ -166,7 +166,7 @@ public class SequenceManager extends Manager {
             FeatureDNA featureDNA = feature.getFeatureDna();
 
             String queryString = "from " + FeatureDNA.class.getName() + " where hash = :hash";
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
             query.setParameter("hash", SequenceUtils
                     .calculateSequenceHash(featureDNA.getSequence()));
 

@@ -110,7 +110,8 @@ public class EntryManager extends Manager {
 
     public static Entry get(int id) throws ManagerException {
         try {
-            Query query = session.createQuery("from " + Entry.class.getName() + " where id = :id");
+            Query query = getSession().createQuery(
+                    "from " + Entry.class.getName() + " where id = :id");
             query.setParameter("id", id);
             Entry entry = (Entry) query.uniqueResult();
             return entry;
@@ -122,8 +123,8 @@ public class EntryManager extends Manager {
 
     public static Entry getByRecordId(String recordId) throws ManagerException {
         try {
-            Query query = session.createQuery("from " + Entry.class.getName()
-                    + " where recordId = :recordId");
+            Query query = getSession().createQuery(
+                    "from " + Entry.class.getName() + " where recordId = :recordId");
             query.setParameter("recordId", recordId);
 
             Entry entry = (Entry) query.uniqueResult();
@@ -136,8 +137,8 @@ public class EntryManager extends Manager {
 
     public static Entry getByPartNumber(String partNumber) throws ManagerException {
         try {
-            Query query = session.createQuery("from " + PartNumber.class.getName()
-                    + " where partNumber = :partNumber");
+            Query query = getSession().createQuery(
+                    "from " + PartNumber.class.getName() + " where partNumber = :partNumber");
             query.setParameter("partNumber", partNumber);
 
             PartNumber entryPartNumber = (PartNumber) query.uniqueResult();
@@ -157,8 +158,8 @@ public class EntryManager extends Manager {
 
     public static Entry getByName(String name) throws ManagerException {
         try {
-            Query query = session.createQuery("from " + Name.class.getName()
-                    + " where name = :name");
+            Query query = getSession().createQuery(
+                    "from " + Name.class.getName() + " where name = :name");
             query.setParameter("name", name);
 
             Name entryName = (Name) query.uniqueResult();
@@ -184,7 +185,7 @@ public class EntryManager extends Manager {
     public static LinkedHashSet<Entry> getByAccount(Account account, int offset, int limit) {
         String queryString = "from Entry where ownerEmail = :ownerEmail";
 
-        Query query = session.createQuery(queryString);
+        Query query = getSession().createQuery(queryString);
 
         query.setParameter("ownerEmail", account.getEmail());
         query.setFirstResult(offset);
@@ -206,7 +207,7 @@ public class EntryManager extends Manager {
         String queryString = "from Entry where ownerEmail = :ownerEmail"
                 + (!sortQuerySuffix.isEmpty() ? (" ORDER BY " + sortQuerySuffix) : "");
 
-        Query query = session.createQuery(queryString);
+        Query query = getSession().createQuery(queryString);
 
         query.setParameter("ownerEmail", account.getEmail());
         query.setFirstResult(offset);
@@ -222,7 +223,7 @@ public class EntryManager extends Manager {
 
         String queryString = "from Entry where ownerEmail = :ownerEmail";
 
-        Query query = session.createQuery(queryString);
+        Query query = getSession().createQuery(queryString);
 
         query.setParameter("ownerEmail", account.getEmail());
 
@@ -233,7 +234,7 @@ public class EntryManager extends Manager {
     public static Set<Entry> getAll() {
         String queryString = "from Entry";
 
-        Query query = session.createQuery(queryString);
+        Query query = getSession().createQuery(queryString);
 
         return new LinkedHashSet<Entry>(query.list());
     }
@@ -245,7 +246,7 @@ public class EntryManager extends Manager {
         try {
             everybodyGroup = GroupManager.getEverybodyGroup();
             String queryString = "select entry from Entry entry, ReadGroup readGroup where readGroup.group = :group and readGroup.entry = entry";
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
             query.setParameter("group", everybodyGroup);
             result = new LinkedHashSet<Entry>(query.list());
         } catch (ManagerException e) {
@@ -265,7 +266,7 @@ public class EntryManager extends Manager {
         String queryString = "from Entry"
                 + (!sortQuerySuffix.isEmpty() ? (" ORDER BY " + sortQuerySuffix) : "");
 
-        Query query = session.createQuery(queryString);
+        Query query = getSession().createQuery(queryString);
         query.setFirstResult(offset);
         query.setMaxResults(limit);
 
@@ -285,7 +286,7 @@ public class EntryManager extends Manager {
             String queryString = "select entry from Entry entry, ReadGroup readGroup where readGroup.group = :group and readGroup.entry = entry"
                     + (!sortQuerySuffix.isEmpty() ? (" ORDER BY " + "entry." + sortQuerySuffix)
                             : "");
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
             query.setParameter("group", everybodyGroup);
             query.setFirstResult(offset);
             query.setMaxResults(limit);
@@ -303,7 +304,7 @@ public class EntryManager extends Manager {
     public static int getNumberOfEntries() {
         String queryString = "select id from Entry";
 
-        Query query = session.createQuery(queryString);
+        Query query = getSession().createQuery(queryString);
 
         return query.list().size();
     }
@@ -314,7 +315,7 @@ public class EntryManager extends Manager {
         try {
             everybodyGroup = GroupManager.getEverybodyGroup();
             String queryString = "select id from ReadGroup readGroup where readGroup.group = :group";
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
             query.setParameter("group", everybodyGroup);
             result = query.list().size();
 
@@ -330,7 +331,7 @@ public class EntryManager extends Manager {
         try {
             String queryString = "from " + PartNumber.class.getName() + " where partNumber LIKE '"
                     + prefix + "%' ORDER BY partNumber DESC";
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
 
             ArrayList<PartNumber> tempList = new ArrayList<PartNumber>(query.list());
             PartNumber entryPartNumber = null;
@@ -375,6 +376,7 @@ public class EntryManager extends Manager {
     /**
      * Updates or Inserts unique funding source and returns the result
      */
+
     private static FundingSource saveFundingSource(FundingSource fundingSource)
             throws ManagerException {
         FundingSource result;
@@ -382,11 +384,19 @@ public class EntryManager extends Manager {
             String queryString = "from " + FundingSource.class.getName()
                     + " where fundingSource=:fundingSource AND"
                     + " principalInvestigator=:principalInvestigator";
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
             query.setParameter("fundingSource", fundingSource.getFundingSource());
             query.setParameter("principalInvestigator", fundingSource.getPrincipalInvestigator());
-
-            FundingSource existingFundingSource = (FundingSource) query.uniqueResult();
+            FundingSource existingFundingSource = null;
+            try {
+                existingFundingSource = (FundingSource) query.uniqueResult();
+            } catch (org.hibernate.NonUniqueResultException e1) {
+                // dirty funding source. There are multiple of these. Clean up.
+                String msg = "Cleaning unp messy funding sources. Try normalizing them";
+                Logger.warn(msg);
+                FundingSource duplicateFundingSource = (FundingSource) query.list().get(0);
+                result = duplicateFundingSource;
+            }
             if (existingFundingSource == null) {
                 result = (FundingSource) dbSave(fundingSource);
             } else {
@@ -397,9 +407,7 @@ public class EntryManager extends Manager {
             String msg = "Could not save unique funding source";
             throw new ManagerException(msg, e);
         }
-
         return result;
-
     }
 
     public static Entry save(Entry entry) throws ManagerException {
@@ -426,9 +434,9 @@ public class EntryManager extends Manager {
 
         // Manual cascade of EntryFundingSource. Guarantees unique FundingSource
         for (EntryFundingSource entryFundingSource : entry.getEntryFundingSources()) {
-            entryFundingSource.setFundingSource(saveFundingSource(entryFundingSource
-                    .getFundingSource()));
-            dbSave(entryFundingSource);
+            FundingSource saveFundingSource = saveFundingSource(entryFundingSource
+                    .getFundingSource());
+            entryFundingSource.setFundingSource(saveFundingSource);
         }
 
         result = (Entry) dbSave(entry);

@@ -61,7 +61,7 @@ public class AccountManager extends Manager {
         Account account = null;
         String queryString = "select data from SessionData sessionData where sessionData.sessionKey = :sessionKey";
         try {
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
             query.setString("sessionKey", authToken);
             HashMap<String, Object> sessionData = (HashMap<String, Object>) query.uniqueResult();
             account = get((Integer) sessionData.get("accountId"));
@@ -95,7 +95,7 @@ public class AccountManager extends Manager {
         LinkedHashSet<Account> accounts = new LinkedHashSet<Account>();
         try {
             String queryString = "from Account";
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
             accounts.addAll(query.list());
         } catch (HibernateException e) {
             String msg = "Could not retrieve all accounts " + e.toString();
@@ -111,7 +111,7 @@ public class AccountManager extends Manager {
         LinkedHashSet<Account> accounts = new LinkedHashSet<Account>();
         try {
             String queryString = "from Account order by firstName";
-            Query query = session.createQuery(queryString);
+            Query query = getSession().createQuery(queryString);
             accounts.addAll(query.list());
         } catch (HibernateException e) {
             String msg = "Could not retrieve all accounts " + e.toString();
