@@ -12,6 +12,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
@@ -32,9 +33,11 @@ public class Sequence implements ISequenceValueObject, Serializable {
     private int id;
 
     @Column(name = "sequence")
+    @Lob
     private String sequence;
 
     @Column(name = "sequence_user")
+    @Lob
     private String sequenceUser;
 
     @Column(name = "fwd_hash", length = 40)

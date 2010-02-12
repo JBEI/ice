@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -36,6 +37,7 @@ public class Comment implements Serializable {
     private Entry entry;
 
     @Column(name = "body", nullable = false)
+    @Lob
     private String body;
 
     @Column(name = "creation_time")

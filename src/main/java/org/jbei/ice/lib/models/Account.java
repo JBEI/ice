@@ -11,6 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -46,6 +47,7 @@ public class Account implements Serializable {
     private String password;
 
     @Column(name = "description")
+    @Lob
     private String description;
 
     @Column(name = "is_subscribed", nullable = false)

@@ -135,6 +135,7 @@ public class SessionData implements Serializable {
         return sessionDataCacheTimeStamp;
     }
 
+    @Override
     public Object clone() throws CloneNotSupportedException {
         throw new CloneNotSupportedException();
     }

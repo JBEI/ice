@@ -42,7 +42,7 @@ public class SequenceFeature implements ISequenceFeatureValueObject, Serializabl
     @Column(name = "strand")
     private int strand;
 
-    @Column(name = "name")
+    @Column(name = "name", length = 127)
     private String name;
 
     public SequenceFeature() {

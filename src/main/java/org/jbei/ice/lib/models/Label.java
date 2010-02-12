@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -27,6 +28,7 @@ public class Label implements Serializable {
     private Account account;
 
     @Column(name = "body", nullable = false)
+    @Lob
     private String name;
 
     public int getId() {

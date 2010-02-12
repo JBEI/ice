@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -28,6 +29,7 @@ public class Attachment implements IAttachmentValueObject, Serializable {
     private int id;
 
     @Column(name = "description", nullable = false)
+    @Lob
     private String description;
 
     @Column(name = "filename", length = 255, nullable = false)

@@ -16,6 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
@@ -69,12 +70,15 @@ public class Entry implements IEntryValueObject, Serializable {
     private String status;
 
     @Column(name = "short_description")
+    @Lob
     private String shortDescription;
 
     @Column(name = "long_description")
+    @Lob
     private String longDescription;
 
     @Column(name = "literature_references")
+    @Lob
     private String references;
 
     @Column(name = "creation_time")
@@ -89,6 +93,7 @@ public class Entry implements IEntryValueObject, Serializable {
     private Integer bioSafetyLevel;
 
     @Column(name = "intellectual_property")
+    @Lob
     private String intellectualProperty;
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "entry")

@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -25,12 +26,17 @@ public class AccountPreferences implements Serializable {
     private int id;
 
     @Column(name = "preferences")
+    @Lob
     private String preferences;
+
     @Column(name = "restriction_enzymes")
+    @Lob
     private String restrictionEnzymes;
-    @ManyToOne()
+
+    @ManyToOne
     @JoinColumn(name = "accounts_id", unique = true, nullable = false)
     private Account account;
+
     @Column(name = "work_space", nullable = true)
     private WorkSpace workSpace;
 

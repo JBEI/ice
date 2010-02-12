@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -26,6 +27,7 @@ public class FeatureDNA implements Serializable {
     private String hash;
 
     @Column(name = "sequence", nullable = false, unique = true)
+    @Lob
     private String sequence;
 
     @OneToOne
