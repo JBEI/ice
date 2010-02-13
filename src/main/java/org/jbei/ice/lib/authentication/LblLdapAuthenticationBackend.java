@@ -50,7 +50,7 @@ public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Ser
 
                 account.setLastLoginTime(Calendar.getInstance().getTime());
 
-                // AccountManager.dbSave(account);
+                AccountManager.save(account);
 
                 Logger.info("User " + loginId + " authenticated via lbl-ldap.");
             }
