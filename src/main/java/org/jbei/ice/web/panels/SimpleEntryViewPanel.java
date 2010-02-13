@@ -9,6 +9,7 @@ import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.web.pages.UnprotectedPage;
+import org.jbei.ice.web.utils.WebUtils;
 
 public class SimpleEntryViewPanel<T extends Entry> extends AbstractEntryViewPanel<T> {
     private static final long serialVersionUID = 1L;
@@ -18,21 +19,26 @@ public class SimpleEntryViewPanel<T extends Entry> extends AbstractEntryViewPane
         super(id, entryModel);
     }
 
+    @Override
     protected void renderSummary() {
-        add(new MultiLineLabel("shortDescription", trimLongField(getEntry().getShortDescription(),
-                MAX_LONG_FIELD_LENGTH)));
+        add(new MultiLineLabel("shortDescription", trimLongField(WebUtils
+                .jbeiLinkifyText(getEntry().getShortDescription()), MAX_LONG_FIELD_LENGTH))
+                .setEscapeModelStrings(false));
     }
 
+    @Override
     protected void renderNotes() {
-        add(new MultiLineLabel("longDescription", trimLongField(getEntry().getLongDescription(),
-                MAX_LONG_FIELD_LENGTH)));
+        add(new MultiLineLabel("longDescription", trimLongField(WebUtils.jbeiLinkifyText(getEntry()
+                .getLongDescription()), MAX_LONG_FIELD_LENGTH)).setEscapeModelStrings(false));
     }
 
+    @Override
     protected void renderReferences() {
-        add(new MultiLineLabel("references", trimLongField(getEntry().getReferences(),
-                MAX_LONG_FIELD_LENGTH)));
+        add(new MultiLineLabel("references", trimLongField(WebUtils.jbeiLinkifyText(getEntry()
+                .getReferences()), MAX_LONG_FIELD_LENGTH)).setEscapeModelStrings(false));
     }
 
+    @Override
     protected void renderAttachments() {
         ResourceReference hasAttachmentImage = new ResourceReference(UnprotectedPage.class,
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "attachment.gif");
@@ -40,12 +46,14 @@ public class SimpleEntryViewPanel<T extends Entry> extends AbstractEntryViewPane
                 .hasAttachment(getEntry())));
     }
 
+    @Override
     protected void renderSamples() {
         ResourceReference hasSampleImage = new ResourceReference(UnprotectedPage.class,
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sample.png");
         add(new Image("samples", hasSampleImage).setVisible(SampleManager.hasSample(getEntry())));
     }
 
+    @Override
     protected void renderSequence() {
         ResourceReference hasSequenceImage = new ResourceReference(UnprotectedPage.class,
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sequence.gif");

@@ -23,6 +23,7 @@ import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.ProfilePage;
 import org.jbei.ice.web.pages.UnprotectedPage;
+import org.jbei.ice.web.utils.WebUtils;
 
 public abstract class AbstractEntriesDataView<T> extends DataView<T> {
     private static final long serialVersionUID = 1L;
@@ -49,7 +50,8 @@ public abstract class AbstractEntriesDataView<T> extends DataView<T> {
     }
 
     protected void renderDescription(Item<T> item) {
-        item.add(new Label("description", getEntry(item).getShortDescription()));
+        item.add(new Label("description", WebUtils.jbeiLinkifyText(getEntry(item)
+                .getShortDescription())).setEscapeModelStrings(false));
     }
 
     protected void renderStatus(Item<T> item) {

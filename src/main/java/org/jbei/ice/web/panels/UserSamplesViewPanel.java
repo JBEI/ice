@@ -21,6 +21,7 @@ import org.jbei.ice.web.dataProviders.UserSamplesDataProvider;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.UnprotectedPage;
+import org.jbei.ice.web.utils.WebUtils;
 
 public class UserSamplesViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -50,7 +51,8 @@ public class UserSamplesViewPanel extends Panel {
                 item.add(new Label("index", ""
                         + (getItemsPerPage() * getCurrentPage() + item.getIndex() + 1)));
                 item.add(new Label("label", sample.getLabel()));
-                item.add(new Label("notes", sample.getNotes()));
+                item.add(new Label("notes", WebUtils.jbeiLinkifyText(sample.getNotes()))
+                        .setEscapeModelStrings(false));
 
                 StringBuilder locations = new StringBuilder();
                 if (sample.getLocations() != null && sample.getLocations().size() > 0) {

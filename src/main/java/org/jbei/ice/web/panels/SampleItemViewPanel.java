@@ -13,6 +13,7 @@ import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryViewPage;
+import org.jbei.ice.web.utils.WebUtils;
 
 public class SampleItemViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -29,7 +30,8 @@ public class SampleItemViewPanel extends Panel {
         add(new Label("counter", counter.toString()));
         add(new Label("label", sample.getLabel()));
         add(new Label("depositor", sample.getDepositor()));
-        add(new Label("notes", sample.getNotes()));
+        add(new Label("notes", WebUtils.jbeiLinkifyText(sample.getNotes()))
+                .setEscapeModelStrings(false));
 
         class DeleteSampleLink extends AjaxFallbackLink {
             private static final long serialVersionUID = 1L;
