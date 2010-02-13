@@ -22,8 +22,6 @@ public class UserRestrictionEnzymesService {
             if (accountPreferences != null && accountPreferences.getRestrictionEnzymes() != null
                     && !accountPreferences.getRestrictionEnzymes().isEmpty()) {
                 try {
-                    System.out.println(accountPreferences.getRestrictionEnzymes());
-
                     userRestrictionEnzymes = (UserRestrictionEnzymes) SerializationUtils
                             .deserializeFromString(accountPreferences.getRestrictionEnzymes());
                 } catch (SerializationUtils.SerializationUtilsException e) {
