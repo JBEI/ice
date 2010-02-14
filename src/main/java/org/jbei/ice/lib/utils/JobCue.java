@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.search.Blast;
-import org.jbei.ice.lib.search.Search;
+import org.jbei.ice.lib.search.LuceneSearch;
 
 public class JobCue implements Runnable {
 
@@ -54,7 +54,7 @@ public class JobCue implements Runnable {
             if (jobType == 1) {
                 Logger.info("Running rebuildIndex");
                 try {
-                    Search s = Search.getInstance();
+                    LuceneSearch s = LuceneSearch.getInstance();
                     s.rebuildIndex();
                 } catch (Exception e) {
                     String msg = "Could not create search index";

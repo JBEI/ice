@@ -42,17 +42,17 @@ import org.jbei.ice.lib.utils.Utils;
  * @author tham
  * 
  */
-public class Search {
+public class LuceneSearch {
     private IndexSearcher indexSearcher = null;
     private File indexFile = null;
     private boolean newIndex = false;
     private final int SEARCH_MAX_RESULT = 1000;
 
     private static class SingletonHolder {
-        private static final Search INSTANCE = new Search();
+        private static final LuceneSearch INSTANCE = new LuceneSearch();
     }
 
-    public static Search getInstance() {
+    public static LuceneSearch getInstance() {
         return SingletonHolder.INSTANCE;
     }
 
@@ -69,7 +69,7 @@ public class Search {
         return indexSearcher;
     }
 
-    private Search() {
+    private LuceneSearch() {
         initializeIndexSearcher();
     }
 
@@ -246,7 +246,7 @@ public class Search {
             content = content + samplesString + " ";
         }
 
-        if (entry.getClass().isInstance(Plasmid.class)) {
+        if (entry instanceof Plasmid) {
             Plasmid plasmid = (Plasmid) entry;
             String backbone = (plasmid.getBackbone() != null) ? plasmid.getBackbone() : "";
             String origin = (plasmid.getOriginOfReplication() != null) ? plasmid
@@ -262,7 +262,7 @@ public class Search {
             document.add(new Field("Promoters", promoters, Field.Store.YES, Field.Index.ANALYZED));
             content = content + promoters + " ";
 
-        } else if (entry.getClass().isInstance(Strain.class)) {
+        } else if (entry instanceof Strain) {
             Strain strain = (Strain) entry;
             String host = (strain.getHost() != null) ? strain.getHost() : "";
             String genotype = (strain.getGenotypePhenotype() != null) ? strain
@@ -277,7 +277,7 @@ public class Search {
             document.add(new Field("Plasmids", plasmids, Field.Store.YES, Field.Index.ANALYZED));
             content = content + plasmids + " ";
 
-        } else if (entry.getClass().isInstance(Part.class)) {
+        } else if (entry instanceof Part) {
             Part part = (Part) entry;
             String format = (part.getPackageFormat() != null) ? part.getPackageFormat() : "";
             document

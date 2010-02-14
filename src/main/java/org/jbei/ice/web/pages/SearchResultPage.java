@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.search.Search;
+import org.jbei.ice.lib.search.AggregateSearch;
 import org.jbei.ice.lib.search.SearchResult;
 import org.jbei.ice.web.panels.EmptyMessagePanel;
 import org.jbei.ice.web.panels.SearchResultPanel;
@@ -30,7 +30,7 @@ public class SearchResultPage extends ProtectedPage {
         ArrayList<SearchResult> searchResults = null;
         Panel searchResultPanel = null;
         try {
-            searchResults = Search.getInstance().query(getQueryString());
+            searchResults = AggregateSearch.query(getQueryString());
 
             if (searchResults.size() == 0) {
                 searchResultPanel = new EmptyMessagePanel("searchResultPanel", "No results found");
