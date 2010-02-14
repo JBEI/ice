@@ -57,6 +57,11 @@ public class SearchResult implements Serializable {
         return incoming;
     }
 
+    /**
+     * Add object search results to target, and return the target
+     * 
+     * @author tham
+     */
     public static ArrayList<SearchResult> sumSearchResults(ArrayList<SearchResult> target,
             ArrayList<SearchResult> object) {
         ArrayList<String> targetRecordIds = new ArrayList<String>();
@@ -68,12 +73,12 @@ public class SearchResult implements Serializable {
             objectRecordIds.add(searchResult.getRecordId());
         }
         @SuppressWarnings("unchecked")
-        ArrayList<String> tempTargetRecordIds = (ArrayList<String>) targetRecordIds.clone();
-        tempTargetRecordIds.retainAll(objectRecordIds);
-        if (tempTargetRecordIds.size() == 0) { // intersect is zero. Add object to target
+        ArrayList<String> intersectiongRecordIds = (ArrayList<String>) targetRecordIds.clone();
+        intersectiongRecordIds.retainAll(objectRecordIds);
+        if (intersectiongRecordIds.size() == 0) { // intersect is zero. Add object to target
             target.addAll(object);
-        } else { // intersect is not zero. Sum the scores of object
-            for (String recordId : tempTargetRecordIds) {
+        } else { // intersect is not zero. Add the score of intersecting objects
+            for (String recordId : intersectiongRecordIds) {
                 int targetIndex = targetRecordIds.indexOf(recordId);
                 int objectIndex = objectRecordIds.indexOf(recordId);
                 SearchResult targetResult = target.get(targetIndex);
@@ -85,8 +90,16 @@ public class SearchResult implements Serializable {
                     Logger.error(msg);
                 }
             }
+            // add the non-intersecting objects
+            @SuppressWarnings("unchecked")
+            ArrayList<String> nonIntersectingObjectRecordIds = (ArrayList<String>) objectRecordIds
+                    .clone();
+            nonIntersectingObjectRecordIds.removeAll(intersectiongRecordIds);
+            for (String recordId : nonIntersectingObjectRecordIds) {
+                int objectIndex = objectRecordIds.indexOf(recordId);
+                target.add(object.get(objectIndex));
+            }
         }
         return SearchResult.sort(target);
     }
-
 }
