@@ -112,11 +112,27 @@ public class SessionData implements Serializable {
     }
 
     public void setData(HashMap<String, Object> data) {
+        HashMap<String, Object> oldData = this.data;
         this.data = data;
+        try {
+            persist();
+        } catch (ManagerException e) {
+            String msg = "Could not setData in SessionData: " + e.toString();
+            Logger.error(msg);
+            this.data = oldData;
+        }
     }
 
     public void setExpireDate(long expireDate) {
+        long oldExpireDate = this.expireDate;
         this.expireDate = expireDate;
+        try {
+            persist();
+        } catch (ManagerException e) {
+            String msg = "Could not setExpireDate in SessionData: " + e.toString();
+            Logger.error(msg);
+            this.expireDate = oldExpireDate;
+        }
     }
 
     public long getExpireDate() {
@@ -179,7 +195,8 @@ public class SessionData implements Serializable {
         try {
             sessionData.persist();
         } catch (ManagerException e) {
-            e.printStackTrace();
+            // SessionData could not be persisted. return null
+            sessionData = null;
         }
         return sessionData;
     }

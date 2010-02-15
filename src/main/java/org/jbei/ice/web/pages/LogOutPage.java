@@ -7,9 +7,10 @@ public class LogOutPage extends UnprotectedPage {
     public LogOutPage(PageParameters parameters) {
         super(parameters);
 
-        ((IceSession) getSession()).deAuthenticateUser();
-        ((IceSession) getSession()).invalidateNow();
-
+        if (((IceSession) getSession()).isAuthenticated()) {
+            ((IceSession) getSession()).deAuthenticateUser();
+            ((IceSession) getSession()).invalidateNow();
+        }
         setResponsePage(HomePage.class);
     }
 }

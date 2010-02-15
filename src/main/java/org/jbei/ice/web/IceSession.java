@@ -22,29 +22,18 @@ import org.jbei.ice.lib.utils.JbeirSettings;
 public class IceSession extends WebSession {
 
     private static final long serialVersionUID = 1L;
-    private Account account = null;
     private IAuthenticationBackend authenticator = null;
-    private SessionData sessionData = null;
     private String COOKIE_NAME = JbeirSettings.getSetting("COOKIE_NAME");
+
+    private Request request;
+    private Response response;
 
     public IceSession(Request request, Response response, IAuthenticationBackend authenticator2) {
         super(request);
+
+        this.request = request;
+        this.response = response;
         this.authenticator = authenticator2;
-
-        SessionData sessionData = SessionData.getInstance(request, response);
-        setSessionData(sessionData);
-        HashMap<String, Object> data = sessionData.getData();
-        if (data.containsKey("accountId")) {
-            Integer accountId = (Integer) data.get("accountId");
-            try {
-                setAccount(AccountManager.get(accountId));
-            } catch (ManagerException e) {
-                e.printStackTrace();
-                sessionData = null;
-            }
-        }
-
-        setSessionData(sessionData);
     }
 
     /**
@@ -69,11 +58,6 @@ public class IceSession extends WebSession {
         response.addCookie(cookie);
 
         savedSession.setExpireDate(expireDate);
-        try {
-            savedSession.persist();
-        } catch (ManagerException e) {
-            e.printStackTrace();
-        }
 
     }
 
@@ -84,7 +68,6 @@ public class IceSession extends WebSession {
             account = authenticator.authenticate(login, password);
 
             if (account != null) {
-                setAccount(account);
                 AccountPreferences accountPreferences = AccountManager
                         .getAccountPreferences(account);
                 if (accountPreferences == null) {
@@ -106,11 +89,10 @@ public class IceSession extends WebSession {
 
     public void deAuthenticateUser() {
         clearSavedSession();
-        account = null;
     }
 
     public boolean isAuthenticated() {
-        return (account == null) ? false : true;
+        return (getAccount() == null) ? false : true;
     }
 
     //getters and setters
@@ -125,19 +107,25 @@ public class IceSession extends WebSession {
         return result;
     }
 
-    public void setSessionData(SessionData sessionData) {
-        this.sessionData = sessionData;
-    }
-
     public SessionData getSessionData() {
+        SessionData sessionData = SessionData.getInstance(this.request, this.response);
         return sessionData;
     }
 
-    private void setAccount(Account account) {
-        this.account = account;
-    }
-
     public Account getAccount() {
+        Account account = null;
+        SessionData sessionData = SessionData.getInstance(this.request, this.response);
+        HashMap<String, Object> data = sessionData.getData();
+        if (data.containsKey("accountId")) {
+            Integer accountId = (Integer) data.get("accountId");
+            try {
+                account = AccountManager.get(accountId);
+            } catch (ManagerException e) {
+                String msg = "Could not getAccount from IceSession: " + e.toString();
+                Logger.error(msg);
+            }
+        }
+
         return account;
     }
 
@@ -145,8 +133,8 @@ public class IceSession extends WebSession {
         try {
             AccountManager.save(accountPreferences);
         } catch (ManagerException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            String msg = "Could not setAccountPreferences in IceSession: " + e.toString();
+            Logger.error(msg);
         }
     }
 
@@ -155,14 +143,14 @@ public class IceSession extends WebSession {
         try {
             result = AccountManager.getAccountPreferences(getAccount());
         } catch (ManagerException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            String msg = "Could not getAccountPreferences in IceSession: " + e.toString();
+            Logger.error(msg);
         }
         return result;
     }
 
     //private methods
     private void clearSavedSession() {
-        sessionData.delete();
+        getSessionData().delete();
     }
 }
