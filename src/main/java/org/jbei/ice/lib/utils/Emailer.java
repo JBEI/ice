@@ -13,7 +13,7 @@ import javax.mail.internet.MimeMessage;
 import org.jbei.ice.lib.logging.Logger;
 
 public class Emailer {
-    public static void send(String receiverEmail, String subject, String body) {
+    public static void send(String receiverEmail, String ccEmail, String subject, String body) {
         Properties props = new Properties();
         props.put("mail.smtp.host", JbeirSettings.getSetting("SMTP_HOST"));
         // props.put("mail.debug", "true");
@@ -24,8 +24,7 @@ public class Emailer {
             Message msg = new MimeMessage(session);
             msg.setFrom(new InternetAddress(JbeirSettings.getSetting("ADMIN_EMAIL")));
 
-            InternetAddress[] receivers = {
-                    new InternetAddress(JbeirSettings.getSetting("ADMIN_EMAIL")),
+            InternetAddress[] receivers = { new InternetAddress(ccEmail),
                     new InternetAddress(receiverEmail) };
 
             msg.setRecipients(Message.RecipientType.TO, receivers);
@@ -41,29 +40,11 @@ public class Emailer {
         }
     }
 
+    public static void send(String receiverEmail, String subject, String body) {
+        send(receiverEmail, JbeirSettings.getSetting("ADMIN_EMAIL"), subject, body);
+    }
+
     public static void error(String subject, String body) {
-        Properties props = new Properties();
-        props.put("mail.smtp.host", JbeirSettings.getSetting("SMTP_HOST"));
-        // props.put("mail.debug", "true");
-
-        Session session = Session.getInstance(props);
-
-        try {
-            Message msg = new MimeMessage(session);
-            msg.setFrom(new InternetAddress(JbeirSettings.getSetting("ADMIN_EMAIL")));
-
-            InternetAddress[] receivers = { new InternetAddress(JbeirSettings
-                    .getSetting("ADMIN_EMAIL")) };
-
-            msg.setRecipients(Message.RecipientType.TO, receivers);
-            msg.setSubject(subject);
-            msg.setSentDate(new Date());
-            msg.setText(body);
-
-            Transport.send(msg);
-        } catch (MessagingException e) {
-            Logger.error("Error message: " + e.getMessage());
-            Logger.error("Stacktrace: " + e.getStackTrace());
-        }
+        send(JbeirSettings.getSetting("ADMIN_EMAIL"), subject, body);
     }
 }

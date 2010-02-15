@@ -32,13 +32,16 @@ public class ErrorPage extends WebPage {
     }
 
     private void sendEmail(Throwable throwable) {
-        String body = Utils.stackTraceToString(throwable);
-        String subject = (throwable.getMessage().length() > 50) ? (throwable.getMessage()
-                .substring(0, 50) + "...") : throwable.getMessage();
+        if (throwable != null) {
+            String body = Utils.stackTraceToString(throwable);
+            String subject = (throwable.getMessage().length() > 50) ? (throwable.getMessage()
+                    .substring(0, 50) + "...") : throwable.getMessage();
 
-        Emailer.error(JbeirSettings.getSetting("ERROR_EMAIL_EXCEPTION_PREFIX") + subject, body);
+            Emailer.error(JbeirSettings.getSetting("ERROR_EMAIL_EXCEPTION_PREFIX") + " " + subject,
+                    body);
 
-        Logger.error(throwable.getMessage());
-        Logger.error(body);
+            Logger.error(throwable.getMessage());
+            Logger.error(body);
+        }
     }
 }
