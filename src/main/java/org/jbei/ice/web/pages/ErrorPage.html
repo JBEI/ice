@@ -12,59 +12,29 @@
 <table border="0" cellpadding="0" cellspacing="0" class="main_table">
 	<tr>
 		<td style="width: 100%; height: 100%">
-		<h2><span style="color: #cc3333">System Internal Error</span></h2>
-		<h3>Title:</h3>
-		<div class="descriptionbox"><span style="font-family: Courier New, Arial">Unknown
-		System Error Occurred!</span></div>
-		<h3>Description:</h3>
-		<div class="descriptionbox"><span style="font-family: Courier New, Arial">Please send
-		us <a href="/feedback/">feedback</a> to <a href="zdmytriv@lbl.gov">zdmytriv@lbl.gov</a> with
-		detail description of error. Sorry for inconvenience, JBEI Registry Team</span></div>
+		<div class="descriptionbox">
+		<h2>We have encountered a problem</h2>
 		<h3>Error:</h3>
-		<div class="descriptionbox"><span style="font-family: Courier New, Arial; white-space: pre"
-			wicket:id="message" /></div>
+		<p><span style="font-family: Courier New, Arial; white-space: pre" wicket:id="message"></span></p>
+
+		Please send us <a href="#" wicket:id="feedbackLink">feedback</a> or email <a href="#"
+			wicket:id="emailLink"><span wicket:id="emailLabel"></span></a> with detail description of error.
+		Sorry for inconvenience
+
+		<ul>
+			<li>What you were attempting to do?</li>
+			<li>What action did you take?</li>
+			<li>What did you expect to happen?</li>
+			<li>What actually happened?</li>
+			<li>Is the error reproducable?</li>
+		</ul>
+
+		<p>Please also cut and paste the content from below into the error report, this will help us
+		to track down the problem.</p>
 		<h3>Traceback:</h3>
-		<div class="descriptionbox"><span style="font-family: Courier New, Arial; white-space: pre"
-			wicket:id="traceback"></span></div>
-		</td>
-	</tr>
-	<tr>
-		<td align="center" valign="bottom" style="height: 60px">
-		<table border="0" cellpadding="0" cellspacing="0" style="width: 100%; height: 60px">
-			<tr>
-				<td>
-				<table border="0" cellspacing="0" cellpadding="0" style="width: 10%">
-					<tr>
-						<td><a href="http://genomicsgtl.energy.gov/centers/"
-							title="DOE BioEnergy Research Centers"><img
-							src="/static/images/doe-bioenergy-research-cent.gif" alt="" style="width: 89px; height: 79px" /></a></td>
-						<td><a href="http://www.lbnl.gov" title="Lawrence Berkeley National Laboratory"><img
-							src="/static/images/lbnl-logo.gif" alt="" style="width: 89px; height: 79px" /></a></td>
-						<td><a href="http://www.sandia.gov" title="Sandia National Laboratories"><img
-							src="/static/images/sandia-lab-logo.gif" alt="" style="width: 114px; height: 79px" /></a></td>
-						<td><a href="http://www.berkeley.edu" title="University of California, Berkeley"><img
-							src="/static/images/ucb-logo.gif" alt="" style="width: 76px; height: 79px" /></a></td>
-						<td><a href="http://www.ucdavis.edu" title="Inoversity of California, Davis"><img
-							src="/static/images/ucdavis-logo.gif" alt="" style="width: 117px; height: 79px" /></a></td>
-						<td><a href="http://www.ciw.edu" title="Carnegie Institution for Science"><img
-							src="/static/images/carnegie-insitution-logo.gif" alt="" style="width: 115px; height: 79px" /></a></td>
-						<td><a href="http://www.llnl.gov" title="Lawrence Livermore National Laboratory"><img
-							src="/static/images/llnl-logo.gif" alt="" style="width: 176px; height: 79px" /></a></td>
-					</tr>
-				</table>
-				</td>
-				<td align="right">
-				<div>&copy; <a href="/">JBEI Registry</a><br />
-				All rights reserved.<br />
-				<a href="http://code.google.com/p/gd-ice/issues/entry?template=Suggest%20Feature">Feature
-				Request</a> | <a href="http://code.google.com/p/gd-ice/issues/entry?template=Report%20Bug">Report
-				a Bug</a> | <a href="/feedback/">Feedback</a></div>
-				</td>
-			</tr>
-		</table>
+		<span style="font-family: Courier New, Arial; white-space: pre" wicket:id="traceback"></span></div>
 		</td>
 	</tr>
 </table>
 </body>
 </html>
-

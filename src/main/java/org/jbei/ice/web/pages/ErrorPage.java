@@ -2,6 +2,8 @@ package org.jbei.ice.web.pages;
 
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.resources.StyleSheetReference;
 import org.apache.wicket.model.Model;
 import org.jbei.ice.lib.logging.Logger;
@@ -18,6 +20,11 @@ public class ErrorPage extends WebPage {
         add(new StyleSheetReference("stylesheet", ErrorPage.class, "main.css"));
 
         add(new Label("title", "System Internal Error"));
+
+        add(new BookmarkablePageLink<FeedbackPage>("feedbackLink", FeedbackPage.class));
+        add(new ExternalLink("emailLink", "mailto:" + JbeirSettings.getSetting("ADMIN_EMAIL"))
+                .add(new Label("emailLabel", JbeirSettings.getSetting("ADMIN_EMAIL"))));
+
         add(new Label("message", new Model<String>(throwable.getMessage())));
         add(new Label("traceback", new Model<String>(Utils.stackTraceToString(throwable))));
 
