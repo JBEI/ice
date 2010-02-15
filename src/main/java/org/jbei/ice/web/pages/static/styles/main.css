@@ -430,14 +430,39 @@ span.form_help_text {
 	margin-top: 0px;
 }
 
-#paging span {
-	border: 5px solid #CCCCCC;
-	color: #808185;
-	margin-right: 3px;
-	padding: 4px 4px 3px;
+.pagingControls {
+	list-style-type: none;
+	text-align: left;
+	white-space: nowrap;
+	padding: 0px;
+	margin: 0px;
+}
+
+.pagingControls li {
+	display: inline;
+	margin: 0px;
+}
+
+.pagingControls a:hover {
 	text-decoration: none;
 }
 
-#paging a {
-	border: 5px solid #333333;
+.pagingControls .disabled,.pagingControls a {
+	background-color: white;
+	border: 1px solid #CCCCCC;
+	padding: 2px 6px 2px 6px;
+}
+
+.pagingControls .currPage {
+	font-size: 13px;
+	font-weight: bold;
+	padding: 2px 6px 2px 6px;
+}
+
+.pagingControls .prevBtn,.pagingControls .nextBtn {
+	white-space: nowrap;
+}
+
+.pagingControls .disabled {
+	color: #999999;
 }
