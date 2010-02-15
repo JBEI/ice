@@ -2,8 +2,7 @@ package org.jbei.ice.web.panels;
 
 import java.util.ArrayList;
 
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.AjaxFormChoiceComponentUpdatingBehavior;
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.form.RadioChoice;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
@@ -27,28 +26,39 @@ public class SelectNewEntryTypePanel extends Panel {
         partTypes.add("Strain with One Plasmid");
 
         RadioChoice<String> partTypeChoice = new RadioChoice<String>("partTypes",
-                new PropertyModel<String>(this, "typeSelection"), partTypes);
-        partTypeChoice.add(new AjaxFormChoiceComponentUpdatingBehavior() {
+                new PropertyModel<String>(this, "typeSelection"), partTypes) {
             private static final long serialVersionUID = 1L;
 
-            Panel formPanel = null;
+            @Override
+            protected void onSelectionChanged(Object newSelection) {
+                Component formPanel = getPage().get("formPanel");
 
-            public void onUpdate(AjaxRequestTarget target) {
-                if (getTypeSelection().equals("Plasmid")) {
+                String tSelection = getTypeSelection();
+
+                if (tSelection == null) {
+                    return;
+                }
+
+                if (tSelection.equals("Plasmid")) {
                     formPanel = new PlasmidNewFormPanel("formPanel");
-                } else if (getTypeSelection().equals("Strain")) {
+                } else if (tSelection.equals("Strain")) {
                     formPanel = new StrainNewFormPanel("formPanel");
-                } else if (getTypeSelection().equals("Part")) {
+                } else if (tSelection.equals("Part")) {
                     formPanel = new PartNewFormPanel("formPanel");
-                } else if (getTypeSelection().equals("Strain with One Plasmid")) {
+                } else if (tSelection.equals("Strain with One Plasmid")) {
                     formPanel = new PlasmidStrainNewFormPanel("formPanel");
                 }
 
                 formPanel.setOutputMarkupId(true);
-                target.getPage().replace(formPanel);
-                target.addComponent(formPanel);
+                getPage().replace(formPanel);
+                getPage().addOrReplace(formPanel);
             }
-        });
+
+            @Override
+            protected boolean wantOnSelectionChangedNotifications() {
+                return true;
+            }
+        };
 
         add(partTypeChoice);
     }
