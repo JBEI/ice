@@ -9,6 +9,7 @@ import org.apache.wicket.markup.html.CSSPackageResource;
 import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.data.DataView;
@@ -27,23 +28,16 @@ public class QueryResultPanel extends Panel {
     private AbstractEntriesDataView<Entry> entriesDataView;
     private EntriesQueryDataProvider sortableDataProvider;
 
-    ResourceReference blankImage;
-    ResourceReference hasAttachmentImage;
-    ResourceReference hasSequenceImage;
-    ResourceReference hasSampleImage;
+    private ResourceReference hasAttachmentImage;
+    private ResourceReference hasSequenceImage;
+    private ResourceReference hasSampleImage;
+
+    private Fragment resultsTableFragment;
+    private Fragment noResultsFragment;
 
     public QueryResultPanel(String id, ArrayList<String[]> queries) {
         super(id);
 
-        updateView(queries);
-
-        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
-        add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
-                UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
-
-        blankImage = new ResourceReference(UnprotectedPage.class,
-                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "blank.png");
         hasAttachmentImage = new ResourceReference(UnprotectedPage.class,
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "attachment.gif");
         hasSequenceImage = new ResourceReference(UnprotectedPage.class,
@@ -51,9 +45,19 @@ public class QueryResultPanel extends Panel {
         hasSampleImage = new ResourceReference(UnprotectedPage.class,
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sample.png");
 
-        add(new Image("attachmentHeaderImage", hasAttachmentImage));
-        add(new Image("sequenceHeaderImage", hasSequenceImage));
-        add(new Image("sampleHeaderImage", hasSampleImage));
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
+        add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
+
+        resultsTableFragment = new Fragment("resultsPanel", "resultsTableFragment", this);
+        noResultsFragment = new Fragment("resultsPanel", "noResultsFragment", this);
+
+        updateView(queries);
+
+        resultsTableFragment.add(new Image("attachmentHeaderImage", hasAttachmentImage));
+        resultsTableFragment.add(new Image("sequenceHeaderImage", hasSequenceImage));
+        resultsTableFragment.add(new Image("sampleHeaderImage", hasSampleImage));
     }
 
     public void updateView(ArrayList<String[]> queries) {
@@ -77,16 +81,23 @@ public class QueryResultPanel extends Panel {
 
         entriesDataView.setOutputMarkupId(true);
 
-        addOrReplace(entriesDataView);
-        addOrReplace(getNavigation(entriesDataView));
+        resultsTableFragment.addOrReplace(entriesDataView);
+        resultsTableFragment.addOrReplace(getNavigation(entriesDataView));
 
         renderSortableColumns();
 
         renderExportLinks();
+
+        if (sortableDataProvider.size() == 0) {
+            addOrReplace(noResultsFragment);
+        } else {
+            addOrReplace(resultsTableFragment);
+        }
     }
 
     private void renderSortableColumns() {
-        addOrReplace(new OrderByBorder("orderByType", "type", sortableDataProvider) {
+        resultsTableFragment.addOrReplace(new OrderByBorder("orderByType", "type",
+                sortableDataProvider) {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -95,7 +106,8 @@ public class QueryResultPanel extends Panel {
             }
         });
 
-        addOrReplace(new OrderByBorder("orderBySummary", "summary", sortableDataProvider) {
+        resultsTableFragment.addOrReplace(new OrderByBorder("orderBySummary", "summary",
+                sortableDataProvider) {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -104,7 +116,8 @@ public class QueryResultPanel extends Panel {
             }
         });
 
-        addOrReplace(new OrderByBorder("orderByOwner", "owner", sortableDataProvider) {
+        resultsTableFragment.addOrReplace(new OrderByBorder("orderByOwner", "owner",
+                sortableDataProvider) {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -113,7 +126,8 @@ public class QueryResultPanel extends Panel {
             }
         });
 
-        addOrReplace(new OrderByBorder("orderByStatus", "status", sortableDataProvider) {
+        resultsTableFragment.addOrReplace(new OrderByBorder("orderByStatus", "status",
+                sortableDataProvider) {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -122,7 +136,8 @@ public class QueryResultPanel extends Panel {
             }
         });
 
-        addOrReplace(new OrderByBorder("orderByCreated", "created", sortableDataProvider) {
+        resultsTableFragment.addOrReplace(new OrderByBorder("orderByCreated", "created",
+                sortableDataProvider) {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -133,7 +148,7 @@ public class QueryResultPanel extends Panel {
     }
 
     private void renderExportLinks() {
-        addOrReplace(new Link<Page>("printableCurrentLink") {
+        resultsTableFragment.addOrReplace(new Link<Page>("printableCurrentLink") {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -143,7 +158,7 @@ public class QueryResultPanel extends Panel {
             }
         });
 
-        addOrReplace(new Link<Page>("printableAllLink") {
+        resultsTableFragment.addOrReplace(new Link<Page>("printableAllLink") {
             private static final long serialVersionUID = 2L;
 
             @Override
@@ -153,7 +168,7 @@ public class QueryResultPanel extends Panel {
             }
         });
 
-        addOrReplace(new Link<Page>("excelCurrentLink") {
+        resultsTableFragment.addOrReplace(new Link<Page>("excelCurrentLink") {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -163,7 +178,7 @@ public class QueryResultPanel extends Panel {
             }
         });
 
-        addOrReplace(new Link<Page>("excelAllLink") {
+        resultsTableFragment.addOrReplace(new Link<Page>("excelAllLink") {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -173,7 +188,7 @@ public class QueryResultPanel extends Panel {
             }
         });
 
-        addOrReplace(new Link<Page>("xmlLink") {
+        resultsTableFragment.addOrReplace(new Link<Page>("xmlLink") {
             private static final long serialVersionUID = 1L;
 
             @Override

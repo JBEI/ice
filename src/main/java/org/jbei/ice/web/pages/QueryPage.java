@@ -124,14 +124,15 @@ public class QueryPage extends ProtectedPage {
                 QueryResultPanel queryResultPanel = (QueryResultPanel) getPage().get(
                         "queryResultPanel");
 
+                queryResultPanel.setVisible(true);
                 queryResultPanel.updateView(queries);
 
                 target.addComponent(queryResultPanel);
             }
         }.setDefaultFormProcessing(false));
 
-        add(new QueryResultPanel("queryResultPanel", new ArrayList<String[]>())
-                .setOutputMarkupId(true));
+        add(new QueryResultPanel("queryResultPanel", new ArrayList<String[]>()).setOutputMarkupId(
+                true).setVisible(false).setOutputMarkupPlaceholderTag(true));
     }
 
     public List<QueryItemPanel> getFilterPanels() {
