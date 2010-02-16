@@ -135,6 +135,8 @@ public class PlasmidUpdateFormPanel extends Panel {
                     this.status = complete;
                 } else if (plasmid.getStatus().equals("in progress")) {
                     this.status = inProgress;
+                } else {
+                    this.status = complete;
                 }
 
                 add(new DropDownChoice<CustomChoice>("status", new PropertyModel<CustomChoice>(

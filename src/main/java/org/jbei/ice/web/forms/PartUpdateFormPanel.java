@@ -148,6 +148,8 @@ public class PartUpdateFormPanel extends Panel {
                     this.status = complete;
                 } else if (part.getStatus().equals("in progress")) {
                     this.status = inProgress;
+                } else {
+                    this.status = complete;
                 }
 
                 add(new DropDownChoice<CustomChoice>("status", new PropertyModel<CustomChoice>(

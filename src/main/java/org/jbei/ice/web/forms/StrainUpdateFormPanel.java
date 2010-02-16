@@ -131,6 +131,8 @@ public class StrainUpdateFormPanel extends Panel {
                     this.status = complete;
                 } else if (strain.getStatus().equals("in progress")) {
                     this.status = inProgress;
+                } else {
+                    this.status = complete;
                 }
 
                 add(new DropDownChoice<CustomChoice>("status", new PropertyModel<CustomChoice>(
