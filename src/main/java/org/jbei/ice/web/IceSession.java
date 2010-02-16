@@ -8,6 +8,8 @@ import javax.servlet.http.Cookie;
 import org.apache.wicket.Request;
 import org.apache.wicket.Response;
 import org.apache.wicket.Session;
+import org.apache.wicket.protocol.http.WebRequest;
+import org.apache.wicket.protocol.http.WebRequestCycle;
 import org.apache.wicket.protocol.http.WebResponse;
 import org.apache.wicket.protocol.http.WebSession;
 import org.jbei.ice.lib.authentication.IAuthenticationBackend;
@@ -25,14 +27,9 @@ public class IceSession extends WebSession {
     private IAuthenticationBackend authenticator = null;
     private String COOKIE_NAME = JbeirSettings.getSetting("COOKIE_NAME");
 
-    private Request request;
-    private Response response;
-
     public IceSession(Request request, Response response, IAuthenticationBackend authenticator2) {
         super(request);
 
-        this.request = request;
-        this.response = response;
         this.authenticator = authenticator2;
     }
 
@@ -58,6 +55,7 @@ public class IceSession extends WebSession {
         response.addCookie(cookie);
 
         savedSession.setExpireDate(expireDate);
+        PersistentSessionDataWrapper.getInstance().persist(savedSession);
 
     }
 
@@ -73,11 +71,21 @@ public class IceSession extends WebSession {
                 if (accountPreferences == null) {
                     accountPreferences = new AccountPreferences();
                     accountPreferences.setAccount(account);
+                    setAccountPreferences(accountPreferences);
                 }
-                setAccountPreferences(accountPreferences);
+
                 SessionData sessionData = getSessionData();
+                if (sessionData == null) {
+                    // User authenticates but this session is not associated.
+                    while (true) {
+                        sessionData = getSessionData();
+                        if (sessionData != null) {
+                            break;
+                        }
+                    }
+                }
                 sessionData.getData().put("accountId", account.getId());
-                sessionData.persist();
+                PersistentSessionDataWrapper.getInstance().persist(sessionData);
                 result = true;
             }
         } catch (Exception e) {
@@ -108,21 +116,25 @@ public class IceSession extends WebSession {
     }
 
     public SessionData getSessionData() {
-        SessionData sessionData = SessionData.getInstance(this.request, this.response);
+        SessionData sessionData = PersistentSessionDataWrapper.getInstance().getSessionData(
+                getRequest());
         return sessionData;
     }
 
     public Account getAccount() {
         Account account = null;
-        SessionData sessionData = SessionData.getInstance(this.request, this.response);
-        HashMap<String, Object> data = sessionData.getData();
-        if (data.containsKey("accountId")) {
-            Integer accountId = (Integer) data.get("accountId");
-            try {
-                account = AccountManager.get(accountId);
-            } catch (ManagerException e) {
-                String msg = "Could not getAccount from IceSession: " + e.toString();
-                Logger.error(msg);
+        SessionData sessionData = PersistentSessionDataWrapper.getInstance().getSessionData(
+                getRequest());
+        if (sessionData != null) {
+            HashMap<String, Object> data = sessionData.getData();
+            if (data.containsKey("accountId")) {
+                Integer accountId = (Integer) data.get("accountId");
+                try {
+                    account = AccountManager.get(accountId);
+                } catch (ManagerException e) {
+                    String msg = "Could not getAccount from IceSession: " + e.toString();
+                    Logger.error(msg);
+                }
             }
         }
 
@@ -151,6 +163,13 @@ public class IceSession extends WebSession {
 
     //private methods
     private void clearSavedSession() {
-        getSessionData().delete();
+        PersistentSessionDataWrapper.getInstance().delete(getSessionData().getSessionKey());
     }
+
+    private WebRequest getRequest() {
+
+        WebRequestCycle webRequestCycle = (WebRequestCycle) WebRequestCycle.get();
+        return webRequestCycle.getWebRequest();
+    }
+
 }
