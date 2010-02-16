@@ -41,7 +41,7 @@ public class SessionManager extends Manager {
             result = (SessionData) dbSave(sessionData);
 
         } catch (Exception e) {
-            String msg = "Could not save SessionData " + sessionData.getSessionKey();
+            String msg = "Could not save SessionData " + sessionData.getSessionKey() + e.toString();
             Logger.error(msg);
             throw new ManagerException(msg, e);
         }

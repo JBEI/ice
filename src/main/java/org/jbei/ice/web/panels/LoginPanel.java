@@ -13,6 +13,7 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.protocol.http.WebResponse;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.ForgotPasswordPage;
 import org.jbei.ice.web.pages.RegistrationPage;
@@ -23,7 +24,6 @@ public class LoginPanel extends Panel {
 
     public LoginPanel(String id) {
         super(id);
-
         class LoginForm extends StatelessForm<Object> {
             private static final long serialVersionUID = 1L;
             private String loginName;
@@ -55,7 +55,13 @@ public class LoginPanel extends Panel {
                 if (authenticated) {
                     if (getKeepSignedIn()) {
                         IceSession iceSession = (IceSession) getSession();
-                        iceSession.makeSessionPersistent(((WebResponse) getResponse()));
+                        try {
+                            iceSession.makeSessionPersistent(((WebResponse) getResponse()));
+                        } catch (ManagerException e) {
+                            String msg = "Could not save authentication to db: " + e.toString();
+                            Logger.error(msg);
+                            error("System Error: " + msg);
+                        }
                     }
 
                     if (!continueToOriginalDestination()) {

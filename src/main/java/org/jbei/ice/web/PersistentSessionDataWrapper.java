@@ -90,8 +90,14 @@ public class PersistentSessionDataWrapper {
 
     }
 
-    public synchronized void persist(SessionData sessionData) {
-
+    public synchronized void persist(SessionData sessionData) throws ManagerException {
+        try {
+            SessionManager.save(sessionData);
+        } catch (ManagerException e) {
+            String msg = "Could not persist session data" + e.toString();
+            Logger.error(msg);
+            throw e;
+        }
     }
 
     public synchronized void delete(String sessionKey) {
@@ -138,12 +144,6 @@ public class PersistentSessionDataWrapper {
         if (sessionData != null) {
             // In the cache. Just extend cache expire time.
             getSessionDataCacheTimeStamp().put(sessionKey, getCacheExpirationTime());
-            try {
-                SessionManager.save(sessionData);
-            } catch (ManagerException e) {
-                // couldn't persist in database. Return null
-                sessionData = null;
-            }
         } else {
             // Not in cache, get from database, then put into cache
             try {

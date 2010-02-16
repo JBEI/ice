@@ -64,7 +64,9 @@ public class AccountManager extends Manager {
             Query query = getSession().createQuery(queryString);
             query.setString("sessionKey", authToken);
             HashMap<String, Object> sessionData = (HashMap<String, Object>) query.uniqueResult();
-            account = get((Integer) sessionData.get("accountId"));
+            if (sessionData != null) {
+                account = get((Integer) sessionData.get("accountId"));
+            }
 
         } catch (HibernateException e) {
             Logger.info("Could not retrieve account by sessionKey");

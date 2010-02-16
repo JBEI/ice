@@ -36,8 +36,10 @@ public class IceSession extends WebSession {
     /**
      * Save account id into SessionData, and save into db for persistent
      * token based authentication.
+     * 
+     * @throws ManagerException
      */
-    public void makeSessionPersistent(WebResponse response) {
+    public void makeSessionPersistent(WebResponse response) throws ManagerException {
         SessionData savedSession = getSessionData();
         HashMap<String, Object> data = savedSession.getData();
         if (data == null) {
@@ -55,7 +57,11 @@ public class IceSession extends WebSession {
         response.addCookie(cookie);
 
         savedSession.setExpireDate(expireDate);
-        PersistentSessionDataWrapper.getInstance().persist(savedSession);
+        try {
+            PersistentSessionDataWrapper.getInstance().persist(savedSession);
+        } catch (ManagerException e) {
+            throw e;
+        }
 
     }
 
