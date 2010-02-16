@@ -1,6 +1,5 @@
 package org.jbei.ice.web;
 
-import org.apache.wicket.Application;
 import org.apache.wicket.Request;
 import org.apache.wicket.RequestCycle;
 import org.apache.wicket.Response;
@@ -85,7 +84,8 @@ public class WicketApplication extends WebApplication {
         IceAuthorizationStrategy authorizationStrategy = new IceAuthorizationStrategy();
         securitySettings.setAuthorizationStrategy(authorizationStrategy);
         securitySettings.setUnauthorizedComponentInstantiationListener(authorizationStrategy);
-        Application.get().getRequestLoggerSettings().setRequestLoggerEnabled(true);
+        // Be careful with below. It captures all requests, including login pages (passwords)
+        // Application.get().getRequestLoggerSettings().setRequestLoggerEnabled(true);
     }
 
     @Override
