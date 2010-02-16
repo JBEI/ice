@@ -83,12 +83,9 @@ public class IceSession extends WebSession {
                 SessionData sessionData = getSessionData();
                 if (sessionData == null) {
                     // User authenticates but this session is not associated.
-                    while (true) {
-                        sessionData = getSessionData();
-                        if (sessionData != null) {
-                            break;
-                        }
-                    }
+                    String msg = "User is authenticated but this session is not associated";
+                    Logger.error(msg);
+                    throw new RuntimeException(msg);
                 }
                 sessionData.getData().put("accountId", account.getId());
                 PersistentSessionDataWrapper.getInstance().persist(sessionData);
