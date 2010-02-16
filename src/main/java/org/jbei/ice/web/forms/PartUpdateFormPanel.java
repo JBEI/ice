@@ -209,6 +209,8 @@ public class PartUpdateFormPanel extends Panel {
                 }
 
                 part.setAlias(getAlias());
+                part.setCreator(getCreator());
+                part.setCreatorEmail(getCreatorEmail());
                 part.setStatus(getStatus().getValue());
                 part.setKeywords(getKeywords());
                 part.setShortDescription(getSummary());

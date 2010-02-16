@@ -112,8 +112,8 @@ public class PlasmidStrainNewFormPanel extends Panel {
                 add(new TextField<String>("plasmidAlias"));
                 add(new TextField<String>("plasmidCreator").setRequired(true).setLabel(
                         new Model<String>("Creator")));
-                add(new TextField<String>("plasmidCreatorEmail").setRequired(true).setLabel(
-                        new Model<String>("Creator's Email")));
+                add(new TextField<String>("plasmidCreatorEmail").setLabel(new Model<String>(
+                        "Creator's Email")));
 
                 CustomChoice planned = new CustomChoice(JbeiConstants.getStatus("planned"),
                         "planned");

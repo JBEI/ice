@@ -196,6 +196,8 @@ public class StrainUpdateFormPanel extends Panel {
                 }
 
                 strain.setAlias(getAlias());
+                strain.setCreator(getCreator());
+                strain.setCreatorEmail(getCreatorEmail());
                 strain.setStatus(getStatus().getValue());
                 strain.setKeywords(getKeywords());
                 strain.setShortDescription(getSummary());

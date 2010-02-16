@@ -201,6 +201,8 @@ public class PlasmidUpdateFormPanel extends Panel {
                 }
 
                 plasmid.setAlias(getAlias());
+                plasmid.setCreator(getCreator());
+                plasmid.setCreatorEmail(getCreatorEmail());
                 plasmid.setStatus(getStatus().getValue());
                 plasmid.setKeywords(getKeywords());
                 plasmid.setShortDescription(getSummary());
