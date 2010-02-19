@@ -13,6 +13,7 @@ import org.jbei.ice.lib.authentication.AuthenticationBackendManager;
 import org.jbei.ice.lib.authentication.IAuthenticationBackend;
 import org.jbei.ice.lib.permissions.IceAuthorizationStrategy;
 import org.jbei.ice.lib.utils.JobCue;
+import org.jbei.ice.web.pages.AssertErrorPage;
 import org.jbei.ice.web.pages.BlastPage;
 import org.jbei.ice.web.pages.EntriesPage;
 import org.jbei.ice.web.pages.EntryNewPage;
@@ -61,6 +62,7 @@ public class WicketApplication extends WebApplication {
         mountBookmarkablePage("/update-account", UpdateAccountPage.class);
         mountBookmarkablePage("/update-password", UpdatePasswordPage.class);
         mountBookmarkablePage("/feedback", FeedbackPage.class);
+        mountBookmarkablePage("/assertError", AssertErrorPage.class);
         mount(new IndexedParamUrlCodingStrategy("/entry/view", EntryViewPage.class));
         mount(new IndexedParamUrlCodingStrategy("/entry/update", EntryUpdatePage.class));
         mountBookmarkablePage("/entry/new", EntryNewPage.class);
