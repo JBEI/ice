@@ -1,5 +1,8 @@
 package org.jbei.ice.web.pages;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -33,7 +36,10 @@ public class ErrorPage extends WebPage {
 
     private void sendEmail(Throwable throwable) {
         if (throwable != null) {
-            String body = Utils.stackTraceToString(throwable);
+            SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+            String body = "System Time: " + dateFormatter.format((new Date())) + "\n\n";
+            body = body + Utils.stackTraceToString(throwable);
             String subject = (throwable.getMessage().length() > 50) ? (throwable.getMessage()
                     .substring(0, 50) + "...") : throwable.getMessage();
 
