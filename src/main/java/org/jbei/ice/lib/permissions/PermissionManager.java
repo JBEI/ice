@@ -28,7 +28,9 @@ public class PermissionManager extends Manager {
             entry = EntryManager.get(entryId);
             if (entry != null) {
                 account = AccountManager.getAccountByAuthToken(sessionKey);
-                result = hasReadPermission(entry, account);
+                if (account != null) {
+                    result = hasReadPermission(entry, account);
+                }
             }
         } catch (ManagerException e) {
             // if lookup fails, doesn't have permission
@@ -47,7 +49,9 @@ public class PermissionManager extends Manager {
             entry = EntryManager.get(entryId);
             if (entry != null) {
                 account = AccountManager.getAccountByAuthToken(sessionKey);
-                result = hasWritePermission(entry, account);
+                if (account != null) {
+                    result = hasWritePermission(entry, account);
+                }
             }
         } catch (ManagerException e) {
             String msg = "manager exception during permission lookup: " + e.toString();
@@ -58,13 +62,18 @@ public class PermissionManager extends Manager {
 
     public static boolean hasReadPermission(Entry entry, Account account) {
         boolean result = false;
-        result = userHasReadPermission(entry, account) | groupHasReadPermission(entry, account);
+        if (entry != null && account != null) {
+            result = userHasReadPermission(entry, account) | groupHasReadPermission(entry, account);
+        }
         return result;
     }
 
     public static boolean hasWritePermission(Entry entry, Account account) {
-        boolean result = userHasWritePermission(entry, account)
-                | groupHasWritePermission(entry, account);
+        boolean result = false;
+        if (entry != null && account != null) {
+            result = userHasWritePermission(entry, account)
+                    | groupHasWritePermission(entry, account);
+        }
         return result;
     }
 
