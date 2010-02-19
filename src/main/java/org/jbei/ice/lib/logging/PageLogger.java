@@ -1,8 +1,8 @@
 package org.jbei.ice.lib.logging;
 
-public class Logger {
+public class PageLogger {
     private static org.apache.log4j.Logger logger = org.apache.log4j.Logger
-            .getLogger("org.jbei.ice.system");
+            .getLogger("org.jbei.ice.web");
 
     public static void trace(String msg) {
         logger.trace(msg);
@@ -27,5 +27,4 @@ public class Logger {
     public static void fatal(String msg) {
         logger.fatal(msg);
     }
-
 }

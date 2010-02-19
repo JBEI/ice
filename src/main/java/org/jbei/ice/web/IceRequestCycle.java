@@ -8,6 +8,8 @@ import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.protocol.http.WebRequest;
 import org.apache.wicket.protocol.http.WebRequestCycle;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.logging.PageLogger;
+import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.pages.ErrorPage;
@@ -21,7 +23,16 @@ public class IceRequestCycle extends WebRequestCycle {
 
     @Override
     protected void onBeginRequest() {
-        Logger.debug(request.getURL());
+
+        Account account = IceSession.get().getAccount();
+        String user = ((WebRequest) get().getRequest()).getHttpServletRequest().getRemoteAddr();
+
+        if (account != null) {
+            user = account.getEmail();
+        }
+
+        String msg = user + "\t" + request.getURL();
+        PageLogger.info(msg);
     }
 
     @Override

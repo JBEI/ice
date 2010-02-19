@@ -33,14 +33,14 @@ public class PersistentSessionDataWrapper {
     public synchronized SessionData getSessionData(WebRequest request) {
         SessionData sessionData = null;
 
-        Cookie userCookie = (request).getCookie(COOKIE_NAME);
+        Cookie userCookie = request.getCookie(COOKIE_NAME);
 
         if (userCookie != null) {
             String sessionKey = userCookie.getValue();
             sessionData = getCachedInstance(sessionKey);
             if (sessionData != null) {
                 String savedClientIp = (String) sessionData.getData().get("clientIp");
-                String clientIp = (request).getHttpServletRequest().getRemoteAddr();
+                String clientIp = request.getHttpServletRequest().getRemoteAddr();
                 if (!clientIp.equals(savedClientIp)) {
                     this.delete(sessionKey);
                     sessionData = null;
