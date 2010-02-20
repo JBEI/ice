@@ -60,27 +60,23 @@ public class EntryUpdatePage extends ProtectedPage {
                     StringBuilder plasmidsCollection = new StringBuilder();
 
                     for (String selectionMarker : uniqueSelectionMarkers) {
-                        selectionMarkersCollection.append(
+                        selectionMarkersCollection.append("'").append(
                                 Utils.escapeSpecialJavascriptCharacters(selectionMarker)).append(
                                 "', ");
                     }
-
                     for (String promoter : uniquePromoters) {
-                        promotersCollection.append(
+                        promotersCollection.append("'").append(
                                 Utils.escapeSpecialJavascriptCharacters(promoter)).append("', ");
                     }
-
                     for (String originOfReplication : uniqueOriginOfReplications) {
-                        originOfReplicationsCollection.append(
+                        originOfReplicationsCollection.append("'").append(
                                 Utils.escapeSpecialJavascriptCharacters(originOfReplication))
                                 .append("', ");
                     }
-
                     for (String plasmid : uniquePlasmids) {
-                        plasmidsCollection.append(Utils.escapeSpecialJavascriptCharacters(plasmid))
-                                .append("', ");
+                        plasmidsCollection.append("'").append(
+                                Utils.escapeSpecialJavascriptCharacters(plasmid)).append("', ");
                     }
-
                     dataMap
                             .put("selectionMarkersCollection", selectionMarkersCollection
                                     .toString());
