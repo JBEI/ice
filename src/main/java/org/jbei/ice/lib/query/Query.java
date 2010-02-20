@@ -16,7 +16,7 @@ import org.jbei.ice.lib.managers.HibernateHelper;
 import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
-import org.jbei.ice.lib.utils.JbeiConstants;
+import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.utils.Utils;
 
 @SuppressWarnings("unchecked")
@@ -39,16 +39,6 @@ public class Query {
     }
 
     private void initializeFilters() {
-        Map<String, String> entryTypesFilterMap = new LinkedHashMap<String, String>();
-        entryTypesFilterMap.put("plasmid", "Plasmid");
-        entryTypesFilterMap.put("strain", "Strain");
-        entryTypesFilterMap.put("part", "Part");
-
-        Map<String, String> statusMap = new LinkedHashMap<String, String>();
-        statusMap.put("planned", JbeiConstants.getStatus("planned"));
-        statusMap.put("complete", JbeiConstants.getStatus("complete"));
-        statusMap.put("in progress", JbeiConstants.getStatus("in progress"));
-
         Map<String, String> selectionMarkersMap = new LinkedHashMap<String, String>();
         TreeSet<String> uniqueSelectionMarkers = UtilsManager.getUniqueSelectionMarkers();
         for (String selectionMarker : uniqueSelectionMarkers) {
@@ -67,10 +57,6 @@ public class Query {
             originOfReplicationsMap.put(originOfReplication, originOfReplication);
         }
 
-        Map<String, String> bioSafetyLevelMap = new LinkedHashMap<String, String>();
-        bioSafetyLevelMap.put("1", "Level 1");
-        bioSafetyLevelMap.put("2", "Level 2");
-
         Map<String, String> yesNoMap = new LinkedHashMap<String, String>();
         yesNoMap.put("yes", "Yes");
         yesNoMap.put("no", "No");
@@ -78,8 +64,10 @@ public class Query {
         filters.add(new StringFilter("name_or_alias", "Name Or Alias", "filterNameOrAlias"));
         //filters.add(new StringFilter("name", "Name", "filterName"));
         filters.add(new StringFilter("part_number", "Part ID", "filterPartNumber"));
-        filters.add(new SelectionFilter("type", "Type", "filterType", entryTypesFilterMap));
-        filters.add(new SelectionFilter("status", "Status", "filterStatus", statusMap));
+        filters.add(new SelectionFilter("type", "Type", "filterType", Entry
+                .getEntryTypeOptionsMap()));
+        filters.add(new SelectionFilter("status", "Status", "filterStatus", Entry
+                .getStatusOptionsMap()));
         filters.add(new StringFilter("owner", "Owner", "filterOwnerCombined"));
         filters.add(new StringFilter("creator", "Creator", "filterCreatorCombined"));
         filters.add(new StringFilter("strain_plasmids", "Strain Plasmids (Strains only)",
@@ -96,7 +84,7 @@ public class Query {
         //filters.add(new StringFilter("long_description", "Notes", "filterLongDescription"));
         //filters.add(new StringFilter("references", "References", "filterReferences"));
         filters.add(new SelectionFilter("bioSafetyLevel", "Bio Safety Level",
-                "filterBioSafetyLevel", bioSafetyLevelMap));
+                "filterBioSafetyLevel", Entry.getBioSafetyLevelOptionsMap()));
         filters.add(new StringFilter("intelectualProperty", "Intelectual Property",
                 "filterIntelectualProperty"));
         filters.add(new StringFilter("principal_investigator", "Principal Investigator",
@@ -114,8 +102,8 @@ public class Query {
         filters.add(new StringFilter("host", "Host (Strains only)", "filterHost"));
         filters.add(new StringFilter("genotype_phenotype", "Genotype/Phenotype (Strains only)",
                 "filterGenotypePhenotype"));
-        filters.add(new StringFilter("package_format", "Package Format (Parts only)",
-                "filterPackageFormat"));
+        filters.add(new SelectionFilter("package_format", "Package Format (Parts only)",
+                "filterPackageFormat", Part.getPackageFormatOptionsMap()));
         filters.add(new StringFilter("record_id", "Record Id", "filterRecordId"));
     }
 

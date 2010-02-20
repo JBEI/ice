@@ -30,7 +30,7 @@ import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.permissions.AuthenticatedPermissionManager;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.web.IceSession;
-import org.jbei.ice.web.forms.CustomChoice;
+import org.jbei.ice.web.common.CustomChoice;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class PermissionEditPanel extends Panel {

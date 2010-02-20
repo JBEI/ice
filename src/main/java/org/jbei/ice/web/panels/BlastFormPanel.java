@@ -13,7 +13,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.jbei.ice.lib.search.Blast;
 import org.jbei.ice.lib.search.BlastResult;
 import org.jbei.ice.lib.utils.SequenceUtils;
-import org.jbei.ice.web.forms.CustomChoice;
+import org.jbei.ice.web.common.CustomChoice;
 
 public class BlastFormPanel extends Panel {
     private static final long serialVersionUID = 1L;

@@ -24,7 +24,7 @@ import org.jbei.ice.lib.query.Query;
 import org.jbei.ice.lib.query.RadioFilter;
 import org.jbei.ice.lib.query.SelectionFilter;
 import org.jbei.ice.lib.query.StringFilter;
-import org.jbei.ice.web.forms.CustomChoice;
+import org.jbei.ice.web.common.CustomChoice;
 import org.jbei.ice.web.pages.QueryPage;
 
 public class QueryItemPanel extends Panel {

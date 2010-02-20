@@ -3,7 +3,9 @@ package org.jbei.ice.lib.models;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -26,6 +28,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.Cascade;
+import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.lib.value_objects.IEntryValueObject;
 
 @Entity
@@ -439,5 +442,34 @@ public class Entry implements IEntryValueObject, Serializable {
         }
 
         return fundingSource;
+    }
+
+    public static Map<String, String> getBioSafetyLevelOptionsMap() {
+        Map<String, String> resultMap = new LinkedHashMap<String, String>();
+
+        resultMap.put("1", "Level 1");
+        resultMap.put("2", "Level 2");
+
+        return resultMap;
+    }
+
+    public static Map<String, String> getStatusOptionsMap() {
+        Map<String, String> resultMap = new LinkedHashMap<String, String>();
+
+        resultMap.put("planned", JbeiConstants.getStatus("planned"));
+        resultMap.put("complete", JbeiConstants.getStatus("complete"));
+        resultMap.put("in progress", JbeiConstants.getStatus("in progress"));
+
+        return resultMap;
+    }
+
+    public static Map<String, String> getEntryTypeOptionsMap() {
+        Map<String, String> resultMap = new LinkedHashMap<String, String>();
+
+        resultMap.put("plasmid", "Plasmid");
+        resultMap.put("strain", "Strain");
+        resultMap.put("part", "Part");
+
+        return resultMap;
     }
 }

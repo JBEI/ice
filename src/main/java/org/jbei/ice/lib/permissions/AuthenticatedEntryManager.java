@@ -13,6 +13,22 @@ import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
 
 public class AuthenticatedEntryManager {
+    public static Entry createEntry(Entry entry, String sessionKey) throws PermissionException,
+            ManagerException {
+        Entry result = null;
+
+        if (entry == null) {
+            result = null;
+        } else if (entry instanceof Plasmid) {
+            result = createPlasmid((Plasmid) entry, sessionKey);
+        } else if (entry instanceof Strain) {
+            result = createStrain((Strain) entry, sessionKey);
+        } else if (entry instanceof Part) {
+            result = createPart((Part) entry, sessionKey);
+        }
+
+        return result;
+    }
 
     public static Plasmid createPlasmid(Plasmid newPlasmid, String sessionKey)
             throws PermissionException, ManagerException {

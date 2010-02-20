@@ -2,6 +2,8 @@ package org.jbei.ice.lib.models;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,7 +16,6 @@ import org.jbei.ice.lib.value_objects.IPartValueObject;
 @PrimaryKeyJoinColumn(name = "entries_id")
 @Table(name = "parts")
 public class Part extends Entry implements IPartValueObject, Serializable {
-
     private static final long serialVersionUID = 1L;
 
     @Column(name = "package_format", length = 255)
@@ -64,5 +65,15 @@ public class Part extends Entry implements IPartValueObject, Serializable {
 
     public void setPkgdDnaRevHash(String pkgdDnaRevHash) {
         this.pkgdDnaRevHash = pkgdDnaRevHash;
+    }
+
+    public static Map<String, String> getPackageFormatOptionsMap() {
+        Map<String, String> resultMap = new LinkedHashMap<String, String>();
+
+        resultMap.put("", "None");
+        resultMap.put("biobricka", "Biobrick A");
+        resultMap.put("biobrickb", "BioBrick Berkeley");
+
+        return resultMap;
     }
 }

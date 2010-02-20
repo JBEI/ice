@@ -1,4 +1,4 @@
-package org.jbei.ice.web.forms;
+package org.jbei.ice.web.common;
 
 import java.io.Serializable;
 
