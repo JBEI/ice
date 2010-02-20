@@ -82,7 +82,8 @@ public class Query {
         filters.add(new SelectionFilter("status", "Status", "filterStatus", statusMap));
         filters.add(new StringFilter("owner", "Owner", "filterOwnerCombined"));
         filters.add(new StringFilter("creator", "Creator", "filterCreatorCombined"));
-        filters.add(new StringFilter("strain_plasmids", "Strain Plasmids", "filterStrainPlasmids"));
+        filters.add(new StringFilter("strain_plasmids", "Strain Plasmids (Strains only)",
+                "filterStrainPlasmids"));
         //filters.add(new StringFilter("alias", "Alias", "filterAlias"));
         filters.add(new StringFilter("keywords", "Keywords", "filterKeywords"));
         filters.add(new StringFilter("description", "Description (Summary/Notes/References)",
@@ -259,7 +260,7 @@ public class Query {
         } else if (operator.equals("$")) {
             result = field + " like '%" + term + "'";
         } else if (operator.equals("*")) {
-            result = field + " is null or " + field + " like ''";
+            result = field + " is null or " + field + " = ''";
         }
         return result;
     }
