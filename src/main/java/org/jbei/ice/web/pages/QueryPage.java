@@ -18,7 +18,7 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.jbei.ice.lib.query.Filter;
-import org.jbei.ice.web.forms.CustomChoice;
+import org.jbei.ice.web.common.CustomChoice;
 import org.jbei.ice.web.panels.QueryItemPanel;
 import org.jbei.ice.web.panels.QueryResultPanel;
 
