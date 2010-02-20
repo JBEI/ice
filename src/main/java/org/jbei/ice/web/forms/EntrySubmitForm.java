@@ -27,6 +27,7 @@ import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.CommaSeparatedField;
 import org.jbei.ice.web.common.CustomChoice;
+import org.jbei.ice.web.common.FormException;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {

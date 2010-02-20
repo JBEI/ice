@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.web.forms.FormException;
 
 /**
  * Way to map comma separated text field to set of items of class type
