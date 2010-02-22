@@ -3,20 +3,28 @@ package org.jbei.ice.web.forms;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.TreeSet;
 
 import org.apache.wicket.PageParameters;
+import org.apache.wicket.markup.html.CSSPackageResource;
+import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.ChoiceRenderer;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.util.collections.MiniMap;
+import org.apache.wicket.util.template.TextTemplateHeaderContributor;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.GroupManager;
 import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
@@ -24,11 +32,13 @@ import org.jbei.ice.lib.models.Link;
 import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
 import org.jbei.ice.lib.permissions.PermissionManager;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.CommaSeparatedField;
 import org.jbei.ice.web.common.CustomChoice;
 import org.jbei.ice.web.common.FormException;
 import org.jbei.ice.web.pages.EntryViewPage;
+import org.jbei.ice.web.pages.UnprotectedPage;
 
 public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
     private static final long serialVersionUID = 1L;
@@ -61,8 +71,7 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
 
         initializeElements();
 
-        add(new Label("initializeCollectionsScript", "initializeCollections();")
-                .setEscapeModelStrings(false));
+        initializeResources();
     }
 
     protected void initializeElements() {
@@ -91,6 +100,73 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
         add(new TextField<String>("principalInvestigator", new PropertyModel<String>(this,
                 "principalInvestigator")).setRequired(true).setLabel(
                 new Model<String>("Principal Investigator")));
+    }
+
+    protected void initializeResources() {
+        IModel<Map<String, Object>> autocompleteDataMap = new AbstractReadOnlyModel<Map<String, Object>>() {
+            private static final long serialVersionUID = 1L;
+
+            private Map<String, Object> dataMap;
+
+            @Override
+            public Map<String, Object> getObject() {
+                if (dataMap == null) {
+                    TreeSet<String> uniqueSelectionMarkers = UtilsManager
+                            .getUniqueSelectionMarkers();
+                    TreeSet<String> uniquePromoters = UtilsManager.getUniquePromoters();
+                    TreeSet<String> uniqueOriginOfReplications = UtilsManager
+                            .getUniqueOriginOfReplications();
+                    TreeSet<String> uniquePlasmids = UtilsManager.getUniquePublicPlasmidNames();
+
+                    dataMap = new MiniMap<String, Object>(4);
+
+                    StringBuilder selectionMarkersCollection = new StringBuilder();
+                    StringBuilder promotersCollection = new StringBuilder();
+                    StringBuilder originOfReplicationsCollection = new StringBuilder();
+                    StringBuilder plasmidsCollection = new StringBuilder();
+
+                    for (String selectionMarker : uniqueSelectionMarkers) {
+                        selectionMarkersCollection.append("'").append(
+                                Utils.escapeSpecialJavascriptCharacters(selectionMarker)).append(
+                                "',");
+                    }
+                    for (String promoter : uniquePromoters) {
+                        promotersCollection.append("'").append(
+                                Utils.escapeSpecialJavascriptCharacters(promoter)).append("',");
+                    }
+                    for (String originOfReplication : uniqueOriginOfReplications) {
+                        originOfReplicationsCollection.append("'").append(
+                                Utils.escapeSpecialJavascriptCharacters(originOfReplication))
+                                .append("',");
+                    }
+                    for (String plasmid : uniquePlasmids) {
+                        plasmidsCollection.append("'").append(
+                                Utils.escapeSpecialJavascriptCharacters(plasmid)).append("',");
+                    }
+
+                    dataMap
+                            .put("selectionMarkersCollection", selectionMarkersCollection
+                                    .toString());
+                    dataMap.put("promotersCollection", promotersCollection.toString());
+                    dataMap.put("originOfReplicationsCollection", originOfReplicationsCollection
+                            .toString());
+                    dataMap.put("plasmidsCollection", plasmidsCollection.toString());
+                }
+
+                return dataMap;
+            }
+        };
+
+        add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.autocomplete.css"));
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.autocomplete.js"));
+        add(TextTemplateHeaderContributor.forJavaScript(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "autocompleteDataTemplate.js",
+                autocompleteDataMap));
+        add(new Label("initializeCollectionsScript",
+                "try {initializeCollections();} catch (err) {alert(err); }")
+                .setEscapeModelStrings(false));
     }
 
     protected void renderStatuses() {

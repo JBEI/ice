@@ -90,11 +90,14 @@
 		tips.push("Enter [[jbei:part_nnnnnn]] to make a link.");
 		//tips.push("Second tip of the day");
 			//tips.push("Third Long-long very long tip of the day");
-
 			var randomIndex = Math.floor(Math.random() * tips.length);
 			$('#tipOfTheDay').html(tips[randomIndex]);
 
-			assignClueTips();
+			try {
+				assignClueTips();
+			} catch (err) {
+				//alert(err);
+			}
 		});
 </script>
 </body>
