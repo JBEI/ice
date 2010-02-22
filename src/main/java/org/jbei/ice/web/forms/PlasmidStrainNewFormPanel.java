@@ -3,8 +3,11 @@ package org.jbei.ice.web.forms;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.TreeSet;
 
 import org.apache.wicket.PageParameters;
+import org.apache.wicket.markup.html.CSSPackageResource;
+import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.CheckBox;
@@ -15,11 +18,16 @@ import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.util.collections.MiniMap;
+import org.apache.wicket.util.template.TextTemplateHeaderContributor;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
@@ -30,11 +38,13 @@ import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.CommaSeparatedField;
 import org.jbei.ice.web.common.CustomChoice;
 import org.jbei.ice.web.common.FormException;
 import org.jbei.ice.web.pages.EntryViewPage;
+import org.jbei.ice.web.pages.UnprotectedPage;
 
 public class PlasmidStrainNewFormPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -98,9 +108,6 @@ public class PlasmidStrainNewFormPanel extends Panel {
             super(id);
 
             setModel(new CompoundPropertyModel<Object>(this));
-
-            add(new Label("initializeCollectionsScript", "initializeCollections();")
-                    .setEscapeModelStrings(false));
 
             // plasmid fields
             setPlasmidCreator(IceSession.get().getAccount().getFullName());
@@ -166,6 +173,8 @@ public class PlasmidStrainNewFormPanel extends Panel {
             add(new TextField<String>("strainHost", new PropertyModel<String>(this, "strainHost")));
             add(new TextField<String>("strainGenotypePhenotype", new PropertyModel<String>(this,
                     "strainGenotypePhenotype")));
+
+            initializeResources();
         }
 
         protected void renderStatuses() {
@@ -199,6 +208,72 @@ public class PlasmidStrainNewFormPanel extends Panel {
             }
 
             return results;
+        }
+
+        protected void initializeResources() {
+            IModel<Map<String, Object>> autocompleteDataMap = new AbstractReadOnlyModel<Map<String, Object>>() {
+                private static final long serialVersionUID = 1L;
+
+                private Map<String, Object> dataMap;
+
+                @Override
+                public Map<String, Object> getObject() {
+                    if (dataMap == null) {
+                        TreeSet<String> uniqueSelectionMarkers = UtilsManager
+                                .getUniqueSelectionMarkers();
+                        TreeSet<String> uniquePromoters = UtilsManager.getUniquePromoters();
+                        TreeSet<String> uniqueOriginOfReplications = UtilsManager
+                                .getUniqueOriginOfReplications();
+                        TreeSet<String> uniquePlasmids = UtilsManager.getUniquePublicPlasmidNames();
+
+                        dataMap = new MiniMap<String, Object>(4);
+
+                        StringBuilder selectionMarkersCollection = new StringBuilder();
+                        StringBuilder promotersCollection = new StringBuilder();
+                        StringBuilder originOfReplicationsCollection = new StringBuilder();
+                        StringBuilder plasmidsCollection = new StringBuilder();
+
+                        for (String selectionMarker : uniqueSelectionMarkers) {
+                            selectionMarkersCollection.append("'").append(
+                                    Utils.escapeSpecialJavascriptCharacters(selectionMarker))
+                                    .append("',");
+                        }
+                        for (String promoter : uniquePromoters) {
+                            promotersCollection.append("'").append(
+                                    Utils.escapeSpecialJavascriptCharacters(promoter)).append("',");
+                        }
+                        for (String originOfReplication : uniqueOriginOfReplications) {
+                            originOfReplicationsCollection.append("'").append(
+                                    Utils.escapeSpecialJavascriptCharacters(originOfReplication))
+                                    .append("',");
+                        }
+                        for (String plasmid : uniquePlasmids) {
+                            plasmidsCollection.append("'").append(
+                                    Utils.escapeSpecialJavascriptCharacters(plasmid)).append("',");
+                        }
+
+                        dataMap.put("selectionMarkersCollection", selectionMarkersCollection
+                                .toString());
+                        dataMap.put("promotersCollection", promotersCollection.toString());
+                        dataMap.put("originOfReplicationsCollection",
+                                originOfReplicationsCollection.toString());
+                        dataMap.put("plasmidsCollection", plasmidsCollection.toString());
+                    }
+
+                    return dataMap;
+                }
+            };
+
+            add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
+                    UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.autocomplete.css"));
+            add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                    UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.autocomplete.js"));
+            add(TextTemplateHeaderContributor.forJavaScript(UnprotectedPage.class,
+                    UnprotectedPage.JS_RESOURCE_LOCATION + "autocompleteDataTemplate.js",
+                    autocompleteDataMap));
+            add(new Label("initializeCollectionsScript",
+                    "try {initializeCollections();} catch (err) {alert(err); }")
+                    .setEscapeModelStrings(false));
         }
 
         @Override
