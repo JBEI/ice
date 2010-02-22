@@ -70,8 +70,6 @@ public class Query {
                 .getStatusOptionsMap()));
         filters.add(new StringFilter("owner", "Owner", "filterOwnerCombined"));
         filters.add(new StringFilter("creator", "Creator", "filterCreatorCombined"));
-        filters.add(new StringFilter("strain_plasmids", "Strain Plasmids (Strains only)",
-                "filterStrainPlasmids"));
         //filters.add(new StringFilter("alias", "Alias", "filterAlias"));
         filters.add(new StringFilter("keywords", "Keywords", "filterKeywords"));
         filters.add(new StringFilter("description", "Description (Summary/Notes/References)",
@@ -100,6 +98,8 @@ public class Query {
                 "Origin Of Replication (Plasmids only)", "filterOriginOfReplication",
                 originOfReplicationsMap));
         filters.add(new StringFilter("host", "Host (Strains only)", "filterHost"));
+        filters.add(new StringFilter("strain_plasmids", "Strain Plasmids (Strains only)",
+                "filterStrainPlasmids"));
         filters.add(new StringFilter("genotype_phenotype", "Genotype/Phenotype (Strains only)",
                 "filterGenotypePhenotype"));
         filters.add(new SelectionFilter("package_format", "Package Format (Parts only)",
@@ -240,15 +240,21 @@ public class Query {
         } else if (operator.equals("!~")) {
             result = field + " not like '%" + term + "%'" + " or " + field + " is null ";
         } else if (operator.equals("=")) {
-            result = field + " like '" + term + "'";
+            if (term.isEmpty()) {
+                result = field + " = '' or " + field + " = null";
+            } else {
+                result = field + " = '" + term + "'";
+            }
         } else if (operator.equals("!")) {
-            result = field + " not like '" + term + "'" + " or " + field + " is null ";
+            if (term.isEmpty()) {
+                result = field + " != '' and " + field + " != null";
+            } else {
+                result = field + " != '" + term + "'";
+            }
         } else if (operator.equals("^")) {
             result = field + " like '" + term + "%'";
         } else if (operator.equals("$")) {
             result = field + " like '%" + term + "'";
-        } else if (operator.equals("*")) {
-            result = field + " is null or " + field + " = ''";
         }
         return result;
     }
@@ -275,9 +281,6 @@ public class Query {
             newValue = value.substring(1);
         } else if (value.startsWith("$")) {
             operator = "$";
-            newValue = value.substring(1);
-        } else if (value.startsWith("*")) {
-            operator = "*";
             newValue = value.substring(1);
         } else {
             operator = "=";

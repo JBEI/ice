@@ -88,10 +88,6 @@ public class QueryPage extends ProtectedPage {
                         String prefix = stringFilterPrefixSelect.getRawInput();
                         String value = stringFilterInput.getRawInput();
 
-                        if (value.isEmpty()) {
-                            continue;
-                        }
-
                         queries.add(new String[] { filter, prefix + value });
                     } else if (fragmentType.getObject().equals("selection")) {
                         DropDownChoice<CustomChoice> stringFilterPrefixSelect = (DropDownChoice<CustomChoice>) queryFragment
@@ -102,20 +98,12 @@ public class QueryPage extends ProtectedPage {
                         String prefix = stringFilterPrefixSelect.getRawInput();
                         String value = selectionFilterValues.getRawInput();
 
-                        if (value.isEmpty()) {
-                            continue;
-                        }
-
                         queries.add(new String[] { filter, prefix + value });
                     } else if (fragmentType.getObject().equals("radio")) {
                         RadioChoice<CustomChoice> radioChoicesValues = (RadioChoice<CustomChoice>) queryFragment
                                 .get("radioFilter");
 
                         String value = radioChoicesValues.getRawInput();
-
-                        if (value.isEmpty()) {
-                            continue;
-                        }
 
                         queries.add(new String[] { filter, value });
                     }

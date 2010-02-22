@@ -144,7 +144,6 @@ public class QueryItemPanel extends Panel {
         choices.add(new CustomChoice("$", "ends with"));
         choices.add(new CustomChoice("=", "is"));
         choices.add(new CustomChoice("!", "is not"));
-        choices.add(new CustomChoice("*", "is empty"));
 
         CustomChoice stringFilterPrefixChoice = choices.get(0);
         DropDownChoice<CustomChoice> stringFilterPrefixDropDownChoice = new DropDownChoice<CustomChoice>(
