@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.parsers;
 
 import java.io.BufferedReader;
+import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,8 +22,9 @@ import org.jbei.ice.lib.utils.Utils;
 public class GenbankParser extends AbstractParser {
     @Override
     @SuppressWarnings("unchecked")
-    public Sequence parse(BufferedReader br) {
-        Sequence sequence = new Sequence();
+    public Sequence parse(String textSequence) throws InvalidFormatParserException {
+        BufferedReader br = new BufferedReader(new StringReader(textSequence));
+        Sequence sequence = null;
 
         try {
             RichSequenceIterator richSequences = IOTools.readGenbankDNA(br, null);
@@ -34,7 +36,7 @@ public class GenbankParser extends AbstractParser {
 
                 Set<SequenceFeature> sequenceFeatureSet = new HashSet<SequenceFeature>();
 
-                sequence = new Sequence(richSequence.seqString(), "", "", "", null,
+                sequence = new Sequence(richSequence.seqString(), textSequence, "", "", null,
                         sequenceFeatureSet);
 
                 for (Feature feature : featureSet) {
@@ -78,15 +80,20 @@ public class GenbankParser extends AbstractParser {
 
                     sequenceFeatureSet.add(sequenceFeature);
                 }
-            }
 
-            sequence.setFwdHash(SequenceUtils.calculateSequenceHash(sequence.getSequence()));
-            sequence.setRevHash(SequenceUtils.calculateSequenceHash(SequenceUtils
-                    .reverseComplement(sequence.getSequence())));
+                sequence.setFwdHash(SequenceUtils.calculateSequenceHash(sequence.getSequence()));
+                sequence.setRevHash(SequenceUtils.calculateSequenceHash(SequenceUtils
+                        .reverseComplement(sequence.getSequence())));
+            }
         } catch (BioException e) {
-            return null;
+            throw new InvalidFormatParserException("Couln't parse GenBank sequence!", e);
         }
 
         return sequence;
+    }
+
+    @Override
+    public String getName() {
+        return "GenBank";
     }
 }

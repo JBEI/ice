@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.parsers;
 
 import java.io.BufferedReader;
+import java.io.StringReader;
 
 import org.biojava.bio.BioException;
 import org.biojavax.bio.seq.RichSequence;
@@ -11,7 +12,8 @@ import org.jbei.ice.lib.utils.SequenceUtils;
 
 public class FastaParser extends AbstractParser {
     @Override
-    public Sequence parse(BufferedReader br) {
+    public Sequence parse(String textSequence) throws InvalidFormatParserException {
+        BufferedReader br = new BufferedReader(new StringReader(textSequence));
         Sequence sequence = new Sequence();
 
         try {
@@ -20,16 +22,21 @@ public class FastaParser extends AbstractParser {
             if (richSequences.hasNext()) {
                 RichSequence richSequence = richSequences.nextRichSequence();
 
-                sequence = new Sequence(richSequence.seqString(), "", "", "", null, null);
+                sequence = new Sequence(richSequence.seqString(), textSequence, "", "", null, null);
             }
 
             sequence.setFwdHash(SequenceUtils.calculateSequenceHash(sequence.getSequence()));
             sequence.setRevHash(SequenceUtils.calculateSequenceHash(SequenceUtils
                     .reverseComplement(sequence.getSequence())));
         } catch (BioException e) {
-            return null;
+            throw new InvalidFormatParserException("Couln't parse FASTA sequence!", e);
         }
 
         return sequence;
+    }
+
+    @Override
+    public String getName() {
+        return "FASTA";
     }
 }

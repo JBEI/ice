@@ -178,7 +178,7 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
 
         String attachmentText = "";
         if (numAttachments == 0) {
-            attachmentText = "No attachments provided";
+            attachmentText = "";
         } else if (numAttachments == 1) {
             attachmentText = "One attachment provided";
         } else {
@@ -193,7 +193,7 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
 
         String samplesText = "";
         if (numSamples == 0) {
-            samplesText = "No samples provided";
+            samplesText = "";
         } else if (numSamples == 1) {
             samplesText = "One sample provided";
         } else {
@@ -204,8 +204,7 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
     }
 
     protected void renderSequence() {
-        String sequenceText = (SequenceManager.hasSequence(getEntry())) ? "Sequence Provided"
-                : "No sequence provided";
+        String sequenceText = (SequenceManager.hasSequence(getEntry())) ? "Sequence provided" : "";
 
         add(new Label("sequence", sequenceText));
     }

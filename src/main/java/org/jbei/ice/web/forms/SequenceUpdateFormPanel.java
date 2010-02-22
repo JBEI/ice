@@ -17,9 +17,7 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
-import org.jbei.ice.lib.parsers.AbstractParser;
-import org.jbei.ice.lib.parsers.FastaParser;
-import org.jbei.ice.lib.parsers.GenbankParser;
+import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.web.panels.SequenceViewPanel;
 
 public class SequenceUpdateFormPanel extends Panel {
@@ -79,18 +77,13 @@ public class SequenceUpdateFormPanel extends Panel {
                 sequenceUser = new String(fileUpload.getBytes());
             }
 
-            AbstractParser parser = new GenbankParser();
-            Sequence sequence = parser.parse(sequenceUser);
+            Sequence sequence = GeneralParser.getInstance().parse(sequenceUser);
 
             if (sequence == null) {
-                parser = new FastaParser();
-                sequence = parser.parse(sequenceUser);
+                error("Couldn't parse sequence file! Supported formats: "
+                        + GeneralParser.getInstance().availableParsersToString() + ".");
 
-                if (sequence == null) {
-                    error("Couldn't parse sequence file! Sequence should be either in FASTA or GenBank formats.");
-
-                    return;
-                }
+                return;
             }
 
             sequence.setEntry(entry);

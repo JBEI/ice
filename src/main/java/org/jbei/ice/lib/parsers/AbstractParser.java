@@ -1,16 +1,17 @@
 package org.jbei.ice.lib.parsers;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.StringReader;
 
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.utils.FileUtils;
 
 public abstract class AbstractParser {
-    public Sequence parse(File file) throws FileNotFoundException, IOException {
+    public abstract String getName();
+
+    public Sequence parse(File file) throws FileNotFoundException, IOException,
+            InvalidFormatParserException {
         Sequence sequence = null;
 
         String textSequence = FileUtils.readFileToString(file);
@@ -20,15 +21,5 @@ public abstract class AbstractParser {
         return sequence;
     }
 
-    public Sequence parse(String textSequence) {
-        Sequence sequence = parse(new BufferedReader(new StringReader(textSequence)));
-
-        if (sequence != null) {
-            sequence.setSequenceUser(textSequence);
-        }
-
-        return sequence;
-    }
-
-    public abstract Sequence parse(BufferedReader br);
+    public abstract Sequence parse(String textSequence) throws InvalidFormatParserException;
 }
