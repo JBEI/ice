@@ -11,6 +11,8 @@ import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.utils.SequenceUtils;
 
 public class FastaParser extends AbstractParser {
+    private static final String FASTA_PARSER = "FASTA";
+
     @Override
     public Sequence parse(String textSequence) throws InvalidFormatParserException {
         BufferedReader br = new BufferedReader(new StringReader(textSequence));
@@ -37,6 +39,6 @@ public class FastaParser extends AbstractParser {
 
     @Override
     public String getName() {
-        return "FASTA";
+        return FASTA_PARSER;
     }
 }

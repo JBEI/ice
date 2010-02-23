@@ -9,18 +9,24 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.target.resource.ResourceStreamRequestTarget;
+import org.apache.wicket.util.resource.IResourceStream;
+import org.apache.wicket.util.resource.StringResourceStream;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
 import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryUpdatePage;
+import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.ProfilePage;
 import org.jbei.ice.web.utils.WebUtils;
 
@@ -204,8 +210,51 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
     }
 
     protected void renderSequence() {
-        String sequenceText = (SequenceManager.hasSequence(getEntry())) ? "Sequence provided" : "";
+        WebMarkupContainer sequenceLinksContainer = new WebMarkupContainer("sequenceLinksContainer");
 
+        Link<Object> downloadLink = new Link<Object>("downloadLink") {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void onClick() {
+                Entry entry = entryModel.getObject();
+
+                if (SequenceManager.hasSequence(entry)) {
+                    IResourceStream resourceStream = null;
+                    try {
+                        Sequence sequence = SequenceManager.getByEntry(entry);
+
+                        if (sequence != null) {
+                            resourceStream = new StringResourceStream(sequence.getSequenceUser(),
+                                    "application/genbank");
+                            getRequestCycle().setRequestTarget(
+                                    new ResourceStreamRequestTarget(resourceStream, entryModel
+                                            .getObject().getPartNumbersAsString()
+                                            + ".gb"));
+                        }
+                    } catch (ManagerException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+
+        BookmarkablePageLink<Object> viewLink = new BookmarkablePageLink<Object>("viewLink",
+                EntryViewPage.class, new PageParameters("0=" + entryModel.getObject().getId()
+                        + ",1=sequence"));
+
+        sequenceLinksContainer.add(downloadLink);
+        sequenceLinksContainer.add(viewLink);
+
+        String sequenceText = "";
+
+        if (!SequenceManager.hasSequence(entryModel.getObject())) {
+            sequenceLinksContainer.setVisible(false);
+        } else {
+            sequenceText = "Sequence provided";
+        }
+
+        add(sequenceLinksContainer);
         add(new Label("sequence", sequenceText));
     }
 

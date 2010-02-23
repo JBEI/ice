@@ -1,9 +1,6 @@
 package org.jbei.ice.web.panels;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ResourceReference;
@@ -16,10 +13,14 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.DownloadLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.target.resource.ResourceStreamRequestTarget;
+import org.apache.wicket.util.resource.IResourceStream;
+import org.apache.wicket.util.resource.StringResourceStream;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Entry;
@@ -130,57 +131,64 @@ public class SequenceViewPanel extends Panel {
                 "sequenceUser")));
 
         if (sequence != null) {
-            File sequenceFile;
-            try {
-                sequenceFile = File.createTempFile(sequence.getEntry().getPartNumbersAsString()
-                        + "-", ".gb");
+            Link<Object> downloadLink = new Link<Object>("downloadLink") {
+                private static final long serialVersionUID = 1L;
 
-                FileWriter fstream = new FileWriter(sequenceFile);
-                BufferedWriter out = new BufferedWriter(fstream);
-                out.write(sequence.getSequenceUser());
-                out.close();
+                @Override
+                public void onClick() {
+                    IResourceStream resourceStream = new StringResourceStream(sequence
+                            .getSequenceUser(), "application/genbank");
 
-                fragment.add(new DownloadLink("downloadLink", sequenceFile).add(new Label(
-                        "sequenceDownloadFileName", sequence.getEntry().getPartNumbersAsString()
-                                + ".gb")));
+                    getRequestCycle().setRequestTarget(
+                            new ResourceStreamRequestTarget(resourceStream, entry
+                                    .getPartNumbersAsString()
+                                    + ".gb"));
+                }
+            };
 
-                fragment.setOutputMarkupPlaceholderTag(true);
-                fragment.setOutputMarkupId(true);
+            downloadLink.add(new Label("sequenceDownloadFileName", sequence.getEntry()
+                    .getPartNumbersAsString()
+                    + ".gb"));
 
-                fragment.add(new DeleteSequenceLink("deleteLink").setVisible(PermissionManager
-                        .hasWritePermission(entry.getId(), IceSession.get().getSessionKey())));
+            fragment.add(downloadLink);
 
+            fragment.setOutputMarkupPlaceholderTag(true);
+            fragment.setOutputMarkupId(true);
 
-                PageParameters parameters = new PageParameters();
-                parameters.add("entryId", entry.getRecordId());
-                fragment.add(new BookmarkablePageLink<VectorEditorPage>("viewInVectorEditorLink",
-                        VectorEditorPage.class, parameters));
-                
-                WebComponent flashComponent = new WebComponent("vectorViewer");
+            fragment.add(new DeleteSequenceLink("deleteLink").setVisible(PermissionManager
+                    .hasWritePermission(entry.getId(), IceSession.get().getSessionKey())));
 
-                ResourceReference veResourceReference = new ResourceReference(UnprotectedPage.class,
-                        UnprotectedPage.VV_RESOURCE_LOCATION + "VectorViewer.swf?entryId="
-                                + parameters.getString("entryId") + "&sessionId="
-                                + IceSession.get().getSessionKey());
+            PageParameters parameters = new PageParameters();
+            parameters.add("entryId", entry.getRecordId());
+            fragment.add(new BookmarkablePageLink<VectorEditorPage>("viewInVectorEditorLink",
+                    VectorEditorPage.class, parameters));
 
-                flashComponent.add(new SimpleAttributeModifier("src", urlFor(veResourceReference)));
-                flashComponent.add(new SimpleAttributeModifier("quality", "high"));
-                flashComponent.add(new SimpleAttributeModifier("bgcolor", "#869ca7"));
-                flashComponent.add(new SimpleAttributeModifier("width", "100%"));
-                flashComponent.add(new SimpleAttributeModifier("height", "100%"));
-                flashComponent.add(new SimpleAttributeModifier("name", "VectorEditor"));
-                flashComponent.add(new SimpleAttributeModifier("align", "middle"));
-                flashComponent.add(new SimpleAttributeModifier("play", "true"));
-                flashComponent.add(new SimpleAttributeModifier("loop", "false"));
-                flashComponent.add(new SimpleAttributeModifier("type", "application/x-shockwave-flash"));
-                flashComponent.add(new SimpleAttributeModifier("pluginspage",
-                        "http://www.adobe.com/go/getflashplayer"));
+            WebComponent flashComponent = new WebComponent("vectorViewer");
 
-                fragment.add(flashComponent);
-                
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            ResourceReference veResourceReference = new ResourceReference(UnprotectedPage.class,
+                    UnprotectedPage.VV_RESOURCE_LOCATION + "VectorViewer.swf?entryId="
+                            + parameters.getString("entryId") + "&sessionId="
+                            + IceSession.get().getSessionKey());
+
+            flashComponent.add(new SimpleAttributeModifier("src", urlFor(veResourceReference)));
+            flashComponent.add(new SimpleAttributeModifier("quality", "high"));
+            flashComponent.add(new SimpleAttributeModifier("bgcolor", "#869ca7"));
+            flashComponent.add(new SimpleAttributeModifier("width", "100%"));
+            flashComponent.add(new SimpleAttributeModifier("height", "100%"));
+            flashComponent.add(new SimpleAttributeModifier("name", "VectorEditor"));
+            flashComponent.add(new SimpleAttributeModifier("align", "middle"));
+            flashComponent.add(new SimpleAttributeModifier("play", "true"));
+            flashComponent.add(new SimpleAttributeModifier("loop", "false"));
+            flashComponent
+                    .add(new SimpleAttributeModifier("type", "application/x-shockwave-flash"));
+            flashComponent.add(new SimpleAttributeModifier("pluginspage",
+                    "http://www.adobe.com/go/getflashplayer"));
+
+            fragment.add(flashComponent);
+
+            //} catch (IOException e) {
+            //    e.printStackTrace();
+            //}
         } else {
             fragment.add(new DownloadLink("downloadLink", new File("asdf")));
         }

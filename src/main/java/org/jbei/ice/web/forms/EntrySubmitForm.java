@@ -165,8 +165,7 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
                 UnprotectedPage.JS_RESOURCE_LOCATION + "autocompleteDataTemplate.js",
                 autocompleteDataMap));
         add(new Label("initializeCollectionsScript",
-                "try {initializeCollections();} catch (err) {alert(err); }")
-                .setEscapeModelStrings(false));
+                "try {initializeCollections();} catch (err) { }").setEscapeModelStrings(false));
     }
 
     protected void renderStatuses() {

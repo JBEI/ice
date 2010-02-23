@@ -5,12 +5,9 @@ import java.util.TreeSet;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
-import org.apache.wicket.markup.html.CSSPackageResource;
-import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.collections.MiniMap;
-import org.apache.wicket.util.template.TextTemplateHeaderContributor;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Entry;
@@ -89,14 +86,6 @@ public class EntryUpdatePage extends ProtectedPage {
                 return dataMap;
             }
         };
-
-        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.autocomplete.js"));
-        add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
-                UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.autocomplete.css"));
-        add(TextTemplateHeaderContributor.forJavaScript(UnprotectedPage.class,
-                UnprotectedPage.JS_RESOURCE_LOCATION + "autocompleteDataTemplate.js",
-                autocompleteDataMap));
 
         try {
             entry = AuthenticatedEntryManager.get(entryId, IceSession.get().getSessionKey());

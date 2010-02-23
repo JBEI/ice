@@ -68,7 +68,11 @@
 						</tr>
 						<tr>
 							<td class="title_column">Sequence:</td>
-							<td colspan="3"><b><span wicket:id="sequence"></span></b></td>
+							<td colspan="3"><b><span wicket:id="sequence"></span></b>
+							<wicket:container wicket:id="sequenceLinksContainer">
+							(<a href="#" wicket:id="downloadLink">Download</a> | <a href="#" wicket:id="viewLink">View</a>)
+							</wicket:container>
+							</td>
 						</tr>
 						<tr>
 							<td class="title_column">References:</td>

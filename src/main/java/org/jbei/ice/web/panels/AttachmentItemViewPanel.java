@@ -1,6 +1,5 @@
 package org.jbei.ice.web.panels;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.apache.wicket.PageParameters;
@@ -9,6 +8,7 @@ import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.DownloadLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AttachmentManager;
@@ -65,16 +65,21 @@ public class AttachmentItemViewPanel extends Panel {
         deleteAttachmentLink.setOutputMarkupId(true);
         add(deleteAttachmentLink);
 
-        DownloadLink downloadLink = null;
+        Link downloadLink = null;
         try {
             downloadLink = new DownloadLink("downloadAttachmentLink", AttachmentManager
                     .readFile(attachment), attachment.getFileName());
         } catch (IOException e) {
             String msg = "File not found on disk: " + e.toString();
             Logger.error(msg);
-            File file = new File("");
-            downloadLink = new DownloadLink("downloadAttachmentLink", file, attachment
-                    .getFileName());
+            downloadLink = new Link("downloadAttachmentLink") {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public void onClick() {
+                }
+            };
+            downloadLink.setEnabled(false);
             deleteAttachmentLink.setVisible(false);
             remove(description);
             add(new Label("description", "File not found on server!"));

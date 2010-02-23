@@ -20,6 +20,8 @@ import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.Utils;
 
 public class GenbankParser extends AbstractParser {
+    private static final String GENBANK_PARSER = "GenBank";
+
     @Override
     @SuppressWarnings("unchecked")
     public Sequence parse(String textSequence) throws InvalidFormatParserException {
@@ -94,6 +96,6 @@ public class GenbankParser extends AbstractParser {
 
     @Override
     public String getName() {
-        return "GenBank";
+        return GENBANK_PARSER;
     }
 }
