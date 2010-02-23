@@ -3,17 +3,27 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
 	version="2.4">
 
+	<security-constraint>
+     <web-resource-collection>
+        <web-resource-name>Protected Context</web-resource-name>
+          <url-pattern>/*</url-pattern>
+      </web-resource-collection>
+      <!-- auth-constraint goes here if you requre authentication -->
+      <user-data-constraint>
+         <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+      </user-data-constraint>
+    </security-constraint>
+
+
 	<display-name>ice</display-name>
 
 	<!--
-		There are three means to configure Wickets configuration mode and they
-		are tested in the order given. 1) A system property:
-		-Dwicket.configuration 2) servlet specific <init-param> 3) context
-		specific <context-param> The value might be either "development"
-		(reloading when templates change) or "deployment". If no configuration
-		is found, "development" is the default.
+		There are three means to configure Wickets configuration mode and they are tested in the order
+		given. 1) A system property: -Dwicket.configuration 2) servlet specific <init-param> 3) context
+		specific <context-param> The value might be either "development" (reloading when templates change)
+		or "deployment". If no configuration is found, "development" is the default.
 	-->
-	
+
 	<!-- Wicket Application -->
 	<filter>
 		<filter-name>wicket.ice</filter-name>

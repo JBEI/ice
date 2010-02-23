@@ -7,8 +7,8 @@
 	</adapters>
 
 	<default-channels>
-		<channel ref="VectorEditorAMFChannel" />
 		<channel ref="SecureVectorEditorAMFChannel" />
+		<!-- <channel ref="VectorEditorAMFChannel" /> -->
 	</default-channels>
 
 	<destination id="AuthorizationService">

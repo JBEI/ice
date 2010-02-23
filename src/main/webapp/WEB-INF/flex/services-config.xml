@@ -10,13 +10,13 @@
 	</security>
 
 	<channels>
-		<channel-definition id="VectorEditorAMFChannel" class="mx.messaging.channels.AMFChannel">
+		<!-- <channel-definition id="VectorEditorAMFChannel" class="mx.messaging.channels.AMFChannel">
 			<endpoint url="http://{server.name}:{server.port}/{context.root}/messagebroker/amf"
 				class="flex.messaging.endpoints.AMFEndpoint" />
 			<properties>
 				<polling-enabled>false</polling-enabled>
 			</properties>
-		</channel-definition>
+		</channel-definition> -->
 
 		<channel-definition id="SecureVectorEditorAMFChannel" class="mx.messaging.channels.SecureAMFChannel">
 			<endpoint uri="https://{server.name}:{server.port}/{context.root}/messagebroker/amfsecure"
@@ -28,8 +28,8 @@
 	</channels>
 
 	<logging>
-		<!-- <target class="flex.messaging.log.ConsoleTarget" level="Debug"> -->
-		<target class="flex.messaging.log.ConsoleTarget" level="Error">
+		<!-- <target class="flex.messaging.log.ConsoleTarget" level="Error"> -->
+		<target class="flex.messaging.log.ConsoleTarget" level="Debug">
 			<properties>
 				<prefix>[BlazeDS] </prefix>
 				<includeDate>false</includeDate>
