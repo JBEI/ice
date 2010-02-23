@@ -251,8 +251,7 @@ public class LuceneSearch {
             String backbone = (plasmid.getBackbone() != null) ? plasmid.getBackbone() : "";
             String origin = (plasmid.getOriginOfReplication() != null) ? plasmid
                     .getOriginOfReplication() : "";
-            String promoters = (plasmid.getPromoters() != null) ? plasmid.getOriginOfReplication()
-                    : "";
+            String promoters = (plasmid.getPromoters() != null) ? plasmid.getPromoters() : "";
 
             document.add(new Field("Backbone", backbone, Field.Store.YES, Field.Index.ANALYZED));
             content = content + backbone + " ";
