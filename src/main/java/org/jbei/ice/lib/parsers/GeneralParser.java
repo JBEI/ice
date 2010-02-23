@@ -62,5 +62,6 @@ public class GeneralParser {
     private void registerParsers() {
         parsers.add(new GenbankParser());
         parsers.add(new FastaParser());
+        parsers.add(new ApeParser());
     }
 }
