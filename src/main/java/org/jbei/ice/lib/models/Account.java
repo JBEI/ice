@@ -68,6 +68,9 @@ public class Account implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastLoginTime;
 
+    @Column(name = "privilege_level")
+    private int privilegeLevel;
+
     @ManyToMany
     @JoinTable(name = "account_group", joinColumns = @JoinColumn(name = "account_id"), inverseJoinColumns = @JoinColumn(name = "group_id"))
     private Set<Group> groups;
@@ -203,6 +206,14 @@ public class Account implements Serializable {
 
     public void setLastLoginTime(Date lastLoginTime) {
         this.lastLoginTime = lastLoginTime;
+    }
+
+    public void setPrivilegeLevel(int privilegeLevel) {
+        this.privilegeLevel = privilegeLevel;
+    }
+
+    public int getPrivilegeLevel() {
+        return privilegeLevel;
     }
 
     public void setDescription(String description) {

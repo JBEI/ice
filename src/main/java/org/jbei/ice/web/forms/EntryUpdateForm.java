@@ -4,12 +4,15 @@ import java.util.Set;
 
 import org.apache.wicket.PageParameters;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.utils.Job;
 import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.web.IceSession;
@@ -63,21 +66,37 @@ public class EntryUpdateForm<T extends Entry> extends EntrySubmitForm<T> {
     @Override
     protected void submitEntry() {
         Entry entry = getEntry();
+        if (PermissionManager.hasWritePermission(entry.getId(), IceSession.get().getSessionKey())) {
+            try {
+                AuthenticatedEntryManager.save(entry, IceSession.get().getSessionKey());
 
-        try {
-            AuthenticatedEntryManager.save(entry, IceSession.get().getSessionKey());
+                JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
+                JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);
 
-            JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
-            JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);
-
-            setResponsePage(EntryViewPage.class, new PageParameters("0=" + entry.getId()));
-        } catch (ManagerException e) {
-            String msg = "System Error: Could not save! ";
-            Logger.error(msg + e.getMessage());
-            error(msg);
-            e.printStackTrace();
-        } catch (PermissionException e) {
-            error(e.getMessage());
+                setResponsePage(EntryViewPage.class, new PageParameters("0=" + entry.getId()));
+            } catch (ManagerException e) {
+                String msg = "System Error: Could not save! ";
+                Logger.error(msg + e.getMessage());
+                error(msg);
+                e.printStackTrace();
+            } catch (PermissionException e) {
+                error(e.getMessage());
+            }
+        } else {
+            Account account = IceSession.get().getAccount();
+            if (account.getPrivilegeLevel() == 9) {
+                try {
+                    EntryManager.save(entry);
+                    info("Save as admin successful!");
+                } catch (ManagerException e) {
+                    String msg = "System Error: Could not save! ";
+                    Logger.error(msg + e.getMessage());
+                    error(msg);
+                    e.printStackTrace();
+                }
+            } else {
+                error("Save not permitted");
+            }
         }
     }
 }

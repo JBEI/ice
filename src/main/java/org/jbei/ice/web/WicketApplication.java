@@ -13,6 +13,7 @@ import org.jbei.ice.lib.authentication.AuthenticationBackendManager;
 import org.jbei.ice.lib.authentication.IAuthenticationBackend;
 import org.jbei.ice.lib.permissions.IceAuthorizationStrategy;
 import org.jbei.ice.lib.utils.JobCue;
+import org.jbei.ice.web.pages.AdminPage;
 import org.jbei.ice.web.pages.AssertErrorPage;
 import org.jbei.ice.web.pages.BlastPage;
 import org.jbei.ice.web.pages.EntriesPage;
@@ -72,6 +73,7 @@ public class WicketApplication extends WebApplication {
         mount(new QueryStringUrlCodingStrategy("/search", SearchResultPage.class));
         mountBookmarkablePage("/blast", BlastPage.class);
         mountBookmarkablePage("/query", QueryPage.class);
+        mountBookmarkablePage("/admin", AdminPage.class);
 
         // job cue
         JobCue jobCue = JobCue.getInstance();
