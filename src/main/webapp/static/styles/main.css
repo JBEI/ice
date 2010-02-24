@@ -335,20 +335,6 @@ span.form_help_text {
 	float: left;
 }
 
-#tabs span {
-	position: relative;
-	top: 0;
-	margin: 0 2px 0 0;
-	float: left;
-	background: #FFFFFF;
-	border-right: 1px solid #666;
-	border-top: 1px solid #666;
-	border-left: 1px solid #666;
-	padding: 3px 10px 3px 10px;
-	text-decoration: none;
-	color: #333;
-}
-
 #tabs a {
 	position: relative;
 	top: 0;

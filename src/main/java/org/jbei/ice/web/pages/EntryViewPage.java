@@ -10,7 +10,9 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
@@ -104,11 +106,24 @@ public class EntryViewPage extends ProtectedPage {
         samplesLink = new BookmarkablePageLink("samplesLink", EntryViewPage.class,
                 new PageParameters("0=" + entry.getId() + ",1=samples"));
         samplesLink.setOutputMarkupId(true);
+        int numSamples = SampleManager.getNumberOfSamples(entry);
+        String samplesLabel = "Samples";
+        if (numSamples > 0) {
+            samplesLabel = samplesLabel + " (" + numSamples + ")";
+        }
+        samplesLink.add(new Label("samplesLabel", samplesLabel));
         attachmentsLink = new BookmarkablePageLink("attachmentsLink", EntryViewPage.class,
                 new PageParameters("0=" + entry.getId() + ",1=attachments"));
         attachmentsLink.setOutputMarkupId(true);
+        int numAttachments = AttachmentManager.getNumberOfAttachments(entry);
+        String attachmentsLabel = "Attachments";
+        if (numAttachments > 0) {
+            attachmentsLabel = attachmentsLabel + " (" + numAttachments + ")";
+        }
+        attachmentsLink.add(new Label("attachmentsLabel", attachmentsLabel));
         sequenceLink = new BookmarkablePageLink("sequenceLink", EntryViewPage.class,
                 new PageParameters("0=" + entry.getId() + ",1=sequence"));
+
         sequenceLink.setOutputMarkupId(true);
         permissionLink = new BookmarkablePageLink("permissionLink", EntryViewPage.class,
                 new PageParameters("0=" + entry.getId() + ",1=permission"));
