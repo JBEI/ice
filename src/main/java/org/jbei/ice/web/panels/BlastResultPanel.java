@@ -32,7 +32,7 @@ public class BlastResultPanel extends Panel {
         add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
                 UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
         add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
-                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.css"));
+                UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
 
         setBlastQuery(blastQuery);
 
