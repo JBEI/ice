@@ -57,6 +57,7 @@ public class MostRecentEntriesPanel extends Panel {
                 sortableDataProvider, perPage) {
             private static final long serialVersionUID = 1L;
 
+            @Override
             protected Entry getEntry(Item<Entry> item) {
                 return item.getModelObject();
             }

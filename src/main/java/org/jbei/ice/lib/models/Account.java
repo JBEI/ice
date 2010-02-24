@@ -69,7 +69,7 @@ public class Account implements Serializable {
     private Date lastLoginTime;
 
     @Column(name = "privilege_level")
-    private int privilegeLevel;
+    private Integer privilegeLevel;
 
     @ManyToMany
     @JoinTable(name = "account_group", joinColumns = @JoinColumn(name = "account_id"), inverseJoinColumns = @JoinColumn(name = "group_id"))
@@ -208,11 +208,11 @@ public class Account implements Serializable {
         this.lastLoginTime = lastLoginTime;
     }
 
-    public void setPrivilegeLevel(int privilegeLevel) {
+    public void setPrivilegeLevel(Integer privilegeLevel) {
         this.privilegeLevel = privilegeLevel;
     }
 
-    public int getPrivilegeLevel() {
+    public Integer getPrivilegeLevel() {
         return privilegeLevel;
     }
 
