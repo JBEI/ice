@@ -18,6 +18,8 @@ import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.parsers.GeneralParser;
+import org.jbei.ice.lib.utils.Job;
+import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.web.panels.SequenceViewPanel;
 
 public class SequenceUpdateFormPanel extends Panel {
@@ -44,6 +46,7 @@ public class SequenceUpdateFormPanel extends Panel {
             Button cancelButton = new Button("cancelButton", new Model<String>("Cancel")) {
                 private static final long serialVersionUID = 1L;
 
+                @Override
                 public void onSubmit() {
                     sequenceViewPanel.clearForm();
                 }
@@ -58,6 +61,7 @@ public class SequenceUpdateFormPanel extends Panel {
             add(new FileUploadField("sequenceFileInput").setLabel(new Model<String>("File")));
         }
 
+        @Override
         protected void onSubmit() {
             FileUpload fileUpload = getSequenceFileInput();
 
@@ -108,6 +112,8 @@ public class SequenceUpdateFormPanel extends Panel {
 
                 entry.setSequence(sequence);
                 EntryManager.save(entry);
+                JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
+
             } catch (ManagerException e) {
                 e.printStackTrace();
 
