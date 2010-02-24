@@ -42,6 +42,12 @@ public class JobCue implements Runnable {
     @SuppressWarnings("unchecked")
     private synchronized void processCue() {
         // TODO use reflection or something
+        // Sometimes cue is null. It's not clear why.
+        if (cue == null) {
+            cue = new Hashtable<Integer, Long>();
+            String msg = "Job cue is null. Why?";
+            Logger.error(msg);
+        }
         Hashtable<Integer, Long> newCue = (Hashtable<Integer, Long>) cue.clone();
 
         Set<Integer> processedJobs = newCue.keySet();
