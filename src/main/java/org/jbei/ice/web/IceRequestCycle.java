@@ -36,8 +36,13 @@ public class IceRequestCycle extends WebRequestCycle {
             user = account.getEmail();
         }
 
-        String msg = user + "\t" + request.getURL() + "\t" + userAgent;
-        PageLogger.info(msg);
+        String urlInfo = request.getURL();
+        if (urlInfo.startsWith("resources")) {
+
+        } else {
+            String msg = user + "\t" + urlInfo + "\t" + userAgent;
+            PageLogger.info(msg);
+        }
     }
 
     @Override
