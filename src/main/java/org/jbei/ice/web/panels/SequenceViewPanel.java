@@ -7,6 +7,7 @@ import org.apache.wicket.ResourceReference;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
+import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -186,11 +187,12 @@ public class SequenceViewPanel extends Panel {
 
             fragment.add(flashComponent);
 
-            //} catch (IOException e) {
-            //    e.printStackTrace();
-            //}
+            add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                    UnprotectedPage.JS_RESOURCE_LOCATION + "extMouseWheel.js"));
+            add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                    UnprotectedPage.JS_RESOURCE_LOCATION + "hookMouseWheel.js"));
         } else {
-            fragment.add(new DownloadLink("downloadLink", new File("asdf")));
+            fragment.add(new DownloadLink("downloadLink", new File("asdf")).setVisible(false));
         }
 
         return fragment;

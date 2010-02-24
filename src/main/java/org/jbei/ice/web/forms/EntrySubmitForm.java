@@ -175,7 +175,7 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
                 "status"), new Model<ArrayList<CustomChoice>>(statuses),
                 new ChoiceRenderer<CustomChoice>("name", "value")));
 
-        setStatus(statuses.get(1));
+        setStatus(statuses.get(0));
     }
 
     protected void renderBioSafetyLevels() {

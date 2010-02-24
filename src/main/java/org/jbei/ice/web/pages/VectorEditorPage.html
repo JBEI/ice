@@ -42,11 +42,19 @@ html,#fullScreen {
 	var requiredRevision = 0;
 	// -----------------------------------------------------------------------------
 	// -->
+	if (window.addEventListener)
+    /** DOMMouseScroll is for mozilla. */
+    window.addEventListener('DOMMouseScroll', handleWheelEvent, false);
+	/** IE/Opera. */
+	window.onmousewheel = document.onmousewheel = handleWheelEvent;
+
+	function handleWheelEvent(e){
+    	e.preventDefault();
+	}
 </script>
 </head>
 
 <body style="scroll: no; width: 100%; height: 100%">
-<script type="text/javascript" src="static/ve/extMouseWheel.js"></script>
 <script type="text/javascript">
 	// Version check for the Flash Player that has the ability to start Player Product Install (6.0r65)
 	var hasProductInstall = DetectFlashVer(6, 0, 65);

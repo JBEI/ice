@@ -1,5 +1,7 @@
 package org.jbei.ice.web;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.wicket.Page;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.Response;
@@ -23,15 +25,18 @@ public class IceRequestCycle extends WebRequestCycle {
 
     @Override
     protected void onBeginRequest() {
-
         Account account = IceSession.get().getAccount();
-        String user = ((WebRequest) get().getRequest()).getHttpServletRequest().getRemoteAddr();
+        HttpServletRequest httpServletRequest = ((WebRequest) get().getRequest())
+                .getHttpServletRequest();
+
+        String user = httpServletRequest.getRemoteAddr();
+        String userAgent = httpServletRequest.getHeader("User-Agent");
 
         if (account != null) {
             user = account.getEmail();
         }
 
-        String msg = user + "\t" + request.getURL();
+        String msg = user + "\t" + request.getURL() + "\t" + userAgent;
         PageLogger.info(msg);
     }
 

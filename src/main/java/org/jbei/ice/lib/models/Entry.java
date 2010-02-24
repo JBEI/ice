@@ -456,9 +456,9 @@ public class Entry implements IEntryValueObject, Serializable {
     public static Map<String, String> getStatusOptionsMap() {
         Map<String, String> resultMap = new LinkedHashMap<String, String>();
 
-        resultMap.put("planned", JbeiConstants.getStatus("planned"));
         resultMap.put("complete", JbeiConstants.getStatus("complete"));
         resultMap.put("in progress", JbeiConstants.getStatus("in progress"));
+        resultMap.put("planned", JbeiConstants.getStatus("planned"));
 
         return resultMap;
     }

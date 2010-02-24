@@ -3,6 +3,7 @@ package org.jbei.ice.web.pages;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ResourceReference;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
+import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.markup.html.WebPage;
 import org.jbei.ice.web.IceSession;
@@ -32,5 +33,8 @@ public class VectorEditorPage extends WebPage {
                 "http://www.adobe.com/go/getflashplayer"));
 
         add(flashComponent);
+
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "extMouseWheel.js"));
     }
 }
