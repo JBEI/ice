@@ -17,6 +17,9 @@ public class SimpleEntryViewPanel<T extends Entry> extends AbstractEntryViewPane
 
     public SimpleEntryViewPanel(String id, Model<T> entryModel) {
         super(id, entryModel);
+
+        renderAttachments();
+        renderSamples();
     }
 
     @Override
@@ -38,7 +41,6 @@ public class SimpleEntryViewPanel<T extends Entry> extends AbstractEntryViewPane
                 .getReferences()), MAX_LONG_FIELD_LENGTH)).setEscapeModelStrings(false));
     }
 
-    @Override
     protected void renderAttachments() {
         ResourceReference hasAttachmentImage = new ResourceReference(UnprotectedPage.class,
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "attachment.gif");
@@ -46,7 +48,6 @@ public class SimpleEntryViewPanel<T extends Entry> extends AbstractEntryViewPane
                 .hasAttachment(getEntry())));
     }
 
-    @Override
     protected void renderSamples() {
         ResourceReference hasSampleImage = new ResourceReference(UnprotectedPage.class,
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sample.png");

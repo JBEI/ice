@@ -16,13 +16,11 @@ import org.apache.wicket.request.target.resource.ResourceStreamRequestTarget;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.resource.StringResourceStream;
 import org.jbei.ice.lib.managers.AccountManager;
-import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
 import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryUpdatePage;
@@ -51,8 +49,6 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
         renderModificationTime();
         renderKeywords();
         renderSummary();
-        renderAttachments();
-        renderSamples();
         renderSequence();
         renderNotes();
         renderReferences();
@@ -177,36 +173,6 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
     protected void renderSummary() {
         add(new MultiLineLabel("shortDescription", WebUtils.jbeiLinkifyText(getEntry()
                 .getShortDescription())).setEscapeModelStrings(false));
-    }
-
-    protected void renderAttachments() {
-        int numAttachments = AttachmentManager.getNumberOfAttachments(getEntry());
-
-        String attachmentText = "";
-        if (numAttachments == 0) {
-            attachmentText = "";
-        } else if (numAttachments == 1) {
-            attachmentText = "One attachment provided";
-        } else {
-            attachmentText = String.valueOf(numAttachments) + " attachments provided";
-        }
-
-        add(new Label("attachments", attachmentText));
-    }
-
-    protected void renderSamples() {
-        int numSamples = AuthenticatedSampleManager.getNumberOfSamples(getEntry());
-
-        String samplesText = "";
-        if (numSamples == 0) {
-            samplesText = "";
-        } else if (numSamples == 1) {
-            samplesText = "One sample provided";
-        } else {
-            samplesText = String.valueOf(numSamples) + " samples provided";
-        }
-
-        add(new Label("samples", samplesText));
     }
 
     protected void renderSequence() {
