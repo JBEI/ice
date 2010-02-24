@@ -98,32 +98,33 @@ public class CommaSeparatedField<T> implements Serializable {
 
         for (int i = 0; i < itemsAsString.length; i++) {
             String currentItem = itemsAsString[i];
+            if (currentItem.length() > 0) {
+                try {
+                    T instance = klass.newInstance();
+                    Method setMethod = klass.getDeclaredMethod(setterName,
+                            new Class[] { String.class });
+                    setMethod.invoke(instance, currentItem);
+                    result.add(instance);
 
-            try {
-                T instance = klass.newInstance();
-                Method setMethod = klass
-                        .getDeclaredMethod(setterName, new Class[] { String.class });
-                setMethod.invoke(instance, currentItem);
-                result.add(instance);
-
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-                throw new FormException("Couldn't instantiate class");
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-                throw new FormException("Couldn't instantiate class");
-            } catch (SecurityException e) {
-                e.printStackTrace();
-                throw new FormException("Couldn't get setter in form");
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-                throw new FormException("Couldn't get setter in form");
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-                throw new FormException("Couldn't invoke setter in form");
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-                throw new FormException("Couldn't invoke setter in form");
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
+                    throw new FormException("Couldn't instantiate class");
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                    throw new FormException("Couldn't instantiate class");
+                } catch (SecurityException e) {
+                    e.printStackTrace();
+                    throw new FormException("Couldn't get setter in form");
+                } catch (NoSuchMethodException e) {
+                    e.printStackTrace();
+                    throw new FormException("Couldn't get setter in form");
+                } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
+                    throw new FormException("Couldn't invoke setter in form");
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                    throw new FormException("Couldn't invoke setter in form");
+                }
             }
         }
         items = result;
