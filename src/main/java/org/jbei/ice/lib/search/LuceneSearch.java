@@ -308,7 +308,7 @@ public class LuceneSearch {
                 Query query = parser.parse(queryString);
                 IndexSearcher searcher = getIndexSearcher();
                 TopDocs hits = searcher.search(query, SEARCH_MAX_RESULT);
-                Logger.info("" + hits.totalHits + " results found");
+                Logger.info("" + hits.totalHits + " results found for: " + queryString);
 
                 ArrayList<ScoreDoc> hitsArray = new ArrayList<ScoreDoc>(Arrays
                         .asList(hits.scoreDocs));

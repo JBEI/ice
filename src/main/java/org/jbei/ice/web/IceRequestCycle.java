@@ -10,7 +10,7 @@ import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.protocol.http.WebRequest;
 import org.apache.wicket.protocol.http.WebRequestCycle;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.logging.PageLogger;
+import org.jbei.ice.lib.logging.UsageLogger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Utils;
@@ -41,7 +41,7 @@ public class IceRequestCycle extends WebRequestCycle {
 
         } else {
             String msg = user + "\t" + urlInfo + "\t" + userAgent;
-            PageLogger.info(msg);
+            UsageLogger.info(msg);
         }
     }
 

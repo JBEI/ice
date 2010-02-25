@@ -1,8 +1,8 @@
 package org.jbei.ice.lib.logging;
 
-public class PageLogger {
+public class UsageLogger {
     private static org.apache.log4j.Logger logger = org.apache.log4j.Logger
-            .getLogger("org.jbei.ice.web");
+            .getLogger("org.jbei.ice.usage");
 
     public static void trace(String msg) {
         logger.trace(msg);

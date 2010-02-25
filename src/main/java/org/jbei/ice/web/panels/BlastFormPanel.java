@@ -10,6 +10,8 @@ import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.logging.UsageLogger;
 import org.jbei.ice.lib.search.Blast;
 import org.jbei.ice.lib.search.BlastResult;
 import org.jbei.ice.lib.utils.SequenceUtils;
@@ -58,6 +60,9 @@ public class BlastFormPanel extends Panel {
                     blastResults = new Blast().queryDistinct(getQuery(), getBlastProgram()
                             .getValue());
                 }
+
+                UsageLogger.info(blastResults.size() + " results for blast query.");
+                Logger.info(blastResults.size() + " results for blast query.");
 
                 if (blastResults.size() > 0) {
                     Panel resultPanel;
