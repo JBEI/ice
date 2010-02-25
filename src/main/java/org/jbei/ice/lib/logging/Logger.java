@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.logging;
 
 public class Logger {
-    private static org.apache.log4j.Logger logger = org.apache.log4j.Logger
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger
             .getLogger("org.jbei.ice.system");
 
     public static void trace(String msg) {
