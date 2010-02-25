@@ -9,6 +9,7 @@ import org.hibernate.Query;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountPreferences;
+import org.jbei.ice.lib.models.Moderator;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 
@@ -137,6 +138,22 @@ public class AccountManager extends Manager {
         }
 
         return account;
+    }
+
+    public static Boolean isModerator(Account account) {
+        Boolean result = false;
+        try {
+            String queryString = "from Moderator moderator where moderator.account = :account";
+            Query query = HibernateHelper.getSession().createQuery(queryString);
+            query.setParameter("account", account);
+            Moderator moderator = (Moderator) query.uniqueResult();
+            if (moderator != null) {
+                result = true;
+            }
+        } catch (HibernateException e) {
+            Logger.error("Could not determine moderator for account: " + account.getEmail());
+        }
+        return result;
     }
 
     public static Account save(Account account) throws ManagerException {

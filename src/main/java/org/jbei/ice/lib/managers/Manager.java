@@ -13,7 +13,7 @@ public abstract class Manager {
         try {
             // Do not assign transaction to value
             getSession().beginTransaction();
-            obj = getSession().merge(obj);
+            //obj = getSession().merge(obj);
             getSession().delete(obj);
             getSession().getTransaction().commit();
 

@@ -17,8 +17,10 @@ import org.apache.wicket.markup.html.form.ChoiceRenderer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.ListMultipleChoice;
 import org.apache.wicket.markup.html.form.StatelessForm;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.util.CollectionModel;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AccountManager;
@@ -27,6 +29,7 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Group;
+import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
 import org.jbei.ice.lib.permissions.AuthenticatedPermissionManager;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Job;
@@ -196,15 +199,32 @@ public class PermissionEditPanel extends Panel {
             }
         };
 
-        Form form = new StatelessForm("permissionForm") {
+        class PermissionForm extends StatelessForm<Object> {
 
             private static final long serialVersionUID = 1L;
+            private String ownerEmail;
+
+            public PermissionForm(String id) {
+                super(id);
+                setModel(new CompoundPropertyModel<Object>(this));
+                add(new TextField<String>("ownerEmail"));
+            }
 
             @Override
             protected void onSubmit() {
                 // submit handled by savePermssion ajax button
             }
-        };
+
+            public void setOwnerEmail(String userEmail) {
+                this.ownerEmail = userEmail.trim();
+            }
+
+            public String getOwnerEmail() {
+                return ownerEmail;
+            }
+        }
+
+        PermissionForm form = new PermissionForm("permissionForm");
 
         usersLink.add(new SimpleAttributeModifier("class", "active"));
         groupsLink.add(new SimpleAttributeModifier("class", "inactive"));
@@ -371,17 +391,32 @@ public class PermissionEditPanel extends Panel {
                 }
 
                 try {
+                    String sessionKey = IceSession.get().getSessionKey();
                     AuthenticatedPermissionManager.setReadGroup(thisPanel.entry, readGroups,
-                            IceSession.get().getSessionKey());
+                            sessionKey);
                     AuthenticatedPermissionManager.setWriteGroup(thisPanel.entry, writeGroups,
-                            IceSession.get().getSessionKey());
+                            sessionKey);
                     AuthenticatedPermissionManager.setReadUser(thisPanel.entry, readAccounts,
-                            IceSession.get().getSessionKey());
+                            sessionKey);
                     AuthenticatedPermissionManager.setWriteUser(thisPanel.entry, writeAccounts,
-                            IceSession.get().getSessionKey());
+                            sessionKey);
+                    PermissionForm permissionForm = (PermissionForm) form;
+                    String newEmail = permissionForm.getOwnerEmail();
+                    if (newEmail != thisPanel.entry.getOwnerEmail()) {
+                        thisPanel.entry.setOwnerEmail(newEmail);
+                        Account account = AccountManager.getByEmail(newEmail);
+                        if (account != null) {
+                            thisPanel.entry.setOwner(account.getFirstName() + " "
+                                    + account.getLastName());
+                        } else {
+                            thisPanel.entry.setOwner(newEmail);
+                        }
+                        AuthenticatedEntryManager.save(thisPanel.entry, sessionKey);
+                    }
+
+                    JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);
                     setResponsePage(EntryViewPage.class, new PageParameters("0="
                             + thisPanel.entry.getId() + ",1=" + "permission"));
-                    JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);
                 } catch (ManagerException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -407,6 +442,8 @@ public class PermissionEditPanel extends Panel {
         form.add(removeFromWritableButton);
 
         form.add(savePermissionButton);
+
+        form.setOwnerEmail(entry.getOwnerEmail());
 
         add(form);
         add(new FeedbackPanel("feedback"));

@@ -48,6 +48,6 @@
 	<mapping class="org.jbei.ice.lib.models.EntryFundingSource"/>
 	<mapping class="org.jbei.ice.lib.models.AccountFundingSource"/>
 	<mapping class="org.jbei.ice.lib.models.SessionData"/>
-	
+	<mapping class="org.jbei.ice.lib.models.Moderator"/>
 </session-factory>
 </hibernate-configuration>

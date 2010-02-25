@@ -7,6 +7,12 @@
 
 	<table>
 		<tr>
+			<td>Owner:</td>
+			<td><input wicket:id="ownerEmail" class="inputbox" value="user's email"></td>
+		</tr>
+	</table>
+	<table>
+		<tr>
 			<td>
 			<table cellspacing="0" cellpadding="0" border="0">
 				<tr>
@@ -20,8 +26,7 @@
 					</td>
 				</tr>
 				<tr>
-					<td><select wicket:id="choiceList"
-						style="width: 300px; height: 325px; padding: 0px;">
+					<td><select wicket:id="choiceList" style="width: 300px; height: 325px; padding: 0px;">
 					</select></td>
 				</tr>
 
@@ -30,13 +35,11 @@
 			<td>
 			<table height="360px">
 				<tr>
-					<td><input wicket:id="addToReadableButton" value="&gt;"
-						type="button"></input><br></br>
+					<td><input wicket:id="addToReadableButton" value="&gt;" type="button"></input><br></br>
 					</td>
 				</tr>
 				<tr>
-					<td><input wicket:id="addToWritableButton" value="&gt;"
-						type="button"></input></td>
+					<td><input wicket:id="addToWritableButton" value="&gt;" type="button"></input></td>
 				</tr>
 
 			</table>
@@ -47,8 +50,7 @@
 					<td>Read Allowed:</td>
 				</tr>
 				<tr>
-					<td><select wicket:id="readAllowedList"
-						style="width: 300px; height: 150px; padding: 0px;"></select></td>
+					<td><select wicket:id="readAllowedList" style="width: 300px; height: 150px; padding: 0px;"></select></td>
 				</tr>
 				<tr>
 					<td>Write Allowed:</td>
@@ -62,20 +64,17 @@
 			<td>
 			<table height="360px">
 				<tr>
-					<td><input wicket:id="removeFromReadableButton" value="Remove"
-						type="button"></input><br></br>
+					<td><input wicket:id="removeFromReadableButton" value="Remove" type="button"></input><br></br>
 					</td>
 				</tr>
 				<tr>
-					<td><input wicket:id="removeFromWritableButton" value="Remove"
-						type="button"></input></td>
+					<td><input wicket:id="removeFromWritableButton" value="Remove" type="button"></input></td>
 				</tr>
 			</table>
 			</td>
 		</tr>
 		<tr style="text-align: right;">
-			<td colspan=3><input wicket:id="savePermissionButton"
-				type="submit" value="Save Permission"></input></td>
+			<td colspan=3><input wicket:id="savePermissionButton" type="submit" value="Save Permission"></input></td>
 		</tr>
 	</table>
 	</form>

@@ -63,7 +63,12 @@ public class PermissionManager extends Manager {
     public static boolean hasReadPermission(Entry entry, Account account) {
         boolean result = false;
         if (entry != null && account != null) {
-            result = userHasReadPermission(entry, account) | groupHasReadPermission(entry, account);
+            if (AccountManager.isModerator(account)) {
+                result = true;
+            } else {
+                result = userHasReadPermission(entry, account)
+                        | groupHasReadPermission(entry, account);
+            }
         }
         return result;
     }
@@ -71,8 +76,12 @@ public class PermissionManager extends Manager {
     public static boolean hasWritePermission(Entry entry, Account account) {
         boolean result = false;
         if (entry != null && account != null) {
-            result = userHasWritePermission(entry, account)
-                    | groupHasWritePermission(entry, account);
+            if (AccountManager.isModerator(account)) {
+                result = true;
+            } else {
+                result = userHasWritePermission(entry, account)
+                        | groupHasWritePermission(entry, account);
+            }
         }
         return result;
     }

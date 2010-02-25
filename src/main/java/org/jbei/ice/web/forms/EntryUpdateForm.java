@@ -6,7 +6,6 @@ import org.apache.wicket.PageParameters;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
@@ -83,19 +82,14 @@ public class EntryUpdateForm<T extends Entry> extends EntrySubmitForm<T> {
                 error(e.getMessage());
             }
         } else {
-            Account account = IceSession.get().getAccount();
-            if (account.getPrivilegeLevel() == 9) {
-                try {
-                    EntryManager.save(entry);
-                    info("Save as admin successful!");
-                } catch (ManagerException e) {
-                    String msg = "System Error: Could not save! ";
-                    Logger.error(msg + e.getMessage());
-                    error(msg);
-                    e.printStackTrace();
-                }
-            } else {
-                error("Save not permitted");
+            try {
+                EntryManager.save(entry);
+                info("Save as admin successful!");
+            } catch (ManagerException e) {
+                String msg = "System Error: Could not save! ";
+                Logger.error(msg + e.getMessage());
+                error(msg);
+                e.printStackTrace();
             }
         }
     }
