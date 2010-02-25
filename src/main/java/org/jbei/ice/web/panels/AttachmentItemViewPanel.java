@@ -14,6 +14,8 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Attachment;
+import org.jbei.ice.lib.permissions.PermissionManager;
+import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class AttachmentItemViewPanel extends Panel {
@@ -63,6 +65,11 @@ public class AttachmentItemViewPanel extends Panel {
 
         AjaxFallbackLink deleteAttachmentLink = new DeleteAttachmentLink("deleteAttachmentLink");
         deleteAttachmentLink.setOutputMarkupId(true);
+        deleteAttachmentLink.setOutputMarkupPlaceholderTag(true);
+        if (!PermissionManager.hasWritePermission(attachment.getEntry().getId(), IceSession.get()
+                .getSessionKey())) {
+            deleteAttachmentLink.setVisible(false);
+        }
         add(deleteAttachmentLink);
 
         Link downloadLink = null;
