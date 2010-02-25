@@ -16,21 +16,18 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Group;
+import org.jbei.ice.web.IceSession;
 
 public class PermissionManager extends Manager {
 
     // convenience method that wraps actual method
-    public static boolean hasReadPermission(int entryId, String sessionKey) {
+    public static boolean hasReadPermission(int entryId) {
         boolean result = false;
         Entry entry;
-        Account account;
         try {
             entry = EntryManager.get(entryId);
             if (entry != null) {
-                account = AccountManager.getAccountByAuthToken(sessionKey);
-                if (account != null) {
-                    result = hasReadPermission(entry, account);
-                }
+                result = hasReadPermission(entry);
             }
         } catch (ManagerException e) {
             // if lookup fails, doesn't have permission
@@ -41,17 +38,15 @@ public class PermissionManager extends Manager {
     }
 
     // convenience method that wraps actual method
-    public static boolean hasWritePermission(int entryId, String sessionKey) {
+    public static boolean hasWritePermission(int entryId) {
         boolean result = false;
         Entry entry;
-        Account account;
+
         try {
             entry = EntryManager.get(entryId);
             if (entry != null) {
-                account = AccountManager.getAccountByAuthToken(sessionKey);
-                if (account != null) {
-                    result = hasWritePermission(entry, account);
-                }
+                result = hasWritePermission(entry);
+
             }
         } catch (ManagerException e) {
             String msg = "manager exception during permission lookup: " + e.toString();
@@ -60,8 +55,10 @@ public class PermissionManager extends Manager {
         return result;
     }
 
-    public static boolean hasReadPermission(Entry entry, Account account) {
+    public static boolean hasReadPermission(Entry entry) {
         boolean result = false;
+        Account account;
+        account = IceSession.get().getAccount();
         if (entry != null && account != null) {
             if (AccountManager.isModerator(account)) {
                 result = true;
@@ -73,8 +70,12 @@ public class PermissionManager extends Manager {
         return result;
     }
 
-    public static boolean hasWritePermission(Entry entry, Account account) {
+    public static boolean hasWritePermission(Entry entry) {
         boolean result = false;
+
+        Account account;
+        account = IceSession.get().getAccount();
+
         if (entry != null && account != null) {
             if (AccountManager.isModerator(account)) {
                 result = true;

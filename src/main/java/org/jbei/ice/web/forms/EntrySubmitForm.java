@@ -262,6 +262,7 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
         entry.setOwnerEmail(IceSession.get().getAccount().getEmail());
     }
 
+    @Override
     protected void onSubmit() {
         populateEntry();
 
@@ -270,8 +271,7 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
 
     protected void submitEntry() {
         try {
-            Entry newEntry = AuthenticatedEntryManager.createEntry(entry, IceSession.get()
-                    .getSessionKey());
+            Entry newEntry = AuthenticatedEntryManager.createEntry(entry);
             PermissionManager.addReadGroup(entry, GroupManager.getEverybodyGroup());
             setResponsePage(EntryViewPage.class, new PageParameters("0=" + newEntry.getId()));
         } catch (ManagerException e) {

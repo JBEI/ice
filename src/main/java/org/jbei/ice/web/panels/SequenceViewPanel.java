@@ -65,8 +65,7 @@ public class SequenceViewPanel extends Panel {
 
     private void initializeControls() {
         topLinkContainer = new WebMarkupContainer("topLink");
-        topLinkContainer.setVisible(PermissionManager.hasWritePermission(entry.getId(), IceSession
-                .get().getSessionKey()));
+        topLinkContainer.setVisible(PermissionManager.hasWritePermission(entry.getId()));
         add(topLinkContainer);
 
         addSequenceLink = new AjaxFallbackLink<Object>("actionSequenceLink") {
@@ -157,7 +156,7 @@ public class SequenceViewPanel extends Panel {
             fragment.setOutputMarkupId(true);
 
             fragment.add(new DeleteSequenceLink("deleteLink").setVisible(PermissionManager
-                    .hasWritePermission(entry.getId(), IceSession.get().getSessionKey())));
+                    .hasWritePermission(entry.getId())));
 
             PageParameters parameters = new PageParameters();
             parameters.add("entryId", entry.getRecordId());
@@ -221,6 +220,7 @@ public class SequenceViewPanel extends Panel {
                     "return confirm('Delete this sequence?');"));
         }
 
+        @Override
         public void onClick(AjaxRequestTarget target) {
             try {
                 entry.setSequence(null);

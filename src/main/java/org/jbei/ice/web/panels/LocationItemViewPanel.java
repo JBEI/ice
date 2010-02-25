@@ -55,8 +55,7 @@ public class LocationItemViewPanel extends Panel {
 
                 location.getSample().getLocations().remove(location);
                 try {
-                    AuthenticatedSampleManager.save(location.getSample(), IceSession.get()
-                            .getSessionKey());
+                    AuthenticatedSampleManager.save(location.getSample());
                     JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
                     JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);
                 } catch (PermissionException e) {

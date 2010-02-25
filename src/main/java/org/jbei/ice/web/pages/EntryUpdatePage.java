@@ -10,7 +10,6 @@ import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionManager;
-import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.forms.PartUpdateFormPanel;
 import org.jbei.ice.web.forms.PlasmidUpdateFormPanel;
 import org.jbei.ice.web.forms.StrainUpdateFormPanel;
@@ -22,12 +21,12 @@ public class EntryUpdatePage extends ProtectedPage {
         super(parameters);
         int entryId = parameters.getInt("0");
 
-        if (!PermissionManager.hasWritePermission(entryId, IceSession.get().getSessionKey())) {
+        if (!PermissionManager.hasWritePermission(entryId)) {
             throw new RestartResponseAtInterceptPageException(PermissionDeniedPage.class);
         }
 
         try {
-            entry = AuthenticatedEntryManager.get(entryId, IceSession.get().getSessionKey());
+            entry = AuthenticatedEntryManager.get(entryId);
             String recordType = entry.getRecordType();
             if (recordType.equals("strain")) {
                 StrainUpdateFormPanel panel = new StrainUpdateFormPanel("entry", (Strain) entry);

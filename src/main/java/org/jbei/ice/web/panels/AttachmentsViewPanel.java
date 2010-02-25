@@ -13,7 +13,6 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.permissions.PermissionManager;
-import org.jbei.ice.web.IceSession;
 
 public class AttachmentsViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -57,8 +56,7 @@ public class AttachmentsViewPanel extends Panel {
         }
 
         WebMarkupContainer topLinkContainer = new WebMarkupContainer("topLink");
-        topLinkContainer.setVisible(PermissionManager.hasWritePermission(entry.getId(), IceSession
-                .get().getSessionKey()));
+        topLinkContainer.setVisible(PermissionManager.hasWritePermission(entry.getId()));
         topLinkContainer.add(new AddAttachmentLink("addAttachmentLink"));
         add(topLinkContainer);
 

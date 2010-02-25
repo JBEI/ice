@@ -373,13 +373,12 @@ public class PlasmidStrainNewFormPanel extends Panel {
 
             // persist
             try {
-                Plasmid newPlasmid = AuthenticatedEntryManager.createPlasmid(plasmid, IceSession
-                        .get().getSessionKey());
+                Plasmid newPlasmid = AuthenticatedEntryManager.createPlasmid(plasmid);
                 String plasmidPartNumberString = "[[jbei:"
                         + plasmid.getPartNumbers().toArray(new PartNumber[0])[0].getPartNumber()
                         + "]]";
                 strain.setPlasmids(plasmidPartNumberString);
-                AuthenticatedEntryManager.createStrain(strain, IceSession.get().getSessionKey());
+                AuthenticatedEntryManager.createStrain(strain);
                 setResponsePage(EntryViewPage.class, new PageParameters("0=" + newPlasmid.getId()));
             } catch (ManagerException e) {
                 String msg = "System Error: Could not save! ";

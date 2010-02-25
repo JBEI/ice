@@ -18,7 +18,6 @@ import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Job;
 import org.jbei.ice.lib.utils.JobCue;
-import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class LocationItemEditPanel extends Panel {
@@ -98,8 +97,7 @@ public class LocationItemEditPanel extends Panel {
                 sample.getLocations().add(location);
 
                 try {
-                    sample = AuthenticatedSampleManager.save(sample, IceSession.get()
-                            .getSessionKey());
+                    sample = AuthenticatedSampleManager.save(sample);
                     JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
                     JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);
 

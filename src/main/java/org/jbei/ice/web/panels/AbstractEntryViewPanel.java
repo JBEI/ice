@@ -22,7 +22,6 @@ import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.permissions.PermissionManager;
-import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryUpdatePage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.ProfilePage;
@@ -65,8 +64,7 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
     protected void renderTopLink() {
         WebMarkupContainer topLinkContainer = new WebMarkupContainer("topLink");
 
-        topLinkContainer.setVisible(PermissionManager.hasWritePermission(getEntry().getId(),
-                IceSession.get().getSessionKey()));
+        topLinkContainer.setVisible(PermissionManager.hasWritePermission(getEntry().getId()));
         topLinkContainer.add(new BookmarkablePageLink<WebPage>("updateLink", EntryUpdatePage.class,
                 new PageParameters("0=" + getEntry().getId())));
 

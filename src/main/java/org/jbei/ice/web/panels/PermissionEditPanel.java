@@ -102,14 +102,10 @@ public class PermissionEditPanel extends Panel {
         }
 
         try {
-            Set<Account> readAccounts = AuthenticatedPermissionManager.getReadUser(this.entry,
-                    IceSession.get().getSessionKey());
-            Set<Account> writeAccounts = AuthenticatedPermissionManager.getWriteUser(this.entry,
-                    IceSession.get().getSessionKey());
-            Set<Group> readGroups = AuthenticatedPermissionManager.getReadGroup(this.entry,
-                    IceSession.get().getSessionKey());
-            Set<Group> writeGroups = AuthenticatedPermissionManager.getWriteGroup(this.entry,
-                    IceSession.get().getSessionKey());
+            Set<Account> readAccounts = AuthenticatedPermissionManager.getReadUser(this.entry);
+            Set<Account> writeAccounts = AuthenticatedPermissionManager.getWriteUser(this.entry);
+            Set<Group> readGroups = AuthenticatedPermissionManager.getReadGroup(this.entry);
+            Set<Group> writeGroups = AuthenticatedPermissionManager.getWriteGroup(this.entry);
 
             for (Account account : readAccounts) {
                 int choiceItemIndex = -1;
@@ -392,14 +388,10 @@ public class PermissionEditPanel extends Panel {
 
                 try {
                     String sessionKey = IceSession.get().getSessionKey();
-                    AuthenticatedPermissionManager.setReadGroup(thisPanel.entry, readGroups,
-                            sessionKey);
-                    AuthenticatedPermissionManager.setWriteGroup(thisPanel.entry, writeGroups,
-                            sessionKey);
-                    AuthenticatedPermissionManager.setReadUser(thisPanel.entry, readAccounts,
-                            sessionKey);
-                    AuthenticatedPermissionManager.setWriteUser(thisPanel.entry, writeAccounts,
-                            sessionKey);
+                    AuthenticatedPermissionManager.setReadGroup(thisPanel.entry, readGroups);
+                    AuthenticatedPermissionManager.setWriteGroup(thisPanel.entry, writeGroups);
+                    AuthenticatedPermissionManager.setReadUser(thisPanel.entry, readAccounts);
+                    AuthenticatedPermissionManager.setWriteUser(thisPanel.entry, writeAccounts);
                     PermissionForm permissionForm = (PermissionForm) form;
                     String newEmail = permissionForm.getOwnerEmail();
                     if (newEmail != thisPanel.entry.getOwnerEmail()) {
@@ -411,7 +403,7 @@ public class PermissionEditPanel extends Panel {
                         } else {
                             thisPanel.entry.setOwner(newEmail);
                         }
-                        AuthenticatedEntryManager.save(thisPanel.entry, sessionKey);
+                        AuthenticatedEntryManager.save(thisPanel.entry);
                     }
 
                     JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);

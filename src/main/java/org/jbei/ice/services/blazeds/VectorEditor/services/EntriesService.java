@@ -19,7 +19,7 @@ public class EntriesService {
         try {
             entry = EntryManager.getByRecordId(entryId);
 
-            if (PermissionManager.hasReadPermission(entry, account)) {
+            if (PermissionManager.hasReadPermission(entry)) {
                 return entry;
             }
         } catch (ManagerException e) {

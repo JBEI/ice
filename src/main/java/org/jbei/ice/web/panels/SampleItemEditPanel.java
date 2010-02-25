@@ -83,8 +83,7 @@ public class SampleItemEditPanel extends Panel {
                 sample.setNotes(getNotes());
 
                 try {
-                    AuthenticatedSampleManager.save(sampleItemEditPanel.getSample(), IceSession
-                            .get().getSessionKey());
+                    AuthenticatedSampleManager.save(sampleItemEditPanel.getSample());
                     JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
                     JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);
                 } catch (PermissionException e) {

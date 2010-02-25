@@ -11,7 +11,6 @@ import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.panels.PartSimpleViewPanel;
 import org.jbei.ice.web.panels.PlasmidSimpleViewPanel;
 import org.jbei.ice.web.panels.StrainSimpleViewPanel;
@@ -27,12 +26,11 @@ public class EntryTipPage extends ProtectedPage {
 
         try {
             entryId = Integer.parseInt(identifier);
-            entry = AuthenticatedEntryManager.get(entryId, IceSession.get().getSessionKey());
+            entry = AuthenticatedEntryManager.get(entryId);
         } catch (NumberFormatException e) {
             // Not a number. Perhaps it's a part number or recordId?
             try {
-                entry = AuthenticatedEntryManager.getByPartNumber(identifier, IceSession.get()
-                        .getSessionKey());
+                entry = AuthenticatedEntryManager.getByPartNumber(identifier);
                 entryId = entry.getId();
             } catch (PermissionException e1) {
                 // entryId is still 0
@@ -42,8 +40,7 @@ public class EntryTipPage extends ProtectedPage {
 
             if (entryId == 0) {
                 try {
-                    entry = AuthenticatedEntryManager.getByRecordId(identifier, IceSession.get()
-                            .getSessionKey());
+                    entry = AuthenticatedEntryManager.getByRecordId(identifier);
                     entryId = entry.getId();
                 } catch (PermissionException e1) {
                     // entryId is still 0

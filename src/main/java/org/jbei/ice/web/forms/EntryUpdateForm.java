@@ -14,7 +14,6 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.utils.Job;
 import org.jbei.ice.lib.utils.JobCue;
-import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class EntryUpdateForm<T extends Entry> extends EntrySubmitForm<T> {
@@ -65,9 +64,9 @@ public class EntryUpdateForm<T extends Entry> extends EntrySubmitForm<T> {
     @Override
     protected void submitEntry() {
         Entry entry = getEntry();
-        if (PermissionManager.hasWritePermission(entry.getId(), IceSession.get().getSessionKey())) {
+        if (PermissionManager.hasWritePermission(entry.getId())) {
             try {
-                AuthenticatedEntryManager.save(entry, IceSession.get().getSessionKey());
+                AuthenticatedEntryManager.save(entry);
 
                 JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
                 JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);

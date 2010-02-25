@@ -8,6 +8,7 @@ import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sample;
+import org.jbei.ice.web.IceSession;
 
 /**
  * All samples are visible to everyone, and anyone can create samples. Only edit and delete require
@@ -48,19 +49,24 @@ public class AuthenticatedSampleManager {
         return SampleManager.create(sample);
     }
 
-    public static Sample save(Sample sample, String sessionKey) throws ManagerException {
+    public static Sample save(Sample sample) throws ManagerException {
         if (sample.getId() == 0) {
             // This is a new sample, which means anyone is allowed to create.
             return SampleManager.save(sample);
         } else {
             try {
                 Sample oldSample = SampleManager.get(sample.getId());
-                Account user = AccountManager.getAccountByAuthToken(sessionKey);
-                if (oldSample.getDepositor().equals(user.getEmail())) {
-                    return SampleManager.save(sample);
+                Account user = IceSession.get().getAccount();
+                if (user != null) {
+                    if (oldSample.getDepositor().equals(user.getEmail())) {
+                        return SampleManager.save(sample);
+                    } else {
+                        throw new PermissionException("save not permitted");
+                    }
                 } else {
-                    throw new PermissionException("save not permitted");
+                    return null;
                 }
+
             } catch (ManagerException e) {
                 throw new PermissionException("save failed");
             }
