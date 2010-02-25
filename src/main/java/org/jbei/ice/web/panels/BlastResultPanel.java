@@ -26,7 +26,7 @@ public class BlastResultPanel extends Panel {
     private AbstractEntriesDataView<BlastResult> blastDataView;
 
     public BlastResultPanel(String id, String blastQuery, ArrayList<BlastResult> blastResults,
-            int limit) {
+            int limit, boolean dnaQuery) {
         super(id);
 
         add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
@@ -114,6 +114,13 @@ public class BlastResultPanel extends Panel {
         add(blastDataView);
 
         add(new JbeiPagingNavigator("navigator", blastDataView));
+        String alignedHeader = null;
+        if (dnaQuery == true) {
+            alignedHeader = "Aligned (BP)";
+        } else {
+            alignedHeader = "Aligned (AA)";
+        }
+        add(new Label("alignedHeader", alignedHeader));
     }
 
     public void setBlastQuery(String blastQuery) {

@@ -49,6 +49,7 @@ public class BlastFormPanel extends Panel {
                 add(new Button("submit"));
             }
 
+            @Override
             public void onSubmit() {
                 ArrayList<BlastResult> blastResults = new ArrayList<BlastResult>();
                 BlastFormPanel thisPanel = (BlastFormPanel) getParent();
@@ -72,10 +73,10 @@ public class BlastFormPanel extends Panel {
                         }
 
                         resultPanel = new BlastResultPanel("blastResultPanel", proteinQuery,
-                                blastResults, 15);
+                                blastResults, 15, false);
                     } else {
                         resultPanel = new BlastResultPanel("blastResultPanel", getQuery(),
-                                blastResults, 15);
+                                blastResults, 15, true);
                     }
 
                     thisPanel.replace(resultPanel);
