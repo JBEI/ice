@@ -25,13 +25,11 @@ public class HibernateHelper {
     }
 
     public static Session getSession() {
-
         if (session == null) {
             session = getSessionFactory().openSession();
         } else if (!session.isOpen()) {
             session = getSessionFactory().openSession();
         }
-
         return session;
     }
 

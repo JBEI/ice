@@ -3,7 +3,9 @@ package org.jbei.ice.lib.managers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
@@ -48,37 +50,56 @@ public class SequenceManager extends Manager {
     @SuppressWarnings("unchecked")
     public static List<Sequence> getAll() {
         String queryString = "from Sequence";
+        Session session = getSession();
+        Query query = session.createQuery(queryString);
+        ArrayList<Sequence> result = null;
+        try {
+            result = new ArrayList<Sequence>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not get all sequences " + e.toString());
+        } finally {
 
-        Query query = getSession().createQuery(queryString);
-
-        return new ArrayList<Sequence>(query.list());
+        }
+        return result;
     }
 
     @SuppressWarnings("unchecked")
     public static List<Sequence> getAllVisible() {
         Group everybodyGroup = null;
         List<Sequence> result = null;
-
+        Session session = getSession();
         try {
             everybodyGroup = GroupManager.getEverybodyGroup();
             String queryString = "select entry.sequence from Entry entry, ReadGroup readGroup where readGroup.group = :group and readGroup.entry = entry";
-            Query query = getSession().createQuery(queryString);
+            Query query = session.createQuery(queryString);
             query.setParameter("group", everybodyGroup);
             result = new ArrayList<Sequence>(query.list());
 
         } catch (ManagerException e) {
             Logger.error("getAllVisible: " + e.toString());
+        } finally {
+
         }
         return result;
     }
 
     public static Sequence get(int id) throws ManagerException {
-        Sequence sequence = (Sequence) getSession().load(Sequence.class, id);
+        Session session = getSession();
+        Sequence sequence = null;
+        try {
+            sequence = (Sequence) session.load(Sequence.class, id);
+        } catch (HibernateException e) {
+            Logger.error("Could not get sequence " + e.toString());
+        } finally {
+
+        }
+
         return sequence;
     }
 
     public static Sequence getByUuid(String uuid) throws ManagerException {
-        Query query = getSession().createQuery("from " + Sequence.class.getName()
+        Session session = getSession();
+        Query query = session.createQuery("from " + Sequence.class.getName()
                 + " where uuid = :uuid");
         query.setString("uuid", uuid);
         Sequence sequence;
@@ -86,25 +107,34 @@ public class SequenceManager extends Manager {
             sequence = (Sequence) query.uniqueResult();
         } catch (Exception e) {
             throw new ManagerException("Could not retrieve Sequence by uuid");
+        } finally {
+
         }
         return sequence;
     }
 
     public static Sequence getByEntry(Entry entry) throws ManagerException {
-        Sequence sequence;
-        Query query = getSession().createQuery("from " + Sequence.class.getName()
+        Sequence sequence = null;
+        Session session = getSession();
+        Query query = session.createQuery("from " + Sequence.class.getName()
                 + " where entries_id = :entryId");
         query.setInteger("entryId", entry.getId());
-        sequence = (Sequence) query.uniqueResult();
+        try {
+            sequence = (Sequence) query.uniqueResult();
+        } catch (HibernateException e) {
+            Logger.error("Could not get sequence " + e.toString());
+        } finally {
 
+        }
         return sequence;
     }
 
     public static boolean hasSequence(Entry entry) {
         boolean result = false;
+        Session session = getSession();
         try {
             String queryString = "from " + Sequence.class.getName() + " where entry = :entry";
-            Query query = getSession().createQuery(queryString);
+            Query query = session.createQuery(queryString);
             query.setParameter("entry", entry);
             Sequence sequence = (Sequence) query.uniqueResult();
             if (sequence == null) {
@@ -118,6 +148,9 @@ public class SequenceManager extends Manager {
             }
 
         } catch (Exception e) {
+            String msg = "Could net determine if entry has sequence " + entry.getRecordId();
+            Logger.warn(msg);
+        } finally {
 
         }
         return result;
@@ -161,12 +194,12 @@ public class SequenceManager extends Manager {
 
     public static Feature getExistingFeature(Feature feature) {
         Feature result = null;
-
+        Session session = getSession();
         try {
             FeatureDNA featureDNA = feature.getFeatureDna();
 
             String queryString = "from " + FeatureDNA.class.getName() + " where hash = :hash";
-            Query query = getSession().createQuery(queryString);
+            Query query = session.createQuery(queryString);
             query.setParameter("hash", SequenceUtils
                     .calculateSequenceHash(featureDNA.getSequence()));
 
@@ -184,6 +217,9 @@ public class SequenceManager extends Manager {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            Logger.warn(e.toString());
+        } finally {
+
         }
 
         return result;

@@ -5,6 +5,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
@@ -30,9 +31,10 @@ public class SampleManager extends Manager {
     @SuppressWarnings("unchecked")
     public static LinkedHashSet<Sample> get(Entry entry) throws ManagerException {
         LinkedHashSet<Sample> result = null;
+        Session session = getSession();
         try {
             String queryString = "from Sample as sample where sample.entry = :entry order by sample.id desc";
-            Query query = getSession().createQuery(queryString);
+            Query query = session.createQuery(queryString);
 
             query.setEntity("entry", entry);
 
@@ -41,6 +43,8 @@ public class SampleManager extends Manager {
             String msg = "Could not get Sample by Entry " + entry.getRecordId();
             Logger.error(msg);
             throw new ManagerException(msg, e);
+        } finally {
+
         }
 
         return result;
@@ -50,10 +54,11 @@ public class SampleManager extends Manager {
     public static LinkedHashSet<Sample> getByAccount(Account account, int offset, int limit)
             throws ManagerException {
         LinkedHashSet<Sample> result = null;
+        Session session = getSession();
         try {
             String queryString = "from Sample as sample where sample.depositor = :depositor";
 
-            Query query = getSession().createQuery(queryString);
+            Query query = session.createQuery(queryString);
 
             query.setParameter("depositor", account.getEmail());
             query.setFirstResult(offset);
@@ -64,16 +69,19 @@ public class SampleManager extends Manager {
             String msg = "Could not retrieve samples by account " + account.getEmail();
             Logger.error(msg);
             throw new ManagerException(msg, e);
+        } finally {
+
         }
 
         return result;
     }
 
     public static int getByAccountCount(Account account) throws ManagerException {
+        Session session = getSession();
         try {
             String queryString = "from Sample as sample where sample.depositor = :depositor";
 
-            Query query = getSession().createQuery(queryString);
+            Query query = session.createQuery(queryString);
 
             query.setParameter("depositor", account.getEmail());
 
@@ -82,15 +90,18 @@ public class SampleManager extends Manager {
             String msg = "Could not retrieve samples by account " + account.getEmail();
             Logger.error(msg);
             throw new ManagerException(msg, e);
+        } finally {
+
         }
     }
 
     @SuppressWarnings("unchecked")
     public static boolean hasSample(Entry entry) {
         boolean result = false;
+        Session session = getSession();
         try {
             String queryString = "from " + Sample.class.getName() + " where entry = :entry";
-            Query query = getSession().createQuery(queryString);
+            Query query = session.createQuery(queryString);
             query.setParameter("entry", entry);
             List samples = query.list();
             if (samples.size() > 0) {
@@ -99,6 +110,8 @@ public class SampleManager extends Manager {
         } catch (Exception e) {
             String msg = "Could not determine if entry has Sample: " + entry.getRecordId();
             Logger.error(msg);
+        } finally {
+
         }
         return result;
     }
@@ -106,15 +119,18 @@ public class SampleManager extends Manager {
     @SuppressWarnings("unchecked")
     public static int getNumberOfSamples(Entry entry) {
         int result = 0;
+        Session session = getSession();
         try {
             String queryString = "from " + Sample.class.getName() + " where entry = :entry";
-            Query query = getSession().createQuery(queryString);
+            Query query = session.createQuery(queryString);
             query.setParameter("entry", entry);
             List samples = query.list();
             result = samples.size();
         } catch (Exception e) {
             String msg = "Could not determine if entry has Sample: " + entry.getRecordId();
             Logger.error(msg);
+        } finally {
+
         }
         return result;
     }

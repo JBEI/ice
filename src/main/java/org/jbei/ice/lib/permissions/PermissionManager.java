@@ -10,7 +10,6 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.GroupManager;
-import org.jbei.ice.lib.managers.HibernateHelper;
 import org.jbei.ice.lib.managers.Manager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
@@ -304,7 +303,7 @@ public class PermissionManager extends Manager {
     protected static boolean userHasReadPermission(Entry entry, Account account) {
         boolean result = false;
         String queryString = "select readUser.account.id from ReadUser as readUser where readUser.entry = :entry";
-        Query query = HibernateHelper.getSession().createQuery(queryString);
+        Query query = getSession().createQuery(queryString);
         query.setEntity("entry", entry);
 
         @SuppressWarnings("unchecked")
@@ -322,7 +321,7 @@ public class PermissionManager extends Manager {
         String queryString = "select writeUser.account.id from WriteUser as writeUser where writeUser.entry = :entry";
         Query query = null;
         try {
-            query = HibernateHelper.getSession().createQuery(queryString);
+            query = getSession().createQuery(queryString);
         } catch (Exception e) {
             Logger.warn(e.toString());
         }
@@ -343,7 +342,7 @@ public class PermissionManager extends Manager {
     protected static boolean groupHasReadPermission(Entry entry, Account account) {
         boolean result = false;
         String queryString = "select readGroup.group.id from ReadGroup as readGroup where readGroup.entry = :entry";
-        Query query = HibernateHelper.getSession().createQuery(queryString);
+        Query query = getSession().createQuery(queryString);
         query.setEntity("entry", entry);
 
         @SuppressWarnings("unchecked")
@@ -362,7 +361,7 @@ public class PermissionManager extends Manager {
     protected static boolean groupHasWritePermission(Entry entry, Account account) {
         boolean result = false;
         String queryString = "select writeGroup.group.id from WriteGroup as writeGroup where writeGroup.entry = :entry";
-        Query query = HibernateHelper.getSession().createQuery(queryString);
+        Query query = getSession().createQuery(queryString);
         query.setEntity("entry", entry);
 
         @SuppressWarnings("unchecked")

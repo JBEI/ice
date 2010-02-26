@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
@@ -81,14 +82,17 @@ public class AttachmentManager extends Manager {
     }
 
     public static Attachment getByFileId(String fileId) throws ManagerException {
-        Query query = getSession().createQuery(
-                "from " + Attachment.class.getName() + " where file_id = :fileId");
+        Session session = getSession();
+        Query query = session.createQuery("from " + Attachment.class.getName()
+                + " where file_id = :fileId");
         query.setString("fileId", fileId);
         Attachment attachment = null;
         try {
             attachment = (Attachment) query.uniqueResult();
         } catch (Exception e) {
             throw new ManagerException("Could not retrieve Attachment by FileId");
+        } finally {
+
         }
         if (attachment == null) {
             throw new ManagerException("No such fileId found");
@@ -106,21 +110,29 @@ public class AttachmentManager extends Manager {
 
     @SuppressWarnings("unchecked")
     public static ArrayList<Attachment> getByEntry(Entry entry) throws ManagerException {
-        ArrayList<Attachment> attachments;
-        Query query = getSession().createQuery(
-                "from " + Attachment.class.getName() + " where entries_id = :entryId");
+        ArrayList<Attachment> attachments = null;
+        Session session = getSession();
+        Query query = session.createQuery("from " + Attachment.class.getName()
+                + " where entries_id = :entryId");
         query.setInteger("entryId", entry.getId());
-        attachments = (ArrayList<Attachment>) query.list();
+        try {
+            attachments = (ArrayList<Attachment>) query.list();
+        } catch (HibernateException e) {
+            String msg = "Could not get attachments by entry" + e.toString();
+            Logger.error(msg);
+        } finally {
 
+        }
         return attachments;
     }
 
     @SuppressWarnings("unchecked")
     public static boolean hasAttachment(Entry entry) {
         boolean result = false;
+        Session session = getSession();
         try {
             String queryString = "from " + Attachment.class.getName() + " where entry = :entry";
-            Query query = getSession().createQuery(queryString);
+            Query query = session.createQuery(queryString);
             query.setParameter("entry", entry);
             List attachments = query.list();
             if (attachments.size() > 0) {
@@ -130,6 +142,8 @@ public class AttachmentManager extends Manager {
             String msg = "Could not determine if entry has attachments: " + entry.getRecordId();
             Logger.error(msg);
 
+        } finally {
+
         }
         return result;
     }
@@ -137,15 +151,18 @@ public class AttachmentManager extends Manager {
     @SuppressWarnings("unchecked")
     public static int getNumberOfAttachments(Entry entry) {
         int result = 0;
+        Session session = getSession();
         try {
             String queryString = "from " + Attachment.class.getName() + " where entry = :entry";
-            Query query = getSession().createQuery(queryString);
+            Query query = session.createQuery(queryString);
             query.setParameter("entry", entry);
             List attachments = query.list();
             result = attachments.size();
         } catch (Exception e) {
             String msg = "Could not determine if entry has attachments: " + entry.getRecordId();
             Logger.error(msg);
+        } finally {
+
         }
         return result;
     }

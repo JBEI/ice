@@ -3,6 +3,7 @@ package org.jbei.ice.lib.managers;
 import java.util.Calendar;
 
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.SessionData;
@@ -11,9 +12,10 @@ public class SessionManager extends Manager {
 
     public static SessionData get(String sessionKey) throws ManagerException {
         SessionData sessionData = null;
+        Session session = getSession();
         try {
             String queryString = "from SessionData where sessionKey = :sessionKey";
-            Query query = HibernateHelper.getSession().createQuery(queryString);
+            Query query = session.createQuery(queryString);
             query.setString("sessionKey", sessionKey);
 
             sessionData = (SessionData) query.uniqueResult();
@@ -30,6 +32,8 @@ public class SessionManager extends Manager {
             String msg = "Could not get SessionData by id " + sessionKey;
             Logger.error(msg);
             throw new ManagerException(msg, e);
+        } finally {
+
         }
 
         return sessionData;
@@ -66,11 +70,11 @@ public class SessionManager extends Manager {
      * Flush the database of expired session's
      */
     public static void flush() {
-
+        Session session = getSession();
         try {
             String queryString = "delete SessionData sessionData where sessionData.expireDate < :now";
-            Transaction tx = getSession().beginTransaction();
-            Query query = getSession().createQuery(queryString);
+            Transaction tx = session.beginTransaction();
+            Query query = session.createQuery(queryString);
             query.setLong("now", Calendar.getInstance().getTimeInMillis());
             query.executeUpdate();
             tx.commit();
@@ -78,6 +82,8 @@ public class SessionManager extends Manager {
         } catch (Exception e) {
             String msg = "Could not flush expired sessions: " + e.toString();
             Logger.error(msg);
+        } finally {
+
         }
     }
 

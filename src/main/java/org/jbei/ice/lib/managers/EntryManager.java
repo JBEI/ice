@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
@@ -109,22 +110,25 @@ public class EntryManager extends Manager {
     }
 
     public static Entry get(int id) throws ManagerException {
+        Session session = getSession();
         try {
-            Query query = getSession().createQuery(
-                    "from " + Entry.class.getName() + " where id = :id");
+            Query query = session.createQuery("from " + Entry.class.getName() + " where id = :id");
             query.setParameter("id", id);
             Entry entry = (Entry) query.uniqueResult();
             return entry;
 
         } catch (HibernateException e) {
             throw new ManagerException("Couldn't retrieve Entry by id: " + String.valueOf(id), e);
+        } finally {
+
         }
     }
 
     public static Entry getByRecordId(String recordId) throws ManagerException {
+        Session session = getSession();
         try {
-            Query query = getSession().createQuery(
-                    "from " + Entry.class.getName() + " where recordId = :recordId");
+            Query query = session.createQuery("from " + Entry.class.getName()
+                    + " where recordId = :recordId");
             query.setParameter("recordId", recordId);
 
             Entry entry = (Entry) query.uniqueResult();
@@ -132,13 +136,16 @@ public class EntryManager extends Manager {
             return entry;
         } catch (HibernateException e) {
             throw new ManagerException("Couldn't retrieve Entry by recordId: " + recordId, e);
+        } finally {
+
         }
     }
 
     public static Entry getByPartNumber(String partNumber) throws ManagerException {
+        Session session = getSession();
         try {
-            Query query = getSession().createQuery(
-                    "from " + PartNumber.class.getName() + " where partNumber = :partNumber");
+            Query query = session.createQuery("from " + PartNumber.class.getName()
+                    + " where partNumber = :partNumber");
             query.setParameter("partNumber", partNumber);
 
             PartNumber entryPartNumber = (PartNumber) query.uniqueResult();
@@ -153,13 +160,16 @@ public class EntryManager extends Manager {
             return entry;
         } catch (HibernateException e) {
             throw new ManagerException("Couldn't retrieve Entry by partNumber: " + partNumber, e);
+        } finally {
+
         }
     }
 
     public static Entry getByName(String name) throws ManagerException {
+        Session session = getSession();
         try {
-            Query query = getSession().createQuery(
-                    "from " + Name.class.getName() + " where name = :name");
+            Query query = session.createQuery("from " + Name.class.getName()
+                    + " where name = :name");
             query.setParameter("name", name);
 
             Name entryName = (Name) query.uniqueResult();
@@ -171,6 +181,8 @@ public class EntryManager extends Manager {
             return entryName.getEntry();
         } catch (HibernateException e) {
             throw new ManagerException("Couldn't retrieve Entry by name: " + name, e);
+        } finally {
+
         }
     }
 
@@ -184,14 +196,21 @@ public class EntryManager extends Manager {
     @SuppressWarnings("unchecked")
     public static LinkedHashSet<Entry> getByAccount(Account account, int offset, int limit) {
         String queryString = "from Entry where ownerEmail = :ownerEmail";
-
-        Query query = getSession().createQuery(queryString);
+        Session session = getSession();
+        Query query = session.createQuery(queryString);
 
         query.setParameter("ownerEmail", account.getEmail());
         query.setFirstResult(offset);
         query.setMaxResults(limit);
+        LinkedHashSet<Entry> result = new LinkedHashSet<Entry>();
+        try {
+            result = new LinkedHashSet<Entry>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Couldn't retrieve Entry by name: " + e.toString());
+        } finally {
 
-        return new LinkedHashSet<Entry>(query.list());
+        }
+        return result;
     }
 
     @SuppressWarnings("unchecked")
@@ -206,14 +225,22 @@ public class EntryManager extends Manager {
 
         String queryString = "from Entry where ownerEmail = :ownerEmail"
                 + (!sortQuerySuffix.isEmpty() ? (" ORDER BY " + sortQuerySuffix) : "");
-
-        Query query = getSession().createQuery(queryString);
+        Session session = getSession();
+        Query query = session.createQuery(queryString);
 
         query.setParameter("ownerEmail", account.getEmail());
         query.setFirstResult(offset);
         query.setMaxResults(limit);
 
-        return new LinkedHashSet<Entry>(query.list());
+        LinkedHashSet<Entry> result = null;
+        try {
+            result = new LinkedHashSet<Entry>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not get entries by account " + e.toString());
+        } finally {
+
+        }
+        return result;
     }
 
     public static int getByAccountCount(Account account) {
@@ -222,35 +249,53 @@ public class EntryManager extends Manager {
         }
 
         String queryString = "from Entry where ownerEmail = :ownerEmail";
-
-        Query query = getSession().createQuery(queryString);
+        Session session = getSession();
+        Query query = session.createQuery(queryString);
 
         query.setParameter("ownerEmail", account.getEmail());
+        int result = 0;
+        try {
+            result = query.list().size();
+        } catch (HibernateException e) {
+            Logger.error("Could not get number of entries by  account " + e.toString());
+        } finally {
 
-        return query.list().size();
+        }
+        return result;
     }
 
     @SuppressWarnings("unchecked")
     public static Set<Entry> getAll() {
         String queryString = "from Entry";
+        Session session = getSession();
+        Query query = session.createQuery(queryString);
+        LinkedHashSet<Entry> result = null;
+        try {
+            new LinkedHashSet<Entry>(query.list());
+        } catch (HibernateException e) {
+            String msg = "could not get all entries: " + e.toString();
+            Logger.error(msg);
+        } finally {
 
-        Query query = getSession().createQuery(queryString);
-
-        return new LinkedHashSet<Entry>(query.list());
+        }
+        return result;
     }
 
     @SuppressWarnings("unchecked")
     public static Set<Entry> getAllVisible() {
         Set<Entry> result = null;
         Group everybodyGroup = null;
+        Session session = getSession();
         try {
             everybodyGroup = GroupManager.getEverybodyGroup();
             String queryString = "select entry from Entry entry, ReadGroup readGroup where readGroup.group = :group and readGroup.entry = entry";
-            Query query = getSession().createQuery(queryString);
+            Query query = session.createQuery(queryString);
             query.setParameter("group", everybodyGroup);
             result = new LinkedHashSet<Entry>(query.list());
         } catch (ManagerException e) {
             Logger.error("getAllVisible: " + e.toString());
+        } finally {
+
         }
         return result;
     }
@@ -265,12 +310,19 @@ public class EntryManager extends Manager {
 
         String queryString = "from Entry"
                 + (!sortQuerySuffix.isEmpty() ? (" ORDER BY " + sortQuerySuffix) : "");
-
-        Query query = getSession().createQuery(queryString);
+        Session session = getSession();
+        Query query = session.createQuery(queryString);
         query.setFirstResult(offset);
         query.setMaxResults(limit);
+        LinkedHashSet<Entry> result = null;
+        try {
+            new LinkedHashSet<Entry>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not get all entries by limit " + e.toString());
+        } finally {
 
-        return new LinkedHashSet<Entry>(query.list());
+        }
+        return result;
     }
 
     @SuppressWarnings("unchecked")
@@ -278,6 +330,7 @@ public class EntryManager extends Manager {
         String sortQuerySuffix = "";
         Group everybodyGroup;
         LinkedHashSet<Entry> result = null;
+        Session session = getSession();
         try {
             everybodyGroup = GroupManager.getEverybodyGroup();
             if (sortFields != null && sortFields.length > 0) {
@@ -286,7 +339,7 @@ public class EntryManager extends Manager {
             String queryString = "select entry from Entry entry, ReadGroup readGroup where readGroup.group = :group and readGroup.entry = entry"
                     + (!sortQuerySuffix.isEmpty() ? (" ORDER BY " + "entry." + sortQuerySuffix)
                             : "");
-            Query query = getSession().createQuery(queryString);
+            Query query = session.createQuery(queryString);
             query.setParameter("group", everybodyGroup);
             query.setFirstResult(offset);
             query.setMaxResults(limit);
@@ -296,6 +349,8 @@ public class EntryManager extends Manager {
             Logger.error("getAllVisible: " + e.toString());
         } catch (Exception e) {
             Logger.error("getAllVisible: " + e.toString());
+        } finally {
+
         }
 
         return result;
@@ -303,24 +358,34 @@ public class EntryManager extends Manager {
 
     public static int getNumberOfEntries() {
         String queryString = "select id from Entry";
+        Session session = getSession();
+        Query query = session.createQuery(queryString);
+        int result = 0;
+        try {
+            result = query.list().size();
+        } catch (HibernateException e) {
+            Logger.error("Could not get number of entries " + e.toString());
+        } finally {
 
-        Query query = getSession().createQuery(queryString);
-
-        return query.list().size();
+        }
+        return result;
     }
 
     public static int getNumberOfVisibleEntries() {
         Group everybodyGroup;
         int result = 0;
+        Session session = getSession();
         try {
             everybodyGroup = GroupManager.getEverybodyGroup();
             String queryString = "select id from ReadGroup readGroup where readGroup.group = :group";
-            Query query = getSession().createQuery(queryString);
+            Query query = session.createQuery(queryString);
             query.setParameter("group", everybodyGroup);
             result = query.list().size();
 
         } catch (ManagerException e) {
             Logger.error("getNumberOfVisibleEntries: " + e.toString());
+        } finally {
+
         }
         return result;
     }
@@ -328,10 +393,11 @@ public class EntryManager extends Manager {
     @SuppressWarnings("unchecked")
     private static String generateNextPartNumber(String prefix, String delimiter, String suffix)
             throws ManagerException {
+        Session session = getSession();
         try {
             String queryString = "from " + PartNumber.class.getName() + " where partNumber LIKE '"
                     + prefix + "%' ORDER BY partNumber DESC";
-            Query query = getSession().createQuery(queryString);
+            Query query = session.createQuery(queryString);
 
             ArrayList<PartNumber> tempList = new ArrayList<PartNumber>(query.list());
             PartNumber entryPartNumber = null;
@@ -364,6 +430,8 @@ public class EntryManager extends Manager {
             return nextPartNumber;
         } catch (HibernateException e) {
             throw new ManagerException("Couldn't retrieve Entry by partNumber", e);
+        } finally {
+
         }
     }
 
@@ -380,11 +448,12 @@ public class EntryManager extends Manager {
     private static FundingSource saveFundingSource(FundingSource fundingSource)
             throws ManagerException {
         FundingSource result;
+        Session session = getSession();
         try {
             String queryString = "from " + FundingSource.class.getName()
                     + " where fundingSource=:fundingSource AND"
                     + " principalInvestigator=:principalInvestigator";
-            Query query = getSession().createQuery(queryString);
+            Query query = session.createQuery(queryString);
             query.setParameter("fundingSource", fundingSource.getFundingSource());
             query.setParameter("principalInvestigator", fundingSource.getPrincipalInvestigator());
             FundingSource existingFundingSource = null;
@@ -406,6 +475,8 @@ public class EntryManager extends Manager {
         } catch (Exception e) {
             String msg = "Could not save unique funding source";
             throw new ManagerException(msg, e);
+        } finally {
+
         }
         return result;
     }

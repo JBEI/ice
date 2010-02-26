@@ -1,9 +1,12 @@
 package org.jbei.ice.lib.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.GroupManager;
@@ -99,25 +102,31 @@ public class PopulateInitialDatabase {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static void normalizeFundingSources(FundingSource dupeFundingSource) {
 
         String queryString = "from " + FundingSource.class.getName()
                 + " where fundingSource=:fundingSource AND"
                 + " principalInvestigator=:principalInvestigator";
-        Query query = HibernateHelper.getSession().createQuery(queryString);
+        Session session = HibernateHelper.getSession();
+        Query query = session.createQuery(queryString);
         query.setParameter("fundingSource", dupeFundingSource.getFundingSource());
         query.setParameter("principalInvestigator", dupeFundingSource.getPrincipalInvestigator());
-        @SuppressWarnings("unchecked")
-        List<FundingSource> dupeFundingSources = query.list();
+        ArrayList<FundingSource> dupeFundingSources = new ArrayList<FundingSource>();
+        try {
+            dupeFundingSources = new ArrayList<FundingSource>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not get funding sources " + e.toString());
+        }
         FundingSource keepFundingSource = dupeFundingSources.get(0);
         for (int i = 1; i < dupeFundingSources.size(); i++) {
             FundingSource deleteFundingSource = dupeFundingSources.get(i);
             // normalize EntryFundingSources
             queryString = "from " + EntryFundingSource.class.getName()
                     + " where fundingSource=:fundingSource";
-            query = HibernateHelper.getSession().createQuery(queryString);
+
+            query = session.createQuery(queryString);
             query.setParameter("fundingSource", deleteFundingSource);
-            @SuppressWarnings("unchecked")
             List<EntryFundingSource> entryFundingSources = (query).list();
             for (EntryFundingSource entryFundingSource : entryFundingSources) {
                 try {
@@ -128,13 +137,14 @@ public class PopulateInitialDatabase {
                     Logger.error(msg);
                 }
             }
+
             // normalize AccountFundingSources
             queryString = "from " + AccountFundingSource.class.getName()
                     + " where fundingSource=:fundingSource";
-            query = HibernateHelper.getSession().createQuery(queryString);
+            query = session.createQuery(queryString);
             query.setParameter("fundingSource", deleteFundingSource);
-            @SuppressWarnings("unchecked")
             List<AccountFundingSource> accountFundingSources = query.list();
+
             for (AccountFundingSource accountFundingSource : accountFundingSources) {
                 accountFundingSource.setFundingSource(keepFundingSource);
                 try {
@@ -156,5 +166,4 @@ public class PopulateInitialDatabase {
             }
         }
     }
-
 }

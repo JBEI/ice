@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
@@ -13,14 +14,17 @@ public class GroupManager extends Manager {
 
     public static Group get(String uuid) throws ManagerException {
         Group result = null;
+        Session session = getSession();
         try {
-            Query query = HibernateHelper.getSession().createQuery("from Group where uuid = :uuid");
+            Query query = session.createQuery("from Group where uuid = :uuid");
             query.setString("uuid", uuid);
             result = (Group) query.uniqueResult();
         } catch (Exception e) {
             String str = "Could not get Group by uuid: " + uuid + " " + e.toString();
             Logger.error(str);
             throw new ManagerException(str);
+        } finally {
+
         }
 
         return result;
@@ -28,8 +32,9 @@ public class GroupManager extends Manager {
 
     public static Group get(int id) throws ManagerException {
         Group result = null;
+        Session session = getSession();
         try {
-            Query query = HibernateHelper.getSession().createQuery("from Group where id = :id");
+            Query query = session.createQuery("from Group where id = :id");
             query.setInteger("id", id);
             result = (Group) query.uniqueResult();
         } catch (Exception e) {
@@ -37,6 +42,8 @@ public class GroupManager extends Manager {
             String msg = "Could not get Group by id: " + id + " " + e.toString();
             Logger.error(msg);
             throw new ManagerException(msg);
+        } finally {
+
         }
 
         return result;
@@ -58,14 +65,17 @@ public class GroupManager extends Manager {
     @SuppressWarnings("unchecked")
     public static Set<Group> getAll() throws ManagerException {
         LinkedHashSet<Group> groups = new LinkedHashSet<Group>();
+        Session session = getSession();
         try {
             String queryString = "from Group";
-            Query query = getSession().createQuery(queryString);
+            Query query = session.createQuery(queryString);
             groups.addAll(query.list());
         } catch (HibernateException e) {
             String msg = "Could not retrieve all groups: " + e.toString();
             Logger.warn(msg);
             throw new ManagerException(msg);
+        } finally {
+
         }
         return groups;
     }

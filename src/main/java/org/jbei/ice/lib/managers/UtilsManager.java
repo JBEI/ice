@@ -8,7 +8,10 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
+import org.hibernate.Session;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Comment;
 import org.jbei.ice.lib.models.Entry;
@@ -22,8 +25,9 @@ import org.jbei.ice.lib.utils.Utils;
 public class UtilsManager extends Manager {
     public static TreeSet<String> getUniqueSelectionMarkers() {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-        Query query = HibernateHelper.getSession().createQuery(
-                "select distinct selectionMarker.name from SelectionMarker selectionMarker");
+        Session session = getSession();
+        Query query = session
+                .createQuery("select distinct selectionMarker.name from SelectionMarker selectionMarker");
         HashSet<String> rawMarkers = new HashSet<String>(query.list());
         /* Markers are comma separated lists, so must parse them 
         getting from the database */
@@ -44,12 +48,17 @@ public class UtilsManager extends Manager {
 
     public static TreeSet<String> getUniquePublicPlasmidNames() {
         TreeSet<String> results = new TreeSet<String>();
+        Session session = getSession();
+        Query query = session
+                .createQuery("select distinct name.name from Plasmid plasmid inner join plasmid.names as name where name.name <> '' order by name.name asc");
+        HashSet<String> names = new HashSet<String>();
+        try {
+            new HashSet<String>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not get unique public plasmid names " + e.toString());
+        } finally {
 
-        Query query = HibernateHelper
-                .getSession()
-                .createQuery(
-                        "select distinct name.name from Plasmid plasmid inner join plasmid.names as name where name.name <> '' order by name.name asc");
-        HashSet<String> names = new HashSet<String>(query.list());
+        }
 
         for (String name : names) {
             results.add(name);
@@ -60,10 +69,17 @@ public class UtilsManager extends Manager {
 
     public static TreeSet<String> getUniquePromoters() {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+        Session session = getSession();
+        Query query = session
+                .createQuery("select distinct plasmid.promoters from Plasmid plasmid ");
+        HashSet<String> rawPromoters = new HashSet<String>();
+        try {
+            rawPromoters = new HashSet<String>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not get unique promoters " + e.toString());
+        } finally {
 
-        Query query = HibernateHelper.getSession().createQuery(
-                "select distinct plasmid.promoters from Plasmid plasmid ");
-        HashSet<String> rawPromoters = new HashSet<String>(query.list());
+        }
         /* Prometers are comma separated lists, so must parse them 
         getting from the database */
 
@@ -83,11 +99,19 @@ public class UtilsManager extends Manager {
 
     public static TreeSet<String> getUniqueOriginOfReplications() {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+        Session session = getSession();
+        Query query = session
+                .createQuery("select distinct plasmid.originOfReplication from Plasmid plasmid ");
 
-        Query query = HibernateHelper.getSession().createQuery(
-                "select distinct plasmid.originOfReplication from Plasmid plasmid ");
+        HashSet<String> rawOrigins = new HashSet<String>();
 
-        HashSet<String> rawOrigins = new HashSet<String>(query.list());
+        try {
+            rawOrigins = new HashSet<String>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not get unique origins of replication " + e.toString());
+        } finally {
+
+        }
         /* Origin of replications are comma separated lists, so must parse them 
         getting from the database */
 
@@ -111,12 +135,19 @@ public class UtilsManager extends Manager {
         HashSet<Integer> strainIds = new HashSet<Integer>();
 
         Set<PartNumber> partNumbers = plasmid.getPartNumbers();
+        Session session = getSession();
 
         for (PartNumber partNumber : partNumbers) {
-            Query query = HibernateHelper.getSession().createQuery(
-                    "select strain.id from Strain strain where strain.plasmids like :partNumber");
+            Query query = session
+                    .createQuery("select strain.id from Strain strain where strain.plasmids like :partNumber");
             query.setString("partNumber", "%" + partNumber.getPartNumber() + "%");
-            strainIds.addAll(query.list());
+            try {
+                strainIds.addAll(query.list());
+            } catch (HibernateException e) {
+                Logger.error("Could not get strains for plasmid " + e.toString());
+            } finally {
+
+            }
         }
 
         Pattern basicJbeiPattern = Pattern.compile("\\[\\[jbei:.*?\\]\\]");
@@ -318,15 +349,18 @@ public class UtilsManager extends Manager {
 
     public static Vote getVote(Entry entry, Account account) throws ManagerException {
         Vote vote = null;
+        Session session = getSession();
         try {
-            Query query = HibernateHelper.getSession().createQuery(
-                    "select vote from Vote vote where vote.account = :account vote.entry = :entry");
+            Query query = session
+                    .createQuery("select vote from Vote vote where vote.account = :account vote.entry = :entry");
             query.setEntity("account", account);
             query.setEntity("entry", entry);
 
             vote = (Vote) query.uniqueResult();
         } catch (Exception e) {
             throw new ManagerException("Could not get vote by entry and account");
+        } finally {
+
         }
 
         return vote;
@@ -404,11 +438,11 @@ public class UtilsManager extends Manager {
     }
 
     public static void main(String[] args) throws ManagerException {
-        /*Query query = HibernateHelper.getSession().createQuery(
+        /*Query query = session.createQuery(
                 "select entry from Entry entry where entry = 3810");
         //Entry entry = (Entry) query.uniqueResult();
         
-        query = HibernateHelper.getSession().createQuery(
+        query = session.createQuery(
         		"select account from Account account where id = 1"
         );
         Account account = (Account) query.uniqueResult();

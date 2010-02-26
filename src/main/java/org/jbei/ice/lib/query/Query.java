@@ -11,7 +11,9 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.TreeSet;
 
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.HibernateHelper;
 import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Entry;
@@ -21,7 +23,7 @@ import org.jbei.ice.lib.utils.Utils;
 
 @SuppressWarnings("unchecked")
 public class Query {
-    protected static Session session = HibernateHelper.getSession();
+
     private ArrayList<Filter> filters = new ArrayList<Filter>();
 
     private static Query instance = null;
@@ -184,15 +186,21 @@ public class Query {
         }
 
         if (resultIds.size() > 0) {
-            org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                    "SELECT entry FROM Entry entry WHERE id in (:ids) "
+            Session session = HibernateHelper.getSession();
+            org.hibernate.Query query = session
+                    .createQuery("SELECT entry FROM Entry entry WHERE id in (:ids) "
                             + (!sortQuerySuffix.isEmpty() ? ("ORDER BY " + sortQuerySuffix) : ""));
 
             query.setParameterList("ids", resultIds);
             query.setFirstResult(offset);
             query.setMaxResults(limit);
+            try {
+                result = new LinkedHashSet<Entry>(query.list());
+            } catch (HibernateException e) {
+                Logger.error("Could not query " + e.toString());
+            } finally {
 
-            result = new LinkedHashSet<Entry>(query.list());
+            }
         }
 
         return result;
@@ -298,10 +306,17 @@ public class Query {
 
         String criteria = makeCriterion("lower(name.name)", parsedQuery.get("operator"),
                 parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct name.entry.id from Name name where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct name.entry.id from Name name where " + criteria);
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
 
+        }
         return rawResults;
     }
 
@@ -310,9 +325,17 @@ public class Query {
 
         String criteria = makeCriterion("lower(strain.plasmids)", parsedQuery.get("operator"),
                 parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct strain.id from Strain strain where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct strain.id from Strain strain where " + criteria);
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
 
         return rawResults;
     }
@@ -321,10 +344,18 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.recordType)", parsedQuery.get("operator"),
                 parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct entry.id from Entry entry where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct entry.id from Entry entry where " + criteria);
 
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
         return rawResults;
     }
 
@@ -332,10 +363,17 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.alias)", parsedQuery.get("operator"),
                 parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct entry.id from Entry entry where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct entry.id from Entry entry where " + criteria);
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
 
+        }
         return rawResults;
     }
 
@@ -343,9 +381,19 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(partNumber.partNumber)",
                 parsedQuery.get("operator"), parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct partNumber.entry.id from PartNumber partNumber where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct partNumber.entry.id from PartNumber partNumber where "
+                        + criteria);
+
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
 
         return rawResults;
     }
@@ -354,16 +402,32 @@ public class Query {
         HashSet<Integer> result = null;
         HashSet<Integer> allEntriesWithAttachment = null;
         HashSet<Integer> allEntries = null;
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct attachment.entry.id from Attachment attachment");
+        allEntriesWithAttachment = new HashSet<Integer>();
 
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct attachment.entry.id from Attachment attachment");
-        allEntriesWithAttachment = new HashSet<Integer>(query.list());
+        try {
+            allEntriesWithAttachment = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
 
         if (queryString.equals("yes")) {
             result = allEntriesWithAttachment;
         } else {
-            query = HibernateHelper.getSession().createQuery("select entry.id from Entry entry");
-            allEntries = new HashSet<Integer>(query.list());
+            session = HibernateHelper.getSession();
+            query = session.createQuery("select entry.id from Entry entry");
+            allEntries = new HashSet<Integer>();
+            try {
+                allEntries = new HashSet<Integer>(query.list());
+            } catch (HibernateException e) {
+                Logger.error("Could not query " + e.toString());
+            } finally {
+
+            }
 
             allEntries.removeAll(allEntriesWithAttachment);
             result = allEntries;
@@ -376,16 +440,31 @@ public class Query {
         HashSet<Integer> result = null;
         HashSet<Integer> allEntriesWithSample = null;
         HashSet<Integer> allEntries = null;
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct sample.entry.id from Sample sample");
+        allEntriesWithSample = new HashSet<Integer>();
+        try {
+            allEntriesWithSample = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
 
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct sample.entry.id from Sample sample");
-        allEntriesWithSample = new HashSet<Integer>(query.list());
+        }
 
         if (queryString.equals("yes")) {
             result = allEntriesWithSample;
         } else {
-            query = HibernateHelper.getSession().createQuery("select entry.id from Entry entry");
-            allEntries = new HashSet<Integer>(query.list());
+            session = HibernateHelper.getSession();
+            query = session.createQuery("select entry.id from Entry entry");
+            allEntries = new HashSet<Integer>();
+            try {
+                allEntries = new HashSet<Integer>(query.list());
+            } catch (HibernateException e) {
+                Logger.error("Could not query " + e.toString());
+            } finally {
+
+            }
 
             allEntries.removeAll(allEntriesWithSample);
             result = allEntries;
@@ -398,17 +477,31 @@ public class Query {
         HashSet<Integer> result = null;
         HashSet<Integer> allEntriesWithSequence = null;
         HashSet<Integer> allEntries = null;
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct sequence.entry.id from Sequence sequence");
+        allEntriesWithSequence = new HashSet<Integer>();
+        try {
+            allEntriesWithSequence = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
 
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct sequence.entry.id from Sequence sequence");
-        allEntriesWithSequence = new HashSet<Integer>(query.list());
+        }
 
         if (queryString.equals("yes")) {
             result = allEntriesWithSequence;
         } else {
-            query = HibernateHelper.getSession().createQuery("select entry.id from Entry entry");
-            allEntries = new HashSet<Integer>(query.list());
+            session = HibernateHelper.getSession();
+            query = session.createQuery("select entry.id from Entry entry");
+            allEntries = new HashSet<Integer>();
+            try {
+                allEntries = new HashSet<Integer>(query.list());
+            } catch (HibernateException e) {
+                Logger.error("Could not query " + e.toString());
+            } finally {
 
+            }
             allEntries.removeAll(allEntriesWithSequence);
             result = allEntries;
         }
@@ -420,9 +513,17 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.recordId) ", parsedQuery.get("operator"),
                 parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct entry.id from Entry entry where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct entry.id from Entry entry where " + criteria);
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
 
         return rawResults;
     }
@@ -440,10 +541,18 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.owner) ", parsedQuery.get("operator"),
                 parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct entry.id from Entry entry where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct entry.id from Entry entry where " + criteria);
 
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
         return rawResults;
     }
 
@@ -451,10 +560,18 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.ownerEmail) ", parsedQuery.get("operator"),
                 parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct entry.id from Entry entry where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct entry.id from Entry entry where " + criteria);
 
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
         return rawResults;
     }
 
@@ -471,10 +588,18 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.creator) ", parsedQuery.get("operator"),
                 parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct entry.id from Entry entry where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct entry.id from Entry entry where " + criteria);
 
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
         return rawResults;
     }
 
@@ -483,10 +608,18 @@ public class Query {
 
         String criteria = makeCriterion("lower(entry.creatorEmail) ", parsedQuery.get("operator"),
                 parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct entry.id from Entry entry where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct entry.id from Entry entry where " + criteria);
 
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
         return rawResults;
     }
 
@@ -494,9 +627,17 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.keywords)", parsedQuery.get("operator"),
                 parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct entry.id from Entry entry where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct entry.id from Entry entry where " + criteria);
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
 
         return rawResults;
     }
@@ -516,9 +657,18 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.shortDescription)", parsedQuery
                 .get("operator"), parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct entry.id from Entry entry where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct entry.id from Entry entry where " + criteria);
+
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
 
         return rawResults;
     }
@@ -527,10 +677,18 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.longDescription)",
                 parsedQuery.get("operator"), parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct entry.id from Entry entry where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct entry.id from Entry entry where " + criteria);
 
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
         return rawResults;
     }
 
@@ -538,10 +696,18 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.references)", parsedQuery.get("operator"),
                 parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct entry.id from Entry entry where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct entry.id from Entry entry where " + criteria);
 
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
         return rawResults;
     }
 
@@ -549,9 +715,18 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(plasmid.backbone)", parsedQuery.get("operator"),
                 parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct plasmid.id from Plasmid plasmid where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct plasmid.id from Plasmid plasmid where " + criteria);
+
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
 
         return rawResults;
     }
@@ -560,10 +735,18 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(plasmid.promoters)", parsedQuery.get("operator"),
                 parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct plasmid.id from Plasmid plasmid where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct plasmid.id from Plasmid plasmid where " + criteria);
 
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
         return rawResults;
     }
 
@@ -571,10 +754,18 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(plasmid.originOfReplication)", parsedQuery
                 .get("operator"), parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct plasmid.id from Plasmid plasmid where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct plasmid.id from Plasmid plasmid where " + criteria);
 
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
         return rawResults;
     }
 
@@ -582,10 +773,17 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(strain.host)", parsedQuery.get("operator"),
                 parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct strain.id from Strain strain where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct strain.id from Strain strain where " + criteria);
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
 
+        }
         return rawResults;
     }
 
@@ -593,9 +791,17 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(strain.genotypePhenotype)", parsedQuery
                 .get("operator"), parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct strain.id from Strain strain where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct strain.id from Strain strain where " + criteria);
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
 
         return rawResults;
     }
@@ -604,9 +810,17 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(part.packageFormat)", parsedQuery.get("operator"),
                 parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct part.id from Part part where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct part.id from Part part where " + criteria);
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
 
         return rawResults;
     }
@@ -615,9 +829,18 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(marker.name)", parsedQuery.get("operator"),
                 parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct marker.entry.id from SelectionMarker marker where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct marker.entry.id from SelectionMarker marker where "
+                        + criteria);
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
 
         return rawResults;
     }
@@ -626,9 +849,17 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.status)", parsedQuery.get("operator"),
                 parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct entry.id from Entry entry where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct entry.id from Entry entry where " + criteria);
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
 
         return rawResults;
     }
@@ -637,9 +868,17 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(strain.plasmids)", parsedQuery.get("operator"),
                 parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct strain.id from Strain strain where " + criteria);
-        HashSet<Integer> rawResults = new HashSet<Integer>(query.list());
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session
+                .createQuery("select distinct strain.id from Strain strain where " + criteria);
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
 
         return rawResults;
     }
@@ -659,11 +898,19 @@ public class Query {
         String criteria = makeCriterion(
                 "lower(entryFundingSource.fundingSource.principalInvestigator)", parsedQuery
                         .get("operator"), parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct entry.id from " + EntryFundingSource.class.getName()
-                        + " entryFundingSource where " + criteria);
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session.createQuery("select distinct entry.id from "
+                + EntryFundingSource.class.getName() + " entryFundingSource where " + criteria);
 
-        return new HashSet<Integer>(query.list());
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
+        return rawResults;
     }
 
     protected HashSet<Integer> filterFundingSource(String queryString) {
@@ -671,11 +918,18 @@ public class Query {
 
         String criteria = makeCriterion("lower(entryFundingSource.fundingSource.fundingSource)",
                 parsedQuery.get("operator"), parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct entry.id from " + EntryFundingSource.class.getName()
-                        + " entryFundingSource where " + criteria);
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session.createQuery("select distinct entry.id from "
+                + EntryFundingSource.class.getName() + " entryFundingSource where " + criteria);
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
 
-        return new HashSet<Integer>(query.list());
+        }
+        return rawResults;
     }
 
     protected HashSet<Integer> filterIntelectualProperty(String queryString) {
@@ -683,11 +937,20 @@ public class Query {
 
         String criteria = makeCriterion("lower(entry.intellectualProperty)", parsedQuery
                 .get("operator"), parsedQuery.get("value"));
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct entry.id from " + Entry.class.getName() + " entry where "
-                        + criteria);
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session.createQuery("select distinct entry.id from "
+                + Entry.class.getName() + " entry where " + criteria);
 
-        return new HashSet<Integer>(query.list());
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
+
+        }
+        return rawResults;
+
     }
 
     protected HashSet<Integer> filterBioSafetyLevel(String queryString) {
@@ -702,12 +965,19 @@ public class Query {
         } else if (operator.equals("!")) {
             criteria = "entry.bioSafetyLevel != " + parsedQuery.get("value");
         }
+        Session session = HibernateHelper.getSession();
+        org.hibernate.Query query = session.createQuery("select distinct entry.id from "
+                + Entry.class.getName() + " entry where " + criteria);
 
-        org.hibernate.Query query = HibernateHelper.getSession().createQuery(
-                "select distinct entry.id from " + Entry.class.getName() + " entry where "
-                        + criteria);
+        HashSet<Integer> rawResults = new HashSet<Integer>();
+        try {
+            rawResults = new HashSet<Integer>(query.list());
+        } catch (HibernateException e) {
+            Logger.error("Could not query " + e.toString());
+        } finally {
 
-        return new HashSet<Integer>(query.list());
+        }
+        return rawResults;
     }
 
     public static void main(String[] args) {

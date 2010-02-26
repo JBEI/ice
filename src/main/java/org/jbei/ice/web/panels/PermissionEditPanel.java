@@ -34,7 +34,6 @@ import org.jbei.ice.lib.permissions.AuthenticatedPermissionManager;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Job;
 import org.jbei.ice.lib.utils.JobCue;
-import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.CustomChoice;
 import org.jbei.ice.web.pages.EntryViewPage;
 
@@ -387,7 +386,6 @@ public class PermissionEditPanel extends Panel {
                 }
 
                 try {
-                    String sessionKey = IceSession.get().getSessionKey();
                     AuthenticatedPermissionManager.setReadGroup(thisPanel.entry, readGroups);
                     AuthenticatedPermissionManager.setWriteGroup(thisPanel.entry, writeGroups);
                     AuthenticatedPermissionManager.setReadUser(thisPanel.entry, readAccounts);
