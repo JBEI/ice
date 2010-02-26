@@ -36,6 +36,27 @@ public class PermissionManager extends Manager {
         return result;
     }
 
+    public static boolean hasReadPermission(int entryId, String sessionKey) {
+        boolean result = false;
+        Entry entry;
+
+        Account account = AccountManager.getAccountByAuthToken(sessionKey);
+        if (account != null) {
+
+            try {
+                entry = EntryManager.get(entryId);
+                if (entry != null) {
+                    result = hasReadPermission(entry, account);
+                }
+            } catch (ManagerException e) {
+                // if lookup fails, doesn't have permission
+                String msg = "manager exception during permission lookup: " + e.toString();
+                Logger.warn(msg);
+            }
+        }
+        return result;
+    }
+
     // convenience method that wraps actual method
     public static boolean hasWritePermission(int entryId) {
         boolean result = false;
@@ -50,6 +71,24 @@ public class PermissionManager extends Manager {
         } catch (ManagerException e) {
             String msg = "manager exception during permission lookup: " + e.toString();
             Logger.warn(msg);
+        }
+        return result;
+    }
+
+    public static boolean hasWritePermission(int entryId, String sessionKey) {
+        boolean result = false;
+        Entry entry;
+        Account account = AccountManager.getAccountByAuthToken(sessionKey);
+        if (account != null) {
+            try {
+                entry = EntryManager.get(entryId);
+                if (entry != null) {
+                    result = hasWritePermission(entry, account);
+                }
+            } catch (ManagerException e) {
+                String msg = "manager exception during permission lookup: " + e.toString();
+                Logger.warn(msg);
+            }
         }
         return result;
     }
@@ -69,12 +108,38 @@ public class PermissionManager extends Manager {
         return result;
     }
 
+    public static boolean hasReadPermission(Entry entry, Account account) {
+        boolean result = false;
+        if (entry != null && account != null) {
+            if (AccountManager.isModerator(account)) {
+                result = true;
+            } else {
+                result = userHasReadPermission(entry, account)
+                        | groupHasReadPermission(entry, account);
+            }
+        }
+        return result;
+    }
+
     public static boolean hasWritePermission(Entry entry) {
         boolean result = false;
 
         Account account;
         account = IceSession.get().getAccount();
 
+        if (entry != null && account != null) {
+            if (AccountManager.isModerator(account)) {
+                result = true;
+            } else {
+                result = userHasWritePermission(entry, account)
+                        | groupHasWritePermission(entry, account);
+            }
+        }
+        return result;
+    }
+
+    public static boolean hasWritePermission(Entry entry, Account account) {
+        boolean result = false;
         if (entry != null && account != null) {
             if (AccountManager.isModerator(account)) {
                 result = true;

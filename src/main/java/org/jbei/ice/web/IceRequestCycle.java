@@ -27,6 +27,7 @@ public class IceRequestCycle extends WebRequestCycle {
 
     @Override
     protected void onBeginRequest() {
+        @SuppressWarnings("unused")
         Session session = HibernateHelper.getSession();
         Account account = IceSession.get().getAccount();
         HttpServletRequest httpServletRequest = ((WebRequest) get().getRequest())
