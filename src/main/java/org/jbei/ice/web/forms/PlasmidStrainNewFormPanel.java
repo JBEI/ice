@@ -197,7 +197,7 @@ public class PlasmidStrainNewFormPanel extends Panel {
                     new Model<ArrayList<CustomChoice>>(bioSafetyLevels),
                     new ChoiceRenderer<CustomChoice>("name", "value")));
 
-            setPlasmidStatus(bioSafetyLevels.get(0));
+            setPlasmidBioSafetyLevel(bioSafetyLevels.get(0));
         }
 
         protected ArrayList<CustomChoice> customChoicesListRenderer(Map<String, String> map) {
