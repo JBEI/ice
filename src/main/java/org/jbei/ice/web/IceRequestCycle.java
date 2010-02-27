@@ -16,7 +16,7 @@ import org.jbei.ice.lib.managers.HibernateHelper;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.web.pages.ErrorPage;
-import org.jbei.ice.web.pages.HomePage;
+import org.jbei.ice.web.pages.PageExpiredPage;
 import org.jbei.ice.web.pages.PermissionDeniedPage;
 
 public class IceRequestCycle extends WebRequestCycle {
@@ -63,9 +63,7 @@ public class IceRequestCycle extends WebRequestCycle {
             Logger.warn(msg);
             result = new PermissionDeniedPage(new PageParameters());
         } else if (e instanceof PageExpiredException) {
-            // If Page is expired due to forms going stale, etc,
-            // drop the users to their home page
-            result = new HomePage(new PageParameters());
+            result = new PageExpiredPage(new PageParameters());
         } else {
             Logger.error("Unknown Error", e);
             result = new ErrorPage(e);

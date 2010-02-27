@@ -73,7 +73,7 @@ public class SessionManager extends Manager {
     public static void flush() {
         Session session = getSession();
         try {
-            String queryString = "SessionData sessionData where sessionData.expireDate < :now";
+            String queryString = "from SessionData sessionData where sessionData.expireDate < :now";
             Query query = session.createQuery(queryString);
             query.setLong("now", Calendar.getInstance().getTimeInMillis());
             @SuppressWarnings("unchecked")
