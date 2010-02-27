@@ -52,7 +52,7 @@ public class IceRequestCycle extends WebRequestCycle {
     @Override
     protected void onEndRequest() {
         Session session = HibernateHelper.getSession();
-        session.close();
+        session.flush();
     }
 
     @Override
