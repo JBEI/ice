@@ -9,10 +9,8 @@ import org.apache.wicket.protocol.http.PageExpiredException;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.protocol.http.WebRequest;
 import org.apache.wicket.protocol.http.WebRequestCycle;
-import org.hibernate.Session;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.logging.UsageLogger;
-import org.jbei.ice.lib.managers.HibernateHelper;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.web.pages.ErrorPage;
@@ -26,8 +24,8 @@ public class IceRequestCycle extends WebRequestCycle {
 
     @Override
     protected void onBeginRequest() {
-        @SuppressWarnings("unused")
-        Session session = HibernateHelper.getSession();
+        //@SuppressWarnings("unused")
+        //Session session = HibernateHelper.getSession();
         Account account = IceSession.get().getAccount();
         HttpServletRequest httpServletRequest = ((WebRequest) get().getRequest())
                 .getHttpServletRequest();
@@ -51,8 +49,8 @@ public class IceRequestCycle extends WebRequestCycle {
 
     @Override
     protected void onEndRequest() {
-        Session session = HibernateHelper.getSession();
-        session.flush();
+        // Session session = HibernateHelper.getSession();
+        // session.flush();
     }
 
     @Override
