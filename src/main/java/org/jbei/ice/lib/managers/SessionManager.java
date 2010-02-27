@@ -1,10 +1,10 @@
 package org.jbei.ice.lib.managers;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.SessionData;
 
@@ -69,16 +69,18 @@ public class SessionManager extends Manager {
     /**
      * Flush the database of expired session's
      */
+
     public static void flush() {
         Session session = getSession();
         try {
-            String queryString = "delete SessionData sessionData where sessionData.expireDate < :now";
-            Transaction tx = session.beginTransaction();
+            String queryString = "SessionData sessionData where sessionData.expireDate < :now";
             Query query = session.createQuery(queryString);
             query.setLong("now", Calendar.getInstance().getTimeInMillis());
-            query.executeUpdate();
-            tx.commit();
-
+            @SuppressWarnings("unchecked")
+            ArrayList<SessionData> result = new ArrayList<SessionData>(query.list());
+            for (SessionData sessionData : result) {
+                dbDelete(sessionData);
+            }
         } catch (Exception e) {
             String msg = "Could not flush expired sessions: " + e.toString();
             Logger.error(msg, e);
