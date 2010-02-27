@@ -326,7 +326,6 @@ public class PermissionEditPanel extends Panel {
                     Integer id = thisPanel.choiceItems.get(Integer.parseInt(item.getValue()))
                             .getId();
 
-                    System.out.print(type + ":" + id + " ");
                     if (type.equals("account")) {
                         Account account = null;
                         try {
@@ -356,7 +355,6 @@ public class PermissionEditPanel extends Panel {
                             .getKey();
                     Integer id = thisPanel.choiceItems.get(Integer.parseInt(item.getValue()))
                             .getId();
-                    System.out.print(type + ":" + id + " ");
 
                     if (type.equals("account")) {
                         Account account = null;

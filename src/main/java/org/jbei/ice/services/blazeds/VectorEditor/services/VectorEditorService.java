@@ -49,15 +49,15 @@ public class VectorEditorService extends BaseService {
                 userRestrictionEnzymes = new UserRestrictionEnzymes();
             }
         } catch (SerializationUtils.SerializationUtilsException e) {
-            Logger.error(getServiceName() + Utils.stackTraceToString(e));
+            Logger.error(getServiceName(), e);
 
             return null;
         } catch (ManagerException e) {
-            Logger.error(getServiceName() + Utils.stackTraceToString(e));
+            Logger.error(getServiceName(), e);
 
             return null;
         } catch (Exception e) {
-            Logger.error(getServiceName() + Utils.stackTraceToString(e));
+            Logger.error(getServiceName(), e);
 
             return null;
         }
@@ -88,11 +88,11 @@ public class VectorEditorService extends BaseService {
                         serializedUserRestrictionEnzymes));
             }
         } catch (SerializationUtils.SerializationUtilsException e) {
-            Logger.error(getServiceName() + Utils.stackTraceToString(e));
+            Logger.error(getServiceName(), e);
         } catch (ManagerException e) {
-            Logger.error(getServiceName() + Utils.stackTraceToString(e));
+            Logger.error(getServiceName(), e);
         } catch (Exception e) {
-            Logger.error(getServiceName() + Utils.stackTraceToString(e));
+            Logger.error(getServiceName(), e);
         }
     }
 
@@ -113,7 +113,7 @@ public class VectorEditorService extends BaseService {
                     userPreferences = (UserPreferences) SerializationUtils
                             .deserializeFromString(accountPreferences.getPreferences());
                 } catch (SerializationUtils.SerializationUtilsException e) {
-                    Logger.error(getLoggerPrefix() + Utils.stackTraceToString(e));
+                    Logger.error(getLoggerPrefix(), e);
 
                     return null;
                 }
@@ -121,11 +121,11 @@ public class VectorEditorService extends BaseService {
                 userPreferences = new UserPreferences();
             }
         } catch (ManagerException e) {
-            Logger.error(getLoggerPrefix() + Utils.stackTraceToString(e));
+            Logger.error(getServiceName(), e);
 
             return null;
         } catch (Exception e) {
-            Logger.error(getLoggerPrefix() + Utils.stackTraceToString(e));
+            Logger.error(getServiceName(), e);
 
             return null;
         }
@@ -147,7 +147,7 @@ public class VectorEditorService extends BaseService {
             try {
                 serializedPreferences = SerializationUtils.serializeToString(preferences);
             } catch (SerializationUtils.SerializationUtilsException e) {
-                Logger.error(getLoggerPrefix() + Utils.stackTraceToString(e));
+                Logger.error(getLoggerPrefix(), e);
             }
 
             if (accountPreferences != null) {
@@ -158,9 +158,9 @@ public class VectorEditorService extends BaseService {
                 AccountManager.save(new AccountPreferences(account, serializedPreferences, ""));
             }
         } catch (ManagerException e) {
-            Logger.error(getLoggerPrefix() + Utils.stackTraceToString(e));
+            Logger.error(getLoggerPrefix(), e);
         } catch (Exception e) {
-            Logger.error(getLoggerPrefix() + Utils.stackTraceToString(e));
+            Logger.error(getLoggerPrefix(), e);
         }
     }
 
@@ -213,11 +213,11 @@ public class VectorEditorService extends BaseService {
 
             result = true;
         } catch (ManagerException e) {
-            Logger.error(getLoggerPrefix() + Utils.stackTraceToString(e));
+            Logger.error(getLoggerPrefix(), e);
 
             return result;
         } catch (Exception e) {
-            Logger.error(getLoggerPrefix() + Utils.stackTraceToString(e));
+            Logger.error(getLoggerPrefix(), e);
 
             return result;
         }
@@ -270,13 +270,11 @@ public class VectorEditorService extends BaseService {
                 sequenceFeatures.add(sequenceFeature);
             }
         } catch (BioException e) {
-            Logger.error("Failed to convert LightSequence to Sequence\n"
-                    + Utils.stackTraceToString(e));
+            Logger.error("Failed to convert LightSequence to Sequence\n", e);
 
             return null;
         } catch (Exception e) {
-            Logger.error("Failed to convert LightSequence to Sequence\n"
-                    + Utils.stackTraceToString(e));
+            Logger.error("Failed to convert LightSequence to Sequence\n", e);
 
             return null;
         }

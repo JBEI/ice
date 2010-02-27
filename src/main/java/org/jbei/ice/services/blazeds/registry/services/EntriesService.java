@@ -6,7 +6,6 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.permissions.PermissionManager;
-import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.services.blazeds.common.BaseService;
 
 public class EntriesService extends BaseService {
@@ -30,11 +29,11 @@ public class EntriesService extends BaseService {
                         + " tried to access entry without permissions.");
             }
         } catch (ManagerException e) {
-            Logger.error(getLoggerPrefix() + Utils.stackTraceToString(e));
+            Logger.error(getLoggerPrefix(), e);
 
             return null;
         } catch (Exception e) {
-            Logger.error(getLoggerPrefix() + Utils.stackTraceToString(e));
+            Logger.error(getLoggerPrefix(), e);
 
             return null;
         }
@@ -58,11 +57,11 @@ public class EntriesService extends BaseService {
                 result = PermissionManager.hasWritePermission(entry, account);
             }
         } catch (ManagerException e) {
-            Logger.error(getLoggerPrefix() + Utils.stackTraceToString(e));
+            Logger.error(getLoggerPrefix(), e);
 
             return result;
         } catch (Exception e) {
-            Logger.error(getLoggerPrefix() + Utils.stackTraceToString(e));
+            Logger.error(getLoggerPrefix(), e);
 
             return result;
         }
@@ -86,11 +85,11 @@ public class EntriesService extends BaseService {
 
             result = true;
         } catch (ManagerException e) {
-            Logger.error(getLoggerPrefix() + Utils.stackTraceToString(e));
+            Logger.error(getLoggerPrefix(), e);
 
             return result;
         } catch (Exception e) {
-            Logger.error(getLoggerPrefix() + Utils.stackTraceToString(e));
+            Logger.error(getLoggerPrefix(), e);
 
             return result;
         }
