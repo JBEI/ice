@@ -55,7 +55,7 @@ public class PopulateInitialDatabase {
                 group1 = group;
             } catch (ManagerException e) {
                 String msg = "Could not save everyone group: " + e.toString();
-                Logger.error(msg);
+                Logger.error(msg, e);
             }
         }
         return group1;
@@ -116,7 +116,7 @@ public class PopulateInitialDatabase {
         try {
             dupeFundingSources = new ArrayList<FundingSource>(query.list());
         } catch (HibernateException e) {
-            Logger.error("Could not get funding sources " + e.toString());
+            Logger.error("Could not get funding sources " + e.toString(), e);
         }
         FundingSource keepFundingSource = dupeFundingSources.get(0);
         for (int i = 1; i < dupeFundingSources.size(); i++) {
@@ -134,7 +134,7 @@ public class PopulateInitialDatabase {
                     Manager.dbSave(entryFundingSource);
                 } catch (ManagerException e) {
                     String msg = "Could set normalized entry funding source: " + e.toString();
-                    Logger.error(msg);
+                    Logger.error(msg, e);
                 }
             }
 
@@ -151,7 +151,7 @@ public class PopulateInitialDatabase {
                     Manager.dbSave(accountFundingSource);
                 } catch (ManagerException e) {
                     String msg = "Could set normalized entry funding source: " + e.toString();
-                    Logger.error(msg);
+                    Logger.error(msg, e);
                 }
             }
             try {
@@ -162,7 +162,7 @@ public class PopulateInitialDatabase {
             } catch (ManagerException e) {
                 String msg = "Could not delete funding source during normalization: "
                         + e.toString();
-                Logger.error(msg);
+                Logger.error(msg, e);
             }
         }
     }

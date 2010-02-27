@@ -62,7 +62,7 @@ public class LuceneSearch {
                 createEmptyIndex();
             } catch (Exception e) {
                 String msg = "Could not initiate search. Is the search index directory writable?";
-                Logger.error(msg);
+                Logger.error(msg, e);
                 throw new SearchException(msg);
             }
         }
@@ -78,7 +78,7 @@ public class LuceneSearch {
         if (!indexFile.canWrite()) {
             String msg = "Search index " + JbeirSettings.getSetting("SEARCH_INDEX_FILE")
                     + " is not writable.";
-            Logger.error(msg);
+            Logger.error(msg, new Exception("Error"));
         }
         FSDirectory directory;
         try {
@@ -87,17 +87,17 @@ public class LuceneSearch {
 
         } catch (IOException e) {
             String msg = "Could not open index file";
-            Logger.error(msg);
+            Logger.error(msg, e);
             try {
                 msg = "Trying to create index file " + indexFile.getAbsolutePath();
-                Logger.error(msg);
+                Logger.error(msg, e);
                 createEmptyIndex();
                 directory = FSDirectory.open(indexFile);
                 indexSearcher = new IndexSearcher(directory, true);
                 newIndex = true;
             } catch (IOException e1) {
                 msg = "Directory exists, but could not create empty index.";
-                Logger.error(msg);
+                Logger.error(msg, e);
                 e.printStackTrace();
                 e1.printStackTrace();
 
@@ -113,7 +113,7 @@ public class LuceneSearch {
             directory = FSDirectory.open(indexFile);
         } catch (IOException e) {
             String msg = "Could not create Empty Index";
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw e;
         }
 
@@ -323,7 +323,7 @@ public class LuceneSearch {
             } catch (Exception e) {
                 String msg = "Could not run query: " + e.toString();
 
-                Logger.error(msg);
+                Logger.error(msg, e);
             }
         }
 

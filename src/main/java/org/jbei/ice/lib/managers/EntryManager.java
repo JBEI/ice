@@ -206,7 +206,7 @@ public class EntryManager extends Manager {
         try {
             result = new LinkedHashSet<Entry>(query.list());
         } catch (HibernateException e) {
-            Logger.error("Couldn't retrieve Entry by name: " + e.toString());
+            Logger.error("Couldn't retrieve Entry by name: " + e.toString(), e);
         } finally {
 
         }
@@ -236,7 +236,7 @@ public class EntryManager extends Manager {
         try {
             result = new LinkedHashSet<Entry>(query.list());
         } catch (HibernateException e) {
-            Logger.error("Could not get entries by account " + e.toString());
+            Logger.error("Could not get entries by account " + e.toString(), e);
         } finally {
 
         }
@@ -257,7 +257,7 @@ public class EntryManager extends Manager {
         try {
             result = query.list().size();
         } catch (HibernateException e) {
-            Logger.error("Could not get number of entries by  account " + e.toString());
+            Logger.error("Could not get number of entries by  account " + e.toString(), e);
         } finally {
 
         }
@@ -274,7 +274,7 @@ public class EntryManager extends Manager {
             new LinkedHashSet<Entry>(query.list());
         } catch (HibernateException e) {
             String msg = "could not get all entries: " + e.toString();
-            Logger.error(msg);
+            Logger.error(msg, e);
         } finally {
 
         }
@@ -293,7 +293,7 @@ public class EntryManager extends Manager {
             query.setParameter("group", everybodyGroup);
             result = new LinkedHashSet<Entry>(query.list());
         } catch (ManagerException e) {
-            Logger.error("getAllVisible: " + e.toString());
+            Logger.error("getAllVisible: " + e.toString(), e);
         } finally {
 
         }
@@ -318,7 +318,7 @@ public class EntryManager extends Manager {
         try {
             new LinkedHashSet<Entry>(query.list());
         } catch (HibernateException e) {
-            Logger.error("Could not get all entries by limit " + e.toString());
+            Logger.error("Could not get all entries by limit " + e.toString(), e);
         } finally {
 
         }
@@ -346,9 +346,9 @@ public class EntryManager extends Manager {
             result = new LinkedHashSet<Entry>(query.list());
 
         } catch (ManagerException e) {
-            Logger.error("getAllVisible: " + e.toString());
+            Logger.error("getAllVisible: " + e.toString(), e);
         } catch (Exception e) {
-            Logger.error("getAllVisible: " + e.toString());
+            Logger.error("getAllVisible: " + e.toString(), e);
         } finally {
 
         }
@@ -364,7 +364,7 @@ public class EntryManager extends Manager {
         try {
             result = query.list().size();
         } catch (HibernateException e) {
-            Logger.error("Could not get number of entries " + e.toString());
+            Logger.error("Could not get number of entries " + e.toString(), e);
         } finally {
 
         }
@@ -383,7 +383,7 @@ public class EntryManager extends Manager {
             result = query.list().size();
 
         } catch (ManagerException e) {
-            Logger.error("getNumberOfVisibleEntries: " + e.toString());
+            Logger.error("getNumberOfVisibleEntries: " + e.toString(), e);
         } finally {
 
         }

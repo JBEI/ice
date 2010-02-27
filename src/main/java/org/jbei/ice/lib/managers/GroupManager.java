@@ -21,7 +21,7 @@ public class GroupManager extends Manager {
             result = (Group) query.uniqueResult();
         } catch (Exception e) {
             String str = "Could not get Group by uuid: " + uuid + " " + e.toString();
-            Logger.error(str);
+            Logger.error(str, e);
             throw new ManagerException(str);
         } finally {
 
@@ -40,7 +40,7 @@ public class GroupManager extends Manager {
         } catch (Exception e) {
             e.printStackTrace();
             String msg = "Could not get Group by id: " + id + " " + e.toString();
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg);
         } finally {
 
@@ -94,7 +94,7 @@ public class GroupManager extends Manager {
         } catch (ManagerException e) {
             e.printStackTrace();
             String msg = "Could not save group " + label + " to database: " + e.toString();
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg);
         }
         return saved;
@@ -115,7 +115,7 @@ public class GroupManager extends Manager {
             e.printStackTrace();
             String msg = "Could not save group " + group.getLabel() + " to database: "
                     + e.toString();
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg);
 
         }
@@ -128,7 +128,7 @@ public class GroupManager extends Manager {
         } catch (ManagerException e) {
             e.printStackTrace();
             String msg = "Could not delete group " + group.getUuid() + ": " + e.toString();
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg);
         }
     }
@@ -140,7 +140,7 @@ public class GroupManager extends Manager {
         } catch (ManagerException e) {
             e.printStackTrace();
             String msg = "Could not save group " + group.getUuid();
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg, e);
         }
         return result;

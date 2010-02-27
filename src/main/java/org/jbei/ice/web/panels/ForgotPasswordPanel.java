@@ -79,7 +79,7 @@ public class ForgotPasswordPanel extends Panel {
                             try {
                                 AccountManager.save(account);
                             } catch (ManagerException e) {
-                                Logger.error("Could not save new password: " + e.toString());
+                                Logger.error("Could not save new password: " + e.toString(), e);
                                 error("Could not generate new password");
                             }
                             CharSequence resetPasswordPage = WebRequestCycle.get().urlFor(

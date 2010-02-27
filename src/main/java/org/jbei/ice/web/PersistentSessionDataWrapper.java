@@ -95,7 +95,7 @@ public class PersistentSessionDataWrapper {
             SessionManager.save(sessionData);
         } catch (ManagerException e) {
             String msg = "Could not persist session data" + e.toString();
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw e;
         }
     }
@@ -117,7 +117,7 @@ public class PersistentSessionDataWrapper {
                 SessionManager.delete(sessionData);
             } catch (ManagerException e) {
                 String msg = "Could not delete session Data: " + e.toString();
-                Logger.error(msg);
+                Logger.error(msg, e);
             }
         }
     }
@@ -150,7 +150,7 @@ public class PersistentSessionDataWrapper {
                 sessionData = SessionManager.get(sessionKey);
             } catch (ManagerException e) {
                 String msg = "Could getCachedInstance: " + e.toString();
-                Logger.error(msg);
+                Logger.error(msg, e);
                 sessionData = null;
             }
 

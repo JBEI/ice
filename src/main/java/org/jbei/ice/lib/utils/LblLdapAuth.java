@@ -169,7 +169,7 @@ public class LblLdapAuth {
         } catch (NamingException e) {
 
             e.printStackTrace();
-            Logger.error("ldap whitelist retrieval failure: " + e.toString());
+            Logger.error("ldap whitelist retrieval failure: " + e.toString(), e);
         }
 
         return result;

@@ -276,7 +276,7 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
             setResponsePage(EntryViewPage.class, new PageParameters("0=" + newEntry.getId()));
         } catch (ManagerException e) {
             String msg = "System Error: Could not save! ";
-            Logger.error(msg + e.getMessage());
+            Logger.error(msg + e.getMessage(), e);
             error(msg);
             e.printStackTrace();
         }

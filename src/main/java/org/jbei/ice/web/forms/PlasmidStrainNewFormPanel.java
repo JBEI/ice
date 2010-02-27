@@ -382,7 +382,7 @@ public class PlasmidStrainNewFormPanel extends Panel {
                 setResponsePage(EntryViewPage.class, new PageParameters("0=" + newPlasmid.getId()));
             } catch (ManagerException e) {
                 String msg = "System Error: Could not save! ";
-                Logger.error(msg + e.getMessage());
+                Logger.error(msg + e.getMessage(), e);
                 error(msg);
                 e.printStackTrace();
             }

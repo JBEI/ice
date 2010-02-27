@@ -8,6 +8,6 @@ public class FormException extends Exception {
     public FormException(String string) {
         super(string);
 
-        Logger.error(string);
+        Logger.error(string, new Exception("Error"));
     }
 }

@@ -74,7 +74,7 @@ public class EntryUpdateForm<T extends Entry> extends EntrySubmitForm<T> {
                 setResponsePage(EntryViewPage.class, new PageParameters("0=" + entry.getId()));
             } catch (ManagerException e) {
                 String msg = "System Error: Could not save! ";
-                Logger.error(msg + e.getMessage());
+                Logger.error(msg + e.getMessage(), e);
                 error(msg);
                 e.printStackTrace();
             } catch (PermissionException e) {
@@ -86,7 +86,7 @@ public class EntryUpdateForm<T extends Entry> extends EntrySubmitForm<T> {
                 info("Save as admin successful!");
             } catch (ManagerException e) {
                 String msg = "System Error: Could not save! ";
-                Logger.error(msg + e.getMessage());
+                Logger.error(msg + e.getMessage(), e);
                 error(msg);
                 e.printStackTrace();
             }

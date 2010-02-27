@@ -1,5 +1,14 @@
 package org.jbei.ice.lib.logging;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.mail.MessagingException;
+
+import org.jbei.ice.lib.utils.Emailer;
+import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.lib.utils.Utils;
+
 public class Logger {
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger
             .getLogger("org.jbei.ice.system");
@@ -20,12 +29,43 @@ public class Logger {
         logger.warn(msg);
     }
 
+    @Deprecated
     public static void error(String msg) {
+        sendEmail(msg);
         logger.error(msg);
     }
 
+    public static void error(String msg, Throwable e) {
+        msg = msg + "\n" + Utils.stackTraceToString(e);
+        if (e instanceof MessagingException) {
+            // if error is "Can't send email, there is no need to try to send email"
+        } else {
+            sendEmail(msg);
+        }
+
+        logger.error(msg);
+    }
+
+    @Deprecated
     public static void fatal(String msg) {
+        sendEmail(msg);
         logger.fatal(msg);
+    }
+
+    public static void fatal(String msg, Throwable e) {
+        msg = msg + "\n" + Utils.stackTraceToString(e);
+        sendEmail(msg);
+        logger.fatal(msg);
+    }
+
+    private static void sendEmail(String msg) {
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String body = "System Time: " + dateFormatter.format((new Date())) + "\n\n";
+        body = body + msg;
+        String subject = "Error";
+        Emailer.error(JbeirSettings.getSetting("ERROR_EMAIL_EXCEPTION_PREFIX") + " " + subject,
+                body);
+
     }
 
 }

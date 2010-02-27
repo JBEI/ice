@@ -15,7 +15,6 @@ import org.jbei.ice.lib.logging.UsageLogger;
 import org.jbei.ice.lib.managers.HibernateHelper;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.pages.ErrorPage;
 import org.jbei.ice.web.pages.HomePage;
 import org.jbei.ice.web.pages.PermissionDeniedPage;
@@ -68,7 +67,7 @@ public class IceRequestCycle extends WebRequestCycle {
             // drop the users to their home page
             result = new HomePage(new PageParameters());
         } else {
-            Logger.error(Utils.stackTraceToString(e));
+            Logger.error("Unknown Error", e);
             result = new ErrorPage(e);
         }
         return result;

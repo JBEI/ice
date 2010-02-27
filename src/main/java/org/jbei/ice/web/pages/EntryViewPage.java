@@ -66,7 +66,7 @@ public class EntryViewPage extends ProtectedPage {
             } catch (PermissionException e1) {
                 // entryId is still 0
             } catch (ManagerException e1) {
-                Logger.error(e.toString());
+                Logger.error(e.toString(), e);
                 throw new RuntimeException(e);
             }
             if (entryId == 0) {
@@ -76,14 +76,14 @@ public class EntryViewPage extends ProtectedPage {
                 } catch (PermissionException e1) {
                     // entryId is still 0
                 } catch (ManagerException e1) {
-                    Logger.error(e.toString());
+                    Logger.error(e.toString(), e);
                     throw new RuntimeException(e);
                 }
             }
         } catch (PermissionException e) {
             entryId = 0;
         } catch (ManagerException e) {
-            Logger.error(e.toString());
+            Logger.error(e.toString(), e);
             throw new RuntimeException(e);
         }
         if (entryId == 0) {

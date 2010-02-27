@@ -46,8 +46,8 @@ public class ErrorPage extends WebPage {
             Emailer.error(JbeirSettings.getSetting("ERROR_EMAIL_EXCEPTION_PREFIX") + " " + subject,
                     body);
 
-            Logger.error(throwable.getMessage());
-            Logger.error(body);
+            Logger.error(throwable.getMessage(), throwable);
+            Logger.error(body, throwable);
         }
     }
 }

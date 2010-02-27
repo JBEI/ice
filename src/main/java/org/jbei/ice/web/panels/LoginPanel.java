@@ -59,7 +59,7 @@ public class LoginPanel extends Panel {
                             iceSession.makeSessionPersistent(((WebResponse) getResponse()));
                         } catch (ManagerException e) {
                             String msg = "Could not save authentication to db: " + e.toString();
-                            Logger.error(msg);
+                            Logger.error(msg, e);
                             error("System Error: " + msg);
                         }
                     }

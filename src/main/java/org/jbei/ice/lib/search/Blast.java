@@ -91,13 +91,13 @@ public class Blast {
             }
         } catch (IOException e1) {
             String msg = "Rebuild blast database failed: ";
-            Logger.error(msg + e1.toString());
+            Logger.error(msg + e1.toString(), e1);
         } catch (SecurityException e) {
             String msg = "Rebuild blast database failed: ";
-            Logger.error(msg + e.toString());
+            Logger.error(msg + e.toString(), e);
         } catch (Exception e) {
             String msg = "Rebuild blast database failed: ";
-            Logger.error(msg + e.toString());
+            Logger.error(msg + e.toString(), e);
         }
 
     }
@@ -116,10 +116,10 @@ public class Blast {
             newBlastDir.renameTo(currentBlastDir);
         } catch (SecurityException e) {
             String msg = "Could not rename Blast db" + e.toString();
-            Logger.error(msg);
+            Logger.error(msg, e);
         } catch (NullPointerException e) {
             String msg = "Could not rename Blast db" + e.toString();
-            Logger.error(msg);
+            Logger.error(msg, e);
         }
     }
 

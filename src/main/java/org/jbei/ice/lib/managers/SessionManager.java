@@ -30,7 +30,7 @@ public class SessionManager extends Manager {
 
         } catch (Exception e) {
             String msg = "Could not get SessionData by id " + sessionKey;
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg, e);
         } finally {
 
@@ -46,7 +46,7 @@ public class SessionManager extends Manager {
 
         } catch (Exception e) {
             String msg = "Could not save SessionData " + sessionData.getSessionKey() + e.toString();
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg, e);
         }
 
@@ -61,7 +61,7 @@ public class SessionManager extends Manager {
             dbDelete(sessionData);
         } catch (Exception e) {
             String msg = "Could not delete session " + sessionData.getSessionKey();
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg, e);
         }
     }
@@ -81,7 +81,7 @@ public class SessionManager extends Manager {
 
         } catch (Exception e) {
             String msg = "Could not flush expired sessions: " + e.toString();
-            Logger.error(msg);
+            Logger.error(msg, e);
         } finally {
 
         }

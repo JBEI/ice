@@ -55,7 +55,7 @@ public class UtilsManager extends Manager {
         try {
             new HashSet<String>(query.list());
         } catch (HibernateException e) {
-            Logger.error("Could not get unique public plasmid names " + e.toString());
+            Logger.error("Could not get unique public plasmid names " + e.toString(), e);
         } finally {
 
         }
@@ -76,7 +76,7 @@ public class UtilsManager extends Manager {
         try {
             rawPromoters = new HashSet<String>(query.list());
         } catch (HibernateException e) {
-            Logger.error("Could not get unique promoters " + e.toString());
+            Logger.error("Could not get unique promoters " + e.toString(), e);
         } finally {
 
         }
@@ -108,7 +108,7 @@ public class UtilsManager extends Manager {
         try {
             rawOrigins = new HashSet<String>(query.list());
         } catch (HibernateException e) {
-            Logger.error("Could not get unique origins of replication " + e.toString());
+            Logger.error("Could not get unique origins of replication " + e.toString(), e);
         } finally {
 
         }
@@ -144,7 +144,7 @@ public class UtilsManager extends Manager {
             try {
                 strainIds.addAll(query.list());
             } catch (HibernateException e) {
-                Logger.error("Could not get strains for plasmid " + e.toString());
+                Logger.error("Could not get strains for plasmid " + e.toString(), e);
             } finally {
 
             }

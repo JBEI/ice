@@ -15,7 +15,7 @@ public class HibernateHelper {
             sessionFactory = new AnnotationConfiguration().configure().buildSessionFactory();
         } catch (Throwable e) {
             String msg = "Could not initialize hibernate!!!";
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new RuntimeException(e);
         }
     }

@@ -19,7 +19,7 @@ public class SampleManager extends Manager {
             result = (Sample) dbGet(Sample.class, id);
         } catch (Exception e) {
             String msg = "Could not get Sample by id";
-            Logger.error(msg);
+            Logger.error(msg, e);
 
             e.printStackTrace();
             throw new ManagerException(msg, e);
@@ -41,7 +41,7 @@ public class SampleManager extends Manager {
             result = new LinkedHashSet<Sample>(query.list());
         } catch (Exception e) {
             String msg = "Could not get Sample by Entry " + entry.getRecordId();
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg, e);
         } finally {
 
@@ -67,7 +67,7 @@ public class SampleManager extends Manager {
             result = new LinkedHashSet<Sample>(query.list());
         } catch (Exception e) {
             String msg = "Could not retrieve samples by account " + account.getEmail();
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg, e);
         } finally {
 
@@ -88,7 +88,7 @@ public class SampleManager extends Manager {
             return query.list().size();
         } catch (Exception e) {
             String msg = "Could not retrieve samples by account " + account.getEmail();
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg, e);
         } finally {
 
@@ -109,7 +109,7 @@ public class SampleManager extends Manager {
             }
         } catch (Exception e) {
             String msg = "Could not determine if entry has Sample: " + entry.getRecordId();
-            Logger.error(msg);
+            Logger.error(msg, e);
         } finally {
 
         }
@@ -128,7 +128,7 @@ public class SampleManager extends Manager {
             result = samples.size();
         } catch (Exception e) {
             String msg = "Could not determine if entry has Sample: " + entry.getRecordId();
-            Logger.error(msg);
+            Logger.error(msg, e);
         } finally {
 
         }
@@ -153,7 +153,7 @@ public class SampleManager extends Manager {
                 result = (Sample) dbSave(sample);
             } catch (Exception e) {
                 String msg = "Could not save sample " + sample.getLabel();
-                Logger.error(msg);
+                Logger.error(msg, e);
                 throw new ManagerException(msg, e);
             }
         }
@@ -165,7 +165,7 @@ public class SampleManager extends Manager {
             dbDelete(sample);
         } catch (Exception e) {
             String msg = "Could not delete sample " + sample.getId();
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg, e);
         }
     }

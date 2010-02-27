@@ -60,7 +60,7 @@ public class EntriesDataProvider extends SortableDataProvider<Entry> {
                 entries.add(entry);
             }
         } catch (Exception e) {
-            Logger.error("EntriesDataProvider.iterator: " + e.toString());
+            Logger.error("EntriesDataProvider.iterator: " + e.toString(), e);
         }
 
         return entries.iterator();

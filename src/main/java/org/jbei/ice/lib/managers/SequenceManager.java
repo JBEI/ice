@@ -56,7 +56,7 @@ public class SequenceManager extends Manager {
         try {
             result = new ArrayList<Sequence>(query.list());
         } catch (HibernateException e) {
-            Logger.error("Could not get all sequences " + e.toString());
+            Logger.error("Could not get all sequences " + e.toString(), e);
         } finally {
 
         }
@@ -76,7 +76,7 @@ public class SequenceManager extends Manager {
             result = new ArrayList<Sequence>(query.list());
 
         } catch (ManagerException e) {
-            Logger.error("getAllVisible: " + e.toString());
+            Logger.error("getAllVisible: " + e.toString(), e);
         } finally {
 
         }
@@ -89,7 +89,7 @@ public class SequenceManager extends Manager {
         try {
             sequence = (Sequence) session.load(Sequence.class, id);
         } catch (HibernateException e) {
-            Logger.error("Could not get sequence " + e.toString());
+            Logger.error("Could not get sequence " + e.toString(), e);
         } finally {
 
         }
@@ -122,7 +122,7 @@ public class SequenceManager extends Manager {
         try {
             sequence = (Sequence) query.uniqueResult();
         } catch (HibernateException e) {
-            Logger.error("Could not get sequence " + e.toString());
+            Logger.error("Could not get sequence " + e.toString(), e);
         } finally {
 
         }

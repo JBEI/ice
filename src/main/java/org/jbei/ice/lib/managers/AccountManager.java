@@ -25,7 +25,7 @@ public class AccountManager extends Manager {
             accountPreferences = (AccountPreferences) query.uniqueResult();
         } catch (Exception e) {
             String msg = "Could not get AccountPreferences by id";
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg);
         } finally {
 
@@ -171,7 +171,7 @@ public class AccountManager extends Manager {
                 result = true;
             }
         } catch (HibernateException e) {
-            Logger.error("Could not determine moderator for account: " + account.getEmail());
+            Logger.error("Could not determine moderator for account: " + account.getEmail(), e);
         } finally {
 
         }
@@ -186,7 +186,7 @@ public class AccountManager extends Manager {
         } catch (Exception e) {
             String msg = "Could not save account " + account.getEmail();
 
-            Logger.error(msg);
+            Logger.error(msg, e);
 
             throw new ManagerException(msg);
         }

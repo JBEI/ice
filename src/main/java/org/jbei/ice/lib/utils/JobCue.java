@@ -59,7 +59,7 @@ public class JobCue implements Runnable {
                     s.rebuildIndex();
                 } catch (Exception e) {
                     String msg = "Could not create search index";
-                    Logger.error(msg);
+                    Logger.error(msg, e);
                     e.printStackTrace();
                 }
 

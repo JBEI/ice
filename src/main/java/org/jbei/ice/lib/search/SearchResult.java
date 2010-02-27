@@ -87,7 +87,7 @@ public class SearchResult implements Serializable {
                     targetResult.setScore(targetResult.getScore() + objectResult.getScore());
                 } else {
                     String msg = "Algorithm Error in SearchResult.sumSearchResults!";
-                    Logger.error(msg);
+                    Logger.error(msg, new Exception("Error"));
                 }
             }
             // add the non-intersecting objects

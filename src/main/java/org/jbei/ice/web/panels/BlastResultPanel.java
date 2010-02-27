@@ -71,7 +71,7 @@ public class BlastResultPanel extends Panel {
                 } else {
                     String msg = "Blast db has record: " + item.getModelObject().getSubjectId()
                             + " which does not exist in database. Try rebuilding blast db";
-                    Logger.error(msg);
+                    Logger.error(msg, new Exception("Error"));
 
                     renderEmptyRow(item);
                 }

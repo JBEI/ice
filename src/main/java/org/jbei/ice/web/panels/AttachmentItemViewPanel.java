@@ -76,7 +76,7 @@ public class AttachmentItemViewPanel extends Panel {
                     .readFile(attachment), attachment.getFileName());
         } catch (IOException e) {
             String msg = "File not found on disk: " + e.toString();
-            Logger.error(msg);
+            Logger.error(msg, e);
             downloadLink = new Link("downloadAttachmentLink") {
                 private static final long serialVersionUID = 1L;
 

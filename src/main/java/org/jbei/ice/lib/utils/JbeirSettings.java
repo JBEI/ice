@@ -16,7 +16,7 @@ public class JbeirSettings {
             }
         } catch (Exception e) {
             String msg = "Could not read properties file: " + e.toString();
-            Logger.error(msg);
+            Logger.error(msg, e);
         }
         return result;
     }

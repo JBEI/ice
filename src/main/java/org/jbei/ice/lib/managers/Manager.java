@@ -32,7 +32,7 @@ public abstract class Manager {
         } catch (Exception e) {
             session.getTransaction().rollback();
             if (session.getTransaction().wasRolledBack()) {
-                Logger.error("I think rollback is not working!");
+                Logger.error("I think rollback is not working!", e);
             }
 
             e.printStackTrace();
@@ -70,10 +70,10 @@ public abstract class Manager {
 
             session.getTransaction().rollback();
             if (session.getTransaction().wasRolledBack()) {
-                Logger.error("I think rollback is not working!");
+                Logger.error("I think rollback is not working!", e);
             }
             String msg = "dbSave exception: " + e.toString();
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg, e);
         } finally {
 

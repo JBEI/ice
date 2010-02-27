@@ -166,7 +166,7 @@ public class PermissionManager extends Manager {
         } catch (Exception e) {
             e.printStackTrace();
             String msg = "Could not set Read User to " + entry.getRecordId();
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg, e);
         }
     }
@@ -200,7 +200,7 @@ public class PermissionManager extends Manager {
         } catch (Exception e) {
             e.printStackTrace();
             String msg = "Could not read ReadUser of " + entry.getRecordId();
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg, e);
         }
     }
@@ -220,7 +220,7 @@ public class PermissionManager extends Manager {
         } catch (Exception e) {
             e.printStackTrace();
             String msg = "Could not set Read Group of " + entry.getRecordId();
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg, e);
         }
     }
@@ -253,7 +253,7 @@ public class PermissionManager extends Manager {
         } catch (Exception e) {
             e.printStackTrace();
             String msg = "Could not get Read Group of " + entry.getRecordId();
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg, e);
         }
     }
@@ -273,7 +273,7 @@ public class PermissionManager extends Manager {
         } catch (Exception e) {
             e.printStackTrace();
             String msg = "Could not set Write User of " + entry.getRecordId();
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg, e);
         }
     }
@@ -306,7 +306,7 @@ public class PermissionManager extends Manager {
         } catch (Exception e) {
             e.printStackTrace();
             String msg = "Could not get Write User of " + entry.getRecordId();
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg, e);
         }
     }
@@ -326,7 +326,7 @@ public class PermissionManager extends Manager {
         } catch (Exception e) {
             e.printStackTrace();
             String msg = "Could not set WriteGroup of " + entry.getRecordId();
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg, e);
         }
     }
@@ -360,7 +360,7 @@ public class PermissionManager extends Manager {
         } catch (Exception e) {
             e.printStackTrace();
             String msg = "Could not get Write Group of " + entry.getRecordId();
-            Logger.error(msg);
+            Logger.error(msg, e);
             throw new ManagerException(msg, e);
         }
     }

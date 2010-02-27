@@ -84,7 +84,7 @@ public class IceSession extends WebSession {
                 if (sessionData == null) {
                     // User authenticates but this session is not associated.
                     String msg = "User is authenticated but this session is not associated";
-                    Logger.error(msg);
+                    Logger.error(msg, new Exception("Error"));
                     throw new RuntimeException(msg);
                 }
                 sessionData.getData().put("accountId", account.getId());
@@ -136,7 +136,7 @@ public class IceSession extends WebSession {
                     account = AccountManager.get(accountId);
                 } catch (ManagerException e) {
                     String msg = "Could not getAccount from IceSession: " + e.toString();
-                    Logger.error(msg);
+                    Logger.error(msg, e);
                 }
             }
         }
@@ -149,7 +149,7 @@ public class IceSession extends WebSession {
             AccountManager.save(accountPreferences);
         } catch (ManagerException e) {
             String msg = "Could not setAccountPreferences in IceSession: " + e.toString();
-            Logger.error(msg);
+            Logger.error(msg, e);
         }
     }
 
@@ -159,7 +159,7 @@ public class IceSession extends WebSession {
             result = AccountManager.getAccountPreferences(getAccount());
         } catch (ManagerException e) {
             String msg = "Could not getAccountPreferences in IceSession: " + e.toString();
-            Logger.error(msg);
+            Logger.error(msg, e);
         }
         return result;
     }

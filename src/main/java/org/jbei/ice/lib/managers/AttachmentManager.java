@@ -54,16 +54,16 @@ public class AttachmentManager extends Manager {
                 dbDelete(attachment);
             } catch (Exception e) {
                 String msg = "Could not delete attachment in db: ";
-                Logger.error(msg + e.toString());
+                Logger.error(msg + e.toString(), e);
                 throw new ManagerException(msg + e.toString());
             }
 
         } catch (IOException e) {
             String msg = "Could not delete file: " + attachment.getFileName();
-            Logger.error(msg);
+            Logger.error(msg, e);
         } catch (HibernateException e) {
             String msg = "Could not remove entry from database." + attachment.getFileName();
-            Logger.error(msg);
+            Logger.error(msg, e);
         }
     }
 
@@ -119,7 +119,7 @@ public class AttachmentManager extends Manager {
             attachments = (ArrayList<Attachment>) query.list();
         } catch (HibernateException e) {
             String msg = "Could not get attachments by entry" + e.toString();
-            Logger.error(msg);
+            Logger.error(msg, e);
         } finally {
 
         }
@@ -140,7 +140,7 @@ public class AttachmentManager extends Manager {
             }
         } catch (Exception e) {
             String msg = "Could not determine if entry has attachments: " + entry.getRecordId();
-            Logger.error(msg);
+            Logger.error(msg, e);
 
         } finally {
 
@@ -160,7 +160,7 @@ public class AttachmentManager extends Manager {
             result = attachments.size();
         } catch (Exception e) {
             String msg = "Could not determine if entry has attachments: " + entry.getRecordId();
-            Logger.error(msg);
+            Logger.error(msg, e);
         } finally {
 
         }
@@ -243,7 +243,7 @@ public class AttachmentManager extends Manager {
             file.delete();
         } catch (SecurityException e) {
             String msg = "Could not delete attachment file: ";
-            Logger.error(msg + e.toString());
+            Logger.error(msg + e.toString(), e);
         }
     }
 }

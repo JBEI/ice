@@ -34,9 +34,9 @@ public class Emailer {
 
             Transport.send(msg);
         } catch (MessagingException e) {
-            Logger.error("Failed to send email message to " + receiverEmail + "!");
-            Logger.error("Error message: " + e.getMessage());
-            Logger.error("Stacktrace: " + e.getStackTrace());
+            Logger.error("Failed to send email message to " + receiverEmail + "!", e);
+            Logger.error("Error message: " + e.getMessage(), e);
+            Logger.error("Stacktrace: " + e.getStackTrace(), e);
         }
     }
 
