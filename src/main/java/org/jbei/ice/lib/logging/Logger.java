@@ -37,12 +37,7 @@ public class Logger {
 
     public static void error(String msg, Throwable e) {
         msg = msg + "\n" + Utils.stackTraceToString(e);
-        if (e instanceof MessagingException) {
-            // if error is "Can't send email, there is no need to try to send email"
-        } else {
-            sendEmail(msg);
-        }
-
+        sendEmail(msg, e);
         logger.error(msg);
     }
 
@@ -54,18 +49,29 @@ public class Logger {
 
     public static void fatal(String msg, Throwable e) {
         msg = msg + "\n" + Utils.stackTraceToString(e);
-        sendEmail(msg);
+        sendEmail(msg, e);
         logger.fatal(msg);
     }
 
-    private static void sendEmail(String msg) {
-        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String body = "System Time: " + dateFormatter.format((new Date())) + "\n\n";
-        body = body + msg;
-        String subject = "Error";
-        Emailer.error(JbeirSettings.getSetting("ERROR_EMAIL_EXCEPTION_PREFIX") + " " + subject,
-                body);
+    private static void sendEmail(String msg, Throwable e) {
+        if (e instanceof MessagingException) {
+            // if error is "Can't send email", there is no need to try to send email
+        } else {
+            if (JbeirSettings.getSetting("SEND_EMAIL_ON_LOGGER_ERRORS").equals("YES")) {
 
+                SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String body = "System Time: " + dateFormatter.format((new Date())) + "\n\n";
+                body = body + msg;
+                String subject = "Error";
+                Emailer.error(JbeirSettings.getSetting("ERROR_EMAIL_EXCEPTION_PREFIX") + " "
+                        + subject, body);
+
+            }
+        }
+    }
+
+    private static void sendEmail(String msg) {
+        sendEmail(msg, new Exception("Error"));
     }
 
 }
