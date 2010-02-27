@@ -7,7 +7,7 @@
 <link rel="stylesheet" type="text/css" href="static/ve/history/history.css" />
 <!--  END Browser History required section -->
 
-<title></title>
+<title wicket:id="title">JBEI Registry</title>
 <!-- Commented in order to make extMouseWheel.js working on Mac -->
 <!-- <script src="AC_OETags.js" language="javascript"></script> -->
 
@@ -17,8 +17,7 @@
 
 <style>
 body {
-	overflow: hidden
-	height: 100%;
+	overflow: hidden height :       100%;
 	margin: 0;
 	padding: 0;
 }
@@ -42,14 +41,37 @@ html,#fullScreen {
 	var requiredRevision = 0;
 	// -----------------------------------------------------------------------------
 	// -->
+</script>
+
+<script type="text/javascript">
+	var initialTitle = document.title;
+	var isSavedSequence = true;
+
 	if (window.addEventListener)
-    /** DOMMouseScroll is for mozilla. */
-    window.addEventListener('DOMMouseScroll', handleWheelEvent, false);
+		/** DOMMouseScroll is for mozilla. */
+		window.addEventListener('DOMMouseScroll', handleWheelEvent, false);
 	/** IE/Opera. */
 	window.onmousewheel = document.onmousewheel = handleWheelEvent;
 
-	function handleWheelEvent(e){
-    	e.preventDefault();
+	function handleWheelEvent(e) {
+		e.preventDefault();
+	}
+
+	function updateSavedStateTitle(isSaved) {
+		if (isSaved == "false") {
+			document.title = "*" + initialTitle;
+			isSavedSequence = false;
+		} else {
+			document.title = initialTitle;
+			isSavedSequence = true;
+		}
+	}
+
+	window.onbeforeunload = confirmExit;
+	function confirmExit() {
+		if (!isSavedSequence) {
+			return "You have made changes to the sequence but didn't save it. Are you sure you want to exit this page?";
+		}
 	}
 </script>
 </head>
@@ -99,7 +121,7 @@ html,#fullScreen {
 <!-- Commented in order to make extMouseWheel.js working on Mac -->
 <!-- <noscript> -->
 
-<table style="width: 100%; height: 96%" class="fullScreen">
+<table style="width: 100%; height: 97%" class="fullScreen">
 	<tr>
 		<td style="width: 100%; height: 100%">
 		<div style="width: 100%; height: 100%" id="flashContainerDiv"><object

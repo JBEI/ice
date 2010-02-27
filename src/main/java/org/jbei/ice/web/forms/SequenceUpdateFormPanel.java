@@ -113,7 +113,6 @@ public class SequenceUpdateFormPanel extends Panel {
                 entry.setSequence(sequence);
                 EntryManager.save(entry);
                 JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
-
             } catch (ManagerException e) {
                 e.printStackTrace();
 

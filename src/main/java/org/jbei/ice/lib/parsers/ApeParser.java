@@ -3,7 +3,7 @@ package org.jbei.ice.lib.parsers;
 import org.jbei.ice.lib.models.Sequence;
 
 public class ApeParser extends GenbankParser {
-    private static final String APE_PARSER = "Ape";
+    private static final String APE_PARSER = "ApE";
 
     @Override
     public String getName() {
