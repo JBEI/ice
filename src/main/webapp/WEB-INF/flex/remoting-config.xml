@@ -11,27 +11,15 @@
 		<!-- <channel ref="VectorEditorAMFChannel" /> -->
 	</default-channels>
 
-	<destination id="AuthorizationService">
-		<properties>
-			<source>org.jbei.ice.services.blazeds.VectorEditor.services.AuthorizationService</source>
-		</properties>
-	</destination>
-
-	<destination id="UserPreferencesService">
-		<properties>
-			<source>org.jbei.ice.services.blazeds.VectorEditor.services.UserPreferencesService</source>
-		</properties>
-	</destination>
-
-	<destination id="UserRestrictionEnzymesService">
-		<properties>
-			<source>org.jbei.ice.services.blazeds.VectorEditor.services.UserRestrictionEnzymesService</source>
-		</properties>
-	</destination>
-
 	<destination id="EntriesService">
 		<properties>
-			<source>org.jbei.ice.services.blazeds.VectorEditor.services.EntriesService</source>
+			<source>org.jbei.ice.services.blazeds.registry.services.EntriesService</source>
+		</properties>
+	</destination>
+
+	<destination id="VectorEditorService">
+		<properties>
+			<source>org.jbei.ice.services.blazeds.VectorEditor.services.VectorEditorService</source>
 		</properties>
 	</destination>
 </service>
