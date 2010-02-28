@@ -1,0 +1,54 @@
+Build instructions gd-ice
+
+Pre-requisits:
+Maven2
+
+1. Download sources from svn:
+    $ svn checkout http://gd-ice.googlecode.com/svn/trunk/ice gd-ice-build
+
+1.1 I prefer to use git-svn to talk to the svn repo, as git lets me
+keep specific settings relevant to the deploy environment. With git,
+the commands are:
+
+    $ git svn init http://gd-ice.googlecode.com/svn/trunk/ice gd-ice-build
+    $ cd gd-ice-build
+    $ git svn fetch
+    $ git checkout -f 
+
+1.2 Let's create a build branch that's separate from the svn.
+    $ git checkout -b build
+
+2. Now, edit the relavent config and settings files:
+    src/main/java/hibernate.cfg.xml
+    src/main/java/jbeir.properties
+    src/main/resources/log4j.properties
+    src/main/webapp/WEB-INF/web.xml
+    
+2.1 Commit those changes to your local branch:
+    $ git add -u
+    $ git commit -m "build: productions settings"
+
+3. Let maven know about jbeir specific libraries.  Run the commands found in
+   pom.readme.txt
+
+4. Build!
+   $ cd gd-ice-build
+   $ mvn package
+
+5. Now you should have target/gd-ice-1.0-SNAPSHOT.war and
+   target/gd-ice-1.0-SNAPSHOT. Deploy these to your webserver install.
+   
+6. Updating
+6.1 If using svn, just svn update and hope / check that your local settings
+    are not over written by new defaults or new options.
+6.2 If using git:
+
+    $ git svn fetch
+    $ git svn rebase
+
+    Git will tell you if your settings don't apply. Fix those conflicts
+    and git add -u, git commit.
+    For best results, instead of adding all the changes to a single git
+    branch commit, commit each file change into individual commits, so
+    they can be individually tracked.
+    
