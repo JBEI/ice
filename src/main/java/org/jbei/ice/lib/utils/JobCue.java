@@ -57,6 +57,7 @@ public class JobCue implements Runnable {
                 try {
                     LuceneSearch s = LuceneSearch.getInstance();
                     s.rebuildIndex();
+                    Logger.info("RebuildIndex complete");
                 } catch (Exception e) {
                     String msg = "Could not create search index";
                     Logger.error(msg, e);
@@ -67,6 +68,7 @@ public class JobCue implements Runnable {
                 Logger.info("Rebuilding blast database");
                 Blast blast = new Blast();
                 blast.rebuildDatabase();
+                Logger.info("Rebuild blast complete");
             }
             cue.remove(jobType);
 

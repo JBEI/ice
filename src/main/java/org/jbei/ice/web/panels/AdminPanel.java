@@ -13,6 +13,8 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.lib.utils.Job;
+import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.web.forms.PartUpdateFormPanel;
 import org.jbei.ice.web.forms.PlasmidUpdateFormPanel;
 import org.jbei.ice.web.forms.StrainUpdateFormPanel;
@@ -88,8 +90,30 @@ public class AdminPanel extends Panel {
 
             }
         };
+
+        AjaxButton rebuildBlastButton = new AjaxButton("rebuildBlastButton") {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
+                JobCue.getInstance().processIn(5000L);
+            }
+        };
+        AjaxButton rebuildSearchButton = new AjaxButton("rebuildSearchButton") {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);
+                JobCue.getInstance().processIn(5000L);
+            }
+        };
+
         EditEntryForm editForm = new EditEntryForm("editForm");
         editForm.add(editButton);
+        editForm.add(rebuildBlastButton);
+        editForm.add(rebuildSearchButton);
 
         add(editForm);
         add(new EmptyMessagePanel("editPanel", "").setOutputMarkupId(true));
