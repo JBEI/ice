@@ -42,6 +42,9 @@ public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Ser
                 account.setLastName(l.getSirName());
                 account.setInstitution(l.getOrg());
                 account.setDescription(l.getDescription());
+                account.setPassword("");
+                account.setIsSubscribed(1);
+                account.setInitials("");
 
                 WebClientInfo temp = (WebClientInfo) IceSession.get().getClientInfo();
                 String ip = temp.getProperties().getRemoteAddress();

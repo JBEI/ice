@@ -34,26 +34,26 @@ public class Account implements Serializable {
     @Column(name = "lastname", length = 50, nullable = false)
     private String lastName;
 
-    @Column(name = "initials", length = 10)
+    @Column(name = "initials", length = 10, nullable = false)
     private String initials;
 
     @Column(name = "email", length = 100, nullable = false)
     private String email;
 
-    @Column(name = "institution", length = 255)
+    @Column(name = "institution", length = 255, nullable = false)
     private String institution;
 
-    @Column(name = "password", length = 32)
+    @Column(name = "password", length = 32, nullable = false)
     private String password;
 
-    @Column(name = "description")
+    @Column(name = "description", nullable = false)
     @Lob
     private String description;
 
     @Column(name = "is_subscribed", nullable = false)
     private int isSubscribed;
 
-    @Column(name = "ip", length = 20)
+    @Column(name = "ip", length = 20, nullable = false)
     private String ip;
 
     @Column(name = "creation_time")
