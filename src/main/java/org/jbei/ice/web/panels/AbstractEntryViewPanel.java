@@ -15,11 +15,16 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.target.resource.ResourceStreamRequestTarget;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.resource.StringResourceStream;
+import org.jbei.ice.lib.composers.SequenceComposer;
+import org.jbei.ice.lib.composers.SequenceComposerException;
+import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.web.pages.EntryUpdatePage;
@@ -183,22 +188,32 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
             public void onClick() {
                 Entry entry = entryModel.getObject();
 
-                if (SequenceManager.hasSequence(entry)) {
-                    IResourceStream resourceStream = null;
-                    try {
-                        Sequence sequence = SequenceManager.getByEntry(entry);
+                if (entry.getSequence() != null) {
+                    Sequence sequence = entry.getSequence();
 
-                        if (sequence != null) {
-                            resourceStream = new StringResourceStream(sequence.getSequenceUser(),
-                                    "application/genbank");
-                            getRequestCycle().setRequestTarget(
-                                    new ResourceStreamRequestTarget(resourceStream, entryModel
-                                            .getObject().getPartNumbersAsString()
-                                            + ".gb"));
-                        }
-                    } catch (ManagerException e) {
-                        e.printStackTrace();
+                    String sequenceString = null;
+                    try {
+                        GenbankFormatter genbankFormatter = new GenbankFormatter(sequence
+                                .getEntry().getNamesAsString());
+                        genbankFormatter
+                                .setCircular((sequence.getEntry() instanceof Plasmid) ? ((Plasmid) sequence
+                                        .getEntry()).getCircular()
+                                        : false);
+
+                        sequenceString = SequenceComposer.compose(sequence, genbankFormatter);
+                    } catch (SequenceComposerException e) {
+                        Logger.error("Failed to generate fasta file for download", e);
+
+                        return;
                     }
+
+                    IResourceStream resourceStream = new StringResourceStream(sequenceString,
+                            "application/genbank");
+
+                    getRequestCycle().setRequestTarget(
+                            new ResourceStreamRequestTarget(resourceStream, entry
+                                    .getPartNumbersAsString()
+                                    + ".gb"));
                 }
             }
         };

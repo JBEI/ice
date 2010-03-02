@@ -12,7 +12,6 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.IceSession;
 
 public class VectorEditorPage extends WebPage {
@@ -49,8 +48,7 @@ public class VectorEditorPage extends WebPage {
 
             add(new Label("title", new Model<String>(entry.getNamesAsString())));
         } catch (ManagerException e) {
-            Logger.error("Failed to pull entry by id '" + entryRecordId + "': "
-                    + Utils.stackTraceToString(e));
+            Logger.error("Failed to pull entry by id '" + entryRecordId + "': ", e);
         }
     }
 }

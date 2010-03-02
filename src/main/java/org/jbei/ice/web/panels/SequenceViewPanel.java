@@ -17,13 +17,17 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.target.resource.ResourceStreamRequestTarget;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.resource.StringResourceStream;
+import org.jbei.ice.lib.composers.SequenceComposer;
+import org.jbei.ice.lib.composers.SequenceComposerException;
+import org.jbei.ice.lib.composers.formatters.FastaFormatter;
+import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.permissions.PermissionManager;
-import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.forms.SequenceNewFormPanel;
 import org.jbei.ice.web.pages.UnprotectedPage;
@@ -46,9 +50,9 @@ public class SequenceViewPanel extends Panel {
         try {
             sequence = SequenceManager.getByEntry(entry);
         } catch (ManagerException e) {
-            Logger.error(Utils.stackTraceToString(e));
+            Logger.error("Could't get sequence for entry", e);
         } catch (Exception e) {
-            Logger.error(Utils.stackTraceToString(e));
+            Logger.error("Could't get sequence for entry", e);
         }
 
         initializeControls();
@@ -181,8 +185,24 @@ public class SequenceViewPanel extends Panel {
 
             @Override
             public void onClick() {
-                IResourceStream resourceStream = new StringResourceStream(sequence
-                        .getSequenceUser(), "application/genbank");
+                String sequenceString = null;
+                try {
+                    GenbankFormatter genbankFormatter = new GenbankFormatter(sequence.getEntry()
+                            .getNamesAsString());
+                    genbankFormatter
+                            .setCircular((sequence.getEntry() instanceof Plasmid) ? ((Plasmid) sequence
+                                    .getEntry()).getCircular()
+                                    : false);
+
+                    sequenceString = SequenceComposer.compose(sequence, genbankFormatter);
+                } catch (SequenceComposerException e) {
+                    Logger.error("Failed to generate fasta file for download", e);
+
+                    return;
+                }
+
+                IResourceStream resourceStream = new StringResourceStream(sequenceString,
+                        "application/genbank");
 
                 getRequestCycle().setRequestTarget(
                         new ResourceStreamRequestTarget(resourceStream, entry
@@ -200,8 +220,18 @@ public class SequenceViewPanel extends Panel {
 
             @Override
             public void onClick() {
-                IResourceStream resourceStream = new StringResourceStream(sequence
-                        .getSequenceUser(), "application/fasta");
+                String sequenceString = null;
+                try {
+                    sequenceString = SequenceComposer.compose(sequence, new FastaFormatter(sequence
+                            .getEntry().getNamesAsString()));
+                } catch (SequenceComposerException e) {
+                    Logger.error("Failed to generate fasta file for download", e);
+
+                    return;
+                }
+
+                IResourceStream resourceStream = new StringResourceStream(sequenceString,
+                        "application/fasta");
 
                 getRequestCycle().setRequestTarget(
                         new ResourceStreamRequestTarget(resourceStream, entry
@@ -232,9 +262,9 @@ public class SequenceViewPanel extends Panel {
 
                     updateView(null);
                 } catch (ManagerException e) {
-                    Logger.error(Utils.stackTraceToString(e));
+                    Logger.error("Could't delete sequence for entry", e);
                 } catch (Exception e) {
-                    Logger.error(Utils.stackTraceToString(e));
+                    Logger.error("Could't delete sequence for entry", e);
                 }
             }
         }
