@@ -133,11 +133,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jbei.ice</groupId>
-			<artifactId>biojava-all</artifactId>
-			<version>SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jbei.ice</groupId>
 			<artifactId>biojava</artifactId>
 			<version>SNAPSHOT</version>
 		</dependency>
