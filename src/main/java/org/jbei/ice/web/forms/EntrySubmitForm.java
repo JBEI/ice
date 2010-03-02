@@ -173,7 +173,7 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
 
         add(new DropDownChoice<CustomChoice>("status", new PropertyModel<CustomChoice>(this,
                 "status"), new Model<ArrayList<CustomChoice>>(statuses),
-                new ChoiceRenderer<CustomChoice>("name", "value")));
+                new ChoiceRenderer<CustomChoice>("name", "value")).setRequired(true));
 
         setStatus(statuses.get(0));
     }
@@ -184,7 +184,7 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
 
         add(new DropDownChoice<CustomChoice>("bioSafetyLevel", new PropertyModel<CustomChoice>(
                 this, "bioSafetyLevel"), new Model<ArrayList<CustomChoice>>(bioSafetyLevels),
-                new ChoiceRenderer<CustomChoice>("name", "value")));
+                new ChoiceRenderer<CustomChoice>("name", "value")).setRequired(true));
 
         setBioSafetyLevel(bioSafetyLevels.get(0));
     }
