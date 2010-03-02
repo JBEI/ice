@@ -7,14 +7,19 @@ Maven2
     $ svn checkout http://gd-ice.googlecode.com/svn/trunk/ice gd-ice-build
 
 1.1 I prefer to use git-svn to talk to the svn repo, as git lets me
-keep specific settings relevant to the deploy environment. With git,
-the commands are:
+    keep specific settings relevant to the deploy environment. With git,
+    the commands are:
 
     $ git svn init http://gd-ice.googlecode.com/svn/trunk/ice gd-ice-build
     $ cd gd-ice-build
     $ git svn fetch
-    $ git checkout -f 
-
+    $ git checkout -f
+    
+    [Note: I also recommend running this command a few times in
+    different directories, because svn doesn't give identical results
+    every time (Yes, svn is *unreliable*). Make sure the git
+    checksome for the last version is the same before continuing. ]
+    
 1.2 Let's create a build branch that's separate from the svn.
     $ git checkout -b build
 
@@ -47,7 +52,7 @@ the commands are:
     $ git svn rebase
 
     Git will tell you if your settings don't apply. Fix those conflicts
-    and git add -u, git commit.
+    and git add -u, git rebase --continue.
     For best results, instead of adding all the changes to a single git
     branch commit, commit each file change into individual commits, so
     they can be individually tracked.
