@@ -2,6 +2,7 @@ package org.jbei.ice.lib.models;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -70,7 +71,7 @@ public class Account implements Serializable {
 
     @ManyToMany
     @JoinTable(name = "account_group", joinColumns = @JoinColumn(name = "account_id"), inverseJoinColumns = @JoinColumn(name = "group_id"))
-    private Set<Group> groups;
+    private Set<Group> groups = new LinkedHashSet<Group>();
 
     public Account() {
         super();
