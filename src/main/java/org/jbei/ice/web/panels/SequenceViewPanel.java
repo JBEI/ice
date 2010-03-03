@@ -88,10 +88,10 @@ public class SequenceViewPanel extends Panel {
         PageParameters parameters = new PageParameters();
         parameters.add("entryId", entry.getRecordId());
 
-        fragment.add(new BookmarkablePageLink<VectorEditorPage>(
-                "createSequenceViaVectorEditorLink", VectorEditorPage.class, parameters)
-                .add(new Label("createSequenceViaVectorEditorLabel",
-                        "Create Sequence using VectorEditor")));
+        BookmarkablePageLink<VectorEditorPage> createSequenceViaVectorEditorLink = new BookmarkablePageLink<VectorEditorPage>(
+                "createSequenceViaVectorEditorLink", VectorEditorPage.class, parameters);
+        createSequenceViaVectorEditorLink.add(new Label("createSequenceViaVectorEditorLabel",
+                "Create Sequence using VectorEditor"));
 
         AjaxFallbackLink<Object> uploadSequenceLink = new AjaxFallbackLink<Object>(
                 "uploadSequenceLink") {
@@ -107,7 +107,16 @@ public class SequenceViewPanel extends Panel {
                 target.addComponent(addNewSequence);
             }
         };
-        fragment.add(uploadSequenceLink.add(new Label("uploadSequenceLabel", "Upload Sequence")));
+        uploadSequenceLink.add(new Label("uploadSequenceLabel", "Upload Sequence"));
+
+        WebMarkupContainer sequenceCreateLinkContainer = new WebMarkupContainer(
+                "sequenceCreateLinkContainer");
+
+        sequenceCreateLinkContainer.add(uploadSequenceLink);
+        sequenceCreateLinkContainer.add(createSequenceViaVectorEditorLink);
+
+        fragment.add(sequenceCreateLinkContainer.setVisible(PermissionManager
+                .hasWritePermission(entry)));
 
         return fragment;
     }
