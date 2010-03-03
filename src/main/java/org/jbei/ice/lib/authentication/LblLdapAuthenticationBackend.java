@@ -56,10 +56,13 @@ public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Ser
                 AccountManager.save(account);
 
                 Logger.info("User " + loginId + " authenticated via lbl-ldap.");
+            } else {
+                // try local backend
+                LocalBackend localBackend = new LocalBackend();
+                account = localBackend.authenticate(loginId, password);
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            Logger.warn("authentication failed for " + loginId + " with " + e.toString());
+            Logger.warn("LDAP authentication failed for " + loginId + " with " + e.toString());
         }
 
         return account;
