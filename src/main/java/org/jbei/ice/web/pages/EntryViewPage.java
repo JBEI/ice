@@ -13,6 +13,7 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
+import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
@@ -100,6 +101,7 @@ public class EntryViewPage extends ProtectedPage {
         generalLink = new BookmarkablePageLink("generalLink", EntryViewPage.class,
                 new PageParameters("0=" + entry.getId()));
         generalLink.setOutputMarkupId(true);
+
         samplesLink = new BookmarkablePageLink("samplesLink", EntryViewPage.class,
                 new PageParameters("0=" + entry.getId() + ",1=samples"));
         samplesLink.setOutputMarkupId(true);
@@ -109,6 +111,7 @@ public class EntryViewPage extends ProtectedPage {
             samplesLabel = samplesLabel + " (" + numSamples + ")";
         }
         samplesLink.add(new Label("samplesLabel", samplesLabel));
+
         attachmentsLink = new BookmarkablePageLink("attachmentsLink", EntryViewPage.class,
                 new PageParameters("0=" + entry.getId() + ",1=attachments"));
         attachmentsLink.setOutputMarkupId(true);
@@ -118,10 +121,15 @@ public class EntryViewPage extends ProtectedPage {
             attachmentsLabel = attachmentsLabel + " (" + numAttachments + ")";
         }
         attachmentsLink.add(new Label("attachmentsLabel", attachmentsLabel));
+
         sequenceLink = new BookmarkablePageLink("sequenceLink", EntryViewPage.class,
                 new PageParameters("0=" + entry.getId() + ",1=sequence"));
-
         sequenceLink.setOutputMarkupId(true);
+        String sequenceLabel = "Sequence";
+        if (SequenceManager.hasSequence(entry)) {
+            sequenceLabel = sequenceLabel + " (1)";
+        }
+        sequenceLink.add(new Label("sequenceLabel", sequenceLabel));
         permissionLink = new BookmarkablePageLink("permissionLink", EntryViewPage.class,
                 new PageParameters("0=" + entry.getId() + ",1=permission"));
         permissionLink.setOutputMarkupId(true);

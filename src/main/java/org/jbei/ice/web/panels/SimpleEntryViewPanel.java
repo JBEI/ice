@@ -20,6 +20,7 @@ public class SimpleEntryViewPanel<T extends Entry> extends AbstractEntryViewPane
 
         renderAttachments();
         renderSamples();
+        renderSequence();
     }
 
     @Override
@@ -54,7 +55,6 @@ public class SimpleEntryViewPanel<T extends Entry> extends AbstractEntryViewPane
         add(new Image("samples", hasSampleImage).setVisible(SampleManager.hasSample(getEntry())));
     }
 
-    @Override
     protected void renderSequence() {
         ResourceReference hasSequenceImage = new ResourceReference(UnprotectedPage.class,
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sequence.gif");

@@ -9,26 +9,14 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.target.resource.ResourceStreamRequestTarget;
-import org.apache.wicket.util.resource.IResourceStream;
-import org.apache.wicket.util.resource.StringResourceStream;
-import org.jbei.ice.lib.composers.SequenceComposer;
-import org.jbei.ice.lib.composers.SequenceComposerException;
-import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Plasmid;
-import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.web.pages.EntryUpdatePage;
-import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.ProfilePage;
 import org.jbei.ice.web.utils.WebUtils;
 
@@ -53,7 +41,6 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
         renderModificationTime();
         renderKeywords();
         renderSummary();
-        renderSequence();
         renderNotes();
         renderReferences();
         renderBioSafetyLevel();
@@ -176,65 +163,6 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
     protected void renderSummary() {
         add(new MultiLineLabel("shortDescription", WebUtils.jbeiLinkifyText(getEntry()
                 .getShortDescription())).setEscapeModelStrings(false));
-    }
-
-    protected void renderSequence() {
-        WebMarkupContainer sequenceLinksContainer = new WebMarkupContainer("sequenceLinksContainer");
-
-        Link<Object> downloadLink = new Link<Object>("downloadLink") {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void onClick() {
-                Entry entry = entryModel.getObject();
-
-                if (entry.getSequence() != null) {
-                    Sequence sequence = entry.getSequence();
-
-                    String sequenceString = null;
-                    try {
-                        GenbankFormatter genbankFormatter = new GenbankFormatter(sequence
-                                .getEntry().getNamesAsString());
-                        genbankFormatter
-                                .setCircular((sequence.getEntry() instanceof Plasmid) ? ((Plasmid) sequence
-                                        .getEntry()).getCircular()
-                                        : false);
-
-                        sequenceString = SequenceComposer.compose(sequence, genbankFormatter);
-                    } catch (SequenceComposerException e) {
-                        Logger.error("Failed to generate fasta file for download", e);
-
-                        return;
-                    }
-
-                    IResourceStream resourceStream = new StringResourceStream(sequenceString,
-                            "application/genbank");
-
-                    getRequestCycle().setRequestTarget(
-                            new ResourceStreamRequestTarget(resourceStream, entry
-                                    .getPartNumbersAsString()
-                                    + ".gb"));
-                }
-            }
-        };
-
-        BookmarkablePageLink<Object> viewLink = new BookmarkablePageLink<Object>("viewLink",
-                EntryViewPage.class, new PageParameters("0=" + entryModel.getObject().getId()
-                        + ",1=sequence"));
-
-        sequenceLinksContainer.add(downloadLink);
-        sequenceLinksContainer.add(viewLink);
-
-        String sequenceText = "";
-
-        if (!SequenceManager.hasSequence(entryModel.getObject())) {
-            sequenceLinksContainer.setVisible(false);
-        } else {
-            sequenceText = "Sequence provided";
-        }
-
-        add(sequenceLinksContainer);
-        add(new Label("sequence", sequenceText));
     }
 
     protected void renderNotes() {
