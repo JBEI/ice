@@ -31,7 +31,9 @@ public class ErrorPage extends WebPage {
         add(new Label("message", new Model<String>(throwable.getMessage())));
         add(new Label("traceback", new Model<String>(Utils.stackTraceToString(throwable))));
 
-        sendEmail(throwable);
+        if (JbeirSettings.getSetting("SEND_EMAIL_ON_ERRORS").equals("YES")) {
+            sendEmail(throwable);
+        }
     }
 
     private void sendEmail(Throwable throwable) {

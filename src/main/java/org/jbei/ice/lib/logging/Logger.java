@@ -57,7 +57,7 @@ public class Logger {
         if (e instanceof MessagingException) {
             // if error is "Can't send email", there is no need to try to send email
         } else {
-            if (JbeirSettings.getSetting("SEND_EMAIL_ON_LOGGER_ERRORS").equals("YES")) {
+            if (JbeirSettings.getSetting("SEND_EMAIL_ON_ERRORS").equals("YES")) {
 
                 SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 String body = "System Time: " + dateFormatter.format((new Date())) + "\n\n";
