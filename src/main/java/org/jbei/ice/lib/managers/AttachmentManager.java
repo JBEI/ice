@@ -20,7 +20,7 @@ import org.jbei.ice.lib.utils.Utils;
 
 public class AttachmentManager extends Manager {
     public static String attachmentDirectory = JbeirSettings.getSetting("ATTACHMENTS_DIRECTORY")
-            + "/";
+            + File.separator;
 
     public static Attachment create(Attachment attachment) throws ManagerException {
         attachment.setFileId(Utils.generateUUID());

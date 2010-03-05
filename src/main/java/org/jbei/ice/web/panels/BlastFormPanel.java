@@ -13,8 +13,9 @@ import org.apache.wicket.model.PropertyModel;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.logging.UsageLogger;
 import org.jbei.ice.lib.search.Blast;
+import org.jbei.ice.lib.search.BlastException;
 import org.jbei.ice.lib.search.BlastResult;
-import org.jbei.ice.lib.search.BlastTookTooLongException;
+import org.jbei.ice.lib.search.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.web.common.CustomChoice;
 
@@ -87,11 +88,13 @@ public class BlastFormPanel extends Panel {
                                     "No matches found");
                             thisPanel.replace(resultPanel);
                         }
-                    } catch (BlastTookTooLongException e) {
+                    } catch (ProgramTookTooLongException e) {
 
                         Panel resultPanel = new EmptyMessagePanel("blastResultPanel",
                                 "Blast took too long to finish. Try a different query");
                         thisPanel.replace(resultPanel);
+                    } catch (BlastException e) {
+                        throw new RuntimeException(e);
                     }
                 }
 
