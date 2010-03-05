@@ -1,10 +1,11 @@
 package org.jbei.ice.lib.search;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -207,8 +208,10 @@ public class Blast {
      * @param queryString
      *            Sequence to be queried
      * @return
+     * @throws BlastTookTooLongException
      */
-    public ArrayList<BlastResult> queryDistinct(String queryString, String blastProgram) {
+    public ArrayList<BlastResult> queryDistinct(String queryString, String blastProgram)
+            throws BlastTookTooLongException {
         ArrayList<BlastResult> tempResults = query(queryString, blastProgram);
 
         HashMap<String, BlastResult> tempHashMap = new HashMap<String, BlastResult>();
@@ -236,8 +239,10 @@ public class Blast {
      * 
      * @param queryString
      * @return
+     * @throws BlastTookTooLongException
      */
-    public ArrayList<BlastResult> query(String queryString, String blastProgram) {
+    public ArrayList<BlastResult> query(String queryString, String blastProgram)
+            throws BlastTookTooLongException {
         ArrayList<BlastResult> result = new ArrayList<BlastResult>();
 
         if (!isBlastDatabaseExists()) {
@@ -279,27 +284,41 @@ public class Blast {
 
             try {
                 Process process = runTime.exec(commandString);
-                InputStream blastOutputStream = process.getInputStream();
-                OutputStream blastInputStream = process.getOutputStream();
+                // output from blast program
+                BufferedInputStream blastOutputStream = new BufferedInputStream(process
+                        .getInputStream());
+
+                // Input into blast program
+                BufferedOutputStream blastInputStream = new BufferedOutputStream(process
+                        .getOutputStream());
 
                 blastInputStream.write(queryString.getBytes());
                 blastInputStream.flush();
                 blastInputStream.close();
-                process.waitFor();
 
-                StringWriter writer = new StringWriter();
-                IOUtils.copy(blastOutputStream, writer);
-                outputString = writer.toString();
+                byte[] buffer = new byte[4096];
+
+                long maxWait = 4000L;
+                long startTime = System.currentTimeMillis();
+                while (true) {
+                    // consume output stream to prevent process from blocking
+                    int temp = blastOutputStream.read(buffer);
+                    if (temp == -1) {
+                        break;
+                    } else {
+                        outputString = outputString + new String(buffer);
+                    }
+
+                    if (System.currentTimeMillis() - startTime > maxWait) {
+                        throw new BlastTookTooLongException();
+                    }
+                }
 
                 blastOutputStream.close();
                 process.destroy();
                 result = processBlastOutput(outputString);
             } catch (IOException e) {
-                // Exception from exec()
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                // Exception from waitFor()
-                e.printStackTrace();
+                Logger.warn("IO exception in blast: " + e.toString());
             }
         }
         return result;
@@ -338,8 +357,18 @@ public class Blast {
     public static void main(String[] args) {
 
         Blast b = new Blast();
-        b.rebuildDatabase();
-
+        String queryString = "ATGAGCAAAGGCGAAGAACTGTTTACCGGCGTGGTGCCGATTCTGGTGGAACTGGATGGCGATGTGAACGGCCATAAATTTAGCGTGCGCGGCGAAGGCGAAGGCGATGCGACCAACGGCAAACTGACCCTGAAATTTATTTGCACCACCGGCAAACTGCCGGTGCCGTGGCCGACCCTGGTGACCACCCTGACCTATGGCGTGCAGTGCTTTAGCCGCTATCCGGATCATATGAAACAGCATGATTTTTTTAAAAGCGCGATGCCGGAAGGCTATGTGCAGGAACGCACCATTAGCTTTAAAGATGATGGCACCTATAAAACCCGCGCGGAAGTGAAATTTGAAGGCGATACCCTGGTGAACCGCATTGAACTGAAAGGCATTGATTTTAAAGAAGATGGCAACATTCTGGGCCATAAACTGGAATATAACTTTAACAGCCATAACGTGTATATTACCGCGGATAAACAGAAAAACGGCATTAAAGCGAACTTTAAAATTCGCCATAACGTGGAAGATGGCAGCGTGCAGCTGGCGG";
+        queryString += "ATGAGCAAAGGCGAAGAACTGTTTACCGGCGTGGTGCCGATTCTGGTGGAACTGGATGGCGATGTGAACGGCCATAAATTTAGCGTGCGCGGCGAAGGCGAAGGCGATGCGACCAACGGCAAACTGACCCTGAAATTTATTTGCACCACCGGCAAACTGCCGGTGCCGTGGCCGACCCTGGTGACCACCCTGACCTATGGCGTGCAGTGCTTTAGCCGCTATCCGGATCATATGAAACAGCATGATTTTTTTAAAAGCGCGATGCCGGAAGGCTATGTGCAGGAACGCACCATTAGCTTTAAAGATGATGGCACCTATAAAACCCGCGCGGAAGTGAAATTTGAAGGCGATACCCTGGTGAACCGCATTGAACTGAAAGGCATTGATTTTAAAGAAGATGGCAACATTCTGGGCCATAAACTGGAATATAACTTTAACAGCCATAACGTGTATATTACCGCGGATAAACAGAAAAACGGCATTAAAGCGAACTTTAAAATTCGCCATAACGTGGAAGATGGCAGCGTGCAGCTGGCGG";
+        //queryString = "ATGAGCAAAGGCGAAGAACTGTTTACCGGCGTGGTGCCGATTCTGGTGGAACTGGATGGCGATGTGAACGGCCATAAATTTAGCGTGCGCGGCGAAGGCGAAGGCGATGCGACCAACGGCAAACTGACCCTGAAATTTATTTGCACCACCGGCAAACTGCCGGTGCCGTGGCCGACCCTGGTGACCACCCTGACCTATGGCGTGCAGTGCTTTAGCCGCTATCCGGATCATATGAAACAGCATGATTTTTTTAAAAGCGCGATGCCGGAAGGCTATGTGCAGGAACGCACCATTAGCTTTAAAGATGATGGCACCTATAAAACCCGCGCGGAAGTGAAATTTGAAGGCGATACCCTGGTGAACCGCATTGAACTGAAAGGCATTGATTTTAAAGAAGATGGCAACATTCTGGGCCATAAACTGGAATATAACTTTAACAGCCATAACGTGTATATTACCGCGGATAAACAGAAAAACGGCATTAAAGCGAACTTTAAAATTCGCCATAACGTGGAAGATGGCAGCGTGCAGCTGGCG";
+        String blastProgram = "tblastx";
+        ArrayList<BlastResult> result;
+        try {
+            result = b.query(queryString, blastProgram);
+            System.out.println("Num Result: " + result.size());
+        } catch (BlastTookTooLongException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     public static synchronized void setRebuilding(boolean rebuilding) {
@@ -349,4 +378,5 @@ public class Blast {
     public static synchronized boolean isRebuilding() {
         return rebuilding;
     }
+
 }

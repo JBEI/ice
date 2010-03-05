@@ -14,6 +14,7 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.logging.UsageLogger;
 import org.jbei.ice.lib.search.Blast;
 import org.jbei.ice.lib.search.BlastResult;
+import org.jbei.ice.lib.search.BlastTookTooLongException;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.web.common.CustomChoice;
 
@@ -57,40 +58,43 @@ public class BlastFormPanel extends Panel {
                 BlastFormPanel thisPanel = (BlastFormPanel) getParent();
 
                 if (getQuery() != null) {
-                    blastResults = new Blast().queryDistinct(getQuery(), getBlastProgram()
-                            .getValue());
-                }
+                    try {
+                        blastResults = new Blast().queryDistinct(getQuery(), getBlastProgram()
+                                .getValue());
 
-                UsageLogger.info(blastResults.size() + " results for blast query.");
-                Logger.info(blastResults.size() + " results for blast query.");
+                        UsageLogger.info(blastResults.size() + " results for blast query.");
+                        Logger.info(blastResults.size() + " results for blast query.");
 
-                if (blastResults.size() > 0) {
-                    Panel resultPanel;
-
-                    if (getBlastProgram().getValue().equals("tblastx")) {
-                        String proteinQuery;
-
-                        try {
-                            proteinQuery = SequenceUtils.translateToProtein(getQuery());
-                        } catch (Exception e) {
-                            proteinQuery = "";
-                            e.printStackTrace();
+                        if (blastResults.size() > 0) {
+                            Panel resultPanel;
+                            if (getBlastProgram().getValue().equals("tblastx")) {
+                                String proteinQuery;
+                                try {
+                                    proteinQuery = SequenceUtils.translateToProtein(getQuery());
+                                } catch (Exception e) {
+                                    proteinQuery = "";
+                                    e.printStackTrace();
+                                }
+                                resultPanel = new BlastResultPanel("blastResultPanel",
+                                        proteinQuery, blastResults, 15, false);
+                            } else {
+                                resultPanel = new BlastResultPanel("blastResultPanel", getQuery(),
+                                        blastResults, 15, true);
+                            }
+                            thisPanel.replace(resultPanel);
+                        } else {
+                            Panel resultPanel = new EmptyMessagePanel("blastResultPanel",
+                                    "No matches found");
+                            thisPanel.replace(resultPanel);
                         }
+                    } catch (BlastTookTooLongException e) {
 
-                        resultPanel = new BlastResultPanel("blastResultPanel", proteinQuery,
-                                blastResults, 15, false);
-                    } else {
-                        resultPanel = new BlastResultPanel("blastResultPanel", getQuery(),
-                                blastResults, 15, true);
+                        Panel resultPanel = new EmptyMessagePanel("blastResultPanel",
+                                "Blast took too long to finish. Try a different query");
+                        thisPanel.replace(resultPanel);
                     }
-
-                    thisPanel.replace(resultPanel);
-                } else {
-                    Panel resultPanel = new EmptyMessagePanel("blastResultPanel",
-                            "No matches found");
-
-                    thisPanel.replace(resultPanel);
                 }
+
             }
 
             @SuppressWarnings("unused")
