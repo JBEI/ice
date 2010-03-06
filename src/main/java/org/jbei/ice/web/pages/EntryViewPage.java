@@ -1,10 +1,8 @@
 package org.jbei.ice.web.pages;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.Page;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
-import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -27,6 +25,7 @@ import org.jbei.ice.web.panels.PartViewPanel;
 import org.jbei.ice.web.panels.PermissionEditPanel;
 import org.jbei.ice.web.panels.PlasmidViewPanel;
 import org.jbei.ice.web.panels.SampleViewPanel;
+import org.jbei.ice.web.panels.SequenceAnalysisViewPanel;
 import org.jbei.ice.web.panels.SequenceViewPanel;
 import org.jbei.ice.web.panels.StrainViewPanel;
 
@@ -41,19 +40,68 @@ public class EntryViewPage extends ProtectedPage {
     public Component permissionPanel;
 
     public BookmarkablePageLink<Object> generalLink;
+    public BookmarkablePageLink<Object> sequenceLink;
+    public BookmarkablePageLink<Object> sequenceAnalysisLink;
     public BookmarkablePageLink<Object> samplesLink;
     public BookmarkablePageLink<Object> attachmentsLink;
-    public BookmarkablePageLink<Object> sequenceLink;
     public BookmarkablePageLink<Object> permissionLink;
 
     public String subPage = null;
     public String entryTitle = "";
 
-    @SuppressWarnings("unchecked")
+    private final String SAMPLES_URL_KEY = "samples";
+    private final String SEQUENCE_URL_KEY = "sequence";
+    private final String SEQUENCE_ANALYSIS_URL_KEY = "seqanalysis";
+    private final String ATTACHMENTS_URL_KEY = "attachments";
+    private final String PERMISSIONS_URL_KEY = "permission";
+
     public EntryViewPage(PageParameters parameters) {
         super(parameters);
 
+        processPageParameters(parameters);
+
+        subPage = parameters.getString("1");
+
+        String recordType = JbeiConstants.getRecordType(entry.getRecordType());
+        entryTitle = recordType + ": " + entry.getNamesAsString();
+        add(new Label("titleName", entryTitle));
+
+        renderGeneralLink();
+        renderSamplesLink();
+        renderAttachmentsLink();
+        renderSequenceLink();
+        renderSequenceAnalysisLink();
+        renderPermissionsLink();
+
+        setActiveLink();
+
+        add(generalLink);
+        add(sequenceLink);
+        add(sequenceAnalysisLink);
+        add(samplesLink);
+        add(attachmentsLink);
+        add(permissionLink);
+
+        // TODO: REMOVE THIS LATER
+        sequenceAnalysisLink.setVisible(false);
+
+        if (!PermissionManager.hasWritePermission(entry.getId())) {
+            permissionLink.setVisible(false);
+        }
+
+        generalPanel = makeSubPagePanel(entry);
+        displayPanel = generalPanel;
+        add(displayPanel);
+    }
+
+    @Override
+    protected String getTitle() {
+        return entryTitle + " - " + super.getTitle();
+    }
+
+    private void processPageParameters(PageParameters parameters) {
         int entryId = 0;
+
         String identifier = parameters.getString("0");
 
         try {
@@ -87,112 +135,61 @@ public class EntryViewPage extends ProtectedPage {
             Logger.error(e.toString(), e);
             throw new RuntimeException(e);
         }
+
         if (entryId == 0) {
             throw new RestartResponseAtInterceptPageException(PermissionDeniedPage.class);
         }
-
-        subPage = parameters.getString("1");
-
-        String recordType = JbeiConstants.getRecordType(entry.getRecordType());
-
-        entryTitle = recordType + ": " + entry.getNamesAsString();
-        add(new Label("titleName", entryTitle));
-
-        generalLink = new BookmarkablePageLink("generalLink", EntryViewPage.class,
-                new PageParameters("0=" + entry.getId()));
-        generalLink.setOutputMarkupId(true);
-
-        samplesLink = new BookmarkablePageLink("samplesLink", EntryViewPage.class,
-                new PageParameters("0=" + entry.getId() + ",1=samples"));
-        samplesLink.setOutputMarkupId(true);
-        int numSamples = SampleManager.getNumberOfSamples(entry);
-        String samplesLabel = "Samples";
-        if (numSamples > 0) {
-            samplesLabel = samplesLabel + " (" + numSamples + ")";
-        }
-        samplesLink.add(new Label("samplesLabel", samplesLabel));
-
-        attachmentsLink = new BookmarkablePageLink("attachmentsLink", EntryViewPage.class,
-                new PageParameters("0=" + entry.getId() + ",1=attachments"));
-        attachmentsLink.setOutputMarkupId(true);
-        int numAttachments = AttachmentManager.getNumberOfAttachments(entry);
-        String attachmentsLabel = "Attachments";
-        if (numAttachments > 0) {
-            attachmentsLabel = attachmentsLabel + " (" + numAttachments + ")";
-        }
-        attachmentsLink.add(new Label("attachmentsLabel", attachmentsLabel));
-
-        sequenceLink = new BookmarkablePageLink("sequenceLink", EntryViewPage.class,
-                new PageParameters("0=" + entry.getId() + ",1=sequence"));
-        sequenceLink.setOutputMarkupId(true);
-        String sequenceLabel = "Sequence";
-        if (SequenceManager.hasSequence(entry)) {
-            sequenceLabel = sequenceLabel + " (1)";
-        }
-        sequenceLink.add(new Label("sequenceLabel", sequenceLabel));
-        permissionLink = new BookmarkablePageLink("permissionLink", EntryViewPage.class,
-                new PageParameters("0=" + entry.getId() + ",1=permission"));
-        permissionLink.setOutputMarkupId(true);
-
-        setActiveLink();
-
-        add(generalLink);
-        add(samplesLink);
-        add(attachmentsLink);
-        add(sequenceLink);
-        add(permissionLink);
-        if (!PermissionManager.hasWritePermission(entry.getId())) {
-            permissionLink.setVisible(false);
-        }
-        generalPanel = makeSubPagePanel(entry);
-        displayPanel = generalPanel;
-        add(displayPanel);
     }
 
-    public void setActiveLink() {
-        generalLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(true);
-        samplesLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(true);
-        attachmentsLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(
-                true);
-        sequenceLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(true);
-        permissionLink.add(new SimpleAttributeModifier("class", "inactive"))
-                .setOutputMarkupId(true);
+    private void setActiveLink() {
+        SimpleAttributeModifier inactiveSimpleAttributeModifier = new SimpleAttributeModifier(
+                "class", "inactive");
+        SimpleAttributeModifier activeSimpleAttributeModifier = new SimpleAttributeModifier(
+                "class", "active");
+
+        generalLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
+        sequenceLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
+        sequenceAnalysisLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
+        samplesLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
+        attachmentsLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
+        permissionLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
 
         if (subPage == null) {
-            generalLink.add(new SimpleAttributeModifier("class", "active")).setOutputMarkupId(true);
-        } else if (subPage.equals("samples")) {
-            samplesLink.add(new SimpleAttributeModifier("class", "active")).setOutputMarkupId(true);
-        } else if (subPage.equals("attachments")) {
-            attachmentsLink.add(new SimpleAttributeModifier("class", "active")).setOutputMarkupId(
-                    true);
-        } else if (subPage.equals("sequence")) {
-            sequenceLink.add(new SimpleAttributeModifier("class", "active"))
-                    .setOutputMarkupId(true);
-        } else if (subPage.equals("permission")) {
-            permissionLink.add(new SimpleAttributeModifier("class", "active")).setOutputMarkupId(
-                    true);
+            generalLink.add(activeSimpleAttributeModifier).setOutputMarkupId(true);
+        } else if (subPage.equals(SAMPLES_URL_KEY)) {
+            samplesLink.add(activeSimpleAttributeModifier).setOutputMarkupId(true);
+        } else if (subPage.equals(ATTACHMENTS_URL_KEY)) {
+            attachmentsLink.add(activeSimpleAttributeModifier).setOutputMarkupId(true);
+        } else if (subPage.equals(SEQUENCE_URL_KEY)) {
+            sequenceLink.add(activeSimpleAttributeModifier).setOutputMarkupId(true);
+        } else if (subPage.equals(SEQUENCE_ANALYSIS_URL_KEY)) {
+            sequenceAnalysisLink.add(activeSimpleAttributeModifier).setOutputMarkupId(true);
+        } else if (subPage.equals(PERMISSIONS_URL_KEY)) {
+            permissionLink.add(activeSimpleAttributeModifier).setOutputMarkupId(true);
         }
     }
 
-    public Panel makeSubPagePanel(Entry entry) {
+    private Panel makeSubPagePanel(Entry entry) {
         if (subPage == null) {
             return makeGeneralPanel(entry);
-        } else if (subPage.equals("samples")) {
-            return makeSamplesPanel(entry);
-        } else if (subPage.equals("attachments")) {
-            return makeAttachmentsPanel(entry);
-        } else if (subPage.equals("sequence")) {
+        } else if (subPage.equals(SEQUENCE_URL_KEY)) {
             return makeSequencePanel(entry);
-        } else if (subPage.equals("permission")) {
+        } else if (subPage.equals(SEQUENCE_ANALYSIS_URL_KEY)) {
+            return makeSequenceAnalysisPanel(entry);
+        } else if (subPage.equals(SAMPLES_URL_KEY)) {
+            return makeSamplesPanel(entry);
+        } else if (subPage.equals(ATTACHMENTS_URL_KEY)) {
+            return makeAttachmentsPanel(entry);
+        } else if (subPage.equals(PERMISSIONS_URL_KEY)) {
             return makePermissionPanel(entry);
         } else {
             return makeGeneralPanel(entry);
         }
     }
 
-    public Panel makeGeneralPanel(Entry entry) {
-
+    private Panel makeGeneralPanel(Entry entry) {
         Panel panel = null;
+
         if (entry instanceof Strain) {
             panel = new StrainViewPanel("centerPanel", (Strain) entry);
         } else if (entry instanceof Plasmid) {
@@ -204,49 +201,107 @@ public class EntryViewPage extends ProtectedPage {
         if (panel != null) {
             panel.setOutputMarkupId(true);
         }
+
         return panel;
     }
 
-    public Panel makeSamplesPanel(Entry entry) {
+    private Panel makeSamplesPanel(Entry entry) {
         Panel panel = new SampleViewPanel("centerPanel", entry);
         panel.setOutputMarkupId(true);
         return panel;
     }
 
-    public Panel makeAttachmentsPanel(Entry entry) {
+    private Panel makeAttachmentsPanel(Entry entry) {
         Panel panel = new AttachmentsViewPanel("centerPanel", entry);
         panel.setOutputMarkupId(true);
         return panel;
     }
 
-    public Panel makeSequencePanel(Entry entry) {
+    private Panel makeSequencePanel(Entry entry) {
         Panel panel = new SequenceViewPanel("centerPanel", entry);
         panel.setOutputMarkupId(true);
         return panel;
     }
 
-    public Panel makePermissionPanel(Entry entry) {
+    private Panel makeSequenceAnalysisPanel(Entry entry) {
+        Panel panel = new SequenceAnalysisViewPanel("centerPanel", entry);
+        panel.setOutputMarkupId(true);
+        return panel;
+    }
+
+    private Panel makePermissionPanel(Entry entry) {
         Panel panel = new PermissionEditPanel("centerPanel", entry);
         panel.setOutputMarkupId(true);
         return panel;
     }
 
-    public void refreshTabLinks(Page page, AjaxRequestTarget target) {
-        page.replace(generalLink);
-        page.replace(samplesLink);
-        page.replace(attachmentsLink);
-        page.replace(sequenceLink);
-        page.replace(permissionLink);
+    private void renderGeneralLink() {
+        generalLink = new BookmarkablePageLink<Object>("generalLink", EntryViewPage.class,
+                new PageParameters("0=" + entry.getId()));
 
-        target.addComponent(generalLink);
-        target.addComponent(samplesLink);
-        target.addComponent(attachmentsLink);
-        target.addComponent(sequenceLink);
-        target.addComponent(permissionLink);
+        generalLink.setOutputMarkupId(true);
     }
 
-    @Override
-    protected String getTitle() {
-        return entryTitle + " - " + super.getTitle();
+    private void renderSamplesLink() {
+        samplesLink = new BookmarkablePageLink<Object>("samplesLink", EntryViewPage.class,
+                new PageParameters("0=" + entry.getId() + ",1=" + SAMPLES_URL_KEY));
+
+        samplesLink.setOutputMarkupId(true);
+
+        int numSamples = SampleManager.getNumberOfSamples(entry);
+        String samplesLabel = "Samples";
+        if (numSamples > 0) {
+            samplesLabel = samplesLabel + " (" + numSamples + ")";
+        }
+
+        samplesLink.add(new Label("samplesLabel", samplesLabel));
+    }
+
+    private void renderSequenceLink() {
+        sequenceLink = new BookmarkablePageLink<Object>("sequenceLink", EntryViewPage.class,
+                new PageParameters("0=" + entry.getId() + ",1=" + SEQUENCE_URL_KEY));
+
+        sequenceLink.setOutputMarkupId(true);
+
+        String sequenceLabel = "Sequence";
+        if (SequenceManager.hasSequence(entry)) {
+            sequenceLabel = sequenceLabel + " (1)";
+        }
+
+        sequenceLink.add(new Label("sequenceLabel", sequenceLabel));
+    }
+
+    private void renderSequenceAnalysisLink() {
+        sequenceAnalysisLink = new BookmarkablePageLink<Object>("sequenceAnalysisLink",
+                EntryViewPage.class, new PageParameters("0=" + entry.getId() + ",1="
+                        + SEQUENCE_ANALYSIS_URL_KEY));
+
+        sequenceAnalysisLink.setOutputMarkupId(true);
+
+        String sequenceAnalysisLabel = "Seq. Analysis";
+
+        sequenceAnalysisLink.add(new Label("sequenceAnalysisLabel", sequenceAnalysisLabel));
+    }
+
+    private void renderAttachmentsLink() {
+        attachmentsLink = new BookmarkablePageLink<Object>("attachmentsLink", EntryViewPage.class,
+                new PageParameters("0=" + entry.getId() + ",1=" + ATTACHMENTS_URL_KEY));
+
+        attachmentsLink.setOutputMarkupId(true);
+
+        int numAttachments = AttachmentManager.getNumberOfAttachments(entry);
+        String attachmentsLabel = "Attachments";
+        if (numAttachments > 0) {
+            attachmentsLabel = attachmentsLabel + " (" + numAttachments + ")";
+        }
+
+        attachmentsLink.add(new Label("attachmentsLabel", attachmentsLabel));
+    }
+
+    private void renderPermissionsLink() {
+        permissionLink = new BookmarkablePageLink<Object>("permissionLink", EntryViewPage.class,
+                new PageParameters("0=" + entry.getId() + ",1=" + PERMISSIONS_URL_KEY));
+
+        permissionLink.setOutputMarkupId(true);
     }
 }
