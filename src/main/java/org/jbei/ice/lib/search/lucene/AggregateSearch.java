@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.search;
+package org.jbei.ice.lib.search.lucene;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;

@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.search;
+package org.jbei.ice.lib.search.blast;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -28,21 +28,24 @@ import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.lib.utils.Utils;
 
 public class Blast {
-
     private static boolean rebuilding;
+
+    private static final String BL2SEQ_COMMAND_PATTERN = "%s -p blastn -i %s -j %s -r 2";
+    private static final String BLASTALL_COMMAND_PATTERN = "%s -p %s -d %s -m 8";
 
     private String blastBlastall;
     private String bl2seq;
     private String blastDatabaseName;
     private String bigFastaFile = "bigfastafile";
     private String blastFormatLogFile;
+    private String blastDirectory;
 
     public Blast() {
+        blastDirectory = JbeirSettings.getSetting("BLAST_DIRECTORY");
         blastBlastall = JbeirSettings.getSetting("BLAST_BLASTALL");
         bl2seq = JbeirSettings.getSetting("BLAST_BL2SEQ");
-        blastDatabaseName = JbeirSettings.getSetting("BLAST_DIRECTORY") + File.separator
+        blastDatabaseName = blastDirectory + File.separator
                 + JbeirSettings.getSetting("BLAST_DATABASE_NAME");
-
         blastFormatLogFile = JbeirSettings.getSetting("BLAST_DATABASE_NAME") + ".log";
 
         if (!isBlastDatabaseExists()) {
@@ -55,12 +58,13 @@ public class Blast {
 
     private boolean isBlastDatabaseExists() {
         File blastDatabaseFile = new File(blastDatabaseName + ".nsq");
+
         return blastDatabaseFile.exists();
     }
 
     private String breakUpLines(String input) {
-        // String result = "";
         StringBuilder result = new StringBuilder();
+
         int counter = 0;
         int index = 0;
         int end = input.length();
@@ -80,7 +84,7 @@ public class Blast {
     public void rebuildDatabase() {
         Logger.info("Rebuilding blast database");
         try { // The big try
-            File newbigFastaFileDir = new File(JbeirSettings.getSetting("BLAST_DIRECTORY") + ".new");
+            File newbigFastaFileDir = new File(blastDirectory + ".new");
             newbigFastaFileDir.mkdir();
             File bigFastaFile = new File(newbigFastaFileDir.getPath() + File.separator
                     + this.bigFastaFile);
@@ -106,15 +110,15 @@ public class Blast {
     }
 
     private void renameBlastDb(File newBigFastaFileDir) throws IOException {
-        File oldBlastDir = new File(JbeirSettings.getSetting("BLAST_DIRECTORY") + ".old");
+        File oldBlastDir = new File(blastDirectory + ".old");
         if (oldBlastDir.exists()) {
             FileUtils.deleteDirectory(oldBlastDir);
         }
-        oldBlastDir = new File(JbeirSettings.getSetting("BLAST_DIRECTORY") + ".old");
-        File currentBlastDir = new File(JbeirSettings.getSetting("BLAST_DIRECTORY"));
+        oldBlastDir = new File(blastDirectory + ".old");
+        File currentBlastDir = new File(blastDirectory);
         currentBlastDir.renameTo(oldBlastDir);
-        currentBlastDir = new File(JbeirSettings.getSetting("BLAST_DIRECTORY"));
-        File newBlastDir = new File(JbeirSettings.getSetting("BLAST_DIRECTORY") + ".new");
+        currentBlastDir = new File(blastDirectory);
+        File newBlastDir = new File(blastDirectory + ".new");
         try {
             newBlastDir.renameTo(currentBlastDir);
         } catch (SecurityException e) {
@@ -255,7 +259,6 @@ public class Blast {
             jobCue.addJob(Job.REBUILD_BLAST_INDEX);
             jobCue.processIn(5000);
         } else {
-
             while (isRebuilding()) {
                 try {
                     wait(50);
@@ -271,116 +274,75 @@ public class Blast {
                 blastProgramName = "tblastx";
             }
 
-            ArrayList<String> commands = new ArrayList<String>();
-            commands.add(blastBlastall);
-            commands.add("-p");
-            commands.add(blastProgramName);
-            commands.add("-d");
-            commands.add(blastDatabaseName);
-            commands.add("-m");
-            commands.add("8");
-
-            String commandString = Utils.join(" ", commands);
+            String commandString = String.format(BLASTALL_COMMAND_PATTERN, blastBlastall,
+                    blastProgramName, blastDatabaseName);
 
             Logger.info("Blast query: " + commandString);
 
             result = processBlastOutput(runExternalProgram(queryString, commandString));
         }
+
         return result;
     }
 
-    public List<String> runBl2Seq(String reference, List<String> subjects) throws BlastException,
+    public List<String> runBl2Seq(String query, List<String> subjects) throws BlastException,
             ProgramTookTooLongException {
         ArrayList<String> result = new ArrayList<String>();
 
-        String resultItem = "";
-        String dataDirectory = JbeirSettings.getSetting("DATA_DIRECTORY");
-        String referenceFileName = Utils.encryptSHA(reference);
-        File referenceFile = new File(dataDirectory + File.separator + referenceFileName);
         try {
-            FileWriter referenceFileWriter = new FileWriter(referenceFile);
-            referenceFileWriter.write(reference);
+            File dataDirectory = new File(JbeirSettings.getSetting("DATA_DIRECTORY"));
+
+            File queryFile = File.createTempFile("query-", ".seq", dataDirectory);
+            FileWriter referenceFileWriter = new FileWriter(queryFile);
+            referenceFileWriter.write(query);
             referenceFileWriter.close();
+
+            for (String subject : subjects) {
+                File subjectFile = File.createTempFile("subject-", ".seq", dataDirectory);
+
+                FileWriter subjectFileWriter = new FileWriter(subjectFile);
+                subjectFileWriter.write(subject);
+                subjectFileWriter.close();
+
+                String commandString = String.format(BL2SEQ_COMMAND_PATTERN, bl2seq, queryFile
+                        .getPath(), subjectFile.getPath());
+                Logger.info("Bl2seq query: " + commandString);
+
+                String resultItem = runExternalProgram(commandString);
+
+                result.add(resultItem);
+
+                subjectFile.delete();
+            }
+            queryFile.delete();
         } catch (IOException e) {
             throw new BlastException(e);
         }
 
-        for (String subject : subjects) {
-            String subjectFileName = Utils.encryptSHA(subject);
-            File subjectFile = new File(dataDirectory + File.separator + subjectFileName);
-            try {
-                FileWriter subjectFileWriter = new FileWriter(subjectFile);
-                subjectFileWriter.write(subject);
-                subjectFileWriter.close();
-            } catch (IOException e) {
-                throw new BlastException(e);
-            }
-            ArrayList<String> commands = new ArrayList<String>();
-            commands.add(bl2seq);
-            commands.add("-p");
-            commands.add("blastn");
-            commands.add("-i");
-            commands.add(referenceFile.getPath());
-            commands.add("-j");
-            commands.add(subjectFile.getPath());
-            String commandString = Utils.join(" ", commands);
-            Logger.info("Bl2seq query: " + commandString);
-            resultItem = runExternalProgram(commandString);
-
-            result.add(resultItem);
-            subjectFile.delete();
-        }
-        referenceFile.delete();
         return result;
     }
 
     /**
      * Run bl2seq. Because bl2seq needs two inputs, it has to use external files.
      * 
-     * @param reference
+     * @param query
      * @param subject
      * @return
      * @throws BlastException
      * @throws ProgramTookTooLongException
      */
-    public String runBl2Seq(String reference, String subject) throws BlastException,
+    public String runBl2Seq(String query, String subject) throws BlastException,
             ProgramTookTooLongException {
         String result = "";
-        String dataDirectory = JbeirSettings.getSetting("DATA_DIRECTORY");
-        String referenceFileName = Utils.encryptSHA(reference);
-        File referenceFile = new File(dataDirectory + File.separator + referenceFileName);
-        String subjectFileName = Utils.encryptSHA(subject);
-        File subjectFile = new File(dataDirectory + File.separator + subjectFileName);
-        try {
-            FileWriter referenceFileWriter = new FileWriter(referenceFile);
-            referenceFileWriter.write(reference);
-            referenceFileWriter.close();
-        } catch (IOException e) {
-            throw new BlastException(e);
+
+        ArrayList<String> subjects = new ArrayList<String>();
+        subjects.add(subject);
+
+        List<String> bl2seqResults = runBl2Seq(query, subjects);
+
+        if (bl2seqResults.size() > 0) {
+            result = bl2seqResults.get(0);
         }
-
-        try {
-            FileWriter subjectFileWriter = new FileWriter(subjectFile);
-            subjectFileWriter.write(subject);
-            subjectFileWriter.close();
-        } catch (IOException e) {
-            throw new BlastException(e);
-        }
-        ArrayList<String> commands = new ArrayList<String>();
-        commands.add(bl2seq);
-        commands.add("-p");
-        commands.add("blastn");
-        commands.add("-i");
-        commands.add(referenceFile.getPath());
-        commands.add("-j");
-        commands.add(subjectFile.getPath());
-
-        String commandString = Utils.join(" ", commands);
-        Logger.info("Bl2seq query: " + commandString);
-        result = runExternalProgram(commandString);
-
-        referenceFile.delete();
-        subjectFile.delete();
 
         return result;
     }
@@ -483,41 +445,6 @@ public class Blast {
         return blastResults;
     }
 
-    public static void main(String[] args) {
-
-        Blast b = new Blast();
-        String reference = "ATGAGCAAAGGCGAAGAACTGTTTACCGGCGTGGTGCCGATTCTGGTGGAACTGGATGGCGATGTGAACGGCCATAAATTTAGCGTGAGCGGCGAAGGCGAAGGCGATGCGACCTATGGCAAACTGACCCTGAAATTTATTTGCACCACCGGCAAACTGCCGGTGCCGTGGCCGACCCTGGTGACCACCTTTACCTATGGCGTGCAGTGCTTTGCGCGCTATCCGGATCATATGAAACAGCATGATTTTTTTAAAAGCGCGATGCCGGAAGGCTATGTGCAGGAACGCACCATTTTTTTTAAAGATGATGGCAACTATAAAACCCGCGCGGAAGTGAAATTTGAAGGCGATACCCTGGTGAACCGCATTGAACTGAAAGGCATTGATTTTAAAGAAGATGGCAACATTCTGGGCCATAAACTGGAATATAACTATAACAGCCATAAAGTGTATATTACCGCGGATAAACAGAAAAACGGCATTAAAGTGAACTTTAAAACCCGCCATAACATTGAAGATGGCAGCGTGCAGCTGGCGGATCATTATCAGCAGAACACCCCGATTGGCGATGGCCCGGTGCTGCTGCCGGATAACCATTATCTGAGCACCCAGAGCGCGCTGAGCAAAGATCCGAACGAAAAACGCGATCATATGGTGCTGCTGGAATTTGTGACCGCGGCGGGCATTACCCATGGCATGGATGAACTGTATAAAa";
-        String subject = "ATGAGCAAAGGCGAAGAACTGTTTACCGGCGTGGTGCCGATTCTGGTGGAACTGGATGGCGATGTGAACGGCCATAAATTTAGCGTGCGCGGCGAAGGCGAAGGCGATGCGACCAACGGCAAACTGACCCTGAAATTTATTTGCACCACCGGCAAACTGCCGGTGCCGTGGCCGACCCTGGTGACCACCCTGACCTATGGCGTGCAGTGCTTTAGCCGCTATCCGGATCATATGAAACAGCATGATTTTTTTAAAAGCGCGATGCCGGAAGGCTATGTGCAGGAACGCACCATTAGCTTTAAAGATGATGGCACCTATAAAACCCGCGCGGAAGTGAAATTTGAAGGCGATACCCTGGTGAACCGCATTGAACTGAAAGGCATTGATTTTAAAGAAGATGGCAACATTCTGGGCCATAAACTGGAATATAACTTTAACAGCCATAACGTGTATATTACCGCGGATAAACAGAAAAACGGCATTAAAGCGAACTTTAAAATTCGCCATAACGTGGAAGATGGCAGCGTGCAGCTGGCGGATCATTATCAGCAGAACACCCCGATTGGCGATGGCCCGGTGCTGCTGCCGGATAACCATTATCTGAGCACCCAGAGCGTGCTGAGCAAAGATCCGAACGAAAAACGCGATCATATGGTGCTGCTGGAATTTGTGACCGCGGCGGGCATTACCCATGGCATGGATGAACTGTATAAA";
-        String subject2 = "ATGAGCAAAGGCGAAGAACTGTTTACCGGCGTGGTGCCGATTCTGGTGGAACTGGATGGCGATGTGAACGGCCATAAATTTAGCGTGAGCGGCGAAGGCGAAGGCGATGCGACCTATGGCAAACTGACCCTGAAATTTATTTGCACCACCGGCAAACTGCCGGTGCCGTGGCCGACCCTGGTGACCACCCTGACCTATGGCGTGCAGTGCTTTAGCCGCTATCCGGATCATATGAAACAGCATGATTTTTTTAAAAGCGCGATGCCGGAAGGCTATGTGCAGGAACGCACCATTTTTTTTAAAGATGATGGCAACTATAAAACCCGCGCGGAAGTGAAATTTGAAGGCGATACCCTGGTGAACCGCATTGAACTGAAAGGCATTGATTTTAAAGAAGATGGCAACATTCTGGGCCATAAACTGGAATATAACTATAACAGCCATAACGTGTATATTATGGCGGATAAACAGAAAAACGGCATTAAAGTGAACTTTAAAATTCGCCATAACATTGAAGATGGCAGCGTGCAGCTGGCGGATCATTATCAGCAGAACACCCCGATTGGCGATGGCCCGGTGCTGCTGCCGGATAACCATTATCTGAGCACCCAGAGCGCGCTGAGCAAAGATCCGAACGAAAAACGCGATCATATGGTGCTGCTGGAATTTGTGACCGCGGCGGGCATTACCCATGGCATGGATGAACTGTATAAA";
-        try {
-            String result = b.runBl2Seq(reference, subject);
-            System.out.println(result);
-        } catch (BlastException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ProgramTookTooLongException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        ArrayList<String> list = new ArrayList<String>();
-        list.add(subject);
-        list.add(subject2);
-        try {
-            List<String> results = b.runBl2Seq(reference, list);
-            for (String result : results) {
-                System.out.println("###############");
-                System.out.println(result);
-            }
-        } catch (BlastException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ProgramTookTooLongException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-    }
-
     private static synchronized void setRebuilding(boolean rebuilding) {
         Blast.rebuilding = rebuilding;
     }
@@ -526,4 +453,36 @@ public class Blast {
         return rebuilding;
     }
 
+    public static void main(String[] args) {
+        Blast b = new Blast();
+
+        String reference = "ATGAGCAAAGGCGAAGAACTGTTTACCGGCGTGGTGCCGATTCTGGTGGAACTGGATGGCGATGTGAACGGCCATAAATTTAGCGTGAGCGGCGAAGGCGAAGGCGATGCGACCTATGGCAAACTGACCCTGAAATTTATTTGCACCACCGGCAAACTGCCGGTGCCGTGGCCGACCCTGGTGACCACCTTTACCTATGGCGTGCAGTGCTTTGCGCGCTATCCGGATCATATGAAACAGCATGATTTTTTTAAAAGCGCGATGCCGGAAGGCTATGTGCAGGAACGCACCATTTTTTTTAAAGATGATGGCAACTATAAAACCCGCGCGGAAGTGAAATTTGAAGGCGATACCCTGGTGAACCGCATTGAACTGAAAGGCATTGATTTTAAAGAAGATGGCAACATTCTGGGCCATAAACTGGAATATAACTATAACAGCCATAAAGTGTATATTACCGCGGATAAACAGAAAAACGGCATTAAAGTGAACTTTAAAACCCGCCATAACATTGAAGATGGCAGCGTGCAGCTGGCGGATCATTATCAGCAGAACACCCCGATTGGCGATGGCCCGGTGCTGCTGCCGGATAACCATTATCTGAGCACCCAGAGCGCGCTGAGCAAAGATCCGAACGAAAAACGCGATCATATGGTGCTGCTGGAATTTGTGACCGCGGCGGGCATTACCCATGGCATGGATGAACTGTATAAAa";
+        String subject = "ATGAGCAAAGGCGAAGAACTGTTTACCGGCGTGGTGCCGATTCTGGTGGAACTGGATGGCGATGTGAACGGCCATAAATTTAGCGTGCGCGGCGAAGGCGAAGGCGATGCGACCAACGGCAAACTGACCCTGAAATTTATTTGCACCACCGGCAAACTGCCGGTGCCGTGGCCGACCCTGGTGACCACCCTGACCTATGGCGTGCAGTGCTTTAGCCGCTATCCGGATCATATGAAACAGCATGATTTTTTTAAAAGCGCGATGCCGGAAGGCTATGTGCAGGAACGCACCATTAGCTTTAAAGATGATGGCACCTATAAAACCCGCGCGGAAGTGAAATTTGAAGGCGATACCCTGGTGAACCGCATTGAACTGAAAGGCATTGATTTTAAAGAAGATGGCAACATTCTGGGCCATAAACTGGAATATAACTTTAACAGCCATAACGTGTATATTACCGCGGATAAACAGAAAAACGGCATTAAAGCGAACTTTAAAATTCGCCATAACGTGGAAGATGGCAGCGTGCAGCTGGCGGATCATTATCAGCAGAACACCCCGATTGGCGATGGCCCGGTGCTGCTGCCGGATAACCATTATCTGAGCACCCAGAGCGTGCTGAGCAAAGATCCGAACGAAAAACGCGATCATATGGTGCTGCTGGAATTTGTGACCGCGGCGGGCATTACCCATGGCATGGATGAACTGTATAAA";
+        String subject2 = "ATGAGCAAAGGCGAAGAACTGTTTACCGGCGTGGTGCCGATTCTGGTGGAACTGGATGGCGATGTGAACGGCCATAAATTTAGCGTGAGCGGCGAAGGCGAAGGCGATGCGACCTATGGCAAACTGACCCTGAAATTTATTTGCACCACCGGCAAACTGCCGGTGCCGTGGCCGACCCTGGTGACCACCCTGACCTATGGCGTGCAGTGCTTTAGCCGCTATCCGGATCATATGAAACAGCATGATTTTTTTAAAAGCGCGATGCCGGAAGGCTATGTGCAGGAACGCACCATTTTTTTTAAAGATGATGGCAACTATAAAACCCGCGCGGAAGTGAAATTTGAAGGCGATACCCTGGTGAACCGCATTGAACTGAAAGGCATTGATTTTAAAGAAGATGGCAACATTCTGGGCCATAAACTGGAATATAACTATAACAGCCATAACGTGTATATTATGGCGGATAAACAGAAAAACGGCATTAAAGTGAACTTTAAAATTCGCCATAACATTGAAGATGGCAGCGTGCAGCTGGCGGATCATTATCAGCAGAACACCCCGATTGGCGATGGCCCGGTGCTGCTGCCGGATAACCATTATCTGAGCACCCAGAGCGCGCTGAGCAAAGATCCGAACGAAAAACGCGATCATATGGTGCTGCTGGAATTTGTGACCGCGGCGGGCATTACCCATGGCATGGATGAACTGTATAAA";
+
+        try {
+            String result = b.runBl2Seq(reference, subject);
+            System.out.println(result);
+        } catch (BlastException e) {
+            e.printStackTrace();
+        } catch (ProgramTookTooLongException e) {
+            e.printStackTrace();
+        }
+
+        ArrayList<String> list = new ArrayList<String>();
+        list.add(subject);
+        list.add(subject2);
+
+        try {
+            List<String> results = b.runBl2Seq(reference, list);
+            for (String result : results) {
+                System.out.println("###############");
+                System.out.println(result);
+            }
+        } catch (BlastException e) {
+            e.printStackTrace();
+        } catch (ProgramTookTooLongException e) {
+            e.printStackTrace();
+        }
+    }
 }

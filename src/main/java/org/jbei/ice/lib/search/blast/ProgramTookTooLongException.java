@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.search;
+package org.jbei.ice.lib.search.blast;
 
 public class ProgramTookTooLongException extends Exception {
 

@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.search;
+package org.jbei.ice.lib.search.lucene;
 
 @SuppressWarnings("serial")
 public class SearchException extends Exception {
