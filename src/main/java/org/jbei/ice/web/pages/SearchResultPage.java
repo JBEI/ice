@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.logging.UsageLogger;
-import org.jbei.ice.lib.search.AggregateSearch;
-import org.jbei.ice.lib.search.SearchResult;
+import org.jbei.ice.lib.search.lucene.AggregateSearch;
+import org.jbei.ice.lib.search.lucene.SearchResult;
 import org.jbei.ice.web.panels.EmptyMessagePanel;
 import org.jbei.ice.web.panels.SearchResultPanel;
 

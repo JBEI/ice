@@ -7,7 +7,7 @@ import org.apache.wicket.markup.repeater.data.IDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.search.BlastResult;
+import org.jbei.ice.lib.search.blast.BlastResult;
 
 public class BlastDataProvider implements IDataProvider<BlastResult> {
     private static final long serialVersionUID = 1L;

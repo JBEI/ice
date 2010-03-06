@@ -14,7 +14,7 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.search.BlastResult;
+import org.jbei.ice.lib.search.blast.BlastResult;
 import org.jbei.ice.web.dataProviders.BlastDataProvider;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.UnprotectedPage;

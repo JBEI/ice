@@ -5,8 +5,8 @@ import java.util.Hashtable;
 import java.util.Set;
 
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.search.Blast;
-import org.jbei.ice.lib.search.LuceneSearch;
+import org.jbei.ice.lib.search.blast.Blast;
+import org.jbei.ice.lib.search.lucene.LuceneSearch;
 
 public class JobCue implements Runnable {
 

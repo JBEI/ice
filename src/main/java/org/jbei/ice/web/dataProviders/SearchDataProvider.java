@@ -9,7 +9,7 @@ import org.apache.wicket.model.Model;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.search.SearchResult;
+import org.jbei.ice.lib.search.lucene.SearchResult;
 
 public class SearchDataProvider implements IDataProvider<SearchResult> {
     private static final long serialVersionUID = 1L;

@@ -12,10 +12,10 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.logging.UsageLogger;
-import org.jbei.ice.lib.search.Blast;
-import org.jbei.ice.lib.search.BlastException;
-import org.jbei.ice.lib.search.BlastResult;
-import org.jbei.ice.lib.search.ProgramTookTooLongException;
+import org.jbei.ice.lib.search.blast.Blast;
+import org.jbei.ice.lib.search.blast.BlastException;
+import org.jbei.ice.lib.search.blast.BlastResult;
+import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.web.common.CustomChoice;
 

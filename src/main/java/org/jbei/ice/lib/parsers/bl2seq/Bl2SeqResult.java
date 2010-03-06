@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.parsers.bl2seq;
 
 public class Bl2SeqResult {
-    private int rawScore;
+    private int score;
     private int queryStart;
     private int queryEnd;
     private String querySequence;
@@ -10,9 +10,9 @@ public class Bl2SeqResult {
     private String subjectSequence;
     private int orientation; //0 for +/+, 1 for +/-
 
-    public Bl2SeqResult(int rawScore, int queryStart, int queryEnd, String querySequence,
+    public Bl2SeqResult(int score, int queryStart, int queryEnd, String querySequence,
             int subjectStart, int subjectEnd, String subjectSequence, int orientation) {
-        this.rawScore = rawScore;
+        this.score = score;
         this.queryStart = queryStart;
         this.queryEnd = queryEnd;
         this.querySequence = querySequence;
@@ -22,12 +22,12 @@ public class Bl2SeqResult {
         this.orientation = orientation;
     }
 
-    public int getRawScore() {
-        return rawScore;
+    public int getScore() {
+        return score;
     }
 
-    public void setRawScore(int rawScore) {
-        this.rawScore = rawScore;
+    public void setScore(int score) {
+        this.score = score;
     }
 
     public int getQueryStart() {
