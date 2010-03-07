@@ -86,12 +86,11 @@ public class SequenceManager extends Manager {
     public static Sequence get(int id) throws ManagerException {
         Session session = getSession();
         Sequence sequence = null;
+
         try {
             sequence = (Sequence) session.load(Sequence.class, id);
         } catch (HibernateException e) {
-            Logger.error("Could not get sequence " + e.toString(), e);
-        } finally {
-
+            Logger.error("Could not get sequence ", e);
         }
 
         return sequence;
@@ -99,60 +98,59 @@ public class SequenceManager extends Manager {
 
     public static Sequence getByUuid(String uuid) throws ManagerException {
         Session session = getSession();
+
         Query query = session.createQuery("from " + Sequence.class.getName()
                 + " where uuid = :uuid");
         query.setString("uuid", uuid);
-        Sequence sequence;
+
+        Sequence sequence = null;
+
         try {
             sequence = (Sequence) query.uniqueResult();
-        } catch (Exception e) {
-            throw new ManagerException("Could not retrieve Sequence by uuid");
-        } finally {
-
+        } catch (HibernateException e) {
+            Logger.error("Could not retrieve Sequence by uuid", e);
         }
+
         return sequence;
     }
 
     public static Sequence getByEntry(Entry entry) throws ManagerException {
         Sequence sequence = null;
         Session session = getSession();
+
         Query query = session.createQuery("from " + Sequence.class.getName()
                 + " where entries_id = :entryId");
         query.setInteger("entryId", entry.getId());
+
         try {
             sequence = (Sequence) query.uniqueResult();
         } catch (HibernateException e) {
-            Logger.error("Could not get sequence " + e.toString(), e);
-        } finally {
-
+            Logger.error("Could not get sequence ", e);
         }
+
         return sequence;
     }
 
     public static boolean hasSequence(Entry entry) {
         boolean result = false;
         Session session = getSession();
+
         try {
             String queryString = "from " + Sequence.class.getName() + " where entry = :entry";
             Query query = session.createQuery(queryString);
             query.setParameter("entry", entry);
             Sequence sequence = (Sequence) query.uniqueResult();
-            if (sequence == null) {
-
-            } else if (sequence.getSequence() == null) {
-
-            } else if (sequence.getSequence().isEmpty()) {
-
+            if (sequence == null || sequence.getSequence() == null
+                    || sequence.getSequence().isEmpty()) {
+                result = false;
             } else {
                 result = true;
             }
-
         } catch (Exception e) {
             String msg = "Could net determine if entry has sequence " + entry.getRecordId();
             Logger.warn(msg);
-        } finally {
-
         }
+
         return result;
     }
 

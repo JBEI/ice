@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.models;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,69 +10,65 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @Entity
-@Table(name = "sequence_trace_alignments")
-@SequenceGenerator(name = "sequence", sequenceName = "sequence_trace_alignments_id_seq", allocationSize = 1)
-public class SequenceTraceAlignment implements Serializable {
+@Table(name = "trace_sequence_alignments")
+@SequenceGenerator(name = "sequence", sequenceName = "trace_sequence_alignments_id_seq", allocationSize = 1)
+public class TraceSequenceAlignment implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
     private int id;
 
-    @ManyToOne
-    @JoinColumn(name = "entries_id", nullable = false)
-    private Entry entry;
+    @OneToOne
+    @JoinColumn(name = "trace_sequence_id", nullable = false, unique = true)
+    private TraceSequence traceSequence;
 
-    @Column(name = "depositor", length = 255)
-    private String depositor;
-
-    @Column(name = "name", length = 255)
-    private String name;
-
-    @Column(name = "score")
+    @Column(name = "score", nullable = false)
     private int score;
 
-    @Column(name = "bitmatch")
+    @Column(name = "bitmatch", nullable = false)
     @Lob
     private String bitmatch;
 
-    @Column(name = "query_start")
+    @Column(name = "query_start", nullable = false)
     private int queryStart;
 
-    @Column(name = "query_end")
+    @Column(name = "query_end", nullable = false)
     private int queryEnd;
 
-    @Column(name = "subject_start")
+    @Column(name = "subject_start", nullable = false)
     private int subjectStart;
 
-    @Column(name = "subject_end")
+    @Column(name = "subject_end", nullable = false)
     private int subjectEnd;
 
-    @Column(name = "query_alignment")
+    @Column(name = "query_alignment", nullable = false)
     @Lob
     private String queryAlignment;
 
-    @Column(name = "subject_alignment")
+    @Column(name = "subject_alignment", nullable = false)
     @Lob
     private String subjectAlignment;
 
-    public SequenceTraceAlignment() {
+    @Column(name = "modification_time", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date modificationTime;
+
+    public TraceSequenceAlignment() {
         super();
     }
 
-    public SequenceTraceAlignment(Entry entry, String depositor, String name, int score,
-            String bitmatch, int queryStart, int queryEnd, int subjectStart, int subjectEnd,
-            String queryAlignment, String subjectAlignment) {
-        super();
-
-        this.depositor = depositor;
-        this.entry = entry;
-        this.name = name;
+    public TraceSequenceAlignment(TraceSequence traceSequence, int score, String bitmatch,
+            int queryStart, int queryEnd, int subjectStart, int subjectEnd, String queryAlignment,
+            String subjectAlignment, Date modificationTime) {
+        this.traceSequence = traceSequence;
         this.score = score;
         this.bitmatch = bitmatch;
         this.queryStart = queryStart;
@@ -80,6 +77,7 @@ public class SequenceTraceAlignment implements Serializable {
         this.subjectEnd = subjectEnd;
         this.queryAlignment = queryAlignment;
         this.subjectAlignment = subjectAlignment;
+        this.modificationTime = modificationTime;
     }
 
     public int getId() {
@@ -90,28 +88,12 @@ public class SequenceTraceAlignment implements Serializable {
         this.id = id;
     }
 
-    public Entry getEntry() {
-        return entry;
+    public TraceSequence getTraceSequence() {
+        return traceSequence;
     }
 
-    public void setEntry(Entry entry) {
-        this.entry = entry;
-    }
-
-    public String getDepositor() {
-        return depositor;
-    }
-
-    public void setDepositor(String depositor) {
-        this.depositor = depositor;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public void setTraceSequence(TraceSequence traceSequence) {
+        this.traceSequence = traceSequence;
     }
 
     public int getScore() {
@@ -176,5 +158,13 @@ public class SequenceTraceAlignment implements Serializable {
 
     public void setSubjectAlignment(String subjectAlignment) {
         this.subjectAlignment = subjectAlignment;
+    }
+
+    public Date getModificationTime() {
+        return modificationTime;
+    }
+
+    public void setModificationTime(Date modificationTime) {
+        this.modificationTime = modificationTime;
     }
 }

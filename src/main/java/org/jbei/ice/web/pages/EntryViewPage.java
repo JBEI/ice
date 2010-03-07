@@ -12,6 +12,7 @@ import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
+import org.jbei.ice.lib.managers.TraceSequenceManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
@@ -82,7 +83,7 @@ public class EntryViewPage extends ProtectedPage {
         add(attachmentsLink);
         add(permissionLink);
 
-        // TODO: REMOVE THIS LATER
+        // TODO: REMOVE IT LATER
         sequenceAnalysisLink.setVisible(false);
 
         if (!PermissionManager.hasWritePermission(entry.getId())) {
@@ -279,6 +280,10 @@ public class EntryViewPage extends ProtectedPage {
         sequenceAnalysisLink.setOutputMarkupId(true);
 
         String sequenceAnalysisLabel = "Seq. Analysis";
+        int numTraceSequences = TraceSequenceManager.getNumberOfTraceSequences(entry);
+        if (numTraceSequences > 0) {
+            sequenceAnalysisLabel = sequenceAnalysisLabel + " (" + numTraceSequences + ")";
+        }
 
         sequenceAnalysisLink.add(new Label("sequenceAnalysisLabel", sequenceAnalysisLabel));
     }

@@ -1,7 +1,9 @@
 package org.jbei.ice.web.forms;
 
 import java.util.ArrayList;
+import java.util.Date;
 
+import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
@@ -11,8 +13,12 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.managers.TraceSequenceManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sequence;
+import org.jbei.ice.lib.models.TraceSequence;
+import org.jbei.ice.lib.models.TraceSequenceAlignment;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqException;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqParser;
@@ -20,6 +26,8 @@ import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqResult;
 import org.jbei.ice.lib.search.blast.Blast;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.panels.SequenceAnalysisViewPanel;
 
 public class TraceFileNewFormPanel extends Panel {
@@ -65,7 +73,8 @@ public class TraceFileNewFormPanel extends Panel {
             cancelButton.setDefaultFormProcessing(false);
             add(cancelButton);
 
-            add(new FileUploadField("traceFileInput").setLabel(new Model<String>("File")));
+            add(new FileUploadField("traceFileInput").setLabel(new Model<String>("File"))
+                    .setRequired(true));
 
             add(new Button("saveTraceSequenceButton", new Model<String>("Save")));
         }
@@ -74,21 +83,37 @@ public class TraceFileNewFormPanel extends Panel {
         protected void onSubmit() {
             FileUpload fileUpload = getTraceSequenceFileInput();
 
-            String traceSequence = "";
+            assert (fileUpload != null);
 
-            if (fileUpload != null) {
-                traceSequence = new String(fileUpload.getBytes());
-            }
+            String uploadedTraceSequence = new String(fileUpload.getBytes());
+            String traceFileName = fileUpload.getClientFileName();
 
-            Sequence sequence = GeneralParser.getInstance().parse(traceSequence);
+            Sequence sequence = GeneralParser.getInstance().parse(uploadedTraceSequence);
 
-            if (sequence == null) {
+            if (sequence == null || sequence.getSequence() == null) {
                 error("Couldn't parse sequence file! Supported formats: Fasta");
 
                 return;
             }
 
+            TraceSequence traceSequence = new TraceSequence(entry, traceFileName, IceSession.get()
+                    .getAccount().getEmail(), sequence.getSequence(), uploadedTraceSequence, null,
+                    new Date());
+
+            try {
+                TraceSequenceManager.create(traceSequence);
+            } catch (ManagerException e) {
+                Logger.error("Failed to create TraceSequence", e);
+
+                error("Failed to create TraceSequence");
+
+                return;
+            }
+
             if (entry.getSequence() == null) {
+                setResponsePage(EntryViewPage.class, new PageParameters("0=" + entry.getId()
+                        + ",1=seqanalysis"));
+
                 return;
             }
 
@@ -97,7 +122,6 @@ public class TraceFileNewFormPanel extends Panel {
             try {
                 bl2seqAlignment = blast.runBl2Seq(entry.getSequence().getSequence(), sequence
                         .getSequence());
-
             } catch (BlastException e) {
                 Logger.error("bl2seq failed on trace file submit", e);
 
@@ -117,9 +141,34 @@ public class TraceFileNewFormPanel extends Panel {
                 return;
             }
 
-            for (Bl2SeqResult bl2SeqResult : bl2seqAlignments) {
-                System.out.println(bl2SeqResult.getScore());
+            if (bl2seqAlignments.size() > 0) {
+                Bl2SeqResult maxBl2SeqResult = null;
+                int maxScore = -1;
+                for (Bl2SeqResult bl2SeqResult : bl2seqAlignments) {
+                    if (bl2SeqResult.getScore() > maxScore) {
+                        maxScore = bl2SeqResult.getScore();
+                        maxBl2SeqResult = bl2SeqResult;
+                    }
+                }
+
+                TraceSequenceAlignment traceSequenceAlignment = new TraceSequenceAlignment(
+                        traceSequence, maxBl2SeqResult.getScore(), "1,1,1,1,1,1,1,0,0,0,0,0",
+                        maxBl2SeqResult.getQueryStart(), maxBl2SeqResult.getQueryEnd(),
+                        maxBl2SeqResult.getSubjectStart(), maxBl2SeqResult.getSubjectEnd(),
+                        maxBl2SeqResult.getQuerySequence(), maxBl2SeqResult.getSubjectSequence(),
+                        new Date());
+
+                try {
+                    TraceSequenceManager.saveAlignment(traceSequenceAlignment);
+                    traceSequence.setAlignment(traceSequenceAlignment);
+                    TraceSequenceManager.save(traceSequence);
+                } catch (ManagerException e) {
+                    Logger.error("Failed to Save TraceSequenceAlignment", e);
+                }
             }
+
+            setResponsePage(EntryViewPage.class, new PageParameters("0=" + entry.getId()
+                    + ",1=seqanalysis"));
         }
 
         public FileUpload getTraceSequenceFileInput() {

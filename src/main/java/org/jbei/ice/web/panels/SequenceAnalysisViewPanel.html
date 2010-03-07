@@ -2,10 +2,47 @@
 <wicket:panel>
 	<table border="0" cellpadding="3" cellspacing="1" class="entry_table">
 		<tr class="title_row_header">
-			<td>Sequence Analysis | <a href="#" wicket:id="addTraceFileLink">Add trace file</a></td>
+			<td>Sequence Analysis | <a href="#" wicket:id="addTraceFileLink">Add
+			trace file</a></td>
 		</tr>
 		<tr>
-			<td bgcolor="#ffffff"><span wicket:id="traceSequenceFormPanel">Add/Edit form panel</span></td>
+			<td bgcolor="#ffffff">
+			<table border="0" cellpadding="0" cellspacing="0" width="100%">
+				<tr>
+					<td bgcolor="#ffffff"><span wicket:id="traceSequenceFormPanel">Add/Edit
+					form panel</span></td>
+				</tr>
+				<wicket:container wicket:id="tracesContainer">
+					<tr>
+						<td bgcolor="#ffffff">
+						<table class="data_table" border="0" cellpadding="3"
+							cellspacing="1">
+							<tr bgcolor="#F0F0F0">
+								<th>#</th>
+								<th>Name</th>
+								<th>Depositor</th>
+								<th>Alignment</th>
+								<th>Delete</th>
+								<th>Created</th>
+							</tr>
+							<tbody>
+								<tr wicket:id="tracesListView" class="odd_row">
+									<td><span wicket:id="index"></span>.</td>
+									<td><a href="#" wicket:id="nameDownloadLink"><span wicket:id="traceName"></span></a></td>
+									<td style="white-space: nowrap"><a href="#"
+										wicket:id="depositorProfileLink"> <span
+										wicket:id="depositor"></span></a></td>
+									<td><span wicket:id="alignmentScore"></span></td>
+									<td><a href="#" wicket:id="deleteLink">Delete</a></td>
+									<td><span wicket:id="created"></span></td>
+								</tr>
+							</tbody>
+						</table>
+						</td>
+					</tr>
+				</wicket:container>
+			</table>
+			</td>
 		</tr>
 	</table>
 </wicket:panel>
