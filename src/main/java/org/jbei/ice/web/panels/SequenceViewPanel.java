@@ -99,11 +99,14 @@ public class SequenceViewPanel extends Panel {
 
             @Override
             public void onClick(AjaxRequestTarget target) {
+                SequenceViewPanel sequenceViewPanel = (SequenceViewPanel) getParent().getParent()
+                        .getParent();
+
                 SequenceNewFormPanel addNewSequence = new SequenceNewFormPanel("sequenceFormPanel",
-                        (SequenceViewPanel) getParent().getParent(), entry);
+                        (SequenceViewPanel) sequenceViewPanel, entry);
                 addNewSequence.setOutputMarkupId(true);
 
-                getParent().getParent().addOrReplace(addNewSequence);
+                sequenceViewPanel.addOrReplace(addNewSequence);
                 target.addComponent(addNewSequence);
             }
         };
