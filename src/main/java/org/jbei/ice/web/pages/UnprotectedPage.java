@@ -8,9 +8,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.resources.CompressedResourceReference;
 import org.apache.wicket.model.Model;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.panels.FooterPanel;
 import org.jbei.ice.web.panels.HeaderPanel;
 import org.jbei.ice.web.panels.MenuPanel;
@@ -58,15 +56,7 @@ public class UnprotectedPage extends WebPage {
 
     public void handleException(Throwable throwable) {
         if (throwable != null) {
-            String body = Utils.stackTraceToString(throwable);
-            String subject = (throwable.getMessage().length() > 50) ? (throwable.getMessage()
-                    .substring(0, 50) + "...") : throwable.getMessage();
-
-            Emailer.error(JbeirSettings.getSetting("ERROR_EMAIL_EXCEPTION_PREFIX") + " " + subject,
-                    body);
-
             Logger.error(throwable.getMessage(), throwable);
-            Logger.error(body, throwable);
         }
     }
 
