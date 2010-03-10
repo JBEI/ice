@@ -1,13 +1,12 @@
 <html xmlns:wicket>
 <body>
 <wicket:extend>
-	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<table border="0" cellpadding="0" cellspacing="0">
 		<tr>
-			<td colspan="2">
-			<span class="panel_header"><span wicket:id="titleName"></span></span>
-			</td>
+			<td><a href="#" wicket:id="addToWorkspaceLink"><img title="Add to Workspace"
+				wicket:id="plusImage" style="display:inline;"></img></a>&nbsp;<span class="panel_header"> <span wicket:id="titleName"></span></span></td>
 		</tr>
-		<tr>
+		<tr style="width: 500px;">
 			<td>
 			<div id="tabs">
 			<ul>
@@ -23,7 +22,7 @@
 		</tr>
 		<tr>
 			<td>
-			<div wicket:id="centerPanel">Entry View Panel (Will be removed)</div>
+			<div wicket:id="centerPanel" style="width: 800px;">Entry View Panel (Will be removed)</div>
 			</td>
 		</tr>
 	</table>

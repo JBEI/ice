@@ -12,4 +12,5 @@ public class ManagerException extends Exception {
     public ManagerException(String message, Throwable throwable) {
         super(message, throwable);
     }
+
 }

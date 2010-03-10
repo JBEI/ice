@@ -2,9 +2,13 @@ package org.jbei.ice.web.pages;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
+import org.apache.wicket.ResourceReference;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.logging.Logger;
@@ -13,14 +17,17 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.managers.TraceSequenceManager;
+import org.jbei.ice.lib.managers.WorkspaceManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.lib.models.Workspace;
 import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.utils.JbeiConstants;
+import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.panels.AttachmentsViewPanel;
 import org.jbei.ice.web.panels.PartViewPanel;
 import org.jbei.ice.web.panels.PermissionEditPanel;
@@ -82,6 +89,7 @@ public class EntryViewPage extends ProtectedPage {
         add(samplesLink);
         add(attachmentsLink);
         add(permissionLink);
+        add(renderAddToWorkspaceLink());
 
         // TODO: REMOVE IT LATER
         sequenceAnalysisLink.setVisible(false);
@@ -93,6 +101,7 @@ public class EntryViewPage extends ProtectedPage {
         generalPanel = makeSubPagePanel(entry);
         displayPanel = generalPanel;
         add(displayPanel);
+        WorkspaceManager.setVisited(entry);
     }
 
     @Override
@@ -140,6 +149,12 @@ public class EntryViewPage extends ProtectedPage {
         if (entryId == 0) {
             throw new RestartResponseAtInterceptPageException(PermissionDeniedPage.class);
         }
+
+        if (!PermissionManager.hasWritePermission(entry.getId())) {
+            permissionLink.setVisible(false);
+        }
+
+        WorkspaceManager.setVisited(entry);
     }
 
     private void setActiveLink() {
@@ -308,5 +323,39 @@ public class EntryViewPage extends ProtectedPage {
                 new PageParameters("0=" + entry.getId() + ",1=" + PERMISSIONS_URL_KEY));
 
         permissionLink.setOutputMarkupId(true);
+    }
+
+    @SuppressWarnings("unchecked")
+    private AjaxLink renderAddToWorkspaceLink() {
+        final ResourceReference notInWorkspaceImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "plus-empty.png");
+        final ResourceReference inWorkspaceImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "plus-filled.png");
+        AjaxLink addToWorkspaceLink = new AjaxLink("addToWorkspaceLink") {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void onClick(AjaxRequestTarget target) {
+                Workspace workspace = new Workspace(IceSession.get().getAccount(), entry);
+                try {
+                    WorkspaceManager.addOrUpdate(workspace);
+                } catch (ManagerException e) {
+                    Logger.error("Could not addOrUpdate workspace", e);
+                    throw new RuntimeException(e);
+                }
+                Image image = new Image("plusImage", inWorkspaceImage);
+                this.replace(image);
+                getParent().replace(this);
+                target.addComponent(this);
+            }
+        };
+        if (WorkspaceManager.hasEntry(IceSession.get().getAccount(), entry)) {
+            addToWorkspaceLink.add(new Image("plusImage", inWorkspaceImage));
+        } else {
+            addToWorkspaceLink.add(new Image("plusImage", notInWorkspaceImage));
+        }
+        addToWorkspaceLink.setOutputMarkupId(true);
+        return addToWorkspaceLink;
+
     }
 }

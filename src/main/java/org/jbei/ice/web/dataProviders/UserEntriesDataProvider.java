@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 
 import org.apache.wicket.extensions.markup.html.repeater.util.SortParam;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
@@ -19,6 +20,7 @@ public class UserEntriesDataProvider extends AbstractEntriesDataProvider {
         this.account = account;
     }
 
+    @Override
     public Iterator<Entry> iterator(int first, int count) {
         entries.clear();
 
@@ -27,20 +29,18 @@ public class UserEntriesDataProvider extends AbstractEntriesDataProvider {
 
             String field = getSortableField(sp.getProperty());
 
-            LinkedHashSet<Entry> results = (LinkedHashSet<Entry>) EntryManager.getByAccount(
-                    account, first, count,
+            LinkedHashSet<Entry> results = EntryManager.getByAccount(account, first, count,
                     new SortField[] { new SortField(field, sp.isAscending()) });
 
-            for (Entry entry : results) {
-                entries.add(entry);
-            }
+            entries.addAll(results);
         } catch (Exception e) {
-            System.out.println(e.toString());
+            Logger.warn("UserEntriesDataProvider error: " + e.toString());
         }
 
         return entries.iterator();
     }
 
+    @Override
     public int size() {
         return EntryManager.getByAccountCount(account);
     }

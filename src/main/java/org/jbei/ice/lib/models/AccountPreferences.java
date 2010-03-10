@@ -13,8 +13,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import org.jbei.ice.lib.permissions.WorkSpace;
-
 @Entity
 @Table(name = "account_preferences")
 @SequenceGenerator(name = "sequence", sequenceName = "account_preferences_id_seq", allocationSize = 1)
@@ -36,9 +34,6 @@ public class AccountPreferences implements Serializable {
     @ManyToOne
     @JoinColumn(name = "accounts_id", unique = true, nullable = false)
     private Account account;
-
-    @Column(name = "work_space", nullable = true)
-    private WorkSpace workSpace;
 
     public AccountPreferences() {
         super();
@@ -81,14 +76,6 @@ public class AccountPreferences implements Serializable {
 
     public void setAccount(Account account) {
         this.account = account;
-    }
-
-    public void setWorkSpace(WorkSpace workSpace) {
-        this.workSpace = workSpace;
-    }
-
-    public WorkSpace getWorkSpace() {
-        return workSpace;
     }
 
 }

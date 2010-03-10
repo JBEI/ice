@@ -12,7 +12,7 @@
 		-->
 		<property name="hbm2ddl.auto">validate</property>
 		<!-- this will show us all sql statements -->
-		<property name="hibernate.show_sql">true</property>
+		<property name="hibernate.show_sql">false</property>
 		<!-- mapping files -->
 		<mapping class="org.jbei.ice.lib.models.Entry" />
 		<mapping class="org.jbei.ice.lib.models.Plasmid" />
@@ -53,5 +53,6 @@
 		<mapping class="org.jbei.ice.lib.models.Moderator" />
 		<mapping class="org.jbei.ice.lib.models.TraceSequence" />
 		<mapping class="org.jbei.ice.lib.models.TraceSequenceAlignment" />
+		<mapping class="org.jbei.ice.lib.models.Workspace" />
 	</session-factory>
 </hibernate-configuration>

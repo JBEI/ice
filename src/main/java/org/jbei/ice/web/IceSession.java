@@ -153,6 +153,16 @@ public class IceSession extends WebSession {
         }
     }
 
+    public void saveAccountPreferences() {
+        try {
+            AccountManager.save(this.getAccountPreferences());
+
+        } catch (ManagerException e) {
+            String msg = "Could not save accountPreferences in IceSession";
+            Logger.error(msg, e);
+        }
+    }
+
     public AccountPreferences getAccountPreferences() {
         AccountPreferences result = null;
         try {
