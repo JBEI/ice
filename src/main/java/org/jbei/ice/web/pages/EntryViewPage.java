@@ -150,11 +150,6 @@ public class EntryViewPage extends ProtectedPage {
             throw new RestartResponseAtInterceptPageException(PermissionDeniedPage.class);
         }
 
-        if (!PermissionManager.hasWritePermission(entry.getId())) {
-            permissionLink.setVisible(false);
-        }
-
-        WorkspaceManager.setVisited(entry);
     }
 
     private void setActiveLink() {
