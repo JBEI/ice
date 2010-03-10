@@ -59,11 +59,31 @@ public class GenbankParser extends AbstractParser {
 
                     RichLocation featureLocation = (RichLocation) richFeature.getLocation();
                     String genbankType = richFeature.getType();
-                    int start = featureLocation.getMin();
-                    int end = featureLocation.getMax();
+                    int start = featureLocation.getMin() - 1;
+                    int end = featureLocation.getMax() - 1;
 
-                    String featureDNASequence = sequence.getSequence()
-                            .substring(start - 1, end - 1);
+                    String dnaSequence = sequence.getSequence();
+
+                    if (start < 0) {
+                        start = 0;
+                    } else if (start > dnaSequence.length() - 1) {
+                        start = dnaSequence.length() - 1;
+                    }
+
+                    if (end < 0) {
+                        end = 0;
+                    } else if (end > dnaSequence.length() - 1) {
+                        end = dnaSequence.length() - 1;
+                    }
+
+                    String featureDNASequence = "";
+
+                    if (start > end) { // over zero case
+                        featureDNASequence = dnaSequence.substring(start, dnaSequence.length() - 1);
+                        featureDNASequence += dnaSequence.substring(0, end);
+                    } else { // normal
+                        featureDNASequence = sequence.getSequence().substring(start, end);
+                    }
 
                     String featureDNASequenceHash = SequenceUtils
                             .calculateSequenceHash(featureDNASequence);
@@ -78,7 +98,7 @@ public class GenbankParser extends AbstractParser {
                     ourFeature.setFeatureDna(featureDNA);
 
                     SequenceFeature sequenceFeature = new SequenceFeature(sequence, ourFeature,
-                            start, end, featureLocation.getStrand().intValue(), featureName);
+                            start + 1, end + 1, featureLocation.getStrand().intValue(), featureName);
 
                     sequenceFeatureSet.add(sequenceFeature);
                 }
