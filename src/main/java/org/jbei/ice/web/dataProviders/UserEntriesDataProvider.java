@@ -5,9 +5,9 @@ import java.util.LinkedHashSet;
 
 import org.apache.wicket.extensions.markup.html.repeater.util.SortParam;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
 import org.jbei.ice.lib.query.SortField;
 
 public class UserEntriesDataProvider extends AbstractEntriesDataProvider {
@@ -29,8 +29,8 @@ public class UserEntriesDataProvider extends AbstractEntriesDataProvider {
 
             String field = getSortableField(sp.getProperty());
 
-            LinkedHashSet<Entry> results = EntryManager.getByAccount(account, first, count,
-                    new SortField[] { new SortField(field, sp.isAscending()) });
+            LinkedHashSet<Entry> results = AuthenticatedEntryManager.getByAccountVisible(account,
+                    first, count, new SortField[] { new SortField(field, sp.isAscending()) });
 
             entries.addAll(results);
         } catch (Exception e) {
@@ -42,6 +42,6 @@ public class UserEntriesDataProvider extends AbstractEntriesDataProvider {
 
     @Override
     public int size() {
-        return EntryManager.getByAccountCount(account);
+        return AuthenticatedEntryManager.getByAccountVisibleCount(account);
     }
 }

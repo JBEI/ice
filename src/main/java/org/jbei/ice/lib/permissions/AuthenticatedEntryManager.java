@@ -11,6 +11,7 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.lib.query.SortField;
 
 public class AuthenticatedEntryManager {
     public static Entry createEntry(Entry entry) throws PermissionException, ManagerException {
@@ -91,15 +92,32 @@ public class AuthenticatedEntryManager {
             String sessionKey) throws PermissionException, ManagerException {
         LinkedHashSet<Entry> result = (LinkedHashSet<Entry>) EntryManager.getByFilter(data, offset,
                 limit);
-        cleanReadSet(result);
+        result = cleanReadSet(result);
         return result;
     }
 
     public static LinkedHashSet<Entry> getByAccount(Account account, int offset, int limit,
             String sessionKey) throws ManagerException {
         LinkedHashSet<Entry> result = EntryManager.getByAccount(account, offset, limit);
-        cleanReadSet(result);
+        result = cleanReadSet(result);
         return result;
+    }
+
+    public static LinkedHashSet<Entry> getByAccountVisible(Account account, int offset, int limit,
+            SortField[] sortedFields) throws ManagerException {
+        LinkedHashSet<Entry> intermediate = EntryManager.getByAccount(account, 0, 1000,
+                sortedFields);
+        intermediate = cleanReadSet(intermediate);
+        // TODO: Fix big ugly slow way
+        ArrayList<Entry> temp = new ArrayList<Entry>(intermediate);
+        LinkedHashSet<Entry> result = new LinkedHashSet<Entry>(temp.subList(offset, offset + limit));
+        return result;
+    }
+
+    public static int getByAccountVisibleCount(Account account) {
+        LinkedHashSet<Entry> result = EntryManager.getByAccount(account, 0, 3000);
+        result = cleanReadSet(result);
+        return result.size();
     }
 
     public static Entry save(Entry entry) throws ManagerException, PermissionException {
@@ -112,12 +130,14 @@ public class AuthenticatedEntryManager {
         return result;
     }
 
-    private static void cleanReadSet(LinkedHashSet<Entry> result) {
-        for (Entry entry : result) {
-            if (!PermissionManager.hasReadPermission(entry.getId())) {
-                result.remove(entry);
+    private static LinkedHashSet<Entry> cleanReadSet(LinkedHashSet<Entry> inEntries) {
+        LinkedHashSet<Entry> result = new LinkedHashSet<Entry>();
+        for (Entry entry : inEntries) {
+            if (PermissionManager.hasReadPermission(entry.getId())) {
+                result.add(entry);
             }
         }
+        return result;
     }
 
 }
