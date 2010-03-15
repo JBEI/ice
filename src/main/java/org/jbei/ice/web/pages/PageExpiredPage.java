@@ -18,7 +18,7 @@ public class PageExpiredPage extends UnprotectedPage {
                 .getHttpServletRequest();
 
         String urlHeader = (httpServletRequest.isSecure()) ? "https://" : "http://";
-        urlHeader = urlHeader + httpServletRequest.getRemoteHost() + ":"
+        urlHeader = urlHeader + httpServletRequest.getServerName() + ":"
                 + httpServletRequest.getLocalPort() + "/";
 
         String homePageUrl = urlHeader + relativeUrl;

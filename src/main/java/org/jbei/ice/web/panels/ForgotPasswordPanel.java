@@ -93,7 +93,7 @@ public class ForgotPasswordPanel extends Panel {
                             //      .getRemoteAddr();
                             String urlHeader = (httpServletRequest.isSecure()) ? "https://"
                                     : "http://";
-                            urlHeader = urlHeader + httpServletRequest.getRemoteHost() + ":"
+                            urlHeader = urlHeader + httpServletRequest.getServerName() + ":"
                                     + httpServletRequest.getLocalPort() + "/";
                             String resetPasswordPageUrl = urlHeader + resetPasswordPage;
                             String subject = "JBEIRegistry Password Reminder";
