@@ -26,6 +26,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.collections.MiniMap;
 import org.apache.wicket.util.template.TextTemplateHeaderContributor;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.GroupManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Entry;
@@ -38,6 +39,7 @@ import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
+import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.CommaSeparatedField;
@@ -378,7 +380,9 @@ public class PlasmidStrainNewFormPanel extends Panel {
                         + plasmid.getPartNumbers().toArray(new PartNumber[0])[0].getPartNumber()
                         + "]]";
                 strain.setPlasmids(plasmidPartNumberString);
-                AuthenticatedEntryManager.createStrain(strain);
+                Strain newStrain = AuthenticatedEntryManager.createStrain(strain);
+                PermissionManager.addReadGroup(newStrain, GroupManager.getEverybodyGroup());
+                PermissionManager.addReadGroup(newPlasmid, GroupManager.getEverybodyGroup());
                 setResponsePage(EntryViewPage.class, new PageParameters("0=" + newPlasmid.getId()));
             } catch (ManagerException e) {
                 String msg = "System Error: Could not save! ";
