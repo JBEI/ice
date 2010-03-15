@@ -9,7 +9,7 @@ public class WelcomePage extends UnprotectedPage {
         super(parameters);
 
         if (IceSession.get().isAuthenticated()) {
-            throw new RestartResponseAtInterceptPageException(WorkSpacePage.class);
+            throw new RestartResponseAtInterceptPageException(UserPage.class);
         }
     }
 }
