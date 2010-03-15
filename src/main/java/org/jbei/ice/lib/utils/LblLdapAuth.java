@@ -85,7 +85,7 @@ public class LblLdapAuth {
             this.sirName = (String) attributes.get("sn").get();
             this.eMail = (String) attributes.get("mail").get();
             this.eMail = this.eMail.toLowerCase();
-            this.org = (String) attributes.get("o").get();
+            this.org = "Lawrence Berkeley Laboratory";
             this.description = (String) attributes.get("description").get();
 
             authContext = getAuthenticatedContext(employeeNumber, passWord);
