@@ -7,7 +7,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.managers.WorkspaceManager;
 import org.jbei.ice.web.IceSession;
-import org.jbei.ice.web.panels.EmptyMessagePanel;
+import org.jbei.ice.web.panels.EmptyFramedMessagePanel;
 import org.jbei.ice.web.panels.UserEntriesViewPanel;
 import org.jbei.ice.web.panels.UserSamplesViewPanel;
 import org.jbei.ice.web.panels.WorkspaceTablePanel;
@@ -95,7 +95,7 @@ public class UserPage extends ProtectedPage {
             workspacePanel = new WorkspaceTablePanel("centerPanel");
             workspacePanel.setOutputMarkupId(true);
         } else {
-            workspacePanel = new EmptyMessagePanel("centerPanel",
+            workspacePanel = new EmptyFramedMessagePanel("centerPanel",
                     "Your workspace is empty! Try adding parts to your workspace.");
         }
         return workspacePanel;
