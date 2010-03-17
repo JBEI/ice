@@ -7,66 +7,119 @@ import java.util.Set;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.dao.DAO;
+import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.models.AccountPreferences;
 import org.jbei.ice.lib.models.Moderator;
-import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.lib.models.SessionData;
 
-public class AccountManager extends Manager {
-    public static AccountPreferences getAccountPreferences(int id) throws ManagerException {
-        AccountPreferences accountPreferences = null;
-        Session session = getSession();
+public class AccountManager {
+    public static Account get(int id) throws ManagerException {
+        Account account = null;
+
+        Session session = DAO.getSession();
         try {
-            Query query = session.createQuery("from AccountPreferences where id = :id");
-            query.setEntity("id", id);
+            Query query = session
+                    .createQuery("from " + Account.class.getName() + " where id = :id");
+            query.setParameter("id", id);
 
-            accountPreferences = (AccountPreferences) query.uniqueResult();
-        } catch (Exception e) {
-            String msg = "Could not get AccountPreferences by id";
-            Logger.error(msg, e);
-            throw new ManagerException(msg);
-        } finally {
-
+            account = (Account) query.uniqueResult();
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve Account by id: " + String.valueOf(id), e);
         }
 
-        return accountPreferences;
+        return account;
     }
 
-    public static AccountPreferences getAccountPreferences(Account account) throws ManagerException {
-        AccountPreferences accountPreferences = null;
-        Session session = getSession();
+    @SuppressWarnings("unchecked")
+    public static Set<Account> getAllByFirstName() throws ManagerException {
+        LinkedHashSet<Account> accounts = new LinkedHashSet<Account>();
+
+        Session session = DAO.getSession();
         try {
-            Query query = session.createQuery("from AccountPreferences where account = :account");
+            String queryString = "from " + Account.class.getName() + " order by firstName";
+
+            Query query = session.createQuery(queryString);
+
+            accounts.addAll(query.list());
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve all accounts", e);
+        }
+
+        return accounts;
+    }
+
+    public static Account getByEmail(String email) throws ManagerException {
+        Account account = null;
+
+        Session session = DAO.getSession();
+        try {
+            Query query = session.createQuery("from " + Account.class.getName()
+                    + " where email = :email");
+
+            query.setParameter("email", email);
+
+            Object result = query.uniqueResult();
+
+            if (result != null) {
+                account = (Account) result;
+            }
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve Account by email: " + email);
+        }
+
+        return account;
+    }
+
+    public static Boolean isModerator(Account account) throws ManagerException {
+        if (account == null) {
+            throw new ManagerException("Failed to determine moderator for null Account!");
+        }
+
+        Boolean result = false;
+
+        Session session = DAO.getSession();
+        try {
+            String queryString = "from " + Moderator.class.getName()
+                    + " moderator where moderator.account = :account";
+            Query query = session.createQuery(queryString);
             query.setParameter("account", account);
 
-            accountPreferences = (AccountPreferences) query.uniqueResult();
-        } catch (Exception e) {
-            throw new ManagerException("Could not get AccountPreferences by account");
-        } finally {
-
+            Moderator moderator = (Moderator) query.uniqueResult();
+            if (moderator != null) {
+                result = true;
+            }
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to determine moderator for Account: "
+                    + account.getFullName());
         }
 
-        return accountPreferences;
+        return result;
     }
 
-    public static AccountPreferences save(AccountPreferences accountPreferences)
-            throws ManagerException {
-        AccountPreferences result;
-        try {
-            result = (AccountPreferences) dbSave(accountPreferences);
-        } catch (Exception e) {
-            throw new ManagerException("Could not create AccountPreferences in db");
+    public static Account save(Account account) throws ManagerException {
+        if (account == null) {
+            throw new ManagerException("Failed to save null Account!");
         }
+
+        Account result = null;
+
+        try {
+            result = (Account) DAO.save(account);
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to save Account: " + account.getFullName(), e);
+        }
+
         return result;
     }
 
     @SuppressWarnings("unchecked")
-    public static Account getAccountByAuthToken(String authToken) {
+    public static Account getAccountByAuthToken(String authToken) throws ManagerException {
         Account account = null;
-        String queryString = "select data from SessionData sessionData where sessionData.sessionKey = :sessionKey";
-        Session session = getSession();
+
+        String queryString = "select data from " + SessionData.class.getName()
+                + " sessionData where sessionData.sessionKey = :sessionKey";
+        Session session = DAO.getSession();
         try {
             Query query = session.createQuery(queryString);
             query.setString("sessionKey", authToken);
@@ -76,125 +129,9 @@ public class AccountManager extends Manager {
             }
 
         } catch (HibernateException e) {
-            Logger.info("Could not retrieve account by sessionKey");
-        } catch (ManagerException e) {
-            Logger.info("Could not retrieve account by sessionKey");
-            e.printStackTrace();
-        } finally {
-
-        }
-        return account;
-    }
-
-    public static Account get(int id) throws ManagerException {
-        Account account = null;
-        Session session = getSession();
-        try {
-            Query query = session.createQuery("from Account where id = :id");
-            query.setParameter("id", id);
-
-            account = (Account) query.uniqueResult();
-        } catch (HibernateException e) {
-            Logger.warn("Couldn't retrieve Account by id");
-            throw new ManagerException("Couldn't retrieve Account by id: " + String.valueOf(id), e);
-        } finally {
-
+            throw new ManagerException("Failed to get Account by token: " + authToken);
         }
 
         return account;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static Set<Account> getAll() throws ManagerException {
-        LinkedHashSet<Account> accounts = new LinkedHashSet<Account>();
-        Session session = getSession();
-        try {
-            String queryString = "from Account";
-            Query query = session.createQuery(queryString);
-            accounts.addAll(query.list());
-        } catch (HibernateException e) {
-            String msg = "Could not retrieve all accounts " + e.toString();
-            Logger.warn(msg);
-            throw new ManagerException(msg);
-        } finally {
-
-        }
-
-        return accounts;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static Set<Account> getAllByFirstName() throws ManagerException {
-        LinkedHashSet<Account> accounts = new LinkedHashSet<Account>();
-        Session session = getSession();
-        try {
-            String queryString = "from Account order by firstName";
-            Query query = session.createQuery(queryString);
-            accounts.addAll(query.list());
-        } catch (HibernateException e) {
-            String msg = "Could not retrieve all accounts " + e.toString();
-            Logger.warn(msg);
-            throw new ManagerException(msg);
-        } finally {
-
-        }
-
-        return accounts;
-    }
-
-    public static Account getByEmail(String email) throws ManagerException {
-        Account account = null;
-        Session session = getSession();
-        try {
-            Query query = session.createQuery("from Account where email = :email");
-            query.setParameter("email", email);
-            account = (Account) query.uniqueResult();
-        } catch (HibernateException e) {
-            Logger.warn("Couldn't retrieve Account by email");
-            throw new ManagerException("Couldn't retrieve Account by email: " + email);
-        } finally {
-
-        }
-
-        return account;
-    }
-
-    public static Boolean isModerator(Account account) {
-        Boolean result = false;
-        Session session = getSession();
-        try {
-            String queryString = "from Moderator moderator where moderator.account = :account";
-            Query query = session.createQuery(queryString);
-            query.setParameter("account", account);
-            Moderator moderator = (Moderator) query.uniqueResult();
-            if (moderator != null) {
-                result = true;
-            }
-        } catch (HibernateException e) {
-            Logger.error("Could not determine moderator for account: " + account.getEmail(), e);
-        } finally {
-
-        }
-        return result;
-    }
-
-    public static Account save(Account account) throws ManagerException {
-        try {
-            Account result = (Account) dbSave(account);
-
-            return result;
-        } catch (Exception e) {
-            String msg = "Could not save account " + account.getEmail();
-
-            Logger.error(msg, e);
-
-            throw new ManagerException(msg);
-        }
-    }
-
-    public static String encryptPassword(String password) {
-        String md5key = Utils.encryptMD5(JbeirSettings.getSetting("SECRET_KEY") + password);
-
-        return md5key;
     }
 }

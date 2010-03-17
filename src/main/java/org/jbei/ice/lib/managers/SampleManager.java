@@ -1,173 +1,130 @@
 package org.jbei.ice.lib.managers;
 
-import java.util.Calendar;
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Account;
+import org.jbei.ice.lib.dao.DAO;
+import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.Location;
 import org.jbei.ice.lib.models.Sample;
-import org.jbei.ice.lib.utils.Utils;
 
-public class SampleManager extends Manager {
-    public static Sample get(int id) throws ManagerException {
-        Sample result = null;
-        try {
-            result = (Sample) dbGet(Sample.class, id);
-        } catch (Exception e) {
-            String msg = "Could not get Sample by id";
-            Logger.error(msg, e);
-
-            e.printStackTrace();
-            throw new ManagerException(msg, e);
-
+public class SampleManager {
+    public static Sample saveSample(Sample sample) throws ManagerException {
+        if (sample == null) {
+            throw new ManagerException("Failed to save null sample!");
         }
-        return result;
+
+        if (sample.getEntry() == null) {
+            throw new ManagerException("Failed to save sample without entry!");
+        }
+
+        try {
+            sample = (Sample) DAO.save(sample);
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to save sample!", e);
+        }
+
+        return sample;
+    }
+
+    public static void deleteSample(Sample sample) throws ManagerException {
+        if (sample == null) {
+            throw new ManagerException("Failed to delete null sample!");
+        }
+
+        try {
+            DAO.delete(sample);
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to delete sample!", e);
+        }
+    }
+
+    public static Location saveLocation(Location location) throws ManagerException {
+        if (location == null) {
+            throw new ManagerException("Failed to save null location!");
+        }
+
+        if (location.getSample() == null) {
+            throw new ManagerException("Failed to save location without sample!");
+        }
+
+        try {
+            location = (Location) DAO.save(location);
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to save location!", e);
+        }
+
+        return location;
+    }
+
+    public static void deleteLocation(Location location) throws ManagerException {
+        if (location == null) {
+            throw new ManagerException("Failed to delete null location!");
+        }
+
+        try {
+            DAO.delete(location);
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to delete location!", e);
+        }
     }
 
     @SuppressWarnings("unchecked")
-    public static LinkedHashSet<Sample> get(Entry entry) throws ManagerException {
-        LinkedHashSet<Sample> result = null;
-        Session session = getSession();
+    public static ArrayList<Sample> getSamplesByEntry(Entry entry) throws ManagerException {
+        ArrayList<Sample> samples = null;
+
+        Session session = DAO.getSession();
         try {
-            String queryString = "from Sample as sample where sample.entry = :entry order by sample.id desc";
+            String queryString = "from " + Sample.class.getName()
+                    + " as sample where sample.entry = :entry order by sample.id desc";
+
             Query query = session.createQuery(queryString);
 
             query.setEntity("entry", entry);
 
-            result = new LinkedHashSet<Sample>(query.list());
-        } catch (Exception e) {
-            String msg = "Could not get Sample by Entry " + entry.getRecordId();
-            Logger.error(msg, e);
-            throw new ManagerException(msg, e);
-        } finally {
+            List list = query.list();
 
+            if (list != null) {
+                samples = (ArrayList<Sample>) list;
+            }
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve sample by entry: " + entry.getId(), e);
         }
 
-        return result;
+        return samples;
     }
 
     @SuppressWarnings("unchecked")
-    public static LinkedHashSet<Sample> getByAccount(Account account, int offset, int limit)
+    public static ArrayList<Sample> getSamplesByDepositor(String depositor, int offset, int limit)
             throws ManagerException {
-        LinkedHashSet<Sample> result = null;
-        Session session = getSession();
+        ArrayList<Sample> samples = null;
+
+        Session session = DAO.getSession();
         try {
-            String queryString = "from Sample as sample where sample.depositor = :depositor";
+            String queryString = "from " + Sample.class.getName()
+                    + " as sample where sample.depositor = :depositor order by sample.id desc";
 
             Query query = session.createQuery(queryString);
 
-            query.setParameter("depositor", account.getEmail());
+            query.setParameter("depositor", depositor);
             query.setFirstResult(offset);
-            query.setMaxResults(limit);
-
-            result = new LinkedHashSet<Sample>(query.list());
-        } catch (Exception e) {
-            String msg = "Could not retrieve samples by account " + account.getEmail();
-            Logger.error(msg, e);
-            throw new ManagerException(msg, e);
-        } finally {
-
-        }
-
-        return result;
-    }
-
-    public static int getByAccountCount(Account account) throws ManagerException {
-        Session session = getSession();
-        try {
-            String queryString = "from Sample as sample where sample.depositor = :depositor";
-
-            Query query = session.createQuery(queryString);
-
-            query.setParameter("depositor", account.getEmail());
-
-            return query.list().size();
-        } catch (Exception e) {
-            String msg = "Could not retrieve samples by account " + account.getEmail();
-            Logger.error(msg, e);
-            throw new ManagerException(msg, e);
-        } finally {
-
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public static boolean hasSample(Entry entry) {
-        boolean result = false;
-        Session session = getSession();
-        try {
-            String queryString = "from " + Sample.class.getName() + " where entry = :entry";
-            Query query = session.createQuery(queryString);
-            query.setParameter("entry", entry);
-            List samples = query.list();
-            if (samples.size() > 0) {
-                result = true;
+            if (limit >= 0) {
+                query.setMaxResults(limit);
             }
-        } catch (Exception e) {
-            String msg = "Could not determine if entry has Sample: " + entry.getRecordId();
-            Logger.error(msg, e);
-        } finally {
 
-        }
-        return result;
-    }
+            List list = query.list();
 
-    @SuppressWarnings("unchecked")
-    public static int getNumberOfSamples(Entry entry) {
-        int result = 0;
-        Session session = getSession();
-        try {
-            String queryString = "from " + Sample.class.getName() + " where entry = :entry";
-            Query query = session.createQuery(queryString);
-            query.setParameter("entry", entry);
-            List samples = query.list();
-            result = samples.size();
-        } catch (Exception e) {
-            String msg = "Could not determine if entry has Sample: " + entry.getRecordId();
-            Logger.error(msg, e);
-        } finally {
-
-        }
-        return result;
-    }
-
-    public static Sample create(Sample sample) throws ManagerException {
-
-        sample.setCreationTime(Calendar.getInstance().getTime());
-        sample.setUuid(Utils.generateUUID());
-        return save(sample);
-
-    }
-
-    public static Sample save(Sample sample) throws ManagerException {
-        Sample result = null;
-        sample.setModificationTime(Calendar.getInstance().getTime());
-        if (sample.getUuid() == null || sample.getUuid().equals("")) {
-            result = create(sample);
-        } else {
-            try {
-                result = (Sample) dbSave(sample);
-            } catch (Exception e) {
-                String msg = "Could not save sample " + sample.getLabel();
-                Logger.error(msg, e);
-                throw new ManagerException(msg, e);
+            if (list != null) {
+                samples = (ArrayList<Sample>) list;
             }
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve sample by depositor: " + depositor, e);
         }
-        return result;
-    }
 
-    public static void delete(Sample sample) throws ManagerException {
-        try {
-            dbDelete(sample);
-        } catch (Exception e) {
-            String msg = "Could not delete sample " + sample.getId();
-            Logger.error(msg, e);
-            throw new ManagerException(msg, e);
-        }
+        return samples;
     }
-
 }

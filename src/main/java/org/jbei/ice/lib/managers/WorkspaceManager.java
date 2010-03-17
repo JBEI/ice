@@ -4,40 +4,35 @@ import java.util.ArrayList;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.jbei.ice.lib.dao.DAO;
+import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Workspace;
-import org.jbei.ice.lib.query.SortField;
-import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.IceSession;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
-
-public class WorkspaceManager extends Manager {
-
+public class WorkspaceManager {
     public static Workspace create(Account account, Entry entry) throws ManagerException {
         Workspace result = new Workspace(account, entry);
         try {
-            dbSave(result);
-        } catch (ManagerException e) {
-            throw new ManagerException("Could not create Workspace", e);
+            DAO.save(result);
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to create Workspace!", e);
         }
         return result;
     }
 
     public static Workspace addOrUpdate(Workspace workspace) throws ManagerException {
-
         Workspace result = get(workspace.getAccount(), workspace.getEntry());
         if (result == null) {
             result = workspace;
         }
+
         result.setInWorkspace(true);
-        try {
-            result = (Workspace) dbSave(result);
-        } catch (Exception e) {
-            new ManagerException("Could not add workspace ", e);
-        }
+
+        result = (Workspace) save(result);
+
         return result;
     }
 
@@ -45,7 +40,7 @@ public class WorkspaceManager extends Manager {
 
         boolean result = false;
         String queryString = "from Workspace workspace where entry=:entry and account=:account";
-        Session session = getSession();
+        Session session = DAO.getSession();
         Query query = session.createQuery(queryString);
         query.setParameter("entry", entry);
         query.setParameter("account", account);
@@ -64,11 +59,11 @@ public class WorkspaceManager extends Manager {
 
     public static boolean hasEntry(Entry entry) throws ManagerException {
         Account account = IceSession.get().getAccount();
+
         return hasEntry(account, entry);
     }
 
     public static void setVisited(Account account, Entry entry) {
-
         try {
             Workspace queryResult = get(account, entry);
             if (queryResult == null) {
@@ -78,8 +73,7 @@ public class WorkspaceManager extends Manager {
             long numberVisited = queryResult.getNumberVisited() + 1;
             queryResult.setNumberVisited(numberVisited);
             queryResult.setDateVisited(System.currentTimeMillis());
-            dbSave(queryResult);
-
+            DAO.save(queryResult);
         } catch (Exception e) {
             new ManagerException("Could not set visited number", e);
         }
@@ -94,7 +88,7 @@ public class WorkspaceManager extends Manager {
         ArrayList<Workspace> result = null;
         Account account = IceSession.get().getAccount();
         String queryString = "from Workspace workspace where account=:account order by workspace.dateAdded desc";
-        Session session = getSession();
+        Session session = DAO.getSession();
         Query query = session.createQuery(queryString);
         query.setParameter("account", account);
         try {
@@ -108,17 +102,9 @@ public class WorkspaceManager extends Manager {
     }
 
     @SuppressWarnings("unchecked")
-    public static ArrayList<Workspace> getByAccount(Account account, int offset, int limit,
-            SortField[] sortFields) {
-        String sortQuerySuffix = "";
-
-        if (sortFields != null && sortFields.length > 0) {
-            sortQuerySuffix = Utils.join(", ", Arrays.asList(sortFields));
-        }
-
-        String queryString = "from Workspace where account=:account and inWorkspace = true"
-                + (!sortQuerySuffix.isEmpty() ? (" ORDER BY " + sortQuerySuffix) : "");
-        Session session = getSession();
+    public static ArrayList<Workspace> getByAccount(Account account, int offset, int limit) {
+        String queryString = "from Workspace where account=:account and inWorkspace = true";
+        Session session = DAO.getSession();
         Query query = session.createQuery(queryString);
         query.setParameter("account", account);
         query.setFirstResult(offset);
@@ -137,7 +123,7 @@ public class WorkspaceManager extends Manager {
 
     public static Workspace get(Account account, Entry entry) throws ManagerException {
         String queryString = "from Workspace workspace where entry=:entry and account=:account";
-        Session session = getSession();
+        Session session = DAO.getSession();
         Query query = session.createQuery(queryString);
         query.setParameter("entry", entry);
         query.setParameter("account", account);
@@ -152,7 +138,7 @@ public class WorkspaceManager extends Manager {
 
     public static int getCountByAccount(Account account) {
         String queryString = "from Workspace workspace where account=:account and inWorkspace = true order by workspace.dateAdded desc";
-        Session session = getSession();
+        Session session = DAO.getSession();
         Query query = session.createQuery(queryString);
         query.setParameter("account", account);
 
@@ -160,7 +146,14 @@ public class WorkspaceManager extends Manager {
     }
 
     public static Workspace save(Workspace workspace) throws ManagerException {
-        Workspace result = (Workspace) dbSave(workspace);
+        Workspace result = null;
+
+        try {
+            result = (Workspace) DAO.save(workspace);
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to save workspace!", e);
+        }
+
         return result;
     }
 }

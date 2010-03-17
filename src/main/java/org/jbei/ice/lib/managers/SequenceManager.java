@@ -2,222 +2,183 @@ package org.jbei.ice.lib.managers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import org.biojava.bio.BioException;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.dao.DAO;
+import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.FeatureDNA;
-import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.utils.SequenceUtils;
 
-public class SequenceManager extends Manager {
-    public static Sequence create(Sequence sequence) throws ManagerException {
-        Sequence result;
-        try {
-            result = (Sequence) dbSave(sequence);
-        } catch (Exception e) {
-            throw new ManagerException("Could not create Sequence in db");
+public class SequenceManager {
+    public static Sequence saveSequence(Sequence sequence) throws ManagerException {
+        if (sequence == null) {
+            throw new ManagerException("Failed to save null sequence!");
         }
-        return result;
 
-    }
-
-    public static void delete(Sequence sequence) throws ManagerException {
-        try {
-            dbDelete(sequence);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ManagerException("Could not delete sequence in db: " + e.toString());
+        if (sequence.getEntry() == null) {
+            throw new ManagerException("Failed to save sequence without entry!");
         }
-    }
-
-    public static Sequence update(Sequence sequence) throws ManagerException {
-        Sequence result;
-        try {
-            result = (Sequence) dbSave(sequence);
-        } catch (Exception e) {
-            throw new ManagerException("Could not update Sequence in db");
-        }
-        return result;
-
-    }
-
-    @SuppressWarnings("unchecked")
-    public static List<Sequence> getAll() {
-        String queryString = "from Sequence";
-        Session session = getSession();
-        Query query = session.createQuery(queryString);
-        ArrayList<Sequence> result = null;
-        try {
-            result = new ArrayList<Sequence>(query.list());
-        } catch (HibernateException e) {
-            Logger.error("Could not get all sequences " + e.toString(), e);
-        } finally {
-
-        }
-        return result;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static List<Sequence> getAllVisible() {
-        Group everybodyGroup = null;
-        List<Sequence> result = null;
-        Session session = getSession();
-        try {
-            everybodyGroup = GroupManager.getEverybodyGroup();
-            String queryString = "select entry.sequence from Entry entry, ReadGroup readGroup where readGroup.group = :group and readGroup.entry = entry";
-            Query query = session.createQuery(queryString);
-            query.setParameter("group", everybodyGroup);
-            result = new ArrayList<Sequence>(query.list());
-
-        } catch (ManagerException e) {
-            Logger.error("getAllVisible: " + e.toString(), e);
-        } finally {
-
-        }
-        return result;
-    }
-
-    public static Sequence get(int id) throws ManagerException {
-        Session session = getSession();
-        Sequence sequence = null;
 
         try {
-            sequence = (Sequence) session.load(Sequence.class, id);
-        } catch (HibernateException e) {
-            Logger.error("Could not get sequence ", e);
+            Set<SequenceFeature> sequenceFeatureSet = sequence.getSequenceFeatures();
+
+            if (sequenceFeatureSet != null && sequenceFeatureSet.size() > 0) {
+                for (SequenceFeature sequenceFeature : sequenceFeatureSet) {
+                    Feature feature = sequenceFeature.getFeature();
+
+                    if (feature == null || feature.getFeatureDna() == null) {
+                        throw new ManagerException(
+                                "SequenceFeature has no feature or featureDNA assigned to it!");
+                    }
+
+                    Feature existingFeature = getFeatureBySequence(feature.getFeatureDna()
+                            .getSequence());
+
+                    if (existingFeature == null) { // new feature -> save it
+                        existingFeature = saveFeature(feature);
+                    }
+
+                    sequenceFeature.setFeature(existingFeature);
+                }
+            }
+
+            sequence = (Sequence) DAO.save(sequence);
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to save sequence!", e);
         }
 
         return sequence;
     }
 
-    public static Sequence getByUuid(String uuid) throws ManagerException {
-        Session session = getSession();
-
-        Query query = session.createQuery("from " + Sequence.class.getName()
-                + " where uuid = :uuid");
-        query.setString("uuid", uuid);
-
-        Sequence sequence = null;
-
-        try {
-            sequence = (Sequence) query.uniqueResult();
-        } catch (HibernateException e) {
-            Logger.error("Could not retrieve Sequence by uuid", e);
+    public static void deleteSequence(Sequence sequence) throws ManagerException {
+        if (sequence == null) {
+            throw new ManagerException("Failed to delete null sequence!");
         }
 
-        return sequence;
+        try {
+            if (sequence.getEntry() != null) {
+                Entry entry = sequence.getEntry();
+
+                entry.setSequence(null);
+
+                DAO.save(entry);
+
+                sequence.setEntry(null);
+            }
+
+            DAO.delete(sequence);
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to delete sequence!", e);
+        }
+    }
+
+    public static Feature saveFeature(Feature feature) throws ManagerException {
+        if (feature == null) {
+            throw new ManagerException("Failed to save null feature!");
+        }
+
+        try {
+            feature = (Feature) DAO.save(feature);
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to save sequenceFeature!", e);
+        }
+
+        return feature;
+    }
+
+    public static void deleteFeature(Feature feature) throws ManagerException {
+        if (feature == null) {
+            throw new ManagerException("Failed to delete null feature!");
+        }
+
+        try {
+            DAO.delete(feature);
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to delete feature!", e);
+        }
     }
 
     public static Sequence getByEntry(Entry entry) throws ManagerException {
         Sequence sequence = null;
-        Session session = getSession();
 
-        Query query = session.createQuery("from " + Sequence.class.getName()
-                + " where entries_id = :entryId");
-        query.setInteger("entryId", entry.getId());
-
+        Session session = DAO.getSession();
         try {
-            sequence = (Sequence) query.uniqueResult();
-        } catch (HibernateException e) {
-            Logger.error("Could not get sequence ", e);
-        }
+            String queryString = "from " + Sequence.class.getName()
+                    + " as sequence where sequence.entry = :entry";
 
-        return sequence;
-    }
-
-    public static boolean hasSequence(Entry entry) {
-        boolean result = false;
-        Session session = getSession();
-
-        try {
-            String queryString = "from " + Sequence.class.getName() + " where entry = :entry";
             Query query = session.createQuery(queryString);
-            query.setParameter("entry", entry);
-            Sequence sequence = (Sequence) query.uniqueResult();
-            if (sequence == null || sequence.getSequence() == null
-                    || sequence.getSequence().isEmpty()) {
-                result = false;
-            } else {
-                result = true;
+
+            query.setEntity("entry", entry);
+
+            Object queryResult = query.uniqueResult();
+
+            if (queryResult != null) {
+                sequence = (Sequence) queryResult;
             }
-        } catch (Exception e) {
-            String msg = "Could net determine if entry has sequence " + entry.getRecordId();
-            Logger.warn(msg);
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve sequence by entry: " + entry.getId(), e);
         }
 
-        return result;
-    }
-
-    // In python, this is used by soap serve to to serve up sequence and 
-    // restruction enzymes. 
-    public static Sequence getCompositeByEntry(Sequence sequence) throws ManagerException {
         return sequence;
     }
 
-    public static Sequence save(Sequence sequence) throws ManagerException {
-        Sequence result = null;
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Sequence> getSequences() throws ManagerException {
+        ArrayList<Sequence> sequences = null;
 
-        result = (Sequence) dbSave(sequence);
+        Session session = DAO.getSession();
+        try {
+            Query query = session.createQuery("from " + Entry.class.getName());
 
-        return result;
-    }
+            List list = query.list();
 
-    public static SequenceFeature save(SequenceFeature sequenceFeature) throws ManagerException {
-        SequenceFeature result = null;
-
-        result = (SequenceFeature) dbSave(sequenceFeature);
-
-        return result;
-    }
-
-    public static Feature save(Feature feature) throws ManagerException {
-        Feature result = null;
-
-        Feature existingFeature = getExistingFeature(feature);
-
-        if (existingFeature == null) {
-            result = (Feature) dbSave(feature);
-        } else {
-            result = existingFeature;
+            if (list != null) {
+                sequences = (ArrayList<Sequence>) list;
+            }
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve entries!", e);
         }
 
-        return result;
+        return sequences;
     }
 
-    public static Feature getExistingFeature(Feature feature) {
+    private static Feature getFeatureBySequence(String featureDNASequence) throws ManagerException {
         Feature result = null;
-        Session session = getSession();
-        try {
-            FeatureDNA featureDNA = feature.getFeatureDna();
+        Session session = DAO.getSession();
 
+        try {
             String queryString = "from " + FeatureDNA.class.getName() + " where hash = :hash";
             Query query = session.createQuery(queryString);
-            query.setParameter("hash", SequenceUtils
-                    .calculateSequenceHash(featureDNA.getSequence()));
+            query.setParameter("hash", SequenceUtils.calculateSequenceHash(featureDNASequence));
 
-            FeatureDNA resultFeatureDNA = (FeatureDNA) query.uniqueResult();
+            Object queryResult = query.uniqueResult();
 
-            if (resultFeatureDNA == null) {
-                query.setParameter("hash", SequenceUtils.calculateSequenceHash(SequenceUtils
-                        .reverseComplement(featureDNA.getSequence())));
-
-                resultFeatureDNA = (FeatureDNA) query.uniqueResult();
-
-                result = (resultFeatureDNA != null) ? resultFeatureDNA.getFeature() : null;
+            if (queryResult != null) {
+                result = ((FeatureDNA) queryResult).getFeature();
             } else {
-                result = resultFeatureDNA.getFeature();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            Logger.warn(e.toString());
-        } finally {
+                query.setParameter("hash", SequenceUtils.calculateSequenceHash(SequenceUtils
+                        .reverseComplement(featureDNASequence)));
 
+                queryResult = query.uniqueResult();
+
+                if (queryResult != null) {
+                    result = ((FeatureDNA) queryResult).getFeature();
+                } else {
+                    result = null;
+                }
+            }
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to get Feature by sequence!", e);
+        } catch (BioException e) {
+            throw new ManagerException("Failed to get Feature by sequence!", e);
         }
 
         return result;

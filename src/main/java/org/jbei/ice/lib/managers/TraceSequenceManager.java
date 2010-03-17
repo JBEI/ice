@@ -6,18 +6,25 @@ import java.util.List;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.jbei.ice.lib.dao.DAO;
+import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.models.TraceSequenceAlignment;
 
-public class TraceSequenceManager extends Manager {
+public class TraceSequenceManager {
     public static TraceSequence create(TraceSequence traceSequence) throws ManagerException {
         if (traceSequence == null) {
             throw new ManagerException("Couldn't create TraceSequence. TraceSequence is null!");
         }
 
-        TraceSequence result = (TraceSequence) dbSave(traceSequence);
+        TraceSequence result;
+        try {
+            result = (TraceSequence) DAO.save(traceSequence);
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to create TraceSequence!", e);
+        }
 
         return result;
     }
@@ -27,7 +34,11 @@ public class TraceSequenceManager extends Manager {
             throw new ManagerException("Couldn't delete TraceSequence. TraceSequence is null!");
         }
 
-        dbDelete(traceSequence);
+        try {
+            DAO.delete(traceSequence);
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to delete TraceSequence!", e);
+        }
     }
 
     public static TraceSequence save(TraceSequence traceSequence) throws ManagerException {
@@ -35,7 +46,12 @@ public class TraceSequenceManager extends Manager {
             throw new ManagerException("Couldn't save TraceSequence. TraceSequence is null!");
         }
 
-        TraceSequence result = (TraceSequence) dbSave(traceSequence);
+        TraceSequence result;
+        try {
+            result = (TraceSequence) DAO.save(traceSequence);
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to save TraceSequence!", e);
+        }
 
         return result;
     }
@@ -47,7 +63,12 @@ public class TraceSequenceManager extends Manager {
                     "Couldn't save TraceSequenceAlignment. TraceSequenceAlignment is null!");
         }
 
-        TraceSequenceAlignment result = (TraceSequenceAlignment) dbSave(traceSequenceAlignment);
+        TraceSequenceAlignment result;
+        try {
+            result = (TraceSequenceAlignment) DAO.save(traceSequenceAlignment);
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to save TraceSequenceAlignment!", e);
+        }
 
         return result;
     }
@@ -59,11 +80,15 @@ public class TraceSequenceManager extends Manager {
                     "Couldn't delete TraceSequenceAlignment. TraceSequenceAlignment is null!");
         }
 
-        dbDelete(traceSequenceAlignment);
+        try {
+            DAO.delete(traceSequenceAlignment);
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to delete TraceSequenceAlignment!", e);
+        }
     }
 
     public static TraceSequence get(int id) {
-        Session session = getSession();
+        Session session = DAO.getSession();
         TraceSequence traceSequence = null;
 
         try {
@@ -83,7 +108,7 @@ public class TraceSequenceManager extends Manager {
 
         LinkedHashSet<TraceSequence> result = null;
 
-        Session session = getSession();
+        Session session = DAO.getSession();
         try {
             String queryString = "from TraceSequence as traceSequence where traceSequence.entry = :entry order by traceSequence.creationTime asc";
             Query query = session.createQuery(queryString);
@@ -106,7 +131,7 @@ public class TraceSequenceManager extends Manager {
     public static int getNumberOfTraceSequences(Entry entry) {
         int result = 0;
 
-        Session session = getSession();
+        Session session = DAO.getSession();
         try {
             String queryString = "from " + TraceSequence.class.getName() + " where entry = :entry";
             Query query = session.createQuery(queryString);

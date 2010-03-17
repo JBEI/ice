@@ -6,13 +6,14 @@ import java.util.Set;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.models.News;
 
-public class GenericManager extends Manager {
+public class GenericManager {
     @SuppressWarnings("unchecked")
     public static Set<News> getNewses() throws ManagerException {
         LinkedHashSet<News> newses = null;
-        Session session = getSession();
+        Session session = DAO.getSession();
         try {
             Query query = session.createQuery("from News news");
             newses = new LinkedHashSet<News>(query.list());
@@ -28,7 +29,7 @@ public class GenericManager extends Manager {
     @SuppressWarnings("unchecked")
     public static Set<News> getPublishedNewses(int offset, int limit) throws ManagerException {
         LinkedHashSet<News> newses = null;
-        Session session = getSession();
+        Session session = DAO.getSession();
         try {
             Query query = session
                     .createQuery("from News news where news.isPublished = 1 order by news.publicationTime desc");
@@ -47,7 +48,7 @@ public class GenericManager extends Manager {
     @SuppressWarnings("unchecked")
     public static Set<News> getAllPublishedNewses() throws ManagerException {
         LinkedHashSet<News> newses = null;
-        Session session = getSession();
+        Session session = DAO.getSession();
         try {
             Query query = session
                     .createQuery("from News news where news.isPublished = 1 order by news.publicationTime desc");
@@ -63,7 +64,7 @@ public class GenericManager extends Manager {
 
     public static long getTotalEntries() throws ManagerException {
         long result = 0;
-        Session session = getSession();
+        Session session = DAO.getSession();
         Query query = session.createQuery("select count(entry.id) from Entry entry");
         try {
             result = (Long) query.uniqueResult();

@@ -11,6 +11,8 @@ import java.util.regex.Pattern;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.jbei.ice.lib.dao.DAO;
+import org.jbei.ice.lib.dao.HibernateHelper;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Comment;
@@ -22,10 +24,10 @@ import org.jbei.ice.lib.models.Vote;
 import org.jbei.ice.lib.utils.Utils;
 
 @SuppressWarnings("unchecked")
-public class UtilsManager extends Manager {
+public class UtilsManager {
     public static TreeSet<String> getUniqueSelectionMarkers() {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-        Session session = getSession();
+        Session session = DAO.getSession();
         Query query = session
                 .createQuery("select distinct selectionMarker.name from SelectionMarker selectionMarker");
         HashSet<String> rawMarkers = new HashSet<String>(query.list());
@@ -48,7 +50,7 @@ public class UtilsManager extends Manager {
 
     public static TreeSet<String> getUniquePublicPlasmidNames() {
         TreeSet<String> results = new TreeSet<String>();
-        Session session = getSession();
+        Session session = DAO.getSession();
         Query query = session
                 .createQuery("select distinct name.name from Plasmid plasmid inner join plasmid.names as name where name.name <> '' order by name.name asc");
         HashSet<String> names = new HashSet<String>();
@@ -69,7 +71,7 @@ public class UtilsManager extends Manager {
 
     public static TreeSet<String> getUniquePromoters() {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-        Session session = getSession();
+        Session session = DAO.getSession();
         Query query = session
                 .createQuery("select distinct plasmid.promoters from Plasmid plasmid ");
         HashSet<String> rawPromoters = new HashSet<String>();
@@ -99,7 +101,7 @@ public class UtilsManager extends Manager {
 
     public static TreeSet<String> getUniqueOriginOfReplications() {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-        Session session = getSession();
+        Session session = DAO.getSession();
         Query query = session
                 .createQuery("select distinct plasmid.originOfReplication from Plasmid plasmid ");
 
@@ -135,7 +137,7 @@ public class UtilsManager extends Manager {
         HashSet<Integer> strainIds = new HashSet<Integer>();
 
         Set<PartNumber> partNumbers = plasmid.getPartNumbers();
-        Session session = getSession();
+        Session session = DAO.getSession();
 
         for (PartNumber partNumber : partNumbers) {
             Query query = session
@@ -197,7 +199,7 @@ public class UtilsManager extends Manager {
             throws ManagerException {
         Comment comment = new Comment(entry, account, body);
         try {
-            comment = (Comment) dbSave(comment);
+            comment = (Comment) DAO.save(comment);
         } catch (Exception e) {
             e.printStackTrace();
             throw new ManagerException("Could not add comment");
@@ -214,7 +216,7 @@ public class UtilsManager extends Manager {
 
         Vote vote = new Vote(entry, account, score, comment);
         try {
-            vote = (Vote) dbSave(vote);
+            vote = (Vote) DAO.save(vote);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -349,7 +351,7 @@ public class UtilsManager extends Manager {
 
     public static Vote getVote(Entry entry, Account account) throws ManagerException {
         Vote vote = null;
-        Session session = getSession();
+        Session session = DAO.getSession();
         try {
             Query query = session
                     .createQuery("select vote from Vote vote where vote.account = :account vote.entry = :entry");
@@ -381,7 +383,7 @@ public class UtilsManager extends Manager {
         vote.setScore(score);
         vote.setComment(comment);
         try {
-            dbSave(vote);
+            DAO.save(vote);
         } catch (Exception e) {
             e.printStackTrace();
             throw new ManagerException("Update vote failed");

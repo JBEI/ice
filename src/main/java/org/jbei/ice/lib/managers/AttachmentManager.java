@@ -1,249 +1,147 @@
 package org.jbei.ice.lib.managers;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.wicket.util.io.Streams;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.dao.DAO;
+import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.utils.Base64String;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 
-public class AttachmentManager extends Manager {
-    public static String attachmentDirectory = JbeirSettings.getSetting("ATTACHMENTS_DIRECTORY")
-            + File.separator;
+public class AttachmentManager {
+    private static String attachmentDirectory = JbeirSettings.getSetting("ATTACHMENTS_DIRECTORY");
 
-    public static Attachment create(Attachment attachment) throws ManagerException {
-        attachment.setFileId(Utils.generateUUID());
+    public static Attachment save(Attachment attachment, InputStream inputStream)
+            throws ManagerException {
+        if (attachment == null) {
+            throw new ManagerException("Failed to save null attachment!");
+        }
+
+        // TODO: Refactor via transactions
+
+        String fileId = Utils.generateUUID();
+
+        attachment.setFileId(fileId);
+
         Attachment result = null;
+
         try {
-            writeFileData(attachment);
+            writeAttachmentToFile(fileId, inputStream);
 
-            result = (Attachment) dbSave(attachment);
-
+            result = (Attachment) DAO.save(attachment);
         } catch (IOException e) {
-
-            throw new ManagerException("Could not write file: " + e.toString());
-        } catch (Exception e) {
-            System.out.println(e.toString());
+            throw new ManagerException("Failed to create attachment file!", e);
+        } catch (DAOException e) {
             try {
-                deleteFile(attachment);
+                deleteAttachmentFile(attachment);
             } catch (IOException e1) {
-                throw new ManagerException("Could not delete file: " + e1.toString());
+                throw new ManagerException(e);
             }
-            throw new ManagerException("Could not create Attachment in db");
+
+            throw new ManagerException("Failed to save attachment!", e);
         }
 
         return result;
     }
 
     public static void delete(Attachment attachment) throws ManagerException {
-        try {
-
-            deleteFile(attachment);
-            try {
-                dbDelete(attachment);
-            } catch (Exception e) {
-                String msg = "Could not delete attachment in db: ";
-                Logger.error(msg + e.toString(), e);
-                throw new ManagerException(msg + e.toString());
-            }
-
-        } catch (IOException e) {
-            String msg = "Could not delete file: " + attachment.getFileName();
-            Logger.error(msg, e);
-        } catch (HibernateException e) {
-            String msg = "Could not remove entry from database." + attachment.getFileName();
-            Logger.error(msg, e);
-        }
-    }
-
-    public static Attachment get(int id) throws ManagerException {
-        Attachment attachment = null;
-        try {
-            attachment = (Attachment) dbGet(Attachment.class, id);
-            attachment = readFileData(attachment);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new ManagerException("Error reading file: " + e.toString());
-        } catch (Exception e) {
-            throw new ManagerException("Failed loading attachment from db: " + e.toString());
-        }
-        return attachment;
-    }
-
-    public static Attachment getByFileId(String fileId) throws ManagerException {
-        Session session = getSession();
-        Query query = session.createQuery("from " + Attachment.class.getName()
-                + " where file_id = :fileId");
-        query.setString("fileId", fileId);
-        Attachment attachment = null;
-        try {
-            attachment = (Attachment) query.uniqueResult();
-        } catch (Exception e) {
-            throw new ManagerException("Could not retrieve Attachment by FileId");
-        } finally {
-
-        }
         if (attachment == null) {
-            throw new ManagerException("No such fileId found");
-        } else {
-
-            try {
-                attachment = readFileData(attachment);
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new ManagerException("Could not read file: " + e.toString());
-            }
+            throw new ManagerException("Failed to delete null attachment!");
         }
-        return attachment;
+
+        try {
+            // TODO: Refactor via transactions 
+            DAO.delete(attachment);
+
+            deleteAttachmentFile(attachment);
+        } catch (IOException e) {
+            throw new ManagerException("Failed to delete attachment file!");
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to delete attachment!");
+        }
     }
 
     @SuppressWarnings("unchecked")
     public static ArrayList<Attachment> getByEntry(Entry entry) throws ManagerException {
         ArrayList<Attachment> attachments = null;
-        Session session = getSession();
-        Query query = session.createQuery("from " + Attachment.class.getName()
-                + " where entries_id = :entryId");
-        query.setInteger("entryId", entry.getId());
-        try {
-            attachments = (ArrayList<Attachment>) query.list();
-        } catch (HibernateException e) {
-            String msg = "Could not get attachments by entry" + e.toString();
-            Logger.error(msg, e);
-        } finally {
 
+        Session session = DAO.getSession();
+        try {
+            String queryString = "from " + Attachment.class.getName()
+                    + " as attachment where attachment.entry = :entry order by attachment.id desc";
+
+            Query query = session.createQuery(queryString);
+
+            query.setEntity("entry", entry);
+
+            List list = query.list();
+
+            if (list != null) {
+                attachments = (ArrayList<Attachment>) list;
+            }
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve attachment by entry: " + entry.getId(),
+                    e);
         }
+
         return attachments;
     }
 
-    @SuppressWarnings("unchecked")
-    public static boolean hasAttachment(Entry entry) {
-        boolean result = false;
-        Session session = getSession();
-        try {
-            String queryString = "from " + Attachment.class.getName() + " where entry = :entry";
-            Query query = session.createQuery(queryString);
-            query.setParameter("entry", entry);
-            List attachments = query.list();
-            if (attachments.size() > 0) {
-                result = true;
-            }
-        } catch (Exception e) {
-            String msg = "Could not determine if entry has attachments: " + entry.getRecordId();
-            Logger.error(msg, e);
+    public static File getFile(Attachment attachment) throws ManagerException {
+        File file = new File(attachmentDirectory + File.separator + attachment.getFileId());
 
-        } finally {
-
+        if (!file.canRead()) {
+            throw new ManagerException("Failed to open file for read!");
         }
-        return result;
-    }
 
-    @SuppressWarnings("unchecked")
-    public static int getNumberOfAttachments(Entry entry) {
-        int result = 0;
-        Session session = getSession();
-        try {
-            String queryString = "from " + Attachment.class.getName() + " where entry = :entry";
-            Query query = session.createQuery(queryString);
-            query.setParameter("entry", entry);
-            List attachments = query.list();
-            result = attachments.size();
-        } catch (Exception e) {
-            String msg = "Could not determine if entry has attachments: " + entry.getRecordId();
-            Logger.error(msg, e);
-        } finally {
-
-        }
-        return result;
-    }
-
-    public static void main(String[] args) throws IOException, ManagerException {
-
-    }
-
-    public static File readFile(Attachment attachment) throws IOException {
-        File file = new File(attachmentDirectory + attachment.getFileId());
-        if (file.canRead()) {
-
-        } else {
-            throw new IOException("could not read file: " + attachment.getFileId());
-        }
         return file;
     }
 
-    protected static Attachment readFileData(Attachment attachment) throws IOException {
-
-        File file = new File(attachmentDirectory + attachment.getFileId());
-        InputStream inputStream = new FileInputStream(file);
-        long fileLength = file.length();
-        if (fileLength > 524288000) { // 500 MegaBytes
-            throw new IOException("File size limit reached (500MB)");
-        } else {
-            byte[] bytes = new byte[(int) fileLength];
-            int offset = 0;
-            int numRead = 0;
-            while (offset < bytes.length
-                    && (numRead = inputStream.read(bytes, offset, bytes.length - offset)) >= 0) {
-                offset += numRead;
-            }
-
-            if (offset < bytes.length) {
-                throw new IOException("Could not read all of file " + file.getName());
-            }
-            inputStream.close();
-            Base64String b64 = new Base64String();
-            b64.putBytes(bytes);
-            attachment.setData(b64);
-
-            return attachment;
-
-        }
-    }
-
-    protected static Attachment writeFileData(Attachment attachment) throws IOException {
-        File file = new File(attachmentDirectory + attachment.getFileId());
-        File fileDir = file.getParentFile();
+    private static void writeAttachmentToFile(String fileName, InputStream inputStream)
+            throws IOException, ManagerException {
         try {
+            File file = new File(attachmentDirectory + File.separator + fileName);
+
+            File fileDir = new File(attachmentDirectory);
+
             if (!fileDir.exists()) {
                 fileDir.mkdirs();
             }
+
             if (!file.exists()) {
                 file.createNewFile();
             }
+
             FileOutputStream outputStream = new FileOutputStream(file);
-            byte[] bytes = attachment.getData().getBytes();
 
-            if (bytes.length > 524288000) {
-                throw new IOException("File size limit reached (500MB)");
-            } else {
-                outputStream.write(bytes);
+            try {
+                Streams.copy(inputStream, outputStream, 4096);
+            } finally {
+                outputStream.close();
             }
-
-            outputStream.close();
         } catch (SecurityException e) {
-            Logger.warn(e.toString());
+            throw new ManagerException(e);
         }
-        return attachment;
-
     }
 
-    protected static void deleteFile(Attachment attachment) throws IOException {
+    private static void deleteAttachmentFile(Attachment attachment) throws IOException,
+            ManagerException {
         try {
-            File file = new File(attachmentDirectory + attachment.getFileId());
+            File file = new File(attachmentDirectory + File.separator + attachment.getFileId());
+
             file.delete();
         } catch (SecurityException e) {
-            String msg = "Could not delete attachment file: ";
-            Logger.error(msg + e.toString(), e);
+            throw new ManagerException(e);
         }
     }
 }

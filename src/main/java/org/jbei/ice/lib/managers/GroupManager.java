@@ -6,15 +6,17 @@ import java.util.Set;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.jbei.ice.lib.dao.DAO;
+import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 
-public class GroupManager extends Manager {
+public class GroupManager {
 
     public static Group get(String uuid) throws ManagerException {
         Group result = null;
-        Session session = getSession();
+        Session session = DAO.getSession();
         try {
             Query query = session.createQuery("from Group where uuid = :uuid");
             query.setString("uuid", uuid);
@@ -32,7 +34,7 @@ public class GroupManager extends Manager {
 
     public static Group get(int id) throws ManagerException {
         Group result = null;
-        Session session = getSession();
+        Session session = DAO.getSession();
         try {
             Query query = session.createQuery("from Group where id = :id");
             query.setInteger("id", id);
@@ -65,7 +67,7 @@ public class GroupManager extends Manager {
     @SuppressWarnings("unchecked")
     public static Set<Group> getAll() throws ManagerException {
         LinkedHashSet<Group> groups = new LinkedHashSet<Group>();
-        Session session = getSession();
+        Session session = DAO.getSession();
         try {
             String queryString = "from Group";
             Query query = session.createQuery(queryString);
@@ -90,8 +92,8 @@ public class GroupManager extends Manager {
 
         Group saved = null;
         try {
-            saved = (Group) dbSave(g);
-        } catch (ManagerException e) {
+            saved = (Group) DAO.save(g);
+        } catch (DAOException e) {
             e.printStackTrace();
             String msg = "Could not save group " + label + " to database: " + e.toString();
             Logger.error(msg, e);
@@ -110,8 +112,8 @@ public class GroupManager extends Manager {
 
     public static Group update(Group group) throws ManagerException {
         try {
-            dbSave(group);
-        } catch (ManagerException e) {
+            DAO.save(group);
+        } catch (DAOException e) {
             e.printStackTrace();
             String msg = "Could not save group " + group.getLabel() + " to database: "
                     + e.toString();
@@ -124,8 +126,8 @@ public class GroupManager extends Manager {
 
     public static void delete(Group group) throws ManagerException {
         try {
-            dbDelete(group);
-        } catch (ManagerException e) {
+            DAO.delete(group);
+        } catch (DAOException e) {
             e.printStackTrace();
             String msg = "Could not delete group " + group.getUuid() + ": " + e.toString();
             Logger.error(msg, e);
@@ -136,8 +138,8 @@ public class GroupManager extends Manager {
     public static Group save(Group group) throws ManagerException {
         Group result = null;
         try {
-            result = (Group) dbSave(group);
-        } catch (ManagerException e) {
+            result = (Group) DAO.save(group);
+        } catch (DAOException e) {
             e.printStackTrace();
             String msg = "Could not save group " + group.getUuid();
             Logger.error(msg, e);
@@ -179,5 +181,4 @@ public class GroupManager extends Manager {
         }
 
     }
-
 }

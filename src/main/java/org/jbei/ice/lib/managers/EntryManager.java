@@ -1,16 +1,17 @@
 package org.jbei.ice.lib.managers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.List;
+
+import javax.persistence.NonUniqueResultException;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Account;
+import org.jbei.ice.lib.dao.DAO;
+import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
@@ -22,19 +23,296 @@ import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Strain;
-import org.jbei.ice.lib.query.SortField;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 
-public class EntryManager extends Manager {
-    public static final String STRAIN_ENTRY_TYPE = "strain";
-    public static final String PLASMID_ENTRY_TYPE = "plasmid";
-    public static final String PART_ENTRY_TYPE = "part";
+public class EntryManager {
+    private static final String STRAIN_ENTRY_TYPE = "strain";
+    private static final String PLASMID_ENTRY_TYPE = "plasmid";
+    private static final String PART_ENTRY_TYPE = "part";
 
-    public EntryManager() {
+    public static Entry createEntry(Entry entry) throws ManagerException {
+        Entry result = null;
+
+        if (entry == null) {
+            result = null;
+        } else if (entry instanceof Plasmid) {
+            result = createPlasmid((Plasmid) entry);
+        } else if (entry instanceof Strain) {
+            result = createStrain((Strain) entry);
+        } else if (entry instanceof Part) {
+            result = createPart((Part) entry);
+        }
+
+        return result;
     }
 
-    public static Plasmid createPlasmid(Plasmid newPlasmid) throws ManagerException {
+    public static Entry get(int id) throws ManagerException {
+        Entry entry = null;
+
+        Session session = DAO.getSession();
+        try {
+            Query query = session.createQuery("from " + Entry.class.getName() + " where id = :id");
+
+            query.setParameter("id", id);
+
+            Object queryResult = query.uniqueResult();
+
+            if (queryResult != null) {
+                entry = (Entry) queryResult;
+            }
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve entry by id: " + id, e);
+        }
+
+        return entry;
+    }
+
+    public static Entry getByRecordId(String recordId) throws ManagerException {
+        Entry entry = null;
+
+        Session session = DAO.getSession();
+        try {
+            Query query = session.createQuery("from " + Entry.class.getName()
+                    + " where recordId = :recordId");
+
+            query.setParameter("recordId", recordId);
+
+            Object queryResult = query.uniqueResult();
+
+            if (queryResult != null) {
+                entry = (Entry) queryResult;
+            }
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve entry by recordId: " + recordId, e);
+        }
+
+        return entry;
+    }
+
+    public static Entry getByPartNumber(String partNumber) throws ManagerException {
+        Entry entry = null;
+
+        Session session = DAO.getSession();
+        try {
+            Query query = session.createQuery("from " + PartNumber.class.getName()
+                    + " where partNumber = :partNumber");
+
+            query.setParameter("partNumber", partNumber);
+
+            Object queryResult = query.uniqueResult();
+
+            if (queryResult != null) {
+                entry = ((PartNumber) queryResult).getEntry();
+            }
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve entry by partNumber: " + partNumber, e);
+        }
+
+        return entry;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static int getNumberOfVisibleEntries() throws ManagerException {
+        Group everybodyGroup;
+
+        int result = 0;
+        Session session = DAO.getSession();
+
+        try {
+            everybodyGroup = GroupManager.getEverybodyGroup();
+
+            String queryString = "select id from ReadGroup readGroup where readGroup.group = :group";
+
+            Query query = session.createQuery(queryString);
+
+            query.setParameter("group", everybodyGroup);
+
+            List<Object> results = query.list();
+
+            if (results == null) {
+                result = 0;
+            } else {
+                result = results.size();
+            }
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve number of visible entries!", e);
+        }
+
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Entry> getAllEntries() throws ManagerException {
+        ArrayList<Entry> entries = null;
+
+        Session session = DAO.getSession();
+        try {
+            Query query = session.createQuery("from " + Entry.class.getName());
+
+            List list = query.list();
+
+            if (list != null) {
+                entries = (ArrayList<Entry>) list;
+            }
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve entries!", e);
+        }
+
+        return entries;
+    }
+
+    public static ArrayList<Integer> getEntries() throws ManagerException {
+        return getEntries(null, false);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Integer> getEntries(String field, boolean ascending)
+            throws ManagerException {
+        ArrayList<Integer> entries = null;
+
+        Session session = DAO.getSession();
+        try {
+            String orderSuffix = (field == null) ? ""
+                    : (" ORDER BY " + field + " " + (ascending ? "ASC" : "DESC"));
+
+            String queryString = "select id from " + Entry.class.getName() + orderSuffix;
+
+            Query query = session.createQuery(queryString);
+
+            List list = query.list();
+
+            if (list != null) {
+                entries = (ArrayList<Integer>) list;
+            }
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve entries!", e);
+        }
+
+        return entries;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Integer> getEntriesByOwner(String owner) throws ManagerException {
+        ArrayList<Integer> entries = null;
+
+        Session session = DAO.getSession();
+        try {
+            String queryString = "select id from " + Entry.class.getName()
+                    + " where ownerEmail = :ownerEmail";
+
+            Query query = session.createQuery(queryString);
+
+            query.setParameter("ownerEmail", owner);
+
+            List list = query.list();
+
+            if (list != null) {
+                entries = (ArrayList<Integer>) list;
+            }
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve entries by owner: " + owner, e);
+        }
+
+        return entries;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Entry> getEntriesByIdSet(ArrayList<Integer> ids)
+            throws ManagerException {
+        ArrayList<Entry> entries = null;
+
+        if (ids.size() == 0) {
+            return entries;
+        }
+
+        String filter = Utils.join(", ", ids);
+
+        Session session = DAO.getSession();
+        try {
+            Query query = session.createQuery("from " + Entry.class.getName() + " WHERE id in ("
+                    + filter + ")");
+
+            ArrayList list = (ArrayList) query.list();
+
+            if (list != null) {
+                entries = (ArrayList<Entry>) list;
+            }
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve entries!", e);
+        }
+
+        return entries;
+    }
+
+    public static void delete(Entry entry) throws ManagerException {
+        if (entry == null) {
+            throw new ManagerException("Failed to delete null entry!");
+        }
+
+        try {
+            DAO.delete(entry);
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to delete entry!", e);
+        }
+    }
+
+    public static Entry save(Entry entry) throws ManagerException {
+        if (entry == null) {
+            throw new ManagerException("Failed to save null entry!");
+        }
+
+        Entry savedEntry = null;
+        // deal with associated objects here instead of making individual forms
+        // deal with foreign key checks. Deletion of old values happen through
+        // Set.clear() and
+        // hibernate cascade delete-orphaned in the model.Entry
+
+        try {
+            if (entry.getSelectionMarkers() != null) {
+                for (SelectionMarker selectionMarker : entry.getSelectionMarkers()) {
+                    selectionMarker.setEntry(entry);
+                }
+            }
+
+            if (entry.getLinks() != null) {
+                for (Link link : entry.getLinks()) {
+                    link.setEntry(entry);
+                }
+            }
+
+            if (entry.getNames() != null) {
+                for (Name name : entry.getNames()) {
+                    name.setEntry(entry);
+                }
+            }
+
+            if (entry.getPartNumbers() != null) {
+                for (PartNumber partNumber : entry.getPartNumbers()) {
+                    partNumber.setEntry(entry);
+                }
+            }
+
+            entry.setModificationTime(Calendar.getInstance().getTime());
+
+            if (entry.getEntryFundingSources() != null) {
+                // Manual cascade of EntryFundingSource. Guarantees unique FundingSource
+                for (EntryFundingSource entryFundingSource : entry.getEntryFundingSources()) {
+                    FundingSource saveFundingSource = saveFundingSource(entryFundingSource
+                            .getFundingSource());
+                    entryFundingSource.setFundingSource(saveFundingSource);
+                }
+            }
+
+            savedEntry = (Entry) DAO.save(entry);
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to save entry!", e);
+        }
+
+        return savedEntry;
+    }
+
+    private static Plasmid createPlasmid(Plasmid newPlasmid) throws ManagerException {
         Plasmid savedPlasmid = null;
 
         String number = getNextPartNumber();
@@ -48,18 +326,15 @@ public class EntryManager extends Manager {
         newPlasmid.setVersionId(newPlasmid.getRecordId());
         newPlasmid.setRecordType(PLASMID_ENTRY_TYPE);
         newPlasmid.setCreationTime(Calendar.getInstance().getTime());
-        try {
-            savedPlasmid = (Plasmid) save(newPlasmid);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ManagerException("Could not save Plasmid to db: " + e.toString());
-        }
-        return savedPlasmid;
 
+        savedPlasmid = (Plasmid) save(newPlasmid);
+
+        return savedPlasmid;
     }
 
-    public static Strain createStrain(Strain newStrain) throws ManagerException {
+    private static Strain createStrain(Strain newStrain) throws ManagerException {
         Strain savedStrain = null;
+
         String number = getNextPartNumber();
         PartNumber partNumber = new PartNumber();
         partNumber.setPartNumber(number);
@@ -70,18 +345,15 @@ public class EntryManager extends Manager {
         newStrain.setVersionId(newStrain.getRecordId());
         newStrain.setRecordType(STRAIN_ENTRY_TYPE);
         newStrain.setCreationTime(Calendar.getInstance().getTime());
-        try {
-            savedStrain = (Strain) save(newStrain);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ManagerException("Could not save Plasmid to db: " + e.toString());
-        }
-        return savedStrain;
 
+        savedStrain = (Strain) save(newStrain);
+
+        return savedStrain;
     }
 
-    public static Part createPart(Part newPart) throws ManagerException {
-        Part savedStrain = null;
+    private static Part createPart(Part newPart) throws ManagerException {
+        Part savedPart = null;
+
         String number = getNextPartNumber();
         PartNumber partNumber = new PartNumber();
         partNumber.setPartNumber(number);
@@ -92,308 +364,48 @@ public class EntryManager extends Manager {
         newPart.setVersionId(newPart.getRecordId());
         newPart.setRecordType(PART_ENTRY_TYPE);
         newPart.setCreationTime(Calendar.getInstance().getTime());
-        try {
-            savedStrain = (Part) save(newPart);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ManagerException("Could not save Plasmid to db: " + e.toString());
-        }
-        return savedStrain;
+
+        savedPart = (Part) save(newPart);
+
+        return savedPart;
     }
 
-    public static void remove(Entry entry) throws ManagerException {
-        try {
-            dbDelete(entry);
-        } catch (Exception e) {
-            throw new ManagerException("Couldn't delete Entry: " + e.toString());
-        }
-    }
+    /**
+     * Updates or Inserts unique funding source and returns the result
+     */
+    private static FundingSource saveFundingSource(FundingSource fundingSource) throws DAOException {
+        FundingSource result;
 
-    public static Entry get(int id) throws ManagerException {
-        Session session = getSession();
-        try {
-            Query query = session.createQuery("from " + Entry.class.getName() + " where id = :id");
-            query.setParameter("id", id);
-            Entry entry = (Entry) query.uniqueResult();
-            return entry;
-
-        } catch (HibernateException e) {
-            throw new ManagerException("Couldn't retrieve Entry by id: " + String.valueOf(id), e);
-        } finally {
-
-        }
-    }
-
-    public static Entry getByRecordId(String recordId) throws ManagerException {
-        Session session = getSession();
-        try {
-            Query query = session.createQuery("from " + Entry.class.getName()
-                    + " where recordId = :recordId");
-            query.setParameter("recordId", recordId);
-
-            Entry entry = (Entry) query.uniqueResult();
-
-            return entry;
-        } catch (HibernateException e) {
-            throw new ManagerException("Couldn't retrieve Entry by recordId: " + recordId, e);
-        } finally {
-
-        }
-    }
-
-    public static Entry getByPartNumber(String partNumber) throws ManagerException {
-        Session session = getSession();
-        try {
-            Query query = session.createQuery("from " + PartNumber.class.getName()
-                    + " where partNumber = :partNumber");
-            query.setParameter("partNumber", partNumber);
-
-            PartNumber entryPartNumber = (PartNumber) query.uniqueResult();
-
-            Entry entry;
-            if (entryPartNumber == null) {
-                entry = null;
-            } else {
-                entry = entryPartNumber.getEntry();
-            }
-
-            return entry;
-        } catch (HibernateException e) {
-            throw new ManagerException("Couldn't retrieve Entry by partNumber: " + partNumber, e);
-        } finally {
-
-        }
-    }
-
-    public static Entry getByName(String name) throws ManagerException {
-        Session session = getSession();
-        try {
-            Query query = session.createQuery("from " + Name.class.getName()
-                    + " where name = :name");
-            query.setParameter("name", name);
-
-            Name entryName = (Name) query.uniqueResult();
-
-            if (entryName == null) {
-                return null;
-            }
-
-            return entryName.getEntry();
-        } catch (HibernateException e) {
-            throw new ManagerException("Couldn't retrieve Entry by name: " + name, e);
-        } finally {
-
-        }
-    }
-
-    public static Set<Entry> getByFilter(ArrayList<String[]> data, int offset, int limit) {
-        LinkedHashSet<Entry> result = org.jbei.ice.lib.query.Query.getInstance().query(data,
-                offset, limit);
-
-        return result;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static LinkedHashSet<Entry> getByAccount(Account account, int offset, int limit) {
-        String queryString = "from Entry where ownerEmail = :ownerEmail";
-        Session session = getSession();
+        Session session = DAO.getSession();
+        String queryString = "from " + FundingSource.class.getName()
+                + " where fundingSource=:fundingSource AND"
+                + " principalInvestigator=:principalInvestigator";
         Query query = session.createQuery(queryString);
+        query.setParameter("fundingSource", fundingSource.getFundingSource());
+        query.setParameter("principalInvestigator", fundingSource.getPrincipalInvestigator());
+        FundingSource existingFundingSource = null;
 
-        query.setParameter("ownerEmail", account.getEmail());
-        query.setFirstResult(offset);
-        query.setMaxResults(limit);
-        LinkedHashSet<Entry> result = new LinkedHashSet<Entry>();
         try {
-            result = new LinkedHashSet<Entry>(query.list());
-        } catch (HibernateException e) {
-            Logger.error("Couldn't retrieve Entry by name: " + e.toString(), e);
-        } finally {
-
-        }
-        return result;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static LinkedHashSet<Entry> getByAccount(Account account, int offset, int limit,
-            SortField[] sortFields) {
-
-        String sortQuerySuffix = "";
-
-        if (sortFields != null && sortFields.length > 0) {
-            sortQuerySuffix = Utils.join(", ", Arrays.asList(sortFields));
+            existingFundingSource = (FundingSource) query.uniqueResult();
+        } catch (NonUniqueResultException e) {
+            // dirty funding source. There are multiple of these. Clean up.
+            FundingSource duplicateFundingSource = (FundingSource) query.list().get(0);
+            result = duplicateFundingSource;
         }
 
-        String queryString = "from Entry where ownerEmail = :ownerEmail"
-                + (!sortQuerySuffix.isEmpty() ? (" ORDER BY " + sortQuerySuffix) : "");
-        Session session = getSession();
-        Query query = session.createQuery(queryString);
-
-        query.setParameter("ownerEmail", account.getEmail());
-        query.setFirstResult(offset);
-        query.setMaxResults(limit);
-
-        LinkedHashSet<Entry> result = null;
-        try {
-            result = new LinkedHashSet<Entry>(query.list());
-        } catch (HibernateException e) {
-            Logger.error("Could not get entries by account " + e.toString(), e);
-        } finally {
-
-        }
-        return result;
-    }
-
-    public static int getByAccountCount(Account account) {
-        if (account == null) {
-            return 0;
+        if (existingFundingSource == null) {
+            result = (FundingSource) DAO.save(fundingSource);
+        } else {
+            result = existingFundingSource;
         }
 
-        String queryString = "from Entry where ownerEmail = :ownerEmail";
-        Session session = getSession();
-        Query query = session.createQuery(queryString);
-
-        query.setParameter("ownerEmail", account.getEmail());
-        int result = 0;
-        try {
-            result = query.list().size();
-        } catch (HibernateException e) {
-            Logger.error("Could not get number of entries by  account " + e.toString(), e);
-        } finally {
-
-        }
-        return result;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static Set<Entry> getAll() {
-        String queryString = "from Entry";
-        Session session = getSession();
-        Query query = session.createQuery(queryString);
-        LinkedHashSet<Entry> result = null;
-        try {
-            new LinkedHashSet<Entry>(query.list());
-        } catch (HibernateException e) {
-            String msg = "could not get all entries: " + e.toString();
-            Logger.error(msg, e);
-        } finally {
-
-        }
-        return result;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static Set<Entry> getAllVisible() {
-        Set<Entry> result = null;
-        Group everybodyGroup = null;
-        Session session = getSession();
-        try {
-            everybodyGroup = GroupManager.getEverybodyGroup();
-            String queryString = "select entry from Entry entry, ReadGroup readGroup where readGroup.group = :group and readGroup.entry = entry";
-            Query query = session.createQuery(queryString);
-            query.setParameter("group", everybodyGroup);
-            result = new LinkedHashSet<Entry>(query.list());
-        } catch (ManagerException e) {
-            Logger.error("getAllVisible: " + e.toString(), e);
-        } finally {
-
-        }
-        return result;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static Set<Entry> getAll(int offset, int limit, SortField[] sortFields) {
-        String sortQuerySuffix = "";
-
-        if (sortFields != null && sortFields.length > 0) {
-            sortQuerySuffix = Utils.join(", ", Arrays.asList(sortFields));
-        }
-
-        String queryString = "from Entry"
-                + (!sortQuerySuffix.isEmpty() ? (" ORDER BY " + sortQuerySuffix) : "");
-        Session session = getSession();
-        Query query = session.createQuery(queryString);
-        query.setFirstResult(offset);
-        query.setMaxResults(limit);
-        LinkedHashSet<Entry> result = null;
-        try {
-            new LinkedHashSet<Entry>(query.list());
-        } catch (HibernateException e) {
-            Logger.error("Could not get all entries by limit " + e.toString(), e);
-        } finally {
-
-        }
-        return result;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static Set<Entry> getAllVisible(int offset, int limit, SortField[] sortFields) {
-        String sortQuerySuffix = "";
-        Group everybodyGroup;
-        LinkedHashSet<Entry> result = null;
-        Session session = getSession();
-        try {
-            everybodyGroup = GroupManager.getEverybodyGroup();
-            if (sortFields != null && sortFields.length > 0) {
-                sortQuerySuffix = Utils.join(", ", Arrays.asList(sortFields));
-            }
-            String queryString = "select entry from Entry entry, ReadGroup readGroup where readGroup.group = :group and readGroup.entry = entry"
-                    + (!sortQuerySuffix.isEmpty() ? (" ORDER BY " + "entry." + sortQuerySuffix)
-                            : "");
-            Query query = session.createQuery(queryString);
-            query.setParameter("group", everybodyGroup);
-            query.setFirstResult(offset);
-            query.setMaxResults(limit);
-            result = new LinkedHashSet<Entry>(query.list());
-
-        } catch (ManagerException e) {
-            Logger.error("getAllVisible: " + e.toString(), e);
-        } catch (Exception e) {
-            Logger.error("getAllVisible: " + e.toString(), e);
-        } finally {
-
-        }
-
-        return result;
-    }
-
-    public static int getNumberOfEntries() {
-        String queryString = "select id from Entry";
-        Session session = getSession();
-        Query query = session.createQuery(queryString);
-        int result = 0;
-        try {
-            result = query.list().size();
-        } catch (HibernateException e) {
-            Logger.error("Could not get number of entries " + e.toString(), e);
-        } finally {
-
-        }
-        return result;
-    }
-
-    public static int getNumberOfVisibleEntries() {
-        Group everybodyGroup;
-        int result = 0;
-        Session session = getSession();
-        try {
-            everybodyGroup = GroupManager.getEverybodyGroup();
-            String queryString = "select id from ReadGroup readGroup where readGroup.group = :group";
-            Query query = session.createQuery(queryString);
-            query.setParameter("group", everybodyGroup);
-            result = query.list().size();
-
-        } catch (ManagerException e) {
-            Logger.error("getNumberOfVisibleEntries: " + e.toString(), e);
-        } finally {
-
-        }
         return result;
     }
 
     @SuppressWarnings("unchecked")
     private static String generateNextPartNumber(String prefix, String delimiter, String suffix)
             throws ManagerException {
-        Session session = getSession();
+        Session session = DAO.getSession();
         try {
             String queryString = "from " + PartNumber.class.getName() + " where partNumber LIKE '"
                     + prefix + "%' ORDER BY partNumber DESC";
@@ -440,84 +452,4 @@ public class EntryManager extends Manager {
                 .getSetting("PART_NUMBER_DELIMITER"), JbeirSettings
                 .getSetting("PART_NUMBER_DIGITAL_SUFFIX"));
     }
-
-    /**
-     * Updates or Inserts unique funding source and returns the result
-     */
-
-    private static FundingSource saveFundingSource(FundingSource fundingSource)
-            throws ManagerException {
-        FundingSource result;
-        Session session = getSession();
-        try {
-            String queryString = "from " + FundingSource.class.getName()
-                    + " where fundingSource=:fundingSource AND"
-                    + " principalInvestigator=:principalInvestigator";
-            Query query = session.createQuery(queryString);
-            query.setParameter("fundingSource", fundingSource.getFundingSource());
-            query.setParameter("principalInvestigator", fundingSource.getPrincipalInvestigator());
-            FundingSource existingFundingSource = null;
-            try {
-                existingFundingSource = (FundingSource) query.uniqueResult();
-            } catch (org.hibernate.NonUniqueResultException e1) {
-                // dirty funding source. There are multiple of these. Clean up.
-                String msg = "Cleaning unp messy funding sources. Try normalizing them";
-                Logger.warn(msg);
-                FundingSource duplicateFundingSource = (FundingSource) query.list().get(0);
-                result = duplicateFundingSource;
-            }
-            if (existingFundingSource == null) {
-                result = (FundingSource) dbSave(fundingSource);
-            } else {
-                result = existingFundingSource;
-            }
-
-        } catch (Exception e) {
-            String msg = "Could not save unique funding source";
-            throw new ManagerException(msg, e);
-        } finally {
-
-        }
-        return result;
-    }
-
-    public static Entry save(Entry entry) throws ManagerException {
-        Entry result = null;
-        // deal with associated objects here instead of making individual forms
-        // deal with foreign key checks. Deletion of old values happen through
-        // Set.clear() and
-        // hibernate cascade delete-orphaned in the model.Entry
-
-        for (SelectionMarker selectionMarker : entry.getSelectionMarkers()) {
-            selectionMarker.setEntry(entry);
-        }
-        for (Link link : entry.getLinks()) {
-            link.setEntry(entry);
-        }
-        for (Name name : entry.getNames()) {
-            name.setEntry(entry);
-        }
-        for (PartNumber partNumber : entry.getPartNumbers()) {
-            partNumber.setEntry(entry);
-        }
-
-        entry.setModificationTime(Calendar.getInstance().getTime());
-
-        // Manual cascade of EntryFundingSource. Guarantees unique FundingSource
-        for (EntryFundingSource entryFundingSource : entry.getEntryFundingSources()) {
-            FundingSource saveFundingSource = saveFundingSource(entryFundingSource
-                    .getFundingSource());
-            entryFundingSource.setFundingSource(saveFundingSource);
-        }
-
-        result = (Entry) dbSave(entry);
-
-        return result;
-    }
-
-    public static void main(String[] args) {
-
-        System.out.println("" + getNumberOfVisibleEntries());
-    }
-
 }
