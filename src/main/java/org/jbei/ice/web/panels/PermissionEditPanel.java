@@ -22,19 +22,21 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.util.CollectionModel;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.AccountManager;
+import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.ApplicationContoller;
+import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.managers.GroupManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Group;
-import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
 import org.jbei.ice.lib.permissions.AuthenticatedPermissionManager;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.utils.Job;
-import org.jbei.ice.lib.utils.JobCue;
+import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.CustomChoice;
+import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class PermissionEditPanel extends Panel {
@@ -67,6 +69,8 @@ public class PermissionEditPanel extends Panel {
 
         this.entry = entry;
 
+        // TODO: This code should be move partially to contoller
+
         // Get all the groups and accounts, and combine them into a large list
         // that will be used later to disambiguate groups and users.
         Set<Account> accounts = null;
@@ -75,16 +79,15 @@ public class PermissionEditPanel extends Panel {
         ArrayList<CustomChoice> groupsChoices = new ArrayList<CustomChoice>();
 
         try {
-            accounts = AccountManager.getAllByFirstName();
-        } catch (ManagerException e) {
-            Logger.warn(e.toString());
-            accounts = new HashSet<Account>();
+            accounts = AccountController.getAllByFirstName();
+        } catch (ControllerException e) {
+            throw new ViewException(e);
         }
+
         try {
             groups = GroupManager.getAll();
         } catch (ManagerException e) {
-            Logger.warn(e.toString());
-            groups = new HashSet<Group>();
+            throw new ViewException(e);
         }
 
         for (Account account : accounts) {
@@ -139,10 +142,10 @@ public class PermissionEditPanel extends Panel {
             }
 
         } catch (ManagerException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            throw new ViewException(e1);
+        } catch (PermissionException e) {
+            throw new ViewPermissionException("No permissions to edit permissions!", e);
         }
-        // end populate
 
         groupsChoiceList = generateGroupsChoices(groupsChoices);
         accountsChoiceList = generateUsersChoices(accountsChoices);
@@ -329,11 +332,11 @@ public class PermissionEditPanel extends Panel {
                     if (type.equals("account")) {
                         Account account = null;
                         try {
-                            account = AccountManager.get(id);
-                        } catch (ManagerException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
+                            account = AccountController.get(id);
+                        } catch (ControllerException e) {
+                            throw new ViewException(e);
                         }
+
                         if (account != null) {
                             readAccounts.add(account);
                         }
@@ -342,7 +345,7 @@ public class PermissionEditPanel extends Panel {
                         try {
                             group = GroupManager.get(id);
                         } catch (ManagerException e) {
-                            e.printStackTrace();
+                            throw new ViewException(e);
                         }
                         if (group != null) {
                             readGroups.add(group);
@@ -359,10 +362,9 @@ public class PermissionEditPanel extends Panel {
                     if (type.equals("account")) {
                         Account account = null;
                         try {
-                            account = AccountManager.get(id);
-                        } catch (ManagerException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
+                            account = AccountController.get(id);
+                        } catch (ControllerException e) {
+                            throw new ViewException(e);
                         }
                         if (account != null) {
                             readAccounts.add(account);
@@ -373,7 +375,7 @@ public class PermissionEditPanel extends Panel {
                         try {
                             group = GroupManager.get(id);
                         } catch (ManagerException e) {
-                            e.printStackTrace();
+                            throw new ViewException(e);
                         }
                         if (group != null) {
                             readGroups.add(group);
@@ -389,28 +391,32 @@ public class PermissionEditPanel extends Panel {
                     AuthenticatedPermissionManager.setReadUser(thisPanel.entry, readAccounts);
                     AuthenticatedPermissionManager.setWriteUser(thisPanel.entry, writeAccounts);
                     PermissionForm permissionForm = (PermissionForm) form;
+
+                    EntryController entryController = new EntryController(IceSession.get()
+                            .getAccount());
+
                     String newEmail = permissionForm.getOwnerEmail();
                     if (newEmail != thisPanel.entry.getOwnerEmail()) {
                         thisPanel.entry.setOwnerEmail(newEmail);
-                        Account account = AccountManager.getByEmail(newEmail);
+                        Account account = AccountController.getByEmail(newEmail);
                         if (account != null) {
                             thisPanel.entry.setOwner(account.getFirstName() + " "
                                     + account.getLastName());
                         } else {
                             thisPanel.entry.setOwner(newEmail);
                         }
-                        AuthenticatedEntryManager.save(thisPanel.entry);
+                        entryController.save(thisPanel.entry);
                     }
 
-                    JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);
+                    ApplicationContoller.scheduleSearchIndexRebuildJob();
                     setResponsePage(EntryViewPage.class, new PageParameters("0="
                             + thisPanel.entry.getId() + ",1=" + "permission"));
+                } catch (ControllerException e) {
+                    throw new ViewException(e);
                 } catch (ManagerException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    throw new ViewException(e);
                 } catch (PermissionException e) {
-                    String msg = "You do not have permission to edit";
-                    thisPanel.error(msg);
+                    throw new ViewPermissionException("No permissions to edit permissions!", e);
                 }
 
             }

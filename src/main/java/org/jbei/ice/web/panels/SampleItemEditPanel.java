@@ -9,12 +9,14 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
+import org.jbei.ice.controllers.ApplicationContoller;
+import org.jbei.ice.controllers.SampleController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Sample;
-import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.utils.Job;
-import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class SampleItemEditPanel extends Panel {
@@ -82,18 +84,21 @@ public class SampleItemEditPanel extends Panel {
                 sample.setDepositor(getDepositor());
                 sample.setNotes(getNotes());
 
+                SampleController sampleController = new SampleController(IceSession.get()
+                        .getAccount());
+
                 try {
-                    AuthenticatedSampleManager.save(sampleItemEditPanel.getSample());
-                    JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
-                    JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);
-                } catch (PermissionException e) {
-                    error("Save not permitted");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
+                    sampleController.saveSample(sampleItemEditPanel.getSample());
+                    ApplicationContoller.scheduleBlastIndexRebuildJob();
+                    ApplicationContoller.scheduleSearchIndexRebuildJob();
+
                     setRedirect(true);
                     setResponsePage(EntryViewPage.class, new PageParameters("0="
                             + sample.getEntry().getId() + ",1=samples"));
+                } catch (PermissionException e) {
+                    throw new ViewPermissionException("No permissions to save sample!", e);
+                } catch (ControllerException e) {
+                    throw new ViewException(e);
                 }
             }
 

@@ -7,14 +7,18 @@ import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
-import org.jbei.ice.lib.managers.EntryManager;
-import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Job;
 import org.jbei.ice.lib.utils.JobCue;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.forms.PartUpdateFormPanel;
 import org.jbei.ice.web.forms.PlasmidUpdateFormPanel;
 import org.jbei.ice.web.forms.StrainUpdateFormPanel;
@@ -55,17 +59,21 @@ public class AdminPanel extends Panel {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                EntryController entryController = new EntryController(IceSession.get().getAccount());
 
                 EditEntryForm parentForm = (EditEntryForm) getParent();
                 String entryId = parentForm.getEntryId();
                 Entry entry = null;
+
                 try {
-                    entry = EntryManager.get(Integer.parseInt(entryId));
-                } catch (NumberFormatException e) {
-                    // It's ok
-                } catch (ManagerException e) {
-                    // It's ok
+                    entry = entryController.getByIdentifier(entryId);
+                } catch (ControllerException e) {
+                    throw new ViewException(e);
+                } catch (PermissionException e) {
+                    // This should never happen. Because user is admin/moderator
+                    throw new ViewPermissionException("No permission to view entry!", e);
                 }
+
                 if (entry == null) {
                     Panel answer = new EmptyMessagePanel("editPanel", "invalid entryId");
                     answer.setOutputMarkupId(true);

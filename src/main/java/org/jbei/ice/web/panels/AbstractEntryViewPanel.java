@@ -11,11 +11,13 @@ import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
-import org.jbei.ice.lib.managers.AccountManager;
-import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.permissions.PermissionManager;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.EntryUpdatePage;
 import org.jbei.ice.web.pages.ProfilePage;
 import org.jbei.ice.web.utils.WebUtils;
@@ -54,11 +56,19 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
     }
 
     protected void renderTopLink() {
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
+
         WebMarkupContainer topLinkContainer = new WebMarkupContainer("topLink");
 
-        topLinkContainer.setVisible(PermissionManager.hasWritePermission(getEntry().getId()));
-        topLinkContainer.add(new BookmarkablePageLink<WebPage>("updateLink", EntryUpdatePage.class,
-                new PageParameters("0=" + getEntry().getId())));
+        try {
+            topLinkContainer.setOutputMarkupId(true);
+            topLinkContainer.setOutputMarkupPlaceholderTag(true);
+            topLinkContainer.setVisible(entryController.hasWritePermission(getEntry()));
+            topLinkContainer.add(new BookmarkablePageLink<WebPage>("updateLink",
+                    EntryUpdatePage.class, new PageParameters("0=" + getEntry().getId())));
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        }
 
         add(topLinkContainer);
     }
@@ -86,9 +96,9 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
 
         Account creatorAccount;
         try {
-            creatorAccount = AccountManager.getByEmail(getEntry().getCreatorEmail());
-        } catch (ManagerException e) {
-            creatorAccount = null;
+            creatorAccount = AccountController.getByEmail(getEntry().getCreatorEmail());
+        } catch (ControllerException e) {
+            throw new ViewException(e);
         }
 
         if (creatorAccount == null) {
@@ -109,9 +119,9 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
 
         Account ownerAccount;
         try {
-            ownerAccount = AccountManager.getByEmail(getEntry().getOwnerEmail());
-        } catch (ManagerException e) {
-            ownerAccount = null;
+            ownerAccount = AccountController.getByEmail(getEntry().getOwnerEmail());
+        } catch (ControllerException e) {
+            throw new ViewException(e);
         }
 
         if (ownerAccount == null) {

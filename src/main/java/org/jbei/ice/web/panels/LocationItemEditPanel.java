@@ -12,17 +12,20 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
+import org.jbei.ice.controllers.ApplicationContoller;
+import org.jbei.ice.controllers.SampleController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Location;
 import org.jbei.ice.lib.models.Sample;
-import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.utils.Job;
-import org.jbei.ice.lib.utils.JobCue;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class LocationItemEditPanel extends Panel {
-
     private static final long serialVersionUID = 1L;
+
     private Location location = null;
 
     public LocationItemEditPanel(String id) {
@@ -30,8 +33,8 @@ public class LocationItemEditPanel extends Panel {
     }
 
     public LocationItemEditPanel(String id, Location passedLocation) {
-        // TODO Auto-generated constructor stub
         super(id);
+
         setLocation(passedLocation);
 
         class LocationEditForm extends StatelessForm<Object> {
@@ -83,6 +86,9 @@ public class LocationItemEditPanel extends Panel {
 
             @Override
             protected void onSubmit() {
+                SampleController sampleController = new SampleController(IceSession.get()
+                        .getAccount());
+
                 LocationItemEditPanel thisPanel = (LocationItemEditPanel) getParent();
                 Location location = thisPanel.getLocation();
 
@@ -97,9 +103,9 @@ public class LocationItemEditPanel extends Panel {
                 sample.getLocations().add(location);
 
                 try {
-                    sample = AuthenticatedSampleManager.save(sample);
-                    JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
-                    JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);
+                    sample = sampleController.saveSample(sample);
+                    ApplicationContoller.scheduleBlastIndexRebuildJob();
+                    ApplicationContoller.scheduleSearchIndexRebuildJob();
 
                     /* Inserting into a LinkedHashSet puts the last entered location
                      * at the bottom, which is undesirable for displaying the locations by reverse 
@@ -123,14 +129,14 @@ public class LocationItemEditPanel extends Panel {
 
                     /* end brute force sort */
 
-                } catch (PermissionException e) {
-                    error("Permission Denied");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
                     setRedirect(true);
+
                     setResponsePage(EntryViewPage.class, new PageParameters("0="
                             + location.getSample().getEntry().getId() + ",1=samples"));
+                } catch (ControllerException e) {
+                    throw new ViewException(e);
+                } catch (PermissionException e) {
+                    throw new ViewPermissionException("No permissions to edit location!", e);
                 }
             }
 
@@ -195,5 +201,4 @@ public class LocationItemEditPanel extends Panel {
     public Location getLocation() {
         return location;
     }
-
 }

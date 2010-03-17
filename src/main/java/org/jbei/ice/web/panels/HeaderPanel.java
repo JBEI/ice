@@ -10,7 +10,10 @@ import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
-import org.jbei.ice.lib.managers.EntryManager;
+import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.HomePage;
 import org.jbei.ice.web.pages.UnprotectedPage;
 
@@ -20,12 +23,22 @@ public class HeaderPanel extends Panel {
     public HeaderPanel(String id) {
         super(id);
 
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
+
         add(new BookmarkablePageLink<String>("homeLink", HomePage.class).add(new Image("logoImage",
                 new ResourceReference(UnprotectedPage.class,
                         UnprotectedPage.IMAGES_RESOURCE_LOCATION + "logo.gif"))));
         add(new LoginStatusPanel("loginStatusPanel"));
-        add(new Label("numberOfPartsLabel", new Model<String>(String.valueOf(EntryManager
-                .getNumberOfEntries()))));
+
+        int numberOfEntries = 0;
+
+        try {
+            numberOfEntries = entryController.getNumberOfVisibleEntries();
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        }
+
+        add(new Label("numberOfPartsLabel", new Model<String>(String.valueOf(numberOfEntries))));
         DateFormat dateFormat = new SimpleDateFormat("EEEE, MMMMM d, yyyy");
         add(new Label("dateLabel", new Model<String>(dateFormat.format(new Date()))));
     }

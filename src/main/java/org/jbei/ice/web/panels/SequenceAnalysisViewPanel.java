@@ -19,8 +19,9 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.target.resource.ResourceStreamRequestTarget;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.resource.StringResourceStream;
+import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.TraceSequenceManager;
 import org.jbei.ice.lib.models.Account;
@@ -81,6 +82,7 @@ public class SequenceAnalysisViewPanel extends Panel {
         try {
             tracesSet = TraceSequenceManager.getByEntry(entry);
         } catch (ManagerException e) {
+            // TODO: Fix it later
             Logger.error("Failed to fetch TraceSequence by Entry on SeqAnalysis view", e);
         }
 
@@ -137,8 +139,8 @@ public class SequenceAnalysisViewPanel extends Panel {
                 Account depositorAccount = null;
 
                 try {
-                    depositorAccount = AccountManager.getByEmail(traceSequence.getDepositor());
-                } catch (ManagerException e) {
+                    depositorAccount = AccountController.getByEmail(traceSequence.getDepositor());
+                } catch (ControllerException e) {
                     e.printStackTrace();
                 }
 

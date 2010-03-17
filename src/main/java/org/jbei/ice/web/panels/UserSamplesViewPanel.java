@@ -31,6 +31,7 @@ public class UserSamplesViewPanel extends Panel {
 
     public UserSamplesViewPanel(String id) {
         super(id);
+
         sortableDataProvider = new UserSamplesDataProvider(IceSession.get().getAccount());
 
         add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,

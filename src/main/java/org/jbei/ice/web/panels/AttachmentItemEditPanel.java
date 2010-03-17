@@ -1,5 +1,7 @@
 package org.jbei.ice.web.panels;
 
+import java.io.IOException;
+
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
@@ -10,32 +12,34 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
-import org.jbei.ice.lib.managers.AttachmentManager;
+import org.jbei.ice.controllers.AttachmentController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Attachment;
-import org.jbei.ice.lib.utils.Base64String;
+import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class AttachmentItemEditPanel extends Panel {
-
     private static final long serialVersionUID = 1L;
+
     private Attachment attachment = null;
 
     public AttachmentItemEditPanel(String id, Attachment passedAttachment) {
         super(id);
+
         attachment = passedAttachment;
 
         class AttachmentEditForm extends Form<Object> {
-
             private static final long serialVersionUID = 1L;
 
             private String description;
             private FileUpload fileInput;
 
-            // private File fileInput;
-            // private String fileName;
-
             public AttachmentEditForm(String id) {
                 super(id);
+
                 this.setModel(new CompoundPropertyModel<Object>(this));
 
                 // Always needed for upload forms
@@ -46,6 +50,7 @@ public class AttachmentItemEditPanel extends Panel {
 
                     public void onSubmit() {
                         setRedirect(true);
+
                         setResponsePage(EntryViewPage.class, new PageParameters("0="
                                 + attachment.getEntry().getId() + ",1=attachments"));
                     }
@@ -65,18 +70,23 @@ public class AttachmentItemEditPanel extends Panel {
                 Attachment attachment = thisPanel.getAttachment();
                 attachment.setDescription((getDescription() != null) ? getDescription() : "");
                 attachment.setFileName(fileUpload.getClientFileName());
-                Base64String data = new Base64String();
-                data.putBytes(fileUpload.getBytes());
-                attachment.setData(data);
+
+                AttachmentController attachmentController = new AttachmentController(IceSession
+                        .get().getAccount());
 
                 try {
-                    AttachmentManager.create(attachment);
+                    attachmentController.save(attachment, fileUpload.getInputStream());
+
                     setRedirect(true);
+
                     setResponsePage(EntryViewPage.class, new PageParameters("0="
                             + attachment.getEntry().getId() + ",1=attachments"));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    error("Could not upload file: " + e.toString());
+                } catch (ControllerException e) {
+                    throw new ViewException(e);
+                } catch (IOException e) {
+                    throw new ViewException(e);
+                } catch (PermissionException e) {
+                    throw new ViewPermissionException("No permissions to save attachment!", e);
                 }
             }
 
@@ -110,5 +120,4 @@ public class AttachmentItemEditPanel extends Panel {
     public Attachment getAttachment() {
         return attachment;
     }
-
 }

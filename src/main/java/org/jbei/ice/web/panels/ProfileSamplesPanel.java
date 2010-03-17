@@ -12,13 +12,14 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.data.DataView;
-import org.jbei.ice.lib.managers.AccountManager;
-import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Location;
 import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Sample;
+import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.dataProviders.UserSamplesDataProvider;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
@@ -35,9 +36,9 @@ public class ProfileSamplesPanel extends Panel {
 
         Account account = null;
         try {
-            account = AccountManager.getByEmail(accountEmail);
-        } catch (ManagerException e) {
-            e.printStackTrace();
+            account = AccountController.getByEmail(accountEmail);
+        } catch (ControllerException e) {
+            throw new ViewException(e);
         }
 
         sortableDataProvider = new UserSamplesDataProvider(account);

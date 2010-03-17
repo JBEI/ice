@@ -1,7 +1,5 @@
 package org.jbei.ice.web.panels;
 
-import java.io.IOException;
-
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
@@ -10,21 +8,28 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.DownloadLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.AttachmentManager;
-import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.controllers.AttachmentController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Attachment;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionManager;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class AttachmentItemViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
     private Integer index = null;
     private Attachment attachment = null;
+    private transient AttachmentController attachmentController;
 
     @SuppressWarnings("unchecked")
     public AttachmentItemViewPanel(String id, Integer counter, Attachment attachment) {
         super(id);
+
+        attachmentController = new AttachmentController(IceSession.get().getAccount());
+
         this.setAttachment(attachment);
         this.setIndex(counter);
 
@@ -51,9 +56,11 @@ public class AttachmentItemViewPanel extends Panel {
                 Attachment attachment = thisPanel.getAttachment();
 
                 try {
-                    AttachmentManager.delete(attachment);
-                } catch (ManagerException e) {
-                    e.printStackTrace();
+                    attachmentController.delete(attachment);
+                } catch (ControllerException e) {
+                    throw new ViewException(e);
+                } catch (PermissionException e) {
+                    throw new ViewPermissionException("No permissions to delete attachment!", e);
                 }
 
                 setRedirect(true);
@@ -72,11 +79,9 @@ public class AttachmentItemViewPanel extends Panel {
 
         Link downloadLink = null;
         try {
-            downloadLink = new DownloadLink("downloadAttachmentLink", AttachmentManager
-                    .readFile(attachment), attachment.getFileName());
-        } catch (IOException e) {
-            String msg = "File not found on disk: " + e.toString();
-            Logger.error(msg, e);
+            downloadLink = new DownloadLink("downloadAttachmentLink", attachmentController
+                    .getFile(attachment), attachment.getFileName());
+        } catch (ControllerException e) {
             downloadLink = new Link("downloadAttachmentLink") {
                 private static final long serialVersionUID = 1L;
 
@@ -84,13 +89,19 @@ public class AttachmentItemViewPanel extends Panel {
                 public void onClick() {
                 }
             };
+
             downloadLink.setEnabled(false);
             deleteAttachmentLink.setVisible(false);
             remove(description);
+
             add(new Label("description", "File not found on server!"));
+        } catch (PermissionException e) {
+            throw new ViewPermissionException("No permissions to get attachment file!", e);
         }
+
         if (downloadLink != null) {
             downloadLink.add(new Label("fileName", attachment.getFileName()));
+
             add(downloadLink);
         }
     }

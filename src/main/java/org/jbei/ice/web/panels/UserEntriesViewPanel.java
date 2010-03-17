@@ -2,7 +2,6 @@ package org.jbei.ice.web.panels;
 
 import org.apache.wicket.Page;
 import org.apache.wicket.ResourceReference;
-import org.apache.wicket.extensions.markup.html.repeater.data.sort.OrderByBorder;
 import org.apache.wicket.markup.html.CSSPackageResource;
 import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.image.Image;
@@ -67,47 +66,7 @@ public class UserEntriesViewPanel extends Panel {
 
         add(new JbeiPagingNavigator("navigator", entriesDataView));
 
-        renderSortableColumns();
-
         renderExportLinks();
-    }
-
-    private void renderSortableColumns() {
-        add(new OrderByBorder("orderByType", "type", sortableDataProvider) {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected void onSortChanged() {
-                entriesDataView.setCurrentPage(0);
-            }
-        });
-
-        add(new OrderByBorder("orderBySummary", "summary", sortableDataProvider) {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected void onSortChanged() {
-                entriesDataView.setCurrentPage(0);
-            }
-        });
-
-        add(new OrderByBorder("orderByStatus", "status", sortableDataProvider) {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected void onSortChanged() {
-                entriesDataView.setCurrentPage(0);
-            }
-        });
-
-        add(new OrderByBorder("orderByCreated", "created", sortableDataProvider) {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected void onSortChanged() {
-                entriesDataView.setCurrentPage(0);
-            }
-        });
     }
 
     private void renderExportLinks() {

@@ -7,11 +7,13 @@ import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.controllers.SampleController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Sample;
-import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.utils.WebUtils;
 
@@ -24,6 +26,7 @@ public class SampleItemViewPanel extends Panel {
     @SuppressWarnings("unchecked")
     public SampleItemViewPanel(String id, Integer counter, Sample sample) {
         super(id);
+
         this.setSample(sample);
         this.setIndex(counter);
 
@@ -47,12 +50,15 @@ public class SampleItemViewPanel extends Panel {
                 SampleItemViewPanel thisPanel = (SampleItemViewPanel) getParent().getParent();
                 Sample sample = thisPanel.getSample();
 
+                SampleController sampleController = new SampleController(IceSession.get()
+                        .getAccount());
+
                 try {
-                    AuthenticatedSampleManager.delete(sample, IceSession.get().getSessionKey());
+                    sampleController.deleteSample(sample);
                 } catch (PermissionException e) {
-                    error("delete not permitted");
-                } catch (ManagerException e) {
-                    e.printStackTrace();
+                    throw new ViewPermissionException("No permissions to delete sample!", e);
+                } catch (ControllerException e) {
+                    throw new ViewException(e);
                 }
 
                 setRedirect(true);
@@ -98,8 +104,13 @@ public class SampleItemViewPanel extends Panel {
         WebMarkupContainer sampleEditDeleteContainer = new WebMarkupContainer(
                 "sampleEditDeleteContainer");
 
-        sampleEditDeleteContainer.setVisible(IceSession.get().getAccount().getEmail().equals(
-                sample.getDepositor()));
+        SampleController sampleController = new SampleController(IceSession.get().getAccount());
+
+        try {
+            sampleEditDeleteContainer.setVisible(sampleController.hasWritePermission(sample));
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        }
 
         AjaxFallbackLink deleteSampleLink = new DeleteSampleLink("deleteSampleLink");
         deleteSampleLink.setOutputMarkupId(true);

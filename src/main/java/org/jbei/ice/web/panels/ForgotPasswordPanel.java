@@ -15,16 +15,15 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.protocol.http.WebRequestCycle;
 import org.apache.wicket.validation.validator.EmailAddressValidator;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.AccountManager;
-import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.UpdatePasswordPage;
 
 public class ForgotPasswordPanel extends Panel {
-
     private static final long serialVersionUID = 1L;
 
     public ForgotPasswordPanel(String id) {
@@ -65,23 +64,22 @@ public class ForgotPasswordPanel extends Panel {
                         ForgotPasswordPanel thisPanel = (ForgotPasswordPanel) getParent()
                                 .getParent();
                         Account account = null;
+
                         try {
-                            account = AccountManager.getByEmail(getEmail());
-                        } catch (ManagerException e) {
-                            String msg = "Manager exception on request new password from "
-                                    + getEmail();
-                            Logger.info(msg);
-                            error("Unknown User Exception.");
+                            account = AccountController.getByEmail(getEmail());
+                        } catch (ControllerException e) {
+                            throw new ViewException(e);
                         }
+
                         if (account != null) {
                             String newPassword = Utils.generateUUID().substring(24);
-                            account.setPassword(AccountManager.encryptPassword(newPassword));
                             try {
-                                AccountManager.save(account);
-                            } catch (ManagerException e) {
-                                Logger.error("Could not save new password: " + e.toString(), e);
-                                error("Could not generate new password");
+                                account.setPassword(AccountController.encryptPassword(newPassword));
+                                AccountController.save(account);
+                            } catch (ControllerException e) {
+                                throw new ViewException(e);
                             }
+
                             CharSequence resetPasswordPage = WebRequestCycle.get().urlFor(
                                     UpdatePasswordPage.class, new PageParameters());
                             WebRequestCycle webRequestCycle = (WebRequestCycle) WebRequestCycle
@@ -102,18 +100,17 @@ public class ForgotPasswordPanel extends Panel {
                             body = body
                                     + "Please go to the following link and change your password.\n\n";
                             body = body + resetPasswordPageUrl.toString();
+
                             try {
                                 Emailer.send(account.getEmail(), subject, body);
-                                //Emailer.send(getEmail(), subject, body);
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                throw new ViewException(e);
                             }
 
                             Panel responsePanel = new EmptyMessagePanel(thisPanel.getId(),
                                     "A new password has been emailed to you.");
                             thisPanel.getParent().replace(responsePanel.setOutputMarkupId(true));
                             target.addComponent(responsePanel);
-
                         } else {
                             error("Unknown user.");
                         }

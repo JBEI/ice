@@ -17,18 +17,20 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.target.resource.ResourceStreamRequestTarget;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.resource.StringResourceStream;
-import org.jbei.ice.lib.composers.SequenceComposer;
+import org.jbei.ice.controllers.ApplicationContoller;
+import org.jbei.ice.controllers.SequenceController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.composers.SequenceComposerException;
 import org.jbei.ice.lib.composers.formatters.FastaFormatter;
 import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sequence;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.forms.SequenceNewFormPanel;
 import org.jbei.ice.web.pages.UnprotectedPage;
 import org.jbei.ice.web.pages.VectorEditorPage;
@@ -47,12 +49,12 @@ public class SequenceViewPanel extends Panel {
 
         this.entry = entry;
 
+        SequenceController sequenceController = new SequenceController(IceSession.get()
+                .getAccount());
         try {
-            sequence = SequenceManager.getByEntry(entry);
-        } catch (ManagerException e) {
-            Logger.error("Could't get sequence for entry", e);
-        } catch (Exception e) {
-            Logger.error("Could't get sequence for entry", e);
+            sequence = sequenceController.getByEntry(entry);
+        } catch (ControllerException e) {
+            throw new ViewException(e);
         }
 
         initializeControls();
@@ -199,6 +201,9 @@ public class SequenceViewPanel extends Panel {
             public void onClick() {
                 String sequenceString = null;
                 try {
+                    SequenceController sequenceController = new SequenceController(IceSession.get()
+                            .getAccount());
+
                     GenbankFormatter genbankFormatter = new GenbankFormatter(sequence.getEntry()
                             .getNamesAsString());
                     genbankFormatter
@@ -206,11 +211,9 @@ public class SequenceViewPanel extends Panel {
                                     .getEntry()).getCircular()
                                     : false);
 
-                    sequenceString = SequenceComposer.compose(sequence, genbankFormatter);
-                } catch (SequenceComposerException e) {
-                    Logger.error("Failed to generate fasta file for download", e);
-
-                    return;
+                    sequenceString = sequenceController.compose(sequence, genbankFormatter);
+                } catch (SequenceComposerException e) { // TODO: Fix it later
+                    throw new ViewException("Failed to generate genbank file for download!", e);
                 }
 
                 IResourceStream resourceStream = new StringResourceStream(sequenceString,
@@ -232,14 +235,15 @@ public class SequenceViewPanel extends Panel {
 
             @Override
             public void onClick() {
+                SequenceController sequenceController = new SequenceController(IceSession.get()
+                        .getAccount());
+
                 String sequenceString = null;
                 try {
-                    sequenceString = SequenceComposer.compose(sequence, new FastaFormatter(sequence
-                            .getEntry().getNamesAsString()));
+                    sequenceString = sequenceController.compose(sequence, new FastaFormatter(
+                            sequence.getEntry().getNamesAsString()));
                 } catch (SequenceComposerException e) {
-                    Logger.error("Failed to generate fasta file for download", e);
-
-                    return;
+                    throw new ViewException("Failed to generate fasta file for download!", e);
                 }
 
                 IResourceStream resourceStream = new StringResourceStream(sequenceString,
@@ -268,15 +272,17 @@ public class SequenceViewPanel extends Panel {
             @Override
             public void onClick(AjaxRequestTarget target) {
                 try {
-                    entry.setSequence(null);
+                    SequenceController sequenceController = new SequenceController(IceSession.get()
+                            .getAccount());
 
-                    SequenceManager.delete(sequence);
+                    sequenceController.delete(sequence);
+                    ApplicationContoller.scheduleBlastIndexRebuildJob();
 
                     updateView(null);
-                } catch (ManagerException e) {
-                    Logger.error("Could't delete sequence for entry", e);
-                } catch (Exception e) {
-                    Logger.error("Could't delete sequence for entry", e);
+                } catch (ControllerException e) {
+                    throw new ViewException(e);
+                } catch (PermissionException e) {
+                    throw new ViewPermissionException("No permission to delete sequence!", e);
                 }
             }
         }

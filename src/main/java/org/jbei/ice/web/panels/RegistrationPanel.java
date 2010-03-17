@@ -11,14 +11,14 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.validation.validator.EmailAddressValidator;
 import org.apache.wicket.validation.validator.StringValidator;
-import org.jbei.ice.lib.managers.AccountManager;
-import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.RegistrationSuccessfulPage;
-import org.jbei.ice.web.pages.UnprotectedPage;
 import org.jbei.ice.web.pages.WelcomePage;
 
 public class RegistrationPanel extends Panel {
@@ -77,23 +77,23 @@ public class RegistrationPanel extends Panel {
                     error("Password and Confirm doesn't much");
                 }
                 try {
-                    Account account = AccountManager.getByEmail(email);
+                    Account account = AccountController.getByEmail(email);
                     if (account != null) {
                         error("Account with this email address already registered");
                         return;
                     }
-                    account = new Account(firstName, lastName, initials, email, AccountManager
+                    account = new Account(firstName, lastName, initials, email, AccountController
                             .encryptPassword(password), institution, description);
-                    AccountManager.save(account);
+                    AccountController.save(account);
                     setResponsePage(RegistrationSuccessfulPage.class);
                     Emailer.send(email, "Account created successfully", "Dear " + firstName + " "
                             + lastName + ",\n\nThank you for creating "
                             + JbeirSettings.getSetting("PROJECT_NAME")
                             + " account.\n\nBest regards,\nRegistry Team");
-                } catch (ManagerException e) {
-                    ((UnprotectedPage) getPage()).handleException(e);
+                } catch (ControllerException e) {
+                    throw new ViewException(e);
                 } catch (Exception e) {
-                    ((UnprotectedPage) getPage()).handleException(e);
+                    throw new ViewException(e);
                 }
             }
         }

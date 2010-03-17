@@ -8,6 +8,7 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.utils.WebUtils;
 
 public class PlasmidSimpleViewPanel extends SimpleEntryViewPanel<Plasmid> {
@@ -37,7 +38,7 @@ public class PlasmidSimpleViewPanel extends SimpleEntryViewPanel<Plasmid> {
         try {
             temp = UtilsManager.getStrainsForPlasmid(getEntry());
         } catch (ManagerException e) {
-            e.printStackTrace();
+            throw new ViewException(e);
         }
 
         add(new Label("linksToStrains", WebUtils.makeEntryLinks(temp)).setEscapeModelStrings(false));

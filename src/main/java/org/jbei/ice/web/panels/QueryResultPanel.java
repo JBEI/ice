@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.apache.wicket.Page;
 import org.apache.wicket.ResourceReference;
-import org.apache.wicket.extensions.markup.html.repeater.data.sort.OrderByBorder;
 import org.apache.wicket.markup.html.CSSPackageResource;
 import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.image.Image;
@@ -84,8 +83,6 @@ public class QueryResultPanel extends Panel {
         resultsTableFragment.addOrReplace(entriesDataView);
         resultsTableFragment.addOrReplace(getNavigation(entriesDataView));
 
-        renderSortableColumns();
-
         renderExportLinks();
 
         if (sortableDataProvider.size() == 0) {
@@ -93,58 +90,6 @@ public class QueryResultPanel extends Panel {
         } else {
             addOrReplace(resultsTableFragment);
         }
-    }
-
-    private void renderSortableColumns() {
-        resultsTableFragment.addOrReplace(new OrderByBorder("orderByType", "type",
-                sortableDataProvider) {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected void onSortChanged() {
-                entriesDataView.setCurrentPage(0);
-            }
-        });
-
-        resultsTableFragment.addOrReplace(new OrderByBorder("orderBySummary", "summary",
-                sortableDataProvider) {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected void onSortChanged() {
-                entriesDataView.setCurrentPage(0);
-            }
-        });
-
-        resultsTableFragment.addOrReplace(new OrderByBorder("orderByOwner", "owner",
-                sortableDataProvider) {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected void onSortChanged() {
-                entriesDataView.setCurrentPage(0);
-            }
-        });
-
-        resultsTableFragment.addOrReplace(new OrderByBorder("orderByStatus", "status",
-                sortableDataProvider) {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected void onSortChanged() {
-                entriesDataView.setCurrentPage(0);
-            }
-        });
-
-        resultsTableFragment.addOrReplace(new OrderByBorder("orderByCreated", "created",
-                sortableDataProvider) {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected void onSortChanged() {
-                entriesDataView.setCurrentPage(0);
-            }
-        });
     }
 
     private void renderExportLinks() {

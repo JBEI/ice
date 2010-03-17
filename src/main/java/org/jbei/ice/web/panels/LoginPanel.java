@@ -12,9 +12,12 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.protocol.http.WebResponse;
+import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.IceSession.IceSessionException;
+import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.ForgotPasswordPage;
 import org.jbei.ice.web.pages.RegistrationPage;
 import org.jbei.ice.web.pages.UserPage;
@@ -51,38 +54,35 @@ public class LoginPanel extends Panel {
             // overridden methods
             @Override
             protected void onSubmit() {
-                boolean authenticated = authenticate(getLogin(), getPassword());
-                if (authenticated) {
+                IceSession icesession = (IceSession) getSession();
+
+                try {
+                    icesession.authenticateUser(getLogin(), getPassword());
+
                     if (getKeepSignedIn()) {
                         IceSession iceSession = (IceSession) getSession();
                         try {
                             iceSession.makeSessionPersistent(((WebResponse) getResponse()));
                         } catch (ManagerException e) {
-                            String msg = "Could not save authentication to db: " + e.toString();
-                            Logger.error(msg, e);
-                            error("System Error: " + msg);
+                            throw new ViewException(e);
                         }
                     }
 
                     if (!continueToOriginalDestination()) {
                         setResponsePage(UserPage.class);
                     }
-
-                } else {
+                } catch (IceSessionException e) {
+                    // TODO (Zinovii) Do something smart, go somewhere an REPORT!
+                    e.printStackTrace();
+                } catch (InvalidCredentialsException e) {
                     Logger.info("Login failed for user " + getLogin());
+
                     error("Unknown username / password combination");
                 }
             }
 
             @Override
             protected void onError() {
-            }
-
-            // specific method
-            protected boolean authenticate(String username, String password) {
-                IceSession icesession = (IceSession) getSession();
-
-                return icesession.authenticateUser(username, password);
             }
 
             // setters and getters

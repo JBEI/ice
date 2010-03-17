@@ -13,8 +13,6 @@ import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
-import org.jbei.ice.lib.managers.EntryManager;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.search.lucene.SearchResult;
 import org.jbei.ice.web.dataProviders.SearchDataProvider;
@@ -66,16 +64,8 @@ public class SearchResultPanel extends Panel {
             @Override
             protected Entry getEntry(Item<SearchResult> item) {
                 SearchResult searchResult = item.getModelObject();
-                Entry entry = null;
-                try {
-                    entry = EntryManager.getByRecordId(searchResult.getRecordId());
-                } catch (ManagerException e) {
-                    e.printStackTrace();
 
-                    return null;
-                }
-
-                return entry;
+                return searchResult.getEntry();
             }
 
             @Override

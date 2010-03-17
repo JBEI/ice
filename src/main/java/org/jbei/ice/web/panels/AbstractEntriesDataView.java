@@ -11,14 +11,14 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.data.DataView;
 import org.apache.wicket.markup.repeater.data.IDataProvider;
-import org.jbei.ice.lib.managers.AccountManager;
-import org.jbei.ice.lib.managers.AttachmentManager;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SequenceManager;
+import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
 import org.jbei.ice.lib.utils.JbeiConstants;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.ProfilePage;
@@ -72,9 +72,9 @@ public abstract class AbstractEntriesDataView<T> extends DataView<T> {
         Account ownerAccount = null;
 
         try {
-            ownerAccount = AccountManager.getByEmail(entry.getOwnerEmail());
-        } catch (ManagerException e) {
-            e.printStackTrace();
+            ownerAccount = AccountController.getByEmail(entry.getOwnerEmail());
+        } catch (ControllerException e) {
+            throw new ViewException(e);
         }
 
         BookmarkablePageLink<ProfilePage> ownerProfileLink = new BookmarkablePageLink<ProfilePage>(
@@ -97,6 +97,8 @@ public abstract class AbstractEntriesDataView<T> extends DataView<T> {
     protected void renderImages(Item<T> item) {
         Entry entry = getEntry(item);
 
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
+
         ResourceReference blankImage = new ResourceReference(UnprotectedPage.class,
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "blank.png");
         ResourceReference hasAttachmentImage = new ResourceReference(UnprotectedPage.class,
@@ -106,12 +108,16 @@ public abstract class AbstractEntriesDataView<T> extends DataView<T> {
         ResourceReference hasSampleImage = new ResourceReference(UnprotectedPage.class,
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sample.png");
 
-        item.add(new Image("hasAttachment",
-                (AttachmentManager.hasAttachment(entry)) ? hasAttachmentImage : blankImage));
-        item.add(new Image("hasSequence", (SequenceManager.hasSequence(entry)) ? hasSequenceImage
-                : blankImage));
-        item.add(new Image("hasSample",
-                (AuthenticatedSampleManager.hasSample(entry)) ? hasSampleImage : blankImage));
+        try {
+            item.add(new Image("hasAttachment",
+                    (entryController.hasAttachments(entry)) ? hasAttachmentImage : blankImage));
+            item.add(new Image("hasSequence",
+                    (entryController.hasSequence(entry)) ? hasSequenceImage : blankImage));
+            item.add(new Image("hasSample", (entryController.hasSamples(entry)) ? hasSampleImage
+                    : blankImage));
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        }
     }
 
     protected void renderIndex(Item<T> item) {

@@ -6,9 +6,10 @@ import java.util.Date;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.lib.managers.AccountManager;
-import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Account;
+import org.jbei.ice.web.common.ViewException;
 
 public class ProfileAboutUserPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -18,9 +19,9 @@ public class ProfileAboutUserPanel extends Panel {
 
         Account account = null;
         try {
-            account = AccountManager.getByEmail(accountEmail);
-        } catch (ManagerException e) {
-            e.printStackTrace();
+            account = AccountController.getByEmail(accountEmail);
+        } catch (ControllerException e) {
+            throw new ViewException(e);
         }
 
         if (account == null) {

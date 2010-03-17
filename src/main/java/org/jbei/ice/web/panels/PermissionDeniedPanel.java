@@ -5,8 +5,9 @@ import org.apache.wicket.markup.html.panel.Panel;
 public class PermissionDeniedPanel extends Panel {
     private static final long serialVersionUID = 1L;
 
-    public PermissionDeniedPanel(String id) {
+    public PermissionDeniedPanel(String id, String message) {
         super(id);
-        add(new EmptyMessagePanel("msgPanel", "You are do not have permission to view this page"));
+
+        add(new EmptyMessagePanel("msgPanel", message));
     }
 }

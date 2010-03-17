@@ -10,10 +10,8 @@ import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
+import org.jbei.ice.controllers.BlastController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.logging.UsageLogger;
-import org.jbei.ice.lib.search.blast.Blast;
-import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastResult;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.SequenceUtils;
@@ -22,13 +20,17 @@ import org.jbei.ice.web.common.CustomChoice;
 public class BlastFormPanel extends Panel {
     private static final long serialVersionUID = 1L;
     private String blastQuery;
+    private final String BLAST_RESULT_PANEL_NAME = "blastResultPanel";
+    private final String BLAST_FORM_NAME = "blastForm";
 
     public BlastFormPanel(String id) {
         super(id);
 
         class BlastForm extends StatelessForm<Object> {
-
             private static final long serialVersionUID = 1L;
+
+            private final int NUMBER_OF_ENTRIES_PER_PAGE = 15;
+
             private String query = "";
             private CustomChoice blastProgram;
 
@@ -55,49 +57,47 @@ public class BlastFormPanel extends Panel {
 
             @Override
             public void onSubmit() {
-                ArrayList<BlastResult> blastResults = new ArrayList<BlastResult>();
                 BlastFormPanel thisPanel = (BlastFormPanel) getParent();
 
-                if (getQuery() != null) {
+                String query = getQuery();
+                String program = getBlastProgram().getValue();
+
+                if (query != null && !query.isEmpty() && program != null && !program.isEmpty()) {
+                    ArrayList<BlastResult> blastResults = null;
+
                     try {
-                        blastResults = new Blast().queryDistinct(getQuery(), getBlastProgram()
-                                .getValue());
-
-                        UsageLogger.info(blastResults.size() + " results for blast query.");
-                        Logger.info(blastResults.size() + " results for blast query.");
-
-                        if (blastResults.size() > 0) {
-                            Panel resultPanel;
-                            if (getBlastProgram().getValue().equals("tblastx")) {
-                                String proteinQuery;
-                                try {
-                                    proteinQuery = SequenceUtils.translateToProtein(getQuery());
-                                } catch (Exception e) {
-                                    proteinQuery = "";
-                                    e.printStackTrace();
-                                }
-                                resultPanel = new BlastResultPanel("blastResultPanel",
-                                        proteinQuery, blastResults, 15, false);
-                            } else {
-                                resultPanel = new BlastResultPanel("blastResultPanel", getQuery(),
-                                        blastResults, 15, true);
-                            }
-                            thisPanel.replace(resultPanel);
-                        } else {
-                            Panel resultPanel = new EmptyMessagePanel("blastResultPanel",
-                                    "No matches found");
-                            thisPanel.replace(resultPanel);
-                        }
+                        blastResults = BlastController.query(query, program);
                     } catch (ProgramTookTooLongException e) {
-
-                        Panel resultPanel = new EmptyMessagePanel("blastResultPanel",
+                        Panel resultPanel = new EmptyMessagePanel(BLAST_RESULT_PANEL_NAME,
                                 "Blast took too long to finish. Try a different query");
                         thisPanel.replace(resultPanel);
-                    } catch (BlastException e) {
-                        throw new RuntimeException(e);
+                    }
+
+                    if (blastResults != null && blastResults.size() > 0) {
+                        Panel resultPanel;
+                        if (program.equals("tblastx")) {
+                            String proteinQuery;
+                            try {
+                                proteinQuery = SequenceUtils.translateToProtein(query);
+                            } catch (Exception e) { // TODO: Check this later
+                                proteinQuery = "";
+
+                                Logger.error("Failed to translate dna to protein!", e);
+                            }
+
+                            resultPanel = new BlastResultPanel(BLAST_RESULT_PANEL_NAME,
+                                    proteinQuery, blastResults, NUMBER_OF_ENTRIES_PER_PAGE, false);
+                        } else {
+                            resultPanel = new BlastResultPanel(BLAST_RESULT_PANEL_NAME, query,
+                                    blastResults, NUMBER_OF_ENTRIES_PER_PAGE, true);
+                        }
+                        thisPanel.replace(resultPanel);
+                    } else {
+                        Panel resultPanel = new EmptyMessagePanel(BLAST_RESULT_PANEL_NAME,
+                                "No matches found");
+                        thisPanel.replace(resultPanel);
                     }
                 }
-
             }
 
             @SuppressWarnings("unused")
@@ -118,8 +118,8 @@ public class BlastFormPanel extends Panel {
             }
         }
 
-        add(new BlastForm("blastForm"));
-        add(new EmptyMessagePanel("blastResultPanel", ""));
+        add(new BlastForm(BLAST_FORM_NAME));
+        add(new EmptyMessagePanel(BLAST_RESULT_PANEL_NAME, ""));
     }
 
     public void setBlastQuery(String blastQuery) {

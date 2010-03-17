@@ -7,20 +7,24 @@ import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.controllers.SampleController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sample;
-import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
 
 public class SampleViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
 
-    Entry entry = null;
-    ArrayList<Sample> samples = new ArrayList<Sample>();
-    ArrayList<Panel> panels = new ArrayList<Panel>();
+    private Entry entry = null;
+    private ArrayList<Sample> samples = new ArrayList<Sample>();
+    private ArrayList<Panel> panels = new ArrayList<Panel>();
 
     public SampleViewPanel(String id, Entry entry) {
         super(id);
+
+        SampleController sampleController = new SampleController(IceSession.get().getAccount());
 
         this.entry = entry;
         class AddSampleLink extends AjaxFallbackLink<Object> {
@@ -55,9 +59,9 @@ public class SampleViewPanel extends Panel {
         add(new AddSampleLink("addSampleLink"));
 
         try {
-            samples.addAll(AuthenticatedSampleManager.get(entry));
-        } catch (ManagerException e) {
-            e.printStackTrace();
+            samples.addAll(sampleController.getSamples(entry));
+        } catch (ControllerException e) {
+            throw new ViewException(e);
         }
 
         Object[] temp = samples.toArray();

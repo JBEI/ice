@@ -10,11 +10,15 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
+import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.EntryManager;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.search.blast.BlastResult;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.dataProviders.BlastDataProvider;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.UnprotectedPage;
@@ -46,9 +50,15 @@ public class BlastResultPanel extends Panel {
             protected Entry getEntry(Item<BlastResult> item) {
                 Entry entry = null;
                 try {
-                    entry = EntryManager.getByRecordId(item.getModelObject().getSubjectId());
-                } catch (ManagerException e) {
-                    e.printStackTrace();
+                    EntryController entryController = new EntryController(IceSession.get()
+                            .getAccount());
+
+                    entry = entryController.getByRecordId(item.getModelObject().getSubjectId());
+                } catch (ControllerException e) {
+                    throw new ViewException(e);
+                } catch (PermissionException e) {
+                    // This should never happen, because entries should be prefiltered before!
+                    throw new ViewPermissionException("No permissions to view entry!", e);
                 }
 
                 return entry;

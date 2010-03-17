@@ -7,14 +7,15 @@ import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.controllers.ApplicationContoller;
+import org.jbei.ice.controllers.SampleController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Location;
-import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.utils.Job;
-import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class LocationItemViewPanel extends Panel {
@@ -53,15 +54,18 @@ public class LocationItemViewPanel extends Panel {
                 Location location = thisPanel.getLocation();
                 Entry entry = location.getSample().getEntry();
 
+                SampleController sampleController = new SampleController(IceSession.get()
+                        .getAccount());
+
                 location.getSample().getLocations().remove(location);
                 try {
-                    AuthenticatedSampleManager.save(location.getSample());
-                    JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
-                    JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);
+                    sampleController.saveSample(location.getSample());
+                    ApplicationContoller.scheduleBlastIndexRebuildJob();
+                    ApplicationContoller.scheduleSearchIndexRebuildJob();
+                } catch (ControllerException e) {
+                    throw new ViewException(e);
                 } catch (PermissionException e) {
-                    error("Save not permitted");
-                } catch (ManagerException e) {
-                    e.printStackTrace();
+                    throw new ViewPermissionException("No permissions to delete location!", e);
                 }
 
                 setRedirect(true);
@@ -107,8 +111,16 @@ public class LocationItemViewPanel extends Panel {
 
         WebMarkupContainer locationEditDeleteContainer = new WebMarkupContainer(
                 "locationEditDeleteContainer");
-        locationEditDeleteContainer.setVisible(IceSession.get().getAccount().getEmail().equals(
-                location.getSample().getDepositor()));
+
+        SampleController sampleController = new SampleController(IceSession.get().getAccount());
+
+        try {
+            locationEditDeleteContainer.setVisible(sampleController
+                    .hasLocationWritePermission(location));
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        }
+
         add(locationEditDeleteContainer);
 
         AjaxFallbackLink<Object> deleteLocationLink = new DeleteLocationLink("deleteLocationLink");

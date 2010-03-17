@@ -4,10 +4,11 @@ import org.apache.wicket.ResourceReference;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.model.Model;
-import org.jbei.ice.lib.managers.AttachmentManager;
-import org.jbei.ice.lib.managers.SampleManager;
-import org.jbei.ice.lib.managers.SequenceManager;
+import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.UnprotectedPage;
 import org.jbei.ice.web.utils.WebUtils;
 
@@ -15,12 +16,14 @@ public class SimpleEntryViewPanel<T extends Entry> extends AbstractEntryViewPane
     private static final long serialVersionUID = 1L;
     private static final int MAX_LONG_FIELD_LENGTH = 100;
 
+    private transient EntryController entryController;
+
     public SimpleEntryViewPanel(String id, Model<T> entryModel) {
         super(id, entryModel);
 
-        renderAttachments();
-        renderSamples();
-        renderSequence();
+        entryController = new EntryController(IceSession.get().getAccount());
+
+        renderIcons();
     }
 
     @Override
@@ -42,23 +45,23 @@ public class SimpleEntryViewPanel<T extends Entry> extends AbstractEntryViewPane
                 .getReferences()), MAX_LONG_FIELD_LENGTH)).setEscapeModelStrings(false));
     }
 
-    protected void renderAttachments() {
+    protected void renderIcons() {
         ResourceReference hasAttachmentImage = new ResourceReference(UnprotectedPage.class,
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "attachment.gif");
-        add(new Image("attachments", hasAttachmentImage).setVisible(AttachmentManager
-                .hasAttachment(getEntry())));
-    }
-
-    protected void renderSamples() {
         ResourceReference hasSampleImage = new ResourceReference(UnprotectedPage.class,
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sample.png");
-        add(new Image("samples", hasSampleImage).setVisible(SampleManager.hasSample(getEntry())));
-    }
-
-    protected void renderSequence() {
         ResourceReference hasSequenceImage = new ResourceReference(UnprotectedPage.class,
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sequence.gif");
-        add(new Image("sequence", hasSequenceImage).setVisible(SequenceManager
-                .hasSequence(getEntry())));
+
+        try {
+            add(new Image("attachments", hasAttachmentImage).setVisible(entryController
+                    .hasAttachments(getEntry())));
+            add(new Image("samples", hasSampleImage).setVisible(entryController
+                    .hasSamples(getEntry())));
+            add(new Image("sequence", hasSequenceImage).setVisible(entryController
+                    .hasSequence(getEntry())));
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        }
     }
 }

@@ -19,6 +19,7 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.WorkspaceManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Workspace;
+import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.UnprotectedPage;
@@ -72,19 +73,17 @@ public class WorkspaceDataView extends DataView<Workspace> {
         // renderDeleteLink
         final ResourceReference xFilledImage = new ResourceReference(UnprotectedPage.class,
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "x-filled.png");
-        AjaxLink removeLink = new AjaxLink("removeLink") {
-
+        AjaxLink<Object> removeLink = new AjaxLink<Object>("removeLink") {
             private static final long serialVersionUID = 1L;
 
             @Override
             public void onClick(AjaxRequestTarget target) {
-
                 try {
                     workspace.setInWorkspace(false);
                     WorkspaceManager.save(workspace);
                     setResponsePage(UserPage.class, new PageParameters("0=" + "workspace"));
                 } catch (ManagerException e) {
-                    Logger.error("Could not remove from workspace", e);
+                    throw new ViewException("Could not remove from workspace", e);
                 }
             }
 
@@ -117,7 +116,7 @@ public class WorkspaceDataView extends DataView<Workspace> {
                         WorkspaceManager.save(workspace);
                         image = new Image("starImage", starFilledImage);
                     } catch (ManagerException e) {
-                        Logger.error("Could not save star", e);
+                        throw new ViewException("Could not save star", e);
                     }
                 }
                 this.replace(image);

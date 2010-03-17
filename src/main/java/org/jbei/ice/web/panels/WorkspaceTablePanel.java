@@ -1,7 +1,6 @@
 package org.jbei.ice.web.panels;
 
 import org.apache.wicket.Page;
-import org.apache.wicket.extensions.markup.html.repeater.data.sort.OrderByBorder;
 import org.apache.wicket.markup.html.CSSPackageResource;
 import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.link.Link;
@@ -16,7 +15,6 @@ import org.jbei.ice.web.pages.PrintableEntriesTablePage;
 import org.jbei.ice.web.pages.UnprotectedPage;
 
 public class WorkspaceTablePanel extends Panel {
-
     private static final long serialVersionUID = 1L;
 
     private WorkspaceDataProvider workspaceDataProvider;
@@ -26,6 +24,7 @@ public class WorkspaceTablePanel extends Panel {
         super(id);
 
         workspaceDataProvider = new WorkspaceDataProvider(IceSession.get().getAccount());
+
         add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
                 UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
         add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
@@ -35,30 +34,8 @@ public class WorkspaceTablePanel extends Panel {
 
         add(workspaceDataView);
         add(new JbeiPagingNavigator("navigator", workspaceDataView));
-        renderSortableColumns();
+
         renderExportLinks();
-
-    }
-
-    private void renderSortableColumns() {
-        add(new OrderByBorder("orderByDateAdded", "dateAdded", workspaceDataProvider) {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected void onSortChanged() {
-                workspaceDataView.setCurrentPage(0);
-            }
-        });
-
-        add(new OrderByBorder("orderByDateVisited", "dateVisited", workspaceDataProvider) {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected void onSortChanged() {
-                workspaceDataView.setCurrentPage(0);
-            }
-        });
     }
 
     private void renderExportLinks() {

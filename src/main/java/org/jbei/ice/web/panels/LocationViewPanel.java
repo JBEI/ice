@@ -8,9 +8,12 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.jbei.ice.controllers.SampleController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Location;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
 
 public class LocationViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -57,8 +60,15 @@ public class LocationViewPanel extends Panel {
         }
 
         WebMarkupContainer topLinkContainer = new WebMarkupContainer("topLinkContainer");
-        topLinkContainer.setVisible(IceSession.get().getAccount().getEmail().equals(
-                sample.getDepositor()));
+
+        SampleController sampleController = new SampleController(IceSession.get().getAccount());
+
+        try {
+            topLinkContainer.setVisible(sampleController.hasWritePermission(sample));
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        }
+
         topLinkContainer.add(new AddLocationLink("addLocationLink"));
         add(topLinkContainer);
 
