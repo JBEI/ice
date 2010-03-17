@@ -23,7 +23,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.util.CollectionModel;
 import org.jbei.ice.controllers.AccountController;
-import org.jbei.ice.controllers.ApplicationContoller;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.managers.GroupManager;
@@ -408,7 +407,6 @@ public class PermissionEditPanel extends Panel {
                         entryController.save(thisPanel.entry);
                     }
 
-                    ApplicationContoller.scheduleSearchIndexRebuildJob();
                     setResponsePage(EntryViewPage.class, new PageParameters("0="
                             + thisPanel.entry.getId() + ",1=" + "permission"));
                 } catch (ControllerException e) {

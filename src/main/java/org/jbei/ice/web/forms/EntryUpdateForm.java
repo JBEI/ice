@@ -3,7 +3,6 @@ package org.jbei.ice.web.forms;
 import java.util.Set;
 
 import org.apache.wicket.PageParameters;
-import org.jbei.ice.controllers.ApplicationContoller;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
@@ -77,9 +76,6 @@ public class EntryUpdateForm<T extends Entry> extends EntrySubmitForm<T> {
         try {
             if (entryController.hasWritePermission(entry)) {
                 entryController.save(entry);
-
-                ApplicationContoller.scheduleBlastIndexRebuildJob();
-                ApplicationContoller.scheduleSearchIndexRebuildJob();
 
                 setResponsePage(EntryViewPage.class, new PageParameters("0=" + entry.getId()));
             } else {

@@ -15,7 +15,6 @@ import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastResult;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.search.lucene.AggregateSearch;
-import org.jbei.ice.lib.search.lucene.LuceneSearch;
 import org.jbei.ice.lib.search.lucene.SearchException;
 import org.jbei.ice.lib.search.lucene.SearchResult;
 import org.jbei.ice.web.IceSession;
@@ -53,18 +52,6 @@ public class SearchController extends Controller {
         return results;
     }
 
-    public void rebuildSearchIndex() {
-        try {
-            Logger.info("Rebuilding search index");
-
-            LuceneSearch.getInstance().rebuildIndex();
-
-            Logger.info("Rebuild search index complete");
-        } catch (Exception e) { // TODO: Fix this!
-            Logger.error(SearchControllerException.FAILED_TO_REBUILD_SEARCH_INDEX, e);
-        }
-    }
-
     public static ArrayList<BlastResult> query(String query, String program)
             throws ProgramTookTooLongException {
 
@@ -88,12 +75,5 @@ public class SearchController extends Controller {
         }
 
         return results;
-    }
-
-    public class SearchControllerException extends Exception {
-        private static final long serialVersionUID = 1L;
-
-        public static final String FAILED_TO_REBUILD_SEARCH_INDEX = "Failed to rebuild search index!";
-        public static final String SEARCH_FAILED = "Search failed!";
     }
 }

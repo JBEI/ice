@@ -3,7 +3,6 @@ package org.jbei.ice.services.blazeds.VectorEditor.services;
 import java.util.LinkedHashSet;
 
 import org.jbei.ice.controllers.AccountController;
-import org.jbei.ice.controllers.ApplicationContoller;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -191,7 +190,6 @@ public class VectorEditorService extends BaseService {
             sequenceController.update(sequence);
 
             entryController.save(entry);
-            ApplicationContoller.scheduleBlastIndexRebuildJob();
 
             result = true;
         } catch (ControllerException e) {

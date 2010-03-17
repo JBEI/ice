@@ -43,6 +43,11 @@ public class SequenceController extends Controller {
     }
 
     public Sequence save(Sequence sequence) throws ControllerException, PermissionException {
+        return save(sequence, true);
+    }
+
+    public Sequence save(Sequence sequence, boolean scheduleIndexRebuild)
+            throws ControllerException, PermissionException {
         Sequence result = null;
 
         if (sequence == null) {
@@ -56,6 +61,10 @@ public class SequenceController extends Controller {
         // TODO: Use transactional saveSequence
         try {
             result = SequenceManager.saveSequence(sequence);
+
+            if (scheduleIndexRebuild) {
+                ApplicationContoller.scheduleBlastIndexRebuildJob();
+            }
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
@@ -64,6 +73,11 @@ public class SequenceController extends Controller {
     }
 
     public Sequence update(Sequence sequence) throws ControllerException, PermissionException {
+        return update(sequence, true);
+    }
+
+    public Sequence update(Sequence sequence, boolean scheduleIndexRebuild)
+            throws ControllerException, PermissionException {
         Sequence result = null;
 
         if (sequence == null) {
@@ -89,6 +103,10 @@ public class SequenceController extends Controller {
             entry.setSequence(sequence);
 
             result = SequenceManager.saveSequence(sequence);
+
+            if (scheduleIndexRebuild) {
+                ApplicationContoller.scheduleBlastIndexRebuildJob();
+            }
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
@@ -97,6 +115,11 @@ public class SequenceController extends Controller {
     }
 
     public void delete(Sequence sequence) throws ControllerException, PermissionException {
+        delete(sequence, true);
+    }
+
+    public void delete(Sequence sequence, boolean scheduleIndexRebuild) throws ControllerException,
+            PermissionException {
         if (sequence == null) {
             throw new ControllerException("Failed to save null sequence!");
         }
@@ -107,6 +130,10 @@ public class SequenceController extends Controller {
 
         try {
             SequenceManager.deleteSequence(sequence);
+
+            if (scheduleIndexRebuild) {
+                ApplicationContoller.scheduleBlastIndexRebuildJob();
+            }
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }

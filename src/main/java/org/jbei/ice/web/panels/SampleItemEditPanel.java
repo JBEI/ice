@@ -9,7 +9,6 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
-import org.jbei.ice.controllers.ApplicationContoller;
 import org.jbei.ice.controllers.SampleController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Sample;
@@ -89,8 +88,6 @@ public class SampleItemEditPanel extends Panel {
 
                 try {
                     sampleController.saveSample(sampleItemEditPanel.getSample());
-                    ApplicationContoller.scheduleBlastIndexRebuildJob();
-                    ApplicationContoller.scheduleSearchIndexRebuildJob();
 
                     setRedirect(true);
                     setResponsePage(EntryViewPage.class, new PageParameters("0="

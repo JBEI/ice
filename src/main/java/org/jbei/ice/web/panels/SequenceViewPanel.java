@@ -17,7 +17,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.target.resource.ResourceStreamRequestTarget;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.resource.StringResourceStream;
-import org.jbei.ice.controllers.ApplicationContoller;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.composers.SequenceComposerException;
@@ -276,7 +275,6 @@ public class SequenceViewPanel extends Panel {
                             .getAccount());
 
                     sequenceController.delete(sequence);
-                    ApplicationContoller.scheduleBlastIndexRebuildJob();
 
                     updateView(null);
                 } catch (ControllerException e) {

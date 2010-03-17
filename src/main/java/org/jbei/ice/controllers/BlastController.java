@@ -12,19 +12,6 @@ import org.jbei.ice.lib.search.blast.BlastResult;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 
 public class BlastController {
-    public static void rebuildBlastDatabase() {
-        try {
-            Logger.info("Rebuilding Blast database ...");
-
-            Blast blast = new Blast();
-            blast.rebuildDatabase();
-
-            Logger.info("Rebuild Blast database complete");
-        } catch (Exception e) {
-            Logger.error(BlastControllerException.FAILED_TO_REBUILD_BLAST_DATABASE, e);
-        }
-    }
-
     public static ArrayList<BlastResult> query(String query, String program)
             throws ProgramTookTooLongException {
 

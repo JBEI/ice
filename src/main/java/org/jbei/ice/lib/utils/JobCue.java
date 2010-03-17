@@ -4,8 +4,8 @@ import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.Set;
 
-import org.jbei.ice.controllers.BlastController;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.search.blast.Blast;
 import org.jbei.ice.lib.search.lucene.LuceneSearch;
 import org.jbei.ice.lib.search.lucene.SearchException;
 
@@ -57,7 +57,9 @@ public class JobCue implements Runnable {
                 if (jobType == 1) {
                     LuceneSearch.getInstance().rebuildIndex();
                 } else if (jobType == 2) {
-                    BlastController.rebuildBlastDatabase();
+                    Blast blast = new Blast();
+
+                    blast.rebuildDatabase();
                 }
 
                 cue.remove(jobType);

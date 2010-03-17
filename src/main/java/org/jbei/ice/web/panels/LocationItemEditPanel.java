@@ -12,7 +12,6 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
-import org.jbei.ice.controllers.ApplicationContoller;
 import org.jbei.ice.controllers.SampleController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Location;
@@ -104,8 +103,6 @@ public class LocationItemEditPanel extends Panel {
 
                 try {
                     sample = sampleController.saveSample(sample);
-                    ApplicationContoller.scheduleBlastIndexRebuildJob();
-                    ApplicationContoller.scheduleSearchIndexRebuildJob();
 
                     /* Inserting into a LinkedHashSet puts the last entered location
                      * at the bottom, which is undesirable for displaying the locations by reverse 

@@ -95,6 +95,11 @@ public class SampleController extends Controller {
     }
 
     public Sample saveSample(Sample sample) throws ControllerException, PermissionException {
+        return saveSample(sample, true);
+    }
+
+    public Sample saveSample(Sample sample, boolean scheduleIndexRebuild)
+            throws ControllerException, PermissionException {
         if (!hasWritePermission(sample)) {
             throw new PermissionException("No permissions to save sample!");
         }
@@ -103,6 +108,10 @@ public class SampleController extends Controller {
 
         try {
             savedSample = SampleManager.saveSample(sample);
+
+            if (scheduleIndexRebuild) {
+                ApplicationContoller.scheduleSearchIndexRebuildJob();
+            }
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
@@ -111,12 +120,21 @@ public class SampleController extends Controller {
     }
 
     public void deleteSample(Sample sample) throws ControllerException, PermissionException {
+        deleteSample(sample, true);
+    }
+
+    public void deleteSample(Sample sample, boolean scheduleIndexRebuild)
+            throws ControllerException, PermissionException {
         if (!hasWritePermission(sample)) {
             throw new PermissionException("No permissions to delete sample!");
         }
 
         try {
             SampleManager.deleteSample(sample);
+
+            if (scheduleIndexRebuild) {
+                ApplicationContoller.scheduleSearchIndexRebuildJob();
+            }
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
@@ -177,6 +195,11 @@ public class SampleController extends Controller {
     }
 
     public Location saveLocation(Location location) throws ControllerException, PermissionException {
+        return saveLocation(location);
+    }
+
+    public Location saveLocation(Location location, boolean scheduleIndexRebuild)
+            throws ControllerException, PermissionException {
         Location savedLocation = null;
 
         if (!hasLocationWritePermission(location)) {
@@ -185,6 +208,10 @@ public class SampleController extends Controller {
 
         try {
             savedLocation = SampleManager.saveLocation(location);
+
+            if (scheduleIndexRebuild) {
+                ApplicationContoller.scheduleSearchIndexRebuildJob();
+            }
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
@@ -193,12 +220,21 @@ public class SampleController extends Controller {
     }
 
     public void deleteLocation(Location location) throws ControllerException, PermissionException {
+        deleteLocation(location, true);
+    }
+
+    public void deleteLocation(Location location, boolean scheduleIndexRebuild)
+            throws ControllerException, PermissionException {
         if (!hasLocationWritePermission(location)) {
             throw new PermissionException("No permissions to delete location!");
         }
 
         try {
             SampleManager.deleteLocation(location);
+
+            if (scheduleIndexRebuild) {
+                ApplicationContoller.scheduleSearchIndexRebuildJob();
+            }
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }

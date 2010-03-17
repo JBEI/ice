@@ -27,24 +27,24 @@ public class EntryController extends Controller {
     }
 
     public Entry createEntry(Entry entry) throws ControllerException {
+        return createEntry(entry, true, true);
+    }
+
+    public Entry createEntry(Entry entry, boolean scheduleIndexRebuild, boolean doAddReadGroup)
+            throws ControllerException {
         Entry createdEntry = null;
 
         try {
             createdEntry = EntryManager.createEntry(entry);
-        } catch (ManagerException e) {
-            throw new ControllerException(e);
-        }
 
-        return createdEntry;
-    }
+            if (doAddReadGroup) {
+                PermissionManager.addReadGroup(createdEntry, GroupManager.getEverybodyGroup());
+            }
 
-    public Entry createEntryAndAddReadGroup(Entry entry) throws ControllerException {
-        Entry createdEntry = null;
-
-        try {
-            createdEntry = createEntry(entry);
-
-            PermissionManager.addReadGroup(createdEntry, GroupManager.getEverybodyGroup());
+            if (scheduleIndexRebuild) {
+                ApplicationContoller.scheduleBlastIndexRebuildJob();
+                ApplicationContoller.scheduleSearchIndexRebuildJob();
+            }
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
@@ -316,6 +316,11 @@ public class EntryController extends Controller {
     }
 
     public void save(Entry entry) throws ControllerException, PermissionException {
+        save(entry, true);
+    }
+
+    public void save(Entry entry, boolean scheduleIndexRebuild) throws ControllerException,
+            PermissionException {
         if (entry == null) {
             throw new ControllerException("Failed to save null entry!");
         }
@@ -326,12 +331,22 @@ public class EntryController extends Controller {
 
         try {
             EntryManager.save(entry);
+
+            if (scheduleIndexRebuild) {
+                ApplicationContoller.scheduleSearchIndexRebuildJob();
+                ApplicationContoller.scheduleBlastIndexRebuildJob();
+            }
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
     }
 
     public void delete(Entry entry) throws ControllerException, PermissionException {
+        delete(entry, true);
+    }
+
+    public void delete(Entry entry, boolean scheduleIndexRebuild) throws ControllerException,
+            PermissionException {
         throw new NotImplementedException();
 
         // EntryManager.delete(entry);

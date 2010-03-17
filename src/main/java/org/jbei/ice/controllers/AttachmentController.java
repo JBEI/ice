@@ -37,6 +37,11 @@ public class AttachmentController extends Controller {
 
     public Attachment save(Attachment attachment, InputStream inputStream)
             throws ControllerException, PermissionException {
+        return save(attachment, inputStream, true);
+    }
+
+    public Attachment save(Attachment attachment, InputStream inputStream,
+            boolean scheduleIndexRebuild) throws ControllerException, PermissionException {
         if (!hasWritePermission(attachment)) {
             throw new PermissionException("No permissions to save attachment!");
         }
@@ -45,6 +50,10 @@ public class AttachmentController extends Controller {
 
         try {
             savedAttachment = AttachmentManager.save(attachment, inputStream);
+
+            if (scheduleIndexRebuild) {
+                ApplicationContoller.scheduleSearchIndexRebuildJob();
+            }
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
@@ -53,12 +62,21 @@ public class AttachmentController extends Controller {
     }
 
     public void delete(Attachment attachment) throws ControllerException, PermissionException {
+        delete(attachment, true);
+    }
+
+    public void delete(Attachment attachment, boolean scheduleIndexRebuild)
+            throws ControllerException, PermissionException {
         if (!hasWritePermission(attachment)) {
             throw new PermissionException("No permissions to delete attachment!");
         }
 
         try {
             AttachmentManager.delete(attachment);
+
+            if (scheduleIndexRebuild) {
+                ApplicationContoller.scheduleSearchIndexRebuildJob();
+            }
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }

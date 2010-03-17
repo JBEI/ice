@@ -370,13 +370,13 @@ public class PlasmidStrainNewFormPanel extends Panel {
 
             // persist
             try {
-                Plasmid newPlasmid = (Plasmid) entryController.createEntryAndAddReadGroup(plasmid);
+                Plasmid newPlasmid = (Plasmid) entryController.createEntry(plasmid);
                 String plasmidPartNumberString = "[[jbei:"
                         + plasmid.getPartNumbers().toArray(new PartNumber[0])[0].getPartNumber()
                         + "]]";
                 strain.setPlasmids(plasmidPartNumberString);
-                entryController.createEntryAndAddReadGroup(strain);
-                entryController.createEntryAndAddReadGroup(newPlasmid);
+                entryController.createEntry(strain);
+                entryController.createEntry(newPlasmid);
                 setResponsePage(EntryViewPage.class, new PageParameters("0=" + newPlasmid.getId()));
             } catch (ControllerException e) {
                 throw new ViewException(e);

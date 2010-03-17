@@ -7,7 +7,6 @@ import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.controllers.ApplicationContoller;
 import org.jbei.ice.controllers.SampleController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
@@ -60,8 +59,6 @@ public class LocationItemViewPanel extends Panel {
                 location.getSample().getLocations().remove(location);
                 try {
                     sampleController.saveSample(location.getSample());
-                    ApplicationContoller.scheduleBlastIndexRebuildJob();
-                    ApplicationContoller.scheduleSearchIndexRebuildJob();
                 } catch (ControllerException e) {
                     throw new ViewException(e);
                 } catch (PermissionException e) {

@@ -266,7 +266,7 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
         EntryController entryController = new EntryController(IceSession.get().getAccount());
 
         try {
-            Entry newEntry = entryController.createEntryAndAddReadGroup(entry);
+            Entry newEntry = entryController.createEntry(entry);
 
             setResponsePage(EntryViewPage.class, new PageParameters("0=" + newEntry.getId()));
         } catch (ControllerException e) {
