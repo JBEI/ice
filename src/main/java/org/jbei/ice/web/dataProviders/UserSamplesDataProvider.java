@@ -2,15 +2,16 @@ package org.jbei.ice.web.dataProviders;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.controllers.SampleController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Sample;
-import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
 
 public class UserSamplesDataProvider extends SortableDataProvider<Sample> {
     private static final long serialVersionUID = 1L;
@@ -18,24 +19,28 @@ public class UserSamplesDataProvider extends SortableDataProvider<Sample> {
     private Account account;
     private ArrayList<Sample> samples = new ArrayList<Sample>();
 
+    private transient SampleController sampleController;
+
     public UserSamplesDataProvider(Account account) {
         super();
 
         this.account = account;
+
+        sampleController = new SampleController(IceSession.get().getAccount());
     }
 
     public Iterator<Sample> iterator(int first, int count) {
         samples.clear();
 
         try {
-            LinkedHashSet<Sample> results = AuthenticatedSampleManager.getByAccount(account, first,
-                    count);
+            ArrayList<Sample> results = sampleController.getSamplesByDepositor(account.getEmail(),
+                    first, count);
 
             for (Sample sample : results) {
                 samples.add(sample);
             }
-        } catch (Exception e) {
-            System.out.println(e.toString());
+        } catch (ControllerException e) {
+            throw new ViewException(e);
         }
 
         return samples.iterator();
@@ -46,11 +51,15 @@ public class UserSamplesDataProvider extends SortableDataProvider<Sample> {
     }
 
     public int size() {
+        int numberOfSamples = 0;
+
         try {
-            return AuthenticatedSampleManager.getByAccountCount(account);
-        } catch (ManagerException e) {
-            return 0;
+            numberOfSamples = sampleController.getNumberOfSamplesByDepositor(account.getEmail());
+        } catch (ControllerException e) {
+            throw new ViewException(e);
         }
+
+        return numberOfSamples;
     }
 
     public ArrayList<Sample> getSamples() {

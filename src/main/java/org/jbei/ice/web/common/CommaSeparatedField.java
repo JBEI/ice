@@ -19,8 +19,8 @@ import org.jbei.ice.lib.utils.Utils;
  * 
  */
 public class CommaSeparatedField<T> implements Serializable {
-
     private static final long serialVersionUID = 1L;
+
     protected ArrayList<T> items = null;
     protected Class<T> klass = null;
     protected String getterName = null;
@@ -48,7 +48,7 @@ public class CommaSeparatedField<T> implements Serializable {
      * @return Comma separated string
      * @throws FormException
      */
-    public String getString() throws FormException {
+    public String getString() throws ViewException {
         ArrayList<String> itemsAsString = new ArrayList<String>();
 
         for (T item : items) {
@@ -56,24 +56,17 @@ public class CommaSeparatedField<T> implements Serializable {
             try {
                 Method getMethod = item.getClass().getDeclaredMethod(getterName, new Class[] {});
                 itemsAsString.add((String) getMethod.invoke(item, (Object[]) null));
-
             } catch (SecurityException e) {
-                e.printStackTrace();
-                throw new FormException("Couldn't use getter in form");
+                throw new ViewException("Couldn't use getter in form");
             } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-                throw new FormException("Couldn't use getter in form");
+                throw new ViewException("Couldn't use getter in form");
             } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-                throw new FormException("Couldn't invoke getter in form");
+                throw new ViewException("Couldn't invoke getter in form");
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
-                throw new FormException("Couldn't invoke getter in form");
+                throw new ViewException("Couldn't invoke getter in form");
             } catch (InvocationTargetException e) {
-                e.printStackTrace();
-                throw new FormException("Couldn't invoke getter in form");
+                throw new ViewException("Couldn't invoke getter in form");
             }
-
         }
 
         String result = Utils.join(", ", itemsAsString);
@@ -88,7 +81,7 @@ public class CommaSeparatedField<T> implements Serializable {
      * @return ArrayList of objects with its property set
      * @throws FormException
      */
-    public ArrayList<T> setString(String string) throws FormException {
+    public ArrayList<T> setString(String string) throws ViewException {
         ArrayList<T> result = new ArrayList<T>();
         if (string == null) {
             return result;
@@ -107,36 +100,28 @@ public class CommaSeparatedField<T> implements Serializable {
                     result.add(instance);
 
                 } catch (InstantiationException e) {
-                    e.printStackTrace();
-                    throw new FormException("Couldn't instantiate class");
+                    throw new ViewException("Couldn't instantiate class");
                 } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                    throw new FormException("Couldn't instantiate class");
+                    throw new ViewException("Couldn't instantiate class");
                 } catch (SecurityException e) {
-                    e.printStackTrace();
-                    throw new FormException("Couldn't get setter in form");
+                    throw new ViewException("Couldn't get setter in form");
                 } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                    throw new FormException("Couldn't get setter in form");
+                    throw new ViewException("Couldn't get setter in form");
                 } catch (IllegalArgumentException e) {
-                    e.printStackTrace();
-                    throw new FormException("Couldn't invoke setter in form");
+                    throw new ViewException("Couldn't invoke setter in form");
                 } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                    throw new FormException("Couldn't invoke setter in form");
+                    throw new ViewException("Couldn't invoke setter in form");
                 }
             }
         }
+
         items = result;
         return result;
     }
 
     public HashSet<T> getItemsAsSet() {
         HashSet<T> result = new HashSet<T>(items);
+
         return result;
-    }
-
-    public static void main(String[] args) {
-
     }
 }

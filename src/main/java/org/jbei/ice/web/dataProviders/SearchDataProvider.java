@@ -6,8 +6,6 @@ import java.util.Iterator;
 import org.apache.wicket.markup.repeater.data.IDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.jbei.ice.lib.managers.EntryManager;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.search.lucene.SearchResult;
 
@@ -36,12 +34,8 @@ public class SearchDataProvider implements IDataProvider<SearchResult> {
 
         entries = new ArrayList<Entry>();
 
-        try {
-            for (int i = first; i < first + count; i++) {
-                entries.add(EntryManager.getByRecordId(searchResults.get(i).getRecordId()));
-            }
-        } catch (ManagerException e) {
-            e.printStackTrace();
+        for (int i = first; i < first + count; i++) {
+            entries.add(searchResults.get(i).getEntry());
         }
 
         return (Iterator<SearchResult>) searchResults.subList(first, first + count).iterator();

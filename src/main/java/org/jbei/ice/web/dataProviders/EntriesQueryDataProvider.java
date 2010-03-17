@@ -2,45 +2,46 @@ package org.jbei.ice.web.dataProviders;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 
-import org.apache.wicket.extensions.markup.html.repeater.util.SortParam;
+import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.query.Query;
-import org.jbei.ice.lib.query.SortField;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
 
 public class EntriesQueryDataProvider extends AbstractEntriesDataProvider {
     private static final long serialVersionUID = 1L;
 
     private ArrayList<String[]> queries;
+    private transient EntryController entryController;
 
     public EntriesQueryDataProvider(ArrayList<String[]> queries) {
         super();
 
         this.queries = queries;
+
+        entryController = new EntryController(IceSession.get().getAccount());
     }
 
     public int size() {
-        return Query.getInstance().queryCount(queries);
+        int numberOfQueryEntries = 0;
+
+        try {
+            numberOfQueryEntries = entryController.getNumberOfEntriesByQueries(queries);
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        }
+
+        return numberOfQueryEntries;
     }
 
     public Iterator<Entry> iterator(int first, int count) {
         entries.clear();
 
         try {
-            SortParam sp = getSort();
-
-            String field = getSortableField(sp.getProperty());
-
-            LinkedHashSet<Entry> results = (LinkedHashSet<Entry>) Query.getInstance().query(
-                    queries, first, count,
-                    new SortField[] { new SortField(field, sp.isAscending()) });
-
-            for (Entry entry : results) {
-                entries.add(entry);
-            }
-        } catch (Exception e) {
-            System.out.println(e.toString());
+            entries = entryController.getEntriesByQueries(queries, first, count);
+        } catch (ControllerException e) {
+            throw new ViewException(e);
         }
 
         return entries.iterator();

@@ -1,66 +1,41 @@
 package org.jbei.ice.web.dataProviders;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Set;
 
-import org.apache.wicket.extensions.markup.html.repeater.util.SortParam;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.EntryManager;
+import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.query.SortField;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
 
 public class EntriesDataProvider extends SortableDataProvider<Entry> {
     private static final long serialVersionUID = 1L;
 
-    private HashMap<String, String> sortableFieldsMap = new HashMap<String, String>();
-
     private ArrayList<Entry> entries = new ArrayList<Entry>();
+    private transient EntryController entryController;
 
     public EntriesDataProvider() {
         super();
 
-        sortableFieldsMap.put("id", "id");
-        sortableFieldsMap.put("type", "recordType");
-        sortableFieldsMap.put("created", "creationTime");
-        sortableFieldsMap.put("status", "status");
-        sortableFieldsMap.put("summary", "shortDescription");
-
-        setSort("id", true);
-    }
-
-    private String getSortableField(String key) {
-        String result = "";
-
-        result = sortableFieldsMap.get(key);
-
-        if (result == null) {
-            result = "id";
-        }
-
-        return result;
+        entryController = new EntryController(IceSession.get().getAccount());
     }
 
     public Iterator<? extends Entry> iterator(int first, int count) {
         entries.clear();
 
         try {
-            SortParam sp = getSort();
-
-            String field = getSortableField(sp.getProperty());
-
-            Set<Entry> results = EntryManager.getAllVisible(first, count,
-                    new SortField[] { new SortField(field, sp.isAscending()) });
+            ArrayList<Entry> results = entryController.getEntries(first, count, "creationTime",
+                    false);
 
             for (Entry entry : results) {
                 entries.add(entry);
             }
-        } catch (Exception e) {
-            Logger.error("EntriesDataProvider.iterator: " + e.toString(), e);
+        } catch (ControllerException e) {
+            throw new ViewException(e);
         }
 
         return entries.iterator();
@@ -71,7 +46,15 @@ public class EntriesDataProvider extends SortableDataProvider<Entry> {
     }
 
     public int size() {
-        return EntryManager.getNumberOfVisibleEntries();
+        int numberOfEntries = 0;
+
+        try {
+            numberOfEntries = entryController.getNumberOfVisibleEntries();
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        }
+
+        return numberOfEntries;
     }
 
     public ArrayList<Entry> getEntries() {
