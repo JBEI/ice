@@ -1,7 +1,5 @@
 package org.jbei.ice.lib.permissions;
 
-import java.io.Serializable;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -11,14 +9,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 
 @Entity
 @Table(name = "permission_read_users")
 @SequenceGenerator(name = "sequence", sequenceName = "permission_read_users_id_seq", allocationSize = 1)
-public class ReadUser implements Serializable {
-
+public class ReadUser implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -65,5 +63,4 @@ public class ReadUser implements Serializable {
     public void setAccount(Account readUser) {
         this.account = readUser;
     }
-
 }

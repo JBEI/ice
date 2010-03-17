@@ -6,54 +6,61 @@ import java.util.Set;
 
 import org.hibernate.Query;
 import org.hibernate.Transaction;
+import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.GroupManager;
-import org.jbei.ice.lib.managers.Manager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.web.IceSession;
 
-public class PermissionManager extends Manager {
+public class PermissionManager {
 
     // convenience method that wraps actual method
     public static boolean hasReadPermission(int entryId) {
+        return hasReadPermission(entryId, IceSession.get().getAccount());
+    }
+
+    public static boolean hasReadPermission(int entryId, String sessionKey) {
         boolean result = false;
-        Entry entry;
+
+        Account account = null;
         try {
-            entry = EntryManager.get(entryId);
-            if (entry != null) {
-                result = hasReadPermission(entry);
+            account = AccountManager.getAccountByAuthToken(sessionKey);
+
+            if (account != null) {
+                result = hasReadPermission(entryId, account)
+                        | groupHasReadPermission(entryId, account);
             }
         } catch (ManagerException e) {
             // if lookup fails, doesn't have permission
             String msg = "manager exception during permission lookup: " + e.toString();
             Logger.warn(msg);
         }
+
         return result;
     }
 
-    public static boolean hasReadPermission(int entryId, String sessionKey) {
+    public static boolean hasReadPermission(int entryId, Account account) {
         boolean result = false;
-        Entry entry;
 
-        Account account = AccountManager.getAccountByAuthToken(sessionKey);
-        if (account != null) {
-
+        if (entryId > 0 && account != null) {
             try {
-                entry = EntryManager.get(entryId);
-                if (entry != null) {
-                    result = hasReadPermission(entry, account);
+                if (AccountManager.isModerator(account)) {
+                    result = true;
+                } else {
+                    result = groupHasReadPermission(entryId, account)
+                            || userHasReadPermission(entryId, account);
                 }
             } catch (ManagerException e) {
-                // if lookup fails, doesn't have permission
-                String msg = "manager exception during permission lookup: " + e.toString();
-                Logger.warn(msg);
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
         }
+
         return result;
     }
 
@@ -78,44 +85,57 @@ public class PermissionManager extends Manager {
     public static boolean hasWritePermission(int entryId, String sessionKey) {
         boolean result = false;
         Entry entry;
-        Account account = AccountManager.getAccountByAuthToken(sessionKey);
-        if (account != null) {
-            try {
+        try {
+            Account account = AccountManager.getAccountByAuthToken(sessionKey);
+            if (account != null) {
                 entry = EntryManager.get(entryId);
                 if (entry != null) {
                     result = hasWritePermission(entry, account);
                 }
-            } catch (ManagerException e) {
-                String msg = "manager exception during permission lookup: " + e.toString();
-                Logger.warn(msg);
             }
+        } catch (ManagerException e) {
+            String msg = "manager exception during permission lookup: " + e.toString();
+            Logger.warn(msg);
         }
         return result;
     }
 
-    public static boolean hasReadPermission(Entry entry) {
+    public static boolean hasWritePermission(int entryId, Account account) {
         boolean result = false;
-        Account account;
-        account = IceSession.get().getAccount();
-        if (entry != null && account != null) {
-            if (AccountManager.isModerator(account)) {
-                result = true;
-            } else {
-                result = userHasReadPermission(entry, account)
-                        | groupHasReadPermission(entry, account);
+        Entry entry;
+
+        try {
+            entry = EntryManager.get(entryId);
+
+            if (entry != null) {
+                result = hasWritePermission(entry, account);
             }
+        } catch (ManagerException e) {
+            // if lookup fails, doesn't have permission
+            String msg = "manager exception during permission lookup: " + e.toString();
+            Logger.warn(msg);
         }
+
         return result;
+    }
+
+    public static boolean hasReadPermission(Entry entry) {
+        return hasReadPermission(entry, IceSession.get().getAccount());
     }
 
     public static boolean hasReadPermission(Entry entry, Account account) {
         boolean result = false;
         if (entry != null && account != null) {
-            if (AccountManager.isModerator(account)) {
-                result = true;
-            } else {
-                result = userHasReadPermission(entry, account)
-                        | groupHasReadPermission(entry, account);
+            try {
+                if (AccountManager.isModerator(account)) {
+                    result = true;
+                } else {
+                    result = userHasReadPermission(entry, account)
+                            | groupHasReadPermission(entry, account);
+                }
+            } catch (ManagerException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
         }
         return result;
@@ -128,11 +148,16 @@ public class PermissionManager extends Manager {
         account = IceSession.get().getAccount();
 
         if (entry != null && account != null) {
-            if (AccountManager.isModerator(account)) {
-                result = true;
-            } else {
-                result = userHasWritePermission(entry, account)
-                        | groupHasWritePermission(entry, account);
+            try {
+                if (AccountManager.isModerator(account)) {
+                    result = true;
+                } else {
+                    result = userHasWritePermission(entry, account)
+                            | groupHasWritePermission(entry, account);
+                }
+            } catch (ManagerException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
         }
         return result;
@@ -141,11 +166,16 @@ public class PermissionManager extends Manager {
     public static boolean hasWritePermission(Entry entry, Account account) {
         boolean result = false;
         if (entry != null && account != null) {
-            if (AccountManager.isModerator(account)) {
-                result = true;
-            } else {
-                result = userHasWritePermission(entry, account)
-                        | groupHasWritePermission(entry, account);
+            try {
+                if (AccountManager.isModerator(account)) {
+                    result = true;
+                } else {
+                    result = userHasWritePermission(entry, account)
+                            | groupHasWritePermission(entry, account);
+                }
+            } catch (ManagerException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
         }
         return result;
@@ -153,15 +183,15 @@ public class PermissionManager extends Manager {
 
     public static void setReadUser(Entry entry, Set<Account> accounts) throws ManagerException {
         String queryString = "delete  ReadUser readUser where readUser.entry = :entry";
-        Transaction tx = getSession().beginTransaction();
-        Query query = getSession().createQuery(queryString);
+        Transaction tx = DAO.getSession().beginTransaction();
+        Query query = DAO.getSession().createQuery(queryString);
         query.setEntity("entry", entry);
         query.executeUpdate();
         tx.commit();
         try {
             for (Account account : accounts) {
                 ReadUser readUser = new ReadUser(entry, account);
-                dbSave(readUser);
+                DAO.save(readUser);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -190,7 +220,7 @@ public class PermissionManager extends Manager {
         try {
             String queryString = "select readUser.account from ReadUser readUser where readUser.entry = :entry";
 
-            Query query = getSession().createQuery(queryString);
+            Query query = DAO.getSession().createQuery(queryString);
             query.setEntity("entry", entry);
 
             @SuppressWarnings("unchecked")
@@ -207,15 +237,15 @@ public class PermissionManager extends Manager {
 
     public static void setReadGroup(Entry entry, Set<Group> groups) throws ManagerException {
         String queryString = "delete  ReadGroup readGroup where readGroup.entry = :entry";
-        Transaction tx = getSession().beginTransaction();
-        Query query = getSession().createQuery(queryString);
+        Transaction tx = DAO.getSession().beginTransaction();
+        Query query = DAO.getSession().createQuery(queryString);
         query.setEntity("entry", entry);
         query.executeUpdate();
         tx.commit();
         try {
             for (Group group : groups) {
                 ReadGroup readGroup = new ReadGroup(entry, group);
-                dbSave(readGroup);
+                DAO.save(readGroup);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -243,7 +273,7 @@ public class PermissionManager extends Manager {
     public static Set<Group> getReadGroup(Entry entry) throws ManagerException {
         try {
             String queryString = "select readGroup.group from ReadGroup readGroup where readGroup.entry = :entry";
-            Query query = getSession().createQuery(queryString);
+            Query query = DAO.getSession().createQuery(queryString);
             query.setEntity("entry", entry);
 
             @SuppressWarnings("unchecked")
@@ -260,15 +290,15 @@ public class PermissionManager extends Manager {
 
     public static void setWriteUser(Entry entry, Set<Account> accounts) throws ManagerException {
         String queryString = "delete  WriteUser writeUser where writeUser.entry = :entry";
-        Transaction tx = getSession().beginTransaction();
-        Query query = getSession().createQuery(queryString);
+        Transaction tx = DAO.getSession().beginTransaction();
+        Query query = DAO.getSession().createQuery(queryString);
         query.setEntity("entry", entry);
         query.executeUpdate();
         tx.commit();
         try {
             for (Account account : accounts) {
                 WriteUser writeUser = new WriteUser(entry, account);
-                dbSave(writeUser);
+                DAO.save(writeUser);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -296,7 +326,7 @@ public class PermissionManager extends Manager {
     public static Set<Account> getWriteUser(Entry entry) throws ManagerException {
         try {
             String queryString = "select writeUser.account from WriteUser writeUser where writeUser.entry = :entry";
-            Query query = getSession().createQuery(queryString);
+            Query query = DAO.getSession().createQuery(queryString);
             query.setEntity("entry", entry);
 
             @SuppressWarnings("unchecked")
@@ -313,15 +343,15 @@ public class PermissionManager extends Manager {
 
     public static void setWriteGroup(Entry entry, Set<Group> groups) throws ManagerException {
         String queryString = "delete  WriteGroup writeGroup where writeGroup.entry = :entry";
-        Transaction tx = getSession().beginTransaction();
-        Query query = getSession().createQuery(queryString);
+        Transaction tx = DAO.getSession().beginTransaction();
+        Query query = DAO.getSession().createQuery(queryString);
         query.setEntity("entry", entry);
         query.executeUpdate();
         tx.commit();
         try {
             for (Group group : groups) {
                 WriteGroup writeGroup = new WriteGroup(entry, group);
-                dbSave(writeGroup);
+                DAO.save(writeGroup);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -350,7 +380,7 @@ public class PermissionManager extends Manager {
         try {
             String queryString = "select writeGroup.group from WriteGroup writeGroup where writeGroup.entry = :entry";
 
-            Query query = getSession().createQuery(queryString);
+            Query query = DAO.getSession().createQuery(queryString);
             query.setEntity("entry", entry);
 
             @SuppressWarnings("unchecked")
@@ -368,7 +398,7 @@ public class PermissionManager extends Manager {
     protected static boolean userHasReadPermission(Entry entry, Account account) {
         boolean result = false;
         String queryString = "select readUser.account.id from ReadUser as readUser where readUser.entry = :entry";
-        Query query = getSession().createQuery(queryString);
+        Query query = DAO.getSession().createQuery(queryString);
         query.setEntity("entry", entry);
 
         @SuppressWarnings("unchecked")
@@ -381,12 +411,41 @@ public class PermissionManager extends Manager {
         return result;
     }
 
+    @SuppressWarnings("unchecked")
+    protected static boolean userHasReadPermission(int entryId, Account account) {
+        boolean result = false;
+
+        String queryString1 = "select count(id) from Entry as entry where entry.ownerEmail = '"
+                + account.getEmail() + "' AND " + " entry.id = " + entryId;
+        Query query1 = DAO.getSession().createQuery(queryString1);
+
+        Long numberOfEntries = (Long) query1.uniqueResult();
+
+        if (numberOfEntries > 0) {
+            result = true;
+        }
+
+        if (!result) {
+            String queryString2 = "select readUser.account.id from ReadUser as readUser where readUser.entry.id = "
+                    + entryId;
+            Query query2 = DAO.getSession().createQuery(queryString2);
+            //query.setEntity("entryId", entryId);
+
+            List<Integer> accounts = query2.list();
+            if (accounts.contains(account.getId())) {
+                result = true;
+            }
+        }
+
+        return result;
+    }
+
     protected static boolean userHasWritePermission(Entry entry, Account account) {
         boolean result = false;
         String queryString = "select writeUser.account.id from WriteUser as writeUser where writeUser.entry = :entry";
         Query query = null;
         try {
-            query = getSession().createQuery(queryString);
+            query = DAO.getSession().createQuery(queryString);
         } catch (Exception e) {
             Logger.warn(e.toString());
         }
@@ -407,8 +466,28 @@ public class PermissionManager extends Manager {
     protected static boolean groupHasReadPermission(Entry entry, Account account) {
         boolean result = false;
         String queryString = "select readGroup.group.id from ReadGroup as readGroup where readGroup.entry = :entry";
-        Query query = getSession().createQuery(queryString);
+        Query query = DAO.getSession().createQuery(queryString);
         query.setEntity("entry", entry);
+
+        @SuppressWarnings("unchecked")
+        List<Integer> readGroups = query.list();
+
+        Set<Integer> accountGroups = getAllAccountGroups(account);
+
+        accountGroups.retainAll(new HashSet<Integer>(readGroups));
+        if (accountGroups.size() > 0) {
+            result = true;
+        }
+
+        return result;
+    }
+
+    protected static boolean groupHasReadPermission(int entryId, Account account) {
+        boolean result = false;
+
+        String queryString = "select readGroup.group.id from ReadGroup as readGroup where readGroup.entry.id = "
+                + entryId;
+        Query query = DAO.getSession().createQuery(queryString);
 
         @SuppressWarnings("unchecked")
         List<Integer> readGroups = query.list();
@@ -426,7 +505,7 @@ public class PermissionManager extends Manager {
     protected static boolean groupHasWritePermission(Entry entry, Account account) {
         boolean result = false;
         String queryString = "select writeGroup.group.id from WriteGroup as writeGroup where writeGroup.entry = :entry";
-        Query query = getSession().createQuery(queryString);
+        Query query = DAO.getSession().createQuery(queryString);
         query.setEntity("entry", entry);
 
         @SuppressWarnings("unchecked")
