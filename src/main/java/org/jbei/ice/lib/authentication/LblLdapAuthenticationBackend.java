@@ -3,45 +3,44 @@ package org.jbei.ice.lib.authentication;
 import java.io.Serializable;
 import java.util.Calendar;
 
-import javax.naming.NamingException;
-
 import org.apache.wicket.protocol.http.request.WebClientInfo;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.AccountManager;
+import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.utils.LblLdapAuth;
+import org.jbei.ice.lib.utils.LblLdapAuthenticationWrapper;
+import org.jbei.ice.lib.utils.LblLdapAuthenticationWrapper.LblLdapAuthenticationWrapperException;
 import org.jbei.ice.web.IceSession;
 
 public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Serializable {
     private static final long serialVersionUID = 1L;
 
-    public Account authenticate(String loginId, String password) {
-        Account account = null;
-        LblLdapAuth l = null;
-
-        try {
-            l = new LblLdapAuth();
-        } catch (NamingException e1) {
-            Logger.debug("Could not initialize ldap auth");
+    public Account authenticate(String loginId, String password)
+            throws AuthenticationBackendException, InvalidCredentialsException {
+        if (loginId == null || password == null) {
+            throw new InvalidCredentialsException("Login and Password are mandatory!");
         }
 
+        Account account = null;
+
         try {
+            LblLdapAuthenticationWrapper lblLdapAuthenticationWrapper = new LblLdapAuthenticationWrapper();
+
             loginId = loginId.toLowerCase();
-            if (l == null) {
-                throw new Exception("Could not initialize ldap auth object");
-            } else if (l.isWikiUser(loginId)) {
-                l.authenticate(loginId, password);
-                account = AccountManager.getByEmail(loginId + "@lbl.gov");
+
+            if (lblLdapAuthenticationWrapper.isWikiUser(loginId)) {
+                lblLdapAuthenticationWrapper.authenticate(loginId, password);
+
+                account = AccountController.getByEmail(loginId + "@lbl.gov");
 
                 if (account == null) {
                     account = new Account();
                 }
 
-                account.setEmail(l.geteMail());
-                account.setFirstName(l.getGivenName());
-                account.setLastName(l.getSirName());
-                account.setInstitution(l.getOrg());
-                account.setDescription(l.getDescription());
+                account.setEmail(lblLdapAuthenticationWrapper.geteMail());
+                account.setFirstName(lblLdapAuthenticationWrapper.getGivenName());
+                account.setLastName(lblLdapAuthenticationWrapper.getSirName());
+                account.setInstitution(lblLdapAuthenticationWrapper.getOrg());
+                account.setDescription(lblLdapAuthenticationWrapper.getDescription());
                 account.setPassword("");
                 account.setIsSubscribed(1);
                 account.setInitials("");
@@ -53,16 +52,17 @@ public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Ser
 
                 account.setLastLoginTime(Calendar.getInstance().getTime());
 
-                AccountManager.save(account);
-
-                Logger.info("User " + loginId + " authenticated via lbl-ldap.");
+                AccountController.save(account);
             } else {
                 // try local backend
                 LocalBackend localBackend = new LocalBackend();
                 account = localBackend.authenticate(loginId, password);
             }
-        } catch (Exception e) {
-            Logger.warn("LDAP authentication failed for " + loginId + " with " + e.toString());
+        } catch (LblLdapAuthenticationWrapperException e) {
+            throw new AuthenticationBackendException("LBL LDAP authentication wrapper failed for "
+                    + loginId, e);
+        } catch (ControllerException e) {
+            throw new AuthenticationBackendException("LDAP authentication failed for " + loginId, e);
         }
 
         return account;

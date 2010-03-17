@@ -1,7 +1,8 @@
 package org.jbei.ice.lib.authentication;
 
-import org.jbei.ice.lib.managers.AccountManager;
-import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 
 public class LocalBackend implements IAuthenticationBackend {
@@ -9,14 +10,14 @@ public class LocalBackend implements IAuthenticationBackend {
         Account account = null;
 
         try {
-            account = AccountManager.getByEmail(userId);
+            account = AccountController.getByEmail(userId);
 
-            if ((account == null)
-                    || (!account.getPassword().equals(AccountManager.encryptPassword(password)))) {
+            if ((account == null) || (!AccountController.isValidPassword(account, password))) {
                 return null;
             }
-        } catch (ManagerException e) {
-            e.printStackTrace();
+        } catch (ControllerException e) {
+            // TODO: (Zinovii) Throw AuthenticationFailedException
+            Logger.error("Authentication failed!", e);
         }
 
         return account;
