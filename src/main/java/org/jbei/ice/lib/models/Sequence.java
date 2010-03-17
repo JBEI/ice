@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.models;
 
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,12 +19,13 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Cascade;
-import org.jbei.ice.lib.value_objects.ISequenceValueObject;
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.vo.ISequenceValueObject;
 
 @Entity
 @Table(name = "sequences")
 @SequenceGenerator(name = "sequence", sequenceName = "sequences_id_seq", allocationSize = 1)
-public class Sequence implements ISequenceValueObject, Serializable {
+public class Sequence implements ISequenceValueObject, IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -47,7 +47,7 @@ public class Sequence implements ISequenceValueObject, Serializable {
     private String revHash;
 
     @OneToOne
-    @JoinColumn(name = "entries_id", nullable = false)
+    @JoinColumn(name = "entries_id", nullable = false, unique = true)
     private Entry entry;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "sequence")

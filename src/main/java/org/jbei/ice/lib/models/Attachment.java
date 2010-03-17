@@ -1,7 +1,5 @@
 package org.jbei.ice.lib.models;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -12,15 +10,14 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
-import org.jbei.ice.lib.utils.Base64String;
-import org.jbei.ice.lib.value_objects.IAttachmentValueObject;
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.vo.IAttachmentValueObject;
 
 @Entity
 @Table(name = "attachments")
 @SequenceGenerator(name = "sequence", sequenceName = "attachments_id_seq", allocationSize = 1)
-public class Attachment implements IAttachmentValueObject, Serializable {
+public class Attachment implements IAttachmentValueObject, IModel {
 
     private static final long serialVersionUID = 1L;
 
@@ -42,9 +39,6 @@ public class Attachment implements IAttachmentValueObject, Serializable {
     @JoinColumn(name = "entries_id", nullable = false)
     private Entry entry;
 
-    @Transient
-    private Base64String data; //data is persisted base64 encoded string as a file on disk, not in db. 
-
     public Attachment() {
     }
 
@@ -60,11 +54,10 @@ public class Attachment implements IAttachmentValueObject, Serializable {
      * @param data
      *            base64 encoded string
      */
-    public Attachment(String description, String fileName, Entry entry, Base64String data) {
+    public Attachment(String description, String fileName, Entry entry) {
         this.description = description;
         this.fileName = fileName;
         this.entry = entry;
-        this.data = data;
     }
 
     public int getId() {
@@ -106,13 +99,4 @@ public class Attachment implements IAttachmentValueObject, Serializable {
     public void setEntry(Entry entry) {
         this.entry = entry;
     }
-
-    public void setData(Base64String data) {
-        this.data = data;
-    }
-
-    public Base64String getData() {
-        return data;
-    }
-
 }

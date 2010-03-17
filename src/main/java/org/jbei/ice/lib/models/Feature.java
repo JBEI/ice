@@ -1,7 +1,5 @@
 package org.jbei.ice.lib.models;
 
-import java.io.Serializable;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,12 +11,13 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Cascade;
-import org.jbei.ice.lib.value_objects.IFeatureValueObject;
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.vo.IFeatureValueObject;
 
 @Entity
 @Table(name = "features")
 @SequenceGenerator(name = "sequence", sequenceName = "features_id_seq", allocationSize = 1)
-public class Feature implements IFeatureValueObject, Serializable {
+public class Feature implements IFeatureValueObject, IModel {
     private static final long serialVersionUID = 1L;
 
     @Id

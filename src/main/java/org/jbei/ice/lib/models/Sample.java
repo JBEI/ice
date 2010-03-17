@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.models;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -23,12 +22,13 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.Cascade;
-import org.jbei.ice.lib.value_objects.ISampleValueObject;
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.vo.ISampleValueObject;
 
 @Entity
 @Table(name = "samples")
 @SequenceGenerator(name = "sequence", sequenceName = "samples_id_seq", allocationSize = 1)
-public class Sample implements ISampleValueObject, Serializable {
+public class Sample implements ISampleValueObject, IModel {
 
     private static final long serialVersionUID = 1L;
 

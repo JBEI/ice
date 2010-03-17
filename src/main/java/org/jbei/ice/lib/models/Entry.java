@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.models;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -28,14 +27,15 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.Cascade;
+import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.utils.JbeiConstants;
-import org.jbei.ice.lib.value_objects.IEntryValueObject;
+import org.jbei.ice.lib.vo.IEntryValueObject;
 
 @Entity
 @Table(name = "entries")
 @SequenceGenerator(name = "sequence", sequenceName = "entries_id_seq", allocationSize = 1)
 @Inheritance(strategy = InheritanceType.JOINED)
-public class Entry implements IEntryValueObject, Serializable {
+public class Entry implements IEntryValueObject, IModel {
     private static final long serialVersionUID = 1L;
 
     @Id

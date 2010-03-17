@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.models;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -10,12 +9,13 @@ import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
-import org.jbei.ice.lib.value_objects.IPartValueObject;
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.vo.IPartValueObject;
 
 @Entity
 @PrimaryKeyJoinColumn(name = "entries_id")
 @Table(name = "parts")
-public class Part extends Entry implements IPartValueObject, Serializable {
+public class Part extends Entry implements IPartValueObject, IModel {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "package_format", length = 255)

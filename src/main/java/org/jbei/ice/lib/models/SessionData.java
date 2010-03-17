@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.models;
 
-import java.io.Serializable;
 import java.util.Calendar;
 import java.util.HashMap;
 
@@ -9,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.utils.Utils;
 
 /**
@@ -25,7 +25,7 @@ import org.jbei.ice.lib.utils.Utils;
  */
 @Entity
 @Table(name = "session_data")
-public class SessionData implements Serializable {
+public class SessionData implements IModel {
 
     private static final long serialVersionUID = 1L;
     private static Long DEFAULT_EXPIRATION = 259200000L; // 3 days = 259200000 ms

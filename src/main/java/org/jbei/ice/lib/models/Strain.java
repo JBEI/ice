@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.models;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -8,12 +7,13 @@ import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
-import org.jbei.ice.lib.value_objects.IStrainValueObject;
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.vo.IStrainValueObject;
 
 @Entity
 @PrimaryKeyJoinColumn(name = "entries_id")
 @Table(name = "strains")
-public class Strain extends Entry implements IStrainValueObject, Serializable {
+public class Strain extends Entry implements IStrainValueObject, IModel {
 
     private static final long serialVersionUID = 1L;
 

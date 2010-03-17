@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.models;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -8,12 +7,13 @@ import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
-import org.jbei.ice.lib.value_objects.IPlasmidValueObject;
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.vo.IPlasmidValueObject;
 
 @Entity
 @PrimaryKeyJoinColumn(name = "entries_id")
 @Table(name = "plasmids")
-public class Plasmid extends Entry implements IPlasmidValueObject, Serializable {
+public class Plasmid extends Entry implements IPlasmidValueObject, IModel {
 
     private static final long serialVersionUID = 1L;
 

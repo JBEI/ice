@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.models;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -16,12 +15,13 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.jbei.ice.lib.value_objects.ILocationValueObject;
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.vo.ILocationValueObject;
 
 @Entity
 @Table(name = "locations")
 @SequenceGenerator(name = "sequence", sequenceName = "locations_id_seq", allocationSize = 1)
-public class Location implements ILocationValueObject, Serializable {
+public class Location implements ILocationValueObject, IModel {
     private static final long serialVersionUID = 1L;
 
     @Id

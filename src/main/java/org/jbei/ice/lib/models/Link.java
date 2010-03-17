@@ -1,7 +1,5 @@
 package org.jbei.ice.lib.models;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -12,12 +10,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import org.jbei.ice.lib.value_objects.ILinkValueObject;
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.vo.ILinkValueObject;
 
 @Entity
 @Table(name = "links")
 @SequenceGenerator(name = "sequence", sequenceName = "links_id_seq", allocationSize = 1)
-public class Link implements ILinkValueObject, Serializable {
+public class Link implements ILinkValueObject, IModel {
     /**
 	 * 
 	 */

@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.models;
 
-import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -17,10 +16,12 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.jbei.ice.lib.dao.IModel;
+
 @Entity
 @Table(name = "votes")
 @SequenceGenerator(name = "sequence", sequenceName = "votes_id_seq", allocationSize = 1)
-public class Vote implements Serializable {
+public class Vote implements IModel {
 
     private static final long serialVersionUID = 1L;
 

@@ -1,7 +1,5 @@
 package org.jbei.ice.lib.models;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -12,12 +10,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import org.jbei.ice.lib.value_objects.IPartNumberValueObject;
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.vo.IPartNumberValueObject;
 
 @Entity
 @Table(name = "part_numbers")
 @SequenceGenerator(name = "sequence", sequenceName = "part_numbers_id_seq", allocationSize = 1)
-public class PartNumber implements IPartNumberValueObject, Serializable {
+public class PartNumber implements IPartNumberValueObject, IModel {
     /**
 	 * 
 	 */

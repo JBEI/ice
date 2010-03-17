@@ -1,7 +1,5 @@
 package org.jbei.ice.lib.models;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,10 +8,12 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.jbei.ice.lib.dao.IModel;
+
 @Entity
 @Table(name = "assembly_relationship")
 @SequenceGenerator(name = "sequence", sequenceName = "assembly_relationship_id_seq", allocationSize = 1)
-public class AssemblyRelationship implements Serializable {
+public class AssemblyRelationship implements IModel {
 
     private static final long serialVersionUID = 1L;
 

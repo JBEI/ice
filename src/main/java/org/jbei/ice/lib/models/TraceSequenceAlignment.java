@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.models;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -16,10 +15,12 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.jbei.ice.lib.dao.IModel;
+
 @Entity
 @Table(name = "trace_sequence_alignments")
 @SequenceGenerator(name = "sequence", sequenceName = "trace_sequence_alignments_id_seq", allocationSize = 1)
-public class TraceSequenceAlignment implements Serializable {
+public class TraceSequenceAlignment implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id

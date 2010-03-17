@@ -1,7 +1,5 @@
 package org.jbei.ice.lib.models;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,10 +11,12 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.jbei.ice.lib.dao.IModel;
+
 @Entity
 @Table(name = "feature_dna")
 @SequenceGenerator(name = "sequence", sequenceName = "feature_dna_id_seq", allocationSize = 1)
-public class FeatureDNA implements Serializable {
+public class FeatureDNA implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id

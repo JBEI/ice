@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.models;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -14,10 +13,12 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.jbei.ice.lib.dao.IModel;
+
 @Entity
 @Table(name = "news")
 @SequenceGenerator(name = "sequence", sequenceName = "news_id_seq", allocationSize = 1)
-public class News implements Serializable {
+public class News implements IModel {
     private static final long serialVersionUID = 1L;
 
     @Id
