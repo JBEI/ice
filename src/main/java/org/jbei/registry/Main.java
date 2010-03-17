@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
-import org.jbei.ice.lib.managers.HibernateHelper;
+import org.jbei.ice.lib.dao.HibernateHelper;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.PartNumber;
