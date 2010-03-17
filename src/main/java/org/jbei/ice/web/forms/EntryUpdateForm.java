@@ -3,17 +3,16 @@ package org.jbei.ice.web.forms;
 import java.util.Set;
 
 import org.apache.wicket.PageParameters;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.EntryManager;
-import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.controllers.ApplicationContoller;
+import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
-import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.permissions.PermissionManager;
-import org.jbei.ice.lib.utils.Job;
-import org.jbei.ice.lib.utils.JobCue;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class EntryUpdateForm<T extends Entry> extends EntrySubmitForm<T> {
@@ -21,6 +20,15 @@ public class EntryUpdateForm<T extends Entry> extends EntrySubmitForm<T> {
 
     public EntryUpdateForm(String id, T entry) {
         super(id);
+
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
+        try {
+            if (!entryController.hasWritePermission(entry)) {
+                throw new ViewPermissionException("No write permissions for this entry!");
+            }
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        }
 
         setEntry(entry);
 
@@ -63,33 +71,27 @@ public class EntryUpdateForm<T extends Entry> extends EntrySubmitForm<T> {
 
     @Override
     protected void submitEntry() {
-        Entry entry = getEntry();
-        if (PermissionManager.hasWritePermission(entry.getId())) {
-            try {
-                AuthenticatedEntryManager.save(entry);
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
 
-                JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
-                JobCue.getInstance().addJob(Job.REBUILD_SEARCH_INDEX);
+        Entry entry = getEntry();
+        try {
+            if (entryController.hasWritePermission(entry)) {
+                entryController.save(entry);
+
+                ApplicationContoller.scheduleBlastIndexRebuildJob();
+                ApplicationContoller.scheduleSearchIndexRebuildJob();
 
                 setResponsePage(EntryViewPage.class, new PageParameters("0=" + entry.getId()));
-            } catch (ManagerException e) {
-                String msg = "System Error: Could not save! ";
-                Logger.error(msg + e.getMessage(), e);
-                error(msg);
-                e.printStackTrace();
-            } catch (PermissionException e) {
-                error(e.getMessage());
-            }
-        } else {
-            try {
-                EntryManager.save(entry);
+            } else {
+                // TODO: Double check what is going on here
+                // entryController.saveAndUpdateIndexes(entry);
+
                 info("Save as admin successful!");
-            } catch (ManagerException e) {
-                String msg = "System Error: Could not save! ";
-                Logger.error(msg + e.getMessage(), e);
-                error(msg);
-                e.printStackTrace();
             }
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        } catch (PermissionException e) {
+            throw new ViewPermissionException("No permissions to save entry!", e);
         }
     }
 }

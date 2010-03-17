@@ -12,6 +12,7 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
+import org.jbei.ice.controllers.BlastController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.TraceSequenceManager;
@@ -20,11 +21,7 @@ import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.models.TraceSequenceAlignment;
 import org.jbei.ice.lib.parsers.GeneralParser;
-import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqException;
-import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqParser;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqResult;
-import org.jbei.ice.lib.search.blast.Blast;
-import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryViewPage;
@@ -117,31 +114,15 @@ public class TraceFileNewFormPanel extends Panel {
                 return;
             }
 
-            Blast blast = new Blast();
-            String bl2seqAlignment = null;
+            ArrayList<Bl2SeqResult> bl2seqAlignments = null;
             try {
-                bl2seqAlignment = blast.runBl2Seq(entry.getSequence().getSequence(), sequence
-                        .getSequence());
-            } catch (BlastException e) {
-                Logger.error("bl2seq failed on trace file submit", e);
-
-                return;
+                bl2seqAlignments = BlastController.alignSequencesAndParse(entry.getSequence()
+                        .getSequence(), sequence.getSequence());
             } catch (ProgramTookTooLongException e) {
-                Logger.error("bl2seq failed on trace file submit", e);
-
-                return;
+                Logger.error("Prgoram took to long to align and parse sequences", e);
             }
 
-            ArrayList<Bl2SeqResult> bl2seqAlignments;
-            try {
-                bl2seqAlignments = Bl2SeqParser.parse(bl2seqAlignment);
-            } catch (Bl2SeqException e) {
-                Logger.error("bl2seq parser failed on trace file submit", e);
-
-                return;
-            }
-
-            if (bl2seqAlignments.size() > 0) {
+            if (bl2seqAlignments != null && bl2seqAlignments.size() > 0) {
                 Bl2SeqResult maxBl2SeqResult = null;
                 int maxScore = -1;
                 for (Bl2SeqResult bl2SeqResult : bl2seqAlignments) {

@@ -10,16 +10,16 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
-import org.jbei.ice.lib.managers.EntryManager;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SequenceManager;
+import org.biojava.utils.ParserException;
+import org.jbei.ice.controllers.SequenceController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.parsers.GeneralParser;
-import org.jbei.ice.lib.utils.Job;
-import org.jbei.ice.lib.utils.JobCue;
+import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.panels.SequenceViewPanel;
 
 public class SequenceUpdateFormPanel extends Panel {
@@ -81,45 +81,32 @@ public class SequenceUpdateFormPanel extends Panel {
                 sequenceUser = new String(fileUpload.getBytes());
             }
 
-            Sequence sequence = GeneralParser.getInstance().parse(sequenceUser);
+            SequenceController sequenceController = new SequenceController(IceSession.get()
+                    .getAccount());
 
-            if (sequence == null) {
-                error("Couldn't parse sequence file! Supported formats: "
-                        + GeneralParser.getInstance().availableParsersToString() + ".");
-
-                return;
-            }
-
-            sequence.setEntry(entry);
+            Sequence newSequence = null;
 
             try {
-                Sequence currentSequence = entry.getSequence();
-                entry.setSequence(null);
-
-                SequenceManager.delete(currentSequence);
-
-                if (sequence.getSequenceFeatures() != null) {
-                    for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
-                        Feature feature = sequenceFeature.getFeature();
-
-                        Feature saveResultFeature = SequenceManager.save(feature);
-
-                        if (saveResultFeature != feature) {
-                            sequenceFeature.setFeature(saveResultFeature);
-                        }
-                    }
-                }
-
-                entry.setSequence(sequence);
-                EntryManager.save(entry);
-                JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
-            } catch (ManagerException e) {
-                e.printStackTrace();
+                newSequence = sequenceController.parse(sequenceUser);
+            } catch (ParserException e) {
+                error("Couldn't parse sequence file! Supported formats: "
+                        + GeneralParser.getInstance().availableParsersToString() + ".");
+                error("If you are using ApE, try opening and re-saving using a recent version.");
 
                 return;
             }
 
-            sequenceViewPanel.updateView(sequence);
+            try {
+                newSequence.setEntry(entry);
+
+                sequenceController.update(newSequence);
+            } catch (ControllerException e) {
+                throw new ViewException(e);
+            } catch (PermissionException e) {
+                throw new ViewPermissionException("No permissions to update sequence!", e);
+            }
+
+            sequenceViewPanel.updateView(newSequence);
         }
 
         public String getSequenceUser() {

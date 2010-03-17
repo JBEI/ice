@@ -25,9 +25,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.collections.MiniMap;
 import org.apache.wicket.util.template.TextTemplateHeaderContributor;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.GroupManager;
-import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
@@ -38,13 +37,11 @@ import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Strain;
-import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
-import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.CommaSeparatedField;
 import org.jbei.ice.web.common.CustomChoice;
-import org.jbei.ice.web.common.FormException;
+import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.UnprotectedPage;
 
@@ -284,22 +281,19 @@ public class PlasmidStrainNewFormPanel extends Panel {
             Plasmid plasmid = new Plasmid();
 
             // plasmid form processing
-            try {
-                CommaSeparatedField<Link> linksField = new CommaSeparatedField<Link>(Link.class,
-                        "getLink", "setLink");
-                linksField.setString(getPlasmidLinks());
-                plasmid.setLinks(linksField.getItemsAsSet());
-                CommaSeparatedField<Name> namesField = new CommaSeparatedField<Name>(Name.class,
-                        "getName", "setName");
-                namesField.setString(getPlasmidNames());
-                plasmid.setNames(namesField.getItemsAsSet());
-                CommaSeparatedField<SelectionMarker> selectionMarkersField = new CommaSeparatedField<SelectionMarker>(
-                        SelectionMarker.class, "getName", "setName");
-                selectionMarkersField.setString(getPlasmidSelectionMarkers());
-                plasmid.setSelectionMarkers(selectionMarkersField.getItemsAsSet());
-            } catch (FormException e) {
-                e.printStackTrace();
-            }
+            CommaSeparatedField<Link> linksField = new CommaSeparatedField<Link>(Link.class,
+                    "getLink", "setLink");
+            linksField.setString(getPlasmidLinks());
+            plasmid.setLinks(linksField.getItemsAsSet());
+            CommaSeparatedField<Name> namesField = new CommaSeparatedField<Name>(Name.class,
+                    "getName", "setName");
+            namesField.setString(getPlasmidNames());
+            plasmid.setNames(namesField.getItemsAsSet());
+            CommaSeparatedField<SelectionMarker> selectionMarkersField = new CommaSeparatedField<SelectionMarker>(
+                    SelectionMarker.class, "getName", "setName");
+            selectionMarkersField.setString(getPlasmidSelectionMarkers());
+            plasmid.setSelectionMarkers(selectionMarkersField.getItemsAsSet());
+
             plasmid.setCreator(getPlasmidCreator());
             plasmid.setCreatorEmail(getPlasmidCreatorEmail());
             plasmid.setOwner(IceSession.get().getAccount().getFirstName() + " "
@@ -321,7 +315,7 @@ public class PlasmidStrainNewFormPanel extends Panel {
             EntryFundingSource newPlasmidFundingSource = new EntryFundingSource();
             newPlasmidFundingSource.setEntry(plasmid);
             newPlasmidFundingSource.setFundingSource(fundingSource);
-            // TODO: Handle multiple funding sources
+            // TODO: Tim; Handle multiple funding sources
             LinkedHashSet<EntryFundingSource> plasmidFundingSources = new LinkedHashSet<EntryFundingSource>();
             plasmidFundingSources.add(newPlasmidFundingSource);
             plasmid.setEntryFundingSources(plasmidFundingSources);
@@ -331,22 +325,21 @@ public class PlasmidStrainNewFormPanel extends Panel {
             plasmid.setCircular(getPlasmidCircular());
 
             // simplified strain form processing
-            try {
-                CommaSeparatedField<Link> linksField = new CommaSeparatedField<Link>(Link.class,
-                        "getLink", "setLink");
-                linksField.setString(getStrainLinks());
-                strain.setLinks(linksField.getItemsAsSet());
-                CommaSeparatedField<Name> namesField = new CommaSeparatedField<Name>(Name.class,
-                        "getName", "setName");
-                namesField.setString(getStrainNames());
-                strain.setNames(namesField.getItemsAsSet());
-                CommaSeparatedField<SelectionMarker> selectionMarkersField = new CommaSeparatedField<SelectionMarker>(
-                        SelectionMarker.class, "getName", "setName");
-                selectionMarkersField.setString(getStrainSelectionMarkers());
-                strain.setSelectionMarkers(selectionMarkersField.getItemsAsSet());
-            } catch (FormException e) {
-                e.printStackTrace();
-            }
+            CommaSeparatedField<Link> linksField2 = new CommaSeparatedField<Link>(Link.class,
+                    "getLink", "setLink");
+            linksField2.setString(getStrainLinks());
+            strain.setLinks(linksField2.getItemsAsSet());
+
+            CommaSeparatedField<Name> namesField2 = new CommaSeparatedField<Name>(Name.class,
+                    "getName", "setName");
+            namesField2.setString(getStrainNames());
+            strain.setNames(namesField2.getItemsAsSet());
+
+            CommaSeparatedField<SelectionMarker> selectionMarkersField2 = new CommaSeparatedField<SelectionMarker>(
+                    SelectionMarker.class, "getName", "setName");
+            selectionMarkersField2.setString(getStrainSelectionMarkers());
+            strain.setSelectionMarkers(selectionMarkersField2.getItemsAsSet());
+
             strain.setCreator(getPlasmidCreator());
             strain.setCreatorEmail(getPlasmidCreatorEmail());
             strain.setOwner(IceSession.get().getAccount().getFirstName() + " "
@@ -363,7 +356,7 @@ public class PlasmidStrainNewFormPanel extends Panel {
             EntryFundingSource newStrainFundingSource = new EntryFundingSource();
             newStrainFundingSource.setEntry(strain);
             newStrainFundingSource.setFundingSource(fundingSource);
-            // TODO: Handle multiple funding sources
+            // TODO: Tim; Handle multiple funding sources
             LinkedHashSet<EntryFundingSource> strainFundingSources = new LinkedHashSet<EntryFundingSource>();
             strainFundingSources.add(newStrainFundingSource);
             strain.setEntryFundingSources(strainFundingSources);
@@ -373,22 +366,20 @@ public class PlasmidStrainNewFormPanel extends Panel {
             String plasmidNameString = plasmidTempNames[0].getName();
             strain.setPlasmids(plasmidNameString);
 
+            EntryController entryController = new EntryController(IceSession.get().getAccount());
+
             // persist
             try {
-                Plasmid newPlasmid = AuthenticatedEntryManager.createPlasmid(plasmid);
+                Plasmid newPlasmid = (Plasmid) entryController.createEntryAndAddReadGroup(plasmid);
                 String plasmidPartNumberString = "[[jbei:"
                         + plasmid.getPartNumbers().toArray(new PartNumber[0])[0].getPartNumber()
                         + "]]";
                 strain.setPlasmids(plasmidPartNumberString);
-                Strain newStrain = AuthenticatedEntryManager.createStrain(strain);
-                PermissionManager.addReadGroup(newStrain, GroupManager.getEverybodyGroup());
-                PermissionManager.addReadGroup(newPlasmid, GroupManager.getEverybodyGroup());
+                entryController.createEntryAndAddReadGroup(strain);
+                entryController.createEntryAndAddReadGroup(newPlasmid);
                 setResponsePage(EntryViewPage.class, new PageParameters("0=" + newPlasmid.getId()));
-            } catch (ManagerException e) {
-                String msg = "System Error: Could not save! ";
-                Logger.error(msg + e.getMessage(), e);
-                error(msg);
-                e.printStackTrace();
+            } catch (ControllerException e) {
+                throw new ViewException(e);
             }
         }
 

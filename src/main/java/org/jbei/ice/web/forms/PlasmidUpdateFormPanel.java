@@ -9,7 +9,6 @@ import org.apache.wicket.model.PropertyModel;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.web.common.CommaSeparatedField;
-import org.jbei.ice.web.common.FormException;
 
 public class PlasmidUpdateFormPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -70,14 +69,10 @@ public class PlasmidUpdateFormPanel extends Panel {
 
             Plasmid plasmid = getEntry();
 
-            try {
-                CommaSeparatedField<SelectionMarker> selectionMarkersField = new CommaSeparatedField<SelectionMarker>(
-                        SelectionMarker.class, "getName", "setName");
-                selectionMarkersField.setString(getSelectionMarkers());
-                plasmid.setSelectionMarkers(selectionMarkersField.getItemsAsSet());
-            } catch (FormException e) {
-                e.printStackTrace();
-            }
+            CommaSeparatedField<SelectionMarker> selectionMarkersField = new CommaSeparatedField<SelectionMarker>(
+                    SelectionMarker.class, "getName", "setName");
+            selectionMarkersField.setString(getSelectionMarkers());
+            plasmid.setSelectionMarkers(selectionMarkersField.getItemsAsSet());
 
             plasmid.setBackbone(getBackbone());
             plasmid.setOriginOfReplication(getOriginOfReplication());

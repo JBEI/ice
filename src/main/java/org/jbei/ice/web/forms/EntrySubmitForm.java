@@ -21,22 +21,19 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.collections.MiniMap;
 import org.apache.wicket.util.template.TextTemplateHeaderContributor;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.GroupManager;
-import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.Link;
 import org.jbei.ice.lib.models.Name;
-import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
-import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.CommaSeparatedField;
 import org.jbei.ice.web.common.CustomChoice;
-import org.jbei.ice.web.common.FormException;
+import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.UnprotectedPage;
 
@@ -218,19 +215,15 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
     }
 
     protected void populateEntry() {
-        try {
-            CommaSeparatedField<Link> linksField = new CommaSeparatedField<Link>(Link.class,
-                    "getLink", "setLink");
-            linksField.setString(getLinks());
-            entry.setLinks(linksField.getItemsAsSet());
+        CommaSeparatedField<Link> linksField = new CommaSeparatedField<Link>(Link.class, "getLink",
+                "setLink");
+        linksField.setString(getLinks());
+        entry.setLinks(linksField.getItemsAsSet());
 
-            CommaSeparatedField<Name> namesField = new CommaSeparatedField<Name>(Name.class,
-                    "getName", "setName");
-            namesField.setString(getNames());
-            entry.setNames(namesField.getItemsAsSet());
-        } catch (FormException e) {
-            e.printStackTrace();
-        }
+        CommaSeparatedField<Name> namesField = new CommaSeparatedField<Name>(Name.class, "getName",
+                "setName");
+        namesField.setString(getNames());
+        entry.setNames(namesField.getItemsAsSet());
 
         populateEntryOwner();
 
@@ -270,15 +263,14 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
     }
 
     protected void submitEntry() {
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
+
         try {
-            Entry newEntry = AuthenticatedEntryManager.createEntry(entry);
-            PermissionManager.addReadGroup(entry, GroupManager.getEverybodyGroup());
+            Entry newEntry = entryController.createEntryAndAddReadGroup(entry);
+
             setResponsePage(EntryViewPage.class, new PageParameters("0=" + newEntry.getId()));
-        } catch (ManagerException e) {
-            String msg = "System Error: Could not save! ";
-            Logger.error(msg + e.getMessage(), e);
-            error(msg);
-            e.printStackTrace();
+        } catch (ControllerException e) {
+            throw new ViewException(e);
         }
     }
 

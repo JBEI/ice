@@ -8,7 +8,6 @@ import org.apache.wicket.model.PropertyModel;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.web.common.CommaSeparatedField;
-import org.jbei.ice.web.common.FormException;
 
 public class StrainUpdateFormPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -65,14 +64,10 @@ public class StrainUpdateFormPanel extends Panel {
 
             Strain strain = getEntry();
 
-            try {
-                CommaSeparatedField<SelectionMarker> selectionMarkersField = new CommaSeparatedField<SelectionMarker>(
-                        SelectionMarker.class, "getName", "setName");
-                selectionMarkersField.setString(getSelectionMarkers());
-                strain.setSelectionMarkers(selectionMarkersField.getItemsAsSet());
-            } catch (FormException e) {
-                e.printStackTrace();
-            }
+            CommaSeparatedField<SelectionMarker> selectionMarkersField = new CommaSeparatedField<SelectionMarker>(
+                    SelectionMarker.class, "getName", "setName");
+            selectionMarkersField.setString(getSelectionMarkers());
+            strain.setSelectionMarkers(selectionMarkersField.getItemsAsSet());
 
             strain.setHost(getHost());
             strain.setGenotypePhenotype(getGenotypePhenotype());
