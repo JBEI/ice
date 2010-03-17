@@ -19,15 +19,20 @@ import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.seq.RNATools;
 import org.biojava.bio.symbol.IllegalSymbolException;
 import org.biojava.bio.symbol.SymbolList;
+import org.jbei.ice.controllers.SequenceController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Job;
 import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.web.IceSession;
 
 public class Blast {
+    public static final String BLASTN_PROGRAM = "blastn";
+    public static final String TBLASTX_PROGRAM = "tblastx";
+
     private static boolean rebuilding;
 
     private static final String BL2SEQ_COMMAND_PATTERN = "%s -p blastn -i %s -j %s -r 2";
@@ -56,33 +61,7 @@ public class Blast {
         }
     }
 
-    private boolean isBlastDatabaseExists() {
-        File blastDatabaseFile = new File(blastDatabaseName + ".nsq");
-
-        return blastDatabaseFile.exists();
-    }
-
-    private String breakUpLines(String input) {
-        StringBuilder result = new StringBuilder();
-
-        int counter = 0;
-        int index = 0;
-        int end = input.length();
-        while (index < end) {
-            result = result.append(input.substring(index, index + 1));
-            counter = counter + 1;
-            index = index + 1;
-
-            if (counter == 59) {
-                result = result.append("\n");
-                counter = 0;
-            }
-        }
-        return result.toString();
-    }
-
     public void rebuildDatabase() {
-        Logger.info("Rebuilding blast database");
         try { // The big try
             File newbigFastaFileDir = new File(blastDirectory + ".new");
             newbigFastaFileDir.mkdir();
@@ -107,6 +86,174 @@ public class Blast {
             Logger.error(msg + e.toString(), e);
         }
 
+    }
+
+    /**
+     * get only the longest distinct matches. No partial matches for the
+     * same record.
+     * 
+     * @param queryString
+     *            Sequence to be queried
+     * @return
+     * @throws ProgramTookTooLongException
+     * @throws BlastException
+     */
+    public ArrayList<BlastResult> query(String queryString, String blastProgram)
+            throws ProgramTookTooLongException, BlastException {
+        ArrayList<BlastResult> tempResults = queryAll(queryString, blastProgram);
+
+        HashMap<String, BlastResult> tempHashMap = new HashMap<String, BlastResult>();
+
+        for (BlastResult result : tempResults) {
+            if (tempHashMap.containsKey(result.getSubjectId())) {
+                BlastResult currentResult = tempHashMap.get(result.getSubjectId());
+                if (result.getRelativeScore() > currentResult.getRelativeScore()) {
+                    tempHashMap.put(result.getSubjectId(), result);
+                }
+            } else {
+                tempHashMap.put(result.getSubjectId(), result);
+            }
+
+        }
+
+        ArrayList<BlastResult> outputResult = new ArrayList<BlastResult>(tempHashMap.values());
+        Collections.sort(outputResult);
+
+        return outputResult;
+    }
+
+    public List<String> runBl2Seq(String query, List<String> subjects) throws BlastException,
+            ProgramTookTooLongException {
+        ArrayList<String> result = new ArrayList<String>();
+
+        try {
+            File dataDirectory = new File(JbeirSettings.getSetting("DATA_DIRECTORY"));
+
+            File queryFile = File.createTempFile("query-", ".seq", dataDirectory);
+            FileWriter referenceFileWriter = new FileWriter(queryFile);
+            referenceFileWriter.write(query);
+            referenceFileWriter.close();
+
+            for (String subject : subjects) {
+                File subjectFile = File.createTempFile("subject-", ".seq", dataDirectory);
+
+                FileWriter subjectFileWriter = new FileWriter(subjectFile);
+                subjectFileWriter.write(subject);
+                subjectFileWriter.close();
+
+                String commandString = String.format(BL2SEQ_COMMAND_PATTERN, bl2seq, queryFile
+                        .getPath(), subjectFile.getPath());
+                Logger.info("Bl2seq query: " + commandString);
+
+                String resultItem = runExternalProgram(commandString);
+
+                result.add(resultItem);
+
+                subjectFile.delete();
+            }
+            queryFile.delete();
+        } catch (IOException e) {
+            throw new BlastException(e);
+        }
+
+        return result;
+    }
+
+    /**
+     * Run bl2seq. Because bl2seq needs two inputs, it has to use external files.
+     * 
+     * @param query
+     * @param subject
+     * @return
+     * @throws BlastException
+     * @throws ProgramTookTooLongException
+     */
+    public String runBl2Seq(String query, String subject) throws BlastException,
+            ProgramTookTooLongException {
+        String result = "";
+
+        ArrayList<String> subjects = new ArrayList<String>();
+        subjects.add(subject);
+
+        List<String> bl2seqResults = runBl2Seq(query, subjects);
+
+        if (bl2seqResults.size() > 0) {
+            result = bl2seqResults.get(0);
+        }
+
+        return result;
+    }
+
+    /**
+     * Standard blast query
+     * 
+     * @param queryString
+     * @return
+     * @throws ProgramTookTooLongException
+     * @throws BlastException
+     */
+    private ArrayList<BlastResult> queryAll(String queryString, String blastProgram)
+            throws ProgramTookTooLongException, BlastException {
+        ArrayList<BlastResult> result = new ArrayList<BlastResult>();
+
+        if (!isBlastDatabaseExists()) {
+            Logger.info("Creating blast database for the first time");
+            JobCue jobCue = JobCue.getInstance();
+            jobCue.addJob(Job.REBUILD_BLAST_INDEX);
+            jobCue.processIn(5000);
+        } else {
+            while (isRebuilding()) {
+                try {
+                    wait(50);
+                } catch (InterruptedException e) {
+
+                    e.printStackTrace();
+                    throw new BlastException(e);
+                }
+            }
+
+            String commandString = String.format(BLASTALL_COMMAND_PATTERN, blastBlastall,
+                    getProgram(blastProgram), blastDatabaseName);
+
+            Logger.info("Blast query: " + commandString);
+
+            result = processBlastOutput(runExternalProgram(queryString, commandString));
+        }
+
+        return result;
+    }
+
+    private String getProgram(String program) throws BlastException {
+        if (program != null && (program.equals(BLASTN_PROGRAM) || program.equals(TBLASTX_PROGRAM))) {
+            return program;
+        } else {
+            throw new BlastException(new BlastException("Invalid program"));
+        }
+    }
+
+    private boolean isBlastDatabaseExists() {
+        File blastDatabaseFile = new File(blastDatabaseName + ".nsq");
+
+        return blastDatabaseFile.exists();
+    }
+
+    private String breakUpLines(String input) {
+        StringBuilder result = new StringBuilder();
+
+        int counter = 0;
+        int index = 0;
+        int end = input.length();
+        while (index < end) {
+            result = result.append(input.substring(index, index + 1));
+            counter = counter + 1;
+            index = index + 1;
+
+            if (counter == 59) {
+                result = result.append("\n");
+                counter = 0;
+            }
+        }
+        return result.toString();
     }
 
     private void renameBlastDb(File newBigFastaFileDir) throws IOException {
@@ -172,8 +319,18 @@ public class Blast {
         }
     }
 
-    private void writeBigFastaFile(FileWriter bigFastaWriter) throws IOException {
-        List<Sequence> sequencesList = SequenceManager.getAllVisible();
+    private void writeBigFastaFile(FileWriter bigFastaWriter) throws IOException, BlastException {
+        SequenceController sequenceController = new SequenceController(IceSession.get()
+                .getAccount()); // TODO: double check this. What's happen when account is null? 
+
+        List<Sequence> sequencesList = null;
+
+        try {
+            sequencesList = sequenceController.getSequences();
+        } catch (ControllerException e) {
+            throw new BlastException(e);
+        }
+
         for (Sequence sequence : sequencesList) {
             String recordId = sequence.getEntry().getRecordId();
             String sequenceString = "";
@@ -181,6 +338,7 @@ public class Blast {
             String temp = sequence.getSequence();
             if (temp != null) {
                 SymbolList symL = null;
+
                 try {
                     symL = DNATools.createDNA(sequence.getSequence().trim());
                 } catch (IllegalSymbolException e1) {
@@ -194,6 +352,7 @@ public class Blast {
                         Logger.warn(e2.toString());
                     }
                 }
+
                 if (symL != null) {
                     sequenceString = breakUpLines(symL.seqString());
                 }
@@ -203,148 +362,9 @@ public class Blast {
                 bigFastaWriter.write(sequenceString + "\n");
             }
         }
+
         bigFastaWriter.flush();
         bigFastaWriter.close();
-    }
-
-    /**
-     * get only the longest distinct matches. No partial matches for the
-     * same record.
-     * 
-     * @param queryString
-     *            Sequence to be queried
-     * @return
-     * @throws ProgramTookTooLongException
-     * @throws BlastException
-     */
-    public ArrayList<BlastResult> queryDistinct(String queryString, String blastProgram)
-            throws ProgramTookTooLongException, BlastException {
-        ArrayList<BlastResult> tempResults = query(queryString, blastProgram);
-
-        HashMap<String, BlastResult> tempHashMap = new HashMap<String, BlastResult>();
-
-        for (BlastResult result : tempResults) {
-            if (tempHashMap.containsKey(result.getSubjectId())) {
-                BlastResult currentResult = tempHashMap.get(result.getSubjectId());
-                if (result.getRelativeScore() > currentResult.getRelativeScore()) {
-                    tempHashMap.put(result.getSubjectId(), result);
-                }
-            } else {
-                tempHashMap.put(result.getSubjectId(), result);
-            }
-
-        }
-
-        ArrayList<BlastResult> outputResult = new ArrayList<BlastResult>(tempHashMap.values());
-        Collections.sort(outputResult);
-
-        return outputResult;
-    }
-
-    /**
-     * Standard blast query
-     * 
-     * @param queryString
-     * @return
-     * @throws ProgramTookTooLongException
-     * @throws BlastException
-     */
-    public ArrayList<BlastResult> query(String queryString, String blastProgram)
-            throws ProgramTookTooLongException, BlastException {
-        ArrayList<BlastResult> result = new ArrayList<BlastResult>();
-
-        if (!isBlastDatabaseExists()) {
-            Logger.info("Creating blast database for the first time");
-            JobCue jobCue = JobCue.getInstance();
-            jobCue.addJob(Job.REBUILD_BLAST_INDEX);
-            jobCue.processIn(5000);
-        } else {
-            while (isRebuilding()) {
-                try {
-                    wait(50);
-                } catch (InterruptedException e) {
-
-                    e.printStackTrace();
-                    throw new BlastException(e);
-                }
-            }
-
-            String blastProgramName = "blastn";
-            if (blastProgram.equals("tblastx")) {
-                blastProgramName = "tblastx";
-            }
-
-            String commandString = String.format(BLASTALL_COMMAND_PATTERN, blastBlastall,
-                    blastProgramName, blastDatabaseName);
-
-            Logger.info("Blast query: " + commandString);
-
-            result = processBlastOutput(runExternalProgram(queryString, commandString));
-        }
-
-        return result;
-    }
-
-    public List<String> runBl2Seq(String query, List<String> subjects) throws BlastException,
-            ProgramTookTooLongException {
-        ArrayList<String> result = new ArrayList<String>();
-
-        try {
-            File dataDirectory = new File(JbeirSettings.getSetting("DATA_DIRECTORY"));
-
-            File queryFile = File.createTempFile("query-", ".seq", dataDirectory);
-            FileWriter referenceFileWriter = new FileWriter(queryFile);
-            referenceFileWriter.write(query);
-            referenceFileWriter.close();
-
-            for (String subject : subjects) {
-                File subjectFile = File.createTempFile("subject-", ".seq", dataDirectory);
-
-                FileWriter subjectFileWriter = new FileWriter(subjectFile);
-                subjectFileWriter.write(subject);
-                subjectFileWriter.close();
-
-                String commandString = String.format(BL2SEQ_COMMAND_PATTERN, bl2seq, queryFile
-                        .getPath(), subjectFile.getPath());
-                Logger.info("Bl2seq query: " + commandString);
-
-                String resultItem = runExternalProgram(commandString);
-
-                result.add(resultItem);
-
-                subjectFile.delete();
-            }
-            queryFile.delete();
-        } catch (IOException e) {
-            throw new BlastException(e);
-        }
-
-        return result;
-    }
-
-    /**
-     * Run bl2seq. Because bl2seq needs two inputs, it has to use external files.
-     * 
-     * @param query
-     * @param subject
-     * @return
-     * @throws BlastException
-     * @throws ProgramTookTooLongException
-     */
-    public String runBl2Seq(String query, String subject) throws BlastException,
-            ProgramTookTooLongException {
-        String result = "";
-
-        ArrayList<String> subjects = new ArrayList<String>();
-        subjects.add(subject);
-
-        List<String> bl2seqResults = runBl2Seq(query, subjects);
-
-        if (bl2seqResults.size() > 0) {
-            result = bl2seqResults.get(0);
-        }
-
-        return result;
     }
 
     private String runExternalProgram(String commandString) throws ProgramTookTooLongException,
@@ -415,7 +435,7 @@ public class Blast {
         return outputString;
     }
 
-    public ArrayList<BlastResult> processBlastOutput(String blastOutput) {
+    private ArrayList<BlastResult> processBlastOutput(String blastOutput) {
         ArrayList<String> lines = new ArrayList<String>(Arrays.asList(blastOutput.split("\n")));
 
         ArrayList<BlastResult> blastResults = new ArrayList<BlastResult>();
