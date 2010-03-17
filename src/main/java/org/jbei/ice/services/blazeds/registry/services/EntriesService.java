@@ -1,10 +1,11 @@
 package org.jbei.ice.services.blazeds.registry.services;
 
+import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.EntryManager;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.services.blazeds.common.BaseService;
 
@@ -18,24 +19,26 @@ public class EntriesService extends BaseService {
             return null;
         }
 
+        EntryController entryController = new EntryController(account);
+
         Entry entry = null;
         try {
-            entry = EntryManager.getByRecordId(entryId);
-
-            if (PermissionManager.hasReadPermission(entry, account)) {
-                return entry;
-            } else {
-                Logger.warn(getLoggerPrefix() + "User " + account.getFullName()
-                        + " tried to access entry without permissions.");
-            }
-        } catch (ManagerException e) {
-            Logger.error(getLoggerPrefix(), e);
+            entry = entryController.getByRecordId(entryId);
+        } catch (ControllerException e) {
+            Logger.error("Failed to get entry!", e);
 
             return null;
-        } catch (Exception e) {
-            Logger.error(getLoggerPrefix(), e);
+        } catch (PermissionException e) {
+            Logger.error("Failed to get entry!", e);
 
             return null;
+        }
+
+        if (PermissionManager.hasReadPermission(entry, account)) {
+            return entry;
+        } else {
+            Logger.warn(getLoggerPrefix() + "User " + account.getFullName()
+                    + " tried to access entry without permissions.");
         }
 
         return entry;
@@ -50,20 +53,21 @@ public class EntriesService extends BaseService {
             return result;
         }
 
+        EntryController entryController = new EntryController(account);
+
         try {
-            Entry entry = EntryManager.getByRecordId(entryId);
+            Entry entry = entryController.getByRecordId(entryId);
 
             if (entry != null) {
                 result = PermissionManager.hasWritePermission(entry, account);
             }
-        } catch (ManagerException e) {
+        } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
 
             return result;
-        } catch (Exception e) {
-            Logger.error(getLoggerPrefix(), e);
-
-            return result;
+        } catch (PermissionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
 
         return result;
@@ -78,17 +82,19 @@ public class EntriesService extends BaseService {
             return result;
         }
 
+        EntryController entryController = new EntryController(account);
+
         try {
-            EntryManager.save(entry);
+            entryController.save(entry);
 
             Logger.info(getLoggerPrefix() + "Entry saved via " + getServiceName());
 
             result = true;
-        } catch (ManagerException e) {
+        } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
 
             return result;
-        } catch (Exception e) {
+        } catch (PermissionException e) {
             Logger.error(getLoggerPrefix(), e);
 
             return result;
