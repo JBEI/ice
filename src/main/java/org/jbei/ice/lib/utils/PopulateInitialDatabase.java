@@ -7,11 +7,12 @@ import java.util.Set;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.jbei.ice.lib.dao.DAO;
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.HibernateHelper;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.GroupManager;
-import org.jbei.ice.lib.managers.HibernateHelper;
-import org.jbei.ice.lib.managers.Manager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.AccountFundingSource;
 import org.jbei.ice.lib.models.Entry;
@@ -71,7 +72,13 @@ public class PopulateInitialDatabase {
             Logger.debug(e.toString());
         }
         if (group1 != null) {
-            Set<Entry> allEntries = EntryManager.getAll();
+            ArrayList<Entry> allEntries = null;
+            try {
+                allEntries = EntryManager.getAllEntries();
+            } catch (ManagerException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
             for (Entry entry : allEntries) {
                 try {
                     Set<Group> groups = PermissionManager.getReadGroup(entry);
@@ -92,12 +99,19 @@ public class PopulateInitialDatabase {
     }
 
     public static void normalizeAllFundingSources() {
-        Set<Entry> allEntries = EntryManager.getAll();
+        ArrayList<Entry> allEntries = null;
+
+        try {
+            allEntries = EntryManager.getAllEntries();
+        } catch (ManagerException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
         for (Entry entry : allEntries) {
             Set<EntryFundingSource> entryFundingSources = entry.getEntryFundingSources();
             for (EntryFundingSource entryFundingSource : entryFundingSources) {
                 normalizeFundingSources(entryFundingSource.getFundingSource());
-
             }
         }
     }
@@ -131,8 +145,8 @@ public class PopulateInitialDatabase {
             for (EntryFundingSource entryFundingSource : entryFundingSources) {
                 try {
                     entryFundingSource.setFundingSource(keepFundingSource);
-                    Manager.dbSave(entryFundingSource);
-                } catch (ManagerException e) {
+                    DAO.save(entryFundingSource);
+                } catch (DAOException e) {
                     String msg = "Could set normalized entry funding source: " + e.toString();
                     Logger.error(msg, e);
                 }
@@ -148,8 +162,8 @@ public class PopulateInitialDatabase {
             for (AccountFundingSource accountFundingSource : accountFundingSources) {
                 accountFundingSource.setFundingSource(keepFundingSource);
                 try {
-                    Manager.dbSave(accountFundingSource);
-                } catch (ManagerException e) {
+                    DAO.save(accountFundingSource);
+                } catch (DAOException e) {
                     String msg = "Could set normalized entry funding source: " + e.toString();
                     Logger.error(msg, e);
                 }
@@ -157,9 +171,9 @@ public class PopulateInitialDatabase {
             try {
                 String temp = deleteFundingSource.getPrincipalInvestigator() + ":"
                         + deleteFundingSource.getFundingSource();
-                Manager.dbDelete(deleteFundingSource);
+                DAO.delete(deleteFundingSource);
                 Logger.info("Normalized funding source: " + temp);
-            } catch (ManagerException e) {
+            } catch (DAOException e) {
                 String msg = "Could not delete funding source during normalization: "
                         + e.toString();
                 Logger.error(msg, e);

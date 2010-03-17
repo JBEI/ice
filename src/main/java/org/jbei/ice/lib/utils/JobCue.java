@@ -4,9 +4,10 @@ import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.Set;
 
+import org.jbei.ice.controllers.BlastController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.search.blast.Blast;
 import org.jbei.ice.lib.search.lucene.LuceneSearch;
+import org.jbei.ice.lib.search.lucene.SearchException;
 
 public class JobCue implements Runnable {
 
@@ -51,33 +52,23 @@ public class JobCue implements Runnable {
             Logger.info("Processing jobs: " + processedJobs.toString());
         }
 
-        for (Integer jobType : processedJobs) {
-            if (jobType == 1) {
-                Logger.info("Running rebuildIndex");
-                try {
-                    LuceneSearch s = LuceneSearch.getInstance();
-                    s.rebuildIndex();
-                    Logger.info("RebuildIndex complete");
-                } catch (Exception e) {
-                    String msg = "Could not create search index";
-                    Logger.error(msg, e);
-                    e.printStackTrace();
+        try {
+            for (Integer jobType : processedJobs) {
+                if (jobType == 1) {
+                    LuceneSearch.getInstance().rebuildIndex();
+                } else if (jobType == 2) {
+                    BlastController.rebuildBlastDatabase();
                 }
 
-            } else if (jobType == 2) {
-                Logger.info("Rebuilding blast database");
-                Blast blast = new Blast();
-                blast.rebuildDatabase();
-                Logger.info("Rebuild blast complete");
+                cue.remove(jobType);
             }
-            cue.remove(jobType);
-
+        } catch (SearchException e) {
+            throw new RuntimeException(e); // TODO: not sure here
         }
     }
 
     /**
      * I hope you know what you are doing
-     * 
      */
     public void processNow() {
         getInstance().setCounter(wakeupInterval);

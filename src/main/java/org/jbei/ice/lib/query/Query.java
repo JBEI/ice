@@ -2,24 +2,21 @@ package org.jbei.ice.lib.query;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.TreeSet;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.jbei.ice.lib.dao.HibernateHelper;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.HibernateHelper;
 import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.Part;
-import org.jbei.ice.lib.utils.Utils;
 
 @SuppressWarnings("unchecked")
 public class Query {
@@ -145,13 +142,8 @@ public class Query {
         return result;
     }
 
-    public LinkedHashSet<Entry> query(ArrayList<String[]> data, int offset, int limit) {
-        return query(data, offset, limit, new SortField[] { new SortField("id", true) });
-    }
-
-    public LinkedHashSet<Entry> query(ArrayList<String[]> data, int offset, int limit,
-            SortField[] sortFields) {
-        TreeSet<Integer> resultIds = new TreeSet<Integer>();
+    public ArrayList<Integer> query(ArrayList<String[]> data) {
+        ArrayList<Integer> resultIds = new ArrayList<Integer>();
 
         boolean firstRun = true;
 
@@ -168,72 +160,12 @@ public class Query {
                 } else {
                     resultIds.retainAll(runFilter(item[0], item[1]));
                 }
-            } catch (Exception e) {
+            } catch (Exception e) { // TODO: Fix this!
                 e.printStackTrace();
             }
         }
 
-        if (limit > resultIds.size() || limit == -1) {
-            limit = resultIds.size();
-        }
-
-        LinkedHashSet<Entry> result = new LinkedHashSet<Entry>();
-
-        String sortQuerySuffix = "";
-
-        if (sortFields != null && sortFields.length > 0) {
-            sortQuerySuffix = Utils.join(", ", Arrays.asList(sortFields));
-        }
-
-        if (resultIds.size() > 0) {
-            Session session = HibernateHelper.getSession();
-            org.hibernate.Query query = session
-                    .createQuery("SELECT entry FROM Entry entry WHERE id in (:ids) "
-                            + (!sortQuerySuffix.isEmpty() ? ("ORDER BY " + sortQuerySuffix) : ""));
-
-            query.setParameterList("ids", resultIds);
-            query.setFirstResult(offset);
-            query.setMaxResults(limit);
-            try {
-                result = new LinkedHashSet<Entry>(query.list());
-            } catch (HibernateException e) {
-                Logger.error("Could not query " + e.toString(), e);
-            } finally {
-
-            }
-        }
-
-        return result;
-    }
-
-    public int queryCount(ArrayList<String[]> data) {
-        TreeSet<Integer> resultIds = new TreeSet<Integer>();
-
-        boolean firstRun = true;
-
-        for (String[] item : data) {
-            try {
-                if (firstRun) {
-                    HashSet queryResultSet = runFilter(item[0], item[1]);
-
-                    for (Iterator<Integer> iterator = queryResultSet.iterator(); iterator.hasNext();) {
-                        resultIds.add(iterator.next());
-                    }
-
-                    firstRun = false;
-                } else {
-                    resultIds.retainAll(runFilter(item[0], item[1]));
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        return resultIds.size();
-    }
-
-    public LinkedHashSet<Entry> query(ArrayList<String[]> data) {
-        return query(data, 0, -1);
+        return resultIds;
     }
 
     public final ArrayList<Filter> filters() {

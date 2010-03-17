@@ -5,13 +5,11 @@ import java.io.Serializable;
 import org.postgresql.util.Base64;
 
 /* Class to hold Base64 encoded bytes
- * 
  */
 public class Base64String implements Serializable {
-
     private static final long serialVersionUID = 1L;
 
-    protected String data = "";
+    private String data = "";
 
     public void putBytes(byte[] bytes) {
         this.data = Base64.encodeBytes(bytes);
@@ -19,7 +17,12 @@ public class Base64String implements Serializable {
 
     public byte[] getBytes() {
         byte[] bytes = Base64.decode(this.data);
+
         return bytes;
+    }
+
+    public String getData() {
+        return this.data;
     }
 
     public String toString() {
