@@ -2,12 +2,12 @@ package org.jbei.ice.services.blazeds.VectorEditor.services;
 
 import java.util.LinkedHashSet;
 
-import org.biojava.bio.BioException;
+import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.ApplicationContoller;
+import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.SequenceController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.AccountManager;
-import org.jbei.ice.lib.managers.EntryManager;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountPreferences;
 import org.jbei.ice.lib.models.Entry;
@@ -15,8 +15,6 @@ import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.FeatureDNA;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
-import org.jbei.ice.lib.utils.Job;
-import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.utils.Utils;
@@ -39,7 +37,8 @@ public class VectorEditorService extends BaseService {
                 return null;
             }
 
-            AccountPreferences accountPreferences = AccountManager.getAccountPreferences(account);
+            AccountPreferences accountPreferences = AccountController
+                    .getAccountPreferences(account);
 
             if (accountPreferences != null && accountPreferences.getRestrictionEnzymes() != null
                     && !accountPreferences.getRestrictionEnzymes().isEmpty()) {
@@ -52,7 +51,7 @@ public class VectorEditorService extends BaseService {
             Logger.error(getServiceName(), e);
 
             return null;
-        } catch (ManagerException e) {
+        } catch (ControllerException e) {
             Logger.error(getServiceName(), e);
 
             return null;
@@ -74,7 +73,8 @@ public class VectorEditorService extends BaseService {
                 return;
             }
 
-            AccountPreferences accountPreferences = AccountManager.getAccountPreferences(account);
+            AccountPreferences accountPreferences = AccountController
+                    .getAccountPreferences(account);
 
             String serializedUserRestrictionEnzymes = SerializationUtils
                     .serializeToString(userRestrictionEnzymes);
@@ -82,14 +82,14 @@ public class VectorEditorService extends BaseService {
             if (accountPreferences != null) {
                 accountPreferences.setRestrictionEnzymes(serializedUserRestrictionEnzymes);
 
-                AccountManager.save(accountPreferences);
+                AccountController.saveAccountPreferences(accountPreferences);
             } else {
-                AccountManager.save(new AccountPreferences(account, "",
+                AccountController.saveAccountPreferences(new AccountPreferences(account, "",
                         serializedUserRestrictionEnzymes));
             }
         } catch (SerializationUtils.SerializationUtilsException e) {
             Logger.error(getServiceName(), e);
-        } catch (ManagerException e) {
+        } catch (ControllerException e) {
             Logger.error(getServiceName(), e);
         } catch (Exception e) {
             Logger.error(getServiceName(), e);
@@ -105,7 +105,8 @@ public class VectorEditorService extends BaseService {
                 return null;
             }
 
-            AccountPreferences accountPreferences = AccountManager.getAccountPreferences(account);
+            AccountPreferences accountPreferences = AccountController
+                    .getAccountPreferences(account);
 
             if (accountPreferences != null && accountPreferences.getPreferences() != null
                     && !accountPreferences.getPreferences().isEmpty()) {
@@ -120,7 +121,7 @@ public class VectorEditorService extends BaseService {
             } else {
                 userPreferences = new UserPreferences();
             }
-        } catch (ManagerException e) {
+        } catch (ControllerException e) {
             Logger.error(getServiceName(), e);
 
             return null;
@@ -141,7 +142,8 @@ public class VectorEditorService extends BaseService {
                 return;
             }
 
-            AccountPreferences accountPreferences = AccountManager.getAccountPreferences(account);
+            AccountPreferences accountPreferences = AccountController
+                    .getAccountPreferences(account);
 
             String serializedPreferences = "";
             try {
@@ -153,11 +155,12 @@ public class VectorEditorService extends BaseService {
             if (accountPreferences != null) {
                 accountPreferences.setPreferences(serializedPreferences);
 
-                AccountManager.save(accountPreferences);
+                AccountController.saveAccountPreferences(accountPreferences);
             } else {
-                AccountManager.save(new AccountPreferences(account, serializedPreferences, ""));
+                AccountController.saveAccountPreferences(new AccountPreferences(account,
+                        serializedPreferences, ""));
             }
-        } catch (ManagerException e) {
+        } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
         } catch (Exception e) {
             Logger.error(getLoggerPrefix(), e);
@@ -173,50 +176,30 @@ public class VectorEditorService extends BaseService {
             return result;
         }
 
+        EntryController entryController = new EntryController(account);
+        SequenceController sequenceController = new SequenceController(account);
+
         try {
-            Entry entry = EntryManager.getByRecordId(entryId);
+            Entry entry = entryController.getByRecordId(entryId);
 
             if (entry == null) {
                 return false;
             }
 
             Sequence sequence = lightSequenceToSequence(lightSequence, entry);
+            sequence.setEntry(entry);
+            sequenceController.update(sequence);
 
-            if (sequence == null) {
-                return false;
-            }
-
-            if (entry.getSequence() != null) {
-                Sequence currentSequence = entry.getSequence();
-                entry.setSequence(null);
-
-                SequenceManager.delete(currentSequence);
-            }
-
-            if (sequence.getSequenceFeatures() != null) {
-                for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
-                    Feature feature = sequenceFeature.getFeature();
-
-                    Feature saveResultFeature = SequenceManager.save(feature);
-
-                    if (saveResultFeature != feature) {
-                        sequenceFeature.setFeature(saveResultFeature);
-                    }
-                }
-            }
-
-            entry.setSequence(sequence);
-            EntryManager.save(entry);
-            JobCue.getInstance().addJob(Job.REBUILD_BLAST_INDEX);
-
-            Logger.info(getLoggerPrefix() + "Sequence saved via " + getServiceName());
+            entryController.save(entry);
+            ApplicationContoller.scheduleBlastIndexRebuildJob();
 
             result = true;
-        } catch (ManagerException e) {
+        } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
 
             return result;
         } catch (Exception e) {
+            // TODO: Handle it properly
             Logger.error(getLoggerPrefix(), e);
 
             return result;
@@ -269,10 +252,6 @@ public class VectorEditorService extends BaseService {
 
                 sequenceFeatures.add(sequenceFeature);
             }
-        } catch (BioException e) {
-            Logger.error("Failed to convert LightSequence to Sequence\n", e);
-
-            return null;
         } catch (Exception e) {
             Logger.error("Failed to convert LightSequence to Sequence\n", e);
 
