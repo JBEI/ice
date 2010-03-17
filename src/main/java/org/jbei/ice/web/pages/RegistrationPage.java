@@ -6,14 +6,14 @@ import org.jbei.ice.web.panels.EmptyMessagePanel;
 import org.jbei.ice.web.panels.RegistrationPanel;
 
 public class RegistrationPage extends UnprotectedPage {
-
     public RegistrationPage(PageParameters parameters) {
         super(parameters);
+
         if (JbeirSettings.getSetting("NEW_REGISTRATION_ALLOWED").equals("yes")) {
             add(new RegistrationPanel("registrationPanel"));
         } else {
-            String msg = "New registration has been disable by the administrator.";
-            add(new EmptyMessagePanel("registrationPanel", msg));
+            add(new EmptyMessagePanel("registrationPanel",
+                    "New registration has been disable by the administrator."));
         }
     }
 

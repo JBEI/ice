@@ -17,6 +17,15 @@ public class PrintableEntriesFullContentPage extends ProtectedPage {
     public PrintableEntriesFullContentPage(ArrayList<Entry> entries) {
         super();
 
+        initialize(entries);
+    }
+
+    @Override
+    protected void initializeComponents() {
+        add(new Label("title", "Printable"));
+    }
+
+    private void initialize(ArrayList<Entry> entries) {
         RepeatingView repeatingView = new RepeatingView("entriesRepeatingView");
 
         int index = 0;
@@ -37,10 +46,5 @@ public class PrintableEntriesFullContentPage extends ProtectedPage {
         }
 
         add(repeatingView);
-    }
-
-    @Override
-    protected void initializeComponents() {
-        add(new Label("title", "Printable"));
     }
 }

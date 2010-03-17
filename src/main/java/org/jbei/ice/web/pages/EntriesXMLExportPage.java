@@ -4,8 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.jbei.ice.lib.managers.AttachmentManager;
-import org.jbei.ice.lib.managers.SequenceManager;
+import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Link;
 import org.jbei.ice.lib.models.Name;
@@ -13,7 +13,8 @@ import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
-import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
 
 public class EntriesXMLExportPage extends XMLExportPage {
     private ArrayList<Entry> entries;
@@ -27,6 +28,8 @@ public class EntriesXMLExportPage extends XMLExportPage {
     @Override
     public String getContent() {
         int index = 1;
+
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
 
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -136,14 +139,18 @@ public class EntriesXMLExportPage extends XMLExportPage {
             stringBuilder.append("<fundingSource>").append(
                     escapeXMLValue(entry.fundingSourceToString())).append("</fundingSource>");
 
-            stringBuilder.append("<hasAttachments>").append(
-                    (AttachmentManager.hasAttachment(entry)) ? "Yes" : "No").append(
-                    "</hasAttachments>");
-            stringBuilder.append("<hasSamples>").append(
-                    (AuthenticatedSampleManager.hasSample(entry)) ? "Yes" : "No").append(
-                    "</hasSamples>");
-            stringBuilder.append("<hasSequence>").append(
-                    (SequenceManager.hasSequence(entry)) ? "Yes" : "No").append("</hasSequence>");
+            try {
+                stringBuilder.append("<hasAttachments>").append(
+                        (entryController.hasAttachments(entry)) ? "Yes" : "No").append(
+                        "</hasAttachments>");
+                stringBuilder.append("<hasSamples>").append(
+                        (entryController.hasSamples(entry)) ? "Yes" : "No").append("</hasSamples>");
+                stringBuilder.append("<hasSequence>").append(
+                        (entryController.hasSequence(entry)) ? "Yes" : "No").append(
+                        "</hasSequence>");
+            } catch (ControllerException e) {
+                throw new ViewException(e);
+            }
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
 

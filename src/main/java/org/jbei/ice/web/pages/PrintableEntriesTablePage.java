@@ -14,14 +14,14 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.jbei.ice.lib.managers.AccountManager;
-import org.jbei.ice.lib.managers.AttachmentManager;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SequenceManager;
+import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.permissions.AuthenticatedSampleManager;
 import org.jbei.ice.lib.utils.JbeiConstants;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
 
 public class PrintableEntriesTablePage extends ProtectedPage {
     private ArrayList<Entry> entries;
@@ -94,6 +94,9 @@ public class PrintableEntriesTablePage extends ProtectedPage {
         ListView<Entry> entriesDataView = new ListView<Entry>("entriesDataView", entries) {
             private static final long serialVersionUID = 1L;
 
+            private transient EntryController entryController = new EntryController(IceSession
+                    .get().getAccount());
+
             @Override
             protected void populateItem(ListItem<Entry> item) {
                 Entry entry = item.getModelObject();
@@ -117,9 +120,9 @@ public class PrintableEntriesTablePage extends ProtectedPage {
                     Account ownerAccount = null;
 
                     try {
-                        ownerAccount = AccountManager.getByEmail(entry.getOwnerEmail());
-                    } catch (ManagerException e) {
-                        e.printStackTrace();
+                        ownerAccount = AccountController.getByEmail(entry.getOwnerEmail());
+                    } catch (ControllerException e) {
+                        throw new ViewException(e);
                     }
 
                     BookmarkablePageLink<ProfilePage> ownerProfileLink = new BookmarkablePageLink<ProfilePage>(
@@ -137,12 +140,18 @@ public class PrintableEntriesTablePage extends ProtectedPage {
 
                 item.add(new Label("status", JbeiConstants.getStatus(entry.getStatus())));
 
-                item.add(new Image("hasAttachment",
-                        (AttachmentManager.hasAttachment(entry)) ? attachmentImage : blankImage));
-                item.add(new Image("hasSequence",
-                        (SequenceManager.hasSequence(entry)) ? sequenceImage : blankImage));
-                item.add(new Image("hasSample",
-                        (AuthenticatedSampleManager.hasSample(entry)) ? sampleImage : blankImage));
+                try {
+                    item
+                            .add(new Image("hasAttachment",
+                                    (entryController.hasAttachments(entry)) ? attachmentImage
+                                            : blankImage));
+                    item.add(new Image("hasSequence",
+                            (entryController.hasSequence(entry)) ? sequenceImage : blankImage));
+                    item.add(new Image("hasSample",
+                            (entryController.hasSamples(entry)) ? sampleImage : blankImage));
+                } catch (ControllerException e) {
+                    throw new ViewException(e);
+                }
 
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
                 String dateString = dateFormat.format(entry.getCreationTime());

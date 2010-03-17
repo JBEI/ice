@@ -10,107 +10,110 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.validation.validator.EmailAddressValidator;
 import org.apache.wicket.validation.validator.StringValidator;
-import org.jbei.ice.lib.managers.AccountManager;
-import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
 
 public class UpdateAccountPage extends ProtectedPage {
     public UpdateAccountPage(PageParameters parameters) {
         super(parameters);
 
-        class UpdateAccountForm extends StatelessForm<Object> {
-            private static final long serialVersionUID = 3046351143658183110L;
+        add(new UpdateAccountForm("updateAccountForm"));
+    }
 
-            private String firstName;
-            private String lastName;
-            private String initials;
-            private String email;
-            private String institution;
-            private String description;
+    class UpdateAccountForm extends StatelessForm<Object> {
+        private static final long serialVersionUID = 3046351143658183110L;
 
-            Account account;
+        private String firstName;
+        private String lastName;
+        private String initials;
+        private String email;
+        private String institution;
+        private String description;
 
-            public UpdateAccountForm(String id) {
-                super(id);
+        Account account;
 
-                IceSession session = IceSession.get();
+        public UpdateAccountForm(String id) {
+            super(id);
 
-                if (!session.isAuthenticated()) {
-                    setResponsePage(WelcomePage.class);
+            initialize(id);
+        }
 
-                    return;
-                }
+        @Override
+        protected void onSubmit() {
+            try {
+                assert (account != null);
 
-                account = session.getAccount();
+                if (!email.equals(account.getEmail())) {
+                    Account testAccount = AccountController.getByEmail(email);
 
-                setModel(new CompoundPropertyModel<Object>(this));
+                    if (testAccount != null) {
+                        error("Account with this email address already registered");
 
-                firstName = account.getFirstName();
-                lastName = account.getLastName();
-                initials = account.getInitials();
-                email = account.getEmail();
-                institution = account.getInstitution();
-                description = account.getDescription();
-
-                add(new TextField<String>("firstName").setRequired(true).setLabel(
-                        new Model<String>("Given name")).add(
-                        new StringValidator.MaximumLengthValidator(50)));
-                add(new TextField<String>("lastName").setRequired(true).setLabel(
-                        new Model<String>("Family name")).add(
-                        new StringValidator.MaximumLengthValidator(50)));
-                add(new TextField<String>("initials").setLabel(new Model<String>("Initials")).add(
-                        new StringValidator.MaximumLengthValidator(10)));
-                add(new TextField<String>("email").setRequired(true).setLabel(
-                        new Model<String>("Email")).add(
-                        new StringValidator.MaximumLengthValidator(100)).add(
-                        EmailAddressValidator.getInstance()));
-                add(new TextField<String>("institution").setLabel(new Model<String>("Institution")));
-                add(new TextArea<String>("description").setLabel(new Model<String>("Description")));
-
-                add(new Button("submitButton", new Model<String>("Update")));
-
-                add(new FeedbackPanel("feedback"));
-            }
-
-            @Override
-            protected void onSubmit() {
-                try {
-                    assert (account != null);
-
-                    if (!email.equals(account.getEmail())) {
-                        Account testAccount = AccountManager.getByEmail(email);
-
-                        if (testAccount != null) {
-                            error("Account with this email address already registered");
-
-                            return;
-                        }
+                        return;
                     }
-
-                    account.setFirstName(firstName);
-                    account.setLastName(lastName);
-                    account.setInitials(initials);
-                    account.setEmail(email);
-                    account.setInstitution(institution);
-                    account.setDescription(description);
-
-                    AccountManager.save(account);
-
-                    setResponsePage(UpdateAccountSuccessfulPage.class);
-
-                    Emailer
-                            .send(email, "Your account information has been updated",
-                                    "Your account information has been updated.\n\nBest regards,\nRegistry Team");
-                } catch (ManagerException e) {
-                    handleException(e);
-                } catch (Exception e) {
-                    handleException(e);
                 }
+
+                account.setFirstName(firstName);
+                account.setLastName(lastName);
+                account.setInitials(initials);
+                account.setEmail(email);
+                account.setInstitution(institution);
+                account.setDescription(description);
+
+                AccountController.save(account);
+
+                setResponsePage(UpdateAccountSuccessfulPage.class);
+
+                Emailer
+                        .send(email, "Your account information has been updated",
+                                "Your account information has been updated.\n\nBest regards,\nRegistry Team");
+            } catch (ControllerException e) {
+                throw new ViewException(e);
             }
         }
 
-        add(new UpdateAccountForm("updateAccountForm"));
+        private void initialize(String id) {
+            IceSession session = IceSession.get();
+
+            if (!session.isAuthenticated()) {
+                setResponsePage(WelcomePage.class);
+
+                return;
+            }
+
+            account = session.getAccount();
+
+            setModel(new CompoundPropertyModel<Object>(this));
+
+            firstName = account.getFirstName();
+            lastName = account.getLastName();
+            initials = account.getInitials();
+            email = account.getEmail();
+            institution = account.getInstitution();
+            description = account.getDescription();
+
+            add(new TextField<String>("firstName").setRequired(true).setLabel(
+                    new Model<String>("Given name")).add(
+                    new StringValidator.MaximumLengthValidator(50)));
+            add(new TextField<String>("lastName").setRequired(true).setLabel(
+                    new Model<String>("Family name")).add(
+                    new StringValidator.MaximumLengthValidator(50)));
+            add(new TextField<String>("initials").setLabel(new Model<String>("Initials")).add(
+                    new StringValidator.MaximumLengthValidator(10)));
+            add(new TextField<String>("email").setRequired(true).setLabel(
+                    new Model<String>("Email"))
+                    .add(new StringValidator.MaximumLengthValidator(100)).add(
+                            EmailAddressValidator.getInstance()));
+            add(new TextField<String>("institution").setLabel(new Model<String>("Institution")));
+            add(new TextArea<String>("description").setLabel(new Model<String>("Description")));
+
+            add(new Button("submitButton", new Model<String>("Update")));
+
+            add(new FeedbackPanel("feedback"));
+        }
     }
 }

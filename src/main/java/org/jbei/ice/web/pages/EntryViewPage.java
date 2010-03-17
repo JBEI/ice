@@ -3,7 +3,6 @@ package org.jbei.ice.web.pages;
 import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ResourceReference;
-import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
@@ -11,11 +10,11 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.AttachmentManager;
+import org.jbei.ice.controllers.AttachmentController;
+import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.SampleController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SampleManager;
-import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.managers.TraceSequenceManager;
 import org.jbei.ice.lib.managers.WorkspaceManager;
 import org.jbei.ice.lib.models.Entry;
@@ -23,11 +22,12 @@ import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.models.Workspace;
-import org.jbei.ice.lib.permissions.AuthenticatedEntryManager;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.panels.AttachmentsViewPanel;
 import org.jbei.ice.web.panels.PartViewPanel;
 import org.jbei.ice.web.panels.PermissionEditPanel;
@@ -63,8 +63,12 @@ public class EntryViewPage extends ProtectedPage {
     private final String ATTACHMENTS_URL_KEY = "attachments";
     private final String PERMISSIONS_URL_KEY = "permission";
 
+    private transient EntryController entryController;
+
     public EntryViewPage(PageParameters parameters) {
         super(parameters);
+
+        entryController = new EntryController(IceSession.get().getAccount());
 
         processPageParameters(parameters);
 
@@ -110,44 +114,17 @@ public class EntryViewPage extends ProtectedPage {
     }
 
     private void processPageParameters(PageParameters parameters) {
-        int entryId = 0;
-
-        String identifier = parameters.getString("0");
-
-        try {
-            entryId = Integer.parseInt(identifier);
-            entry = AuthenticatedEntryManager.get(entryId);
-        } catch (NumberFormatException e) {
-            // Not a number. Perhaps it's a part number or recordId?
-            try {
-                entry = AuthenticatedEntryManager.getByPartNumber(identifier);
-                entryId = entry.getId();
-            } catch (PermissionException e1) {
-                // entryId is still 0
-            } catch (ManagerException e1) {
-                Logger.error(e.toString(), e);
-                throw new RuntimeException(e);
-            }
-            if (entryId == 0) {
-                try {
-                    entry = AuthenticatedEntryManager.getByRecordId(identifier);
-                    entryId = entry.getId();
-                } catch (PermissionException e1) {
-                    // entryId is still 0
-                } catch (ManagerException e1) {
-                    Logger.error(e.toString(), e);
-                    throw new RuntimeException(e);
-                }
-            }
-        } catch (PermissionException e) {
-            entryId = 0;
-        } catch (ManagerException e) {
-            Logger.error(e.toString(), e);
-            throw new RuntimeException(e);
+        if (parameters == null || parameters.size() == 0) {
+            throw new ViewException("Parameters are missing!");
         }
 
-        if (entryId == 0) {
-            throw new RestartResponseAtInterceptPageException(PermissionDeniedPage.class);
+        String identifier = parameters.getString("0");
+        try {
+            entry = entryController.getByIdentifier(identifier);
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        } catch (PermissionException e) {
+            throw new ViewPermissionException("No permission to view entry!", e);
         }
 
     }
@@ -259,7 +236,16 @@ public class EntryViewPage extends ProtectedPage {
 
         samplesLink.setOutputMarkupId(true);
 
-        int numSamples = SampleManager.getNumberOfSamples(entry);
+        SampleController sampleController = new SampleController(IceSession.get().getAccount());
+
+        int numSamples = 0;
+
+        try {
+            numSamples = sampleController.getNumberOfSamples(entry);
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        }
+
         String samplesLabel = "Samples";
         if (numSamples > 0) {
             samplesLabel = samplesLabel + " (" + numSamples + ")";
@@ -275,8 +261,13 @@ public class EntryViewPage extends ProtectedPage {
         sequenceLink.setOutputMarkupId(true);
 
         String sequenceLabel = "Sequence";
-        if (SequenceManager.hasSequence(entry)) {
-            sequenceLabel = sequenceLabel + " (1)";
+
+        try {
+            if (entryController.hasSequence(entry)) {
+                sequenceLabel = sequenceLabel + " (1)";
+            }
+        } catch (ControllerException e) {
+            throw new ViewException(e);
         }
 
         sequenceLink.add(new Label("sequenceLabel", sequenceLabel));
@@ -304,7 +295,17 @@ public class EntryViewPage extends ProtectedPage {
 
         attachmentsLink.setOutputMarkupId(true);
 
-        int numAttachments = AttachmentManager.getNumberOfAttachments(entry);
+        AttachmentController attachmentController = new AttachmentController(IceSession.get()
+                .getAccount());
+
+        int numAttachments = 0;
+
+        try {
+            numAttachments = attachmentController.getNumberOfAttachments(entry);
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        }
+
         String attachmentsLabel = "Attachments";
         if (numAttachments > 0) {
             attachmentsLabel = attachmentsLabel + " (" + numAttachments + ")";
@@ -332,12 +333,13 @@ public class EntryViewPage extends ProtectedPage {
             @Override
             public void onClick(AjaxRequestTarget target) {
                 Workspace workspace = new Workspace(IceSession.get().getAccount(), entry);
+
                 try {
-                    WorkspaceManager.addOrUpdate(workspace);
-                } catch (ManagerException e) {
-                    Logger.error("Could not addOrUpdate workspace", e);
-                    throw new RuntimeException(e);
+                    WorkspaceManager.addOrUpdate(workspace); // TODO: Replace this with Controller
+                } catch (ManagerException e) { // TODO: Fix this
+                    throw new ViewException(e);
                 }
+
                 Image image = new Image("plusImage", inWorkspaceImage);
                 this.replace(image);
                 getParent().replace(this);

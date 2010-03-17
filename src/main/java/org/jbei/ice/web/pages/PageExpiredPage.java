@@ -9,6 +9,11 @@ import org.apache.wicket.protocol.http.WebRequestCycle;
 public class PageExpiredPage extends UnprotectedPage {
     public PageExpiredPage(PageParameters parameters) {
         super(parameters);
+
+        initialize();
+    }
+
+    private void initialize() {
         CharSequence relativeUrl = WebRequestCycle.get().urlFor(HomePage.class,
                 new PageParameters());
 

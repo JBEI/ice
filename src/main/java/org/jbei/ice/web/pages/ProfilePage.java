@@ -6,9 +6,10 @@ import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.lib.managers.AccountManager;
-import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Account;
+import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.panels.EmptyMessagePanel;
 import org.jbei.ice.web.panels.ProfileAboutUserPanel;
 import org.jbei.ice.web.panels.ProfileEntriesPanel;
@@ -33,12 +34,20 @@ public class ProfilePage extends ProtectedPage {
     public ProfilePage(PageParameters parameters) {
         super(parameters);
 
+        initialize(parameters);
+    }
+
+    private void initialize(PageParameters parameters) {
+        if (parameters == null || parameters.size() < 2) {
+            throw new ViewException("Parameters are missing!");
+        }
+
         currentPage = parameters.getString("0");
         accountEmail = parameters.getString("1");
 
         try {
-            account = AccountManager.getByEmail(accountEmail);
-        } catch (ManagerException e) {
+            account = AccountController.getByEmail(accountEmail);
+        } catch (ControllerException e) {
             account = null;
         }
 

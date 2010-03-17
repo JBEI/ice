@@ -27,7 +27,15 @@ public class UserPage extends ProtectedPage {
     public UserPage(PageParameters parameters) {
         super(parameters);
 
-        currentPage = parameters.getString("0");
+        initialize(parameters);
+    }
+
+    private void initialize(PageParameters parameters) {
+        if (parameters == null || parameters.size() == 0) {
+            currentPage = null;
+        } else {
+            currentPage = parameters.getString("0");
+        }
 
         entriesLink = new BookmarkablePageLink<Object>("entriesLink", UserPage.class,
                 new PageParameters("0=entries"));

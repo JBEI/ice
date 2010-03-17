@@ -8,14 +8,26 @@ import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.Model;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.EntryManager;
-import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.common.ViewPermissionException;
 
 public class VectorEditorPage extends WebPage {
     public VectorEditorPage(PageParameters parameters) {
+        super(parameters);
+
+        initialize(parameters);
+    }
+
+    private void initialize(PageParameters parameters) {
+        if (parameters == null || parameters.size() == 0) {
+            throw new ViewException("Parameters are missing!");
+        }
+
         WebComponent flashComponent = new WebComponent("flashComponent");
 
         String entryRecordId = parameters.getString("entryId");
@@ -43,12 +55,16 @@ public class VectorEditorPage extends WebPage {
         add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
                 UnprotectedPage.JS_RESOURCE_LOCATION + "extMouseWheel.js"));
 
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
+
         try {
-            Entry entry = EntryManager.getByRecordId(entryRecordId);
+            Entry entry = entryController.getByRecordId(entryRecordId);
 
             add(new Label("title", new Model<String>(entry.getNamesAsString())));
-        } catch (ManagerException e) {
-            Logger.error("Failed to pull entry by id '" + entryRecordId + "': ", e);
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        } catch (PermissionException e) {
+            throw new ViewPermissionException("No permissions to view entry!", e);
         }
     }
 }

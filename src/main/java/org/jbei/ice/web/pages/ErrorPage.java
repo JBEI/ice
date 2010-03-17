@@ -37,19 +37,21 @@ public class ErrorPage extends WebPage {
     }
 
     private void sendEmail(Throwable throwable) {
-        if (throwable != null) {
-            SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-            String body = "System Time: " + dateFormatter.format((new Date())) + "\n\n";
-            body = body + Utils.stackTraceToString(throwable);
-            String subject = (throwable.getMessage().length() > 50) ? (throwable.getMessage()
-                    .substring(0, 50) + "...") : throwable.getMessage();
-
-            Emailer.error(JbeirSettings.getSetting("ERROR_EMAIL_EXCEPTION_PREFIX") + " " + subject,
-                    body);
-
-            Logger.error(throwable.getMessage(), throwable);
-            Logger.error(body, throwable);
+        if (throwable == null) {
+            return;
         }
+
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        String body = "System Time: " + dateFormatter.format((new Date())) + "\n\n";
+        body = body + Utils.stackTraceToString(throwable);
+        String subject = (throwable.getMessage().length() > 50) ? (throwable.getMessage()
+                .substring(0, 50) + "...") : throwable.getMessage();
+
+        Emailer.error(JbeirSettings.getSetting("ERROR_EMAIL_EXCEPTION_PREFIX") + " " + subject,
+                body);
+
+        Logger.error(throwable.getMessage(), throwable);
+        Logger.error(body, throwable);
     }
 }

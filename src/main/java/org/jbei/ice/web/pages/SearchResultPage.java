@@ -3,44 +3,39 @@ package org.jbei.ice.web.pages;
 import java.util.ArrayList;
 
 import org.apache.wicket.PageParameters;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.lib.logging.UsageLogger;
-import org.jbei.ice.lib.search.lucene.AggregateSearch;
+import org.jbei.ice.controllers.SearchController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.search.lucene.SearchResult;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.panels.EmptyMessagePanel;
 import org.jbei.ice.web.panels.SearchResultPanel;
 
 public class SearchResultPage extends ProtectedPage {
-    String queryString = null;
-
-    public String getQueryString() {
-        return queryString;
-    }
-
-    public void setQueryString(String queryString) {
-        this.queryString = queryString;
-    }
+    private final int NUMBER_OF_ENTRIES_PER_PAGE = 15;
+    private final String SEARCH_RESULT_PANEL_NAME = "searchResultPanel";
 
     public SearchResultPage(PageParameters parameters) {
         super(parameters);
-        setQueryString(parameters.getString("search"));
 
-        ArrayList<SearchResult> searchResults = null;
-        Panel searchResultPanel = null;
+        String queryString = parameters.getString("search");
+
+        ArrayList<SearchResult> searchResults;
+
+        SearchController searchController = new SearchController(IceSession.get().getAccount());
+
         try {
-            searchResults = AggregateSearch.query(getQueryString());
-            UsageLogger.info(searchResults.size() + " results found for: " + getQueryString());
+            searchResults = searchController.find(queryString);
 
-            if (searchResults.size() == 0) {
-
-                searchResultPanel = new EmptyMessagePanel("searchResultPanel", "No results found");
+            if (searchResults == null || searchResults.size() == 0) {
+                add(new EmptyMessagePanel(SEARCH_RESULT_PANEL_NAME, "No results found"));
             } else {
-                searchResultPanel = new SearchResultPanel("searchResultPanel", searchResults, 15);
+                add(new SearchResultPanel(SEARCH_RESULT_PANEL_NAME, searchResults,
+                        NUMBER_OF_ENTRIES_PER_PAGE));
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (ControllerException e) {
+            throw new ViewException(e);
         }
-        add(searchResultPanel);
     }
 
     @Override

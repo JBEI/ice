@@ -8,6 +8,10 @@ public class LoginPage extends UnprotectedPage {
     public LoginPage(PageParameters parameters) {
         super(parameters);
 
+        initialize();
+    }
+
+    private void initialize() {
         if (IceSession.get().isAuthenticated()) {
             setRedirect(true);
             setResponsePage(HomePage.class);
