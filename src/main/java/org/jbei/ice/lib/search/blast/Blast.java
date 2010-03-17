@@ -19,15 +19,13 @@ import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.seq.RNATools;
 import org.biojava.bio.symbol.IllegalSymbolException;
 import org.biojava.bio.symbol.SymbolList;
-import org.jbei.ice.controllers.SequenceController;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.controllers.ApplicationContoller;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.lib.utils.Job;
-import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.web.IceSession;
 
 public class Blast {
     public static final String BLASTN_PROGRAM = "blastn";
@@ -55,37 +53,33 @@ public class Blast {
 
         if (!isBlastDatabaseExists()) {
             Logger.info("Creating blast db for the first time");
-            JobCue jobCue = JobCue.getInstance();
-            jobCue.addJob(Job.REBUILD_BLAST_INDEX);
-            jobCue.processIn(1000);
+
+            ApplicationContoller.scheduleBlastIndexRebuildJob(1000); // TODO: Blast class shouldn't know about jobcueing system, move this 
         }
     }
 
-    public void rebuildDatabase() {
+    public void rebuildDatabase() throws BlastException {
         try { // The big try
-            File newbigFastaFileDir = new File(blastDirectory + ".new");
-            newbigFastaFileDir.mkdir();
-            File bigFastaFile = new File(newbigFastaFileDir.getPath() + File.separator
-                    + this.bigFastaFile);
-            FileWriter bigFastaWriter = new FileWriter(bigFastaFile);
-            writeBigFastaFile(bigFastaWriter);
-            formatBlastDb(newbigFastaFileDir);
             synchronized (this) {
+                File newbigFastaFileDir = new File(blastDirectory + ".new");
+                newbigFastaFileDir.mkdir();
+                File bigFastaFile = new File(newbigFastaFileDir.getPath() + File.separator
+                        + this.bigFastaFile);
+                FileWriter bigFastaWriter = new FileWriter(bigFastaFile);
+                writeBigFastaFile(bigFastaWriter);
+                formatBlastDb(newbigFastaFileDir);
+
                 setRebuilding(true);
                 renameBlastDb(newbigFastaFileDir);
                 setRebuilding(false);
             }
-        } catch (IOException e1) {
-            String msg = "Rebuild blast database failed: ";
-            Logger.error(msg + e1.toString(), e1);
+        } catch (IOException e) {
+            throw new BlastException("Failed to rebuild Blast database!", e);
         } catch (SecurityException e) {
-            String msg = "Rebuild blast database failed: ";
-            Logger.error(msg + e.toString(), e);
+            throw new BlastException("Failed to rebuild Blast database!", e);
         } catch (Exception e) {
-            String msg = "Rebuild blast database failed: ";
-            Logger.error(msg + e.toString(), e);
+            throw new BlastException("Failed to rebuild Blast database!", e);
         }
-
     }
 
     /**
@@ -107,13 +101,13 @@ public class Blast {
         for (BlastResult result : tempResults) {
             if (tempHashMap.containsKey(result.getSubjectId())) {
                 BlastResult currentResult = tempHashMap.get(result.getSubjectId());
+
                 if (result.getRelativeScore() > currentResult.getRelativeScore()) {
                     tempHashMap.put(result.getSubjectId(), result);
                 }
             } else {
                 tempHashMap.put(result.getSubjectId(), result);
             }
-
         }
 
         ArrayList<BlastResult> outputResult = new ArrayList<BlastResult>(tempHashMap.values());
@@ -198,16 +192,13 @@ public class Blast {
 
         if (!isBlastDatabaseExists()) {
             Logger.info("Creating blast database for the first time");
-            JobCue jobCue = JobCue.getInstance();
-            jobCue.addJob(Job.REBUILD_BLAST_INDEX);
-            jobCue.processIn(5000);
+
+            ApplicationContoller.scheduleBlastIndexRebuildJob(5000); // TODO: Move this, blast shouldn't know about jobs
         } else {
             while (isRebuilding()) {
                 try {
                     wait(50);
                 } catch (InterruptedException e) {
-
-                    e.printStackTrace();
                     throw new BlastException(e);
                 }
             }
@@ -320,14 +311,11 @@ public class Blast {
     }
 
     private void writeBigFastaFile(FileWriter bigFastaWriter) throws IOException, BlastException {
-        SequenceController sequenceController = new SequenceController(IceSession.get()
-                .getAccount()); // TODO: double check this. What's happen when account is null? 
-
         List<Sequence> sequencesList = null;
 
         try {
-            sequencesList = sequenceController.getSequences();
-        } catch (ControllerException e) {
+            sequencesList = SequenceManager.getAllSequences();
+        } catch (ManagerException e) {
             throw new BlastException(e);
         }
 

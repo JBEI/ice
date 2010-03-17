@@ -1,15 +1,21 @@
 package org.jbei.ice.lib.search.blast;
 
 public class BlastException extends Exception {
-
-    public BlastException(Exception e) {
-        super(e);
-    }
-
-    public BlastException(String errorString) {
-        super(errorString);
-    }
-
     private static final long serialVersionUID = 1L;
 
+    public BlastException() {
+        super();
+    }
+
+    public BlastException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public BlastException(String message) {
+        super(message);
+    }
+
+    public BlastException(Throwable cause) {
+        super(cause);
+    }
 }

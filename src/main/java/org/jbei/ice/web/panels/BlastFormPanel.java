@@ -10,12 +10,15 @@ import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.PropertyModel;
-import org.jbei.ice.controllers.BlastController;
+import org.jbei.ice.controllers.SearchController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.search.blast.BlastResult;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.SequenceUtils;
+import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.CustomChoice;
+import org.jbei.ice.web.common.ViewException;
 
 public class BlastFormPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -65,8 +68,17 @@ public class BlastFormPanel extends Panel {
                 if (query != null && !query.isEmpty() && program != null && !program.isEmpty()) {
                     ArrayList<BlastResult> blastResults = null;
 
+                    SearchController searchController = new SearchController(IceSession.get()
+                            .getAccount());
+
                     try {
-                        blastResults = BlastController.query(query, program);
+                        if (program.equals("blastn")) {
+                            blastResults = searchController.blastn(query);
+                        } else if (program.equals("tblastx")) {
+                            blastResults = searchController.tblastx(query);
+                        }
+                    } catch (ControllerException e) {
+                        throw new ViewException(e);
                     } catch (ProgramTookTooLongException e) {
                         Panel resultPanel = new EmptyMessagePanel(BLAST_RESULT_PANEL_NAME,
                                 "Blast took too long to finish. Try a different query");

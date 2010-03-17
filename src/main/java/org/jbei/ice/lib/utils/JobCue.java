@@ -6,11 +6,11 @@ import java.util.Set;
 
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.search.blast.Blast;
+import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.lucene.LuceneSearch;
 import org.jbei.ice.lib.search.lucene.SearchException;
 
 public class JobCue implements Runnable {
-
     private final Hashtable<Integer, Long> cue = new Hashtable<Integer, Long>();
     private long counter = 0L;
     private static long wakeupInterval = 1000L;
@@ -42,30 +42,40 @@ public class JobCue implements Runnable {
 
     @SuppressWarnings("unchecked")
     private synchronized void processCue() {
-        // TODO use reflection or something
+        // TODO: Tim; use reflection or something
 
         Hashtable<Integer, Long> newCue = (Hashtable<Integer, Long>) cue.clone();
 
         Set<Integer> processedJobs = newCue.keySet();
+
         Logger.debug("Proccesing jobs. There are " + processedJobs.size() + " jobs.");
+
         if (processedJobs.size() > 0) {
             Logger.info("Processing jobs: " + processedJobs.toString());
         }
 
-        try {
-            for (Integer jobType : processedJobs) {
-                if (jobType == 1) {
+        if (processedJobs == null || processedJobs.size() == 0) {
+            return;
+        }
+
+        for (Integer jobType : processedJobs) {
+            if (jobType == 1) {
+                try {
                     LuceneSearch.getInstance().rebuildIndex();
-                } else if (jobType == 2) {
+                } catch (SearchException e) {
+                    Logger.error("Failed to rebuild search database!", e); // TODO: Scream more loud here
+                }
+            } else if (jobType == 2) {
+                try {
                     Blast blast = new Blast();
 
                     blast.rebuildDatabase();
+                } catch (BlastException e) {
+                    Logger.error("Failed to rebuild blast database!", e); // TODO: Scream more loud here
                 }
-
-                cue.remove(jobType);
             }
-        } catch (SearchException e) {
-            throw new RuntimeException(e); // TODO: not sure here
+
+            cue.remove(jobType);
         }
     }
 

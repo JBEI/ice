@@ -131,12 +131,12 @@ public class SequenceManager {
     }
 
     @SuppressWarnings("unchecked")
-    public static ArrayList<Sequence> getSequences() throws ManagerException {
+    public static ArrayList<Sequence> getAllSequences() throws ManagerException {
         ArrayList<Sequence> sequences = null;
 
         Session session = DAO.getSession();
         try {
-            Query query = session.createQuery("from " + Entry.class.getName());
+            Query query = session.createQuery("from " + Sequence.class.getName());
 
             List list = query.list();
 

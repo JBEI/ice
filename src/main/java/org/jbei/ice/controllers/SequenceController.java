@@ -1,7 +1,5 @@
 package org.jbei.ice.controllers;
 
-import java.util.ArrayList;
-
 import org.biojava.utils.ParserException;
 import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -137,24 +135,6 @@ public class SequenceController extends Controller {
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
-    }
-
-    public ArrayList<Sequence> getSequences() throws ControllerException {
-        ArrayList<Sequence> sequences = new ArrayList<Sequence>();
-
-        try {
-            ArrayList<Sequence> allSequences = SequenceManager.getSequences();
-
-            for (Sequence sequence : allSequences) {
-                if (hasReadPermission(sequence)) {
-                    sequences.add(sequence);
-                }
-            }
-        } catch (ManagerException e) {
-            throw new ControllerException(e);
-        }
-
-        return sequences;
     }
 
     public Sequence parse(String sequence) throws ParserException {

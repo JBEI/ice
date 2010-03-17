@@ -2,12 +2,13 @@ package org.jbei.ice.controllers;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.controllers.BlastController.BlastControllerException;
 import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.EntryPermissionVerifier;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.logging.UsageLogger;
+import org.jbei.ice.lib.managers.EntryManager;
+import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.search.blast.Blast;
@@ -52,26 +53,47 @@ public class SearchController extends Controller {
         return results;
     }
 
-    public static ArrayList<BlastResult> query(String query, String program)
-            throws ProgramTookTooLongException {
+    public ArrayList<BlastResult> blastn(String query) throws ProgramTookTooLongException,
+            ControllerException {
+        return blast(query, "blastn");
+    }
 
-        ArrayList<BlastResult> results = null;
+    public ArrayList<BlastResult> tblastx(String query) throws ProgramTookTooLongException,
+            ControllerException {
+        return blast(query, "tblastx");
+    }
+
+    protected ArrayList<BlastResult> blast(String query, String program)
+            throws ProgramTookTooLongException, ControllerException {
+
+        ArrayList<BlastResult> results = new ArrayList<BlastResult>();
 
         try {
             Logger.info(String.format("Blast '%s' searching for %s", program, query));
 
+            EntryController entryController = new EntryController(IceSession.get().getAccount());
+
             Blast blast = new Blast();
 
-            results = blast.query(query, program);
+            ArrayList<BlastResult> blastResults = blast.query(query, program);
+            if (blastResults != null) {
+                for (BlastResult blastResult : blastResults) {
+                    Entry entry = EntryManager.getByRecordId(blastResult.getSubjectId());
+
+                    if (entry != null && entryController.hasReadPermission(entry)) {
+                        results.add(blastResult);
+                    }
+                }
+            }
 
             Logger.info(String.format("Blast found %d results", (results == null) ? 0 : results
                     .size()));
         } catch (BlastException e) {
-            Logger.error(BlastControllerException.BLAST_QUERY_FAILED, e);
+            throw new ControllerException(e);
+        } catch (ManagerException e) {
+            throw new ControllerException(e);
         } catch (ProgramTookTooLongException e) {
             throw new ProgramTookTooLongException(e);
-        } catch (Exception e) {
-            Logger.error(BlastControllerException.BLAST_QUERY_FAILED, e);
         }
 
         return results;

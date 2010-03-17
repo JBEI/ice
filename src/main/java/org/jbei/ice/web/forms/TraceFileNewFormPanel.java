@@ -12,7 +12,6 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
-import org.jbei.ice.controllers.BlastController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.TraceSequenceManager;
@@ -22,7 +21,6 @@ import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.models.TraceSequenceAlignment;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqResult;
-import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.panels.SequenceAnalysisViewPanel;
@@ -114,13 +112,13 @@ public class TraceFileNewFormPanel extends Panel {
                 return;
             }
 
-            ArrayList<Bl2SeqResult> bl2seqAlignments = null;
-            try {
+            ArrayList<Bl2SeqResult> bl2seqAlignments = new ArrayList<Bl2SeqResult>();
+            /*try {
                 bl2seqAlignments = BlastController.alignSequencesAndParse(entry.getSequence()
-                        .getSequence(), sequence.getSequence());
+                    .getSequence(), sequence.getSequence());
             } catch (ProgramTookTooLongException e) {
                 Logger.error("Prgoram took to long to align and parse sequences", e);
-            }
+            }*/
 
             if (bl2seqAlignments != null && bl2seqAlignments.size() > 0) {
                 Bl2SeqResult maxBl2SeqResult = null;
