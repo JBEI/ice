@@ -7,28 +7,36 @@ import java.util.regex.Pattern;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.protocol.http.WebRequestCycle;
-import org.jbei.ice.lib.managers.EntryManager;
-import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class WebUtils {
-
-    public static String makeEntryLink(JbeiLink jbeiLink) {
+    private static String makeEntryLink(JbeiLink jbeiLink) {
         String result = null;
+
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
 
         CharSequence relativePath = WebRequestCycle.get().urlFor(EntryViewPage.class,
                 new PageParameters());
 
         int id = 0;
-        try {
-            Entry entry = EntryManager.getByPartNumber(jbeiLink.getPartNumber());
+        Entry entry = null;
 
-            if (entry != null) {
-                id = entry.getId();
-            }
-        } catch (ManagerException e) {
-            e.printStackTrace();
+        try {
+            entry = entryController.getByPartNumber(jbeiLink.getPartNumber());
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        } catch (PermissionException e) {
+            throw new ViewException(e);
+        }
+
+        if (entry != null) {
+            id = entry.getId();
         }
 
         String descriptiveLabel = "";
@@ -41,28 +49,26 @@ public class WebUtils {
         }
 
         result = "<a href=" + relativePath + "/" + id + ">" + descriptiveLabel + "</a>";
+
         return result;
     }
 
-    public static String makeEntryLink(int id) {
-
+    private static String makeEntryLink(int id) {
         String result = null;
+
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
 
         CharSequence relativePath = WebRequestCycle.get().urlFor(EntryViewPage.class,
                 new PageParameters());
-        // TODO this is not very elegant at all. Is there a better way than to generate <a> tag manually?
+        // TODO this is not very elegant at all. Is there a better way than to generate <a> tag manually? Yes, Tim!
         try {
             result = "<a href=" + relativePath.toString() + "/" + id + ">"
-                    + EntryManager.get(id).getOnePartNumber().getPartNumber() + "</a>";
-        } catch (ManagerException e) {
-
-            e.printStackTrace();
+                    + entryController.get(id).getOnePartNumber().getPartNumber() + "</a>";
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        } catch (PermissionException e) {
+            throw new ViewException(e);
         }
-        return result;
-    }
-
-    public static String parseJbeiLinks(String text) {
-        String result = null;
 
         return result;
     }
@@ -78,56 +84,59 @@ public class WebUtils {
     }
 
     public static String jbeiLinkifyText(String text) {
-        Pattern basicJbeiPattern = Pattern.compile("\\[\\[jbei:.*?\\]\\]");
-        Pattern partNumberPattern = Pattern.compile("\\[\\[jbei:(.*)\\]\\]");
-        Pattern descriptivePattern = Pattern.compile("\\[\\[jbei:(.*)\\|(.*)\\]\\]");
+        String newText = "";
 
-        if (text == null) {
-            return "";
-        }
-        Matcher basicJbeiMatcher = basicJbeiPattern.matcher(text);
+        try {
+            EntryController entryController = new EntryController(IceSession.get().getAccount());
 
-        ArrayList<JbeiLink> jbeiLinks = new ArrayList<JbeiLink>();
-        ArrayList<Integer> starts = new ArrayList<Integer>();
-        ArrayList<Integer> ends = new ArrayList<Integer>();
+            Pattern basicJbeiPattern = Pattern.compile("\\[\\[jbei:.*?\\]\\]");
+            Pattern partNumberPattern = Pattern.compile("\\[\\[jbei:(.*)\\]\\]");
+            Pattern descriptivePattern = Pattern.compile("\\[\\[jbei:(.*)\\|(.*)\\]\\]");
 
-        while (basicJbeiMatcher.find()) {
-            String partNumber = null;
-            String descriptive = null;
+            if (text == null) {
+                return "";
+            }
+            Matcher basicJbeiMatcher = basicJbeiPattern.matcher(text);
 
-            Matcher partNumberMatcher = partNumberPattern.matcher(basicJbeiMatcher.group());
-            Matcher descriptivePatternMatcher = descriptivePattern
-                    .matcher(basicJbeiMatcher.group());
+            ArrayList<JbeiLink> jbeiLinks = new ArrayList<JbeiLink>();
+            ArrayList<Integer> starts = new ArrayList<Integer>();
+            ArrayList<Integer> ends = new ArrayList<Integer>();
 
-            if (descriptivePatternMatcher.find()) {
-                partNumber = descriptivePatternMatcher.group(1).trim();
-                descriptive = descriptivePatternMatcher.group(2).trim();
+            while (basicJbeiMatcher.find()) {
+                String partNumber = null;
+                String descriptive = null;
 
-            } else if (partNumberMatcher.find()) {
-                partNumber = partNumberMatcher.group(1).trim();
+                Matcher partNumberMatcher = partNumberPattern.matcher(basicJbeiMatcher.group());
+                Matcher descriptivePatternMatcher = descriptivePattern.matcher(basicJbeiMatcher
+                        .group());
+
+                if (descriptivePatternMatcher.find()) {
+                    partNumber = descriptivePatternMatcher.group(1).trim();
+                    descriptive = descriptivePatternMatcher.group(2).trim();
+
+                } else if (partNumberMatcher.find()) {
+                    partNumber = partNumberMatcher.group(1).trim();
+                }
+
+                if (partNumber != null) {
+                    Entry entry = entryController.getByPartNumber(partNumber);
+
+                    if (entry != null) {
+                        jbeiLinks.add(new JbeiLink(partNumber, descriptive));
+                        starts.add(basicJbeiMatcher.start());
+                        ends.add(basicJbeiMatcher.end());
+                    }
+                }
             }
 
-            if (partNumber != null) {
-                Entry entry = null;
-                try {
-                    entry = EntryManager.getByPartNumber(partNumber);
-                } catch (ManagerException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                if (entry != null) {
-                    jbeiLinks.add(new JbeiLink(partNumber, descriptive));
-                    starts.add(basicJbeiMatcher.start());
-                    ends.add(basicJbeiMatcher.end());
-                }
+            newText = new String(text);
+            for (int i = jbeiLinks.size() - 1; i > -1; i = i - 1) {
+                String before = newText.substring(0, starts.get(i));
+                String after = newText.substring(ends.get(i));
+                newText = before + makeEntryLink(jbeiLinks.get(i)) + after;
             }
-        }
-
-        String newText = new String(text);
-        for (int i = jbeiLinks.size() - 1; i > -1; i = i - 1) {
-            String before = newText.substring(0, starts.get(i));
-            String after = newText.substring(ends.get(i));
-            newText = before + makeEntryLink(jbeiLinks.get(i)) + after;
+        } catch (Exception e) {
+            return text;
         }
 
         return newText;

@@ -12,9 +12,12 @@ import org.apache.wicket.protocol.http.WebRequest;
 import org.apache.wicket.protocol.http.WebRequestCycle;
 import org.apache.wicket.protocol.http.WebResponse;
 import org.apache.wicket.protocol.http.WebSession;
+import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.authentication.AuthenticationBackendException;
 import org.jbei.ice.lib.authentication.IAuthenticationBackend;
+import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountPreferences;
@@ -22,15 +25,15 @@ import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.utils.JbeirSettings;
 
 public class IceSession extends WebSession {
-
     private static final long serialVersionUID = 1L;
+
     private IAuthenticationBackend authenticator = null;
     private String COOKIE_NAME = JbeirSettings.getSetting("COOKIE_NAME");
 
-    public IceSession(Request request, Response response, IAuthenticationBackend authenticator2) {
+    public IceSession(Request request, Response response, IAuthenticationBackend authenticator) {
         super(request);
 
-        this.authenticator = authenticator2;
+        this.authenticator = authenticator;
     }
 
     /**
@@ -65,14 +68,13 @@ public class IceSession extends WebSession {
 
     }
 
-    public boolean authenticateUser(String login, String password) {
-        Account account = null;
-        boolean result = false;
+    public void authenticateUser(String login, String password) throws IceSessionException,
+            InvalidCredentialsException {
         try {
-            account = authenticator.authenticate(login, password);
+            Account account = authenticator.authenticate(login, password);
 
             if (account != null) {
-                AccountPreferences accountPreferences = AccountManager
+                AccountPreferences accountPreferences = AccountController
                         .getAccountPreferences(account);
                 if (accountPreferences == null) {
                     accountPreferences = new AccountPreferences();
@@ -89,13 +91,14 @@ public class IceSession extends WebSession {
                 }
                 sessionData.getData().put("accountId", account.getId());
                 PersistentSessionDataWrapper.getInstance().persist(sessionData);
-                result = true;
             }
-        } catch (Exception e) {
-            Logger.warn("Could not authenticate user " + login + ": " + e.toString());
-            e.printStackTrace();
+        } catch (ManagerException e) {
+            throw new IceSessionException("Authentication exception!", e);
+        } catch (ControllerException e) {
+            throw new IceSessionException("Authentication exception!", e);
+        } catch (AuthenticationBackendException e) {
+            throw new IceSessionException("Authentication exception!", e);
         }
-        return result;
     }
 
     public void deAuthenticateUser() {
@@ -133,8 +136,8 @@ public class IceSession extends WebSession {
             if (data.containsKey("accountId")) {
                 Integer accountId = (Integer) data.get("accountId");
                 try {
-                    account = AccountManager.get(accountId);
-                } catch (ManagerException e) {
+                    account = AccountController.get(accountId);
+                } catch (ControllerException e) {
                     String msg = "Could not getAccount from IceSession: " + e.toString();
                     Logger.error(msg, e);
                 }
@@ -146,8 +149,8 @@ public class IceSession extends WebSession {
 
     public void setAccountPreferences(AccountPreferences accountPreferences) {
         try {
-            AccountManager.save(accountPreferences);
-        } catch (ManagerException e) {
+            AccountController.saveAccountPreferences(accountPreferences);
+        } catch (ControllerException e) {
             String msg = "Could not setAccountPreferences in IceSession: " + e.toString();
             Logger.error(msg, e);
         }
@@ -155,9 +158,9 @@ public class IceSession extends WebSession {
 
     public void saveAccountPreferences() {
         try {
-            AccountManager.save(this.getAccountPreferences());
-
-        } catch (ManagerException e) {
+            AccountController.saveAccountPreferences(getAccountPreferences());
+        } catch (ControllerException e) {
+            // TODO: handle this properly
             String msg = "Could not save accountPreferences in IceSession";
             Logger.error(msg, e);
         }
@@ -166,8 +169,8 @@ public class IceSession extends WebSession {
     public AccountPreferences getAccountPreferences() {
         AccountPreferences result = null;
         try {
-            result = AccountManager.getAccountPreferences(getAccount());
-        } catch (ManagerException e) {
+            result = AccountController.getAccountPreferences(getAccount());
+        } catch (ControllerException e) {
             String msg = "Could not getAccountPreferences in IceSession: " + e.toString();
             Logger.error(msg, e);
         }
@@ -185,4 +188,23 @@ public class IceSession extends WebSession {
         return webRequestCycle.getWebRequest();
     }
 
+    public class IceSessionException extends Exception {
+        private static final long serialVersionUID = 1L;
+
+        public IceSessionException() {
+            super();
+        }
+
+        public IceSessionException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public IceSessionException(String message) {
+            super(message);
+        }
+
+        public IceSessionException(Throwable cause) {
+            super(cause);
+        }
+    }
 }

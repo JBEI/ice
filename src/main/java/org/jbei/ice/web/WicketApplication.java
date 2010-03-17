@@ -11,10 +11,10 @@ import org.apache.wicket.request.target.coding.QueryStringUrlCodingStrategy;
 import org.apache.wicket.settings.ISecuritySettings;
 import org.jbei.ice.lib.authentication.AuthenticationBackendManager;
 import org.jbei.ice.lib.authentication.IAuthenticationBackend;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.IceAuthorizationStrategy;
 import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.web.pages.AdminPage;
-import org.jbei.ice.web.pages.AssertErrorPage;
 import org.jbei.ice.web.pages.BlastPage;
 import org.jbei.ice.web.pages.EntriesPage;
 import org.jbei.ice.web.pages.EntryNewPage;
@@ -50,36 +50,11 @@ public class WicketApplication extends WebApplication {
 
     @Override
     protected void init() {
-        try {
-            authenticator = AuthenticationBackendManager.loadAuthenticationBackend();
-        } catch (AuthenticationBackendManager.AuthenticationBackendManagerException e) {
-            e.printStackTrace();
-        }
+        initializeAuthenticationBackend();
 
-        mountBookmarkablePage("/login", LoginPage.class);
-        mountBookmarkablePage("/logout", LogOutPage.class);
-        mountBookmarkablePage("/registration", RegistrationPage.class);
-        mountBookmarkablePage("/update-account", UpdateAccountPage.class);
-        mountBookmarkablePage("/update-password", UpdatePasswordPage.class);
-        mountBookmarkablePage("/feedback", FeedbackPage.class);
-        mountBookmarkablePage("/assertError", AssertErrorPage.class);
-        mount(new IndexedParamUrlCodingStrategy("/entry/view", EntryViewPage.class));
-        mount(new IndexedParamUrlCodingStrategy("/entry/update", EntryUpdatePage.class));
-        mountBookmarkablePage("/entry/new", EntryNewPage.class);
-        mount(new IndexedParamUrlCodingStrategy("/entry/tip", EntryTipPage.class));
-        mount(new IndexedParamUrlCodingStrategy("/entries", EntriesPage.class));
-        mount(new IndexedParamUrlCodingStrategy("/user", UserPage.class));
-        mount(new IndexedParamUrlCodingStrategy("/profile", ProfilePage.class));
-        mount(new QueryStringUrlCodingStrategy("/search", SearchResultPage.class));
-        mountBookmarkablePage("/blast", BlastPage.class);
-        mountBookmarkablePage("/query", QueryPage.class);
-        mountBookmarkablePage("/admin", AdminPage.class);
+        mountPages();
 
-        // job cue
-        JobCue jobCue = JobCue.getInstance();
-        Thread jobThread = new Thread(jobCue);
-        jobThread.setPriority(Thread.MIN_PRIORITY);
-        jobThread.start();
+        initializeQueueingSystem();
 
         // settings
         ISecuritySettings securitySettings = getSecuritySettings();
@@ -106,5 +81,40 @@ public class WicketApplication extends WebApplication {
     @Override
     public Class<HomePage> getHomePage() {
         return HomePage.class;
+    }
+
+    private void initializeAuthenticationBackend() {
+        try {
+            authenticator = AuthenticationBackendManager.loadAuthenticationBackend();
+        } catch (AuthenticationBackendManager.AuthenticationBackendManagerException e) {
+            Logger.error("Failed to load authentication backend!", e);
+        }
+    }
+
+    private void mountPages() {
+        mountBookmarkablePage("/login", LoginPage.class);
+        mountBookmarkablePage("/logout", LogOutPage.class);
+        mountBookmarkablePage("/registration", RegistrationPage.class);
+        mountBookmarkablePage("/update-account", UpdateAccountPage.class);
+        mountBookmarkablePage("/update-password", UpdatePasswordPage.class);
+        mountBookmarkablePage("/feedback", FeedbackPage.class);
+        mount(new IndexedParamUrlCodingStrategy("/entry/view", EntryViewPage.class));
+        mount(new IndexedParamUrlCodingStrategy("/entry/update", EntryUpdatePage.class));
+        mountBookmarkablePage("/entry/new", EntryNewPage.class);
+        mount(new IndexedParamUrlCodingStrategy("/entry/tip", EntryTipPage.class));
+        mount(new IndexedParamUrlCodingStrategy("/entries", EntriesPage.class));
+        mount(new IndexedParamUrlCodingStrategy("/user", UserPage.class));
+        mount(new IndexedParamUrlCodingStrategy("/profile", ProfilePage.class));
+        mount(new QueryStringUrlCodingStrategy("/search", SearchResultPage.class));
+        mountBookmarkablePage("/blast", BlastPage.class);
+        mountBookmarkablePage("/query", QueryPage.class);
+        mountBookmarkablePage("/admin", AdminPage.class);
+    }
+
+    private void initializeQueueingSystem() {
+        JobCue jobCue = JobCue.getInstance();
+        Thread jobThread = new Thread(jobCue);
+        jobThread.setPriority(Thread.MIN_PRIORITY);
+        jobThread.start();
     }
 }

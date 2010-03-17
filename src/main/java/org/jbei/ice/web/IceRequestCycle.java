@@ -1,5 +1,7 @@
 package org.jbei.ice.web;
 
+import java.lang.reflect.InvocationTargetException;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.wicket.Page;
@@ -12,7 +14,8 @@ import org.apache.wicket.protocol.http.WebRequestCycle;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.logging.UsageLogger;
 import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.pages.ErrorPage;
 import org.jbei.ice.web.pages.PageExpiredPage;
 import org.jbei.ice.web.pages.PermissionDeniedPage;
@@ -24,8 +27,6 @@ public class IceRequestCycle extends WebRequestCycle {
 
     @Override
     protected void onBeginRequest() {
-        //@SuppressWarnings("unused")
-        //Session session = HibernateHelper.getSession();
         Account account = IceSession.get().getAccount();
         HttpServletRequest httpServletRequest = ((WebRequest) get().getRequest())
                 .getHttpServletRequest();
@@ -48,24 +49,36 @@ public class IceRequestCycle extends WebRequestCycle {
     }
 
     @Override
-    protected void onEndRequest() {
-        // Session session = HibernateHelper.getSession();
-        // session.flush();
-    }
-
-    @Override
     public Page onRuntimeException(Page page, RuntimeException e) {
         Page result = null;
-        if (e instanceof PermissionException) {
-            String msg = "Permission violation: " + e.toString();
+
+        if (e instanceof ViewPermissionException) {
+            String msg = "Permission violation: " + e.getMessage();
+
             Logger.warn(msg);
-            result = new PermissionDeniedPage(new PageParameters());
+
+            result = new PermissionDeniedPage(new PageParameters("0=" + msg));
+        } else if (e.getCause() instanceof InvocationTargetException
+                && ((InvocationTargetException) e.getCause()).getTargetException() != null
+                && ((InvocationTargetException) e.getCause()).getTargetException() instanceof ViewPermissionException) {
+            String msg = "Permission violation: "
+                    + ((InvocationTargetException) e.getCause()).getTargetException().getMessage();
+
+            Logger.warn(msg);
+
+            result = new PermissionDeniedPage(new PageParameters("0=" + msg));
+        } else if (e instanceof ViewException) {
+            Logger.error("Unexpected Error", e);
+
+            result = new ErrorPage(e);
         } else if (e instanceof PageExpiredException) {
             result = new PageExpiredPage(new PageParameters());
         } else {
             Logger.error("Unknown Error", e);
+
             result = new ErrorPage(e);
         }
+
         return result;
     }
 }
