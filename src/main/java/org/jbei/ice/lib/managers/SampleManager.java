@@ -43,24 +43,6 @@ public class SampleManager {
         }
     }
 
-    public static Location saveLocation(Location location) throws ManagerException {
-        if (location == null) {
-            throw new ManagerException("Failed to save null location!");
-        }
-
-        if (location.getSample() == null) {
-            throw new ManagerException("Failed to save location without sample!");
-        }
-
-        try {
-            location = (Location) DAO.save(location);
-        } catch (DAOException e) {
-            throw new ManagerException("Failed to save location!", e);
-        }
-
-        return location;
-    }
-
     public static void deleteLocation(Location location) throws ManagerException {
         if (location == null) {
             throw new ManagerException("Failed to delete null location!");

@@ -195,19 +195,23 @@ public class SampleController extends Controller {
     }
 
     public Location saveLocation(Location location) throws ControllerException, PermissionException {
-        return saveLocation(location);
+        return saveLocation(location, true);
     }
 
     public Location saveLocation(Location location, boolean scheduleIndexRebuild)
             throws ControllerException, PermissionException {
-        Location savedLocation = null;
-
         if (!hasLocationWritePermission(location)) {
             throw new PermissionException("No permissions to save location!");
         }
 
         try {
-            savedLocation = SampleManager.saveLocation(location);
+            Sample sample = location.getSample();
+            /*Set<Location> locations = sample.getLocations();
+
+            locations.add(location);*/
+            sample.getLocations().add(location);
+
+            sample = SampleManager.saveSample(sample);
 
             if (scheduleIndexRebuild) {
                 ApplicationContoller.scheduleSearchIndexRebuildJob();
@@ -216,7 +220,7 @@ public class SampleController extends Controller {
             throw new ControllerException(e);
         }
 
-        return savedLocation;
+        return location;
     }
 
     public void deleteLocation(Location location) throws ControllerException, PermissionException {
@@ -230,7 +234,11 @@ public class SampleController extends Controller {
         }
 
         try {
-            SampleManager.deleteLocation(location);
+            Sample sample = location.getSample();
+
+            sample.getLocations().remove(location);
+
+            SampleManager.saveSample(sample);
 
             if (scheduleIndexRebuild) {
                 ApplicationContoller.scheduleSearchIndexRebuildJob();

@@ -11,6 +11,7 @@ import org.jbei.ice.controllers.SampleController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Location;
+import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
@@ -56,9 +57,12 @@ public class LocationItemViewPanel extends Panel {
                 SampleController sampleController = new SampleController(IceSession.get()
                         .getAccount());
 
-                location.getSample().getLocations().remove(location);
+                Sample sample = location.getSample();
+
+                sample.getLocations().remove(location);
                 try {
-                    sampleController.saveSample(location.getSample());
+                    sampleController.deleteLocation(location);
+                    sampleController.saveSample(sample);
                 } catch (ControllerException e) {
                     throw new ViewException(e);
                 } catch (PermissionException e) {

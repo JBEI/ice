@@ -54,16 +54,18 @@ public class WebUtils {
     }
 
     private static String makeEntryLink(int id) {
-        String result = null;
+        String result = "";
 
         EntryController entryController = new EntryController(IceSession.get().getAccount());
 
         CharSequence relativePath = WebRequestCycle.get().urlFor(EntryViewPage.class,
                 new PageParameters());
-        // TODO this is not very elegant at all. Is there a better way than to generate <a> tag manually? Yes, Tim!
+        // TODO this is not very elegant at all. Is there a better way than to generate <a> tag manually?
         try {
-            result = "<a href=" + relativePath.toString() + "/" + id + ">"
-                    + entryController.get(id).getOnePartNumber().getPartNumber() + "</a>";
+            if (entryController.hasReadPermissionById(id)) {
+                result = "<a href=" + relativePath.toString() + "/" + id + ">"
+                        + entryController.get(id).getOnePartNumber().getPartNumber() + "</a>";
+            }
         } catch (ControllerException e) {
             throw new ViewException(e);
         } catch (PermissionException e) {

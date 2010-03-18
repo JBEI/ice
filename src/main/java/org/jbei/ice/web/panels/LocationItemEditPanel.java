@@ -37,7 +37,6 @@ public class LocationItemEditPanel extends Panel {
         setLocation(passedLocation);
 
         class LocationEditForm extends StatelessForm<Object> {
-
             private static final long serialVersionUID = 1L;
 
             private String locationString;
@@ -98,11 +97,10 @@ public class LocationItemEditPanel extends Panel {
                 location.setnRows(getnRows());
                 location.setWells(getWells());
 
-                Sample sample = location.getSample();
-                sample.getLocations().add(location);
-
                 try {
-                    sample = sampleController.saveSample(sample);
+                    sampleController.saveLocation(location);
+
+                    Sample sample = location.getSample();
 
                     /* Inserting into a LinkedHashSet puts the last entered location
                      * at the bottom, which is undesirable for displaying the locations by reverse 

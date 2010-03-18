@@ -16,12 +16,8 @@ public class SimpleEntryViewPanel<T extends Entry> extends AbstractEntryViewPane
     private static final long serialVersionUID = 1L;
     private static final int MAX_LONG_FIELD_LENGTH = 100;
 
-    private transient EntryController entryController;
-
     public SimpleEntryViewPanel(String id, Model<T> entryModel) {
         super(id, entryModel);
-
-        entryController = new EntryController(IceSession.get().getAccount());
 
         renderIcons();
     }
@@ -52,6 +48,8 @@ public class SimpleEntryViewPanel<T extends Entry> extends AbstractEntryViewPane
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sample.png");
         ResourceReference hasSequenceImage = new ResourceReference(UnprotectedPage.class,
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sequence.gif");
+
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
 
         try {
             add(new Image("attachments", hasAttachmentImage).setVisible(entryController
