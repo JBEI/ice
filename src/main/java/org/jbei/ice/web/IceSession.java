@@ -160,7 +160,6 @@ public class IceSession extends WebSession {
         try {
             AccountController.saveAccountPreferences(getAccountPreferences());
         } catch (ControllerException e) {
-            // TODO: handle this properly
             String msg = "Could not save accountPreferences in IceSession";
             Logger.error(msg, e);
         }

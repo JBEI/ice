@@ -16,16 +16,16 @@ public class EntriesDataProvider extends SortableDataProvider<Entry> {
     private static final long serialVersionUID = 1L;
 
     private ArrayList<Entry> entries = new ArrayList<Entry>();
-    private transient EntryController entryController;
 
     public EntriesDataProvider() {
         super();
 
-        entryController = new EntryController(IceSession.get().getAccount());
     }
 
     public Iterator<? extends Entry> iterator(int first, int count) {
         entries.clear();
+
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
 
         try {
             ArrayList<Entry> results = entryController.getEntries(first, count, "creationTime",
@@ -47,6 +47,8 @@ public class EntriesDataProvider extends SortableDataProvider<Entry> {
 
     public int size() {
         int numberOfEntries = 0;
+
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
 
         try {
             numberOfEntries = entryController.getNumberOfVisibleEntries();

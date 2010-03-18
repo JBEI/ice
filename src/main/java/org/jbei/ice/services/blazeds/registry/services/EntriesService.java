@@ -6,7 +6,6 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.services.blazeds.common.BaseService;
 
 public class EntriesService extends BaseService {
@@ -29,16 +28,10 @@ public class EntriesService extends BaseService {
 
             return null;
         } catch (PermissionException e) {
-            Logger.error("Failed to get entry!", e);
-
-            return null;
-        }
-
-        if (PermissionManager.hasReadPermission(entry, account)) {
-            return entry;
-        } else {
             Logger.warn(getLoggerPrefix() + "User " + account.getFullName()
                     + " tried to access entry without permissions.");
+
+            return null;
         }
 
         return entry;
@@ -59,15 +52,17 @@ public class EntriesService extends BaseService {
             Entry entry = entryController.getByRecordId(entryId);
 
             if (entry != null) {
-                result = PermissionManager.hasWritePermission(entry, account);
+                result = entryController.hasWritePermission(entry);
             }
         } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
 
             return result;
         } catch (PermissionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Logger.warn(getLoggerPrefix() + "User " + account.getFullName()
+                    + " tried to access entry without permissions.");
+
+            return false;
         }
 
         return result;

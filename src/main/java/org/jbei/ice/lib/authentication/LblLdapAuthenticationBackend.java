@@ -12,12 +12,18 @@ import org.jbei.ice.lib.utils.LblLdapAuthenticationWrapper.LblLdapAuthentication
 import org.jbei.ice.web.IceSession;
 
 public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Serializable {
+    private final String LBL_LDAP_EMAIL_SUFFIX = "@lbl.gov";
+
+    public String getBackendName() {
+        return "LblLdapAuthenticationBackend";
+    }
+
     private static final long serialVersionUID = 1L;
 
     public Account authenticate(String loginId, String password)
             throws AuthenticationBackendException, InvalidCredentialsException {
         if (loginId == null || password == null) {
-            throw new InvalidCredentialsException("Login and Password are mandatory!");
+            throw new InvalidCredentialsException("Username and Password are mandatory!");
         }
 
         Account account = null;
@@ -30,7 +36,7 @@ public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Ser
             if (lblLdapAuthenticationWrapper.isWikiUser(loginId)) {
                 lblLdapAuthenticationWrapper.authenticate(loginId, password);
 
-                account = AccountController.getByEmail(loginId + "@lbl.gov");
+                account = AccountController.getByEmail(loginId + LBL_LDAP_EMAIL_SUFFIX);
 
                 if (account == null) {
                     account = new Account();

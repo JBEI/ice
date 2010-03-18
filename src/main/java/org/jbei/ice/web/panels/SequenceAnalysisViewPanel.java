@@ -28,6 +28,7 @@ import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.forms.TraceFileNewFormPanel;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.ProfilePage;
@@ -82,8 +83,7 @@ public class SequenceAnalysisViewPanel extends Panel {
         try {
             tracesSet = TraceSequenceManager.getByEntry(entry);
         } catch (ManagerException e) {
-            // TODO: Fix it later
-            Logger.error("Failed to fetch TraceSequence by Entry on SeqAnalysis view", e);
+            throw new ViewException("Failed to fetch TraceSequence by Entry on SeqAnalysis view", e);
         }
 
         if (tracesSet != null) {

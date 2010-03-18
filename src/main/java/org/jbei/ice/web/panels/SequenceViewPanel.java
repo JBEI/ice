@@ -17,6 +17,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.target.resource.ResourceStreamRequestTarget;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.resource.StringResourceStream;
+import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.composers.SequenceComposerException;
@@ -26,7 +27,6 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.common.ViewPermissionException;
@@ -119,8 +119,14 @@ public class SequenceViewPanel extends Panel {
         sequenceCreateLinkContainer.add(uploadSequenceLink);
         sequenceCreateLinkContainer.add(createSequenceViaVectorEditorLink);
 
-        fragment.add(sequenceCreateLinkContainer.setVisible(PermissionManager
-                .hasWritePermission(entry)));
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
+
+        try {
+            fragment.add(sequenceCreateLinkContainer.setVisible(entryController
+                    .hasWritePermission(entry)));
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        }
 
         return fragment;
     }
@@ -211,7 +217,7 @@ public class SequenceViewPanel extends Panel {
                                     : false);
 
                     sequenceString = sequenceController.compose(sequence, genbankFormatter);
-                } catch (SequenceComposerException e) { // TODO: Fix it later
+                } catch (SequenceComposerException e) {
                     throw new ViewException("Failed to generate genbank file for download!", e);
                 }
 
@@ -285,7 +291,13 @@ public class SequenceViewPanel extends Panel {
             }
         }
 
-        container.add(new DeleteSequenceLink("deleteLink").setVisible(PermissionManager
-                .hasWritePermission(entry.getId())));
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
+
+        try {
+            container.add(new DeleteSequenceLink("deleteLink").setVisible(entryController
+                    .hasWritePermission(entry)));
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        }
     }
 }

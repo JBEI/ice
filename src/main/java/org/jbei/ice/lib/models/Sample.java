@@ -61,7 +61,7 @@ public class Sample implements ISampleValueObject, IModel {
     @Temporal(TemporalType.TIMESTAMP)
     private Date modificationTime;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "sample")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "sample")
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @JoinColumn(name = "samples_id")
     @OrderBy("id DESC")

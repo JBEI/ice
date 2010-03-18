@@ -142,13 +142,13 @@ public class Query {
         return result;
     }
 
-    public ArrayList<Integer> query(ArrayList<String[]> data) {
+    public ArrayList<Integer> query(ArrayList<String[]> data) throws QueryException {
         ArrayList<Integer> resultIds = new ArrayList<Integer>();
 
         boolean firstRun = true;
 
-        for (String[] item : data) {
-            try {
+        try {
+            for (String[] item : data) {
                 if (firstRun) {
                     HashSet queryResultSet = runFilter(item[0], item[1]);
 
@@ -160,9 +160,9 @@ public class Query {
                 } else {
                     resultIds.retainAll(runFilter(item[0], item[1]));
                 }
-            } catch (Exception e) { // TODO: Fix this!
-                e.printStackTrace();
             }
+        } catch (Exception e) {
+            throw new QueryException(e);
         }
 
         return resultIds;

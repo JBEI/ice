@@ -63,7 +63,7 @@ public class JobCue implements Runnable {
                 try {
                     LuceneSearch.getInstance().rebuildIndex();
                 } catch (SearchException e) {
-                    Logger.error("Failed to rebuild search database!", e); // TODO: Scream more loud here
+                    Logger.error("Failed to rebuild search database!", e);
                 }
             } else if (jobType == 2) {
                 try {
@@ -71,7 +71,7 @@ public class JobCue implements Runnable {
 
                     blast.rebuildDatabase();
                 } catch (BlastException e) {
-                    Logger.error("Failed to rebuild blast database!", e); // TODO: Scream more loud here
+                    Logger.error("Failed to rebuild blast database!", e);
                 }
             }
 
@@ -114,8 +114,7 @@ public class JobCue implements Runnable {
             }
 
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Logger.error("Failed to run jobcue!", e);
         }
     }
 

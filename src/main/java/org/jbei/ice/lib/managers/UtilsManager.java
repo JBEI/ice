@@ -398,7 +398,7 @@ public class UtilsManager {
             Query query = HibernateHelper
                     .getSession()
                     .createQuery(
-                    //TODO: redo this in proper hql
+                    //TODO: Tim; redo this in proper hql
                             "select entry.id from Vote vote group by entry.id order by sum(comment.score) desc");
             List entries = query.list();
             for (Object item : entries) {
@@ -420,7 +420,7 @@ public class UtilsManager {
             Query query = HibernateHelper
                     .getSession()
                     .createQuery(
-                    // TODO: redo this in proper hql
+                    // TODO: Tim; redo this in proper hql
                             // working sql query:
                             // test_registry=> select entries.id, count(comments.id) from entries join comments on comments.entries_id=entries.id group by entries.id order by count(comments.id) desc;
                             // This is a WORKAROUND.

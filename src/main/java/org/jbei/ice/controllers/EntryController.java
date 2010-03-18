@@ -1,6 +1,7 @@
 package org.jbei.ice.controllers;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.jbei.ice.controllers.common.Controller;
@@ -20,6 +21,7 @@ import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.query.Query;
+import org.jbei.ice.lib.query.QueryException;
 
 public class EntryController extends Controller {
     public EntryController(Account account) {
@@ -264,6 +266,8 @@ public class EntryController extends Controller {
 
             entries = EntryManager.getEntriesByIdSet(filterEntriesByPermissionAndOffsetLimit(
                     queryResultIds, offset, limit));
+        } catch (QueryException e) {
+            throw new ControllerException(e);
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
@@ -304,12 +308,16 @@ public class EntryController extends Controller {
     public int getNumberOfEntriesByQueries(ArrayList<String[]> filters) throws ControllerException {
         int numberOfEntriesByQueries = 0;
 
-        ArrayList<Integer> queryResultIds = Query.getInstance().query(filters);
+        try {
+            ArrayList<Integer> queryResultIds = Query.getInstance().query(filters);
 
-        for (Integer entryId : queryResultIds) {
-            if (hasReadPermissionById(entryId)) {
-                numberOfEntriesByQueries++;
+            for (Integer entryId : queryResultIds) {
+                if (hasReadPermissionById(entryId)) {
+                    numberOfEntriesByQueries++;
+                }
             }
+        } catch (QueryException e) {
+            throw new ControllerException(e);
         }
 
         return numberOfEntriesByQueries;
@@ -330,6 +338,8 @@ public class EntryController extends Controller {
         }
 
         try {
+            entry.setModificationTime(Calendar.getInstance().getTime());
+
             EntryManager.save(entry);
 
             if (scheduleIndexRebuild) {

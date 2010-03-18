@@ -27,8 +27,6 @@ public class AttachmentManager {
             throw new ManagerException("Failed to save null attachment!");
         }
 
-        // TODO: Refactor via transactions
-
         String fileId = Utils.generateUUID();
 
         attachment.setFileId(fileId);
@@ -60,7 +58,6 @@ public class AttachmentManager {
         }
 
         try {
-            // TODO: Refactor via transactions 
             DAO.delete(attachment);
 
             deleteAttachmentFile(attachment);

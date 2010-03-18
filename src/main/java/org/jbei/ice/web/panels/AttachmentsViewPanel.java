@@ -9,10 +9,10 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.controllers.AttachmentController;
+import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 
@@ -57,10 +57,16 @@ public class AttachmentsViewPanel extends Panel {
             }
         }
 
-        WebMarkupContainer topLinkContainer = new WebMarkupContainer("topLink");
-        topLinkContainer.setVisible(PermissionManager.hasWritePermission(entry.getId()));
-        topLinkContainer.add(new AddAttachmentLink("addAttachmentLink"));
-        add(topLinkContainer);
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
+
+        try {
+            WebMarkupContainer topLinkContainer = new WebMarkupContainer("topLink");
+            topLinkContainer.setVisible(entryController.hasWritePermission(entry));
+            topLinkContainer.add(new AddAttachmentLink("addAttachmentLink"));
+            add(topLinkContainer);
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        }
 
         AttachmentController attachmentController = new AttachmentController(IceSession.get()
                 .getAccount());

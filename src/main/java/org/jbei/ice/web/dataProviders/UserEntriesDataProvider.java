@@ -14,19 +14,17 @@ public class UserEntriesDataProvider extends AbstractEntriesDataProvider {
     private static final long serialVersionUID = 1L;
     private Account account;
 
-    private transient EntryController entryController;
-
     public UserEntriesDataProvider(Account account) {
         super();
 
         this.account = account;
-
-        entryController = new EntryController(IceSession.get().getAccount());
     }
 
     @Override
     public Iterator<Entry> iterator(int first, int count) {
         entries.clear();
+
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
 
         try {
             ArrayList<Entry> results = (ArrayList<Entry>) entryController.getEntriesByOwner(account
@@ -43,6 +41,8 @@ public class UserEntriesDataProvider extends AbstractEntriesDataProvider {
     @Override
     public int size() {
         int numberOfEntries = 0;
+
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
 
         try {
             numberOfEntries = entryController.getNumberOfEntriesByOwner(account.getEmail());

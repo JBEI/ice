@@ -197,7 +197,6 @@ public class VectorEditorService extends BaseService {
 
             return result;
         } catch (Exception e) {
-            // TODO: Handle it properly
             Logger.error(getLoggerPrefix(), e);
 
             return result;

@@ -9,10 +9,10 @@ import org.apache.wicket.markup.html.link.DownloadLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.controllers.AttachmentController;
+import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.common.ViewPermissionException;
@@ -22,13 +22,10 @@ public class AttachmentItemViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
     private Integer index = null;
     private Attachment attachment = null;
-    private transient AttachmentController attachmentController;
 
     @SuppressWarnings("unchecked")
     public AttachmentItemViewPanel(String id, Integer counter, Attachment attachment) {
         super(id);
-
-        attachmentController = new AttachmentController(IceSession.get().getAccount());
 
         this.setAttachment(attachment);
         this.setIndex(counter);
@@ -55,6 +52,9 @@ public class AttachmentItemViewPanel extends Panel {
                 AttachmentItemViewPanel thisPanel = (AttachmentItemViewPanel) getParent();
                 Attachment attachment = thisPanel.getAttachment();
 
+                AttachmentController attachmentController = new AttachmentController(IceSession
+                        .get().getAccount());
+
                 try {
                     attachmentController.delete(attachment);
                 } catch (ControllerException e) {
@@ -69,13 +69,24 @@ public class AttachmentItemViewPanel extends Panel {
             }
         }
 
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
+
         AjaxFallbackLink deleteAttachmentLink = new DeleteAttachmentLink("deleteAttachmentLink");
         deleteAttachmentLink.setOutputMarkupId(true);
         deleteAttachmentLink.setOutputMarkupPlaceholderTag(true);
-        if (!PermissionManager.hasWritePermission(attachment.getEntry().getId())) {
-            deleteAttachmentLink.setVisible(false);
+
+        try {
+            if (!entryController.hasWritePermission(attachment.getEntry())) {
+                deleteAttachmentLink.setVisible(false);
+            }
+        } catch (ControllerException e1) {
+            throw new ViewException(e1);
         }
+
         add(deleteAttachmentLink);
+
+        AttachmentController attachmentController = new AttachmentController(IceSession.get()
+                .getAccount());
 
         Link downloadLink = null;
         try {

@@ -56,7 +56,6 @@ public class SequenceController extends Controller {
             throw new PermissionException("No write permission for sequence!");
         }
 
-        // TODO: Use transactional saveSequence
         try {
             result = SequenceManager.saveSequence(sequence);
 
@@ -87,8 +86,6 @@ public class SequenceController extends Controller {
         }
 
         try {
-            // TODO: Use transactions here in case delete OK but save fails
-            // TODO: Refactor this method
             Entry entry = sequence.getEntry();
             Sequence oldSequence = entry.getSequence();
             entry.setSequence(null);

@@ -30,8 +30,7 @@ public class GeneralParser {
 
                 break;
             } catch (InvalidFormatParserException e) {
-                // TODO: Handle this
-                e.printStackTrace();
+                // it's ok
             }
         }
 

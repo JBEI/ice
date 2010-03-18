@@ -91,7 +91,7 @@ public class BlastFormPanel extends Panel {
                             String proteinQuery;
                             try {
                                 proteinQuery = SequenceUtils.translateToProtein(query);
-                            } catch (Exception e) { // TODO: Check this later
+                            } catch (Exception e) {
                                 proteinQuery = "";
 
                                 Logger.error("Failed to translate dna to protein!", e);

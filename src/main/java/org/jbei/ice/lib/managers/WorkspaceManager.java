@@ -2,6 +2,7 @@ package org.jbei.ice.lib.managers;
 
 import java.util.ArrayList;
 
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAO;
@@ -37,13 +38,14 @@ public class WorkspaceManager {
     }
 
     public static boolean hasEntry(Account account, Entry entry) {
-
         boolean result = false;
+
         String queryString = "from Workspace workspace where entry=:entry and account=:account";
         Session session = DAO.getSession();
         Query query = session.createQuery(queryString);
         query.setParameter("entry", entry);
         query.setParameter("account", account);
+
         try {
             Workspace queryResult = (Workspace) query.uniqueResult();
             if (queryResult != null) {
@@ -54,6 +56,7 @@ public class WorkspaceManager {
         } catch (Exception e) {
             Logger.error("Could not determine if account's entry is in workspace", e);
         }
+
         return result;
     }
 
@@ -102,20 +105,21 @@ public class WorkspaceManager {
     }
 
     @SuppressWarnings("unchecked")
-    public static ArrayList<Workspace> getByAccount(Account account, int offset, int limit) {
-        String queryString = "from Workspace where account=:account and inWorkspace = true";
-        Session session = DAO.getSession();
-        Query query = session.createQuery(queryString);
-        query.setParameter("account", account);
-        query.setFirstResult(offset);
-        query.setMaxResults(limit);
+    public static ArrayList<Workspace> getByAccount(Account account, int offset, int limit)
+            throws ManagerException {
         ArrayList<Workspace> result = null;
+
         try {
+            String queryString = "from Workspace where account=:account and inWorkspace = true";
+            Session session = DAO.getSession();
+            Query query = session.createQuery(queryString);
+            query.setParameter("account", account);
+            query.setFirstResult(offset);
+            query.setMaxResults(limit);
 
             result = new ArrayList<Workspace>(query.list());
-
-        } catch (Exception e) {
-            Logger.error("Could not get workspace by account ", e);
+        } catch (HibernateException e) {
+            throw new ManagerException("Could not get workspace by account ", e);
         }
 
         return result;
@@ -136,13 +140,21 @@ public class WorkspaceManager {
         return result;
     }
 
-    public static int getCountByAccount(Account account) {
-        String queryString = "from Workspace workspace where account=:account and inWorkspace = true order by workspace.dateAdded desc";
-        Session session = DAO.getSession();
-        Query query = session.createQuery(queryString);
-        query.setParameter("account", account);
+    public static int getCountByAccount(Account account) throws ManagerException {
+        int size = 0;
 
-        return query.list().size();
+        try {
+            String queryString = "from Workspace workspace where account=:account and inWorkspace = true order by workspace.dateAdded desc";
+            Session session = DAO.getSession();
+            Query query = session.createQuery(queryString);
+            query.setParameter("account", account);
+
+            size = query.list().size();
+        } catch (HibernateException e) {
+            throw new ManagerException(e);
+        }
+
+        return size;
     }
 
     public static Workspace save(Workspace workspace) throws ManagerException {

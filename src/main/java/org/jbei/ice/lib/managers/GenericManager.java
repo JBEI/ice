@@ -62,7 +62,7 @@ public class GenericManager {
 
     }
 
-    public static long getTotalEntries() throws ManagerException {
+    public static long getTotalEntries1() throws ManagerException {
         long result = 0;
         Session session = DAO.getSession();
         Query query = session.createQuery("select count(entry.id) from Entry entry");

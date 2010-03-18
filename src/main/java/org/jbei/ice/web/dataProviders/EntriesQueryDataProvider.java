@@ -13,18 +13,17 @@ public class EntriesQueryDataProvider extends AbstractEntriesDataProvider {
     private static final long serialVersionUID = 1L;
 
     private ArrayList<String[]> queries;
-    private transient EntryController entryController;
 
     public EntriesQueryDataProvider(ArrayList<String[]> queries) {
         super();
 
         this.queries = queries;
-
-        entryController = new EntryController(IceSession.get().getAccount());
     }
 
     public int size() {
         int numberOfQueryEntries = 0;
+
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
 
         try {
             numberOfQueryEntries = entryController.getNumberOfEntriesByQueries(queries);
@@ -37,6 +36,8 @@ public class EntriesQueryDataProvider extends AbstractEntriesDataProvider {
 
     public Iterator<Entry> iterator(int first, int count) {
         entries.clear();
+
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
 
         try {
             entries = entryController.getEntriesByQueries(queries, first, count);

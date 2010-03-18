@@ -78,11 +78,6 @@ public class EntryUpdateForm<T extends Entry> extends EntrySubmitForm<T> {
                 entryController.save(entry);
 
                 setResponsePage(EntryViewPage.class, new PageParameters("0=" + entry.getId()));
-            } else {
-                // TODO: Double check what is going on here
-                // entryController.saveAndUpdateIndexes(entry);
-
-                info("Save as admin successful!");
             }
         } catch (ControllerException e) {
             throw new ViewException(e);

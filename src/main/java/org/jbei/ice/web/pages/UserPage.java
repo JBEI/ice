@@ -5,8 +5,10 @@ import org.apache.wicket.PageParameters;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.WorkspaceManager;
 import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.panels.EmptyFramedMessagePanel;
 import org.jbei.ice.web.panels.UserEntriesViewPanel;
 import org.jbei.ice.web.panels.UserSamplesViewPanel;
@@ -96,7 +98,13 @@ public class UserPage extends ProtectedPage {
     }
 
     private Panel createWorkspacePanel() {
-        long workspaces = WorkspaceManager.getCountByAccount(IceSession.get().getAccount());
+        long workspaces = 0;
+        try {
+            workspaces = WorkspaceManager.getCountByAccount(IceSession.get().getAccount());
+        } catch (ManagerException e) {
+            throw new ViewException(e);
+        }
+
         Panel workspacePanel = null;
         if (workspaces > 0) {
 

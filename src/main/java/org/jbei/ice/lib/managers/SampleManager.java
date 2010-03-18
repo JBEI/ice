@@ -9,7 +9,6 @@ import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Location;
 import org.jbei.ice.lib.models.Sample;
 
 public class SampleManager {
@@ -40,18 +39,6 @@ public class SampleManager {
             DAO.delete(sample);
         } catch (DAOException e) {
             throw new ManagerException("Failed to delete sample!", e);
-        }
-    }
-
-    public static void deleteLocation(Location location) throws ManagerException {
-        if (location == null) {
-            throw new ManagerException("Failed to delete null location!");
-        }
-
-        try {
-            DAO.delete(location);
-        } catch (DAOException e) {
-            throw new ManagerException("Failed to delete location!", e);
         }
     }
 

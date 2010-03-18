@@ -206,9 +206,7 @@ public class SampleController extends Controller {
 
         try {
             Sample sample = location.getSample();
-            /*Set<Location> locations = sample.getLocations();
 
-            locations.add(location);*/
             sample.getLocations().add(location);
 
             sample = SampleManager.saveSample(sample);

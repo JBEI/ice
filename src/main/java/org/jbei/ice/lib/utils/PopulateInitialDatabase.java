@@ -76,7 +76,6 @@ public class PopulateInitialDatabase {
             try {
                 allEntries = EntryManager.getAllEntries();
             } catch (ManagerException e1) {
-                // TODO Auto-generated catch block
                 e1.printStackTrace();
             }
             for (Entry entry : allEntries) {
@@ -104,7 +103,6 @@ public class PopulateInitialDatabase {
         try {
             allEntries = EntryManager.getAllEntries();
         } catch (ManagerException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 

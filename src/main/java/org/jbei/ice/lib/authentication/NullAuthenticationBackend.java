@@ -2,18 +2,29 @@ package org.jbei.ice.lib.authentication;
 
 import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 
 public class NullAuthenticationBackend implements IAuthenticationBackend {
-    public Account authenticate(String userId, String password) {
+    public String getBackendName() {
+        return "NullAuthenticationBackend";
+    }
+
+    public Account authenticate(String userId, String password)
+            throws AuthenticationBackendException, InvalidCredentialsException {
+        if (userId == null || password == null) {
+            throw new InvalidCredentialsException("Username and Password are mandatory!");
+        }
+
         Account account = null;
 
         try {
             account = AccountController.getByEmail(userId);
         } catch (ControllerException e) {
-            // TODO: (Zinovii) Throw AuthenticationFailedException
-            Logger.error("Authentication failed!", e);
+            throw new AuthenticationBackendException(e);
+        }
+
+        if (account == null) {
+            throw new InvalidCredentialsException("Invalid Username or Password!");
         }
 
         return account;

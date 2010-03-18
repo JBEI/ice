@@ -23,7 +23,6 @@ import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.models.Workspace;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
@@ -63,12 +62,10 @@ public class EntryViewPage extends ProtectedPage {
     private final String ATTACHMENTS_URL_KEY = "attachments";
     private final String PERMISSIONS_URL_KEY = "permission";
 
-    private transient EntryController entryController;
-
     public EntryViewPage(PageParameters parameters) {
         super(parameters);
 
-        entryController = new EntryController(IceSession.get().getAccount());
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
 
         processPageParameters(parameters);
 
@@ -95,11 +92,15 @@ public class EntryViewPage extends ProtectedPage {
         add(permissionLink);
         add(renderAddToWorkspaceLink());
 
-        // TODO: REMOVE IT LATER
+        // TODO: Zinovii; REMOVE IT LATER
         sequenceAnalysisLink.setVisible(false);
 
-        if (!PermissionManager.hasWritePermission(entry.getId())) {
-            permissionLink.setVisible(false);
+        try {
+            if (!entryController.hasWritePermission(entry)) {
+                permissionLink.setVisible(false);
+            }
+        } catch (ControllerException e) {
+            throw new ViewException(e);
         }
 
         generalPanel = makeSubPagePanel(entry);
@@ -117,6 +118,8 @@ public class EntryViewPage extends ProtectedPage {
         if (parameters == null || parameters.size() == 0) {
             throw new ViewException("Parameters are missing!");
         }
+
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
 
         String identifier = parameters.getString("0");
         try {
@@ -262,6 +265,8 @@ public class EntryViewPage extends ProtectedPage {
 
         String sequenceLabel = "Sequence";
 
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
+
         try {
             if (entryController.hasSequence(entry)) {
                 sequenceLabel = sequenceLabel + " (1)";
@@ -335,8 +340,8 @@ public class EntryViewPage extends ProtectedPage {
                 Workspace workspace = new Workspace(IceSession.get().getAccount(), entry);
 
                 try {
-                    WorkspaceManager.addOrUpdate(workspace); // TODO: Replace this with Controller
-                } catch (ManagerException e) { // TODO: Fix this
+                    WorkspaceManager.addOrUpdate(workspace);
+                } catch (ManagerException e) {
                     throw new ViewException(e);
                 }
 

@@ -11,7 +11,7 @@ import org.jbei.ice.lib.utils.Utils;
 
 /**
  * Way to map comma separated text field to set of items of class type
- * TODO: Wicket has a nice dynamic getter/setter generation from field name.
+ * TODO: Tim; Wicket has a nice dynamic getter/setter generation from field name.
  * Implement something similar. Right now, it must be passed the method names
  * 
  * @author tham

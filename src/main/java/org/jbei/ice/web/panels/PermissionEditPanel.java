@@ -68,7 +68,7 @@ public class PermissionEditPanel extends Panel {
 
         this.entry = entry;
 
-        // TODO: This code should be move partially to contoller
+        // TODO: Tim; This code should be move partially to contoller
 
         // Get all the groups and accounts, and combine them into a large list
         // that will be used later to disambiguate groups and users.

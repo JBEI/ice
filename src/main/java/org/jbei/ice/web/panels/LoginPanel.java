@@ -72,12 +72,11 @@ public class LoginPanel extends Panel {
                         setResponsePage(UserPage.class);
                     }
                 } catch (IceSessionException e) {
-                    // TODO (Zinovii) Do something smart, go somewhere an REPORT!
-                    e.printStackTrace();
+                    throw new ViewException(e);
                 } catch (InvalidCredentialsException e) {
                     Logger.info("Login failed for user " + getLogin());
 
-                    error("Unknown username / password combination");
+                    error(e.getMessage());
                 }
             }
 

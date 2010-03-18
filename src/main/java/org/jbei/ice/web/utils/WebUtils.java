@@ -60,7 +60,7 @@ public class WebUtils {
 
         CharSequence relativePath = WebRequestCycle.get().urlFor(EntryViewPage.class,
                 new PageParameters());
-        // TODO this is not very elegant at all. Is there a better way than to generate <a> tag manually?
+        // TODO: Tim; this is not very elegant at all. Is there a better way than to generate <a> tag manually?
         try {
             if (entryController.hasReadPermissionById(id)) {
                 result = "<a href=" + relativePath.toString() + "/" + id + ">"

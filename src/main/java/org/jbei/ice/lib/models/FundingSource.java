@@ -69,7 +69,7 @@ public class FundingSource implements IModel {
     }
 
     public void setEntryFundingSources(Set<EntryFundingSource> entryFundingSources) {
-        //TODO
+        // TODO: Tim; Implement setEntryFundingSources method for FundingSource
         //this.entryFundingSources = entryFundingSources;
     }
 
@@ -78,7 +78,7 @@ public class FundingSource implements IModel {
     }
 
     public void setAccountFundingSources(Set<AccountFundingSource> accountFundingSources) {
-        //TODO
+        // TODO: Tim; Implement setAccountFundingSources method for FundingSource
         //this.accountFundingSources = accountFundingSources;
     }
 

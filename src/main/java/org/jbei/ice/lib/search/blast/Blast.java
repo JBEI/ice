@@ -54,7 +54,7 @@ public class Blast {
         if (!isBlastDatabaseExists()) {
             Logger.info("Creating blast db for the first time");
 
-            ApplicationContoller.scheduleBlastIndexRebuildJob(1000); // TODO: Blast class shouldn't know about jobcueing system, move this 
+            ApplicationContoller.scheduleBlastIndexRebuildJob(1000);
         }
     }
 
@@ -193,7 +193,7 @@ public class Blast {
         if (!isBlastDatabaseExists()) {
             Logger.info("Creating blast database for the first time");
 
-            ApplicationContoller.scheduleBlastIndexRebuildJob(5000); // TODO: Move this, blast shouldn't know about jobs
+            ApplicationContoller.scheduleBlastIndexRebuildJob(5000);
         } else {
             while (isRebuilding()) {
                 try {

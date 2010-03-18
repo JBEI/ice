@@ -19,18 +19,16 @@ public class UserSamplesDataProvider extends SortableDataProvider<Sample> {
     private Account account;
     private ArrayList<Sample> samples = new ArrayList<Sample>();
 
-    private transient SampleController sampleController;
-
     public UserSamplesDataProvider(Account account) {
         super();
 
         this.account = account;
-
-        sampleController = new SampleController(IceSession.get().getAccount());
     }
 
     public Iterator<Sample> iterator(int first, int count) {
         samples.clear();
+
+        SampleController sampleController = new SampleController(IceSession.get().getAccount());
 
         try {
             ArrayList<Sample> results = sampleController.getSamplesByDepositor(account.getEmail(),
@@ -52,6 +50,8 @@ public class UserSamplesDataProvider extends SortableDataProvider<Sample> {
 
     public int size() {
         int numberOfSamples = 0;
+
+        SampleController sampleController = new SampleController(IceSession.get().getAccount());
 
         try {
             numberOfSamples = sampleController.getNumberOfSamplesByDepositor(account.getEmail());

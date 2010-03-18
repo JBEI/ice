@@ -56,7 +56,6 @@ public class PermissionManager {
                             || userHasReadPermission(entryId, account);
                 }
             } catch (ManagerException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -134,7 +133,6 @@ public class PermissionManager {
                             | groupHasReadPermission(entry, account);
                 }
             } catch (ManagerException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -156,7 +154,6 @@ public class PermissionManager {
                             | groupHasWritePermission(entry, account);
                 }
             } catch (ManagerException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -174,7 +171,6 @@ public class PermissionManager {
                             | groupHasWritePermission(entry, account);
                 }
             } catch (ManagerException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }

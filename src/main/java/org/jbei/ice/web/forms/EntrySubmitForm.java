@@ -244,7 +244,7 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
         EntryFundingSource newEntryFundingSource = new EntryFundingSource();
         newEntryFundingSource.setEntry(entry);
         newEntryFundingSource.setFundingSource(fundingSource);
-        // TODO: Handle multiple funding sources
+        // TODO: Tim; Handle multiple funding sources
         LinkedHashSet<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
         entryFundingSources.add(newEntryFundingSource);
         entry.setEntryFundingSources(entryFundingSources);

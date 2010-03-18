@@ -94,9 +94,6 @@ public class PrintableEntriesTablePage extends ProtectedPage {
         ListView<Entry> entriesDataView = new ListView<Entry>("entriesDataView", entries) {
             private static final long serialVersionUID = 1L;
 
-            private transient EntryController entryController = new EntryController(IceSession
-                    .get().getAccount());
-
             @Override
             protected void populateItem(ListItem<Entry> item) {
                 Entry entry = item.getModelObject();
@@ -139,6 +136,8 @@ public class PrintableEntriesTablePage extends ProtectedPage {
                 }
 
                 item.add(new Label("status", JbeiConstants.getStatus(entry.getStatus())));
+
+                EntryController entryController = new EntryController(IceSession.get().getAccount());
 
                 try {
                     item

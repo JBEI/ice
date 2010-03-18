@@ -40,11 +40,15 @@ public class Utils {
     public final static String toCommaSeparatedStringFromSelectionMarkers(
             Set<SelectionMarker> hashSet) {
         String result = null;
+
         ArrayList<String> temp = new ArrayList<String>();
+
         for (SelectionMarker selectionMarker : hashSet) {
             temp.add(selectionMarker.getName());
         }
+
         result = join(", ", temp);
+
         return result;
     }
 
