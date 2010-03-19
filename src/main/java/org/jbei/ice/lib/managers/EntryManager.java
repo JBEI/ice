@@ -64,7 +64,9 @@ public class EntryManager {
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve entry by id: " + id, e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return entry;
@@ -88,7 +90,9 @@ public class EntryManager {
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve entry by recordId: " + recordId, e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return entry;
@@ -112,7 +116,9 @@ public class EntryManager {
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve entry by partNumber: " + partNumber, e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return entry;
@@ -144,7 +150,9 @@ public class EntryManager {
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve number of visible entries!", e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return result;
@@ -166,7 +174,9 @@ public class EntryManager {
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve entries!", e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return entries;
@@ -198,7 +208,9 @@ public class EntryManager {
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve entries!", e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return entries;
@@ -225,7 +237,9 @@ public class EntryManager {
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve entries by owner: " + owner, e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return entries;
@@ -255,7 +269,9 @@ public class EntryManager {
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve entries!", e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return entries;
@@ -408,7 +424,9 @@ public class EntryManager {
             FundingSource duplicateFundingSource = (FundingSource) query.list().get(0);
             result = duplicateFundingSource;
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         if (existingFundingSource == null) {
@@ -461,7 +479,9 @@ public class EntryManager {
         } catch (HibernateException e) {
             throw new ManagerException("Couldn't retrieve Entry by partNumber", e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
     }
 

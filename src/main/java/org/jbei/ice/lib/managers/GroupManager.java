@@ -26,7 +26,9 @@ public class GroupManager {
             Logger.error(str, e);
             throw new ManagerException(str);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return result;
@@ -45,7 +47,9 @@ public class GroupManager {
             Logger.error(msg, e);
             throw new ManagerException(msg);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return result;
@@ -77,7 +81,9 @@ public class GroupManager {
             Logger.warn(msg);
             throw new ManagerException(msg);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         return groups;
     }

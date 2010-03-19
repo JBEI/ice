@@ -90,7 +90,9 @@ public class AttachmentManager {
             throw new ManagerException("Failed to retrieve attachment by entry: " + entry.getId(),
                     e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return attachments;

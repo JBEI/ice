@@ -96,7 +96,9 @@ public class TraceSequenceManager {
         } catch (HibernateException e) {
             Logger.error("Could not get TraceSequence!", e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return traceSequence;
@@ -125,7 +127,9 @@ public class TraceSequenceManager {
 
             throw new ManagerException(msg, e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return result;
@@ -147,7 +151,9 @@ public class TraceSequenceManager {
                     + entry.getRecordId();
             Logger.error(msg, e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return result;

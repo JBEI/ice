@@ -27,7 +27,9 @@ public class AccountManager {
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve Account by id: " + String.valueOf(id), e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return account;
@@ -47,7 +49,9 @@ public class AccountManager {
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve all accounts", e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return accounts;
@@ -71,7 +75,9 @@ public class AccountManager {
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve Account by email: " + email);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return account;
@@ -99,7 +105,9 @@ public class AccountManager {
             throw new ManagerException("Failed to determine moderator for Account: "
                     + account.getFullName());
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return result;
@@ -139,7 +147,9 @@ public class AccountManager {
         } catch (HibernateException e) {
             throw new ManagerException("Failed to get Account by token: " + authToken);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return account;

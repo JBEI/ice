@@ -616,7 +616,9 @@ public class Query {
         } catch (HibernateException e) {
             Logger.error("Could not query ", e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         return rawResults;
     }

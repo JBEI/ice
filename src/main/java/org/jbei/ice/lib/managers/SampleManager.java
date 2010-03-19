@@ -63,7 +63,9 @@ public class SampleManager {
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve sample by entry: " + entry.getId(), e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return samples;
@@ -95,7 +97,9 @@ public class SampleManager {
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve sample by depositor: " + depositor, e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return samples;

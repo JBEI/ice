@@ -234,7 +234,9 @@ public class PermissionManager {
             Logger.error(msg, e);
             throw new ManagerException(msg, e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
     }
 
@@ -256,7 +258,9 @@ public class PermissionManager {
             String msg = "Could not set Read Group of " + entry.getRecordId();
             throw new ManagerException(msg, e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
     }
 
@@ -293,7 +297,9 @@ public class PermissionManager {
             Logger.error(msg, e);
             throw new ManagerException(msg, e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
     }
 
@@ -318,7 +324,9 @@ public class PermissionManager {
         } catch (DAOException e) {
             throw new ManagerException(e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
     }
 
@@ -354,7 +362,9 @@ public class PermissionManager {
             Logger.error(msg, e);
             throw new ManagerException(msg, e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
     }
@@ -412,7 +422,9 @@ public class PermissionManager {
             String msg = "Could not get Write Group of " + entry.getRecordId();
             throw new ManagerException(msg, e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
     }
 
@@ -429,7 +441,9 @@ public class PermissionManager {
         } catch (HibernateException e) {
             throw e;
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         if (account.getEmail().equals(entry.getOwnerEmail())) {
             result = true;
@@ -454,7 +468,9 @@ public class PermissionManager {
         } catch (HibernateException e) {
             throw e;
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         if (numberOfEntries > 0) {
             result = true;
@@ -472,7 +488,9 @@ public class PermissionManager {
                 throw e;
             } finally {
 
-                session.close();
+                if (session.isOpen()) {
+                    session.close();
+                }
             }
 
             if (accounts.contains(account.getId())) {
@@ -505,7 +523,9 @@ public class PermissionManager {
         } catch (HibernateException e) {
             throw e;
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         return result;
     }
@@ -523,7 +543,9 @@ public class PermissionManager {
         } catch (HibernateException e) {
             throw e;
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         Set<Integer> accountGroups = getAllAccountGroups(account);
 
@@ -549,7 +571,9 @@ public class PermissionManager {
         } catch (HibernateException e) {
             throw e;
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         Set<Integer> accountGroups = getAllAccountGroups(account);
 
@@ -573,7 +597,9 @@ public class PermissionManager {
         } catch (HibernateException e) {
             throw e;
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         Set<Integer> accountGroups = getAllAccountGroups(account);

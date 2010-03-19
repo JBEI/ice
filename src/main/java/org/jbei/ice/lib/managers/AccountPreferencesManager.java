@@ -28,7 +28,9 @@ public class AccountPreferencesManager {
             throw new ManagerException("Failed to get AccountPreferences by Account: "
                     + account.getFullName(), e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return accountPreferences;

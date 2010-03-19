@@ -32,7 +32,9 @@ public class DAO {
 
             throw new DAOException("dbDelete failed!", e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
     }
 
@@ -60,7 +62,9 @@ public class DAO {
 
             throw new DAOException("dbSave failed!", e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return result;
@@ -77,7 +81,9 @@ public class DAO {
             throw new DAOException("dbGet failed for " + theClass.getCanonicalName() + " and id="
                     + id, e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return result;
@@ -96,7 +102,9 @@ public class DAO {
         } catch (HibernateException e) {
             throw new DAOException("Merge failed: ", e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return result;

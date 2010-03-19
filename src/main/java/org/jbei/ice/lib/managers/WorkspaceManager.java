@@ -56,7 +56,9 @@ public class WorkspaceManager {
         } catch (Exception e) {
             Logger.error("Could not determine if account's entry is in workspace", e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return result;
@@ -103,7 +105,9 @@ public class WorkspaceManager {
         } catch (Exception e) {
             new ManagerException("Could not get workspace for account " + account.getEmail(), e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         return result;
     }
@@ -124,7 +128,9 @@ public class WorkspaceManager {
         } catch (HibernateException e) {
             throw new ManagerException("Could not get workspace by account ", e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return result;
@@ -142,7 +148,9 @@ public class WorkspaceManager {
         } catch (Exception e) {
             throw new ManagerException("Could not get by account and entry", e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         return result;
     }
@@ -159,7 +167,9 @@ public class WorkspaceManager {
         } catch (HibernateException e) {
             throw new ManagerException(e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return size;

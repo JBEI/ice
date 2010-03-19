@@ -35,7 +35,9 @@ public class UtilsManager {
         } catch (HibernateException e) {
             throw new ManagerException(e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         /* Markers are comma separated lists, so must parse them 
         getting from the database */
@@ -65,7 +67,9 @@ public class UtilsManager {
         } catch (HibernateException e) {
             Logger.error("Could not get unique public plasmid names " + e.toString(), e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         for (String name : names) {
@@ -86,7 +90,9 @@ public class UtilsManager {
         } catch (HibernateException e) {
             Logger.error("Could not get unique promoters " + e.toString(), e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         /* Prometers are comma separated lists, so must parse them 
         getting from the database */
@@ -118,7 +124,9 @@ public class UtilsManager {
         } catch (HibernateException e) {
             Logger.error("Could not get unique origins of replication " + e.toString(), e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         /* Origin of replications are comma separated lists, so must parse them 
         getting from the database */
@@ -154,7 +162,9 @@ public class UtilsManager {
             } catch (HibernateException e) {
                 Logger.error("Could not get strains for plasmid " + e.toString(), e);
             } finally {
-                session.close();
+                if (session.isOpen()) {
+                    session.close();
+                }
             }
         }
 
@@ -297,7 +307,9 @@ public class UtilsManager {
         } catch (Exception e) {
             throw new ManagerException("Could not get votes by account");
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return result;
@@ -315,7 +327,9 @@ public class UtilsManager {
         } catch (Exception e) {
             throw new ManagerException("Could not get votes by account");
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return result;
@@ -333,7 +347,9 @@ public class UtilsManager {
         } catch (Exception e) {
             throw new ManagerException("Could not get votes by entry");
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return result;
@@ -351,7 +367,9 @@ public class UtilsManager {
         } catch (Exception e) {
             throw new ManagerException("Could not get votes by account");
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return result;
@@ -370,7 +388,9 @@ public class UtilsManager {
         } catch (Exception e) {
             throw new ManagerException("Could not get vote by entry and account");
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return vote;
@@ -417,7 +437,9 @@ public class UtilsManager {
         } catch (Exception e) {
             throw new ManagerException("Could not get most voted");
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return result;
@@ -443,7 +465,9 @@ public class UtilsManager {
         } catch (Exception e) {
             throw new ManagerException("Could not get most commented");
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return result;

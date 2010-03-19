@@ -34,7 +34,9 @@ public class SessionManager {
             Logger.error(msg, e);
             throw new ManagerException(msg, e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return sessionData;
@@ -86,7 +88,9 @@ public class SessionManager {
             String msg = "Could not flush expired sessions: " + e.toString();
             Logger.error(msg, e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
     }
 }

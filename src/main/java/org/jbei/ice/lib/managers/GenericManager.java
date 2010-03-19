@@ -20,7 +20,9 @@ public class GenericManager {
         } catch (HibernateException e) {
             throw new ManagerException("Couldn't retrieve News: " + e.toString());
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         return newses;
 
@@ -39,7 +41,9 @@ public class GenericManager {
         } catch (HibernateException e) {
             throw new ManagerException("Couldn't retrieve News: " + e.toString());
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         return newses;
 
@@ -56,7 +60,9 @@ public class GenericManager {
         } catch (HibernateException e) {
             throw new ManagerException("Couldn't retrieve News: " + e.toString());
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         return newses;
 
@@ -71,7 +77,9 @@ public class GenericManager {
         } catch (HibernateException e) {
             throw new ManagerException("Couldn't retrieve News: " + e.toString());
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         return result;
     }

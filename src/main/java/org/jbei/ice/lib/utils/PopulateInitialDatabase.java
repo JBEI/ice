@@ -138,7 +138,9 @@ public class PopulateInitialDatabase {
         } catch (HibernateException e) {
             Logger.error("Could not get funding sources " + e.toString(), e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
         FundingSource keepFundingSource = dupeFundingSources.get(0);
         for (int i = 1; i < dupeFundingSources.size(); i++) {
@@ -155,7 +157,9 @@ public class PopulateInitialDatabase {
             } catch (HibernateException e) {
                 Logger.error("Could not get funding sources " + e.toString(), e);
             } finally {
-                session.close();
+                if (session.isOpen()) {
+                    session.close();
+                }
             }
 
             for (EntryFundingSource entryFundingSource : entryFundingSources) {
@@ -179,7 +183,9 @@ public class PopulateInitialDatabase {
             } catch (HibernateException e) {
                 Logger.error("Could not get funding sources " + e.toString(), e);
             } finally {
-                session.close();
+                if (session.isOpen()) {
+                    session.close();
+                }
             }
 
             for (AccountFundingSource accountFundingSource : accountFundingSources) {

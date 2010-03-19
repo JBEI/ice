@@ -126,7 +126,9 @@ public class SequenceManager {
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve sequence by entry: " + entry.getId(), e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return sequence;
@@ -148,7 +150,9 @@ public class SequenceManager {
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve entries!", e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return sequences;
@@ -184,7 +188,9 @@ public class SequenceManager {
         } catch (BioException e) {
             throw new ManagerException("Failed to get Feature by sequence!", e);
         } finally {
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
 
         return result;
