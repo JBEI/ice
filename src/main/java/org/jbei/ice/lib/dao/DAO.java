@@ -16,7 +16,7 @@ public class DAO {
         Session session = getSession();
 
         try {
-            session.beginTransaction(); // Do not assign transaction to value
+            session.getTransaction().begin(); // Do not assign transaction to value
 
             try {
                 session.delete(model);
@@ -42,8 +42,7 @@ public class DAO {
 
         Session session = getSession();
         try {
-            session.beginTransaction(); // Do not assign transaction to value
-
+            session.getTransaction().begin(); // Do not assign transaction to value
             try {
                 session.saveOrUpdate(model);
                 session.getTransaction().commit();
