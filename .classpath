@@ -14,5 +14,12 @@
 	<classpathentry kind="lib" path="lib/biojava-1.7-all.jar"/>
 	<classpathentry kind="lib" path="lib/biojava.jar"/>
 	<classpathentry kind="lib" path="lib/bytecode.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v6.0">
+		<attributes>
+			<attribute name="owner.project.facets" value="jst.web"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
