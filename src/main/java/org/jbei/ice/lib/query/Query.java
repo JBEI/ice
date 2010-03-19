@@ -11,8 +11,9 @@ import java.util.TreeSet;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.jbei.ice.lib.dao.HibernateHelper;
+import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
@@ -39,7 +40,13 @@ public class Query {
 
     private void initializeFilters() {
         Map<String, String> selectionMarkersMap = new LinkedHashMap<String, String>();
-        TreeSet<String> uniqueSelectionMarkers = UtilsManager.getUniqueSelectionMarkers();
+        TreeSet<String> uniqueSelectionMarkers = null;
+        try {
+            uniqueSelectionMarkers = UtilsManager.getUniqueSelectionMarkers();
+        } catch (ManagerException e) {
+            String msg = "Could not get unique selection markers in Query";
+            Logger.error(msg, e);
+        }
         for (String selectionMarker : uniqueSelectionMarkers) {
             selectionMarkersMap.put(selectionMarker, selectionMarker);
         }
@@ -601,7 +608,7 @@ public class Query {
 
     private HashSet<Integer> hibernateQuery(String queryString) {
         HashSet<Integer> rawResults = new HashSet<Integer>();
-        Session session = HibernateHelper.getSession();
+        Session session = DAO.newSession();
         org.hibernate.Query query = session.createQuery(queryString);
 
         try {
@@ -609,6 +616,7 @@ public class Query {
         } catch (HibernateException e) {
             Logger.error("Could not query ", e);
         } finally {
+            session.close();
         }
         return rawResults;
     }

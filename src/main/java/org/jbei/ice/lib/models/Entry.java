@@ -99,7 +99,7 @@ public class Entry implements IEntryValueObject, IModel {
     @Lob
     private String intellectualProperty;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "entry")
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "entry", fetch = FetchType.EAGER)
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     private Sequence sequence;
 

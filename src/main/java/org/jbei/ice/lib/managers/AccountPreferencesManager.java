@@ -16,7 +16,7 @@ public class AccountPreferencesManager {
 
         AccountPreferences accountPreferences = null;
 
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
 
         try {
             Query query = session.createQuery("from " + AccountPreferences.class.getName()
@@ -27,6 +27,8 @@ public class AccountPreferencesManager {
         } catch (HibernateException e) {
             throw new ManagerException("Failed to get AccountPreferences by Account: "
                     + account.getFullName(), e);
+        } finally {
+            session.close();
         }
 
         return accountPreferences;

@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.models;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -22,15 +23,15 @@ public class EntryAssemblyRelationship implements IModel {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
     private int id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "subject")
     private Entry subject;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "object")
     private Entry object;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "relationship")
     private AssemblyRelationship relationship;
 

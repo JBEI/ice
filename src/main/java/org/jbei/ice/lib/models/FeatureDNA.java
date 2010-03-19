@@ -2,6 +2,7 @@ package org.jbei.ice.lib.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -30,7 +31,7 @@ public class FeatureDNA implements IModel {
     @Lob
     private String sequence;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "feature_id", nullable = false, unique = true)
     private Feature feature;
 

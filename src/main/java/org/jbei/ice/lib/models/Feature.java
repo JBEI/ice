@@ -3,6 +3,7 @@ package org.jbei.ice.lib.models;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -42,7 +43,7 @@ public class Feature implements IFeatureValueObject, IModel {
     @Column(name = "genbank_type", length = 127)
     private String genbankType;
 
-    @OneToOne(mappedBy = "feature", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "feature", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     private FeatureDNA featureDna;
 

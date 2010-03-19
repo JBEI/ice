@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.models;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -21,15 +22,15 @@ public class FeatureFeatureRelationship implements IModel {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
     private int id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "subject")
     private Feature subject;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "object")
     private Feature object;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "relationship")
     private FeatureRelationship relationship;
 

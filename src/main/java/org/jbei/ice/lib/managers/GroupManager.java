@@ -16,7 +16,7 @@ public class GroupManager {
 
     public static Group get(String uuid) throws ManagerException {
         Group result = null;
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             Query query = session.createQuery("from Group where uuid = :uuid");
             query.setString("uuid", uuid);
@@ -26,7 +26,7 @@ public class GroupManager {
             Logger.error(str, e);
             throw new ManagerException(str);
         } finally {
-
+            session.close();
         }
 
         return result;
@@ -34,7 +34,7 @@ public class GroupManager {
 
     public static Group get(int id) throws ManagerException {
         Group result = null;
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             Query query = session.createQuery("from Group where id = :id");
             query.setInteger("id", id);
@@ -45,7 +45,7 @@ public class GroupManager {
             Logger.error(msg, e);
             throw new ManagerException(msg);
         } finally {
-
+            session.close();
         }
 
         return result;
@@ -67,7 +67,7 @@ public class GroupManager {
     @SuppressWarnings("unchecked")
     public static Set<Group> getAll() throws ManagerException {
         LinkedHashSet<Group> groups = new LinkedHashSet<Group>();
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             String queryString = "from Group";
             Query query = session.createQuery(queryString);
@@ -77,7 +77,7 @@ public class GroupManager {
             Logger.warn(msg);
             throw new ManagerException(msg);
         } finally {
-
+            session.close();
         }
         return groups;
     }

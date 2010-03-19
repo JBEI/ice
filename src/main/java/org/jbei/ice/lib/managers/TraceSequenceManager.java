@@ -88,13 +88,15 @@ public class TraceSequenceManager {
     }
 
     public static TraceSequence get(int id) {
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         TraceSequence traceSequence = null;
 
         try {
             traceSequence = (TraceSequence) session.load(TraceSequence.class, id);
         } catch (HibernateException e) {
             Logger.error("Could not get TraceSequence!", e);
+        } finally {
+            session.close();
         }
 
         return traceSequence;
@@ -108,7 +110,7 @@ public class TraceSequenceManager {
 
         LinkedHashSet<TraceSequence> result = null;
 
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             String queryString = "from TraceSequence as traceSequence where traceSequence.entry = :entry order by traceSequence.creationTime asc";
             Query query = session.createQuery(queryString);
@@ -122,6 +124,8 @@ public class TraceSequenceManager {
             Logger.error(msg, e);
 
             throw new ManagerException(msg, e);
+        } finally {
+            session.close();
         }
 
         return result;
@@ -131,7 +135,7 @@ public class TraceSequenceManager {
     public static int getNumberOfTraceSequences(Entry entry) {
         int result = 0;
 
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             String queryString = "from " + TraceSequence.class.getName() + " where entry = :entry";
             Query query = session.createQuery(queryString);
@@ -142,6 +146,8 @@ public class TraceSequenceManager {
             String msg = "Could not determine number of TraceSequences for entry: "
                     + entry.getRecordId();
             Logger.error(msg, e);
+        } finally {
+            session.close();
         }
 
         return result;

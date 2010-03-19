@@ -32,7 +32,7 @@ public class WorkspaceManager {
 
         result.setInWorkspace(true);
 
-        result = (Workspace) save(result);
+        result = save(result);
 
         return result;
     }
@@ -41,7 +41,7 @@ public class WorkspaceManager {
         boolean result = false;
 
         String queryString = "from Workspace workspace where entry=:entry and account=:account";
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         Query query = session.createQuery(queryString);
         query.setParameter("entry", entry);
         query.setParameter("account", account);
@@ -55,6 +55,8 @@ public class WorkspaceManager {
             }
         } catch (Exception e) {
             Logger.error("Could not determine if account's entry is in workspace", e);
+        } finally {
+            session.close();
         }
 
         return result;
@@ -91,7 +93,7 @@ public class WorkspaceManager {
         ArrayList<Workspace> result = null;
         Account account = IceSession.get().getAccount();
         String queryString = "from Workspace workspace where account=:account order by workspace.dateAdded desc";
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         Query query = session.createQuery(queryString);
         query.setParameter("account", account);
         try {
@@ -100,6 +102,8 @@ public class WorkspaceManager {
             result = temp;
         } catch (Exception e) {
             new ManagerException("Could not get workspace for account " + account.getEmail(), e);
+        } finally {
+            session.close();
         }
         return result;
     }
@@ -108,10 +112,9 @@ public class WorkspaceManager {
     public static ArrayList<Workspace> getByAccount(Account account, int offset, int limit)
             throws ManagerException {
         ArrayList<Workspace> result = null;
-
+        Session session = DAO.newSession();
         try {
             String queryString = "from Workspace where account=:account and inWorkspace = true";
-            Session session = DAO.getSession();
             Query query = session.createQuery(queryString);
             query.setParameter("account", account);
             query.setFirstResult(offset);
@@ -120,6 +123,8 @@ public class WorkspaceManager {
             result = new ArrayList<Workspace>(query.list());
         } catch (HibernateException e) {
             throw new ManagerException("Could not get workspace by account ", e);
+        } finally {
+            session.close();
         }
 
         return result;
@@ -127,7 +132,7 @@ public class WorkspaceManager {
 
     public static Workspace get(Account account, Entry entry) throws ManagerException {
         String queryString = "from Workspace workspace where entry=:entry and account=:account";
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         Query query = session.createQuery(queryString);
         query.setParameter("entry", entry);
         query.setParameter("account", account);
@@ -136,22 +141,25 @@ public class WorkspaceManager {
             result = (Workspace) query.uniqueResult();
         } catch (Exception e) {
             throw new ManagerException("Could not get by account and entry", e);
+        } finally {
+            session.close();
         }
         return result;
     }
 
     public static int getCountByAccount(Account account) throws ManagerException {
         int size = 0;
-
+        Session session = DAO.newSession();
         try {
             String queryString = "from Workspace workspace where account=:account and inWorkspace = true order by workspace.dateAdded desc";
-            Session session = DAO.getSession();
             Query query = session.createQuery(queryString);
             query.setParameter("account", account);
 
             size = query.list().size();
         } catch (HibernateException e) {
             throw new ManagerException(e);
+        } finally {
+            session.close();
         }
 
         return size;

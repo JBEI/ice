@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -28,7 +29,7 @@ public class TraceSequence implements IModel {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
     private int id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false)
     private Entry entry;
 
@@ -46,7 +47,7 @@ public class TraceSequence implements IModel {
     @Lob
     private String sequenceUser;
 
-    @OneToOne(optional = true, mappedBy = "traceSequence")
+    @OneToOne(optional = true, mappedBy = "traceSequence", fetch = FetchType.EAGER)
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     private TraceSequenceAlignment alignment;
 

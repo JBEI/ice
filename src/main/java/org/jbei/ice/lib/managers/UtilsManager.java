@@ -12,7 +12,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAO;
-import org.jbei.ice.lib.dao.HibernateHelper;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Comment;
@@ -25,12 +24,19 @@ import org.jbei.ice.lib.utils.Utils;
 
 @SuppressWarnings("unchecked")
 public class UtilsManager {
-    public static TreeSet<String> getUniqueSelectionMarkers() {
+    public static TreeSet<String> getUniqueSelectionMarkers() throws ManagerException {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         Query query = session
                 .createQuery("select distinct selectionMarker.name from SelectionMarker selectionMarker");
-        HashSet<String> rawMarkers = new HashSet<String>(query.list());
+        HashSet<String> rawMarkers = null;
+        try {
+            rawMarkers = new HashSet<String>(query.list());
+        } catch (HibernateException e) {
+            throw new ManagerException(e);
+        } finally {
+            session.close();
+        }
         /* Markers are comma separated lists, so must parse them 
         getting from the database */
 
@@ -50,7 +56,7 @@ public class UtilsManager {
 
     public static TreeSet<String> getUniquePublicPlasmidNames() {
         TreeSet<String> results = new TreeSet<String>();
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         Query query = session
                 .createQuery("select distinct name.name from Plasmid plasmid inner join plasmid.names as name where name.name <> '' order by name.name asc");
         HashSet<String> names = new HashSet<String>();
@@ -59,7 +65,7 @@ public class UtilsManager {
         } catch (HibernateException e) {
             Logger.error("Could not get unique public plasmid names " + e.toString(), e);
         } finally {
-
+            session.close();
         }
 
         for (String name : names) {
@@ -71,7 +77,7 @@ public class UtilsManager {
 
     public static TreeSet<String> getUniquePromoters() {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         Query query = session
                 .createQuery("select distinct plasmid.promoters from Plasmid plasmid ");
         HashSet<String> rawPromoters = new HashSet<String>();
@@ -80,7 +86,7 @@ public class UtilsManager {
         } catch (HibernateException e) {
             Logger.error("Could not get unique promoters " + e.toString(), e);
         } finally {
-
+            session.close();
         }
         /* Prometers are comma separated lists, so must parse them 
         getting from the database */
@@ -101,7 +107,7 @@ public class UtilsManager {
 
     public static TreeSet<String> getUniqueOriginOfReplications() {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         Query query = session
                 .createQuery("select distinct plasmid.originOfReplication from Plasmid plasmid ");
 
@@ -112,7 +118,7 @@ public class UtilsManager {
         } catch (HibernateException e) {
             Logger.error("Could not get unique origins of replication " + e.toString(), e);
         } finally {
-
+            session.close();
         }
         /* Origin of replications are comma separated lists, so must parse them 
         getting from the database */
@@ -137,7 +143,7 @@ public class UtilsManager {
         HashSet<Integer> strainIds = new HashSet<Integer>();
 
         Set<PartNumber> partNumbers = plasmid.getPartNumbers();
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
 
         for (PartNumber partNumber : partNumbers) {
             Query query = session
@@ -148,7 +154,7 @@ public class UtilsManager {
             } catch (HibernateException e) {
                 Logger.error("Could not get strains for plasmid " + e.toString(), e);
             } finally {
-
+                session.close();
             }
         }
 
@@ -281,16 +287,17 @@ public class UtilsManager {
 
     public static LinkedHashSet<Comment> getComments(Entry entry) throws ManagerException {
         LinkedHashSet<Comment> result = null;
+        Session session = DAO.newSession();
         try {
-            Query query = HibernateHelper
-                    .getSession()
-                    .createQuery(
-                            "select comment from Comment comment where comment.entry = :entry order by comment.creationTime");
+            Query query = session
+                    .createQuery("select comment from Comment comment where comment.entry = :entry order by comment.creationTime");
             query.setEntity("entry", entry);
             result = new LinkedHashSet<Comment>(query.list());
 
         } catch (Exception e) {
             throw new ManagerException("Could not get votes by account");
+        } finally {
+            session.close();
         }
 
         return result;
@@ -298,16 +305,17 @@ public class UtilsManager {
 
     public static LinkedHashSet<Comment> getComments(Account account) throws ManagerException {
         LinkedHashSet<Comment> result = null;
+        Session session = DAO.newSession();
         try {
-            Query query = HibernateHelper
-                    .getSession()
-                    .createQuery(
-                            "select comment from Comment comment where comment.account = :account order by comment.creationTime");
+            Query query = session
+                    .createQuery("select comment from Comment comment where comment.account = :account order by comment.creationTime");
             query.setEntity("account", account);
             result = new LinkedHashSet<Comment>(query.list());
 
         } catch (Exception e) {
             throw new ManagerException("Could not get votes by account");
+        } finally {
+            session.close();
         }
 
         return result;
@@ -315,17 +323,17 @@ public class UtilsManager {
 
     public static LinkedHashSet<Vote> getVotes(Entry entry) throws ManagerException {
         LinkedHashSet<Vote> result = null;
+        Session session = DAO.newSession();
         try {
-
-            Query query = HibernateHelper
-                    .getSession()
-                    .createQuery(
-                            "select vote from Vote vote where vote.entry = :entry order by vote.creationTime");
+            Query query = session
+                    .createQuery("select vote from Vote vote where vote.entry = :entry order by vote.creationTime");
             query.setEntity("entry", entry);
             result = new LinkedHashSet<Vote>(query.list());
 
         } catch (Exception e) {
             throw new ManagerException("Could not get votes by entry");
+        } finally {
+            session.close();
         }
 
         return result;
@@ -333,17 +341,17 @@ public class UtilsManager {
 
     public static LinkedHashSet<Vote> getVotes(Account account) throws ManagerException {
         LinkedHashSet<Vote> result = null;
+        Session session = DAO.newSession();
         try {
-
-            Query query = HibernateHelper
-                    .getSession()
-                    .createQuery(
-                            "select vote from Vote vote where vote.account = :account order by vote.creationTime");
+            Query query = session
+                    .createQuery("select vote from Vote vote where vote.account = :account order by vote.creationTime");
             query.setEntity("account", account);
             result = new LinkedHashSet<Vote>(query.list());
 
         } catch (Exception e) {
             throw new ManagerException("Could not get votes by account");
+        } finally {
+            session.close();
         }
 
         return result;
@@ -351,7 +359,7 @@ public class UtilsManager {
 
     public static Vote getVote(Entry entry, Account account) throws ManagerException {
         Vote vote = null;
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             Query query = session
                     .createQuery("select vote from Vote vote where vote.account = :account vote.entry = :entry");
@@ -362,7 +370,7 @@ public class UtilsManager {
         } catch (Exception e) {
             throw new ManagerException("Could not get vote by entry and account");
         } finally {
-
+            session.close();
         }
 
         return vote;
@@ -394,12 +402,11 @@ public class UtilsManager {
 
     public static LinkedHashSet<Entry> getMostVoted() throws ManagerException {
         LinkedHashSet<Entry> result = new LinkedHashSet<Entry>();
+        Session session = DAO.newSession();
         try {
-            Query query = HibernateHelper
-                    .getSession()
-                    .createQuery(
-                    //TODO: Tim; redo this in proper hql
-                            "select entry.id from Vote vote group by entry.id order by sum(comment.score) desc");
+            Query query = session.createQuery(
+            //TODO: Tim; redo this in proper hql
+                    "select entry.id from Vote vote group by entry.id order by sum(comment.score) desc");
             List entries = query.list();
             for (Object item : entries) {
                 Integer id = (Integer) item;
@@ -409,6 +416,8 @@ public class UtilsManager {
 
         } catch (Exception e) {
             throw new ManagerException("Could not get most voted");
+        } finally {
+            session.close();
         }
 
         return result;
@@ -416,15 +425,14 @@ public class UtilsManager {
 
     public static LinkedHashSet<Entry> getMostCommented() throws ManagerException {
         LinkedHashSet<Entry> result = new LinkedHashSet<Entry>();
+        Session session = DAO.newSession();
         try {
-            Query query = HibernateHelper
-                    .getSession()
-                    .createQuery(
-                    // TODO: Tim; redo this in proper hql
-                            // working sql query:
-                            // test_registry=> select entries.id, count(comments.id) from entries join comments on comments.entries_id=entries.id group by entries.id order by count(comments.id) desc;
-                            // This is a WORKAROUND.
-                            "select entry.id from Comment comment group by entry.id order by count(comment) desc");
+            Query query = session.createQuery(
+            // TODO: Tim; redo this in proper hql
+                    // working sql query:
+                    // test_registry=> select entries.id, count(comments.id) from entries join comments on comments.entries_id=entries.id group by entries.id order by count(comments.id) desc;
+                    // This is a WORKAROUND.
+                    "select entry.id from Comment comment group by entry.id order by count(comment) desc");
             List entries = query.list();
             for (Object item : entries) {
                 Integer item2 = (Integer) item;
@@ -434,6 +442,8 @@ public class UtilsManager {
 
         } catch (Exception e) {
             throw new ManagerException("Could not get most commented");
+        } finally {
+            session.close();
         }
 
         return result;

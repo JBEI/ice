@@ -109,7 +109,7 @@ public class SequenceManager {
     public static Sequence getByEntry(Entry entry) throws ManagerException {
         Sequence sequence = null;
 
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             String queryString = "from " + Sequence.class.getName()
                     + " as sequence where sequence.entry = :entry";
@@ -125,6 +125,8 @@ public class SequenceManager {
             }
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve sequence by entry: " + entry.getId(), e);
+        } finally {
+            session.close();
         }
 
         return sequence;
@@ -134,7 +136,7 @@ public class SequenceManager {
     public static ArrayList<Sequence> getAllSequences() throws ManagerException {
         ArrayList<Sequence> sequences = null;
 
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             Query query = session.createQuery("from " + Sequence.class.getName());
 
@@ -145,6 +147,8 @@ public class SequenceManager {
             }
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve entries!", e);
+        } finally {
+            session.close();
         }
 
         return sequences;
@@ -152,7 +156,7 @@ public class SequenceManager {
 
     private static Feature getFeatureBySequence(String featureDNASequence) throws ManagerException {
         Feature result = null;
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
 
         try {
             String queryString = "from " + FeatureDNA.class.getName() + " where hash = :hash";
@@ -179,6 +183,8 @@ public class SequenceManager {
             throw new ManagerException("Failed to get Feature by sequence!", e);
         } catch (BioException e) {
             throw new ManagerException("Failed to get Feature by sequence!", e);
+        } finally {
+            session.close();
         }
 
         return result;

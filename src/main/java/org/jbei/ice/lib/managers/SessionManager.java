@@ -13,7 +13,7 @@ public class SessionManager {
 
     public static SessionData get(String sessionKey) throws ManagerException {
         SessionData sessionData = null;
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             String queryString = "from SessionData where sessionKey = :sessionKey";
             Query query = session.createQuery(queryString);
@@ -34,7 +34,7 @@ public class SessionManager {
             Logger.error(msg, e);
             throw new ManagerException(msg, e);
         } finally {
-
+            session.close();
         }
 
         return sessionData;
@@ -72,7 +72,7 @@ public class SessionManager {
      */
 
     public static void flush() {
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             String queryString = "from SessionData sessionData where sessionData.expireDate < :now";
             Query query = session.createQuery(queryString);
@@ -85,6 +85,8 @@ public class SessionManager {
         } catch (Exception e) {
             String msg = "Could not flush expired sessions: " + e.toString();
             Logger.error(msg, e);
+        } finally {
+            session.close();
         }
     }
 }

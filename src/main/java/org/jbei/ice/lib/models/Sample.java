@@ -49,7 +49,7 @@ public class Sample implements ISampleValueObject, IModel {
     @Lob
     private String notes;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false, unique = true)
     private Entry entry;
 

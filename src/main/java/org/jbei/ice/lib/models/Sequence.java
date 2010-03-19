@@ -46,11 +46,11 @@ public class Sequence implements ISequenceValueObject, IModel {
     @Column(name = "rev_hash", length = 40)
     private String revHash;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false, unique = true)
     private Entry entry;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "sequence")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "sequence")
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @JoinColumn(name = "sequence_id")
     @OrderBy("id")

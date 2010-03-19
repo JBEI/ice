@@ -5,6 +5,7 @@ import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -33,12 +34,12 @@ public class FundingSource implements IModel {
     @Column(name = "principal_investigator", length = 255, nullable = false)
     private String principalInvestigator;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "funding_source_id")
     @OrderBy("id")
     private Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "funding_source_id")
     @OrderBy("id")
     private Set<AccountFundingSource> accountFundingSources = new LinkedHashSet<AccountFundingSource>();

@@ -72,7 +72,7 @@ public class AttachmentManager {
     public static ArrayList<Attachment> getByEntry(Entry entry) throws ManagerException {
         ArrayList<Attachment> attachments = null;
 
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             String queryString = "from " + Attachment.class.getName()
                     + " as attachment where attachment.entry = :entry order by attachment.id desc";
@@ -89,6 +89,8 @@ public class AttachmentManager {
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve attachment by entry: " + entry.getId(),
                     e);
+        } finally {
+            session.close();
         }
 
         return attachments;

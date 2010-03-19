@@ -9,7 +9,6 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.dao.HibernateHelper;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.GroupManager;
@@ -30,7 +29,12 @@ public class PopulateInitialDatabase {
         createFirstGroup();
         populatePermissionReadGroup();
          */
-        normalizeAllFundingSources();
+        try {
+            normalizeAllFundingSources();
+        } catch (DAOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     public static Group createFirstGroup() {
@@ -97,7 +101,7 @@ public class PopulateInitialDatabase {
         }
     }
 
-    public static void normalizeAllFundingSources() {
+    public static void normalizeAllFundingSources() throws DAOException {
         ArrayList<Entry> allEntries = null;
 
         try {
@@ -109,18 +113,22 @@ public class PopulateInitialDatabase {
         for (Entry entry : allEntries) {
             Set<EntryFundingSource> entryFundingSources = entry.getEntryFundingSources();
             for (EntryFundingSource entryFundingSource : entryFundingSources) {
-                normalizeFundingSources(entryFundingSource.getFundingSource());
+                try {
+                    normalizeFundingSources(entryFundingSource.getFundingSource());
+                } catch (DAOException e) {
+                    throw e;
+                }
             }
         }
     }
 
     @SuppressWarnings("unchecked")
-    public static void normalizeFundingSources(FundingSource dupeFundingSource) {
+    public static void normalizeFundingSources(FundingSource dupeFundingSource) throws DAOException {
 
         String queryString = "from " + FundingSource.class.getName()
                 + " where fundingSource=:fundingSource AND"
                 + " principalInvestigator=:principalInvestigator";
-        Session session = HibernateHelper.getSession();
+        Session session = DAO.newSession();
         Query query = session.createQuery(queryString);
         query.setParameter("fundingSource", dupeFundingSource.getFundingSource());
         query.setParameter("principalInvestigator", dupeFundingSource.getPrincipalInvestigator());
@@ -129,6 +137,8 @@ public class PopulateInitialDatabase {
             dupeFundingSources = new ArrayList<FundingSource>(query.list());
         } catch (HibernateException e) {
             Logger.error("Could not get funding sources " + e.toString(), e);
+        } finally {
+            session.close();
         }
         FundingSource keepFundingSource = dupeFundingSources.get(0);
         for (int i = 1; i < dupeFundingSources.size(); i++) {
@@ -136,26 +146,41 @@ public class PopulateInitialDatabase {
             // normalize EntryFundingSources
             queryString = "from " + EntryFundingSource.class.getName()
                     + " where fundingSource=:fundingSource";
-
+            session = DAO.newSession();
             query = session.createQuery(queryString);
             query.setParameter("fundingSource", deleteFundingSource);
-            List<EntryFundingSource> entryFundingSources = (query).list();
+            List<EntryFundingSource> entryFundingSources = null;
+            try {
+                entryFundingSources = (query).list();
+            } catch (HibernateException e) {
+                Logger.error("Could not get funding sources " + e.toString(), e);
+            } finally {
+                session.close();
+            }
+
             for (EntryFundingSource entryFundingSource : entryFundingSources) {
                 try {
                     entryFundingSource.setFundingSource(keepFundingSource);
                     DAO.save(entryFundingSource);
                 } catch (DAOException e) {
-                    String msg = "Could set normalized entry funding source: " + e.toString();
-                    Logger.error(msg, e);
+                    throw e;
                 }
             }
 
             // normalize AccountFundingSources
             queryString = "from " + AccountFundingSource.class.getName()
                     + " where fundingSource=:fundingSource";
+            session = DAO.newSession();
             query = session.createQuery(queryString);
             query.setParameter("fundingSource", deleteFundingSource);
-            List<AccountFundingSource> accountFundingSources = query.list();
+            List<AccountFundingSource> accountFundingSources = null;
+            try {
+                accountFundingSources = query.list();
+            } catch (HibernateException e) {
+                Logger.error("Could not get funding sources " + e.toString(), e);
+            } finally {
+                session.close();
+            }
 
             for (AccountFundingSource accountFundingSource : accountFundingSources) {
                 accountFundingSource.setFundingSource(keepFundingSource);

@@ -2,6 +2,7 @@ package org.jbei.ice.lib.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -29,7 +30,7 @@ public class PartNumber implements IPartNumberValueObject, IModel {
     @Column(name = "part_number", length = 127, nullable = false)
     private String partNumber;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false)
     private Entry entry;
 

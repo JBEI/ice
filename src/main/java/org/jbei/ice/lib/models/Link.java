@@ -2,6 +2,7 @@ package org.jbei.ice.lib.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -32,7 +33,7 @@ public class Link implements ILinkValueObject, IModel {
     @Column(name = "url", length = 255)
     private String url;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false)
     private Entry entry;
 

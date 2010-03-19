@@ -50,7 +50,7 @@ public class EntryManager {
     public static Entry get(int id) throws ManagerException {
         Entry entry = null;
 
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             Query query = session.createQuery("from " + Entry.class.getName() + " where id = :id");
 
@@ -63,6 +63,8 @@ public class EntryManager {
             }
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve entry by id: " + id, e);
+        } finally {
+            session.close();
         }
 
         return entry;
@@ -71,7 +73,7 @@ public class EntryManager {
     public static Entry getByRecordId(String recordId) throws ManagerException {
         Entry entry = null;
 
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             Query query = session.createQuery("from " + Entry.class.getName()
                     + " where recordId = :recordId");
@@ -85,6 +87,8 @@ public class EntryManager {
             }
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve entry by recordId: " + recordId, e);
+        } finally {
+            session.close();
         }
 
         return entry;
@@ -93,7 +97,7 @@ public class EntryManager {
     public static Entry getByPartNumber(String partNumber) throws ManagerException {
         Entry entry = null;
 
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             Query query = session.createQuery("from " + PartNumber.class.getName()
                     + " where partNumber = :partNumber");
@@ -107,6 +111,8 @@ public class EntryManager {
             }
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve entry by partNumber: " + partNumber, e);
+        } finally {
+            session.close();
         }
 
         return entry;
@@ -117,11 +123,11 @@ public class EntryManager {
         Group everybodyGroup;
 
         int result = 0;
-        Session session = DAO.getSession();
+        Session session = null;
 
         try {
             everybodyGroup = GroupManager.getEverybodyGroup();
-
+            session = DAO.newSession();
             String queryString = "select id from ReadGroup readGroup where readGroup.group = :group";
 
             Query query = session.createQuery(queryString);
@@ -137,6 +143,8 @@ public class EntryManager {
             }
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve number of visible entries!", e);
+        } finally {
+            session.close();
         }
 
         return result;
@@ -146,7 +154,7 @@ public class EntryManager {
     public static ArrayList<Entry> getAllEntries() throws ManagerException {
         ArrayList<Entry> entries = null;
 
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             Query query = session.createQuery("from " + Entry.class.getName());
 
@@ -157,6 +165,8 @@ public class EntryManager {
             }
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve entries!", e);
+        } finally {
+            session.close();
         }
 
         return entries;
@@ -171,7 +181,7 @@ public class EntryManager {
             throws ManagerException {
         ArrayList<Integer> entries = null;
 
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             String orderSuffix = (field == null) ? ""
                     : (" ORDER BY " + field + " " + (ascending ? "ASC" : "DESC"));
@@ -187,6 +197,8 @@ public class EntryManager {
             }
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve entries!", e);
+        } finally {
+            session.close();
         }
 
         return entries;
@@ -196,7 +208,7 @@ public class EntryManager {
     public static ArrayList<Integer> getEntriesByOwner(String owner) throws ManagerException {
         ArrayList<Integer> entries = null;
 
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             String queryString = "select id from " + Entry.class.getName()
                     + " where ownerEmail = :ownerEmail";
@@ -212,6 +224,8 @@ public class EntryManager {
             }
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve entries by owner: " + owner, e);
+        } finally {
+            session.close();
         }
 
         return entries;
@@ -228,7 +242,7 @@ public class EntryManager {
 
         String filter = Utils.join(", ", ids);
 
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             Query query = session.createQuery("from " + Entry.class.getName() + " WHERE id in ("
                     + filter + ")");
@@ -236,10 +250,12 @@ public class EntryManager {
             ArrayList list = (ArrayList) query.list();
 
             if (list != null) {
-                entries = (ArrayList<Entry>) list;
+                entries = list;
             }
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve entries!", e);
+        } finally {
+            session.close();
         }
 
         return entries;
@@ -376,7 +392,7 @@ public class EntryManager {
     private static FundingSource saveFundingSource(FundingSource fundingSource) throws DAOException {
         FundingSource result;
 
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         String queryString = "from " + FundingSource.class.getName()
                 + " where fundingSource=:fundingSource AND"
                 + " principalInvestigator=:principalInvestigator";
@@ -391,6 +407,8 @@ public class EntryManager {
             // dirty funding source. There are multiple of these. Clean up.
             FundingSource duplicateFundingSource = (FundingSource) query.list().get(0);
             result = duplicateFundingSource;
+        } finally {
+            session.close();
         }
 
         if (existingFundingSource == null) {
@@ -405,7 +423,7 @@ public class EntryManager {
     @SuppressWarnings("unchecked")
     private static String generateNextPartNumber(String prefix, String delimiter, String suffix)
             throws ManagerException {
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             String queryString = "from " + PartNumber.class.getName() + " where partNumber LIKE '"
                     + prefix + "%' ORDER BY partNumber DESC";
@@ -443,7 +461,7 @@ public class EntryManager {
         } catch (HibernateException e) {
             throw new ManagerException("Couldn't retrieve Entry by partNumber", e);
         } finally {
-
+            session.close();
         }
     }
 

@@ -2,6 +2,7 @@ package org.jbei.ice.lib.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -27,7 +28,7 @@ public class Name implements INameValueObject, IModel {
     @Column(name = "name", length = 127, nullable = false)
     private String name;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false, unique = false)
     private Entry entry;
 

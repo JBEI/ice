@@ -2,6 +2,7 @@ package org.jbei.ice.lib.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -35,7 +36,7 @@ public class Attachment implements IAttachmentValueObject, IModel {
     @Column(name = "file_id", length = 36, nullable = false)
     private String fileId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false)
     private Entry entry;
 

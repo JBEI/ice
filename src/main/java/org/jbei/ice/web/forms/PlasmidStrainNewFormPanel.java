@@ -27,6 +27,8 @@ import org.apache.wicket.util.collections.MiniMap;
 import org.apache.wicket.util.template.TextTemplateHeaderContributor;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
@@ -218,8 +220,13 @@ public class PlasmidStrainNewFormPanel extends Panel {
                 @Override
                 public Map<String, Object> getObject() {
                     if (dataMap == null) {
-                        TreeSet<String> uniqueSelectionMarkers = UtilsManager
-                                .getUniqueSelectionMarkers();
+                        TreeSet<String> uniqueSelectionMarkers = null;
+                        try {
+                            uniqueSelectionMarkers = UtilsManager.getUniqueSelectionMarkers();
+                        } catch (ManagerException e) {
+                            String msg = "Colud not get unique Selection Markers";
+                            Logger.error(msg, e);
+                        }
                         TreeSet<String> uniquePromoters = UtilsManager.getUniquePromoters();
                         TreeSet<String> uniqueOriginOfReplications = UtilsManager
                                 .getUniqueOriginOfReplications();

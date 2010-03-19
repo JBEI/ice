@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.models;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -22,11 +23,11 @@ public class AccountFundingSource implements IModel {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
     private int id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "funding_source_id", nullable = false)
     private FundingSource fundingSource;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "accounts_id", nullable = false)
     private Account account;
 

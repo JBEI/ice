@@ -17,7 +17,7 @@ public class AccountManager {
     public static Account get(int id) throws ManagerException {
         Account account = null;
 
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             Query query = session
                     .createQuery("from " + Account.class.getName() + " where id = :id");
@@ -26,6 +26,8 @@ public class AccountManager {
             account = (Account) query.uniqueResult();
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve Account by id: " + String.valueOf(id), e);
+        } finally {
+            session.close();
         }
 
         return account;
@@ -35,7 +37,7 @@ public class AccountManager {
     public static Set<Account> getAllByFirstName() throws ManagerException {
         LinkedHashSet<Account> accounts = new LinkedHashSet<Account>();
 
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             String queryString = "from " + Account.class.getName() + " order by firstName";
 
@@ -44,6 +46,8 @@ public class AccountManager {
             accounts.addAll(query.list());
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve all accounts", e);
+        } finally {
+            session.close();
         }
 
         return accounts;
@@ -52,7 +56,7 @@ public class AccountManager {
     public static Account getByEmail(String email) throws ManagerException {
         Account account = null;
 
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             Query query = session.createQuery("from " + Account.class.getName()
                     + " where email = :email");
@@ -66,6 +70,8 @@ public class AccountManager {
             }
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve Account by email: " + email);
+        } finally {
+            session.close();
         }
 
         return account;
@@ -78,7 +84,7 @@ public class AccountManager {
 
         Boolean result = false;
 
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             String queryString = "from " + Moderator.class.getName()
                     + " moderator where moderator.account = :account";
@@ -92,6 +98,8 @@ public class AccountManager {
         } catch (HibernateException e) {
             throw new ManagerException("Failed to determine moderator for Account: "
                     + account.getFullName());
+        } finally {
+            session.close();
         }
 
         return result;
@@ -119,7 +127,7 @@ public class AccountManager {
 
         String queryString = "select data from " + SessionData.class.getName()
                 + " sessionData where sessionData.sessionKey = :sessionKey";
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             Query query = session.createQuery(queryString);
             query.setString("sessionKey", authToken);
@@ -130,6 +138,8 @@ public class AccountManager {
 
         } catch (HibernateException e) {
             throw new ManagerException("Failed to get Account by token: " + authToken);
+        } finally {
+            session.close();
         }
 
         return account;

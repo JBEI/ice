@@ -46,7 +46,7 @@ public class SampleManager {
     public static ArrayList<Sample> getSamplesByEntry(Entry entry) throws ManagerException {
         ArrayList<Sample> samples = null;
 
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             String queryString = "from " + Sample.class.getName()
                     + " as sample where sample.entry = :entry order by sample.id desc";
@@ -62,6 +62,8 @@ public class SampleManager {
             }
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve sample by entry: " + entry.getId(), e);
+        } finally {
+            session.close();
         }
 
         return samples;
@@ -72,7 +74,7 @@ public class SampleManager {
             throws ManagerException {
         ArrayList<Sample> samples = null;
 
-        Session session = DAO.getSession();
+        Session session = DAO.newSession();
         try {
             String queryString = "from " + Sample.class.getName()
                     + " as sample where sample.depositor = :depositor order by sample.id desc";
@@ -92,6 +94,8 @@ public class SampleManager {
             }
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve sample by depositor: " + depositor, e);
+        } finally {
+            session.close();
         }
 
         return samples;

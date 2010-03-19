@@ -4,8 +4,9 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
 public class DAO {
-    public static Session getSession() {
-        return HibernateHelper.getSession();
+
+    public static Session newSession() {
+        return HibernateHelper.newSession();
     }
 
     public static void delete(IModel model) throws DAOException {
@@ -13,7 +14,7 @@ public class DAO {
             throw new DAOException("Failed to delete null model!");
         }
 
-        Session session = getSession();
+        Session session = newSession();
 
         try {
             session.getTransaction().begin(); // Do not assign transaction to value
@@ -30,6 +31,8 @@ public class DAO {
             session.getTransaction().rollback();
 
             throw new DAOException("dbDelete failed!", e);
+        } finally {
+            session.close();
         }
     }
 
@@ -40,7 +43,7 @@ public class DAO {
 
         Object result = null;
 
-        Session session = getSession();
+        Session session = newSession();
         try {
             session.getTransaction().begin(); // Do not assign transaction to value
             try {
@@ -56,6 +59,8 @@ public class DAO {
             session.getTransaction().rollback();
 
             throw new DAOException("dbSave failed!", e);
+        } finally {
+            session.close();
         }
 
         return result;
@@ -64,13 +69,15 @@ public class DAO {
     public static Object get(Class<? extends IModel> theClass, int id) throws DAOException {
         Object result = null;
 
-        Session tempSession = getSession();
+        Session session = newSession();
 
         try {
-            result = tempSession.load(theClass, id);
+            result = session.load(theClass, id);
         } catch (HibernateException e) {
             throw new DAOException("dbGet failed for " + theClass.getCanonicalName() + " and id="
                     + id, e);
+        } finally {
+            session.close();
         }
 
         return result;
@@ -83,11 +90,13 @@ public class DAO {
 
         Object result = null;
 
-        Session session = getSession();
+        Session session = newSession();
         try {
             result = session.merge(model);
         } catch (HibernateException e) {
             throw new DAOException("Merge failed: ", e);
+        } finally {
+            session.close();
         }
 
         return result;
