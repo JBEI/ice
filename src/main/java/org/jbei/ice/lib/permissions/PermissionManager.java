@@ -585,6 +585,7 @@ public class PermissionManager {
         return result;
     }
 
+    @SuppressWarnings("unchecked")
     protected static boolean groupHasWritePermission(Entry entry, Account account) {
         boolean result = false;
         String queryString = "select writeGroup.group.id from WriteGroup as writeGroup where writeGroup.entry = :entry";

@@ -19,7 +19,6 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -98,10 +97,6 @@ public class Entry implements IEntryValueObject, IModel {
     @Column(name = "intellectual_property")
     @Lob
     private String intellectualProperty;
-
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "entry", fetch = FetchType.EAGER)
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
-    private Sequence sequence;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry")
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
@@ -396,14 +391,6 @@ public class Entry implements IEntryValueObject, IModel {
 
     public String getIntellectualProperty() {
         return intellectualProperty;
-    }
-
-    public void setSequence(Sequence sequence) {
-        this.sequence = sequence;
-    }
-
-    public Sequence getSequence() {
-        return sequence;
     }
 
     public void setEntryFundingSources(Set<EntryFundingSource> entryFundingSources) {

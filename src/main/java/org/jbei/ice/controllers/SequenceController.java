@@ -86,8 +86,8 @@ public class SequenceController extends Controller {
         }
 
         try {
-            Entry entry = sequence.getEntry();
-            Sequence oldSequence = entry.getSequence();
+            // TODO: Zinovii; check this comment later
+            /*Sequence oldSequence = entry.getSequence();
             entry.setSequence(null);
 
             if (oldSequence != null) {
@@ -95,7 +95,7 @@ public class SequenceController extends Controller {
             }
 
             sequence.setEntry(entry);
-            entry.setSequence(sequence);
+            entry.setSequence(sequence);*/
 
             result = SequenceManager.saveSequence(sequence);
 

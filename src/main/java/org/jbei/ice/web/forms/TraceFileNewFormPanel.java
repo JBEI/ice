@@ -105,12 +105,13 @@ public class TraceFileNewFormPanel extends Panel {
                 return;
             }
 
-            if (entry.getSequence() == null) {
+            // TODO: Zinovii; Review what's going on here
+            /*if (entry.getSequence() == null) {
                 setResponsePage(EntryViewPage.class, new PageParameters("0=" + entry.getId()
                         + ",1=seqanalysis"));
 
                 return;
-            }
+            }*/
 
             ArrayList<Bl2SeqResult> bl2seqAlignments = new ArrayList<Bl2SeqResult>();
             /*try {

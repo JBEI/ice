@@ -64,15 +64,7 @@ public class SequenceManager {
         }
 
         try {
-            if (sequence.getEntry() != null) {
-                Entry entry = sequence.getEntry();
-
-                entry.setSequence(null);
-
-                DAO.save(entry);
-
-                sequence.setEntry(null);
-            }
+            sequence.setEntry(null);
 
             DAO.delete(sequence);
         } catch (DAOException e) {

@@ -124,8 +124,16 @@ public class SequenceUpdateFormPanel extends Panel {
         this.entry = entry;
         this.sequenceViewPanel = sequenceViewPanel;
 
-        SequenceUpdateForm sequenceForm = new SequenceUpdateForm("sequenceNewForm", entry
-                .getSequence());
+        SequenceController sequenceController = new SequenceController(IceSession.get()
+                .getAccount());
+
+        SequenceUpdateForm sequenceForm;
+        try {
+            sequenceForm = new SequenceUpdateForm("sequenceNewForm", sequenceController
+                    .getByEntry(entry));
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        }
 
         add(sequenceForm);
         add(new FeedbackPanel("feedback"));

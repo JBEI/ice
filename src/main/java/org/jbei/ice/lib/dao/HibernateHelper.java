@@ -6,8 +6,6 @@ import org.hibernate.cfg.AnnotationConfiguration;
 import org.jbei.ice.lib.logging.Logger;
 
 public class HibernateHelper {
-    private static Session session = null;
-
     private static final SessionFactory sessionFactory;
 
     static {
