@@ -3,21 +3,19 @@ package org.jbei.ice.lib.vo;
 import org.jbei.ice.lib.models.Entry;
 
 public interface ILinkValueObject {
+    int getId();
 
-    public abstract int getId();
+    void setId(int id);
 
-    public abstract void setId(int id);
+    String getLink();
 
-    public abstract String getLink();
+    void setLink(String link);
 
-    public abstract void setLink(String link);
+    String getUrl();
 
-    public abstract String getUrl();
+    void setUrl(String url);
 
-    public abstract void setUrl(String url);
+    Entry getEntry();
 
-    public abstract Entry getEntry();
-
-    public abstract void setEntry(Entry entry);
-
+    void setEntry(Entry entry);
 }

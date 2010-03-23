@@ -1,33 +1,31 @@
 package org.jbei.ice.lib.vo;
 
 public interface IFeatureValueObject {
-
     public abstract String getName();
 
     public abstract void setName(String name);
 
-    public abstract String getDescription();
+    String getDescription();
 
-    public abstract void setDescription(String description);
+    void setDescription(String description);
 
-    public abstract String getIdentification();
+    String getIdentification();
 
-    public abstract void setIdentification(String identification);
+    void setIdentification(String identification);
 
-    public abstract String getUuid();
+    String getUuid();
 
-    public abstract void setUuid(String uuid);
+    void setUuid(String uuid);
 
-    public abstract int getAutoFind();
+    int getAutoFind();
 
-    public abstract void setAutoFind(int autoFind);
+    void setAutoFind(int autoFind);
 
-    public abstract String getGenbankType();
+    String getGenbankType();
 
-    public abstract void setGenbankType(String genbankType);
+    void setGenbankType(String genbankType);
 
-    public abstract void setId(int id);
+    void setId(int id);
 
-    public abstract int getId();
-
+    int getId();
 }

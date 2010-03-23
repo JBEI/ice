@@ -3,17 +3,15 @@ package org.jbei.ice.lib.vo;
 import org.jbei.ice.lib.models.Entry;
 
 public interface IPartNumberValueObject {
+    int getId();
 
-    public abstract int getId();
+    void setId(int id);
 
-    public abstract void setId(int id);
+    String getPartNumber();
 
-    public abstract String getPartNumber();
+    void setPartNumber(String partNumber);
 
-    public abstract void setPartNumber(String partNumber);
+    Entry getEntry();
 
-    public abstract Entry getEntry();
-
-    public abstract void setEntry(Entry entry);
-
+    void setEntry(Entry entry);
 }

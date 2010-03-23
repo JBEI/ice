@@ -3,17 +3,15 @@ package org.jbei.ice.lib.vo;
 import org.jbei.ice.lib.models.Entry;
 
 public interface INameValueObject {
+    void setId(int id);
 
-    public abstract void setId(int id);
+    int getId();
 
-    public abstract int getId();
+    String getName();
 
-    public abstract String getName();
+    void setName(String name);
 
-    public abstract void setName(String name);
+    Entry getEntry();
 
-    public abstract Entry getEntry();
-
-    public abstract void setEntry(Entry entry);
-
+    void setEntry(Entry entry);
 }

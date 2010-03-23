@@ -4,33 +4,31 @@ import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Sequence;
 
 public interface ISequenceFeatureValueObject {
+    void setId(int id);
 
-    public abstract void setId(int id);
+    int getId();
 
-    public abstract int getId();
+    ISequenceValueObject getSequence();
 
-    public abstract ISequenceValueObject getSequence();
+    void setSequence(Sequence sequence);
 
-    public abstract void setSequence(Sequence sequence);
+    Feature getFeature();
 
-    public abstract Feature getFeature();
+    void setFeature(Feature feature);
 
-    public abstract void setFeature(Feature feature);
+    int getStart();
 
-    public abstract int getStart();
+    void setStart(int start);
 
-    public abstract void setStart(int start);
+    int getEnd();
 
-    public abstract int getEnd();
+    void setEnd(int end);
 
-    public abstract void setEnd(int end);
+    int getStrand();
 
-    public abstract int getStrand();
+    void setStrand(int strand);
 
-    public abstract void setStrand(int strand);
+    String getName();
 
-    public abstract String getName();
-
-    public abstract void setName(String name);
-
+    void setName(String name);
 }

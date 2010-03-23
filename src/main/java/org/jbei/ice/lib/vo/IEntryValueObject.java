@@ -7,92 +7,85 @@ import org.jbei.ice.lib.models.Link;
 import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.models.SelectionMarker;
-import org.jbei.ice.lib.models.Sequence;
 
 public interface IEntryValueObject {
+    int getId();
 
-    public abstract int getId();
+    void setId(int id);
 
-    public abstract void setId(int id);
+    String getRecordId();
 
-    public abstract String getRecordId();
+    void setRecordId(String recordId);
 
-    public abstract void setRecordId(String recordId);
+    String getVersionId();
 
-    public abstract String getVersionId();
+    void setVersionId(String versionId);
 
-    public abstract void setVersionId(String versionId);
+    String getRecordType();
 
-    public abstract String getRecordType();
+    void setRecordType(String recordType);
 
-    public abstract void setRecordType(String recordType);
+    Set<Name> getNames();
 
-    public abstract Set<Name> getNames();
+    void setNames(Set<Name> names);
 
-    public abstract void setNames(Set<Name> names);
+    Set<PartNumber> getPartNumbers();
 
-    public abstract Set<PartNumber> getPartNumbers();
+    void setPartNumbers(Set<PartNumber> partNumbers);
 
-    public abstract void setPartNumbers(Set<PartNumber> partNumbers);
+    String getOwner();
 
-    public abstract String getOwner();
+    void setOwner(String owner);
 
-    public abstract void setOwner(String owner);
+    String getOwnerEmail();
 
-    public abstract String getOwnerEmail();
+    void setOwnerEmail(String ownerEmail);
 
-    public abstract void setOwnerEmail(String ownerEmail);
+    String getCreator();
 
-    public abstract String getCreator();
+    void setCreator(String creator);
 
-    public abstract void setCreator(String creator);
+    String getCreatorEmail();
 
-    public abstract String getCreatorEmail();
+    void setCreatorEmail(String creatorEmail);
 
-    public abstract void setCreatorEmail(String creatorEmail);
+    String getStatus();
 
-    public abstract String getStatus();
+    void setStatus(String status);
 
-    public abstract void setStatus(String status);
+    String getAlias();
 
-    public abstract String getAlias();
+    void setAlias(String alias);
 
-    public abstract void setAlias(String alias);
+    Set<SelectionMarker> getSelectionMarkers();
 
-    public abstract Set<SelectionMarker> getSelectionMarkers();
+    void setSelectionMarkers(Set<SelectionMarker> selectionMarkers);
 
-    public abstract void setSelectionMarkers(Set<SelectionMarker> selectionMarkers);
+    Set<Link> getLinks();
 
-    public abstract Set<Link> getLinks();
+    void setLinks(Set<Link> links);
 
-    public abstract void setLinks(Set<Link> links);
+    String getKeywords();
 
-    public abstract String getKeywords();
+    void setKeywords(String keywords);
 
-    public abstract void setKeywords(String keywords);
+    String getShortDescription();
 
-    public abstract String getShortDescription();
+    void setShortDescription(String shortDescription);
 
-    public abstract void setShortDescription(String shortDescription);
+    String getLongDescription();
 
-    public abstract String getLongDescription();
+    void setLongDescription(String longDescription);
 
-    public abstract void setLongDescription(String longDescription);
+    String getReferences();
 
-    public abstract String getReferences();
+    void setReferences(String references);
 
-    public abstract void setReferences(String references);
+    Date getCreationTime();
 
-    public abstract Date getCreationTime();
+    void setCreationTime(Date creationTime);
 
-    public abstract void setCreationTime(Date creationTime);
+    Date getModificationTime();
 
-    public abstract Date getModificationTime();
-
-    public abstract void setModificationTime(Date modificationTime);
-
-    public abstract void setSequence(Sequence sequence);
-
-    public abstract Sequence getSequence();
-
+    void setModificationTime(Date modificationTime);
 }

@@ -3,23 +3,23 @@ package org.jbei.ice.lib.vo;
 import org.jbei.ice.lib.models.Entry;
 
 public interface IAttachmentValueObject {
-    public abstract int getId();
+    int getId();
 
-    public abstract void setId(int id);
+    void setId(int id);
 
-    public abstract void setDescription(String description);
+    void setDescription(String description);
 
-    public abstract String getDescription();
+    String getDescription();
 
-    public abstract String getFileName();
+    String getFileName();
 
-    public abstract void setFileName(String fileName);
+    void setFileName(String fileName);
 
-    public abstract String getFileId();
+    String getFileId();
 
-    public abstract void setFileId(String fileId);
+    void setFileId(String fileId);
 
-    public abstract Entry getEntry();
+    Entry getEntry();
 
-    public abstract void setEntry(Entry entry);
+    void setEntry(Entry entry);
 }

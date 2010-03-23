@@ -5,45 +5,43 @@ import java.util.Date;
 import org.jbei.ice.lib.models.Sample;
 
 public interface ILocationValueObject {
+    int getId();
 
-    public abstract int getId();
+    void setId(int id);
 
-    public abstract void setId(int id);
+    Sample getSample();
 
-    public abstract Sample getSample();
+    void setSample(Sample sample);
 
-    public abstract void setSample(Sample sample);
+    String getLocation();
 
-    public abstract String getLocation();
+    void setLocation(String location);
 
-    public abstract void setLocation(String location);
+    String getBarcode();
 
-    public abstract String getBarcode();
+    void setBarcode(String barcode);
 
-    public abstract void setBarcode(String barcode);
+    String getNotes();
 
-    public abstract String getNotes();
+    void setNotes(String notes);
 
-    public abstract void setNotes(String notes);
+    String getWells();
 
-    public abstract String getWells();
+    void setWells(String wells);
 
-    public abstract void setWells(String wells);
+    int getnColumns();
 
-    public abstract int getnColumns();
+    void setnColumns(int nColumns);
 
-    public abstract void setnColumns(int nColumns);
+    int getnRows();
 
-    public abstract int getnRows();
+    void setnRows(int nRows);
 
-    public abstract void setnRows(int nRows);
+    Date getCreationTime();
 
-    public abstract Date getCreationTime();
+    void setCreationTime(Date creationTime);
 
-    public abstract void setCreationTime(Date creationTime);
+    Date getModificationTime();
 
-    public abstract Date getModificationTime();
-
-    public abstract void setModificationTime(Date modificationTime);
-
+    void setModificationTime(Date modificationTime);
 }

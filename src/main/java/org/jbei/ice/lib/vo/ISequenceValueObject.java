@@ -6,33 +6,31 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.SequenceFeature;
 
 public interface ISequenceValueObject {
+    int getId();
 
-    public abstract int getId();
+    void setId(int id);
 
-    public abstract void setId(int id);
+    String getSequence();
 
-    public abstract String getSequence();
+    void setSequence(String sequence);
 
-    public abstract void setSequence(String sequence);
+    String getSequenceUser();
 
-    public abstract String getSequenceUser();
+    void setSequenceUser(String sequenceUser);
 
-    public abstract void setSequenceUser(String sequenceUser);
+    String getFwdHash();
 
-    public abstract String getFwdHash();
+    void setFwdHash(String fwdHash);
 
-    public abstract void setFwdHash(String fwdHash);
+    String getRevHash();
 
-    public abstract String getRevHash();
+    void setRevHash(String revHash);
 
-    public abstract void setRevHash(String revHash);
+    void setEntry(Entry entry);
 
-    public abstract void setEntry(Entry entry);
+    Entry getEntry();
 
-    public abstract Entry getEntry();
+    void setSequenceFeatures(Set<SequenceFeature> sequenceFeatures);
 
-    public abstract void setSequenceFeatures(Set<SequenceFeature> sequenceFeatures);
-
-    public abstract Set<SequenceFeature> getSequenceFeatures();
-
+    Set<SequenceFeature> getSequenceFeatures();
 }

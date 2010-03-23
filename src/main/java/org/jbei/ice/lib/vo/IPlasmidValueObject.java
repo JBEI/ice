@@ -1,21 +1,19 @@
 package org.jbei.ice.lib.vo;
 
 public interface IPlasmidValueObject extends IEntryValueObject {
+    String getBackbone();
 
-    public abstract String getBackbone();
+    void setBackbone(String backbone);
 
-    public abstract void setBackbone(String backbone);
+    String getOriginOfReplication();
 
-    public abstract String getOriginOfReplication();
+    void setOriginOfReplication(String originOfReplication);
 
-    public abstract void setOriginOfReplication(String originOfReplication);
+    String getPromoters();
 
-    public abstract String getPromoters();
+    void setPromoters(String promoters);
 
-    public abstract void setPromoters(String promoters);
+    boolean getCircular();
 
-    public abstract boolean getCircular();
-
-    public abstract void setCircular(boolean circular);
-
+    void setCircular(boolean circular);
 }

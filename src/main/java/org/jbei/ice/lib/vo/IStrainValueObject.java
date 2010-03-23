@@ -1,17 +1,15 @@
 package org.jbei.ice.lib.vo;
 
 public interface IStrainValueObject extends IEntryValueObject {
+    String getHost();
 
-    public abstract String getHost();
+    void setHost(String host);
 
-    public abstract void setHost(String host);
+    String getGenotypePhenotype();
 
-    public abstract String getGenotypePhenotype();
+    void setGenotypePhenotype(String genotypePhenotype);
 
-    public abstract void setGenotypePhenotype(String genotypePhenotype);
+    String getPlasmids();
 
-    public abstract String getPlasmids();
-
-    public abstract void setPlasmids(String plasmids);
-
+    void setPlasmids(String plasmids);
 }

@@ -1,17 +1,15 @@
 package org.jbei.ice.lib.vo;
 
 public interface IPartValueObject extends IEntryValueObject {
+    String getPackageFormat();
 
-    public abstract String getPackageFormat();
+    void setPackageFormat(String packageFormat);
 
-    public abstract void setPackageFormat(String packageFormat);
+    String getPkgdDnaFwdHash();
 
-    public abstract String getPkgdDnaFwdHash();
+    void setPkgdDnaFwdHash(String pkgdDnaFwdHash);
 
-    public abstract void setPkgdDnaFwdHash(String pkgdDnaFwdHash);
+    String getPkgdDnaRevHash();
 
-    public abstract String getPkgdDnaRevHash();
-
-    public abstract void setPkgdDnaRevHash(String pkgdDnaRevHash);
-
+    void setPkgdDnaRevHash(String pkgdDnaRevHash);
 }

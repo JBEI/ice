@@ -5,37 +5,35 @@ import java.util.Date;
 import org.jbei.ice.lib.models.Entry;
 
 public interface ISampleValueObject {
+    int getId();
 
-    public abstract int getId();
+    void setId(int id);
 
-    public abstract void setId(int id);
+    void setUuid(String uuid);
 
-    public abstract void setUuid(String uuid);
+    String getUuid();
 
-    public abstract String getUuid();
+    String getDepositor();
 
-    public abstract String getDepositor();
+    void setDepositor(String depositor);
 
-    public abstract void setDepositor(String depositor);
+    String getLabel();
 
-    public abstract String getLabel();
+    void setLabel(String label);
 
-    public abstract void setLabel(String label);
+    String getNotes();
 
-    public abstract String getNotes();
+    void setNotes(String notes);
 
-    public abstract void setNotes(String notes);
+    Entry getEntry();
 
-    public abstract Entry getEntry();
+    void setEntry(Entry entry);
 
-    public abstract void setEntry(Entry entry);
+    Date getCreationTime();
 
-    public abstract Date getCreationTime();
+    void setCreationTime(Date creationTime);
 
-    public abstract void setCreationTime(Date creationTime);
+    Date getModificationTime();
 
-    public abstract Date getModificationTime();
-
-    public abstract void setModificationTime(Date modificationTime);
-
+    void setModificationTime(Date modificationTime);
 }
