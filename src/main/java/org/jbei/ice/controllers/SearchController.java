@@ -27,13 +27,13 @@ public class SearchController extends Controller {
 
     public ArrayList<SearchResult> find(String query) throws ControllerException {
         ArrayList<SearchResult> results = new ArrayList<SearchResult>();
-
+        String cleanedQuery = query.replace(":", " ");
         try {
-            UsageLogger.info(String.format("Searching for: %s", query));
+            UsageLogger.info(String.format("Searching for: %s", cleanedQuery));
 
             EntryController entryController = new EntryController(IceSession.get().getAccount());
 
-            ArrayList<SearchResult> searchResults = AggregateSearch.query(query);
+            ArrayList<SearchResult> searchResults = AggregateSearch.query(cleanedQuery);
             if (searchResults != null) {
                 for (SearchResult searchResult : searchResults) {
                     Entry entry = searchResult.getEntry();
