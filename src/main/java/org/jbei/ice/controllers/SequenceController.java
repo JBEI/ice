@@ -1,6 +1,5 @@
 package org.jbei.ice.controllers;
 
-import org.biojava.utils.ParserException;
 import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.SequencePermissionVerifier;
@@ -86,24 +85,23 @@ public class SequenceController extends Controller {
         }
 
         try {
-            // TODO: Zinovii; check this comment later
-            /*Sequence oldSequence = entry.getSequence();
-            entry.setSequence(null);
+            Entry entry = sequence.getEntry();
 
-            if (oldSequence != null) {
-                SequenceManager.deleteSequence(oldSequence);
+            if (entry != null) {
+                Sequence oldSequence = getByEntry(entry);
+
+                if (oldSequence != null) {
+                    SequenceManager.deleteSequence(oldSequence);
+                }
             }
 
-            sequence.setEntry(entry);
-            entry.setSequence(sequence);*/
-
-            result = SequenceManager.saveSequence(sequence);
-
-            if (scheduleIndexRebuild) {
-                ApplicationContoller.scheduleBlastIndexRebuildJob();
-            }
+            result = save(sequence);
         } catch (ManagerException e) {
             throw new ControllerException(e);
+        }
+
+        if (scheduleIndexRebuild) {
+            ApplicationContoller.scheduleBlastIndexRebuildJob();
         }
 
         return result;
@@ -134,7 +132,7 @@ public class SequenceController extends Controller {
         }
     }
 
-    public Sequence parse(String sequence) throws ParserException {
+    public Sequence parse(String sequence) {
         return GeneralParser.getInstance().parse(sequence);
     }
 
