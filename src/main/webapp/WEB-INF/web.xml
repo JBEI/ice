@@ -4,16 +4,14 @@
 	version="2.4">
 
 	<security-constraint>
-     <web-resource-collection>
-        <web-resource-name>Protected Context</web-resource-name>
-          <url-pattern>/*</url-pattern>
-      </web-resource-collection>
-      <!-- auth-constraint goes here if you requre authentication -->
-      <user-data-constraint>
-         <transport-guarantee>CONFIDENTIAL</transport-guarantee>
-      </user-data-constraint>
-    </security-constraint>
-
+		<web-resource-collection>
+			<web-resource-name>Protected Context</web-resource-name>
+			<url-pattern>/*</url-pattern>
+		</web-resource-collection>
+		<user-data-constraint>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+		</user-data-constraint>
+	</security-constraint>
 
 	<display-name>ice</display-name>
 
@@ -40,7 +38,7 @@
 	</filter-mapping>
 
 
-	<!-- BlazeDS bridge -->
+	<!-- BlazeDS -->
 	<servlet>
 		<servlet-name>MessageBrokerServlet</servlet-name>
 		<servlet-class>flex.messaging.MessageBrokerServlet</servlet-class>
@@ -57,6 +55,24 @@
 	</servlet-mapping>
 
 
-	<!-- WSDL WebServices -->
-	<!-- TODO -->
+	<!-- Apache CXF WebServices -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>WEB-INF/cxf/beans.xml</param-value>
+	</context-param>
+	
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+	<servlet>
+		<servlet-name>CXFServlet</servlet-name>
+		<servlet-class>org.apache.cxf.transport.servlet.CXFServlet</servlet-class>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>CXFServlet</servlet-name>
+		<url-pattern>/api/*</url-pattern>
+	</servlet-mapping>
 </web-app>
