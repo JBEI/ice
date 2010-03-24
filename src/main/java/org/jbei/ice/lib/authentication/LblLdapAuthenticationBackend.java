@@ -65,8 +65,7 @@ public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Ser
                 account = localBackend.authenticate(loginId, password);
             }
         } catch (LblLdapAuthenticationWrapperException e) {
-            throw new AuthenticationBackendException("LBL LDAP authentication wrapper failed for "
-                    + loginId, e);
+            throw new InvalidCredentialsException("Invalid credentials!");
         } catch (ControllerException e) {
             throw new AuthenticationBackendException("LDAP authentication failed for " + loginId, e);
         }

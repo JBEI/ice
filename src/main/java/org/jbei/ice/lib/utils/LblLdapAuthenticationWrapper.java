@@ -223,13 +223,8 @@ public class LblLdapAuthenticationWrapper {
                 + baseDN);
         env.put(Context.SECURITY_CREDENTIALS, passWord);
 
-        InitialDirContext result = null;
-        try {
-            result = new InitialDirContext(env);
-        } catch (NamingException e) {
-            e.printStackTrace();
-            throw e;
-        }
+        InitialDirContext result = new InitialDirContext(env);
+
         return result;
     }
 
