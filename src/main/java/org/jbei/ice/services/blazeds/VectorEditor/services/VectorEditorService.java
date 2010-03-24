@@ -186,10 +186,7 @@ public class VectorEditorService extends BaseService {
             }
 
             Sequence sequence = lightSequenceToSequence(lightSequence, entry);
-            sequence.setEntry(entry);
             sequenceController.update(sequence);
-
-            entryController.save(entry);
 
             result = true;
         } catch (ControllerException e) {
