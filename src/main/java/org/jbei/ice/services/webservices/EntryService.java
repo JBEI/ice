@@ -2,6 +2,8 @@ package org.jbei.ice.services.webservices;
 
 import java.util.ArrayList;
 
+import javax.jws.WebService;
+
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Account;
@@ -12,8 +14,13 @@ import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionException;
 
+@WebService
 public class EntryService extends JBEIService {
     public EntryService() {
+    }
+
+    public String helloWorld() {
+        return "Hello World!";
     }
 
     public boolean hasReadPermissions(String sessionId, String entryId) throws SessionException,
