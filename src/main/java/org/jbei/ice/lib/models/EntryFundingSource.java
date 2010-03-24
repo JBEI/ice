@@ -9,6 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
 
@@ -46,6 +47,7 @@ public class EntryFundingSource implements IModel {
         this.fundingSource = fundingSource;
     }
 
+    @XmlTransient
     public Entry getEntry() {
         return entry;
     }

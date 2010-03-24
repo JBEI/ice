@@ -1,17 +1,10 @@
 package org.jbei.ice.lib.models;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -21,7 +14,6 @@ import org.jbei.ice.lib.dao.IModel;
 @Table(name = "funding_source")
 @SequenceGenerator(name = "sequence", sequenceName = "funding_source_id_seq", allocationSize = 1)
 public class FundingSource implements IModel {
-
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -34,7 +26,7 @@ public class FundingSource implements IModel {
     @Column(name = "principal_investigator", length = 255, nullable = false)
     private String principalInvestigator;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    /*@OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "funding_source_id")
     @OrderBy("id")
     private Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
@@ -42,7 +34,7 @@ public class FundingSource implements IModel {
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "funding_source_id")
     @OrderBy("id")
-    private Set<AccountFundingSource> accountFundingSources = new LinkedHashSet<AccountFundingSource>();
+    private Set<AccountFundingSource> accountFundingSources = new LinkedHashSet<AccountFundingSource>();*/
 
     //getters and setters
     public int getId() {
@@ -69,7 +61,7 @@ public class FundingSource implements IModel {
         this.principalInvestigator = principalInvestigator;
     }
 
-    public void setEntryFundingSources(Set<EntryFundingSource> entryFundingSources) {
+    /*public void setEntryFundingSources(Set<EntryFundingSource> entryFundingSources) {
         // TODO: Tim; Implement setEntryFundingSources method for FundingSource
         //this.entryFundingSources = entryFundingSources;
     }
@@ -86,5 +78,5 @@ public class FundingSource implements IModel {
     public Set<AccountFundingSource> getAccountFundingSources() {
         return accountFundingSources;
     }
-
+    */
 }

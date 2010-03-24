@@ -10,6 +10,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.vo.IPartNumberValueObject;
@@ -18,9 +19,6 @@ import org.jbei.ice.lib.vo.IPartNumberValueObject;
 @Table(name = "part_numbers")
 @SequenceGenerator(name = "sequence", sequenceName = "part_numbers_id_seq", allocationSize = 1)
 public class PartNumber implements IPartNumberValueObject, IModel {
-    /**
-	 * 
-	 */
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -58,6 +56,7 @@ public class PartNumber implements IPartNumberValueObject, IModel {
         this.partNumber = partNumber;
     }
 
+    @XmlTransient
     public Entry getEntry() {
         return entry;
     }

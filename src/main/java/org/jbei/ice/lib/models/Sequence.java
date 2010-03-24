@@ -47,7 +47,7 @@ public class Sequence implements ISequenceValueObject, IModel {
     private String revHash;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "entries_id", nullable = false, unique = true)
+    @JoinColumn(name = "entries_id", nullable = true, unique = true)
     private Entry entry;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "sequence")

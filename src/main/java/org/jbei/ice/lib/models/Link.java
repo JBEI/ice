@@ -10,6 +10,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.vo.ILinkValueObject;
@@ -18,9 +19,6 @@ import org.jbei.ice.lib.vo.ILinkValueObject;
 @Table(name = "links")
 @SequenceGenerator(name = "sequence", sequenceName = "links_id_seq", allocationSize = 1)
 public class Link implements ILinkValueObject, IModel {
-    /**
-	 * 
-	 */
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -71,6 +69,7 @@ public class Link implements ILinkValueObject, IModel {
         this.url = url;
     }
 
+    @XmlTransient
     public Entry getEntry() {
         return entry;
     }
