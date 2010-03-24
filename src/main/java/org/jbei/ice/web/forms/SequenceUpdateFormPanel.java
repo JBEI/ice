@@ -10,7 +10,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
-import org.biojava.utils.ParserException;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
@@ -84,11 +83,9 @@ public class SequenceUpdateFormPanel extends Panel {
             SequenceController sequenceController = new SequenceController(IceSession.get()
                     .getAccount());
 
-            Sequence newSequence = null;
+            Sequence newSequence = sequenceController.parse(sequenceUser);
 
-            try {
-                newSequence = sequenceController.parse(sequenceUser);
-            } catch (ParserException e) {
+            if (newSequence == null) {
                 error("Couldn't parse sequence file! Supported formats: "
                         + GeneralParser.getInstance().availableParsersToString() + ".");
                 error("If you are using ApE, try opening and re-saving using a recent version.");

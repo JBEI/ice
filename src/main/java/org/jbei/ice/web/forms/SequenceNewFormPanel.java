@@ -9,7 +9,6 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
-import org.biojava.utils.ParserException;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
@@ -79,11 +78,9 @@ public class SequenceNewFormPanel extends Panel {
             SequenceController sequenceController = new SequenceController(IceSession.get()
                     .getAccount());
 
-            Sequence sequence = null;
+            Sequence sequence = sequenceController.parse(sequenceUser);
 
-            try {
-                sequence = sequenceController.parse(sequenceUser);
-            } catch (ParserException e) {
+            if (sequence == null) {
                 error("Couldn't parse sequence file! Supported formats: "
                         + GeneralParser.getInstance().availableParsersToString() + ".");
                 error("If you are using ApE, try opening and re-saving using a recent version.");
