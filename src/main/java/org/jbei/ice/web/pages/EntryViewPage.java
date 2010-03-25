@@ -3,6 +3,7 @@ package org.jbei.ice.web.pages;
 import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ResourceReference;
+import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
@@ -128,6 +129,9 @@ public class EntryViewPage extends ProtectedPage {
             throw new ViewException(e);
         } catch (PermissionException e) {
             throw new ViewPermissionException("No permission to view entry!", e);
+        }
+        if (entry == null) {
+            throw new RestartResponseAtInterceptPageException(PermissionDeniedPage.class);
         }
 
     }
