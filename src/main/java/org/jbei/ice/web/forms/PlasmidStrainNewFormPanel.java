@@ -130,7 +130,7 @@ public class PlasmidStrainNewFormPanel extends Panel {
                     "plasmidKeywords")));
             add(new TextArea<String>("plasmidSummary", new PropertyModel<String>(this,
                     "plasmidSummary")).setRequired(true).setLabel(
-                    new Model<String>("Plasmid Summary")));
+                new Model<String>("Plasmid Summary")));
             add(new TextArea<String>("plasmidNotes",
                     new PropertyModel<String>(this, "plasmidNotes")));
             add(new TextArea<String>("plasmidReferences", new PropertyModel<String>(this,
@@ -141,7 +141,7 @@ public class PlasmidStrainNewFormPanel extends Panel {
                     "plasmidFundingSource")));
             add(new TextField<String>("plasmidPrincipalInvestigator", new PropertyModel<String>(
                     this, "plasmidPrincipalInvestigator")).setRequired(true).setLabel(
-                    new Model<String>("Principal Investigator")));
+                new Model<String>("Principal Investigator")));
             add(new TextField<String>("plasmidBackbone", new PropertyModel<String>(this,
                     "plasmidBackbone")));
             add(new TextField<String>("plasmidOriginOfReplication", new PropertyModel<String>(this,
@@ -165,7 +165,7 @@ public class PlasmidStrainNewFormPanel extends Panel {
                     "strainKeywords")));
             add(new TextArea<String>("strainSummary", new PropertyModel<String>(this,
                     "strainSummary")).setRequired(true).setLabel(
-                    new Model<String>("Strain Summary")));
+                new Model<String>("Strain Summary")));
             add(new TextArea<String>("strainNotes", new PropertyModel<String>(this, "strainNotes")));
             add(new TextArea<String>("strainReferences", new PropertyModel<String>(this,
                     "strainReferences")));
@@ -241,28 +241,28 @@ public class PlasmidStrainNewFormPanel extends Panel {
 
                         for (String selectionMarker : uniqueSelectionMarkers) {
                             selectionMarkersCollection.append("'").append(
-                                    Utils.escapeSpecialJavascriptCharacters(selectionMarker))
-                                    .append("',");
+                                Utils.escapeSpecialJavascriptCharacters(selectionMarker)).append(
+                                "',");
                         }
                         for (String promoter : uniquePromoters) {
                             promotersCollection.append("'").append(
-                                    Utils.escapeSpecialJavascriptCharacters(promoter)).append("',");
+                                Utils.escapeSpecialJavascriptCharacters(promoter)).append("',");
                         }
                         for (String originOfReplication : uniqueOriginOfReplications) {
                             originOfReplicationsCollection.append("'").append(
-                                    Utils.escapeSpecialJavascriptCharacters(originOfReplication))
+                                Utils.escapeSpecialJavascriptCharacters(originOfReplication))
                                     .append("',");
                         }
                         for (String plasmid : uniquePlasmids) {
                             plasmidsCollection.append("'").append(
-                                    Utils.escapeSpecialJavascriptCharacters(plasmid)).append("',");
+                                Utils.escapeSpecialJavascriptCharacters(plasmid)).append("',");
                         }
 
                         dataMap.put("selectionMarkersCollection", selectionMarkersCollection
                                 .toString());
                         dataMap.put("promotersCollection", promotersCollection.toString());
                         dataMap.put("originOfReplicationsCollection",
-                                originOfReplicationsCollection.toString());
+                            originOfReplicationsCollection.toString());
                         dataMap.put("plasmidsCollection", plasmidsCollection.toString());
                     }
 
@@ -271,12 +271,12 @@ public class PlasmidStrainNewFormPanel extends Panel {
             };
 
             add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
-                    UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.autocomplete.css"));
+                UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.autocomplete.css"));
             add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-                    UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.autocomplete.js"));
+                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.autocomplete.js"));
             add(TextTemplateHeaderContributor.forJavaScript(UnprotectedPage.class,
-                    UnprotectedPage.JS_RESOURCE_LOCATION + "autocompleteDataTemplate.js",
-                    autocompleteDataMap));
+                UnprotectedPage.JS_RESOURCE_LOCATION + "autocompleteDataTemplate.js",
+                autocompleteDataMap));
             add(new Label("initializeCollectionsScript",
                     "try {initializeCollections();} catch (err) {alert(err); }")
                     .setEscapeModelStrings(false));
@@ -377,13 +377,12 @@ public class PlasmidStrainNewFormPanel extends Panel {
 
             // persist
             try {
-                Plasmid newPlasmid = (Plasmid) entryController.createEntry(plasmid);
+                Plasmid newPlasmid = (Plasmid) entryController.createEntry(plasmid, true, true);
                 String plasmidPartNumberString = "[[jbei:"
                         + plasmid.getPartNumbers().toArray(new PartNumber[0])[0].getPartNumber()
                         + "]]";
                 strain.setPlasmids(plasmidPartNumberString);
-                entryController.createEntry(strain);
-                entryController.createEntry(newPlasmid);
+                entryController.createEntry(strain, true, true);
                 setResponsePage(EntryViewPage.class, new PageParameters("0=" + newPlasmid.getId()));
             } catch (ControllerException e) {
                 throw new ViewException(e);
