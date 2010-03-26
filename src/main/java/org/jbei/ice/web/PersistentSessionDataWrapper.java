@@ -3,23 +3,29 @@ package org.jbei.ice.web;
 import java.util.Calendar;
 import java.util.HashMap;
 
-import javax.servlet.http.Cookie;
-
-import org.apache.wicket.Request;
-import org.apache.wicket.RequestCycle;
-import org.apache.wicket.protocol.http.WebRequest;
-import org.apache.wicket.protocol.http.WebResponse;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SessionManager;
+import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.utils.JbeirSettings;
 
+/**
+ * SessionData is kept in a cache in memory to prevent getting of multiple instances
+ * from
+ * hibernate, creating a race condition. Instead of keeping a dynamically sized
+ * cache, consider using a
+ * fix sized cache for performance, at the risk of using a too small of a cache
+ * which
+ * will result in strange session data errors.
+ * 
+ * @author tham
+ * 
+ */
 public class PersistentSessionDataWrapper {
 
     private static HashMap<String, SessionData> sessionDataCache = new HashMap<String, SessionData>();
     private static HashMap<String, Long> sessionDataCacheTimeStamp = new HashMap<String, Long>();
-    private static String COOKIE_NAME = JbeirSettings.getSetting("COOKIE_NAME");
     private static Long CACHE_TIMEOUT = 60000L; // 1 minute = 60000 ms
 
     private static class SingletonHolder {
@@ -30,67 +36,35 @@ public class PersistentSessionDataWrapper {
         return SingletonHolder.INSTANCE;
     }
 
-    public synchronized SessionData getSessionData(WebRequest request) {
+    public synchronized SessionData getSessionData(String sessionKey) throws ManagerException {
         SessionData sessionData = null;
-
-        Cookie userCookie = request.getCookie(COOKIE_NAME);
-
-        if (userCookie != null) {
-            String sessionKey = userCookie.getValue();
-            sessionData = getCachedInstance(sessionKey);
-            if (sessionData != null) {
-                String savedClientIp = (String) sessionData.getData().get("clientIp");
-                String clientIp = request.getHttpServletRequest().getRemoteAddr();
-                if (!clientIp.equals(savedClientIp)) {
-                    this.delete(sessionKey);
-                    sessionData = null;
-                }
-            }
-        }
-        if (sessionData == null) {
-            sessionData = newSessionData(request);
-        }
+        sessionData = getCachedInstance(sessionKey);
 
         return sessionData;
     }
 
-    private SessionData newSessionData(Request request) {
-        pruneCache();
-
-        String clientIp = ((WebRequest) request).getHttpServletRequest().getRemoteAddr();
-        SessionData sessionData = new SessionData(clientIp, JbeirSettings.getSetting("SITE_SECRET"));
-        sessionData.getData().put("clientIp", clientIp);
+    public SessionData newSessionData() throws ManagerException {
+        SessionData sessionData = new SessionData(JbeirSettings.getSetting("SITE_SECRET"));
         try {
-            SessionManager.save(sessionData);
+            persist(sessionData);
             getSessionDataCache().put(sessionData.getSessionKey(), sessionData);
             Long cacheExpirationTime = Calendar.getInstance().getTimeInMillis() + CACHE_TIMEOUT;
             getSessionDataCacheTimeStamp().put(sessionData.getSessionKey(), cacheExpirationTime);
-            Cookie cookie = new Cookie(COOKIE_NAME, sessionData.getSessionKey());
-            cookie.setPath("/");
-            cookie.setMaxAge(-1);
-            try {
-                WebResponse response = (WebResponse) RequestCycle.get().getResponse();
-                (response).addCookie(cookie);
-            } catch (ClassCastException e) {
-                /* This is because of a seeming bug in Wicket.  getResponse() sometimes
-                    returns a StringResponse instead of WebResponse. Nothing has to be done
-                    here anyway.
-                 */
-                Logger.debug("Could not cast StringResponse to WebResponse");
-            }
-
         } catch (ManagerException e) {
-            // SessionData could not be persisted. return null
-            String msg = "newSessionData failed: " + e.toString();
-            Logger.debug(msg);
-            sessionData = null;
+            throw e;
         }
-
         return sessionData;
+    }
 
+    public SessionData newSessionData(Account account) throws ManagerException {
+        SessionData sessionData = newSessionData();
+        sessionData.setAccount(account);
+        persist(sessionData);
+        return sessionData;
     }
 
     public synchronized void persist(SessionData sessionData) throws ManagerException {
+        pruneCache();
         try {
             SessionManager.save(sessionData);
         } catch (ManagerException e) {
@@ -149,11 +123,8 @@ public class PersistentSessionDataWrapper {
             try {
                 sessionData = SessionManager.get(sessionKey);
             } catch (ManagerException e) {
-                String msg = "Could getCachedInstance: " + e.toString();
-                Logger.error(msg, e);
                 sessionData = null;
             }
-
             if (sessionData != null) {
                 getSessionDataCache().put(sessionKey, sessionData);
                 getSessionDataCacheTimeStamp().put(sessionKey, getCacheExpirationTime());

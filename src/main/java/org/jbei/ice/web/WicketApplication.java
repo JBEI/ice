@@ -9,9 +9,6 @@ import org.apache.wicket.protocol.http.WebRequest;
 import org.apache.wicket.request.target.coding.IndexedParamUrlCodingStrategy;
 import org.apache.wicket.request.target.coding.QueryStringUrlCodingStrategy;
 import org.apache.wicket.settings.ISecuritySettings;
-import org.jbei.ice.lib.authentication.AuthenticationBackendManager;
-import org.jbei.ice.lib.authentication.IAuthenticationBackend;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.IceAuthorizationStrategy;
 import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.web.pages.AdminPage;
@@ -40,7 +37,6 @@ import org.jbei.ice.web.pages.UserPage;
  * @see org.jbei.Start#main(String[])
  */
 public class WicketApplication extends WebApplication {
-    private IAuthenticationBackend authenticator = null;
 
     /**
      * Constructor
@@ -50,8 +46,6 @@ public class WicketApplication extends WebApplication {
 
     @Override
     protected void init() {
-        initializeAuthenticationBackend();
-
         mountPages();
 
         initializeQueueingSystem();
@@ -72,7 +66,7 @@ public class WicketApplication extends WebApplication {
 
     @Override
     public Session newSession(Request request, Response response) {
-        return new IceSession(request, response, authenticator);
+        return new IceSession(request);
     }
 
     /**
@@ -81,14 +75,6 @@ public class WicketApplication extends WebApplication {
     @Override
     public Class<HomePage> getHomePage() {
         return HomePage.class;
-    }
-
-    private void initializeAuthenticationBackend() {
-        try {
-            authenticator = AuthenticationBackendManager.loadAuthenticationBackend();
-        } catch (AuthenticationBackendManager.AuthenticationBackendManagerException e) {
-            Logger.error("Failed to load authentication backend!", e);
-        }
     }
 
     private void mountPages() {

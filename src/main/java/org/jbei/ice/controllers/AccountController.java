@@ -3,13 +3,20 @@ package org.jbei.ice.controllers;
 import java.util.Set;
 
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.authentication.AuthenticationBackendException;
+import org.jbei.ice.lib.authentication.AuthenticationBackendManager;
+import org.jbei.ice.lib.authentication.IAuthenticationBackend;
+import org.jbei.ice.lib.authentication.InvalidCredentialsException;
+import org.jbei.ice.lib.authentication.AuthenticationBackendManager.AuthenticationBackendManagerException;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.AccountPreferencesManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountPreferences;
+import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.web.PersistentSessionDataWrapper;
 
 public class AccountController {
     public static Account get(int id) throws ControllerException {
@@ -114,6 +121,57 @@ public class AccountController {
         }
 
         return accountPreferences;
+    }
+
+    public static SessionData authenticate(String login, String password)
+            throws InvalidCredentialsException {
+        SessionData result = null;
+        IAuthenticationBackend authenticationBackend = null;
+        try {
+            authenticationBackend = AuthenticationBackendManager.loadAuthenticationBackend();
+        } catch (AuthenticationBackendManagerException e) {
+            throw new InvalidCredentialsException(e);
+        }
+        Account account = null;
+        try {
+            account = authenticationBackend.authenticate(login, password);
+        } catch (AuthenticationBackendException e2) {
+            throw new InvalidCredentialsException(e2);
+        }
+        if (account != null) {
+            AccountPreferences accountPreferences = null;
+            try {
+                accountPreferences = AccountController.getAccountPreferences(account);
+                if (accountPreferences == null) {
+                    accountPreferences = new AccountPreferences();
+                    accountPreferences.setAccount(account);
+                    AccountController.saveAccountPreferences(accountPreferences);
+                }
+            } catch (ControllerException e1) {
+                throw new InvalidCredentialsException(e1);
+            }
+
+            try {
+                result = PersistentSessionDataWrapper.getInstance().newSessionData(account);
+            } catch (ManagerException e) {
+                throw new InvalidCredentialsException(e);
+            }
+        }
+        return result;
+    }
+
+    public boolean isAuthenticated(String sessionKey) throws ControllerException {
+        boolean result = false;
+        try {
+            SessionData sessionData = PersistentSessionDataWrapper.getInstance().getSessionData(
+                sessionKey);
+            if (sessionData != null) {
+                result = true;
+            }
+        } catch (ManagerException e) {
+            throw new ControllerException(e);
+        }
+        return result;
     }
 
     public static void saveAccountPreferences(AccountPreferences accountPreferences)

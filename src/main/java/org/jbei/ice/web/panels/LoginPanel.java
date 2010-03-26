@@ -15,6 +15,7 @@ import org.apache.wicket.protocol.http.WebResponse;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.IceSession.IceSessionException;
 import org.jbei.ice.web.common.ViewException;
@@ -39,9 +40,9 @@ public class LoginPanel extends Panel {
                 setModel(new CompoundPropertyModel<Object>(this));
 
                 add(new TextField<String>("loginName").setRequired(true).setLabel(
-                        new Model<String>("Login")));
+                    new Model<String>("Login")));
                 add(new PasswordTextField("loginPassword").setRequired(true).setLabel(
-                        new Model<String>("Password")));
+                    new Model<String>("Password")));
                 add(new CheckBox("keepSignedIn"));
                 add(new BookmarkablePageLink<RegistrationPage>("registrationLink",
                         RegistrationPage.class));
@@ -54,15 +55,17 @@ public class LoginPanel extends Panel {
             // overridden methods
             @Override
             protected void onSubmit() {
-                IceSession icesession = (IceSession) getSession();
+                IceSession iceSession = (IceSession) getSession();
 
                 try {
-                    icesession.authenticateUser(getLogin(), getPassword());
+                    SessionData sessionData = iceSession
+                            .authenticateUser(getLogin(), getPassword());
 
                     if (getKeepSignedIn()) {
-                        IceSession iceSession = (IceSession) getSession();
+
                         try {
-                            iceSession.makeSessionPersistent(((WebResponse) getResponse()));
+                            iceSession.makeSessionPersistent(((WebResponse) getResponse()),
+                                sessionData);
                         } catch (ManagerException e) {
                             throw new ViewException(e);
                         }

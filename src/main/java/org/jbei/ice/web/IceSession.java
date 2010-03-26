@@ -1,12 +1,11 @@
 package org.jbei.ice.web;
 
 import java.util.Calendar;
-import java.util.HashMap;
 
 import javax.servlet.http.Cookie;
 
 import org.apache.wicket.Request;
-import org.apache.wicket.Response;
+import org.apache.wicket.RequestCycle;
 import org.apache.wicket.Session;
 import org.apache.wicket.protocol.http.WebRequest;
 import org.apache.wicket.protocol.http.WebRequestCycle;
@@ -14,8 +13,6 @@ import org.apache.wicket.protocol.http.WebResponse;
 import org.apache.wicket.protocol.http.WebSession;
 import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.authentication.AuthenticationBackendException;
-import org.jbei.ice.lib.authentication.IAuthenticationBackend;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
@@ -27,13 +24,10 @@ import org.jbei.ice.lib.utils.JbeirSettings;
 public class IceSession extends WebSession {
     private static final long serialVersionUID = 1L;
 
-    private IAuthenticationBackend authenticator = null;
     private String COOKIE_NAME = JbeirSettings.getSetting("COOKIE_NAME");
 
-    public IceSession(Request request, Response response, IAuthenticationBackend authenticator) {
+    public IceSession(Request request) {
         super(request);
-
-        this.authenticator = authenticator;
     }
 
     /**
@@ -42,63 +36,39 @@ public class IceSession extends WebSession {
      * 
      * @throws ManagerException
      */
-    public void makeSessionPersistent(WebResponse response) throws ManagerException {
-        SessionData savedSession = getSessionData();
-        HashMap<String, Object> data = savedSession.getData();
-        if (data == null) {
-            data = new HashMap<String, Object>();
-        }
-        data.put("accountId", getAccount().getId());
-        savedSession.setData(data);
+    public void makeSessionPersistent(WebResponse response, SessionData sessionData)
+            throws ManagerException {
 
         long currentTime = Calendar.getInstance().getTimeInMillis();
         long expireDate = currentTime + 7776000000L; //90 days
 
-        Cookie cookie = new Cookie(COOKIE_NAME, savedSession.getSessionKey());
+        Cookie cookie = new Cookie(COOKIE_NAME, sessionData.getSessionKey());
         cookie.setPath("/");
         cookie.setMaxAge(7776000);
         response.addCookie(cookie);
 
-        savedSession.setExpireDate(expireDate);
+        sessionData.setExpireDate(expireDate);
         try {
-            PersistentSessionDataWrapper.getInstance().persist(savedSession);
+            PersistentSessionDataWrapper.getInstance().persist(sessionData);
         } catch (ManagerException e) {
             throw e;
         }
 
     }
 
-    public void authenticateUser(String login, String password) throws IceSessionException,
+    public SessionData authenticateUser(String login, String password) throws IceSessionException,
             InvalidCredentialsException {
-        try {
-            Account account = authenticator.authenticate(login, password);
 
-            if (account != null) {
-                AccountPreferences accountPreferences = AccountController
-                        .getAccountPreferences(account);
-                if (accountPreferences == null) {
-                    accountPreferences = new AccountPreferences();
-                    accountPreferences.setAccount(account);
-                    setAccountPreferences(accountPreferences);
-                }
+        SessionData sessionData = AccountController.authenticate(login, password);
 
-                SessionData sessionData = getSessionData();
-                if (sessionData == null) {
-                    // User authenticates but this session is not associated.
-                    String msg = "User is authenticated but this session is not associated";
-                    Logger.error(msg, new Exception("Error"));
-                    throw new RuntimeException(msg);
-                }
-                sessionData.getData().put("accountId", account.getId());
-                PersistentSessionDataWrapper.getInstance().persist(sessionData);
-            }
-        } catch (ManagerException e) {
-            throw new IceSessionException("Authentication exception!", e);
-        } catch (ControllerException e) {
-            throw new IceSessionException("Authentication exception!", e);
-        } catch (AuthenticationBackendException e) {
-            throw new IceSessionException("Authentication exception!", e);
+        if (sessionData == null) {
+            // User authenticates but this session is not associated.
+            String msg = "User is authenticated but this session is not associated";
+            Logger.error(msg, new Exception("Error"));
+            throw new RuntimeException(msg);
         }
+        setCookie(sessionData);
+        return sessionData;
     }
 
     public void deAuthenticateUser() {
@@ -122,26 +92,44 @@ public class IceSession extends WebSession {
     }
 
     public SessionData getSessionData() {
-        SessionData sessionData = PersistentSessionDataWrapper.getInstance().getSessionData(
-                getRequest());
+        SessionData sessionData = null;
+        Cookie userCookie = getRequest().getCookie(COOKIE_NAME);
+        if (userCookie != null) {
+            String sessionKey = userCookie.getValue();
+            try {
+                sessionData = PersistentSessionDataWrapper.getInstance().getSessionData(sessionKey);
+            } catch (ManagerException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if (sessionData != null) {
+            setCookie(sessionData);
+        }
+
         return sessionData;
+    }
+
+    private void setCookie(SessionData sessionData) {
+        Cookie cookie = new Cookie(COOKIE_NAME, sessionData.getSessionKey());
+        cookie.setPath("/");
+        cookie.setMaxAge(-1);
+        try {
+            WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+            (response).addCookie(cookie);
+        } catch (ClassCastException e) {
+            /* This is because of a seeming bug in Wicket.  getResponse() sometimes
+                returns a StringResponse instead of WebResponse. Nothing has to be done
+                here anyway.
+             */
+            Logger.debug("Could not cast StringResponse to WebResponse");
+        }
     }
 
     public Account getAccount() {
         Account account = null;
-        SessionData sessionData = PersistentSessionDataWrapper.getInstance().getSessionData(
-                getRequest());
+        SessionData sessionData = getSessionData();
         if (sessionData != null) {
-            HashMap<String, Object> data = sessionData.getData();
-            if (data.containsKey("accountId")) {
-                Integer accountId = (Integer) data.get("accountId");
-                try {
-                    account = AccountController.get(accountId);
-                } catch (ControllerException e) {
-                    String msg = "Could not getAccount from IceSession: " + e.toString();
-                    Logger.error(msg, e);
-                }
-            }
+            account = sessionData.getAccount();
         }
 
         return account;

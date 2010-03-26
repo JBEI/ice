@@ -5,24 +5,15 @@ import java.util.HashMap;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.utils.Utils;
 
-/**
- * SessionData keeps a cache in memory to prevent getting of multiple instances
- * from
- * hibernate, creating a race condition. Instead of keeping a dynamically sized
- * cache, consider using a
- * fix sized cache for performance, at the risk of using a too small of a cache
- * which
- * will result in strange session data errors.
- * 
- * @author tham
- * 
- */
 @Entity
 @Table(name = "session_data")
 public class SessionData implements IModel {
@@ -40,7 +31,10 @@ public class SessionData implements IModel {
     @Column(name = "expire_date")
     private long expireDate;
 
-    // needed for hibernate. use getInstance instead
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "accounts_id", nullable = true)
+    private Account account;
+
     public SessionData() {
     }
 
@@ -69,13 +63,21 @@ public class SessionData implements IModel {
         return expireDate;
     }
 
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
     @Override
     public Object clone() throws CloneNotSupportedException {
         throw new CloneNotSupportedException();
     }
 
-    public SessionData(String clientIp, String secret) {
-        String sha = generateSessionKey(clientIp, secret);
+    public SessionData(String secret) {
+        String sha = generateSessionKey(secret);
         setSessionKey(sha);
         long currentTime = Calendar.getInstance().getTimeInMillis();
         long expireDate = currentTime + DEFAULT_EXPIRATION;
@@ -83,8 +85,8 @@ public class SessionData implements IModel {
         setData(new HashMap<String, Object>());
     }
 
-    private static String generateSessionKey(String clientIp, String secret) {
-        String temp = java.util.UUID.randomUUID().toString() + clientIp + secret + ""
+    private static String generateSessionKey(String secret) {
+        String temp = java.util.UUID.randomUUID().toString() + secret + ";"
                 + Calendar.getInstance().getTimeInMillis();
 
         return Utils.encryptSHA(temp);

@@ -7,6 +7,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.SessionData;
 
 public class SessionManager {
@@ -30,8 +31,37 @@ public class SessionManager {
             }
 
         } catch (Exception e) {
-            String msg = "Could not get SessionData by id " + sessionKey;
-            Logger.error(msg, e);
+            String msg = "Could not get SessionData by sessionKey: " + sessionKey;
+            throw new ManagerException(msg, e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+
+        return sessionData;
+    }
+
+    public static SessionData get(Account account) throws ManagerException {
+        SessionData sessionData = null;
+        Session session = DAO.newSession();
+        try {
+            String queryString = "from SessionData where account = :account";
+            Query query = session.createQuery(queryString);
+            query.setParameter("account", account);
+
+            sessionData = (SessionData) query.uniqueResult();
+
+            //stop expired sessions right here
+            if (sessionData != null) {
+                if (sessionData.getExpireDate() < Calendar.getInstance().getTimeInMillis()) {
+                    delete(sessionData);
+                    sessionData = null;
+                }
+            }
+
+        } catch (Exception e) {
+            String msg = "Could not get SessionData by account: " + account.getEmail();
             throw new ManagerException(msg, e);
         } finally {
             if (session.isOpen()) {
