@@ -67,7 +67,7 @@ public class IceSession extends WebSession {
             Logger.error(msg, new Exception("Error"));
             throw new RuntimeException(msg);
         }
-        setCookie(sessionData);
+        setSessionKeyCookie(sessionData.getSessionKey());
         return sessionData;
     }
 
@@ -102,15 +102,12 @@ public class IceSession extends WebSession {
                 throw new RuntimeException(e);
             }
         }
-        if (sessionData != null) {
-            setCookie(sessionData);
-        }
 
         return sessionData;
     }
 
-    private void setCookie(SessionData sessionData) {
-        Cookie cookie = new Cookie(COOKIE_NAME, sessionData.getSessionKey());
+    private void setSessionKeyCookie(String sessionKey) {
+        Cookie cookie = new Cookie(COOKIE_NAME, sessionKey);
         cookie.setPath("/");
         cookie.setMaxAge(-1);
         try {
