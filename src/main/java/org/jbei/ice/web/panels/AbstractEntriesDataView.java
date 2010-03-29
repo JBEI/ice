@@ -50,8 +50,8 @@ public abstract class AbstractEntriesDataView<T> extends DataView<T> {
     }
 
     protected void renderDescription(Item<T> item) {
-        item.add(new Label("description", WebUtils.jbeiLinkifyText(getEntry(item)
-                .getShortDescription())).setEscapeModelStrings(false));
+        item.add(new Label("description", WebUtils
+                .linkifyText(getEntry(item).getShortDescription())).setEscapeModelStrings(false));
     }
 
     protected void renderStatus(Item<T> item) {

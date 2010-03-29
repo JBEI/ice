@@ -2,6 +2,7 @@ package org.jbei.ice.web.utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,6 +16,8 @@ import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.EntryViewPage;
 
+import edu.emory.mathcs.backport.java.util.Collections;
+
 public class WebUtils {
     private static String makeEntryLink(JbeiLink jbeiLink) {
         String result = null;
@@ -22,7 +25,7 @@ public class WebUtils {
         EntryController entryController = new EntryController(IceSession.get().getAccount());
 
         CharSequence relativePath = WebRequestCycle.get().urlFor(EntryViewPage.class,
-                new PageParameters());
+            new PageParameters());
 
         int id = 0;
         Entry entry = null;
@@ -59,7 +62,7 @@ public class WebUtils {
         EntryController entryController = new EntryController(IceSession.get().getAccount());
 
         CharSequence relativePath = WebRequestCycle.get().urlFor(EntryViewPage.class,
-                new PageParameters());
+            new PageParameters());
         // TODO: Tim; this is not very elegant at all. Is there a better way than to generate <a> tag manually?
         try {
             if (entryController.hasReadPermissionById(id)) {
@@ -85,7 +88,96 @@ public class WebUtils {
         return result.toString();
     }
 
-    public static String jbeiLinkifyText(String text) {
+    public static String urlLinkifyText(String text) {
+
+        Pattern urlPattern = Pattern.compile("\\bhttp://(\\S*)\\b");
+        Pattern secureUrlPattern = Pattern.compile("\\bhttps://(\\S*)\\b");
+
+        if (text == null) {
+            return "";
+        }
+
+        class UrlLinkText {
+            private String url = "";
+            private int start = 0;
+            private int end = 0;
+
+            public UrlLinkText(String url, int start, int end) {
+                setUrl(url);
+                setStart(start);
+                setEnd(end);
+            }
+
+            public String getUrl() {
+                return url;
+            }
+
+            public void setUrl(String url) {
+                this.url = url;
+            }
+
+            public int getStart() {
+                return start;
+            }
+
+            public void setStart(int start) {
+                this.start = start;
+            }
+
+            public int getEnd() {
+                return end;
+            }
+
+            public void setEnd(int end) {
+                this.end = end;
+            }
+        }
+
+        class UrlComparator implements Comparator<UrlLinkText> {
+            @Override
+            public int compare(UrlLinkText o1, UrlLinkText o2) {
+                if (o1.getStart() < o2.getStart()) {
+                    return -1;
+                } else if (o1.getStart() > o2.getStart()) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+        }
+        UrlComparator urlComparator = new UrlComparator();
+
+        ArrayList<UrlLinkText> urls = new ArrayList<UrlLinkText>();
+        Matcher urlMatcher = urlPattern.matcher(text);
+        while (urlMatcher.find()) {
+            urls.add(new UrlLinkText(urlMatcher.group(0).trim(), urlMatcher.start(), urlMatcher
+                    .end()));
+        }
+        Matcher secureUrlMatcher = secureUrlPattern.matcher(text);
+        while (secureUrlMatcher.find()) {
+            urls.add(new UrlLinkText(secureUrlMatcher.group(0).trim(), secureUrlMatcher.start(),
+                    secureUrlMatcher.end()));
+        }
+        Collections.sort(urls, urlComparator);
+        String newText = text;
+        for (int i = urls.size() - 1; i > -1; i = i - 1) {
+            String before = newText.substring(0, urls.get(i).getStart());
+            String after = newText.substring(urls.get(i).getEnd());
+            newText = before + "<a href=" + urls.get(i).getUrl() + ">" + urls.get(i).getUrl()
+                    + "</a>" + after;
+        }
+
+        return newText;
+    }
+
+    public static String linkifyText(String text) {
+        String newText = jbeiLinkifyText(text);
+        newText = urlLinkifyText(newText);
+
+        return newText;
+    }
+
+    private static String jbeiLinkifyText(String text) {
         String newText = "";
 
         try {

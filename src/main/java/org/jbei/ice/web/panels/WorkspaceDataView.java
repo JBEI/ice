@@ -61,7 +61,7 @@ public class WorkspaceDataView extends DataView<Workspace> {
         item.add(entryLink);
 
         item.add(new Label("name", entry.getOneName().getName()));
-        item.add(new Label("description", WebUtils.jbeiLinkifyText(entry.getShortDescription()))
+        item.add(new Label("description", WebUtils.linkifyText(entry.getShortDescription()))
                 .setEscapeModelStrings(false));
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");

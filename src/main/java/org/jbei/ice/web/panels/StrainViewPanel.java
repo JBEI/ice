@@ -28,7 +28,7 @@ public class StrainViewPanel extends AbstractEntryViewPanel<Strain> {
     }
 
     protected void renderPlasmids() {
-        add(new Label("plasmids", WebUtils.jbeiLinkifyText(getEntry().getPlasmids()))
+        add(new Label("plasmids", WebUtils.linkifyText(getEntry().getPlasmids()))
                 .setEscapeModelStrings(false));
     }
 }

@@ -35,9 +35,9 @@ public class UserSamplesViewPanel extends Panel {
         sortableDataProvider = new UserSamplesDataProvider(IceSession.get().getAccount());
 
         add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
+            UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
         add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
-                UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
+            UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
 
         dataView = new DataView<Sample>("samplesDataView", sortableDataProvider, 15) {
             private static final long serialVersionUID = 1L;
@@ -52,7 +52,7 @@ public class UserSamplesViewPanel extends Panel {
                 item.add(new Label("index", ""
                         + (getItemsPerPage() * getCurrentPage() + item.getIndex() + 1)));
                 item.add(new Label("label", sample.getLabel()));
-                item.add(new Label("notes", WebUtils.jbeiLinkifyText(sample.getNotes()))
+                item.add(new Label("notes", WebUtils.linkifyText(sample.getNotes()))
                         .setEscapeModelStrings(false));
 
                 StringBuilder locations = new StringBuilder();

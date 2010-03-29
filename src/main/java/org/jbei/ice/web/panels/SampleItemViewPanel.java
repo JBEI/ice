@@ -33,7 +33,7 @@ public class SampleItemViewPanel extends Panel {
         add(new Label("counter", counter.toString()));
         add(new Label("label", sample.getLabel()));
         add(new Label("depositor", sample.getDepositor()));
-        add(new Label("notes", WebUtils.jbeiLinkifyText(sample.getNotes()))
+        add(new Label("notes", WebUtils.linkifyText(sample.getNotes()))
                 .setEscapeModelStrings(false));
 
         class DeleteSampleLink extends AjaxFallbackLink {

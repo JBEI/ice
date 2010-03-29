@@ -142,7 +142,7 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
     }
 
     protected void renderLinks() {
-        add(new Label("links", WebUtils.jbeiLinkifyText(getEntry().getLinksAsString()))
+        add(new Label("links", WebUtils.linkifyText(getEntry().getLinksAsString()))
                 .setEscapeModelStrings(false));
     }
 
@@ -171,17 +171,17 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
     }
 
     protected void renderSummary() {
-        add(new MultiLineLabel("shortDescription", WebUtils.jbeiLinkifyText(getEntry()
+        add(new MultiLineLabel("shortDescription", WebUtils.linkifyText(getEntry()
                 .getShortDescription())).setEscapeModelStrings(false));
     }
 
     protected void renderNotes() {
-        add(new MultiLineLabel("longDescription", WebUtils.jbeiLinkifyText(getEntry()
+        add(new MultiLineLabel("longDescription", WebUtils.linkifyText(getEntry()
                 .getLongDescription())).setEscapeModelStrings(false));
     }
 
     protected void renderReferences() {
-        add(new MultiLineLabel("references", WebUtils.jbeiLinkifyText(getEntry().getReferences()))
+        add(new MultiLineLabel("references", WebUtils.linkifyText(getEntry().getReferences()))
                 .setEscapeModelStrings(false));
     }
 
@@ -202,7 +202,8 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
             intellectualProperty = getEntry().getIntellectualProperty();
         }
 
-        add(new Label("intellectualProperty", intellectualProperty));
+        add(new Label("intellectualProperty", WebUtils.linkifyText(intellectualProperty))
+                .setEscapeModelStrings(false));
     }
 
     protected void renderPrincipalInvestigator() {
