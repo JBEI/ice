@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.managers;
 
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -129,19 +128,18 @@ public class AccountManager {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
     public static Account getAccountByAuthToken(String authToken) throws ManagerException {
         Account account = null;
 
-        String queryString = "select data from " + SessionData.class.getName()
+        String queryString = "from " + SessionData.class.getName()
                 + " sessionData where sessionData.sessionKey = :sessionKey";
         Session session = DAO.newSession();
         try {
             Query query = session.createQuery(queryString);
             query.setString("sessionKey", authToken);
-            HashMap<String, Object> sessionData = (HashMap<String, Object>) query.uniqueResult();
+            SessionData sessionData = (SessionData) query.uniqueResult();
             if (sessionData != null) {
-                account = get((Integer) sessionData.get("accountId"));
+                account = sessionData.getAccount();
             }
 
         } catch (HibernateException e) {
