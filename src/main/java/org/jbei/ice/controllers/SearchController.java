@@ -28,6 +28,12 @@ public class SearchController extends Controller {
     public ArrayList<SearchResult> find(String query) throws ControllerException {
         ArrayList<SearchResult> results = new ArrayList<SearchResult>();
         String cleanedQuery = query.replace(":", " ");
+        if (cleanedQuery.startsWith("*")) {
+            cleanedQuery = cleanedQuery.substring(1);
+        }
+        if (cleanedQuery.startsWith("?")) {
+            cleanedQuery = cleanedQuery.substring(1);
+        }
         try {
             UsageLogger.info(String.format("Searching for: %s", cleanedQuery));
 
