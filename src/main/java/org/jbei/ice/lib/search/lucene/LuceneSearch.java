@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -24,6 +25,7 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
+import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
@@ -207,7 +209,7 @@ public class LuceneSearch {
         Logger.info("Created empty Index");
     }
 
-    protected static Document createDocument(Entry entry) {
+    protected static Document createDocument(Entry entry) throws SearchException {
         Document document = new Document();
         String content = "";
 
@@ -316,6 +318,20 @@ public class LuceneSearch {
             content = content + origin + " ";
             document.add(new Field("Promoters", promoters, Field.Store.YES, Field.Index.ANALYZED));
             content = content + promoters + " ";
+            LinkedHashSet<Strain> strains = new LinkedHashSet<Strain>();
+            try {
+                strains = UtilsManager.getStrainsForPlasmid(plasmid);
+            } catch (ManagerException e) {
+                throw new SearchException(e);
+            }
+            StringBuilder strainStringBuilder = new StringBuilder();
+            for (Strain strain : strains) {
+                strainStringBuilder.append(strain.getPartNumbersAsString());
+                strainStringBuilder.append(" ");
+            }
+            document.add(new Field("Strains", strainStringBuilder.toString(), Field.Store.YES,
+                    Field.Index.ANALYZED));
+            content = content + strainStringBuilder.toString() + " ";
 
         } else if (entry instanceof Strain) {
             Strain strain = (Strain) entry;
