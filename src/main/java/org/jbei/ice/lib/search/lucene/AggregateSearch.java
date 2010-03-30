@@ -52,7 +52,7 @@ public class AggregateSearch {
             queries.add(new String[] { "name_or_alias", "~" + queryString });
 
             ArrayList<Entry> matchedSubstringEntries = entryController.getEntriesByQueries(queries,
-                    0, -1);
+                0, -1);
             if (matchedSubstringEntries != null) {
                 substringMatches.addAll(matchedSubstringEntries);
             }
@@ -64,6 +64,18 @@ public class AggregateSearch {
             if (matchedSubstringEntries != null) {
                 substringMatches.addAll(matchedSubstringEntries);
             }
+
+            // Remove duplicates 
+            // If getEntriesByQueris is non-lazy, this may contain duplicates
+            ArrayList<Integer> seenBefore = new ArrayList<Integer>();
+            LinkedHashSet<Entry> newSubstringMatches = new LinkedHashSet<Entry>();
+            for (Entry entry : substringMatches) {
+                if (!seenBefore.contains(entry.getId())) {
+                    seenBefore.add(entry.getId());
+                    newSubstringMatches.add(entry);
+                }
+            }
+            substringMatches = newSubstringMatches;
 
             for (Entry entry : substringMatches) {
                 substringResults.add(new SearchResult(entry, 1.0F));
