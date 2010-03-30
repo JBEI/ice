@@ -27,10 +27,11 @@ public class UserEntriesDataProvider extends AbstractEntriesDataProvider {
         EntryController entryController = new EntryController(IceSession.get().getAccount());
 
         try {
-            ArrayList<Entry> results = (ArrayList<Entry>) entryController.getEntriesByOwner(account
-                    .getEmail(), first, count);
-
-            entries.addAll(results);
+            ArrayList<Entry> results = entryController.getEntriesByOwner(account.getEmail(), first,
+                count);
+            if (results != null) {
+                entries.addAll(results);
+            }
         } catch (ControllerException e) {
             throw new ViewException(e);
         }
