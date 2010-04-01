@@ -11,6 +11,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.vo.ISequenceFeatureValueObject;
@@ -65,10 +66,12 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         this.id = id;
     }
 
+    @XmlTransient
     public int getId() {
         return id;
     }
 
+    @XmlTransient
     public Sequence getSequence() {
         return sequence;
     }

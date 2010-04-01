@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
@@ -95,6 +96,7 @@ public class Feature implements IFeatureValueObject, IModel {
         this.uuid = uuid;
     }
 
+    @XmlTransient
     public int getAutoFind() {
         return autoFind;
     }
@@ -115,6 +117,7 @@ public class Feature implements IFeatureValueObject, IModel {
         this.id = id;
     }
 
+    @XmlTransient
     public int getId() {
         return id;
     }

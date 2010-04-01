@@ -11,6 +11,7 @@ import javax.persistence.Lob;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
 
@@ -47,6 +48,7 @@ public class FeatureDNA implements IModel {
         this.feature = feature;
     }
 
+    @XmlTransient
     public int getId() {
         return id;
     }
@@ -71,6 +73,7 @@ public class FeatureDNA implements IModel {
         this.sequence = sequence;
     }
 
+    @XmlTransient
     public Feature getFeature() {
         return feature;
     }

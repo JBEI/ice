@@ -8,6 +8,7 @@ import org.hibernate.SessionException;
 import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SearchController;
+import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.logging.Logger;
@@ -21,6 +22,7 @@ import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
+import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.permissions.PermissionException;
@@ -30,18 +32,6 @@ import org.jbei.ice.lib.search.lucene.SearchResult;
 
 @WebService
 public class RegistryAPI {
-
-    /**
-     * Authorizes user and returns unique session id
-     * 
-     * @param login
-     *            User login
-     * @param password
-     *            User Password
-     * @return Returns SessionId
-     * @throws SessionException
-     * @throws ServiceException
-     */
     public String authorize(String login, String password) throws SessionException,
             ServiceException {
         String sessionId = null;
@@ -657,8 +647,8 @@ public class RegistryAPI {
                             .equals(entryFundingSource.getFundingSource().getFundingSource())
                             && currentEntryEntryFundingSource.getFundingSource()
                                     .getPrincipalInvestigator().equals(
-                                        entryFundingSource.getFundingSource()
-                                                .getPrincipalInvestigator())) {
+                                            entryFundingSource.getFundingSource()
+                                                    .getPrincipalInvestigator())) {
                         existEntryFundingSource = true;
 
                         break;
@@ -679,8 +669,8 @@ public class RegistryAPI {
         return currentEntry;
     }
 
-    public void remove(String sessionId, String entryId) throws SessionException, ServiceException,
-            ServicePermissionException {
+    public void removeEntry(String sessionId, String entryId) throws SessionException,
+            ServiceException, ServicePermissionException {
         EntryController entryController = getEntryController(sessionId);
 
         try {
@@ -697,11 +687,58 @@ public class RegistryAPI {
         }
     }
 
+    public Sequence getSequence(String sessionId, String entryId) throws SessionException,
+            ServiceException, ServicePermissionException {
+
+        SequenceController sequenceController = getSequenceController(sessionId);
+        EntryController entryController = getEntryController(sessionId);
+
+        Sequence sequence = null;
+
+        try {
+            Entry entry = entryController.getByRecordId(entryId);
+
+            sequence = sequenceController.getByEntry(entry);
+        } catch (PermissionException e) {
+            throw new ServicePermissionException("No permission to read this entry");
+        } catch (ControllerException e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
+        }
+
+        return sequence;
+    }
+
+    // --------------------------------------------
+
+    /*public Sequence createSequence(String sessionId, String entryId, Sequence sequence)
+            throws SessionException, ServiceException, ServicePermissionException {
+        return null;
+    }
+
+    public void removeSequence(String sessionId, Sequence sequence) throws SessionException,
+            ServiceException, ServicePermissionException {
+    }
+
+    public Sequence uploadSequence(String sessionId, String entryId, String Sequence)
+            throws SessionException, ServiceException, ServicePermissionException {
+        return null;
+    }*/
+
+    // --------------------------------------------
+
     protected EntryController getEntryController(String sessionId) throws SessionException,
             ServiceException {
         Account account = validateAccount(sessionId);
 
         return new EntryController(account);
+    }
+
+    protected SequenceController getSequenceController(String sessionId) throws ServiceException {
+        Account account = validateAccount(sessionId);
+
+        return new SequenceController(account);
     }
 
     protected SearchController getSearchController(String sessionId) throws SessionException,

@@ -17,6 +17,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
@@ -71,6 +72,7 @@ public class Sequence implements ISequenceValueObject, IModel {
         this.sequenceFeatures = sequenceFeatures;
     }
 
+    @XmlTransient
     public int getId() {
         return id;
     }
@@ -87,6 +89,7 @@ public class Sequence implements ISequenceValueObject, IModel {
         this.sequence = sequence;
     }
 
+    @XmlTransient
     public String getSequenceUser() {
         return sequenceUser;
     }
@@ -95,6 +98,7 @@ public class Sequence implements ISequenceValueObject, IModel {
         this.sequenceUser = sequenceUser;
     }
 
+    @XmlTransient
     public String getFwdHash() {
         return fwdHash;
     }
@@ -103,6 +107,7 @@ public class Sequence implements ISequenceValueObject, IModel {
         this.fwdHash = fwdHash;
     }
 
+    @XmlTransient
     public String getRevHash() {
         return revHash;
     }
@@ -111,12 +116,13 @@ public class Sequence implements ISequenceValueObject, IModel {
         this.revHash = revHash;
     }
 
-    public void setEntry(Entry entry) {
-        this.entry = entry;
-    }
-
+    @XmlTransient
     public Entry getEntry() {
         return entry;
+    }
+
+    public void setEntry(Entry entry) {
+        this.entry = entry;
     }
 
     public void setSequenceFeatures(Set<SequenceFeature> sequenceFeatures) {

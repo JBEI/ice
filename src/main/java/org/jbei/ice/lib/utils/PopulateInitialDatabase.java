@@ -32,7 +32,6 @@ public class PopulateInitialDatabase {
         try {
             normalizeAllFundingSources();
         } catch (DAOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
