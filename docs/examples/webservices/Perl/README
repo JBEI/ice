@@ -1,0 +1,12 @@
+1. install perl module SOAP::WSDL::Manual and all the dependencies
+in shell run: 'perl -MCPAN -e shell'
+in cpan shell run: install SOAP::WSDL::Manual
+in cpan shell run: install SOAP::WSDL
+in cpan shell run: install IO::Socket::SSL
+
+2. open generate_classes.pl and adjust constants according to your OS
+
+3. run ./generate_classes.pl.
+This script will latest version of WebService classes.
+
+4. Start using it!
