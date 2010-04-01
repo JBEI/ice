@@ -32,8 +32,7 @@ import org.jbei.ice.lib.search.lucene.SearchResult;
 
 @WebService
 public class RegistryAPI {
-    public String authorize(String login, String password) throws SessionException,
-            ServiceException {
+    public String login(String login, String password) throws SessionException, ServiceException {
         String sessionId = null;
 
         try {

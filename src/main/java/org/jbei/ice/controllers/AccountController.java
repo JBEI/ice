@@ -129,6 +129,12 @@ public class AccountController {
         IAuthenticationBackend authenticationBackend = null;
 
         try {
+            Thread.sleep(3000); // sets 3 seconds delay on login to prevent login/password bruteforce hacking 
+        } catch (InterruptedException e) {
+            throw new ControllerException(e);
+        }
+
+        try {
             authenticationBackend = AuthenticationBackendManager.loadAuthenticationBackend();
         } catch (AuthenticationBackendManagerException e) {
             throw new ControllerException(e);
@@ -167,7 +173,7 @@ public class AccountController {
         boolean result = false;
         try {
             SessionData sessionData = PersistentSessionDataWrapper.getInstance().getSessionData(
-                sessionKey);
+                    sessionKey);
             if (sessionData != null) {
                 result = true;
             }
