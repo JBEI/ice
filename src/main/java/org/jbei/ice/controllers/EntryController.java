@@ -79,6 +79,10 @@ public class EntryController extends Controller {
             throw new ControllerException(e);
         }
 
+        if (entry == null) {
+            return null;
+        }
+
         if (!hasReadPermission(entry)) {
             throw new PermissionException("No read permission for entry!");
         }
@@ -182,6 +186,14 @@ public class EntryController extends Controller {
         return getEntryPermissionVerifier().hasWritePermissionsById(entryId, getAccount());
     }
 
+    public boolean hasReadPermissionByRecordId(String entryId) throws ControllerException {
+        return getEntryPermissionVerifier().hasReadPermissionsByRecordId(entryId, getAccount());
+    }
+
+    public boolean hasWritePermissionByRecordId(String entryId) throws ControllerException {
+        return getEntryPermissionVerifier().hasWritePermissionsByRecordId(entryId, getAccount());
+    }
+
     public boolean hasSequence(Entry entry) throws ControllerException {
         boolean result = false;
 
@@ -235,7 +247,7 @@ public class EntryController extends Controller {
 
         try {
             entries = EntryManager.getEntriesByIdSet(filterEntriesByPermissionAndOffsetLimit(
-                    EntryManager.getEntries(field, ascending), offset, limit));
+                EntryManager.getEntries(field, ascending), offset, limit));
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
@@ -249,7 +261,7 @@ public class EntryController extends Controller {
 
         try {
             entries = EntryManager.getEntriesByIdSet(filterEntriesByPermissionAndOffsetLimit(
-                    EntryManager.getEntriesByOwner(owner), offset, limit));
+                EntryManager.getEntriesByOwner(owner), offset, limit));
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
@@ -265,7 +277,7 @@ public class EntryController extends Controller {
             ArrayList<Integer> queryResultIds = Query.getInstance().query(filters);
 
             entries = EntryManager.getEntriesByIdSet(filterEntriesByPermissionAndOffsetLimit(
-                    queryResultIds, offset, limit));
+                queryResultIds, offset, limit));
         } catch (QueryException e) {
             throw new ControllerException(e);
         } catch (ManagerException e) {
@@ -323,11 +335,11 @@ public class EntryController extends Controller {
         return numberOfEntriesByQueries;
     }
 
-    public void save(Entry entry) throws ControllerException, PermissionException {
-        save(entry, true);
+    public Entry save(Entry entry) throws ControllerException, PermissionException {
+        return save(entry, true);
     }
 
-    public void save(Entry entry, boolean scheduleIndexRebuild) throws ControllerException,
+    public Entry save(Entry entry, boolean scheduleIndexRebuild) throws ControllerException,
             PermissionException {
         if (entry == null) {
             throw new ControllerException("Failed to save null entry!");
@@ -337,10 +349,12 @@ public class EntryController extends Controller {
             throw new PermissionException("No write permission for entry!");
         }
 
+        Entry savedEntry = null;
+
         try {
             entry.setModificationTime(Calendar.getInstance().getTime());
 
-            EntryManager.save(entry);
+            savedEntry = EntryManager.save(entry);
 
             if (scheduleIndexRebuild) {
                 ApplicationContoller.scheduleSearchIndexRebuildJob();
@@ -349,6 +363,8 @@ public class EntryController extends Controller {
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
+
+        return savedEntry;
     }
 
     public void delete(Entry entry) throws ControllerException, PermissionException {

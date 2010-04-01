@@ -23,4 +23,12 @@ public class EntryPermissionVerifier implements IPermissionVerifier {
     public boolean hasWritePermissionsById(int id, Account account) {
         return PermissionManager.hasWritePermission(id, account);
     }
+
+    public boolean hasReadPermissionsByRecordId(String entryId, Account account) {
+        return PermissionManager.hasReadPermission(entryId, account);
+    }
+
+    public boolean hasWritePermissionsByRecordId(String entryId, Account account) {
+        return PermissionManager.hasWritePermission(entryId, account);
+    }
 }

@@ -18,7 +18,6 @@ import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.search.lucene.AggregateSearch;
 import org.jbei.ice.lib.search.lucene.SearchException;
 import org.jbei.ice.lib.search.lucene.SearchResult;
-import org.jbei.ice.web.IceSession;
 
 public class SearchController extends Controller {
     public SearchController(Account account) {
@@ -37,9 +36,10 @@ public class SearchController extends Controller {
         try {
             UsageLogger.info(String.format("Searching for: %s", cleanedQuery));
 
-            EntryController entryController = new EntryController(IceSession.get().getAccount());
+            EntryController entryController = new EntryController(getAccount());
 
-            ArrayList<SearchResult> searchResults = AggregateSearch.query(cleanedQuery);
+            ArrayList<SearchResult> searchResults = AggregateSearch.query(cleanedQuery,
+                getAccount());
             if (searchResults != null) {
                 for (SearchResult searchResult : searchResults) {
                     Entry entry = searchResult.getEntry();
@@ -77,7 +77,7 @@ public class SearchController extends Controller {
         try {
             Logger.info(String.format("Blast '%s' searching for %s", program, query));
 
-            EntryController entryController = new EntryController(IceSession.get().getAccount());
+            EntryController entryController = new EntryController(getAccount());
 
             Blast blast = new Blast();
 
@@ -87,6 +87,8 @@ public class SearchController extends Controller {
                     Entry entry = EntryManager.getByRecordId(blastResult.getSubjectId());
 
                     if (entry != null && entryController.hasReadPermission(entry)) {
+                        blastResult.setEntry(entry);
+
                         results.add(blastResult);
                     }
                 }

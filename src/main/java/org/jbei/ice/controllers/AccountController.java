@@ -94,11 +94,11 @@ public class AccountController {
         return result;
     }
 
-    public static Account getAccountByAuthToken(String authToken) throws ControllerException {
+    public static Account getAccountBySessionKey(String sessionKey) throws ControllerException {
         Account account = null;
 
         try {
-            account = AccountManager.getAccountByAuthToken(authToken);
+            account = AccountManager.getAccountByAuthToken(sessionKey);
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
@@ -124,43 +124,46 @@ public class AccountController {
     }
 
     public static SessionData authenticate(String login, String password)
-            throws InvalidCredentialsException {
+            throws InvalidCredentialsException, ControllerException {
         SessionData result = null;
         IAuthenticationBackend authenticationBackend = null;
+
         try {
             authenticationBackend = AuthenticationBackendManager.loadAuthenticationBackend();
         } catch (AuthenticationBackendManagerException e) {
-            throw new InvalidCredentialsException(e);
+            throw new ControllerException(e);
         }
+
         Account account = null;
         try {
             account = authenticationBackend.authenticate(login, password);
         } catch (AuthenticationBackendException e2) {
             throw new InvalidCredentialsException(e2);
         }
+
         if (account != null) {
-            AccountPreferences accountPreferences = null;
-            try {
-                accountPreferences = AccountController.getAccountPreferences(account);
-                if (accountPreferences == null) {
-                    accountPreferences = new AccountPreferences();
-                    accountPreferences.setAccount(account);
-                    AccountController.saveAccountPreferences(accountPreferences);
-                }
-            } catch (ControllerException e1) {
-                throw new InvalidCredentialsException(e1);
+            AccountPreferences accountPreferences = AccountController
+                    .getAccountPreferences(account);
+
+            if (accountPreferences == null) {
+                accountPreferences = new AccountPreferences();
+
+                accountPreferences.setAccount(account);
+
+                AccountController.saveAccountPreferences(accountPreferences);
             }
 
             try {
                 result = PersistentSessionDataWrapper.getInstance().newSessionData(account);
             } catch (ManagerException e) {
-                throw new InvalidCredentialsException(e);
+                throw new ControllerException(e);
             }
         }
+
         return result;
     }
 
-    public boolean isAuthenticated(String sessionKey) throws ControllerException {
+    public static boolean isAuthenticated(String sessionKey) throws ControllerException {
         boolean result = false;
         try {
             SessionData sessionData = PersistentSessionDataWrapper.getInstance().getSessionData(
@@ -174,8 +177,19 @@ public class AccountController {
         return result;
     }
 
+    public static void deauthenticate(String sessionKey) throws ControllerException {
+        if (isAuthenticated(sessionKey)) {
+            try {
+                PersistentSessionDataWrapper.getInstance().delete(sessionKey);
+            } catch (ManagerException e) {
+                throw new ControllerException(e);
+            }
+        }
+    }
+
     public static void saveAccountPreferences(AccountPreferences accountPreferences)
-            throws ControllerException {
+
+    throws ControllerException {
         try {
             AccountPreferencesManager.save(accountPreferences);
         } catch (ManagerException e) {
