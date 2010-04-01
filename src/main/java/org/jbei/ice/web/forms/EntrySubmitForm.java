@@ -3,6 +3,7 @@ package org.jbei.ice.web.forms;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.wicket.PageParameters;
@@ -252,7 +253,7 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
         newEntryFundingSource.setEntry(entry);
         newEntryFundingSource.setFundingSource(fundingSource);
         // TODO: Tim; Handle multiple funding sources
-        LinkedHashSet<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
+        Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
         entryFundingSources.add(newEntryFundingSource);
         entry.setEntryFundingSources(entryFundingSources);
     }

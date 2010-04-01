@@ -25,6 +25,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
@@ -154,6 +155,7 @@ public class Entry implements IEntryValueObject, IModel {
         this.modificationTime = modificationTime;
     }
 
+    @XmlTransient
     public int getId() {
         return id;
     }
@@ -170,6 +172,7 @@ public class Entry implements IEntryValueObject, IModel {
         this.recordId = recordId;
     }
 
+    @XmlTransient
     public String getVersionId() {
         return versionId;
     }
@@ -178,6 +181,7 @@ public class Entry implements IEntryValueObject, IModel {
         this.versionId = versionId;
     }
 
+    @XmlTransient
     public String getRecordType() {
         return recordType;
     }
@@ -188,6 +192,10 @@ public class Entry implements IEntryValueObject, IModel {
 
     public Set<Name> getNames() {
         return names;
+    }
+
+    public void setNames(Set<Name> names) {
+        this.names = names;
     }
 
     public Name getOneName() {
@@ -207,11 +215,6 @@ public class Entry implements IEntryValueObject, IModel {
         result = org.jbei.ice.lib.utils.Utils.join(", ", names);
 
         return result;
-    }
-
-    public void setNames(Set<Name> names) {
-        this.names.clear();
-        this.names.addAll(names);
     }
 
     public Set<PartNumber> getPartNumbers() {
@@ -239,8 +242,7 @@ public class Entry implements IEntryValueObject, IModel {
     }
 
     public void setPartNumbers(Set<PartNumber> partNumbers) {
-        this.partNumbers.clear();
-        this.partNumbers.addAll(partNumbers);
+        this.partNumbers = partNumbers;
     }
 
     public String getOwner() {
@@ -307,8 +309,7 @@ public class Entry implements IEntryValueObject, IModel {
     }
 
     public void setSelectionMarkers(Set<SelectionMarker> selectionMarkers) {
-        this.selectionMarkers.clear();
-        this.selectionMarkers.addAll(selectionMarkers);
+        this.selectionMarkers = selectionMarkers;
     }
 
     public Set<Link> getLinks() {
@@ -327,8 +328,7 @@ public class Entry implements IEntryValueObject, IModel {
     }
 
     public void setLinks(Set<Link> links) {
-        this.links.clear(); //This way lets Hibernate know the set has been updated
-        this.links.addAll(links);
+        this.links = links;
     }
 
     public String getKeywords() {
@@ -363,6 +363,7 @@ public class Entry implements IEntryValueObject, IModel {
         this.references = references;
     }
 
+    @XmlTransient
     public Date getCreationTime() {
         return creationTime;
     }
@@ -371,6 +372,7 @@ public class Entry implements IEntryValueObject, IModel {
         this.creationTime = creationTime;
     }
 
+    @XmlTransient
     public Date getModificationTime() {
         return modificationTime;
     }
@@ -396,8 +398,7 @@ public class Entry implements IEntryValueObject, IModel {
     }
 
     public void setEntryFundingSources(Set<EntryFundingSource> entryFundingSources) {
-        this.entryFundingSources.clear();
-        this.entryFundingSources.addAll(entryFundingSources);
+        this.entryFundingSources = entryFundingSources;
     }
 
     public Set<EntryFundingSource> getEntryFundingSources() {

@@ -7,6 +7,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
 
@@ -37,6 +38,7 @@ public class FundingSource implements IModel {
     private Set<AccountFundingSource> accountFundingSources = new LinkedHashSet<AccountFundingSource>();*/
 
     //getters and setters
+    @XmlTransient
     public int getId() {
         return id;
     }

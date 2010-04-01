@@ -45,6 +45,7 @@ public class Link implements ILinkValueObject, IModel {
         this.entry = entry;
     }
 
+    @XmlTransient
     public int getId() {
         return id;
     }

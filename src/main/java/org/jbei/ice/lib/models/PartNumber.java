@@ -40,6 +40,7 @@ public class PartNumber implements IPartNumberValueObject, IModel {
         this.entry = entry;
     }
 
+    @XmlTransient
     public int getId() {
         return id;
     }

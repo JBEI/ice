@@ -3,6 +3,7 @@ package org.jbei.ice.web.forms;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.wicket.PageParameters;
@@ -323,7 +324,7 @@ public class PlasmidStrainNewFormPanel extends Panel {
             newPlasmidFundingSource.setEntry(plasmid);
             newPlasmidFundingSource.setFundingSource(fundingSource);
             // TODO: Tim; Handle multiple funding sources
-            LinkedHashSet<EntryFundingSource> plasmidFundingSources = new LinkedHashSet<EntryFundingSource>();
+            Set<EntryFundingSource> plasmidFundingSources = new LinkedHashSet<EntryFundingSource>();
             plasmidFundingSources.add(newPlasmidFundingSource);
             plasmid.setEntryFundingSources(plasmidFundingSources);
             plasmid.setBackbone(getPlasmidBackbone());
@@ -364,7 +365,7 @@ public class PlasmidStrainNewFormPanel extends Panel {
             newStrainFundingSource.setEntry(strain);
             newStrainFundingSource.setFundingSource(fundingSource);
             // TODO: Tim; Handle multiple funding sources
-            LinkedHashSet<EntryFundingSource> strainFundingSources = new LinkedHashSet<EntryFundingSource>();
+            Set<EntryFundingSource> strainFundingSources = new LinkedHashSet<EntryFundingSource>();
             strainFundingSources.add(newStrainFundingSource);
             strain.setEntryFundingSources(strainFundingSources);
             strain.setHost(getStrainHost());

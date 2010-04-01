@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 import org.jbei.ice.lib.utils.Utils;
 
@@ -123,5 +124,9 @@ public class CommaSeparatedField<T> implements Serializable {
         HashSet<T> result = new HashSet<T>(items);
 
         return result;
+    }
+
+    public List<T> getItems() {
+        return items;
     }
 }

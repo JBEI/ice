@@ -11,7 +11,6 @@ import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.SessionData;
 
 public class SessionManager {
-
     public static SessionData get(String sessionKey) throws ManagerException {
         SessionData sessionData = null;
         Session session = DAO.newSession();

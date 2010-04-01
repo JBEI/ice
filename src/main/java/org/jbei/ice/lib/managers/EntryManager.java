@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.NonUniqueResultException;
 
@@ -350,7 +351,7 @@ public class EntryManager {
         String number = getNextPartNumber();
         PartNumber partNumber = new PartNumber();
         partNumber.setPartNumber(number);
-        LinkedHashSet<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
+        Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
         partNumbers.add(partNumber);
         newPlasmid.setPartNumbers(partNumbers);
 
@@ -370,7 +371,7 @@ public class EntryManager {
         String number = getNextPartNumber();
         PartNumber partNumber = new PartNumber();
         partNumber.setPartNumber(number);
-        LinkedHashSet<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
+        Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
         partNumbers.add(partNumber);
         newStrain.setPartNumbers(partNumbers);
         newStrain.setRecordId(Utils.generateUUID());
@@ -389,7 +390,7 @@ public class EntryManager {
         String number = getNextPartNumber();
         PartNumber partNumber = new PartNumber();
         partNumber.setPartNumber(number);
-        LinkedHashSet<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
+        Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
         partNumbers.add(partNumber);
         newPart.setPartNumbers(partNumbers);
         newPart.setRecordId(Utils.generateUUID());

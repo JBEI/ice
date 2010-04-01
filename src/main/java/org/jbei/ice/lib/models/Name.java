@@ -44,6 +44,7 @@ public class Name implements INameValueObject, IModel {
         this.id = id;
     }
 
+    @XmlTransient
     public int getId() {
         return id;
     }

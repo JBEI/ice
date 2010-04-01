@@ -59,7 +59,14 @@ public class IceSession extends WebSession {
     public SessionData authenticateUser(String login, String password) throws IceSessionException,
             InvalidCredentialsException {
 
-        SessionData sessionData = AccountController.authenticate(login, password);
+        SessionData sessionData = null;
+        try {
+            sessionData = AccountController.authenticate(login, password);
+        } catch (ControllerException e) {
+            Logger.error("Authentication failed!", e);
+
+            return null;
+        }
 
         if (sessionData == null) {
             // User authenticates but this session is not associated.
@@ -67,7 +74,9 @@ public class IceSession extends WebSession {
             Logger.error(msg, new Exception("Error"));
             throw new RuntimeException(msg);
         }
+
         setSessionKeyCookie(sessionData.getSessionKey());
+
         return sessionData;
     }
 
@@ -163,7 +172,15 @@ public class IceSession extends WebSession {
 
     //private methods
     private void clearSavedSession() {
-        PersistentSessionDataWrapper.getInstance().delete(getSessionData().getSessionKey());
+        try {
+            SessionData sessionData = getSessionData();
+
+            if (sessionData != null) {
+                PersistentSessionDataWrapper.getInstance().delete(sessionData.getSessionKey());
+            }
+        } catch (ManagerException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private WebRequest getRequest() {

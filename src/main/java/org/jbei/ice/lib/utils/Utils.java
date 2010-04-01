@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
@@ -38,7 +37,7 @@ public class Utils {
     }
 
     public final static String toCommaSeparatedStringFromSelectionMarkers(
-            Set<SelectionMarker> hashSet) {
+            Collection<SelectionMarker> hashSet) {
         String result = null;
 
         ArrayList<String> temp = new ArrayList<String>();
@@ -52,47 +51,59 @@ public class Utils {
         return result;
     }
 
-    public final static String toCommaSeparatedStringFromLinks(Set<Link> hashSet) {
+    public final static String toCommaSeparatedStringFromLinks(Collection<Link> hashSet) {
         String result = null;
+
         ArrayList<String> temp = new ArrayList<String>();
         for (Link link : hashSet) {
             temp.add(link.getLink());
         }
         result = join(", ", temp);
+
         return result;
     }
 
-    public final static String toCommaSeparatedStringFromNames(Set<Name> hashSet) {
+    public final static String toCommaSeparatedStringFromNames(Collection<Name> hashSet) {
         String result = null;
+
         ArrayList<String> temp = new ArrayList<String>();
         for (Name name : hashSet) {
             temp.add(name.getName());
         }
+
         result = join(", ", temp);
+
         return result;
     }
 
-    public final static String toCommaSeparatedStringFromPartNumbers(Set<PartNumber> hashSet) {
+    public final static String toCommaSeparatedStringFromPartNumbers(Collection<PartNumber> hashSet) {
         String result = null;
+
         ArrayList<String> temp = new ArrayList<String>();
+
         for (PartNumber partNumber : hashSet) {
             temp.add(partNumber.getPartNumber());
         }
+
         result = join(", ", temp);
 
         return result;
     }
 
     public final static String toCommaSeparatedStringFromEntryFundingSources(
-            Set<EntryFundingSource> hashSet) {
+            Collection<EntryFundingSource> entryFundingSources) {
         String result = null;
+
         ArrayList<String> temp = new ArrayList<String>();
-        for (EntryFundingSource entryFundingSource : hashSet) {
+
+        for (EntryFundingSource entryFundingSource : entryFundingSources) {
             FundingSource fundingSource = entryFundingSource.getFundingSource();
             temp.add(fundingSource.getFundingSource());
             temp.add(fundingSource.getPrincipalInvestigator());
         }
+
         result = join(", ", temp);
+
         return result;
     }
 

@@ -29,7 +29,6 @@ public class Logger {
         logger.warn(msg);
     }
 
-    @Deprecated
     public static void error(String msg) {
         sendEmail(msg);
         logger.error(msg);
@@ -37,6 +36,12 @@ public class Logger {
 
     public static void error(String msg, Throwable e) {
         msg = msg + "\n" + Utils.stackTraceToString(e);
+        sendEmail(msg, e);
+        logger.error(msg);
+    }
+
+    public static void error(Throwable e) {
+        String msg = Utils.stackTraceToString(e);
         sendEmail(msg, e);
         logger.error(msg);
     }
@@ -73,5 +78,4 @@ public class Logger {
     private static void sendEmail(String msg) {
         sendEmail(msg, new Exception("Error"));
     }
-
 }

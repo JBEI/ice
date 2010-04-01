@@ -15,6 +15,11 @@ public class SearchResult implements Serializable {
     private Entry entry;
     private float score;
 
+    public SearchResult() {
+        entry = null;
+        score = 0;
+    }
+
     public SearchResult(Entry entry, float score) {
         setEntry(entry);
         setScore(score);
@@ -36,7 +41,7 @@ public class SearchResult implements Serializable {
         return score;
     }
 
-    public static ArrayList<SearchResult> sort(ArrayList<SearchResult> incoming) {
+    protected static ArrayList<SearchResult> sort(ArrayList<SearchResult> incoming) {
         class SearchResultComparator implements Comparator<SearchResult> {
             public int compare(SearchResult arg0, SearchResult arg1) {
                 float temp = arg1.getScore() - arg0.getScore();
@@ -62,7 +67,7 @@ public class SearchResult implements Serializable {
      * Add object search results to target, and return the target
      */
     @SuppressWarnings("unchecked")
-    public static ArrayList<SearchResult> sumSearchResults(ArrayList<SearchResult> target,
+    protected static ArrayList<SearchResult> sumSearchResults(ArrayList<SearchResult> target,
             ArrayList<SearchResult> object) {
         ArrayList<String> targetRecordIds = new ArrayList<String>();
         ArrayList<String> objectRecordIds = new ArrayList<String>();

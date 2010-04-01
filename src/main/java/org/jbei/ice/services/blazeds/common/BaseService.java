@@ -12,7 +12,7 @@ public class BaseService {
         Account account = null;
 
         try {
-            account = AccountController.getAccountByAuthToken(authToken);
+            account = AccountController.getAccountBySessionKey(authToken);
         } catch (ControllerException e) {
             Logger.error("Failed to get account by token: " + authToken, e);
         }

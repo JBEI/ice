@@ -5,8 +5,8 @@ import java.util.LinkedHashSet;
 
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.web.IceSession;
 
 /**
  * Combine different searches into one interface, with heuristics built in to
@@ -16,8 +16,9 @@ import org.jbei.ice.web.IceSession;
  * 
  */
 public class AggregateSearch {
-    public static ArrayList<SearchResult> query(String queryString) throws SearchException {
-        EntryController entryController = new EntryController(IceSession.get().getAccount());
+    public static ArrayList<SearchResult> query(String queryString, Account account)
+            throws SearchException {
+        EntryController entryController = new EntryController(account);
 
         ArrayList<SearchResult> result = new ArrayList<SearchResult>();
 

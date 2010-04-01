@@ -31,6 +31,7 @@ public class EntryFundingSource implements IModel {
     @JoinColumn(name = "entries_id", nullable = false)
     private Entry entry;
 
+    @XmlTransient
     public int getId() {
         return id;
     }

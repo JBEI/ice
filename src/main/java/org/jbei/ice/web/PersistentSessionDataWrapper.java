@@ -45,14 +45,12 @@ public class PersistentSessionDataWrapper {
 
     public SessionData newSessionData() throws ManagerException {
         SessionData sessionData = new SessionData(JbeirSettings.getSetting("SITE_SECRET"));
-        try {
-            persist(sessionData);
-            getSessionDataCache().put(sessionData.getSessionKey(), sessionData);
-            Long cacheExpirationTime = Calendar.getInstance().getTimeInMillis() + CACHE_TIMEOUT;
-            getSessionDataCacheTimeStamp().put(sessionData.getSessionKey(), cacheExpirationTime);
-        } catch (ManagerException e) {
-            throw e;
-        }
+
+        persist(sessionData);
+        getSessionDataCache().put(sessionData.getSessionKey(), sessionData);
+        Long cacheExpirationTime = Calendar.getInstance().getTimeInMillis() + CACHE_TIMEOUT;
+        getSessionDataCacheTimeStamp().put(sessionData.getSessionKey(), cacheExpirationTime);
+
         return sessionData;
     }
 
@@ -60,21 +58,17 @@ public class PersistentSessionDataWrapper {
         SessionData sessionData = newSessionData();
         sessionData.setAccount(account);
         persist(sessionData);
+
         return sessionData;
     }
 
     public synchronized void persist(SessionData sessionData) throws ManagerException {
         pruneCache();
-        try {
-            SessionManager.save(sessionData);
-        } catch (ManagerException e) {
-            String msg = "Could not persist session data" + e.toString();
-            Logger.error(msg, e);
-            throw e;
-        }
+
+        SessionManager.save(sessionData);
     }
 
-    public synchronized void delete(String sessionKey) {
+    public synchronized void delete(String sessionKey) throws ManagerException {
         SessionData sessionData = getSessionDataCache().get(sessionKey);
         if (sessionData != null) {
             getSessionDataCache().remove(sessionKey);
@@ -87,12 +81,7 @@ public class PersistentSessionDataWrapper {
             }
         }
         if (sessionData != null) {
-            try {
-                SessionManager.delete(sessionData);
-            } catch (ManagerException e) {
-                String msg = "Could not delete session Data: " + e.toString();
-                Logger.error(msg, e);
-            }
+            SessionManager.delete(sessionData);
         }
     }
 

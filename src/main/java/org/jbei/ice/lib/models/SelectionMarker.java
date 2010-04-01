@@ -40,6 +40,7 @@ public class SelectionMarker implements ISelectionMarkerValueObject, IModel {
         this.entry = entry;
     }
 
+    @XmlTransient
     public int getId() {
         return id;
     }

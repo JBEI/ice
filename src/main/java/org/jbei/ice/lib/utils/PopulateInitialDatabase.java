@@ -112,12 +112,9 @@ public class PopulateInitialDatabase {
 
         for (Entry entry : allEntries) {
             Set<EntryFundingSource> entryFundingSources = entry.getEntryFundingSources();
+
             for (EntryFundingSource entryFundingSource : entryFundingSources) {
-                try {
-                    normalizeFundingSources(entryFundingSource.getFundingSource());
-                } catch (DAOException e) {
-                    throw e;
-                }
+                normalizeFundingSources(entryFundingSource.getFundingSource());
             }
         }
     }
