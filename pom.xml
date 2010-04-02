@@ -242,7 +242,7 @@
 						<id>process-classes</id>
 						<phase>process-classes</phase>
 						<configuration>
-							<className>org.jbei.ice.services.webservices.CalculatorService</className>
+							<className>org.jbei.ice.services.webservices.RegistryAPI</className>
 							<genWsdl>true</genWsdl>
 							<verbose>true</verbose>
 						</configuration>
