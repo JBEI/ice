@@ -123,13 +123,13 @@ public class AccountController {
         return accountPreferences;
     }
 
-    public static SessionData authenticate(String login, String password)
+    public static SessionData authenticate(String login, String password, String ip)
             throws InvalidCredentialsException, ControllerException {
         SessionData result = null;
         IAuthenticationBackend authenticationBackend = null;
 
         try {
-            Thread.sleep(3000); // sets 3 seconds delay on login to prevent login/password bruteforce hacking 
+            Thread.sleep(2000); // sets 2 seconds delay on login to prevent login/password bruteforce hacking 
         } catch (InterruptedException e) {
             throw new ControllerException(e);
         }
@@ -142,7 +142,7 @@ public class AccountController {
 
         Account account = null;
         try {
-            account = authenticationBackend.authenticate(login, password);
+            account = authenticationBackend.authenticate(login, password, ip);
         } catch (AuthenticationBackendException e2) {
             throw new InvalidCredentialsException(e2);
         }
@@ -169,11 +169,16 @@ public class AccountController {
         return result;
     }
 
+    public static SessionData authenticate(String login, String password)
+            throws InvalidCredentialsException, ControllerException {
+        return authenticate(login, password, "");
+    }
+
     public static boolean isAuthenticated(String sessionKey) throws ControllerException {
         boolean result = false;
         try {
             SessionData sessionData = PersistentSessionDataWrapper.getInstance().getSessionData(
-                    sessionKey);
+                sessionKey);
             if (sessionData != null) {
                 result = true;
             }

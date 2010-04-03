@@ -9,8 +9,15 @@ public class LocalBackend implements IAuthenticationBackend {
         return "LocalBackend";
     }
 
+    @Override
     public Account authenticate(String userId, String password) throws InvalidCredentialsException,
             AuthenticationBackendException {
+        return authenticate(userId, password, "");
+    }
+
+    @Override
+    public Account authenticate(String userId, String password, String ip)
+            throws AuthenticationBackendException, InvalidCredentialsException {
         if (userId == null || password == null) {
             throw new InvalidCredentialsException("Username and Password are mandatory!");
         }

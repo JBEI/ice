@@ -11,6 +11,7 @@ import org.apache.wicket.protocol.http.WebRequest;
 import org.apache.wicket.protocol.http.WebRequestCycle;
 import org.apache.wicket.protocol.http.WebResponse;
 import org.apache.wicket.protocol.http.WebSession;
+import org.apache.wicket.protocol.http.request.WebClientInfo;
 import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
@@ -60,8 +61,12 @@ public class IceSession extends WebSession {
             InvalidCredentialsException {
 
         SessionData sessionData = null;
+
+        WebClientInfo webClientInfo = (WebClientInfo) getClientInfo();
+        String ip = webClientInfo.getProperties().getRemoteAddress();
+
         try {
-            sessionData = AccountController.authenticate(login, password);
+            sessionData = AccountController.authenticate(login, password, ip);
         } catch (ControllerException e) {
             Logger.error("Authentication failed!", e);
 

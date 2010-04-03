@@ -7,4 +7,7 @@ public interface IAuthenticationBackend {
 
     Account authenticate(String userId, String password) throws AuthenticationBackendException,
             InvalidCredentialsException;
+
+    Account authenticate(String userId, String password, String ip)
+            throws AuthenticationBackendException, InvalidCredentialsException;
 }

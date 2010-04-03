@@ -9,7 +9,8 @@ public class NullAuthenticationBackend implements IAuthenticationBackend {
         return "NullAuthenticationBackend";
     }
 
-    public Account authenticate(String userId, String password)
+    @Override
+    public Account authenticate(String userId, String password, String ip)
             throws AuthenticationBackendException, InvalidCredentialsException {
         if (userId == null || password == null) {
             throw new InvalidCredentialsException("Username and Password are mandatory!");
@@ -28,5 +29,11 @@ public class NullAuthenticationBackend implements IAuthenticationBackend {
         }
 
         return account;
+    }
+
+    @Override
+    public Account authenticate(String userId, String password)
+            throws AuthenticationBackendException, InvalidCredentialsException {
+        return authenticate(userId, password);
     }
 }
