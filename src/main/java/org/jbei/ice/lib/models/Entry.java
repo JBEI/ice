@@ -195,7 +195,11 @@ public class Entry implements IEntryValueObject, IModel {
     }
 
     public void setNames(Set<Name> names) {
-        this.names = names;
+        /*
+         * Warning! This is a hibernate workaround. 
+         */
+        this.names.clear();
+        this.names.addAll(names);
     }
 
     public Name getOneName() {
@@ -242,7 +246,8 @@ public class Entry implements IEntryValueObject, IModel {
     }
 
     public void setPartNumbers(Set<PartNumber> partNumbers) {
-        this.partNumbers = partNumbers;
+        this.partNumbers.clear();
+        this.partNumbers.addAll(partNumbers);
     }
 
     public String getOwner() {
@@ -309,7 +314,8 @@ public class Entry implements IEntryValueObject, IModel {
     }
 
     public void setSelectionMarkers(Set<SelectionMarker> selectionMarkers) {
-        this.selectionMarkers = selectionMarkers;
+        this.selectionMarkers.clear();
+        this.selectionMarkers.addAll(selectionMarkers);
     }
 
     public Set<Link> getLinks() {
@@ -328,7 +334,8 @@ public class Entry implements IEntryValueObject, IModel {
     }
 
     public void setLinks(Set<Link> links) {
-        this.links = links;
+        this.links.clear();
+        this.links.addAll(links);
     }
 
     public String getKeywords() {
@@ -398,7 +405,8 @@ public class Entry implements IEntryValueObject, IModel {
     }
 
     public void setEntryFundingSources(Set<EntryFundingSource> entryFundingSources) {
-        this.entryFundingSources = entryFundingSources;
+        this.entryFundingSources.clear();
+        this.entryFundingSources.addAll(entryFundingSources);
     }
 
     public Set<EntryFundingSource> getEntryFundingSources() {
