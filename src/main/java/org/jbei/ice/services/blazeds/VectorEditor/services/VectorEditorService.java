@@ -1,7 +1,5 @@
 package org.jbei.ice.services.blazeds.VectorEditor.services;
 
-import java.util.LinkedHashSet;
-
 import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SequenceController;
@@ -10,15 +8,9 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountPreferences;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Feature;
-import org.jbei.ice.lib.models.FeatureDNA;
 import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.models.SequenceFeature;
-import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.SerializationUtils;
-import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.services.blazeds.VectorEditor.vo.LightFeature;
-import org.jbei.ice.services.blazeds.VectorEditor.vo.LightSequence;
+import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.services.blazeds.VectorEditor.vo.UserPreferences;
 import org.jbei.ice.services.blazeds.VectorEditor.vo.UserRestrictionEnzymes;
 import org.jbei.ice.services.blazeds.common.BaseService;
@@ -166,7 +158,8 @@ public class VectorEditorService extends BaseService {
         }
     }
 
-    public boolean saveLightSequence(String authToken, String entryId, LightSequence lightSequence) {
+    public boolean saveFeaturedDNASequence(String authToken, String entryId,
+            FeaturedDNASequence featuredDNASequence) {
         boolean result = false;
 
         Account account = getAccountByToken(authToken);
@@ -185,7 +178,10 @@ public class VectorEditorService extends BaseService {
                 return false;
             }
 
-            Sequence sequence = lightSequenceToSequence(lightSequence, entry);
+            Sequence sequence = sequenceController
+                    .featuredDNASequenceToSequence(featuredDNASequence);
+
+            sequence.setEntry(entry);
             sequenceController.update(sequence);
 
             result = true;
@@ -205,53 +201,5 @@ public class VectorEditorService extends BaseService {
     @Override
     protected String getServiceName() {
         return VECTOR_EDITOR_SERVICE_NAME;
-    }
-
-    private Sequence lightSequenceToSequence(LightSequence lightSequence, Entry entry) {
-        LinkedHashSet<SequenceFeature> sequenceFeatures = new LinkedHashSet<SequenceFeature>();
-        Sequence sequence = new Sequence(lightSequence.getSequence(), "", "", "", entry,
-                sequenceFeatures);
-
-        try {
-            sequence.setFwdHash(SequenceUtils.calculateSequenceHash(sequence.getSequence()));
-            sequence.setRevHash(SequenceUtils.calculateSequenceHash(SequenceUtils
-                    .reverseComplement(sequence.getSequence())));
-
-            for (LightFeature lightFeature : lightSequence.getFeatures()) {
-                String featureDNASequence = "";
-                if (lightFeature.getEnd() < lightFeature.getStart()) {
-                    featureDNASequence = sequence.getSequence().substring(lightFeature.getStart(),
-                            sequence.getSequence().length());
-                    featureDNASequence += sequence.getSequence().substring(0,
-                            lightFeature.getEnd() + 1);
-                } else {
-                    featureDNASequence = sequence.getSequence().substring(lightFeature.getStart(),
-                            lightFeature.getEnd() + 1);
-                }
-
-                String featureDNASequenceHash = SequenceUtils
-                        .calculateSequenceHash(featureDNASequence);
-
-                Feature feature = new Feature(lightFeature.getName(), "", "", Utils.generateUUID(),
-                        0, lightFeature.getType());
-
-                FeatureDNA featureDNA = new FeatureDNA(featureDNASequenceHash, featureDNASequence,
-                        feature);
-
-                feature.setFeatureDna(featureDNA);
-
-                SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature,
-                        lightFeature.getStart() + 1, lightFeature.getEnd() + 1, lightFeature
-                                .getStrand(), lightFeature.getName());
-
-                sequenceFeatures.add(sequenceFeature);
-            }
-        } catch (Exception e) {
-            Logger.error("Failed to convert LightSequence to Sequence\n", e);
-
-            return null;
-        }
-
-        return sequence;
     }
 }
