@@ -23,7 +23,7 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.vo.ISampleValueObject;
+import org.jbei.ice.lib.models.interfaces.ISampleValueObject;
 
 @Entity
 @Table(name = "samples")

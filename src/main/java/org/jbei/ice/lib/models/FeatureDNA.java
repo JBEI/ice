@@ -14,6 +14,7 @@ import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.utils.SequenceUtils;
 
 @Entity
 @Table(name = "feature_dna")
@@ -45,6 +46,14 @@ public class FeatureDNA implements IModel {
 
         this.hash = hash;
         this.sequence = sequence;
+        this.feature = feature;
+    }
+
+    public FeatureDNA(String sequence, Feature feature) {
+        super();
+
+        this.sequence = sequence;
+        this.hash = SequenceUtils.calculateSequenceHash(sequence);
         this.feature = feature;
     }
 

@@ -13,7 +13,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.vo.IAttachmentValueObject;
+import org.jbei.ice.lib.models.interfaces.IAttachmentValueObject;
 
 @Entity
 @Table(name = "attachments")

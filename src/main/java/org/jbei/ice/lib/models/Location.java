@@ -17,7 +17,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.vo.ILocationValueObject;
+import org.jbei.ice.lib.models.interfaces.ILocationValueObject;
 
 @Entity
 @Table(name = "locations")

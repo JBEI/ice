@@ -13,7 +13,7 @@ import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.vo.ISelectionMarkerValueObject;
+import org.jbei.ice.lib.models.interfaces.ISelectionMarkerValueObject;
 
 @Entity
 @Table(name = "selection_markers")

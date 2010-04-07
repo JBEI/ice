@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.vo.IFeatureValueObject;
+import org.jbei.ice.lib.models.interfaces.IFeatureValueObject;
 
 @Entity
 @Table(name = "features")
@@ -53,7 +53,7 @@ public class Feature implements IFeatureValueObject, IModel {
     }
 
     public Feature(String name, String description, String identification, String uuid,
-            int autoFind, String genbankType) {
+            int autoFind, String genbankType, FeatureDNA featureDNA) {
         super();
 
         this.name = name;
@@ -62,6 +62,7 @@ public class Feature implements IFeatureValueObject, IModel {
         this.uuid = uuid;
         this.autoFind = autoFind;
         this.genbankType = genbankType;
+        this.featureDna = featureDNA;
     }
 
     public String getName() {

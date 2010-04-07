@@ -13,7 +13,7 @@ import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.vo.INameValueObject;
+import org.jbei.ice.lib.models.interfaces.INameValueObject;
 
 @Entity
 @Table(name = "names")

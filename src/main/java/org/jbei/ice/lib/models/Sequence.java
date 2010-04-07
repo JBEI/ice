@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.vo.ISequenceValueObject;
+import org.jbei.ice.lib.models.interfaces.ISequenceValueObject;
 
 @Entity
 @Table(name = "sequences")

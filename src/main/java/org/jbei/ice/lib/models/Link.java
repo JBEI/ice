@@ -13,7 +13,7 @@ import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.vo.ILinkValueObject;
+import org.jbei.ice.lib.models.interfaces.ILinkValueObject;
 
 @Entity
 @Table(name = "links")

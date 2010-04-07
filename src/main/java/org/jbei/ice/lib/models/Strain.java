@@ -8,7 +8,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.vo.IStrainValueObject;
+import org.jbei.ice.lib.models.interfaces.IStrainValueObject;
 
 @Entity
 @PrimaryKeyJoinColumn(name = "entries_id")

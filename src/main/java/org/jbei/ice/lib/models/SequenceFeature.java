@@ -14,7 +14,7 @@ import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.vo.ISequenceFeatureValueObject;
+import org.jbei.ice.lib.models.interfaces.ISequenceFeatureValueObject;
 
 @Entity
 @Table(name = "sequence_feature")

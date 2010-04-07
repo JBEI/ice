@@ -10,7 +10,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.vo.IPartValueObject;
+import org.jbei.ice.lib.models.interfaces.IPartValueObject;
 
 @Entity
 @PrimaryKeyJoinColumn(name = "entries_id")

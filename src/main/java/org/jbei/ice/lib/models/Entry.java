@@ -29,8 +29,8 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.models.interfaces.IEntryValueObject;
 import org.jbei.ice.lib.utils.JbeiConstants;
-import org.jbei.ice.lib.vo.IEntryValueObject;
 
 @Entity
 @Table(name = "entries")
@@ -194,12 +194,22 @@ public class Entry implements IEntryValueObject, IModel {
         return names;
     }
 
-    public void setNames(Set<Name> names) {
+    public void setNames(Set<Name> inputNames) {
         /*
          * Warning! This is a hibernate workaround. 
          */
-        this.names.clear();
-        this.names.addAll(names);
+
+        // for JAXB webservices should be this way
+        if (inputNames == null) {
+            this.names.clear();
+
+            return;
+        }
+
+        if (inputNames != this.names) {
+            this.names.clear();
+            this.names.addAll(inputNames);
+        }
     }
 
     public Name getOneName() {
@@ -245,9 +255,18 @@ public class Entry implements IEntryValueObject, IModel {
         return result;
     }
 
-    public void setPartNumbers(Set<PartNumber> partNumbers) {
-        this.partNumbers.clear();
-        this.partNumbers.addAll(partNumbers);
+    public void setPartNumbers(Set<PartNumber> inputPartNumbers) {
+        // for JAXB webservices should be this way
+        if (inputPartNumbers == null) {
+            this.partNumbers.clear();
+
+            return;
+        }
+
+        if (inputPartNumbers != this.partNumbers) {
+            this.partNumbers.clear();
+            this.partNumbers.addAll(inputPartNumbers);
+        }
     }
 
     public String getOwner() {
@@ -313,9 +332,19 @@ public class Entry implements IEntryValueObject, IModel {
         return result;
     }
 
-    public void setSelectionMarkers(Set<SelectionMarker> selectionMarkers) {
-        this.selectionMarkers.clear();
-        this.selectionMarkers.addAll(selectionMarkers);
+    public void setSelectionMarkers(Set<SelectionMarker> inputSelectionMarkers) {
+        if (inputSelectionMarkers == null) {
+            this.selectionMarkers.clear();
+
+            return;
+        }
+
+        if (inputSelectionMarkers == this.selectionMarkers) {
+            this.selectionMarkers = inputSelectionMarkers;
+        } else {
+            this.selectionMarkers.clear();
+            this.selectionMarkers.addAll(inputSelectionMarkers);
+        }
     }
 
     public Set<Link> getLinks() {
@@ -333,9 +362,17 @@ public class Entry implements IEntryValueObject, IModel {
         return result;
     }
 
-    public void setLinks(Set<Link> links) {
-        this.links.clear();
-        this.links.addAll(links);
+    public void setLinks(Set<Link> inputLinks) {
+        if (inputLinks == null) {
+            this.links.clear();
+
+            return;
+        }
+
+        if (inputLinks != this.links) {
+            this.links.clear();
+            this.links.addAll(inputLinks);
+        }
     }
 
     public String getKeywords() {
@@ -404,9 +441,17 @@ public class Entry implements IEntryValueObject, IModel {
         return intellectualProperty;
     }
 
-    public void setEntryFundingSources(Set<EntryFundingSource> entryFundingSources) {
-        this.entryFundingSources.clear();
-        this.entryFundingSources.addAll(entryFundingSources);
+    public void setEntryFundingSources(Set<EntryFundingSource> inputEntryFundingSources) {
+        if (inputEntryFundingSources == null) {
+            this.entryFundingSources.clear();
+
+            return;
+        }
+
+        if (inputEntryFundingSources != this.entryFundingSources) {
+            this.entryFundingSources.clear();
+            this.entryFundingSources.addAll(inputEntryFundingSources);
+        }
     }
 
     public Set<EntryFundingSource> getEntryFundingSources() {
