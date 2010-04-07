@@ -1,5 +1,11 @@
 package org.jbei.ice.controllers;
 
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
 import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.SequencePermissionVerifier;
@@ -10,9 +16,15 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.Feature;
+import org.jbei.ice.lib.models.FeatureDNA;
 import org.jbei.ice.lib.models.Sequence;
+import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.utils.SequenceUtils;
+import org.jbei.ice.lib.vo.DNAFeature;
+import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
 public class SequenceController extends Controller {
     public SequenceController(Account account) {
@@ -132,12 +144,100 @@ public class SequenceController extends Controller {
         }
     }
 
-    public Sequence parse(String sequence) {
+    public FeaturedDNASequence parse(String sequence) {
         return GeneralParser.getInstance().parse(sequence);
     }
 
     public String compose(Sequence sequence, IFormatter formatter) throws SequenceComposerException {
         return SequenceComposer.compose(sequence, formatter);
+    }
+
+    public FeaturedDNASequence sequenceToFeaturedDNASequence(Sequence sequence) {
+        if (sequence == null) {
+            return null;
+        }
+
+        List<DNAFeature> features = new LinkedList<DNAFeature>();
+
+        if (sequence.getSequenceFeatures() != null && sequence.getSequenceFeatures().size() > 0) {
+            for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
+                DNAFeature dnaFeature = new DNAFeature(sequenceFeature.getStart(), sequenceFeature
+                        .getEnd(), sequenceFeature.getFeature().getGenbankType(), sequenceFeature
+                        .getFeature().getName(), sequenceFeature.getStrand(),
+                        new LinkedHashMap<String, String>());
+
+                features.add(dnaFeature);
+            }
+        }
+
+        FeaturedDNASequence featuredDNASequence = new FeaturedDNASequence(sequence.getSequence(),
+                features);
+
+        return featuredDNASequence;
+    }
+
+    public Sequence featuredDNASequenceToSequence(FeaturedDNASequence featuredDNASequence) {
+        if (featuredDNASequence == null) {
+            return null;
+        }
+
+        String sequenceString = featuredDNASequence.getSequence().toLowerCase();
+        String fwdHash = SequenceUtils.calculateSequenceHash(sequenceString);
+        String revHash = SequenceUtils.calculateSequenceHash(SequenceUtils
+                .reverseComplement(sequenceString));
+
+        Set<SequenceFeature> sequenceFeatures = new LinkedHashSet<SequenceFeature>();
+
+        Sequence sequence = new Sequence(sequenceString, "", fwdHash, revHash, null,
+                sequenceFeatures);
+
+        if (featuredDNASequence.getFeatures() != null
+                && featuredDNASequence.getFeatures().size() > 0) {
+            for (DNAFeature dnaFeature : featuredDNASequence.getFeatures()) {
+                int start = dnaFeature.getStart();
+                int end = dnaFeature.getEnd();
+
+                if (start < 0) {
+                    start = 0;
+                } else if (start > featuredDNASequence.getSequence().length() - 1) {
+                    start = featuredDNASequence.getSequence().length() - 1;
+                }
+
+                if (end < 0) {
+                    end = 0;
+                } else if (end > featuredDNASequence.getSequence().length() - 1) {
+                    end = featuredDNASequence.getSequence().length() - 1;
+                }
+
+                String featureSequence = featuredDNASequence.getSequence().substring(start, end);
+
+                if (start > end) { // over zero case
+                    featureSequence = featuredDNASequence.getSequence().substring(start,
+                        featuredDNASequence.getSequence().length() - 1);
+                    featureSequence += featuredDNASequence.getSequence().substring(0, end);
+                } else { // normal
+                    featureSequence = featuredDNASequence.getSequence().substring(start, end);
+                }
+
+                String featureDNASequenceHash = SequenceUtils
+                        .calculateSequenceHash(featureSequence);
+
+                Feature feature = new Feature(dnaFeature.getName(), "", "", "", 0, dnaFeature
+                        .getType(), null);
+
+                FeatureDNA featureDNA = new FeatureDNA(featureDNASequenceHash, featureSequence,
+                        feature);
+
+                feature.setFeatureDna(featureDNA);
+
+                SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature, start,
+                        end, dnaFeature.getStrand(), dnaFeature.getName());
+
+                sequenceFeatures.add(sequenceFeature);
+            }
+        }
+
+        return sequence;
     }
 
     protected SequencePermissionVerifier getSequencePermissionVerifier() {

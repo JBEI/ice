@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.biojava.bio.BioException;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -16,6 +15,7 @@ import org.jbei.ice.lib.models.FeatureDNA;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.utils.SequenceUtils;
+import org.jbei.ice.lib.utils.Utils;
 
 public class SequenceManager {
     public static Sequence saveSequence(Sequence sequence) throws ManagerException {
@@ -43,6 +43,8 @@ public class SequenceManager {
                             .getSequence());
 
                     if (existingFeature == null) { // new feature -> save it
+                        feature.setUuid(Utils.generateUUID());
+
                         existingFeature = saveFeature(feature);
                     }
 
@@ -176,8 +178,6 @@ public class SequenceManager {
                 }
             }
         } catch (HibernateException e) {
-            throw new ManagerException("Failed to get Feature by sequence!", e);
-        } catch (BioException e) {
             throw new ManagerException("Failed to get Feature by sequence!", e);
         } finally {
             if (session.isOpen()) {

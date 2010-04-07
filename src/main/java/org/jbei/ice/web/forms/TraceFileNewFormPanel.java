@@ -1,9 +1,7 @@
 package org.jbei.ice.web.forms;
 
 import java.util.ArrayList;
-import java.util.Date;
 
-import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
@@ -12,17 +10,8 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.TraceSequenceManager;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.models.TraceSequence;
-import org.jbei.ice.lib.models.TraceSequenceAlignment;
-import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqResult;
-import org.jbei.ice.web.IceSession;
-import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.panels.SequenceAnalysisViewPanel;
 
 public class TraceFileNewFormPanel extends Panel {
@@ -83,7 +72,7 @@ public class TraceFileNewFormPanel extends Panel {
             String uploadedTraceSequence = new String(fileUpload.getBytes());
             String traceFileName = fileUpload.getClientFileName();
 
-            Sequence sequence = GeneralParser.getInstance().parse(uploadedTraceSequence);
+            /*Sequence sequence = GeneralParser.getInstance().parse(uploadedTraceSequence);
 
             if (sequence == null || sequence.getSequence() == null) {
                 error("Couldn't parse sequence file! Supported formats: Fasta");
@@ -121,7 +110,7 @@ public class TraceFileNewFormPanel extends Panel {
                 Logger.error("Prgoram took to long to align and parse sequences", e);
             }*/
 
-            if (bl2seqAlignments != null && bl2seqAlignments.size() > 0) {
+            /*if (bl2seqAlignments != null && bl2seqAlignments.size() > 0) {
                 Bl2SeqResult maxBl2SeqResult = null;
                 int maxScore = -1;
                 for (Bl2SeqResult bl2SeqResult : bl2seqAlignments) {
@@ -149,6 +138,7 @@ public class TraceFileNewFormPanel extends Panel {
 
             setResponsePage(EntryViewPage.class, new PageParameters("0=" + entry.getId()
                     + ",1=seqanalysis"));
+                    */
         }
 
         public FileUpload getTraceSequenceFileInput() {

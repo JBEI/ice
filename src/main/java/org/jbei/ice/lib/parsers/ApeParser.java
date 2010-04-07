@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.parsers;
 
-import org.jbei.ice.lib.models.Sequence;
+import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
 public class ApeParser extends GenbankParser {
     private static final String APE_PARSER = "ApE";
@@ -11,7 +11,7 @@ public class ApeParser extends GenbankParser {
     }
 
     @Override
-    public Sequence parse(String textSequence) throws InvalidFormatParserException {
+    public FeaturedDNASequence parse(String textSequence) throws InvalidFormatParserException {
         return super.parse(textSequence);
     }
 }

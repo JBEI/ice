@@ -2,7 +2,10 @@ package org.jbei.ice.lib.parsers;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.biojava.bio.BioException;
@@ -13,20 +16,17 @@ import org.biojavax.bio.seq.RichLocation;
 import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.seq.RichSequenceIterator;
 import org.biojavax.bio.seq.RichSequence.IOTools;
-import org.jbei.ice.lib.models.FeatureDNA;
-import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.models.SequenceFeature;
-import org.jbei.ice.lib.utils.SequenceUtils;
-import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.lib.vo.DNAFeature;
+import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
 public class GenbankParser extends AbstractParser {
     private static final String GENBANK_PARSER = "GenBank";
 
     @Override
     @SuppressWarnings("unchecked")
-    public Sequence parse(String textSequence) throws InvalidFormatParserException {
+    public FeaturedDNASequence parse(String textSequence) throws InvalidFormatParserException {
         BufferedReader br = new BufferedReader(new StringReader(textSequence));
-        Sequence sequence = null;
+        FeaturedDNASequence sequence = null;
 
         try {
             RichSequenceIterator richSequences = IOTools.readGenbankDNA(br, null);
@@ -36,20 +36,19 @@ public class GenbankParser extends AbstractParser {
 
                 Set<Feature> featureSet = richSequence.getFeatureSet();
 
-                Set<SequenceFeature> sequenceFeatureSet = new HashSet<SequenceFeature>();
+                List<DNAFeature> dnaFeatures = new LinkedList<DNAFeature>();
 
-                sequence = new Sequence(richSequence.seqString(), textSequence, "", "", null,
-                        sequenceFeatureSet);
+                sequence = new FeaturedDNASequence(richSequence.seqString(), dnaFeatures);
 
                 for (Feature feature : featureSet) {
                     RichFeature richFeature = (RichFeature) feature;
 
-                    String featureDescription = "";
                     String featureName = "";
 
+                    Map<String, String> notesMap = new LinkedHashMap<String, String>();
                     Set<Note> notes = richFeature.getNoteSet();
                     for (Note note : notes) {
-                        featureDescription = note.getTerm().getName() + "=" + note.getValue();
+                        notesMap.put(note.getTerm().getName(), note.getValue());
 
                         if (note.getTerm().getName().toLowerCase().equals("name")
                                 || note.getTerm().getName().toLowerCase().equals("label")) {
@@ -85,27 +84,12 @@ public class GenbankParser extends AbstractParser {
                         featureDNASequence = sequence.getSequence().substring(start, end);
                     }
 
-                    String featureDNASequenceHash = SequenceUtils
-                            .calculateSequenceHash(featureDNASequence);
+                    DNAFeature dnaFeature = new DNAFeature(start + 1, end + 1, genbankType,
+                            featureName, featureLocation.getStrand().intValue(),
+                            new LinkedHashMap<String, String>());
 
-                    org.jbei.ice.lib.models.Feature ourFeature = new org.jbei.ice.lib.models.Feature(
-                            featureName, featureDescription, "", Utils.generateUUID(), 0,
-                            genbankType);
-
-                    FeatureDNA featureDNA = new FeatureDNA(featureDNASequenceHash,
-                            featureDNASequence, ourFeature);
-
-                    ourFeature.setFeatureDna(featureDNA);
-
-                    SequenceFeature sequenceFeature = new SequenceFeature(sequence, ourFeature,
-                            start + 1, end + 1, featureLocation.getStrand().intValue(), featureName);
-
-                    sequenceFeatureSet.add(sequenceFeature);
+                    dnaFeatures.add(dnaFeature);
                 }
-
-                sequence.setFwdHash(SequenceUtils.calculateSequenceHash(sequence.getSequence()));
-                sequence.setRevHash(SequenceUtils.calculateSequenceHash(SequenceUtils
-                        .reverseComplement(sequence.getSequence())));
             }
         } catch (BioException e) {
             throw new InvalidFormatParserException("Couln't parse GenBank sequence!", e);

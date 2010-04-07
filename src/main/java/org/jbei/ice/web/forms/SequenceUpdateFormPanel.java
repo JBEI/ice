@@ -14,11 +14,8 @@ import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.parsers.GeneralParser;
-import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
-import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.panels.SequenceViewPanel;
 
 public class SequenceUpdateFormPanel extends Panel {
@@ -83,7 +80,8 @@ public class SequenceUpdateFormPanel extends Panel {
             SequenceController sequenceController = new SequenceController(IceSession.get()
                     .getAccount());
 
-            Sequence newSequence = sequenceController.parse(sequenceUser);
+            // TODO: Zinovii; Fix and test this 
+            /*Sequence newSequence = sequenceController.parse(sequenceUser);
 
             if (newSequence == null) {
                 error("Couldn't parse sequence file! Supported formats: "
@@ -103,7 +101,7 @@ public class SequenceUpdateFormPanel extends Panel {
                 throw new ViewPermissionException("No permissions to update sequence!", e);
             }
 
-            sequenceViewPanel.updateView(newSequence);
+            sequenceViewPanel.updateView(newSequence);*/
         }
 
         public String getSequenceUser() {

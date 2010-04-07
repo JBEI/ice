@@ -3,7 +3,7 @@ package org.jbei.ice.lib.parsers;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.jbei.ice.lib.models.Sequence;
+import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
 public class GeneralParser {
     private static GeneralParser instance = null;
@@ -21,8 +21,8 @@ public class GeneralParser {
         return instance;
     }
 
-    public Sequence parse(String sequence) {
-        Sequence parsedSequence = null;
+    public FeaturedDNASequence parse(String sequence) {
+        FeaturedDNASequence parsedSequence = null;
 
         for (AbstractParser parser : parsers) {
             try {

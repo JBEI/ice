@@ -4,15 +4,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.utils.FileUtils;
+import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
 public abstract class AbstractParser {
     public abstract String getName();
 
-    public Sequence parse(File file) throws FileNotFoundException, IOException,
+    public FeaturedDNASequence parse(File file) throws FileNotFoundException, IOException,
             InvalidFormatParserException {
-        Sequence sequence = null;
+        FeaturedDNASequence sequence = null;
 
         String textSequence = FileUtils.readFileToString(file);
 
@@ -21,5 +21,6 @@ public abstract class AbstractParser {
         return sequence;
     }
 
-    public abstract Sequence parse(String textSequence) throws InvalidFormatParserException;
+    public abstract FeaturedDNASequence parse(String textSequence)
+            throws InvalidFormatParserException;
 }
