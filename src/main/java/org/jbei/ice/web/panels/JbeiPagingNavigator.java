@@ -39,6 +39,7 @@ public class JbeiPagingNavigator extends PagingNavigator {
                 labelProvider) {
             private static final long serialVersionUID = 1L;
 
+            @Override
             protected AbstractLink newPagingNavigationLink(String id, IPageable pageable,
                     int pageIndex) {
                 PagingNavigationLink<Void> pagingNavigationLink = new PagingNavigationLink<Void>(
@@ -50,6 +51,7 @@ public class JbeiPagingNavigator extends PagingNavigator {
                 return pagingNavigationLink;
             }
 
+            @Override
             protected void populateItem(LoopItem loopItem) {
                 final int pageIndex = getStartIndex() + loopItem.getIteration();
 
@@ -120,6 +122,7 @@ public class JbeiPagingNavigator extends PagingNavigator {
         } else {
             lastPageLink.add(new SimpleAttributeModifier("class", "disabled"));
         }
+        lastPageLink.setVisible(false);
 
         Component prevPageLink = get("prev");
         if (getPageable().getCurrentPage() > 0) {
