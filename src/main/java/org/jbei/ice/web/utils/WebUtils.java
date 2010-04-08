@@ -2,6 +2,7 @@ package org.jbei.ice.web.utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,8 +16,6 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.EntryViewPage;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class WebUtils {
     private static String makeEntryLink(JbeiLink jbeiLink) {

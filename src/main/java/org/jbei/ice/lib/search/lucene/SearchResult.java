@@ -2,12 +2,11 @@ package org.jbei.ice.lib.search.lucene;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Entry;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class SearchResult implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -94,7 +93,7 @@ public class SearchResult implements Serializable {
                 SearchResult objectResult = object.get(objectIndex);
 
                 if (targetResult.getEntry().getRecordId().equals(
-                        objectResult.getEntry().getRecordId())) {
+                    objectResult.getEntry().getRecordId())) {
                     targetResult.setScore(targetResult.getScore() + objectResult.getScore());
                 } else {
                     String msg = "Algorithm Error in SearchResult.sumSearchResults!";
