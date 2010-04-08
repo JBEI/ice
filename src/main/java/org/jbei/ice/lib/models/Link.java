@@ -25,10 +25,10 @@ public class Link implements ILinkValueObject, IModel {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
     private int id;
 
-    @Column(name = "link", length = 40)
+    @Column(name = "link", length = 1023)
     private String link;
 
-    @Column(name = "url", length = 255)
+    @Column(name = "url", length = 1023)
     private String url;
 
     @ManyToOne(fetch = FetchType.EAGER)
