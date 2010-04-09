@@ -55,12 +55,16 @@ public class RegistryAPI {
             throw new ServiceException("Registry Service Internal Error!");
         }
 
+        log("User by login '" + login + "' successfully logged in");
+
         return sessionId;
     }
 
     public void logout(@WebParam(name = "sessionId") String sessionId) throws ServiceException {
         try {
             AccountController.deauthenticate(sessionId);
+
+            log("User by sessionId '" + sessionId + "' successfully logged out");
         } catch (ControllerException e) {
             Logger.error(e);
 
@@ -105,6 +109,8 @@ public class RegistryAPI {
 
         try {
             results = searchController.find(query);
+
+            log("User '" + searchController.getAccount().getEmail() + "' searched for " + query);
         } catch (ControllerException e) {
             Logger.error(e);
 
@@ -123,6 +129,9 @@ public class RegistryAPI {
 
         try {
             results = searchController.blastn(querySequence);
+
+            log("User '" + searchController.getAccount().getEmail() + "' blasted 'blastn' for "
+                    + querySequence);
         } catch (ControllerException e) {
             Logger.error(e);
 
@@ -146,6 +155,9 @@ public class RegistryAPI {
 
         try {
             results = searchController.tblastx(querySequence);
+
+            log("User '" + searchController.getAccount().getEmail() + "' blasted 'tblastx' for "
+                    + querySequence);
         } catch (ControllerException e) {
             Logger.error(e);
 
@@ -246,6 +258,9 @@ public class RegistryAPI {
         Entry newEntry = null;
         try {
             newEntry = entryController.createEntry(remoteEntry);
+
+            log("User '" + entryController.getAccount().getEmail() + "' created plasmid: '"
+                    + plasmid.getRecordId() + "', " + plasmid.getId());
         } catch (ControllerException e) {
             Logger.error(e);
 
@@ -264,6 +279,9 @@ public class RegistryAPI {
         Entry newEntry = null;
         try {
             newEntry = entryController.createEntry(remoteEntry);
+
+            log("User '" + entryController.getAccount().getEmail() + "' created strain: '"
+                    + strain.getRecordId() + "', " + strain.getId());
         } catch (ControllerException e) {
             Logger.error(e);
 
@@ -282,6 +300,9 @@ public class RegistryAPI {
         Entry newEntry = null;
         try {
             newEntry = entryController.createEntry(remoteEntry);
+
+            log("User '" + entryController.getAccount().getEmail() + "' created part: '"
+                    + part.getRecordId() + "', " + part.getId());
         } catch (ControllerException e) {
             Logger.error(e);
 
@@ -300,6 +321,9 @@ public class RegistryAPI {
 
         try {
             savedEntry = entryController.save(updateEntry(sessionId, plasmid));
+
+            log("User '" + entryController.getAccount().getEmail() + "' update plasmid: '"
+                    + savedEntry.getRecordId() + "', " + savedEntry.getId());
         } catch (ControllerException e) {
             Logger.error(e);
 
@@ -320,6 +344,9 @@ public class RegistryAPI {
 
         try {
             savedEntry = entryController.save(updateEntry(sessionId, strain));
+
+            log("User '" + entryController.getAccount().getEmail() + "' update strain: '"
+                    + savedEntry.getRecordId() + "', " + savedEntry.getId());
         } catch (ControllerException e) {
             Logger.error(e);
 
@@ -340,6 +367,9 @@ public class RegistryAPI {
 
         try {
             savedEntry = entryController.save(updateEntry(sessionId, part));
+
+            log("User '" + entryController.getAccount().getEmail() + "' update part: '"
+                    + savedEntry.getRecordId() + "', " + savedEntry.getId());
         } catch (ControllerException e) {
             Logger.error(e);
 
@@ -691,10 +721,12 @@ public class RegistryAPI {
         EntryController entryController = getEntryController(sessionId);
 
         try {
-            Entry entry;
-            entry = entryController.getByRecordId(entryId);
+            Entry entry = entryController.getByRecordId(entryId);
 
             entryController.delete(entry);
+
+            log("User '" + entryController.getAccount().getEmail() + "' removed entry: '" + entryId
+                    + "'");
         } catch (ControllerException e) {
             Logger.error(e);
 
@@ -718,6 +750,9 @@ public class RegistryAPI {
 
             sequence = sequenceController.sequenceToFeaturedDNASequence(sequenceController
                     .getByEntry(entry));
+
+            log("User '" + entryController.getAccount().getEmail() + "' pulled sequence: '"
+                    + entryId + "'");
         } catch (PermissionException e) {
             throw new ServicePermissionException("No permission to read this entry");
         } catch (ControllerException e) {
@@ -764,6 +799,9 @@ public class RegistryAPI {
             try {
                 savedFeaturedDNASequence = sequenceController
                         .sequenceToFeaturedDNASequence(sequenceController.save(sequence));
+
+                log("User '" + entryController.getAccount().getEmail() + "' saved sequence: '"
+                        + entryId + "'");
             } catch (PermissionException e) {
                 throw new ServicePermissionException("No permissions to save this sequence!");
             }
@@ -803,6 +841,9 @@ public class RegistryAPI {
             if (sequence != null) {
                 try {
                     sequenceController.delete(sequence);
+
+                    log("User '" + entryController.getAccount().getEmail()
+                            + "' removed sequence: '" + entryId + "'");
                 } catch (PermissionException e) {
                     throw new ServicePermissionException("No permission to delete sequence");
                 }
@@ -853,6 +894,9 @@ public class RegistryAPI {
 
                 savedFeaturedDNASequence = sequenceController
                         .sequenceToFeaturedDNASequence(savedSequence);
+
+                log("User '" + entryController.getAccount().getEmail()
+                        + "' uploaded new sequence: '" + entryId + "'");
             } catch (PermissionException e) {
                 throw new ServicePermissionException("No permissions to save sequence to entry!", e);
             }
@@ -906,5 +950,9 @@ public class RegistryAPI {
         }
 
         return account;
+    }
+
+    private void log(String message) {
+        Logger.info("RegistryAPI: " + message);
     }
 }

@@ -3,6 +3,7 @@ package org.jbei.ice.services.blazeds.common;
 import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.logging.UsageLogger;
 import org.jbei.ice.lib.models.Account;
 
 public class BaseService {
@@ -32,5 +33,9 @@ public class BaseService {
 
     protected String getLoggerPrefix() {
         return getServiceName() + ": ";
+    }
+
+    protected void logInfo(String message) {
+        UsageLogger.info(getLoggerPrefix() + message);
     }
 }

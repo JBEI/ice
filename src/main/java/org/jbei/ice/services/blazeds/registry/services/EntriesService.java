@@ -20,6 +20,8 @@ public class EntriesService extends BaseService {
             return null;
         }
 
+        logInfo(account.getEmail() + " getEntry: " + entryId);
+
         EntryController entryController = new EntryController(account);
 
         Entry entry = null;
@@ -84,7 +86,7 @@ public class EntriesService extends BaseService {
         try {
             entryController.save(entry);
 
-            Logger.info(getLoggerPrefix() + "Entry saved via " + getServiceName());
+            logInfo(account.getEmail() + " saveEntry: " + entry.getRecordId());
 
             result = true;
         } catch (ControllerException e) {
@@ -106,6 +108,8 @@ public class EntriesService extends BaseService {
         if (account == null) {
             return null;
         }
+
+        logInfo(account.getEmail() + " getSequence: " + entryId);
 
         EntryController entryController = new EntryController(account);
 
@@ -170,7 +174,7 @@ public class EntriesService extends BaseService {
 
                 sequenceController.save(sequence);
 
-                Logger.info(getLoggerPrefix() + "Entry saved via " + getServiceName());
+                logInfo(account.getEmail() + " saveSequence: " + entryId);
 
                 result = true;
             } else {

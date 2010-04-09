@@ -78,6 +78,8 @@ public class VectorEditorService extends BaseService {
                 AccountController.saveAccountPreferences(new AccountPreferences(account, "",
                         serializedUserRestrictionEnzymes));
             }
+
+            logInfo(account.getEmail() + " saveUserRestrictionEnzymes");
         } catch (SerializationUtils.SerializationUtilsException e) {
             Logger.error(getServiceName(), e);
         } catch (ControllerException e) {
@@ -151,6 +153,8 @@ public class VectorEditorService extends BaseService {
                 AccountController.saveAccountPreferences(new AccountPreferences(account,
                         serializedPreferences, ""));
             }
+
+            logInfo(account.getEmail() + " saveUserPreferences");
         } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
         } catch (Exception e) {
@@ -183,6 +187,8 @@ public class VectorEditorService extends BaseService {
 
             sequence.setEntry(entry);
             sequenceController.update(sequence);
+
+            logInfo(account.getEmail() + " saveFeaturedDNASequence: " + entryId);
 
             result = true;
         } catch (ControllerException e) {
