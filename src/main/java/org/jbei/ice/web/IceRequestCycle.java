@@ -32,20 +32,18 @@ public class IceRequestCycle extends WebRequestCycle {
                 .getHttpServletRequest();
 
         String user = httpServletRequest.getRemoteAddr();
-        String userAgent = httpServletRequest.getHeader("User-Agent");
+        //String userAgent = httpServletRequest.getHeader("User-Agent");
 
         if (account != null) {
             user = account.getEmail();
         }
 
         String urlInfo = request.getURL();
-        if (urlInfo.startsWith("resources")) {
-
-        } else {
-            String msg = user + "\t" + urlInfo + "\t" + userAgent;
+        if (!urlInfo.startsWith("resources")) {
+            //String msg = user + "\t" + urlInfo + "\t" + userAgent;
+            String msg = user + "\t" + urlInfo;
             UsageLogger.info(msg);
         }
-
     }
 
     @Override
