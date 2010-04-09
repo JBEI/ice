@@ -110,7 +110,8 @@ public class RegistryAPI {
         try {
             results = searchController.find(query);
 
-            log("User '" + searchController.getAccount().getEmail() + "' searched for " + query);
+            log("User '" + searchController.getAccount().getEmail() + "' searched for '" + query
+                    + "'");
         } catch (ControllerException e) {
             Logger.error(e);
 

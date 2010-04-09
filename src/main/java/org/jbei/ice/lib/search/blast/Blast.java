@@ -204,7 +204,7 @@ public class Blast {
             }
 
             String commandString = String.format(BLASTALL_COMMAND_PATTERN, blastBlastall,
-                    getProgram(blastProgram), blastDatabaseName);
+                getProgram(blastProgram), blastDatabaseName);
 
             Logger.info("Blast query: " + commandString);
 
@@ -298,11 +298,11 @@ public class Blast {
         IOUtils.copy(blastOutputStream, writer);
         blastOutputStream.close();
         String outputString = writer.toString();
-        Logger.info("format output was: " + outputString);
+        Logger.debug("format output was: " + outputString);
         writer = new StringWriter();
         IOUtils.copy(blastErrorStream, writer);
         String errorString = writer.toString();
-        Logger.info("format error was: " + errorString);
+        Logger.debug("format error was: " + errorString);
         process.destroy();
 
         if (errorString.length() > 0) {
@@ -335,9 +335,9 @@ public class Blast {
                         symL = RNATools.createRNA(sequence.getSequence().trim());
                     } catch (IllegalSymbolException e2) {
                         // skip this sequence
-                        Logger.warn("invalid characters in sequence for "
+                        Logger.debug("invalid characters in sequence for "
                                 + sequence.getEntry().getRecordId());
-                        Logger.warn(e2.toString());
+                        Logger.debug(e2.toString());
                     }
                 }
 

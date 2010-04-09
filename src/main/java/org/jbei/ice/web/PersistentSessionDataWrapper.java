@@ -93,8 +93,8 @@ public class PersistentSessionDataWrapper {
                 getSessionDataCache().remove(sessionKey);
             }
         }
-        Logger.info("SessionData cache went from " + before + " to " + getSessionDataCache().size()
-                + " elements");
+        Logger.debug("SessionData cache went from " + before + " to "
+                + getSessionDataCache().size() + " elements");
     }
 
     private HashMap<String, SessionData> getSessionDataCache() {

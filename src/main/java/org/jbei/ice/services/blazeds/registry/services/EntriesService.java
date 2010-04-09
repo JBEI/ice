@@ -20,8 +20,6 @@ public class EntriesService extends BaseService {
             return null;
         }
 
-        logInfo(account.getEmail() + " getEntry: " + entryId);
-
         EntryController entryController = new EntryController(account);
 
         Entry entry = null;
@@ -108,8 +106,6 @@ public class EntriesService extends BaseService {
         if (account == null) {
             return null;
         }
-
-        logInfo(account.getEmail() + " getSequence: " + entryId);
 
         EntryController entryController = new EntryController(account);
 
