@@ -16,7 +16,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
 
 @Entity
@@ -33,8 +32,11 @@ public class TraceSequence implements IModel {
     @JoinColumn(name = "entries_id", nullable = false)
     private Entry entry;
 
-    @Column(name = "name", length = 255, nullable = false)
-    private String name;
+    @Column(name = "file_id", length = 36, nullable = false, unique = true)
+    private String fileId;
+
+    @Column(name = "filename", length = 255, nullable = false)
+    private String filename;
 
     @Column(name = "depositor", length = 255, nullable = false)
     private String depositor;
@@ -43,14 +45,6 @@ public class TraceSequence implements IModel {
     @Lob
     private String sequence;
 
-    @Column(name = "sequence_user", nullable = false)
-    @Lob
-    private String sequenceUser;
-
-    @OneToOne(optional = true, mappedBy = "traceSequence", fetch = FetchType.EAGER)
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
-    private TraceSequenceAlignment alignment;
-
     @Column(name = "creation_time", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
@@ -58,14 +52,27 @@ public class TraceSequence implements IModel {
     public TraceSequence() {
     }
 
-    public TraceSequence(Entry entry, String name, String depositor, String sequence,
-            String sequenceUser, TraceSequenceAlignment alignment, Date creationTime) {
+    public TraceSequence(Entry entry, String fileId, String filename, String depositor,
+            String sequence) {
+        super();
+
         this.entry = entry;
-        this.name = name;
+        this.fileId = fileId;
+        this.filename = filename;
         this.depositor = depositor;
         this.sequence = sequence;
-        this.sequenceUser = sequenceUser;
-        this.alignment = alignment;
+        this.creationTime = new Date();
+    }
+
+    public TraceSequence(Entry entry, String fileId, String filename, String depositor,
+            String sequence, Date creationTime) {
+        super();
+
+        this.entry = entry;
+        this.fileId = fileId;
+        this.filename = filename;
+        this.depositor = depositor;
+        this.sequence = sequence;
         this.creationTime = creationTime;
     }
 
@@ -85,12 +92,20 @@ public class TraceSequence implements IModel {
         this.entry = entry;
     }
 
-    public String getName() {
-        return name;
+    public String getFileId() {
+        return fileId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFileId(String fileId) {
+        this.fileId = fileId;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
     }
 
     public String getDepositor() {
@@ -107,22 +122,6 @@ public class TraceSequence implements IModel {
 
     public void setSequence(String sequence) {
         this.sequence = sequence;
-    }
-
-    public String getSequenceUser() {
-        return sequenceUser;
-    }
-
-    public void setSequenceUser(String sequenceUser) {
-        this.sequenceUser = sequenceUser;
-    }
-
-    public TraceSequenceAlignment getAlignment() {
-        return alignment;
-    }
-
-    public void setAlignment(TraceSequenceAlignment alignment) {
-        this.alignment = alignment;
     }
 
     public Date getCreationTime() {

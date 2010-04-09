@@ -62,9 +62,9 @@ public class AttachmentManager {
 
             deleteAttachmentFile(attachment);
         } catch (IOException e) {
-            throw new ManagerException("Failed to delete attachment file!");
+            throw new ManagerException("Failed to delete attachment file!", e);
         } catch (DAOException e) {
-            throw new ManagerException("Failed to delete attachment!");
+            throw new ManagerException("Failed to delete attachment!", e);
         }
     }
 

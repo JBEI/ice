@@ -14,9 +14,9 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.controllers.AttachmentController;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SampleController;
+import org.jbei.ice.controllers.SequenceAnalysisController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.TraceSequenceManager;
 import org.jbei.ice.lib.managers.WorkspaceManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
@@ -93,8 +93,7 @@ public class EntryViewPage extends ProtectedPage {
         add(permissionLink);
         add(renderAddToWorkspaceLink());
 
-        // TODO: Zinovii; REMOVE IT LATER
-        sequenceAnalysisLink.setVisible(false);
+        sequenceAnalysisLink.setVisible(false); // TODO: Zinovii; Remove it later
 
         try {
             if (!entryController.hasWritePermission(entry)) {
@@ -289,10 +288,19 @@ public class EntryViewPage extends ProtectedPage {
 
         sequenceAnalysisLink.setOutputMarkupId(true);
 
+        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController(
+                IceSession.get().getAccount());
+
         String sequenceAnalysisLabel = "Seq. Analysis";
-        int numTraceSequences = TraceSequenceManager.getNumberOfTraceSequences(entry);
-        if (numTraceSequences > 0) {
-            sequenceAnalysisLabel = sequenceAnalysisLabel + " (" + numTraceSequences + ")";
+        int numTraceSequences;
+        try {
+            numTraceSequences = sequenceAnalysisController.getNumberOfTraceSequences(entry);
+
+            if (numTraceSequences > 0) {
+                sequenceAnalysisLabel = sequenceAnalysisLabel + " (" + numTraceSequences + ")";
+            }
+        } catch (ControllerException e) {
+            throw new ViewException(e);
         }
 
         sequenceAnalysisLink.add(new Label("sequenceAnalysisLabel", sequenceAnalysisLabel));

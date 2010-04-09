@@ -35,10 +35,6 @@ public class TraceSequenceAlignment implements IModel {
     @Column(name = "score", nullable = false)
     private int score;
 
-    @Column(name = "bitmatch", nullable = false)
-    @Lob
-    private String bitmatch;
-
     @Column(name = "query_start", nullable = false)
     private int queryStart;
 
@@ -67,12 +63,11 @@ public class TraceSequenceAlignment implements IModel {
         super();
     }
 
-    public TraceSequenceAlignment(TraceSequence traceSequence, int score, String bitmatch,
-            int queryStart, int queryEnd, int subjectStart, int subjectEnd, String queryAlignment,
+    public TraceSequenceAlignment(TraceSequence traceSequence, int score, int queryStart,
+            int queryEnd, int subjectStart, int subjectEnd, String queryAlignment,
             String subjectAlignment, Date modificationTime) {
         this.traceSequence = traceSequence;
         this.score = score;
-        this.bitmatch = bitmatch;
         this.queryStart = queryStart;
         this.queryEnd = queryEnd;
         this.subjectStart = subjectStart;
@@ -104,14 +99,6 @@ public class TraceSequenceAlignment implements IModel {
 
     public void setScore(int score) {
         this.score = score;
-    }
-
-    public String getBitmatch() {
-        return bitmatch;
-    }
-
-    public void setBitmatch(String bitmatch) {
-        this.bitmatch = bitmatch;
     }
 
     public int getQueryStart() {

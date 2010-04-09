@@ -1,8 +1,7 @@
 package org.jbei.ice.web.panels;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.List;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -11,24 +10,21 @@ import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.link.DownloadLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.request.target.resource.ResourceStreamRequestTarget;
-import org.apache.wicket.util.resource.IResourceStream;
-import org.apache.wicket.util.resource.StringResourceStream;
 import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.SequenceAnalysisController;
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.TraceSequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.TraceSequence;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.forms.TraceFileNewFormPanel;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.ProfilePage;
@@ -77,19 +73,14 @@ public class SequenceAnalysisViewPanel extends Panel {
     }
 
     private void renderTracesListView() {
-        ArrayList<TraceSequence> traces = new ArrayList<TraceSequence>();
+        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController(
+                IceSession.get().getAccount());
 
-        LinkedHashSet<TraceSequence> tracesSet = null;
+        List<TraceSequence> traces = null;
         try {
-            tracesSet = TraceSequenceManager.getByEntry(entry);
-        } catch (ManagerException e) {
+            traces = sequenceAnalysisController.getTraceSequences(entry);
+        } catch (ControllerException e) {
             throw new ViewException("Failed to fetch TraceSequence by Entry on SeqAnalysis view", e);
-        }
-
-        if (tracesSet != null) {
-            for (TraceSequence traceSequence : tracesSet) {
-                traces.add(traceSequence);
-            }
         }
 
         ListView<TraceSequence> tracesListView = new ListView<TraceSequence>("tracesListView",
@@ -104,7 +95,6 @@ public class SequenceAnalysisViewPanel extends Panel {
 
                 renderNameDownloadLink(item);
                 renderDepositorLink(item);
-                renderAlignmentScore(item);
                 renderDeleteLink(item);
                 renderCreationTime(item);
             }
@@ -112,25 +102,20 @@ public class SequenceAnalysisViewPanel extends Panel {
             private void renderNameDownloadLink(final ListItem<TraceSequence> item) {
                 TraceSequence traceSequence = item.getModelObject();
 
-                Link<Object> nameDownloadLink = new Link<Object>("nameDownloadLink") {
-                    private static final long serialVersionUID = 1L;
+                SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController(
+                        IceSession.get().getAccount());
 
-                    @Override
-                    public void onClick() {
-                        TraceSequence traceSequence = item.getModelObject();
+                DownloadLink nameDownloadLink;
 
-                        String result = traceSequence.getSequenceUser();
+                try {
+                    nameDownloadLink = new DownloadLink("nameDownloadLink",
+                            sequenceAnalysisController.getFile(traceSequence), traceSequence
+                                    .getFilename());
+                } catch (ControllerException e) {
+                    throw new ViewException(e);
+                }
 
-                        IResourceStream resourceStream = new StringResourceStream(result,
-                                "application/trace");
-
-                        getRequestCycle().setRequestTarget(
-                                new ResourceStreamRequestTarget(resourceStream, traceSequence
-                                        .getName()));
-                    }
-                };
-
-                item.add(nameDownloadLink.add(new Label("traceName", traceSequence.getName())));
+                item.add(nameDownloadLink.add(new Label("traceName", traceSequence.getFilename())));
             }
 
             private void renderDepositorLink(ListItem<TraceSequence> item) {
@@ -163,18 +148,6 @@ public class SequenceAnalysisViewPanel extends Panel {
                 item.add(depositorProfileLink);
             }
 
-            private void renderAlignmentScore(ListItem<TraceSequence> item) {
-                TraceSequence traceSequence = item.getModelObject();
-
-                String alignmentScore = "-";
-                if (traceSequence.getAlignment() != null) {
-                    alignmentScore = "Score: "
-                            + String.valueOf(traceSequence.getAlignment().getScore());
-                }
-
-                item.add(new Label("alignmentScore", alignmentScore));
-            }
-
             private void renderCreationTime(ListItem<TraceSequence> item) {
                 TraceSequence traceSequence = item.getModelObject();
 
@@ -200,20 +173,27 @@ public class SequenceAnalysisViewPanel extends Panel {
                         try {
                             TraceSequence traceSequence = item.getModelObject();
 
-                            TraceSequenceManager.delete(traceSequence);
+                            SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController(
+                                    IceSession.get().getAccount());
+
+                            sequenceAnalysisController.removeTraceSequence(traceSequence);
 
                             setResponsePage(EntryViewPage.class, new PageParameters("0="
                                     + entry.getId() + ",1=seqanalysis"));
-                        } catch (ManagerException e) {
-                            Logger.error("Could't delete trace sequence for entry", e);
-                        } catch (Exception e) {
-                            Logger.error("Could't delete trace sequence for entry", e);
+                        } catch (ControllerException e) {
+                            throw new ViewException(e);
+                        } catch (PermissionException e) {
+                            throw new ViewPermissionException(
+                                    "No permissions to remove trace sequence!", e);
                         }
                     }
                 }
 
-                item.add(new DeleteSequenceLink("deleteLink").setVisible(item.getModelObject()
-                        .getDepositor().equals(IceSession.get().getAccount().getEmail())));
+                SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController(
+                        IceSession.get().getAccount());
+
+                item.add(new DeleteSequenceLink("deleteLink").setVisible(sequenceAnalysisController
+                        .hasWritePermission(item.getModelObject())));
             }
         };
 

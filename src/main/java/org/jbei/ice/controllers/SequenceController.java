@@ -25,6 +25,7 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.vo.DNAFeature;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
+import org.jbei.ice.lib.vo.IDNASequence;
 
 public class SequenceController extends Controller {
     public SequenceController(Account account) {
@@ -144,7 +145,7 @@ public class SequenceController extends Controller {
         }
     }
 
-    public FeaturedDNASequence parse(String sequence) {
+    public IDNASequence parse(String sequence) {
         return GeneralParser.getInstance().parse(sequence);
     }
 

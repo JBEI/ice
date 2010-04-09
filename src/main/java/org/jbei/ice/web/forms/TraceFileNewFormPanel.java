@@ -1,7 +1,8 @@
 package org.jbei.ice.web.forms;
 
-import java.util.ArrayList;
+import java.io.IOException;
 
+import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
@@ -10,8 +11,13 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.Model;
+import org.jbei.ice.controllers.SequenceAnalysisController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqResult;
+import org.jbei.ice.lib.vo.IDNASequence;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.panels.SequenceAnalysisViewPanel;
 
 public class TraceFileNewFormPanel extends Panel {
@@ -69,76 +75,39 @@ public class TraceFileNewFormPanel extends Panel {
 
             assert (fileUpload != null);
 
-            String uploadedTraceSequence = new String(fileUpload.getBytes());
             String traceFileName = fileUpload.getClientFileName();
 
-            /*Sequence sequence = GeneralParser.getInstance().parse(uploadedTraceSequence);
+            SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController(
+                    IceSession.get().getAccount());
 
-            if (sequence == null || sequence.getSequence() == null) {
-                error("Couldn't parse sequence file! Supported formats: Fasta");
-
-                return;
-            }
-
-            TraceSequence traceSequence = new TraceSequence(entry, traceFileName, IceSession.get()
-                    .getAccount().getEmail(), sequence.getSequence(), uploadedTraceSequence, null,
-                    new Date());
+            IDNASequence dnaSequence = null;
 
             try {
-                TraceSequenceManager.create(traceSequence);
-            } catch (ManagerException e) {
-                Logger.error("Failed to create TraceSequence", e);
+                dnaSequence = sequenceAnalysisController.parse(fileUpload.getBytes());
+            } catch (ControllerException e) {
+                throw new ViewException(e);
+            }
 
-                error("Failed to create TraceSequence");
+            if (dnaSequence == null || dnaSequence.getSequence() == null) {
+                error("Couldn't parse sequence file! Supported formats: Fasta, GenBank, ABI");
 
                 return;
             }
 
-            // TODO: Zinovii; Review what's going on here
-            /*if (entry.getSequence() == null) {
-                setResponsePage(EntryViewPage.class, new PageParameters("0=" + entry.getId()
-                        + ",1=seqanalysis"));
+            try {
+                sequenceAnalysisController.uploadTraceSequence(entry, traceFileName, IceSession
+                        .get().getAccount().getEmail(), dnaSequence.getSequence().toLowerCase(),
+                    fileUpload.getInputStream());
 
-                return;
-            }*/
-
-            ArrayList<Bl2SeqResult> bl2seqAlignments = new ArrayList<Bl2SeqResult>();
-            /*try {
-                bl2seqAlignments = BlastController.alignSequencesAndParse(entry.getSequence()
-                    .getSequence(), sequence.getSequence());
-            } catch (ProgramTookTooLongException e) {
-                Logger.error("Prgoram took to long to align and parse sequences", e);
-            }*/
-
-            /*if (bl2seqAlignments != null && bl2seqAlignments.size() > 0) {
-                Bl2SeqResult maxBl2SeqResult = null;
-                int maxScore = -1;
-                for (Bl2SeqResult bl2SeqResult : bl2seqAlignments) {
-                    if (bl2SeqResult.getScore() > maxScore) {
-                        maxScore = bl2SeqResult.getScore();
-                        maxBl2SeqResult = bl2SeqResult;
-                    }
-                }
-
-                TraceSequenceAlignment traceSequenceAlignment = new TraceSequenceAlignment(
-                        traceSequence, maxBl2SeqResult.getScore(), "1,1,1,1,1,1,1,0,0,0,0,0",
-                        maxBl2SeqResult.getQueryStart(), maxBl2SeqResult.getQueryEnd(),
-                        maxBl2SeqResult.getSubjectStart(), maxBl2SeqResult.getSubjectEnd(),
-                        maxBl2SeqResult.getQuerySequence(), maxBl2SeqResult.getSubjectSequence(),
-                        new Date());
-
-                try {
-                    TraceSequenceManager.saveAlignment(traceSequenceAlignment);
-                    traceSequence.setAlignment(traceSequenceAlignment);
-                    TraceSequenceManager.save(traceSequence);
-                } catch (ManagerException e) {
-                    Logger.error("Failed to Save TraceSequenceAlignment", e);
-                }
+                sequenceAnalysisController.rebuildAllAlignments(entry);
+            } catch (ControllerException e) {
+                throw new ViewException(e);
+            } catch (IOException e) {
+                throw new ViewException(e);
             }
 
             setResponsePage(EntryViewPage.class, new PageParameters("0=" + entry.getId()
                     + ",1=seqanalysis"));
-                    */
         }
 
         public FileUpload getTraceSequenceFileInput() {
