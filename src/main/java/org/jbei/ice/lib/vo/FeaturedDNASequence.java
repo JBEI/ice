@@ -1,13 +1,12 @@
 package org.jbei.ice.lib.vo;
 
-import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class FeaturedDNASequence implements Serializable {
+public class FeaturedDNASequence implements IDNASequence {
     private static final long serialVersionUID = 1L;
 
     private List<DNAFeature> features = new LinkedList<DNAFeature>();

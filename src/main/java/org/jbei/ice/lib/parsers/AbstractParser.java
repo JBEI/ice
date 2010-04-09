@@ -1,26 +1,25 @@
 package org.jbei.ice.lib.parsers;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.jbei.ice.lib.utils.FileUtils;
-import org.jbei.ice.lib.vo.FeaturedDNASequence;
+import org.jbei.ice.lib.vo.IDNASequence;
 
-public abstract class AbstractParser {
-    public abstract String getName();
+public abstract class AbstractParser implements IDNAParser {
+    public abstract IDNASequence parse(String textSequence) throws InvalidFormatParserException;
 
-    public FeaturedDNASequence parse(File file) throws FileNotFoundException, IOException,
+    public abstract IDNASequence parse(byte[] bytes) throws InvalidFormatParserException;
+
+    public IDNASequence parse(File file) throws FileNotFoundException, IOException,
             InvalidFormatParserException {
-        FeaturedDNASequence sequence = null;
+        FileInputStream fileInputStream = new FileInputStream(file);
 
-        String textSequence = FileUtils.readFileToString(file);
+        int availableBytes = fileInputStream.available();
+        byte[] bytes = new byte[availableBytes];
+        fileInputStream.read(bytes);
 
-        sequence = parse(textSequence);
-
-        return sequence;
+        return parse(bytes);
     }
-
-    public abstract FeaturedDNASequence parse(String textSequence)
-            throws InvalidFormatParserException;
 }

@@ -18,13 +18,23 @@ import org.biojavax.bio.seq.RichSequenceIterator;
 import org.biojavax.bio.seq.RichSequence.IOTools;
 import org.jbei.ice.lib.vo.DNAFeature;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
+import org.jbei.ice.lib.vo.IDNASequence;
 
 public class GenbankParser extends AbstractParser {
     private static final String GENBANK_PARSER = "GenBank";
 
+    public String getName() {
+        return GENBANK_PARSER;
+    }
+
+    @Override
+    public IDNASequence parse(byte[] bytes) throws InvalidFormatParserException {
+        return parse(new String(bytes));
+    }
+
     @Override
     @SuppressWarnings("unchecked")
-    public FeaturedDNASequence parse(String textSequence) throws InvalidFormatParserException {
+    public IDNASequence parse(String textSequence) throws InvalidFormatParserException {
         BufferedReader br = new BufferedReader(new StringReader(textSequence));
         FeaturedDNASequence sequence = null;
 
@@ -96,10 +106,5 @@ public class GenbankParser extends AbstractParser {
         }
 
         return sequence;
-    }
-
-    @Override
-    public String getName() {
-        return GENBANK_PARSER;
     }
 }

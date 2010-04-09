@@ -10,9 +10,15 @@ import org.biojavax.bio.seq.RichSequenceIterator;
 import org.biojavax.bio.seq.RichSequence.IOTools;
 import org.jbei.ice.lib.vo.DNAFeature;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
+import org.jbei.ice.lib.vo.IDNASequence;
 
 public class FastaParser extends AbstractParser {
     private static final String FASTA_PARSER = "FASTA";
+
+    @Override
+    public String getName() {
+        return FASTA_PARSER;
+    }
 
     @Override
     public FeaturedDNASequence parse(String textSequence) throws InvalidFormatParserException {
@@ -38,7 +44,7 @@ public class FastaParser extends AbstractParser {
     }
 
     @Override
-    public String getName() {
-        return FASTA_PARSER;
+    public IDNASequence parse(byte[] bytes) throws InvalidFormatParserException {
+        return parse(new String(bytes));
     }
 }
