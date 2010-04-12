@@ -2,8 +2,8 @@
 <wicket:panel>
 	<table border="0" cellpadding="3" cellspacing="1" class="entry_table">
 		<tr class="title_row_header">
-			<td>Sequence Analysis | <a href="#" wicket:id="addTraceFileLink">Add
-			trace file</a></td>
+			<td>Sequence Analysis <span style="color: #FF0000">(Beta)</span>
+			| <a href="#" wicket:id="addTraceFileLink">Add trace file</a></td>
 		</tr>
 		<tr>
 			<td bgcolor="#ffffff">
@@ -12,6 +12,9 @@
 					<td bgcolor="#ffffff"><span wicket:id="traceSequenceFormPanel">Add/Edit
 					form panel</span></td>
 				</tr>
+
+				<wicket:container wicket:id="emptyTracesContainer">No traces provided</wicket:container>
+
 				<wicket:container wicket:id="tracesContainer">
 					<tr>
 						<td bgcolor="#ffffff">
@@ -27,7 +30,8 @@
 							<tbody>
 								<tr wicket:id="tracesListView" class="odd_row">
 									<td><span wicket:id="index"></span>.</td>
-									<td><a href="#" wicket:id="nameDownloadLink"><span wicket:id="traceName"></span></a></td>
+									<td><a href="#" wicket:id="nameDownloadLink"><span
+										wicket:id="traceName"></span></a></td>
 									<td style="white-space: nowrap"><a href="#"
 										wicket:id="depositorProfileLink"> <span
 										wicket:id="depositor"></span></a></td>
@@ -36,6 +40,27 @@
 								</tr>
 							</tbody>
 						</table>
+						</td>
+					</tr>
+				</wicket:container>
+				
+				<wicket:container wicket:id="sequenceCheckerContainer">
+					<tr>
+						<td><br />
+						</td>
+					</tr>
+					<tr>
+						<td style="width: 700px; height: 600px">
+						<div style="width: 100%; height: 100%" id="flashContainerDiv"><object
+							classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540002"
+							id="SequenceChecker" width="100%" height="100%"
+							codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
+							<param name="movie" value="SequenceChecker.swf" />
+							<param name="quality" value="high" />
+							<param name="bgcolor" value="#869ca7" />
+							<param name="wmode" value="window" />
+							<param name="allowScriptAccess" value="sameDomain" />
+							<embed wicket:id="sequenceChecker" /></object></div>
 						</td>
 					</tr>
 				</wicket:container>

@@ -4,19 +4,24 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 import org.apache.wicket.PageParameters;
+import org.apache.wicket.ResourceReference;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
+import org.apache.wicket.markup.html.JavascriptPackageResource;
+import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.DownloadLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.SequenceAnalysisController;
+import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
@@ -28,6 +33,7 @@ import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.forms.TraceFileNewFormPanel;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.ProfilePage;
+import org.jbei.ice.web.pages.UnprotectedPage;
 
 public class SequenceAnalysisViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -72,6 +78,34 @@ public class SequenceAnalysisViewPanel extends Panel {
         });
     }
 
+    private WebComponent renderSequenceCheckerEmbededObject() {
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "extMouseWheel.js"));
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+                UnprotectedPage.JS_RESOURCE_LOCATION + "hookMouseWheel.js"));
+
+        WebComponent flashComponent = new WebComponent("sequenceChecker");
+
+        ResourceReference veResourceReference = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.SC_RESOURCE_LOCATION + "SequenceChecker.swf?entryId="
+                        + entry.getRecordId() + "&sessionId=" + IceSession.get().getSessionKey());
+
+        flashComponent.add(new SimpleAttributeModifier("src", urlFor(veResourceReference)));
+        flashComponent.add(new SimpleAttributeModifier("quality", "high"));
+        flashComponent.add(new SimpleAttributeModifier("bgcolor", "#869ca7"));
+        flashComponent.add(new SimpleAttributeModifier("width", "100%"));
+        flashComponent.add(new SimpleAttributeModifier("height", "100%"));
+        flashComponent.add(new SimpleAttributeModifier("name", "VectorEditor"));
+        flashComponent.add(new SimpleAttributeModifier("align", "middle"));
+        flashComponent.add(new SimpleAttributeModifier("play", "true"));
+        flashComponent.add(new SimpleAttributeModifier("loop", "false"));
+        flashComponent.add(new SimpleAttributeModifier("type", "application/x-shockwave-flash"));
+        flashComponent.add(new SimpleAttributeModifier("pluginspage",
+                "http://www.adobe.com/go/getflashplayer"));
+
+        return flashComponent;
+    }
+
     private void renderTracesListView() {
         SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController(
                 IceSession.get().getAccount());
@@ -99,20 +133,29 @@ public class SequenceAnalysisViewPanel extends Panel {
                 renderCreationTime(item);
             }
 
+            @SuppressWarnings("unchecked")
             private void renderNameDownloadLink(final ListItem<TraceSequence> item) {
                 TraceSequence traceSequence = item.getModelObject();
 
                 SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController(
                         IceSession.get().getAccount());
 
-                DownloadLink nameDownloadLink;
+                Link nameDownloadLink;
 
                 try {
                     nameDownloadLink = new DownloadLink("nameDownloadLink",
                             sequenceAnalysisController.getFile(traceSequence), traceSequence
                                     .getFilename());
                 } catch (ControllerException e) {
-                    throw new ViewException(e);
+                    nameDownloadLink = new Link("nameDownloadLink") {
+                        private static final long serialVersionUID = 1L;
+
+                        @Override
+                        public void onClick() {
+                        }
+                    };
+
+                    nameDownloadLink.setEnabled(false);
                 }
 
                 item.add(nameDownloadLink.add(new Label("traceName", traceSequence.getFilename())));
@@ -126,7 +169,7 @@ public class SequenceAnalysisViewPanel extends Panel {
                 try {
                     depositorAccount = AccountController.getByEmail(traceSequence.getDepositor());
                 } catch (ControllerException e) {
-                    e.printStackTrace();
+                    throw new ViewException(e);
                 }
 
                 BookmarkablePageLink<ProfilePage> depositorProfileLink = new BookmarkablePageLink<ProfilePage>(
@@ -202,7 +245,34 @@ public class SequenceAnalysisViewPanel extends Panel {
         tracesContainer.setOutputMarkupPlaceholderTag(true);
         tracesContainer.setVisible(traces.size() != 0);
 
+        WebMarkupContainer sequenceCheckerContainer = new WebMarkupContainer(
+                "sequenceCheckerContainer");
+        tracesContainer.setOutputMarkupId(true);
+        tracesContainer.setOutputMarkupPlaceholderTag(true);
+        tracesContainer.setVisible(traces.size() != 0);
+
+        // hide sequence checker if sequence doesn't exist
+        SequenceController sequenceController = new SequenceController(IceSession.get()
+                .getAccount());
+
+        WebComponent flashComponent = renderSequenceCheckerEmbededObject();
+        sequenceCheckerContainer.add(flashComponent);
+        try {
+            if (sequenceController.getByEntry(entry) == null) {
+                sequenceCheckerContainer.setVisible(false);
+            }
+        } catch (ControllerException e) {
+            throw new ViewException(e);
+        }
+
         add(tracesContainer);
+        add(sequenceCheckerContainer);
+
+        WebMarkupContainer emptyTracesContainer = new WebMarkupContainer("emptyTracesContainer");
+        emptyTracesContainer.setOutputMarkupId(true);
+        emptyTracesContainer.setVisible(traces.size() == 0);
+        add(emptyTracesContainer);
+
         tracesContainer.add(tracesListView);
     }
 }
