@@ -29,7 +29,6 @@
 		<mapping class="org.jbei.ice.lib.models.SequenceFeature" />
 		<mapping class="org.jbei.ice.lib.models.AssemblyRelationship" />
 		<mapping class="org.jbei.ice.lib.models.EntryAssemblyRelationship" />
-		<mapping class="org.jbei.ice.lib.models.FeatureDNA" />
 		<mapping class="org.jbei.ice.lib.models.Comment" />
 		<mapping class="org.jbei.ice.lib.models.Vote" />
 		<mapping class="org.jbei.ice.lib.models.News" />

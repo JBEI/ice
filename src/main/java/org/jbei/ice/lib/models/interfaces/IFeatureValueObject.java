@@ -9,13 +9,17 @@ public interface IFeatureValueObject {
 
     void setDescription(String description);
 
+    String getHash();
+
+    void setHash(String hash);
+
+    String getSequence();
+
+    void setSequence(String sequence);
+
     String getIdentification();
 
     void setIdentification(String identification);
-
-    String getUuid();
-
-    void setUuid(String uuid);
 
     int getAutoFind();
 

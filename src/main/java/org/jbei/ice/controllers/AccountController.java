@@ -107,7 +107,7 @@ public class AccountController {
     }
 
     public static String encryptPassword(String password) {
-        return Utils.encryptMD5(JbeirSettings.getSetting("SECRET_KEY") + password);
+        return Utils.encryptSHA(JbeirSettings.getSetting("SECRET_KEY") + password);
     }
 
     public static AccountPreferences getAccountPreferences(Account account)

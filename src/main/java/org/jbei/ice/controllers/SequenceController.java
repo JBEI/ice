@@ -17,7 +17,6 @@ import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
-import org.jbei.ice.lib.models.FeatureDNA;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.parsers.GeneralParser;
@@ -220,16 +219,8 @@ public class SequenceController extends Controller {
                     featureSequence = featuredDNASequence.getSequence().substring(start, end);
                 }
 
-                String featureDNASequenceHash = SequenceUtils
-                        .calculateSequenceHash(featureSequence);
-
-                Feature feature = new Feature(dnaFeature.getName(), "", "", "", 0, dnaFeature
-                        .getType(), null);
-
-                FeatureDNA featureDNA = new FeatureDNA(featureDNASequenceHash, featureSequence,
-                        feature);
-
-                feature.setFeatureDna(featureDNA);
+                Feature feature = new Feature(dnaFeature.getName(), "", "", featureSequence, 0,
+                        dnaFeature.getType());
 
                 SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature, start,
                         end, dnaFeature.getStrand(), dnaFeature.getName());

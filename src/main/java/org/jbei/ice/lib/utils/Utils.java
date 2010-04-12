@@ -170,6 +170,7 @@ public class Utils {
         return encrypt(string, "SHA-1");
     }
 
+    @Deprecated
     public static String encryptMD5(String string) {
         return encrypt(string, "MD5");
     }

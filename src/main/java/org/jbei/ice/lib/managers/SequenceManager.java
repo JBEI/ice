@@ -11,11 +11,9 @@ import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
-import org.jbei.ice.lib.models.FeatureDNA;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.utils.SequenceUtils;
-import org.jbei.ice.lib.utils.Utils;
 
 public class SequenceManager {
     public static Sequence saveSequence(Sequence sequence) throws ManagerException {
@@ -34,17 +32,13 @@ public class SequenceManager {
                 for (SequenceFeature sequenceFeature : sequenceFeatureSet) {
                     Feature feature = sequenceFeature.getFeature();
 
-                    if (feature == null || feature.getFeatureDna() == null) {
-                        throw new ManagerException(
-                                "SequenceFeature has no feature or featureDNA assigned to it!");
+                    if (feature == null) {
+                        throw new ManagerException("SequenceFeature has no feature");
                     }
 
-                    Feature existingFeature = getFeatureBySequence(feature.getFeatureDna()
-                            .getSequence());
+                    Feature existingFeature = getFeatureBySequence(feature.getSequence());
 
                     if (existingFeature == null) { // new feature -> save it
-                        feature.setUuid(Utils.generateUUID());
-
                         existingFeature = saveFeature(feature);
                     }
 
@@ -157,14 +151,14 @@ public class SequenceManager {
         Session session = DAO.newSession();
 
         try {
-            String queryString = "from " + FeatureDNA.class.getName() + " where hash = :hash";
+            String queryString = "from " + Feature.class.getName() + " where hash = :hash";
             Query query = session.createQuery(queryString);
             query.setParameter("hash", SequenceUtils.calculateSequenceHash(featureDNASequence));
 
             Object queryResult = query.uniqueResult();
 
             if (queryResult != null) {
-                result = ((FeatureDNA) queryResult).getFeature();
+                result = (Feature) queryResult;
             } else {
                 query.setParameter("hash", SequenceUtils.calculateSequenceHash(SequenceUtils
                         .reverseComplement(featureDNASequence)));
@@ -172,7 +166,7 @@ public class SequenceManager {
                 queryResult = query.uniqueResult();
 
                 if (queryResult != null) {
-                    result = ((FeatureDNA) queryResult).getFeature();
+                    result = (Feature) queryResult;
                 } else {
                     result = null;
                 }

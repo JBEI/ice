@@ -1,20 +1,18 @@
 package org.jbei.ice.lib.models;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.Lob;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.IFeatureValueObject;
+import org.jbei.ice.lib.utils.Utils;
 
 @Entity
 @Table(name = "features")
@@ -26,17 +24,27 @@ public class Feature implements IFeatureValueObject, IModel {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
     private int id;
 
+    /**
+     * This field is the human annotated name. It is to be used for auto fill.
+     */
     @Column(name = "name", length = 127)
     private String name;
 
+    /**
+     * this is the human annotated description.
+     */
     @Column(name = "description", length = 1023)
     private String description;
 
     @Column(name = "identification", length = 127)
     private String identification;
 
-    @Column(name = "uuid", length = 36)
-    private String uuid;
+    @Column(name = "hash_sha", length = 40, nullable = false, unique = true)
+    private String hash;
+
+    @Column(name = "sequence", nullable = false)
+    @Lob
+    private String sequence;
 
     @Column(name = "auto_find")
     private int autoFind;
@@ -44,25 +52,22 @@ public class Feature implements IFeatureValueObject, IModel {
     @Column(name = "genbank_type", length = 127)
     private String genbankType;
 
-    @OneToOne(mappedBy = "feature", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
-    private FeatureDNA featureDna;
-
     public Feature() {
         super();
     }
 
-    public Feature(String name, String description, String identification, String uuid,
-            int autoFind, String genbankType, FeatureDNA featureDNA) {
+    public Feature(String name, String description, String identification, String sequence,
+            int autoFind, String genbankType) {
         super();
 
         this.name = name;
         this.description = description;
         this.identification = identification;
-        this.uuid = uuid;
         this.autoFind = autoFind;
         this.genbankType = genbankType;
-        this.featureDna = featureDNA;
+        setSequence(sequence);
+        this.hash = Utils.encryptSHA(sequence);
+
     }
 
     public String getName() {
@@ -87,14 +92,6 @@ public class Feature implements IFeatureValueObject, IModel {
 
     public void setIdentification(String identification) {
         this.identification = identification;
-    }
-
-    public String getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
     }
 
     @XmlTransient
@@ -123,11 +120,22 @@ public class Feature implements IFeatureValueObject, IModel {
         return id;
     }
 
-    public void setFeatureDna(FeatureDNA featureDna) {
-        this.featureDna = featureDna;
+    public void setHash(String hash) {
+        this.hash = hash;
     }
 
-    public FeatureDNA getFeatureDna() {
-        return featureDna;
+    public String getHash() {
+        return hash;
     }
+
+    public void setSequence(String sequence) {
+        if (sequence != null) {
+            this.sequence = sequence.toLowerCase();
+        }
+    }
+
+    public String getSequence() {
+        return sequence;
+    }
+
 }
