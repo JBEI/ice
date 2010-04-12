@@ -243,13 +243,13 @@ public class SequenceAnalysisViewPanel extends Panel {
         WebMarkupContainer tracesContainer = new WebMarkupContainer("tracesContainer");
         tracesContainer.setOutputMarkupId(true);
         tracesContainer.setOutputMarkupPlaceholderTag(true);
-        tracesContainer.setVisible(traces.size() != 0);
+        tracesContainer.setVisible(traces != null && traces.size() != 0);
 
         WebMarkupContainer sequenceCheckerContainer = new WebMarkupContainer(
                 "sequenceCheckerContainer");
         tracesContainer.setOutputMarkupId(true);
         tracesContainer.setOutputMarkupPlaceholderTag(true);
-        tracesContainer.setVisible(traces.size() != 0);
+        tracesContainer.setVisible(traces != null && traces.size() != 0);
 
         // hide sequence checker if sequence doesn't exist
         SequenceController sequenceController = new SequenceController(IceSession.get()
@@ -258,7 +258,8 @@ public class SequenceAnalysisViewPanel extends Panel {
         WebComponent flashComponent = renderSequenceCheckerEmbededObject();
         sequenceCheckerContainer.add(flashComponent);
         try {
-            if (sequenceController.getByEntry(entry) == null) {
+            if (sequenceController.getByEntry(entry) == null || traces == null
+                    || traces.size() == 0) {
                 sequenceCheckerContainer.setVisible(false);
             }
         } catch (ControllerException e) {
@@ -270,7 +271,7 @@ public class SequenceAnalysisViewPanel extends Panel {
 
         WebMarkupContainer emptyTracesContainer = new WebMarkupContainer("emptyTracesContainer");
         emptyTracesContainer.setOutputMarkupId(true);
-        emptyTracesContainer.setVisible(traces.size() == 0);
+        emptyTracesContainer.setVisible(traces == null || traces.size() == 0);
         add(emptyTracesContainer);
 
         tracesContainer.add(tracesListView);

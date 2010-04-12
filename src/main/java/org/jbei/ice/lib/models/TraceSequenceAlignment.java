@@ -61,6 +61,9 @@ public class TraceSequenceAlignment implements IModel {
     @Lob
     private String subjectAlignment;
 
+    @Column(name = "sequence_hash", length = 40)
+    private String sequenceHash;
+
     @Column(name = "modification_time", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date modificationTime;
@@ -71,7 +74,7 @@ public class TraceSequenceAlignment implements IModel {
 
     public TraceSequenceAlignment(TraceSequence traceSequence, int score, int strand,
             int queryStart, int queryEnd, int subjectStart, int subjectEnd, String queryAlignment,
-            String subjectAlignment, Date modificationTime) {
+            String subjectAlignment, String sequenceHash, Date modificationTime) {
         this.traceSequence = traceSequence;
         this.strand = strand;
         this.score = score;
@@ -81,6 +84,7 @@ public class TraceSequenceAlignment implements IModel {
         this.subjectEnd = subjectEnd;
         this.queryAlignment = queryAlignment;
         this.subjectAlignment = subjectAlignment;
+        this.sequenceHash = sequenceHash;
         this.modificationTime = modificationTime;
     }
 
@@ -162,6 +166,14 @@ public class TraceSequenceAlignment implements IModel {
 
     public void setSubjectAlignment(String subjectAlignment) {
         this.subjectAlignment = subjectAlignment;
+    }
+
+    public String getSequenceHash() {
+        return sequenceHash;
+    }
+
+    public void setSequenceHash(String sequenceHash) {
+        this.sequenceHash = sequenceHash;
     }
 
     public Date getModificationTime() {
