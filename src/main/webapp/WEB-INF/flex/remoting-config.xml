@@ -22,4 +22,10 @@
 			<source>org.jbei.ice.services.blazeds.VectorEditor.services.VectorEditorService</source>
 		</properties>
 	</destination>
+	
+	<destination id="SequenceCheckerService">
+		<properties>
+			<source>org.jbei.ice.services.blazeds.SequenceChecker.services.SequenceCheckerService</source>
+		</properties>
+	</destination>
 </service>
