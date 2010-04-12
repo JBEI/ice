@@ -20,7 +20,7 @@ import org.jbei.ice.lib.utils.JbeirSettings;
 public class TraceSequenceManager {
     private static String traceFilesDirectory = JbeirSettings.getSetting("TRACE_FILES_DIRECTORY");
 
-    public static TraceSequence save(TraceSequence traceSequence, InputStream inputStream)
+    public static TraceSequence create(TraceSequence traceSequence, InputStream inputStream)
             throws ManagerException {
         if (traceSequence == null) {
             throw new ManagerException("Couldn't save TraceSequence. TraceSequence is null!");
@@ -42,9 +42,26 @@ public class TraceSequenceManager {
                 throw new ManagerException(e1);
             }
 
-            throw new ManagerException("Failed to save TraceSequence!", e);
+            throw new ManagerException("Failed to create TraceSequence!", e);
         } catch (IOException e) {
             throw new ManagerException("Failed to save trace file locally!", e);
+        }
+
+        return result;
+    }
+
+    public static TraceSequence save(TraceSequence traceSequence) throws ManagerException {
+        TraceSequence result = null;
+
+        try {
+            TraceSequenceAlignment traceSequenceAlignment = (TraceSequenceAlignment) DAO
+                    .save(traceSequence.getTraceSequenceAlignment());
+
+            traceSequence.setTraceSequenceAlignment(traceSequenceAlignment);
+
+            result = (TraceSequence) DAO.save(traceSequence);
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to save TraceSequence!", e);
         }
 
         return result;
@@ -194,7 +211,7 @@ public class TraceSequenceManager {
         return result;
     }
 
-    public static TraceSequenceAlignment saveAlignment(TraceSequenceAlignment traceSequenceAlignment)
+    /*public static TraceSequenceAlignment saveAlignment(TraceSequenceAlignment traceSequenceAlignment)
             throws ManagerException {
         if (traceSequenceAlignment == null) {
             throw new ManagerException(
@@ -247,5 +264,5 @@ public class TraceSequenceManager {
         }
 
         return traceSequenceAlignment;
-    }
+    }*/
 }

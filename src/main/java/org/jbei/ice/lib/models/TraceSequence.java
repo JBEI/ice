@@ -2,6 +2,7 @@ package org.jbei.ice.lib.models;
 
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -15,7 +16,9 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlTransient;
 
+import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
 
 @Entity
@@ -24,6 +27,7 @@ import org.jbei.ice.lib.dao.IModel;
 public class TraceSequence implements IModel {
     private static final long serialVersionUID = -850409542887009114L;
 
+    @XmlTransient
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
     private int id;
@@ -48,6 +52,10 @@ public class TraceSequence implements IModel {
     @Column(name = "creation_time", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
+
+    @OneToOne(mappedBy = "traceSequence", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
+    private TraceSequenceAlignment traceSequenceAlignment;
 
     public TraceSequence() {
     }
@@ -122,6 +130,14 @@ public class TraceSequence implements IModel {
 
     public void setSequence(String sequence) {
         this.sequence = sequence;
+    }
+
+    public TraceSequenceAlignment getTraceSequenceAlignment() {
+        return traceSequenceAlignment;
+    }
+
+    public void setTraceSequenceAlignment(TraceSequenceAlignment traceSequenceAlignment) {
+        this.traceSequenceAlignment = traceSequenceAlignment;
     }
 
     public Date getCreationTime() {

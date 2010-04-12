@@ -15,6 +15,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
 
@@ -24,16 +25,21 @@ import org.jbei.ice.lib.dao.IModel;
 public class TraceSequenceAlignment implements IModel {
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
-
+    @XmlTransient
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "trace_sequence_id", nullable = false, unique = true)
     private TraceSequence traceSequence;
 
+    @XmlTransient
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
+    private int id;
+
     @Column(name = "score", nullable = false)
     private int score;
+
+    @Column(name = "strand", nullable = false)
+    private int strand;
 
     @Column(name = "query_start", nullable = false)
     private int queryStart;
@@ -63,10 +69,11 @@ public class TraceSequenceAlignment implements IModel {
         super();
     }
 
-    public TraceSequenceAlignment(TraceSequence traceSequence, int score, int queryStart,
-            int queryEnd, int subjectStart, int subjectEnd, String queryAlignment,
+    public TraceSequenceAlignment(TraceSequence traceSequence, int score, int strand,
+            int queryStart, int queryEnd, int subjectStart, int subjectEnd, String queryAlignment,
             String subjectAlignment, Date modificationTime) {
         this.traceSequence = traceSequence;
+        this.strand = strand;
         this.score = score;
         this.queryStart = queryStart;
         this.queryEnd = queryEnd;
@@ -77,14 +84,6 @@ public class TraceSequenceAlignment implements IModel {
         this.modificationTime = modificationTime;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public TraceSequence getTraceSequence() {
         return traceSequence;
     }
@@ -93,8 +92,24 @@ public class TraceSequenceAlignment implements IModel {
         this.traceSequence = traceSequence;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public int getScore() {
         return score;
+    }
+
+    public int getStrand() {
+        return strand;
+    }
+
+    public void setStrand(int strand) {
+        this.strand = strand;
     }
 
     public void setScore(int score) {

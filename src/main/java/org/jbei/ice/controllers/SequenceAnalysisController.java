@@ -60,7 +60,7 @@ public class SequenceAnalysisController extends Controller {
 
         TraceSequence savedTraceSequence = null;
         try {
-            savedTraceSequence = TraceSequenceManager.save(traceSequence, inputStream);
+            savedTraceSequence = TraceSequenceManager.create(traceSequence, inputStream);
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
@@ -79,13 +79,6 @@ public class SequenceAnalysisController extends Controller {
         }
 
         try {
-            TraceSequenceAlignment traceSequenceAlignment = TraceSequenceManager
-                    .getAlignment(traceSequence);
-
-            if (traceSequenceAlignment != null) {
-                TraceSequenceManager.deleteAlignment(traceSequenceAlignment);
-            }
-
             TraceSequenceManager.delete(traceSequence);
         } catch (ManagerException e) {
             throw new ControllerException(e);
@@ -155,39 +148,15 @@ public class SequenceAnalysisController extends Controller {
         return result;
     }
 
-    public TraceSequenceAlignment getTraceSequenceAlignment(TraceSequence traceSequence)
+    public void buildOrRebuildAlignment(TraceSequence traceSequence, Sequence sequence)
             throws ControllerException {
-        TraceSequenceAlignment traceSequenceAlignment = null;
-
-        try {
-            traceSequenceAlignment = TraceSequenceManager.getAlignment(traceSequence);
-        } catch (ManagerException e) {
-            throw new ControllerException(e);
-        }
-
-        return traceSequenceAlignment;
-    }
-
-    public TraceSequenceAlignment buildOrRebuildAlignment(TraceSequence traceSequence,
-            Sequence sequence) throws ControllerException {
         if (traceSequence == null) {
             throw new ControllerException("Failed to rebuild alignment for null trace sequence!");
         }
 
-        try {
-            TraceSequenceAlignment traceSequenceAlignment = TraceSequenceManager
-                    .getAlignment(traceSequence);
-
-            if (traceSequenceAlignment != null) {
-                TraceSequenceManager.deleteAlignment(traceSequenceAlignment);
-            }
-        } catch (ManagerException e) {
-            throw new ControllerException(e);
-        }
-
         // if sequence is null => delete alignment
         if (sequence == null) {
-            return null;
+            return;
         }
 
         // actually build alignment
@@ -198,7 +167,7 @@ public class SequenceAnalysisController extends Controller {
 
         Blast blast = new Blast();
         try {
-            bl2seqOutput = blast.runBl2Seq(traceSequenceString, entrySequenceString);
+            bl2seqOutput = blast.runBl2Seq(entrySequenceString, traceSequenceString);
         } catch (BlastException e) {
             throw new ControllerException(e);
         } catch (ProgramTookTooLongException e) {
@@ -206,7 +175,7 @@ public class SequenceAnalysisController extends Controller {
         }
 
         if (bl2seqOutput == null || bl2seqOutput.isEmpty()) {
-            return null;
+            return;
         }
 
         TraceSequenceAlignment traceSequenceAlignment = null;
@@ -226,13 +195,17 @@ public class SequenceAnalysisController extends Controller {
                 }
 
                 if (maxBl2SeqResult != null) {
+                    int strand = maxBl2SeqResult.getOrientation() == 0 ? 1 : -1;
+
                     traceSequenceAlignment = new TraceSequenceAlignment(traceSequence,
-                            maxBl2SeqResult.getScore(), maxBl2SeqResult.getQueryStart(),
+                            maxBl2SeqResult.getScore(), strand, maxBl2SeqResult.getQueryStart(),
                             maxBl2SeqResult.getQueryEnd(), maxBl2SeqResult.getSubjectStart(),
                             maxBl2SeqResult.getSubjectEnd(), maxBl2SeqResult.getQuerySequence(),
                             maxBl2SeqResult.getSubjectSequence(), new Date());
 
-                    TraceSequenceManager.saveAlignment(traceSequenceAlignment);
+                    traceSequence.setTraceSequenceAlignment(traceSequenceAlignment);
+
+                    TraceSequenceManager.save(traceSequence);
                 }
             }
         } catch (Bl2SeqException e) {
@@ -240,8 +213,6 @@ public class SequenceAnalysisController extends Controller {
         } catch (ManagerException e) {
             new ControllerException(e);
         }
-
-        return traceSequenceAlignment;
     }
 
     public void rebuildAllAlignments(Entry entry) throws ControllerException {
