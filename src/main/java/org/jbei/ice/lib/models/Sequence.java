@@ -125,8 +125,18 @@ public class Sequence implements ISequenceValueObject, IModel {
         this.entry = entry;
     }
 
-    public void setSequenceFeatures(Set<SequenceFeature> sequenceFeatures) {
-        this.sequenceFeatures = sequenceFeatures;
+    public void setSequenceFeatures(Set<SequenceFeature> inputSequenceFeatures) {
+        // for JAXB webservices should be this way
+        if (inputSequenceFeatures == null) {
+            this.sequenceFeatures.clear();
+
+            return;
+        }
+
+        if (inputSequenceFeatures != this.sequenceFeatures) {
+            this.sequenceFeatures.clear();
+            this.sequenceFeatures.addAll(inputSequenceFeatures);
+        }
     }
 
     public Set<SequenceFeature> getSequenceFeatures() {

@@ -102,7 +102,7 @@ public class GenbankParser extends AbstractParser {
                 }
             }
         } catch (BioException e) {
-            throw new InvalidFormatParserException("Couln't parse GenBank sequence!", e);
+            throw new InvalidFormatParserException("Couldn't parse GenBank sequence!", e);
         }
 
         return sequence;

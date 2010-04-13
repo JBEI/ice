@@ -6,11 +6,10 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class FeaturedDNASequence implements IDNASequence {
+public class FeaturedDNASequence extends SimpleDNASequence {
     private static final long serialVersionUID = 1L;
 
     private List<DNAFeature> features = new LinkedList<DNAFeature>();
-    private String sequence = "";
     private String accessionNumber = "";
     private String identifier = "";
 
@@ -19,18 +18,16 @@ public class FeaturedDNASequence implements IDNASequence {
     }
 
     public FeaturedDNASequence(String sequence, List<DNAFeature> features) {
-        super();
+        super(sequence);
 
         this.features = features;
-        this.sequence = sequence;
     }
 
     public FeaturedDNASequence(String sequence, List<DNAFeature> features, String accessionNumber,
             String identifier) {
-        super();
+        super(sequence);
 
         this.features = features;
-        this.sequence = sequence;
         this.accessionNumber = accessionNumber;
         this.identifier = identifier;
     }
@@ -41,14 +38,6 @@ public class FeaturedDNASequence implements IDNASequence {
 
     public void setFeatures(List<DNAFeature> features) {
         this.features = features;
-    }
-
-    public String getSequence() {
-        return sequence;
-    }
-
-    public void setSequence(String sequence) {
-        this.sequence = sequence;
     }
 
     public String getAccessionNumber() {

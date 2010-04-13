@@ -152,7 +152,7 @@ public class SequenceController extends Controller {
         return SequenceComposer.compose(sequence, formatter);
     }
 
-    public FeaturedDNASequence sequenceToFeaturedDNASequence(Sequence sequence) {
+    public FeaturedDNASequence sequenceToDNASequence(Sequence sequence) {
         if (sequence == null) {
             return null;
         }
@@ -176,12 +176,12 @@ public class SequenceController extends Controller {
         return featuredDNASequence;
     }
 
-    public Sequence featuredDNASequenceToSequence(FeaturedDNASequence featuredDNASequence) {
-        if (featuredDNASequence == null) {
+    public Sequence dnaSequenceToSequence(IDNASequence dnaSequence) {
+        if (dnaSequence == null) {
             return null;
         }
 
-        String sequenceString = featuredDNASequence.getSequence().toLowerCase();
+        String sequenceString = dnaSequence.getSequence().toLowerCase();
         String fwdHash = SequenceUtils.calculateSequenceHash(sequenceString);
         String revHash = SequenceUtils.calculateSequenceHash(SequenceUtils
                 .reverseComplement(sequenceString));
@@ -191,41 +191,46 @@ public class SequenceController extends Controller {
         Sequence sequence = new Sequence(sequenceString, "", fwdHash, revHash, null,
                 sequenceFeatures);
 
-        if (featuredDNASequence.getFeatures() != null
-                && featuredDNASequence.getFeatures().size() > 0) {
-            for (DNAFeature dnaFeature : featuredDNASequence.getFeatures()) {
-                int start = dnaFeature.getStart();
-                int end = dnaFeature.getEnd();
+        if (dnaSequence instanceof FeaturedDNASequence) {
+            FeaturedDNASequence featuredDNASequence = (FeaturedDNASequence) dnaSequence;
 
-                if (start < 0) {
-                    start = 0;
-                } else if (start > featuredDNASequence.getSequence().length() - 1) {
-                    start = featuredDNASequence.getSequence().length() - 1;
+            if (featuredDNASequence.getFeatures() != null
+                    && featuredDNASequence.getFeatures().size() > 0) {
+                for (DNAFeature dnaFeature : featuredDNASequence.getFeatures()) {
+                    int start = dnaFeature.getStart();
+                    int end = dnaFeature.getEnd();
+
+                    if (start < 0) {
+                        start = 0;
+                    } else if (start > featuredDNASequence.getSequence().length() - 1) {
+                        start = featuredDNASequence.getSequence().length() - 1;
+                    }
+
+                    if (end < 0) {
+                        end = 0;
+                    } else if (end > featuredDNASequence.getSequence().length() - 1) {
+                        end = featuredDNASequence.getSequence().length() - 1;
+                    }
+
+                    String featureSequence = featuredDNASequence.getSequence()
+                            .substring(start, end);
+
+                    if (start > end) { // over zero case
+                        featureSequence = featuredDNASequence.getSequence().substring(start,
+                                featuredDNASequence.getSequence().length() - 1);
+                        featureSequence += featuredDNASequence.getSequence().substring(0, end);
+                    } else { // normal
+                        featureSequence = featuredDNASequence.getSequence().substring(start, end);
+                    }
+
+                    Feature feature = new Feature(dnaFeature.getName(), "", "", featureSequence, 0,
+                            dnaFeature.getType());
+
+                    SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature, start,
+                            end, dnaFeature.getStrand(), dnaFeature.getName());
+
+                    sequenceFeatures.add(sequenceFeature);
                 }
-
-                if (end < 0) {
-                    end = 0;
-                } else if (end > featuredDNASequence.getSequence().length() - 1) {
-                    end = featuredDNASequence.getSequence().length() - 1;
-                }
-
-                String featureSequence = featuredDNASequence.getSequence().substring(start, end);
-
-                if (start > end) { // over zero case
-                    featureSequence = featuredDNASequence.getSequence().substring(start,
-                        featuredDNASequence.getSequence().length() - 1);
-                    featureSequence += featuredDNASequence.getSequence().substring(0, end);
-                } else { // normal
-                    featureSequence = featuredDNASequence.getSequence().substring(start, end);
-                }
-
-                Feature feature = new Feature(dnaFeature.getName(), "", "", featureSequence, 0,
-                        dnaFeature.getType());
-
-                SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature, start,
-                        end, dnaFeature.getStrand(), dnaFeature.getName());
-
-                sequenceFeatures.add(sequenceFeature);
             }
         }
 

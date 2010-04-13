@@ -15,7 +15,7 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.vo.FeaturedDNASequence;
+import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.common.ViewPermissionException;
@@ -79,8 +79,7 @@ public class SequenceNewFormPanel extends Panel {
             SequenceController sequenceController = new SequenceController(IceSession.get()
                     .getAccount());
 
-            FeaturedDNASequence dnaSequence = (FeaturedDNASequence) sequenceController
-                    .parse(sequenceUser);
+            IDNASequence dnaSequence = sequenceController.parse(sequenceUser);
 
             if (dnaSequence == null) {
                 error("Couldn't parse sequence file! Supported formats: "
@@ -93,7 +92,7 @@ public class SequenceNewFormPanel extends Panel {
             Sequence sequence = null;
 
             try {
-                sequence = sequenceController.featuredDNASequenceToSequence(dnaSequence);
+                sequence = sequenceController.dnaSequenceToSequence(dnaSequence);
 
                 sequence.setEntry(entry);
 

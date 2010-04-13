@@ -749,7 +749,7 @@ public class RegistryAPI {
         try {
             Entry entry = entryController.getByRecordId(entryId);
 
-            sequence = sequenceController.sequenceToFeaturedDNASequence(sequenceController
+            sequence = sequenceController.sequenceToDNASequence(sequenceController
                     .getByEntry(entry));
 
             log("User '" + entryController.getAccount().getEmail() + "' pulled sequence: '"
@@ -793,13 +793,13 @@ public class RegistryAPI {
             }
 
             Sequence sequence = sequenceController
-                    .featuredDNASequenceToSequence(featuredDNASequence);
+                    .dnaSequenceToSequence(featuredDNASequence);
 
             sequence.setEntry(entry);
 
             try {
                 savedFeaturedDNASequence = sequenceController
-                        .sequenceToFeaturedDNASequence(sequenceController.save(sequence));
+                        .sequenceToDNASequence(sequenceController.save(sequence));
 
                 log("User '" + entryController.getAccount().getEmail() + "' saved sequence: '"
                         + entryId + "'");
@@ -887,14 +887,14 @@ public class RegistryAPI {
             }
 
             try {
-                modelSequence = sequenceController.featuredDNASequenceToSequence(dnaSequence);
+                modelSequence = sequenceController.dnaSequenceToSequence(dnaSequence);
 
                 modelSequence.setEntry(entry);
 
                 Sequence savedSequence = sequenceController.save(modelSequence);
 
                 savedFeaturedDNASequence = sequenceController
-                        .sequenceToFeaturedDNASequence(savedSequence);
+                        .sequenceToDNASequence(savedSequence);
 
                 log("User '" + entryController.getAccount().getEmail()
                         + "' uploaded new sequence: '" + entryId + "'");

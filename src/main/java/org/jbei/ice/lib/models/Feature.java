@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.IFeatureValueObject;
-import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.lib.utils.SequenceUtils;
 
 @Entity
 @Table(name = "features")
@@ -66,7 +66,7 @@ public class Feature implements IFeatureValueObject, IModel {
         this.autoFind = autoFind;
         this.genbankType = genbankType;
         setSequence(sequence);
-        this.hash = Utils.encryptSHA(sequence);
+        this.hash = SequenceUtils.calculateSequenceHash(sequence);
 
     }
 

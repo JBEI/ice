@@ -24,9 +24,7 @@ public class ABIParser extends AbstractParser {
             SymbolList symbolList = abiTrace.getSequence();
 
             if (symbolList != null) {
-                simpleDNASequence = new SimpleDNASequence();
-
-                simpleDNASequence.setSequence(symbolList.seqString().toLowerCase());
+                simpleDNASequence = new SimpleDNASequence(symbolList.seqString().toLowerCase());
             }
         } catch (Exception e) {
             throw new InvalidFormatParserException(e);

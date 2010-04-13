@@ -3,7 +3,14 @@ package org.jbei.ice.lib.vo;
 public class SimpleDNASequence implements IDNASequence {
     private static final long serialVersionUID = 1L;
 
-    private String sequence;
+    private String sequence = "";
+
+    public SimpleDNASequence() {
+    }
+
+    public SimpleDNASequence(String sequence) {
+        this.sequence = sequence;
+    }
 
     @Override
     public String getSequence() {
