@@ -79,6 +79,7 @@ public class GeneralParser {
         parsers.add(new GenbankParser());
         parsers.add(new FastaParser());
         parsers.add(new ApeParser());
+        parsers.add(new GenbankLocusFriendlyParser());
         parsers.add(new PlainParser());
     }
 }

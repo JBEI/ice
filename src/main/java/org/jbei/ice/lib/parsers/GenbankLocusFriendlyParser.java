@@ -8,12 +8,12 @@ import java.util.regex.Pattern;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
 
-public class ApeParser extends GenbankParser {
-    private static final String APE_PARSER = "ApE";
+public class GenbankLocusFriendlyParser extends GenbankParser {
+    private static final String LOCUS_FRIENDLY_GenBank_PARSER = "GenBank-NoLocus";
 
     @Override
     public String getName() {
-        return APE_PARSER;
+        return LOCUS_FRIENDLY_GenBank_PARSER;
     }
 
     @Override
@@ -56,7 +56,7 @@ public class ApeParser extends GenbankParser {
             throw new InvalidFormatParserException("Failed to find LOCUS field!");
         }
 
-        String newLocus = adjustOldApeLocusFormat(locusLine);
+        String newLocus = adjustLocusFormat(locusLine);
 
         if (newLocus == null || newLocus.isEmpty()) {
             throw new InvalidFormatParserException("Failed to parse LOCUS field!");
@@ -69,18 +69,8 @@ public class ApeParser extends GenbankParser {
         return super.parse(newTextSequence);
     }
 
-    private String adjustOldApeLocusFormat(String locusLine) {
-        // Old ApE file format misses sequence name, so it's replaced by UNKNOWN
-        String result = null;
-
-        Pattern oldApeLocusLinePattern = Pattern
-                .compile("^LOCUS\\s+\\d+\\s+(bp|aa)\\s{1,4}([dms]s-)?(\\S+)?\\s+(circular|linear)?\\s*(\\S+)?\\s*(\\S+)?$");
-
-        Matcher locusLineMatch = oldApeLocusLinePattern.matcher(locusLine);
-        if (locusLineMatch.matches()) {
-            result = locusLine.replace("LOCUS", "LOCUS       uknown");
-        }
-
-        return result;
+    private String adjustLocusFormat(String locusLine) {
+        // generate random locus so real genbank parser can parse it
+        return "LOCUS       Unknown                111 bp    DNA     linear   CON 25-MAY-2007";
     }
 }
