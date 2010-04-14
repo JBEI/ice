@@ -84,7 +84,6 @@ public class SequenceNewFormPanel extends Panel {
             if (dnaSequence == null) {
                 error("Couldn't parse sequence file! Supported formats: "
                         + GeneralParser.getInstance().availableParsersToString() + ".");
-                error("If you are using ApE, try opening and re-saving using a recent version.");
 
                 return;
             }

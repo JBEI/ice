@@ -949,8 +949,7 @@ public class RegistryAPI {
 
         if (dnaSequence == null) {
             throw new ServiceException("Couldn't parse sequence file! Supported formats: "
-                    + GeneralParser.getInstance().availableParsersToString()
-                    + ".\nIf you are using ApE, try opening and re-saving using a recent version.");
+                    + GeneralParser.getInstance().availableParsersToString());
         }
 
         Entry entry = null;
