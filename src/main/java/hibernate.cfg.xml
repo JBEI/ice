@@ -7,6 +7,12 @@
 		<property name="hibernate.connection.username">test_user</property>
 		<property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
 		<property name="hibernate.connection.password">t@stuz@r</property>
+		<property name="hibernate.connection.pool_size">3</property>
+		<property name="hibernate.c3p0.min_size">3</property>
+		<property name="hibernate.c3p0.max_size">15</property>
+		<property name="hibernate.c3p0.timeout">20</property>
+		<property name="hibernate.c3p0.max_statements">10</property>
+		
 		<!--
 			use below when table rearrangement is needed. "create" or "update"
 		-->
