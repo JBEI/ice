@@ -972,6 +972,7 @@ public class RegistryAPI {
                 modelSequence = sequenceController.dnaSequenceToSequence(dnaSequence);
 
                 modelSequence.setEntry(entry);
+                modelSequence.setSequenceUser(sequence);
 
                 Sequence savedSequence = sequenceController.save(modelSequence);
 

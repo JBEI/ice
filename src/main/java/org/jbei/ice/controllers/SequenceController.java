@@ -234,7 +234,7 @@ public class SequenceController extends Controller {
                             java.util.Map.Entry<String, String> pairs = (java.util.Map.Entry<String, String>) iterator
                                     .next();
 
-                            descriptionNotes += (pairs.getKey() + "=\"" + pairs.getValue() + "\"");
+                            descriptionNotes += (pairs.getKey() + "=" + pairs.getValue() + "");
 
                             if (iterator.hasNext()) {
                                 descriptionNotes += "\n";

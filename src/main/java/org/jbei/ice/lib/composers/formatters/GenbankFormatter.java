@@ -2,7 +2,9 @@ package org.jbei.ice.lib.composers.formatters;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -119,9 +121,7 @@ public class GenbankFormatter extends AbstractFormatter {
                     }
 
                     RichFeature.Template featureTemplate = new RichFeature.Template();
-                    RichAnnotation richAnnotation = new SimpleRichAnnotation();
-                    richAnnotation.addNote(new SimpleNote(RichObjectFactory.getDefaultOntology()
-                            .getOrCreateTerm("label"), sequenceFeature.getName(), 1));
+                    RichAnnotation richAnnotation = getAnnotations(sequenceFeature);
 
                     featureTemplate.annotation = richAnnotation;
                     featureTemplate.location = new SimpleRichLocation(
@@ -160,6 +160,49 @@ public class GenbankFormatter extends AbstractFormatter {
         }
 
         return strand;
+    }
+
+    protected RichAnnotation getAnnotations(SequenceFeature sequenceFeature) {
+        RichAnnotation richAnnotation = new SimpleRichAnnotation();
+
+        if (sequenceFeature.getName() == null || sequenceFeature.getName().isEmpty()) {
+            return richAnnotation;
+        }
+
+        richAnnotation.addNote(new SimpleNote(RichObjectFactory.getDefaultOntology()
+                .getOrCreateTerm("label"), sequenceFeature.getName(), 1));
+
+        String descriptionNotes = sequenceFeature.getFeature().getDescription();
+
+        if (descriptionNotes == null || descriptionNotes.isEmpty()) {
+            return richAnnotation;
+        }
+
+        List<String> noteLines = (List<String>) Arrays.asList(descriptionNotes.split("\n"));
+
+        if (noteLines == null || noteLines.size() == 0) {
+            return richAnnotation;
+        }
+
+        for (int i = 0; i < noteLines.size(); i++) {
+            String line = noteLines.get(i);
+
+            String key = "";
+            String value = "";
+            for (int j = 0; i < line.length(); j++) {
+                if (line.charAt(j) == '=') {
+                    key = line.substring(0, j);
+                    value = line.substring(j + 1, line.length());
+
+                    break;
+                }
+            }
+
+            richAnnotation.addNote(new SimpleNote(RichObjectFactory.getDefaultOntology()
+                    .getOrCreateTerm(key), value, i + 2));
+        }
+
+        return richAnnotation;
     }
 
     protected Position getMinPosition(SequenceFeature sequenceFeature) {

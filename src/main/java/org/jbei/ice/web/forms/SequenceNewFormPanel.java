@@ -93,6 +93,7 @@ public class SequenceNewFormPanel extends Panel {
             try {
                 sequence = sequenceController.dnaSequenceToSequence(dnaSequence);
 
+                sequence.setSequenceUser(sequenceUser);
                 sequence.setEntry(entry);
 
                 sequenceController.save(sequence);
