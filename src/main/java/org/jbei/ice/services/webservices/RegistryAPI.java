@@ -53,6 +53,10 @@ public class RegistryAPI {
             Logger.error(e);
 
             throw new ServiceException("Registry Service Internal Error!");
+        } catch (Exception e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
         }
 
         log("User by login '" + login + "' successfully logged in");
@@ -69,6 +73,10 @@ public class RegistryAPI {
             Logger.error(e);
 
             throw new ServiceException("Registry Service Internal Error!");
+        } catch (Exception e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
         }
     }
 
@@ -79,6 +87,10 @@ public class RegistryAPI {
         try {
             authenticated = AccountController.isAuthenticated(sessionId);
         } catch (ControllerException e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
+        } catch (Exception e) {
             Logger.error(e);
 
             throw new ServiceException("Registry Service Internal Error!");
@@ -96,6 +108,10 @@ public class RegistryAPI {
             Logger.error(e);
 
             throw new ServiceException("Registry Service Internal Error!");
+        } catch (Exception e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
         }
 
         return result;
@@ -103,16 +119,20 @@ public class RegistryAPI {
 
     public ArrayList<SearchResult> search(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "query") String query) throws ServiceException, SessionException {
-        SearchController searchController = getSearchController(sessionId);
-
         ArrayList<SearchResult> results = null;
 
         try {
+            SearchController searchController = getSearchController(sessionId);
+
             results = searchController.find(query);
 
             log("User '" + searchController.getAccount().getEmail() + "' searched for '" + query
                     + "'");
         } catch (ControllerException e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
+        } catch (Exception e) {
             Logger.error(e);
 
             throw new ServiceException("Registry Service Internal Error!");
@@ -124,11 +144,11 @@ public class RegistryAPI {
     public ArrayList<BlastResult> blastn(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "querySequence") String querySequence) throws SessionException,
             ServiceException {
-        SearchController searchController = getSearchController(sessionId);
-
         ArrayList<BlastResult> results = null;
 
         try {
+            SearchController searchController = getSearchController(sessionId);
+
             results = searchController.blastn(querySequence);
 
             log("User '" + searchController.getAccount().getEmail() + "' blasted 'blastn' for "
@@ -142,6 +162,10 @@ public class RegistryAPI {
 
             throw new ServiceException(
                     "It took to long to search for sequence, try shorter sequence.");
+        } catch (Exception e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
         }
 
         return results;
@@ -150,11 +174,11 @@ public class RegistryAPI {
     public ArrayList<BlastResult> tblastx(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "querySequence") String querySequence) throws SessionException,
             ServiceException {
-        SearchController searchController = getSearchController(sessionId);
-
         ArrayList<BlastResult> results = null;
 
         try {
+            SearchController searchController = getSearchController(sessionId);
+
             results = searchController.tblastx(querySequence);
 
             log("User '" + searchController.getAccount().getEmail() + "' blasted 'tblastx' for "
@@ -168,6 +192,10 @@ public class RegistryAPI {
 
             throw new ServiceException(
                     "It took to long to search for sequence, try shorter sequence.");
+        } catch (Exception e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
         }
 
         return results;
@@ -176,11 +204,11 @@ public class RegistryAPI {
     public Entry getByRecordId(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
-        EntryController entryController = getEntryController(sessionId);
-
         Entry entry = null;
 
         try {
+            EntryController entryController = getEntryController(sessionId);
+
             entry = entryController.getByRecordId(entryId);
         } catch (ControllerException e) {
             Logger.error(e);
@@ -189,6 +217,10 @@ public class RegistryAPI {
         } catch (PermissionException e) {
             throw new ServicePermissionException("No permissions to read this entry by entryId: "
                     + entryId);
+        } catch (Exception e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
         }
 
         return entry;
@@ -197,11 +229,11 @@ public class RegistryAPI {
     public Entry getByPartNumber(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "partNumber") String partNumber) throws SessionException,
             ServiceException, ServicePermissionException {
-        EntryController entryController = getEntryController(sessionId);
-
         Entry entry = null;
 
         try {
+            EntryController entryController = getEntryController(sessionId);
+
             entry = entryController.getByPartNumber(partNumber);
         } catch (ControllerException e) {
             Logger.error(e);
@@ -210,6 +242,10 @@ public class RegistryAPI {
         } catch (PermissionException e) {
             throw new ServicePermissionException(
                     "No permissions to read this entry by partNumber: " + partNumber);
+        } catch (Exception e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
         }
 
         return entry;
@@ -220,11 +256,15 @@ public class RegistryAPI {
             ServicePermissionException {
         boolean result = false;
 
-        EntryController entryController = getEntryController(sessionId);
-
         try {
+            EntryController entryController = getEntryController(sessionId);
+
             result = entryController.hasReadPermissionByRecordId(entryId);
         } catch (ControllerException e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
+        } catch (Exception e) {
             Logger.error(e);
 
             throw new ServiceException("Registry Service Internal Error!");
@@ -237,11 +277,15 @@ public class RegistryAPI {
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException {
         boolean result = false;
 
-        EntryController entryController = getEntryController(sessionId);
-
         try {
+            EntryController entryController = getEntryController(sessionId);
+
             result = entryController.hasWritePermissionByRecordId(entryId);
         } catch (ControllerException e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
+        } catch (Exception e) {
             Logger.error(e);
 
             throw new ServiceException("Registry Service Internal Error!");
@@ -252,17 +296,21 @@ public class RegistryAPI {
 
     public Plasmid createPlasmid(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "plasmid") Plasmid plasmid) throws SessionException, ServiceException {
-        EntryController entryController = getEntryController(sessionId);
-
-        Entry remoteEntry = createEntry(sessionId, plasmid);
-
         Entry newEntry = null;
         try {
+            EntryController entryController = getEntryController(sessionId);
+
+            Entry remoteEntry = createEntry(sessionId, plasmid);
+
             newEntry = entryController.createEntry(remoteEntry);
 
             log("User '" + entryController.getAccount().getEmail() + "' created plasmid: '"
                     + plasmid.getRecordId() + "', " + plasmid.getId());
         } catch (ControllerException e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
+        } catch (Exception e) {
             Logger.error(e);
 
             throw new ServiceException("Registry Service Internal Error!");
@@ -273,17 +321,21 @@ public class RegistryAPI {
 
     public Strain createStrain(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "strain") Strain strain) throws SessionException, ServiceException {
-        EntryController entryController = getEntryController(sessionId);
-
-        Entry remoteEntry = createEntry(sessionId, strain);
-
         Entry newEntry = null;
         try {
+            EntryController entryController = getEntryController(sessionId);
+
+            Entry remoteEntry = createEntry(sessionId, strain);
+
             newEntry = entryController.createEntry(remoteEntry);
 
             log("User '" + entryController.getAccount().getEmail() + "' created strain: '"
                     + strain.getRecordId() + "', " + strain.getId());
         } catch (ControllerException e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
+        } catch (Exception e) {
             Logger.error(e);
 
             throw new ServiceException("Registry Service Internal Error!");
@@ -294,17 +346,21 @@ public class RegistryAPI {
 
     public Part createPart(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "part") Part part) throws SessionException, ServiceException {
-        EntryController entryController = getEntryController(sessionId);
-
-        Entry remoteEntry = createEntry(sessionId, part);
-
         Entry newEntry = null;
         try {
+            EntryController entryController = getEntryController(sessionId);
+
+            Entry remoteEntry = createEntry(sessionId, part);
+
             newEntry = entryController.createEntry(remoteEntry);
 
             log("User '" + entryController.getAccount().getEmail() + "' created part: '"
                     + part.getRecordId() + "', " + part.getId());
         } catch (ControllerException e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
+        } catch (Exception e) {
             Logger.error(e);
 
             throw new ServiceException("Registry Service Internal Error!");
@@ -316,11 +372,11 @@ public class RegistryAPI {
     public Plasmid updatePlasmid(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "plasmid") Plasmid plasmid) throws SessionException, ServiceException,
             ServicePermissionException {
-        EntryController entryController = getEntryController(sessionId);
-
         Entry savedEntry = null;
 
         try {
+            EntryController entryController = getEntryController(sessionId);
+
             savedEntry = entryController.save(updateEntry(sessionId, plasmid));
 
             log("User '" + entryController.getAccount().getEmail() + "' update plasmid: '"
@@ -331,6 +387,10 @@ public class RegistryAPI {
             throw new ServiceException("Registry Service Internal Error!");
         } catch (PermissionException e) {
             throw new ServicePermissionException("No permissions to save this entry!");
+        } catch (Exception e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
         }
 
         return (Plasmid) savedEntry;
@@ -339,11 +399,11 @@ public class RegistryAPI {
     public Strain updateStrain(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "strain") Strain strain) throws SessionException, ServiceException,
             ServicePermissionException {
-        EntryController entryController = getEntryController(sessionId);
-
         Entry savedEntry = null;
 
         try {
+            EntryController entryController = getEntryController(sessionId);
+
             savedEntry = entryController.save(updateEntry(sessionId, strain));
 
             log("User '" + entryController.getAccount().getEmail() + "' update strain: '"
@@ -354,6 +414,10 @@ public class RegistryAPI {
             throw new ServiceException("Registry Service Internal Error!");
         } catch (PermissionException e) {
             throw new ServicePermissionException("No permissions to save this entry!");
+        } catch (Exception e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
         }
 
         return (Strain) savedEntry;
@@ -362,11 +426,11 @@ public class RegistryAPI {
     public Part updatePart(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "part") Part part) throws SessionException, ServiceException,
             ServicePermissionException {
-        EntryController entryController = getEntryController(sessionId);
-
         Entry savedEntry = null;
 
         try {
+            EntryController entryController = getEntryController(sessionId);
+
             savedEntry = entryController.save(updateEntry(sessionId, part));
 
             log("User '" + entryController.getAccount().getEmail() + "' update part: '"
@@ -377,6 +441,10 @@ public class RegistryAPI {
             throw new ServiceException("Registry Service Internal Error!");
         } catch (PermissionException e) {
             throw new ServicePermissionException("No permissions to save this entry!");
+        } catch (Exception e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
         }
 
         return (Part) savedEntry;
@@ -496,11 +564,11 @@ public class RegistryAPI {
 
     protected Entry updateEntry(String sessionId, Entry entry) throws SessionException,
             ServiceException, ServicePermissionException {
-        EntryController entryController = getEntryController(sessionId);
-
         Entry currentEntry = null;
 
         try {
+            EntryController entryController = getEntryController(sessionId);
+
             try {
                 currentEntry = entryController.getByRecordId(entry.getRecordId());
             } catch (PermissionException e) {
@@ -719,9 +787,9 @@ public class RegistryAPI {
     public void removeEntry(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
-        EntryController entryController = getEntryController(sessionId);
-
         try {
+            EntryController entryController = getEntryController(sessionId);
+
             Entry entry = entryController.getByRecordId(entryId);
 
             entryController.delete(entry);
@@ -734,6 +802,10 @@ public class RegistryAPI {
             throw new ServiceException("Registry Service Internal Error!");
         } catch (PermissionException e) {
             throw new ServicePermissionException("No permissions to delete this entry!");
+        } catch (Exception e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
         }
     }
 
@@ -741,12 +813,12 @@ public class RegistryAPI {
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
 
-        SequenceController sequenceController = getSequenceController(sessionId);
-        EntryController entryController = getEntryController(sessionId);
-
         FeaturedDNASequence sequence = null;
 
         try {
+            SequenceController sequenceController = getSequenceController(sessionId);
+            EntryController entryController = getEntryController(sessionId);
+
             Entry entry = entryController.getByRecordId(entryId);
 
             sequence = sequenceController.sequenceToDNASequence(sequenceController
@@ -760,6 +832,10 @@ public class RegistryAPI {
             Logger.error(e);
 
             throw new ServiceException("Registry Service Internal Error!");
+        } catch (Exception e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
         }
 
         return sequence;
@@ -770,13 +846,13 @@ public class RegistryAPI {
             @WebParam(name = "sequence") FeaturedDNASequence featuredDNASequence)
             throws SessionException, ServiceException, ServicePermissionException {
 
-        EntryController entryController = getEntryController(sessionId);
-        SequenceController sequenceController = getSequenceController(sessionId);
-
         Entry entry = null;
         FeaturedDNASequence savedFeaturedDNASequence = null;
 
         try {
+            EntryController entryController = getEntryController(sessionId);
+            SequenceController sequenceController = getSequenceController(sessionId);
+
             try {
                 entry = entryController.getByRecordId(entryId);
             } catch (PermissionException e) {
@@ -792,8 +868,7 @@ public class RegistryAPI {
                         "Entry has sequence already assigned. Remove it first and then create new one.");
             }
 
-            Sequence sequence = sequenceController
-                    .dnaSequenceToSequence(featuredDNASequence);
+            Sequence sequence = sequenceController.dnaSequenceToSequence(featuredDNASequence);
 
             sequence.setEntry(entry);
 
@@ -807,6 +882,10 @@ public class RegistryAPI {
                 throw new ServicePermissionException("No permissions to save this sequence!");
             }
         } catch (ControllerException e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
+        } catch (Exception e) {
             Logger.error(e);
 
             throw new ServiceException("Registry Service Internal Error!");
@@ -824,9 +903,9 @@ public class RegistryAPI {
     public void removeSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
-        EntryController entryController = getEntryController(sessionId);
-
         try {
+            EntryController entryController = getEntryController(sessionId);
+
             Entry entry = null;
 
             try {
@@ -850,6 +929,10 @@ public class RegistryAPI {
                 }
             }
         } catch (ControllerException e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
+        } catch (Exception e) {
             Logger.error(e);
 
             throw new ServiceException("Registry Service Internal Error!");
@@ -893,8 +976,7 @@ public class RegistryAPI {
 
                 Sequence savedSequence = sequenceController.save(modelSequence);
 
-                savedFeaturedDNASequence = sequenceController
-                        .sequenceToDNASequence(savedSequence);
+                savedFeaturedDNASequence = sequenceController.sequenceToDNASequence(savedSequence);
 
                 log("User '" + entryController.getAccount().getEmail()
                         + "' uploaded new sequence: '" + entryId + "'");
@@ -903,6 +985,10 @@ public class RegistryAPI {
             }
         } catch (ControllerException e) {
             throw new ViewException(e);
+        } catch (Exception e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
         }
 
         return savedFeaturedDNASequence;
