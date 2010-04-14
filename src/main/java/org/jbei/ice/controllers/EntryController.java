@@ -2,6 +2,7 @@ package org.jbei.ice.controllers;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.jbei.ice.controllers.common.Controller;
@@ -248,6 +249,10 @@ public class EntryController extends Controller {
         try {
             entries = EntryManager.getEntriesByIdSet(filterEntriesByPermissionAndOffsetLimit(
                 EntryManager.getEntries(field, ascending), offset, limit));
+
+            if (entries != null) {
+                Collections.reverse(entries);
+            }
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
@@ -262,6 +267,10 @@ public class EntryController extends Controller {
         try {
             entries = EntryManager.getEntriesByIdSet(filterEntriesByPermissionAndOffsetLimit(
                 EntryManager.getEntriesByOwner(owner), offset, limit));
+
+            if (entries != null) {
+                Collections.reverse(entries);
+            }
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
@@ -278,6 +287,10 @@ public class EntryController extends Controller {
 
             entries = EntryManager.getEntriesByIdSet(filterEntriesByPermissionAndOffsetLimit(
                 queryResultIds, offset, limit));
+
+            if (entries != null) {
+                Collections.reverse(entries);
+            }
         } catch (QueryException e) {
             throw new ControllerException(e);
         } catch (ManagerException e) {
