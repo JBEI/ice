@@ -93,8 +93,6 @@ public class EntryViewPage extends ProtectedPage {
         add(permissionLink);
         add(renderAddToWorkspaceLink());
 
-        sequenceAnalysisLink.setVisible(false); // TODO: Zinovii; Remove it later
-
         try {
             if (!entryController.hasWritePermission(entry)) {
                 permissionLink.setVisible(false);
