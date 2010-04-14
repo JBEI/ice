@@ -58,12 +58,19 @@ public class GenbankParser extends AbstractParser {
                     Map<String, String> notesMap = new LinkedHashMap<String, String>();
                     Set<Note> notes = richFeature.getNoteSet();
                     for (Note note : notes) {
-                        notesMap.put(note.getTerm().getName(), note.getValue());
+                        if (note.getTerm().getName().toLowerCase().equals("name")) {
+                            notesMap.put("name", note.getValue());
 
-                        if (note.getTerm().getName().toLowerCase().equals("name")
-                                || note.getTerm().getName().toLowerCase().equals("label")) {
                             featureName = note.getValue();
+
+                            continue;
+                        } else if (note.getTerm().getName().toLowerCase().equals("label")) {
+                            featureName = note.getValue();
+
+                            continue;
                         }
+
+                        notesMap.put(note.getTerm().getName(), note.getValue());
                     }
 
                     RichLocation featureLocation = (RichLocation) richFeature.getLocation();
@@ -95,8 +102,7 @@ public class GenbankParser extends AbstractParser {
                     }
 
                     DNAFeature dnaFeature = new DNAFeature(start + 1, end + 1, genbankType,
-                            featureName, featureLocation.getStrand().intValue(),
-                            new LinkedHashMap<String, String>());
+                            featureName, featureLocation.getStrand().intValue(), notesMap);
 
                     dnaFeatures.add(dnaFeature);
                 }

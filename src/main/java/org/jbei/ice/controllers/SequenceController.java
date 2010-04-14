@@ -1,5 +1,6 @@
 package org.jbei.ice.controllers;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -217,14 +218,32 @@ public class SequenceController extends Controller {
 
                     if (start > end) { // over zero case
                         featureSequence = featuredDNASequence.getSequence().substring(start,
-                                featuredDNASequence.getSequence().length() - 1);
+                            featuredDNASequence.getSequence().length() - 1);
                         featureSequence += featuredDNASequence.getSequence().substring(0, end);
                     } else { // normal
                         featureSequence = featuredDNASequence.getSequence().substring(start, end);
                     }
 
-                    Feature feature = new Feature(dnaFeature.getName(), "", "", featureSequence, 0,
-                            dnaFeature.getType());
+                    String descriptionNotes = "";
+
+                    if (dnaFeature.getNotes() != null && dnaFeature.getNotes().size() > 0) {
+                        Iterator<java.util.Map.Entry<String, String>> iterator = dnaFeature
+                                .getNotes().entrySet().iterator();
+
+                        while (iterator.hasNext()) {
+                            java.util.Map.Entry<String, String> pairs = (java.util.Map.Entry<String, String>) iterator
+                                    .next();
+
+                            descriptionNotes += (pairs.getKey() + "=\"" + pairs.getValue() + "\"");
+
+                            if (iterator.hasNext()) {
+                                descriptionNotes += "\n";
+                            }
+                        }
+                    }
+
+                    Feature feature = new Feature(dnaFeature.getName(), descriptionNotes, "",
+                            featureSequence, 0, dnaFeature.getType());
 
                     SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature, start,
                             end, dnaFeature.getStrand(), dnaFeature.getName());

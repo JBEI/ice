@@ -33,7 +33,8 @@ public class Feature implements IFeatureValueObject, IModel {
     /**
      * this is the human annotated description.
      */
-    @Column(name = "description", length = 1023)
+    @Column(name = "description")
+    @Lob
     private String description;
 
     @Column(name = "identification", length = 127)
