@@ -23,7 +23,6 @@ import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.UnprotectedPage;
-import org.jbei.ice.web.pages.UserPage;
 import org.jbei.ice.web.utils.WebUtils;
 
 public class WorkspaceDataView extends DataView<Workspace> {
@@ -70,26 +69,6 @@ public class WorkspaceDataView extends DataView<Workspace> {
         dateString = dateFormat.format(new Date(workspace.getDateVisited()));
         item.add(new Label("dateVisited", dateString));
 
-        // renderDeleteLink
-        final ResourceReference xFilledImage = new ResourceReference(UnprotectedPage.class,
-                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "x-filled.png");
-        AjaxLink<Object> removeLink = new AjaxLink<Object>("removeLink") {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                try {
-                    workspace.setInWorkspace(false);
-                    WorkspaceManager.save(workspace);
-                    setResponsePage(UserPage.class, new PageParameters("0=" + "workspace"));
-                } catch (ManagerException e) {
-                    throw new ViewException("Could not remove from workspace", e);
-                }
-            }
-
-        };
-        removeLink.add(new Image("removeImage", xFilledImage));
-        item.add(removeLink);
     }
 
     @SuppressWarnings("unchecked")
@@ -101,10 +80,10 @@ public class WorkspaceDataView extends DataView<Workspace> {
             @Override
             public void onClick(AjaxRequestTarget target) {
                 Image image = null;
-                if (workspace.isStarred()) {
+                if (workspace.isInWorkspace()) {
 
                     try {
-                        workspace.setStarred(false);
+                        workspace.setInWorkspace(false);
                         WorkspaceManager.save(workspace);
                         image = new Image("starImage", starEmptyImage);
                     } catch (ManagerException e) {
@@ -112,7 +91,7 @@ public class WorkspaceDataView extends DataView<Workspace> {
                     }
                 } else {
                     try {
-                        workspace.setStarred(true);
+                        workspace.setInWorkspace(true);
                         WorkspaceManager.save(workspace);
                         image = new Image("starImage", starFilledImage);
                     } catch (ManagerException e) {
@@ -124,7 +103,7 @@ public class WorkspaceDataView extends DataView<Workspace> {
                 target.addComponent(this);
             }
         };
-        if (workspace.isStarred()) {
+        if (workspace.isInWorkspace()) {
             starLink.add(new Image("starImage", starFilledImage));
         } else {
             starLink.add(new Image("starImage", starEmptyImage));

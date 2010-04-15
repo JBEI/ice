@@ -339,9 +339,9 @@ public class EntryViewPage extends ProtectedPage {
     @SuppressWarnings("unchecked")
     private AjaxLink renderAddToWorkspaceLink() {
         final ResourceReference notInWorkspaceImage = new ResourceReference(UnprotectedPage.class,
-                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "plus-empty.png");
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "star-empty.png");
         final ResourceReference inWorkspaceImage = new ResourceReference(UnprotectedPage.class,
-                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "plus-filled.png");
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "star-filled.png");
         AjaxLink addToWorkspaceLink = new AjaxLink("addToWorkspaceLink") {
             private static final long serialVersionUID = 1L;
 
@@ -355,16 +355,16 @@ public class EntryViewPage extends ProtectedPage {
                     throw new ViewException(e);
                 }
 
-                Image image = new Image("plusImage", inWorkspaceImage);
+                Image image = new Image("starImage", inWorkspaceImage);
                 this.replace(image);
                 getParent().replace(this);
                 target.addComponent(this);
             }
         };
         if (WorkspaceManager.hasEntry(IceSession.get().getAccount(), entry)) {
-            addToWorkspaceLink.add(new Image("plusImage", inWorkspaceImage));
+            addToWorkspaceLink.add(new Image("starImage", inWorkspaceImage));
         } else {
-            addToWorkspaceLink.add(new Image("plusImage", notInWorkspaceImage));
+            addToWorkspaceLink.add(new Image("starImage", notInWorkspaceImage));
         }
         addToWorkspaceLink.setOutputMarkupId(true);
         return addToWorkspaceLink;
