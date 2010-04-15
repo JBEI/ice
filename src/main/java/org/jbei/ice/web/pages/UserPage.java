@@ -57,10 +57,10 @@ public class UserPage extends ProtectedPage {
 
         if (currentPage != null && currentPage.equals("samples")) {
             currentPanel = createSamplesPanel();
-        } else if (currentPage != null && currentPage.equals("entries")) {
-            currentPanel = createEntriesPanel();
-        } else {
+        } else if (currentPage != null && currentPage.equals("workspace")) {
             currentPanel = createWorkspacePanel();
+        } else {
+            currentPanel = createEntriesPanel();
         }
 
         add(currentPanel);
@@ -73,11 +73,11 @@ public class UserPage extends ProtectedPage {
 
         if (currentPage != null && currentPage.equals("samples")) {
             samplesLink.add(new SimpleAttributeModifier("class", "active")).setOutputMarkupId(true);
-        } else if (currentPage != null && currentPage.equals("entries")) {
-            entriesLink.add(new SimpleAttributeModifier("class", "active")).setOutputMarkupId(true);
-        } else {
+        } else if (currentPage != null && currentPage.equals("workspace")) {
             workspaceLink.add(new SimpleAttributeModifier("class", "active")).setOutputMarkupId(
                 true);
+        } else {
+            entriesLink.add(new SimpleAttributeModifier("class", "active")).setOutputMarkupId(true);
         }
     }
 
