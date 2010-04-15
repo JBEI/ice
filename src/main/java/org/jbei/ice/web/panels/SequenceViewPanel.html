@@ -13,8 +13,7 @@
 	<wicket:fragment wicket:id="sequenceFragment">
 		<table border="0" cellpadding="2" cellspacing="2" width="100%">
 			<tr>
-				<td>Download: (<a href="#" wicket:id="genbankDownloadLink">GenBank</a>
-				| <a href="#" wicket:id="fastaDownloadLink">FASTA</a>)</td>
+				<td>Download: (<wicket:container wicket:id="originalDownloadLinkContainer"><a href="#" wicket:id="originalDownloadLink">Original</a> | </wicket:container><a href="#" wicket:id="genbankDownloadLink">GenBank</a> | <a href="#" wicket:id="fastaDownloadLink">FASTA</a>)</td>
 				<td align="right"><a href="#" wicket:id="deleteLink">Delete</a></td>
 			</tr>
 			<tr>

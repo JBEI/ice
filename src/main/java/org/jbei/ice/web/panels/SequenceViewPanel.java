@@ -136,6 +136,7 @@ public class SequenceViewPanel extends Panel {
 
         if (sequence != null) {
             renderDeleteLink(fragment);
+            renderOriginalDownloadLink(fragment);
             renderGenbankDownloadLink(fragment);
             renderFastaDownloadLink(fragment);
             renderVectorEditorLink(fragment);
@@ -145,9 +146,9 @@ public class SequenceViewPanel extends Panel {
             fragment.setOutputMarkupId(true);
 
             add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-                    UnprotectedPage.JS_RESOURCE_LOCATION + "extMouseWheel.js"));
+                UnprotectedPage.JS_RESOURCE_LOCATION + "extMouseWheel.js"));
             add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-                    UnprotectedPage.JS_RESOURCE_LOCATION + "hookMouseWheel.js"));
+                UnprotectedPage.JS_RESOURCE_LOCATION + "hookMouseWheel.js"));
         }
 
         return fragment;
@@ -198,6 +199,38 @@ public class SequenceViewPanel extends Panel {
         container.add(flashComponent);
     }
 
+    private void renderOriginalDownloadLink(WebMarkupContainer container) {
+        Link<Object> originalDownloadLink = new Link<Object>("originalDownloadLink") {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void onClick() {
+                String sequenceString = sequence.getSequenceUser();
+
+                if (sequenceString != null && !sequenceString.isEmpty()) {
+                    IResourceStream resourceStream = new StringResourceStream(sequenceString,
+                            "application/genbank");
+
+                    getRequestCycle().setRequestTarget(
+                        new ResourceStreamRequestTarget(resourceStream, entry
+                                .getPartNumbersAsString()
+                                + ".gb"));
+                }
+            }
+        };
+
+        WebMarkupContainer originalDownloadLinkContainer = new WebMarkupContainer(
+                "originalDownloadLinkContainer");
+
+        originalDownloadLinkContainer.add(originalDownloadLink);
+
+        container.add(originalDownloadLinkContainer);
+
+        if (sequence.getSequenceUser() == null || sequence.getSequenceUser().isEmpty()) {
+            originalDownloadLinkContainer.setVisible(false);
+        }
+    }
+
     private void renderGenbankDownloadLink(WebMarkupContainer container) {
         Link<Object> downloadLink = new Link<Object>("genbankDownloadLink") {
             private static final long serialVersionUID = 1L;
@@ -225,9 +258,8 @@ public class SequenceViewPanel extends Panel {
                         "application/genbank");
 
                 getRequestCycle().setRequestTarget(
-                        new ResourceStreamRequestTarget(resourceStream, entry
-                                .getPartNumbersAsString()
-                                + ".gb"));
+                    new ResourceStreamRequestTarget(resourceStream, entry.getPartNumbersAsString()
+                            + ".gb"));
             }
         };
 
@@ -255,9 +287,8 @@ public class SequenceViewPanel extends Panel {
                         "application/fasta");
 
                 getRequestCycle().setRequestTarget(
-                        new ResourceStreamRequestTarget(resourceStream, entry
-                                .getPartNumbersAsString()
-                                + ".fasta"));
+                    new ResourceStreamRequestTarget(resourceStream, entry.getPartNumbersAsString()
+                            + ".fasta"));
             }
         };
 
