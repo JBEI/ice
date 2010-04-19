@@ -33,7 +33,7 @@ public class Blast {
 
     private static boolean rebuilding;
 
-    private static final String BL2SEQ_COMMAND_PATTERN = "%s -p blastn -i %s -j %s -r 2";
+    private static final String BL2SEQ_COMMAND_PATTERN = "%s -p blastn -i %s -j %s -r 2 -F F";
     private static final String BLASTALL_COMMAND_PATTERN = "%s -p %s -d %s -m 8";
 
     private String blastBlastall;
