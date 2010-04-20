@@ -22,6 +22,8 @@ public class FastaParser extends AbstractParser {
 
     @Override
     public FeaturedDNASequence parse(String textSequence) throws InvalidFormatParserException {
+        textSequence = cleanSequence(textSequence);
+
         BufferedReader br = new BufferedReader(new StringReader(textSequence));
         FeaturedDNASequence sequence = null;
 

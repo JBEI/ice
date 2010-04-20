@@ -22,6 +22,8 @@ public class ApeParser extends GenbankParser {
             return null;
         }
 
+        textSequence = cleanSequence(textSequence);
+
         IDNASequence dnaSequence = null;
 
         try {

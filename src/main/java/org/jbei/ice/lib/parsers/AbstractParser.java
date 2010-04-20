@@ -22,4 +22,13 @@ public abstract class AbstractParser implements IDNAParser {
 
         return parse(bytes);
     }
+
+    protected String cleanSequence(String sequence) {
+        sequence = sequence.trim();
+        sequence = sequence.replace("\n\n", "\n"); // *nix
+        sequence = sequence.replace("\n\r\n\r", "\n\r"); // win
+        sequence = sequence.replace("\r\r", "\r"); // mac
+
+        return sequence;
+    }
 }

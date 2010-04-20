@@ -35,6 +35,8 @@ public class GenbankParser extends AbstractParser {
     @Override
     @SuppressWarnings("unchecked")
     public IDNASequence parse(String textSequence) throws InvalidFormatParserException {
+        textSequence = cleanSequence(textSequence);
+
         BufferedReader br = new BufferedReader(new StringReader(textSequence));
         FeaturedDNASequence sequence = null;
 

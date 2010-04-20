@@ -22,6 +22,8 @@ public class GenbankLocusFriendlyParser extends GenbankParser {
             return null;
         }
 
+        textSequence = cleanSequence(textSequence);
+
         IDNASequence dnaSequence = null;
 
         try {

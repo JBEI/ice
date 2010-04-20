@@ -13,6 +13,8 @@ public class PlainParser extends AbstractParser {
 
     @Override
     public IDNASequence parse(String textSequence) throws InvalidFormatParserException {
+        textSequence = cleanSequence(textSequence);
+
         SymbolList sl = null;
         try {
             sl = new SimpleSymbolList(DNATools.getDNA().getTokenization("token"), textSequence
