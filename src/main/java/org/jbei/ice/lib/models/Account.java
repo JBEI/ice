@@ -46,7 +46,7 @@ public class Account implements IModel {
     @Column(name = "institution", length = 255, nullable = false)
     private String institution;
 
-    @Column(name = "password", length = 32, nullable = false)
+    @Column(name = "password", length = 40, nullable = false)
     private String password;
 
     @Column(name = "description", nullable = false)
