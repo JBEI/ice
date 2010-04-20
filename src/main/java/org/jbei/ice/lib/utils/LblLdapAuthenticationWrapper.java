@@ -108,47 +108,42 @@ public class LblLdapAuthenticationWrapper {
     public boolean isWikiUser(String loginName) throws LblLdapAuthenticationWrapperException {
         boolean result = false;
 
-        //Use "JBEI Employees" and "Keasling Lab" as whitelist
-        String query = "cn=JBEI Employees,ou=JBEI-Groups,ou=Groups,o=Lawrence Berkeley Laboratory,c=US";
-        String query2 = "cn=Keasling Lab,ou=JBEI-Groups,ou=Groups,o=Lawrence Berkeley Laboratory,c=US";
-        String filter = "(objectClass=*)";
-        SearchControls cons = new SearchControls();
-        cons.setSearchScope(SearchControls.SUBTREE_SCOPE);
-        cons.setCountLimit(0);
+        //Use "JBEI Employees" and "Keasling Lab", and BIOFAB as whitelist
+        ArrayList<String> whitelistGroups = new ArrayList<String>();
 
+        whitelistGroups.add("JBEI Employees");
+        whitelistGroups.add("Keasling Lab");
+        whitelistGroups.add("BIOFAB");
+
+        String queryPrefix = "cn=";
+        String querySuffix = ",ou=JBEI-Groups,ou=Groups,o=Lawrence Berkeley Laboratory,c=US";
+        String filter = "(objectClass=*)";
+
+        ArrayList<String> whiteList = new ArrayList<String>();
+        SearchControls searchControls = new SearchControls();
+        searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+        searchControls.setCountLimit(0);
         try {
             if (dirContext == null) {
                 dirContext = getContext();
             }
 
-            SearchResult searchResult = dirContext.search(query, filter, cons).nextElement();
-            NamingEnumeration<?> uniqueMembers = searchResult.getAttributes().get("uniquemember")
-                    .getAll();
+            for (String group : whitelistGroups) {
+                String queryString = queryPrefix + group + querySuffix;
+                SearchResult searchResult = dirContext.search(queryString, filter, searchControls)
+                        .nextElement();
+                NamingEnumeration<?> uniqueMembers = searchResult.getAttributes().get(
+                    "uniquemember").getAll();
+                while (uniqueMembers.hasMore()) {
+                    String temp = (String) uniqueMembers.next();
+                    whiteList.add(temp.toLowerCase());
+                }
+                uniqueMembers.close();
 
-            SearchResult searchResult2 = dirContext.search(query2, filter, cons).nextElement();
-            NamingEnumeration<?> uniqueMembers2 = searchResult2.getAttributes().get("uniquemember")
-                    .getAll();
-
-            ArrayList<String> whiteList = new ArrayList<String>();
-            while (uniqueMembers.hasMore()) {
-                String temp = (String) uniqueMembers.next();
-
-                whiteList.add(temp.toLowerCase());
             }
-
-            while (uniqueMembers2.hasMore()) {
-                String temp = (String) uniqueMembers2.next();
-
-                whiteList.add(temp.toLowerCase());
-            }
-
             if (whiteList.contains(loginName.toLowerCase())) {
                 result = true;
             }
-
-            uniqueMembers.close();
-            uniqueMembers2.close();
-
         } catch (NamingException e) {
             throw new LblLdapAuthenticationWrapperException(
                     "Failed to fetch wiki ldap users whitelist!", e);
