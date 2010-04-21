@@ -12,6 +12,8 @@ import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
+import org.jbei.ice.lib.logging.Logger;
+
 /**
  * Little wrapper for lbl ldap.
  * 
@@ -149,6 +151,14 @@ public class LblLdapAuthenticationWrapper {
                     "Failed to fetch wiki ldap users whitelist!", e);
         }
 
+        String msg = null;
+        if (result) {
+            msg = loginName.toLowerCase() + "is in whitelist.";
+        } else {
+            msg = loginName.toLowerCase() + "is not in whitelist.";
+        }
+
+        Logger.info(msg);
         return result;
     }
 
