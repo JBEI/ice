@@ -153,9 +153,9 @@ public class LblLdapAuthenticationWrapper {
 
         String msg = null;
         if (result) {
-            msg = loginName.toLowerCase() + "is in whitelist.";
+            msg = loginName.toLowerCase() + " is in whitelist.";
         } else {
-            msg = loginName.toLowerCase() + "is not in whitelist.";
+            msg = loginName.toLowerCase() + " is not in whitelist.";
         }
 
         Logger.info(msg);
