@@ -117,11 +117,15 @@ public class TraceSequenceManager {
             File fileDir = new File(traceFilesDirectory);
 
             if (!fileDir.exists()) {
-                fileDir.mkdirs();
+                if (!fileDir.mkdirs()) {
+                    throw new ManagerException("Could not create trace directory");
+                }
             }
 
             if (!file.exists()) {
-                file.createNewFile();
+                if (!file.createNewFile()) {
+                    throw new ManagerException("Could not create trace file " + file.getName());
+                }
             }
 
             FileOutputStream outputStream = new FileOutputStream(file);

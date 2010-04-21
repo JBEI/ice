@@ -116,11 +116,15 @@ public class AttachmentManager {
             File fileDir = new File(attachmentDirectory);
 
             if (!fileDir.exists()) {
-                fileDir.mkdirs();
+                if (!fileDir.mkdirs()) {
+                    throw new ManagerException("Could not create attachment directory");
+                }
             }
 
             if (!file.exists()) {
-                file.createNewFile();
+                if (!file.createNewFile()) {
+                    throw new ManagerException("Could not create attachment file " + file.getName());
+                }
             }
 
             FileOutputStream outputStream = new FileOutputStream(file);

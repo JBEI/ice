@@ -104,7 +104,11 @@ public class EntryViewPage extends ProtectedPage {
         generalPanel = makeSubPagePanel(entry);
         displayPanel = generalPanel;
         add(displayPanel);
-        WorkspaceManager.setVisited(entry);
+        try {
+            WorkspaceManager.setVisited(entry);
+        } catch (ManagerException e) {
+            throw new ViewException(e);
+        }
     }
 
     @Override

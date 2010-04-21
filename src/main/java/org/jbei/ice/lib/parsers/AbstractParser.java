@@ -19,7 +19,7 @@ public abstract class AbstractParser implements IDNAParser {
         int availableBytes = fileInputStream.available();
         byte[] bytes = new byte[availableBytes];
         fileInputStream.read(bytes);
-
+        fileInputStream.close();
         return parse(bytes);
     }
 

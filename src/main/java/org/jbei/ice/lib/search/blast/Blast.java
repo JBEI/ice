@@ -62,7 +62,9 @@ public class Blast {
         try { // The big try
             synchronized (this) {
                 File newbigFastaFileDir = new File(blastDirectory + ".new");
-                newbigFastaFileDir.mkdir();
+                if (!newbigFastaFileDir.mkdir()) {
+                    throw new BlastException("Could not create " + blastDirectory + ".new");
+                }
                 File bigFastaFile = new File(newbigFastaFileDir.getPath() + File.separator
                         + this.bigFastaFile);
                 FileWriter bigFastaWriter = new FileWriter(bigFastaFile);
@@ -143,9 +145,14 @@ public class Blast {
 
                 result.add(resultItem);
 
-                subjectFile.delete();
+                if (!subjectFile.delete()) {
+                    throw new BlastException("Could not delete subjectFile "
+                            + subjectFile.getName());
+                }
             }
-            queryFile.delete();
+            if (!queryFile.delete()) {
+                throw new BlastException("Could not delete queryFile " + queryFile.getName());
+            }
         } catch (IOException e) {
             throw new BlastException(e);
         }
@@ -247,24 +254,21 @@ public class Blast {
         return result.toString();
     }
 
-    private void renameBlastDb(File newBigFastaFileDir) throws IOException {
+    private void renameBlastDb(File newBigFastaFileDir) throws IOException, BlastException {
         File oldBlastDir = new File(blastDirectory + ".old");
         if (oldBlastDir.exists()) {
             FileUtils.deleteDirectory(oldBlastDir);
         }
         oldBlastDir = new File(blastDirectory + ".old");
         File currentBlastDir = new File(blastDirectory);
-        currentBlastDir.renameTo(oldBlastDir);
+        if (!currentBlastDir.renameTo(oldBlastDir)) {
+            throw new BlastException("Could not rename directory " + blastDirectory + ".old");
+        }
         currentBlastDir = new File(blastDirectory);
         File newBlastDir = new File(blastDirectory + ".new");
-        try {
-            newBlastDir.renameTo(currentBlastDir);
-        } catch (SecurityException e) {
-            String msg = "Could not rename Blast db" + e.toString();
-            Logger.error(msg, e);
-        } catch (NullPointerException e) {
-            String msg = "Could not rename Blast db" + e.toString();
-            Logger.error(msg, e);
+
+        if (!newBlastDir.renameTo(currentBlastDir)) {
+            throw new BlastException("Could not rename blast db");
         }
     }
 
@@ -364,8 +368,8 @@ public class Blast {
             throws ProgramTookTooLongException, BlastException {
 
         Runtime runTime = Runtime.getRuntime();
-        String outputString = "";
-        String errorString = "";
+        StringBuilder outputString = new StringBuilder();
+        StringBuilder errorString = new StringBuilder();
 
         try {
             Process process = runTime.exec(commandString);
@@ -396,13 +400,13 @@ public class Blast {
                 int temp = programOutputStream.read(outputBuffer);
                 int temp2 = programErrorStream.read(errorBuffer);
                 if (temp2 != -1) {
-                    errorString = errorString + new String(errorBuffer);
+                    errorString = errorString.append(new String(errorBuffer));
                 }
 
                 if (temp == -1) {
                     break;
                 } else {
-                    outputString = outputString + new String(outputBuffer);
+                    outputString = outputString.append(new String(outputBuffer));
                 }
 
                 if (System.currentTimeMillis() - startTime > maxWait) {
@@ -411,6 +415,7 @@ public class Blast {
             }
 
             programOutputStream.close();
+            programErrorStream.close();
             process.destroy();
 
         } catch (IOException e) {
@@ -418,9 +423,9 @@ public class Blast {
         }
 
         if (errorString.length() > 0) {
-            throw new BlastException(errorString);
+            throw new BlastException(errorString.toString());
         }
-        return outputString;
+        return outputString.toString();
     }
 
     private ArrayList<BlastResult> processBlastOutput(String blastOutput) {

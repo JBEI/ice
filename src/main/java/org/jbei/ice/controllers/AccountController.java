@@ -142,7 +142,7 @@ public class AccountController {
 
         Account account = null;
         try {
-            account = authenticationBackend.authenticate(login, password, ip);
+            account = authenticationBackend.authenticate(login, password);
         } catch (AuthenticationBackendException e2) {
             throw new InvalidCredentialsException(e2);
         }

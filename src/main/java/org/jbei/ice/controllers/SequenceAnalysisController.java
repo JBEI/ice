@@ -111,7 +111,7 @@ public class SequenceAnalysisController extends Controller {
                             || traceSequence.getTraceSequenceAlignment().getSequenceHash()
                                     .isEmpty()
                             || !traceSequence.getTraceSequenceAlignment().getSequenceHash().equals(
-                                    sequence.getFwdHash())) {
+                                sequence.getFwdHash())) {
                         buildOrRebuildAlignment(traceSequence, sequence);
 
                         wasUpdated = true;
@@ -257,7 +257,7 @@ public class SequenceAnalysisController extends Controller {
         } catch (Bl2SeqException e) {
             throw new ControllerException(e);
         } catch (ManagerException e) {
-            new ControllerException(e);
+            throw new ControllerException(e);
         }
     }
 

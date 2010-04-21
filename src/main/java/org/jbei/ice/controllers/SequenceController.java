@@ -223,26 +223,27 @@ public class SequenceController extends Controller {
                         featureSequence = featuredDNASequence.getSequence().substring(start, end);
                     }
 
-                    String descriptionNotes = "";
+                    StringBuilder descriptionNotes = new StringBuilder();
 
                     if (dnaFeature.getNotes() != null && dnaFeature.getNotes().size() > 0) {
                         Iterator<java.util.Map.Entry<String, String>> iterator = dnaFeature
                                 .getNotes().entrySet().iterator();
 
                         while (iterator.hasNext()) {
-                            java.util.Map.Entry<String, String> pairs = (java.util.Map.Entry<String, String>) iterator
-                                    .next();
+                            java.util.Map.Entry<String, String> pairs = iterator.next();
 
-                            descriptionNotes += (pairs.getKey() + "=" + pairs.getValue() + "");
+                            descriptionNotes.append(pairs.getKey()).append("=").append(
+                                pairs.getValue());
 
                             if (iterator.hasNext()) {
-                                descriptionNotes += "\n";
+                                descriptionNotes.append("\n");
                             }
                         }
                     }
 
-                    Feature feature = new Feature(dnaFeature.getName(), descriptionNotes, "",
-                            featureSequence, 0, dnaFeature.getType());
+                    Feature feature = new Feature(dnaFeature.getName(),
+                            descriptionNotes.toString(), "", featureSequence, 0, dnaFeature
+                                    .getType());
 
                     SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature, start,
                             end, dnaFeature.getStrand(), dnaFeature.getName());

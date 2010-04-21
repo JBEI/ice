@@ -70,7 +70,7 @@ public class WorkspaceManager {
         return hasEntry(account, entry);
     }
 
-    public static void setVisited(Account account, Entry entry) {
+    public static void setVisited(Account account, Entry entry) throws ManagerException {
         try {
             Workspace queryResult = get(account, entry);
             if (queryResult == null) {
@@ -82,16 +82,16 @@ public class WorkspaceManager {
             queryResult.setDateVisited(System.currentTimeMillis());
             DAO.save(queryResult);
         } catch (Exception e) {
-            new ManagerException("Could not set visited number", e);
+            throw new ManagerException("Could not set visited number", e);
         }
     }
 
-    public static void setVisited(Entry entry) {
+    public static void setVisited(Entry entry) throws ManagerException {
         Account account = IceSession.get().getAccount();
         setVisited(account, entry);
     }
 
-    public static ArrayList<Workspace> get() {
+    public static ArrayList<Workspace> get() throws ManagerException {
         ArrayList<Workspace> result = null;
         Account account = IceSession.get().getAccount();
         String queryString = "from Workspace workspace where account=:account order by workspace.dateAdded desc";
@@ -103,7 +103,11 @@ public class WorkspaceManager {
             ArrayList<Workspace> temp = new ArrayList<Workspace>(query.list());
             result = temp;
         } catch (Exception e) {
-            new ManagerException("Could not get workspace for account " + account.getEmail(), e);
+            if (session.isOpen()) {
+                session.close();
+            }
+            throw new ManagerException("Could not get workspace for account " + account.getEmail(),
+                    e);
         } finally {
             if (session.isOpen()) {
                 session.close();
