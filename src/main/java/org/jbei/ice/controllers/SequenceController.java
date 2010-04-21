@@ -213,8 +213,7 @@ public class SequenceController extends Controller {
                         end = featuredDNASequence.getSequence().length() - 1;
                     }
 
-                    String featureSequence = featuredDNASequence.getSequence()
-                            .substring(start, end);
+                    String featureSequence = "";
 
                     if (start > end) { // over zero case
                         featureSequence = featuredDNASequence.getSequence().substring(start,

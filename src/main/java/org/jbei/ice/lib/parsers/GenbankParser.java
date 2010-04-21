@@ -70,6 +70,10 @@ public class GenbankParser extends AbstractParser {
                             featureName = note.getValue();
 
                             continue;
+                        } else if (note.getTerm().getName().toLowerCase().equals("apeinfo_label")) { // ApE only
+                            featureName = note.getValue();
+
+                            continue;
                         }
 
                         notesMap.put(note.getTerm().getName(), note.getValue());
