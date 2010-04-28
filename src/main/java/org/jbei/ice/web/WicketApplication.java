@@ -13,6 +13,7 @@ import org.jbei.ice.lib.permissions.IceAuthorizationStrategy;
 import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.web.pages.AdminPage;
 import org.jbei.ice.web.pages.BlastPage;
+import org.jbei.ice.web.pages.DBPage;
 import org.jbei.ice.web.pages.EntriesPage;
 import org.jbei.ice.web.pages.EntryNewPage;
 import org.jbei.ice.web.pages.EntryTipPage;
@@ -78,6 +79,8 @@ public class WicketApplication extends WebApplication {
     }
 
     private void mountPages() {
+        mountBookmarkablePage("/db_features_reupload", DBPage.class); // TODO: Zinovii; Remove this
+
         mountBookmarkablePage("/login", LoginPage.class);
         mountBookmarkablePage("/logout", LogOutPage.class);
         mountBookmarkablePage("/registration", RegistrationPage.class);
