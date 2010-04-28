@@ -1,5 +1,7 @@
 package org.jbei.ice.controllers;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -104,6 +106,11 @@ public class SequenceController extends Controller {
                 Sequence oldSequence = getByEntry(entry);
 
                 if (oldSequence != null) {
+                    if ((sequence.getSequenceUser() == null || sequence.getSequenceUser().isEmpty())
+                            && oldSequence.getSequenceUser() != null) {
+                        sequence.setSequenceUser(oldSequence.getSequenceUser());
+                    }
+
                     SequenceManager.deleteSequence(oldSequence);
                 }
             }
@@ -145,15 +152,16 @@ public class SequenceController extends Controller {
         }
     }
 
-    public IDNASequence parse(String sequence) {
+    public static IDNASequence parse(String sequence) {
         return GeneralParser.getInstance().parse(sequence);
     }
 
-    public String compose(Sequence sequence, IFormatter formatter) throws SequenceComposerException {
+    public static String compose(Sequence sequence, IFormatter formatter)
+            throws SequenceComposerException {
         return SequenceComposer.compose(sequence, formatter);
     }
 
-    public FeaturedDNASequence sequenceToDNASequence(Sequence sequence) {
+    public static FeaturedDNASequence sequenceToDNASequence(Sequence sequence) {
         if (sequence == null) {
             return null;
         }
@@ -162,10 +170,45 @@ public class SequenceController extends Controller {
 
         if (sequence.getSequenceFeatures() != null && sequence.getSequenceFeatures().size() > 0) {
             for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
+                LinkedHashMap<String, ArrayList<String>> notes = new LinkedHashMap<String, ArrayList<String>>();
+
+                if (sequenceFeature.getDescription() != null
+                        && sequenceFeature.getDescription().isEmpty()) {
+
+                    List<String> noteLines = (List<String>) Arrays.asList(sequenceFeature
+                            .getDescription().split("\n"));
+
+                    if (noteLines != null && noteLines.size() > 0) {
+                        for (int i = 0; i < noteLines.size(); i++) {
+                            String line = noteLines.get(i);
+
+                            String key = "";
+                            String value = "";
+                            for (int j = 0; i < line.length(); j++) {
+                                if (line.charAt(j) == '=') {
+                                    key = line.substring(0, j);
+                                    value = line.substring(j + 1, line.length());
+
+                                    break;
+                                }
+                            }
+
+                            if (notes.containsKey(key)) {
+                                notes.get(key).add(value);
+                            } else {
+                                ArrayList<String> values = new ArrayList<String>();
+
+                                values.add(value);
+
+                                notes.put(key, values);
+                            }
+                        }
+                    }
+                }
+
                 DNAFeature dnaFeature = new DNAFeature(sequenceFeature.getStart(), sequenceFeature
-                        .getEnd(), sequenceFeature.getFeature().getGenbankType(), sequenceFeature
-                        .getFeature().getName(), sequenceFeature.getStrand(),
-                        new LinkedHashMap<String, String>());
+                        .getEnd(), sequenceFeature.getGenbankType(), sequenceFeature.getName(),
+                        sequenceFeature.getStrand(), notes);
 
                 features.add(dnaFeature);
             }
@@ -177,7 +220,7 @@ public class SequenceController extends Controller {
         return featuredDNASequence;
     }
 
-    public Sequence dnaSequenceToSequence(IDNASequence dnaSequence) {
+    public static Sequence dnaSequenceToSequence(IDNASequence dnaSequence) {
         if (dnaSequence == null) {
             return null;
         }
@@ -201,39 +244,50 @@ public class SequenceController extends Controller {
                     int start = dnaFeature.getStart();
                     int end = dnaFeature.getEnd();
 
-                    if (start < 0) {
-                        start = 0;
-                    } else if (start > featuredDNASequence.getSequence().length() - 1) {
-                        start = featuredDNASequence.getSequence().length() - 1;
+                    if (start < 1) {
+                        start = 1;
+                    } else if (start > featuredDNASequence.getSequence().length()) {
+                        start = featuredDNASequence.getSequence().length();
                     }
 
-                    if (end < 0) {
-                        end = 0;
-                    } else if (end > featuredDNASequence.getSequence().length() - 1) {
-                        end = featuredDNASequence.getSequence().length() - 1;
+                    if (end < 1) {
+                        end = 1;
+                    } else if (end > featuredDNASequence.getSequence().length()) {
+                        end = featuredDNASequence.getSequence().length();
                     }
 
                     String featureSequence = "";
 
                     if (start > end) { // over zero case
-                        featureSequence = featuredDNASequence.getSequence().substring(start,
-                            featuredDNASequence.getSequence().length() - 1);
+                        featureSequence = featuredDNASequence.getSequence().substring(start - 1,
+                            featuredDNASequence.getSequence().length());
                         featureSequence += featuredDNASequence.getSequence().substring(0, end);
                     } else { // normal
-                        featureSequence = featuredDNASequence.getSequence().substring(start, end);
+                        featureSequence = featuredDNASequence.getSequence().substring(start - 1,
+                            end);
+                    }
+
+                    if (dnaFeature.getStrand() == -1) {
+                        featureSequence = SequenceUtils.reverseComplement(featureSequence);
                     }
 
                     StringBuilder descriptionNotes = new StringBuilder();
 
                     if (dnaFeature.getNotes() != null && dnaFeature.getNotes().size() > 0) {
-                        Iterator<java.util.Map.Entry<String, String>> iterator = dnaFeature
+                        Iterator<java.util.Map.Entry<String, ArrayList<String>>> iterator = dnaFeature
                                 .getNotes().entrySet().iterator();
 
                         while (iterator.hasNext()) {
-                            java.util.Map.Entry<String, String> pairs = iterator.next();
+                            java.util.Map.Entry<String, ArrayList<String>> pairs = (java.util.Map.Entry<String, ArrayList<String>>) iterator
+                                    .next();
+                            for (int k = 0; k < pairs.getValue().size(); k++) {
+                                descriptionNotes.append(pairs.getKey()).append("=").append("\"")
+                                        .append(pairs.getValue().get(k)).append("\"");
 
-                            descriptionNotes.append(pairs.getKey()).append("=").append(
-                                pairs.getValue());
+                                if (k < pairs.getValue().size() - 1) {
+                                    descriptionNotes.append("\n");
+                                }
+                            }
 
                             if (iterator.hasNext()) {
                                 descriptionNotes.append("\n");
@@ -246,7 +300,8 @@ public class SequenceController extends Controller {
                                     .getType());
 
                     SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature, start,
-                            end, dnaFeature.getStrand(), dnaFeature.getName());
+                            end, dnaFeature.getStrand(), dnaFeature.getName(), descriptionNotes
+                                    .toString(), dnaFeature.getType());
 
                     sequenceFeatures.add(sequenceFeature);
                 }
