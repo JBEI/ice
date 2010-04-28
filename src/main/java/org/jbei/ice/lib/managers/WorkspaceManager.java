@@ -183,7 +183,18 @@ public class WorkspaceManager {
         Workspace result = null;
 
         try {
-            result = (Workspace) DAO.save(workspace);
+            Workspace existingWorkspace = get(workspace.getAccount(), workspace.getEntry());
+            // prevent duplicate workspace rows
+            if (existingWorkspace != null) {
+                existingWorkspace.setDateAdded(workspace.getDateAdded());
+                existingWorkspace.setDateVisited(workspace.getDateVisited());
+                existingWorkspace.setInWorkspace(workspace.isInWorkspace());
+                existingWorkspace.setStarred(workspace.isStarred());
+                existingWorkspace.setNumberVisited(workspace.getNumberVisited());
+                result = (Workspace) DAO.save(existingWorkspace);
+            } else {
+                result = (Workspace) DAO.save(workspace);
+            }
         } catch (DAOException e) {
             throw new ManagerException("Failed to save workspace!", e);
         }
