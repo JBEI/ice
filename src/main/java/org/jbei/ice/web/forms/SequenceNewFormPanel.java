@@ -79,7 +79,7 @@ public class SequenceNewFormPanel extends Panel {
             SequenceController sequenceController = new SequenceController(IceSession.get()
                     .getAccount());
 
-            IDNASequence dnaSequence = sequenceController.parse(sequenceUser);
+            IDNASequence dnaSequence = SequenceController.parse(sequenceUser);
 
             if (dnaSequence == null) {
                 error("Couldn't parse sequence file! Supported formats: "
@@ -91,7 +91,7 @@ public class SequenceNewFormPanel extends Panel {
             Sequence sequence = null;
 
             try {
-                sequence = sequenceController.dnaSequenceToSequence(dnaSequence);
+                sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
 
                 sequence.setSequenceUser(sequenceUser);
                 sequence.setEntry(entry);

@@ -182,8 +182,7 @@ public class VectorEditorService extends BaseService {
                 return false;
             }
 
-            Sequence sequence = sequenceController
-                    .dnaSequenceToSequence(featuredDNASequence);
+            Sequence sequence = SequenceController.dnaSequenceToSequence(featuredDNASequence);
 
             sequence.setEntry(entry);
             sequenceController.update(sequence);

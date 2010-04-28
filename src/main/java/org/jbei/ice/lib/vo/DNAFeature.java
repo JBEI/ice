@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.vo;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -12,14 +13,14 @@ public class DNAFeature implements Serializable {
     private String type = "";
     private String name = "";
     private int strand = 1;
-    private Map<String, String> notes = new LinkedHashMap<String, String>();
+    private Map<String, ArrayList<String>> notes = new LinkedHashMap<String, ArrayList<String>>();
 
     public DNAFeature() {
         super();
     }
 
     public DNAFeature(int start, int end, String type, String name, int strand,
-            Map<String, String> notes) {
+            Map<String, ArrayList<String>> notes) {
         super();
 
         this.start = start;
@@ -62,11 +63,11 @@ public class DNAFeature implements Serializable {
         this.name = name;
     }
 
-    public Map<String, String> getNotes() {
+    public Map<String, ArrayList<String>> getNotes() {
         return notes;
     }
 
-    public void setNotes(Map<String, String> notes) {
+    public void setNotes(Map<String, ArrayList<String>> notes) {
         this.notes = notes;
     }
 

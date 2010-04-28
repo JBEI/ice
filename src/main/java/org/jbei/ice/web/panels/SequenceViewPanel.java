@@ -239,9 +239,6 @@ public class SequenceViewPanel extends Panel {
             public void onClick() {
                 String sequenceString = null;
                 try {
-                    SequenceController sequenceController = new SequenceController(IceSession.get()
-                            .getAccount());
-
                     GenbankFormatter genbankFormatter = new GenbankFormatter(sequence.getEntry()
                             .getNamesAsString());
                     genbankFormatter
@@ -249,7 +246,7 @@ public class SequenceViewPanel extends Panel {
                                     .getEntry()).getCircular()
                                     : false);
 
-                    sequenceString = sequenceController.compose(sequence, genbankFormatter);
+                    sequenceString = SequenceController.compose(sequence, genbankFormatter);
                 } catch (SequenceComposerException e) {
                     throw new ViewException("Failed to generate genbank file for download!", e);
                 }
@@ -272,12 +269,9 @@ public class SequenceViewPanel extends Panel {
 
             @Override
             public void onClick() {
-                SequenceController sequenceController = new SequenceController(IceSession.get()
-                        .getAccount());
-
                 String sequenceString = null;
                 try {
-                    sequenceString = sequenceController.compose(sequence, new FastaFormatter(
+                    sequenceString = SequenceController.compose(sequence, new FastaFormatter(
                             sequence.getEntry().getNamesAsString()));
                 } catch (SequenceComposerException e) {
                     throw new ViewException("Failed to generate fasta file for download!", e);

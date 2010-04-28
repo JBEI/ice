@@ -822,7 +822,7 @@ public class RegistryAPI {
 
             Entry entry = entryController.getByRecordId(entryId);
 
-            sequence = sequenceController.sequenceToDNASequence(sequenceController
+            sequence = SequenceController.sequenceToDNASequence(sequenceController
                     .getByEntry(entry));
 
             log("User '" + entryController.getAccount().getEmail() + "' pulled sequence: '"
@@ -895,7 +895,7 @@ public class RegistryAPI {
                         .setCircular((sequence.getEntry() instanceof Plasmid) ? ((Plasmid) entry)
                                 .getCircular() : false);
 
-                genbankSequence = sequenceController.compose(sequence, genbankFormatter);
+                genbankSequence = SequenceController.compose(sequence, genbankFormatter);
             }
 
             log("User '" + entryController.getAccount().getEmail()
@@ -929,7 +929,7 @@ public class RegistryAPI {
             Sequence sequence = sequenceController.getByEntry(entry);
 
             if (sequence != null) {
-                fastaSequence = sequenceController.compose(sequence, new FastaFormatter(entry
+                fastaSequence = SequenceController.compose(sequence, new FastaFormatter(entry
                         .getNamesAsString()));
             }
 
@@ -977,12 +977,12 @@ public class RegistryAPI {
                         "Entry has sequence already assigned. Remove it first and then create new one.");
             }
 
-            Sequence sequence = sequenceController.dnaSequenceToSequence(featuredDNASequence);
+            Sequence sequence = SequenceController.dnaSequenceToSequence(featuredDNASequence);
 
             sequence.setEntry(entry);
 
             try {
-                savedFeaturedDNASequence = sequenceController
+                savedFeaturedDNASequence = SequenceController
                         .sequenceToDNASequence(sequenceController.save(sequence));
 
                 log("User '" + entryController.getAccount().getEmail() + "' saved sequence: '"
@@ -1054,7 +1054,7 @@ public class RegistryAPI {
         EntryController entryController = getEntryController(sessionId);
         SequenceController sequenceController = getSequenceController(sessionId);
 
-        FeaturedDNASequence dnaSequence = (FeaturedDNASequence) sequenceController.parse(sequence);
+        FeaturedDNASequence dnaSequence = (FeaturedDNASequence) SequenceController.parse(sequence);
 
         if (dnaSequence == null) {
             throw new ServiceException("Couldn't parse sequence file! Supported formats: "
@@ -1078,14 +1078,14 @@ public class RegistryAPI {
             }
 
             try {
-                modelSequence = sequenceController.dnaSequenceToSequence(dnaSequence);
+                modelSequence = SequenceController.dnaSequenceToSequence(dnaSequence);
 
                 modelSequence.setEntry(entry);
                 modelSequence.setSequenceUser(sequence);
 
                 Sequence savedSequence = sequenceController.save(modelSequence);
 
-                savedFeaturedDNASequence = sequenceController.sequenceToDNASequence(savedSequence);
+                savedFeaturedDNASequence = SequenceController.sequenceToDNASequence(savedSequence);
 
                 log("User '" + entryController.getAccount().getEmail()
                         + "' uploaded new sequence: '" + entryId + "'");
