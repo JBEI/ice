@@ -17,7 +17,6 @@ import org.biojavax.RichAnnotation;
 import org.biojavax.RichObjectFactory;
 import org.biojavax.SimpleNote;
 import org.biojavax.SimpleRichAnnotation;
-import org.biojavax.bio.seq.Position;
 import org.biojavax.bio.seq.RichFeature;
 import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.seq.SimplePosition;
@@ -121,12 +120,10 @@ public class GenbankFormatter extends AbstractFormatter {
                     }
 
                     RichFeature.Template featureTemplate = new RichFeature.Template();
-                    RichAnnotation richAnnotation = getAnnotations(sequenceFeature);
-
-                    featureTemplate.annotation = richAnnotation;
-                    featureTemplate.location = new SimpleRichLocation(
-                            getMinPosition(sequenceFeature), getMaxPosition(sequenceFeature), 1,
-                            getStrand(sequenceFeature));
+                    featureTemplate.annotation = getAnnotations(sequenceFeature);
+                    featureTemplate.location = new SimpleRichLocation(new SimplePosition(
+                            sequenceFeature.getStart()), new SimplePosition(sequenceFeature
+                            .getEnd()), 1, getStrand(sequenceFeature));
 
                     featureTemplate.source = getDefaultFeatureSource();
                     featureTemplate.type = getFeatureType(sequenceFeature);
@@ -165,14 +162,13 @@ public class GenbankFormatter extends AbstractFormatter {
     protected RichAnnotation getAnnotations(SequenceFeature sequenceFeature) {
         RichAnnotation richAnnotation = new SimpleRichAnnotation();
 
-        if (sequenceFeature.getName() == null || sequenceFeature.getName().isEmpty()) {
-            return richAnnotation;
+        if (sequenceFeature.getName() != null && !sequenceFeature.getName().isEmpty()) {
+            richAnnotation.addNote(new SimpleNote(RichObjectFactory.getDefaultOntology()
+                    .getOrCreateTerm("label"), '"' + normalizeFeatureValue(sequenceFeature
+                    .getName()) + '"', 1));
         }
 
-        richAnnotation.addNote(new SimpleNote(RichObjectFactory.getDefaultOntology()
-                .getOrCreateTerm("label"), sequenceFeature.getName(), 1));
-
-        String descriptionNotes = sequenceFeature.getFeature().getDescription();
+        String descriptionNotes = sequenceFeature.getDescription();
 
         if (descriptionNotes == null || descriptionNotes.isEmpty()) {
             return richAnnotation;
@@ -199,37 +195,22 @@ public class GenbankFormatter extends AbstractFormatter {
             }
 
             richAnnotation.addNote(new SimpleNote(RichObjectFactory.getDefaultOntology()
-                    .getOrCreateTerm(key), value, i + 2));
+                    .getOrCreateTerm(key), normalizeFeatureValue(value), i + 2));
         }
 
         return richAnnotation;
     }
 
-    protected Position getMinPosition(SequenceFeature sequenceFeature) {
-        int min = sequenceFeature.getStart() < sequenceFeature.getEnd() ? sequenceFeature
-                .getStart() : sequenceFeature.getEnd();
-
-        return new SimplePosition(min);
-    }
-
-    protected Position getMaxPosition(SequenceFeature sequenceFeature) {
-        int max = sequenceFeature.getStart() < sequenceFeature.getEnd() ? sequenceFeature.getEnd()
-                : sequenceFeature.getStart();
-
-        return new SimplePosition(max);
-    }
-
     protected String getFeatureType(SequenceFeature sequenceFeature) {
         String featureType;
 
-        if (sequenceFeature.getFeature().getGenbankType() == null
-                || sequenceFeature.getFeature().getGenbankType().isEmpty()) {
+        if (sequenceFeature.getGenbankType() == null || sequenceFeature.getGenbankType().isEmpty()) {
             Logger.warn("SequenceFeature by id: " + sequenceFeature.getId()
                     + " has invalid genbank type.");
 
             featureType = "misc_feature";
         } else {
-            featureType = sequenceFeature.getFeature().getGenbankType();
+            featureType = sequenceFeature.getGenbankType();
         }
 
         return featureType;
@@ -237,5 +218,22 @@ public class GenbankFormatter extends AbstractFormatter {
 
     protected String getDefaultFeatureSource() {
         return "org.jbei";
+    }
+
+    private String normalizeFeatureValue(String value) {
+        if (value == null || value.isEmpty()) {
+            return "";
+        }
+
+        String result = value.trim();
+        if (result.length() > 2) {
+            if (result.charAt(0) == '"' || result.charAt(value.length() - 1) == '"') {
+                result = result.substring(1, value.length() - 1);
+
+                result = result.trim();
+            }
+        }
+
+        return result;
     }
 }
