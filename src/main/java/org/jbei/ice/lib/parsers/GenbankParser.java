@@ -2,6 +2,7 @@ package org.jbei.ice.lib.parsers;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Set;
 import org.biojava.bio.BioException;
 import org.biojava.bio.seq.Feature;
 import org.biojavax.Note;
+import org.biojavax.RankedCrossRef;
 import org.biojavax.bio.seq.RichFeature;
 import org.biojavax.bio.seq.RichLocation;
 import org.biojavax.bio.seq.RichSequence;
@@ -55,32 +57,101 @@ public class GenbankParser extends AbstractParser {
                 for (Feature feature : featureSet) {
                     RichFeature richFeature = (RichFeature) feature;
 
+                    String genbankType = richFeature.getType();
+
                     String featureName = "";
 
-                    Map<String, String> notesMap = new LinkedHashMap<String, String>();
+                    Map<String, ArrayList<String>> notesMap = new LinkedHashMap<String, ArrayList<String>>();
                     Set<Note> notes = richFeature.getNoteSet();
                     for (Note note : notes) {
                         if (note.getTerm().getName().toLowerCase().equals("name")) {
-                            notesMap.put("name", note.getValue());
+                            featureName = cleanFeatureValue(note.getValue());
 
-                            featureName = note.getValue();
+                            if (notesMap.containsKey("name")) {
+                                notesMap.get("name").add(featureName);
+                            } else {
+                                ArrayList<String> names = new ArrayList<String>();
+
+                                names.add(featureName);
+
+                                notesMap.put("name", names);
+                            }
 
                             continue;
                         } else if (note.getTerm().getName().toLowerCase().equals("label")) {
-                            featureName = note.getValue();
+                            featureName = cleanFeatureValue(note.getValue());
 
                             continue;
                         } else if (note.getTerm().getName().toLowerCase().equals("apeinfo_label")) { // ApE only
-                            featureName = note.getValue();
+                            featureName = cleanFeatureValue(note.getValue());
 
                             continue;
                         }
 
-                        notesMap.put(note.getTerm().getName(), note.getValue());
+                        if (notesMap.containsKey(note.getTerm().getName())) {
+                            notesMap.get(note.getTerm().getName()).add(featureName);
+                        } else {
+                            ArrayList<String> values = new ArrayList<String>();
+
+                            values.add(cleanFeatureValue(note.getValue()));
+
+                            notesMap.put(note.getTerm().getName(), values);
+                        }
+                    }
+
+                    // special case for source feature; it stores organism info and db_xref in richSequence
+                    if (genbankType.equals("source") && richSequence.getTaxon() != null) {
+                        if (richSequence.getTaxon().getDisplayName() != null
+                                && !richSequence.getTaxon().getDisplayName().isEmpty()) {
+                            if (notesMap.containsKey("organism")) {
+                                notesMap.get("organism").add(
+                                    richSequence.getTaxon().getDisplayName());
+                            } else {
+                                ArrayList<String> values = new ArrayList<String>();
+
+                                values.add(cleanFeatureValue(richSequence.getTaxon()
+                                        .getDisplayName()));
+
+                                notesMap.put("organism", values);
+                            }
+                        }
+
+                        if (richSequence.getTaxon().getNCBITaxID() > 0) {
+                            if (notesMap.containsKey("db_xref")) {
+                                notesMap.get("db_xref").add(
+                                    cleanFeatureValue("taxon:"
+                                            + richSequence.getTaxon().getNCBITaxID()));
+                            } else {
+                                ArrayList<String> values = new ArrayList<String>();
+
+                                values.add(cleanFeatureValue("taxon:"
+                                        + richSequence.getTaxon().getNCBITaxID()));
+
+                                notesMap.put("db_xref", values);
+                            }
+                        }
+                    }
+
+                    if (richFeature.getRankedCrossRefs() != null
+                            && richFeature.getRankedCrossRefs().size() > 0) {
+                        for (Object object : richFeature.getRankedCrossRefs()) {
+                            RankedCrossRef rankedCrossRef = (RankedCrossRef) object;
+
+                            if (notesMap.containsKey("db_xref")) {
+                                notesMap.get("db_xref").add(
+                                    cleanFeatureValue(rankedCrossRef.getCrossRef().toString()));
+                            } else {
+                                ArrayList<String> values = new ArrayList<String>();
+
+                                values.add(cleanFeatureValue(rankedCrossRef.getCrossRef()
+                                        .toString()));
+
+                                notesMap.put("db_xref", values);
+                            }
+                        }
                     }
 
                     RichLocation featureLocation = (RichLocation) richFeature.getLocation();
-                    String genbankType = richFeature.getType();
                     int start = featureLocation.getMin() - 1;
                     int end = featureLocation.getMax() - 1;
 
@@ -98,17 +169,10 @@ public class GenbankParser extends AbstractParser {
                         end = dnaSequence.length() - 1;
                     }
 
-                    String featureDNASequence = "";
-
-                    if (start > end) { // over zero case
-                        featureDNASequence = dnaSequence.substring(start, dnaSequence.length() - 1);
-                        featureDNASequence += dnaSequence.substring(0, end);
-                    } else { // normal
-                        featureDNASequence = sequence.getSequence().substring(start, end);
-                    }
+                    int strand = featureLocation.getStrand().intValue();
 
                     DNAFeature dnaFeature = new DNAFeature(start + 1, end + 1, genbankType,
-                            featureName, featureLocation.getStrand().intValue(), notesMap);
+                            featureName, strand, notesMap);
 
                     dnaFeatures.add(dnaFeature);
                 }
@@ -118,5 +182,19 @@ public class GenbankParser extends AbstractParser {
         }
 
         return sequence;
+    }
+
+    private String cleanFeatureValue(String value) {
+        if (value == null || value.isEmpty()) {
+            return "";
+        }
+
+        String result = value.trim();
+        result = result.replace("&quot;", "\""); // remove &quot;
+        result = result.replace("\\", " "); // remove VectorNTI slashes
+        result = result.replaceAll("\\s+", " "); // remove double spaces
+        result = result.trim(); // trim again
+
+        return result;
     }
 }
