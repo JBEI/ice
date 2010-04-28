@@ -13,6 +13,8 @@ import org.jbei.ice.controllers.SearchController;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
+import org.jbei.ice.lib.composers.formatters.FastaFormatter;
+import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
@@ -812,7 +814,6 @@ public class RegistryAPI {
     public FeaturedDNASequence getSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
-
         FeaturedDNASequence sequence = null;
 
         try {
@@ -839,6 +840,114 @@ public class RegistryAPI {
         }
 
         return sequence;
+    }
+
+    public String getOriginalGenBankSequence(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
+            ServicePermissionException {
+        String genbankSequence = "";
+
+        try {
+            SequenceController sequenceController = getSequenceController(sessionId);
+            EntryController entryController = getEntryController(sessionId);
+
+            Entry entry = entryController.getByRecordId(entryId);
+
+            Sequence sequence = sequenceController.getByEntry(entry);
+
+            if (sequence != null) {
+                genbankSequence = sequence.getSequenceUser();
+            }
+
+            log("User '" + entryController.getAccount().getEmail()
+                    + "' pulled original genbank sequence: '" + entryId + "'");
+        } catch (PermissionException e) {
+            throw new ServicePermissionException("No permission to read this entry");
+        } catch (ControllerException e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
+        } catch (Exception e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
+        }
+
+        return genbankSequence;
+    }
+
+    public String getGenBankSequence(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
+            ServicePermissionException {
+        String genbankSequence = "";
+
+        try {
+            SequenceController sequenceController = getSequenceController(sessionId);
+            EntryController entryController = getEntryController(sessionId);
+
+            Entry entry = entryController.getByRecordId(entryId);
+
+            Sequence sequence = sequenceController.getByEntry(entry);
+
+            if (sequence != null) {
+                GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getNamesAsString());
+                genbankFormatter
+                        .setCircular((sequence.getEntry() instanceof Plasmid) ? ((Plasmid) entry)
+                                .getCircular() : false);
+
+                genbankSequence = sequenceController.compose(sequence, genbankFormatter);
+            }
+
+            log("User '" + entryController.getAccount().getEmail()
+                    + "' pulled generated genbank sequence: '" + entryId + "'");
+        } catch (PermissionException e) {
+            throw new ServicePermissionException("No permission to read this entry");
+        } catch (ControllerException e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
+        } catch (Exception e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
+        }
+
+        return genbankSequence;
+    }
+
+    public String getFastaSequence(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
+            ServicePermissionException {
+        String fastaSequence = "";
+
+        try {
+            SequenceController sequenceController = getSequenceController(sessionId);
+            EntryController entryController = getEntryController(sessionId);
+
+            Entry entry = entryController.getByRecordId(entryId);
+
+            Sequence sequence = sequenceController.getByEntry(entry);
+
+            if (sequence != null) {
+                fastaSequence = sequenceController.compose(sequence, new FastaFormatter(entry
+                        .getNamesAsString()));
+            }
+
+            log("User '" + entryController.getAccount().getEmail()
+                    + "' pulled generated fasta sequence: '" + entryId + "'");
+        } catch (PermissionException e) {
+            throw new ServicePermissionException("No permission to read this entry");
+        } catch (ControllerException e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
+        } catch (Exception e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
+        }
+
+        return fastaSequence;
     }
 
     public FeaturedDNASequence createSequence(@WebParam(name = "sessionId") String sessionId,
@@ -1017,7 +1126,7 @@ public class RegistryAPI {
     protected Account validateAccount(@WebParam(name = "sessionId") String sessionId)
             throws ServiceException, SessionException {
         if (!isAuthenticated(sessionId)) {
-            throw new SessionException("Not uauthorized access! Autorize first!");
+            throw new SessionException("Unauthorized access! Autorize first!");
         }
 
         Account account = null;
