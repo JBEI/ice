@@ -24,15 +24,9 @@ public class Feature implements IFeatureValueObject, IModel {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
     private int id;
 
-    /**
-     * This field is the human annotated name. It is to be used for auto fill.
-     */
     @Column(name = "name", length = 127)
     private String name;
 
-    /**
-     * this is the human annotated description.
-     */
     @Column(name = "description")
     @Lob
     private String description;

@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
@@ -46,20 +47,28 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
     @Column(name = "name", length = 127)
     private String name;
 
+    @Column(name = "description")
+    @Lob
+    private String description;
+
+    @Column(name = "genbank_type", length = 127)
+    private String genbankType;
+
     public SequenceFeature() {
         super();
     }
 
     public SequenceFeature(Sequence sequence, Feature feature, int start, int end, int strand,
-            String name) {
+            String name, String description, String genbankType) {
         super();
-
         this.sequence = sequence;
         this.feature = feature;
         this.start = start;
         this.end = end;
         this.strand = strand;
         this.name = name;
+        this.description = description;
+        this.genbankType = genbankType;
     }
 
     public void setId(int id) {
@@ -118,5 +127,21 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getGenbankType() {
+        return genbankType;
+    }
+
+    public void setGenbankType(String genbankType) {
+        this.genbankType = genbankType;
     }
 }
