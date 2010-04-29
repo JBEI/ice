@@ -2,11 +2,8 @@ package org.jbei.ice.lib.parsers;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.biojava.bio.BioException;
@@ -19,6 +16,7 @@ import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.seq.RichSequenceIterator;
 import org.biojavax.bio.seq.RichSequence.IOTools;
 import org.jbei.ice.lib.vo.DNAFeature;
+import org.jbei.ice.lib.vo.DNAFeatureNote;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
 
@@ -61,21 +59,14 @@ public class GenbankParser extends AbstractParser {
 
                     String featureName = "";
 
-                    Map<String, ArrayList<String>> notesMap = new LinkedHashMap<String, ArrayList<String>>();
+                    DNAFeature dnaFeature = new DNAFeature();
+
                     Set<Note> notes = richFeature.getNoteSet();
                     for (Note note : notes) {
                         if (note.getTerm().getName().toLowerCase().equals("name")) {
                             featureName = cleanFeatureValue(note.getValue());
 
-                            if (notesMap.containsKey("name")) {
-                                notesMap.get("name").add(featureName);
-                            } else {
-                                ArrayList<String> names = new ArrayList<String>();
-
-                                names.add(featureName);
-
-                                notesMap.put("name", names);
-                            }
+                            dnaFeature.addNote(new DNAFeatureNote("name", featureName));
 
                             continue;
                         } else if (note.getTerm().getName().toLowerCase().equals("label")) {
@@ -88,47 +79,23 @@ public class GenbankParser extends AbstractParser {
                             continue;
                         }
 
-                        if (notesMap.containsKey(note.getTerm().getName())) {
-                            notesMap.get(note.getTerm().getName()).add(featureName);
-                        } else {
-                            ArrayList<String> values = new ArrayList<String>();
-
-                            values.add(cleanFeatureValue(note.getValue()));
-
-                            notesMap.put(note.getTerm().getName(), values);
-                        }
+                        dnaFeature.addNote(new DNAFeatureNote(note.getTerm().getName(),
+                                cleanFeatureValue(note.getValue())));
                     }
 
                     // special case for source feature; it stores organism info and db_xref in richSequence
                     if (genbankType.equals("source") && richSequence.getTaxon() != null) {
                         if (richSequence.getTaxon().getDisplayName() != null
                                 && !richSequence.getTaxon().getDisplayName().isEmpty()) {
-                            if (notesMap.containsKey("organism")) {
-                                notesMap.get("organism").add(
-                                    richSequence.getTaxon().getDisplayName());
-                            } else {
-                                ArrayList<String> values = new ArrayList<String>();
 
-                                values.add(cleanFeatureValue(richSequence.getTaxon()
-                                        .getDisplayName()));
-
-                                notesMap.put("organism", values);
-                            }
+                            dnaFeature.addNote(new DNAFeatureNote("organism", richSequence
+                                    .getTaxon().getDisplayName()));
                         }
 
                         if (richSequence.getTaxon().getNCBITaxID() > 0) {
-                            if (notesMap.containsKey("db_xref")) {
-                                notesMap.get("db_xref").add(
+                            dnaFeature.addNote(new DNAFeatureNote("db_xref",
                                     cleanFeatureValue("taxon:"
-                                            + richSequence.getTaxon().getNCBITaxID()));
-                            } else {
-                                ArrayList<String> values = new ArrayList<String>();
-
-                                values.add(cleanFeatureValue("taxon:"
-                                        + richSequence.getTaxon().getNCBITaxID()));
-
-                                notesMap.put("db_xref", values);
-                            }
+                                            + richSequence.getTaxon().getNCBITaxID())));
                         }
                     }
 
@@ -137,17 +104,8 @@ public class GenbankParser extends AbstractParser {
                         for (Object object : richFeature.getRankedCrossRefs()) {
                             RankedCrossRef rankedCrossRef = (RankedCrossRef) object;
 
-                            if (notesMap.containsKey("db_xref")) {
-                                notesMap.get("db_xref").add(
-                                    cleanFeatureValue(rankedCrossRef.getCrossRef().toString()));
-                            } else {
-                                ArrayList<String> values = new ArrayList<String>();
-
-                                values.add(cleanFeatureValue(rankedCrossRef.getCrossRef()
-                                        .toString()));
-
-                                notesMap.put("db_xref", values);
-                            }
+                            dnaFeature.addNote(new DNAFeatureNote("db_xref",
+                                    cleanFeatureValue(rankedCrossRef.getCrossRef().toString())));
                         }
                     }
 
@@ -171,8 +129,11 @@ public class GenbankParser extends AbstractParser {
 
                     int strand = featureLocation.getStrand().intValue();
 
-                    DNAFeature dnaFeature = new DNAFeature(start + 1, end + 1, genbankType,
-                            featureName, strand, notesMap);
+                    dnaFeature.setStart(start + 1);
+                    dnaFeature.setEnd(end + 1);
+                    dnaFeature.setStrand(strand);
+                    dnaFeature.setType(genbankType);
+                    dnaFeature.setName(featureName);
 
                     dnaFeatures.add(dnaFeature);
                 }

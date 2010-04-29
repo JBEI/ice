@@ -194,6 +194,10 @@ public class GenbankFormatter extends AbstractFormatter {
                 }
             }
 
+            if (key == null || key.isEmpty() || key.toLowerCase().equals("label")) { // skip invalid or feature with "label" note
+                continue;
+            }
+
             richAnnotation.addNote(new SimpleNote(RichObjectFactory.getDefaultOntology()
                     .getOrCreateTerm(key), normalizeFeatureValue(value), i + 2));
         }

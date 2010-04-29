@@ -1,9 +1,6 @@
 package org.jbei.ice.controllers;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,6 +23,7 @@ import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.vo.DNAFeature;
+import org.jbei.ice.lib.vo.DNAFeatureNote;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
 
@@ -170,7 +168,7 @@ public class SequenceController extends Controller {
 
         if (sequence.getSequenceFeatures() != null && sequence.getSequenceFeatures().size() > 0) {
             for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
-                LinkedHashMap<String, ArrayList<String>> notes = new LinkedHashMap<String, ArrayList<String>>();
+                DNAFeature dnaFeature = new DNAFeature();
 
                 if (sequenceFeature.getDescription() != null
                         && sequenceFeature.getDescription().isEmpty()) {
@@ -193,22 +191,18 @@ public class SequenceController extends Controller {
                                 }
                             }
 
-                            if (notes.containsKey(key)) {
-                                notes.get(key).add(value);
-                            } else {
-                                ArrayList<String> values = new ArrayList<String>();
+                            DNAFeatureNote dnaFeatureNote = new DNAFeatureNote(key, value);
 
-                                values.add(value);
-
-                                notes.put(key, values);
-                            }
+                            dnaFeature.addNote(dnaFeatureNote);
                         }
                     }
                 }
 
-                DNAFeature dnaFeature = new DNAFeature(sequenceFeature.getStart(), sequenceFeature
-                        .getEnd(), sequenceFeature.getGenbankType(), sequenceFeature.getName(),
-                        sequenceFeature.getStrand(), notes);
+                dnaFeature.setEnd(sequenceFeature.getEnd());
+                dnaFeature.setStart(sequenceFeature.getStart());
+                dnaFeature.setType(sequenceFeature.getGenbankType());
+                dnaFeature.setName(sequenceFeature.getName());
+                dnaFeature.setStrand(sequenceFeature.getStrand());
 
                 features.add(dnaFeature);
             }
@@ -274,24 +268,16 @@ public class SequenceController extends Controller {
                     StringBuilder descriptionNotes = new StringBuilder();
 
                     if (dnaFeature.getNotes() != null && dnaFeature.getNotes().size() > 0) {
-                        Iterator<java.util.Map.Entry<String, ArrayList<String>>> iterator = dnaFeature
-                                .getNotes().entrySet().iterator();
-
-                        while (iterator.hasNext()) {
-                            java.util.Map.Entry<String, ArrayList<String>> pairs = (java.util.Map.Entry<String, ArrayList<String>>) iterator
-                                    .next();
-                            for (int k = 0; k < pairs.getValue().size(); k++) {
-                                descriptionNotes.append(pairs.getKey()).append("=").append("\"")
-                                        .append(pairs.getValue().get(k)).append("\"");
-
-                                if (k < pairs.getValue().size() - 1) {
-                                    descriptionNotes.append("\n");
-                                }
-                            }
-
-                            if (iterator.hasNext()) {
+                        int index = 0;
+                        for (DNAFeatureNote dnaFeatureNote : dnaFeature.getNotes()) {
+                            if (index > 0) {
                                 descriptionNotes.append("\n");
                             }
+
+                            descriptionNotes.append(dnaFeatureNote.getName()).append("=").append(
+                                "\"").append(dnaFeatureNote.getValue()).append("\"");
+
+                            index++;
                         }
                     }
 
