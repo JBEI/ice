@@ -30,6 +30,9 @@ public class SearchController extends Controller {
             return results;
         }
         String cleanedQuery = query.replace(":", " ");
+        cleanedQuery = cleanedQuery.replace("(", "\\(");
+        cleanedQuery = cleanedQuery.replace(")", "\\)");
+        cleanedQuery = cleanedQuery.replace("+", "\\+");
         if (cleanedQuery.startsWith("*")) {
             cleanedQuery = cleanedQuery.substring(1);
         }
