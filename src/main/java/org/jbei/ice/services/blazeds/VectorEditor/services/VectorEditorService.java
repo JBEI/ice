@@ -4,6 +4,8 @@ import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.composers.SequenceComposerException;
+import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountPreferences;
@@ -191,6 +193,42 @@ public class VectorEditorService extends BaseService {
 
             result = true;
         } catch (ControllerException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return result;
+        } catch (Exception e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return result;
+        }
+
+        return result;
+    }
+
+    public String generateGenBank(String authToken, FeaturedDNASequence featuredDNASequence,
+            String name, boolean isCircular) {
+        String result = "";
+
+        Account account = getAccountByToken(authToken);
+
+        if (account == null) {
+            return result;
+        }
+
+        if (featuredDNASequence == null) {
+            return result;
+        }
+
+        Sequence sequence = SequenceController.dnaSequenceToSequence(featuredDNASequence);
+
+        GenbankFormatter genbankFormatter = new GenbankFormatter(name);
+        genbankFormatter.setCircular(isCircular);
+
+        try {
+            result = SequenceController.compose(sequence, genbankFormatter);
+
+            logInfo(account.getEmail() + " generated and fetched genbank sequence");
+        } catch (SequenceComposerException e) {
             Logger.error(getLoggerPrefix(), e);
 
             return result;

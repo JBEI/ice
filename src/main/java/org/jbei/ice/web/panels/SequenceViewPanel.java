@@ -214,7 +214,7 @@ public class SequenceViewPanel extends Panel {
                     getRequestCycle().setRequestTarget(
                         new ResourceStreamRequestTarget(resourceStream, entry
                                 .getPartNumbersAsString()
-                                + ".gb"));
+                                + ".seq"));
                 }
             }
         };
