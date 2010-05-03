@@ -275,7 +275,7 @@ public class SequenceController extends Controller {
                             }
 
                             descriptionNotes.append(dnaFeatureNote.getName()).append("=").append(
-                                "\"").append(dnaFeatureNote.getValue()).append("\"");
+                                dnaFeatureNote.getValue());
 
                             index++;
                         }

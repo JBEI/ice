@@ -92,8 +92,9 @@ public class GenbankFormatter extends AbstractFormatter {
 
         SimpleRichSequence simpleRichSequence = null;
         try {
-            simpleRichSequence = new SimpleRichSequence(getNamespace(), name, accessionNumber,
-                    version, DNATools.createDNA(sequence.getSequence()), seqVersion);
+            simpleRichSequence = new SimpleRichSequence(getNamespace(), normalizeLocusName(name),
+                    accessionNumber, version, DNATools.createDNA(sequence.getSequence()),
+                    seqVersion);
 
             simpleRichSequence.setCircular(getCircular());
             if (getDescription() != null && !getDescription().isEmpty()) {
@@ -163,9 +164,9 @@ public class GenbankFormatter extends AbstractFormatter {
         RichAnnotation richAnnotation = new SimpleRichAnnotation();
 
         if (sequenceFeature.getName() != null && !sequenceFeature.getName().isEmpty()) {
-            richAnnotation.addNote(new SimpleNote(RichObjectFactory.getDefaultOntology()
-                    .getOrCreateTerm("label"), '"' + normalizeFeatureValue(sequenceFeature
-                    .getName()) + '"', 1));
+            richAnnotation
+                    .addNote(new SimpleNote(RichObjectFactory.getDefaultOntology().getOrCreateTerm(
+                        "label"), normalizeFeatureValue(sequenceFeature.getName()), 1));
         }
 
         String descriptionNotes = sequenceFeature.getDescription();
@@ -224,17 +225,38 @@ public class GenbankFormatter extends AbstractFormatter {
         return "org.jbei";
     }
 
+    private String normalizeLocusName(String locusName) {
+        if (locusName == null || locusName.isEmpty()) {
+            return "";
+        }
+
+        /* Locus name has to be max 10 characters long */
+        String result = locusName;
+
+        if (locusName.length() > 10) {
+            result = locusName.substring(0, 10);
+        }
+
+        return result;
+    }
+
     private String normalizeFeatureValue(String value) {
         if (value == null || value.isEmpty()) {
             return "";
         }
 
         String result = value.trim();
-        if (result.length() > 2) {
-            if (result.charAt(0) == '"' || result.charAt(value.length() - 1) == '"') {
-                result = result.substring(1, value.length() - 1);
+        while (true) {
+            if (result.length() > 2) {
+                if (result.charAt(0) == '"' || result.charAt(result.length() - 1) == '"') {
+                    result = result.substring(1, result.length() - 1);
 
-                result = result.trim();
+                    result = result.trim();
+                } else {
+                    break;
+                }
+            } else {
+                break;
             }
         }
 
