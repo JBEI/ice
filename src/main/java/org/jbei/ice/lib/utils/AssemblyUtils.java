@@ -6,7 +6,8 @@ import org.jbei.ice.lib.models.Part.AssemblyStandard;
 
 public interface AssemblyUtils {
 
-    public AssemblyStandard determineAssemblyStandard(String partSequenceString);
+    public AssemblyStandard determineAssemblyStandard(String partSequenceString)
+            throws UtilityException;
 
     public SequenceFeatureCollection determineAssemblyFeatures(Sequence partSequence)
             throws UtilityException;

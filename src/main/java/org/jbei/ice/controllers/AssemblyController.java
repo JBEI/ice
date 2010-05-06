@@ -34,18 +34,25 @@ public class AssemblyController extends Controller {
         getAssemblyUtils().add(new RawAssemblyUtils());
     }
 
-    public AssemblyStandard determineAssemblyStandard(Sequence partSequence) {
+    public AssemblyStandard determineAssemblyStandard(Sequence partSequence)
+            throws ControllerException {
         AssemblyStandard result = null;
         String partSequenceString = partSequence.getSequence();
         result = determineAssemblyStandard(partSequenceString);
         return result;
     }
 
-    public AssemblyStandard determineAssemblyStandard(String partSequenceString) {
+    public AssemblyStandard determineAssemblyStandard(String partSequenceString)
+            throws ControllerException {
         AssemblyStandard result = null;
         int counter = 0;
         while (result == null && counter < getAssemblyUtils().size()) {
-            result = getAssemblyUtils().get(counter).determineAssemblyStandard(partSequenceString);
+            try {
+                result = getAssemblyUtils().get(counter).determineAssemblyStandard(
+                    partSequenceString);
+            } catch (UtilityException e) {
+                throw new ControllerException(e);
+            }
             counter = counter + 1;
         }
         return result;

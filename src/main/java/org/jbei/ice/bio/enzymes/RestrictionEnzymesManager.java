@@ -45,6 +45,10 @@ public class RestrictionEnzymesManager {
         return lookupEnzyme;
     }
 
+    public org.biojava.bio.molbio.RestrictionEnzyme getBioJavaEnzyme(String name) {
+        return RestrictionEnzymeManager.getEnzyme(name);
+    }
+
     @SuppressWarnings("unchecked")
     private void loadEnzymes() throws RestrictionEnzymesManagerException {
         InputStream is = RestrictionEnzymesManager.class
@@ -53,7 +57,7 @@ public class RestrictionEnzymesManager {
         try {
             RestrictionEnzymeManager.loadEnzymeFile(is, false);
 
-            Set<org.biojava.bio.molbio.RestrictionEnzyme> reSet = (Set<org.biojava.bio.molbio.RestrictionEnzyme>) RestrictionEnzymeManager
+            Set<org.biojava.bio.molbio.RestrictionEnzyme> reSet = RestrictionEnzymeManager
                     .getAllEnzymes();
 
             for (org.biojava.bio.molbio.RestrictionEnzyme re : reSet) {

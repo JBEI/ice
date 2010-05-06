@@ -7,6 +7,13 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.biojava.bio.molbio.RestrictionEnzyme;
+import org.biojava.bio.molbio.RestrictionMapper;
+import org.biojava.bio.seq.DNATools;
+import org.biojava.bio.symbol.IllegalSymbolException;
+import org.biojava.utils.SimpleThreadPool;
+import org.jbei.ice.bio.enzymes.RestrictionEnzymesManager;
+import org.jbei.ice.bio.enzymes.RestrictionEnzymesManagerException;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -31,7 +38,8 @@ public class BiobrickBUtils implements AssemblyUtils {
     public static final String biobrickBScar = "ggatct";
     public static final String biobrickBScarFeatureName = "Biobrick B Scar";
 
-    public AssemblyStandard determineAssemblyStandard(String partSequenceString) {
+    public AssemblyStandard determineAssemblyStandard(String partSequenceString)
+            throws UtilityException {
         AssemblyStandard result = null;
         result = determineBiobrickBAssemblyStandard(partSequenceString);
         return result;
@@ -46,8 +54,12 @@ public class BiobrickBUtils implements AssemblyUtils {
         return joinBiobrickB(part1, part2);
     }
 
-    private static AssemblyStandard determineBiobrickBAssemblyStandard(String partSequenceString) {
+    private static AssemblyStandard determineBiobrickBAssemblyStandard(String partSequenceString)
+            throws UtilityException {
         AssemblyStandard result = null;
+        if (!isBiobrickBCompatible(partSequenceString)) {
+            return result;
+        }
         try {
             if ((findBiobrickBPrefix(partSequenceString) != null)
                     && (findBiobrickBSuffix(partSequenceString) != null)) {
@@ -55,6 +67,41 @@ public class BiobrickBUtils implements AssemblyUtils {
             }
         } catch (ControllerException e) {
             // don't worry.
+        }
+        return result;
+    }
+
+    private static boolean isBiobrickBCompatible(String sequenceString) throws UtilityException {
+        boolean result = false;
+        org.biojava.bio.seq.Sequence sequence = null;
+        try {
+            sequence = DNATools.createDNASequence(sequenceString, "temp");
+        } catch (IllegalSymbolException e) {
+            throw new UtilityException(e);
+        }
+        RestrictionMapper restrictionMapper = new RestrictionMapper(new SimpleThreadPool());
+        ArrayList<RestrictionEnzyme> restrictionEnzymes = new ArrayList<RestrictionEnzyme>();
+        RestrictionEnzymesManager restrictionEnzymeManager = null;
+        try {
+            restrictionEnzymeManager = RestrictionEnzymesManager.getInstance();
+        } catch (RestrictionEnzymesManagerException e) {
+            throw new UtilityException(e);
+        }
+        restrictionEnzymes.add(restrictionEnzymeManager.getBioJavaEnzyme("EcoRI"));
+        restrictionEnzymes.add(restrictionEnzymeManager.getBioJavaEnzyme("BglII"));
+        restrictionEnzymes.add(restrictionEnzymeManager.getBioJavaEnzyme("BamHI"));
+        restrictionEnzymes.add(restrictionEnzymeManager.getBioJavaEnzyme("XhoI"));
+        int counter = 0;
+        for (RestrictionEnzyme restrictionEnzyme : restrictionEnzymes) {
+            restrictionMapper.clearEnzymes();
+            restrictionMapper.addEnzyme(restrictionEnzyme);
+            org.biojava.bio.seq.Sequence annotatedSequence = restrictionMapper.annotate(sequence);
+            if (annotatedSequence.countFeatures() == 1) {
+                counter = counter + 1;
+            }
+        }
+        if (counter == 4) {
+            result = true;
         }
         return result;
     }
@@ -338,6 +385,16 @@ public class BiobrickBUtils implements AssemblyUtils {
         feature.setHash(SequenceUtils.calculateSequenceHash(biobrickBScar));
         feature = SequenceManager.getReferenceFeature(feature);
         return feature;
+    }
+
+    public static void main(String[] args) {
+        String part1Sequence = "gaattcaaaagatct--ggatccaaactcgag";
+        try {
+            System.out.println("" + isBiobrickBCompatible(part1Sequence));
+        } catch (UtilityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
 }
