@@ -1,9 +1,11 @@
 package org.jbei.ice.lib.models.interfaces;
 
-public interface IPartValueObject extends IEntryValueObject {
-    String getPackageFormat();
+import org.jbei.ice.lib.models.Part.AssemblyStandard;
 
-    void setPackageFormat(String packageFormat);
+public interface IPartValueObject extends IEntryValueObject {
+    AssemblyStandard getPackageFormat();
+
+    void setPackageFormat(AssemblyStandard packageFormat);
 
     String getPkgdDnaFwdHash();
 

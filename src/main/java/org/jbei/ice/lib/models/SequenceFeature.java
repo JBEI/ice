@@ -2,6 +2,8 @@ package org.jbei.ice.lib.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -41,6 +43,9 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
     @Column(name = "feature_end")
     private int end;
 
+    /**
+     * +1 or -1
+     */
     @Column(name = "strand")
     private int strand;
 
@@ -53,6 +58,10 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
 
     @Column(name = "genbank_type", length = 127)
     private String genbankType;
+
+    @Column(name = "flag")
+    @Enumerated(EnumType.STRING)
+    private Flag flag;
 
     public SequenceFeature() {
         super();
@@ -69,6 +78,10 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         this.name = name;
         this.description = description;
         this.genbankType = genbankType;
+    }
+
+    public enum Flag {
+        PREFIX, SUFFIX, SCAR, INNER, SUBINNER;
     }
 
     public void setId(int id) {
@@ -97,6 +110,9 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         this.feature = feature;
     }
 
+    /**
+     * This is 1 based ala Genbank
+     */
     public int getStart() {
         return start;
     }
@@ -143,5 +159,13 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
 
     public void setGenbankType(String genbankType) {
         this.genbankType = genbankType;
+    }
+
+    public void setFlag(Flag flag) {
+        this.flag = flag;
+    }
+
+    public Flag getFlag() {
+        return flag;
     }
 }

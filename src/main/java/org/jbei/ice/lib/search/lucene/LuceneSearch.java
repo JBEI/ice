@@ -350,7 +350,8 @@ public class LuceneSearch {
 
         } else if (entry instanceof Part) {
             Part part = (Part) entry;
-            String format = (part.getPackageFormat() != null) ? part.getPackageFormat() : "";
+            String format = (part.getPackageFormat().toString() != null) ? part.getPackageFormat()
+                    .toString() : "";
             document
                     .add(new Field("Package Format", format, Field.Store.YES, Field.Index.ANALYZED));
             content = content + format + " ";

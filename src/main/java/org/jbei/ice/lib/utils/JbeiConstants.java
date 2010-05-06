@@ -1,5 +1,9 @@
 package org.jbei.ice.lib.utils;
 
+import java.util.Map;
+
+import org.jbei.ice.lib.models.Part;
+
 public class JbeiConstants {
 
     public final static String getStatus(String key) {
@@ -15,16 +19,12 @@ public class JbeiConstants {
     }
 
     public final static String getPackageFormat(String key) {
-        String result = "";
-        if (key.equals("biobricka")) {
-            result = "Biobrick A";
-        } else if (key.equals("biobrickb")) {
-            result = "BioBrick Berkeley";
-        } else if (key.equals("")) {
-            result = "None";
-        } else {
+        Map<String, String> map = Part.getPackageFormatOptionsMap();
+        String result = map.get(key);
+        if (result == null) {
             result = "Unrecognized Format";
         }
+
         return result;
     }
 

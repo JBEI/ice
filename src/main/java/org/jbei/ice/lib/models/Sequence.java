@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.models;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -22,6 +21,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.ISequenceValueObject;
+import org.jbei.ice.lib.utils.SequenceFeatureCollection;
 
 @Entity
 @Table(name = "sequences")
@@ -55,7 +55,7 @@ public class Sequence implements ISequenceValueObject, IModel {
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @JoinColumn(name = "sequence_id")
     @OrderBy("id")
-    private Set<SequenceFeature> sequenceFeatures = new HashSet<SequenceFeature>();
+    private Set<SequenceFeature> sequenceFeatures = new SequenceFeatureCollection();
 
     public Sequence() {
     }
@@ -69,7 +69,7 @@ public class Sequence implements ISequenceValueObject, IModel {
         this.fwdHash = fwdHash;
         this.revHash = revHash;
         this.entry = entry;
-        this.sequenceFeatures = sequenceFeatures;
+        this.sequenceFeatures = new SequenceFeatureCollection(sequenceFeatures);
     }
 
     @XmlTransient
@@ -140,6 +140,19 @@ public class Sequence implements ISequenceValueObject, IModel {
     }
 
     public Set<SequenceFeature> getSequenceFeatures() {
+
+        /* Hibernate hack.
+        To use costum collections with Hibernate, I have to implement all sorts
+        of hibernate methods to do this correctly. Instead, I just replace this set
+        when I do a get method here with the SequenceFeatureCollection.
+        */
+        if (this.sequenceFeatures instanceof SequenceFeatureCollection) {
+
+        } else {
+            SequenceFeatureCollection newSequenceFeatures = new SequenceFeatureCollection();
+            newSequenceFeatures.addAll(this.sequenceFeatures);
+            this.sequenceFeatures = newSequenceFeatures;
+        }
         return sequenceFeatures;
     }
 }

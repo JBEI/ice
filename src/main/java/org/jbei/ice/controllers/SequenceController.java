@@ -21,6 +21,7 @@ import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.utils.SequenceFeatureCollection;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.vo.DNAFeature;
 import org.jbei.ice.lib.vo.DNAFeatureNote;
@@ -297,7 +298,14 @@ public class SequenceController extends Controller {
         return sequence;
     }
 
+    public SequenceFeatureCollection annotateBiobrickPart(Sequence sequence) {
+        // TODO
+        SequenceFeatureCollection result = null;
+        return result;
+    }
+
     protected SequencePermissionVerifier getSequencePermissionVerifier() {
         return (SequencePermissionVerifier) getPermissionVerifier();
     }
+
 }

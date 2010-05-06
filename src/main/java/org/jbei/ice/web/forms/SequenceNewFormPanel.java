@@ -12,6 +12,7 @@ import org.apache.wicket.model.Model;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;

@@ -10,6 +10,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.jbei.ice.lib.models.Part;
+import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.web.common.CustomChoice;
 
 public class PartNewFormPanel extends Panel {
@@ -56,7 +57,7 @@ public class PartNewFormPanel extends Panel {
 
             Part part = getEntry();
 
-            part.setPackageFormat(getPackageFormat().getValue());
+            part.setPackageFormat(AssemblyStandard.valueOf(getPackageFormat().getValue()));
         }
 
         // Getters and setters for PartForm

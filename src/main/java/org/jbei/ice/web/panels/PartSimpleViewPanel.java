@@ -15,7 +15,11 @@ public class PartSimpleViewPanel extends SimpleEntryViewPanel<Part> {
     }
 
     protected void renderPackageFormat() {
-        add(new Label("packageFormat", JbeiConstants
-                .getPackageFormat(getEntry().getPackageFormat())));
+
+        String packageFormat = null;
+        if (getEntry().getPackageFormat() != null) {
+            packageFormat = getEntry().getPackageFormat().toString();
+        }
+        add(new Label("packageFormat", JbeiConstants.getPackageFormat(packageFormat)));
     }
 }

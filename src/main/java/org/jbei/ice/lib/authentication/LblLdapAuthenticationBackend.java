@@ -10,7 +10,7 @@ import org.jbei.ice.lib.utils.LblLdapAuthenticationWrapper;
 import org.jbei.ice.lib.utils.LblLdapAuthenticationWrapper.LblLdapAuthenticationWrapperException;
 
 public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Serializable {
-    private final String LBL_LDAP_EMAIL_SUFFIX = "@lbl.gov";
+    private static String LBL_LDAP_EMAIL_SUFFIX = "@lbl.gov";
 
     public String getBackendName() {
         return "LblLdapAuthenticationBackend";

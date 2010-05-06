@@ -1,0 +1,67 @@
+Biobrick Assembly Computation
+BiobrickA, BBF RFC 10: http://hdl.handle.net/1721.1/45138
+BiobrickA, BBF RFC 20: http://hdl.handle.net/1721.1/44962
+Bgl Bricks, BBF RFC 21: http://hdl.handle.net/1721.1/46747
+
+Notation:
+EcoRI is cut like this
+---
+g ^ aatt . c
+         ---
+
+Here are how biobrick A assembly is done and constants used:
+
+long prefix:  gaattcgcggccgcttctagag (RFC 10)
+short prefix: gaattcgcggccgcttctag (RFC 20)
+short suffix: tactagtagcggccgctgcag (RFC 10)
+long suffix:  tactagtagcggccgcctgcagg (RFC 20)
+
+
+------Prefix---------------  first part -------Suffix------
+ EcoRI              XBaI                   SpeI            PstI
+g^aatt.cgcggccgctt^ctag.ag ..... ...... ta^ctag.tagcggccgc^tgca.g
+|                                       |  |  |
+0 based position                        |  |  -15 = maximum 1st Feature position (suffix dependent)
+                                        | (-)19 = Suffix Chop (suffix dependent) 
+                                       (-) 21 = scar offset (suffix dependent)
+
+                        ------Prefix--------------  Second part -------Suffix------
+                        EcoRI              XBaI                   SpeI            PstI
+                        g^aatt.cgcggccgctt^ctag.ag ..... ...... ta^ctag.tagcggccgc^tgca.g
+                        |                  |
+                        0                  16 = PrefixChop length 
+                                           16 = minimum 2nd feature position
+
+So, sequence concatination happens from firstPart(0 to firstPart.length - suffix chop)
+concatinated with secondPart(prefixChopLength to secondPart.length)
+
+To preserve all the possible features from the first part,
+the feature has to end before (firstPart.length - maximum 1st Feature position)
+
+To preserve all the possible features from the second part,
+the feature has to start at or after position 16 (genbank position 17)
+
+Scar starts from position (firstPart.length - scar offset + 1 for genbank position) and 
+ends 6 or 8 basepairs later, depending on prefix type of the second part.
+Scar can be tactag or tactagag
+
+
+BiobrickB (BBF RFC 21)
+
+Prefix: gaattc___agatct (e.g. GAATTCatgAGATCT)
+Suffix: ggatcc___ctcgag (e.g. GGATCCtaaCTCGAG)
+
+------prefix-------  first part ----- suffix ------ 
+g^aatt.c___a^gatc.t ----- ----- g^gatc.c___c^tcga.g
+                                | |  |
+                                | |  maximum 1st feature position
+                                | suffix chop 
+                                scar start
+
+                     ------prefix------  second part----- suffix ------ 
+                     g^aatt.c___a^gatc.t ----- ------g^gatc.c___c^tcga.g
+                                  | 
+                                  prefixchop length
+                                  minimum 2nd feature position
+scar = ggatct
+

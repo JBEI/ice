@@ -10,6 +10,10 @@ public class SequenceUtils {
         return Utils.encryptSHA(sequence.toLowerCase());
     }
 
+    public static String calculateReverseComplementSequenceHash(String sequence) {
+        return calculateSequenceHash(reverseComplement(sequence));
+    }
+
     public static String reverseComplement(String sequence) {
         SymbolList symL = null;
 

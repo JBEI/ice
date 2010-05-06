@@ -7,6 +7,7 @@ import java.util.Set;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.Entry;
@@ -146,14 +147,15 @@ public class SequenceManager {
         return sequences;
     }
 
-    private static Feature getFeatureBySequence(String featureDNASequence) throws ManagerException {
+    private static Feature getFeatureBySequence(String featureDnaSequence) throws ManagerException {
+        featureDnaSequence = featureDnaSequence.toLowerCase();
         Feature result = null;
         Session session = DAO.newSession();
 
         try {
             String queryString = "from " + Feature.class.getName() + " where hash = :hash";
             Query query = session.createQuery(queryString);
-            query.setParameter("hash", SequenceUtils.calculateSequenceHash(featureDNASequence));
+            query.setParameter("hash", SequenceUtils.calculateSequenceHash(featureDnaSequence));
 
             Object queryResult = query.uniqueResult();
 
@@ -161,7 +163,7 @@ public class SequenceManager {
                 result = (Feature) queryResult;
             } else {
                 query.setParameter("hash", SequenceUtils.calculateSequenceHash(SequenceUtils
-                        .reverseComplement(featureDNASequence)));
+                        .reverseComplement(featureDnaSequence)));
 
                 queryResult = query.uniqueResult();
 
@@ -181,4 +183,49 @@ public class SequenceManager {
 
         return result;
     }
+
+    /**
+     * Use this to look for a reference feature that should exist in the features table,
+     * such as known biobrick prefix/suffix/scar sequence.
+     * This method creates the feature if it doesn't exist, using the values passed.
+     * 
+     * @param feature
+     * @return
+     * @throws ControllerException
+     * @throws ManagerException
+     */
+    public static Feature getReferenceFeature(Feature feature) throws ControllerException {
+        try {
+            Feature oldFeature = getFeatureBySequence(feature.getSequence());
+            if (oldFeature == null) {
+                Feature newFeature = SequenceManager.saveFeature(feature);
+                return newFeature;
+            } else {
+                return oldFeature;
+            }
+        } catch (ManagerException e) {
+            throw new ControllerException(e);
+        }
+
+    }
+
+    public static Feature getFeature(int id) {
+        Feature result = null;
+        Session session = DAO.newSession();
+        try {
+            String queryString = "from " + Feature.class.getName() + " where id = :id";
+            Query query = session.createQuery(queryString);
+            query.setParameter("id", id);
+            Object queryResult = query.uniqueResult();
+            if (true) {
+                result = (Feature) queryResult;
+                result = result;
+            }
+        } catch (HibernateException e) {
+            e.printStackTrace();
+        }
+        return result;
+
+    }
+
 }
