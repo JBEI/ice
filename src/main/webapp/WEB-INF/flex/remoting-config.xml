@@ -11,21 +11,9 @@
 		<!-- <channel ref="VectorEditorAMFChannel" /> -->
 	</default-channels>
 
-	<destination id="EntriesService">
+	<destination id="RegistryAMFAPI">
 		<properties>
-			<source>org.jbei.ice.services.blazeds.registry.services.EntriesService</source>
-		</properties>
-	</destination>
-
-	<destination id="VectorEditorService">
-		<properties>
-			<source>org.jbei.ice.services.blazeds.VectorEditor.services.VectorEditorService</source>
-		</properties>
-	</destination>
-	
-	<destination id="SequenceCheckerService">
-		<properties>
-			<source>org.jbei.ice.services.blazeds.SequenceChecker.services.SequenceCheckerService</source>
+			<source>org.jbei.ice.services.blazeds.RegistryAMFAPI</source>
 		</properties>
 	</destination>
 </service>

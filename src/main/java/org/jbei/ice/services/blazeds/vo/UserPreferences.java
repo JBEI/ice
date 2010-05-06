@@ -1,4 +1,4 @@
-package org.jbei.ice.services.blazeds.VectorEditor.vo;
+package org.jbei.ice.services.blazeds.vo;
 
 import java.io.Serializable;
 

@@ -9,9 +9,6 @@ import java.io.Serializable;
 
 import org.apache.commons.codec.binary.Base64;
 
-//import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
-//import com.sun.org.apache.xml.internal.security.utils.Base64;
-
 public class SerializationUtils {
     public static class SerializationUtilsException extends Exception {
         private static final long serialVersionUID = -6597529889622775652L;

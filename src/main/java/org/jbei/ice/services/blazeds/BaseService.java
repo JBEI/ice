@@ -1,4 +1,4 @@
-package org.jbei.ice.services.blazeds.common;
+package org.jbei.ice.services.blazeds;
 
 import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -9,17 +9,19 @@ import org.jbei.ice.lib.models.Account;
 public class BaseService {
     public static final String BASE_SERVICE_NAME = "BlazeDS";
 
-    protected Account getAccountByToken(String authToken) {
+    protected Account getAccountBySessionId(String sessionId) {
         Account account = null;
 
         try {
-            account = AccountController.getAccountBySessionKey(authToken);
+            account = AccountController.getAccountBySessionKey(sessionId);
         } catch (ControllerException e) {
-            Logger.error("Failed to get account by token: " + authToken, e);
+            Logger.error("Failed to get account by sessionId: " + sessionId, e);
+
+            return null;
         }
 
         if (account == null) {
-            Logger.warn(getServiceName() + "User by token doesn't exist: " + authToken);
+            Logger.warn(getServiceName() + "User by sessionId doesn't exist: " + sessionId);
 
             return null;
         }

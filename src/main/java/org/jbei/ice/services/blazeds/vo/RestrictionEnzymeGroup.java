@@ -1,8 +1,10 @@
-package org.jbei.ice.services.blazeds.VectorEditor.vo;
+package org.jbei.ice.services.blazeds.vo;
 
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.jbei.ice.bio.enzymes.RestrictionEnzyme;
 
 public class RestrictionEnzymeGroup implements Serializable {
     private static final long serialVersionUID = 2321365485733702387L;

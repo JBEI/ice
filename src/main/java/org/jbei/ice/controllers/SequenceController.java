@@ -171,7 +171,7 @@ public class SequenceController extends Controller {
                 DNAFeature dnaFeature = new DNAFeature();
 
                 if (sequenceFeature.getDescription() != null
-                        && sequenceFeature.getDescription().isEmpty()) {
+                        && !sequenceFeature.getDescription().isEmpty()) {
 
                     List<String> noteLines = (List<String>) Arrays.asList(sequenceFeature
                             .getDescription().split("\n"));
