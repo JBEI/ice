@@ -195,7 +195,7 @@ public class BiobrickAUtils implements AssemblyUtils {
             }
         }
         Entry part = partSequence.getEntry();
-        String featureName = "inner." + part.getRecordId(); // uuid of the given part
+        String featureName = part.getRecordId(); // uuid of the given part
         String featureDescription = featureName;
         String featureIdentification = part.getRecordId();
         Feature innerPartFeature = new Feature(featureName, featureDescription,
