@@ -17,8 +17,10 @@ import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
+import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
+import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.SequenceFeatureCollection;
@@ -70,8 +72,18 @@ public class SequenceController extends Controller {
         }
 
         try {
-            result = SequenceManager.saveSequence(sequence);
 
+            if (sequence.getEntry() instanceof Part) {
+                Part part = (Part) sequence.getEntry();
+                AssemblyController assemblyController = new AssemblyController(getAccount());
+                AssemblyStandard assemblyType = assemblyController
+                        .determineAssemblyStandard(sequence);
+                part.setPackageFormat(assemblyType);
+
+                assemblyController.populateAssemblyAnnotations(sequence);
+
+            }
+            result = SequenceManager.saveSequence(sequence);
             if (scheduleIndexRebuild) {
                 ApplicationContoller.scheduleBlastIndexRebuildJob();
             }
@@ -174,8 +186,8 @@ public class SequenceController extends Controller {
                 if (sequenceFeature.getDescription() != null
                         && !sequenceFeature.getDescription().isEmpty()) {
 
-                    List<String> noteLines = (List<String>) Arrays.asList(sequenceFeature
-                            .getDescription().split("\n"));
+                    List<String> noteLines = Arrays.asList(sequenceFeature.getDescription().split(
+                        "\n"));
 
                     if (noteLines != null && noteLines.size() > 0) {
                         for (int i = 0; i < noteLines.size(); i++) {

@@ -21,7 +21,7 @@ import org.jbei.ice.lib.models.interfaces.IPartValueObject;
 public class Part extends Entry implements IPartValueObject, IModel {
     private static final long serialVersionUID = 1L;
 
-    @Column(name = "package_format")
+    @Column(name = "package_format", nullable = false)
     @Enumerated(EnumType.STRING)
     private AssemblyStandard packageFormat;
 

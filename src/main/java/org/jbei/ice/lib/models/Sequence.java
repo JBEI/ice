@@ -47,7 +47,7 @@ public class Sequence implements ISequenceValueObject, IModel {
     @Column(name = "rev_hash", length = 40)
     private String revHash;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "entries_id", nullable = true, unique = true)
     private Entry entry;
 

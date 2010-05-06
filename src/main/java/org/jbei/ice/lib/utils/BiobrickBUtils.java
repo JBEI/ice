@@ -74,7 +74,7 @@ public class BiobrickBUtils implements AssemblyUtils {
         }
         if (prefixMatches.size() > 1) {
             throw new ControllerException("Multiple prefixes found");
-        } else {
+        } else if (prefixMatches.size() == 1) {
             result = new SimpleFeature(prefixMatches.get(0), prefixStarts.get(0), prefixEnds.get(0));
         }
         return result;
@@ -95,7 +95,7 @@ public class BiobrickBUtils implements AssemblyUtils {
         }
         if (prefixMatches.size() > 1) {
             throw new ControllerException("Multiple suffix found");
-        } else {
+        } else if (prefixMatches.size() == 1) {
             result = new SimpleFeature(prefixMatches.get(0), prefixStarts.get(0), prefixEnds.get(0));
         }
         return result;

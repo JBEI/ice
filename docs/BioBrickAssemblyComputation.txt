@@ -52,6 +52,7 @@ Prefix: gaattc___agatct (e.g. GAATTCatgAGATCT)
 Suffix: ggatcc___ctcgag (e.g. GGATCCtaaCTCGAG)
 
 ------prefix-------  first part ----- suffix ------ 
+  EcoRI     BglII                BamHI       XhoI
 g^aatt.c___a^gatc.t ----- ----- g^gatc.c___c^tcga.g
                                 | |  |
                                 | |  maximum 1st feature position

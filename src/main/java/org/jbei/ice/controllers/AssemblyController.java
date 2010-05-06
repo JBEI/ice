@@ -1,9 +1,11 @@
 package org.jbei.ice.controllers;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.controllers.common.Controller;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.EntryPermissionVerifier;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.EntryManager;
@@ -32,8 +34,7 @@ public class AssemblyController extends Controller {
         getAssemblyUtils().add(new RawAssemblyUtils());
     }
 
-    public AssemblyStandard determineAssemblyStandard(Sequence partSequence)
-            throws UtilityException {
+    public AssemblyStandard determineAssemblyStandard(Sequence partSequence) {
         AssemblyStandard result = null;
         String partSequenceString = partSequence.getSequence();
         result = determineAssemblyStandard(partSequenceString);
@@ -51,29 +52,36 @@ public class AssemblyController extends Controller {
     }
 
     public SequenceFeatureCollection determineAssemblyFeatures(Sequence partSequence)
-            throws UtilityException {
+            throws ControllerException {
 
         SequenceFeatureCollection sequenceFeatures = null;
-
         String partSequenceString = partSequence.getSequence();
-
         AssemblyStandard standard = determineAssemblyStandard(partSequenceString);
-        if (standard == AssemblyStandard.BIOBRICKA) {
-            sequenceFeatures = getAssemblyUtils().get(0).determineAssemblyFeatures(partSequence);
-        } else if (standard == AssemblyStandard.BIOBRICKB) {
-            sequenceFeatures = getAssemblyUtils().get(1).determineAssemblyFeatures(partSequence);
-        } else if (standard == AssemblyStandard.RAW) {
-            sequenceFeatures = getAssemblyUtils().get(2).determineAssemblyFeatures(partSequence);
+        try {
+            if (standard == AssemblyStandard.BIOBRICKA) {
+                sequenceFeatures = getAssemblyUtils().get(0)
+                        .determineAssemblyFeatures(partSequence);
+            } else if (standard == AssemblyStandard.BIOBRICKB) {
+                sequenceFeatures = getAssemblyUtils().get(1)
+                        .determineAssemblyFeatures(partSequence);
+            } else if (standard == AssemblyStandard.RAW) {
+                sequenceFeatures = getAssemblyUtils().get(2)
+                        .determineAssemblyFeatures(partSequence);
+            }
+        } catch (UtilityException e) {
+            throw new ControllerException(e);
         }
 
         return sequenceFeatures;
     }
 
     public static void main(String[] args) {
-
         try {
             mainRunBiobrickBTest();
         } catch (PermissionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ControllerException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -86,7 +94,7 @@ public class AssemblyController extends Controller {
         */
     }
 
-    private static void mainRunBiobrickBTest() throws PermissionException {
+    private static void mainRunBiobrickBTest() throws PermissionException, ControllerException {
         AssemblyController as = null;
         try {
             as = new AssemblyController(AccountManager.get(86));
@@ -98,27 +106,20 @@ public class AssemblyController extends Controller {
             Part part2 = (Part) EntryManager.get(4394);
             Sequence part2Sequence = SequenceManager.getByEntry(part2);
             Set<SequenceFeature> sequenceFeatures = part2Sequence.getSequenceFeatures();
-            try {
-                ////Part result = as.joinBiobrickB(part2, part2);
 
-                SequenceFeatureCollection temp = as.determineAssemblyFeatures(part2Sequence);
-                //sequenceFeatures.addAll(temp);
-                //SequenceManager.saveSequence(part2Sequence);
+            ////Part result = as.joinBiobrickB(part2, part2);
 
-                System.out.println("===\n" + part2.getOnePartNumber().getPartNumber() + ": "
-                        + part2Sequence.getSequence().length());
-                for (SequenceFeature item : temp) {
+            SequenceFeatureCollection temp = as.determineAssemblyFeatures(part2Sequence);
+            //sequenceFeatures.addAll(temp);
+            //SequenceManager.saveSequence(part2Sequence);
 
-                    System.out.println(item.getName() + ": " + item.getStart() + ":"
-                            + item.getEnd());
-                }
+            System.out.println("===\n" + part2.getOnePartNumber().getPartNumber() + ": "
+                    + part2Sequence.getSequence().length());
+            for (SequenceFeature item : temp) {
 
-            } catch (UtilityException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } finally {
-
+                System.out.println(item.getName() + ": " + item.getStart() + ":" + item.getEnd());
             }
+
             //sequenceFeatures.addAll(determineAssemblyFeatures(part2));
             // SequenceManager.saveSequence(part2Sequence);
         } catch (ManagerException e) {
@@ -153,4 +154,98 @@ public class AssemblyController extends Controller {
         return assemblyUtils;
     }
 
+    /**
+     * Comparator for assembly basic sequence features
+     * 
+     * @param sequenceFeatures1
+     * @param sequenceFeatures2
+     * @return 0 if identical.
+     */
+    public int compareAssemblyAnnotations(SequenceFeatureCollection sequenceFeatures1,
+            SequenceFeatureCollection sequenceFeatures2) {
+        int result = 1;
+
+        if (sequenceFeatures1 == null || sequenceFeatures2 == null) {
+            return result;
+        }
+        SequenceFeature inner1 = null;
+        SequenceFeature prefix1 = null;
+        SequenceFeature suffix1 = null;
+        SequenceFeature inner2 = null;
+        SequenceFeature prefix2 = null;
+        SequenceFeature suffix2 = null;
+
+        List<SequenceFeature> temp = sequenceFeatures1.get(SequenceFeature.Flag.INNER);
+        if (temp.size() == 1) {
+            inner1 = temp.get(0);
+        }
+        temp = sequenceFeatures1.get(SequenceFeature.Flag.PREFIX);
+        if (temp.size() == 1) {
+            prefix1 = temp.get(0);
+        }
+        temp = sequenceFeatures1.get(SequenceFeature.Flag.SUFFIX);
+        if (temp.size() == 1) {
+            suffix1 = temp.get(0);
+        }
+        temp = sequenceFeatures2.get(SequenceFeature.Flag.INNER);
+        if (temp.size() == 1) {
+            inner2 = temp.get(0);
+        }
+        temp = sequenceFeatures2.get(SequenceFeature.Flag.PREFIX);
+        if (temp.size() == 1) {
+            prefix2 = temp.get(0);
+        }
+        temp = sequenceFeatures2.get(SequenceFeature.Flag.SUFFIX);
+        if (temp.size() == 1) {
+            suffix2 = temp.get(0);
+        }
+
+        int counter = 0;
+        if (inner1 != null && inner2 != null) {
+            if (inner1.getSequence().getFwdHash().equals(inner2.getSequence().getFwdHash())) {
+                counter = counter + 1;
+            }
+        }
+        if (prefix1 != null && prefix2 != null) {
+            if (prefix1.getSequence().getFwdHash().equals(prefix2.getSequence().getFwdHash())) {
+                counter = counter + 1;
+            }
+        }
+        if (suffix1 != null && suffix2 != null) {
+            if (suffix1.getSequence().getFwdHash().equals(suffix2.getSequence().getFwdHash())) {
+                counter = counter + 1;
+            }
+        }
+        if (counter == 3) {
+            result = 0;
+        }
+        return result;
+    }
+
+    public void populateAssemblyAnnotations(Sequence partSequence) throws ControllerException {
+        SequenceFeatureCollection newSequenceFeatures = determineAssemblyFeatures(partSequence);
+        Set<SequenceFeature> temp = partSequence.getSequenceFeatures();
+        SequenceFeatureCollection oldSequenceFeatures = null;
+        if (temp != null) {
+            // old sequencefeatures exist
+            if (temp instanceof SequenceFeatureCollection) {
+                oldSequenceFeatures = (SequenceFeatureCollection) temp;
+            } else {
+                throw new ControllerException("Bad SequenceFeatureCollection");
+            }
+
+            // If innerFeature has not changed, keep all old sequenceFeatures
+            if (compareAssemblyAnnotations(newSequenceFeatures, oldSequenceFeatures) == 0) {
+                newSequenceFeatures = oldSequenceFeatures;
+            } else {
+                // discard old sequenceFeatures
+            }
+        }
+        partSequence.setSequenceFeatures(newSequenceFeatures);
+        try {
+            SequenceManager.saveSequence(partSequence);
+        } catch (ManagerException e) {
+            throw new ControllerException(e);
+        }
+    }
 }
