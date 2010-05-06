@@ -7,7 +7,8 @@ import org.jbei.ice.lib.models.Part.AssemblyStandard;
 public class RawAssemblyUtils implements AssemblyUtils {
 
     @Override
-    public SequenceFeatureCollection determineAssemblyFeatures(Part part) throws UtilityException {
+    public SequenceFeatureCollection determineAssemblyFeatures(Sequence partSequence)
+            throws UtilityException {
         // TODO Auto-generated method stub
         return null;
     }

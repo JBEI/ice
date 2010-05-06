@@ -8,7 +8,8 @@ public interface AssemblyUtils {
 
     public AssemblyStandard determineAssemblyStandard(String partSequenceString);
 
-    public SequenceFeatureCollection determineAssemblyFeatures(Part part) throws UtilityException;
+    public SequenceFeatureCollection determineAssemblyFeatures(Sequence partSequence)
+            throws UtilityException;
 
     public Sequence join(Part part1, Part part2) throws UtilityException;
 }

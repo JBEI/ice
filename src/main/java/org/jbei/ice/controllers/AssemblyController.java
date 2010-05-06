@@ -32,14 +32,9 @@ public class AssemblyController extends Controller {
         getAssemblyUtils().add(new RawAssemblyUtils());
     }
 
-    public AssemblyStandard determineAssemblyStandard(Part part) throws UtilityException {
+    public AssemblyStandard determineAssemblyStandard(Sequence partSequence)
+            throws UtilityException {
         AssemblyStandard result = null;
-        Sequence partSequence;
-        try {
-            partSequence = SequenceManager.getByEntry(part);
-        } catch (ManagerException e) {
-            throw new UtilityException(e);
-        }
         String partSequenceString = partSequence.getSequence();
         result = determineAssemblyStandard(partSequenceString);
         return result;
@@ -55,25 +50,22 @@ public class AssemblyController extends Controller {
         return result;
     }
 
-    public SequenceFeatureCollection determineAssemblyFeatures(Part part) throws UtilityException {
+    public SequenceFeatureCollection determineAssemblyFeatures(Sequence partSequence)
+            throws UtilityException {
 
         SequenceFeatureCollection sequenceFeatures = null;
-        try {
-            Sequence partSequence = SequenceManager.getByEntry(part);
 
-            String partSequenceString = partSequence.getSequence();
+        String partSequenceString = partSequence.getSequence();
 
-            AssemblyStandard standard = determineAssemblyStandard(partSequenceString);
-            if (standard == AssemblyStandard.BIOBRICKA) {
-                sequenceFeatures = getAssemblyUtils().get(0).determineAssemblyFeatures(part);
-            } else if (standard == AssemblyStandard.BIOBRICKB) {
-                sequenceFeatures = getAssemblyUtils().get(1).determineAssemblyFeatures(part);
-            } else if (standard == AssemblyStandard.RAW) {
-                sequenceFeatures = getAssemblyUtils().get(2).determineAssemblyFeatures(part);
-            }
-        } catch (ManagerException e) {
-            throw new UtilityException(e);
+        AssemblyStandard standard = determineAssemblyStandard(partSequenceString);
+        if (standard == AssemblyStandard.BIOBRICKA) {
+            sequenceFeatures = getAssemblyUtils().get(0).determineAssemblyFeatures(partSequence);
+        } else if (standard == AssemblyStandard.BIOBRICKB) {
+            sequenceFeatures = getAssemblyUtils().get(1).determineAssemblyFeatures(partSequence);
+        } else if (standard == AssemblyStandard.RAW) {
+            sequenceFeatures = getAssemblyUtils().get(2).determineAssemblyFeatures(partSequence);
         }
+
         return sequenceFeatures;
     }
 
@@ -109,7 +101,7 @@ public class AssemblyController extends Controller {
             try {
                 ////Part result = as.joinBiobrickB(part2, part2);
 
-                SequenceFeatureCollection temp = as.determineAssemblyFeatures(part2);
+                SequenceFeatureCollection temp = as.determineAssemblyFeatures(part2Sequence);
                 //sequenceFeatures.addAll(temp);
                 //SequenceManager.saveSequence(part2Sequence);
 

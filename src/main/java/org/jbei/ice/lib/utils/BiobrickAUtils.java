@@ -10,6 +10,7 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
+import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Part;
@@ -62,8 +63,9 @@ public class BiobrickAUtils implements AssemblyUtils {
         return result;
     }
 
-    public SequenceFeatureCollection determineAssemblyFeatures(Part part) throws UtilityException {
-        return determineBiobrickAFeatures(part);
+    public SequenceFeatureCollection determineAssemblyFeatures(Sequence partSequence)
+            throws UtilityException {
+        return determineBiobrickAFeatures(partSequence);
     }
 
     public Sequence join(Part part1, Part part2) throws UtilityException {
@@ -88,15 +90,9 @@ public class BiobrickAUtils implements AssemblyUtils {
         return result;
     }
 
-    private static SequenceFeatureCollection determineBiobrickAFeatures(Part part)
+    private static SequenceFeatureCollection determineBiobrickAFeatures(Sequence partSequence)
             throws UtilityException {
         //all positions are 0 based positions, not offsets
-        Sequence partSequence = null;
-        try {
-            partSequence = SequenceManager.getByEntry(part);
-        } catch (ManagerException e) {
-            throw new UtilityException(e);
-        }
         String partSequenceString = partSequence.getSequence();
         int partSequenceLength = partSequenceString.length();
         SequenceFeatureCollection sequenceFeatures = new SequenceFeatureCollection();
@@ -198,6 +194,7 @@ public class BiobrickAUtils implements AssemblyUtils {
                 }
             }
         }
+        Entry part = partSequence.getEntry();
         String featureName = "inner." + part.getRecordId(); // uuid of the given part
         String featureDescription = featureName;
         String featureIdentification = part.getRecordId();
@@ -316,7 +313,7 @@ public class BiobrickAUtils implements AssemblyUtils {
             }
             // calculate and annotate biobrick sequencefeatures
             Set<SequenceFeature> newPartSequenceFeatures = newPartSequence.getSequenceFeatures();
-            SequenceFeatureCollection newFeatures = determineBiobrickAFeatures(newPart);
+            SequenceFeatureCollection newFeatures = determineBiobrickAFeatures(newPartSequence);
             // annotate subinner features and scar
             //
             SequenceFeatureCollection part1SequenceFeatures = (SequenceFeatureCollection) part1Sequence
