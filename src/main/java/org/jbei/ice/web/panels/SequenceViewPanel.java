@@ -14,9 +14,6 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.request.target.resource.ResourceStreamRequestTarget;
-import org.apache.wicket.util.resource.IResourceStream;
-import org.apache.wicket.util.resource.StringResourceStream;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -31,6 +28,7 @@ import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.forms.SequenceNewFormPanel;
+import org.jbei.ice.web.pages.DownloadPage;
 import org.jbei.ice.web.pages.UnprotectedPage;
 import org.jbei.ice.web.pages.VectorEditorPage;
 
@@ -208,13 +206,8 @@ public class SequenceViewPanel extends Panel {
                 String sequenceString = sequence.getSequenceUser();
 
                 if (sequenceString != null && !sequenceString.isEmpty()) {
-                    IResourceStream resourceStream = new StringResourceStream(sequenceString,
-                            "application/genbank");
-
-                    getRequestCycle().setRequestTarget(
-                        new ResourceStreamRequestTarget(resourceStream, entry
-                                .getPartNumbersAsString()
-                                + ".seq"));
+                    setResponsePage(new DownloadPage(entry.getPartNumbersAsString() + ".seq",
+                            "text/plain", sequenceString));
                 }
             }
         };
@@ -251,12 +244,8 @@ public class SequenceViewPanel extends Panel {
                     throw new ViewException("Failed to generate genbank file for download!", e);
                 }
 
-                IResourceStream resourceStream = new StringResourceStream(sequenceString,
-                        "application/genbank");
-
-                getRequestCycle().setRequestTarget(
-                    new ResourceStreamRequestTarget(resourceStream, entry.getPartNumbersAsString()
-                            + ".gb"));
+                setResponsePage(new DownloadPage(entry.getPartNumbersAsString() + ".gb",
+                        "text/plain", sequenceString));
             }
         };
 
@@ -277,12 +266,8 @@ public class SequenceViewPanel extends Panel {
                     throw new ViewException("Failed to generate fasta file for download!", e);
                 }
 
-                IResourceStream resourceStream = new StringResourceStream(sequenceString,
-                        "application/fasta");
-
-                getRequestCycle().setRequestTarget(
-                    new ResourceStreamRequestTarget(resourceStream, entry.getPartNumbersAsString()
-                            + ".fasta"));
+                setResponsePage(new DownloadPage(entry.getPartNumbersAsString() + ".fasta",
+                        "text/plain", sequenceString));
             }
         };
 
