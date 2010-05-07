@@ -163,7 +163,7 @@ public class BiobrickBUtils implements AssemblyUtils {
             if (prefixMatch != null) {
                 Feature feature = new Feature(biobrickBPrefixFeatureName,
                         biobrickBPrefixFeatureName, "", prefixMatch.getSequence(), 0,
-                        "MISC_FEATURE");
+                        "misc_feature");
                 SequenceFeature sequenceFeature = new SequenceFeature(partSequence, feature,
                         prefixMatch.getStart() + 1, prefixMatch.getEnd() + 1, +1,
                         feature.getName(), feature.getDescription(), feature.getGenbankType());
@@ -175,7 +175,7 @@ public class BiobrickBUtils implements AssemblyUtils {
             if (suffixMatch != null) {
                 Feature feature = new Feature(biobrickBSuffixFeatureName,
                         biobrickBSuffixFeatureName, "", suffixMatch.getSequence(), 0,
-                        "MISC_FEATURE");
+                        "misc_feature");
                 SequenceFeature sequenceFeature = new SequenceFeature(partSequence, feature,
                         suffixMatch.getStart() + 1, suffixMatch.getEnd() + 1, +1,
                         feature.getName(), feature.getDescription(), feature.getGenbankType());
@@ -205,7 +205,7 @@ public class BiobrickBUtils implements AssemblyUtils {
             String featureDescription = featureName;
             String featureIdentification = part.getRecordId();
             Feature innerPartFeature = new Feature(featureName, featureDescription,
-                    featureIdentification, partSequenceString, 0, "MISC_FEATURE");
+                    featureIdentification, partSequenceString, 0, "misc_feature");
             SequenceFeature sequenceFeature = new SequenceFeature(partSequence, innerPartFeature,
                     minimumFeatureStart + 1, maximumFeatureEnd + 1, +1, innerPartFeature.getName(),
                     innerPartFeature.getDescription(), innerPartFeature.getGenbankType());
@@ -254,22 +254,22 @@ public class BiobrickBUtils implements AssemblyUtils {
             String joinedSequence = null;
             String part1SequenceString = part1Sequence.getSequence();
             String part2SequenceString = part2Sequence.getSequence();
-            int prefixOffset = 0;
-            int suffixOffset = 0;
+            int prefixChopPosition = 0;
+            int suffixChopPosition = 0;
             int scarLength = 6;
-            int scarStart = -1;
+            int scarStartPosition = -1;
 
             try {
-                prefixOffset = findBiobrickBPrefix(part2SequenceString).getEnd() - 4;
-                suffixOffset = findBiobrickBSuffix(part1SequenceString).getStart() + 1;
+                prefixChopPosition = findBiobrickBPrefix(part2SequenceString).getEnd() - 4;
+                suffixChopPosition = findBiobrickBSuffix(part1SequenceString).getStart() + 1;
             } catch (ControllerException e1) {
                 throw new UtilityException(e1);
             }
 
-            String firstPart = part1SequenceString.substring(0, suffixOffset);
-            String secondPart = part2SequenceString.substring(prefixOffset);
+            String firstPart = part1SequenceString.substring(0, suffixChopPosition);
+            String secondPart = part2SequenceString.substring(prefixChopPosition);
             joinedSequence = firstPart + secondPart;
-            scarStart = suffixOffset - 1;
+            scarStartPosition = suffixChopPosition - 1;
             // end concat sequence
             // create new part
             Part newPart = new Part();
@@ -336,18 +336,17 @@ public class BiobrickBUtils implements AssemblyUtils {
             temp.setFeature(part2InnerFeature.getFeature());
             temp.setName(part2InnerFeature.getName());
             temp.setFlag(SequenceFeature.Flag.SUBINNER);
-            // TODO: recalculate this
-            //int secondPartFeatureOffset = 
-            temp.setStart(part2InnerFeature.getStart() + scarStart - prefixOffset + 1);
-            temp.setEnd(part2InnerFeature.getEnd() + scarStart - prefixOffset + 1);
+            int secondPartFeatureOffset = scarStartPosition - prefixChopPosition + 1;
+            temp.setStart(part2InnerFeature.getStart() + secondPartFeatureOffset);
+            temp.setEnd(part2InnerFeature.getEnd() + secondPartFeatureOffset);
             temp.setStrand(part2InnerFeature.getStrand());
             newFeatures.add(temp);
             // scar
             temp = new SequenceFeature();
             temp.setSequence(newPartSequence);
             temp.setFlag(SequenceFeature.Flag.SCAR);
-            temp.setStart(scarStart + 1);
-            temp.setEnd(scarStart + scarLength);
+            temp.setStart(scarStartPosition + 1);
+            temp.setEnd(scarStartPosition + scarLength);
             temp.setStrand(1);
             try {
                 temp.setFeature(getBiobrickBScarFeature());
@@ -380,7 +379,7 @@ public class BiobrickBUtils implements AssemblyUtils {
         feature.setAutoFind(1);
         feature.setDescription(biobrickBScarFeatureName);
         feature.setName(biobrickBScarFeatureName);
-        feature.setGenbankType("MISC_FEATURE");
+        feature.setGenbankType("misc_feature");
         feature.setSequence(biobrickBScar);
         feature.setHash(SequenceUtils.calculateSequenceHash(biobrickBScar));
         feature = SequenceManager.getReferenceFeature(feature);
