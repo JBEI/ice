@@ -54,6 +54,65 @@ public class BiobrickBUtils implements AssemblyUtils {
         return joinBiobrickB(part1, part2);
     }
 
+    @Override
+    public int compareAssemblyAnnotations(SequenceFeatureCollection sequenceFeatures1,
+            SequenceFeatureCollection sequenceFeatures2) {
+        int result = 1;
+        if (sequenceFeatures1 == null || sequenceFeatures2 == null) {
+            return result;
+        }
+        SequenceFeature inner1 = null;
+        SequenceFeature prefix1 = null;
+        SequenceFeature suffix1 = null;
+        SequenceFeature inner2 = null;
+        SequenceFeature prefix2 = null;
+        SequenceFeature suffix2 = null;
+        List<SequenceFeature> temp = sequenceFeatures1.get(SequenceFeature.Flag.INNER);
+        if (temp.size() == 1) {
+            inner1 = temp.get(0);
+        }
+        temp = sequenceFeatures1.get(SequenceFeature.Flag.PREFIX);
+        if (temp.size() == 1) {
+            prefix1 = temp.get(0);
+        }
+        temp = sequenceFeatures1.get(SequenceFeature.Flag.SUFFIX);
+        if (temp.size() == 1) {
+            suffix1 = temp.get(0);
+        }
+        temp = sequenceFeatures2.get(SequenceFeature.Flag.INNER);
+        if (temp.size() == 1) {
+            inner2 = temp.get(0);
+        }
+        temp = sequenceFeatures2.get(SequenceFeature.Flag.PREFIX);
+        if (temp.size() == 1) {
+            prefix2 = temp.get(0);
+        }
+        temp = sequenceFeatures2.get(SequenceFeature.Flag.SUFFIX);
+        if (temp.size() == 1) {
+            suffix2 = temp.get(0);
+        }
+        int counter = 0;
+        if (inner1 != null && inner2 != null) {
+            if (inner1.getSequence().getFwdHash().equals(inner2.getSequence().getFwdHash())) {
+                counter = counter + 1;
+            }
+        }
+        if (prefix1 != null && prefix2 != null) {
+            if (prefix1.getSequence().getFwdHash().equals(prefix2.getSequence().getFwdHash())) {
+                counter = counter + 1;
+            }
+        }
+        if (suffix1 != null && suffix2 != null) {
+            if (suffix1.getSequence().getFwdHash().equals(suffix2.getSequence().getFwdHash())) {
+                counter = counter + 1;
+            }
+        }
+        if (counter == 3) {
+            result = 0;
+        }
+        return result;
+    }
+
     private static AssemblyStandard determineBiobrickBAssemblyStandard(String partSequenceString)
             throws UtilityException {
         AssemblyStandard result = null;

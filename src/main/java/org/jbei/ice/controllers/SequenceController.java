@@ -1,7 +1,6 @@
 package org.jbei.ice.controllers;
 
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -237,11 +236,8 @@ public class SequenceController extends Controller {
         String revHash = SequenceUtils.calculateSequenceHash(SequenceUtils
                 .reverseComplement(sequenceString));
 
-        Set<SequenceFeature> sequenceFeatures = new LinkedHashSet<SequenceFeature>();
-
-        Sequence sequence = new Sequence(sequenceString, "", fwdHash, revHash, null,
-                sequenceFeatures);
-
+        Sequence sequence = new Sequence(sequenceString, "", fwdHash, revHash, null);
+        Set<SequenceFeature> sequenceFeatures = sequence.getSequenceFeatures();
         if (dnaSequence instanceof FeaturedDNASequence) {
             FeaturedDNASequence featuredDNASequence = (FeaturedDNASequence) dnaSequence;
 

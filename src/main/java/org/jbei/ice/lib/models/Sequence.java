@@ -61,7 +61,7 @@ public class Sequence implements ISequenceValueObject, IModel {
     }
 
     public Sequence(String sequence, String sequenceUser, String fwdHash, String revHash,
-            Entry entry, Set<SequenceFeature> sequenceFeatures) {
+            Entry entry) {
         super();
 
         this.sequence = sequence;
@@ -69,7 +69,6 @@ public class Sequence implements ISequenceValueObject, IModel {
         this.fwdHash = fwdHash;
         this.revHash = revHash;
         this.entry = entry;
-        this.sequenceFeatures = new SequenceFeatureCollection(sequenceFeatures);
     }
 
     @XmlTransient

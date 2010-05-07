@@ -13,4 +13,7 @@ public interface AssemblyUtils {
             throws UtilityException;
 
     public Sequence join(Part part1, Part part2) throws UtilityException;
+
+    public int compareAssemblyAnnotations(SequenceFeatureCollection sequenceFeatures1,
+            SequenceFeatureCollection sequenceFeatures2);
 }

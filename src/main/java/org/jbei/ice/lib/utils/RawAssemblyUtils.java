@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.utils;
 
+import java.util.List;
+
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Part;
@@ -26,6 +28,34 @@ public class RawAssemblyUtils implements AssemblyUtils {
         return null;
     }
 
+    @Override
+    public int compareAssemblyAnnotations(SequenceFeatureCollection sequenceFeatures1,
+            SequenceFeatureCollection sequenceFeatures2) {
+        int result = 1;
+        if (sequenceFeatures1 == null || sequenceFeatures2 == null) {
+            return result;
+        }
+        SequenceFeature inner1 = null;
+        SequenceFeature inner2 = null;
+        List<SequenceFeature> temp = sequenceFeatures1.get(SequenceFeature.Flag.INNER);
+        if (temp.size() == 1) {
+            inner1 = temp.get(0);
+        }
+
+        temp = sequenceFeatures2.get(SequenceFeature.Flag.INNER);
+        if (temp.size() == 1) {
+            inner2 = temp.get(0);
+        }
+
+        if (inner1 != null && inner2 != null) {
+            if (inner1.getSequence().getFwdHash().equals(inner2.getSequence().getFwdHash())) {
+                result = 1;
+            }
+        }
+
+        return result;
+    }
+
     private SequenceFeatureCollection determineRawAssemblyFeatures(Sequence partSequence) {
         SequenceFeatureCollection sequenceFeatures = new SequenceFeatureCollection();
         String partSequenceString = partSequence.getSequence();
@@ -42,4 +72,5 @@ public class RawAssemblyUtils implements AssemblyUtils {
         sequenceFeatures.add(sequenceFeature);
         return sequenceFeatures;
     }
+
 }

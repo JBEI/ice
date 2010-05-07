@@ -1,7 +1,6 @@
 package org.jbei.ice.controllers;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.controllers.common.Controller;
@@ -168,64 +167,22 @@ public class AssemblyController extends Controller {
      * @param sequenceFeatures2
      * @return 0 if identical.
      */
-    public int compareAssemblyAnnotations(SequenceFeatureCollection sequenceFeatures1,
-            SequenceFeatureCollection sequenceFeatures2) {
-        int result = 1;
+    public int compareAssemblyAnnotations(AssemblyStandard standard,
+            SequenceFeatureCollection sequenceFeatures1, SequenceFeatureCollection sequenceFeatures2) {
+        int result = -1;
+        if (standard == AssemblyStandard.BIOBRICKA) {
+            result = getAssemblyUtils().get(0).compareAssemblyAnnotations(sequenceFeatures1,
+                sequenceFeatures2);
 
-        if (sequenceFeatures1 == null || sequenceFeatures2 == null) {
-            return result;
-        }
-        SequenceFeature inner1 = null;
-        SequenceFeature prefix1 = null;
-        SequenceFeature suffix1 = null;
-        SequenceFeature inner2 = null;
-        SequenceFeature prefix2 = null;
-        SequenceFeature suffix2 = null;
+        } else if (standard == AssemblyStandard.BIOBRICKB) {
+            result = getAssemblyUtils().get(1).compareAssemblyAnnotations(sequenceFeatures1,
+                sequenceFeatures2);
 
-        List<SequenceFeature> temp = sequenceFeatures1.get(SequenceFeature.Flag.INNER);
-        if (temp.size() == 1) {
-            inner1 = temp.get(0);
-        }
-        temp = sequenceFeatures1.get(SequenceFeature.Flag.PREFIX);
-        if (temp.size() == 1) {
-            prefix1 = temp.get(0);
-        }
-        temp = sequenceFeatures1.get(SequenceFeature.Flag.SUFFIX);
-        if (temp.size() == 1) {
-            suffix1 = temp.get(0);
-        }
-        temp = sequenceFeatures2.get(SequenceFeature.Flag.INNER);
-        if (temp.size() == 1) {
-            inner2 = temp.get(0);
-        }
-        temp = sequenceFeatures2.get(SequenceFeature.Flag.PREFIX);
-        if (temp.size() == 1) {
-            prefix2 = temp.get(0);
-        }
-        temp = sequenceFeatures2.get(SequenceFeature.Flag.SUFFIX);
-        if (temp.size() == 1) {
-            suffix2 = temp.get(0);
+        } else if (standard == AssemblyStandard.RAW) {
+            result = getAssemblyUtils().get(2).compareAssemblyAnnotations(sequenceFeatures1,
+                sequenceFeatures2);
         }
 
-        int counter = 0;
-        if (inner1 != null && inner2 != null) {
-            if (inner1.getSequence().getFwdHash().equals(inner2.getSequence().getFwdHash())) {
-                counter = counter + 1;
-            }
-        }
-        if (prefix1 != null && prefix2 != null) {
-            if (prefix1.getSequence().getFwdHash().equals(prefix2.getSequence().getFwdHash())) {
-                counter = counter + 1;
-            }
-        }
-        if (suffix1 != null && suffix2 != null) {
-            if (suffix1.getSequence().getFwdHash().equals(suffix2.getSequence().getFwdHash())) {
-                counter = counter + 1;
-            }
-        }
-        if (counter == 3) {
-            result = 0;
-        }
         return result;
     }
 
@@ -242,7 +199,12 @@ public class AssemblyController extends Controller {
             }
 
             // If innerFeature has not changed, keep all old sequenceFeatures
-            if (compareAssemblyAnnotations(newSequenceFeatures, oldSequenceFeatures) == 0) {
+            Part part = null;
+            if (partSequence.getEntry() instanceof Part) {
+                part = (Part) partSequence.getEntry();
+            }
+            if (compareAssemblyAnnotations(part.getPackageFormat(), newSequenceFeatures,
+                oldSequenceFeatures) == 0) {
                 newSequenceFeatures = oldSequenceFeatures;
             } else {
                 // discard old sequenceFeatures
