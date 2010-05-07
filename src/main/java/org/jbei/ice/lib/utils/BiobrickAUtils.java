@@ -90,27 +90,27 @@ public class BiobrickAUtils implements AssemblyUtils {
         SequenceFeature inner2 = null;
         SequenceFeature prefix2 = null;
         SequenceFeature suffix2 = null;
-        List<SequenceFeature> temp = sequenceFeatures1.get(SequenceFeature.Flag.INNER);
+        List<SequenceFeature> temp = sequenceFeatures1.get(SequenceFeature.AnnotationType.INNER);
         if (temp.size() == 1) {
             inner1 = temp.get(0);
         }
-        temp = sequenceFeatures1.get(SequenceFeature.Flag.PREFIX);
+        temp = sequenceFeatures1.get(SequenceFeature.AnnotationType.PREFIX);
         if (temp.size() == 1) {
             prefix1 = temp.get(0);
         }
-        temp = sequenceFeatures1.get(SequenceFeature.Flag.SUFFIX);
+        temp = sequenceFeatures1.get(SequenceFeature.AnnotationType.SUFFIX);
         if (temp.size() == 1) {
             suffix1 = temp.get(0);
         }
-        temp = sequenceFeatures2.get(SequenceFeature.Flag.INNER);
+        temp = sequenceFeatures2.get(SequenceFeature.AnnotationType.INNER);
         if (temp.size() == 1) {
             inner2 = temp.get(0);
         }
-        temp = sequenceFeatures2.get(SequenceFeature.Flag.PREFIX);
+        temp = sequenceFeatures2.get(SequenceFeature.AnnotationType.PREFIX);
         if (temp.size() == 1) {
             prefix2 = temp.get(0);
         }
-        temp = sequenceFeatures2.get(SequenceFeature.Flag.SUFFIX);
+        temp = sequenceFeatures2.get(SequenceFeature.AnnotationType.SUFFIX);
         if (temp.size() == 1) {
             suffix2 = temp.get(0);
         }
@@ -204,15 +204,15 @@ public class BiobrickAUtils implements AssemblyUtils {
         SequenceFeatureCollection sequenceFeatures = new SequenceFeatureCollection();
         if (partSequenceString.startsWith(biobrickAPrefix)) {
             Feature feature = new Feature(biobrickAPrefixFeatureName, biobrickAPrefixFeatureName,
-                    "", biobrickAPrefix, 1, "MISC_FEATURE");
+                    "", biobrickAPrefix, 1, "misc_feature");
             try {
                 feature = SequenceManager.getReferenceFeature(feature);
             } catch (ControllerException e) {
                 throw new UtilityException(e);
             }
             SequenceFeature sequenceFeature = new SequenceFeature(partSequence, feature, 1, 22, +1,
-                    feature.getName(), feature.getDescription(), feature.getGenbankType());
-            sequenceFeature.setFlag(SequenceFeature.Flag.PREFIX);
+                    feature.getName(), feature.getDescription(), feature.getGenbankType(),
+                    SequenceFeature.AnnotationType.PREFIX);
             sequenceFeatures.add(sequenceFeature);
         } else if (partSequenceString.startsWith(biobrickAPrefix2)) {
             Feature feature = new Feature(biobrickAPrefix2FeatureName, biobrickAPrefix2FeatureName,
@@ -224,8 +224,8 @@ public class BiobrickAUtils implements AssemblyUtils {
 
             }
             SequenceFeature sequenceFeature = new SequenceFeature(partSequence, feature, 1, 20, +1,
-                    feature.getName(), feature.getDescription(), feature.getGenbankType());
-            sequenceFeature.setFlag(SequenceFeature.Flag.PREFIX);
+                    feature.getName(), feature.getDescription(), feature.getGenbankType(),
+                    SequenceFeature.AnnotationType.PREFIX);
             sequenceFeatures.add(sequenceFeature);
         }
         if (partSequenceString.endsWith(biobrickASuffix)) {
@@ -238,8 +238,9 @@ public class BiobrickAUtils implements AssemblyUtils {
             }
             SequenceFeature sequenceFeature = new SequenceFeature(partSequence, feature,
                     partSequenceLength - 20, partSequenceLength, +1, feature.getName(), feature
-                            .getDescription(), feature.getGenbankType());
-            sequenceFeature.setFlag(SequenceFeature.Flag.SUFFIX);
+                            .getDescription(), feature.getGenbankType(),
+                    SequenceFeature.AnnotationType.SUFFIX);
+
             sequenceFeatures.add(sequenceFeature);
         } else if (partSequenceString.endsWith(biobrickASuffix2)) {
             Feature feature = new Feature(biobrickASuffix2FeatureName, biobrickASuffix2FeatureName,
@@ -251,8 +252,9 @@ public class BiobrickAUtils implements AssemblyUtils {
             }
             SequenceFeature sequenceFeature = new SequenceFeature(partSequence, feature,
                     partSequenceLength - 22, partSequenceLength, +1, feature.getName(), feature
-                            .getDescription(), feature.getGenbankType());
-            sequenceFeature.setFlag(SequenceFeature.Flag.SUFFIX);
+                            .getDescription(), feature.getGenbankType(),
+                    SequenceFeature.AnnotationType.SUFFIX);
+
             sequenceFeatures.add(sequenceFeature);
         }
         // determine inner feature
@@ -309,15 +311,19 @@ public class BiobrickAUtils implements AssemblyUtils {
                 featureIdentification, partSequenceString, 0, "misc_feature");
         SequenceFeature sequenceFeature = new SequenceFeature(partSequence, innerPartFeature,
                 minimumFeatureStart + 1, maximumFeatureEnd + 1, +1, innerPartFeature.getName(),
-                innerPartFeature.getDescription(), innerPartFeature.getGenbankType());
-        sequenceFeature.setFlag(SequenceFeature.Flag.INNER);
+                innerPartFeature.getDescription(), innerPartFeature.getGenbankType(),
+                SequenceFeature.AnnotationType.INNER);
+
         sequenceFeatures.add(sequenceFeature);
         // check if part has at least prefix, suffix, and one inner feature
         //
         int temp = 0;
-        List<SequenceFeature> prefixFeature = sequenceFeatures.get(SequenceFeature.Flag.PREFIX);
-        List<SequenceFeature> suffixFeature = sequenceFeatures.get(SequenceFeature.Flag.SUFFIX);
-        List<SequenceFeature> innerFeature = sequenceFeatures.get(SequenceFeature.Flag.INNER);
+        List<SequenceFeature> prefixFeature = sequenceFeatures
+                .get(SequenceFeature.AnnotationType.PREFIX);
+        List<SequenceFeature> suffixFeature = sequenceFeatures
+                .get(SequenceFeature.AnnotationType.SUFFIX);
+        List<SequenceFeature> innerFeature = sequenceFeatures
+                .get(SequenceFeature.AnnotationType.INNER);
         if (prefixFeature.size() == 1) {
             if (prefixFeature.get(0).getStart() == 1) {
                 temp = temp + 1;
@@ -425,17 +431,17 @@ public class BiobrickAUtils implements AssemblyUtils {
             SequenceFeatureCollection part1SequenceFeatures = (SequenceFeatureCollection) part1Sequence
                     .getSequenceFeatures();
             SequenceFeature part1InnerFeature = part1SequenceFeatures.get(
-                SequenceFeature.Flag.INNER).get(0);
+                SequenceFeature.AnnotationType.INNER).get(0);
             SequenceFeatureCollection part2SequenceFeatures = (SequenceFeatureCollection) part2Sequence
                     .getSequenceFeatures();
             SequenceFeature part2InnerFeature = part2SequenceFeatures.get(
-                SequenceFeature.Flag.INNER).get(0);
+                SequenceFeature.AnnotationType.INNER).get(0);
             // part1 inner feature as subinner feature 
             SequenceFeature temp = new SequenceFeature();
             temp.setSequence(newPartSequence);
             temp.setFeature(part1InnerFeature.getFeature());
             temp.setName(part1InnerFeature.getName());
-            temp.setFlag(SequenceFeature.Flag.SUBINNER);
+            temp.setAnnotationType(SequenceFeature.AnnotationType.SUBINNER);
             temp.setStart(part1InnerFeature.getStart());
             temp.setEnd(part1InnerFeature.getEnd());
             temp.setStrand(part1InnerFeature.getStrand());
@@ -446,7 +452,7 @@ public class BiobrickAUtils implements AssemblyUtils {
             temp.setSequence(newPartSequence);
             temp.setFeature(part2InnerFeature.getFeature());
             temp.setName(part2InnerFeature.getName());
-            temp.setFlag(SequenceFeature.Flag.SUBINNER);
+            temp.setAnnotationType(SequenceFeature.AnnotationType.SUBINNER);
             int secondPartFeatureOffset = scarStartPosition - prefixChopPosition + 2;
             temp.setStart(part2InnerFeature.getStart() + secondPartFeatureOffset);
             temp.setEnd(part2InnerFeature.getEnd() + secondPartFeatureOffset);
@@ -455,7 +461,7 @@ public class BiobrickAUtils implements AssemblyUtils {
             // scar
             temp = new SequenceFeature();
             temp.setSequence(newPartSequence);
-            temp.setFlag(SequenceFeature.Flag.SCAR);
+            temp.setAnnotationType(SequenceFeature.AnnotationType.SCAR);
             temp.setStart(scarStartPosition + 1);
             temp.setEnd(scarStartPosition + scarLength);
             temp.setStrand(1);

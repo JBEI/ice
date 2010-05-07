@@ -111,6 +111,7 @@ public class AssemblyController extends Controller {
         try {
             Part part2 = (Part) EntryManager.get(4394);
             Sequence part2Sequence = SequenceManager.getByEntry(part2);
+            @SuppressWarnings("unused")
             Set<SequenceFeature> sequenceFeatures = part2Sequence.getSequenceFeatures();
 
             ////Part result = as.joinBiobrickB(part2, part2);
@@ -135,6 +136,7 @@ public class AssemblyController extends Controller {
 
     }
 
+    @SuppressWarnings("unused")
     private static void mainRunJoin() {
         try {
             Part part1 = (Part) EntryManager.get(4394);

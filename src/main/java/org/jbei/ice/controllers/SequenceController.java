@@ -20,6 +20,7 @@ import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.models.Part.AssemblyStandard;
+import org.jbei.ice.lib.models.SequenceFeature.AnnotationType;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.SequenceFeatureCollection;
@@ -216,6 +217,10 @@ public class SequenceController extends Controller {
                 dnaFeature.setName(sequenceFeature.getName());
                 dnaFeature.setStrand(sequenceFeature.getStrand());
 
+                if (sequenceFeature.getAnnotationType() != null) {
+                    dnaFeature.setAnnotationType(sequenceFeature.getAnnotationType().toString());
+                }
+
                 features.add(dnaFeature);
             }
         }
@@ -294,9 +299,16 @@ public class SequenceController extends Controller {
                             descriptionNotes.toString(), "", featureSequence, 0, dnaFeature
                                     .getType());
 
+                    AnnotationType annotationType = null;
+
+                    if (dnaFeature.getAnnotationType() != null
+                            && !dnaFeature.getAnnotationType().isEmpty()) {
+                        annotationType = AnnotationType.valueOf(dnaFeature.getAnnotationType());
+                    }
+
                     SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature, start,
                             end, dnaFeature.getStrand(), dnaFeature.getName(), descriptionNotes
-                                    .toString(), dnaFeature.getType());
+                                    .toString(), dnaFeature.getType(), annotationType);
 
                     sequenceFeatures.add(sequenceFeature);
                 }

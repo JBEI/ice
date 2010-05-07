@@ -12,6 +12,7 @@ public class DNAFeature implements Serializable {
     private String type = "";
     private String name = "";
     private int strand = 1;
+    private String annotationType;
     private List<DNAFeatureNote> notes = new LinkedList<DNAFeatureNote>();
 
     public DNAFeature() {
@@ -19,7 +20,7 @@ public class DNAFeature implements Serializable {
     }
 
     public DNAFeature(int start, int end, String type, String name, int strand,
-            List<DNAFeatureNote> notes) {
+            List<DNAFeatureNote> notes, String annotationType) {
         super();
 
         this.start = start;
@@ -28,6 +29,7 @@ public class DNAFeature implements Serializable {
         this.name = name;
         this.strand = strand;
         this.notes = notes;
+        this.annotationType = annotationType;
     }
 
     public int getStart() {
@@ -80,5 +82,13 @@ public class DNAFeature implements Serializable {
 
     public void addNote(DNAFeatureNote dnaFeatureNote) {
         notes.add(dnaFeatureNote);
+    }
+
+    public String getAnnotationType() {
+        return annotationType;
+    }
+
+    public void setAnnotationType(String annotationType) {
+        this.annotationType = annotationType;
     }
 }

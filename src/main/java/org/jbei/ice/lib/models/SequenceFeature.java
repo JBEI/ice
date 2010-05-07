@@ -61,14 +61,14 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
 
     @Column(name = "flag")
     @Enumerated(EnumType.STRING)
-    private Flag flag;
+    private AnnotationType annotationType;
 
     public SequenceFeature() {
         super();
     }
 
     public SequenceFeature(Sequence sequence, Feature feature, int start, int end, int strand,
-            String name, String description, String genbankType) {
+            String name, String description, String genbankType, AnnotationType annotationType) {
         super();
         this.sequence = sequence;
         this.feature = feature;
@@ -78,9 +78,10 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         this.name = name;
         this.description = description;
         this.genbankType = genbankType;
+        this.annotationType = annotationType;
     }
 
-    public enum Flag {
+    public enum AnnotationType {
         PREFIX, SUFFIX, SCAR, INNER, SUBINNER;
     }
 
@@ -161,11 +162,11 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         this.genbankType = genbankType;
     }
 
-    public void setFlag(Flag flag) {
-        this.flag = flag;
+    public void setAnnotationType(AnnotationType annotationType) {
+        this.annotationType = annotationType;
     }
 
-    public Flag getFlag() {
-        return flag;
+    public AnnotationType getAnnotationType() {
+        return annotationType;
     }
 }

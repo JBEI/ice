@@ -22,6 +22,10 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
     }
 
     public SequenceFeatureCollection(Collection<SequenceFeature> c) {
+        if (c == null) {
+            return;
+        }
+
         addAll(c);
     }
 
@@ -35,7 +39,7 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
         return result;
     }
 
-    public boolean exists(SequenceFeature.Flag flag) {
+    public boolean exists(SequenceFeature.AnnotationType flag) {
         boolean result = false;
         List<SequenceFeature> temp = get(flag);
         if (temp.size() > 0) {
@@ -54,10 +58,10 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
         return result;
     }
 
-    public List<SequenceFeature> get(SequenceFeature.Flag flag) {
+    public List<SequenceFeature> get(SequenceFeature.AnnotationType flag) {
         ArrayList<SequenceFeature> result = new ArrayList<SequenceFeature>();
         for (SequenceFeature sequenceFeature : sequenceFeatures) {
-            if (sequenceFeature.getFlag() == flag) {
+            if (sequenceFeature.getAnnotationType() == flag) {
                 result.add(sequenceFeature);
             }
         }

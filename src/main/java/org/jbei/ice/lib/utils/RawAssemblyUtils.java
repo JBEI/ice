@@ -37,12 +37,12 @@ public class RawAssemblyUtils implements AssemblyUtils {
         }
         SequenceFeature inner1 = null;
         SequenceFeature inner2 = null;
-        List<SequenceFeature> temp = sequenceFeatures1.get(SequenceFeature.Flag.INNER);
+        List<SequenceFeature> temp = sequenceFeatures1.get(SequenceFeature.AnnotationType.INNER);
         if (temp.size() == 1) {
             inner1 = temp.get(0);
         }
 
-        temp = sequenceFeatures2.get(SequenceFeature.Flag.INNER);
+        temp = sequenceFeatures2.get(SequenceFeature.AnnotationType.INNER);
         if (temp.size() == 1) {
             inner2 = temp.get(0);
         }
@@ -67,10 +67,11 @@ public class RawAssemblyUtils implements AssemblyUtils {
                 featureIdentification, partSequenceString, 0, "misc_feature");
         SequenceFeature sequenceFeature = new SequenceFeature(partSequence, innerPartFeature, 1,
                 partSequenceString.length(), +1, innerPartFeature.getName(), innerPartFeature
-                        .getDescription(), innerPartFeature.getGenbankType());
-        sequenceFeature.setFlag(SequenceFeature.Flag.INNER);
+                        .getDescription(), innerPartFeature.getGenbankType(),
+                SequenceFeature.AnnotationType.INNER);
+
         sequenceFeatures.add(sequenceFeature);
+
         return sequenceFeatures;
     }
-
 }

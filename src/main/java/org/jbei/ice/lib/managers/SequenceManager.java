@@ -219,7 +219,6 @@ public class SequenceManager {
             Object queryResult = query.uniqueResult();
             if (true) {
                 result = (Feature) queryResult;
-                result = result;
             }
         } catch (HibernateException e) {
             e.printStackTrace();
