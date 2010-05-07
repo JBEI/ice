@@ -233,7 +233,7 @@ public class AssemblyController extends Controller {
         SequenceFeatureCollection newSequenceFeatures = determineAssemblyFeatures(partSequence);
         Set<SequenceFeature> temp = partSequence.getSequenceFeatures();
         SequenceFeatureCollection oldSequenceFeatures = null;
-        if (temp != null) {
+        if (temp.size() > 0) {
             // old sequencefeatures exist
             if (temp instanceof SequenceFeatureCollection) {
                 oldSequenceFeatures = (SequenceFeatureCollection) temp;
