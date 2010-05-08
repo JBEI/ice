@@ -186,7 +186,7 @@ public class GenbankFormatter extends AbstractFormatter {
 
             String key = "";
             String value = "";
-            for (int j = 0; i < line.length(); j++) {
+            for (int j = 0; j < line.length(); j++) {
                 if (line.charAt(j) == '=') {
                     key = line.substring(0, j);
                     value = line.substring(j + 1, line.length());
