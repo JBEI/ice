@@ -68,11 +68,25 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
         return result;
     }
 
+    public List<SequenceFeature> getBySequence(String sequenceString) {
+        if (sequenceString.length() == 761) {
+            System.out.println("");
+        }
+        ArrayList<SequenceFeature> result = new ArrayList<SequenceFeature>();
+        for (SequenceFeature sequenceFeature : sequenceFeatures) {
+            String featureSequence = sequenceFeature.getFeature().getSequence();
+            if (featureSequence.equals(sequenceString)) {
+                result.add(sequenceFeature);
+            }
+        }
+        return result;
+    }
+
     /**
      * @param 1 based position
      * @return
      */
-    public List<SequenceFeature> getFeatursAt(int position) {
+    public List<SequenceFeature> getFeaturesAt(int position) {
         ArrayList<SequenceFeature> result = new ArrayList<SequenceFeature>();
         for (SequenceFeature sequenceFeature : sequenceFeatures) {
             if (sequenceFeature.getStart() >= position && position <= sequenceFeature.getEnd()) {

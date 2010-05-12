@@ -18,6 +18,7 @@ import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
@@ -47,6 +48,42 @@ public class BiobrickBUtils implements AssemblyUtils {
     public SequenceFeatureCollection determineAssemblyFeatures(Sequence partSequence)
             throws UtilityException {
         return determineBiobrickBFeatures(partSequence);
+    }
+
+    @Override
+    public Sequence populateAssemblyFeatures(Sequence partSequence) throws UtilityException {
+        SequenceFeatureCollection newSequenceFeatures = determineAssemblyFeatures(partSequence);
+        Set<SequenceFeature> temp = partSequence.getSequenceFeatures();
+
+        if (!(temp instanceof SequenceFeatureCollection)) {
+            throw new UtilityException("Not A SequenceFeatureCollection");
+        }
+        SequenceFeatureCollection oldSequenceFeatures = (SequenceFeatureCollection) temp;
+        for (SequenceFeature newSequenceFeature : newSequenceFeatures) {
+            List<SequenceFeature> foundOldSequenceFeatures = oldSequenceFeatures
+                    .getBySequence(newSequenceFeature.getFeature().getSequence());
+            if (foundOldSequenceFeatures.size() > 1) {
+                // multiple with same sequence. Remove them and replace with new feature
+                oldSequenceFeatures.removeAll(foundOldSequenceFeatures);
+                oldSequenceFeatures.add(newSequenceFeature);
+            } else if (foundOldSequenceFeatures.size() == 1) {
+                SequenceFeature foundOldSequenceFeature = foundOldSequenceFeatures.get(0);
+                if (!(foundOldSequenceFeature.getAnnotationType() == newSequenceFeature
+                        .getAnnotationType())) {
+                    oldSequenceFeatures.remove(foundOldSequenceFeature);
+                    oldSequenceFeatures.add(newSequenceFeature);
+                }
+            } else if (foundOldSequenceFeatures.size() == 0) {
+                oldSequenceFeatures.add(newSequenceFeature);
+            }
+        }
+        try {
+            SequenceManager.saveSequence(partSequence);
+        } catch (ManagerException e) {
+            throw new UtilityException(e);
+        }
+        return partSequence;
+
     }
 
     public Sequence join(Sequence part1, Sequence part2) throws UtilityException {
@@ -265,7 +302,8 @@ public class BiobrickBUtils implements AssemblyUtils {
             String featureDescription = featureName;
             String featureIdentification = part.getRecordId();
             Feature innerPartFeature = new Feature(featureName, featureDescription,
-                    featureIdentification, partSequenceString, 0, "misc_feature");
+                    featureIdentification, partSequenceString.substring(minimumFeatureStart,
+                        maximumFeatureEnd + 1), 0, "misc_feature");
             SequenceFeature sequenceFeature = new SequenceFeature(partSequence, innerPartFeature,
                     minimumFeatureStart + 1, maximumFeatureEnd + 1, +1, innerPartFeature.getName(),
                     innerPartFeature.getDescription(), innerPartFeature.getGenbankType(),
@@ -426,8 +464,7 @@ public class BiobrickBUtils implements AssemblyUtils {
             try {
                 newPartSequence = sequenceController.save(newPartSequence);
             } catch (ControllerException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw new UtilityException(e);
             } catch (PermissionException e) {
                 throw new UtilityException(e);
             }
