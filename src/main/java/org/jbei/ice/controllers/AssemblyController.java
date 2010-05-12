@@ -11,6 +11,7 @@ import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
+import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
@@ -81,16 +82,100 @@ public class AssemblyController extends Controller {
         return sequenceFeatures;
     }
 
-    public static void main(String[] args) {
-        try {
-            mainRunBiobrickBTest();
-        } catch (PermissionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ControllerException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+    /**
+     * Comparator for assembly basic sequence features
+     * 
+     * @param sequenceFeatures1
+     * @param sequenceFeatures2
+     * @return 0 if identical.
+     */
+    public int compareAssemblyAnnotations(AssemblyStandard standard,
+            SequenceFeatureCollection sequenceFeatures1, SequenceFeatureCollection sequenceFeatures2) {
+        int result = -1;
+        if (standard == AssemblyStandard.BIOBRICKA) {
+            result = getAssemblyUtils().get(0).compareAssemblyAnnotations(sequenceFeatures1,
+                sequenceFeatures2);
+        } else if (standard == AssemblyStandard.BIOBRICKB) {
+            result = getAssemblyUtils().get(1).compareAssemblyAnnotations(sequenceFeatures1,
+                sequenceFeatures2);
+        } else if (standard == AssemblyStandard.RAW) {
+            result = getAssemblyUtils().get(2).compareAssemblyAnnotations(sequenceFeatures1,
+                sequenceFeatures2);
         }
+        return result;
+    }
+
+    public void populateAssemblyAnnotations(Sequence partSequence) throws ControllerException {
+        SequenceFeatureCollection newSequenceFeatures = determineAssemblyFeatures(partSequence);
+        Set<SequenceFeature> temp = partSequence.getSequenceFeatures();
+        SequenceFeatureCollection oldSequenceFeatures = null;
+        if (temp.size() > 0) {
+            // old sequencefeatures exist
+            if (temp instanceof SequenceFeatureCollection) {
+                oldSequenceFeatures = (SequenceFeatureCollection) temp;
+            } else {
+                throw new ControllerException("Bad SequenceFeatureCollection");
+            }
+            // If innerFeature has not changed, keep all old sequenceFeatures, except prefix, suffix, and inner
+            Part part = null;
+            if (partSequence.getEntry() instanceof Part) {
+                part = (Part) partSequence.getEntry();
+            }
+            if (compareAssemblyAnnotations(part.getPackageFormat(), newSequenceFeatures,
+                oldSequenceFeatures) == 0) {
+                newSequenceFeatures = oldSequenceFeatures;
+            } else {
+                // discard old sequenceFeatures
+            }
+        }
+        partSequence.setSequenceFeatures(newSequenceFeatures);
+        try {
+            SequenceManager.saveSequence(partSequence);
+        } catch (ManagerException e) {
+            throw new ControllerException(e);
+        }
+    }
+
+    public Sequence joinBiobricks(Sequence sequence1, Sequence sequence2)
+            throws ControllerException {
+        AssemblyStandard part1Standard = determineAssemblyStandard(sequence1);
+        AssemblyStandard part2Standard = determineAssemblyStandard(sequence2);
+
+        Sequence result = null;
+
+        if (part1Standard != part2Standard) {
+            return null;
+        }
+        try {
+            if (part1Standard == AssemblyStandard.BIOBRICKA) {
+                result = getAssemblyUtils().get(0).join(sequence1, sequence2);
+            } else if (part1Standard == AssemblyStandard.BIOBRICKB) {
+                result = getAssemblyUtils().get(1).join(sequence1, sequence2);
+            } else if (part1Standard == AssemblyStandard.RAW) {
+                result = getAssemblyUtils().get(3).join(sequence1, sequence2);
+            }
+        } catch (UtilityException e) {
+            throw new ControllerException(e);
+        }
+
+        Entry entry = result.getEntry();
+        entry.setCreator(getAccount().getFullName());
+        entry.setCreatorEmail(getAccount().getEmail());
+        entry.setOwner(getAccount().getFullName());
+        entry.setOwnerEmail(getAccount().getEmail());
+        SequenceController sequenceController = null;
+        try {
+            sequenceController = new SequenceController(getAccount());
+            result = sequenceController.save(result);
+        } catch (PermissionException e) {
+            throw new ControllerException(e);
+        }
+        return result;
+    }
+
+    public static void main(String[] args) {
+
+        mainRunBiobrickJoinTest();
 
         //mainRunJoin();
 
@@ -98,6 +183,37 @@ public class AssemblyController extends Controller {
         InnerFeature feature = (InnerFeature) SequenceManager.getFeature(1347);
         System.out.println(feature.toString());
         */
+    }
+
+    private static void mainRunBiobrickJoinTest() {
+        AssemblyController as = null;
+        try {
+            as = new AssemblyController(AccountManager.get(86));
+        } catch (ManagerException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        try {
+
+            // bbb
+            //Part part1 = (Part) EntryManager.get(4431);
+            //Part part2 = (Part) EntryManager.get(4430);
+            // bba
+            Part part1 = (Part) EntryManager.get(4428);
+            Part part2 = (Part) EntryManager.get(4429);
+
+            Sequence sequence1 = SequenceManager.getByEntry(part1);
+            Sequence sequence2 = SequenceManager.getByEntry(part2);
+
+            Sequence result = as.joinBiobricks(sequence1, sequence2);
+            System.out.println(result.getEntry().getId());
+        } catch (ManagerException e) {
+            e.printStackTrace();
+        } catch (ControllerException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
     }
 
     private static void mainRunBiobrickBTest() throws PermissionException, ControllerException {
@@ -160,63 +276,5 @@ public class AssemblyController extends Controller {
 
     public ArrayList<AssemblyUtils> getAssemblyUtils() {
         return assemblyUtils;
-    }
-
-    /**
-     * Comparator for assembly basic sequence features
-     * 
-     * @param sequenceFeatures1
-     * @param sequenceFeatures2
-     * @return 0 if identical.
-     */
-    public int compareAssemblyAnnotations(AssemblyStandard standard,
-            SequenceFeatureCollection sequenceFeatures1, SequenceFeatureCollection sequenceFeatures2) {
-        int result = -1;
-        if (standard == AssemblyStandard.BIOBRICKA) {
-            result = getAssemblyUtils().get(0).compareAssemblyAnnotations(sequenceFeatures1,
-                sequenceFeatures2);
-
-        } else if (standard == AssemblyStandard.BIOBRICKB) {
-            result = getAssemblyUtils().get(1).compareAssemblyAnnotations(sequenceFeatures1,
-                sequenceFeatures2);
-
-        } else if (standard == AssemblyStandard.RAW) {
-            result = getAssemblyUtils().get(2).compareAssemblyAnnotations(sequenceFeatures1,
-                sequenceFeatures2);
-        }
-
-        return result;
-    }
-
-    public void populateAssemblyAnnotations(Sequence partSequence) throws ControllerException {
-        SequenceFeatureCollection newSequenceFeatures = determineAssemblyFeatures(partSequence);
-        Set<SequenceFeature> temp = partSequence.getSequenceFeatures();
-        SequenceFeatureCollection oldSequenceFeatures = null;
-        if (temp.size() > 0) {
-            // old sequencefeatures exist
-            if (temp instanceof SequenceFeatureCollection) {
-                oldSequenceFeatures = (SequenceFeatureCollection) temp;
-            } else {
-                throw new ControllerException("Bad SequenceFeatureCollection");
-            }
-
-            // If innerFeature has not changed, keep all old sequenceFeatures
-            Part part = null;
-            if (partSequence.getEntry() instanceof Part) {
-                part = (Part) partSequence.getEntry();
-            }
-            if (compareAssemblyAnnotations(part.getPackageFormat(), newSequenceFeatures,
-                oldSequenceFeatures) == 0) {
-                newSequenceFeatures = oldSequenceFeatures;
-            } else {
-                // discard old sequenceFeatures
-            }
-        }
-        partSequence.setSequenceFeatures(newSequenceFeatures);
-        try {
-            SequenceManager.saveSequence(partSequence);
-        } catch (ManagerException e) {
-            throw new ControllerException(e);
-        }
     }
 }

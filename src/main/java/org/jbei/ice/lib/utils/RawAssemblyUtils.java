@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
-import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.models.Part.AssemblyStandard;
@@ -23,7 +22,7 @@ public class RawAssemblyUtils implements AssemblyUtils {
     }
 
     @Override
-    public Sequence join(Part part1, Part part2) throws UtilityException {
+    public Sequence join(Sequence part1, Sequence part2) throws UtilityException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -49,7 +48,7 @@ public class RawAssemblyUtils implements AssemblyUtils {
 
         if (inner1 != null && inner2 != null) {
             if (inner1.getSequence().getFwdHash().equals(inner2.getSequence().getFwdHash())) {
-                result = 1;
+                result = 0;
             }
         }
 

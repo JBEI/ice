@@ -14,12 +14,11 @@ import org.biojava.bio.symbol.IllegalSymbolException;
 import org.biojava.utils.SimpleThreadPool;
 import org.jbei.ice.bio.enzymes.RestrictionEnzymesManager;
 import org.jbei.ice.bio.enzymes.RestrictionEnzymesManagerException;
+import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
-import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Name;
@@ -50,7 +49,7 @@ public class BiobrickBUtils implements AssemblyUtils {
         return determineBiobrickBFeatures(partSequence);
     }
 
-    public Sequence join(Part part1, Part part2) throws UtilityException {
+    public Sequence join(Sequence part1, Sequence part2) throws UtilityException {
         return joinBiobrickB(part1, part2);
     }
 
@@ -303,18 +302,14 @@ public class BiobrickBUtils implements AssemblyUtils {
         return sequenceFeatures;
     }
 
-    private Sequence joinBiobrickB(Part part1, Part part2) throws UtilityException {
+    private Sequence joinBiobrickB(Sequence part1Sequence, Sequence part2Sequence)
+            throws UtilityException {
         Sequence result = null;
+        Part part1 = (Part) part1Sequence.getEntry();
+        Part part2 = (Part) part2Sequence.getEntry();
         if (part1.getPackageFormat().equals(Part.AssemblyStandard.BIOBRICKB)
                 && part2.getPackageFormat().equals(Part.AssemblyStandard.BIOBRICKB)) {
-            Sequence part1Sequence = null;
-            Sequence part2Sequence = null;
-            try {
-                part1Sequence = SequenceManager.getByEntry(part1);
-                part2Sequence = SequenceManager.getByEntry(part2);
-            } catch (ManagerException e) {
-                throw new UtilityException(e);
-            }
+
             // concat sequence string
             String joinedSequence = null;
             String part1SequenceString = part1Sequence.getSequence();
@@ -343,22 +338,24 @@ public class BiobrickBUtils implements AssemblyUtils {
             String newPartNameString = part1.getOnePartNumber().getPartNumber() + "+"
                     + part2.getOnePartNumber().getPartNumber();
             inputNames.add(new Name(newPartNameString, newPart));
+            newPart.setPackageFormat(part1.getPackageFormat());
             newPart.setNames(inputNames);
             newPart.setShortDescription("Assembly of " + newPartNameString);
             newPart.setStatus("in progress");
             newPart.setBioSafetyLevel(Math
                     .max(part1.getBioSafetyLevel(), part2.getBioSafetyLevel()));
-            newPart.setOwner(getAccount().getFullName());
-            newPart.setOwnerEmail(getAccount().getEmail());
-            newPart.setCreator(getAccount().getFullName());
-            newPart.setCreatorEmail(getAccount().getEmail());
-            EntryController entryController = new EntryController(getAccount());
+            newPart.setOwner("System");
+            newPart.setOwnerEmail("System");
+            newPart.setCreator("System");
+            newPart.setCreatorEmail("System");
+            EntryController entryController = null;
             try {
+                entryController = new EntryController(AccountController.getSystemAccount());
                 newPart = (Part) entryController.createEntry(newPart);
             } catch (ControllerException e) {
                 throw new UtilityException(e);
             }
-            SequenceController sequenceController = new SequenceController(getAccount());
+            SequenceController sequenceController = null;
             Sequence newPartSequence = new Sequence();
             newPartSequence.setEntry(newPart);
             newPartSequence.setSequence(joinedSequence);
@@ -366,15 +363,16 @@ public class BiobrickBUtils implements AssemblyUtils {
             newPartSequence.setRevHash(SequenceUtils
                     .calculateReverseComplementSequenceHash(joinedSequence));
             try {
+                sequenceController = new SequenceController(AccountController.getSystemAccount());
                 newPartSequence = sequenceController.save(newPartSequence);
             } catch (ControllerException e) {
                 throw new UtilityException(e);
             } catch (PermissionException e) {
                 throw new UtilityException(e);
             }
-            // calculate and annotate biobrick sequencefeatures
+
             Set<SequenceFeature> newPartSequenceFeatures = newPartSequence.getSequenceFeatures();
-            SequenceFeatureCollection newFeatures = determineBiobrickBFeatures(newPartSequence);
+            SequenceFeatureCollection newFeatures = new SequenceFeatureCollection();
             // annotate subinner features and scar
             //
             SequenceFeatureCollection part1SequenceFeatures = (SequenceFeatureCollection) part1Sequence
@@ -391,6 +389,7 @@ public class BiobrickBUtils implements AssemblyUtils {
             temp.setFeature(part1InnerFeature.getFeature());
             temp.setName(part1InnerFeature.getName());
             temp.setAnnotationType(SequenceFeature.AnnotationType.SUBINNER);
+            temp.setGenbankType("misc_feature");
             temp.setStart(part1InnerFeature.getStart());
             temp.setEnd(part1InnerFeature.getEnd());
             temp.setStrand(part1InnerFeature.getStrand());
@@ -401,15 +400,18 @@ public class BiobrickBUtils implements AssemblyUtils {
             temp.setFeature(part2InnerFeature.getFeature());
             temp.setName(part2InnerFeature.getName());
             temp.setAnnotationType(SequenceFeature.AnnotationType.SUBINNER);
+            temp.setGenbankType("misc_feature");
             int secondPartFeatureOffset = scarStartPosition - prefixChopPosition + 1;
             temp.setStart(part2InnerFeature.getStart() + secondPartFeatureOffset);
             temp.setEnd(part2InnerFeature.getEnd() + secondPartFeatureOffset);
             temp.setStrand(part2InnerFeature.getStrand());
+
             newFeatures.add(temp);
             // scar
             temp = new SequenceFeature();
             temp.setSequence(newPartSequence);
             temp.setAnnotationType(SequenceFeature.AnnotationType.SCAR);
+            temp.setGenbankType("misc_feature");
             temp.setStart(scarStartPosition + 1);
             temp.setEnd(scarStartPosition + scarLength);
             temp.setStrand(1);
@@ -432,11 +434,6 @@ public class BiobrickBUtils implements AssemblyUtils {
             result = newPartSequence;
         }
         return result;
-    }
-
-    private Account getAccount() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     private static Feature getBiobrickBScarFeature() throws ControllerException {

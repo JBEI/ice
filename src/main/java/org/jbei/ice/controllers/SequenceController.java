@@ -72,7 +72,6 @@ public class SequenceController extends Controller {
         }
 
         try {
-
             if (sequence.getEntry() instanceof Part) {
                 Part part = (Part) sequence.getEntry();
                 AssemblyController assemblyController = new AssemblyController(getAccount());

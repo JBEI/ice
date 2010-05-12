@@ -22,6 +22,7 @@ import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.ISequenceValueObject;
 import org.jbei.ice.lib.utils.SequenceFeatureCollection;
+import org.jbei.ice.lib.utils.SequenceUtils;
 
 @Entity
 @Table(name = "sequences")
@@ -86,6 +87,9 @@ public class Sequence implements ISequenceValueObject, IModel {
 
     public void setSequence(String sequence) {
         this.sequence = sequence;
+        setFwdHash(SequenceUtils.calculateSequenceHash(sequence));
+        setRevHash(SequenceUtils.calculateReverseComplementSequenceHash(sequence));
+
     }
 
     @XmlTransient

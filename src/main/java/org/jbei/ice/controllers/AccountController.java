@@ -199,12 +199,22 @@ public class AccountController {
     }
 
     public static void saveAccountPreferences(AccountPreferences accountPreferences)
-
-    throws ControllerException {
+            throws ControllerException {
         try {
             AccountPreferencesManager.save(accountPreferences);
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
+    }
+
+    public static Account getSystemAccount() throws ControllerException {
+        Account account = null;
+        try {
+            // TODO: Fix this
+            account = AccountManager.get(1);
+        } catch (ManagerException e) {
+            throw new ControllerException(e);
+        }
+        return account;
     }
 }
