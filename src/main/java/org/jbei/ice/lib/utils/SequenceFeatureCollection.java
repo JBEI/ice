@@ -69,9 +69,6 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
     }
 
     public List<SequenceFeature> getBySequence(String sequenceString) {
-        if (sequenceString.length() == 761) {
-            System.out.println("");
-        }
         ArrayList<SequenceFeature> result = new ArrayList<SequenceFeature>();
         for (SequenceFeature sequenceFeature : sequenceFeatures) {
             String featureSequence = sequenceFeature.getFeature().getSequence();

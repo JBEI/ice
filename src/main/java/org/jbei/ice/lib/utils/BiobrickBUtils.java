@@ -27,6 +27,7 @@ import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.models.Part.AssemblyStandard;
+import org.jbei.ice.lib.models.SequenceFeature.AnnotationType;
 import org.jbei.ice.lib.permissions.PermissionException;
 
 public class BiobrickBUtils implements AssemblyUtils {
@@ -74,6 +75,15 @@ public class BiobrickBUtils implements AssemblyUtils {
                     oldSequenceFeatures.add(newSequenceFeature);
                 }
             } else if (foundOldSequenceFeatures.size() == 0) {
+                // maybe there is a part labeled INNER already
+                List<SequenceFeature> foundOldInnerSequenceFeatures = oldSequenceFeatures
+                        .get(AnnotationType.INNER);
+                if (foundOldInnerSequenceFeatures.size() > 1) {
+                    oldSequenceFeatures.removeAll(foundOldInnerSequenceFeatures);
+                } else if (foundOldInnerSequenceFeatures.size() == 1) {
+                    // inner exists, but is no longer valid
+                    oldSequenceFeatures.remove(foundOldInnerSequenceFeatures.get(0));
+                }
                 oldSequenceFeatures.add(newSequenceFeature);
             }
         }
