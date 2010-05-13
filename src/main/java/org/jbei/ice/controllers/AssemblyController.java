@@ -189,8 +189,8 @@ public class AssemblyController extends Controller {
             //Part part1 = (Part) EntryManager.get(4431);
             //Part part2 = (Part) EntryManager.get(4430);
             // bba
-            Part part1 = (Part) EntryManager.get(4428);
-            Part part2 = (Part) EntryManager.get(4429);
+            Part part1 = (Part) EntryManager.get(4444);
+            Part part2 = (Part) EntryManager.get(4444);
 
             Sequence sequence1 = SequenceManager.getByEntry(part1);
             Sequence sequence2 = SequenceManager.getByEntry(part2);

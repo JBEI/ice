@@ -410,14 +410,6 @@ public class BiobrickBUtils implements AssemblyUtils {
             newPartSequence.setFwdHash(SequenceUtils.calculateSequenceHash(joinedSequence));
             newPartSequence.setRevHash(SequenceUtils
                     .calculateReverseComplementSequenceHash(joinedSequence));
-            try {
-                sequenceController = new SequenceController(AccountController.getSystemAccount());
-                newPartSequence = sequenceController.save(newPartSequence);
-            } catch (ControllerException e) {
-                throw new UtilityException(e);
-            } catch (PermissionException e) {
-                throw new UtilityException(e);
-            }
 
             Set<SequenceFeature> newPartSequenceFeatures = newPartSequence.getSequenceFeatures();
             SequenceFeatureCollection newFeatures = new SequenceFeatureCollection();
@@ -472,6 +464,7 @@ public class BiobrickBUtils implements AssemblyUtils {
             newFeatures.add(temp);
             newPartSequenceFeatures.addAll(newFeatures);
             try {
+                sequenceController = new SequenceController(AccountController.getSystemAccount());
                 newPartSequence = sequenceController.save(newPartSequence);
             } catch (ControllerException e) {
                 throw new UtilityException(e);
