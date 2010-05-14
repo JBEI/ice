@@ -277,7 +277,7 @@
 		</plugins>
 	</build>
 	<properties>
-		<wicket.version>1.4.3</wicket.version>
+		<wicket.version>1.4.8</wicket.version>
 		<jetty.version>6.1.6</jetty.version>
 	</properties>
 </project>
