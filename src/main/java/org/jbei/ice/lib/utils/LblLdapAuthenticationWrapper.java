@@ -110,12 +110,13 @@ public class LblLdapAuthenticationWrapper {
     public boolean isWikiUser(String loginName) throws LblLdapAuthenticationWrapperException {
         boolean result = false;
 
-        //Use "JBEI Employees" and "Keasling Lab", and BIOFAB as whitelist
         ArrayList<String> whitelistGroups = new ArrayList<String>();
 
-        whitelistGroups.add("JBEI Employees");
-        whitelistGroups.add("Keasling Lab");
-        whitelistGroups.add("BIOFAB");
+        String whitelistString = JbeirSettings.getSetting("LBL_LDAP_WHITELIST_GROUPS");
+        String[] whiteListArray = whitelistString.split(",");
+        for (int i = 0; i < whiteListArray.length; i++) {
+            whitelistGroups.add(whiteListArray[i]);
+        }
 
         String queryPrefix = "cn=";
         String querySuffix = ",ou=JBEI-Groups,ou=Groups,o=Lawrence Berkeley Laboratory,c=US";
