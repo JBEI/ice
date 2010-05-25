@@ -16,4 +16,10 @@
 			<source>org.jbei.ice.services.blazeds.RegistryAMFAPI</source>
 		</properties>
 	</destination>
+	
+	<destination id="Johnny5HelperService">
+		<properties>
+			<source>org.jbei.ice.services.johnny5.Johnny5HelperService</source>
+		</properties>
+	</destination>
 </service>
