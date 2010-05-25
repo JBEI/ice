@@ -9,6 +9,8 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -78,20 +80,47 @@ public class Johnny5HelperService {
 
             byte data[] = new byte[BUFFER];
 
+            HashMap<String, String> uniqueEntries = new LinkedHashMap<String, String>();
+
             for (int i = 0; i < 3 + fileList.size(); i++) {
                 FileInputStream fis;
                 ZipEntry entry;
                 if (i == 0) {
+                    if (uniqueEntries.containsKey(source)) {
+                        continue;
+                    }
+
+                    uniqueEntries.put(source, source);
+
                     fis = new FileInputStream(source);
                     entry = new ZipEntry(sourceName);
                 } else if (i == 1) {
+                    if (uniqueEntries.containsKey(source)) {
+                        continue;
+                    }
+
+                    uniqueEntries.put(source, source);
+
                     fis = new FileInputStream(source2);
                     entry = new ZipEntry(source2Name);
                 } else if (i == 2) {
+                    if (uniqueEntries.containsKey(source)) {
+                        continue;
+                    }
+
+                    uniqueEntries.put(source, source);
+
                     fis = new FileInputStream(source3);
                     entry = new ZipEntry(source3Name);
                 } else {
                     FileInfo fi = fileList.get(i - 3);
+
+                    if (uniqueEntries.containsKey(fi.getName())) {
+                        continue;
+                    }
+
+                    uniqueEntries.put(fi.getName(), fi.getName());
+
                     fis = new FileInputStream(dataDirectory + "/" + fi.getName());
                     entry = new ZipEntry(fi.getName());
                 }
