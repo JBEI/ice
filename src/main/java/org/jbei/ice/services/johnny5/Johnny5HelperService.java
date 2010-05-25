@@ -29,9 +29,12 @@ public class Johnny5HelperService {
 
         UsageLogger.info("Johnny5HelperService: archiving johnny5 files...");
 
-        String source = prefix + "_seqListFile.csv";
-        String source2 = prefix + "_partListFile.csv";
-        String source3 = prefix + "_targetListFile.csv";
+        String source = JbeirSettings.getSetting("DATA_DIRECTORY") + "/" + prefix
+                + "_seqListFile.csv";
+        String source2 = JbeirSettings.getSetting("DATA_DIRECTORY") + "/" + prefix
+                + "_partListFile.csv";
+        String source3 = JbeirSettings.getSetting("DATA_DIRECTORY") + "/" + prefix
+                + "_targetListFile.csv";
         String target = JbeirSettings.getSetting("DATA_DIRECTORY") + "/" + prefix
                 + "_completeOutput-" + Utils.generateUUID() + ".zip";
 
