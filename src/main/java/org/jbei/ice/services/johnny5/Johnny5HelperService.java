@@ -27,14 +27,12 @@ public class Johnny5HelperService {
 
         UsageLogger.info("Johnny5HelperService: archiving johnny5 files...");
 
-        String source = JbeirSettings.getSetting("DATA_DIRECTORY") + "/" + prefix
-                + "_seqListFile.csv";
-        String source2 = JbeirSettings.getSetting("DATA_DIRECTORY") + "/" + prefix
-                + "_partListFile.csv";
-        String source3 = JbeirSettings.getSetting("DATA_DIRECTORY") + "/" + prefix
-                + "_targetListFile.csv";
-        String target = JbeirSettings.getSetting("DATA_DIRECTORY") + "/" + prefix
-                + "_completeOutput-" + Utils.generateUUID() + ".zip";
+        String dataDirectory = JbeirSettings.getSetting("DATA_DIRECTORY");
+        String source = dataDirectory + "/" + prefix + "_seqListFile.csv";
+        String source2 = dataDirectory + "/" + prefix + "_partListFile.csv";
+        String source3 = dataDirectory + "/" + prefix + "_targetListFile.csv";
+        String target = dataDirectory + "/" + prefix + "_completeOutput-" + Utils.generateUUID()
+                + ".zip";
 
         try {
             // Write first three arguments to a files
@@ -61,8 +59,7 @@ public class Johnny5HelperService {
 
             for (FileInfo fileInfo : fileList) {
                 // Create file
-                FileWriter fstream = new FileWriter(JbeirSettings.getSetting("DATA_DIRECTORY")
-                        + "/" + fileInfo.getName());
+                FileWriter fstream = new FileWriter(dataDirectory + "/" + fileInfo.getName());
                 BufferedWriter out = new BufferedWriter(fstream);
                 out.write(fileInfo.getFile());
                 //Close the output stream
@@ -88,7 +85,7 @@ public class Johnny5HelperService {
                     entry = new ZipEntry(source3);
                 } else {
                     FileInfo fi = fileList.get(i - 3);
-                    fis = new FileInputStream(fi.getName());
+                    fis = new FileInputStream(dataDirectory + "/" + fi.getName());
                     entry = new ZipEntry(fi.getName());
                 }
 
@@ -116,7 +113,7 @@ public class Johnny5HelperService {
             del3.delete();
 
             for (FileInfo fileInfo : fileList) {
-                File del = new File(fileInfo.getName());
+                File del = new File(dataDirectory + "/" + fileInfo.getName());
                 del.delete();
             }
 
