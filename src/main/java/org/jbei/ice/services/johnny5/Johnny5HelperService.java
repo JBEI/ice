@@ -86,29 +86,29 @@ public class Johnny5HelperService {
                 FileInputStream fis;
                 ZipEntry entry;
                 if (i == 0) {
-                    if (uniqueEntries.containsKey(source)) {
+                    if (uniqueEntries.containsKey(sourceName)) {
                         continue;
                     }
 
-                    uniqueEntries.put(source, source);
+                    uniqueEntries.put(sourceName, sourceName);
 
                     fis = new FileInputStream(source);
                     entry = new ZipEntry(sourceName);
                 } else if (i == 1) {
-                    if (uniqueEntries.containsKey(source)) {
+                    if (uniqueEntries.containsKey(source2Name)) {
                         continue;
                     }
 
-                    uniqueEntries.put(source, source);
+                    uniqueEntries.put(source2Name, source2Name);
 
                     fis = new FileInputStream(source2);
                     entry = new ZipEntry(source2Name);
                 } else if (i == 2) {
-                    if (uniqueEntries.containsKey(source)) {
+                    if (uniqueEntries.containsKey(source3Name)) {
                         continue;
                     }
 
-                    uniqueEntries.put(source, source);
+                    uniqueEntries.put(source3Name, source3Name);
 
                     fis = new FileInputStream(source3);
                     entry = new ZipEntry(source3Name);
