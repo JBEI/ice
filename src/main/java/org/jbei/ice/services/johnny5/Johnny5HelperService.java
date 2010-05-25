@@ -5,10 +5,8 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.List;
@@ -40,96 +38,74 @@ public class Johnny5HelperService {
 
         try {
             // Write first three arguments to a files
-            try {
-                // Create file
-                FileWriter fstream = new FileWriter(source);
-                BufferedWriter out = new BufferedWriter(fstream);
-                out.write(seqFile);
-                // Close the output stream
-                out.close();
-            } catch (Exception e) {//Catch exception if any
-                System.err.println("Error: " + e.getMessage());
-            }
+            // Create file
+            FileWriter fstream1 = new FileWriter(source);
+            BufferedWriter out1 = new BufferedWriter(fstream1);
+            out1.write(seqFile);
+            // Close the output stream
+            out1.close();
 
-            try {
-                // Create file
-                FileWriter fstream = new FileWriter(source2);
-                BufferedWriter out = new BufferedWriter(fstream);
-                out.write(partFile);
-                // Close the output stream
-                out.close();
-            } catch (Exception e) {// Catch exception if any
-                System.err.println("Error: " + e.getMessage());
-            }
+            // Create file
+            FileWriter fstream2 = new FileWriter(source2);
+            BufferedWriter out2 = new BufferedWriter(fstream2);
+            out2.write(partFile);
+            // Close the output stream
+            out2.close();
 
-            try {
-                // Create file
-                FileWriter fstream = new FileWriter(source3);
-                BufferedWriter out = new BufferedWriter(fstream);
-                out.write(targetFile);
-                //Close the output stream
-                out.close();
-            } catch (Exception e) {//Catch exception if any
-                System.err.println("Error: " + e.getMessage());
-            }
+            // Create file
+            FileWriter fstream3 = new FileWriter(source3);
+            BufferedWriter out3 = new BufferedWriter(fstream3);
+            out3.write(targetFile);
+            //Close the output stream
+            out3.close();
 
             for (FileInfo fileInfo : fileList) {
-                try {
-                    // Create file
-                    FileWriter fstream = new FileWriter(fileInfo.getName());
-                    BufferedWriter out = new BufferedWriter(fstream);
-                    out.write(fileInfo.getFile());
-                    //Close the output stream
-                    out.close();
-                } catch (Exception e) {//Catch exception if any
-                    System.err.println("Error: " + e.getMessage());
-                }
+                // Create file
+                FileWriter fstream = new FileWriter(JbeirSettings.getSetting("DATA_DIRECTORY")
+                        + "/" + fileInfo.getName());
+                BufferedWriter out = new BufferedWriter(fstream);
+                out.write(fileInfo.getFile());
+                //Close the output stream
+                out.close();
             }
 
-            try {
+            FileOutputStream dest = new FileOutputStream(target);
+            ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(dest));
 
-                FileOutputStream dest = new FileOutputStream(target);
-                ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(dest));
+            byte data[] = new byte[BUFFER];
 
-                byte data[] = new byte[BUFFER];
-
-                for (int i = 0; i < 3 + fileList.size(); i++) {
-                    FileInputStream fis;
-                    ZipEntry entry;
-                    if (i == 0) {
-                        fis = new FileInputStream(source);
-                        entry = new ZipEntry(source);
-                    } else if (i == 1) {
-                        fis = new FileInputStream(source2);
-                        entry = new ZipEntry(source2);
-                    } else if (i == 2) {
-                        fis = new FileInputStream(source3);
-                        entry = new ZipEntry(source3);
-                    } else {
-                        FileInfo fi = fileList.get(i - 3);
-                        fis = new FileInputStream(fi.getName());
-                        entry = new ZipEntry(fi.getName());
-                    }
-
-                    BufferedInputStream origin = new BufferedInputStream(fis, BUFFER);
-                    zos.putNextEntry(entry);
-
-                    int count;
-                    while ((count = origin.read(data, 0, BUFFER)) != -1) {
-                        zos.write(data, 0, count);
-                    }
-
-                    origin.close();
-
+            for (int i = 0; i < 3 + fileList.size(); i++) {
+                FileInputStream fis;
+                ZipEntry entry;
+                if (i == 0) {
+                    fis = new FileInputStream(source);
+                    entry = new ZipEntry(source);
+                } else if (i == 1) {
+                    fis = new FileInputStream(source2);
+                    entry = new ZipEntry(source2);
+                } else if (i == 2) {
+                    fis = new FileInputStream(source3);
+                    entry = new ZipEntry(source3);
+                } else {
+                    FileInfo fi = fileList.get(i - 3);
+                    fis = new FileInputStream(fi.getName());
+                    entry = new ZipEntry(fi.getName());
                 }
 
-                // Finish zip process
-                zos.close();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+                BufferedInputStream origin = new BufferedInputStream(fis, BUFFER);
+                zos.putNextEntry(entry);
+
+                int count;
+                while ((count = origin.read(data, 0, BUFFER)) != -1) {
+                    zos.write(data, 0, count);
+                }
+
+                origin.close();
+
             }
+
+            // Finish zip process
+            zos.close();
 
             //clean up
             File del1 = new File(source);
