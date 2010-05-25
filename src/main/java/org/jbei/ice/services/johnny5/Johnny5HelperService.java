@@ -28,9 +28,16 @@ public class Johnny5HelperService {
         UsageLogger.info("Johnny5HelperService: archiving johnny5 files...");
 
         String dataDirectory = JbeirSettings.getSetting("DATA_DIRECTORY");
-        String source = dataDirectory + "/" + prefix + "_seqListFile.csv";
-        String source2 = dataDirectory + "/" + prefix + "_partListFile.csv";
-        String source3 = dataDirectory + "/" + prefix + "_targetListFile.csv";
+
+        String sourceName = prefix + "_seqListFile.csv";
+        String source = dataDirectory + "/" + sourceName;
+
+        String source2Name = prefix + "_partListFile.csv";
+        String source2 = dataDirectory + "/" + source2Name;
+
+        String source3Name = prefix + "_targetListFile.csv";
+        String source3 = dataDirectory + "/" + source3Name;
+
         String target = dataDirectory + "/" + prefix + "_completeOutput-" + Utils.generateUUID()
                 + ".zip";
 
@@ -76,13 +83,13 @@ public class Johnny5HelperService {
                 ZipEntry entry;
                 if (i == 0) {
                     fis = new FileInputStream(source);
-                    entry = new ZipEntry(source);
+                    entry = new ZipEntry(sourceName);
                 } else if (i == 1) {
                     fis = new FileInputStream(source2);
-                    entry = new ZipEntry(source2);
+                    entry = new ZipEntry(source2Name);
                 } else if (i == 2) {
                     fis = new FileInputStream(source3);
-                    entry = new ZipEntry(source3);
+                    entry = new ZipEntry(source3Name);
                 } else {
                     FileInfo fi = fileList.get(i - 3);
                     fis = new FileInputStream(dataDirectory + "/" + fi.getName());
