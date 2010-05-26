@@ -24,6 +24,7 @@ import org.jbei.ice.web.pages.EntryViewPage;
 public class MiniAttachmentsViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
     private static final String ATTACHMENTS_URL_KEY = "attachments";
+    private static final int SHORT_FILENAME_LENGTH = 20;
 
     Entry entry = null;
     ArrayList<Attachment> attachments = new ArrayList<Attachment>();
@@ -93,7 +94,11 @@ public class MiniAttachmentsViewPanel extends Panel {
                     throw new ViewPermissionException("No permissions to get attachment file!", e);
                 }
                 if (downloadLink != null) {
-                    downloadLink.add(new Label("fileName", attachment.getFileName()));
+                    String shortFileName = attachment.getFileName().substring(0,
+                            SHORT_FILENAME_LENGTH)
+                            + "...";
+
+                    downloadLink.add(new Label("fileName", shortFileName));
                     item.add(downloadLink);
                 }
 
