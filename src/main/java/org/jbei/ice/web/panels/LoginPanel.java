@@ -51,8 +51,12 @@ public class LoginPanel extends Panel {
                     bookmarkablePageLink.setVisible(false);
                 }
                 add(bookmarkablePageLink);
-                add(new BookmarkablePageLink<ForgotPasswordPage>("forgotPasswordLink",
-                        ForgotPasswordPage.class));
+                BookmarkablePageLink<ForgotPasswordPage> forgotPasswordLink = new BookmarkablePageLink<ForgotPasswordPage>(
+                        "forgotPasswordLink", ForgotPasswordPage.class);
+                if (!JbeirSettings.getSetting("PASSWORD_CHANGE_ALLOWED").equals("yes")) {
+                    forgotPasswordLink.setVisible(false);
+                }
+                add(forgotPasswordLink);
                 add(new Button("logInButton", new Model<String>("Log In")));
 
             }
