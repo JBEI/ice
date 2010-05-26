@@ -299,14 +299,13 @@ form {
 	padding-left: 0;
 	list-style-type: none;
 	float: left;
-	width: 140px;
 }
 
+#menu ul li {display: inline;}
+
 #menu a {
-	display: block;
+	display: inline;
 	padding: 3px;
-	width: 120px;
-	/*border-bottom: 1px dotted #CCC;*/
 }
 
 #menu a:link,#menulist a:visited {
