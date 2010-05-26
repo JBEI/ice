@@ -1,0 +1,35 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<table class="mini_table" frame="border" style="margin-top: 10px;">
+		<tr>
+			<td colspan=2><span class="panel_header"><a wicket:id="permissionPageLink" href="#">&nbsp;Permission</a></span>
+			</td>
+		</tr>
+		<tr>
+			<td colspan=2 style="background-color: #BBBBBB;"></td>
+		</tr>
+		<tr>
+			<td colspan=2>Can Read:</td>
+		</tr>
+		<tr wicket:id="readableList">
+			<td>&nbsp;</td>
+			<td><span wicket:id="readableItem"></span></td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td><a href="#" wicket:id="moreReadableLink">...more</a></td>
+		</tr>
+		<tr>
+			<td colspan=2>Can Write:</td>
+		</tr>
+		<tr wicket:id="writableList">
+			<td>&nbsp;</td>
+			<td><span wicket:id="writableItem"></span></td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td><a href="#" wicket:id="moreWritableLink">...more</a></td>
+		</tr>
+	</table>
+</wicket:panel>
+</html>

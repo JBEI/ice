@@ -3,7 +3,6 @@ package org.jbei.ice.web.panels;
 import java.util.ArrayList;
 
 import org.apache.wicket.PageParameters;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.DownloadLink;
@@ -12,7 +11,6 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.controllers.AttachmentController;
-import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
@@ -47,73 +45,60 @@ public class MiniAttachmentsViewPanel extends Panel {
         }
         add(new Label("attachmentsCount", "(" + numAttachments + ")"));
 
-        EntryController entryController = new EntryController(IceSession.get().getAccount());
-
-        try {
-            WebMarkupContainer topLinkContainer = new WebMarkupContainer("topLink");
-            topLinkContainer.setVisible(entryController.hasWritePermission(entry));
-        } catch (ControllerException e) {
-            throw new ViewException(e);
-        }
-
         try {
             attachments.addAll(attachmentController.getAttachments(entry));
         } catch (ControllerException e) {
             throw new ViewException(e);
         }
 
-        if (attachments.size() > 0) {
-            BookmarkablePageLink<Object> moreLink = new BookmarkablePageLink<Object>("moreLink",
-                    EntryViewPage.class, new PageParameters("0=" + entry.getId() + ",1="
-                            + ATTACHMENTS_URL_KEY));
-            moreLink.setVisible(false);
-            int showLimit = 4;
-            if (attachments.size() > showLimit) {
-                moreLink.setVisible(true);
+        BookmarkablePageLink<Object> moreLink = new BookmarkablePageLink<Object>("moreLink",
+                EntryViewPage.class, new PageParameters("0=" + entry.getId() + ",1="
+                        + ATTACHMENTS_URL_KEY));
+        moreLink.setVisible(false);
+        int showLimit = 4;
+        if (attachments.size() > showLimit) {
+            moreLink.setVisible(true);
+            attachments = new ArrayList<Attachment>(attachments.subList(0, showLimit));
+        }
 
-                attachments = new ArrayList<Attachment>(attachments.subList(0, showLimit));
-            }
+        ListView<Attachment> attachmentsList = new ListView<Attachment>("attachmentsList",
+                attachments) {
 
-            ListView<Attachment> attachmentsList = new ListView<Attachment>("attachmentsList",
-                    attachments) {
+            private static final long serialVersionUID = 1L;
 
-                private static final long serialVersionUID = 1L;
+            @SuppressWarnings("unchecked")
+            @Override
+            protected void populateItem(ListItem<Attachment> item) {
+                AttachmentController attachmentController = new AttachmentController(IceSession
+                        .get().getAccount());
+                Link downloadLink = null;
+                Attachment attachment = item.getModelObject();
+                try {
+                    downloadLink = new DownloadLink("downloadAttachmentLink", attachmentController
+                            .getFile(attachment), attachment.getFileName());
+                } catch (ControllerException e) {
+                    downloadLink = new Link("downloadAttachmentLink") {
+                        private static final long serialVersionUID = 1L;
 
-                @SuppressWarnings("unchecked")
-                @Override
-                protected void populateItem(ListItem<Attachment> item) {
-                    AttachmentController attachmentController = new AttachmentController(IceSession
-                            .get().getAccount());
-                    Link downloadLink = null;
-                    Attachment attachment = item.getModelObject();
-                    try {
-                        downloadLink = new DownloadLink("downloadAttachmentLink",
-                                attachmentController.getFile(attachment), attachment.getFileName());
-                    } catch (ControllerException e) {
-                        downloadLink = new Link("downloadAttachmentLink") {
-                            private static final long serialVersionUID = 1L;
-
-                            @Override
-                            public void onClick() {
-                            }
-                        };
-                        downloadLink.setEnabled(false);
-                    } catch (PermissionException e) {
-                        throw new ViewPermissionException("No permissions to get attachment file!",
-                                e);
-                    }
-                    if (downloadLink != null) {
-                        downloadLink.add(new Label("fileName", attachment.getFileName()));
-                        item.add(downloadLink);
-                    }
-
+                        @Override
+                        public void onClick() {
+                        }
+                    };
+                    downloadLink.setEnabled(false);
+                } catch (PermissionException e) {
+                    throw new ViewPermissionException("No permissions to get attachment file!", e);
+                }
+                if (downloadLink != null) {
+                    downloadLink.add(new Label("fileName", attachment.getFileName()));
+                    item.add(downloadLink);
                 }
 
-            };
+            }
 
-            add(attachmentsList);
-            add(moreLink);
-        }
+        };
+
+        add(attachmentsList);
+        add(moreLink);
     }
 
     public Entry getEntry() {

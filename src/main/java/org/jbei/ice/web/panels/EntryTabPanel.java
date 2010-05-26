@@ -24,7 +24,6 @@ public class EntryTabPanel extends Panel {
     public BookmarkablePageLink<Object> sequenceLink;
     public BookmarkablePageLink<Object> sequenceAnalysisLink;
     public BookmarkablePageLink<Object> samplesLink;
-    public BookmarkablePageLink<Object> permissionLink;
 
     private final String SAMPLES_URL_KEY = "samples";
     private final String SEQUENCE_URL_KEY = "sequence";
@@ -42,22 +41,11 @@ public class EntryTabPanel extends Panel {
         renderSamplesLink();
         renderSequenceLink();
         renderSequenceAnalysisLink();
-        renderPermissionsLink();
-        EntryController entryController = new EntryController(IceSession.get().getAccount());
-
-        try {
-            if (!entryController.hasWritePermission(entry)) {
-                permissionLink.setVisible(false);
-            }
-        } catch (ControllerException e) {
-            throw new ViewException(e);
-        }
 
         add(generalLink);
         add(sequenceLink);
         add(sequenceAnalysisLink);
         add(samplesLink);
-        add(permissionLink);
         setActiveLink();
     }
 
@@ -70,7 +58,6 @@ public class EntryTabPanel extends Panel {
         sequenceLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
         sequenceAnalysisLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
         samplesLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
-        permissionLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
         if (subPage == null) {
             generalLink.add(activeSimpleAttributeModifier).setOutputMarkupId(true);
         } else if (subPage.equals(SAMPLES_URL_KEY)) {
@@ -81,7 +68,6 @@ public class EntryTabPanel extends Panel {
         } else if (subPage.equals(SEQUENCE_ANALYSIS_URL_KEY)) {
             sequenceAnalysisLink.add(activeSimpleAttributeModifier).setOutputMarkupId(true);
         } else if (subPage.equals(PERMISSIONS_URL_KEY)) {
-            permissionLink.add(activeSimpleAttributeModifier).setOutputMarkupId(true);
         }
     }
 
@@ -143,12 +129,6 @@ public class EntryTabPanel extends Panel {
             throw new ViewException(e);
         }
         sequenceAnalysisLink.add(new Label("sequenceAnalysisLabel", sequenceAnalysisLabel));
-    }
-
-    private void renderPermissionsLink() {
-        permissionLink = new BookmarkablePageLink<Object>("permissionLink", EntryViewPage.class,
-                new PageParameters("0=" + entry.getId() + ",1=" + PERMISSIONS_URL_KEY));
-        permissionLink.setOutputMarkupId(true);
     }
 
 }

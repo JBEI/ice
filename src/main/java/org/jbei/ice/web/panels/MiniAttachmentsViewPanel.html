@@ -2,21 +2,22 @@
 <wicket:panel>
 	<table class="mini_table" frame="border">
 		<tr>
-			<td><span class="panel_header"><a wicket:id="attachmentsPageLink" href="#">&nbsp;Attachments</a></span>
+			<td colspan=2><span class="panel_header"><a wicket:id="attachmentsPageLink" href="#">&nbsp;Attachments</a></span>
 			<span wicket:id="attachmentsCount"></span></td>
 		</tr>
 		<tr>
-			<td style="background-color: #BBBBBB;"></td>
+			<td colspan=2 style="background-color: #BBBBBB;"></td>
 		</tr>
 		<tr wicket:id="attachmentsList">
-			<td>
+			<td colspan=2>
 			<a href="#" wicket:id="downloadAttachmentLink">&nbsp;&nbsp;<span
 					wicket:id="fileName"></span></a>
 			</td>
 		</tr>
 		<tr>
-		<td style="text-align:right;">
-		<a href="#" wicket:id="moreLink">(more...)</a>
+		<td>&nbsp;</td>
+		<td>
+		<a href="#" wicket:id="moreLink">...more</a>
 		</td>
 		</tr>
 	</table>

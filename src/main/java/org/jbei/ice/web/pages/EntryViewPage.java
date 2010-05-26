@@ -1,5 +1,7 @@
 package org.jbei.ice.web.pages;
 
+import java.util.ArrayList;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ResourceReference;
@@ -8,7 +10,8 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
-import org.apache.wicket.markup.html.panel.EmptyPanel;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -27,6 +30,7 @@ import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.panels.AttachmentsViewPanel;
 import org.jbei.ice.web.panels.EntryTabPanel;
 import org.jbei.ice.web.panels.MiniAttachmentsViewPanel;
+import org.jbei.ice.web.panels.MiniPermissionViewPanel;
 import org.jbei.ice.web.panels.PartViewPanel;
 import org.jbei.ice.web.panels.PermissionEditPanel;
 import org.jbei.ice.web.panels.PlasmidViewPanel;
@@ -73,16 +77,40 @@ public class EntryViewPage extends ProtectedPage {
         generalPanel = makeSubPagePanel(entry);
         displayPanel = generalPanel;
         add(displayPanel);
+        ArrayList<Panel> sidePanels = new ArrayList<Panel>();
         try {
             WorkspaceManager.setVisited(entry);
         } catch (ManagerException e) {
             throw new ViewException(e);
         }
-        Panel miniAttachmentsPanel = new MiniAttachmentsViewPanel("miniAttachmentsViewPanel", entry);
-        if (subPage != null && subPage.equals(ATTACHMENTS_URL_KEY)) {
-            miniAttachmentsPanel = new EmptyPanel("miniAttachmentsViewPanel");
+
+        Panel miniAttachmentsPanel = new MiniAttachmentsViewPanel("sidePanel", entry);
+        sidePanels.add(miniAttachmentsPanel);
+
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
+        try {
+            if (entryController.hasWritePermission(entry)) {
+                Panel miniPermissionPanel = new MiniPermissionViewPanel("sidePanel", entry);
+                sidePanels.add(miniPermissionPanel);
+            }
+        } catch (ControllerException e) {
+            throw new ViewException(e);
         }
-        add(miniAttachmentsPanel);
+
+        if (subPage != null
+                && (subPage.equals(ATTACHMENTS_URL_KEY) || subPage.equals(PERMISSIONS_URL_KEY))) {
+            sidePanels.clear();
+        }
+        ListView<Panel> sidePanelsListView = new ListView<Panel>("sidePanels", sidePanels) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected void populateItem(ListItem<Panel> item) {
+                Panel panel = item.getModelObject();
+                item.add(panel);
+            }
+        };
+        add(sidePanelsListView);
     }
 
     @Override
