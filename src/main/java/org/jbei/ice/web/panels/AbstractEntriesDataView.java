@@ -27,6 +27,7 @@ import org.jbei.ice.web.utils.WebUtils;
 
 public abstract class AbstractEntriesDataView<T> extends DataView<T> {
     private static final long serialVersionUID = 1L;
+    private static final int MAX_LONG_FIELD_LENGTH = 100;
 
     public AbstractEntriesDataView(String id, IDataProvider<T> dataProvider, int perPage) {
         super(id, dataProvider, perPage);
@@ -50,8 +51,8 @@ public abstract class AbstractEntriesDataView<T> extends DataView<T> {
     }
 
     protected void renderDescription(Item<T> item) {
-        item.add(new Label("description", WebUtils
-                .linkifyText(getEntry(item).getShortDescription())).setEscapeModelStrings(false));
+        item.add(new Label("description", trimLongField(WebUtils.linkifyText(getEntry(item)
+                .getShortDescription()), MAX_LONG_FIELD_LENGTH)).setEscapeModelStrings(false));
     }
 
     protected void renderStatus(Item<T> item) {
@@ -144,5 +145,16 @@ public abstract class AbstractEntriesDataView<T> extends DataView<T> {
         String dateString = dateFormat.format(getEntry(item).getCreationTime());
 
         item.add(new Label("date", dateString));
+    }
+
+    protected String trimLongField(String value, int maxLength) {
+        if (value == null || value.isEmpty()) {
+            return "";
+        }
+        if (value.length() > maxLength) {
+            return value.substring(0, maxLength) + "...";
+        } else {
+            return value;
+        }
     }
 }

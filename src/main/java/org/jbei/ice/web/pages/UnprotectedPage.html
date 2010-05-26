@@ -16,7 +16,7 @@
 		<td align="center" style="width: 100%; height: 100%">
 		<table border="0" cellpadding="0" cellspacing="0" class="main_table">
 			<tr>
-				<td align="center" colspan="2">
+				<td align="center">
 				<table border="0" cellspacing="0" cellpadding="1" style="width: 100%; height: 2px">
 					<tr>
 						<td style="background-color: #6C95C9;"></td>
@@ -25,17 +25,24 @@
 				</td>
 			</tr>
 			<tr>
-				<td align="left"><!-- Menu Begin -->
-				<div wicket:id="menuPanel" id="menu">This will be replaced</div>
+				<td>
+				<table border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td align="left" style="white-space:nowrap;"><!-- Menu Begin -->
+						<div wicket:id="menuPanel" id="menu">This will be replaced</div>
+						</td>
+						<td style="width: 100%">&nbsp;</td>
+						<td align="right" valign="top"><nobr><!-- Search Bar Begin -->
+						<div wicket:id="searchBarPanel"></div></nobr>
+						<form action="/search" method="get">
+						</form>
+						<!-- Search Bar End --></td>
+					</tr>
+				</table>
 				</td>
-				<td align="right" valign="top"><!-- Search Bar Begin -->
-				<div wicket:id="searchBarPanel"></div>
-				<form action="/search" method="get">
-				</form>
-				<!-- Search Bar End --></td>
 			</tr>
 			<tr>
-				<td align="center" valign="top" colspan="2">
+				<td align="center" valign="top">
 				<table border="0" cellspacing="0" cellpadding="1" style="width: 100%; height: 2px">
 					<tr>
 						<td style="background-color: #CCCC99"></td>
@@ -44,7 +51,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td valign="top" style="height: 100%;" colspan="2">
+				<td valign="top" style="height: 100%;">
 				<table border="0" cellpadding="0" cellspacing="0" style="margin-top: 10px; height: 100%"; >
 					<tr>
 						<td style="width: 10px">&nbsp;</td>
