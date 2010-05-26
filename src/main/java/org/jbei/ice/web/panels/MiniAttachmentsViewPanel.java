@@ -3,10 +3,11 @@ package org.jbei.ice.web.panels;
 import java.util.ArrayList;
 
 import org.apache.wicket.PageParameters;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.DownloadLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -15,8 +16,10 @@ import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class MiniAttachmentsViewPanel extends Panel {
@@ -25,59 +28,33 @@ public class MiniAttachmentsViewPanel extends Panel {
 
     Entry entry = null;
     ArrayList<Attachment> attachments = new ArrayList<Attachment>();
-    ArrayList<Panel> panels = new ArrayList<Panel>();
 
     public MiniAttachmentsViewPanel(String id, Entry entry) {
         super(id);
 
         this.entry = entry;
 
-        add(new BookmarkablePageLink<Object>("attachmentsLink", EntryViewPage.class,
+        add(new BookmarkablePageLink<Object>("attachmentsPageLink", EntryViewPage.class,
                 new PageParameters("0=" + entry.getId() + ",1=" + ATTACHMENTS_URL_KEY)));
+        AttachmentController attachmentController = new AttachmentController(IceSession.get()
+                .getAccount());
 
-        class AddAttachmentLink extends AjaxFallbackLink<Object> {
-            private static final long serialVersionUID = 1L;
-
-            public AddAttachmentLink(String id) {
-                super(id);
-            }
-
-            @Override
-            public void onClick(AjaxRequestTarget target) {
-                MiniAttachmentsViewPanel thisPanel = (MiniAttachmentsViewPanel) getParent()
-                        .getParent();
-                ArrayList<Panel> thisPanelsPanels = thisPanel.getPanels();
-                if (thisPanelsPanels.size() > 0
-                        && thisPanelsPanels.get(0) instanceof AttachmentItemEditPanel) {
-                    // If the first item is already an edit form, do nothing.
-                } else {
-                    Attachment newAttachment = new Attachment();
-                    newAttachment.setEntry(thisPanel.getEntry());
-                    Panel newAttachmentEditPanel = new AttachmentItemEditPanel(
-                            "attachmentItemPanel", newAttachment);
-                    newAttachmentEditPanel.setOutputMarkupId(true);
-
-                    panels.add(0, newAttachmentEditPanel);
-
-                    target.getPage().replace(thisPanel);
-                    target.addComponent(thisPanel);
-                }
-            }
+        int numAttachments = 0;
+        try {
+            numAttachments = attachmentController.getNumberOfAttachments(entry);
+        } catch (ControllerException e1) {
+            throw new ViewException(e1);
         }
+        add(new Label("attachmentsCount", "(" + numAttachments + ")"));
 
         EntryController entryController = new EntryController(IceSession.get().getAccount());
 
         try {
             WebMarkupContainer topLinkContainer = new WebMarkupContainer("topLink");
             topLinkContainer.setVisible(entryController.hasWritePermission(entry));
-            //topLinkContainer.add(new AddAttachmentLink("addAttachmentLink"));
-            //add(topLinkContainer);
         } catch (ControllerException e) {
             throw new ViewException(e);
         }
-
-        AttachmentController attachmentController = new AttachmentController(IceSession.get()
-                .getAccount());
 
         try {
             attachments.addAll(attachmentController.getAttachments(entry));
@@ -85,45 +62,58 @@ public class MiniAttachmentsViewPanel extends Panel {
             throw new ViewException(e);
         }
 
-        Object[] temp = attachments.toArray();
-        if (temp.length == 0) {
-            Panel attachmentItemPanel = new EmptyMessagePanel("attachmentItemPanel",
-                    "No attachments provided");
-            attachmentItemPanel.setOutputMarkupId(true);
-            //panels.add(attachmentItemPanel);
-        } else {
-            populatePanels();
-        }
+        if (attachments.size() > 0) {
+            BookmarkablePageLink<Object> moreLink = new BookmarkablePageLink<Object>("moreLink",
+                    EntryViewPage.class, new PageParameters("0=" + entry.getId() + ",1="
+                            + ATTACHMENTS_URL_KEY));
+            moreLink.setVisible(false);
+            int showLimit = 4;
+            if (attachments.size() > showLimit) {
+                moreLink.setVisible(true);
 
-        ListView<Object> attachmentsList = generateAttachmentsList("attachmentsListView");
-        attachmentsList.setOutputMarkupId(true);
-        //add(attachmentsList);
-    }
-
-    public void populatePanels() {
-        int counter = 1;
-        panels.clear();
-        for (Attachment attachment : attachments) {
-            Panel attachmentItemPanel = new AttachmentItemViewPanel("attachmentItemPanel", counter,
-                    attachment);
-            attachmentItemPanel.setOutputMarkupId(true);
-            panels.add(attachmentItemPanel);
-            counter = counter + 1;
-        }
-    }
-
-    public ListView<Object> generateAttachmentsList(String id) {
-        ListView<Object> attachmentsListView = new ListView<Object>(id, panels) {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected void populateItem(ListItem<Object> item) {
-                Panel panel = (Panel) item.getModelObject();
-                item.add(panel);
+                attachments = new ArrayList<Attachment>(attachments.subList(0, showLimit));
             }
-        };
 
-        return attachmentsListView;
+            ListView<Attachment> attachmentsList = new ListView<Attachment>("attachmentsList",
+                    attachments) {
+
+                private static final long serialVersionUID = 1L;
+
+                @SuppressWarnings("unchecked")
+                @Override
+                protected void populateItem(ListItem<Attachment> item) {
+                    AttachmentController attachmentController = new AttachmentController(IceSession
+                            .get().getAccount());
+                    Link downloadLink = null;
+                    Attachment attachment = item.getModelObject();
+                    try {
+                        downloadLink = new DownloadLink("downloadAttachmentLink",
+                                attachmentController.getFile(attachment), attachment.getFileName());
+                    } catch (ControllerException e) {
+                        downloadLink = new Link("downloadAttachmentLink") {
+                            private static final long serialVersionUID = 1L;
+
+                            @Override
+                            public void onClick() {
+                            }
+                        };
+                        downloadLink.setEnabled(false);
+                    } catch (PermissionException e) {
+                        throw new ViewPermissionException("No permissions to get attachment file!",
+                                e);
+                    }
+                    if (downloadLink != null) {
+                        downloadLink.add(new Label("fileName", attachment.getFileName()));
+                        item.add(downloadLink);
+                    }
+
+                }
+
+            };
+
+            add(attachmentsList);
+            add(moreLink);
+        }
     }
 
     public Entry getEntry() {
@@ -134,7 +124,4 @@ public class MiniAttachmentsViewPanel extends Panel {
         this.entry = entry;
     }
 
-    public ArrayList<Panel> getPanels() {
-        return panels;
-    }
 }

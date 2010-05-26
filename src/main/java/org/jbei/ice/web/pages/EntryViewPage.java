@@ -11,7 +11,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.controllers.AttachmentController;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SampleController;
 import org.jbei.ice.controllers.SequenceAnalysisController;
@@ -52,7 +51,6 @@ public class EntryViewPage extends ProtectedPage {
     public BookmarkablePageLink<Object> sequenceLink;
     public BookmarkablePageLink<Object> sequenceAnalysisLink;
     public BookmarkablePageLink<Object> samplesLink;
-    public BookmarkablePageLink<Object> attachmentsLink;
     public BookmarkablePageLink<Object> permissionLink;
 
     public String subPage = null;
@@ -79,7 +77,6 @@ public class EntryViewPage extends ProtectedPage {
 
         renderGeneralLink();
         renderSamplesLink();
-        renderAttachmentsLink();
         renderSequenceLink();
         renderSequenceAnalysisLink();
         renderPermissionsLink();
@@ -90,7 +87,6 @@ public class EntryViewPage extends ProtectedPage {
         add(sequenceLink);
         add(sequenceAnalysisLink);
         add(samplesLink);
-        add(attachmentsLink);
         add(permissionLink);
         add(renderAddToWorkspaceLink());
 
@@ -150,7 +146,6 @@ public class EntryViewPage extends ProtectedPage {
         sequenceLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
         sequenceAnalysisLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
         samplesLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
-        attachmentsLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
         permissionLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
 
         if (subPage == null) {
@@ -158,7 +153,7 @@ public class EntryViewPage extends ProtectedPage {
         } else if (subPage.equals(SAMPLES_URL_KEY)) {
             samplesLink.add(activeSimpleAttributeModifier).setOutputMarkupId(true);
         } else if (subPage.equals(ATTACHMENTS_URL_KEY)) {
-            attachmentsLink.add(activeSimpleAttributeModifier).setOutputMarkupId(true);
+
         } else if (subPage.equals(SEQUENCE_URL_KEY)) {
             sequenceLink.add(activeSimpleAttributeModifier).setOutputMarkupId(true);
         } else if (subPage.equals(SEQUENCE_ANALYSIS_URL_KEY)) {
@@ -309,31 +304,6 @@ public class EntryViewPage extends ProtectedPage {
         }
 
         sequenceAnalysisLink.add(new Label("sequenceAnalysisLabel", sequenceAnalysisLabel));
-    }
-
-    private void renderAttachmentsLink() {
-        attachmentsLink = new BookmarkablePageLink<Object>("attachmentsLink", EntryViewPage.class,
-                new PageParameters("0=" + entry.getId() + ",1=" + ATTACHMENTS_URL_KEY));
-
-        attachmentsLink.setOutputMarkupId(true);
-
-        AttachmentController attachmentController = new AttachmentController(IceSession.get()
-                .getAccount());
-
-        int numAttachments = 0;
-
-        try {
-            numAttachments = attachmentController.getNumberOfAttachments(entry);
-        } catch (ControllerException e) {
-            throw new ViewException(e);
-        }
-
-        String attachmentsLabel = "Attachments";
-        if (numAttachments > 0) {
-            attachmentsLabel = attachmentsLabel + " (" + numAttachments + ")";
-        }
-
-        attachmentsLink.add(new Label("attachmentsLabel", attachmentsLabel));
     }
 
     private void renderPermissionsLink() {
