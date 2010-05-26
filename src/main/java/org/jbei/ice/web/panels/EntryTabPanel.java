@@ -5,7 +5,6 @@ import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SampleController;
 import org.jbei.ice.controllers.SequenceAnalysisController;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -21,12 +20,10 @@ public class EntryTabPanel extends Panel {
     public Entry entry = null;
 
     public BookmarkablePageLink<Object> generalLink;
-    public BookmarkablePageLink<Object> sequenceLink;
     public BookmarkablePageLink<Object> sequenceAnalysisLink;
     public BookmarkablePageLink<Object> samplesLink;
 
     private final String SAMPLES_URL_KEY = "samples";
-    private final String SEQUENCE_URL_KEY = "sequence";
     private final String SEQUENCE_ANALYSIS_URL_KEY = "seqanalysis";
     private final String ATTACHMENTS_URL_KEY = "attachments";
     private final String PERMISSIONS_URL_KEY = "permission";
@@ -39,11 +36,9 @@ public class EntryTabPanel extends Panel {
         this.subPage = subPage;
         renderGeneralLink();
         renderSamplesLink();
-        renderSequenceLink();
         renderSequenceAnalysisLink();
 
         add(generalLink);
-        add(sequenceLink);
         add(sequenceAnalysisLink);
         add(samplesLink);
         setActiveLink();
@@ -55,7 +50,6 @@ public class EntryTabPanel extends Panel {
         SimpleAttributeModifier activeSimpleAttributeModifier = new SimpleAttributeModifier(
                 "class", "active");
         generalLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
-        sequenceLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
         sequenceAnalysisLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
         samplesLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
         if (subPage == null) {
@@ -63,8 +57,6 @@ public class EntryTabPanel extends Panel {
         } else if (subPage.equals(SAMPLES_URL_KEY)) {
             samplesLink.add(activeSimpleAttributeModifier).setOutputMarkupId(true);
         } else if (subPage.equals(ATTACHMENTS_URL_KEY)) {
-        } else if (subPage.equals(SEQUENCE_URL_KEY)) {
-            sequenceLink.add(activeSimpleAttributeModifier).setOutputMarkupId(true);
         } else if (subPage.equals(SEQUENCE_ANALYSIS_URL_KEY)) {
             sequenceAnalysisLink.add(activeSimpleAttributeModifier).setOutputMarkupId(true);
         } else if (subPage.equals(PERMISSIONS_URL_KEY)) {
@@ -93,22 +85,6 @@ public class EntryTabPanel extends Panel {
             samplesLabel = samplesLabel + " (" + numSamples + ")";
         }
         samplesLink.add(new Label("samplesLabel", samplesLabel));
-    }
-
-    private void renderSequenceLink() {
-        sequenceLink = new BookmarkablePageLink<Object>("sequenceLink", EntryViewPage.class,
-                new PageParameters("0=" + entry.getId() + ",1=" + SEQUENCE_URL_KEY));
-        sequenceLink.setOutputMarkupId(true);
-        String sequenceLabel = "Sequence";
-        EntryController entryController = new EntryController(IceSession.get().getAccount());
-        try {
-            if (entryController.hasSequence(entry)) {
-                sequenceLabel = sequenceLabel + " (1)";
-            }
-        } catch (ControllerException e) {
-            throw new ViewException(e);
-        }
-        sequenceLink.add(new Label("sequenceLabel", sequenceLabel));
     }
 
     private void renderSequenceAnalysisLink() {

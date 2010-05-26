@@ -3,18 +3,14 @@
 	<table class="mini_table" style="margin-bottom: 10px;" frame="border" border="0" cellpadding="3"
 		cellspacing="0">
 		<tr class="title_row_header">
-			<td colspan=2><span><a wicket:id="attachmentsPageLink" href="#">&nbsp;Attachments</a></span>
+			<td><span><a wicket:id="attachmentsPageLink" href="#">&nbsp;Attachments</a></span>
 			<span wicket:id="attachmentsCount"></span></td>
 		</tr>
 		<tr wicket:id="attachmentsList">
-			<td colspan=2><a href="#" wicket:id="downloadAttachmentLink">&nbsp;&nbsp;<span
+			<td><a href="#" wicket:id="downloadAttachmentLink"><span
 				wicket:id="fileName"></span></a></td>
 		</tr>
-		<tr>
-			<td>&nbsp;</td>
-			<td><a href="#" wicket:id="moreLink">...more</a></td>
-		</tr>
+		<wicket:container wicket:id="moreAttachmentsLinkPanel"></wicket:container>
 	</table>
-
 </wicket:panel>
 </html>

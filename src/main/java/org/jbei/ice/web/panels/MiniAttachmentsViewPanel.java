@@ -9,6 +9,7 @@ import org.apache.wicket.markup.html.link.DownloadLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.controllers.AttachmentController;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -57,8 +58,11 @@ public class MiniAttachmentsViewPanel extends Panel {
         moreLink.setVisible(false);
         int showLimit = 4;
         if (attachments.size() > showLimit) {
-            moreLink.setVisible(true);
+            Panel moreLinkPanel = new MoreAttachmentsLinkPanel("moreAttachmentsLinkPanel", entry);
+            add(moreLinkPanel);
             attachments = new ArrayList<Attachment>(attachments.subList(0, showLimit));
+        } else {
+            add(new EmptyPanel("moreAttachmentsLinkPanel"));
         }
 
         ListView<Attachment> attachmentsList = new ListView<Attachment>("attachmentsList",

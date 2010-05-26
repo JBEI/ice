@@ -9,6 +9,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
@@ -18,6 +19,8 @@ import org.jbei.ice.lib.permissions.AuthenticatedPermissionManager;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.pages.EntryViewPage;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 public class MiniPermissionViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -36,23 +39,23 @@ public class MiniPermissionViewPanel extends Panel {
         List<String> readAllowed = getReadAllowed();
         List<String> writeAllowed = getWriteAllowed();
 
-        BookmarkablePageLink<Object> moreReadableLink = new BookmarkablePageLink<Object>(
-                "moreReadableLink", EntryViewPage.class, new PageParameters("0=" + entry.getId()
-                        + ",1=" + PERMISSION_URL_KEY));
-        moreReadableLink.setVisible(false);
-        BookmarkablePageLink<Object> moreWritableLink = new BookmarkablePageLink<Object>(
-                "moreWritableLink", EntryViewPage.class, new PageParameters("0=" + entry.getId()
-                        + ",1=" + PERMISSION_URL_KEY));
-        moreWritableLink.setVisible(false);
-
         int listLimit = 4;
         if (readAllowed.size() > listLimit) {
             readAllowed = readAllowed.subList(0, listLimit);
-            moreReadableLink.setVisible(true);
+            Panel moreReadableLinkPanel = new MorePermissionLinkPanel("moreReadableLinkPanel",
+                    entry);
+            add(moreReadableLinkPanel);
+        } else {
+            add(new EmptyPanel("moreReadableLinkPanel"));
         }
+
         if (writeAllowed.size() > listLimit) {
             writeAllowed = writeAllowed.subList(0, listLimit);
-            moreWritableLink.setVisible(true);
+            Panel moreWritableLinkPanel = new MorePermissionLinkPanel("moreWritableLinkPanel",
+                    entry);
+            add(moreWritableLinkPanel);
+        } else {
+            add(new EmptyPanel("moreWritableLinkPanel"));
         }
 
         ListView<String> readableList = new ListView<String>("readableList", readAllowed) {
@@ -78,9 +81,6 @@ public class MiniPermissionViewPanel extends Panel {
 
         add(readableList);
         add(writableList);
-
-        add(moreReadableLink);
-        add(moreWritableLink);
     }
 
     public Entry getEntry() {
@@ -104,13 +104,18 @@ public class MiniPermissionViewPanel extends Panel {
         } catch (PermissionException e) {
             throw new ViewPermissionException(e);
         }
-
+        ArrayList<String> tempArray = new ArrayList<String>();
         for (Group group : readGroups) {
-            readAllowed.add(group.getLabel());
+            tempArray.add(group.getLabel());
         }
+        Collections.sort(tempArray);
+        readAllowed.addAll(tempArray);
+        tempArray.clear();
         for (Account account : readAccounts) {
-            readAllowed.add(account.getFullName());
+            tempArray.add(account.getFullName());
         }
+        Collections.sort(tempArray);
+        readAllowed.addAll(tempArray);
 
         return readAllowed;
 
@@ -129,13 +134,18 @@ public class MiniPermissionViewPanel extends Panel {
         } catch (PermissionException e) {
             throw new ViewPermissionException(e);
         }
-
+        ArrayList<String> tempArray = new ArrayList<String>();
         for (Group group : writeGroups) {
-            writeAllowed.add(group.getLabel());
+            tempArray.add(group.getLabel());
         }
+        Collections.sort(tempArray);
+        writeAllowed.addAll(tempArray);
+        tempArray.clear();
         for (Account account : writeAccounts) {
-            writeAllowed.add(account.getFullName());
+            tempArray.add(account.getFullName());
         }
+        Collections.sort(tempArray);
+        writeAllowed.addAll(tempArray);
         return writeAllowed;
     }
 

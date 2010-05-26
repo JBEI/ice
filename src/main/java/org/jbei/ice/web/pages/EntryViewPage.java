@@ -12,6 +12,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -53,7 +54,6 @@ public class EntryViewPage extends ProtectedPage {
     public String entryTitle = "";
 
     private final String SAMPLES_URL_KEY = "samples";
-    private final String SEQUENCE_URL_KEY = "sequence";
     private final String SEQUENCE_ANALYSIS_URL_KEY = "seqanalysis";
     private final String ATTACHMENTS_URL_KEY = "attachments";
     private final String PERMISSIONS_URL_KEY = "permission";
@@ -77,6 +77,12 @@ public class EntryViewPage extends ProtectedPage {
         generalPanel = makeSubPagePanel(entry);
         displayPanel = generalPanel;
         add(displayPanel);
+        if (subPage == null) {
+            sequencePanel = makeSequencePanel(entry);
+            add(sequencePanel);
+        } else {
+            add(new EmptyPanel("sequencePanel"));
+        }
         ArrayList<Panel> sidePanels = new ArrayList<Panel>();
         try {
             WorkspaceManager.setVisited(entry);
@@ -142,8 +148,6 @@ public class EntryViewPage extends ProtectedPage {
     private Panel makeSubPagePanel(Entry entry) {
         if (subPage == null) {
             return makeGeneralPanel(entry);
-        } else if (subPage.equals(SEQUENCE_URL_KEY)) {
-            return makeSequencePanel(entry);
         } else if (subPage.equals(SEQUENCE_ANALYSIS_URL_KEY)) {
             return makeSequenceAnalysisPanel(entry);
         } else if (subPage.equals(SAMPLES_URL_KEY)) {
@@ -188,7 +192,7 @@ public class EntryViewPage extends ProtectedPage {
     }
 
     private Panel makeSequencePanel(Entry entry) {
-        Panel panel = new SequenceViewPanel("centerPanel", entry);
+        Panel panel = new SequenceViewPanel("sequencePanel", entry);
         panel.setOutputMarkupId(true);
         return panel;
     }
