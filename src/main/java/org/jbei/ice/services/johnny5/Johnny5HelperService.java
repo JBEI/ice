@@ -29,7 +29,7 @@ public class Johnny5HelperService {
 
         UsageLogger.info("Johnny5HelperService: archiving johnny5 files...");
 
-        String dataDirectory = JbeirSettings.getSetting("DATA_DIRECTORY");
+        String dataDirectory = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
 
         String sourceName = prefix + "_seqListFile.csv";
         String source = dataDirectory + "/" + sourceName;
@@ -39,6 +39,9 @@ public class Johnny5HelperService {
 
         String source3Name = prefix + "_targetListFile.csv";
         String source3 = dataDirectory + "/" + source3Name;
+
+        String sequencesZipName = prefix + "_sequences.zip";
+        String sequencesZip = dataDirectory + "/" + sequencesZipName;
 
         String target = dataDirectory + "/" + prefix + "_completeOutput-" + Utils.generateUUID()
                 + ".zip";
@@ -75,54 +78,62 @@ public class Johnny5HelperService {
                 out.close();
             }
 
+            // Archiving sequences
+            FileOutputStream sequencesFileOutputStream = new FileOutputStream(sequencesZip);
+            ZipOutputStream zipOutputStreamForSequences = new ZipOutputStream(
+                    new BufferedOutputStream(sequencesFileOutputStream));
+
+            HashMap<String, String> uniqueEntries = new LinkedHashMap<String, String>();
+
+            byte sequenceDataBuffer[] = new byte[BUFFER];
+
+            for (int i = 0; i < fileList.size(); i++) {
+                FileInfo fi = fileList.get(i);
+
+                String sequneceName = fi.getName();
+
+                if (uniqueEntries.containsKey(sequneceName)) {
+                    continue;
+                }
+
+                uniqueEntries.put(sequneceName, sequneceName);
+
+                FileInputStream fis = new FileInputStream(dataDirectory + "/" + sequneceName);
+                ZipEntry entry = new ZipEntry(sequneceName);
+
+                BufferedInputStream origin = new BufferedInputStream(fis, BUFFER);
+                zipOutputStreamForSequences.putNextEntry(entry);
+
+                int count;
+                while ((count = origin.read(sequenceDataBuffer, 0, BUFFER)) != -1) {
+                    zipOutputStreamForSequences.write(sequenceDataBuffer, 0, count);
+                }
+
+                origin.close();
+            }
+            zipOutputStreamForSequences.close();
+
+            // Archiving everything
             FileOutputStream dest = new FileOutputStream(target);
             ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(dest));
 
             byte data[] = new byte[BUFFER];
 
-            HashMap<String, String> uniqueEntries = new LinkedHashMap<String, String>();
-
-            for (int i = 0; i < 3 + fileList.size(); i++) {
-                FileInputStream fis;
-                ZipEntry entry;
+            for (int i = 0; i < 4; i++) {
+                FileInputStream fis = null;
+                ZipEntry entry = null;
                 if (i == 0) {
-                    if (uniqueEntries.containsKey(sourceName)) {
-                        continue;
-                    }
-
-                    uniqueEntries.put(sourceName, sourceName);
-
                     fis = new FileInputStream(source);
                     entry = new ZipEntry(sourceName);
                 } else if (i == 1) {
-                    if (uniqueEntries.containsKey(source2Name)) {
-                        continue;
-                    }
-
-                    uniqueEntries.put(source2Name, source2Name);
-
                     fis = new FileInputStream(source2);
                     entry = new ZipEntry(source2Name);
                 } else if (i == 2) {
-                    if (uniqueEntries.containsKey(source3Name)) {
-                        continue;
-                    }
-
-                    uniqueEntries.put(source3Name, source3Name);
-
                     fis = new FileInputStream(source3);
                     entry = new ZipEntry(source3Name);
-                } else {
-                    FileInfo fi = fileList.get(i - 3);
-
-                    if (uniqueEntries.containsKey(fi.getName())) {
-                        continue;
-                    }
-
-                    uniqueEntries.put(fi.getName(), fi.getName());
-
-                    fis = new FileInputStream(dataDirectory + "/" + fi.getName());
-                    entry = new ZipEntry(fi.getName());
+                } else if (i == 3) {
+                    fis = new FileInputStream(sequencesZip);
+                    entry = new ZipEntry(sequencesZipName);
                 }
 
                 BufferedInputStream origin = new BufferedInputStream(fis, BUFFER);
@@ -134,7 +145,6 @@ public class Johnny5HelperService {
                 }
 
                 origin.close();
-
             }
 
             // Finish zip process
@@ -152,6 +162,9 @@ public class Johnny5HelperService {
                 File del = new File(dataDirectory + "/" + fileInfo.getName());
                 del.delete();
             }
+
+            File sequenceZipFile = new File(sequencesZip);
+            sequenceZipFile.delete();
 
             // Reading bytes
             FileInputStream fis = new FileInputStream(target);
