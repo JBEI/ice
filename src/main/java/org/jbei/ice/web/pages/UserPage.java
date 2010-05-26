@@ -11,6 +11,7 @@ import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.panels.EmptyWorkspaceMessagePanel;
 import org.jbei.ice.web.panels.UserEntriesViewPanel;
+import org.jbei.ice.web.panels.UserRecentlyViewedPanel;
 import org.jbei.ice.web.panels.UserSamplesViewPanel;
 import org.jbei.ice.web.panels.WorkspaceTablePanel;
 
@@ -19,10 +20,12 @@ public class UserPage extends ProtectedPage {
     public Component entriesPanel;
     public Component samplesPanel;
     public Component workspacePanel;
+    public Component recentlyViewedPanel;
 
     public BookmarkablePageLink<Object> entriesLink;
     public BookmarkablePageLink<Object> samplesLink;
     public BookmarkablePageLink<Object> workspaceLink;
+    public BookmarkablePageLink<Object> recentlyViewedLink;
 
     public String currentPage = null;
 
@@ -48,17 +51,23 @@ public class UserPage extends ProtectedPage {
         workspaceLink = new BookmarkablePageLink<Object>("workspaceLink", UserPage.class,
                 new PageParameters("0=workspace"));
         workspaceLink.setOutputMarkupId(true);
+        recentlyViewedLink = new BookmarkablePageLink<Object>("recentlyViewedLink", UserPage.class,
+                new PageParameters("0=recent"));
+        recentlyViewedLink.setOutputMarkupId(true);
 
         updateTab();
 
         add(entriesLink);
         add(samplesLink);
         add(workspaceLink);
+        add(recentlyViewedLink);
 
         if (currentPage != null && currentPage.equals("samples")) {
             currentPanel = createSamplesPanel();
         } else if (currentPage != null && currentPage.equals("workspace")) {
             currentPanel = createWorkspacePanel();
+        } else if (currentPage != null && currentPage.equals("recent")) {
+            currentPanel = createRecentlyViewedPanel();
         } else {
             currentPanel = createEntriesPanel();
         }
@@ -70,12 +79,17 @@ public class UserPage extends ProtectedPage {
         entriesLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(true);
         samplesLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(true);
         workspaceLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(true);
+        recentlyViewedLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(
+            true);
 
         if (currentPage != null && currentPage.equals("samples")) {
             samplesLink.add(new SimpleAttributeModifier("class", "active")).setOutputMarkupId(true);
         } else if (currentPage != null && currentPage.equals("workspace")) {
             workspaceLink.add(new SimpleAttributeModifier("class", "active")).setOutputMarkupId(
                 true);
+        } else if (currentPage != null && currentPage.equals("recent")) {
+            recentlyViewedLink.add(new SimpleAttributeModifier("class", "active"))
+                    .setOutputMarkupId(true);
         } else {
             entriesLink.add(new SimpleAttributeModifier("class", "active")).setOutputMarkupId(true);
         }
@@ -114,6 +128,12 @@ public class UserPage extends ProtectedPage {
             workspacePanel = new EmptyWorkspaceMessagePanel("centerPanel");
         }
         return workspacePanel;
+    }
+
+    private Panel createRecentlyViewedPanel() {
+        UserRecentlyViewedPanel userRecentlyViewedPanel = new UserRecentlyViewedPanel("centerPanel");
+        userRecentlyViewedPanel.setOutputMarkupId(true);
+        return userRecentlyViewedPanel;
     }
 
     @Override

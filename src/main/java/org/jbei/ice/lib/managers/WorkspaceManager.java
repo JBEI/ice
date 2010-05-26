@@ -201,4 +201,50 @@ public class WorkspaceManager {
 
         return result;
     }
+
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Workspace> getRecentlyViewedByAccount(Account account, int offset,
+            int limit) throws ManagerException {
+        if (offset > 50) {
+            offset = 50;
+        }
+        ArrayList<Workspace> result = null;
+        Session session = DAO.newSession();
+        try {
+            String queryString = "from Workspace workspace where account=:account order by workspace.dateVisited desc";
+            Query query = session.createQuery(queryString);
+            query.setParameter("account", account);
+            query.setFirstResult(offset);
+            query.setMaxResults(limit);
+            result = new ArrayList<Workspace>(query.list());
+        } catch (HibernateException e) {
+            throw new ManagerException("Could not get recently viewed workspace by account ", e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+        return result;
+    }
+
+    public static int getRecentlyViewedCount(Account account) throws ManagerException {
+        int size = 0;
+        Session session = DAO.newSession();
+        try {
+            String queryString = "from Workspace workspace where account=:account order by workspace.dateAdded desc";
+            Query query = session.createQuery(queryString);
+            query.setParameter("account", account);
+            size = query.list().size();
+        } catch (HibernateException e) {
+            throw new ManagerException(e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+        if (size > 50) {
+            size = 50;
+        }
+        return size;
+    }
 }

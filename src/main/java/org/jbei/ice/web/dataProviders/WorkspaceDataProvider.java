@@ -25,7 +25,7 @@ public class WorkspaceDataProvider extends SortableDataProvider<Workspace> {
     public WorkspaceDataProvider(Account account) {
         super();
 
-        this.account = account;
+        this.setAccount(account);
     }
 
     @Override
@@ -34,7 +34,7 @@ public class WorkspaceDataProvider extends SortableDataProvider<Workspace> {
 
         try {
             // TODO: Tim; Move this to some controller and filter according to permission
-            ArrayList<Workspace> result = WorkspaceManager.getByAccount(account, first, count);
+            ArrayList<Workspace> result = WorkspaceManager.getByAccount(getAccount(), first, count);
 
             workspaces.addAll(result);
         } catch (ManagerException e) {
@@ -52,7 +52,7 @@ public class WorkspaceDataProvider extends SortableDataProvider<Workspace> {
     @Override
     public int size() {
         try {
-            return WorkspaceManager.getCountByAccount(account);
+            return WorkspaceManager.getCountByAccount(getAccount());
         } catch (ManagerException e) {
             throw new ViewException(e);
         }
@@ -76,5 +76,13 @@ public class WorkspaceDataProvider extends SortableDataProvider<Workspace> {
         }
 
         return result;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    public Account getAccount() {
+        return account;
     }
 }
