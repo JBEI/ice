@@ -62,6 +62,15 @@ public class Blast {
         try { // The big try
             synchronized (this) {
                 File newbigFastaFileDir = new File(blastDirectory + ".new");
+
+                if (newbigFastaFileDir.exists()) {
+                    try {
+                        FileUtils.deleteDirectory(newbigFastaFileDir);
+                    } catch (Exception e) {
+                        throw new BlastException(e);
+                    }
+
+                }
                 if (!newbigFastaFileDir.mkdir()) {
                     throw new BlastException("Could not create " + blastDirectory + ".new");
                 }
@@ -259,15 +268,17 @@ public class Blast {
         if (oldBlastDir.exists()) {
             FileUtils.deleteDirectory(oldBlastDir);
         }
-        oldBlastDir = new File(blastDirectory + ".old");
-        File currentBlastDir = new File(blastDirectory);
-        if (!currentBlastDir.renameTo(oldBlastDir)) {
-            throw new BlastException("Could not rename directory " + blastDirectory + ".old");
-        }
-        currentBlastDir = new File(blastDirectory);
-        File newBlastDir = new File(blastDirectory + ".new");
 
-        if (!newBlastDir.renameTo(currentBlastDir)) {
+        File currentBlastDir = new File(blastDirectory);
+        if (currentBlastDir.exists()) {
+            if (!currentBlastDir.renameTo(oldBlastDir)) {
+                throw new BlastException("Could not rename directory " + blastDirectory + ".old");
+            }
+        } else {
+            // no current blast directory
+        }
+
+        if (!newBigFastaFileDir.renameTo(currentBlastDir)) {
             throw new BlastException("Could not rename blast db");
         }
     }
