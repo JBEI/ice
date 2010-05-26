@@ -29,6 +29,7 @@ import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.panels.AttachmentsViewPanel;
+import org.jbei.ice.web.panels.MiniAttachmentsViewPanel;
 import org.jbei.ice.web.panels.PartViewPanel;
 import org.jbei.ice.web.panels.PermissionEditPanel;
 import org.jbei.ice.web.panels.PlasmidViewPanel;
@@ -109,6 +110,8 @@ public class EntryViewPage extends ProtectedPage {
         } catch (ManagerException e) {
             throw new ViewException(e);
         }
+        Panel miniPanel = new MiniAttachmentsViewPanel("miniAttachmentsViewPanel", entry);
+        add(miniPanel);
     }
 
     @Override
