@@ -12,7 +12,6 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.web.pages.EntriesPage;
 import org.jbei.ice.web.pages.EntryNewPage;
-import org.jbei.ice.web.pages.FeedbackPage;
 import org.jbei.ice.web.pages.HomePage;
 import org.jbei.ice.web.pages.UserPage;
 
@@ -48,7 +47,6 @@ public class MenuPanel extends Panel {
         addPageLinkMenuItem(EntriesPage.class, "Entries");
         addPageLinkMenuItem(UserPage.class, "My Entries");
         addPageLinkMenuItem(EntryNewPage.class, "Add new entry");
-        addPageLinkMenuItem(FeedbackPage.class, "Feedback");
 
         ListView<MenuItem> menuList = new ListView<MenuItem>("menuList", menuItems) {
             private static final long serialVersionUID = 1L;
