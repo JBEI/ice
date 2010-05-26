@@ -16,7 +16,7 @@
 		<td align="center" style="width: 100%; height: 100%">
 		<table border="0" cellpadding="0" cellspacing="0" class="main_table">
 			<tr>
-				<td align="center">
+				<td align="center" colspan="2">
 				<table border="0" cellspacing="0" cellpadding="1" style="width: 100%; height: 2px">
 					<tr>
 						<td style="background-color: #6C95C9;"></td>
@@ -25,14 +25,17 @@
 				</td>
 			</tr>
 			<tr>
-				<td align="center" valign="top" style="height: 20px"><!-- Search Bar Begin -->
+				<td align="left"><!-- Menu Begin -->
+				<div wicket:id="menuPanel" id="menu">This will be replaced</div>
+				</td>
+				<td align="right" valign="top"><!-- Search Bar Begin -->
 				<div wicket:id="searchBarPanel"></div>
 				<form action="/search" method="get">
 				</form>
 				<!-- Search Bar End --></td>
 			</tr>
 			<tr>
-				<td align="center" valign="top">
+				<td align="center" valign="top" colspan="2">
 				<table border="0" cellspacing="0" cellpadding="1" style="width: 100%; height: 2px">
 					<tr>
 						<td style="background-color: #CCCC99"></td>
@@ -41,12 +44,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td valign="top" style="width: 100%;"><!-- Menu Begin -->
-				<div wicket:id="menuPanel" id="menu">This will be replaced</div>
-				</td>
-			</tr>
-			<tr>
-				<td valign="top" style="height: 100%;">
+				<td valign="top" style="height: 100%;" colspan="2">
 				<table border="0" cellpadding="0" cellspacing="0" style="margin-top: 10px; height: 100%"; >
 					<tr>
 						<td style="width: 10px">&nbsp;</td>
@@ -74,25 +72,25 @@
 	</tr>
 </table>
 <script type="text/javascript">
-        function assignClueTips() {
-                $('.entry_tip').cluetip( {
-                        width : '800px',
-                        showTitle : false,
-                        arrows : false,
-                        topOffset : 15,
-                        leftOffset : 15,
-                        positionBy : 'auto',
-                        cursor : 'pointer',
-                        cluetipClass : 'jbeiregistry'
-                });
-        }
-        $(document).ready(function() {
-                try {
-                        assignClueTips();
-                } catch (err) {
-                        //alert(err);
-                }
-        });
+	function assignClueTips() {
+		$('.entry_tip').cluetip( {
+			width : '800px',
+			showTitle : false,
+			arrows : false,
+			topOffset : 15,
+			leftOffset : 15,
+			positionBy : 'auto',
+			cursor : 'pointer',
+			cluetipClass : 'jbeiregistry'
+		});
+	}
+	$(document).ready(function() {
+		try {
+			assignClueTips();
+		} catch (err) {
+			//alert(err);
+		}
+	});
 </script>
 </body>
 </html>
