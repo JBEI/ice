@@ -44,7 +44,7 @@ public class UnprotectedPage extends WebPage {
 
     protected void initializeJavascript() {
         add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-                JS_RESOURCE_LOCATION + "jquery-1.3.2.js"));
+            JS_RESOURCE_LOCATION + "jquery-1.3.2.js"));
     }
 
     protected void initializeComponents() {

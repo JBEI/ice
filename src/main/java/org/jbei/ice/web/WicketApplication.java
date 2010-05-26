@@ -19,7 +19,6 @@ import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryUpdatePage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.FeedbackPage;
-import org.jbei.ice.web.pages.HomePage;
 import org.jbei.ice.web.pages.LogOutPage;
 import org.jbei.ice.web.pages.LoginPage;
 import org.jbei.ice.web.pages.ProfilePage;
@@ -29,6 +28,7 @@ import org.jbei.ice.web.pages.SearchResultPage;
 import org.jbei.ice.web.pages.UpdateAccountPage;
 import org.jbei.ice.web.pages.UpdatePasswordPage;
 import org.jbei.ice.web.pages.UserPage;
+import org.jbei.ice.web.pages.WelcomePage;
 
 /**
  * Application object for your web application. If you want to run this
@@ -73,8 +73,8 @@ public class WicketApplication extends WebApplication {
      * @see org.apache.wicket.Application#getHomePage()
      */
     @Override
-    public Class<HomePage> getHomePage() {
-        return HomePage.class;
+    public Class<WelcomePage> getHomePage() {
+        return WelcomePage.class;
     }
 
     private void mountPages() {

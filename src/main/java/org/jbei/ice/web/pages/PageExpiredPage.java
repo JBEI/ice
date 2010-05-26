@@ -14,8 +14,8 @@ public class PageExpiredPage extends UnprotectedPage {
     }
 
     private void initialize() {
-        CharSequence relativeUrl = WebRequestCycle.get().urlFor(HomePage.class,
-                new PageParameters());
+        CharSequence relativeUrl = WebRequestCycle.get().urlFor(WelcomePage.class,
+            new PageParameters());
 
         WebRequestCycle webRequestCycle = (WebRequestCycle) WebRequestCycle.get();
 

@@ -14,8 +14,8 @@ import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
-import org.jbei.ice.web.pages.HomePage;
 import org.jbei.ice.web.pages.UnprotectedPage;
+import org.jbei.ice.web.pages.WelcomePage;
 
 public class HeaderPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -25,8 +25,8 @@ public class HeaderPanel extends Panel {
 
         EntryController entryController = new EntryController(IceSession.get().getAccount());
 
-        add(new BookmarkablePageLink<String>("homeLink", HomePage.class).add(new Image("logoImage",
-                new ResourceReference(UnprotectedPage.class,
+        add(new BookmarkablePageLink<String>("homeLink", WelcomePage.class).add(new Image(
+                "logoImage", new ResourceReference(UnprotectedPage.class,
                         UnprotectedPage.IMAGES_RESOURCE_LOCATION + "logo.gif"))));
         add(new LoginStatusPanel("loginStatusPanel"));
 

@@ -12,6 +12,6 @@ public class LogOutPage extends UnprotectedPage {
             ((IceSession) getSession()).invalidateNow();
         }
 
-        setResponsePage(HomePage.class);
+        setResponsePage(WelcomePage.class);
     }
 }

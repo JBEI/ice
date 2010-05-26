@@ -16,6 +16,7 @@ import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.SessionData;
+import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.IceSession.IceSessionException;
 import org.jbei.ice.web.common.ViewException;
@@ -44,8 +45,12 @@ public class LoginPanel extends Panel {
                 add(new PasswordTextField("loginPassword").setRequired(true).setLabel(
                     new Model<String>("Password")));
                 add(new CheckBox("keepSignedIn"));
-                add(new BookmarkablePageLink<RegistrationPage>("registrationLink",
-                        RegistrationPage.class));
+                BookmarkablePageLink<RegistrationPage> bookmarkablePageLink = new BookmarkablePageLink<RegistrationPage>(
+                        "registrationLink", RegistrationPage.class);
+                if (!JbeirSettings.getSetting("NEW_REGISTRATION_ALLOWED").equals("yes")) {
+                    bookmarkablePageLink.setVisible(false);
+                }
+                add(bookmarkablePageLink);
                 add(new BookmarkablePageLink<ForgotPasswordPage>("forgotPasswordLink",
                         ForgotPasswordPage.class));
                 add(new Button("logInButton", new Model<String>("Log In")));

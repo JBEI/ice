@@ -14,7 +14,7 @@ public class LoginPage extends UnprotectedPage {
     private void initialize() {
         if (IceSession.get().isAuthenticated()) {
             setRedirect(true);
-            setResponsePage(HomePage.class);
+            setResponsePage(UserPage.class);
 
             return;
         }

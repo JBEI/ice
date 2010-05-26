@@ -32,6 +32,7 @@ public class WorkspaceDataView extends DataView<Workspace> {
     }
 
     private static final long serialVersionUID = 1L;
+    private static final int MAX_LONG_FIELD_LENGTH = 100;
 
     @Override
     protected void populateItem(Item<Workspace> item) {
@@ -60,8 +61,8 @@ public class WorkspaceDataView extends DataView<Workspace> {
         item.add(entryLink);
 
         item.add(new Label("name", entry.getOneName().getName()));
-        item.add(new Label("description", WebUtils.linkifyText(entry.getShortDescription()))
-                .setEscapeModelStrings(false));
+        item.add(new Label("description", trimLongField(WebUtils.linkifyText(entry
+                .getShortDescription()), MAX_LONG_FIELD_LENGTH)).setEscapeModelStrings(false));
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
         String dateString = dateFormat.format(new Date(workspace.getDateAdded()));
@@ -115,4 +116,14 @@ public class WorkspaceDataView extends DataView<Workspace> {
         return item.getModelObject();
     }
 
+    protected String trimLongField(String value, int maxLength) {
+        if (value == null || value.isEmpty()) {
+            return "";
+        }
+        if (value.length() > maxLength) {
+            return value.substring(0, maxLength) + "...";
+        } else {
+            return value;
+        }
+    }
 }
