@@ -32,6 +32,7 @@ import org.jbei.ice.web.panels.AttachmentsViewPanel;
 import org.jbei.ice.web.panels.EntryTabPanel;
 import org.jbei.ice.web.panels.MiniAttachmentsViewPanel;
 import org.jbei.ice.web.panels.MiniPermissionViewPanel;
+import org.jbei.ice.web.panels.MiniSamplesViewPanel;
 import org.jbei.ice.web.panels.PartViewPanel;
 import org.jbei.ice.web.panels.PermissionEditPanel;
 import org.jbei.ice.web.panels.PlasmidViewPanel;
@@ -93,6 +94,9 @@ public class EntryViewPage extends ProtectedPage {
         Panel miniAttachmentsPanel = new MiniAttachmentsViewPanel("sidePanel", entry);
         sidePanels.add(miniAttachmentsPanel);
 
+        Panel miniSamplesViewPanel = new MiniSamplesViewPanel("sidePanel", entry);
+        sidePanels.add(miniSamplesViewPanel);
+
         EntryController entryController = new EntryController(IceSession.get().getAccount());
         try {
             if (entryController.hasWritePermission(entry)) {
@@ -104,9 +108,11 @@ public class EntryViewPage extends ProtectedPage {
         }
 
         if (subPage != null
-                && (subPage.equals(ATTACHMENTS_URL_KEY) || subPage.equals(PERMISSIONS_URL_KEY))) {
+                && (subPage.equals(ATTACHMENTS_URL_KEY) || subPage.equals(PERMISSIONS_URL_KEY) || subPage
+                        .equals(SAMPLES_URL_KEY))) {
             sidePanels.clear();
         }
+
         ListView<Panel> sidePanelsListView = new ListView<Panel>("sidePanels", sidePanels) {
             private static final long serialVersionUID = 1L;
 

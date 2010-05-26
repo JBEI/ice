@@ -42,8 +42,8 @@ public class MiniAttachmentsViewPanel extends Panel {
         int numAttachments = 0;
         try {
             numAttachments = attachmentController.getNumberOfAttachments(entry);
-        } catch (ControllerException e1) {
-            throw new ViewException(e1);
+        } catch (ControllerException e) {
+            throw new ViewException(e);
         }
         add(new Label("attachmentsCount", "(" + numAttachments + ")"));
 
@@ -53,10 +53,6 @@ public class MiniAttachmentsViewPanel extends Panel {
             throw new ViewException(e);
         }
 
-        BookmarkablePageLink<Object> moreLink = new BookmarkablePageLink<Object>("moreLink",
-                EntryViewPage.class, new PageParameters("0=" + entry.getId() + ",1="
-                        + ATTACHMENTS_URL_KEY));
-        moreLink.setVisible(false);
         int showLimit = 4;
         if (attachments.size() > showLimit) {
             Panel moreLinkPanel = new MoreAttachmentsLinkPanel("moreAttachmentsLinkPanel", entry);
@@ -94,10 +90,14 @@ public class MiniAttachmentsViewPanel extends Panel {
                     throw new ViewPermissionException("No permissions to get attachment file!", e);
                 }
                 if (downloadLink != null) {
-                    String shortFileName = attachment.getFileName().substring(0,
-                            SHORT_FILENAME_LENGTH)
-                            + "...";
-
+                    String shortFileName = null;
+                    if (attachment.getFileName().length() > SHORT_FILENAME_LENGTH) {
+                        shortFileName = attachment.getFileName()
+                                .substring(0, SHORT_FILENAME_LENGTH)
+                                + "...";
+                    } else {
+                        shortFileName = attachment.getFileName();
+                    }
                     downloadLink.add(new Label("fileName", shortFileName));
                     item.add(downloadLink);
                 }
@@ -107,7 +107,6 @@ public class MiniAttachmentsViewPanel extends Panel {
         };
 
         add(attachmentsList);
-        add(moreLink);
     }
 
     public Entry getEntry() {

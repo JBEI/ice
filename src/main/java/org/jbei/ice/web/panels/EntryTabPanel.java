@@ -5,7 +5,6 @@ import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.controllers.SampleController;
 import org.jbei.ice.controllers.SequenceAnalysisController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
@@ -21,7 +20,6 @@ public class EntryTabPanel extends Panel {
 
     public BookmarkablePageLink<Object> generalLink;
     public BookmarkablePageLink<Object> sequenceAnalysisLink;
-    public BookmarkablePageLink<Object> samplesLink;
 
     private final String SAMPLES_URL_KEY = "samples";
     private final String SEQUENCE_ANALYSIS_URL_KEY = "seqanalysis";
@@ -35,12 +33,10 @@ public class EntryTabPanel extends Panel {
         this.entry = entry;
         this.subPage = subPage;
         renderGeneralLink();
-        renderSamplesLink();
         renderSequenceAnalysisLink();
 
         add(generalLink);
         add(sequenceAnalysisLink);
-        add(samplesLink);
         setActiveLink();
     }
 
@@ -51,11 +47,9 @@ public class EntryTabPanel extends Panel {
                 "class", "active");
         generalLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
         sequenceAnalysisLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
-        samplesLink.add(inactiveSimpleAttributeModifier).setOutputMarkupId(true);
         if (subPage == null) {
             generalLink.add(activeSimpleAttributeModifier).setOutputMarkupId(true);
         } else if (subPage.equals(SAMPLES_URL_KEY)) {
-            samplesLink.add(activeSimpleAttributeModifier).setOutputMarkupId(true);
         } else if (subPage.equals(ATTACHMENTS_URL_KEY)) {
         } else if (subPage.equals(SEQUENCE_ANALYSIS_URL_KEY)) {
             sequenceAnalysisLink.add(activeSimpleAttributeModifier).setOutputMarkupId(true);
@@ -67,24 +61,6 @@ public class EntryTabPanel extends Panel {
         generalLink = new BookmarkablePageLink<Object>("generalLink", EntryViewPage.class,
                 new PageParameters("0=" + entry.getId()));
         generalLink.setOutputMarkupId(true);
-    }
-
-    private void renderSamplesLink() {
-        samplesLink = new BookmarkablePageLink<Object>("samplesLink", EntryViewPage.class,
-                new PageParameters("0=" + entry.getId() + ",1=" + SAMPLES_URL_KEY));
-        samplesLink.setOutputMarkupId(true);
-        SampleController sampleController = new SampleController(IceSession.get().getAccount());
-        int numSamples = 0;
-        try {
-            numSamples = sampleController.getNumberOfSamples(entry);
-        } catch (ControllerException e) {
-            throw new ViewException(e);
-        }
-        String samplesLabel = "Samples";
-        if (numSamples > 0) {
-            samplesLabel = samplesLabel + " (" + numSamples + ")";
-        }
-        samplesLink.add(new Label("samplesLabel", samplesLabel));
     }
 
     private void renderSequenceAnalysisLink() {
