@@ -1,28 +1,34 @@
 <html xmlns:wicket>
 <body>
 <wicket:extend>
-	<table border="0" cellpadding="0" cellspacing="0" align="left" style="margin-right:10px;">
+	<a href="#" wicket:id="addToWorkspaceLink"><img title="Add to Workspace" wicket:id="starImage"
+		style="display: inline;"></img></a>&nbsp;<span class="panel_header"> <span
+		wicket:id="titleName"></span></span>
+		<table border="0" cellpadding="0" cellspacing="0">
+				<tr style="width: 500px;">
+					<td>
+					<div wicket:id="entryTabPanel"></div>
+					</td>
+				</tr>
+		</table>
+	<table border="0" cellpadding="0" cellspacing="0">
 		<tr>
-			<td><a href="#" wicket:id="addToWorkspaceLink"><img title="Add to Workspace"
-				wicket:id="starImage" style="display: inline;"></img></a>&nbsp;<span class="panel_header"> <span
-				wicket:id="titleName"></span></span></td>
-		</tr>
-		<tr style="width: 500px;">
-			<td>
-			<div  wicket:id="entryTabPanel">
+			<td valign="top">
+			<table border="0" cellpadding="0" cellspacing="0" align="left" style="margin-right: 10px;">
+				<tr>
+					<td>
+					<div wicket:id="centerPanel" style="width: 800px;">Entry View Panel (Will be removed)</div>
+					</td>
+				</tr>
+			</table>
+			</td>
+			<td valign="top">
+			<div align=right wicket:id="sidePanels">
+			<div wicket:id="sidePanel"></div>
 			</div>
 			</td>
 		</tr>
-		<tr>
-			<td>
-			<div wicket:id="centerPanel" style="width: 800px;">Entry View Panel (Will be removed)</div>
-			</td>
-		</tr>
 	</table>
-	<div align=right wicket:id="sidePanels">
-	   <div wicket:id="sidePanel"></div>
-	</div>
-	
 </wicket:extend>
 </body>
 </html>

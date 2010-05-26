@@ -73,5 +73,26 @@
 			wicket:id="footerPanel">Footer Panel</span> <!-- Footer End --></td>
 	</tr>
 </table>
+<script type="text/javascript">
+        function assignClueTips() {
+                $('.entry_tip').cluetip( {
+                        width : '800px',
+                        showTitle : false,
+                        arrows : false,
+                        topOffset : 15,
+                        leftOffset : 15,
+                        positionBy : 'auto',
+                        cursor : 'pointer',
+                        cluetipClass : 'jbeiregistry'
+                });
+        }
+        $(document).ready(function() {
+                try {
+                        assignClueTips();
+                } catch (err) {
+                        //alert(err);
+                }
+        });
+</script>
 </body>
 </html>

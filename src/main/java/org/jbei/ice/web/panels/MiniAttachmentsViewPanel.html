@@ -1,24 +1,18 @@
 <html xmlns:wicket>
 <wicket:panel>
-	<table class="mini_table" frame="border">
-		<tr>
-			<td colspan=2><span class="panel_header"><a wicket:id="attachmentsPageLink" href="#">&nbsp;Attachments</a></span>
+	<table class="mini_table" style="margin-bottom: 10px;" frame="border" border="0" cellpadding="3"
+		cellspacing="0">
+		<tr class="title_row_header">
+			<td colspan=2><span><a wicket:id="attachmentsPageLink" href="#">&nbsp;Attachments</a></span>
 			<span wicket:id="attachmentsCount"></span></td>
 		</tr>
-		<tr>
-			<td colspan=2 style="background-color: #BBBBBB;"></td>
-		</tr>
 		<tr wicket:id="attachmentsList">
-			<td colspan=2>
-			<a href="#" wicket:id="downloadAttachmentLink">&nbsp;&nbsp;<span
-					wicket:id="fileName"></span></a>
-			</td>
+			<td colspan=2><a href="#" wicket:id="downloadAttachmentLink">&nbsp;&nbsp;<span
+				wicket:id="fileName"></span></a></td>
 		</tr>
 		<tr>
-		<td>&nbsp;</td>
-		<td>
-		<a href="#" wicket:id="moreLink">...more</a>
-		</td>
+			<td>&nbsp;</td>
+			<td><a href="#" wicket:id="moreLink">...more</a></td>
 		</tr>
 	</table>
 
