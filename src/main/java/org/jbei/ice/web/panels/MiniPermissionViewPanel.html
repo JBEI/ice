@@ -2,10 +2,11 @@
 <wicket:panel>
 	<table class="mini_table" frame="border" border="0" cellpadding="3" cellspacing="0">
 		<tr class="title_row_header">
-			<td colspan=2><span><a wicket:id="permissionPageLink" href="#">&nbsp;Permission</a></span></td>
+			<td colspan=2><span>Permissions <span wicket:id="editLink">&nbsp;|&nbsp;<a
+				wicket:id="permissionPageLink" href="#">Edit</a></span></span></td>
 		</tr>
 		<tr>
-			<td colspan=2>Can Read:</td>
+			<td colspan=2>Read Allowed:</td>
 		</tr>
 		<tr wicket:id="readableList">
 			<td>&nbsp;</td>
@@ -15,7 +16,7 @@
 			<wicket:container wicket:id="moreReadableLinkPanel"></wicket:container>
 		</tr>
 		<tr>
-			<td colspan=2>Can Write:</td>
+			<td colspan=2>Read and Write allowed:</td>
 		</tr>
 		<tr wicket:id="writableList">
 			<td>&nbsp;</td>

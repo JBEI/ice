@@ -5,18 +5,23 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.wicket.PageParameters;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.permissions.AuthenticatedPermissionManager;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.pages.EntryViewPage;
 
@@ -33,11 +38,27 @@ public class MiniPermissionViewPanel extends Panel {
 
         this.entry = entry;
 
-        add(new BookmarkablePageLink<Object>("permissionPageLink", EntryViewPage.class,
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
+        WebMarkupContainer editLink = new WebMarkupContainer("editLink");
+        editLink.add(new BookmarkablePageLink<Object>("permissionPageLink", EntryViewPage.class,
                 new PageParameters("0=" + entry.getId() + ",1=" + PERMISSION_URL_KEY)));
+        try {
+            editLink.setVisible(entryController.hasWritePermission(entry));
+        } catch (ControllerException e1) {
+            throw new ViewException(e1);
+        }
+        add(editLink);
 
         List<String> readAllowed = getReadAllowed();
         List<String> writeAllowed = getWriteAllowed();
+        readAllowed.removeAll(writeAllowed);
+
+        if (readAllowed.size() == 0) {
+            readAllowed.add("Only you");
+        }
+        if (writeAllowed.size() == 0) {
+            writeAllowed.add("Only you");
+        }
 
         int listLimit = 4;
         if (readAllowed.size() > listLimit) {
