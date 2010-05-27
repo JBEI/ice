@@ -68,8 +68,6 @@ public class PermissionEditPanel extends Panel {
 
         this.entry = entry;
 
-        // TODO: Tim; This code should be move partially to contoller
-
         // Get all the groups and accounts, and combine them into a large list
         // that will be used later to disambiguate groups and users.
         Set<Account> accounts = null;
@@ -408,7 +406,7 @@ public class PermissionEditPanel extends Panel {
                     }
 
                     setResponsePage(EntryViewPage.class, new PageParameters("0="
-                            + thisPanel.entry.getId() + ",1=" + "permission"));
+                            + thisPanel.entry.getId()));
                 } catch (ControllerException e) {
                     throw new ViewException(e);
                 } catch (ManagerException e) {
