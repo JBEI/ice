@@ -40,7 +40,6 @@ public class MiniSamplesViewPanel extends Panel {
         } catch (ControllerException e) {
             throw new ViewException(e);
         }
-        add(new Label("samplesCount", "(" + numSamples + ")"));
 
         this.entry = entry;
 
@@ -76,7 +75,25 @@ public class MiniSamplesViewPanel extends Panel {
 
         };
 
-        add(samplesList);
+        ArrayList<String> emptySamplesArray = new ArrayList<String>();
+        emptySamplesArray.add("No Samples");
+        ListView<String> emptySamplesList = new ListView<String>("samplesList", emptySamplesArray) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected void populateItem(ListItem<String> item) {
+                item.add(new Label("sampleItem", item.getModelObject()));
+            }
+        };
+
+        if (numSamples != 0) {
+            add(new Label("samplesCount", "(" + numSamples + ")"));
+            add(samplesList);
+        } else {
+            add(new Label("samplesCount", ""));
+            add(emptySamplesList);
+        }
+
     }
 
     public Entry getEntry() {

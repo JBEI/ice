@@ -3,6 +3,7 @@ package org.jbei.ice.web.panels;
 import java.util.ArrayList;
 
 import org.apache.wicket.PageParameters;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.DownloadLink;
@@ -12,6 +13,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.controllers.AttachmentController;
+import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
@@ -20,6 +22,7 @@ import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.common.ViewPermissionException;
 import org.jbei.ice.web.pages.EntryViewPage;
+import org.jbei.ice.web.pages.WelcomePage;
 
 public class MiniAttachmentsViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -33,9 +36,17 @@ public class MiniAttachmentsViewPanel extends Panel {
         super(id);
 
         this.entry = entry;
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
 
-        add(new BookmarkablePageLink<Object>("attachmentsPageLink", EntryViewPage.class,
+        WebMarkupContainer editLink = new WebMarkupContainer("editLink");
+        editLink.add(new BookmarkablePageLink<Object>("attachmentsPageLink", EntryViewPage.class,
                 new PageParameters("0=" + entry.getId() + ",1=" + ATTACHMENTS_URL_KEY)));
+        try {
+            editLink.setVisible(entryController.hasWritePermission(entry));
+        } catch (ControllerException e1) {
+            throw new ViewException(e1);
+        }
+        add(editLink);
         AttachmentController attachmentController = new AttachmentController(IceSession.get()
                 .getAccount());
 
@@ -45,7 +56,6 @@ public class MiniAttachmentsViewPanel extends Panel {
         } catch (ControllerException e) {
             throw new ViewException(e);
         }
-        add(new Label("attachmentsCount", "(" + numAttachments + ")"));
 
         try {
             attachments.addAll(attachmentController.getAttachments(entry));
@@ -106,7 +116,33 @@ public class MiniAttachmentsViewPanel extends Panel {
 
         };
 
-        add(attachmentsList);
+        ArrayList<String> emptyAttachmentsArray = new ArrayList<String>();
+        emptyAttachmentsArray.add("No Attachments");
+        ListView<String> emptyAttachmentsList = new ListView<String>("attachmentsList",
+                emptyAttachmentsArray) {
+
+            private static final long serialVersionUID = 1L;
+
+            @SuppressWarnings("unchecked")
+            @Override
+            protected void populateItem(ListItem<String> item) {
+                BookmarkablePageLink downloadLink = new BookmarkablePageLink(
+                        "downloadAttachmentLink", WelcomePage.class);
+                downloadLink.add(new Label("fileName", item.getModelObject()));
+                downloadLink.setEnabled(false);
+                item.add(downloadLink);
+
+            }
+        };
+
+        if (numAttachments != 0) {
+            add(new Label("attachmentsCount", "(" + numAttachments + ")"));
+            add(attachmentsList);
+        } else {
+            add(new Label("attachmentsCount", ""));
+            add(emptyAttachmentsList);
+        }
+
     }
 
     public Entry getEntry() {

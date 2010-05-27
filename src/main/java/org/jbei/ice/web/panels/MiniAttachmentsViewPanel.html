@@ -3,12 +3,11 @@
 	<table class="mini_table" style="margin-bottom: 10px;" frame="border" border="0" cellpadding="3"
 		cellspacing="0">
 		<tr class="title_row_header">
-			<td><span><a wicket:id="attachmentsPageLink" href="#">&nbsp;Attachments</a></span>
-			<span wicket:id="attachmentsCount"></span></td>
+			<td><span>Attachments <span wicket:id="attachmentsCount"></span><span
+				wicket:id="editLink">&nbsp;|&nbsp;<a wicket:id="attachmentsPageLink" href="#">Edit</a></span></span></td>
 		</tr>
 		<tr wicket:id="attachmentsList">
-			<td><a href="#" wicket:id="downloadAttachmentLink"><span
-				wicket:id="fileName"></span></a></td>
+			<td><a href="#" wicket:id="downloadAttachmentLink"><span wicket:id="fileName"></span></a></td>
 		</tr>
 		<wicket:container wicket:id="moreAttachmentsLinkPanel"></wicket:container>
 	</table>
