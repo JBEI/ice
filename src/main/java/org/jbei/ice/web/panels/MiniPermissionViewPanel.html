@@ -5,26 +5,8 @@
 			<td colspan=2><span>Permissions <span wicket:id="editLink">&nbsp;|&nbsp;<a
 				wicket:id="permissionPageLink" href="#">Edit</a></span></span></td>
 		</tr>
-		<tr>
-			<td colspan=2>Read Allowed:</td>
-		</tr>
-		<tr wicket:id="readableList">
-			<td>&nbsp;</td>
-			<td><span wicket:id="readableItem"></span></td>
-		</tr>
-		<tr>
-			<wicket:container wicket:id="moreReadableLinkPanel"></wicket:container>
-		</tr>
-		<tr>
-			<td colspan=2>Read and Write allowed:</td>
-		</tr>
-		<tr wicket:id="writableList">
-			<td>&nbsp;</td>
-			<td><span wicket:id="writableItem"></span></td>
-		</tr>
-		<tr>
-			<wicket:container wicket:id="moreWritableLinkPanel"></wicket:container>
-		</tr>
+		<wicket:container wicket:id="readAllowedPanel"></wicket:container>
+		<wicket:container wicket:id="writeAllowedPanel"></wicket:container>
 	</table>
 </wicket:panel>
 </html>

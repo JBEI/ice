@@ -6,10 +6,7 @@ import java.util.Set;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.controllers.EntryController;
@@ -53,55 +50,22 @@ public class MiniPermissionViewPanel extends Panel {
         List<String> writeAllowed = getWriteAllowed();
         readAllowed.removeAll(writeAllowed);
 
-        if (readAllowed.size() == 0) {
-            readAllowed.add("Only you");
-        }
         if (writeAllowed.size() == 0) {
             writeAllowed.add("Only you");
         }
 
-        int listLimit = 4;
-        if (readAllowed.size() > listLimit) {
-            readAllowed = readAllowed.subList(0, listLimit);
-            Panel moreReadableLinkPanel = new MorePermissionLinkPanel("moreReadableLinkPanel",
-                    entry);
-            add(moreReadableLinkPanel);
+        if (readAllowed.size() == 0) {
+            add(new EmptyPanel("readAllowedPanel"));
         } else {
-            add(new EmptyPanel("moreReadableLinkPanel"));
+            MiniPermissionReadAllowedPanel readAllowedPanel = new MiniPermissionReadAllowedPanel(
+                    "readAllowedPanel", entry, readAllowed);
+            add(readAllowedPanel);
         }
 
-        if (writeAllowed.size() > listLimit) {
-            writeAllowed = writeAllowed.subList(0, listLimit);
-            Panel moreWritableLinkPanel = new MorePermissionLinkPanel("moreWritableLinkPanel",
-                    entry);
-            add(moreWritableLinkPanel);
-        } else {
-            add(new EmptyPanel("moreWritableLinkPanel"));
-        }
+        MiniPermissionWriteAllowedPanel writeAllowedPanel = new MiniPermissionWriteAllowedPanel(
+                "writeAllowedPanel", entry, writeAllowed);
+        add(writeAllowedPanel);
 
-        ListView<String> readableList = new ListView<String>("readableList", readAllowed) {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected void populateItem(ListItem<String> item) {
-                String itemLabel = item.getModelObject();
-                item.add(new Label("readableItem", itemLabel));
-            }
-
-        };
-
-        ListView<String> writableList = new ListView<String>("writableList", writeAllowed) {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected void populateItem(ListItem<String> item) {
-                String itemLabel = item.getModelObject();
-                item.add(new Label("writableItem", itemLabel));
-            }
-        };
-
-        add(readableList);
-        add(writableList);
     }
 
     public Entry getEntry() {
