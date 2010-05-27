@@ -21,8 +21,8 @@ import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.IceSession.IceSessionException;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.ForgotPasswordPage;
+import org.jbei.ice.web.pages.HomePage;
 import org.jbei.ice.web.pages.RegistrationPage;
-import org.jbei.ice.web.pages.UserPage;
 
 public class LoginPanel extends Panel {
     private static final long serialVersionUID = -3410412725639985716L;
@@ -81,7 +81,7 @@ public class LoginPanel extends Panel {
                     }
 
                     if (!continueToOriginalDestination()) {
-                        setResponsePage(UserPage.class);
+                        setResponsePage(HomePage.class);
                     }
                 } catch (IceSessionException e) {
                     throw new ViewException(e);
