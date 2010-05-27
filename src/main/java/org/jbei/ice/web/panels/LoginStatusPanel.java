@@ -8,9 +8,9 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.pages.LogOutPage;
-import org.jbei.ice.web.pages.LoginPage;
 import org.jbei.ice.web.pages.ProfilePage;
 import org.jbei.ice.web.pages.RegistrationPage;
+import org.jbei.ice.web.pages.WelcomePage;
 
 public class LoginStatusPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -38,7 +38,7 @@ public class LoginStatusPanel extends Panel {
             }
         };
 
-        preLogin.add(new BookmarkablePageLink("logIn", LoginPage.class));
+        preLogin.add(new BookmarkablePageLink("logIn", WelcomePage.class));
         preLogin.add(new BookmarkablePageLink("register", RegistrationPage.class));
 
         return preLogin;

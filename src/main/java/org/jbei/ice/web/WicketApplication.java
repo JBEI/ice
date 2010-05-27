@@ -20,7 +20,6 @@ import org.jbei.ice.web.pages.EntryUpdatePage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.FeedbackPage;
 import org.jbei.ice.web.pages.LogOutPage;
-import org.jbei.ice.web.pages.LoginPage;
 import org.jbei.ice.web.pages.ProfilePage;
 import org.jbei.ice.web.pages.QueryPage;
 import org.jbei.ice.web.pages.RegistrationPage;
@@ -78,7 +77,7 @@ public class WicketApplication extends WebApplication {
     }
 
     private void mountPages() {
-        mountBookmarkablePage("/login", LoginPage.class);
+        mountBookmarkablePage("/login", WelcomePage.class);
         mountBookmarkablePage("/logout", LogOutPage.class);
         mountBookmarkablePage("/registration", RegistrationPage.class);
         mountBookmarkablePage("/update-account", UpdateAccountPage.class);
