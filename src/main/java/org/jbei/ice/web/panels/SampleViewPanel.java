@@ -2,8 +2,10 @@ package org.jbei.ice.web.panels;
 
 import java.util.ArrayList;
 
+import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -13,6 +15,7 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.pages.EntryViewPage;
 
 public class SampleViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -76,6 +79,8 @@ public class SampleViewPanel extends Panel {
         ListView<Object> samplesList = generateSamplesList("samplesListView");
         samplesList.setOutputMarkupId(true);
         add(samplesList);
+        add(new BookmarkablePageLink<Object>("backToEntryLink", EntryViewPage.class,
+                new PageParameters("0=" + entry.getId())));
     }
 
     public void populatePanels() {

@@ -70,9 +70,6 @@ public class EntryViewPage extends ProtectedPage {
         entryTitle = recordType + ": " + entry.getNamesAsString();
         add(new Label("titleName", entryTitle));
 
-        Panel entryTabPanel = new EntryTabPanel("entryTabPanel", subPage, entry);
-        entryTabPanel.setOutputMarkupId(true);
-        add(entryTabPanel);
         add(renderAddToWorkspaceLink());
 
         generalPanel = makeSubPagePanel(entry);
@@ -111,6 +108,11 @@ public class EntryViewPage extends ProtectedPage {
                 && (subPage.equals(ATTACHMENTS_URL_KEY) || subPage.equals(PERMISSIONS_URL_KEY) || subPage
                         .equals(SAMPLES_URL_KEY))) {
             sidePanels.clear();
+            add(new EmptyPanel("entryTabPanel"));
+        } else {
+            Panel entryTabPanel = new EntryTabPanel("entryTabPanel", subPage, entry);
+            entryTabPanel.setOutputMarkupId(true);
+            add(entryTabPanel);
         }
 
         ListView<Panel> sidePanelsListView = new ListView<Panel>("sidePanels", sidePanels) {

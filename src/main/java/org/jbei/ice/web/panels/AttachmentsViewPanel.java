@@ -2,9 +2,11 @@ package org.jbei.ice.web.panels;
 
 import java.util.ArrayList;
 
+import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -15,6 +17,7 @@ import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.pages.EntryViewPage;
 
 public class AttachmentsViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -90,6 +93,8 @@ public class AttachmentsViewPanel extends Panel {
         ListView<Object> attachmentsList = generateAttachmentsList("attachmentsListView");
         attachmentsList.setOutputMarkupId(true);
         add(attachmentsList);
+        add(new BookmarkablePageLink<Object>("backToEntryLink", EntryViewPage.class,
+                new PageParameters("0=" + entry.getId())));
     }
 
     public void populatePanels() {

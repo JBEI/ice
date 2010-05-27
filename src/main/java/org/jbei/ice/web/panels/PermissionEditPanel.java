@@ -18,6 +18,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.ListMultipleChoice;
 import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
@@ -437,6 +438,8 @@ public class PermissionEditPanel extends Panel {
 
         add(form);
         add(new FeedbackPanel("feedback"));
+        add(new BookmarkablePageLink<Object>("backToEntryLink", EntryViewPage.class,
+                new PageParameters("0=" + entry.getId())));
     }
 
     private static class CustomChoiceComparator implements Comparator<CustomChoice>, Serializable {
