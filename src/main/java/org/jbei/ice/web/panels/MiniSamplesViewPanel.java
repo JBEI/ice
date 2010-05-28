@@ -76,13 +76,14 @@ public class MiniSamplesViewPanel extends Panel {
         };
 
         ArrayList<String> emptySamplesArray = new ArrayList<String>();
-        emptySamplesArray.add("No Samples");
+        emptySamplesArray.add("<i>No Samples</i>");
         ListView<String> emptySamplesList = new ListView<String>("samplesList", emptySamplesArray) {
             private static final long serialVersionUID = 1L;
 
             @Override
             protected void populateItem(ListItem<String> item) {
-                item.add(new Label("sampleItem", item.getModelObject()));
+                Label sampleItem = new Label("sampleItem", item.getModelObject());
+                item.add(sampleItem.setEscapeModelStrings(false));
             }
         };
 
