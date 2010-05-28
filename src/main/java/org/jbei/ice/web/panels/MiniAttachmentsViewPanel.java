@@ -136,7 +136,7 @@ public class MiniAttachmentsViewPanel extends Panel {
         };
 
         if (numAttachments != 0) {
-            add(new Label("attachmentsCount", "(" + numAttachments + ")"));
+            add(new Label("attachmentsCount", " (" + numAttachments + ")"));
             add(attachmentsList);
         } else {
             add(new Label("attachmentsCount", ""));

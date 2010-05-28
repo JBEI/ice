@@ -1,12 +1,18 @@
 <html xmlns:wicket>
 <wicket:panel>
-	<table class="mini_table" frame="border" border="0" cellpadding="3" cellspacing="0">
+	<table class="mini_table" cellpadding="3" cellspacing="1">
 		<tr class="title_row_header">
-			<td colspan=2><span>Permissions <span wicket:id="editLink">&nbsp;|&nbsp;<a
+			<td colspan=2><span>Permissions<span wicket:id="editLink">&nbsp;|&nbsp;<a
 				wicket:id="permissionPageLink" href="#">Edit</a></span></span></td>
 		</tr>
-		<wicket:container wicket:id="readAllowedPanel"></wicket:container>
-		<wicket:container wicket:id="writeAllowedPanel"></wicket:container>
+		<tr>
+			<td bgcolor="#ffffff">
+			<table cellpadding="0" cellspacing="0">
+				<wicket:container wicket:id="readAllowedPanel"></wicket:container>
+				<wicket:container wicket:id="writeAllowedPanel"></wicket:container>
+			</table>
+			</td>
+		</tr>
 	</table>
 </wicket:panel>
 </html>

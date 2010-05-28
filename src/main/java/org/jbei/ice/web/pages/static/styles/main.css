@@ -60,11 +60,8 @@ tr {
 }
 
 .mini_table {
-    background-color: #FFFFFF;
+    background-color: #BBBBBB;
     width: 200px;
-    border-style:solid;
-    border-width:1px;
-    border-color:#AAAAAA;
 }
 
 /* TIP DOESN'T WORK WHEN THIS IS SET*/

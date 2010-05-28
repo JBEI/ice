@@ -87,7 +87,7 @@ public class MiniSamplesViewPanel extends Panel {
         };
 
         if (numSamples != 0) {
-            add(new Label("samplesCount", "(" + numSamples + ")"));
+            add(new Label("samplesCount", " (" + numSamples + ")"));
             add(samplesList);
         } else {
             add(new Label("samplesCount", ""));
