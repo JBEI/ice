@@ -48,23 +48,23 @@ public class RegistrationPanel extends Panel {
                 }
                 setModel(new CompoundPropertyModel<Object>(this));
                 add(new TextField<String>("firstName").setRequired(true).setLabel(
-                        new Model<String>("Given name")).add(
-                        new StringValidator.MaximumLengthValidator(50)));
+                    new Model<String>("Given name")).add(
+                    new StringValidator.MaximumLengthValidator(50)));
                 add(new TextField<String>("lastName").setRequired(true).setLabel(
-                        new Model<String>("Family name")).add(
-                        new StringValidator.MaximumLengthValidator(50)));
+                    new Model<String>("Family name")).add(
+                    new StringValidator.MaximumLengthValidator(50)));
                 add(new TextField<String>("initials").setLabel(new Model<String>("Initials")).add(
-                        new StringValidator.MaximumLengthValidator(10)));
+                    new StringValidator.MaximumLengthValidator(10)));
                 add(new TextField<String>("email").setRequired(true).setLabel(
-                        new Model<String>("Email")).add(
-                        new StringValidator.MaximumLengthValidator(100)).add(
-                        EmailAddressValidator.getInstance()));
+                    new Model<String>("Email"))
+                        .add(new StringValidator.MaximumLengthValidator(100)).add(
+                            EmailAddressValidator.getInstance()));
                 add(new PasswordTextField("password").setRequired(true).setLabel(
-                        new Model<String>("Password")).add(
-                        new StringValidator.MinimumLengthValidator(6)));
+                    new Model<String>("Password")).add(
+                    new StringValidator.MinimumLengthValidator(6)));
                 add(new PasswordTextField("confirmPassword").setRequired(true).setLabel(
-                        new Model<String>("Confirm")).add(
-                        new StringValidator.MinimumLengthValidator(6)));
+                    new Model<String>("Confirm"))
+                        .add(new StringValidator.MinimumLengthValidator(6)));
                 add(new TextField<String>("institution").setLabel(new Model<String>("Institution")));
                 add(new TextArea<String>("description").setLabel(new Model<String>("Description")));
                 add(new Button("submitButton", new Model<String>("Submit")));
@@ -81,6 +81,15 @@ public class RegistrationPanel extends Panel {
                     if (account != null) {
                         error("Account with this email address already registered");
                         return;
+                    }
+                    if (initials == null) {
+                        initials = "";
+                    }
+                    if (description == null) {
+                        description = "";
+                    }
+                    if (description == null) {
+                        description = "";
                     }
                     account = new Account(firstName, lastName, initials, email, AccountController
                             .encryptPassword(password), institution, description);
