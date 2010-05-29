@@ -85,8 +85,8 @@ public class RegistrationPanel extends Panel {
                     if (initials == null) {
                         initials = "";
                     }
-                    if (description == null) {
-                        description = "";
+                    if (institution == null) {
+                        institution = "";
                     }
                     if (description == null) {
                         description = "";
