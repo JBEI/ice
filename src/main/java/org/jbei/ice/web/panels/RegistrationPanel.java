@@ -1,5 +1,7 @@
 package org.jbei.ice.web.panels;
 
+import java.util.Calendar;
+
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.StatelessForm;
@@ -75,34 +77,40 @@ public class RegistrationPanel extends Panel {
             protected void onSubmit() {
                 if (!password.equals(confirmPassword)) {
                     error("Password and Confirm doesn't much");
-                }
-                try {
-                    Account account = AccountController.getByEmail(email);
-                    if (account != null) {
-                        error("Account with this email address already registered");
-                        return;
+                } else {
+                    try {
+                        Account account = AccountController.getByEmail(email);
+                        if (account != null) {
+                            error("Account with this email address already registered");
+                            return;
+                        }
+                        if (initials == null) {
+                            initials = "";
+                        }
+                        if (institution == null) {
+                            institution = "";
+                        }
+                        if (description == null) {
+                            description = "";
+                        }
+
+                        account = new Account(firstName, lastName, initials, email,
+                                AccountController.encryptPassword(password), institution,
+                                description);
+                        account.setIp("");
+                        account.setIsSubscribed(1);
+                        account.setCreationTime(Calendar.getInstance().getTime());
+                        AccountController.save(account);
+                        setResponsePage(RegistrationSuccessfulPage.class);
+                        Emailer.send(email, "Account created successfully", "Dear " + firstName
+                                + " " + lastName + ",\n\nThank you for creating "
+                                + JbeirSettings.getSetting("PROJECT_NAME")
+                                + " account.\n\nBest regards,\nRegistry Team");
+                    } catch (ControllerException e) {
+                        throw new ViewException(e);
+                    } catch (Exception e) {
+                        throw new ViewException(e);
                     }
-                    if (initials == null) {
-                        initials = "";
-                    }
-                    if (institution == null) {
-                        institution = "";
-                    }
-                    if (description == null) {
-                        description = "";
-                    }
-                    account = new Account(firstName, lastName, initials, email, AccountController
-                            .encryptPassword(password), institution, description);
-                    AccountController.save(account);
-                    setResponsePage(RegistrationSuccessfulPage.class);
-                    Emailer.send(email, "Account created successfully", "Dear " + firstName + " "
-                            + lastName + ",\n\nThank you for creating "
-                            + JbeirSettings.getSetting("PROJECT_NAME")
-                            + " account.\n\nBest regards,\nRegistry Team");
-                } catch (ControllerException e) {
-                    throw new ViewException(e);
-                } catch (Exception e) {
-                    throw new ViewException(e);
                 }
             }
         }
