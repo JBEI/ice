@@ -11,6 +11,8 @@ import org.apache.wicket.request.target.coding.QueryStringUrlCodingStrategy;
 import org.apache.wicket.settings.ISecuritySettings;
 import org.jbei.ice.lib.permissions.IceAuthorizationStrategy;
 import org.jbei.ice.lib.utils.JobCue;
+import org.jbei.ice.lib.utils.PopulateInitialDatabase;
+import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.web.pages.AdminPage;
 import org.jbei.ice.web.pages.BlastPage;
 import org.jbei.ice.web.pages.EntriesPage;
@@ -48,7 +50,11 @@ public class WicketApplication extends WebApplication {
         mountPages();
 
         initializeQueueingSystem();
-
+        try {
+            PopulateInitialDatabase.initializeDatabase();
+        } catch (UtilityException e) {
+            throw new RuntimeException(e);
+        }
         // settings
         ISecuritySettings securitySettings = getSecuritySettings();
         IceAuthorizationStrategy authorizationStrategy = new IceAuthorizationStrategy();

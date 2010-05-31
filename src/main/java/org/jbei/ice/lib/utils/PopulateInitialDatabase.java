@@ -36,6 +36,22 @@ public class PopulateInitialDatabase {
         }
     }
 
+    public static void initializeDatabase() throws UtilityException {
+        Group group1 = null;
+        try {
+            group1 = GroupManager.get(everyoneGroup);
+        } catch (ManagerException e) {
+            throw new UtilityException(e);
+        }
+
+        if (group1 == null) {
+            // Since everyone group doesn't exist, assume database is new
+            // Put all other db initialization below.
+            createFirstGroup();
+        }
+
+    }
+
     public static Group createFirstGroup() {
         Group group1 = null;
         try {
