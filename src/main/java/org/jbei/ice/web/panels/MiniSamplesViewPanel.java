@@ -65,6 +65,9 @@ public class MiniSamplesViewPanel extends Panel {
             protected void populateItem(ListItem<Sample> item) {
                 String itemLabel = item.getModelObject().getLabel();
                 String shortItemLabel = null;
+                if (itemLabel == null) {
+                    itemLabel = "";
+                }
                 if (itemLabel.length() > SHORT_SAMPLENAME_LENGTH) {
                     shortItemLabel = itemLabel.substring(0, SHORT_SAMPLENAME_LENGTH) + "...";
                 } else {
