@@ -17,6 +17,7 @@ import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Part;
+import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.models.Part.AssemblyStandard;
@@ -225,7 +226,9 @@ public class SequenceController extends Controller {
         }
 
         FeaturedDNASequence featuredDNASequence = new FeaturedDNASequence(sequence.getSequence(),
-                features);
+                sequence.getEntry().getNamesAsString(),
+                (sequence.getEntry() instanceof Plasmid) ? ((Plasmid) sequence.getEntry())
+                        .getCircular() : false, features, "", "");
 
         return featuredDNASequence;
     }

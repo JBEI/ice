@@ -12,6 +12,8 @@ public class FeaturedDNASequence extends SimpleDNASequence {
     private List<DNAFeature> features = new LinkedList<DNAFeature>();
     private String accessionNumber = "";
     private String identifier = "";
+    private String name = "";
+    private boolean isCircular = true;
 
     public FeaturedDNASequence() {
         super();
@@ -23,10 +25,12 @@ public class FeaturedDNASequence extends SimpleDNASequence {
         this.features = features;
     }
 
-    public FeaturedDNASequence(String sequence, List<DNAFeature> features, String accessionNumber,
-            String identifier) {
+    public FeaturedDNASequence(String sequence, String name, boolean isCircular,
+            List<DNAFeature> features, String accessionNumber, String identifier) {
         super(sequence);
 
+        this.name = name;
+        this.isCircular = isCircular;
         this.features = features;
         this.accessionNumber = accessionNumber;
         this.identifier = identifier;
@@ -54,5 +58,21 @@ public class FeaturedDNASequence extends SimpleDNASequence {
 
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public boolean getIsCircular() {
+        return isCircular;
+    }
+
+    public void setIsCircular(boolean isCircular) {
+        this.isCircular = isCircular;
     }
 }

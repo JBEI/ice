@@ -20,6 +20,7 @@ import org.jbei.ice.lib.models.AccountPreferences;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
+import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
@@ -401,5 +402,48 @@ public class RegistryAMFAPI extends BaseService {
         }
 
         return enzymes;
+    }
+
+    public FeaturedDNASequence parseSequenceFile(String data) {
+        FeaturedDNASequence featuredDNASequence = null;
+
+        try {
+            featuredDNASequence = (FeaturedDNASequence) GeneralParser.getInstance().parse(data);
+
+            if (featuredDNASequence == null) {
+                logInfo("Failed to parse sequence file!");
+            } else {
+                logInfo("Successfully parsed DNA sequence");
+            }
+        } catch (Exception e) {
+            Logger.error(getServiceName(), e);
+        }
+
+        return featuredDNASequence;
+    }
+
+    public String generateSequenceFile(FeaturedDNASequence featuredDNASequence) {
+        String result = "";
+
+        Sequence sequence = SequenceController.dnaSequenceToSequence(featuredDNASequence);
+
+        GenbankFormatter genbankFormatter = new GenbankFormatter("NewSequence");
+        genbankFormatter.setCircular(true);
+
+        try {
+            result = SequenceController.compose(sequence, genbankFormatter);
+
+            logInfo("Generated and fetched sequence");
+        } catch (SequenceComposerException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return result;
+        } catch (Exception e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return result;
+        }
+
+        return result;
     }
 }
