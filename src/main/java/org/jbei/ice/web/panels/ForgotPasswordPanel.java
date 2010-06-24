@@ -21,7 +21,7 @@ import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.common.ViewException;
-import org.jbei.ice.web.pages.UpdatePasswordPage;
+import org.jbei.ice.web.pages.ProfilePage;
 
 public class ForgotPasswordPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -47,7 +47,7 @@ public class ForgotPasswordPanel extends Panel {
                 setModel(new CompoundPropertyModel<Object>(this));
 
                 add(new TextField<String>("email").setRequired(true).setLabel(
-                        new Model<String>("Email")).add(EmailAddressValidator.getInstance()));
+                    new Model<String>("Email")).add(EmailAddressValidator.getInstance()));
                 add(new AjaxButton("submitButton", new Model<String>("Submit")) {
 
                     private static final long serialVersionUID = 1L;
@@ -81,7 +81,8 @@ public class ForgotPasswordPanel extends Panel {
                             }
 
                             CharSequence resetPasswordPage = WebRequestCycle.get().urlFor(
-                                    UpdatePasswordPage.class, new PageParameters());
+                                ProfilePage.class,
+                                new PageParameters("0=password,1=" + account.getEmail()));
                             WebRequestCycle webRequestCycle = (WebRequestCycle) WebRequestCycle
                                     .get();
                             HttpServletRequest httpServletRequest = webRequestCycle.getWebRequest()
