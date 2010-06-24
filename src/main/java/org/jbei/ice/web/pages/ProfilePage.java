@@ -9,9 +9,12 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Account;
+import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.panels.EmptyMessagePanel;
+import org.jbei.ice.web.panels.PasswordEditPanel;
 import org.jbei.ice.web.panels.ProfileAboutUserPanel;
+import org.jbei.ice.web.panels.ProfileEditPanel;
 import org.jbei.ice.web.panels.ProfileEntriesPanel;
 import org.jbei.ice.web.panels.ProfileSamplesPanel;
 
@@ -74,6 +77,19 @@ public class ProfilePage extends ProtectedPage {
             currentPanel = createSamplesPanel();
         } else if (currentPage != null && currentPage.equals("entries")) {
             currentPanel = createEntriesPanel();
+        } else if (currentPage != null && currentPage.equals("update")) {
+            if (account.getEmail().equals(IceSession.get().getAccount().getEmail())) {
+                currentPanel = createEditPanel(account);
+            } else {
+                currentPanel = createAboutPanel();
+            }
+        } else if (currentPage != null && currentPage.equals("password")) {
+            if (account.getEmail().equals(IceSession.get().getAccount().getEmail())) {
+                currentPanel = createEditPasswordPanel(account);
+            } else {
+                currentPanel = createAboutPanel();
+            }
+
         } else {
             currentPanel = createAboutPanel();
         }
@@ -100,7 +116,7 @@ public class ProfilePage extends ProtectedPage {
 
         if (account == null) {
             profileAboutUserPanel = new EmptyMessagePanel("centerPanel",
-                    "Account is not registered.");
+                    "Account is not known to this registry.");
         } else {
             profileAboutUserPanel = new ProfileAboutUserPanel("centerPanel", accountEmail);
         }
@@ -108,6 +124,25 @@ public class ProfilePage extends ProtectedPage {
         profileAboutUserPanel.setOutputMarkupId(true);
 
         return profileAboutUserPanel;
+    }
+
+    private Panel createEditPanel(Account account) {
+        Panel profileEditPanel = null;
+        if (account == null) {
+            profileEditPanel = new EmptyMessagePanel("centerPanel",
+                    "Account is not known to this registry.");
+        } else {
+            profileEditPanel = new ProfileEditPanel("centerPanel", account);
+        }
+
+        return profileEditPanel;
+    }
+
+    private Panel createEditPasswordPanel(Account account) {
+        Panel passwordEditPanel = null;
+        passwordEditPanel = new PasswordEditPanel("centerPanel", account);
+
+        return passwordEditPanel;
     }
 
     private Panel createEntriesPanel() {

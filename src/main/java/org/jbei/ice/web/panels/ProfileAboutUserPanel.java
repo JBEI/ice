@@ -3,13 +3,20 @@ package org.jbei.ice.web.panels;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.apache.wicket.PageParameters;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Account;
+import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.pages.ProfilePage;
 
 public class ProfileAboutUserPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -31,6 +38,31 @@ public class ProfileAboutUserPanel extends Panel {
             add(new MultiLineLabel("institution", ""));
             add(new MultiLineLabel("description", ""));
         } else {
+
+            WebMarkupContainer topLinkContainer = new WebMarkupContainer("updateSpan");
+
+            boolean updateAllowed = (JbeirSettings.getSetting("PROFILE_EDIT_ALLOWED")
+                    .equalsIgnoreCase("yes")) ? true : false;
+
+            topLinkContainer.setOutputMarkupId(true);
+            topLinkContainer.setOutputMarkupPlaceholderTag(true);
+            topLinkContainer.setVisible(updateAllowed
+                    && accountEmail.equals(IceSession.get().getAccount().getEmail()));
+            topLinkContainer.add(new BookmarkablePageLink<WebPage>("updateLink", ProfilePage.class,
+                    new PageParameters("0=update, 1=" + account.getEmail())));
+            add(topLinkContainer);
+
+            WebMarkupContainer changePasswordSpan = new WebMarkupContainer("passwordSpan");
+            boolean passwordAllowed = (JbeirSettings.getSetting("PASSWORD_CHANGE_ALLOWED")
+                    .equalsIgnoreCase("yes")) ? true : false;
+            changePasswordSpan.setOutputMarkupId(true);
+            changePasswordSpan.setOutputMarkupPlaceholderTag(true);
+            changePasswordSpan.setVisible(passwordAllowed
+                    && accountEmail.equals(IceSession.get().getAccount().getEmail()));
+            changePasswordSpan.add(new BookmarkablePageLink<WebPage>("passwordLink",
+                    ProfilePage.class, new PageParameters("0=password, 1=" + account.getEmail())));
+            add(changePasswordSpan);
+
             Date memberSinceDate = account.getCreationTime();
             String memberSince = "";
 

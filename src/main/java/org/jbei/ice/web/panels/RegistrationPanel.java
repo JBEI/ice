@@ -76,7 +76,7 @@ public class RegistrationPanel extends Panel {
             @Override
             protected void onSubmit() {
                 if (!password.equals(confirmPassword)) {
-                    error("Password and Confirm doesn't much");
+                    error("Password and Confirm does not match.");
                 } else {
                     try {
                         Account account = AccountController.getByEmail(email);
