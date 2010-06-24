@@ -88,8 +88,6 @@ public class ForgotPasswordPanel extends Panel {
                             HttpServletRequest httpServletRequest = webRequestCycle.getWebRequest()
                                     .getHttpServletRequest();
 
-                            //String temp2 = ((WebRequest) request).getHttpServletRequest()
-                            //      .getRemoteAddr();
                             String urlHeader = (httpServletRequest.isSecure()) ? "https://"
                                     : "http://";
                             urlHeader = urlHeader + httpServletRequest.getServerName() + ":"
