@@ -1,11 +1,12 @@
 package org.jbei.ice.lib.search.blast;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -384,12 +385,6 @@ public class Blast {
 
         try {
             Process process = runTime.exec(commandString);
-            // output from program
-            BufferedInputStream programOutputStream = new BufferedInputStream(process
-                    .getInputStream());
-            // error from program
-            BufferedInputStream programErrorStream = new BufferedInputStream(process
-                    .getErrorStream());
 
             if (inputString.length() > 0) {
                 // Input into program
@@ -401,23 +396,30 @@ public class Blast {
                 programInputStream.close();
             }
 
-            byte[] outputBuffer = new byte[4096];
-            byte[] errorBuffer = new byte[4096];
-
             long maxWait = 4000L;
             long startTime = System.currentTimeMillis();
+
+            BufferedReader programOutputReader = new BufferedReader(new InputStreamReader(process
+                    .getInputStream()));
+            BufferedReader programErrorReader = new BufferedReader(new InputStreamReader(process
+                    .getErrorStream()));
+
+            String tempError = null;
+            String tempOutput = null;
             while (true) {
                 // consume output stream to prevent process from blocking
-                int temp = programOutputStream.read(outputBuffer);
-                int temp2 = programErrorStream.read(errorBuffer);
-                if (temp2 != -1) {
-                    errorString = errorString.append(new String(errorBuffer));
+                tempError = programErrorReader.readLine();
+                tempOutput = programOutputReader.readLine();
+                if (tempError != null) {
+                    errorString.append(tempError);
+                    errorString.append("\n");
                 }
-
-                if (temp == -1) {
+                if (tempOutput != null) {
+                    outputString.append(tempOutput);
+                    outputString.append("\n");
+                }
+                if (tempError == null && tempOutput == null) {
                     break;
-                } else {
-                    outputString = outputString.append(new String(outputBuffer));
                 }
 
                 if (System.currentTimeMillis() - startTime > maxWait) {
@@ -425,8 +427,8 @@ public class Blast {
                 }
             }
 
-            programOutputStream.close();
-            programErrorStream.close();
+            programOutputReader.close();
+            programErrorReader.close();
             process.destroy();
 
         } catch (IOException e) {
