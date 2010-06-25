@@ -392,11 +392,12 @@ public class Blast {
                         process.getOutputStream()));
 
                 programInputWriter.write(inputString);
-
+                programInputWriter.flush();
                 programInputWriter.close();
+                process.getOutputStream().close();
             }
 
-            long maxWait = 4000L;
+            long maxWait = 5000L;
             long startTime = System.currentTimeMillis();
 
             BufferedReader programOutputReader = new BufferedReader(new InputStreamReader(process
@@ -406,24 +407,52 @@ public class Blast {
 
             String tempError = null;
             String tempOutput = null;
+
+            /*
+             * How to Deal with External Blast
+             * 
+             * Blast seems to be blocked by the stdin not being flushed, and stdout
+             * not being emptied. This means that this thread should read the stdout
+             * of blast periodically. But since it may take a while for blast to to start
+             * filling stdout, it will be empty for a while before there is any data in it.
+             * 
+             * So, to prevent blocking as well as doing proper time out, this loop
+             * tries to read from the stdout and sterr. If nothing is read for a long 
+             * time, it times out. If something is read, it's collected. If nothing is 
+             * read after getting some output, it quits. 
+             * 
+             * @ tham
+             * 
+             */
+            boolean errorStreamFinished = false;
+            boolean outputStreamFinished = false;
+            boolean somethingWasRead = false;
             while (true) {
-                // consume output stream to prevent process from blocking
-                tempError = programErrorReader.readLine();
-                tempOutput = programOutputReader.readLine();
-                if (tempError != null) {
-                    errorString.append(tempError);
-                    errorString.append("\n");
-                }
-                if (tempOutput != null) {
+                if (programOutputReader.ready()) {
+                    somethingWasRead = true;
+                    tempOutput = programOutputReader.readLine();
+
                     outputString.append(tempOutput);
                     outputString.append("\n");
-                }
-                if (tempError == null && tempOutput == null) {
-                    break;
+                } else if (somethingWasRead) {
+                    outputStreamFinished = true;
                 }
 
+                if (programErrorReader.ready()) {
+                    somethingWasRead = true;
+                    tempError = programErrorReader.readLine();
+
+                    errorString.append(tempError);
+                    errorString.append("\n");
+
+                } else if (somethingWasRead) {
+                    errorStreamFinished = true;
+                }
+                if (errorStreamFinished && outputStreamFinished) {
+                    break;
+                }
                 if (System.currentTimeMillis() - startTime > maxWait) {
-                    throw new ProgramTookTooLongException();
+                    throw new ProgramTookTooLongException("Blast took too long");
                 }
             }
 
