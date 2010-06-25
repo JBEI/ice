@@ -1,12 +1,13 @@
 package org.jbei.ice.lib.search.blast;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -387,13 +388,12 @@ public class Blast {
             Process process = runTime.exec(commandString);
 
             if (inputString.length() > 0) {
-                // Input into program
-                BufferedOutputStream programInputStream = new BufferedOutputStream(process
-                        .getOutputStream());
+                BufferedWriter programInputWriter = new BufferedWriter(new OutputStreamWriter(
+                        process.getOutputStream()));
 
-                programInputStream.write(inputString.getBytes());
-                programInputStream.flush();
-                programInputStream.close();
+                programInputWriter.write(inputString);
+
+                programInputWriter.close();
             }
 
             long maxWait = 4000L;
