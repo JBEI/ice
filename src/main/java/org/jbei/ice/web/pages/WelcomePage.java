@@ -11,6 +11,7 @@ import org.apache.wicket.markup.html.resources.CompressedResourceReference;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.panels.FooterPanel;
 import org.jbei.ice.web.panels.LoginPanel;
+import org.jbei.ice.web.panels.WelcomeMessagePanel;
 
 public class WelcomePage extends WebPage {
     public static final String STYLES_RESOURCE_LOCATION = "static/styles/";
@@ -26,6 +27,7 @@ public class WelcomePage extends WebPage {
                         UnprotectedPage.IMAGES_RESOURCE_LOCATION + "logo.gif"))));
         add(CSSPackageResource.getHeaderContribution(new CompressedResourceReference(
                 UnprotectedPage.class, STYLES_RESOURCE_LOCATION + "main.css")));
+        add(new WelcomeMessagePanel("welcomeMessagePanel"));
         add(new LoginPanel("loginPanel"));
         add(new FooterPanel("footerPanel"));
     }
