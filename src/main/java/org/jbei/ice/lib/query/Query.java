@@ -126,24 +126,24 @@ public class Query {
         return result;
     }
 
-    private HashSet<Integer> runFilter(String key, String value) {
+    private HashSet<Integer> runFilter(String key, String value) throws QueryException {
         HashSet<Integer> result = null;
 
         try {
             Filter queryType = filterByKey(key);
 
             result = (HashSet<Integer>) this.getClass().getDeclaredMethod(queryType.method,
-                    String.class).invoke(this, value);
+                String.class).invoke(this, value);
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+            throw new QueryException(e);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            throw new QueryException(e);
         } catch (InvocationTargetException e) {
-            e.printStackTrace();
+            throw new QueryException(e);
         } catch (SecurityException e) {
-            e.printStackTrace();
+            throw new QueryException(e);
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            throw new QueryException(e);
         }
 
         return result;
@@ -244,7 +244,7 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
 
         String criteria = makeCriterion("lower(name.name)", parsedQuery.get("operator"),
-                parsedQuery.get("value"));
+            parsedQuery.get("value"));
 
         String query = "select distinct name.entry.id from Name name where " + criteria;
         return hibernateQuery(query);
@@ -254,7 +254,7 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
 
         String criteria = makeCriterion("lower(strain.plasmids)", parsedQuery.get("operator"),
-                parsedQuery.get("value"));
+            parsedQuery.get("value"));
 
         String query = "select distinct strain.id from Strain strain where " + criteria;
         return hibernateQuery(query);
@@ -263,7 +263,7 @@ public class Query {
     protected HashSet<Integer> filterType(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.recordType)", parsedQuery.get("operator"),
-                parsedQuery.get("value"));
+            parsedQuery.get("value"));
 
         String query = "select distinct entry.id from Entry entry where " + criteria;
         return hibernateQuery(query);
@@ -272,7 +272,7 @@ public class Query {
     protected HashSet<Integer> filterAlias(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.alias)", parsedQuery.get("operator"),
-                parsedQuery.get("value"));
+            parsedQuery.get("value"));
 
         String query = "select distinct entry.id from Entry entry where " + criteria;
         return hibernateQuery(query);
@@ -281,7 +281,7 @@ public class Query {
     protected HashSet<Integer> filterPartNumber(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(partNumber.partNumber)",
-                parsedQuery.get("operator"), parsedQuery.get("value"));
+            parsedQuery.get("operator"), parsedQuery.get("value"));
 
         String query = "select distinct partNumber.entry.id from PartNumber partNumber where "
                 + criteria;
@@ -354,7 +354,7 @@ public class Query {
     protected HashSet<Integer> filterRecordId(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.recordId) ", parsedQuery.get("operator"),
-                parsedQuery.get("value"));
+            parsedQuery.get("value"));
 
         String query = "select distinct entry.id from Entry entry where " + criteria;
         return hibernateQuery(query);
@@ -372,7 +372,7 @@ public class Query {
     protected HashSet<Integer> filterOwner(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.owner) ", parsedQuery.get("operator"),
-                parsedQuery.get("value"));
+            parsedQuery.get("value"));
 
         String query = "select distinct entry.id from Entry entry where " + criteria;
         return hibernateQuery(query);
@@ -381,7 +381,7 @@ public class Query {
     protected HashSet<Integer> filterOwnerEmail(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.ownerEmail) ", parsedQuery.get("operator"),
-                parsedQuery.get("value"));
+            parsedQuery.get("value"));
 
         String query = "select distinct entry.id from Entry entry where " + criteria;
         return hibernateQuery(query);
@@ -399,7 +399,7 @@ public class Query {
     protected HashSet<Integer> filterCreator(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.creator) ", parsedQuery.get("operator"),
-                parsedQuery.get("value"));
+            parsedQuery.get("value"));
 
         String query = "select distinct entry.id from Entry entry where " + criteria;
         return hibernateQuery(query);
@@ -409,7 +409,7 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
 
         String criteria = makeCriterion("lower(entry.creatorEmail) ", parsedQuery.get("operator"),
-                parsedQuery.get("value"));
+            parsedQuery.get("value"));
 
         String query = "select distinct entry.id from Entry entry where " + criteria;
         return hibernateQuery(query);
@@ -418,7 +418,7 @@ public class Query {
     protected HashSet<Integer> filterKeywords(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.keywords)", parsedQuery.get("operator"),
-                parsedQuery.get("value"));
+            parsedQuery.get("value"));
 
         String query = "select distinct entry.id from Entry entry where " + criteria;
         return hibernateQuery(query);
@@ -447,7 +447,7 @@ public class Query {
     protected HashSet<Integer> filterLongDescription(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.longDescription)",
-                parsedQuery.get("operator"), parsedQuery.get("value"));
+            parsedQuery.get("operator"), parsedQuery.get("value"));
 
         String query = "select distinct entry.id from Entry entry where " + criteria;
         return hibernateQuery(query);
@@ -456,7 +456,7 @@ public class Query {
     protected HashSet<Integer> filterReferences(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.references)", parsedQuery.get("operator"),
-                parsedQuery.get("value"));
+            parsedQuery.get("value"));
 
         String query = "select distinct entry.id from Entry entry where " + criteria;
         return hibernateQuery(query);
@@ -465,7 +465,7 @@ public class Query {
     protected HashSet<Integer> filterBackbone(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(plasmid.backbone)", parsedQuery.get("operator"),
-                parsedQuery.get("value"));
+            parsedQuery.get("value"));
 
         String query = "select distinct plasmid.id from Plasmid plasmid where " + criteria;
         return hibernateQuery(query);
@@ -474,7 +474,7 @@ public class Query {
     protected HashSet<Integer> filterPromoters(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(plasmid.promoters)", parsedQuery.get("operator"),
-                parsedQuery.get("value"));
+            parsedQuery.get("value"));
 
         String query = "select distinct plasmid.id from Plasmid plasmid where " + criteria;
         return hibernateQuery(query);
@@ -492,7 +492,7 @@ public class Query {
     protected HashSet<Integer> filterHost(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(strain.host)", parsedQuery.get("operator"),
-                parsedQuery.get("value"));
+            parsedQuery.get("value"));
 
         String query = "select distinct strain.id from Strain strain where " + criteria;
         return hibernateQuery(query);
@@ -510,7 +510,7 @@ public class Query {
     protected HashSet<Integer> filterPackageFormat(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(part.packageFormat)", parsedQuery.get("operator"),
-                parsedQuery.get("value"));
+            parsedQuery.get("value"));
 
         String query = "select distinct part.id from Part part where " + criteria;
         return hibernateQuery(query);
@@ -519,7 +519,7 @@ public class Query {
     protected HashSet<Integer> filterSelectionMarker(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(marker.name)", parsedQuery.get("operator"),
-                parsedQuery.get("value"));
+            parsedQuery.get("value"));
 
         String query = "select distinct marker.entry.id from SelectionMarker marker where "
                 + criteria;
@@ -529,7 +529,7 @@ public class Query {
     protected HashSet<Integer> filterStatus(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.status)", parsedQuery.get("operator"),
-                parsedQuery.get("value"));
+            parsedQuery.get("value"));
 
         String query = "select distinct entry.id from Entry entry where " + criteria;
         return hibernateQuery(query);
@@ -538,7 +538,7 @@ public class Query {
     protected HashSet<Integer> filterStrainPlasmid(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(strain.plasmids)", parsedQuery.get("operator"),
-                parsedQuery.get("value"));
+            parsedQuery.get("value"));
 
         String query = "select distinct strain.id from Strain strain where " + criteria;
         return hibernateQuery(query);
@@ -557,8 +557,8 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
 
         String criteria = makeCriterion(
-                "lower(entryFundingSource.fundingSource.principalInvestigator)", parsedQuery
-                        .get("operator"), parsedQuery.get("value"));
+            "lower(entryFundingSource.fundingSource.principalInvestigator)", parsedQuery
+                    .get("operator"), parsedQuery.get("value"));
 
         String query = "select distinct entry.id from " + EntryFundingSource.class.getName()
                 + " entryFundingSource where " + criteria;
@@ -569,7 +569,7 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
 
         String criteria = makeCriterion("lower(entryFundingSource.fundingSource.fundingSource)",
-                parsedQuery.get("operator"), parsedQuery.get("value"));
+            parsedQuery.get("operator"), parsedQuery.get("value"));
 
         String query = "select distinct entry.id from " + EntryFundingSource.class.getName()
                 + " entryFundingSource where " + criteria;
@@ -609,6 +609,7 @@ public class Query {
     private HashSet<Integer> hibernateQuery(String queryString) {
         HashSet<Integer> rawResults = new HashSet<Integer>();
         Session session = DAO.newSession();
+        session.beginTransaction();
         org.hibernate.Query query = session.createQuery(queryString);
 
         try {
@@ -616,6 +617,7 @@ public class Query {
         } catch (HibernateException e) {
             Logger.error("Could not query ", e);
         } finally {
+            session.getTransaction().rollback();
             if (session.isOpen()) {
                 session.close();
             }
