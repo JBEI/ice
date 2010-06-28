@@ -33,6 +33,9 @@ public class SearchController extends Controller {
         cleanedQuery = cleanedQuery.replace("(", "\\(");
         cleanedQuery = cleanedQuery.replace(")", "\\)");
         cleanedQuery = cleanedQuery.replace("+", "\\+");
+
+        cleanedQuery = (cleanedQuery.endsWith("\\") ? cleanedQuery.substring(0, cleanedQuery
+                .length() - 1) : cleanedQuery);
         if (cleanedQuery.startsWith("*")) {
             cleanedQuery = cleanedQuery.substring(1);
         }
