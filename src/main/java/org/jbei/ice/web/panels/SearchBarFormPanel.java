@@ -23,6 +23,7 @@ public class SearchBarFormPanel extends Panel {
         super(id);
     }
 
+    @Override
     protected void onBeforeRender() {
         if (!isRendered) {
             String queryString = getPage().getPageParameters().getString("search");
@@ -30,7 +31,7 @@ public class SearchBarFormPanel extends Panel {
             class SearchBarForm extends StatelessForm<Object> {
                 private static final long serialVersionUID = 1L;
 
-                private String searchQuery;
+                private String searchQuery = null;
 
                 public SearchBarForm(String id, String formQueryString) {
                     super(id);
@@ -43,9 +44,7 @@ public class SearchBarFormPanel extends Panel {
 
                 @Override
                 protected void onSubmit() {
-                    setRedirect(true);
-                    setResponsePage(SearchResultPage.class, new PageParameters("search="
-                            + getSearchQuery()));
+                    //handled by ajax button
                 }
 
                 public void setSearchQuery(String searchQuery) {
@@ -72,8 +71,12 @@ public class SearchBarFormPanel extends Panel {
                     setRedirect(true);
                     SearchBarForm temp = (SearchBarForm) getParent();
                     String searchQuery = temp.getSearchQuery();
-                    setResponsePage(SearchResultPage.class, new PageParameters("search="
-                            + searchQuery));
+                    if (searchQuery != null) {
+                        setResponsePage(SearchResultPage.class, new PageParameters("search="
+                                + searchQuery));
+                    } else {
+                        setResponsePage(SearchResultPage.class);
+                    }
                 }
             };
 

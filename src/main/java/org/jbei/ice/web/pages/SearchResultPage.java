@@ -18,24 +18,29 @@ public class SearchResultPage extends ProtectedPage {
     public SearchResultPage(PageParameters parameters) {
         super(parameters);
 
-        String queryString = parameters.getString("search");
+        if (parameters.getString("search") != null) {
+            String queryString = parameters.getString("search");
 
-        ArrayList<SearchResult> searchResults;
+            ArrayList<SearchResult> searchResults;
 
-        SearchController searchController = new SearchController(IceSession.get().getAccount());
+            SearchController searchController = new SearchController(IceSession.get().getAccount());
 
-        try {
-            searchResults = searchController.find(queryString);
+            try {
+                searchResults = searchController.find(queryString);
 
-            if (searchResults == null || searchResults.size() == 0) {
-                add(new EmptyMessagePanel(SEARCH_RESULT_PANEL_NAME, "No results found"));
-            } else {
-                add(new SearchResultPanel(SEARCH_RESULT_PANEL_NAME, searchResults,
-                        NUMBER_OF_ENTRIES_PER_PAGE));
+                if (searchResults == null || searchResults.size() == 0) {
+                    add(new EmptyMessagePanel(SEARCH_RESULT_PANEL_NAME, "No results found"));
+                } else {
+                    add(new SearchResultPanel(SEARCH_RESULT_PANEL_NAME, searchResults,
+                            NUMBER_OF_ENTRIES_PER_PAGE));
+                }
+            } catch (ControllerException e) {
+                throw new ViewException(e);
             }
-        } catch (ControllerException e) {
-            throw new ViewException(e);
+        } else {
+            add(new EmptyMessagePanel(SEARCH_RESULT_PANEL_NAME, "No results found"));
         }
+
     }
 
     @Override
