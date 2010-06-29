@@ -67,7 +67,7 @@ public class ProfileAboutUserPanel extends Panel {
             String memberSince = "";
 
             if (memberSinceDate != null) {
-                SimpleDateFormat dateFormat = new SimpleDateFormat("d MMM yyyy");
+                SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d yyyy");
                 memberSince = dateFormat.format(memberSinceDate);
             }
 

@@ -43,4 +43,23 @@ public class SequenceUtils {
 
         return symL.seqString();
     }
+
+    public static String breakUpLines(String input) {
+        StringBuilder result = new StringBuilder();
+
+        int counter = 0;
+        int index = 0;
+        int end = input.length();
+        while (index < end) {
+            result = result.append(input.substring(index, index + 1));
+            counter = counter + 1;
+            index = index + 1;
+
+            if (counter == 59) {
+                result = result.append("\n");
+                counter = 0;
+            }
+        }
+        return result.toString();
+    }
 }

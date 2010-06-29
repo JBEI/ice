@@ -25,8 +25,10 @@ import org.jbei.ice.controllers.ApplicationContoller;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
+import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.Utils;
 
 public class Blast {
@@ -38,20 +40,20 @@ public class Blast {
     private static final String BL2SEQ_COMMAND_PATTERN = "%s -p blastn -i %s -j %s -r 2 -F F";
     private static final String BLASTALL_COMMAND_PATTERN = "%s -p %s -d %s -m 8";
 
-    private String blastBlastall;
-    private String bl2seq;
-    private String blastDatabaseName;
-    private String bigFastaFile = "bigfastafile";
-    private String blastFormatLogFile;
-    private String blastDirectory;
+    private static String BLASTALL = JbeirSettings.getSetting("BLAST_BLASTALL");
+    private static String BL2SEQ = JbeirSettings.getSetting("BLAST_BL2SEQ");
+    private static String BLAST_DIRECTORY = JbeirSettings.getSetting("BLAST_DIRECTORY");
+    private static String BLAST_DATASE_NAME = BLAST_DIRECTORY + File.separator
+            + JbeirSettings.getSetting("BLAST_DATABASE_NAME");
+    private static String BIG_FASTA_FILE = "bigfastafile";
+    private static String FORMAT_LOG_FILE = JbeirSettings.getSetting("BLAST_DATABASE_NAME")
+            + ".log";
+
+    private static String FEATURE_BLAST_DIRECTORY = JbeirSettings.getSetting("BLAST_DIRECTORY")
+            + "_FEATURES";
+    private static String FEATURE_BLAST_FILE = "featurefastafile";
 
     public Blast() {
-        blastDirectory = JbeirSettings.getSetting("BLAST_DIRECTORY");
-        blastBlastall = JbeirSettings.getSetting("BLAST_BLASTALL");
-        bl2seq = JbeirSettings.getSetting("BLAST_BL2SEQ");
-        blastDatabaseName = blastDirectory + File.separator
-                + JbeirSettings.getSetting("BLAST_DATABASE_NAME");
-        blastFormatLogFile = JbeirSettings.getSetting("BLAST_DATABASE_NAME") + ".log";
 
         if (!isBlastDatabaseExists()) {
             Logger.info("Creating blast db for the first time");
@@ -61,38 +63,8 @@ public class Blast {
     }
 
     public void rebuildDatabase() throws BlastException {
-        try { // The big try
-            synchronized (this) {
-                File newbigFastaFileDir = new File(blastDirectory + ".new");
-
-                if (newbigFastaFileDir.exists()) {
-                    try {
-                        FileUtils.deleteDirectory(newbigFastaFileDir);
-                    } catch (Exception e) {
-                        throw new BlastException(e);
-                    }
-
-                }
-                if (!newbigFastaFileDir.mkdir()) {
-                    throw new BlastException("Could not create " + blastDirectory + ".new");
-                }
-                File bigFastaFile = new File(newbigFastaFileDir.getPath() + File.separator
-                        + this.bigFastaFile);
-                FileWriter bigFastaWriter = new FileWriter(bigFastaFile);
-                writeBigFastaFile(bigFastaWriter);
-                formatBlastDb(newbigFastaFileDir);
-
-                setRebuilding(true);
-                renameBlastDb(newbigFastaFileDir);
-                setRebuilding(false);
-            }
-        } catch (IOException e) {
-            throw new BlastException("Failed to rebuild Blast database!", e);
-        } catch (SecurityException e) {
-            throw new BlastException("Failed to rebuild Blast database!", e);
-        } catch (Exception e) {
-            throw new BlastException("Failed to rebuild Blast database!", e);
-        }
+        rebuildSequenceDatabase();
+        rebuildFeatureBlastDatabase();
     }
 
     /**
@@ -148,7 +120,7 @@ public class Blast {
                 subjectFileWriter.write(subject);
                 subjectFileWriter.close();
 
-                String commandString = String.format(BL2SEQ_COMMAND_PATTERN, bl2seq, queryFile
+                String commandString = String.format(BL2SEQ_COMMAND_PATTERN, BL2SEQ, queryFile
                         .getPath(), subjectFile.getPath());
                 Logger.info("Bl2seq query: " + commandString);
 
@@ -221,8 +193,8 @@ public class Blast {
                 }
             }
 
-            String commandString = String.format(BLASTALL_COMMAND_PATTERN, blastBlastall,
-                getProgram(blastProgram), blastDatabaseName);
+            String commandString = String.format(BLASTALL_COMMAND_PATTERN, BLASTALL,
+                getProgram(blastProgram), BLAST_DATASE_NAME);
 
             Logger.info("Blast query: " + commandString);
 
@@ -241,135 +213,77 @@ public class Blast {
     }
 
     private boolean isBlastDatabaseExists() {
-        File blastDatabaseFile = new File(blastDatabaseName + ".nsq");
+        File blastDatabaseFile = new File(BLAST_DATASE_NAME + ".nsq");
 
         return blastDatabaseFile.exists();
     }
 
-    private String breakUpLines(String input) {
-        StringBuilder result = new StringBuilder();
-
-        int counter = 0;
-        int index = 0;
-        int end = input.length();
-        while (index < end) {
-            result = result.append(input.substring(index, index + 1));
-            counter = counter + 1;
-            index = index + 1;
-
-            if (counter == 59) {
-                result = result.append("\n");
-                counter = 0;
-            }
-        }
-        return result.toString();
-    }
-
-    private void renameBlastDb(File newBigFastaFileDir) throws IOException, BlastException {
-        File oldBlastDir = new File(blastDirectory + ".old");
+    private void renameBlastDb(File newBigFastaFileDir, String baseBlastDirName)
+            throws IOException, BlastException {
+        File oldBlastDir = new File(baseBlastDirName + ".old");
         if (oldBlastDir.exists()) {
             FileUtils.deleteDirectory(oldBlastDir);
         }
 
-        File currentBlastDir = new File(blastDirectory);
+        File currentBlastDir = new File(baseBlastDirName);
         if (currentBlastDir.exists()) {
             if (!currentBlastDir.renameTo(oldBlastDir)) {
-                throw new BlastException("Could not rename directory " + blastDirectory + ".old");
+                throw new BlastException("Could not rename directory " + baseBlastDirName + ".old");
             }
         } else {
             // no current blast directory
         }
 
         if (!newBigFastaFileDir.renameTo(currentBlastDir)) {
-            throw new BlastException("Could not rename blast db");
+            throw new BlastException("Could not rename blast db: " + newBigFastaFileDir.getName());
         }
     }
 
-    private void formatBlastDb(File bigFastaFileDir) throws IOException {
+    private static void formatBlastDb(File fastaFileDir, String fastaFileName, String logFileName,
+            String databaseName) throws BlastException {
         ArrayList<String> commands = new ArrayList<String>();
         commands.add(JbeirSettings.getSetting("BLAST_FORMATDB"));
         commands.add("-i");
-        commands.add(this.bigFastaFile);
+        commands.add(fastaFileName);
         commands.add("-l");
-        commands.add(this.blastFormatLogFile);
+        commands.add(logFileName);
         commands.add("-n");
-        commands.add(JbeirSettings.getSetting("BLAST_DATABASE_NAME"));
+        commands.add(databaseName);
         commands.add("-o");
         commands.add("-pF");
         commands.add("-t");
-        commands.add(JbeirSettings.getSetting("BLAST_DATABASE_NAME"));
+        commands.add(databaseName);
         String commandString = Utils.join(" ", commands);
         Logger.info("formatdb: " + commandString);
 
         Runtime runTime = Runtime.getRuntime();
 
-        Process process = runTime.exec(commandString, new String[0], bigFastaFileDir);
-        InputStream blastOutputStream = process.getInputStream();
-        InputStream blastErrorStream = process.getErrorStream();
         try {
+            Process process = runTime.exec(commandString, new String[0], fastaFileDir);
+            InputStream blastOutputStream = process.getInputStream();
+            InputStream blastErrorStream = process.getErrorStream();
+
             process.waitFor();
+            StringWriter writer = new StringWriter();
+            IOUtils.copy(blastOutputStream, writer);
+            blastOutputStream.close();
+            String outputString = writer.toString();
+            Logger.debug("format output was: " + outputString);
+            writer = new StringWriter();
+            IOUtils.copy(blastErrorStream, writer);
+            String errorString = writer.toString();
+            Logger.debug("format error was: " + errorString);
+            process.destroy();
+            if (errorString.length() > 0) {
+                throw new IOException("Could not format blast db");
+            }
+
         } catch (InterruptedException e) {
-            throw new IOException("Could not run formatdb", e);
-        }
-        StringWriter writer = new StringWriter();
-        IOUtils.copy(blastOutputStream, writer);
-        blastOutputStream.close();
-        String outputString = writer.toString();
-        Logger.debug("format output was: " + outputString);
-        writer = new StringWriter();
-        IOUtils.copy(blastErrorStream, writer);
-        String errorString = writer.toString();
-        Logger.debug("format error was: " + errorString);
-        process.destroy();
-
-        if (errorString.length() > 0) {
-            throw new IOException("Could not format blast db");
-        }
-    }
-
-    private void writeBigFastaFile(FileWriter bigFastaWriter) throws IOException, BlastException {
-        List<Sequence> sequencesList = null;
-
-        try {
-            sequencesList = SequenceManager.getAllSequences();
-        } catch (ManagerException e) {
+            throw new BlastException("Could not run formatdb", e);
+        } catch (IOException e) {
             throw new BlastException(e);
         }
 
-        for (Sequence sequence : sequencesList) {
-            String recordId = sequence.getEntry().getRecordId();
-            String sequenceString = "";
-
-            String temp = sequence.getSequence();
-            if (temp != null) {
-                SymbolList symL = null;
-
-                try {
-                    symL = DNATools.createDNA(sequence.getSequence().trim());
-                } catch (IllegalSymbolException e1) {
-                    // maybe it's rna?
-                    try {
-                        symL = RNATools.createRNA(sequence.getSequence().trim());
-                    } catch (IllegalSymbolException e2) {
-                        // skip this sequence
-                        Logger.debug("invalid characters in sequence for "
-                                + sequence.getEntry().getRecordId());
-                        Logger.debug(e2.toString());
-                    }
-                }
-
-                if (symL != null) {
-                    sequenceString = breakUpLines(symL.seqString());
-                }
-            }
-            if (sequenceString.length() > 0) {
-                bigFastaWriter.write(">" + recordId + "\n");
-                bigFastaWriter.write(sequenceString + "\n");
-            }
-        }
-
-        bigFastaWriter.flush();
-        bigFastaWriter.close();
     }
 
     private String runExternalProgram(String commandString) throws ProgramTookTooLongException,
@@ -506,6 +420,152 @@ public class Blast {
 
     private static synchronized boolean isRebuilding() {
         return rebuilding;
+    }
+
+    private void rebuildSequenceDatabase() throws BlastException {
+        try { // The big try
+            synchronized (this) {
+                File newbigFastaFileDir = new File(BLAST_DIRECTORY + ".new");
+                if (newbigFastaFileDir.exists()) {
+                    try {
+                        FileUtils.deleteDirectory(newbigFastaFileDir);
+                    } catch (Exception e) {
+                        throw new BlastException(e);
+                    }
+                }
+                if (!newbigFastaFileDir.mkdir()) {
+                    throw new BlastException("Could not create " + BLAST_DIRECTORY + ".new");
+                }
+                File bigFastaFile = new File(newbigFastaFileDir.getPath() + File.separator
+                        + BIG_FASTA_FILE);
+                FileWriter bigFastaWriter = new FileWriter(bigFastaFile);
+                writeBigFastaFile(bigFastaWriter);
+                formatBlastDb(newbigFastaFileDir, BIG_FASTA_FILE, FORMAT_LOG_FILE, JbeirSettings
+                        .getSetting("BLAST_DATABASE_NAME"));
+                setRebuilding(true);
+                renameBlastDb(newbigFastaFileDir, BLAST_DIRECTORY);
+                setRebuilding(false);
+            }
+        } catch (IOException e) {
+            throw new BlastException("Failed to rebuild Blast database!", e);
+        } catch (SecurityException e) {
+            throw new BlastException("Failed to rebuild Blast database!", e);
+        } catch (Exception e) {
+            throw new BlastException("Failed to rebuild Blast database!", e);
+        }
+    }
+
+    private void rebuildFeatureBlastDatabase() throws BlastException {
+        try { // the big try
+            String newFeatureFastaDirName = FEATURE_BLAST_DIRECTORY + ".new";
+            File newFeatureFastaDir = new File(newFeatureFastaDirName);
+            if (newFeatureFastaDir.exists()) {
+                org.apache.commons.io.FileUtils.deleteDirectory(newFeatureFastaDir);
+            }
+            if (!newFeatureFastaDir.mkdir()) {
+                throw new BlastException("Could not create " + newFeatureFastaDirName);
+            }
+            File fastaFile = new File(newFeatureFastaDir.getPath() + File.separator
+                    + FEATURE_BLAST_FILE);
+            FileWriter fastaFileWriter = new FileWriter(fastaFile);
+            writeFeatureFastaFile(fastaFileWriter);
+            Blast.formatBlastDb(newFeatureFastaDir, fastaFile.getName(), FEATURE_BLAST_FILE
+                    + ".log", "features");
+
+            setRebuilding(true);
+            renameBlastDb(newFeatureFastaDir, FEATURE_BLAST_DIRECTORY);
+            setRebuilding(false);
+        } catch (IOException e) {
+            throw new BlastException(e);
+        }
+    }
+
+    private void writeBigFastaFile(FileWriter bigFastaWriter) throws BlastException {
+        List<Sequence> sequencesList = null;
+        try {
+            sequencesList = SequenceManager.getAllSequences();
+        } catch (ManagerException e) {
+            throw new BlastException(e);
+        }
+        for (Sequence sequence : sequencesList) {
+            String recordId = sequence.getEntry().getRecordId();
+            String sequenceString = "";
+            String temp = sequence.getSequence();
+            if (temp != null) {
+                SymbolList symL = null;
+                try {
+                    symL = DNATools.createDNA(sequence.getSequence().trim());
+                } catch (IllegalSymbolException e1) {
+                    // maybe it's rna?
+                    try {
+                        symL = RNATools.createRNA(sequence.getSequence().trim());
+                    } catch (IllegalSymbolException e2) {
+                        // skip this sequence
+                        Logger.debug("invalid characters in sequence for "
+                                + sequence.getEntry().getRecordId());
+                        Logger.debug(e2.toString());
+                    }
+                }
+                if (symL != null) {
+                    sequenceString = SequenceUtils.breakUpLines(symL.seqString());
+                }
+            }
+            if (sequenceString.length() > 0) {
+                try {
+                    bigFastaWriter.write(">" + recordId + "\n");
+                    bigFastaWriter.write(sequenceString + "\n");
+                } catch (IOException e) {
+                    throw new BlastException(e);
+                }
+            }
+        }
+        try {
+            bigFastaWriter.flush();
+            bigFastaWriter.close();
+        } catch (IOException e) {
+            throw new BlastException(e);
+        }
+    }
+
+    private void writeFeatureFastaFile(FileWriter fastaFileWriter) throws BlastException {
+        ArrayList<Feature> featureList = null;
+        try {
+            featureList = SequenceManager.getAllFeatures();
+        } catch (ManagerException e) {
+            throw new BlastException(e);
+        }
+        for (Feature feature : featureList) {
+            String hashId = feature.getHash();
+            String temp = feature.getSequence();
+            String sequenceString = "";
+            if (temp != null) {
+                SymbolList symL = null;
+                try {
+                    symL = DNATools.createDNA(feature.getSequence().trim());
+                } catch (IllegalSymbolException e1) {
+                    // skip this sequence
+                    Logger.debug("Invalid characters in sequence for " + feature.getHash());
+                    Logger.debug(e1.getMessage());
+                }
+                if (symL != null) {
+                    sequenceString = SequenceUtils.breakUpLines(symL.seqString());
+                }
+            }
+            if (sequenceString.length() > 2) {
+                try {
+                    fastaFileWriter.write(">" + hashId + "\n");
+                    fastaFileWriter.write(sequenceString + "\n");
+                } catch (IOException e) {
+                    throw new BlastException(e);
+                }
+            }
+        }
+        try {
+            fastaFileWriter.flush();
+            fastaFileWriter.close();
+        } catch (IOException e) {
+            throw new BlastException(e);
+        }
     }
 
     public static void main(String[] args) {

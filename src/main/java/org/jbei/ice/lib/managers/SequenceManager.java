@@ -227,4 +227,25 @@ public class SequenceManager {
 
     }
 
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Feature> getAllFeatures() throws ManagerException {
+        ArrayList<Feature> features = null;
+        Session session = DAO.newSession();
+        try {
+            Query query = session.createQuery("from " + Feature.class.getName());
+            List list = query.list();
+
+            if (list != null) {
+                features = (ArrayList<Feature>) list;
+            }
+        } catch (HibernateException e) {
+            throw new ManagerException(e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+
+        return features;
+    }
 }
