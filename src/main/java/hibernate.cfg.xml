@@ -59,5 +59,6 @@
 		<mapping class="org.jbei.ice.lib.models.TraceSequence" />
 		<mapping class="org.jbei.ice.lib.models.TraceSequenceAlignment" />
 		<mapping class="org.jbei.ice.lib.models.Workspace" />
+		<mapping class="org.jbei.ice.lib.models.Project" />
 	</session-factory>
 </hibernate-configuration>

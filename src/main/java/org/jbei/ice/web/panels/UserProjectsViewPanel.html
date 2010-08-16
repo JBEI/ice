@@ -1,0 +1,41 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<table border="0" cellpadding="3" cellspacing="1" class="data_table">
+		<thead>
+			<tr bgcolor="#F0F0F0">
+				<th>#</th>
+				<th>Type</th>
+				<th>Name</th>
+				<th>Description</th>
+				<th>Created</th>
+				<th>Modified</th>
+				<th>Delete</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr wicket:id="projectsDataView" class="odd_row">
+				<td><span wicket:id="index"></span>.</td>
+				<td><nobr><span wicket:id="type"></span></nobr></td>
+				<td><nobr><a href="#" wicket:id="sequenceAssemblerLink" target="_blank"><span wicket:id="name"></span></a></nobr></td>
+				<td><span wicket:id="description"></span></td>
+				<td><nobr><span wicket:id="created"></span></nobr></td>
+				<td><nobr><span wicket:id="modified"></span></nobr></td>
+				<td><a href="#" wicket:id="deleteLink">Delete</a></td>
+			</tr>
+			<tr bgcolor="#F0F0F0">
+				<td align="center" valign="bottom" style="height: 25px" colspan="20">
+				<table border="0" cellpadding="0" cellspacing="0" style="width: 100%; height: 25px">
+					<tr>
+						<td>
+						<div wicket:id="navigator"></div>
+						</td>
+					</tr>
+				</table>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	<br />
+	<a href="#" wicket:id="createSequenceAssemblyProjectLink" target="_blank">Create Sequence Assembly Project</a>
+</wicket:panel>
+</html>

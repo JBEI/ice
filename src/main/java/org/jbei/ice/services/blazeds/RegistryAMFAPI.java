@@ -2,6 +2,7 @@ package org.jbei.ice.services.blazeds;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.jbei.ice.bio.enzymes.RestrictionEnzyme;
@@ -9,6 +10,7 @@ import org.jbei.ice.bio.enzymes.RestrictionEnzymesManager;
 import org.jbei.ice.bio.enzymes.RestrictionEnzymesManagerException;
 import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.ProjectController;
 import org.jbei.ice.controllers.SequenceAnalysisController;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -18,12 +20,18 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountPreferences;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.Project;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.utils.AssemblyHelper;
 import org.jbei.ice.lib.utils.SerializationUtils;
+import org.jbei.ice.lib.utils.SerializationUtils.SerializationUtilsException;
+import org.jbei.ice.lib.vo.AssemblyProject;
+import org.jbei.ice.lib.vo.AssemblyTable;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
+import org.jbei.ice.lib.vo.PermutationSet;
 import org.jbei.ice.services.blazeds.vo.UserPreferences;
 import org.jbei.ice.services.blazeds.vo.UserRestrictionEnzymes;
 
@@ -445,5 +453,156 @@ public class RegistryAMFAPI extends BaseService {
         }
 
         return result;
+    }
+
+    public AssemblyProject createAssemblyProject(String sessionId, AssemblyProject assemblyProject) {
+        if (assemblyProject == null || sessionId == null) {
+            return null;
+        }
+
+        Account account = getAccountBySessionId(sessionId);
+
+        if (account == null) {
+            return null;
+        }
+
+        String serializedAssemblyTable = "";
+
+        try {
+            serializedAssemblyTable = SerializationUtils.serializeToString(assemblyProject
+                    .getAssemblyTable());
+        } catch (SerializationUtilsException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        }
+
+        ProjectController projectController = new ProjectController(account);
+
+        Project project = projectController.createProject(account, assemblyProject.getName(),
+            assemblyProject.getDescription(), serializedAssemblyTable, "assembly", new Date(),
+            new Date());
+
+        try {
+            Project savedProject = projectController.save(project);
+
+            assemblyProject.setName(savedProject.getName());
+            assemblyProject.setDescription(savedProject.getDescription());
+            assemblyProject.setUuid(savedProject.getUuid());
+            assemblyProject.setOwnerEmail(savedProject.getAccount().getEmail());
+            assemblyProject.setOwnerName(savedProject.getAccount().getFullName());
+            assemblyProject.setCreationTime(savedProject.getCreationTime());
+            assemblyProject.setModificationTime(savedProject.getModificationTime());
+        } catch (ControllerException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        } catch (PermissionException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        }
+
+        return assemblyProject;
+    }
+
+    public AssemblyProject getAssemblyProject(String sessionId, String projectId) {
+        if (projectId == null || sessionId == null || sessionId.isEmpty() || projectId.isEmpty()) {
+            return null;
+        }
+
+        Account account = getAccountBySessionId(sessionId);
+
+        if (account == null) {
+            return null;
+        }
+
+        AssemblyProject assemblyProject = null;
+
+        ProjectController projectController = new ProjectController(account);
+        try {
+            Project project = projectController.getProjectByUUID(projectId);
+
+            AssemblyTable assemblyTable = (AssemblyTable) SerializationUtils
+                    .deserializeFromString(project.getData());
+
+            assemblyProject = new AssemblyProject(project.getName(), project.getDescription(),
+                    project.getUuid(), account.getEmail(), account.getFullName(), assemblyTable,
+                    project.getCreationTime(), project.getModificationTime());
+        } catch (ControllerException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        } catch (SerializationUtilsException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        }
+
+        return assemblyProject;
+    }
+
+    public AssemblyProject saveAssemblyProject(String sessionId, AssemblyProject assemblyProject) {
+        if (sessionId == null || sessionId.isEmpty() || assemblyProject == null
+                || assemblyProject.getUuid() == null) {
+            return null;
+        }
+
+        Account account = getAccountBySessionId(sessionId);
+
+        if (account == null) {
+            return null;
+        }
+
+        AssemblyProject resultAssemblyProject = null;
+
+        ProjectController projectController = new ProjectController(account);
+        try {
+            Project project = projectController.getProjectByUUID(assemblyProject.getUuid());
+
+            project.setName(assemblyProject.getName());
+            project.setDescription(assemblyProject.getDescription());
+            project.setModificationTime(new Date());
+            project.setData(SerializationUtils.serializeToString(assemblyProject.getAssemblyTable()));
+
+            Project savedProject = projectController.save(project);
+
+            resultAssemblyProject = new AssemblyProject(savedProject.getName(),
+                    savedProject.getDescription(), savedProject.getUuid(), savedProject
+                            .getAccount().getEmail(), savedProject.getAccount().getFullName(),
+                    assemblyProject.getAssemblyTable(), savedProject.getCreationTime(),
+                    savedProject.getModificationTime());
+        } catch (ControllerException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        } catch (SerializationUtilsException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        } catch (PermissionException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        }
+
+        return resultAssemblyProject;
+    }
+
+    public PermutationSet assembleAssemblyProject(String sessionId, AssemblyProject assemblyProject) {
+        if (sessionId == null || sessionId.isEmpty() || assemblyProject == null) {
+            return null;
+        }
+
+        Account account = getAccountBySessionId(sessionId);
+
+        if (account == null) {
+            return null;
+        }
+
+        PermutationSet permutationSet = AssemblyHelper.buildPermutationSet(assemblyProject
+                .getAssemblyTable());
+
+        return permutationSet;
     }
 }
