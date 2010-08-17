@@ -12,6 +12,7 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.TraceSequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.models.TraceSequenceAlignment;
@@ -110,8 +111,8 @@ public class SequenceAnalysisController extends Controller {
                             || traceSequence.getTraceSequenceAlignment().getSequenceHash() == null
                             || traceSequence.getTraceSequenceAlignment().getSequenceHash()
                                     .isEmpty()
-                            || !traceSequence.getTraceSequenceAlignment().getSequenceHash().equals(
-                                sequence.getFwdHash())) {
+                            || !traceSequence.getTraceSequenceAlignment().getSequenceHash()
+                                    .equals(sequence.getFwdHash())) {
                         buildOrRebuildAlignment(traceSequence, sequence);
 
                         wasUpdated = true;
@@ -183,7 +184,7 @@ public class SequenceAnalysisController extends Controller {
         }
 
         // if sequence is null => delete alignment
-        if (sequence == null) {
+        if (sequence == null || sequence.getEntry() == null) {
             return;
         }
 
@@ -191,7 +192,16 @@ public class SequenceAnalysisController extends Controller {
         String traceSequenceString = traceSequence.getSequence();
         String entrySequenceString = sequence.getSequence();
 
+        int entrySequenceLength = entrySequenceString.length();
+
         String bl2seqOutput = "";
+
+        boolean isCircular = (sequence.getEntry() instanceof Plasmid)
+                && ((Plasmid) sequence.getEntry()).getCircular();
+
+        if (isCircular) {
+            entrySequenceString += entrySequenceString;
+        }
 
         Blast blast = new Blast();
         try {
@@ -214,8 +224,10 @@ public class SequenceAnalysisController extends Controller {
                 Bl2SeqResult maxBl2SeqResult = null;
 
                 for (Bl2SeqResult bl2seqResult : bl2seqAlignmentResults) {
-                    if (maxAlignedSequenceLength < bl2seqResult.getQuerySequence().length()) {
-                        maxAlignedSequenceLength = bl2seqResult.getQuerySequence().length();
+                    int querySequenceLength = bl2seqResult.getQuerySequence().length();
+
+                    if (maxAlignedSequenceLength < querySequenceLength) {
+                        maxAlignedSequenceLength = querySequenceLength;
                         maxBl2SeqResult = bl2seqResult;
                     }
                 }
@@ -226,23 +238,37 @@ public class SequenceAnalysisController extends Controller {
                     TraceSequenceAlignment traceSequenceAlignment = traceSequence
                             .getTraceSequenceAlignment();
 
+                    int queryStart = maxBl2SeqResult.getQueryStart();
+                    int queryEnd = maxBl2SeqResult.getQueryEnd();
+                    int subjectStart = maxBl2SeqResult.getSubjectStart();
+                    int subjectEnd = maxBl2SeqResult.getSubjectEnd();
+
+                    if (isCircular) {
+                        if (queryEnd > entrySequenceLength - 1) {
+                            queryEnd = queryEnd - entrySequenceLength;
+                        }
+
+                        if (subjectEnd > entrySequenceLength - 1) {
+                            subjectEnd = subjectEnd - entrySequenceLength;
+                        }
+                    }
+
                     if (traceSequenceAlignment == null) {
                         traceSequenceAlignment = new TraceSequenceAlignment(traceSequence,
-                                maxBl2SeqResult.getScore(), strand,
-                                maxBl2SeqResult.getQueryStart(), maxBl2SeqResult.getQueryEnd(),
-                                maxBl2SeqResult.getSubjectStart(), maxBl2SeqResult.getSubjectEnd(),
-                                maxBl2SeqResult.getQuerySequence(), maxBl2SeqResult
-                                        .getSubjectSequence(), sequence.getFwdHash(), new Date());
+                                maxBl2SeqResult.getScore(), strand, queryStart, queryEnd,
+                                subjectStart, subjectEnd, maxBl2SeqResult.getQuerySequence(),
+                                maxBl2SeqResult.getSubjectSequence(), sequence.getFwdHash(),
+                                new Date());
 
                         traceSequence.setTraceSequenceAlignment(traceSequenceAlignment);
                     } else {
                         traceSequenceAlignment.setModificationTime(new Date());
                         traceSequenceAlignment.setScore(maxBl2SeqResult.getScore());
                         traceSequenceAlignment.setStrand(strand);
-                        traceSequenceAlignment.setQueryStart(maxBl2SeqResult.getQueryStart());
-                        traceSequenceAlignment.setQueryEnd(maxBl2SeqResult.getQueryEnd());
-                        traceSequenceAlignment.setSubjectStart(maxBl2SeqResult.getSubjectStart());
-                        traceSequenceAlignment.setSubjectEnd(maxBl2SeqResult.getSubjectEnd());
+                        traceSequenceAlignment.setQueryStart(queryStart);
+                        traceSequenceAlignment.setQueryEnd(queryEnd);
+                        traceSequenceAlignment.setSubjectStart(subjectStart);
+                        traceSequenceAlignment.setSubjectEnd(subjectEnd);
                         traceSequenceAlignment
                                 .setQueryAlignment(maxBl2SeqResult.getQuerySequence());
                         traceSequenceAlignment.setSubjectAlignment(maxBl2SeqResult
