@@ -20,6 +20,7 @@ import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.dataProviders.ProjectsDataProvider;
 import org.jbei.ice.web.pages.SequenceAssemblerPage;
+import org.jbei.ice.web.pages.SequenceCheckerPage;
 import org.jbei.ice.web.pages.UserPage;
 
 public class UserProjectsViewPanel extends Panel {
@@ -36,6 +37,9 @@ public class UserProjectsViewPanel extends Panel {
         add(new BookmarkablePageLink<SequenceAssemblerPage>("createSequenceAssemblyProjectLink",
                 SequenceAssemblerPage.class, new PageParameters()));
 
+        add(new BookmarkablePageLink<SequenceCheckerPage>("createSequenceCheckerProjectLink",
+                SequenceCheckerPage.class, new PageParameters()));
+
         dataView = new DataView<Project>("projectsDataView", dataProvider, 15) {
             private static final long serialVersionUID = 1L;
 
@@ -47,15 +51,26 @@ public class UserProjectsViewPanel extends Panel {
                         : "even_row"));
                 item.add(new Label("index", ""
                         + (getItemsPerPage() * getCurrentPage() + item.getIndex() + 1)));
-                item.add(new Label("type", project.getType()));
 
                 PageParameters parameters = new PageParameters();
                 parameters.add("projectId", project.getUuid());
 
-                BookmarkablePageLink<SequenceAssemblerPage> sequenceAssemblerLink = new BookmarkablePageLink<SequenceAssemblerPage>(
-                        "sequenceAssemblerLink", SequenceAssemblerPage.class, parameters);
-                sequenceAssemblerLink.add(new Label("name", project.getName()));
-                item.add(sequenceAssemblerLink);
+                if (project.getType().equals("assembly")) {
+                    item.add(new Label("type", "Assembly"));
+                    BookmarkablePageLink<SequenceAssemblerPage> sequenceToolLink = new BookmarkablePageLink<SequenceAssemblerPage>(
+                            "sequenceToolLink", SequenceAssemblerPage.class, parameters);
+                    sequenceToolLink.add(new Label("name", project.getName()));
+                    item.add(sequenceToolLink);
+                } else if (project.getType().equals("sequence-checker")) {
+                    item.add(new Label("type", "Sequence Checker"));
+                    BookmarkablePageLink<SequenceCheckerPage> sequenceToolLink = new BookmarkablePageLink<SequenceCheckerPage>(
+                            "sequenceToolLink", SequenceCheckerPage.class, parameters);
+                    sequenceToolLink.add(new Label("name", project.getName()));
+                    item.add(sequenceToolLink);
+                } else {
+                    return;
+                }
+
                 item.add(new MultiLineLabel("description", project.getDescription()));
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
                 String createdDateString = dateFormat.format(project.getCreationTime());

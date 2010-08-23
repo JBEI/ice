@@ -28,10 +28,15 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.AssemblyHelper;
 import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.utils.SerializationUtils.SerializationUtilsException;
+import org.jbei.ice.lib.utils.TraceAlignmentHelper;
 import org.jbei.ice.lib.vo.AssemblyProject;
 import org.jbei.ice.lib.vo.AssemblyTable;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
+import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.PermutationSet;
+import org.jbei.ice.lib.vo.SequenceCheckerData;
+import org.jbei.ice.lib.vo.SequenceCheckerProject;
+import org.jbei.ice.lib.vo.TraceData;
 import org.jbei.ice.services.blazeds.vo.UserPreferences;
 import org.jbei.ice.services.blazeds.vo.UserRestrictionEnzymes;
 
@@ -480,8 +485,8 @@ public class RegistryAMFAPI extends BaseService {
         ProjectController projectController = new ProjectController(account);
 
         Project project = projectController.createProject(account, assemblyProject.getName(),
-            assemblyProject.getDescription(), serializedAssemblyTable, "assembly", new Date(),
-            new Date());
+            assemblyProject.getDescription(), serializedAssemblyTable, assemblyProject.typeName(),
+            new Date(), new Date());
 
         try {
             Project savedProject = projectController.save(project);
@@ -527,8 +532,8 @@ public class RegistryAMFAPI extends BaseService {
                     .deserializeFromString(project.getData());
 
             assemblyProject = new AssemblyProject(project.getName(), project.getDescription(),
-                    project.getUuid(), account.getEmail(), account.getFullName(), assemblyTable,
-                    project.getCreationTime(), project.getModificationTime());
+                    project.getUuid(), account.getEmail(), account.getFullName(),
+                    project.getCreationTime(), project.getModificationTime(), assemblyTable);
         } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
 
@@ -570,8 +575,8 @@ public class RegistryAMFAPI extends BaseService {
             resultAssemblyProject = new AssemblyProject(savedProject.getName(),
                     savedProject.getDescription(), savedProject.getUuid(), savedProject
                             .getAccount().getEmail(), savedProject.getAccount().getFullName(),
-                    assemblyProject.getAssemblyTable(), savedProject.getCreationTime(),
-                    savedProject.getModificationTime());
+                    savedProject.getCreationTime(), savedProject.getModificationTime(),
+                    assemblyProject.getAssemblyTable());
         } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
 
@@ -605,4 +610,242 @@ public class RegistryAMFAPI extends BaseService {
 
         return permutationSet;
     }
+
+    public SequenceCheckerProject createSequenceCheckerProject(String sessionId,
+            SequenceCheckerProject sequenceCheckerProject) {
+        if (sequenceCheckerProject == null || sessionId == null) {
+            return null;
+        }
+
+        Account account = getAccountBySessionId(sessionId);
+
+        if (account == null) {
+            return null;
+        }
+
+        String serializedSequenceCheckerData = "";
+
+        try {
+            serializedSequenceCheckerData = SerializationUtils
+                    .serializeToString(sequenceCheckerProject.getSequenceCheckerData());
+        } catch (SerializationUtilsException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        }
+
+        ProjectController projectController = new ProjectController(account);
+
+        Project project = projectController.createProject(account,
+            sequenceCheckerProject.getName(), sequenceCheckerProject.getDescription(),
+            serializedSequenceCheckerData, sequenceCheckerProject.typeName(), new Date(),
+            new Date());
+
+        try {
+            Project savedProject = projectController.save(project);
+
+            sequenceCheckerProject.setName(savedProject.getName());
+            sequenceCheckerProject.setDescription(savedProject.getDescription());
+            sequenceCheckerProject.setUuid(savedProject.getUuid());
+            sequenceCheckerProject.setOwnerEmail(savedProject.getAccount().getEmail());
+            sequenceCheckerProject.setOwnerName(savedProject.getAccount().getFullName());
+            sequenceCheckerProject.setCreationTime(savedProject.getCreationTime());
+            sequenceCheckerProject.setModificationTime(savedProject.getModificationTime());
+        } catch (ControllerException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        } catch (PermissionException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        }
+
+        return sequenceCheckerProject;
+    }
+
+    public SequenceCheckerProject saveSequenceCheckerProject(String sessionId,
+            SequenceCheckerProject sequenceCheckerProject) {
+        if (sessionId == null || sessionId.isEmpty() || sequenceCheckerProject == null
+                || sequenceCheckerProject.getUuid() == null) {
+            return null;
+        }
+
+        Account account = getAccountBySessionId(sessionId);
+
+        if (account == null) {
+            return null;
+        }
+
+        SequenceCheckerProject resultSequenceCheckerProject = null;
+
+        ProjectController projectController = new ProjectController(account);
+        try {
+            Project project = projectController.getProjectByUUID(sequenceCheckerProject.getUuid());
+
+            project.setName(sequenceCheckerProject.getName());
+            project.setDescription(sequenceCheckerProject.getDescription());
+            project.setModificationTime(new Date());
+            project.setData(SerializationUtils.serializeToString(sequenceCheckerProject
+                    .getSequenceCheckerData()));
+
+            Project savedProject = projectController.save(project);
+
+            resultSequenceCheckerProject = new SequenceCheckerProject(savedProject.getName(),
+                    savedProject.getDescription(), savedProject.getUuid(), savedProject
+                            .getAccount().getEmail(), savedProject.getAccount().getFullName(),
+                    savedProject.getCreationTime(), savedProject.getModificationTime(),
+                    sequenceCheckerProject.getSequenceCheckerData());
+        } catch (ControllerException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        } catch (SerializationUtilsException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        } catch (PermissionException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        }
+
+        return resultSequenceCheckerProject;
+    }
+
+    public SequenceCheckerProject getSequenceCheckerProject(String sessionId, String projectId) {
+        if (projectId == null || sessionId == null || sessionId.isEmpty() || projectId.isEmpty()) {
+            return null;
+        }
+
+        Account account = getAccountBySessionId(sessionId);
+
+        if (account == null) {
+            return null;
+        }
+
+        SequenceCheckerProject sequenceCheckerProject = null;
+
+        ProjectController projectController = new ProjectController(account);
+        try {
+            Project project = projectController.getProjectByUUID(projectId);
+
+            SequenceCheckerData sequenceCheckerData = (SequenceCheckerData) SerializationUtils
+                    .deserializeFromString(project.getData());
+
+            sequenceCheckerProject = new SequenceCheckerProject(project.getName(),
+                    project.getDescription(), project.getUuid(), account.getEmail(),
+                    account.getFullName(), project.getCreationTime(),
+                    project.getModificationTime(), sequenceCheckerData);
+        } catch (ControllerException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        } catch (SerializationUtilsException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        }
+
+        return sequenceCheckerProject;
+    }
+
+    public SequenceCheckerProject alignSequenceCheckerProject(String sessionId,
+            SequenceCheckerProject sequenceCheckerProject) {
+        if (sessionId == null || sessionId.isEmpty() || sequenceCheckerProject == null
+                || sequenceCheckerProject.getSequenceCheckerData() == null) {
+            return null;
+        }
+
+        Account account = getAccountBySessionId(sessionId);
+
+        if (account == null) {
+            return null;
+        }
+
+        if (sequenceCheckerProject.getSequenceCheckerData().getSequence() == null
+                || sequenceCheckerProject.getSequenceCheckerData().getSequence().getSequence() == null
+                || sequenceCheckerProject.getSequenceCheckerData().getSequence().getSequence()
+                        .isEmpty()) { // no sequence available => nullify all traceData objects 
+            if (sequenceCheckerProject.getSequenceCheckerData().getTraces() != null
+                    && sequenceCheckerProject.getSequenceCheckerData().getTraces().size() > 0) {
+                for (int i = 0; i < sequenceCheckerProject.getSequenceCheckerData().getTraces()
+                        .size(); i++) {
+                    TraceData traceData = sequenceCheckerProject.getSequenceCheckerData()
+                            .getTraces().get(i);
+
+                    traceData.setScore(-1);
+                    traceData.setStrand(-1);
+                    traceData.setQueryStart(-1);
+                    traceData.setQueryEnd(-1);
+                    traceData.setSubjectStart(-1);
+                    traceData.setSubjectEnd(-1);
+                    traceData.setQueryAlignment("");
+                    traceData.setSubjectAlignment("");
+                }
+            }
+
+            return sequenceCheckerProject;
+        }
+
+        // trying to align
+        if (sequenceCheckerProject.getSequenceCheckerData().getTraces() != null
+                && sequenceCheckerProject.getSequenceCheckerData().getTraces().size() > 0) {
+            for (int i = 0; i < sequenceCheckerProject.getSequenceCheckerData().getTraces().size(); i++) {
+                TraceData traceData = sequenceCheckerProject.getSequenceCheckerData().getTraces()
+                        .get(i);
+
+                TraceData alignedTraceData = TraceAlignmentHelper.alignSequences(
+                    sequenceCheckerProject.getSequenceCheckerData().getSequence().getSequence(),
+                    traceData.getSequence(), traceData.getFilename(), sequenceCheckerProject
+                            .getSequenceCheckerData().getSequence().getIsCircular());
+
+                if (alignedTraceData == null) {
+                    traceData.setScore(-1);
+                    traceData.setStrand(-1);
+                    traceData.setQueryStart(-1);
+                    traceData.setQueryEnd(-1);
+                    traceData.setSubjectStart(-1);
+                    traceData.setSubjectEnd(-1);
+                    traceData.setQueryAlignment("");
+                    traceData.setSubjectAlignment("");
+                } else {
+                    traceData.setScore(alignedTraceData.getScore());
+                    traceData.setStrand(alignedTraceData.getStrand());
+                    traceData.setQueryStart(alignedTraceData.getQueryStart());
+                    traceData.setQueryEnd(alignedTraceData.getQueryEnd());
+                    traceData.setSubjectStart(alignedTraceData.getSubjectStart());
+                    traceData.setSubjectEnd(alignedTraceData.getSubjectEnd());
+                    traceData.setQueryAlignment(alignedTraceData.getQueryAlignment());
+                    traceData.setSubjectAlignment(alignedTraceData.getSubjectAlignment());
+                }
+            }
+        }
+
+        return sequenceCheckerProject;
+    }
+
+    public TraceData parseTraceFile(String traceFileName, byte[] data) {
+        TraceData traceData = null;
+
+        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController(null);
+
+        try {
+            IDNASequence dnaSequence = sequenceAnalysisController.parse(data);
+
+            if (dnaSequence == null) {
+                logInfo("Failed to parse trace file!");
+            } else {
+                traceData = new TraceData(traceFileName, dnaSequence.getSequence(), -1, -1, -1, -1,
+                        -1, -1, "", "");
+
+                logInfo("Successfully parsed trace file");
+            }
+        } catch (Exception e) {
+            Logger.error(getServiceName(), e);
+        }
+
+        return traceData;
+    }
+
 }
