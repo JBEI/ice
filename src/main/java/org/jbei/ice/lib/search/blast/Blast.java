@@ -120,22 +120,22 @@ public class Blast {
                 subjectFileWriter.write(subject);
                 subjectFileWriter.close();
 
-                String commandString = String.format(BL2SEQ_COMMAND_PATTERN, BL2SEQ, queryFile
-                        .getPath(), subjectFile.getPath());
+                String commandString = String.format(BL2SEQ_COMMAND_PATTERN, BL2SEQ,
+                    queryFile.getPath(), subjectFile.getPath());
                 Logger.info("Bl2seq query: " + commandString);
 
-                String resultItem = runExternalProgram(commandString);
+                String resultItem = runSimpleExternalProgram(commandString);
 
                 result.add(resultItem);
 
-                if (!subjectFile.delete()) {
+                /*if (!subjectFile.delete()) {
                     throw new BlastException("Could not delete subjectFile "
                             + subjectFile.getName());
-                }
+                }*/
             }
-            if (!queryFile.delete()) {
+            /*if (!queryFile.delete()) {
                 throw new BlastException("Could not delete queryFile " + queryFile.getName());
-            }
+            }*/
         } catch (IOException e) {
             throw new BlastException(e);
         }
@@ -286,10 +286,31 @@ public class Blast {
 
     }
 
-    private String runExternalProgram(String commandString) throws ProgramTookTooLongException,
+    private String runSimpleExternalProgram(String commandString) throws BlastException {
+        StringBuilder output = new StringBuilder();
+
+        try {
+            Process p = Runtime.getRuntime().exec(commandString);
+
+            BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String line;
+
+            while ((line = input.readLine()) != null) {
+                output.append(line).append("\n");
+            }
+
+            input.close();
+        } catch (Exception e) {
+            throw new BlastException(e);
+        }
+
+        return output.toString();
+    }
+
+    /*private String runExternalProgram(String commandString) throws ProgramTookTooLongException,
             BlastException {
         return runExternalProgram("", commandString);
-    }
+    }*/
 
     private String runExternalProgram(String inputString, String commandString)
             throws ProgramTookTooLongException, BlastException {
@@ -314,10 +335,10 @@ public class Blast {
             long maxWait = 5000L;
             long startTime = System.currentTimeMillis();
 
-            BufferedReader programOutputReader = new BufferedReader(new InputStreamReader(process
-                    .getInputStream()));
-            BufferedReader programErrorReader = new BufferedReader(new InputStreamReader(process
-                    .getErrorStream()));
+            BufferedReader programOutputReader = new BufferedReader(new InputStreamReader(
+                    process.getInputStream()));
+            BufferedReader programErrorReader = new BufferedReader(new InputStreamReader(
+                    process.getErrorStream()));
 
             String tempError = null;
             String tempOutput = null;
@@ -440,8 +461,8 @@ public class Blast {
                         + BIG_FASTA_FILE);
                 FileWriter bigFastaWriter = new FileWriter(bigFastaFile);
                 writeBigFastaFile(bigFastaWriter);
-                formatBlastDb(newbigFastaFileDir, BIG_FASTA_FILE, FORMAT_LOG_FILE, JbeirSettings
-                        .getSetting("BLAST_DATABASE_NAME"));
+                formatBlastDb(newbigFastaFileDir, BIG_FASTA_FILE, FORMAT_LOG_FILE,
+                    JbeirSettings.getSetting("BLAST_DATABASE_NAME"));
                 setRebuilding(true);
                 renameBlastDb(newbigFastaFileDir, BLAST_DIRECTORY);
                 setRebuilding(false);
