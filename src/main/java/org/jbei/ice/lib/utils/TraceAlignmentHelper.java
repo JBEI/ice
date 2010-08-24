@@ -129,11 +129,19 @@ public class TraceAlignmentHelper {
                 int subjectEnd = maxBl2SeqResult.getSubjectEnd();
 
                 if (isCircular) {
-                    if (queryEnd > querySequenceLength - 1) {
+                    if (queryStart > querySequenceLength) {
+                        queryStart = queryStart - querySequenceLength;
+                    }
+
+                    if (queryEnd > querySequenceLength) {
                         queryEnd = queryEnd - querySequenceLength;
                     }
 
-                    if (subjectEnd > querySequenceLength - 1) {
+                    if (subjectStart > querySequenceLength) {
+                        subjectStart = subjectStart - querySequenceLength;
+                    }
+
+                    if (subjectEnd > querySequenceLength) {
                         subjectEnd = subjectEnd - querySequenceLength;
                     }
                 }

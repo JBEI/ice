@@ -1,6 +1,10 @@
 package org.jbei.ice.lib.vo;
 
-public class DNAFeatureNote {
+import java.io.Serializable;
+
+public class DNAFeatureNote implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String name = "";
     private String value = "";
 
