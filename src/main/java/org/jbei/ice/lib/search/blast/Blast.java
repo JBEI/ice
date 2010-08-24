@@ -128,14 +128,14 @@ public class Blast {
 
                 result.add(resultItem);
 
-                /*if (!subjectFile.delete()) {
+                if (!subjectFile.delete()) {
                     throw new BlastException("Could not delete subjectFile "
                             + subjectFile.getName());
-                }*/
+                }
             }
-            /*if (!queryFile.delete()) {
+            if (!queryFile.delete()) {
                 throw new BlastException("Could not delete queryFile " + queryFile.getName());
-            }*/
+            }
         } catch (IOException e) {
             throw new BlastException(e);
         }
