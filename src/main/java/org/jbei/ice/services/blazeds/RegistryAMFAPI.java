@@ -752,8 +752,7 @@ public class RegistryAMFAPI extends BaseService {
 
     public SequenceCheckerProject alignSequenceCheckerProject(String sessionId,
             SequenceCheckerProject sequenceCheckerProject) {
-        if (sessionId == null || sessionId.isEmpty() || sequenceCheckerProject == null
-                || sequenceCheckerProject.getSequenceCheckerData() == null) {
+        if (sessionId == null || sessionId.isEmpty() || sequenceCheckerProject == null) {
             return null;
         }
 
@@ -761,6 +760,10 @@ public class RegistryAMFAPI extends BaseService {
 
         if (account == null) {
             return null;
+        }
+
+        if (sequenceCheckerProject.getSequenceCheckerData() == null) {
+            return sequenceCheckerProject;
         }
 
         if (sequenceCheckerProject.getSequenceCheckerData().getSequence() == null
