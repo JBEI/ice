@@ -11,8 +11,6 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Project;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 public class ProjectManager {
     public static Project saveProject(Project project) throws ManagerException {
         if (project == null) {
@@ -126,9 +124,5 @@ public class ProjectManager {
         }
 
         return projects;
-    }
-
-    public static ArrayList<Project> getByType() throws ManagerException {
-        throw new NotImplementedException();
     }
 }
