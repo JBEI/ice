@@ -22,6 +22,7 @@ import org.jbei.ice.web.dataProviders.ProjectsDataProvider;
 import org.jbei.ice.web.pages.SequenceAssemblerPage;
 import org.jbei.ice.web.pages.SequenceCheckerPage;
 import org.jbei.ice.web.pages.UserPage;
+import org.jbei.ice.web.pages.VectorEditorToolPage;
 
 public class UserProjectsViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -40,6 +41,9 @@ public class UserProjectsViewPanel extends Panel {
         add(new BookmarkablePageLink<SequenceCheckerPage>("createSequenceCheckerProjectLink",
                 SequenceCheckerPage.class, new PageParameters()));
 
+        add(new BookmarkablePageLink<VectorEditorToolPage>("createVectorEditorProjectLink",
+                VectorEditorToolPage.class, new PageParameters()));
+
         dataView = new DataView<Project>("projectsDataView", dataProvider, 15) {
             private static final long serialVersionUID = 1L;
 
@@ -57,16 +61,22 @@ public class UserProjectsViewPanel extends Panel {
 
                 if (project.getType().equals("assembly")) {
                     item.add(new Label("type", "Assembly"));
-                    BookmarkablePageLink<SequenceAssemblerPage> sequenceToolLink = new BookmarkablePageLink<SequenceAssemblerPage>(
-                            "sequenceToolLink", SequenceAssemblerPage.class, parameters);
-                    sequenceToolLink.add(new Label("name", project.getName()));
-                    item.add(sequenceToolLink);
+                    BookmarkablePageLink<SequenceAssemblerPage> toolLink = new BookmarkablePageLink<SequenceAssemblerPage>(
+                            "toolLink", SequenceAssemblerPage.class, parameters);
+                    toolLink.add(new Label("name", project.getName()));
+                    item.add(toolLink);
                 } else if (project.getType().equals("sequence-checker")) {
                     item.add(new Label("type", "Sequence Checker"));
-                    BookmarkablePageLink<SequenceCheckerPage> sequenceToolLink = new BookmarkablePageLink<SequenceCheckerPage>(
-                            "sequenceToolLink", SequenceCheckerPage.class, parameters);
-                    sequenceToolLink.add(new Label("name", project.getName()));
-                    item.add(sequenceToolLink);
+                    BookmarkablePageLink<SequenceCheckerPage> toolLink = new BookmarkablePageLink<SequenceCheckerPage>(
+                            "toolLink", SequenceCheckerPage.class, parameters);
+                    toolLink.add(new Label("name", project.getName()));
+                    item.add(toolLink);
+                } else if (project.getType().equals("vector-editor")) {
+                    item.add(new Label("type", "Vector Editor"));
+                    BookmarkablePageLink<VectorEditorToolPage> toolLink = new BookmarkablePageLink<VectorEditorToolPage>(
+                            "toolLink", VectorEditorToolPage.class, parameters);
+                    toolLink.add(new Label("name", project.getName()));
+                    item.add(toolLink);
                 } else {
                     return;
                 }

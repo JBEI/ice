@@ -16,7 +16,7 @@
 			<tr wicket:id="projectsDataView" class="odd_row">
 				<td><span wicket:id="index"></span>.</td>
 				<td><nobr><span wicket:id="type"></span></nobr></td>
-				<td><nobr><a href="#" wicket:id="sequenceToolLink" target="_blank"><span wicket:id="name"></span></a></nobr></td>
+				<td><nobr><a href="#" wicket:id="toolLink" target="_blank"><span wicket:id="name"></span></a></nobr></td>
 				<td><span wicket:id="description"></span></td>
 				<td><nobr><span wicket:id="created"></span></nobr></td>
 				<td><nobr><span wicket:id="modified"></span></nobr></td>
@@ -36,8 +36,10 @@
 		</tbody>
 	</table>
 	<br />
-	<a href="#" wicket:id="createSequenceAssemblyProjectLink" target="_blank">Create Sequence Assembly Project</a>
-	<br />
-	<a href="#" wicket:id="createSequenceCheckerProjectLink" target="_blank">Create Sequence Checker Project</a>
+	<ul>
+	<li><a href="#" wicket:id="createVectorEditorProjectLink" target="_blank">Create VectorEditor Project</a></li>
+	<li><a href="#" wicket:id="createSequenceCheckerProjectLink" target="_blank">Create SequenceChecker Project</a></li>
+	<li><a href="#" wicket:id="createSequenceAssemblyProjectLink" target="_blank">Create SequenceAssembly Project</a></li>
+	</ul>
 </wicket:panel>
 </html>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"
+	xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd">
+<head>
+<!--  BEGIN Browser History required section -->
+<link rel="stylesheet" type="text/css" href="static/ve/history/history.css" />
+<!--  END Browser History required section -->
+
+<title wicket:id="title">JBEI Registry</title>
+<!-- Commented in order to make extMouseWheel.js working on Mac -->
+<!-- <script src="AC_OETags.js" language="javascript"></script> -->
+
+<!--  BEGIN Browser History required section -->
+<script src="static/ve/history/history.js" type="text/javascript"></script>
+<!--  END Browser History required section -->
+
+<style>
+body {
+	overflow: hidden height :       100%;
+	margin: 0;
+	padding: 0;
+}
+
+html,#fullScreen {
+	height: 100%;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	border: none;
+}
+</style>
+<script type="text/javascript">
+	// -----------------------------------------------------------------------------
+	// Globals
+	// Major version of Flash required
+	var requiredMajorVersion = 10;
+	// Minor version of Flash required
+	var requiredMinorVersion = 0;
+	// Minor version of Flash required
+	var requiredRevision = 0;
+	// -----------------------------------------------------------------------------
+	// -->
+</script>
+
+<script type="text/javascript">
+	var initialTitle = document.title;
+	var isSavedSequence = true;
+
+	if (window.addEventListener)
+		/** DOMMouseScroll is for mozilla. */
+		window.addEventListener('DOMMouseScroll', handleWheelEvent, false);
+	/** IE/Opera. */
+	window.onmousewheel = document.onmousewheel = handleWheelEvent;
+
+	function handleWheelEvent(e) {
+		e.preventDefault();
+	}
+
+	function updateSavedStateTitle(isSaved) {
+		if (isSaved == "false") {
+			document.title = "*" + initialTitle;
+			isSavedSequence = false;
+		} else {
+			document.title = initialTitle;
+			isSavedSequence = true;
+		}
+	}
+
+	window.onbeforeunload = confirmExit;
+	function confirmExit() {
+		if (!isSavedSequence) {
+			return "You have made changes to the sequence but didn't save it. Are you sure you want to exit this page?";
+		}
+	}
+</script>
+</head>
+
+<body style="scroll: no; width: 100%; height: 100%">
+<script type="text/javascript">
+	// Version check for the Flash Player that has the ability to start Player Product Install (6.0r65)
+	var hasProductInstall = DetectFlashVer(6, 0, 65);
+
+	// Version check based upon the values defined in globals
+	var hasRequestedVersion = DetectFlashVer(requiredMajorVersion,
+			requiredMinorVersion, requiredRevision);
+
+	if (hasProductInstall && !hasRequestedVersion) {
+		// DO NOT MODIFY THE FOLLOWING FOUR LINES
+		// Location visited after installation is complete if installation is required
+		var MMPlayerType = (isIE == true) ? "ActiveX" : "PlugIn";
+		var MMredirectURL = encodeURI(window.location);
+		document.title = document.title.slice(0, 47)
+				+ " - Flash Player Installation";
+		var MMdoctitle = document.title;
+
+		AC_FL_RunContent("src", "playerProductInstall", "FlashVars",
+				"MMredirectURL=" + MMredirectURL + '&MMplayerType='
+						+ MMPlayerType + '&MMdoctitle=' + MMdoctitle + "",
+				"width", "100%", "height", "100%", "align", "middle", "id",
+				"VectorEditor", "quality", "high", "bgcolor", "#869ca7",
+				"name", "VectorEditor", "allowScriptAccess", "sameDomain",
+				"type", "application/x-shockwave-flash", "pluginspage",
+				"http://www.adobe.com/go/getflashplayer");
+	} else if (hasRequestedVersion) {
+		// if we've detected an acceptable version
+		// embed the Flash Content SWF when all tests are passed
+		AC_FL_RunContent("src", "VectorEditor", "width", "100%", "height",
+				"100%", "align", "middle", "id", "VectorEditor", "quality",
+				"high", "bgcolor", "#869ca7", "name", "VectorEditor",
+				"allowScriptAccess", "sameDomain", "type",
+				"application/x-shockwave-flash", "pluginspage",
+				"http://www.adobe.com/go/getflashplayer");
+	} else { // flash is too old or we can't detect the plugin
+		var alternateContent = 'Alternate HTML content should be placed here. ' + 'This content requires the Adobe Flash Player. ' + '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
+		document.write(alternateContent); // insert non-flash content
+	}
+	// -->
+</script>
+
+<!-- Commented in order to make extMouseWheel.js working on Mac -->
+<!-- <noscript> -->
+
+<table style="width: 100%; height: 100%" class="fullScreen">
+	<tr>
+		<td style="width: 100%; height: 100%">
+		<div style="width: 100%; height: 100%" id="flashContainerDiv"><object
+			classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540002" id="VectorEditor" width="100%" height="100%"
+			codebase="https://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
+			<param name="movie" value="VectorEditor.swf" />
+			<param name="quality" value="high" />
+			<param name="bgcolor" value="#869ca7" />
+			<param name="wmode" value="window" />
+			<param name="allowScriptAccess" value="sameDomain" />
+			<embed wicket:id="flashComponent" /> <!-- <embed wicket:id="flashComponent" src="/static/ve/VectorEditor.swf" quality="high" bgcolor="#869ca7"
+						width="100%" height="100%" name="VectorEditor" align="middle"
+						play="true"
+						loop="false"
+						type="application/x-shockwave-flash"
+						pluginspage="http://www.adobe.com/go/getflashplayer">
+					</embed> --></object></div>
+		</td>
+	</tr>
+</table>
+<!-- </noscript> -->
+</body>
+</html>

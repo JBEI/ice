@@ -37,6 +37,7 @@ import org.jbei.ice.lib.vo.PermutationSet;
 import org.jbei.ice.lib.vo.SequenceCheckerData;
 import org.jbei.ice.lib.vo.SequenceCheckerProject;
 import org.jbei.ice.lib.vo.TraceData;
+import org.jbei.ice.lib.vo.VectorEditorProject;
 import org.jbei.ice.services.blazeds.vo.UserPreferences;
 import org.jbei.ice.services.blazeds.vo.UserRestrictionEnzymes;
 
@@ -849,6 +850,144 @@ public class RegistryAMFAPI extends BaseService {
         }
 
         return traceData;
+    }
+
+    public VectorEditorProject createVectorEditorProject(String sessionId,
+            VectorEditorProject vectorEditorProject) {
+        if (vectorEditorProject == null || sessionId == null) {
+            return null;
+        }
+
+        Account account = getAccountBySessionId(sessionId);
+
+        if (account == null) {
+            return null;
+        }
+
+        String serializedVectorEditorData = "";
+
+        try {
+            serializedVectorEditorData = SerializationUtils.serializeToString(vectorEditorProject
+                    .getFeaturedDNASequence());
+        } catch (SerializationUtilsException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        }
+
+        ProjectController projectController = new ProjectController(account);
+
+        Project project = projectController.createProject(account, vectorEditorProject.getName(),
+            vectorEditorProject.getDescription(), serializedVectorEditorData,
+            vectorEditorProject.typeName(), new Date(), new Date());
+
+        try {
+            Project savedProject = projectController.save(project);
+
+            vectorEditorProject.setName(savedProject.getName());
+            vectorEditorProject.setDescription(savedProject.getDescription());
+            vectorEditorProject.setUuid(savedProject.getUuid());
+            vectorEditorProject.setOwnerEmail(savedProject.getAccount().getEmail());
+            vectorEditorProject.setOwnerName(savedProject.getAccount().getFullName());
+            vectorEditorProject.setCreationTime(savedProject.getCreationTime());
+            vectorEditorProject.setModificationTime(savedProject.getModificationTime());
+        } catch (ControllerException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        } catch (PermissionException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        }
+
+        return vectorEditorProject;
+    }
+
+    public VectorEditorProject saveVectorEditorProject(String sessionId,
+            VectorEditorProject vectorEditorProject) {
+        if (sessionId == null || sessionId.isEmpty() || vectorEditorProject == null
+                || vectorEditorProject.getUuid() == null) {
+            return null;
+        }
+
+        Account account = getAccountBySessionId(sessionId);
+
+        if (account == null) {
+            return null;
+        }
+
+        VectorEditorProject resultVectorEditorProject = null;
+
+        ProjectController projectController = new ProjectController(account);
+        try {
+            Project project = projectController.getProjectByUUID(vectorEditorProject.getUuid());
+
+            project.setName(vectorEditorProject.getName());
+            project.setDescription(vectorEditorProject.getDescription());
+            project.setModificationTime(new Date());
+            project.setData(SerializationUtils.serializeToString(vectorEditorProject
+                    .getFeaturedDNASequence()));
+
+            Project savedProject = projectController.save(project);
+
+            resultVectorEditorProject = new VectorEditorProject(savedProject.getName(),
+                    savedProject.getDescription(), savedProject.getUuid(), savedProject
+                            .getAccount().getEmail(), savedProject.getAccount().getFullName(),
+                    savedProject.getCreationTime(), savedProject.getModificationTime(),
+                    vectorEditorProject.getFeaturedDNASequence());
+        } catch (ControllerException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        } catch (SerializationUtilsException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        } catch (PermissionException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        }
+
+        return resultVectorEditorProject;
+    }
+
+    public VectorEditorProject getVectorEditorProject(String sessionId, String projectId) {
+        if (projectId == null || sessionId == null || sessionId.isEmpty() || projectId.isEmpty()) {
+            return null;
+        }
+
+        Account account = getAccountBySessionId(sessionId);
+
+        if (account == null) {
+            return null;
+        }
+
+        VectorEditorProject vectorEditorProject = null;
+
+        ProjectController projectController = new ProjectController(account);
+        try {
+            Project project = projectController.getProjectByUUID(projectId);
+
+            FeaturedDNASequence featuredDNASequence = (FeaturedDNASequence) SerializationUtils
+                    .deserializeFromString(project.getData());
+
+            vectorEditorProject = new VectorEditorProject(project.getName(),
+                    project.getDescription(), project.getUuid(), account.getEmail(),
+                    account.getFullName(), project.getCreationTime(),
+                    project.getModificationTime(), featuredDNASequence);
+        } catch (ControllerException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        } catch (SerializationUtilsException e) {
+            Logger.error(getLoggerPrefix(), e);
+
+            return null;
+        }
+
+        return vectorEditorProject;
     }
 
 }
