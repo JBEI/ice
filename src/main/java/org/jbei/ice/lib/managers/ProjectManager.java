@@ -101,7 +101,7 @@ public class ProjectManager {
         Session session = DAO.newSession();
         try {
             String queryString = "select id from " + Project.class.getName()
-                    + " where account.id = :account_id";
+                    + " where account.id = :account_id ORDER BY modification_time DESC";
 
             Query query = session.createQuery(queryString);
 
