@@ -244,12 +244,20 @@ public class SequenceAnalysisController extends Controller {
                     int subjectEnd = maxBl2SeqResult.getSubjectEnd();
 
                     if (isCircular) {
+                        if (queryStart > entrySequenceLength - 1) {
+                            queryStart = queryStart - entrySequenceLength;
+                        }
+
                         if (queryEnd > entrySequenceLength - 1) {
                             queryEnd = queryEnd - entrySequenceLength;
                         }
 
                         if (subjectEnd > entrySequenceLength - 1) {
                             subjectEnd = subjectEnd - entrySequenceLength;
+                        }
+
+                        if (subjectStart > entrySequenceLength - 1) {
+                            subjectStart = subjectStart - entrySequenceLength;
                         }
                     }
 
