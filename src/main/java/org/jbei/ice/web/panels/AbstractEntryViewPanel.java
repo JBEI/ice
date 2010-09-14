@@ -25,7 +25,7 @@ import org.jbei.ice.web.utils.WebUtils;
 public class AbstractEntryViewPanel<T extends Entry> extends Panel {
     private static final long serialVersionUID = 1L;
 
-    private Model<T> entryModel;
+    private final Model<T> entryModel;
 
     public AbstractEntryViewPanel(String id, Model<T> entryModel) {
         super(id);

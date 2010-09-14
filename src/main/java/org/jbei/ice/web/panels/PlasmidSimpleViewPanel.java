@@ -25,11 +25,13 @@ public class PlasmidSimpleViewPanel extends SimpleEntryViewPanel<Plasmid> {
     }
 
     protected void renderOriginOfReplication() {
-        add(new Label("originOfReplication", getEntry().getOriginOfReplication()));
+        add(new Label("originOfReplication", WebUtils.linkifyText(getEntry()
+                .getOriginOfReplication())).setEscapeModelStrings(false));
     }
 
     protected void renderPromoters() {
-        add(new Label("promoters", getEntry().getPromoters()));
+        add(new Label("promoters", WebUtils.linkifyText(getEntry().getPromoters()))
+                .setEscapeModelStrings(false));
     }
 
     protected void renderLinksToStrain() {
@@ -45,6 +47,7 @@ public class PlasmidSimpleViewPanel extends SimpleEntryViewPanel<Plasmid> {
     }
 
     protected void renderBackbone() {
-        add(new Label("backbone", getEntry().getBackbone()));
+        add(new Label("backbone", WebUtils.linkifyText(getEntry().getBackbone()))
+                .setEscapeModelStrings(false));
     }
 }

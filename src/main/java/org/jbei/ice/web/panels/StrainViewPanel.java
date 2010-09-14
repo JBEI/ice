@@ -20,11 +20,13 @@ public class StrainViewPanel extends AbstractEntryViewPanel<Strain> {
     }
 
     protected void renderHost() {
-        add(new Label("host", getEntry().getHost()));
+        add(new Label("host", WebUtils.linkifyText(getEntry().getHost()))
+                .setEscapeModelStrings(false));
     }
 
     protected void renderGenotypePhenotype() {
-        add(new Label("genotypePhenotype", getEntry().getGenotypePhenotype()));
+        add(new Label("genotypePhenotype", WebUtils.linkifyText(getEntry().getGenotypePhenotype()))
+                .setEscapeModelStrings(false));
     }
 
     protected void renderPlasmids() {
