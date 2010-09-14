@@ -33,6 +33,7 @@ import org.jbei.ice.web.panels.EntryTabPanel;
 import org.jbei.ice.web.panels.MiniAttachmentsViewPanel;
 import org.jbei.ice.web.panels.MiniPermissionViewPanel;
 import org.jbei.ice.web.panels.MiniSamplesViewPanel;
+import org.jbei.ice.web.panels.NotesViewPanel;
 import org.jbei.ice.web.panels.PartViewPanel;
 import org.jbei.ice.web.panels.PermissionEditPanel;
 import org.jbei.ice.web.panels.PlasmidViewPanel;
@@ -81,6 +82,10 @@ public class EntryViewPage extends ProtectedPage {
         } else {
             add(new EmptyPanel("sequencePanel"));
         }
+
+        Component notesPanel = makeNotesPanel(entry);
+        add(notesPanel);
+
         ArrayList<Panel> sidePanels = new ArrayList<Panel>();
         try {
             WorkspaceManager.setVisited(entry);
@@ -201,6 +206,12 @@ public class EntryViewPage extends ProtectedPage {
 
     private Panel makeSequencePanel(Entry entry) {
         Panel panel = new SequenceViewPanel("sequencePanel", entry);
+        panel.setOutputMarkupId(true);
+        return panel;
+    }
+
+    private Panel makeNotesPanel(Entry entry) {
+        Panel panel = new NotesViewPanel("notesPanel", entry);
         panel.setOutputMarkupId(true);
         return panel;
     }

@@ -89,11 +89,6 @@
 						name="short_description" id="id_short_description" cols="20" class="inputarea"></textarea></td>
 				</tr>
 				<tr>
-					<td style="width: 150px">Notes:</td>
-					<td><textarea wicket:id="plasmidNotes" style="width: 640px; height: 100px" rows="5"
-						name="long_description" id="id_long_description" cols="20" class="inputarea"></textarea></td>
-				</tr>
-				<tr>
 					<td style="width: 150px">References:</td>
 					<td><textarea wicket:id="plasmidReferences" style="width: 640px; height: 50px" rows="5"
 						name="references" id="id_references" cols="20" class="inputarea"></textarea></td>
@@ -114,6 +109,15 @@
 				<tr>
 					<td style="width: 150px">Principal Investigator: <span class="required">*</span></td>
 					<td><input wicket:id="plasmidPrincipalInvestigator" class="inputbox" maxlength="255"/></td>
+				</tr>
+				<tr>
+					<td style="width: 150px" valign="top">Notes:</td>
+					<td>
+						Markup Type: <select wicket:id="plasmidNotesMarkupType" class="inputbox"></select>
+						<br/>
+						<br/>
+						<span wicket:id="plasmidMarkupPanel"></span>
+					</td>
 				</tr>
 			</table>
 			</td>
@@ -161,11 +165,6 @@
 						name="short_description" id="id_short_description" cols="20" class="inputarea"></textarea></td>
 				</tr>
 				<tr>
-					<td style="width: 150px">Notes:</td>
-					<td><textarea wicket:id="strainNotes" style="width: 640px; height: 100px" rows="5"
-						name="long_description" id="id_long_description" cols="20" class="inputarea"></textarea></td>
-				</tr>
-				<tr>
 					<td style="width: 150px">References:</td>
 					<td><textarea wicket:id="strainReferences" style="width: 640px; height: 50px" rows="5"
 						name="references" id="id_references" cols="20" class="inputarea"></textarea></td>
@@ -174,6 +173,15 @@
 					<td style="width: 150px">Intellectual Property:</td>
 					<td><textarea wicket:id="strainIntellectualProperty" style="width: 640px; height: 50px"
 						rows="3" name="intellectual_property" cols="20" class="inputarea"></textarea></td>
+				</tr>
+				<tr>
+					<td style="width: 150px" valign="top">Notes:</td>
+					<td>
+						Markup Type: <select wicket:id="strainNotesMarkupType" class="inputbox"></select>
+						<br/>
+						<br/>
+						<span wicket:id="strainMarkupPanel"></span>
+					</td>
 				</tr>
 				<tr>
 					<td style="width: 150px">&nbsp;</td>

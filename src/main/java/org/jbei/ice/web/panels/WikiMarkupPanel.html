@@ -1,0 +1,38 @@
+<html xmlns:wicket>
+	<wicket:panel>
+		<table cellpadding="0" cellspacing="0" border="0">
+			<tr>
+				<td>
+					<div id="tabs">
+					<ul>
+						<li><a wicket:id="wikiMarkupLink">Wiki Markup</a></li>
+						<li><a wicket:id="previewLink">Preview</a></li>
+					</ul>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<span wicket:id="markupPlaceholderFragment"></span>
+					<span wicket:id="previewPlaceholderFragment"></span>
+				</td>
+			</tr>
+		</table>
+		
+		<wicket:fragment wicket:id="markupFragment">
+        <form wicket:id="form">
+            <textarea wicket:id="notes" style="width: 640px; height: 480px" rows="5" name="long_description" cols="20" class="inputarea"></textarea>
+        </form>
+		</wicket:fragment>
+		
+		<wicket:fragment wicket:id="previewFragment">
+		<table cellpadding="3" cellspacing="1" border="0" style="background-color: #BBBBBB; width: 640px; height: 480px">
+			<tr>
+				<td bgcolor="#ffffff" valign="top">
+				<span wicket:id="preview"></span>
+				</td>
+			</tr>
+		</table>
+		</wicket:fragment>
+	</wicket:panel>
+</html>

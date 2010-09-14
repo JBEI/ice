@@ -47,6 +47,10 @@ import org.jbei.ice.web.common.CustomChoice;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.UnprotectedPage;
+import org.jbei.ice.web.panels.AbstractMarkupPanel;
+import org.jbei.ice.web.panels.ConfluenceMarkupPanel;
+import org.jbei.ice.web.panels.TextMarkupPanel;
+import org.jbei.ice.web.panels.WikiMarkupPanel;
 
 public class PlasmidStrainNewFormPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -73,7 +77,6 @@ public class PlasmidStrainNewFormPanel extends Panel {
         private CustomChoice plasmidStatus;
         private String plasmidKeywords;
         private String plasmidSummary;
-        private String plasmidNotes;
         private String plasmidReferences;
         private CustomChoice plasmidBioSafetyLevel;
         private String plasmidIntellectualProperty;
@@ -84,6 +87,7 @@ public class PlasmidStrainNewFormPanel extends Panel {
         private String plasmidOriginOfReplication;
         private String plasmidPromoters;
         private boolean plasmidCircular = true;
+        private CustomChoice plasmidNotesMarkupType;
 
         // strain entry fields
         private String strainLinks;
@@ -95,7 +99,6 @@ public class PlasmidStrainNewFormPanel extends Panel {
         private CustomChoice strainStatus;
         private String strainKeywords;
         private String strainSummary;
-        private String strainNotes;
         private String strainReferences;
         private CustomChoice strainBioSafetyLevel;
         private String strainIntellectualProperty;
@@ -105,6 +108,12 @@ public class PlasmidStrainNewFormPanel extends Panel {
         private String strainHost;
         private String strainGenotypePhenotype;
         private String strainPlasmids;
+
+        private AbstractMarkupPanel plasmidMarkupPanel;
+        private AbstractMarkupPanel strainMarkupPanel;
+        private String plasmidNotesValue;
+        private String strainNotesValue;
+        private CustomChoice strainNotesMarkupType;
 
         public PlasmidStrainForm(String id) {
             super(id);
@@ -132,8 +141,6 @@ public class PlasmidStrainNewFormPanel extends Panel {
             add(new TextArea<String>("plasmidSummary", new PropertyModel<String>(this,
                     "plasmidSummary")).setRequired(true).setLabel(
                 new Model<String>("Plasmid Summary")));
-            add(new TextArea<String>("plasmidNotes",
-                    new PropertyModel<String>(this, "plasmidNotes")));
             add(new TextArea<String>("plasmidReferences", new PropertyModel<String>(this,
                     "plasmidReferences")));
             add(new TextArea<String>("plasmidIntellectualProperty", new PropertyModel<String>(this,
@@ -167,7 +174,6 @@ public class PlasmidStrainNewFormPanel extends Panel {
             add(new TextArea<String>("strainSummary", new PropertyModel<String>(this,
                     "strainSummary")).setRequired(true).setLabel(
                 new Model<String>("Strain Summary")));
-            add(new TextArea<String>("strainNotes", new PropertyModel<String>(this, "strainNotes")));
             add(new TextArea<String>("strainReferences", new PropertyModel<String>(this,
                     "strainReferences")));
             add(new TextArea<String>("strainIntellectualProperty", new PropertyModel<String>(this,
@@ -177,6 +183,123 @@ public class PlasmidStrainNewFormPanel extends Panel {
                     "strainGenotypePhenotype")));
 
             initializeResources();
+
+            plasmidMarkupPanel = new TextMarkupPanel("plasmidMarkupPanel");
+            plasmidMarkupPanel.setOutputMarkupId(true);
+            add(plasmidMarkupPanel);
+
+            strainMarkupPanel = new TextMarkupPanel("strainMarkupPanel");
+            strainMarkupPanel.setOutputMarkupId(true);
+            add(strainMarkupPanel);
+
+            renderPlasmidNotes();
+            renderStrainNotes();
+        }
+
+        protected void renderPlasmidNotes() {
+            ArrayList<CustomChoice> markupTypes = customChoicesListRenderer(Entry
+                    .getMarkupTypeMap());
+
+            DropDownChoice<CustomChoice> notesDropDownChoice = new DropDownChoice<CustomChoice>(
+                    "plasmidNotesMarkupType", new PropertyModel<CustomChoice>(this,
+                            "plasmidNotesMarkupType"), new Model<ArrayList<CustomChoice>>(
+                            markupTypes), new ChoiceRenderer<CustomChoice>("name", "value")) {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                protected void onSelectionChanged(final CustomChoice newSelection) {
+                    CustomChoice tSelection = getPlasmidNotesMarkupType();
+
+                    if (tSelection == null) {
+                        return;
+                    }
+
+                    AbstractMarkupPanel markupPanel = getPlasmidMarkupPanel();
+                    String currentMarkupData = markupPanel.getData();
+
+                    if (tSelection.getValue().equals("text")) {
+                        markupPanel = new TextMarkupPanel("plasmidMarkupPanel");
+                    } else if (tSelection.getValue().equals("wiki")) {
+                        markupPanel = new WikiMarkupPanel("plasmidMarkupPanel");
+                    } else if (tSelection.getValue().equals("confluence")) {
+                        markupPanel = new ConfluenceMarkupPanel("plasmidMarkupPanel");
+                    } else {
+                        markupPanel = new TextMarkupPanel("plasmidMarkupPanel");
+                    }
+
+                    markupPanel.setData(currentMarkupData);
+
+                    markupPanel.setOutputMarkupPlaceholderTag(true);
+                    markupPanel.setOutputMarkupId(true);
+                    this.getParent().replace(markupPanel);
+                    this.getParent().addOrReplace(markupPanel);
+
+                    setPlasmidMarkupPanel(markupPanel);
+                }
+
+                protected boolean wantOnSelectionChangedNotifications() {
+                    return true;
+                }
+            };
+
+            notesDropDownChoice.setRequired(true);
+
+            add(notesDropDownChoice);
+
+            setPlasmidNotesMarkupType(markupTypes.get(0));
+        }
+
+        protected void renderStrainNotes() {
+            ArrayList<CustomChoice> markupTypes = customChoicesListRenderer(Entry
+                    .getMarkupTypeMap());
+
+            DropDownChoice<CustomChoice> notesDropDownChoice = new DropDownChoice<CustomChoice>(
+                    "strainNotesMarkupType", new PropertyModel<CustomChoice>(this,
+                            "strainNotesMarkupType"), new Model<ArrayList<CustomChoice>>(
+                            markupTypes), new ChoiceRenderer<CustomChoice>("name", "value")) {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                protected void onSelectionChanged(final CustomChoice newSelection) {
+                    CustomChoice tSelection = getStrainNotesMarkupType();
+
+                    if (tSelection == null) {
+                        return;
+                    }
+
+                    AbstractMarkupPanel markupPanel = getStrainMarkupPanel();
+                    String currentMarkupData = markupPanel.getData();
+
+                    if (tSelection.getValue().equals("text")) {
+                        markupPanel = new TextMarkupPanel("strainMarkupPanel");
+                    } else if (tSelection.getValue().equals("wiki")) {
+                        markupPanel = new WikiMarkupPanel("strainMarkupPanel");
+                    } else if (tSelection.getValue().equals("confluence")) {
+                        markupPanel = new ConfluenceMarkupPanel("strainMarkupPanel");
+                    } else {
+                        markupPanel = new TextMarkupPanel("strainMarkupPanel");
+                    }
+
+                    markupPanel.setData(currentMarkupData);
+
+                    markupPanel.setOutputMarkupPlaceholderTag(true);
+                    markupPanel.setOutputMarkupId(true);
+                    this.getParent().replace(markupPanel);
+                    this.getParent().addOrReplace(markupPanel);
+
+                    setStrainMarkupPanel(markupPanel);
+                }
+
+                protected boolean wantOnSelectionChangedNotifications() {
+                    return true;
+                }
+            };
+
+            notesDropDownChoice.setRequired(true);
+
+            add(notesDropDownChoice);
+
+            setStrainNotesMarkupType(markupTypes.get(0));
         }
 
         protected void renderStatuses() {
@@ -241,26 +364,32 @@ public class PlasmidStrainNewFormPanel extends Panel {
                         StringBuilder plasmidsCollection = new StringBuilder();
 
                         for (String selectionMarker : uniqueSelectionMarkers) {
-                            selectionMarkersCollection.append("'").append(
-                                Utils.escapeSpecialJavascriptCharacters(selectionMarker)).append(
-                                "',");
+                            selectionMarkersCollection
+                                    .append("'")
+                                    .append(
+                                        Utils.escapeSpecialJavascriptCharacters(selectionMarker))
+                                    .append("',");
                         }
                         for (String promoter : uniquePromoters) {
-                            promotersCollection.append("'").append(
-                                Utils.escapeSpecialJavascriptCharacters(promoter)).append("',");
+                            promotersCollection.append("'")
+                                    .append(Utils.escapeSpecialJavascriptCharacters(promoter))
+                                    .append("',");
                         }
                         for (String originOfReplication : uniqueOriginOfReplications) {
-                            originOfReplicationsCollection.append("'").append(
-                                Utils.escapeSpecialJavascriptCharacters(originOfReplication))
+                            originOfReplicationsCollection
+                                    .append("'")
+                                    .append(
+                                        Utils.escapeSpecialJavascriptCharacters(originOfReplication))
                                     .append("',");
                         }
                         for (String plasmid : uniquePlasmids) {
-                            plasmidsCollection.append("'").append(
-                                Utils.escapeSpecialJavascriptCharacters(plasmid)).append("',");
+                            plasmidsCollection.append("'")
+                                    .append(Utils.escapeSpecialJavascriptCharacters(plasmid))
+                                    .append("',");
                         }
 
-                        dataMap.put("selectionMarkersCollection", selectionMarkersCollection
-                                .toString());
+                        dataMap.put("selectionMarkersCollection",
+                            selectionMarkersCollection.toString());
                         dataMap.put("promotersCollection", promotersCollection.toString());
                         dataMap.put("originOfReplicationsCollection",
                             originOfReplicationsCollection.toString());
@@ -311,7 +440,6 @@ public class PlasmidStrainNewFormPanel extends Panel {
             plasmid.setStatus(getPlasmidStatus().getValue());
             plasmid.setKeywords(getPlasmidKeywords());
             plasmid.setShortDescription(getPlasmidSummary());
-            plasmid.setLongDescription(getPlasmidNotes());
             plasmid.setReferences(getPlasmidReferences());
             plasmid.setBioSafetyLevel(Integer.parseInt(getPlasmidBioSafetyLevel().getValue()));
             plasmid.setIntellectualProperty(getPlasmidIntellectualProperty());
@@ -331,6 +459,23 @@ public class PlasmidStrainNewFormPanel extends Panel {
             plasmid.setOriginOfReplication(getPlasmidOriginOfReplication());
             plasmid.setPromoters(getPlasmidPromoters());
             plasmid.setCircular(getPlasmidCircular());
+            plasmid.setLongDescriptionType(getPlasmidNotesMarkupType().getValue());
+
+            AbstractMarkupPanel plasmidMarkupPanel = getPlasmidMarkupPanel();
+
+            String plasmidNotesString = "";
+            if (plasmidMarkupPanel instanceof TextMarkupPanel) {
+                plasmidNotesString = ((TextMarkupPanel) plasmidMarkupPanel).getNotesTextArea()
+                        .getDefaultModelObjectAsString();
+            } else if (plasmidMarkupPanel instanceof WikiMarkupPanel) {
+                plasmidNotesString = ((WikiMarkupPanel) plasmidMarkupPanel).getMarkupTextArea()
+                        .getDefaultModelObjectAsString();
+            } else if (plasmidMarkupPanel instanceof ConfluenceMarkupPanel) {
+                plasmidNotesString = ((ConfluenceMarkupPanel) plasmidMarkupPanel)
+                        .getMarkupTextArea().getDefaultModelObjectAsString();
+            }
+
+            plasmid.setLongDescription(plasmidNotesString);
 
             // simplified strain form processing
             CommaSeparatedField<Link> linksField2 = new CommaSeparatedField<Link>(Link.class,
@@ -357,7 +502,6 @@ public class PlasmidStrainNewFormPanel extends Panel {
             strain.setStatus(getPlasmidStatus().getValue());
             strain.setKeywords(getStrainKeywords());
             strain.setShortDescription(getStrainSummary());
-            strain.setLongDescription(getStrainNotes());
             strain.setReferences(getStrainReferences());
             strain.setBioSafetyLevel(Integer.parseInt(getPlasmidBioSafetyLevel().getValue()));
             strain.setIntellectualProperty(getStrainIntellectualProperty());
@@ -373,8 +517,25 @@ public class PlasmidStrainNewFormPanel extends Panel {
             Name[] plasmidTempNames = plasmid.getNames().toArray(new Name[0]);
             String plasmidNameString = plasmidTempNames[0].getName();
             strain.setPlasmids(plasmidNameString);
+            strain.setLongDescriptionType(getStrainNotesMarkupType().getValue());
 
             EntryController entryController = new EntryController(IceSession.get().getAccount());
+
+            AbstractMarkupPanel strainMarkupPanel = getStrainMarkupPanel();
+
+            String strainNotesString = "";
+            if (strainMarkupPanel instanceof TextMarkupPanel) {
+                strainNotesString = ((TextMarkupPanel) strainMarkupPanel).getNotesTextArea()
+                        .getDefaultModelObjectAsString();
+            } else if (strainMarkupPanel instanceof WikiMarkupPanel) {
+                strainNotesString = ((WikiMarkupPanel) strainMarkupPanel).getMarkupTextArea()
+                        .getDefaultModelObjectAsString();
+            } else if (strainMarkupPanel instanceof ConfluenceMarkupPanel) {
+                strainNotesString = ((ConfluenceMarkupPanel) strainMarkupPanel).getMarkupTextArea()
+                        .getDefaultModelObjectAsString();
+            }
+
+            strain.setLongDescription(strainNotesString);
 
             // persist
             try {
@@ -460,14 +621,6 @@ public class PlasmidStrainNewFormPanel extends Panel {
 
         public void setPlasmidSummary(String plasmidSummary) {
             this.plasmidSummary = plasmidSummary;
-        }
-
-        public String getPlasmidNotes() {
-            return plasmidNotes;
-        }
-
-        public void setPlasmidNotes(String plasmidNotes) {
-            this.plasmidNotes = plasmidNotes;
         }
 
         public String getPlasmidReferences() {
@@ -614,14 +767,6 @@ public class PlasmidStrainNewFormPanel extends Panel {
             this.strainSummary = strainSummary;
         }
 
-        public String getStrainNotes() {
-            return strainNotes;
-        }
-
-        public void setStrainNotes(String strainNotes) {
-            this.strainNotes = strainNotes;
-        }
-
         public String getStrainReferences() {
             return strainReferences;
         }
@@ -684,6 +829,38 @@ public class PlasmidStrainNewFormPanel extends Panel {
 
         public void setStrainPlasmids(String strainPlasmids) {
             this.strainPlasmids = strainPlasmids;
+        }
+
+        public void setPlasmidNotesMarkupType(CustomChoice plasmidNotesMarkupType) {
+            this.plasmidNotesMarkupType = plasmidNotesMarkupType;
+        }
+
+        public CustomChoice getPlasmidNotesMarkupType() {
+            return plasmidNotesMarkupType;
+        }
+
+        public void setStrainNotesMarkupType(CustomChoice strainNotesMarkupType) {
+            this.strainNotesMarkupType = strainNotesMarkupType;
+        }
+
+        public CustomChoice getStrainNotesMarkupType() {
+            return strainNotesMarkupType;
+        }
+
+        public AbstractMarkupPanel getPlasmidMarkupPanel() {
+            return plasmidMarkupPanel;
+        }
+
+        public void setPlasmidMarkupPanel(AbstractMarkupPanel plasmidMarkupPanel) {
+            this.plasmidMarkupPanel = plasmidMarkupPanel;
+        }
+
+        public AbstractMarkupPanel getStrainMarkupPanel() {
+            return strainMarkupPanel;
+        }
+
+        public void setStrainMarkupPanel(AbstractMarkupPanel strainMarkupPanel) {
+            this.strainMarkupPanel = strainMarkupPanel;
         }
     }
 }

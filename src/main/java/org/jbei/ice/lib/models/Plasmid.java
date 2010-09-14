@@ -34,12 +34,13 @@ public class Plasmid extends Entry implements IPlasmidValueObject, IModel {
 
     public Plasmid(String recordId, String versionId, String recordType, String owner,
             String ownerEmail, String creator, String creatorEmail, String status, String alias,
-            String keywords, String shortDescription, String longDescription, String references,
-            Date creationTime, Date modificationTime, String backbone, String originOfReplication,
-            String promoters, boolean circular) {
+            String keywords, String shortDescription, String longDescription,
+            String longDescriptionType, String references, Date creationTime,
+            Date modificationTime, String backbone, String originOfReplication, String promoters,
+            boolean circular) {
         super(recordId, versionId, recordType, owner, ownerEmail, creator, creatorEmail, status,
-                alias, keywords, shortDescription, longDescription, references, creationTime,
-                modificationTime);
+                alias, keywords, shortDescription, longDescription, longDescriptionType,
+                references, creationTime, modificationTime);
         this.backbone = backbone;
         this.originOfReplication = originOfReplication;
         this.promoters = promoters;

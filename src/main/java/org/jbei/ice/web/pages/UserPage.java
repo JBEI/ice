@@ -61,7 +61,7 @@ public class UserPage extends ProtectedPage {
                 new PageParameters("0=projects"));
         projectsLink.setOutputMarkupId(true);
 
-        projectsLink.setVisible(false); // TODO: Uncomment this to see projects tab
+        projectsLink.setVisible(false); // TODO: Comment this to see projects tab
 
         updateTab();
 

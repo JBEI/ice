@@ -82,6 +82,9 @@ public class Entry implements IEntryValueObject, IModel {
     @Lob
     private String longDescription;
 
+    @Column(name = "long_description_type", length = 31)
+    private String longDescriptionType;
+
     @Column(name = "literature_references")
     @Lob
     private String references;
@@ -136,8 +139,8 @@ public class Entry implements IEntryValueObject, IModel {
 
     public Entry(String recordId, String versionId, String recordType, String owner,
             String ownerEmail, String creator, String creatorEmail, String status, String alias,
-            String keywords, String shortDescription, String longDescription, String references,
-            Date creationTime, Date modificationTime) {
+            String keywords, String shortDescription, String longDescription,
+            String longDescriptionType, String references, Date creationTime, Date modificationTime) {
         this.recordId = recordId;
         this.versionId = versionId;
         this.recordType = recordType;
@@ -150,6 +153,7 @@ public class Entry implements IEntryValueObject, IModel {
         this.keywords = keywords;
         this.shortDescription = shortDescription;
         this.longDescription = longDescription;
+        this.longDescriptionType = longDescriptionType;
         this.references = references;
         this.creationTime = creationTime;
         this.modificationTime = modificationTime;
@@ -399,6 +403,14 @@ public class Entry implements IEntryValueObject, IModel {
         this.longDescription = longDescription;
     }
 
+    public String getLongDescriptionType() {
+        return longDescriptionType;
+    }
+
+    public void setLongDescriptionType(String longDescriptionType) {
+        this.longDescriptionType = longDescriptionType;
+    }
+
     public String getReferences() {
         return references;
     }
@@ -492,6 +504,16 @@ public class Entry implements IEntryValueObject, IModel {
 
         resultMap.put("1", "Level 1");
         resultMap.put("2", "Level 2");
+
+        return resultMap;
+    }
+
+    public static Map<String, String> getMarkupTypeMap() {
+        Map<String, String> resultMap = new LinkedHashMap<String, String>();
+
+        resultMap.put("text", "Text");
+        resultMap.put("wiki", "Wiki");
+        resultMap.put("confluence", "Confluence");
 
         return resultMap;
     }

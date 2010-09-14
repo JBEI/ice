@@ -40,18 +40,21 @@ public class EntryUpdateForm<T extends Entry> extends EntrySubmitForm<T> {
         setNames(entry.getNamesAsString());
         setCreator(entry.getCreator());
         setCreatorEmail(entry.getCreatorEmail());
-        setStatus(lookupCustomChoice(customChoicesList(Entry.getStatusOptionsMap()), entry
-                .getStatus()));
+        setStatus(lookupCustomChoice(customChoicesList(Entry.getStatusOptionsMap()),
+            entry.getStatus()));
         setAlias(entry.getAlias());
         setLinks(entry.getLinksAsString());
         setKeywords(entry.getKeywords());
         setSummary(entry.getShortDescription());
-        setNotes(entry.getLongDescription());
         setReferences(entry.getReferences());
         setIntellectualProperty(entry.getIntellectualProperty());
         setBioSafetyLevel(lookupCustomChoice(
-                customChoicesList(Entry.getBioSafetyLevelOptionsMap()), String.valueOf(entry
-                        .getBioSafetyLevel())));
+            customChoicesList(Entry.getBioSafetyLevelOptionsMap()),
+            String.valueOf(entry.getBioSafetyLevel())));
+        setNotesMarkupType(lookupCustomChoice(customChoicesList(Entry.getMarkupTypeMap()),
+            String.valueOf(entry.getLongDescriptionType())));
+
+        updateNotesMarkupEditor(entry.getLongDescriptionType());
 
         Set<EntryFundingSource> entryFundingSources = entry.getEntryFundingSources();
         if (entryFundingSources != null && entryFundingSources.size() > 0) {

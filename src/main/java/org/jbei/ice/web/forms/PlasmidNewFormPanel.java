@@ -9,9 +9,12 @@ import org.apache.wicket.model.PropertyModel;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.web.common.CommaSeparatedField;
+import org.jbei.ice.web.panels.MarkupAttachmentsPanel;
 
 public class PlasmidNewFormPanel extends Panel {
     private static final long serialVersionUID = 1L;
+
+    private MarkupAttachmentsPanel markupAttachmentsPanel;
 
     public PlasmidNewFormPanel(String id) {
         super(id);
@@ -21,6 +24,24 @@ public class PlasmidNewFormPanel extends Panel {
         add(form);
 
         add(new FeedbackPanel("feedback"));
+
+        //renderMarkupAttachmentsPanel();
+    }
+
+    public MarkupAttachmentsPanel getMarkupAttachmentsPanel() {
+        return markupAttachmentsPanel;
+    }
+
+    public void setMarkupAttachmentsPanel(MarkupAttachmentsPanel markupAttachmentsPanel) {
+        this.markupAttachmentsPanel = markupAttachmentsPanel;
+    }
+
+    protected void renderMarkupAttachmentsPanel() {
+        markupAttachmentsPanel = new MarkupAttachmentsPanel("markupAttachmentsPanel");
+        markupAttachmentsPanel.setOutputMarkupId(true);
+        markupAttachmentsPanel.setOutputMarkupPlaceholderTag(true);
+
+        add(markupAttachmentsPanel);
     }
 
     @SuppressWarnings("unused")

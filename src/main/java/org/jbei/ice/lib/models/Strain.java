@@ -31,12 +31,12 @@ public class Strain extends Entry implements IStrainValueObject, IModel {
 
     public Strain(String recordId, String versionId, String recordType, String owner,
             String ownerEmail, String creator, String creatorEmail, String status, String alias,
-            String keywords, String shortDescription, String longDescription, String references,
-            Date creationTime, Date modificationTime, String host, String genotypePhenotype,
-            String plasmids) {
+            String keywords, String shortDescription, String longDescription,
+            String longDescriptionType, String references, Date creationTime,
+            Date modificationTime, String host, String genotypePhenotype, String plasmids) {
         super(recordId, versionId, recordType, owner, ownerEmail, creator, creatorEmail, status,
-                alias, keywords, shortDescription, longDescription, references, creationTime,
-                modificationTime);
+                alias, keywords, shortDescription, longDescription, longDescriptionType,
+                references, creationTime, modificationTime);
         this.host = host;
         this.genotypePhenotype = genotypePhenotype;
         this.plasmids = plasmids;

@@ -43,7 +43,7 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
         renderModificationTime();
         renderKeywords();
         renderSummary();
-        renderNotes();
+        //renderNotes();
         renderReferences();
         renderBioSafetyLevel();
         renderIntellectualProperty();

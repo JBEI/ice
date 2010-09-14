@@ -39,11 +39,36 @@ import org.jbei.ice.web.common.CustomChoice;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.UnprotectedPage;
+import org.jbei.ice.web.panels.AbstractMarkupPanel;
+import org.jbei.ice.web.panels.ConfluenceMarkupPanel;
+import org.jbei.ice.web.panels.MarkupAttachmentsPanel;
+import org.jbei.ice.web.panels.TextMarkupPanel;
+import org.jbei.ice.web.panels.WikiMarkupPanel;
 
 public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
+    private MarkupAttachmentsPanel markupAttachmentsPanel;
+
+    public MarkupAttachmentsPanel getMarkupAttachmentsPanel() {
+        return markupAttachmentsPanel;
+    }
+
+    public void setMarkupAttachmentsPanel(MarkupAttachmentsPanel markupAttachmentsPanel) {
+        this.markupAttachmentsPanel = markupAttachmentsPanel;
+    }
+
+    protected void renderMarkupAttachmentsPanel() {
+        markupAttachmentsPanel = new MarkupAttachmentsPanel("markupAttachmentsPanel");
+        markupAttachmentsPanel.setOutputMarkupId(true);
+        markupAttachmentsPanel.setOutputMarkupPlaceholderTag(true);
+
+        add(markupAttachmentsPanel);
+    }
+
     private static final long serialVersionUID = 1L;
 
     private T entry;
+
+    private AbstractMarkupPanel markupPanel;
 
     // entry fields
     private String links;
@@ -54,7 +79,7 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
     private CustomChoice status;
     private String keywords;
     private String summary;
-    private String notes;
+    private CustomChoice notesMarkupType;
     private String references;
     private CustomChoice bioSafetyLevel;
     private String intellectualProperty;
@@ -76,7 +101,7 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
 
     protected void initializeElements() {
         add(new TextField<String>("names", new PropertyModel<String>(this, "names")).setRequired(
-                true).setLabel(new Model<String>("Name")));
+            true).setLabel(new Model<String>("Name")));
         add(new TextField<String>("links", new PropertyModel<String>(this, "links")));
         add(new TextField<String>("alias", new PropertyModel<String>(this, "alias")));
         add(new TextField<String>("creator", new PropertyModel<String>(this, "creator"))
@@ -89,7 +114,6 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
         add(new TextField<String>("keywords", new PropertyModel<String>(this, "keywords")));
         add(new TextArea<String>("summary", new PropertyModel<String>(this, "summary"))
                 .setRequired(true).setLabel(new Model<String>("Summary")));
-        add(new TextArea<String>("notes", new PropertyModel<String>(this, "notes")));
         add(new TextArea<String>("references", new PropertyModel<String>(this, "references")));
 
         renderBioSafetyLevels();
@@ -99,7 +123,13 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
         add(new TextField<String>("fundingSource", new PropertyModel<String>(this, "fundingSource")));
         add(new TextField<String>("principalInvestigator", new PropertyModel<String>(this,
                 "principalInvestigator")).setRequired(true).setLabel(
-                new Model<String>("Principal Investigator")));
+            new Model<String>("Principal Investigator")));
+
+        renderNotes();
+
+        renderMarkupPanel();
+
+        //renderMarkupAttachmentsPanel();
     }
 
     protected void initializeResources() {
@@ -131,30 +161,32 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
                     StringBuilder plasmidsCollection = new StringBuilder();
 
                     for (String selectionMarker : uniqueSelectionMarkers) {
-                        selectionMarkersCollection.append("'").append(
-                                Utils.escapeSpecialJavascriptCharacters(selectionMarker)).append(
-                                "',");
+                        selectionMarkersCollection.append("'")
+                                .append(Utils.escapeSpecialJavascriptCharacters(selectionMarker))
+                                .append("',");
                     }
                     for (String promoter : uniquePromoters) {
-                        promotersCollection.append("'").append(
-                                Utils.escapeSpecialJavascriptCharacters(promoter)).append("',");
+                        promotersCollection.append("'")
+                                .append(Utils.escapeSpecialJavascriptCharacters(promoter))
+                                .append("',");
                     }
                     for (String originOfReplication : uniqueOriginOfReplications) {
-                        originOfReplicationsCollection.append("'").append(
-                                Utils.escapeSpecialJavascriptCharacters(originOfReplication))
+                        originOfReplicationsCollection
+                                .append("'")
+                                .append(
+                                    Utils.escapeSpecialJavascriptCharacters(originOfReplication))
                                 .append("',");
                     }
                     for (String plasmid : uniquePlasmids) {
-                        plasmidsCollection.append("'").append(
-                                Utils.escapeSpecialJavascriptCharacters(plasmid)).append("',");
+                        plasmidsCollection.append("'")
+                                .append(Utils.escapeSpecialJavascriptCharacters(plasmid))
+                                .append("',");
                     }
 
-                    dataMap
-                            .put("selectionMarkersCollection", selectionMarkersCollection
-                                    .toString());
+                    dataMap.put("selectionMarkersCollection", selectionMarkersCollection.toString());
                     dataMap.put("promotersCollection", promotersCollection.toString());
-                    dataMap.put("originOfReplicationsCollection", originOfReplicationsCollection
-                            .toString());
+                    dataMap.put("originOfReplicationsCollection",
+                        originOfReplicationsCollection.toString());
                     dataMap.put("plasmidsCollection", plasmidsCollection.toString());
                 }
 
@@ -163,12 +195,12 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
         };
 
         add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
-                UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.autocomplete.css"));
+            UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.autocomplete.css"));
         add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.autocomplete.js"));
+            UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.autocomplete.js"));
         add(TextTemplateHeaderContributor.forJavaScript(UnprotectedPage.class,
-                UnprotectedPage.JS_RESOURCE_LOCATION + "autocompleteDataTemplate.js",
-                autocompleteDataMap));
+            UnprotectedPage.JS_RESOURCE_LOCATION + "autocompleteDataTemplate.js",
+            autocompleteDataMap));
         add(new Label("initializeCollectionsScript",
                 "try {initializeCollections();} catch (err) { }").setEscapeModelStrings(false));
     }
@@ -192,6 +224,66 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
                 new ChoiceRenderer<CustomChoice>("name", "value")).setRequired(true));
 
         setBioSafetyLevel(bioSafetyLevels.get(0));
+    }
+
+    protected void renderNotes() {
+        ArrayList<CustomChoice> markupTypes = customChoicesList(Entry.getMarkupTypeMap());
+
+        DropDownChoice<CustomChoice> notesDropDownChoice = new DropDownChoice<CustomChoice>(
+                "notesMarkupType", new PropertyModel<CustomChoice>(this, "notesMarkupType"),
+                new Model<ArrayList<CustomChoice>>(markupTypes), new ChoiceRenderer<CustomChoice>(
+                        "name", "value")) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected void onSelectionChanged(final CustomChoice newSelection) {
+                CustomChoice tSelection = getNotesMarkupType();
+
+                if (tSelection == null) {
+                    return;
+                }
+
+                AbstractMarkupPanel markupPanel = getMarkupPanel();
+                String currentMarkupData = markupPanel.getData();
+
+                if (tSelection.getValue().equals("text")) {
+                    markupPanel = new TextMarkupPanel("markupPanel");
+                } else if (tSelection.getValue().equals("wiki")) {
+                    markupPanel = new WikiMarkupPanel("markupPanel");
+                } else if (tSelection.getValue().equals("confluence")) {
+                    markupPanel = new ConfluenceMarkupPanel("markupPanel");
+                } else {
+                    markupPanel = new TextMarkupPanel("markupPanel");
+                }
+
+                markupPanel.setData(currentMarkupData);
+
+                markupPanel.setOutputMarkupPlaceholderTag(true);
+                markupPanel.setOutputMarkupId(true);
+                this.getParent().replace(markupPanel);
+                this.getParent().addOrReplace(markupPanel);
+
+                setMarkupPanel(markupPanel);
+            }
+
+            protected boolean wantOnSelectionChangedNotifications() {
+                return true;
+            }
+        };
+
+        notesDropDownChoice.setRequired(true);
+
+        add(notesDropDownChoice);
+
+        setNotesMarkupType(markupTypes.get(0));
+    }
+
+    protected void renderMarkupPanel() {
+        markupPanel = new TextMarkupPanel("markupPanel");
+        markupPanel.setOutputMarkupId(true);
+        markupPanel.setOutputMarkupPlaceholderTag(true);
+
+        add(markupPanel);
     }
 
     protected ArrayList<CustomChoice> customChoicesList(Map<String, String> map) {
@@ -222,6 +314,32 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
         return result;
     }
 
+    protected void updateNotesMarkupEditor(String type) {
+        AbstractMarkupPanel markupPanel = getMarkupPanel();
+
+        if (type.equals("text")) {
+            markupPanel = new TextMarkupPanel("markupPanel");
+            ((TextMarkupPanel) markupPanel).setData(entry.getLongDescription());
+        } else if (type.equals("wiki")) {
+            markupPanel = new WikiMarkupPanel("markupPanel");
+            ((WikiMarkupPanel) markupPanel).setData(entry.getLongDescription());
+        } else if (type.equals("confluence")) {
+            markupPanel = new ConfluenceMarkupPanel("markupPanel");
+            ((ConfluenceMarkupPanel) markupPanel).setData(entry.getLongDescription());
+        } else {
+            markupPanel = new TextMarkupPanel("markupPanel");
+            ((TextMarkupPanel) markupPanel).setData(entry.getLongDescription());
+        }
+
+        markupPanel.setOutputMarkupPlaceholderTag(true);
+        markupPanel.setOutputMarkupId(true);
+        //this.getParent().replace(markupPanel);
+        //this.getParent().addOrReplace(markupPanel);
+        addOrReplace(markupPanel);
+
+        setMarkupPanel(markupPanel);
+    }
+
     protected void populateEntry() {
         CommaSeparatedField<Link> linksField = new CommaSeparatedField<Link>(Link.class, "getLink",
                 "setLink");
@@ -241,10 +359,26 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
         entry.setStatus(getStatus().getValue());
         entry.setKeywords(getKeywords());
         entry.setShortDescription(getSummary());
-        entry.setLongDescription(getNotes());
         entry.setReferences(getReferences());
         entry.setBioSafetyLevel(Integer.parseInt(getBioSafetyLevel().getValue()));
         entry.setIntellectualProperty(getIntellectualProperty());
+        entry.setLongDescriptionType(getNotesMarkupType().getValue());
+
+        AbstractMarkupPanel markupPanel = getMarkupPanel();
+
+        String notesString = "";
+        if (markupPanel instanceof TextMarkupPanel) {
+            notesString = ((TextMarkupPanel) markupPanel).getNotesTextArea()
+                    .getDefaultModelObjectAsString();
+        } else if (markupPanel instanceof WikiMarkupPanel) {
+            notesString = ((WikiMarkupPanel) markupPanel).getMarkupTextArea()
+                    .getDefaultModelObjectAsString();
+        } else if (markupPanel instanceof ConfluenceMarkupPanel) {
+            notesString = ((ConfluenceMarkupPanel) markupPanel).getMarkupTextArea()
+                    .getDefaultModelObjectAsString();
+        }
+
+        entry.setLongDescription(notesString);
 
         FundingSource fundingSource = new FundingSource();
         fundingSource.setFundingSource((getFundingSource() != null) ? getFundingSource() : "");
@@ -346,14 +480,6 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
         this.summary = summary;
     }
 
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
-
     public String getReferences() {
         return references;
     }
@@ -368,6 +494,14 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
 
     public CustomChoice getBioSafetyLevel() {
         return bioSafetyLevel;
+    }
+
+    public void setNotesMarkupType(CustomChoice notesMarkupType) {
+        this.notesMarkupType = notesMarkupType;
+    }
+
+    public CustomChoice getNotesMarkupType() {
+        return notesMarkupType;
     }
 
     public void setIntellectualProperty(String intellectualProperty) {
@@ -400,5 +534,13 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
 
     public void setEntry(T entry) {
         this.entry = entry;
+    }
+
+    public AbstractMarkupPanel getMarkupPanel() {
+        return markupPanel;
+    }
+
+    public void setMarkupPanel(AbstractMarkupPanel markupPanel) {
+        this.markupPanel = markupPanel;
     }
 }

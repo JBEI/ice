@@ -67,11 +67,6 @@
 						name="short_description" id="id_short_description" cols="20" class="inputarea"></textarea></td>
 				</tr>
 				<tr>
-					<td style="width: 150px">Notes:</td>
-					<td><textarea wicket:id="notes" style="width: 640px; height: 100px" rows="5"
-						name="long_description" id="id_long_description" cols="20" class="inputarea"></textarea></td>
-				</tr>
-				<tr>
 					<td style="width: 150px">References:</td>
 					<td><textarea wicket:id="references" style="width: 640px; height: 50px" rows="5"
 						name="references" id="id_references" cols="20" class="inputarea"></textarea></td>
@@ -93,6 +88,15 @@
 				<tr>
 					<td style="width: 150px">Principal Investigator: <span class="required">*</span></td>
 					<td><input wicket:id="principalInvestigator" class="inputbox" maxlength="255"/></td>
+				</tr>
+				<tr>
+					<td style="width: 150px" valign="top">Notes:</td>
+					<td>
+						Markup Type: <select wicket:id="notesMarkupType" class="inputbox"></select>
+						<br/>
+						<br/>
+						<span wicket:id="markupPanel"></span>
+					</td>
 				</tr>
 				<tr>
 					<td style="width: 150px">&nbsp;</td>

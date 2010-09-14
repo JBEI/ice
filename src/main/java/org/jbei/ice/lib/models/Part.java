@@ -36,12 +36,13 @@ public class Part extends Entry implements IPartValueObject, IModel {
 
     public Part(String recordId, String versionId, String recordType, String owner,
             String ownerEmail, String creator, String creatorEmail, String status, String alias,
-            String keywords, String shortDescription, String longDescription, String references,
-            Date creationTime, Date modificationTime, AssemblyStandard packageFormat,
-            String pkgdDnaFwdHash, String pkgdDnaRevHash) {
+            String keywords, String shortDescription, String longDescription,
+            String longDescriptionType, String references, Date creationTime,
+            Date modificationTime, AssemblyStandard packageFormat, String pkgdDnaFwdHash,
+            String pkgdDnaRevHash) {
         super(recordId, versionId, recordType, owner, ownerEmail, creator, creatorEmail, status,
-                alias, keywords, shortDescription, longDescription, references, creationTime,
-                modificationTime);
+                alias, keywords, shortDescription, longDescription, longDescriptionType,
+                references, creationTime, modificationTime);
         this.packageFormat = packageFormat;
         this.pkgdDnaFwdHash = pkgdDnaFwdHash;
         this.pkgdDnaRevHash = pkgdDnaRevHash;

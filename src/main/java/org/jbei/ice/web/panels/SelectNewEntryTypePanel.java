@@ -50,6 +50,7 @@ public class SelectNewEntryTypePanel extends Panel {
                 }
 
                 formPanel.setOutputMarkupId(true);
+                formPanel.setOutputMarkupPlaceholderTag(true);
                 getPage().replace(formPanel);
                 getPage().addOrReplace(formPanel);
             }
