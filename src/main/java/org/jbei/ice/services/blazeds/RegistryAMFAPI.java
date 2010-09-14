@@ -290,12 +290,12 @@ public class RegistryAMFAPI extends BaseService {
         return userPreferences;
     }
 
-    public void saveUserPreferences(String sessionId, UserPreferences preferences) {
+    public boolean saveUserPreferences(String sessionId, UserPreferences preferences) {
         try {
             Account account = getAccountBySessionId(sessionId);
 
             if (account == null) {
-                return;
+                return false;
             }
 
             AccountPreferences accountPreferences = AccountController
@@ -306,6 +306,8 @@ public class RegistryAMFAPI extends BaseService {
                 serializedPreferences = SerializationUtils.serializeToString(preferences);
             } catch (SerializationUtils.SerializationUtilsException e) {
                 Logger.error(getLoggerPrefix(), e);
+
+                return false;
             }
 
             if (accountPreferences != null) {
@@ -318,11 +320,15 @@ public class RegistryAMFAPI extends BaseService {
             }
 
             logInfo(account.getEmail() + " saveUserPreferences");
+
+            return true;
         } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
         } catch (Exception e) {
             Logger.error(getLoggerPrefix(), e);
         }
+
+        return false;
     }
 
     public UserRestrictionEnzymes getUserRestrictionEnzymes(String sessionId) {
