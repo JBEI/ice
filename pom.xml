@@ -189,6 +189,21 @@
 			<artifactId>neethi</artifactId>
 			<version>2.0.2</version>
 		</dependency>
+		<dependency>
+			<groupId>org.jbei.ice</groupId>
+			<artifactId>org.eclipse.mylyn.wikitext.core</artifactId>
+			<version>SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jbei.ice</groupId>
+			<artifactId>org.eclipse.mylyn.wikitext.mediawiki.core</artifactId>
+			<version>SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jbei.ice</groupId>
+			<artifactId>org.eclipse.mylyn.wikitext.confluence.core</artifactId>
+			<version>SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<resources>
