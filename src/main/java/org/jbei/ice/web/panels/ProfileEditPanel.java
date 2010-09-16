@@ -7,6 +7,7 @@ import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
@@ -29,11 +30,10 @@ public class ProfileEditPanel extends Panel {
 
         class AccountEditForm extends StatelessForm<Object> {
             private static final long serialVersionUID = 1L;
-            private String firstName;
-            private String lastName;
+            private final String firstName;
+            private final String lastName;
             private String initials;
-            @SuppressWarnings("unused")
-            private String email;
+            private final String email;
             private String institution;
             private String description;
 
@@ -49,23 +49,25 @@ public class ProfileEditPanel extends Panel {
 
                 setModel(new CompoundPropertyModel<Object>(this));
                 add(new TextField<String>("firstName", new PropertyModel<String>(this, "firstName"))
-                        .setRequired(true).setLabel(new Model<String>("Given name")).add(
-                            new StringValidator.MaximumLengthValidator(50)));
+                        .setRequired(true).setLabel(new Model<String>("Given name"))
+                        .add(new StringValidator.MaximumLengthValidator(50)));
                 add(new TextField<String>("lastName", new PropertyModel<String>(this, "lastName"))
-                        .setRequired(true).setLabel(new Model<String>("Family name")).add(
-                            new StringValidator.MaximumLengthValidator(50)));
+                        .setRequired(true).setLabel(new Model<String>("Family name"))
+                        .add(new StringValidator.MaximumLengthValidator(50)));
                 add(new TextField<String>("initials", new PropertyModel<String>(this, "initials"))
                         .setLabel(new Model<String>("Initials")).add(
                             new StringValidator.MaximumLengthValidator(10)));
                 add(new TextField<String>("email", new PropertyModel<String>(this, "email"))
-                        .setRequired(true).setLabel(new Model<String>("Email")).add(
-                            new StringValidator.MaximumLengthValidator(100)).add(
-                            EmailAddressValidator.getInstance()).setEnabled(false));
+                        .setRequired(true).setLabel(new Model<String>("Email"))
+                        .add(new StringValidator.MaximumLengthValidator(100))
+                        .add(EmailAddressValidator.getInstance()).setEnabled(false));
                 add(new TextField<String>("institution", new PropertyModel<String>(this,
                         "institution")).setLabel(new Model<String>("Institution")));
                 add(new TextArea<String>("description", new PropertyModel<String>(this,
                         "description")).setLabel(new Model<String>("Description")));
                 add(new Button("submitButton", new Model<String>("Submit")));
+                add(new BookmarkablePageLink<Object>("cancelLink", ProfilePage.class,
+                        new PageParameters("0=about,1=" + email)));
                 add(new FeedbackPanel("feedback"));
             }
 
@@ -95,8 +97,8 @@ public class ProfileEditPanel extends Panel {
 
                         AccountController.save(account);
                     }
-                    setResponsePage(ProfilePage.class, new PageParameters("0=about,1="
-                            + account.getEmail()));
+                    setResponsePage(ProfilePage.class,
+                        new PageParameters("0=about,1=" + account.getEmail()));
                 } catch (ControllerException e) {
                     throw new ViewException(e);
                 } catch (Exception e) {
