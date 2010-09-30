@@ -3,8 +3,8 @@ package org.jbei.ice.controllers;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashSet;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.EntryPermissionVerifier;
@@ -17,12 +17,14 @@ import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.query.Query;
 import org.jbei.ice.lib.query.QueryException;
+import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 
 public class EntryController extends Controller {
     public EntryController(Account account) {
@@ -386,9 +388,40 @@ public class EntryController extends Controller {
 
     public void delete(Entry entry, boolean scheduleIndexRebuild) throws ControllerException,
             PermissionException {
-        throw new NotImplementedException();
+        if (entry == null) {
+            throw new ControllerException("Failed to save null entry");
+        }
+        if (!hasWritePermission(entry)) {
+            throw new PermissionException("No write permission for entry");
+        }
+        String deletionString = "This entry is deleted. It was owned by " + entry.getOwnerEmail()
+                + "\n";
+        entry.setLongDescription(deletionString + entry.getLongDescription());
+        entry.setOwnerEmail(PopulateInitialDatabase.systemAccountEmail);
+        // save(entry, true); // Cannot use save, as owner has changed. Must call manager directly
+        try {
+            PermissionManager.setReadGroup(entry, new HashSet<Group>());
+            PermissionManager.setWriteGroup(entry, new HashSet<Group>());
+            PermissionManager.setReadUser(entry, new HashSet<Account>());
+            PermissionManager.setWriteUser(entry, new HashSet<Account>());
+        } catch (ManagerException e) {
+            throw new ControllerException("Failed to change permissions for deleted entry.", e);
+        }
+        entry.setModificationTime(Calendar.getInstance().getTime());
 
-        // EntryManager.delete(entry);
+        try {
+            EntryManager.save(entry);
+        } catch (ManagerException e1) {
+            throw new ControllerException("Failed to save entry deletion", e1);
+        }
+
+        if (scheduleIndexRebuild) {
+            ApplicationContoller.scheduleSearchIndexRebuildJob();
+            ApplicationContoller.scheduleBlastIndexRebuildJob();
+        }
+
+
+
     }
 
     protected EntryPermissionVerifier getEntryPermissionVerifier() {
