@@ -1,5 +1,6 @@
 package org.jbei.ice.web.forms;
 
+import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Button;
@@ -18,6 +19,7 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.CommaSeparatedField;
 import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.pages.DeletionMessagePage;
 
 public class PlasmidUpdateFormPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -42,6 +44,7 @@ public class PlasmidUpdateFormPanel extends Panel {
                 } catch (PermissionException e) {
                     throw new ViewException(e);
                 }
+                setResponsePage(DeletionMessagePage.class, new PageParameters());
             }
         };
 
