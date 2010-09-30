@@ -1,13 +1,12 @@
 package org.jbei.ice.web.panels;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.DownloadLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.EmptyPanel;
@@ -21,6 +20,7 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.common.ViewPermissionException;
+import org.jbei.ice.web.pages.EntryDownloadAttachmentPage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.WelcomePage;
 
@@ -77,13 +77,14 @@ public class MiniAttachmentsViewPanel extends Panel {
 
             private static final long serialVersionUID = 1L;
 
-            @SuppressWarnings("unchecked")
             @Override
             protected void populateItem(ListItem<Attachment> item) {
                 AttachmentController attachmentController = new AttachmentController(IceSession
                         .get().getAccount());
-                Link downloadLink = null;
+
                 Attachment attachment = item.getModelObject();
+
+                /*Link downloadLink = null;
                 try {
                     downloadLink = new DownloadLink("downloadAttachmentLink", attachmentController
                             .getFile(attachment), attachment.getFileName());
@@ -110,8 +111,32 @@ public class MiniAttachmentsViewPanel extends Panel {
                     }
                     downloadLink.add(new Label("fileName", shortFileName));
                     item.add(downloadLink);
+                }*/
+
+                BookmarkablePageLink<String> downloadLink = new BookmarkablePageLink<String>(
+                        "downloadAttachmentLink", EntryDownloadAttachmentPage.class,
+                        new PageParameters("0=" + attachment.getEntry().getId() + ",1="
+                                + attachment.getFileName()));
+
+                try {
+                    File file = attachmentController.getFile(attachment);
+                } catch (ControllerException e) {
+                    downloadLink.setEnabled(false);
+                } catch (PermissionException e) {
+                    throw new ViewPermissionException("No permissions to get attachment file!", e);
                 }
 
+                String shortFileName = null;
+                if (attachment.getFileName().length() > SHORT_FILENAME_LENGTH) {
+                    shortFileName = attachment.getFileName().substring(0, SHORT_FILENAME_LENGTH)
+                            + "...";
+                } else {
+                    shortFileName = attachment.getFileName();
+                }
+
+                downloadLink.add(new Label("fileName", shortFileName));
+
+                item.add(downloadLink);
             }
 
         };

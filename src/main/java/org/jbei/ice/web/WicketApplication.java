@@ -16,6 +16,7 @@ import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.web.pages.AdminPage;
 import org.jbei.ice.web.pages.BlastPage;
 import org.jbei.ice.web.pages.EntriesPage;
+import org.jbei.ice.web.pages.EntryDownloadAttachmentPage;
 import org.jbei.ice.web.pages.EntryNewPage;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryUpdatePage;
@@ -98,6 +99,8 @@ public class WicketApplication extends WebApplication {
         mountBookmarkablePage("/blast", BlastPage.class);
         mountBookmarkablePage("/query", QueryPage.class);
         mountBookmarkablePage("/admin", AdminPage.class);
+        mount(new IndexedParamUrlCodingStrategy("/entry/attachments",
+                EntryDownloadAttachmentPage.class));
     }
 
     private void initializeQueueingSystem() {
