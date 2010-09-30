@@ -45,25 +45,25 @@ public class PermissionEditPanel extends Panel {
 
     private Entry entry = null;
 
-    private ArrayList<ChoiceItem> choiceItems = new ArrayList<ChoiceItem>();
-    private ArrayList<CustomChoice> customChoices = new ArrayList<CustomChoice>();
+    private final ArrayList<ChoiceItem> choiceItems = new ArrayList<ChoiceItem>();
+    private final ArrayList<CustomChoice> customChoices = new ArrayList<CustomChoice>();
 
-    private ArrayList<CustomChoice> accountsSelected = new ArrayList<CustomChoice>();
-    private ArrayList<CustomChoice> groupsSelected = new ArrayList<CustomChoice>();
-    @SuppressWarnings("unchecked")
+    private final ArrayList<CustomChoice> accountsSelected = new ArrayList<CustomChoice>();
+    private final ArrayList<CustomChoice> groupsSelected = new ArrayList<CustomChoice>();
+    @SuppressWarnings("rawtypes")
     private AjaxFallbackLink usersLink = null;
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     private AjaxFallbackLink groupsLink = null;
 
     private ListMultipleChoice<CustomChoice> accountsChoiceList = null;
     private ListMultipleChoice<CustomChoice> groupsChoiceList = null;
 
-    private ArrayList<CustomChoice> readAllowed = new ArrayList<CustomChoice>();
-    private ArrayList<CustomChoice> writeAllowed = new ArrayList<CustomChoice>();
-    private ArrayList<CustomChoice> readAllowedSelected = new ArrayList<CustomChoice>();
-    private ArrayList<CustomChoice> writeAllowedSelected = new ArrayList<CustomChoice>();
+    private final ArrayList<CustomChoice> readAllowed = new ArrayList<CustomChoice>();
+    private final ArrayList<CustomChoice> writeAllowed = new ArrayList<CustomChoice>();
+    private final ArrayList<CustomChoice> readAllowedSelected = new ArrayList<CustomChoice>();
+    private final ArrayList<CustomChoice> writeAllowedSelected = new ArrayList<CustomChoice>();
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     public PermissionEditPanel(String id, Entry entry) {
         super(id);
 
@@ -212,7 +212,7 @@ public class PermissionEditPanel extends Panel {
             }
 
             public void setOwnerEmail(String userEmail) {
-                this.ownerEmail = userEmail.trim();
+                ownerEmail = userEmail.trim();
             }
 
             public String getOwnerEmail() {
@@ -266,8 +266,9 @@ public class PermissionEditPanel extends Panel {
                 for (CustomChoice item : thisPanel.groupsSelected) {
                     if (!thisPanel.writeAllowed.contains(item)) {
                         thisPanel.writeAllowed.add(item);
-                        if (!thisPanel.readAllowed.contains(item))
+                        if (!thisPanel.readAllowed.contains(item)) {
                             thisPanel.readAllowed.add(item);
+                        }
                     }
                 }
                 ListMultipleChoice<CustomChoice> temp = thisPanel.getReadAllowedChoices();
@@ -445,6 +446,7 @@ public class PermissionEditPanel extends Panel {
     private static class CustomChoiceComparator implements Comparator<CustomChoice>, Serializable {
         private static final long serialVersionUID = 1L;
 
+        @Override
         public int compare(CustomChoice arg0, CustomChoice arg1) {
             return arg0.getName().compareToIgnoreCase(arg1.getName());
         }
@@ -473,8 +475,8 @@ public class PermissionEditPanel extends Panel {
         }
 
         public ChoiceItem(java.lang.String key, Integer id) {
-            this.setKey(key);
-            this.setId(id);
+            setKey(key);
+            setId(id);
         }
 
         @Override

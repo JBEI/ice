@@ -3,6 +3,9 @@ package org.jbei.ice.web.forms;
 import java.util.Set;
 
 import org.apache.wicket.PageParameters;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.markup.html.form.Form;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
@@ -12,6 +15,7 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.common.ViewPermissionException;
+import org.jbei.ice.web.pages.DeletionMessagePage;
 import org.jbei.ice.web.pages.EntryViewPage;
 
 public class EntryUpdateForm<T extends Entry> extends EntrySubmitForm<T> {
@@ -87,5 +91,32 @@ public class EntryUpdateForm<T extends Entry> extends EntrySubmitForm<T> {
         } catch (PermissionException e) {
             throw new ViewPermissionException("No permissions to save entry!", e);
         }
+    }
+
+    protected AjaxButton createDeleteButton(Form<?> form) {
+        AjaxButton deleteButton = new AjaxButton("deleteButton", form) {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                Entry entry = getEntry();
+                EntryController entryController = new EntryController(IceSession.get().getAccount());
+                try {
+                    entryController.delete(entry);
+                } catch (ControllerException e) {
+                    throw new ViewException(e);
+                } catch (PermissionException e) {
+                    throw new ViewException(e);
+                }
+                setResponsePage(
+                    DeletionMessagePage.class,
+                    new PageParameters("number=" + entry.getOnePartNumber().getPartNumber()
+                            + ",recordId=" + entry.getRecordId()));
+            }
+        };
+
+        deleteButton.add(new JavascriptEventConfirmation("onclick", "Delete this Entry?"));
+        return deleteButton;
     }
 }

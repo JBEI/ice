@@ -214,8 +214,7 @@ public class AccountController {
     public static Account getSystemAccount() throws ControllerException {
         Account account = null;
         try {
-            // TODO: Fix this
-            account = AccountManager.get(1);
+            account = AccountManager.getByEmail("system");
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
