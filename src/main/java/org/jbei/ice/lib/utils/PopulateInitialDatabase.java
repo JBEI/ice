@@ -1,6 +1,8 @@
 package org.jbei.ice.lib.utils;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -10,9 +12,11 @@ import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.GroupManager;
 import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountFundingSource;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
@@ -23,6 +27,9 @@ import org.jbei.ice.lib.permissions.PermissionManager;
 public class PopulateInitialDatabase {
     // This is a global "everyone" uuid
     public static String everyoneGroup = "8746a64b-abd5-4838-a332-02c356bbeac0";
+
+    // This is the system account: "system" as the email, and "System" as last name
+    public static String systemAccountEmail = "system";
 
     public static void main(String[] args) {
         /*
@@ -50,6 +57,42 @@ public class PopulateInitialDatabase {
             createFirstGroup();
         }
 
+        createSystemAccount();
+
+    }
+
+    private static void createSystemAccount() throws UtilityException {
+        // Check for, and create system account
+        Account systemAccount = null;
+        try {
+            systemAccount = AccountManager.getByEmail(systemAccountEmail);
+        } catch (ManagerException e) {
+            throw new UtilityException(e);
+        }
+        if (systemAccount == null) {
+            // since system account doesn't exist, initialize a new system account
+            systemAccount = new Account();
+            systemAccount.setEmail(systemAccountEmail);
+            systemAccount.setLastName("System");
+            systemAccount.setFirstName("System");
+            systemAccount.setInitials("");
+            systemAccount.setInstitution("");
+            systemAccount.setPassword("");
+            systemAccount.setDescription("System Account");
+            systemAccount.setIsSubscribed(0);
+            systemAccount.setIp("");
+            Date currentTime = Calendar.getInstance().getTime();
+            systemAccount.setCreationTime(currentTime);
+            systemAccount.setModificationTime(currentTime);
+            systemAccount.setLastLoginTime(currentTime);
+
+            try {
+                AccountManager.save(systemAccount);
+            } catch (ManagerException e) {
+                String msg = "Could not create system account: " + e.toString();
+                Logger.error(msg, e);
+            }
+        }
     }
 
     public static Group createFirstGroup() {
@@ -78,8 +121,8 @@ public class PopulateInitialDatabase {
                 Logger.error(msg, e);
             }
         }
-        return group1;
 
+        return group1;
     }
 
     public static void populatePermissionReadGroup() {
