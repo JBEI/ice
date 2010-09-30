@@ -25,7 +25,7 @@ import org.jbei.ice.lib.utils.JbeirSettings;
 public class IceSession extends WebSession {
     private static final long serialVersionUID = 1L;
 
-    private String COOKIE_NAME = JbeirSettings.getSetting("COOKIE_NAME");
+    private final String COOKIE_NAME = JbeirSettings.getSetting("COOKIE_NAME");
 
     public IceSession(Request request) {
         super(request);

@@ -2,6 +2,7 @@ package org.jbei.ice.lib.authentication;
 
 import java.io.Serializable;
 import java.util.Calendar;
+import java.util.Date;
 
 import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -12,6 +13,7 @@ import org.jbei.ice.lib.utils.LblLdapAuthenticationWrapper.LblLdapAuthentication
 public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Serializable {
     private static String LBL_LDAP_EMAIL_SUFFIX = "@lbl.gov";
 
+    @Override
     public String getBackendName() {
         return "LblLdapAuthenticationBackend";
     }
@@ -49,9 +51,10 @@ public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Ser
                 account.setIsSubscribed(1);
                 account.setInitials("");
 
+                Date currentTime = Calendar.getInstance().getTime();
+                account.setCreationTime(currentTime);
+                account.setModificationTime(currentTime);
                 account.setIp(ip);
-
-                account.setLastLoginTime(Calendar.getInstance().getTime());
 
                 AccountController.save(account);
             } else {
@@ -68,6 +71,7 @@ public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Ser
         return account;
     }
 
+    @Override
     public Account authenticate(String loginId, String password)
             throws AuthenticationBackendException, InvalidCredentialsException {
         return authenticate(loginId, password, "");

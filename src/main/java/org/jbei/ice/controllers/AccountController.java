@@ -1,13 +1,14 @@
 package org.jbei.ice.controllers;
 
+import java.util.Calendar;
 import java.util.Set;
 
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.authentication.AuthenticationBackendException;
 import org.jbei.ice.lib.authentication.AuthenticationBackendManager;
+import org.jbei.ice.lib.authentication.AuthenticationBackendManager.AuthenticationBackendManagerException;
 import org.jbei.ice.lib.authentication.IAuthenticationBackend;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
-import org.jbei.ice.lib.authentication.AuthenticationBackendManager.AuthenticationBackendManagerException;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.AccountPreferencesManager;
 import org.jbei.ice.lib.managers.ManagerException;
@@ -129,7 +130,7 @@ public class AccountController {
         IAuthenticationBackend authenticationBackend = null;
 
         try {
-            Thread.sleep(2000); // sets 2 seconds delay on login to prevent login/password bruteforce hacking 
+            Thread.sleep(2000); // sets 2 seconds delay on login to prevent login/password bruteforce hacking
         } catch (InterruptedException e) {
             throw new ControllerException(e);
         }
@@ -159,6 +160,9 @@ public class AccountController {
                 AccountController.saveAccountPreferences(accountPreferences);
             }
 
+            account.setIp(ip);
+            account.setLastLoginTime(Calendar.getInstance().getTime());
+            save(account);
             try {
                 result = PersistentSessionDataWrapper.getInstance().newSessionData(account);
             } catch (ManagerException e) {
