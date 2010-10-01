@@ -1,6 +1,8 @@
 package org.jbei.ice.web.panels;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import org.apache.wicket.PageParameters;
@@ -112,13 +114,19 @@ public class MiniAttachmentsViewPanel extends Panel {
                     downloadLink.add(new Label("fileName", shortFileName));
                     item.add(downloadLink);
                 }*/
-
+                String escapedFileName;
+                try {
+                    escapedFileName = URLEncoder.encode(attachment.getFileName(), "UTF-8");
+                } catch (UnsupportedEncodingException e1) {
+                    escapedFileName = "attachment";
+                }
                 BookmarkablePageLink<String> downloadLink = new BookmarkablePageLink<String>(
                         "downloadAttachmentLink", EntryDownloadAttachmentPage.class,
                         new PageParameters("0=" + attachment.getEntry().getId() + ",1="
-                                + attachment.getFileName()));
+                                + escapedFileName));
 
                 try {
+                    @SuppressWarnings("unused")
                     File file = attachmentController.getFile(attachment);
                 } catch (ControllerException e) {
                     downloadLink.setEnabled(false);

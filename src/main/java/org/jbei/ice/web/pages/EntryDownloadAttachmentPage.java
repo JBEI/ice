@@ -1,6 +1,8 @@
 package org.jbei.ice.web.pages;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 
 import org.apache.wicket.PageParameters;
@@ -83,7 +85,12 @@ public class EntryDownloadAttachmentPage extends ProtectedPage {
         EntryController entryController = new EntryController(IceSession.get().getAccount());
 
         String identifier = parameters.getString("0");
-        String fileToDownload = parameters.getString("1");
+        String fileToDownload;
+        try {
+            fileToDownload = URLDecoder.decode(parameters.getString("1"), "UTF-8");
+        } catch (UnsupportedEncodingException e1) {
+            fileToDownload = "attachment";
+        }
 
         if (fileToDownload == null || fileToDownload.isEmpty()) {
             this.fileToDownload = null;
