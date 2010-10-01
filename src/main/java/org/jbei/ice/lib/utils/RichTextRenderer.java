@@ -20,6 +20,9 @@ public class RichTextRenderer {
     public static String richTextToHtml(String type, String text) {
         String result = "";
 
+        if (type == null) {
+            result = text;
+        }
         if (type.equals(WIKI)) {
             MarkupParser markupParser = new MarkupParser(new MediaWikiLanguage());
 
