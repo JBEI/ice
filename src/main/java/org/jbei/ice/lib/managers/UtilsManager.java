@@ -150,13 +150,13 @@ public class UtilsManager {
         LinkedHashSet<Strain> resultStrains = new LinkedHashSet<Strain>();
         HashSet<Integer> strainIds = new HashSet<Integer>();
 
-        Set<PartNumber> partNumbers = plasmid.getPartNumbers();
+        Set<PartNumber> plasmidPartNumbers = plasmid.getPartNumbers();
         Session session = DAO.newSession();
 
-        for (PartNumber partNumber : partNumbers) {
+        for (PartNumber plasmidPartNumber : plasmidPartNumbers) {
             Query query = session
                     .createQuery("select strain.id from Strain strain where strain.plasmids like :partNumber");
-            query.setString("partNumber", "%" + partNumber.getPartNumber() + "%");
+            query.setString("partNumber", "%" + plasmidPartNumber.getPartNumber() + "%");
             try {
                 strainIds.addAll(query.list());
             } catch (HibernateException e) {
@@ -183,21 +183,26 @@ public class UtilsManager {
             String[] strainPlasmids = strain.getPlasmids().split(",");
             for (String strainPlasmid : strainPlasmids) {
                 strainPlasmid = strainPlasmid.trim();
-                //Matcher jbeiLinkMatcher = basicJbeiPattern.matcher(strainPlasmid);
                 Matcher basicJbeiMatcher = basicJbeiPattern.matcher(strainPlasmid);
-                String strainNumber = null;
+                String strainPlasmidNumber = null;
                 if (basicJbeiMatcher.matches()) {
                     Matcher partNumberMatcher = partNumberPattern.matcher(basicJbeiMatcher.group());
                     Matcher descriptivePatternMatcher = descriptivePattern.matcher(basicJbeiMatcher
                             .group());
 
                     if (descriptivePatternMatcher.find()) {
-                        strainNumber = descriptivePatternMatcher.group(1).trim();
+                        strainPlasmidNumber = descriptivePatternMatcher.group(1).trim();
                     } else if (partNumberMatcher.find()) {
-                        strainNumber = partNumberMatcher.group(1).trim();
+                        strainPlasmidNumber = partNumberMatcher.group(1).trim();
                     }
-                    if (strainNumber != null) {
-                        resultStrains.add(strain);
+
+                    if (strainPlasmidNumber != null) {
+                        for (PartNumber plasmidPartNumber : plasmidPartNumbers) {
+                            if (plasmidPartNumber.getPartNumber().equals(strainPlasmidNumber)) {
+                                resultStrains.add(strain);
+                                break;
+                            }
+                        }
                     }
 
                 } else {
@@ -474,36 +479,6 @@ public class UtilsManager {
     }
 
     public static void main(String[] args) throws ManagerException {
-        /*Query query = session.createQuery(
-                "select entry from Entry entry where entry = 3810");
-        //Entry entry = (Entry) query.uniqueResult();
-        
-        query = session.createQuery(
-        		"select account from Account account where id = 1"
-        );
-        Account account = (Account) query.uniqueResult();
-        
-        Comment newComment = addComment(entry, account,"New comment");
-        
-        System.out.println("new comment " + newComment.getId() + ":" + newComment.getEntry().getId());
-        
-        LinkedHashSet<Comment> comments = getComments(account);
-        for (Comment comment : comments) {
-        	System.out.println("old comment " + comment.getId() + ":" + comment.getEntry().getId());
-        	
-        }
-        
-        
-        try {
-        	dbDelete(newComment);
-        } catch (Exception e) {
-        	e.printStackTrace();
-        }*/
-
-        //TreeSet<String> result = getUniquePlasmidNames();
-
-        //LinkedHashSet<Strain> result = getStrainsForPlasmid(entry);
-
         TreeSet<String> result = getUniqueSelectionMarkers();
         for (String item : result) {
             System.out.println(item);
