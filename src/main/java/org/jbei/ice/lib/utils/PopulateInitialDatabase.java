@@ -9,6 +9,7 @@ import java.util.Set;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
@@ -22,6 +23,7 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.Group;
+import org.jbei.ice.lib.models.Moderator;
 import org.jbei.ice.lib.permissions.PermissionManager;
 
 public class PopulateInitialDatabase {
@@ -30,6 +32,8 @@ public class PopulateInitialDatabase {
 
     // This is the system account: "system" as the email, and "System" as last name
     public static String systemAccountEmail = "system";
+    public static String adminAccountEmail = "Administrator";
+    public static String adminAccountDefaultPassword = "Administrator";
 
     public static void main(String[] args) {
         /*
@@ -58,7 +62,50 @@ public class PopulateInitialDatabase {
         }
 
         createSystemAccount();
+        createAdminAccount();
+    }
 
+    /**
+     * Check for, and create first admin account
+     * 
+     * @throws UtilityException
+     */
+    private static void createAdminAccount() throws UtilityException {
+        Account adminAccount = null;
+        try {
+            adminAccount = AccountManager.getByEmail(adminAccountEmail);
+        } catch (ManagerException e) {
+            throw new UtilityException(e);
+        }
+
+        if (adminAccount == null) {
+            adminAccount = new Account();
+            adminAccount.setEmail(adminAccountEmail);
+            adminAccount.setLastName("");
+            adminAccount.setFirstName("");
+            adminAccount.setInitials("");
+            adminAccount.setInstitution("");
+            adminAccount
+                    .setPassword(AccountController.encryptPassword(adminAccountDefaultPassword));
+            adminAccount.setDescription("Administrator Account");
+            adminAccount.setIsSubscribed(0);
+
+            adminAccount.setIp("");
+            Date currentTime = Calendar.getInstance().getTime();
+            adminAccount.setCreationTime(currentTime);
+            adminAccount.setModificationTime(currentTime);
+            adminAccount.setLastLoginTime(currentTime);
+
+            try {
+                AccountManager.save(adminAccount);
+                Moderator adminModerator = new Moderator();
+                adminModerator.setAccount(adminAccount);
+                AccountManager.saveModerator(adminModerator);
+            } catch (ManagerException e) {
+                String msg = "Could not create administrator account: " + e.toString();
+                Logger.error(msg, e);
+            }
+        }
     }
 
     private static void createSystemAccount() throws UtilityException {
@@ -73,8 +120,8 @@ public class PopulateInitialDatabase {
             // since system account doesn't exist, initialize a new system account
             systemAccount = new Account();
             systemAccount.setEmail(systemAccountEmail);
-            systemAccount.setLastName("System");
-            systemAccount.setFirstName("System");
+            systemAccount.setLastName("");
+            systemAccount.setFirstName("");
             systemAccount.setInitials("");
             systemAccount.setInstitution("");
             systemAccount.setPassword("");
