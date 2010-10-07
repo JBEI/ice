@@ -152,4 +152,19 @@ public class AccountManager {
 
         return account;
     }
+
+    public static Moderator saveModerator(Moderator moderator) throws ManagerException {
+        if (moderator == null) {
+            throw new ManagerException("Failed to save null Moderator");
+        }
+        Moderator result = null;
+        try {
+            result = (Moderator) DAO.save(moderator);
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to save Moderator: "
+                    + moderator.getAccount().getEmail(), e);
+        }
+
+        return result;
+    }
 }
