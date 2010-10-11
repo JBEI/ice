@@ -25,6 +25,7 @@
 		<mapping class="org.jbei.ice.lib.models.Plasmid" />
 		<mapping class="org.jbei.ice.lib.models.Strain" />
 		<mapping class="org.jbei.ice.lib.models.Part" />
+		<mapping class="org.jbei.ice.lib.models.ArabidopsisSeed" />
 		<mapping class="org.jbei.ice.lib.models.Name" />
 		<mapping class="org.jbei.ice.lib.models.PartNumber" />
 		<mapping class="org.jbei.ice.lib.models.Link" />
