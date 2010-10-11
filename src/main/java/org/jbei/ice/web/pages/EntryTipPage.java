@@ -5,6 +5,7 @@ import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.models.ArabidopsisSeed;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
@@ -13,6 +14,7 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.common.ViewPermissionException;
+import org.jbei.ice.web.panels.ArabidopsisSeedSimpleViewPanel;
 import org.jbei.ice.web.panels.PartSimpleViewPanel;
 import org.jbei.ice.web.panels.PlasmidSimpleViewPanel;
 import org.jbei.ice.web.panels.StrainSimpleViewPanel;
@@ -62,6 +64,9 @@ public class EntryTipPage extends ProtectedPage {
                     panel = new PlasmidSimpleViewPanel("centerPanel", (Plasmid) entry);
                 } else if (entry instanceof Part) {
                     panel = new PartSimpleViewPanel("centerPanel", (Part) entry);
+                } else if (entry instanceof ArabidopsisSeed) {
+                    panel = new ArabidopsisSeedSimpleViewPanel("centerPanel",
+                            (ArabidopsisSeed) entry);
                 } else {
                     panel = new EmptyPanel("centerPanel");
                 }

@@ -18,6 +18,7 @@ import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.WorkspaceManager;
+import org.jbei.ice.lib.models.ArabidopsisSeed;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
@@ -28,6 +29,7 @@ import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.common.ViewPermissionException;
+import org.jbei.ice.web.panels.ArabidopsisSeedViewPanel;
 import org.jbei.ice.web.panels.AttachmentsViewPanel;
 import org.jbei.ice.web.panels.EntryTabPanel;
 import org.jbei.ice.web.panels.MiniAttachmentsViewPanel;
@@ -183,6 +185,8 @@ public class EntryViewPage extends ProtectedPage {
             panel = new PlasmidViewPanel("centerPanel", (Plasmid) entry);
         } else if (entry instanceof Part) {
             panel = new PartViewPanel("centerPanel", (Part) entry);
+        } else if (entry instanceof ArabidopsisSeed) {
+            panel = new ArabidopsisSeedViewPanel("centerPanel", (ArabidopsisSeed) entry);
         }
 
         if (panel != null) {
@@ -228,7 +232,7 @@ public class EntryViewPage extends ProtectedPage {
         return panel;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "rawtypes" })
     private AjaxLink renderAddToWorkspaceLink() {
         final ResourceReference notInWorkspaceImage = new ResourceReference(UnprotectedPage.class,
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "star-empty.png");
@@ -246,7 +250,7 @@ public class EntryViewPage extends ProtectedPage {
                     throw new ViewException(e);
                 }
                 Image image = new Image("starImage", inWorkspaceImage);
-                this.replace(image);
+                replace(image);
                 getParent().replace(this);
                 target.addComponent(this);
             }

@@ -1,6 +1,8 @@
 package org.jbei.ice.lib.models;
 
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,6 +10,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @Entity
 @PrimaryKeyJoinColumn(name = "entries_id")
@@ -27,6 +31,7 @@ public class ArabidopsisSeed extends Entry {
     private String ecotype;
 
     @Column(name = "harvest_date")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date harvestDate;
 
     @Column(name = "parents", nullable = false)
@@ -36,6 +41,17 @@ public class ArabidopsisSeed extends Entry {
     @Enumerated(EnumType.STRING)
     private Generation generation;
 
+    public static Map<String, String> getGenerationOptionsMap() {
+        Map<String, String> resultMap = new LinkedHashMap<String, String>();
+        for (Generation generation : Generation.values()) {
+            resultMap.put(generation.toString(), generation.toString());
+        }
+
+        return resultMap;
+
+    }
+
+    // getters and setters
     public String getHomozygosity() {
         return homozygosity;
     }

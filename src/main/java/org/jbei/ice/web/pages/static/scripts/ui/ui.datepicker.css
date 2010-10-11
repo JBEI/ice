@@ -2,7 +2,11 @@
 ----------------------------------*/
 .ui-datepicker {
 	width: 17em;
-	padding: .2em .2em 0;
+	padding: 0.1em 1em 0.1em .6em;
+	background: none repeat scroll 0 0 #FFFCF1;
+	border-style: solid;
+	border-width: 1px;
+	border-color: #454545;
 }
 
 .ui-datepicker .ui-datepicker-header {

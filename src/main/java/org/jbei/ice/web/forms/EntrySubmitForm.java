@@ -201,8 +201,13 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
         add(TextTemplateHeaderContributor.forJavaScript(UnprotectedPage.class,
             UnprotectedPage.JS_RESOURCE_LOCATION + "autocompleteDataTemplate.js",
             autocompleteDataMap));
+        /*
         add(new Label("initializeCollectionsScript",
                 "try {initializeCollections();} catch (err) { }").setEscapeModelStrings(false));
+                */
+        add(new Label("initializeCollectionsScript",
+                "try {initializeCollections();} catch (err) {alert(err); }")
+                .setEscapeModelStrings(false));
     }
 
     protected void renderStatuses() {
@@ -260,12 +265,13 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
 
                 markupPanel.setOutputMarkupPlaceholderTag(true);
                 markupPanel.setOutputMarkupId(true);
-                this.getParent().replace(markupPanel);
-                this.getParent().addOrReplace(markupPanel);
+                getParent().replace(markupPanel);
+                getParent().addOrReplace(markupPanel);
 
                 setMarkupPanel(markupPanel);
             }
 
+            @Override
             protected boolean wantOnSelectionChangedNotifications() {
                 return true;
             }

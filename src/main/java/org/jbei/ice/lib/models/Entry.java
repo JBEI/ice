@@ -40,6 +40,11 @@ import org.jbei.ice.lib.utils.JbeiConstants;
 public class Entry implements IEntryValueObject, IModel {
     private static final long serialVersionUID = 1L;
 
+    public static final String STRAIN_ENTRY_TYPE = "strain";
+    public static final String PLASMID_ENTRY_TYPE = "plasmid";
+    public static final String PART_ENTRY_TYPE = "part";
+    public static final String ARABIDOPSIS_SEED_ENTRY_TYPE = "arabidopsis";
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
     private int id;
@@ -50,7 +55,7 @@ public class Entry implements IEntryValueObject, IModel {
     @Column(name = "version_id", length = 36, nullable = false)
     private String versionId;
 
-    @Column(name = "record_type", length = 10, nullable = false)
+    @Column(name = "record_type", length = 127, nullable = false)
     private String recordType;
 
     @Column(name = "owner", length = 127)
@@ -114,25 +119,25 @@ public class Entry implements IEntryValueObject, IModel {
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @JoinColumn(name = "entries_id")
     @OrderBy("id")
-    private Set<Link> links = new LinkedHashSet<Link>();
+    private final Set<Link> links = new LinkedHashSet<Link>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "entry")
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @JoinColumn(name = "entries_id")
     @OrderBy("id")
-    private Set<Name> names = new LinkedHashSet<Name>();
+    private final Set<Name> names = new LinkedHashSet<Name>();
 
     @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER, mappedBy = "entry")
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @JoinColumn(name = "entries_id")
     @OrderBy("id")
-    private Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
+    private final Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
 
     @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER, mappedBy = "entry")
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @JoinColumn(name = "entries_id")
     @OrderBy("id")
-    private Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
+    private final Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
 
     public Entry() {
     }
@@ -159,45 +164,55 @@ public class Entry implements IEntryValueObject, IModel {
         this.modificationTime = modificationTime;
     }
 
+    @Override
     @XmlTransient
     public int getId() {
         return id;
     }
 
+    @Override
     public void setId(int id) {
         this.id = id;
     }
 
+    @Override
     public String getRecordId() {
         return recordId;
     }
 
+    @Override
     public void setRecordId(String recordId) {
         this.recordId = recordId;
     }
 
+    @Override
     @XmlTransient
     public String getVersionId() {
         return versionId;
     }
 
+    @Override
     public void setVersionId(String versionId) {
         this.versionId = versionId;
     }
 
+    @Override
     @XmlTransient
     public String getRecordType() {
         return recordType;
     }
 
+    @Override
     public void setRecordType(String recordType) {
         this.recordType = recordType;
     }
 
+    @Override
     public Set<Name> getNames() {
         return names;
     }
 
+    @Override
     public void setNames(Set<Name> inputNames) {
         /*
          * Warning! This is a hibernate workaround. 
@@ -205,14 +220,14 @@ public class Entry implements IEntryValueObject, IModel {
 
         // for JAXB webservices should be this way
         if (inputNames == null) {
-            this.names.clear();
+            names.clear();
 
             return;
         }
 
-        if (inputNames != this.names) {
-            this.names.clear();
-            this.names.addAll(inputNames);
+        if (inputNames != names) {
+            names.clear();
+            names.addAll(inputNames);
         }
     }
 
@@ -235,6 +250,7 @@ public class Entry implements IEntryValueObject, IModel {
         return result;
     }
 
+    @Override
     public Set<PartNumber> getPartNumbers() {
         return partNumbers;
     }
@@ -259,68 +275,82 @@ public class Entry implements IEntryValueObject, IModel {
         return result;
     }
 
+    @Override
     public void setPartNumbers(Set<PartNumber> inputPartNumbers) {
         // for JAXB webservices should be this way
         if (inputPartNumbers == null) {
-            this.partNumbers.clear();
+            partNumbers.clear();
 
             return;
         }
 
-        if (inputPartNumbers != this.partNumbers) {
-            this.partNumbers.clear();
-            this.partNumbers.addAll(inputPartNumbers);
+        if (inputPartNumbers != partNumbers) {
+            partNumbers.clear();
+            partNumbers.addAll(inputPartNumbers);
         }
     }
 
+    @Override
     public String getOwner() {
         return owner;
     }
 
+    @Override
     public void setOwner(String owner) {
         this.owner = owner;
     }
 
+    @Override
     public String getOwnerEmail() {
         return ownerEmail;
     }
 
+    @Override
     public void setOwnerEmail(String ownerEmail) {
         this.ownerEmail = ownerEmail;
     }
 
+    @Override
     public String getCreator() {
         return creator;
     }
 
+    @Override
     public void setCreator(String creator) {
         this.creator = creator;
     }
 
+    @Override
     public String getCreatorEmail() {
         return creatorEmail;
     }
 
+    @Override
     public void setCreatorEmail(String creatorEmail) {
         this.creatorEmail = creatorEmail;
     }
 
+    @Override
     public String getStatus() {
         return status;
     }
 
+    @Override
     public void setStatus(String status) {
         this.status = status;
     }
 
+    @Override
     public String getAlias() {
         return alias;
     }
 
+    @Override
     public void setAlias(String alias) {
         this.alias = alias;
     }
 
+    @Override
     public Set<SelectionMarker> getSelectionMarkers() {
         return selectionMarkers;
     }
@@ -336,21 +366,23 @@ public class Entry implements IEntryValueObject, IModel {
         return result;
     }
 
+    @Override
     public void setSelectionMarkers(Set<SelectionMarker> inputSelectionMarkers) {
         if (inputSelectionMarkers == null) {
-            this.selectionMarkers.clear();
+            selectionMarkers.clear();
 
             return;
         }
 
-        if (inputSelectionMarkers == this.selectionMarkers) {
-            this.selectionMarkers = inputSelectionMarkers;
+        if (inputSelectionMarkers == selectionMarkers) {
+            selectionMarkers = inputSelectionMarkers;
         } else {
-            this.selectionMarkers.clear();
-            this.selectionMarkers.addAll(inputSelectionMarkers);
+            selectionMarkers.clear();
+            selectionMarkers.addAll(inputSelectionMarkers);
         }
     }
 
+    @Override
     public Set<Link> getLinks() {
         return links;
     }
@@ -366,39 +398,46 @@ public class Entry implements IEntryValueObject, IModel {
         return result;
     }
 
+    @Override
     public void setLinks(Set<Link> inputLinks) {
         if (inputLinks == null) {
-            this.links.clear();
+            links.clear();
 
             return;
         }
 
-        if (inputLinks != this.links) {
-            this.links.clear();
-            this.links.addAll(inputLinks);
+        if (inputLinks != links) {
+            links.clear();
+            links.addAll(inputLinks);
         }
     }
 
+    @Override
     public String getKeywords() {
         return keywords;
     }
 
+    @Override
     public void setKeywords(String keywords) {
         this.keywords = keywords;
     }
 
+    @Override
     public String getShortDescription() {
         return shortDescription;
     }
 
+    @Override
     public void setShortDescription(String shortDescription) {
         this.shortDescription = shortDescription;
     }
 
+    @Override
     public String getLongDescription() {
         return longDescription;
     }
 
+    @Override
     public void setLongDescription(String longDescription) {
         this.longDescription = longDescription;
     }
@@ -411,28 +450,34 @@ public class Entry implements IEntryValueObject, IModel {
         this.longDescriptionType = longDescriptionType;
     }
 
+    @Override
     public String getReferences() {
         return references;
     }
 
+    @Override
     public void setReferences(String references) {
         this.references = references;
     }
 
+    @Override
     @XmlTransient
     public Date getCreationTime() {
         return creationTime;
     }
 
+    @Override
     public void setCreationTime(Date creationTime) {
         this.creationTime = creationTime;
     }
 
+    @Override
     @XmlTransient
     public Date getModificationTime() {
         return modificationTime;
     }
 
+    @Override
     public void setModificationTime(Date modificationTime) {
         this.modificationTime = modificationTime;
     }
@@ -455,14 +500,14 @@ public class Entry implements IEntryValueObject, IModel {
 
     public void setEntryFundingSources(Set<EntryFundingSource> inputEntryFundingSources) {
         if (inputEntryFundingSources == null) {
-            this.entryFundingSources.clear();
+            entryFundingSources.clear();
 
             return;
         }
 
-        if (inputEntryFundingSources != this.entryFundingSources) {
-            this.entryFundingSources.clear();
-            this.entryFundingSources.addAll(inputEntryFundingSources);
+        if (inputEntryFundingSources != entryFundingSources) {
+            entryFundingSources.clear();
+            entryFundingSources.addAll(inputEntryFundingSources);
         }
     }
 

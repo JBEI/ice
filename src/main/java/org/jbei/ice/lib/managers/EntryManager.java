@@ -13,6 +13,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.models.ArabidopsisSeed;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
@@ -28,10 +29,6 @@ import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 
 public class EntryManager {
-    private static final String STRAIN_ENTRY_TYPE = "strain";
-    private static final String PLASMID_ENTRY_TYPE = "plasmid";
-    private static final String PART_ENTRY_TYPE = "part";
-
     public static Entry createEntry(Entry entry) throws ManagerException {
         Entry result = null;
 
@@ -43,6 +40,8 @@ public class EntryManager {
             result = createStrain((Strain) entry);
         } else if (entry instanceof Part) {
             result = createPart((Part) entry);
+        } else if (entry instanceof ArabidopsisSeed) {
+            result = createArabidopsisSeed((ArabidopsisSeed) entry);
         }
 
         return result;
@@ -167,6 +166,7 @@ public class EntryManager {
         try {
             Query query = session.createQuery("from " + Entry.class.getName());
 
+            @SuppressWarnings("rawtypes")
             List list = query.list();
 
             if (list != null) {
@@ -201,6 +201,7 @@ public class EntryManager {
 
             Query query = session.createQuery(queryString);
 
+            @SuppressWarnings("rawtypes")
             List list = query.list();
 
             if (list != null) {
@@ -217,6 +218,7 @@ public class EntryManager {
         return entries;
     }
 
+
     @SuppressWarnings("unchecked")
     public static ArrayList<Integer> getEntriesByOwner(String owner) throws ManagerException {
         ArrayList<Integer> entries = null;
@@ -230,6 +232,7 @@ public class EntryManager {
 
             query.setParameter("ownerEmail", owner);
 
+            @SuppressWarnings("rawtypes")
             List list = query.list();
 
             if (list != null) {
@@ -262,6 +265,7 @@ public class EntryManager {
             Query query = session.createQuery("from " + Entry.class.getName() + " WHERE id in ("
                     + filter + ")");
 
+            @SuppressWarnings("rawtypes")
             ArrayList list = (ArrayList) query.list();
 
             if (list != null) {
@@ -348,17 +352,8 @@ public class EntryManager {
     private static Plasmid createPlasmid(Plasmid newPlasmid) throws ManagerException {
         Plasmid savedPlasmid = null;
 
-        String number = getNextPartNumber();
-        PartNumber partNumber = new PartNumber();
-        partNumber.setPartNumber(number);
-        Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
-        partNumbers.add(partNumber);
-        newPlasmid.setPartNumbers(partNumbers);
-
-        newPlasmid.setRecordId(Utils.generateUUID());
-        newPlasmid.setVersionId(newPlasmid.getRecordId());
-        newPlasmid.setRecordType(PLASMID_ENTRY_TYPE);
-        newPlasmid.setCreationTime(Calendar.getInstance().getTime());
+        newPlasmid = (Plasmid) createGenericEntry(newPlasmid);
+        newPlasmid.setRecordType(Entry.PLASMID_ENTRY_TYPE);
 
         savedPlasmid = (Plasmid) save(newPlasmid);
 
@@ -368,16 +363,8 @@ public class EntryManager {
     private static Strain createStrain(Strain newStrain) throws ManagerException {
         Strain savedStrain = null;
 
-        String number = getNextPartNumber();
-        PartNumber partNumber = new PartNumber();
-        partNumber.setPartNumber(number);
-        Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
-        partNumbers.add(partNumber);
-        newStrain.setPartNumbers(partNumbers);
-        newStrain.setRecordId(Utils.generateUUID());
-        newStrain.setVersionId(newStrain.getRecordId());
-        newStrain.setRecordType(STRAIN_ENTRY_TYPE);
-        newStrain.setCreationTime(Calendar.getInstance().getTime());
+        newStrain = (Strain) createGenericEntry(newStrain);
+        newStrain.setRecordType(Entry.STRAIN_ENTRY_TYPE);
 
         savedStrain = (Strain) save(newStrain);
 
@@ -387,20 +374,37 @@ public class EntryManager {
     private static Part createPart(Part newPart) throws ManagerException {
         Part savedPart = null;
 
+        newPart = (Part) createGenericEntry(newPart);
+        newPart.setRecordType(Entry.PART_ENTRY_TYPE);
+
+        savedPart = (Part) save(newPart);
+
+        return savedPart;
+    }
+
+    private static ArabidopsisSeed createArabidopsisSeed(ArabidopsisSeed newArabidopsisSeed) throws ManagerException {
+        ArabidopsisSeed savedArabidopsisSeed = null;
+        
+        newArabidopsisSeed = (ArabidopsisSeed) createGenericEntry(newArabidopsisSeed);
+        newArabidopsisSeed.setRecordType(Entry.ARABIDOPSIS_SEED_ENTRY_TYPE);
+
+        savedArabidopsisSeed = (ArabidopsisSeed) save(newArabidopsisSeed);
+        
+        return savedArabidopsisSeed;
+    }
+
+    private static Entry createGenericEntry(Entry newEntry) throws ManagerException {
         String number = getNextPartNumber();
         PartNumber partNumber = new PartNumber();
         partNumber.setPartNumber(number);
         Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
         partNumbers.add(partNumber);
-        newPart.setPartNumbers(partNumbers);
-        newPart.setRecordId(Utils.generateUUID());
-        newPart.setVersionId(newPart.getRecordId());
-        newPart.setRecordType(PART_ENTRY_TYPE);
-        newPart.setCreationTime(Calendar.getInstance().getTime());
+        newEntry.setPartNumbers(partNumbers);
+        newEntry.setRecordId(Utils.generateUUID());
+        newEntry.setVersionId(newEntry.getRecordId());
+        newEntry.setCreationTime(Calendar.getInstance().getTime());
 
-        savedPart = (Part) save(newPart);
-
-        return savedPart;
+        return newEntry;
     }
 
     /**

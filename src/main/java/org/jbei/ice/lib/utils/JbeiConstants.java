@@ -2,6 +2,7 @@ package org.jbei.ice.lib.utils;
 
 import java.util.Map;
 
+import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 
 public class JbeiConstants {
@@ -30,12 +31,14 @@ public class JbeiConstants {
 
     public final static String getRecordType(String key) {
         String result = "";
-        if (key.equals("part")) {
+        if (key.equals(Entry.PART_ENTRY_TYPE)) {
             result = "Part";
-        } else if (key.equals("plasmid")) {
+        } else if (key.equals(Entry.PLASMID_ENTRY_TYPE)) {
             result = "Plasmid";
-        } else if (key.equals("strain")) {
+        } else if (key.equals(Entry.STRAIN_ENTRY_TYPE)) {
             result = "Strain";
+        } else if (key.equals(Entry.ARABIDOPSIS_SEED_ENTRY_TYPE)) {
+            result = "Arabidopsis Seed";
         }
         return result;
     }

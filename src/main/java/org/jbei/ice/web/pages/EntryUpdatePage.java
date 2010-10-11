@@ -5,6 +5,7 @@ import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.models.ArabidopsisSeed;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
@@ -12,6 +13,7 @@ import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.forms.ArabidopsisSeedUpdateFormPanel;
 import org.jbei.ice.web.forms.PartUpdateFormPanel;
 import org.jbei.ice.web.forms.PlasmidUpdateFormPanel;
 import org.jbei.ice.web.forms.StrainUpdateFormPanel;
@@ -52,6 +54,8 @@ public class EntryUpdatePage extends ProtectedPage {
                 panel = new PlasmidUpdateFormPanel("entry", (Plasmid) entry);
             } else if (entry instanceof Part) {
                 panel = new PartUpdateFormPanel("entry", (Part) entry);
+            } else if (entry instanceof ArabidopsisSeed) {
+                panel = new ArabidopsisSeedUpdateFormPanel("entry", (ArabidopsisSeed) entry);
             }
 
             add(panel);
