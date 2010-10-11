@@ -24,7 +24,7 @@ public class ArabidopsisSeed extends Entry {
     private String homozygosity;
 
     @Column(name = "ecotype", nullable = false)
-    private String Ecotype;
+    private String ecotype;
 
     @Column(name = "harvest_date")
     private Date harvestDate;
@@ -45,11 +45,11 @@ public class ArabidopsisSeed extends Entry {
     }
 
     public String getEcotype() {
-        return Ecotype;
+        return ecotype;
     }
 
     public void setEcotype(String ecotype) {
-        Ecotype = ecotype;
+        this.ecotype = ecotype;
     }
 
     public Date getHarvestDate() {
