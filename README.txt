@@ -6,7 +6,8 @@ CONTENTS:
 1. Requirements
 2. Setting up Maven
 3. Build Instructions for Deployment
-4. Contributing Code
+4. Setup
+5. Contributing Code
 
 ===============
 1. Requirements
@@ -41,31 +42,19 @@ We use Maven to help manage our dependencies.
 1.4 Eclipse (For Development only)
 -----------------------------
 
-We use Eclipse as our IDE. 
+We use Eclipse as our IDE. For debugging, we use run-jetty-run plugin. 
 
 ===================
 2. Setting up Maven
 ===================
 
 2.1. Install maven2 (via apt-get or download).
-2.2. Create a temporary directory (/tmp/maventemp) and cd to it.
-2.3. Run:
-mvn archetype:create -DarchetypeGroupId=org.apache.wicket -DarchetypeArtifactId=wicket-archetype-quickstart -DarchetypeVersion=1.4.1 -DgroupId=org.jbei.ice -DartifactId=ice
-2.4. cd ice
-2.5. run:
-    mvn eclipse:eclipse -DdownloadSources=true
-    
-2.6. Eclipse maven plugin: Sonotype maven plugin. If for some reason
-     M2_REPO is not defined in your eclipse, In project properties ->
-     java build path -> Libraries, set variable M2_REPO to maven's
-     repository, likely to be in "$HOME/.m2/repository".
-    
-2. 7. JBEIR ICE's pom.xml has all the dependencies defined. However,
+2.2. JBEIR ICE's pom.xml has all the dependencies defined. However,
       there are some libraries that are not in any public maven repos,
       namely biojava and flex components. So these have to be
       installed to your local maven repo.
 
-Run the following command in the lib/ directory of your sources:
+Run the following command in the lib/ directory of your sources (Section 3.1):
 
 # cd lib
 
@@ -93,7 +82,7 @@ Now you should have all the necessary libraries in your local maven cache.
      Download sources from svn:
      $ svn checkout http://gd-ice.googlecode.com/svn/trunk/ice gd-ice-build
 
-3.1.1 [git] I prefer to use git-svn to talk to the svn repo, as git
+3.1.1 [optional: git] I prefer to use git-svn to talk to the svn repo, as git
       gives me greater flexibility in managing local branches.  With
       git, the commands are:
 
@@ -122,7 +111,6 @@ Now you should have all the necessary libraries in your local maven cache.
       $ git commit -m "build: productions settings"
 
 3.3. Build!
-     $ cd gd-ice-build
      $ mvn package
 
 3.4. Now you should have target/gd-ice-1.0-SNAPSHOT.war and
@@ -142,9 +130,16 @@ Now you should have all the necessary libraries in your local maven cache.
       For best results, instead of adding all the changes to a single git
       branch commit, commit each file change into individual commits, so
       they can be individually tracked.
+  
+====================
+4. Setup
+====================
+When the site is installed and deployed, log in using the default 
+Administrator account. It is 'Administrator' with the password 
+'Administrator'.
     
 ====================
-4. Contributing Code
+5. Contributing Code
 ====================
 
 We will gladly accept patches to our code. Just send us an email
