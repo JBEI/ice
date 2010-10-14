@@ -22,7 +22,7 @@ public class Label implements IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
+    private long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "accounts_id", nullable = false)
@@ -32,11 +32,11 @@ public class Label implements IModel {
     @Lob
     private String name;
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

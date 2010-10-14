@@ -34,7 +34,7 @@ public class MiniSamplesViewPanel extends Panel {
                 new PageParameters("0=" + entry.getId() + ",1=" + SAMPLES_URL_KEY)));
         SampleController sampleController = new SampleController(IceSession.get().getAccount());
 
-        int numSamples = 0;
+        long numSamples = 0;
         try {
             numSamples = sampleController.getNumberOfSamples(entry);
         } catch (ControllerException e) {

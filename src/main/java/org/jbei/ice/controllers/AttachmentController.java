@@ -94,8 +94,8 @@ public class AttachmentController extends Controller {
         return attachments;
     }
 
-    public int getNumberOfAttachments(Entry entry) throws ControllerException {
-        int result = 0;
+    public long getNumberOfAttachments(Entry entry) throws ControllerException {
+        long result = 0;
 
         try {
             ArrayList<Attachment> attachments = AttachmentManager.getByEntry(entry);

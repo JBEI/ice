@@ -29,7 +29,7 @@ public class Account implements IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
+    private long id;
 
     @Column(name = "firstname", length = 50, nullable = false)
     private String firstName;
@@ -109,14 +109,14 @@ public class Account implements IModel {
         this.password = password;
         this.institution = institution;
         this.description = description;
-        this.creationTime = new Date();
+        creationTime = new Date();
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

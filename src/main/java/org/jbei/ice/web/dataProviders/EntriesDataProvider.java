@@ -9,19 +9,21 @@ import org.apache.wicket.model.Model;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 
 public class EntriesDataProvider extends SortableDataProvider<Entry> {
     private static final long serialVersionUID = 1L;
 
-    private ArrayList<Entry> entries = new ArrayList<Entry>();
+    private final ArrayList<Entry> entries = new ArrayList<Entry>();
 
     public EntriesDataProvider() {
         super();
 
     }
 
+    @Override
     public Iterator<? extends Entry> iterator(int first, int count) {
         entries.clear();
 
@@ -29,7 +31,7 @@ public class EntriesDataProvider extends SortableDataProvider<Entry> {
 
         try {
             ArrayList<Entry> results = entryController.getEntries(first, count, "creationTime",
-                    false);
+                false);
 
             for (Entry entry : results) {
                 entries.add(entry);
@@ -41,12 +43,15 @@ public class EntriesDataProvider extends SortableDataProvider<Entry> {
         return entries.iterator();
     }
 
+    @Override
     public IModel<Entry> model(Entry object) {
         return new Model<Entry>(object);
     }
 
+    @Override
     public int size() {
-        int numberOfEntries = 0;
+        long numberOfEntries = 0;
+        int result = 0;
 
         EntryController entryController = new EntryController(IceSession.get().getAccount());
 
@@ -56,7 +61,9 @@ public class EntriesDataProvider extends SortableDataProvider<Entry> {
             throw new ViewException(e);
         }
 
-        return numberOfEntries;
+        result = Utils.safeLongToInt(numberOfEntries);
+
+        return result;
     }
 
     public ArrayList<Entry> getEntries() {

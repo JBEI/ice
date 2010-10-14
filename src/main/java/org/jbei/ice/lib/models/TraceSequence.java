@@ -30,7 +30,7 @@ public class TraceSequence implements IModel {
     @XmlTransient
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
+    private long id;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "entries_id", nullable = false)
@@ -69,7 +69,7 @@ public class TraceSequence implements IModel {
         this.filename = filename;
         this.depositor = depositor;
         this.sequence = sequence;
-        this.creationTime = new Date();
+        creationTime = new Date();
     }
 
     public TraceSequence(Entry entry, String fileId, String filename, String depositor,
@@ -84,11 +84,11 @@ public class TraceSequence implements IModel {
         this.creationTime = creationTime;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

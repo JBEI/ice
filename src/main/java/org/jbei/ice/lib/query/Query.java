@@ -22,7 +22,7 @@ import org.jbei.ice.lib.models.Part;
 @SuppressWarnings("unchecked")
 public class Query {
 
-    private ArrayList<Filter> filters = new ArrayList<Filter>();
+    private final ArrayList<Filter> filters = new ArrayList<Filter>();
 
     private static Query instance = null;
 
@@ -132,8 +132,8 @@ public class Query {
         try {
             Filter queryType = filterByKey(key);
 
-            result = (HashSet<Integer>) this.getClass().getDeclaredMethod(queryType.method,
-                String.class).invoke(this, value);
+            result = (HashSet<Integer>) this.getClass()
+                    .getDeclaredMethod(queryType.method, String.class).invoke(this, value);
         } catch (IllegalArgumentException e) {
             throw new QueryException(e);
         } catch (IllegalAccessException e) {
@@ -149,17 +149,18 @@ public class Query {
         return result;
     }
 
-    public ArrayList<Integer> query(ArrayList<String[]> data) throws QueryException {
-        ArrayList<Integer> resultIds = new ArrayList<Integer>();
+    public ArrayList<Long> query(ArrayList<String[]> data) throws QueryException {
+        ArrayList<Long> resultIds = new ArrayList<Long>();
 
         boolean firstRun = true;
 
         try {
             for (String[] item : data) {
                 if (firstRun) {
+                    @SuppressWarnings("rawtypes")
                     HashSet queryResultSet = runFilter(item[0], item[1]);
 
-                    for (Iterator<Integer> iterator = queryResultSet.iterator(); iterator.hasNext();) {
+                    for (Iterator<Long> iterator = queryResultSet.iterator(); iterator.hasNext();) {
                         resultIds.add(iterator.next());
                     }
 
@@ -437,8 +438,8 @@ public class Query {
 
     protected HashSet<Integer> filterShortDescription(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
-        String criteria = makeCriterion("lower(entry.shortDescription)", parsedQuery
-                .get("operator"), parsedQuery.get("value"));
+        String criteria = makeCriterion("lower(entry.shortDescription)",
+            parsedQuery.get("operator"), parsedQuery.get("value"));
 
         String query = "select distinct entry.id from Entry entry where " + criteria;
         return hibernateQuery(query);
@@ -482,8 +483,8 @@ public class Query {
 
     protected HashSet<Integer> filterOriginOfReplication(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
-        String criteria = makeCriterion("lower(plasmid.originOfReplication)", parsedQuery
-                .get("operator"), parsedQuery.get("value"));
+        String criteria = makeCriterion("lower(plasmid.originOfReplication)",
+            parsedQuery.get("operator"), parsedQuery.get("value"));
 
         String query = "select distinct plasmid.id from Plasmid plasmid where " + criteria;
         return hibernateQuery(query);
@@ -500,8 +501,8 @@ public class Query {
 
     protected HashSet<Integer> filterGenotypePhenotype(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
-        String criteria = makeCriterion("lower(strain.genotypePhenotype)", parsedQuery
-                .get("operator"), parsedQuery.get("value"));
+        String criteria = makeCriterion("lower(strain.genotypePhenotype)",
+            parsedQuery.get("operator"), parsedQuery.get("value"));
 
         String query = "select distinct strain.id from Strain strain where " + criteria;
         return hibernateQuery(query);
@@ -557,8 +558,8 @@ public class Query {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
 
         String criteria = makeCriterion(
-            "lower(entryFundingSource.fundingSource.principalInvestigator)", parsedQuery
-                    .get("operator"), parsedQuery.get("value"));
+            "lower(entryFundingSource.fundingSource.principalInvestigator)",
+            parsedQuery.get("operator"), parsedQuery.get("value"));
 
         String query = "select distinct entry.id from " + EntryFundingSource.class.getName()
                 + " entryFundingSource where " + criteria;
@@ -579,8 +580,8 @@ public class Query {
     protected HashSet<Integer> filterIntelectualProperty(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
 
-        String criteria = makeCriterion("lower(entry.intellectualProperty)", parsedQuery
-                .get("operator"), parsedQuery.get("value"));
+        String criteria = makeCriterion("lower(entry.intellectualProperty)",
+            parsedQuery.get("operator"), parsedQuery.get("value"));
 
         String query = "select distinct entry.id from " + Entry.class.getName() + " entry where "
                 + criteria;

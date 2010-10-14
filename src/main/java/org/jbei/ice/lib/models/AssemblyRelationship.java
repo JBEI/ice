@@ -19,7 +19,7 @@ public class AssemblyRelationship implements IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
+    private long id;
 
     @Column(name = "name", length = 128)
     private String name;
@@ -30,11 +30,11 @@ public class AssemblyRelationship implements IModel {
     @Column(name = "ontology", length = 128)
     private String ontology;
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

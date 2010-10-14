@@ -24,7 +24,7 @@ public class Group implements IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    protected int id;
+    protected long id;
 
     @Column(name = "uuid", length = 36, nullable = false)
     protected String uuid;
@@ -49,11 +49,11 @@ public class Group implements IModel {
     }
 
     // Getters and setters
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

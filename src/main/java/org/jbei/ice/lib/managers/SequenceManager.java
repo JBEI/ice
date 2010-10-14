@@ -131,6 +131,7 @@ public class SequenceManager {
         try {
             Query query = session.createQuery("from " + Sequence.class.getName());
 
+            @SuppressWarnings("rawtypes")
             List list = query.list();
 
             if (list != null) {
@@ -209,7 +210,7 @@ public class SequenceManager {
 
     }
 
-    public static Feature getFeature(int id) {
+    public static Feature getFeature(long id) {
         Feature result = null;
         Session session = DAO.newSession();
         try {
@@ -233,6 +234,7 @@ public class SequenceManager {
         Session session = DAO.newSession();
         try {
             Query query = session.createQuery("from " + Feature.class.getName());
+            @SuppressWarnings("rawtypes")
             List list = query.list();
 
             if (list != null) {

@@ -3,9 +3,9 @@ package org.jbei.ice.lib.models.interfaces;
 import org.jbei.ice.lib.models.Entry;
 
 public interface ILinkValueObject {
-    int getId();
+    long getId();
 
-    void setId(int id);
+    void setId(long id);
 
     String getLink();
 

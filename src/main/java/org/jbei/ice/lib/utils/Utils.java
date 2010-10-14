@@ -210,4 +210,15 @@ public class Utils {
 
         return result;
     }
+
+    public static int safeLongToInt(long l) {
+        int result = 0;
+        if (l < Integer.MIN_VALUE || l > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException(
+                    "Cannot convert this long to Integer. Value too large: " + String.valueOf(l));
+        } else {
+            result = (int) l;
+        }
+        return result;
+    }
 }

@@ -23,7 +23,7 @@ public class PartNumber implements IPartNumberValueObject, IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
+    private long id;
 
     @Column(name = "part_number", length = 127, nullable = false)
     private String partNumber;
@@ -40,28 +40,33 @@ public class PartNumber implements IPartNumberValueObject, IModel {
         this.entry = entry;
     }
 
+    @Override
     @XmlTransient
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
+    @Override
     public String getPartNumber() {
         return partNumber;
     }
 
+    @Override
     public void setPartNumber(String partNumber) {
         this.partNumber = partNumber;
     }
 
+    @Override
     @XmlTransient
     public Entry getEntry() {
         return entry;
     }
 
+    @Override
     public void setEntry(Entry entry) {
         this.entry = entry;
     }

@@ -42,7 +42,7 @@ public class ProjectManager {
         }
     }
 
-    public static Project get(int id) throws ManagerException {
+    public static Project get(long id) throws ManagerException {
         Project project = null;
 
         Session session = DAO.newSession();

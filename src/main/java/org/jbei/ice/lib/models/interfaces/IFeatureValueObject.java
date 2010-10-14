@@ -29,7 +29,7 @@ public interface IFeatureValueObject {
 
     void setGenbankType(String genbankType);
 
-    void setId(int id);
+    void setId(long id);
 
-    int getId();
+    long getId();
 }

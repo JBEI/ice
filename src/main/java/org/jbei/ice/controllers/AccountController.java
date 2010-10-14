@@ -20,7 +20,7 @@ import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.PersistentSessionDataWrapper;
 
 public class AccountController {
-    public static Account get(int id) throws ControllerException {
+    public static Account get(long id) throws ControllerException {
         Account account = null;
 
         try {

@@ -21,7 +21,7 @@ public class EntryFundingSource implements IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
+    private long id;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "funding_source_id", nullable = false)
@@ -32,11 +32,11 @@ public class EntryFundingSource implements IModel {
     private Entry entry;
 
     @XmlTransient
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

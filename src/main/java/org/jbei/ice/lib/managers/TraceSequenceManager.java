@@ -193,7 +193,7 @@ public class TraceSequenceManager {
     }
 
     @SuppressWarnings("unchecked")
-    public static int getNumberOfTraceSequences(Entry entry) throws ManagerException {
+    public static long getNumberOfTraceSequences(Entry entry) throws ManagerException {
         int result = 0;
 
         Session session = DAO.newSession();

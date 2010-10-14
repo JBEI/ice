@@ -4,9 +4,9 @@ import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Sequence;
 
 public interface ISequenceFeatureValueObject {
-    void setId(int id);
+    void setId(long id);
 
-    int getId();
+    long getId();
 
     ISequenceValueObject getSequence();
 

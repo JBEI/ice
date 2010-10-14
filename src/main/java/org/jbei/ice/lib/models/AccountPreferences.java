@@ -22,7 +22,7 @@ public class AccountPreferences implements IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
+    private long id;
 
     @Column(name = "preferences")
     @Lob
@@ -47,11 +47,11 @@ public class AccountPreferences implements IModel {
         this.account = account;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

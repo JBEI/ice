@@ -23,7 +23,7 @@ public class Name implements INameValueObject, IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
+    private long id;
 
     @Column(name = "name", length = 127, nullable = false)
     private String name;
@@ -40,28 +40,33 @@ public class Name implements INameValueObject, IModel {
         this.entry = entry;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
+    @Override
     @XmlTransient
-    public int getId() {
+    public long getId() {
         return id;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
 
+    @Override
     @XmlTransient
     public Entry getEntry() {
         return entry;
     }
 
+    @Override
     public void setEntry(Entry entry) {
         this.entry = entry;
     }

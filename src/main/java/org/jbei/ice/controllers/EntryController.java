@@ -57,7 +57,7 @@ public class EntryController extends Controller {
         return createdEntry;
     }
 
-    public Entry get(int id) throws ControllerException, PermissionException {
+    public Entry get(long id) throws ControllerException, PermissionException {
         Entry entry = null;
 
         try {
@@ -110,12 +110,12 @@ public class EntryController extends Controller {
     }
 
     public Entry getByIdentifier(String identifier) throws ControllerException, PermissionException {
-        int entryId = 0;
+        long entryId = 0;
 
         Entry entry = null;
 
         try {
-            entryId = Integer.parseInt(identifier);
+            entryId = Long.parseLong(identifier);
 
             entry = EntryManager.get(entryId);
         } catch (NumberFormatException e) {
@@ -181,11 +181,11 @@ public class EntryController extends Controller {
         return getEntryPermissionVerifier().hasWritePermissions(entry, getAccount());
     }
 
-    public boolean hasReadPermissionById(int entryId) throws ControllerException {
+    public boolean hasReadPermissionById(long entryId) throws ControllerException {
         return getEntryPermissionVerifier().hasReadPermissionsById(entryId, getAccount());
     }
 
-    public boolean hasWritePermissionById(int entryId) throws ControllerException {
+    public boolean hasWritePermissionById(long entryId) throws ControllerException {
         return getEntryPermissionVerifier().hasWritePermissionsById(entryId, getAccount());
     }
 
@@ -280,12 +280,12 @@ public class EntryController extends Controller {
         return entries;
     }
 
-    public ArrayList<Entry> getEntriesByQueries(ArrayList<String[]> filters, int offset, int limit)
+    public ArrayList<Entry> getEntriesByQueries(ArrayList<String[]> filters, long offset, long limit)
             throws ControllerException {
         ArrayList<Entry> entries = null;
 
         try {
-            ArrayList<Integer> queryResultIds = Query.getInstance().query(filters);
+            ArrayList<Long> queryResultIds = Query.getInstance().query(filters);
 
             entries = EntryManager.getEntriesByIdSet(filterEntriesByPermissionAndOffsetLimit(
                 queryResultIds, offset, limit));
@@ -302,8 +302,8 @@ public class EntryController extends Controller {
         return entries;
     }
 
-    public int getNumberOfVisibleEntries() throws ControllerException {
-        int numberOfVisibleEntries = 0;
+    public long getNumberOfVisibleEntries() throws ControllerException {
+        long numberOfVisibleEntries = 0;
 
         try {
             numberOfVisibleEntries = EntryManager.getNumberOfVisibleEntries();
@@ -314,13 +314,13 @@ public class EntryController extends Controller {
         return numberOfVisibleEntries;
     }
 
-    public int getNumberOfEntriesByOwner(String owner) throws ControllerException {
-        int numberOfEntriesByOwner = 0;
+    public long getNumberOfEntriesByOwner(String owner) throws ControllerException {
+        long numberOfEntriesByOwner = 0;
 
         try {
-            ArrayList<Integer> allEntries = EntryManager.getEntriesByOwner(owner);
+            ArrayList<Long> allEntries = EntryManager.getEntriesByOwner(owner);
 
-            for (Integer entryId : allEntries) {
+            for (Long entryId : allEntries) {
                 if (hasReadPermissionById(entryId)) {
                     numberOfEntriesByOwner++;
                 }
@@ -332,13 +332,13 @@ public class EntryController extends Controller {
         return numberOfEntriesByOwner;
     }
 
-    public int getNumberOfEntriesByQueries(ArrayList<String[]> filters) throws ControllerException {
-        int numberOfEntriesByQueries = 0;
+    public long getNumberOfEntriesByQueries(ArrayList<String[]> filters) throws ControllerException {
+        long numberOfEntriesByQueries = 0;
 
         try {
-            ArrayList<Integer> queryResultIds = Query.getInstance().query(filters);
+            ArrayList<Long> queryResultIds = Query.getInstance().query(filters);
 
-            for (Integer entryId : queryResultIds) {
+            for (Long entryId : queryResultIds) {
                 if (hasReadPermissionById(entryId)) {
                     numberOfEntriesByQueries++;
                 }
@@ -420,21 +420,19 @@ public class EntryController extends Controller {
             ApplicationContoller.scheduleBlastIndexRebuildJob();
         }
 
-
-
     }
 
     protected EntryPermissionVerifier getEntryPermissionVerifier() {
         return (EntryPermissionVerifier) getPermissionVerifier();
     }
 
-    protected ArrayList<Integer> filterEntriesByPermissionAndOffsetLimit(ArrayList<Integer> ids,
-            int offset, int limit) throws ControllerException {
-        ArrayList<Integer> entryIds = new ArrayList<Integer>();
+    protected ArrayList<Long> filterEntriesByPermissionAndOffsetLimit(ArrayList<Long> ids,
+            long offset, long limit) throws ControllerException {
+        ArrayList<Long> entryIds = new ArrayList<Long>();
 
-        int skip = 0;
-        int counter = 0;
-        for (Integer entryId : ids) {
+        long skip = 0;
+        long counter = 0;
+        for (Long entryId : ids) {
             if (hasReadPermissionById(entryId)) {
                 if (offset > skip) {
                     skip++;

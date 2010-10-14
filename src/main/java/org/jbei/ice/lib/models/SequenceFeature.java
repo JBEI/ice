@@ -27,7 +27,7 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
+    private long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sequence_id")
@@ -85,28 +85,33 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         PREFIX, SUFFIX, SCAR, INNER, SUBINNER;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
+    @Override
     @XmlTransient
-    public int getId() {
+    public long getId() {
         return id;
     }
 
+    @Override
     @XmlTransient
     public Sequence getSequence() {
         return sequence;
     }
 
+    @Override
     public void setSequence(Sequence sequence) {
         this.sequence = sequence;
     }
 
+    @Override
     public Feature getFeature() {
         return feature;
     }
 
+    @Override
     public void setFeature(Feature feature) {
         this.feature = feature;
     }
@@ -114,34 +119,42 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
     /**
      * This is 1 based ala Genbank
      */
+    @Override
     public int getStart() {
         return start;
     }
 
+    @Override
     public void setStart(int start) {
         this.start = start;
     }
 
+    @Override
     public int getEnd() {
         return end;
     }
 
+    @Override
     public void setEnd(int end) {
         this.end = end;
     }
 
+    @Override
     public int getStrand() {
         return strand;
     }
 
+    @Override
     public void setStrand(int strand) {
         this.strand = strand;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }

@@ -21,7 +21,7 @@ public class EntryLabel implements IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
+    private long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "labels_id")
@@ -31,7 +31,7 @@ public class EntryLabel implements IModel {
     @JoinColumn(name = "entries_id")
     private Entry entry;
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
@@ -43,7 +43,7 @@ public class EntryLabel implements IModel {
         return label;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

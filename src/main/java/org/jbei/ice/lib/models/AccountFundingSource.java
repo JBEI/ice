@@ -21,7 +21,7 @@ public class AccountFundingSource implements IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
+    private long id;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "funding_source_id", nullable = false)
@@ -31,11 +31,11 @@ public class AccountFundingSource implements IModel {
     @JoinColumn(name = "accounts_id", nullable = false)
     private Account account;
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

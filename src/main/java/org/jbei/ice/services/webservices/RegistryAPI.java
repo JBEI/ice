@@ -101,8 +101,8 @@ public class RegistryAPI {
         return authenticated;
     }
 
-    public int getNumberOfPublicEntries() throws ServiceException {
-        int result = 0;
+    public long getNumberOfPublicEntries() throws ServiceException {
+        long result = 0;
 
         try {
             result = EntryManager.getNumberOfVisibleEntries();
@@ -762,8 +762,10 @@ public class RegistryAPI {
 
                     if (currentEntryEntryFundingSource.getFundingSource().getFundingSource()
                             .equals(entryFundingSource.getFundingSource().getFundingSource())
-                            && currentEntryEntryFundingSource.getFundingSource()
-                                    .getPrincipalInvestigator().equals(
+                            && currentEntryEntryFundingSource
+                                    .getFundingSource()
+                                    .getPrincipalInvestigator()
+                                    .equals(
                                         entryFundingSource.getFundingSource()
                                                 .getPrincipalInvestigator())) {
                         existEntryFundingSource = true;
@@ -929,8 +931,8 @@ public class RegistryAPI {
             Sequence sequence = sequenceController.getByEntry(entry);
 
             if (sequence != null) {
-                fastaSequence = SequenceController.compose(sequence, new FastaFormatter(entry
-                        .getNamesAsString()));
+                fastaSequence = SequenceController.compose(sequence,
+                    new FastaFormatter(entry.getNamesAsString()));
             }
 
             log("User '" + entryController.getAccount().getEmail()

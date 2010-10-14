@@ -111,8 +111,17 @@ public class LocationItemEditPanel extends Panel {
 
                     class LocationComparator implements Comparator<Location> {
 
+                        @Override
                         public int compare(Location arg0, Location arg1) {
-                            return arg1.getId() - arg0.getId();
+                            long difference = arg1.getId() - arg0.getId();
+                            int result = 0;
+                            if (difference < 1) {
+                                result = -1;
+                            }
+                            if (difference > 1) {
+                                result = 1;
+                            }
+                            return result;
                         }
                     }
 

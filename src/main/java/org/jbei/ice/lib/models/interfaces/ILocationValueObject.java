@@ -5,9 +5,9 @@ import java.util.Date;
 import org.jbei.ice.lib.models.Sample;
 
 public interface ILocationValueObject {
-    int getId();
+    long getId();
 
-    void setId(int id);
+    void setId(long id);
 
     Sample getSample();
 

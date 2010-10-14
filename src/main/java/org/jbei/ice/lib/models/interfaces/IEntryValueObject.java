@@ -9,9 +9,9 @@ import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.models.SelectionMarker;
 
 public interface IEntryValueObject {
-    int getId();
+    long getId();
 
-    void setId(int id);
+    void setId(long id);
 
     String getRecordId();
 

@@ -30,7 +30,7 @@ public class HeaderPanel extends Panel {
                         UnprotectedPage.IMAGES_RESOURCE_LOCATION + "logo.gif"))));
         add(new LoginStatusPanel("loginStatusPanel"));
 
-        int numberOfEntries = 0;
+        long numberOfEntries = 0;
 
         try {
             numberOfEntries = entryController.getNumberOfVisibleEntries();

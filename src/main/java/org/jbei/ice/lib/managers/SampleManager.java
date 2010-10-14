@@ -55,6 +55,7 @@ public class SampleManager {
 
             query.setEntity("entry", entry);
 
+            @SuppressWarnings("rawtypes")
             List list = query.list();
 
             if (list != null) {
@@ -89,6 +90,7 @@ public class SampleManager {
                 query.setMaxResults(limit);
             }
 
+            @SuppressWarnings("rawtypes")
             List list = query.list();
 
             if (list != null) {

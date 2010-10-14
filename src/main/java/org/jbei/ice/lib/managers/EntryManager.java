@@ -47,7 +47,7 @@ public class EntryManager {
         return result;
     }
 
-    public static Entry get(int id) throws ManagerException {
+    public static Entry get(long id) throws ManagerException {
         Entry entry = null;
 
         Session session = DAO.newSession();
@@ -125,10 +125,10 @@ public class EntryManager {
     }
 
     @SuppressWarnings("unchecked")
-    public static int getNumberOfVisibleEntries() throws ManagerException {
+    public static long getNumberOfVisibleEntries() throws ManagerException {
         Group everybodyGroup;
 
-        int result = 0;
+        long result = 0;
         Session session = null;
 
         try {
@@ -183,14 +183,14 @@ public class EntryManager {
         return entries;
     }
 
-    public static ArrayList<Integer> getEntries() throws ManagerException {
+    public static ArrayList<Long> getEntries() throws ManagerException {
         return getEntries(null, false);
     }
 
     @SuppressWarnings("unchecked")
-    public static ArrayList<Integer> getEntries(String field, boolean ascending)
+    public static ArrayList<Long> getEntries(String field, boolean ascending)
             throws ManagerException {
-        ArrayList<Integer> entries = null;
+        ArrayList<Long> entries = null;
 
         Session session = DAO.newSession();
         try {
@@ -205,7 +205,7 @@ public class EntryManager {
             List list = query.list();
 
             if (list != null) {
-                entries = (ArrayList<Integer>) list;
+                entries = (ArrayList<Long>) list;
             }
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve entries!", e);
@@ -218,10 +218,9 @@ public class EntryManager {
         return entries;
     }
 
-
     @SuppressWarnings("unchecked")
-    public static ArrayList<Integer> getEntriesByOwner(String owner) throws ManagerException {
-        ArrayList<Integer> entries = null;
+    public static ArrayList<Long> getEntriesByOwner(String owner) throws ManagerException {
+        ArrayList<Long> entries = null;
 
         Session session = DAO.newSession();
         try {
@@ -236,7 +235,7 @@ public class EntryManager {
             List list = query.list();
 
             if (list != null) {
-                entries = (ArrayList<Integer>) list;
+                entries = (ArrayList<Long>) list;
             }
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve entries by owner: " + owner, e);
@@ -250,8 +249,7 @@ public class EntryManager {
     }
 
     @SuppressWarnings("unchecked")
-    public static ArrayList<Entry> getEntriesByIdSet(ArrayList<Integer> ids)
-            throws ManagerException {
+    public static ArrayList<Entry> getEntriesByIdSet(ArrayList<Long> ids) throws ManagerException {
         ArrayList<Entry> entries = null;
 
         if (ids.size() == 0) {
@@ -382,14 +380,15 @@ public class EntryManager {
         return savedPart;
     }
 
-    private static ArabidopsisSeed createArabidopsisSeed(ArabidopsisSeed newArabidopsisSeed) throws ManagerException {
+    private static ArabidopsisSeed createArabidopsisSeed(ArabidopsisSeed newArabidopsisSeed)
+            throws ManagerException {
         ArabidopsisSeed savedArabidopsisSeed = null;
-        
+
         newArabidopsisSeed = (ArabidopsisSeed) createGenericEntry(newArabidopsisSeed);
         newArabidopsisSeed.setRecordType(Entry.ARABIDOPSIS_SEED_ENTRY_TYPE);
 
         savedArabidopsisSeed = (ArabidopsisSeed) save(newArabidopsisSeed);
-        
+
         return savedArabidopsisSeed;
     }
 
@@ -491,8 +490,8 @@ public class EntryManager {
     }
 
     private static String getNextPartNumber() throws ManagerException {
-        return generateNextPartNumber(JbeirSettings.getSetting("PART_NUMBER_PREFIX"), JbeirSettings
-                .getSetting("PART_NUMBER_DELIMITER"), JbeirSettings
-                .getSetting("PART_NUMBER_DIGITAL_SUFFIX"));
+        return generateNextPartNumber(JbeirSettings.getSetting("PART_NUMBER_PREFIX"),
+            JbeirSettings.getSetting("PART_NUMBER_DELIMITER"),
+            JbeirSettings.getSetting("PART_NUMBER_DIGITAL_SUFFIX"));
     }
 }

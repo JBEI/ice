@@ -34,12 +34,12 @@ public class GroupManager {
         return result;
     }
 
-    public static Group get(int id) throws ManagerException {
+    public static Group get(long id) throws ManagerException {
         Group result = null;
         Session session = DAO.newSession();
         try {
             Query query = session.createQuery("from Group where id = :id");
-            query.setInteger("id", id);
+            query.setLong("id", id);
             result = (Group) query.uniqueResult();
         } catch (Exception e) {
             e.printStackTrace();

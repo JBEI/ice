@@ -32,7 +32,7 @@ public class Sequence implements ISequenceValueObject, IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
+    private long id;
 
     @Column(name = "sequence")
     @Lob
@@ -72,19 +72,22 @@ public class Sequence implements ISequenceValueObject, IModel {
         this.entry = entry;
     }
 
+    @Override
     @XmlTransient
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
+    @Override
     public String getSequence() {
         return sequence;
     }
 
+    @Override
     public void setSequence(String sequence) {
         this.sequence = sequence;
         setFwdHash(SequenceUtils.calculateSequenceHash(sequence));
@@ -92,56 +95,66 @@ public class Sequence implements ISequenceValueObject, IModel {
 
     }
 
+    @Override
     @XmlTransient
     public String getSequenceUser() {
         return sequenceUser;
     }
 
+    @Override
     public void setSequenceUser(String sequenceUser) {
         this.sequenceUser = sequenceUser;
     }
 
+    @Override
     @XmlTransient
     public String getFwdHash() {
         return fwdHash;
     }
 
+    @Override
     public void setFwdHash(String fwdHash) {
         this.fwdHash = fwdHash;
     }
 
+    @Override
     @XmlTransient
     public String getRevHash() {
         return revHash;
     }
 
+    @Override
     public void setRevHash(String revHash) {
         this.revHash = revHash;
     }
 
+    @Override
     @XmlTransient
     public Entry getEntry() {
         return entry;
     }
 
+    @Override
     public void setEntry(Entry entry) {
         this.entry = entry;
     }
 
+    @Override
     public void setSequenceFeatures(Set<SequenceFeature> inputSequenceFeatures) {
         // for JAXB webservices should be this way
         if (inputSequenceFeatures == null) {
-            this.sequenceFeatures.clear();
+            sequenceFeatures.clear();
 
             return;
         }
 
-        if (inputSequenceFeatures != this.sequenceFeatures) {
-            this.sequenceFeatures.clear();
-            this.sequenceFeatures.addAll(inputSequenceFeatures);
+        if (inputSequenceFeatures != sequenceFeatures) {
+            sequenceFeatures.clear();
+            sequenceFeatures.addAll(inputSequenceFeatures);
         }
     }
 
+    @Override
     public Set<SequenceFeature> getSequenceFeatures() {
 
         /* Hibernate hack.
@@ -149,12 +162,12 @@ public class Sequence implements ISequenceValueObject, IModel {
         of hibernate methods to do this correctly. Instead, I just replace this set
         when I do a get method here with the SequenceFeatureCollection.
         */
-        if (this.sequenceFeatures instanceof SequenceFeatureCollection) {
+        if (sequenceFeatures instanceof SequenceFeatureCollection) {
 
         } else {
             SequenceFeatureCollection newSequenceFeatures = new SequenceFeatureCollection();
-            newSequenceFeatures.addAll(this.sequenceFeatures);
-            this.sequenceFeatures = newSequenceFeatures;
+            newSequenceFeatures.addAll(sequenceFeatures);
+            sequenceFeatures = newSequenceFeatures;
         }
         return sequenceFeatures;
     }

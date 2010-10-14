@@ -22,11 +22,11 @@ import org.jbei.ice.web.IceSession;
 public class PermissionManager {
 
     // convenience method that wraps actual method
-    public static boolean hasReadPermission(int entryId) {
+    public static boolean hasReadPermission(long entryId) {
         return hasReadPermission(entryId, IceSession.get().getAccount());
     }
 
-    public static boolean hasReadPermission(int entryId, String sessionKey) {
+    public static boolean hasReadPermission(String entryId, String sessionKey) {
         boolean result = false;
 
         Account account = null;
@@ -65,7 +65,7 @@ public class PermissionManager {
         return result;
     }
 
-    public static boolean hasReadPermission(int entryId, Account account) {
+    public static boolean hasReadPermission(long entryId, Account account) {
         boolean result = false;
 
         if (entryId > 0 && account != null) {
@@ -85,7 +85,7 @@ public class PermissionManager {
     }
 
     // convenience method that wraps actual method
-    public static boolean hasWritePermission(int entryId) {
+    public static boolean hasWritePermission(long entryId) {
         boolean result = false;
         Entry entry;
 
@@ -102,7 +102,7 @@ public class PermissionManager {
         return result;
     }
 
-    public static boolean hasWritePermission(int entryId, String sessionKey) {
+    public static boolean hasWritePermission(long entryId, String sessionKey) {
         boolean result = false;
         Entry entry;
         try {
@@ -139,7 +139,7 @@ public class PermissionManager {
         return result;
     }
 
-    public static boolean hasWritePermission(int entryId, Account account) {
+    public static boolean hasWritePermission(long entryId, Account account) {
         boolean result = false;
         Entry entry;
 
@@ -473,7 +473,7 @@ public class PermissionManager {
         Session session = DAO.newSession();
         Query query = session.createQuery(queryString);
         query.setEntity("entry", entry);
-        List<Integer> accounts = null;
+        List<Long> accounts = null;
         try {
             accounts = query.list();
         } catch (HibernateException e) {
@@ -492,7 +492,7 @@ public class PermissionManager {
     }
 
     @SuppressWarnings("unchecked")
-    protected static boolean userHasReadPermission(int entryId, Account account) {
+    protected static boolean userHasReadPermission(long entryId, Account account) {
         boolean result = false;
 
         String queryString1 = "select count(id) from Entry as entry where entry.ownerEmail = '"
@@ -519,7 +519,7 @@ public class PermissionManager {
                     + entryId;
             session = DAO.newSession();
             Query query2 = session.createQuery(queryString2);
-            List<Integer> accounts = null;
+            List<Long> accounts = null;
             try {
                 accounts = query2.list();
             } catch (HibernateException e) {
@@ -567,7 +567,7 @@ public class PermissionManager {
                     + entryId + "'";
             session = DAO.newSession();
             Query query2 = session.createQuery(queryString2);
-            List<Integer> accounts = null;
+            List<Long> accounts = null;
             try {
                 accounts = query2.list();
             } catch (HibernateException e) {
@@ -599,7 +599,7 @@ public class PermissionManager {
                 query.setEntity("entry", entry);
 
                 @SuppressWarnings("unchecked")
-                List<Integer> accounts = query.list();
+                List<Long> accounts = query.list();
                 if (account.getEmail().equals(entry.getOwnerEmail())) {
                     result = true;
                 } else if (accounts.contains(account.getId())) {
@@ -621,7 +621,7 @@ public class PermissionManager {
         boolean result = false;
         String queryString = "select readGroup.group.id from ReadGroup as readGroup where readGroup.entry = :entry";
         Session session = DAO.newSession();
-        List<Integer> readGroups = null;
+        List<Long> readGroups = null;
         try {
             Query query = session.createQuery(queryString);
             query.setEntity("entry", entry);
@@ -633,9 +633,9 @@ public class PermissionManager {
                 session.close();
             }
         }
-        Set<Integer> accountGroups = getAllAccountGroups(account);
+        Set<Long> accountGroups = getAllAccountGroups(account);
 
-        accountGroups.retainAll(new HashSet<Integer>(readGroups));
+        accountGroups.retainAll(new HashSet<Long>(readGroups));
         if (accountGroups.size() > 0) {
             result = true;
         }
@@ -644,13 +644,13 @@ public class PermissionManager {
     }
 
     @SuppressWarnings("unchecked")
-    protected static boolean groupHasReadPermission(int entryId, Account account) {
+    protected static boolean groupHasReadPermission(long entryId, Account account) {
         boolean result = false;
 
         String queryString = "select readGroup.group.id from ReadGroup as readGroup where readGroup.entry.id = "
                 + entryId;
         Session session = DAO.newSession();
-        List<Integer> readGroups = null;
+        List<Long> readGroups = null;
         try {
             Query query = session.createQuery(queryString);
             readGroups = query.list();
@@ -661,9 +661,9 @@ public class PermissionManager {
                 session.close();
             }
         }
-        Set<Integer> accountGroups = getAllAccountGroups(account);
+        Set<Long> accountGroups = getAllAccountGroups(account);
 
-        accountGroups.retainAll(new HashSet<Integer>(readGroups));
+        accountGroups.retainAll(new HashSet<Long>(readGroups));
         if (accountGroups.size() > 0) {
             result = true;
         }
@@ -678,7 +678,7 @@ public class PermissionManager {
         String queryString = "select readGroup.group.id from ReadGroup as readGroup where readGroup.entry.recordId = '"
                 + entryId + "'";
         Session session = DAO.newSession();
-        List<Integer> readGroups = null;
+        List<Long> readGroups = null;
         try {
             Query query = session.createQuery(queryString);
             readGroups = query.list();
@@ -689,9 +689,9 @@ public class PermissionManager {
                 session.close();
             }
         }
-        Set<Integer> accountGroups = getAllAccountGroups(account);
+        Set<Long> accountGroups = getAllAccountGroups(account);
 
-        accountGroups.retainAll(new HashSet<Integer>(readGroups));
+        accountGroups.retainAll(new HashSet<Long>(readGroups));
         if (accountGroups.size() > 0) {
             result = true;
         }
@@ -706,7 +706,7 @@ public class PermissionManager {
         Session session = DAO.newSession();
         Query query = session.createQuery(queryString);
         query.setEntity("entry", entry);
-        List<Integer> readGroups = null;
+        List<Long> readGroups = null;
         try {
             readGroups = query.list();
         } catch (HibernateException e) {
@@ -717,9 +717,9 @@ public class PermissionManager {
             }
         }
 
-        Set<Integer> accountGroups = getAllAccountGroups(account);
+        Set<Long> accountGroups = getAllAccountGroups(account);
 
-        accountGroups.retainAll(new HashSet<Integer>(readGroups));
+        accountGroups.retainAll(new HashSet<Long>(readGroups));
         if (accountGroups.size() > 0) {
             result = true;
         }
@@ -727,7 +727,7 @@ public class PermissionManager {
         return result;
     }
 
-    protected static HashSet<Integer> getParentGroups(Group group, HashSet<Integer> groupIds) {
+    protected static HashSet<Long> getParentGroups(Group group, HashSet<Long> groupIds) {
         if (groupIds.contains(group.getId())) {
             return groupIds;
         } else {
@@ -741,8 +741,8 @@ public class PermissionManager {
         return groupIds;
     }
 
-    protected static Set<Integer> getAllAccountGroups(Account account) {
-        HashSet<Integer> accountGroups = new HashSet<Integer>();
+    protected static Set<Long> getAllAccountGroups(Account account) {
+        HashSet<Long> accountGroups = new HashSet<Long>();
 
         for (Group group : account.getGroups()) {
             accountGroups = getParentGroups(group, accountGroups);

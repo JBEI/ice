@@ -23,7 +23,7 @@ public class Link implements ILinkValueObject, IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
+    private long id;
 
     @Column(name = "link", length = 1023)
     private String link;
@@ -45,36 +45,43 @@ public class Link implements ILinkValueObject, IModel {
         this.entry = entry;
     }
 
+    @Override
     @XmlTransient
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
+    @Override
     public String getLink() {
         return link;
     }
 
+    @Override
     public void setLink(String link) {
         this.link = link;
     }
 
+    @Override
     public String getUrl() {
         return url;
     }
 
+    @Override
     public void setUrl(String url) {
         this.url = url;
     }
 
+    @Override
     @XmlTransient
     public Entry getEntry() {
         return entry;
     }
 
+    @Override
     public void setEntry(Entry entry) {
         this.entry = entry;
     }

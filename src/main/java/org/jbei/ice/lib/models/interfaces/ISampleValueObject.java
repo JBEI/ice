@@ -5,9 +5,9 @@ import java.util.Date;
 import org.jbei.ice.lib.models.Entry;
 
 public interface ISampleValueObject {
-    int getId();
+    long getId();
 
-    void setId(int id);
+    void setId(long id);
 
     void setUuid(String uuid);
 

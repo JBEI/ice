@@ -26,7 +26,7 @@ public class Project implements IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
+    private long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "accounts_id", unique = true, nullable = false)
@@ -74,11 +74,11 @@ public class Project implements IModel {
         this.modificationTime = modificationTime;
     }
 
-    public int getInt() {
+    public long setId() {
         return id;
     }
 
-    public void setInt(int id) {
+    public void getId(long id) {
         this.id = id;
     }
 

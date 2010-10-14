@@ -22,7 +22,7 @@ public class Feature implements IFeatureValueObject, IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
+    private long id;
 
     @Column(name = "name", length = 127)
     private String name;
@@ -61,74 +61,89 @@ public class Feature implements IFeatureValueObject, IModel {
         this.autoFind = autoFind;
         this.genbankType = genbankType;
         setSequence(sequence);
-        this.hash = SequenceUtils.calculateSequenceHash(sequence);
+        hash = SequenceUtils.calculateSequenceHash(sequence);
 
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
 
+    @Override
     public String getDescription() {
         return description;
     }
 
+    @Override
     public void setDescription(String description) {
         this.description = description;
     }
 
+    @Override
     public String getIdentification() {
         return identification;
     }
 
+    @Override
     public void setIdentification(String identification) {
         this.identification = identification;
     }
 
+    @Override
     @XmlTransient
     public int getAutoFind() {
         return autoFind;
     }
 
+    @Override
     public void setAutoFind(int autoFind) {
         this.autoFind = autoFind;
     }
 
+    @Override
     public String getGenbankType() {
         return genbankType;
     }
 
+    @Override
     public void setGenbankType(String genbankType) {
         this.genbankType = genbankType;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
+    @Override
     @XmlTransient
-    public int getId() {
+    public long getId() {
         return id;
     }
 
+    @Override
     public void setHash(String hash) {
         this.hash = hash;
     }
 
+    @Override
     public String getHash() {
         return hash;
     }
 
+    @Override
     public void setSequence(String sequence) {
         if (sequence != null) {
             this.sequence = sequence.toLowerCase();
         }
     }
 
+    @Override
     public String getSequence() {
         return sequence;
     }

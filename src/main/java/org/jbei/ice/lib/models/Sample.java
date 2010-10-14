@@ -34,7 +34,7 @@ public class Sample implements ISampleValueObject, IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
+    private long id;
 
     @Column(name = "uuid", length = 36)
     private String uuid;
@@ -68,12 +68,12 @@ public class Sample implements ISampleValueObject, IModel {
     private Set<Location> locations = new LinkedHashSet<Location>();
 
     @Override
-    public int getId() {
+    public long getId() {
         return id;
     }
 
     @Override
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

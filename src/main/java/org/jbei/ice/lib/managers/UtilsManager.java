@@ -148,7 +148,7 @@ public class UtilsManager {
     public static LinkedHashSet<Strain> getStrainsForPlasmid(Plasmid plasmid)
             throws ManagerException {
         LinkedHashSet<Strain> resultStrains = new LinkedHashSet<Strain>();
-        HashSet<Integer> strainIds = new HashSet<Integer>();
+        HashSet<Long> strainIds = new HashSet<Long>();
 
         Set<PartNumber> plasmidPartNumbers = plasmid.getPartNumbers();
         Session session = DAO.newSession();
@@ -172,7 +172,7 @@ public class UtilsManager {
         Pattern partNumberPattern = Pattern.compile("\\[\\[jbei:(.*)\\]\\]");
         Pattern descriptivePattern = Pattern.compile("\\[\\[jbei:(.*)\\|(.*)\\]\\]");
 
-        for (int strainId : strainIds) {
+        for (long strainId : strainIds) {
             Strain strain;
             try {
                 strain = (Strain) EntryManager.get(strainId);
@@ -432,6 +432,7 @@ public class UtilsManager {
             Query query = session.createQuery(
             //TODO: Tim; redo this in proper hql
                     "select entry.id from Vote vote group by entry.id order by sum(comment.score) desc");
+            @SuppressWarnings("rawtypes")
             List entries = query.list();
             for (Object item : entries) {
                 Integer id = (Integer) item;
@@ -456,10 +457,11 @@ public class UtilsManager {
         try {
             Query query = session.createQuery(
             // TODO: Tim; redo this in proper hql
-                    // working sql query:
-                    // test_registry=> select entries.id, count(comments.id) from entries join comments on comments.entries_id=entries.id group by entries.id order by count(comments.id) desc;
-                    // This is a WORKAROUND.
+            // working sql query:
+            // test_registry=> select entries.id, count(comments.id) from entries join comments on comments.entries_id=entries.id group by entries.id order by count(comments.id) desc;
+            // This is a WORKAROUND.
                     "select entry.id from Comment comment group by entry.id order by count(comment) desc");
+            @SuppressWarnings("rawtypes")
             List entries = query.list();
             for (Object item : entries) {
                 Integer item2 = (Integer) item;

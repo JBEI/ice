@@ -325,8 +325,7 @@ public class PermissionEditPanel extends Panel {
                 for (CustomChoice item : thisPanel.readAllowed) {
                     String type = thisPanel.choiceItems.get(Integer.parseInt(item.getValue()))
                             .getKey();
-                    Integer id = thisPanel.choiceItems.get(Integer.parseInt(item.getValue()))
-                            .getId();
+                    Long id = thisPanel.choiceItems.get(Integer.parseInt(item.getValue())).getId();
 
                     if (type.equals("account")) {
                         Account account = null;
@@ -355,8 +354,7 @@ public class PermissionEditPanel extends Panel {
                 for (CustomChoice item : thisPanel.writeAllowed) {
                     String type = thisPanel.choiceItems.get(Integer.parseInt(item.getValue()))
                             .getKey();
-                    Integer id = thisPanel.choiceItems.get(Integer.parseInt(item.getValue()))
-                            .getId();
+                    Long id = thisPanel.choiceItems.get(Integer.parseInt(item.getValue())).getId();
 
                     if (type.equals("account")) {
                         Account account = null;
@@ -407,8 +405,8 @@ public class PermissionEditPanel extends Panel {
                         entryController.save(thisPanel.entry);
                     }
 
-                    setResponsePage(EntryViewPage.class, new PageParameters("0="
-                            + thisPanel.entry.getId()));
+                    setResponsePage(EntryViewPage.class,
+                        new PageParameters("0=" + thisPanel.entry.getId()));
                 } catch (ControllerException e) {
                     throw new ViewException(e);
                 } catch (ManagerException e) {
@@ -464,8 +462,8 @@ public class PermissionEditPanel extends Panel {
 
         private static final long serialVersionUID = 1L;
 
-        private java.lang.String key;
-        private java.lang.Integer id;
+        private String key;
+        private long id;
 
         @Override
         public java.lang.String toString() {
@@ -474,7 +472,7 @@ public class PermissionEditPanel extends Panel {
             return result;
         }
 
-        public ChoiceItem(java.lang.String key, Integer id) {
+        public ChoiceItem(java.lang.String key, long id) {
             setKey(key);
             setId(id);
         }
@@ -510,11 +508,11 @@ public class PermissionEditPanel extends Panel {
             return key;
         }
 
-        public void setId(Integer id) {
+        public void setId(Long id) {
             this.id = id;
         }
 
-        public Integer getId() {
+        public Long getId() {
             return id;
         }
     }

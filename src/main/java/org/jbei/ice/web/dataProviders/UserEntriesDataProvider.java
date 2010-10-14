@@ -7,12 +7,13 @@ import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 
 public class UserEntriesDataProvider extends AbstractEntriesDataProvider {
     private static final long serialVersionUID = 1L;
-    private Account account;
+    private final Account account;
 
     public UserEntriesDataProvider(Account account) {
         super();
@@ -41,7 +42,7 @@ public class UserEntriesDataProvider extends AbstractEntriesDataProvider {
 
     @Override
     public int size() {
-        int numberOfEntries = 0;
+        long numberOfEntries = 0;
 
         EntryController entryController = new EntryController(IceSession.get().getAccount());
 
@@ -51,6 +52,6 @@ public class UserEntriesDataProvider extends AbstractEntriesDataProvider {
             throw new ViewException(e);
         }
 
-        return numberOfEntries;
+        return Utils.safeLongToInt(numberOfEntries);
     }
 }

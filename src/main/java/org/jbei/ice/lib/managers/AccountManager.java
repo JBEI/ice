@@ -13,7 +13,7 @@ import org.jbei.ice.lib.models.Moderator;
 import org.jbei.ice.lib.models.SessionData;
 
 public class AccountManager {
-    public static Account get(int id) throws ManagerException {
+    public static Account get(long id) throws ManagerException {
         Account account = null;
 
         Session session = DAO.newSession();

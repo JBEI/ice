@@ -140,8 +140,8 @@ public class SampleController extends Controller {
         }
     }
 
-    public int getNumberOfSamples(Entry entry) throws ControllerException {
-        int result = 0;
+    public long getNumberOfSamples(Entry entry) throws ControllerException {
+        long result = 0;
         try {
             ArrayList<Sample> samples = SampleManager.getSamplesByEntry(entry);
 

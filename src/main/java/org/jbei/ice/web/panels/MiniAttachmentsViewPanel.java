@@ -52,7 +52,7 @@ public class MiniAttachmentsViewPanel extends Panel {
         AttachmentController attachmentController = new AttachmentController(IceSession.get()
                 .getAccount());
 
-        int numAttachments = 0;
+        long numAttachments = 0;
         try {
             numAttachments = attachmentController.getNumberOfAttachments(entry);
         } catch (ControllerException e) {
@@ -159,6 +159,7 @@ public class MiniAttachmentsViewPanel extends Panel {
             @SuppressWarnings("unchecked")
             @Override
             protected void populateItem(ListItem<String> item) {
+                @SuppressWarnings("rawtypes")
                 BookmarkablePageLink downloadLink = new BookmarkablePageLink(
                         "downloadAttachmentLink", WelcomePage.class);
                 downloadLink.add(new Label("fileName", item.getModelObject()));

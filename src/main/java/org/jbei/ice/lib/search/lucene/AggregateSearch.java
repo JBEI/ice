@@ -68,7 +68,7 @@ public class AggregateSearch {
 
             // Remove duplicates 
             // If getEntriesByQueris is non-lazy, this may contain duplicates
-            ArrayList<Integer> seenBefore = new ArrayList<Integer>();
+            ArrayList<Long> seenBefore = new ArrayList<Long>();
             LinkedHashSet<Entry> newSubstringMatches = new LinkedHashSet<Entry>();
             for (Entry entry : substringMatches) {
                 if (!seenBefore.contains(entry.getId())) {

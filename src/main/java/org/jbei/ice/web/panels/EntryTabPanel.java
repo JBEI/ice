@@ -71,7 +71,7 @@ public class EntryTabPanel extends Panel {
         SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController(
                 IceSession.get().getAccount());
         String sequenceAnalysisLabel = "Seq. Analysis";
-        int numTraceSequences;
+        long numTraceSequences;
         try {
             numTraceSequences = sequenceAnalysisController.getNumberOfTraceSequences(entry);
             if (numTraceSequences > 0) {

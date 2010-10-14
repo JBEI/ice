@@ -81,6 +81,7 @@ public class AttachmentManager {
 
             query.setEntity("entry", entry);
 
+            @SuppressWarnings("rawtypes")
             List list = query.list();
 
             if (list != null) {

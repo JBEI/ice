@@ -23,7 +23,7 @@ public class News implements IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
+    private long id;
 
     @Column(name = "is_published", nullable = false)
     private int isPublished;
@@ -47,11 +47,11 @@ public class News implements IModel {
     @Temporal(TemporalType.TIMESTAMP)
     private Date publicationTime;
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

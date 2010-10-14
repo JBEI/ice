@@ -47,7 +47,7 @@ public class Entry implements IEntryValueObject, IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
+    private long id;
 
     @Column(name = "record_id", length = 36, nullable = false)
     private String recordId;
@@ -166,12 +166,12 @@ public class Entry implements IEntryValueObject, IModel {
 
     @Override
     @XmlTransient
-    public int getId() {
+    public long getId() {
         return id;
     }
 
     @Override
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

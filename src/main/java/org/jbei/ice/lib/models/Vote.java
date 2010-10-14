@@ -28,7 +28,7 @@ public class Vote implements IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
+    private long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "accounts_id", nullable = false)
@@ -55,18 +55,18 @@ public class Vote implements IModel {
 
     public Vote(Entry entry, Account account, int score, String comment) {
 
-        this.setEntry(entry);
-        this.setAccount(account);
-        this.setComment(comment);
-        this.setScore(score);
-        this.setCreationTime(Calendar.getInstance().getTime());
+        setEntry(entry);
+        setAccount(account);
+        setComment(comment);
+        setScore(score);
+        setCreationTime(Calendar.getInstance().getTime());
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

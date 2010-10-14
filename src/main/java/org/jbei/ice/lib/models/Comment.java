@@ -28,7 +28,7 @@ public class Comment implements IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
+    private long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "accounts_id", nullable = false)
@@ -51,17 +51,17 @@ public class Comment implements IModel {
     }
 
     public Comment(Entry entry, Account account, String body) {
-        this.setEntry(entry);
-        this.setAccount(account);
-        this.setBody(body);
-        this.setCreationTime(Calendar.getInstance().getTime());
+        setEntry(entry);
+        setAccount(account);
+        setBody(body);
+        setCreationTime(Calendar.getInstance().getTime());
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

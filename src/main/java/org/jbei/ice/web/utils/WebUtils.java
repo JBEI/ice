@@ -26,7 +26,7 @@ public class WebUtils {
         CharSequence relativePath = WebRequestCycle.get().urlFor(EntryViewPage.class,
             new PageParameters());
 
-        int id = 0;
+        long id = 0;
         Entry entry = null;
 
         try {
@@ -55,7 +55,7 @@ public class WebUtils {
         return result;
     }
 
-    private static String makeEntryLink(int id) {
+    private static String makeEntryLink(long id) {
         String result = "";
 
         EntryController entryController = new EntryController(IceSession.get().getAccount());

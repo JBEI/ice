@@ -165,8 +165,8 @@ public class SequenceAnalysisController extends Controller {
         return result;
     }
 
-    public int getNumberOfTraceSequences(Entry entry) throws ControllerException {
-        int result = 0;
+    public long getNumberOfTraceSequences(Entry entry) throws ControllerException {
+        long result = 0;
 
         try {
             result = TraceSequenceManager.getNumberOfTraceSequences(entry);

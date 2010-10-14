@@ -27,7 +27,7 @@ public class Location implements ILocationValueObject, IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
-    private int id;
+    private long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "samples_id", nullable = false, unique = false)
@@ -60,82 +60,101 @@ public class Location implements ILocationValueObject, IModel {
     @Temporal(TemporalType.TIMESTAMP)
     private Date modificationTime;
 
-    public int getId() {
+    @Override
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
+    @Override
     public Sample getSample() {
         return sample;
     }
 
+    @Override
     public void setSample(Sample sample) {
         this.sample = sample;
     }
 
+    @Override
     public String getLocation() {
         return location;
     }
 
+    @Override
     public void setLocation(String location) {
         this.location = location;
     }
 
+    @Override
     public String getBarcode() {
         return barcode;
     }
 
+    @Override
     public void setBarcode(String barcode) {
         this.barcode = barcode;
     }
 
+    @Override
     public String getNotes() {
         return notes;
     }
 
+    @Override
     public void setNotes(String notes) {
         this.notes = notes;
     }
 
+    @Override
     public String getWells() {
         return wells;
     }
 
+    @Override
     public void setWells(String wells) {
         this.wells = wells;
     }
 
+    @Override
     public int getnColumns() {
         return nColumns;
     }
 
+    @Override
     public void setnColumns(int nColumns) {
         this.nColumns = nColumns;
     }
 
+    @Override
     public int getnRows() {
         return nRows;
     }
 
+    @Override
     public void setnRows(int nRows) {
         this.nRows = nRows;
     }
 
+    @Override
     public Date getCreationTime() {
         return creationTime;
     }
 
+    @Override
     public void setCreationTime(Date creationTime) {
         this.creationTime = creationTime;
     }
 
+    @Override
     public Date getModificationTime() {
         return modificationTime;
     }
 
+    @Override
     public void setModificationTime(Date modificationTime) {
         this.modificationTime = modificationTime;
     }
