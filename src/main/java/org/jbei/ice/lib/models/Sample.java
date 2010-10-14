@@ -50,7 +50,7 @@ public class Sample implements ISampleValueObject, IModel {
     private String notes;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "entries_id", nullable = false, unique = true)
+    @JoinColumn(name = "entries_id", nullable = false, unique = false)
     private Entry entry;
 
     @Column(name = "creation_time")
@@ -67,66 +67,82 @@ public class Sample implements ISampleValueObject, IModel {
     @OrderBy("id DESC")
     private Set<Location> locations = new LinkedHashSet<Location>();
 
+    @Override
     public int getId() {
         return id;
     }
 
+    @Override
     public void setId(int id) {
         this.id = id;
     }
 
+    @Override
     public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
+    @Override
     public String getUuid() {
         return uuid;
     }
 
+    @Override
     public String getDepositor() {
         return depositor;
     }
 
+    @Override
     public void setDepositor(String depositor) {
         this.depositor = depositor;
     }
 
+    @Override
     public String getLabel() {
         return label;
     }
 
+    @Override
     public void setLabel(String label) {
         this.label = label;
     }
 
+    @Override
     public String getNotes() {
         return notes;
     }
 
+    @Override
     public void setNotes(String notes) {
         this.notes = notes;
     }
 
+    @Override
     public Entry getEntry() {
         return entry;
     }
 
+    @Override
     public void setEntry(Entry entry) {
         this.entry = entry;
     }
 
+    @Override
     public Date getCreationTime() {
         return creationTime;
     }
 
+    @Override
     public void setCreationTime(Date creationTime) {
         this.creationTime = creationTime;
     }
 
+    @Override
     public Date getModificationTime() {
         return modificationTime;
     }
 
+    @Override
     public void setModificationTime(Date modificationTime) {
         this.modificationTime = modificationTime;
     }
