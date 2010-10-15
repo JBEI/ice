@@ -1,0 +1,28 @@
+<html xmlns:wicket>
+<wicket:panel>
+	
+	<table border="0" cellpadding="0" cellspacing="0" width="100%" style="border: 3px solid orange;">	
+	<tr class="title_row_header">
+		<td style="border-top: 1px solid #aaa; border-left: 1px solid #aaa; border-right: 1px solid #aaa">
+		
+			<table cellpadding="4" cellspacing="0" width="100%">
+			<tr>
+				<td><b wicket:id="edit_parts_header">Deleted Parts</b> | <a href="#" wicket:id="edit_link"><span wicket:id="edit_link_text">[text]</span></a></td>
+				<td style="text-align: right">	
+					<form wicket:id="rebuild_indexes_form">
+						<input type="submit" wicket:id="rebuildBlastButton" value="Rebuild Blast"/> &nbsp;
+						<input type="submit" wicket:id="rebuildSearchButton" value="Rebuild Search"/>
+					</form>
+				</td>
+			</tr>
+			</table>
+			
+		</td>
+	</tr>		
+	<tr>
+		<td><span wicket:id="parts_content_panel">[content]</span></td>
+	</tr>		
+	</table>
+		
+</wicket:panel>
+</html>

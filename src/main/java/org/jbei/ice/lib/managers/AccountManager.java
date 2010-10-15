@@ -127,6 +127,22 @@ public class AccountManager {
 
         return result;
     }
+    
+    public static Boolean delete(Account account) throws ManagerException {
+    	if (account == null){
+    		throw new ManagerException("Failed to delete null Account!");
+    	}
+    	
+    	Boolean result = false;
+    	
+    	try {
+			DAO.delete(account);
+			result = true;
+		} catch (DAOException e) {
+			throw new ManagerException("Failed to delete Account: " + account.getFullName(), e);
+		}
+		return result;    		
+    }
 
     public static Account getAccountByAuthToken(String authToken) throws ManagerException {
         Account account = null;

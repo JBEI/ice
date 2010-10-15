@@ -34,7 +34,7 @@ public class RegistrationPanel extends Panel {
 
     private static final long serialVersionUID = 1L;
 
-    public RegistrationPanel(String id) {
+    public RegistrationPanel(String id, boolean isSelfEdit) {
         super(id);
 
         class RegistrationForm extends StatelessForm<Object> {
@@ -46,10 +46,10 @@ public class RegistrationPanel extends Panel {
             private String institution;
             private String description;
 
-            public RegistrationForm(String id) {
+            public RegistrationForm(String id, boolean isSelfEdit) {
                 super(id);
                 IceSession session = IceSession.get();
-                if (session.isAuthenticated()) {
+                if (isSelfEdit && session.isAuthenticated()) {
                     setResponsePage(WelcomePage.class);
                     return;
                 }
@@ -140,6 +140,6 @@ public class RegistrationPanel extends Panel {
 
             }
         }
-        add(new RegistrationForm("registrationForm"));
+        add(new RegistrationForm("registrationForm", isSelfEdit));
     }
 }

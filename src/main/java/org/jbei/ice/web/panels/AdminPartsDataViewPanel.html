@@ -1,0 +1,49 @@
+<html xmlns:wicket>
+<wicket:panel>
+	
+	<table border="0" cellpadding="3" cellspacing="1" class="data_table">
+	<thead>
+		<tr bgcolor="#F0F0F0">
+			<th>#</th>
+			<th>Type</th>
+			<th>Part ID</th>
+			<th>Name</th>
+			<th>Summary</th>
+			<th>Status</th>
+			<th><img wicket:id="attachmentHeaderImage" title="Has Attachments" alt="Has Attachments"></th>
+			<th><img wicket:id="sampleHeaderImage" title="Has Samples" alt="Has Samples"></th>
+			<th><img wicket:id="sequenceHeaderImage" title="Has Sequence" alt="Has Sequence"></th>
+			<th>Created</th>
+			<th>Action</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr wicket:id="entriesDataView" class="odd_row">
+			<td><span wicket:id="index"></span>.</td>
+			<td><span wicket:id="recordType"></span></td>
+			<td><a wicket:id="partIdLink" class="entry_tip"><span wicket:id="partNumber"></span></a></td>
+			<td><span wicket:id="name"></span></td>
+			<td><span wicket:id="description"></span></td>			
+			<td><span wicket:id="status"></span></td>
+			<td><img wicket:id="hasAttachment"></img></td>
+			<td><img wicket:id="hasSample"></img></td>
+			<td><img wicket:id="hasSequence"></img></td>
+			<td><nobr><span wicket:id="date"></span></nobr></td>
+			<td><a href="#" wicket:id="undelete_link"><span wicket:id="undelete_link_label">[undelete]</span></a></td>
+		</tr>
+		<tr bgcolor="#F0F0F0">
+			<td align="center" valign="bottom" style="height: 25px" colspan="20">
+			<table border="0" cellpadding="0" cellspacing="0" style="width: 100%; height: 25px">
+				<tr>
+					<td>
+					<div wicket:id="navigator"></div>
+					</td>
+				</tr>
+			</table>
+			</td>
+		</tr>
+	</tbody>
+	</table> 
+			
+</wicket:panel>
+</html>

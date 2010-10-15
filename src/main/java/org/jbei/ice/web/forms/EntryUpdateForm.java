@@ -118,5 +118,6 @@ public class EntryUpdateForm<T extends Entry> extends EntrySubmitForm<T> {
 
         deleteButton.add(new JavascriptEventConfirmation("onclick", "Delete this Entry?"));
         return deleteButton;
-    }
+    }   
+    
 }

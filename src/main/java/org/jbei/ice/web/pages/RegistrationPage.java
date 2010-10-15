@@ -10,7 +10,7 @@ public class RegistrationPage extends UnprotectedPage {
         super(parameters);
 
         if (JbeirSettings.getSetting("NEW_REGISTRATION_ALLOWED").equals("yes")) {
-            add(new RegistrationPanel("registrationPanel"));
+            add(new RegistrationPanel("registrationPanel", true));
         } else {
             add(new EmptyMessagePanel("registrationPanel",
                     "New registration has been disable by the administrator."));

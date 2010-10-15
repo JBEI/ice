@@ -1,0 +1,33 @@
+<html xmlns:wicket>
+<wicket:panel>
+	
+	<form wicket:id="add_group_form">
+		<table style="border:1px solid #aaa" width="100%">
+		<tr><td colspan="2"></td></tr>
+		<tr>
+			<td style="width: 150px">Label: <span class="required">*</span></td>
+			<td><input wicket:id="label" class="inputbox"></input></td>
+		</tr>
+		<tr>
+			<td style="width: 150px">Description: <span class="required">*</span></td>
+			<td><input wicket:id="description" class="inputbox"></input>&nbsp;</td>
+		</tr>
+		<tr>
+			<td style="width: 150px">Parent</td>
+			<td><select wicket:id="parent" class="inputbox"><option selected="selected" value="Choose one"></option>
+			</select></td>
+		</tr>
+		<tr><td colspan="2">&nbsp;</td></tr>
+		<tr>
+			<td style="width: 150px">&nbsp;</td>
+			<td>
+			<button wicket:id="submit_button" type="submit" class="button">Save</button>
+			<button wicket:id="cancel_button" type="submit" class="button">Cancel</button>
+			</td>
+		</tr>
+		<tr><td colspan="2"></td></tr>
+		</table>
+	</form>
+
+</wicket:panel>
+</html>
