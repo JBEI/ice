@@ -18,21 +18,24 @@ import org.jbei.ice.web.pages.PrintableEntriesTablePage;
 
 public class EntryDataTablePanel<T extends Entry> extends Panel {
 
-	private static final long serialVersionUID = 1L;
-	private final AbstractEntriesDataProvider dataProvider;
-	private final int DEFAULT_ROW_COUNT = 50;
+    private static final long serialVersionUID = 1L;
+    private final AbstractEntriesDataProvider dataProvider;
+    private final int DEFAULT_ROW_COUNT = 50;
 
-	public EntryDataTablePanel(String id, AbstractEntriesDataProvider dataProvider, List<AbstractEntryColumn> registryColumns, boolean renderExportLinks) {
-		super(id);
-		this.dataProvider = dataProvider;
-		
-		RegistryTable<Entry> table = new RegistryTable<Entry>("data_table", registryColumns.toArray(new IColumn[registryColumns.size()]), dataProvider, DEFAULT_ROW_COUNT);
-		add(table);
-		renderExportLinks();
-	}
-	
-	private void renderExportLinks() {
-		
+    public EntryDataTablePanel(String id, AbstractEntriesDataProvider dataProvider,
+            List<AbstractEntryColumn> registryColumns, boolean renderExportLinks) {
+        super(id);
+        this.dataProvider = dataProvider;
+
+        RegistryTable<Entry> table = new RegistryTable<Entry>("data_table",
+                registryColumns.toArray(new IColumn[registryColumns.size()]), dataProvider,
+                DEFAULT_ROW_COUNT);
+        add(table);
+        renderExportLinks();
+    }
+
+    private void renderExportLinks() {
+
         add(new Link<Page>("printableCurrentLink") {
             private static final long serialVersionUID = 1L;
 
@@ -41,7 +44,7 @@ public class EntryDataTablePanel<T extends Entry> extends Panel {
                 setResponsePage(new PrintableEntriesTablePage(dataProvider.getEntries(), true));
             }
         });
-        
+
         add(new Link<Page>("printableAllLink") {
             private static final long serialVersionUID = 2L;
 
@@ -50,7 +53,7 @@ public class EntryDataTablePanel<T extends Entry> extends Panel {
                 setResponsePage(new PrintableEntriesFullContentPage(dataProvider.getEntries()));
             }
         });
-        
+
         add(new Link<Page>("excelCurrentLink") {
             private static final long serialVersionUID = 1L;
 
@@ -59,7 +62,7 @@ public class EntryDataTablePanel<T extends Entry> extends Panel {
                 setResponsePage(new EntriesCurrentFieldsExcelExportPage(dataProvider.getEntries()));
             }
         });
-        
+
         add(new Link<Page>("excelAllLink") {
             private static final long serialVersionUID = 1L;
 
@@ -68,7 +71,7 @@ public class EntryDataTablePanel<T extends Entry> extends Panel {
                 setResponsePage(new EntriesAllFieldsExcelExportPage(dataProvider.getEntries()));
             }
         });
-        
+
         add(new Link<Page>("xmlLink") {
             private static final long serialVersionUID = 1L;
 

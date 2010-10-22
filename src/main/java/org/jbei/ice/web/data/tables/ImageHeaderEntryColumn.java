@@ -8,32 +8,38 @@ import org.jbei.ice.web.pages.UnprotectedPage;
 
 public class ImageHeaderEntryColumn extends AbstractEntryColumn {
 
-	private static final long serialVersionUID = 1L;
-	private final MarkupContainer container;
+    private static final long serialVersionUID = 1L;
+    private final MarkupContainer container;
+    private final String imageId;
+    private final String fragmentId;
+    private final String resourceName;
 
-	/**
-	 * Be sure to add the following fragment to the markup container's html
-	 * 		<wicket:fragment wicket:id="header_image_fragment">
-	 *			<img wicket:id="header_image"/>
-	 *		</wicket:fragment>
-	 *
-	 * @param propertyExpression
-	 * @param container
-	 */
-	public ImageHeaderEntryColumn(String propertyExpression, MarkupContainer container) {
-		super(propertyExpression);
-		this.container = container;
-	}
-	
-	@Override
-	public Fragment getHeader(String componentId) {
-		ResourceReference sequenceImage = new ResourceReference(UnprotectedPage.class,
-                UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sequence.gif");
-		
-		
-		Fragment fragment = new Fragment( componentId, "header_image_fragment", container );
-		fragment.add( new Image("header_image", sequenceImage) );
-		return fragment;
-	}
-	
+    /**
+     * Be sure to add the following fragment to the markup container's html
+     *  <wicket:fragment wicket:id=[fragmentId]">
+     *      <img wicket:id=[imageId]/>
+     *  </wicket:fragment>
+     * 
+     * @param propertyExpression
+     * @param container
+     */
+    public ImageHeaderEntryColumn(String fragmentId, String imageId, String resourceName, String propertyExpression,
+            MarkupContainer container) {
+        super(propertyExpression);
+        this.imageId = imageId;
+        this.fragmentId = fragmentId;
+        this.resourceName = resourceName;
+        this.container = container;
+    }
+
+    @Override
+    public Fragment getHeader(String componentId) {
+        ResourceReference sequenceImage = new ResourceReference(UnprotectedPage.class,
+                UnprotectedPage.IMAGES_RESOURCE_LOCATION + resourceName);
+
+        Fragment fragment = new Fragment(componentId, fragmentId, container);
+        fragment.add(new Image(this.imageId, sequenceImage));
+        return fragment;
+    }
+
 }

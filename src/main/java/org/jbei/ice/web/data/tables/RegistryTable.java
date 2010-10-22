@@ -10,20 +10,21 @@ import org.apache.wicket.model.IModel;
 
 public class RegistryTable<T extends Object> extends DataTable<T> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public RegistryTable(String id, IColumn<T>[] columns, SortableDataProvider<T> dataProvider, int rowsPerPage) {
-		super(id, columns, dataProvider, rowsPerPage);
-	
-		setOutputMarkupId(true);
-		setVersioned(false);
-		
-		addTopToolbar(new AjaxFallbackHeadersToolbar(this, dataProvider));
-		addBottomToolbar(new RegistryTableNavigationToolbar(this));
-	}
+    public RegistryTable(String id, IColumn<T>[] columns, SortableDataProvider<T> dataProvider,
+            int rowsPerPage) {
+        super(id, columns, dataProvider, rowsPerPage);
 
-	@Override
-	protected Item<T> newRowItem(String id, int index, IModel<T> model)	{
-		return new OddEvenItem<T>(id, index, model);
-	}
+        setOutputMarkupId(true);
+        setVersioned(false);
+
+        addTopToolbar(new AjaxFallbackHeadersToolbar(this, dataProvider));
+        addBottomToolbar(new RegistryTableNavigationToolbar(this));
+    }
+
+    @Override
+    protected Item<T> newRowItem(String id, int index, IModel<T> model) {
+        return new OddEvenItem<T>(id, index, model);
+    }
 }

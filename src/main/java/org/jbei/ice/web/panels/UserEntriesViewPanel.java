@@ -44,9 +44,9 @@ public class UserEntriesViewPanel extends Panel {
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sample.png");
 
         add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
+            UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
         add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
-                UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
+            UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
 
         add(new Image("attachmentHeaderImage", hasAttachmentImage));
         add(new Image("sequenceHeaderImage", hasSequenceImage));
@@ -85,8 +85,8 @@ public class UserEntriesViewPanel extends Panel {
 
             @Override
             public void onClick() {
-                setResponsePage(new PrintableEntriesFullContentPage(sortableDataProvider
-                        .getEntries()));
+                setResponsePage(new PrintableEntriesFullContentPage(
+                        sortableDataProvider.getEntries()));
             }
         });
 
@@ -95,8 +95,8 @@ public class UserEntriesViewPanel extends Panel {
 
             @Override
             public void onClick() {
-                setResponsePage(new EntriesCurrentFieldsExcelExportPage(sortableDataProvider
-                        .getEntries()));
+                setResponsePage(new EntriesCurrentFieldsExcelExportPage(
+                        sortableDataProvider.getEntries()));
             }
         });
 
@@ -105,8 +105,8 @@ public class UserEntriesViewPanel extends Panel {
 
             @Override
             public void onClick() {
-                setResponsePage(new EntriesAllFieldsExcelExportPage(sortableDataProvider
-                        .getEntries()));
+                setResponsePage(new EntriesAllFieldsExcelExportPage(
+                        sortableDataProvider.getEntries()));
             }
         });
 
