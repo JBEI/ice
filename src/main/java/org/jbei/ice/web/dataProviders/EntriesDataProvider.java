@@ -3,7 +3,6 @@ package org.jbei.ice.web.dataProviders;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.jbei.ice.controllers.EntryController;
@@ -13,25 +12,29 @@ import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 
-public class EntriesDataProvider extends SortableDataProvider<Entry> {
+public class EntriesDataProvider extends AbstractEntriesDataProvider {
     private static final long serialVersionUID = 1L;
 
     private final ArrayList<Entry> entries = new ArrayList<Entry>();
 
     public EntriesDataProvider() {
         super();
-
+        
+        // default sort
+        setSort("creation_time", false);
     }
 
     @Override
-    public Iterator<? extends Entry> iterator(int first, int count) {
+    public Iterator<Entry> iterator(int first, int count) {
         entries.clear();
 
         EntryController entryController = new EntryController(IceSession.get().getAccount());
-
+        
         try {
-            ArrayList<Entry> results = entryController.getEntries(first, count, "creationTime",
-                false);
+        	String sortParam = getSort().getProperty();
+        	boolean asc = getSort().isAscending();
+        	
+            ArrayList<Entry> results = entryController.getEntries(first, count, sortParam, asc);
 
             for (Entry entry : results) {
                 entries.add(entry);
@@ -39,7 +42,7 @@ public class EntriesDataProvider extends SortableDataProvider<Entry> {
         } catch (ControllerException e) {
             throw new ViewException(e);
         }
-
+        
         return entries.iterator();
     }
 

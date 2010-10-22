@@ -42,7 +42,7 @@ tr {
 	white-space: nowrap;
 }
 
-.title_row_header {
+.title_row_header, .headers {
 	background-color: #F0F0F0;
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 12px;
@@ -91,11 +91,11 @@ a.title {
 	background: #FFF;
 }
 
-.odd_row {
+.odd_row, .odd {
 	background-color: #FFFFFF;
 }
 
-.even_row {
+.even_row, .even {
 	background-color: #FAFAFA;
 }
 
@@ -456,3 +456,43 @@ span.form_help_text {
 .pagingControls .disabled {
 	color: #999999;
 }
+
+th.wicket_orderUp {
+	background: no-repeat url('../images/asc.gif') center;
+}
+
+th.wicket_orderDown {
+	background: no-repeat url('../images/desc.gif') center;
+}
+
+.navigator a {
+    font-size: 10px;    
+    padding: 2px 6px 2px 6px;
+    border: 1px solid #ccc;
+    background-color: white;
+}
+
+.navigator em {
+    font-size: 10px;    
+    padding: 2px 6px 2px 6px;
+    border: 1px solid #ccc;
+    font-weight: bold;
+    background-color: white;
+}
+
+.navigatorLabel {
+    font-weight: bold;  
+    text-align: center;  
+}
+
+tr.navigation {
+    background-color: #f0f0f0;
+}
+
+td.norecords-td {
+    font-weight: bold;
+    background-color: #f0f0f0;
+    text-align: center;
+}
+
+
