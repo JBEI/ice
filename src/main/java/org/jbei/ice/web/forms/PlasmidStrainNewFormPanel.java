@@ -36,7 +36,6 @@ import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.Link;
 import org.jbei.ice.lib.models.Name;
-import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Strain;
@@ -231,12 +230,13 @@ public class PlasmidStrainNewFormPanel extends Panel {
 
                     markupPanel.setOutputMarkupPlaceholderTag(true);
                     markupPanel.setOutputMarkupId(true);
-                    this.getParent().replace(markupPanel);
-                    this.getParent().addOrReplace(markupPanel);
+                    getParent().replace(markupPanel);
+                    getParent().addOrReplace(markupPanel);
 
                     setPlasmidMarkupPanel(markupPanel);
                 }
 
+                @Override
                 protected boolean wantOnSelectionChangedNotifications() {
                     return true;
                 }
@@ -284,12 +284,13 @@ public class PlasmidStrainNewFormPanel extends Panel {
 
                     markupPanel.setOutputMarkupPlaceholderTag(true);
                     markupPanel.setOutputMarkupId(true);
-                    this.getParent().replace(markupPanel);
-                    this.getParent().addOrReplace(markupPanel);
+                    getParent().replace(markupPanel);
+                    getParent().addOrReplace(markupPanel);
 
                     setStrainMarkupPanel(markupPanel);
                 }
 
+                @Override
                 protected boolean wantOnSelectionChangedNotifications() {
                     return true;
                 }
@@ -541,8 +542,8 @@ public class PlasmidStrainNewFormPanel extends Panel {
             try {
                 Plasmid newPlasmid = (Plasmid) entryController.createEntry(plasmid, true, true);
                 String plasmidPartNumberString = "[[jbei:"
-                        + plasmid.getPartNumbers().toArray(new PartNumber[0])[0].getPartNumber()
-                        + "]]";
+                        + newPlasmid.getOnePartNumber().getPartNumber() + "|"
+                        + newPlasmid.getOneName().getName() + "]]";
                 strain.setPlasmids(plasmidPartNumberString);
                 entryController.createEntry(strain, true, true);
                 setResponsePage(EntryViewPage.class, new PageParameters("0=" + newPlasmid.getId()));

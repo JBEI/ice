@@ -45,6 +45,21 @@ public class Entry implements IEntryValueObject, IModel {
     public static final String PART_ENTRY_TYPE = "part";
     public static final String ARABIDOPSIS_SEED_ENTRY_TYPE = "arabidopsis";
 
+    //TODO actually use these types
+    public enum MarkupType {
+        text, wiki, confluence
+    }
+
+    // TODO actually use these types
+    public enum EntryType {
+        strain, plasmid, part, arabidopsis
+    }
+
+    // TODO use these enums. Currently "in progress" with a space is used. 
+    public enum StatusOptions {
+        complete, in_progress, planned
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
     private long id;
@@ -556,9 +571,9 @@ public class Entry implements IEntryValueObject, IModel {
     public static Map<String, String> getMarkupTypeMap() {
         Map<String, String> resultMap = new LinkedHashMap<String, String>();
 
-        resultMap.put("text", "Text");
-        resultMap.put("wiki", "Wiki");
-        resultMap.put("confluence", "Confluence");
+        resultMap.put(Entry.MarkupType.text.name(), "Text");
+        resultMap.put(Entry.MarkupType.wiki.name(), "Wiki");
+        resultMap.put(Entry.MarkupType.confluence.name(), "Confluence");
 
         return resultMap;
     }
@@ -576,9 +591,10 @@ public class Entry implements IEntryValueObject, IModel {
     public static Map<String, String> getEntryTypeOptionsMap() {
         Map<String, String> resultMap = new LinkedHashMap<String, String>();
 
-        resultMap.put("plasmid", "Plasmid");
-        resultMap.put("strain", "Strain");
-        resultMap.put("part", "Part");
+        resultMap.put(Entry.EntryType.plasmid.name(), "Plasmid");
+        resultMap.put(Entry.EntryType.strain.name(), "Strain");
+        resultMap.put(Entry.EntryType.part.name(), "Part");
+        resultMap.put(Entry.EntryType.arabidopsis.name(), "Arabidopsis");
 
         return resultMap;
     }

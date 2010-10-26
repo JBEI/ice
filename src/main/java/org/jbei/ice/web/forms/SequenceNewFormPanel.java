@@ -24,8 +24,8 @@ import org.jbei.ice.web.panels.SequenceViewPanel;
 public class SequenceNewFormPanel extends Panel {
     private static final long serialVersionUID = 1L;
 
-    private SequenceViewPanel sequenceViewPanel;
-    private Entry entry;
+    private final SequenceViewPanel sequenceViewPanel;
+    private final Entry entry;
 
     class SequenceNewEditForm extends Form<Object> {
         private static final long serialVersionUID = 1L;
@@ -35,7 +35,7 @@ public class SequenceNewFormPanel extends Panel {
 
         public SequenceNewEditForm(String id) {
             super(id);
-            this.setModel(new CompoundPropertyModel<Object>(this));
+            setModel(new CompoundPropertyModel<Object>(this));
 
             setMultiPart(true);
 
@@ -83,7 +83,9 @@ public class SequenceNewFormPanel extends Panel {
 
             if (dnaSequence == null) {
                 error("Couldn't parse sequence file! Supported formats: "
-                        + GeneralParser.getInstance().availableParsersToString() + ".");
+                        + GeneralParser.getInstance().availableParsersToString()
+                        + ". "
+                        + "If you believe this is an error, please contact the administrator with your file");
 
                 return;
             }
