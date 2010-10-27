@@ -7,36 +7,20 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.lang.PropertyResolver;
-import org.jbei.ice.lib.models.Entry;
 
-public abstract class AbstractEntryColumn implements IStyledColumn<Entry> {
+public abstract class AbstractSortableColumn<T> implements IStyledColumn<T> {
 
     private static final long serialVersionUID = 1L;
-    private final String propertyExpression;
     private final String sortProperty;
+    private final String propertyExpression;
 
-    public AbstractEntryColumn(String propertyExpression) {
-        this(propertyExpression, null);
-    }
-
-    public AbstractEntryColumn(String propertyExpression, String sortProperty) {
-        this.propertyExpression = propertyExpression;
+    public AbstractSortableColumn(String sortProperty, String propertyExpression) {
         this.sortProperty = sortProperty;
+        this.propertyExpression = propertyExpression;
     }
 
     @Override
-    public String getSortProperty() {
-        return this.sortProperty;
-    }
-
-    @Override
-    public boolean isSortable() {
-        return (this.sortProperty != null);
-    }
-
-    @Override
-    public void populateItem(Item<ICellPopulator<Entry>> item, String componentId,
-            IModel<Entry> rowModel) {
+    public void populateItem(Item<ICellPopulator<T>> item, String componentId, IModel<T> rowModel) {
 
         if (propertyExpression != null && !propertyExpression.isEmpty()) {
             try {
@@ -57,17 +41,30 @@ public abstract class AbstractEntryColumn implements IStyledColumn<Entry> {
         item.add(component);
     }
 
-    protected Component evaluate(String componentId, Entry entry) {
+    /**
+     * override if a custom component is to be used instead of a
+     * property expression
+     * 
+     * @param componentId
+     * @param object
+     * @return component for rendering in the cell
+     */
+    protected Component evaluate(String componentId, T object) {
         return new Label(componentId, "");
     }
 
     @Override
-    public void detach() {
+    public String getSortProperty() {
+        return this.sortProperty;
+    }
+
+    @Override
+    public boolean isSortable() {
+        return (this.sortProperty != null);
     }
 
     @Override
     public String getCssClass() {
         return null;
     }
-
 }

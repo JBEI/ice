@@ -1,28 +1,30 @@
 package org.jbei.ice.web.panels;
 
-import org.apache.wicket.Page;
+import java.text.SimpleDateFormat;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.PageParameters;
 import org.apache.wicket.ResourceReference;
-import org.apache.wicket.markup.html.CSSPackageResource;
-import org.apache.wicket.markup.html.JavascriptPackageResource;
+import org.apache.wicket.behavior.SimpleAttributeModifier;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.data.tables.ImageHeaderColumn;
+import org.jbei.ice.web.data.tables.LabelHeaderColumn;
 import org.jbei.ice.web.dataProviders.UserEntriesDataProvider;
-import org.jbei.ice.web.pages.EntriesAllFieldsExcelExportPage;
-import org.jbei.ice.web.pages.EntriesCurrentFieldsExcelExportPage;
-import org.jbei.ice.web.pages.EntriesXMLExportPage;
-import org.jbei.ice.web.pages.PrintableEntriesFullContentPage;
-import org.jbei.ice.web.pages.PrintableEntriesTablePage;
+import org.jbei.ice.web.pages.EntryTipPage;
+import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.UnprotectedPage;
+import org.jbei.ice.web.utils.WebUtils;
 
-public class UserEntriesViewPanel extends Panel {
+public class UserEntriesViewPanel extends SortableDataTablePanel<Entry> {
     private static final long serialVersionUID = 1L;
-
-    private UserEntriesDataProvider sortableDataProvider;
-    private AbstractEntriesDataView<Entry> entriesDataView;
 
     ResourceReference blankImage;
     ResourceReference hasAttachmentImage;
@@ -32,7 +34,22 @@ public class UserEntriesViewPanel extends Panel {
     public UserEntriesViewPanel(String id) {
         super(id);
 
-        sortableDataProvider = new UserEntriesDataProvider(IceSession.get().getAccount());
+        UserEntriesDataProvider provider = new UserEntriesDataProvider(IceSession.get().getAccount());
+        dataProvider = provider;
+        
+        // table columns
+        addTypeColumn();
+        addPartIDColumn();
+        addNameColumn();
+        addSummaryColumn();
+        addStatusColumn();
+        addHasAttachmentColumn();
+        addHasSampleColumn();
+        addHasSequenceColumn();
+        addCreationTimeColumn();
+
+        setEntries(provider.getEntries());
+        renderTable();
 
         blankImage = new ResourceReference(UnprotectedPage.class,
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "blank.png");
@@ -43,79 +60,152 @@ public class UserEntriesViewPanel extends Panel {
         hasSampleImage = new ResourceReference(UnprotectedPage.class,
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sample.png");
 
-        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-            UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
-        add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
-            UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
-
-        add(new Image("attachmentHeaderImage", hasAttachmentImage));
-        add(new Image("sequenceHeaderImage", hasSequenceImage));
-        add(new Image("sampleHeaderImage", hasSampleImage));
-
-        entriesDataView = new AbstractEntriesDataView<Entry>("entriesDataView",
-                sortableDataProvider, 15) {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected Entry getEntry(Item<Entry> item) {
-                return item.getModelObject();
-            }
-        };
-
-        add(entriesDataView);
-
-        add(new JbeiPagingNavigator("navigator", entriesDataView));
-
-        renderExportLinks();
+//        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+//            UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
+//        add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
+//            UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
+//
+//        add(new Image("attachmentHeaderImage", hasAttachmentImage));
+//        add(new Image("sequenceHeaderImage", hasSequenceImage));
+//        add(new Image("sampleHeaderImage", hasSampleImage));
     }
 
-    private void renderExportLinks() {
-        add(new Link<Page>("printableCurrentLink") {
+    protected void addTypeColumn() {
+        addColumn(new LabelHeaderColumn<Entry>("Type", "recordType", "recordType"));
+    }
+
+    protected void addPartIDColumn() {
+        addColumn(new LabelHeaderColumn<Entry>("Part ID", "id") {
+
             private static final long serialVersionUID = 1L;
 
             @Override
-            public void onClick() {
-                setResponsePage(new PrintableEntriesTablePage(sortableDataProvider.getEntries(),
-                        true));
+            protected Component evaluate(String componentId, Entry entry) {
+                Fragment fragment = new Fragment(componentId, "part_id_cell",
+                        UserEntriesViewPanel.this);
+
+                BookmarkablePageLink<String> entryLink = new BookmarkablePageLink<String>(
+                        "partIdLink", EntryViewPage.class, new PageParameters("0=" + entry.getId()));
+
+                entryLink.add(new Label("partNumber", entry.getOnePartNumber().getPartNumber()));
+                String tipUrl = (String) urlFor(EntryTipPage.class, new PageParameters());
+                entryLink.add(new SimpleAttributeModifier("rel", tipUrl + "/" + entry.getId()));
+                fragment.add(entryLink);
+                return fragment;
             }
         });
+    }
 
-        add(new Link<Page>("printableAllLink") {
-            private static final long serialVersionUID = 2L;
+    protected void addNameColumn() {
+        addColumn(new LabelHeaderColumn<Entry>("Name", "oneName.name", "oneName.name"));
+    }
 
-            @Override
-            public void onClick() {
-                setResponsePage(new PrintableEntriesFullContentPage(
-                        sortableDataProvider.getEntries()));
-            }
-        });
+    protected void addSummaryColumn() {
+        addColumn(new LabelHeaderColumn<Entry>("Summary", null, null) {
 
-        add(new Link<Page>("excelCurrentLink") {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public void onClick() {
-                setResponsePage(new EntriesCurrentFieldsExcelExportPage(
-                        sortableDataProvider.getEntries()));
+            protected Component evaluate(String componentId, Entry entry) {
+                String trimmedDescription = trimLongField(
+                    WebUtils.linkifyText(entry.getShortDescription()), MAX_LONG_FIELD_LENGTH);
+                return new Label(componentId, trimmedDescription).setEscapeModelStrings(false);
             }
         });
+    }
 
-        add(new Link<Page>("excelAllLink") {
+    protected void addStatusColumn() {
+        addColumn(new LabelHeaderColumn<Entry>("Status", "status") {
+
             private static final long serialVersionUID = 1L;
 
             @Override
-            public void onClick() {
-                setResponsePage(new EntriesAllFieldsExcelExportPage(
-                        sortableDataProvider.getEntries()));
+            protected Component evaluate(String componentId, Entry entry) {
+                return new Label(componentId, JbeiConstants.getStatus(entry.getStatus()));
             }
         });
+    }
 
-        add(new Link<Page>("xmlLink") {
+    protected void addHasAttachmentColumn() {
+        addColumn(new ImageHeaderColumn<Entry>("has_attachment_fragment", "has_attachment",
+                "attachment.gif", null, "Has Attachment", this) {
+            private static final long serialVersionUID = 1L;
+
+            protected Component evaluate(String id, Entry entry) {
+
+                EntryController entryController = new EntryController(IceSession.get().getAccount());
+                Fragment fragment = new Fragment(id, "has_attachment_fragment",
+                        UserEntriesViewPanel.this);
+
+                try {
+                    if (entryController.hasAttachments(entry))
+                        fragment.add(new Image("has_attachment", hasAttachmentImage));
+                    else
+                        fragment.add(new Image("has_attachment", blankImage));
+                } catch (ControllerException e) {
+                    fragment.add(new Image("has_attachment", blankImage));
+                }
+                return fragment;
+            }
+        });
+    }
+
+    protected void addHasSampleColumn() {
+        addColumn(new ImageHeaderColumn<Entry>("has_sample_fragment", "has_sample", "sample.png",
+                null, "Has Samples", this) {
+            private static final long serialVersionUID = 1L;
+
+            protected Component evaluate(String id, Entry entry) {
+                Fragment fragment = new Fragment(id, "has_sample_fragment",
+                        UserEntriesViewPanel.this);
+
+                EntryController entryController = new EntryController(IceSession.get().getAccount());
+                try {
+                    if (entryController.hasAttachments(entry))
+                        fragment.add(new Image("has_sample", hasSampleImage));
+                    else
+                        fragment.add(new Image("has_sample", blankImage));
+                } catch (ControllerException e) {
+                    fragment.add(new Image("has_sample", blankImage));
+                }
+                return fragment;
+            }
+        });
+    }
+
+    protected void addHasSequenceColumn() {
+
+        addColumn(new ImageHeaderColumn<Entry>("has_sequence_fragment", "has_sequence",
+                "sequence.gif", null, "Has Sequence", this) {
+            private static final long serialVersionUID = 1L;
+
+            protected Component evaluate(String id, Entry entry) {
+                Fragment fragment = new Fragment(id, "has_sequence_fragment",
+                        UserEntriesViewPanel.this);
+
+                EntryController entryController = new EntryController(IceSession.get().getAccount());
+                try {
+                    if (entryController.hasAttachments(entry))
+                        fragment.add(new Image("has_sequence", hasSequenceImage));
+                    else
+                        fragment.add(new Image("has_sequence", blankImage));
+                } catch (ControllerException e) {
+                    fragment.add(new Image("has_sequence", blankImage));
+                }
+                return fragment;
+            }
+        });
+    }
+
+    protected void addCreationTimeColumn() {
+        addColumn(new LabelHeaderColumn<Entry>("Created", "creationTime") {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public void onClick() {
-                setResponsePage(new EntriesXMLExportPage(sortableDataProvider.getEntries()));
+            protected Component evaluate(String componentId, Entry entry) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
+                String dateString = dateFormat.format(entry.getCreationTime());
+                return new Label(componentId, dateString);
             }
         });
     }

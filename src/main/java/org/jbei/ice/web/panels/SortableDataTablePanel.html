@@ -1,0 +1,27 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<table wicket:id="data_table" class="data_table" cellspacing="1" cellpadding="4"></table>
+	<div wicket:id="export_options"></div>
+	
+	<wicket:fragment wicket:id="part_id_cell">
+		<a href wicket:id="partIdLink" class="entry_tip"><span wicket:id="partNumber"></span></a>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="owner_fragment">
+		<a href wicket:id="ownerProfileLink" class="entry_tip"><span wicket:id="owner"></span></a>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="has_sequence_fragment">
+      <img wicket:id="has_sequence"/>
+    </wicket:fragment>
+    
+    <wicket:fragment wicket:id="has_sample_fragment">
+      <img wicket:id="has_sample"/>
+    </wicket:fragment>
+    
+    <wicket:fragment wicket:id="has_attachment_fragment">
+      <img wicket:id="has_attachment"/>
+    </wicket:fragment>
+    
+</wicket:panel>
+</html>

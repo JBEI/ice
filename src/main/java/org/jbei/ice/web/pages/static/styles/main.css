@@ -458,11 +458,13 @@ span.form_help_text {
 }
 
 th.wicket_orderUp {
-	background: no-repeat url('../images/asc.gif') center;
+	background: no-repeat url('../images/asc.gif') left;
+	padding-left: 15px;
 }
 
 th.wicket_orderDown {
-	background: no-repeat url('../images/desc.gif') center;
+	background: no-repeat url('../images/desc.gif') left;
+	padding-left: 15px;
 }
 
 .navigator a {

@@ -1,41 +1,22 @@
 package org.jbei.ice.web.pages;
 
-import java.text.SimpleDateFormat;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
-import org.apache.wicket.ResourceReference;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.controllers.EntryController;
-import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.WorkspaceManager;
-import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
-import org.jbei.ice.web.data.tables.AbstractEntryColumn;
-import org.jbei.ice.web.data.tables.ImageHeaderEntryColumn;
-import org.jbei.ice.web.data.tables.LabelHeaderEntryColumn;
-import org.jbei.ice.web.dataProviders.UserEntriesDataProvider;
 import org.jbei.ice.web.panels.EmptyWorkspaceMessagePanel;
-import org.jbei.ice.web.panels.EntryDataTablePanel;
+import org.jbei.ice.web.panels.UserEntriesViewPanel;
 import org.jbei.ice.web.panels.UserProjectsViewPanel;
 import org.jbei.ice.web.panels.UserRecentlyViewedPanel;
 import org.jbei.ice.web.panels.UserSamplesViewPanel;
 import org.jbei.ice.web.panels.WorkspaceTablePanel;
-import org.jbei.ice.web.utils.WebUtils;
 
 public class UserPage extends ProtectedPage {
-    private static final int MAX_LONG_FIELD_LENGTH = 100;
-
     public Component currentPanel;
     public Component entriesPanel;
     public Component samplesPanel;
@@ -48,15 +29,6 @@ public class UserPage extends ProtectedPage {
     public BookmarkablePageLink<Object> workspaceLink;
     public BookmarkablePageLink<Object> recentlyViewedLink;
     public BookmarkablePageLink<Object> projectsLink;
-
-    private ResourceReference blankImage = new ResourceReference(UnprotectedPage.class,
-            UnprotectedPage.IMAGES_RESOURCE_LOCATION + "blank.png");
-    private ResourceReference hasAttachmentImage = new ResourceReference(UnprotectedPage.class,
-            UnprotectedPage.IMAGES_RESOURCE_LOCATION + "attachment.gif");
-    private ResourceReference hasSequenceImage = new ResourceReference(UnprotectedPage.class,
-            UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sequence.gif");
-    private ResourceReference hasSampleImage = new ResourceReference(UnprotectedPage.class,
-            UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sample.png");
 
     public String currentPage = null;
 
@@ -139,127 +111,7 @@ public class UserPage extends ProtectedPage {
     }
 
     private Panel createEntriesPanel() {
-
-        UserEntriesDataProvider provider = new UserEntriesDataProvider(IceSession.get()
-                .getAccount());
-
-        List<AbstractEntryColumn> columns = new LinkedList<AbstractEntryColumn>();
-
-        // columns for the user entries panel
-        columns.add(new LabelHeaderEntryColumn("Type", "recordType", "recordType"));
-        columns.add(new LabelHeaderEntryColumn("Part ID", null, "id") {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected Component evaluate(String componentId, Entry entry) {
-                Fragment fragment = new Fragment(componentId, "part_id_cell", UserPage.this);
-
-                BookmarkablePageLink<String> entryLink = new BookmarkablePageLink<String>(
-                        "partIdLink", EntryViewPage.class, new PageParameters("0=" + entry.getId()));
-
-                entryLink.add(new Label("partNumber", entry.getOnePartNumber().getPartNumber()));
-                String tipUrl = (String) urlFor(EntryTipPage.class, new PageParameters());
-                entryLink.add(new SimpleAttributeModifier("rel", tipUrl + "/" + entry.getId()));
-                fragment.add(entryLink);
-                return fragment;
-            }
-        });
-        columns.add(new LabelHeaderEntryColumn("Name", "oneName.name", "oneName.name"));
-        columns.add(new LabelHeaderEntryColumn("Summary", null, null) {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected Component evaluate(String componentId, Entry entry) {
-                String trimmedDescription = trimLongField(
-                    WebUtils.linkifyText(entry.getShortDescription()), MAX_LONG_FIELD_LENGTH);
-                return new Label(componentId, trimmedDescription).setEscapeModelStrings(false);
-            }
-        });
-        columns.add(new LabelHeaderEntryColumn("Status", null, "status") {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected Component evaluate(String componentId, Entry entry) {
-                return new Label(componentId, JbeiConstants.getStatus(entry.getStatus()));
-            }
-        });
-
-        columns.add(new ImageHeaderEntryColumn("has_attachment_fragment", "has_attachment",
-                "attachment.gif", null, this) {
-            private static final long serialVersionUID = 1L;
-
-            protected Component evaluate(String id, Entry entry) {
-
-                EntryController entryController = new EntryController(IceSession.get().getAccount());
-                Fragment fragment = new Fragment(id, "has_attachment_fragment", UserPage.this);
-
-                try {
-                    if (entryController.hasAttachments(entry))
-                        fragment.add(new Image("has_attachment", hasAttachmentImage));
-                    else
-                        fragment.add(new Image("has_attachment", blankImage));
-                } catch (ControllerException e) {
-                    fragment.add(new Image("has_attachment", blankImage));
-                }
-                return fragment;
-            }
-        });
-        columns.add(new ImageHeaderEntryColumn("has_sample_fragment", "has_sample", "sample.png",
-                null, this) {
-            private static final long serialVersionUID = 1L;
-
-            protected Component evaluate(String id, Entry entry) {
-                Fragment fragment = new Fragment(id, "has_sample_fragment", UserPage.this);
-
-                EntryController entryController = new EntryController(IceSession.get().getAccount());
-                try {
-                    if (entryController.hasAttachments(entry))
-                        fragment.add(new Image("has_sample", hasSampleImage));
-                    else
-                        fragment.add(new Image("has_sample", blankImage));
-                } catch (ControllerException e) {
-                    fragment.add(new Image("has_sample", blankImage));
-                }
-                return fragment;
-            }
-        });
-        columns.add(new ImageHeaderEntryColumn("has_sequence_fragment", "has_sequence",
-                "sequence.gif", null, this) {
-            private static final long serialVersionUID = 1L;
-
-            protected Component evaluate(String id, Entry entry) {
-                Fragment fragment = new Fragment(id, "has_sequence_fragment", UserPage.this);
-
-                EntryController entryController = new EntryController(IceSession.get().getAccount());
-                try {
-                    if (entryController.hasAttachments(entry))
-                        fragment.add(new Image("has_sequence", hasSequenceImage));
-                    else
-                        fragment.add(new Image("has_sequence", blankImage));
-                } catch (ControllerException e) {
-                    fragment.add(new Image("has_sequence", blankImage));
-                }
-                return fragment;
-            }
-        });
-
-        columns.add(new LabelHeaderEntryColumn("Created", null, "creationTime") {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected Component evaluate(String componentId, Entry entry) {
-                SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
-                String dateString = dateFormat.format(entry.getCreationTime());
-                return new Label(componentId, dateString);
-            }
-        });
-
-        EntryDataTablePanel<Entry> panel = new EntryDataTablePanel<Entry>("centerPanel", provider,
-                columns, true);
-        panel.setOutputMarkupId(true);
-        return panel;
+        return new UserEntriesViewPanel("centerPanel");
     }
 
     protected String trimLongField(String value, int maxLength) {
