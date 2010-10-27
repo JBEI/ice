@@ -49,6 +49,131 @@ public class ImportHelper {
      * Don't forgot to populate the strain's 'plasmid' field. 
      */
 
+    public static List<HashMap<String, String>> parseStrainFile(File file) throws UtilityException {
+        BufferedReader bufferedReader = null;
+        CSVReader csvReader = null;
+        List<String[]> parsedCsvContent = null;
+        ArrayList<HashMap<String, String>> result = new ArrayList<HashMap<String, String>>();
+
+        try {
+            bufferedReader = new BufferedReader(new FileReader(file));
+            csvReader = new CSVReader(bufferedReader, '\t', '\"');
+            parsedCsvContent = csvReader.readAll();
+        } catch (FileNotFoundException e) {
+            throw new UtilityException(e);
+        } catch (IOException e) {
+            throw new UtilityException(e);
+        }
+        if (parsedCsvContent != null) {
+            HashMap<String, String> row = null;
+            String[] rawRow = null;
+            for (int i = 1; i < parsedCsvContent.size(); i++) { //skip first line
+                row = new HashMap<String, String>();
+                rawRow = parsedCsvContent.get(i);
+                if (rawRow.length != 20) { //column "t" in spreadsheet 
+                    throw new UtilityException("Incorrect number of columns for strain");
+                }
+                row.put("name", rawRow[0]);
+                row.put("creatorEmail", rawRow[1]);
+                row.put("principalInvestigator", rawRow[2]);
+                row.put("fundingSource", rawRow[3]);
+                row.put("patentInformation", rawRow[4]);
+                row.put("bioSafetyLevel", rawRow[5]);
+                row.put("strainName", rawRow[6]);
+                row.put("strainAlias", rawRow[7]);
+                row.put("strainURL", rawRow[8]);
+                row.put("strainStatus", rawRow[9]);
+                row.put("strainSelectionMarker", rawRow[10]);
+                row.put("strainParent", rawRow[11]);
+                row.put("strainGenotype", rawRow[12]);
+                row.put("strainPlasmids", rawRow[13]);
+                row.put("strainKeywords", rawRow[14]);
+                row.put("strainShortDescription", rawRow[15]);
+                row.put("strainLongDescription", rawRow[16]);
+                row.put("strainRefrences", rawRow[17]);
+
+                result.add(row);
+            }
+        }
+        return result;
+    }
+
+    public static void createNewStrains(List<HashMap<String, String>> parsedContent)
+            throws UtilityException {
+        for (HashMap<String, String> item : parsedContent) {
+            Account account = null;
+            try {
+                account = AccountManager.getByEmail(item.get("creatorEmail"));
+            } catch (ManagerException e2) {
+                throw new UtilityException(e2);
+            }
+
+            EntryController entryController = new EntryController(account);
+
+            Strain strain = new Strain();
+            HashSet<Name> strainNames = new HashSet<Name>();
+            strainNames.add(new Name(item.get("strainName"), strain));
+            strain.setNames(strainNames);
+            strain.setCreator(item.get("name"));
+            strain.setCreatorEmail(item.get("creatorEmail"));
+            strain.setOwner(strain.getCreator());
+            strain.setOwnerEmail(strain.getCreatorEmail());
+            EntryFundingSource newStrainFundingSource = new EntryFundingSource();
+            newStrainFundingSource.setEntry(strain);
+            FundingSource fundingSource = new FundingSource();
+            fundingSource.setFundingSource(item.get("fundingSource"));
+            fundingSource.setPrincipalInvestigator(item.get("principalInvestigator"));
+            newStrainFundingSource.setFundingSource(fundingSource);
+            Set<EntryFundingSource> strainFundingSources = new LinkedHashSet<EntryFundingSource>();
+            strainFundingSources.add(newStrainFundingSource);
+            strain.setEntryFundingSources(strainFundingSources);
+            strain.setHost(item.get("strainParent"));
+            strain.setGenotypePhenotype(item.get("strainGenotype"));
+            strain.setPlasmids(item.get("strainPlasmids")); // TODO: Handle multiple plasmids
+            HashSet<SelectionMarker> selectionMarkers = new HashSet<SelectionMarker>();
+            if (item.get("strainSelectionMarker") != null) {
+                selectionMarkers
+                        .add(new SelectionMarker(item.get("strainSelectionMarker"), strain));
+            }
+            strain.setSelectionMarkers(selectionMarkers);
+
+            // try to see if the plasmid exists, and smart link that instead
+            Plasmid plasmid;
+            try {
+                plasmid = (Plasmid) entryController.getByPartNumber(item.get("strainPlasmids"));
+            } catch (ControllerException e1) {
+                throw new UtilityException(e1);
+            } catch (PermissionException e1) {
+                throw new UtilityException(e1);
+            }
+            if (plasmid != null) {
+                strain.setPlasmids("[[jbei:" + plasmid.getOnePartNumber().getPartNumber() + "|"
+                        + plasmid.getOneName().getName() + "]]");
+            }
+
+            strain.setAlias(item.get("strainAlias"));
+            strain.setStatus(item.get("strainStatus"));
+            strain.setKeywords(item.get("strainKeywords"));
+            strain.setShortDescription(item.get("strainShortDescription"));
+            strain.setReferences(item.get("strainReferences"));
+            strain.setBioSafetyLevel(1);
+            strain.setIntellectualProperty(item.get("strainPatentInformation"));
+            strain.setLongDescription(item.get("strainLongDescription"));
+            strain.setLongDescriptionType(Entry.MarkupType.text.name());
+
+            // empty fields
+
+            Strain newStrain = null;
+
+            try {
+                newStrain = (Strain) entryController.createEntry(strain, true, true);
+            } catch (ControllerException e) {
+                throw new UtilityException(e);
+            }
+
+        } // item for loop
+    }
+
     public static List<HashMap<String, String>> parseStrainPlasmidFile(File file)
             throws UtilityException {
         BufferedReader bufferedReader = null;
@@ -261,15 +386,21 @@ public class ImportHelper {
     }
 
     public static void main(String[] args) {
-        String fileName = "/home/tham/Documents/Projects/taeksoon's parts/TSL_Strain_101004.data.csv";
+        String fileName = "/home/tham/Documents/Projects/raef's parts/raef.data.csv";
         String sequenceFilesDir = "/home/tham/Documents/Projects/taeksoon's parts/sequences";
         File csvFile = new File(fileName);
 
         if (csvFile.canRead()) {
+
+            List<HashMap<String, String>> parsedContent;
             try {
-                List<HashMap<String, String>> parsedContent = parseStrainPlasmidFile(csvFile);
+                /*
+                parsedContent = parseStrainPlasmidFile(csvFile);
                 parsedContent = readSequenceFiles(parsedContent, sequenceFilesDir, ".gb");
                 createNewStrainsWithPlasmids(parsedContent);
+                */
+                parsedContent = parseStrainFile(csvFile);
+                createNewStrains(parsedContent);
                 parsedContent.size();
             } catch (UtilityException e) {
 
