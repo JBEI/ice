@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
+import org.apache.wicket.markup.html.CSSPackageResource;
+import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.data.tables.AbstractSortableColumn;
 import org.jbei.ice.web.data.tables.SortableDataTable;
+import org.jbei.ice.web.pages.UnprotectedPage;
 
 /**
  * Panel for displaying a data table of specified types, with sortable columns
@@ -54,7 +57,12 @@ public class SortableDataTablePanel<T> extends Panel {
 
     public void renderTable() {
         if (dataProvider == null)
-            throw new ViewException("Missing the data provider");        
+            throw new ViewException("Missing the data provider"); 
+        
+        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
+            UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
+        add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
+            UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
 
         int size = this.columns.size();
         AbstractSortableColumn<T>[] tableColumns = this.columns

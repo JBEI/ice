@@ -59,15 +59,6 @@ public class UserEntriesViewPanel extends SortableDataTablePanel<Entry> {
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sequence.gif");
         hasSampleImage = new ResourceReference(UnprotectedPage.class,
                 UnprotectedPage.IMAGES_RESOURCE_LOCATION + "sample.png");
-
-//        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-//            UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
-//        add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
-//            UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
-//
-//        add(new Image("attachmentHeaderImage", hasAttachmentImage));
-//        add(new Image("sequenceHeaderImage", hasSequenceImage));
-//        add(new Image("sampleHeaderImage", hasSampleImage));
     }
 
     protected void addTypeColumn() {
