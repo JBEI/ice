@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.models;
 
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,7 +16,6 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.models.Storage.StorageType;
 
 @Entity
 @Table(name = "storage_scheme")
@@ -23,6 +23,11 @@ import org.jbei.ice.lib.models.Storage.StorageType;
 public class StorageScheme implements IModel {
 
     private static final long serialVersionUID = 1L;
+
+    public static final String DEFAULT_PLASMID_STORAGE_SCHEME = "Default Plasmid Storage Scheme";
+    public static final String DEFAULT_STRAIN_STORAGE_SCHEME = "Default Strain Storage Scheme";
+    public static final String DEFAULT_PART_STORAGE_SCHEME = "Default Part Storage Scheme";
+    public static final String DEFAULT_ARABIDOPSIS_STORAGE_SCHEME = "Default Arabidopsis Storage Scheme";
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
@@ -33,11 +38,11 @@ public class StorageScheme implements IModel {
 
     @Column(name = "schemes")
     @Lob
-    private LinkedHashMap<String, StorageType> schemes;
+    private ArrayList<Storage> schemes;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "storage_id")
-    private Storage parent;
+    private Storage root;
 
     public long getId() {
         return id;
@@ -55,20 +60,20 @@ public class StorageScheme implements IModel {
         this.label = label;
     }
 
-    public LinkedHashMap<String, StorageType> getSchemes() {
+    public List<Storage> getSchemes() {
         return schemes;
     }
 
-    public void setSchemes(LinkedHashMap<String, StorageType> schemes) {
+    public void setSchemes(ArrayList<Storage> schemes) {
         this.schemes = schemes;
     }
 
-    public void setParent(Storage parent) {
-        this.parent = parent;
+    public void setRoot(Storage root) {
+        this.root = root;
     }
 
-    public Storage getParent() {
-        return parent;
+    public Storage getRoot() {
+        return root;
     }
 
 }

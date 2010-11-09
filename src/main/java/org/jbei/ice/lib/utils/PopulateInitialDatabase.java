@@ -14,19 +14,31 @@ import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AccountManager;
+import org.jbei.ice.lib.managers.ConfigurationManager;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.GroupManager;
 import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.managers.StorageManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountFundingSource;
+import org.jbei.ice.lib.models.Configuration;
+import org.jbei.ice.lib.models.Configuration.ConfigurationKey;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.models.Moderator;
+import org.jbei.ice.lib.models.Storage;
+import org.jbei.ice.lib.models.Storage.StorageType;
+import org.jbei.ice.lib.models.StorageScheme;
 import org.jbei.ice.lib.permissions.PermissionManager;
 
 public class PopulateInitialDatabase {
+    public static final String DEFAULT_PLASMID_STORAGE_SCHEME_NAME = "Plasmid Storage";
+    public static final String DEFAULT_STRAIN_STORAGE_SCHEME_NAME = "Strain Storage";
+    public static final String DEFAULT_PART_STORAGE_SCHEME_NAME = "Part Storage";
+    public static final String DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME = "Arabidopsis Storage";
+
     // This is a global "everyone" uuid
     public static String everyoneGroup = "8746a64b-abd5-4838-a332-02c356bbeac0";
 
@@ -63,6 +75,177 @@ public class PopulateInitialDatabase {
 
         createSystemAccount();
         createAdminAccount();
+
+        populateDefaultStorageLocationsAndSchemes();
+    }
+
+    /**
+     * Create default root node Storage for each part types
+     */
+    private static void populateDefaultStorageLocationsAndSchemes() throws UtilityException {
+        Configuration strainRootConfig = null;
+        Configuration plasmidRootConfig = null;
+        Configuration partRootConfig = null;
+        Configuration arabidopsisRootConfig = null;
+        Storage strainRoot = null;
+        Storage plasmidRoot = null;
+        Storage partRoot = null;
+        Storage arabidopsisSeedRoot = null;
+
+        try {
+            // read configuration
+            strainRootConfig = ConfigurationManager
+                    .get(ConfigurationKey.DEFAULT_STRAIN_STORAGE_HEAD);
+            plasmidRootConfig = ConfigurationManager
+                    .get(ConfigurationKey.DEFAULT_PLASMID_STORAGE_HEAD);
+            partRootConfig = ConfigurationManager.get(ConfigurationKey.DEFAULT_PART_STORAGE_HEAD);
+            arabidopsisRootConfig = ConfigurationManager
+                    .get(ConfigurationKey.DEFAULT_ARABIDOPSIS_STORAGE_HEAD);
+        } catch (ManagerException e1) {
+            throw new UtilityException(e1);
+        }
+
+        // if null, create new storage and config
+        try {
+            if (strainRootConfig == null) {
+                strainRoot = new Storage(DEFAULT_STRAIN_STORAGE_SCHEME_NAME,
+                        "Default Strain Storage Root", StorageType.GENERIC, systemAccountEmail,
+                        null);
+                strainRoot = StorageManager.save(strainRoot);
+                strainRootConfig = new Configuration(ConfigurationKey.DEFAULT_STRAIN_STORAGE_HEAD,
+                        strainRoot.getUuid());
+                ConfigurationManager.save(strainRootConfig);
+            }
+            if (plasmidRootConfig == null) {
+                plasmidRoot = new Storage(DEFAULT_PLASMID_STORAGE_SCHEME_NAME,
+                        "Default Plasmid Storage Root", StorageType.GENERIC, systemAccountEmail,
+                        null);
+                plasmidRoot = StorageManager.save(plasmidRoot);
+                plasmidRootConfig = new Configuration(
+                        ConfigurationKey.DEFAULT_PLASMID_STORAGE_HEAD, plasmidRoot.getUuid());
+                ConfigurationManager.save(plasmidRootConfig);
+            }
+            if (partRootConfig == null) {
+                partRoot = new Storage(DEFAULT_PART_STORAGE_SCHEME_NAME,
+                        "Default Part Storage Root", StorageType.GENERIC, systemAccountEmail, null);
+                partRoot = StorageManager.save(partRoot);
+                partRoot = StorageManager.save(partRoot);
+                partRootConfig = new Configuration(ConfigurationKey.DEFAULT_PART_STORAGE_HEAD,
+                        partRoot.getUuid());
+                ConfigurationManager.save(partRootConfig);
+            }
+            if (arabidopsisRootConfig == null) {
+                arabidopsisSeedRoot = new Storage(DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME,
+                        "Default Arabidopsis Seed Storage Root", StorageType.GENERIC,
+                        systemAccountEmail, null);
+                arabidopsisSeedRoot = StorageManager.save(arabidopsisSeedRoot);
+                arabidopsisRootConfig = new Configuration(
+                        ConfigurationKey.DEFAULT_ARABIDOPSIS_STORAGE_HEAD,
+                        arabidopsisSeedRoot.getUuid());
+                ConfigurationManager.save(arabidopsisRootConfig);
+            }
+        } catch (ManagerException e) {
+            throw new UtilityException(e);
+        }
+
+        // create a sample storage scheme for each type
+        // plasmid
+        ArrayList<Storage> schemes = new ArrayList<Storage>();
+        StorageScheme plasmidScheme = null;
+        try {
+            plasmidScheme = StorageManager.getStorageScheme(DEFAULT_PLASMID_STORAGE_SCHEME_NAME);
+        } catch (ManagerException e1) {
+            throw new UtilityException(e1);
+        }
+        if (plasmidScheme == null) {
+            plasmidScheme = new StorageScheme();
+            plasmidScheme.setLabel(DEFAULT_PLASMID_STORAGE_SCHEME_NAME);
+            plasmidScheme.setRoot(plasmidRoot);
+            schemes.add(new Storage("Freezer", "", StorageType.FREEZER, "", null));
+            schemes.add(new Storage("Shelf", "", StorageType.SHELF, "", null));
+            schemes.add(new Storage("Box", "", StorageType.BOX_UNINDEXED, "", null));
+            schemes.add(new Storage("Tube", "", StorageType.TUBE, "", null));
+
+            plasmidScheme.setSchemes(schemes);
+            try {
+                StorageManager.update(plasmidScheme);
+            } catch (ManagerException e) {
+                throw new UtilityException(e);
+            }
+        }
+
+        // strain
+        schemes = new ArrayList<Storage>();
+        StorageScheme strainScheme = null;
+        try {
+            strainScheme = StorageManager.getStorageScheme(DEFAULT_STRAIN_STORAGE_SCHEME_NAME);
+        } catch (ManagerException e1) {
+            throw new UtilityException(e1);
+        }
+        if (strainScheme == null) {
+            strainScheme = new StorageScheme();
+            strainScheme.setLabel(DEFAULT_STRAIN_STORAGE_SCHEME_NAME);
+            strainScheme.setRoot(strainRoot);
+            schemes.add(new Storage("Freezer", "", StorageType.FREEZER, "", null));
+            schemes.add(new Storage("Shelf", "", StorageType.SHELF, "", null));
+            schemes.add(new Storage("Box", "", StorageType.BOX_UNINDEXED, "", null));
+            schemes.add(new Storage("Tube", "", StorageType.TUBE, "", null));
+
+            strainScheme.setSchemes(schemes);
+            try {
+                StorageManager.update(strainScheme);
+            } catch (ManagerException e) {
+                throw new UtilityException(e);
+            }
+        }
+        // parts
+        schemes = new ArrayList<Storage>();
+        StorageScheme partScheme = null;
+        try {
+            partScheme = StorageManager.getStorageScheme(DEFAULT_PART_STORAGE_SCHEME_NAME);
+        } catch (ManagerException e1) {
+            throw new UtilityException(e1);
+        }
+        if (partScheme == null) {
+            partScheme = new StorageScheme();
+            partScheme.setLabel(DEFAULT_PART_STORAGE_SCHEME_NAME);
+            partScheme.setRoot(partRoot);
+            schemes.add(new Storage("Freezer", "", StorageType.FREEZER, "", null));
+            schemes.add(new Storage("Shelf", "", StorageType.SHELF, "", null));
+            schemes.add(new Storage("Box", "", StorageType.BOX_UNINDEXED, "", null));
+            schemes.add(new Storage("Tube", "", StorageType.TUBE, "", null));
+
+            partScheme.setSchemes(schemes);
+            try {
+                StorageManager.update(partScheme);
+            } catch (ManagerException e) {
+                throw new UtilityException(e);
+            }
+        }
+        // arabidopsis seeds
+        schemes = new ArrayList<Storage>();
+        StorageScheme arabidopsisScheme = null;
+        try {
+            arabidopsisScheme = StorageManager
+                    .getStorageScheme(DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME);
+        } catch (ManagerException e1) {
+            throw new UtilityException(e1);
+        }
+        if (arabidopsisScheme == null) {
+            arabidopsisScheme = new StorageScheme();
+            arabidopsisScheme.setLabel(DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME);
+            arabidopsisScheme.setRoot(arabidopsisSeedRoot);
+            schemes.add(new Storage("Shelf", "", StorageType.SHELF, "", null));
+            schemes.add(new Storage("Box", "", StorageType.BOX_UNINDEXED, "", null));
+            schemes.add(new Storage("Tube", "", StorageType.TUBE, "", null));
+
+            arabidopsisScheme.setSchemes(schemes);
+            try {
+                StorageManager.update(arabidopsisScheme);
+            } catch (ManagerException e) {
+                throw new UtilityException(e);
+            }
+        }
     }
 
     /**

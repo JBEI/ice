@@ -31,14 +31,14 @@ public class Storage implements IModel {
     private static final long serialVersionUID = 1L;
 
     public enum StorageType {
-        FREEZER, SHELF, BOX_INDEXED, BOX_UNINDEXED, PLATE96, WELL, TUBE
+        GENERIC, FREEZER, SHELF, BOX_INDEXED, BOX_UNINDEXED, PLATE96, WELL, TUBE
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
     private long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id")
     private Storage parent;
 
@@ -48,18 +48,34 @@ public class Storage implements IModel {
     @Column(name = "description", length = 1023)
     private String description;
 
+    @Column(name = "uuid", length = 36, nullable = false)
+    private String uuid;
+
     @Column(name = "storage_type")
     @Enumerated(EnumType.STRING)
-    private StorageType locationType;
+    private StorageType storageType;
 
     @Column(name = "owner_email", length = 255, nullable = false)
     private String ownerEmail;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "parent")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "parent")
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @OrderBy("id")
     @JoinColumn(name = "parent_id")
     private final Set<Storage> children = null;
+
+    public Storage() {
+        super();
+    }
+
+    public Storage(String name, String description, StorageType storageType, String ownerEmail,
+            Storage parent) {
+        setName(name);
+        setDescription(description);
+        setStorageType(storageType);
+        setOwnerEmail(ownerEmail);
+        setParent(parent);
+    }
 
     public long getId() {
         return id;
@@ -93,12 +109,20 @@ public class Storage implements IModel {
         this.description = description;
     }
 
-    public StorageType getLocationType() {
-        return locationType;
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
-    public void setLocationType(StorageType locationType) {
-        this.locationType = locationType;
+    public String getUuid() {
+        return uuid;
+    }
+
+    public StorageType getStorageType() {
+        return storageType;
+    }
+
+    public void setStorageType(StorageType storageType) {
+        this.storageType = storageType;
     }
 
     public String getOwnerEmail() {
@@ -121,6 +145,7 @@ public class Storage implements IModel {
     public static Map<String, String> getLocationTypeOptionsMap() {
         Map<String, String> result = new HashMap<String, String>();
 
+        result.put(StorageType.GENERIC.toString(), "Generic");
         result.put(StorageType.FREEZER.toString(), "Freezer");
         result.put(StorageType.SHELF.toString(), "Shelf");
         result.put(StorageType.BOX_INDEXED.toString(), "Indexed Box");

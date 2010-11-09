@@ -1,6 +1,6 @@
 package org.jbei.ice.web.panels.adminpage;
 
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -14,6 +14,7 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.models.StorageScheme;
 
@@ -40,12 +41,12 @@ public class StorageSchemeEditPanel extends Panel {
         schemeName = storageScheme.getLabel();
         setParentPanel(parentPanel);
 
-        LinkedHashMap<String, StorageType> schemes = storageScheme.getSchemes();
+        List<Storage> schemes = storageScheme.getSchemes();
         if (schemes != null) {
 
-            for (String key : schemes.keySet()) {
+            for (Storage storage : schemes) {
                 StorageSchemeEditItemPanel newSchemeItemPanel = new StorageSchemeEditItemPanel(
-                        "editStorageSchemeItemPanel", key, storageScheme.getSchemes().get(key));
+                        "editStorageSchemeItemPanel", storage.getName(), storage.getStorageType());
                 locationItems.add(newSchemeItemPanel);
             }
         } else {
@@ -84,12 +85,12 @@ public class StorageSchemeEditPanel extends Panel {
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 StorageSchemeEditPanel thisPanel = (StorageSchemeEditPanel) getParent().getParent();
-                LinkedHashMap<String, StorageType> schemes = new LinkedHashMap<String, StorageType>();
+                ArrayList<Storage> schemes = new ArrayList<Storage>();
                 for (StorageSchemeEditItemPanel item : thisPanel.getLocationItems()) {
 
                     StorageType itemLocationType = StorageType.valueOf(item.getLocationType()
                             .getValue());
-                    schemes.put(item.getLocationName(), itemLocationType);
+                    schemes.add(new Storage(item.getLocationName(), "", itemLocationType, "", null));
                 }
                 StorageSchemeChoicePanel originalPanel = (StorageSchemeChoicePanel) thisPanel
                         .getParentPanel();
