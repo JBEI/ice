@@ -1,4 +1,4 @@
-package org.jbei.ice.web.panels;
+package org.jbei.ice.web.panels.adminpage;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -19,6 +19,7 @@ import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.forms.PartUpdateFormPanel;
 import org.jbei.ice.web.forms.PlasmidUpdateFormPanel;
 import org.jbei.ice.web.forms.StrainUpdateFormPanel;
+import org.jbei.ice.web.panels.EmptyMessagePanel;
 
 public class AdminEditPartsFormPanel extends Panel {
 

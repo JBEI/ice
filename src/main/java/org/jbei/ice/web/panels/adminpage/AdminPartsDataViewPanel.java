@@ -1,4 +1,4 @@
-package org.jbei.ice.web.panels;
+package org.jbei.ice.web.panels.adminpage;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ResourceReference;
@@ -23,6 +23,8 @@ import org.jbei.ice.web.dataProviders.UserEntriesDataProvider;
 import org.jbei.ice.web.forms.JavascriptEventConfirmation;
 import org.jbei.ice.web.pages.AdminPage;
 import org.jbei.ice.web.pages.UnprotectedPage;
+import org.jbei.ice.web.panels.AbstractEntriesDataView;
+import org.jbei.ice.web.panels.JbeiPagingNavigator;
 
 public class AdminPartsDataViewPanel extends Panel {
 

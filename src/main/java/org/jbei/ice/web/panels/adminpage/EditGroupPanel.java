@@ -1,9 +1,10 @@
-package org.jbei.ice.web.panels;
+package org.jbei.ice.web.panels.adminpage;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.jbei.ice.web.panels.GroupsDataViewPanel;
 
 public class EditGroupPanel extends Panel {
 

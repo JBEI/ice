@@ -1,4 +1,4 @@
-package org.jbei.ice.web.panels;
+package org.jbei.ice.web.panels.adminpage;
 
 import java.util.LinkedList;
 import java.util.List;

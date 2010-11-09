@@ -1,4 +1,4 @@
-package org.jbei.ice.web.panels;
+package org.jbei.ice.web.panels.adminpage;
 
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.models.Group;

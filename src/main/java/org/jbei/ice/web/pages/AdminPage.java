@@ -13,12 +13,12 @@ import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
-import org.jbei.ice.web.panels.AdminAccountUpdatePanel;
-import org.jbei.ice.web.panels.AdminUpdateGroupPanel;
-import org.jbei.ice.web.panels.EditGroupPanel;
-import org.jbei.ice.web.panels.EditLocationSchemePanel;
-import org.jbei.ice.web.panels.EditPartsPanel;
-import org.jbei.ice.web.panels.EditUserAccountPanel;
+import org.jbei.ice.web.panels.adminpage.AdminAccountUpdatePanel;
+import org.jbei.ice.web.panels.adminpage.AdminUpdateGroupPanel;
+import org.jbei.ice.web.panels.adminpage.StorageSchemeChoicePanel;
+import org.jbei.ice.web.panels.adminpage.EditGroupPanel;
+import org.jbei.ice.web.panels.adminpage.EditPartsPanel;
+import org.jbei.ice.web.panels.adminpage.EditUserAccountPanel;
 
 public class AdminPage extends ProtectedPage {
     private static final String MAIN_PANEL_ID = "centerPanel";
@@ -28,7 +28,7 @@ public class AdminPage extends ProtectedPage {
     private BookmarkablePageLink<Object> editUsersLink;
     private BookmarkablePageLink<Object> editPartsLink;
     private BookmarkablePageLink<Object> editGroupsLink;
-    private BookmarkablePageLink<Object> editLocationSchemeLink;
+    private BookmarkablePageLink<Object> editStorageSchemeLink;
 
     private String currentPage;
 
@@ -75,22 +75,22 @@ public class AdminPage extends ProtectedPage {
         editGroupsLink.setOutputMarkupId(true);
 
         // edit location scheme tab
-        editLocationSchemeLink = new BookmarkablePageLink<Object>("editLocationSchemeLink",
+        editStorageSchemeLink = new BookmarkablePageLink<Object>("editStorageSchemeLink",
                 AdminPage.class, new PageParameters("0=locations"));
-        editLocationSchemeLink.setOutputMarkupId(true);
+        editStorageSchemeLink.setOutputMarkupId(true);
 
         // set tabs css
         editUsersLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(true);
         editPartsLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(true);
         editGroupsLink.add(new SimpleAttributeModifier("class", "inactive"))
                 .setOutputMarkupId(true);
-        editLocationSchemeLink.add(new SimpleAttributeModifier("class", "inactive"))
+        editStorageSchemeLink.add(new SimpleAttributeModifier("class", "inactive"))
                 .setOutputMarkupId(true);
 
         add(editUsersLink);
         add(editPartsLink);
         add(editGroupsLink);
-        add(editLocationSchemeLink);
+        add(editStorageSchemeLink);
 
         if (currentPage != null) {
             if ("users".equals(currentPage)) {
@@ -128,8 +128,8 @@ public class AdminPage extends ProtectedPage {
                 editGroupsLink.add(new SimpleAttributeModifier("class", "active"))
                         .setOutputMarkupId(true);
             } else if ("locations".equals(currentPage)) {
-                currentPanel = new EditLocationSchemePanel(MAIN_PANEL_ID);
-                editLocationSchemeLink.add(new SimpleAttributeModifier("class", "active"))
+                currentPanel = new StorageSchemeChoicePanel(MAIN_PANEL_ID);
+                editStorageSchemeLink.add(new SimpleAttributeModifier("class", "active"))
                         .setOutputMarkupId(true);
             } else {
                 currentPanel = createDefaultPanel();

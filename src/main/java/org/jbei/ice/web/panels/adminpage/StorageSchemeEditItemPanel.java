@@ -1,4 +1,4 @@
-package org.jbei.ice.web.panels;
+package org.jbei.ice.web.panels.adminpage;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -17,15 +17,35 @@ import org.jbei.ice.lib.models.LocationNew;
 import org.jbei.ice.lib.models.LocationNew.LocationType;
 import org.jbei.ice.web.common.CustomChoice;
 
-public class EditLocationSchemeItemPanel extends Panel {
+public class StorageSchemeEditItemPanel extends Panel {
     private static final long serialVersionUID = -1;
 
     private CustomChoice locationType = null;
     private String locationName = null;
+    private ArrayList<CustomChoice> choices = new ArrayList<CustomChoice>();
 
-    public EditLocationSchemeItemPanel(String id) {
+    public StorageSchemeEditItemPanel(String id) {
         super(id);
-        ArrayList<CustomChoice> choices = new ArrayList<CustomChoice>();
+
+        initializeComponents();
+    }
+
+    public StorageSchemeEditItemPanel(String id, String locationName, LocationType locationType) {
+        super(id);
+
+        initializeComponents();
+
+        this.locationName = locationName;
+        for (CustomChoice choice : choices) {
+            if (choice.getValue().equals(locationType.toString())) {
+                this.locationType = choice;
+            }
+        }
+
+    }
+
+    private void initializeComponents() {
+
         Map<String, String> locations = LocationNew.getLocationTypeOptionsMap();
         for (LocationType locationType : LocationType.values()) {
             choices.add(new CustomChoice(locations.get(locationType.toString()), locationType
@@ -51,11 +71,11 @@ public class EditLocationSchemeItemPanel extends Panel {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                EditLocationSchemePanel parentPanel = (EditLocationSchemePanel) getParent()
+                StorageSchemeEditPanel parentPanel = (StorageSchemeEditPanel) getParent()
                         .getParent().getParent().getParent().getParent();
 
                 parentPanel.getLocationItems().add(
-                    new EditLocationSchemeItemPanel("editLocationSchemeItemPanel"));
+                    new StorageSchemeEditItemPanel("editStorageSchemeItemPanel"));
 
                 target.addComponent(form);
             }
@@ -68,10 +88,10 @@ public class EditLocationSchemeItemPanel extends Panel {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                EditLocationSchemePanel parentPanel = (EditLocationSchemePanel) getParent()
+                StorageSchemeEditPanel parentPanel = (StorageSchemeEditPanel) getParent()
                         .getParent().getParent().getParent().getParent();
 
-                LinkedList<EditLocationSchemeItemPanel> locationItems = parentPanel
+                LinkedList<StorageSchemeEditItemPanel> locationItems = parentPanel
                         .getLocationItems();
                 if (locationItems.size() == 1) {
                     return; // keep at least one panel

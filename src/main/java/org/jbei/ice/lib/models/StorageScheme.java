@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.models;
 
-import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -31,7 +30,7 @@ public class StorageScheme implements IModel {
 
     @Column(name = "schemes")
     @Lob
-    private List<HashMap<String, LocationType>> schemes;
+    private LinkedHashMap<String, LocationType> schemes;
 
     public long getId() {
         return id;
@@ -49,11 +48,11 @@ public class StorageScheme implements IModel {
         this.label = label;
     }
 
-    public List<HashMap<String, LocationType>> getSchemes() {
+    public LinkedHashMap<String, LocationType> getSchemes() {
         return schemes;
     }
 
-    public void setSchemes(List<HashMap<String, LocationType>> schemes) {
+    public void setSchemes(LinkedHashMap<String, LocationType> schemes) {
         this.schemes = schemes;
     }
 
