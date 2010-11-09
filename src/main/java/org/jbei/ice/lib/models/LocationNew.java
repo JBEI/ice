@@ -32,7 +32,7 @@ public class LocationNew implements IModel {
     private static final long serialVersionUID = 1L;
 
     public enum LocationType {
-        FREEZER, SHELF, BOX, WELL96, WELL, TUBE
+        FREEZER, SHELF, BOX_INDEXED, BOX_UNINDEXED, PLATE96, WELL, TUBE
     }
 
     @Id
@@ -124,9 +124,10 @@ public class LocationNew implements IModel {
 
         result.put(LocationType.FREEZER.toString(), "Freezer");
         result.put(LocationType.SHELF.toString(), "Shelf");
-        result.put(LocationType.BOX.toString(), "Box");
-        result.put(LocationType.WELL96.toString(), "96 Well Plate");
-        result.put(LocationType.WELL.toString(), "Well");
+        result.put(LocationType.BOX_INDEXED.toString(), "Indexed Box");
+        result.put(LocationType.BOX_UNINDEXED.toString(), "Unindexed Box");
+        result.put(LocationType.PLATE96.toString(), "96 Well Plate");
+        result.put(LocationType.WELL.toString(), "Numbered Well");
         result.put(LocationType.TUBE.toString(), "Labeled Tube");
 
         return result;

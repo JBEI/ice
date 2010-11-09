@@ -69,6 +69,7 @@ public class Sample implements ISampleValueObject, IModel {
     private Set<Location> locations = new LinkedHashSet<Location>();
 
     @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_id")
     private LocationNew locationNew;
 
     @Override
