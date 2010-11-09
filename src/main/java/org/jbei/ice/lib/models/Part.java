@@ -21,6 +21,10 @@ import org.jbei.ice.lib.models.interfaces.IPartValueObject;
 public class Part extends Entry implements IPartValueObject, IModel {
     private static final long serialVersionUID = 1L;
 
+    public enum AssemblyStandard {
+        RAW, BIOBRICKA, BIOBRICKB;
+    }
+
     @Column(name = "package_format", nullable = false)
     @Enumerated(EnumType.STRING)
     private AssemblyStandard packageFormat;
@@ -48,30 +52,32 @@ public class Part extends Entry implements IPartValueObject, IModel {
         this.pkgdDnaRevHash = pkgdDnaRevHash;
     }
 
-    public enum AssemblyStandard {
-        RAW, BIOBRICKA, BIOBRICKB;
-    }
-
+    @Override
     public AssemblyStandard getPackageFormat() {
         return packageFormat;
     }
 
+    @Override
     public void setPackageFormat(AssemblyStandard packageFormat) {
         this.packageFormat = packageFormat;
     }
 
+    @Override
     public String getPkgdDnaFwdHash() {
         return pkgdDnaFwdHash;
     }
 
+    @Override
     public void setPkgdDnaFwdHash(String pkgdDnaFwdHash) {
         this.pkgdDnaFwdHash = pkgdDnaFwdHash;
     }
 
+    @Override
     public String getPkgdDnaRevHash() {
         return pkgdDnaRevHash;
     }
 
+    @Override
     public void setPkgdDnaRevHash(String pkgdDnaRevHash) {
         this.pkgdDnaRevHash = pkgdDnaRevHash;
     }
@@ -80,8 +86,8 @@ public class Part extends Entry implements IPartValueObject, IModel {
         Map<String, String> resultMap = new LinkedHashMap<String, String>();
 
         resultMap.put(AssemblyStandard.RAW.toString(), "Raw");
-        resultMap.put(AssemblyStandard.BIOBRICKA.toString(), "Biobrick A");
-        resultMap.put(AssemblyStandard.BIOBRICKB.toString(), "BioBrick Berkeley");
+        resultMap.put(AssemblyStandard.BIOBRICKA.toString(), "BioBrick A");
+        resultMap.put(AssemblyStandard.BIOBRICKB.toString(), "BglBrick");
 
         return resultMap;
     }

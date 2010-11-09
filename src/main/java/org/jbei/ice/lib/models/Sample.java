@@ -15,6 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -66,6 +67,9 @@ public class Sample implements ISampleValueObject, IModel {
     @JoinColumn(name = "samples_id")
     @OrderBy("id DESC")
     private Set<Location> locations = new LinkedHashSet<Location>();
+
+    @OneToOne(fetch = FetchType.LAZY)
+    private LocationNew locationNew;
 
     @Override
     public long getId() {
@@ -153,6 +157,14 @@ public class Sample implements ISampleValueObject, IModel {
 
     public Set<Location> getLocations() {
         return locations;
+    }
+
+    public LocationNew getLocationNew() {
+        return locationNew;
+    }
+
+    public void setLocationNew(LocationNew locationNew) {
+        this.locationNew = locationNew;
     }
 
 }
