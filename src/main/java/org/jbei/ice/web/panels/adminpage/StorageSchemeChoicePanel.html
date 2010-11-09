@@ -1,9 +1,31 @@
 <html xmlns:wicket>
 <wicket:panel>
-<table width="100%" cellspacing="0">
-	<tr wicket:id="strategyListView">
-		<td><a href="#" wicket:id="strategyLink">link to strategy</a><td>
-		<td><button wicket:id="deleteButton">Delete</button></td>
+<table class="data_table" width="100%" cellspacing="1" cellpadding="0" style="border: 3px solid orange;">
+	<tr>
+		<td width="30%" bgcolor="#ffffff" valign="top">
+		<table border="0" cellpadding="3" cellspacing="1" width="100%" class="data_table">
+			<tr class="title_row_header">
+				<td><span class="panel_header">Location Schemes</span>
+				</td>
+				<td><a href="#" wicket:id="addNewLink">Add New</a>
+				</td>
+			</tr>
+			<tr wicket:id="storageSchemeListView">
+				<td bgcolor="#ffffff" style="border:1px">
+					<a href="#" wicket:id="editLink"><span wicket:id="schemeLabel">Name</span></a>
+				</td>
+				<td bgcolor="#ffffff" style="border:1px" width="30%">
+					<a wicket:id="deleteLink">Delete</a>
+				</td>
+			</tr>
+		</table>
+		</td>
+		<td width="3px" bgcolor="#ffffff">
+			&nbsp;
+		</td>
+		<td width="70%" bgcolor="#ffffff">
+			<wicket:panel wicket:id="editPanel"></wicket:panel>
+		</td>
 	</tr>
 </table>
 </wicket:panel>

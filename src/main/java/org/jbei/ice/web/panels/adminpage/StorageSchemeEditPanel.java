@@ -1,5 +1,6 @@
 package org.jbei.ice.web.panels.adminpage;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,30 +14,45 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.jbei.ice.lib.models.LocationNew.LocationType;
 import org.jbei.ice.lib.models.StorageScheme;
 
 public class StorageSchemeEditPanel extends Panel {
 
     private static final long serialVersionUID = 1L;
+
     private LinkedList<StorageSchemeEditItemPanel> locationItems = new LinkedList<StorageSchemeEditItemPanel>();
-
+    private StorageScheme scheme = null;
     private String schemeName = null;
+    private Panel parentPanel = null;
 
-    public StorageSchemeEditPanel(String id) {
+    public StorageSchemeEditPanel(String id, StorageSchemeChoicePanel parentPanel) {
         super(id);
         locationItems.add(new StorageSchemeEditItemPanel("editStorageSchemeItemPanel"));
-
+        setParentPanel(parentPanel);
         initializeComponents();
     }
 
-    public StorageSchemeEditPanel(String id, StorageScheme storageScheme) {
+    public StorageSchemeEditPanel(String id, StorageScheme storageScheme,
+            StorageSchemeChoicePanel parentPanel) {
         super(id);
+        scheme = storageScheme;
         schemeName = storageScheme.getLabel();
-        for (String key : storageScheme.getSchemes().keySet()) {
-            StorageSchemeEditItemPanel newSchemeItemPanel = new StorageSchemeEditItemPanel(
-                    "editStorageSchemeItemPanel", key, storageScheme.getSchemes().get(key));
-            locationItems.add(newSchemeItemPanel);
+        setParentPanel(parentPanel);
+
+        LinkedHashMap<String, LocationType> schemes = storageScheme.getSchemes();
+        if (schemes != null) {
+
+            for (String key : schemes.keySet()) {
+                StorageSchemeEditItemPanel newSchemeItemPanel = new StorageSchemeEditItemPanel(
+                        "editStorageSchemeItemPanel", key, storageScheme.getSchemes().get(key));
+                locationItems.add(newSchemeItemPanel);
+            }
+        } else {
+            locationItems.add(new StorageSchemeEditItemPanel("editStorageSchemeItemPanel"));
+
         }
+        initializeComponents();
     }
 
     private void initializeComponents() {
@@ -67,9 +83,22 @@ public class StorageSchemeEditPanel extends Panel {
 
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                StorageSchemeEditPanel thisPanel = (StorageSchemeEditPanel) getParent().getParent();
+                LinkedHashMap<String, LocationType> schemes = new LinkedHashMap<String, LocationType>();
+                for (StorageSchemeEditItemPanel item : thisPanel.getLocationItems()) {
 
-                System.out.println("do something");
+                    LocationType itemLocationType = LocationType.valueOf(item.getLocationType()
+                            .getValue());
+                    schemes.put(item.getLocationName(), itemLocationType);
+                }
+                StorageSchemeChoicePanel originalPanel = (StorageSchemeChoicePanel) thisPanel
+                        .getParentPanel();
+                StorageScheme scheme = thisPanel.getScheme();
+                scheme.setLabel(getSchemeName());
+                scheme.setSchemes(schemes);
+                originalPanel.saveScheme(scheme);
 
+                target.addComponent(originalPanel);
             }
 
             @Override
@@ -82,12 +111,12 @@ public class StorageSchemeEditPanel extends Panel {
         add(editStorageSchemeForm);
     }
 
-    public String getSchemeName() {
-        return schemeName;
+    public void setParentPanel(Panel parentPanel) {
+        this.parentPanel = parentPanel;
     }
 
-    public void setSchemeName(String name) {
-        schemeName = name;
+    public Panel getParentPanel() {
+        return parentPanel;
     }
 
     public void setLocationItems(LinkedList<StorageSchemeEditItemPanel> locationItems) {
@@ -96,6 +125,22 @@ public class StorageSchemeEditPanel extends Panel {
 
     public LinkedList<StorageSchemeEditItemPanel> getLocationItems() {
         return locationItems;
+    }
+
+    public void setScheme(StorageScheme scheme) {
+        this.scheme = scheme;
+    }
+
+    public StorageScheme getScheme() {
+        return scheme;
+    }
+
+    public void setSchemeName(String schemeName) {
+        this.schemeName = schemeName;
+    }
+
+    public String getSchemeName() {
+        return schemeName;
     }
 
 }
