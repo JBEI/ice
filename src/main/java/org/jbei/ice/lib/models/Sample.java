@@ -70,7 +70,7 @@ public class Sample implements ISampleValueObject, IModel {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id")
-    private LocationNew locationNew;
+    private Storage storage;
 
     @Override
     public long getId() {
@@ -160,12 +160,12 @@ public class Sample implements ISampleValueObject, IModel {
         return locations;
     }
 
-    public LocationNew getLocationNew() {
-        return locationNew;
+    public Storage getStorage() {
+        return storage;
     }
 
-    public void setLocationNew(LocationNew locationNew) {
-        this.locationNew = locationNew;
+    public void setStorage(Storage locationNew) {
+        storage = locationNew;
     }
 
 }

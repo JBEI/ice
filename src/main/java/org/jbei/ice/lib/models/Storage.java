@@ -24,14 +24,13 @@ import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
 
 @Entity
-@Table(name = "location_new")
-//TODO rename this table after migration
-@SequenceGenerator(name = "sequence", sequenceName = "location_new_id_seq", allocationSize = 1)
-public class LocationNew implements IModel {
+@Table(name = "storage")
+@SequenceGenerator(name = "sequence", sequenceName = "storage_id_seq", allocationSize = 1)
+public class Storage implements IModel {
 
     private static final long serialVersionUID = 1L;
 
-    public enum LocationType {
+    public enum StorageType {
         FREEZER, SHELF, BOX_INDEXED, BOX_UNINDEXED, PLATE96, WELL, TUBE
     }
 
@@ -41,7 +40,7 @@ public class LocationNew implements IModel {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    private LocationNew parent;
+    private Storage parent;
 
     @Column(name = "name", length = 255, nullable = false)
     private String name;
@@ -49,9 +48,9 @@ public class LocationNew implements IModel {
     @Column(name = "description", length = 1023)
     private String description;
 
-    @Column(name = "location_type")
+    @Column(name = "storage_type")
     @Enumerated(EnumType.STRING)
-    private LocationType locationType;
+    private StorageType locationType;
 
     @Column(name = "owner_email", length = 255, nullable = false)
     private String ownerEmail;
@@ -60,7 +59,7 @@ public class LocationNew implements IModel {
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @OrderBy("id")
     @JoinColumn(name = "parent_id")
-    private final Set<LocationNew> children = null;
+    private final Set<Storage> children = null;
 
     public long getId() {
         return id;
@@ -70,11 +69,11 @@ public class LocationNew implements IModel {
         this.id = id;
     }
 
-    public LocationNew getParent() {
+    public Storage getParent() {
         return parent;
     }
 
-    public void setParent(LocationNew parent) {
+    public void setParent(Storage parent) {
         this.parent = parent;
     }
 
@@ -94,11 +93,11 @@ public class LocationNew implements IModel {
         this.description = description;
     }
 
-    public LocationType getLocationType() {
+    public StorageType getLocationType() {
         return locationType;
     }
 
-    public void setLocationType(LocationType locationType) {
+    public void setLocationType(StorageType locationType) {
         this.locationType = locationType;
     }
 
@@ -115,20 +114,20 @@ public class LocationNew implements IModel {
      * 
      * @return
      */
-    public Set<LocationNew> getChildren() {
+    public Set<Storage> getChildren() {
         return children;
     }
 
     public static Map<String, String> getLocationTypeOptionsMap() {
         Map<String, String> result = new HashMap<String, String>();
 
-        result.put(LocationType.FREEZER.toString(), "Freezer");
-        result.put(LocationType.SHELF.toString(), "Shelf");
-        result.put(LocationType.BOX_INDEXED.toString(), "Indexed Box");
-        result.put(LocationType.BOX_UNINDEXED.toString(), "Unindexed Box");
-        result.put(LocationType.PLATE96.toString(), "96 Well Plate");
-        result.put(LocationType.WELL.toString(), "Numbered Well");
-        result.put(LocationType.TUBE.toString(), "Labeled Tube");
+        result.put(StorageType.FREEZER.toString(), "Freezer");
+        result.put(StorageType.SHELF.toString(), "Shelf");
+        result.put(StorageType.BOX_INDEXED.toString(), "Indexed Box");
+        result.put(StorageType.BOX_UNINDEXED.toString(), "Unindexed Box");
+        result.put(StorageType.PLATE96.toString(), "96 Well Plate");
+        result.put(StorageType.WELL.toString(), "Numbered Well");
+        result.put(StorageType.TUBE.toString(), "Labeled Tube");
 
         return result;
     }

@@ -13,8 +13,8 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
-import org.jbei.ice.lib.models.LocationNew;
-import org.jbei.ice.lib.models.LocationNew.LocationType;
+import org.jbei.ice.lib.models.Storage;
+import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.web.common.CustomChoice;
 
 public class StorageSchemeEditItemPanel extends Panel {
@@ -30,7 +30,7 @@ public class StorageSchemeEditItemPanel extends Panel {
         initializeComponents();
     }
 
-    public StorageSchemeEditItemPanel(String id, String locationName, LocationType locationType) {
+    public StorageSchemeEditItemPanel(String id, String locationName, StorageType locationType) {
         super(id);
 
         initializeComponents();
@@ -46,8 +46,8 @@ public class StorageSchemeEditItemPanel extends Panel {
 
     private void initializeComponents() {
 
-        Map<String, String> locations = LocationNew.getLocationTypeOptionsMap();
-        for (LocationType locationType : LocationType.values()) {
+        Map<String, String> locations = Storage.getLocationTypeOptionsMap();
+        for (StorageType locationType : StorageType.values()) {
             choices.add(new CustomChoice(locations.get(locationType.toString()), locationType
                     .toString()));
         }

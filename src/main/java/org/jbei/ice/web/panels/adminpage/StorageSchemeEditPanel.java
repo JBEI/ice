@@ -14,7 +14,7 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
-import org.jbei.ice.lib.models.LocationNew.LocationType;
+import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.models.StorageScheme;
 
 public class StorageSchemeEditPanel extends Panel {
@@ -40,7 +40,7 @@ public class StorageSchemeEditPanel extends Panel {
         schemeName = storageScheme.getLabel();
         setParentPanel(parentPanel);
 
-        LinkedHashMap<String, LocationType> schemes = storageScheme.getSchemes();
+        LinkedHashMap<String, StorageType> schemes = storageScheme.getSchemes();
         if (schemes != null) {
 
             for (String key : schemes.keySet()) {
@@ -84,10 +84,10 @@ public class StorageSchemeEditPanel extends Panel {
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 StorageSchemeEditPanel thisPanel = (StorageSchemeEditPanel) getParent().getParent();
-                LinkedHashMap<String, LocationType> schemes = new LinkedHashMap<String, LocationType>();
+                LinkedHashMap<String, StorageType> schemes = new LinkedHashMap<String, StorageType>();
                 for (StorageSchemeEditItemPanel item : thisPanel.getLocationItems()) {
 
-                    LocationType itemLocationType = LocationType.valueOf(item.getLocationType()
+                    StorageType itemLocationType = StorageType.valueOf(item.getLocationType()
                             .getValue());
                     schemes.put(item.getLocationName(), itemLocationType);
                 }

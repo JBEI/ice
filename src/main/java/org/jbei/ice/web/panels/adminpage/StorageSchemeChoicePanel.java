@@ -12,7 +12,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
-import org.jbei.ice.lib.managers.LocationManager;
+import org.jbei.ice.lib.managers.StorageManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.StorageScheme;
 import org.jbei.ice.web.panels.EmptyMessagePanel;
@@ -30,7 +30,7 @@ public class StorageSchemeChoicePanel extends Panel {
         setOutputMarkupId(true);
         storageSchemes = new ArrayList<StorageScheme>();
         try {
-            storageSchemes = LocationManager.getAllStorageSchemes();
+            storageSchemes = StorageManager.getAllStorageSchemes();
         } catch (ManagerException e) {
             // it's ok. Just render empty.
         }
@@ -90,7 +90,7 @@ public class StorageSchemeChoicePanel extends Panel {
     public void removeStorageScheme(StorageScheme storageScheme) {
 
         try {
-            LocationManager.delete(storageScheme);
+            StorageManager.delete(storageScheme);
             storageSchemes.remove(storageScheme);
         } catch (ManagerException e) {
             error("Could not delete scheme!");
@@ -115,10 +115,10 @@ public class StorageSchemeChoicePanel extends Panel {
         try {
             if (scheme.getId() == 0) {
                 // this is a new scheme. Add to list of schemes after getting id
-                scheme = LocationManager.update(scheme);
+                scheme = StorageManager.update(scheme);
                 storageSchemes.add(scheme);
             } else {
-                LocationManager.update(scheme);
+                StorageManager.update(scheme);
             }
             renderStorageChoiceItems();
 

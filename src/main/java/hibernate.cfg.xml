@@ -63,7 +63,7 @@
 		<mapping class="org.jbei.ice.lib.models.Workspace" />
 		<mapping class="org.jbei.ice.lib.models.Project" />
 		<mapping class="org.jbei.ice.lib.models.Configuration" />
-		<mapping class="org.jbei.ice.lib.models.LocationNew" />
+		<mapping class="org.jbei.ice.lib.models.Storage" />
 		<mapping class="org.jbei.ice.lib.models.StorageScheme" />
 	</session-factory>
 </hibernate-configuration>

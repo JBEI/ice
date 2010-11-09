@@ -8,19 +8,19 @@ import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.LocationNew;
+import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.StorageScheme;
 
-public class LocationManager {
+public class StorageManager {
 
-    public static LocationNew get(long id) throws ManagerException {
-        LocationNew result = null;
+    public static Storage get(long id) throws ManagerException {
+        Storage result = null;
         Session session = DAO.newSession();
         try {
-            Query query = session.createQuery("from " + LocationNew.class.getName()
-                    + " where id = :id");
+            Query query = session
+                    .createQuery("from " + Storage.class.getName() + " where id = :id");
             query.setLong("id", id);
-            result = (LocationNew) query.uniqueResult();
+            result = (Storage) query.uniqueResult();
         } catch (Exception e) {
             String msg = "Could not get Location by id: " + id + " " + e.toString();
             Logger.error(msg, e);
@@ -34,7 +34,7 @@ public class LocationManager {
         return result;
     }
 
-    public static LocationNew update(LocationNew location) throws ManagerException {
+    public static Storage update(Storage location) throws ManagerException {
         try {
             DAO.save(location);
         } catch (DAOException e) {
@@ -46,11 +46,11 @@ public class LocationManager {
         return location;
     }
 
-    public static LocationNew save(LocationNew location) throws ManagerException {
+    public static Storage save(Storage location) throws ManagerException {
         return update(location);
     }
 
-    public static void delete(LocationNew location) throws ManagerException {
+    public static void delete(Storage location) throws ManagerException {
         try {
             DAO.delete(location);
         } catch (DAOException e) {

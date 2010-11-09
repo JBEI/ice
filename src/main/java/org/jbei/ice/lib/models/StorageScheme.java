@@ -4,15 +4,18 @@ import java.util.LinkedHashMap;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.models.LocationNew.LocationType;
+import org.jbei.ice.lib.models.Storage.StorageType;
 
 @Entity
 @Table(name = "storage_scheme")
@@ -30,7 +33,11 @@ public class StorageScheme implements IModel {
 
     @Column(name = "schemes")
     @Lob
-    private LinkedHashMap<String, LocationType> schemes;
+    private LinkedHashMap<String, StorageType> schemes;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "storage_id")
+    private Storage parent;
 
     public long getId() {
         return id;
@@ -48,12 +55,20 @@ public class StorageScheme implements IModel {
         this.label = label;
     }
 
-    public LinkedHashMap<String, LocationType> getSchemes() {
+    public LinkedHashMap<String, StorageType> getSchemes() {
         return schemes;
     }
 
-    public void setSchemes(LinkedHashMap<String, LocationType> schemes) {
+    public void setSchemes(LinkedHashMap<String, StorageType> schemes) {
         this.schemes = schemes;
+    }
+
+    public void setParent(Storage parent) {
+        this.parent = parent;
+    }
+
+    public Storage getParent() {
+        return parent;
     }
 
 }
