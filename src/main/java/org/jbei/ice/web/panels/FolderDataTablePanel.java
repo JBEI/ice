@@ -12,28 +12,29 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.Folder;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.data.tables.ImageHeaderColumn;
 import org.jbei.ice.web.data.tables.LabelHeaderColumn;
-import org.jbei.ice.web.dataProviders.EntriesDataProvider;
+import org.jbei.ice.web.dataProviders.FolderDataProvider;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.utils.WebUtils;
 
-public class MostRecentEntriesPanel extends SortableDataTablePanel<Entry> {
+public class FolderDataTablePanel extends SortableDataTablePanel<Entry> {
+
     private static final long serialVersionUID = 1L;
 
-    public MostRecentEntriesPanel(String id, int perPage) {
+    public FolderDataTablePanel(String id, Folder folder) {
         super(id);
 
-        dataProvider = new EntriesDataProvider();
-        setEntries(((EntriesDataProvider) dataProvider).getEntries());
+        dataProvider = new FolderDataProvider(folder);
 
         addIndexColumn();
-        addTypeColumn();
+        super.addTypeColumn("recordType", true);
         addPartIDColumn();
-        addNameColumn();
+        super.addLabelHeaderColumn("Name", "oneName.name", "oneName.name");
         addSummaryColumn();
         addStatusColumn();
         addHasAttachmentColumn();
@@ -44,32 +45,86 @@ public class MostRecentEntriesPanel extends SortableDataTablePanel<Entry> {
         renderTable();
     }
 
-    protected void addIndexColumn() {
-        addColumn(new LabelHeaderColumn<Entry>("#") {
-
+    protected void addHasAttachmentColumn() {
+        addColumn(new ImageHeaderColumn<Entry>("has_attachment_fragment", "has_attachment",
+                "attachment.gif", null, "Has Attachment", this) {
             private static final long serialVersionUID = 1L;
 
-            @Override
-            protected Component evaluate(String componentId, final Entry entry, int index) {
-                return new Label(componentId, String.valueOf((table.getCurrentPage() * table
-                        .getRowsPerPage()) + index + 1));
+            protected Component evaluate(String id, Entry entry, int row) {
+
+                EntryController entryController = new EntryController(IceSession.get().getAccount());
+                Fragment fragment = new Fragment(id, "has_attachment_fragment",
+                        FolderDataTablePanel.this);
+
+                try {
+                    if (entryController.hasAttachments(entry))
+                        fragment.add(new Image("has_attachment", hasAttachmentImage));
+                    else
+                        fragment.add(new Image("has_attachment", blankImage));
+                } catch (ControllerException e) {
+                    fragment.add(new Image("has_attachment", blankImage));
+                }
+                return fragment;
             }
         });
     }
 
-    protected void addTypeColumn() {
-        addColumn(new LabelHeaderColumn<Entry>("Type", "recordType", "recordType"));
+    protected void addHasSampleColumn() {
+        addColumn(new ImageHeaderColumn<Entry>("has_sample_fragment", "has_sample", "sample.png",
+                null, "Has Samples", this) {
+            private static final long serialVersionUID = 1L;
+
+            protected Component evaluate(String id, Entry entry, int row) {
+                Fragment fragment = new Fragment(id, "has_sample_fragment",
+                        FolderDataTablePanel.this);
+
+                EntryController entryController = new EntryController(IceSession.get().getAccount());
+                try {
+                    if (entryController.hasAttachments(entry))
+                        fragment.add(new Image("has_sample", hasSampleImage));
+                    else
+                        fragment.add(new Image("has_sample", blankImage));
+                } catch (ControllerException e) {
+                    fragment.add(new Image("has_sample", blankImage));
+                }
+                return fragment;
+            }
+        });
+    }
+
+    protected void addHasSequenceColumn() {
+
+        addColumn(new ImageHeaderColumn<Entry>("has_sequence_fragment", "has_sequence",
+                "sequence.gif", null, "Has Sequence", this) {
+            private static final long serialVersionUID = 1L;
+
+            protected Component evaluate(String id, Entry entry, int row) {
+                Fragment fragment = new Fragment(id, "has_sequence_fragment",
+                        FolderDataTablePanel.this);
+
+                EntryController entryController = new EntryController(IceSession.get().getAccount());
+                try {
+                    if (entryController.hasAttachments(entry))
+                        fragment.add(new Image("has_sequence", hasSequenceImage));
+                    else
+                        fragment.add(new Image("has_sequence", blankImage));
+                } catch (ControllerException e) {
+                    fragment.add(new Image("has_sequence", blankImage));
+                }
+                return fragment;
+            }
+        });
     }
 
     protected void addPartIDColumn() {
-        addColumn(new LabelHeaderColumn<Entry>("Part ID") {
+        addColumn(new LabelHeaderColumn<Entry>("Part ID", "onePartNumber.partNumber") {
 
             private static final long serialVersionUID = 1L;
 
             @Override
             protected Component evaluate(String componentId, Entry entry, int row) {
                 Fragment fragment = new Fragment(componentId, "part_id_cell",
-                        MostRecentEntriesPanel.this);
+                        FolderDataTablePanel.this);
 
                 BookmarkablePageLink<String> entryLink = new BookmarkablePageLink<String>(
                         "partIdLink", EntryViewPage.class, new PageParameters("0=" + entry.getId()));
@@ -81,10 +136,6 @@ public class MostRecentEntriesPanel extends SortableDataTablePanel<Entry> {
                 return fragment;
             }
         });
-    }
-
-    protected void addNameColumn() {
-        addColumn(new LabelHeaderColumn<Entry>("Name", null, "oneName.name"));
     }
 
     protected void addSummaryColumn() {
@@ -109,77 +160,6 @@ public class MostRecentEntriesPanel extends SortableDataTablePanel<Entry> {
             @Override
             protected Component evaluate(String componentId, Entry entry, int row) {
                 return new Label(componentId, JbeiConstants.getStatus(entry.getStatus()));
-            }
-        });
-    }
-
-    protected void addHasAttachmentColumn() {
-        addColumn(new ImageHeaderColumn<Entry>("has_attachment_fragment", "has_attachment",
-                "attachment.gif", null, "Has Attachment", this) {
-            private static final long serialVersionUID = 1L;
-
-            protected Component evaluate(String id, Entry entry, int row) {
-
-                EntryController entryController = new EntryController(IceSession.get().getAccount());
-                Fragment fragment = new Fragment(id, "has_attachment_fragment",
-                        MostRecentEntriesPanel.this);
-
-                try {
-                    if (entryController.hasAttachments(entry))
-                        fragment.add(new Image("has_attachment", hasAttachmentImage));
-                    else
-                        fragment.add(new Image("has_attachment", blankImage));
-                } catch (ControllerException e) {
-                    fragment.add(new Image("has_attachment", blankImage));
-                }
-                return fragment;
-            }
-        });
-    }
-
-    protected void addHasSampleColumn() {
-        addColumn(new ImageHeaderColumn<Entry>("has_sample_fragment", "has_sample", "sample.png",
-                null, "Has Samples", this) {
-            private static final long serialVersionUID = 1L;
-
-            protected Component evaluate(String id, Entry entry, int row) {
-                Fragment fragment = new Fragment(id, "has_sample_fragment",
-                        MostRecentEntriesPanel.this);
-
-                EntryController entryController = new EntryController(IceSession.get().getAccount());
-                try {
-                    if (entryController.hasAttachments(entry))
-                        fragment.add(new Image("has_sample", hasSampleImage));
-                    else
-                        fragment.add(new Image("has_sample", blankImage));
-                } catch (ControllerException e) {
-                    fragment.add(new Image("has_sample", blankImage));
-                }
-                return fragment;
-            }
-        });
-    }
-
-    protected void addHasSequenceColumn() {
-
-        addColumn(new ImageHeaderColumn<Entry>("has_sequence_fragment", "has_sequence",
-                "sequence.gif", null, "Has Sequence", this) {
-            private static final long serialVersionUID = 1L;
-
-            protected Component evaluate(String id, Entry entry, int row) {
-                Fragment fragment = new Fragment(id, "has_sequence_fragment",
-                        MostRecentEntriesPanel.this);
-
-                EntryController entryController = new EntryController(IceSession.get().getAccount());
-                try {
-                    if (entryController.hasAttachments(entry))
-                        fragment.add(new Image("has_sequence", hasSequenceImage));
-                    else
-                        fragment.add(new Image("has_sequence", blankImage));
-                } catch (ControllerException e) {
-                    fragment.add(new Image("has_sequence", blankImage));
-                }
-                return fragment;
             }
         });
     }

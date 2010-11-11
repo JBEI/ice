@@ -249,12 +249,10 @@ public class EntryController extends Controller {
         ArrayList<Entry> entries = null;
 
         try {
-            entries = EntryManager.getEntriesByIdSet(filterEntriesByPermissionAndOffsetLimit(
-                EntryManager.getEntries(field, ascending), offset, limit));
-
-            if (entries != null) {
-                Collections.reverse(entries);
-            }
+            ArrayList<Long> entryIds = EntryManager.getEntries(field, ascending);
+            ArrayList<Long> filteredEntries = filterEntriesByPermissionAndOffsetLimit(entryIds,
+                offset, limit);
+            entries = EntryManager.getEntriesByIdSetSort(filteredEntries, field, ascending);
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }

@@ -12,7 +12,7 @@ public class EditGroupPanel extends Panel {
 	private Panel panel;
 	private Label addGroupText;
 	private Label groupHeaderLabel;
-	private AjaxFallbackLink headerLink;
+	private AjaxFallbackLink<Object> headerLink;
 
 	public EditGroupPanel(String id) {
 		super(id);
@@ -33,7 +33,7 @@ public class EditGroupPanel extends Panel {
 		add(panel);
 	}
 	
-	private class AddNewGroupLink extends AjaxFallbackLink {
+	private class AddNewGroupLink extends AjaxFallbackLink<Object> {
 			
 		private static final long serialVersionUID = 1L;
 
@@ -71,7 +71,7 @@ public class EditGroupPanel extends Panel {
 		}
 	}
 	
-	private class ShowAllGroupsLink extends AjaxFallbackLink {
+	private class ShowAllGroupsLink extends AjaxFallbackLink<Object> {
 
 		private static final long serialVersionUID = 1L;
 

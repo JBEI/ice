@@ -1,0 +1,93 @@
+<html xmlns:wicket>
+
+<wicket:head>
+	<head>
+	<style type="text/css">
+ul {
+	list-style: none;
+}
+
+td {
+	background-color: #fff;
+}
+
+a.block {
+	display: block;
+	padding: 2px;
+	padding-left: 5px;
+}
+
+a.active {
+	display: block;
+	padding: 2px;
+	padding-left: 5px;
+	background-color: #f0f0f0;
+	font-weight: bold;
+	color: #9EC068;
+}
+
+a.block:hover {
+	background-color: #f0f0f0;
+}
+</style>
+	</head>
+</wicket:head>
+
+<body>
+<wicket:extend>
+	<table cellpadding="0" cellspacing="0" width="100%">
+		<tr>
+			<td valign="top" width="180px"><!-- Entries -->
+			<table cellspacing="0" cellpadding="0"
+				style="margin-right: 10px; border: 1px solid #BBBBBB; width: 180px">
+				<tr>
+					<th
+						style="background-color: #F0F0F0; font-size: 13px; border-bottom: 1px solid #BBB; font-weight: bold; padding: 3px">Entries</th>
+				</tr>
+				<tr>
+					<td><a href class="block" wicket:id="my_entries">My
+					Entries</a></td>
+				</tr>
+				<tr>
+					<td><a class="block" href wicket:id="all_entries">All
+					Entries</a></td>
+				</tr>
+				<tr>
+					<td><a class="block" href wicket:id="recent">Recently
+					Viewed</a></td>
+				</tr>
+				<tr>
+					<td><a class="block" href wicket:id="samples">Samples</a></td>
+				</tr>
+				<tr>
+					<td><a class="block" href wicket:id="workspace">Workspace</a></td>
+				</tr>
+			</table>
+
+			<br />
+
+			<!-- Folders -->
+			<table cellspacing="0" cellpadding="0"
+				style="margin-right: 10px; width: 180px; border: 1px solid #BBB">
+				<tr>
+					<th
+						style="background-color: #F0F0F0; font-size: 13px; border-bottom: 1px solid #bbb; font-weight: bold; padding: 3px">Collections</th>
+				</tr>
+				<tr>
+					<td bgcolor="#ffffff">
+					<ul style="margin: 0px; padding: 0px">
+						<li wicket:id="folders"><a class="block" href
+							wicket:id="link"><span wicket:id="link_caption"></span></a></li>
+					</ul>
+					</td>
+				</tr>
+			</table>
+			</td>
+			<td valign="top">
+			<div wicket:id="panel"></div>
+			</td>
+		</tr>
+	</table>
+</wicket:extend>
+</body>
+</html>

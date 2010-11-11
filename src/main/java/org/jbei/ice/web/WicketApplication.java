@@ -22,6 +22,7 @@ import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryUpdatePage;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.FeedbackPage;
+import org.jbei.ice.web.pages.FoldersPage;
 import org.jbei.ice.web.pages.LogOutPage;
 import org.jbei.ice.web.pages.ProfilePage;
 import org.jbei.ice.web.pages.QueryPage;
@@ -98,9 +99,10 @@ public class WicketApplication extends WebApplication {
         mount(new QueryStringUrlCodingStrategy("/search", SearchResultPage.class));
         mountBookmarkablePage("/blast", BlastPage.class);
         mountBookmarkablePage("/query", QueryPage.class);
-        mountBookmarkablePage("/admin", AdminPage.class);
+        mount(new IndexedParamUrlCodingStrategy("/admin", AdminPage.class));
         mount(new IndexedParamUrlCodingStrategy("/entry/attachments",
                 EntryDownloadAttachmentPage.class));
+        mount(new IndexedParamUrlCodingStrategy("/folders", FoldersPage.class));
     }
 
     private void initializeQueueingSystem() {

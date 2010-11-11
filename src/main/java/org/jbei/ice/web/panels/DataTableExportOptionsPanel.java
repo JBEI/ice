@@ -18,10 +18,8 @@ import org.jbei.ice.web.pages.PrintableEntriesTablePage;
  * This will be refactored in the coming weeks to make it more generic
  * 
  * @author Hector Plahar
- * @param <T>
- *           Data type being exported
  */
-public class DataTableExportOptionsPanel<T> extends Panel {
+public class DataTableExportOptionsPanel extends Panel {
 
     private static final long serialVersionUID = 1L;
 

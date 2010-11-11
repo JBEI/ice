@@ -14,23 +14,23 @@ public class EditPartsPanel extends Panel {
     private static final long serialVersionUID = 1L;
     private Panel contentPanel;
     private Label editPartsHeader;
-    private AjaxFallbackLink headerLink;
+    private AjaxFallbackLink<?> headerLink;
     private Label headerLabel;
-    
+
     public EditPartsPanel(String id) {
-    	
+
         super(id);
         contentPanel = new AdminPartsDataViewPanel("parts_content_panel");
         contentPanel.setOutputMarkupId(true);
-        
+
         editPartsHeader = new Label("edit_parts_header", "Deleted parts");
         editPartsHeader.setOutputMarkupId(true);
-        
+
         headerLabel = new Label("edit_link_text", "Edit Part");
         headerLabel.setOutputMarkupId(true);
         headerLink = new EditEntryLink("edit_link");
         headerLink.add(headerLabel);
-        
+
         add(editPartsHeader);
         add(contentPanel);
         add(headerLink);
@@ -44,7 +44,7 @@ public class EditPartsPanel extends Panel {
                 JobCue.getInstance().processIn(5000L);
             }
         };
-        
+
         AjaxButton rebuildSearchButton = new AjaxButton("rebuildSearchButton") {
             private static final long serialVersionUID = 1L;
 
@@ -54,98 +54,98 @@ public class EditPartsPanel extends Panel {
                 JobCue.getInstance().processIn(5000L);
             }
         };
-        
-        RebuildIndexesForm form = new RebuildIndexesForm("rebuild_indexes_form");        
+
+        RebuildIndexesForm form = new RebuildIndexesForm("rebuild_indexes_form");
         form.add(rebuildBlastButton);
         form.add(rebuildSearchButton);
-        
+
         add(form);
     }
-    
+
     class RebuildIndexesForm extends StatelessForm<Object> {
 
-		private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-		public RebuildIndexesForm(String id) {
-			super(id);
-		}
+        public RebuildIndexesForm(String id) {
+            super(id);
+        }
     }
-    
-    class EditEntryLink extends AjaxFallbackLink {
 
-		private static final long serialVersionUID = 1L;
+    class EditEntryLink extends AjaxFallbackLink<Object> {
 
-		public EditEntryLink(String id) {
-			super(id);
-		}
+        private static final long serialVersionUID = 1L;
 
-		@Override
-		public void onClick(AjaxRequestTarget target) {
-		
-			Panel panel = new AdminEditPartsFormPanel("parts_content_panel");
-			panel.setOutputMarkupId(true);
-			contentPanel.replaceWith(panel);
-			contentPanel = panel;
-			
-			Label newHeader = new Label("edit_parts_header", "Edit Party Entry");
-			newHeader.setOutputMarkupId(true);
-			editPartsHeader.replaceWith(newHeader);
-			editPartsHeader = newHeader;
-			
-			Label newLabel = new Label("edit_link_text", "Show Deleted Parts");
-			newLabel.setOutputMarkupId(true);
-			headerLabel.replaceWith(newLabel);
-			headerLabel = newLabel;
-			
-			ShowDeletedPartsLink link = new ShowDeletedPartsLink("edit_link");
-			link.setOutputMarkupId(true);
-			link.add(newLabel);
-			headerLink.replaceWith(link);
-			headerLink = link;
-			
-			target.addComponent(newHeader);
-			target.addComponent(link);
-			target.addComponent(newLabel);
-			target.addComponent(panel);
-		}
+        public EditEntryLink(String id) {
+            super(id);
+        }
+
+        @Override
+        public void onClick(AjaxRequestTarget target) {
+
+            Panel panel = new AdminEditPartsFormPanel("parts_content_panel");
+            panel.setOutputMarkupId(true);
+            contentPanel.replaceWith(panel);
+            contentPanel = panel;
+
+            Label newHeader = new Label("edit_parts_header", "Edit Party Entry");
+            newHeader.setOutputMarkupId(true);
+            editPartsHeader.replaceWith(newHeader);
+            editPartsHeader = newHeader;
+
+            Label newLabel = new Label("edit_link_text", "Show Deleted Parts");
+            newLabel.setOutputMarkupId(true);
+            headerLabel.replaceWith(newLabel);
+            headerLabel = newLabel;
+
+            ShowDeletedPartsLink link = new ShowDeletedPartsLink("edit_link");
+            link.setOutputMarkupId(true);
+            link.add(newLabel);
+            headerLink.replaceWith(link);
+            headerLink = link;
+
+            target.addComponent(newHeader);
+            target.addComponent(link);
+            target.addComponent(newLabel);
+            target.addComponent(panel);
+        }
     }
-    
-    class ShowDeletedPartsLink extends AjaxFallbackLink {
 
-		private static final long serialVersionUID = 1L;
+    class ShowDeletedPartsLink extends AjaxFallbackLink<Object> {
 
-		public ShowDeletedPartsLink(String id) {
-			super(id);
-		}
+        private static final long serialVersionUID = 1L;
 
-		@Override
-		public void onClick(AjaxRequestTarget target) {
-			
-			Panel panel = new AdminPartsDataViewPanel("parts_content_panel");
-			panel.setOutputMarkupId(true);
-			contentPanel.replaceWith(panel);
-			contentPanel = panel;
-			
-			Label newHeader = new Label("edit_parts_header", "Deleted Parts");
-			newHeader.setOutputMarkupId(true);
-			editPartsHeader.replaceWith(newHeader);
-			editPartsHeader = newHeader;
-			
-			Label newLabel = new Label("edit_link_text", "Edit Part");
-			newLabel.setOutputMarkupId(true);
-			headerLabel.replaceWith(newLabel);
-			headerLabel = newLabel;
-			
-			EditEntryLink link = new EditEntryLink("edit_link");
-			link.setOutputMarkupId(true);
-			link.add(newLabel);
-			headerLink.replaceWith(link);
-			headerLink = link;
-			
-			target.addComponent(panel);
-			target.addComponent(newHeader);
-			target.addComponent(link);
-			target.addComponent(newLabel);
-		}
+        public ShowDeletedPartsLink(String id) {
+            super(id);
+        }
+
+        @Override
+        public void onClick(AjaxRequestTarget target) {
+
+            Panel panel = new AdminPartsDataViewPanel("parts_content_panel");
+            panel.setOutputMarkupId(true);
+            contentPanel.replaceWith(panel);
+            contentPanel = panel;
+
+            Label newHeader = new Label("edit_parts_header", "Deleted Parts");
+            newHeader.setOutputMarkupId(true);
+            editPartsHeader.replaceWith(newHeader);
+            editPartsHeader = newHeader;
+
+            Label newLabel = new Label("edit_link_text", "Edit Part");
+            newLabel.setOutputMarkupId(true);
+            headerLabel.replaceWith(newLabel);
+            headerLabel = newLabel;
+
+            EditEntryLink link = new EditEntryLink("edit_link");
+            link.setOutputMarkupId(true);
+            link.add(newLabel);
+            headerLink.replaceWith(link);
+            headerLink = link;
+
+            target.addComponent(panel);
+            target.addComponent(newHeader);
+            target.addComponent(link);
+            target.addComponent(newLabel);
+        }
     }
 }

@@ -88,5 +88,4 @@ public class Group implements IModel {
     public void setParent(Group parent) {
         this.parent = parent;
     }
-
 }

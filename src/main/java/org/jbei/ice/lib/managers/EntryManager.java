@@ -195,9 +195,9 @@ public class EntryManager {
         Session session = DAO.newSession();
         try {
             String orderSuffix = (field == null) ? ""
-                    : (" ORDER BY " + field + " " + (ascending ? "ASC" : "DESC"));
+                    : (" ORDER BY e." + field + " " + (ascending ? "ASC" : "DESC"));
 
-            String queryString = "select id from " + Entry.class.getName() + orderSuffix;
+            String queryString = "select id from " + Entry.class.getName() + " e " + orderSuffix;
 
             Query query = session.createQuery(queryString);
 
@@ -239,6 +239,42 @@ public class EntryManager {
             }
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve entries by owner: " + owner, e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+
+        return entries;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Entry> getEntriesByIdSetSort(List<Long> ids, String field,
+            boolean ascending) throws ManagerException {
+        ArrayList<Entry> entries = null;
+
+        if (ids.size() == 0) {
+            return entries;
+        }
+
+        String filter = Utils.join(", ", ids);
+
+        Session session = DAO.newSession();
+        try {
+            String orderSuffix = (field == null) ? ""
+                    : (" ORDER BY e." + field + " " + (ascending ? "ASC" : "DESC"));
+
+            Query query = session.createQuery("from " + Entry.class.getName() + " e WHERE id in ("
+                    + filter + ")" + orderSuffix);
+
+            @SuppressWarnings("rawtypes")
+            ArrayList list = (ArrayList) query.list();
+
+            if (list != null) {
+                entries = list;
+            }
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve entries!", e);
         } finally {
             if (session.isOpen()) {
                 session.close();

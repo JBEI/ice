@@ -13,6 +13,9 @@ import org.jbei.ice.lib.models.Moderator;
 import org.jbei.ice.lib.models.SessionData;
 
 public class AccountManager {
+
+    private static String SYSTEM_ACCOUNT_EMAIL = "system";
+
     public static Account get(long id) throws ManagerException {
         Account account = null;
 
@@ -32,6 +35,10 @@ public class AccountManager {
         }
 
         return account;
+    }
+
+    public static Account getSystemAccount() throws ManagerException {
+        return getByEmail(SYSTEM_ACCOUNT_EMAIL);
     }
 
     @SuppressWarnings("unchecked")
@@ -127,21 +134,21 @@ public class AccountManager {
 
         return result;
     }
-    
+
     public static Boolean delete(Account account) throws ManagerException {
-    	if (account == null){
-    		throw new ManagerException("Failed to delete null Account!");
-    	}
-    	
-    	Boolean result = false;
-    	
-    	try {
-			DAO.delete(account);
-			result = true;
-		} catch (DAOException e) {
-			throw new ManagerException("Failed to delete Account: " + account.getFullName(), e);
-		}
-		return result;    		
+        if (account == null) {
+            throw new ManagerException("Failed to delete null Account!");
+        }
+
+        Boolean result = false;
+
+        try {
+            DAO.delete(account);
+            result = true;
+        } catch (DAOException e) {
+            throw new ManagerException("Failed to delete Account: " + account.getFullName(), e);
+        }
+        return result;
     }
 
     public static Account getAccountByAuthToken(String authToken) throws ManagerException {

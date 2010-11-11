@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
-import org.apache.wicket.ResourceReference;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
@@ -39,17 +38,12 @@ public class SearchResultPanel extends SortableDataTablePanel<SearchResult> {
     private static final long serialVersionUID = 2L;
     private static final int MAX_LONG_FIELD_LENGTH = 100;
 
-    protected ResourceReference blankImage;
-    protected ResourceReference hasAttachmentImage;
-    protected ResourceReference hasSequenceImage;
-    protected ResourceReference hasSampleImage;
-
     protected void addScoreColumn() {
         addColumn(new LabelHeaderColumn<SearchResult>("Score", "score") {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public Component evaluate(String componentId, SearchResult result) {
+            public Component evaluate(String componentId, SearchResult result, int row) {
                 NumberFormat formatter = new DecimalFormat("##");
                 String scoreString = formatter.format(result.getScore() * 100);
                 return new Label(componentId, scoreString);
@@ -63,12 +57,12 @@ public class SearchResultPanel extends SortableDataTablePanel<SearchResult> {
     }
 
     protected void addPartIDColumn() {
-        addColumn(new LabelHeaderColumn<SearchResult>("Part ID", "entry.id") {
+        addColumn(new LabelHeaderColumn<SearchResult>("Part ID", "entry.onePartNumber.partNumber") {
 
             private static final long serialVersionUID = 1L;
 
             @Override
-            public Component evaluate(String componentId, SearchResult result) {
+            public Component evaluate(String componentId, SearchResult result, int row) {
 
                 Entry entry = result.getEntry();
                 Fragment fragment = new Fragment(componentId, "part_id_cell",
@@ -96,7 +90,7 @@ public class SearchResultPanel extends SortableDataTablePanel<SearchResult> {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public Component evaluate(String componentId, SearchResult result) {
+            public Component evaluate(String componentId, SearchResult result, int row) {
                 String value = result.getEntry().getShortDescription();
                 if (value == null || value.isEmpty()) {
                     value = "";
@@ -116,7 +110,7 @@ public class SearchResultPanel extends SortableDataTablePanel<SearchResult> {
 
             private static final long serialVersionUID = 1L;
 
-            public Component evaluate(String id, SearchResult result) {
+            public Component evaluate(String id, SearchResult result, int row) {
 
                 Fragment fragment = new Fragment(id, "owner_fragment", SearchResultPanel.this);
                 Entry entry = result.getEntry();
@@ -154,7 +148,7 @@ public class SearchResultPanel extends SortableDataTablePanel<SearchResult> {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public Component evaluate(String id, SearchResult result) {
+            public Component evaluate(String id, SearchResult result, int row) {
                 return new Label(id, JbeiConstants.getStatus(result.getEntry().getStatus()));
             }
         });
@@ -166,7 +160,7 @@ public class SearchResultPanel extends SortableDataTablePanel<SearchResult> {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public Component evaluate(String id, SearchResult result) {
+            public Component evaluate(String id, SearchResult result, int row) {
                 Fragment fragment = getHeader(id);
                 EntryController entryController = new EntryController(IceSession.get().getAccount());
                 try {
@@ -187,7 +181,7 @@ public class SearchResultPanel extends SortableDataTablePanel<SearchResult> {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public Component evaluate(String id, SearchResult result) {
+            public Component evaluate(String id, SearchResult result, int row) {
                 Fragment fragment = getHeader(id);
                 EntryController entryController = new EntryController(IceSession.get().getAccount());
                 try {
@@ -209,7 +203,7 @@ public class SearchResultPanel extends SortableDataTablePanel<SearchResult> {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public Component evaluate(String id, SearchResult result) {
+            public Component evaluate(String id, SearchResult result, int row) {
                 Fragment fragment = getHeader(id);
                 EntryController entryController = new EntryController(IceSession.get().getAccount());
                 try {
@@ -229,7 +223,7 @@ public class SearchResultPanel extends SortableDataTablePanel<SearchResult> {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public Component evaluate(String id, SearchResult result) {
+            public Component evaluate(String id, SearchResult result, int row) {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
                 String dateString = dateFormat.format(result.getEntry().getCreationTime());
                 return new Label(id, dateString);
@@ -255,7 +249,7 @@ public class SearchResultPanel extends SortableDataTablePanel<SearchResult> {
         addHasSamplesColumn();
         addHasSequenceColumn();
         addCreatedColumn();
-        
+
         setEntries(provider.getEntries());
 
         renderTable();

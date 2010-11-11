@@ -19,9 +19,9 @@ public class EntriesDataProvider extends AbstractEntriesDataProvider {
 
     public EntriesDataProvider() {
         super();
-        
+
         // default sort
-        setSort("creation_time", false);
+        setSort("creationTime", false);
     }
 
     @Override
@@ -29,20 +29,20 @@ public class EntriesDataProvider extends AbstractEntriesDataProvider {
         entries.clear();
 
         EntryController entryController = new EntryController(IceSession.get().getAccount());
-        
+
         try {
-        	String sortParam = getSort().getProperty();
-        	boolean asc = getSort().isAscending();
-        	
+            String sortParam = getSort().getProperty();
+            boolean asc = getSort().isAscending();
+
             ArrayList<Entry> results = entryController.getEntries(first, count, sortParam, asc);
 
-            for (Entry entry : results) {
-                entries.add(entry);
+            if (results != null) {
+                entries.addAll(results);
             }
         } catch (ControllerException e) {
             throw new ViewException(e);
         }
-        
+
         return entries.iterator();
     }
 

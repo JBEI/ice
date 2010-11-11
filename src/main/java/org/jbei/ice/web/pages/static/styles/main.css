@@ -42,7 +42,7 @@ tr {
 	white-space: nowrap;
 }
 
-.title_row_header, .headers {
+.title_row_header,.headers {
 	background-color: #F0F0F0;
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 12px;
@@ -60,8 +60,8 @@ tr {
 }
 
 .mini_table {
-    background-color: #BBBBBB;
-    width: 200px;
+	background-color: #BBBBBB;
+	width: 200px;
 }
 
 /* TIP DOESN'T WORK WHEN THIS IS SET*/
@@ -91,11 +91,11 @@ a.title {
 	background: #FFF;
 }
 
-.odd_row, .odd {
+.odd_row,.odd {
 	background-color: #FFFFFF;
 }
 
-.even_row, .even {
+.even_row,.even {
 	background-color: #FAFAFA;
 }
 
@@ -306,7 +306,9 @@ form {
 	float: left;
 }
 
-#menu ul li {display: inline;}
+#menu ul li {
+	display: inline;
+}
 
 #menu a {
 	display: inline;
@@ -458,43 +460,65 @@ span.form_help_text {
 }
 
 th.wicket_orderUp {
-	background: no-repeat url('../images/asc.gif') left;
-	padding-left: 15px;
+	background: no-repeat url('../images/asc.gif') 90% 50%;
 }
 
 th.wicket_orderDown {
-	background: no-repeat url('../images/desc.gif') left;
-	padding-left: 15px;
+	background: no-repeat url('../images/desc.gif') 90% 50%;
+}
+
+th a {
+	display: block;
 }
 
 .navigator a {
-    font-size: 10px;    
-    padding: 2px 6px 2px 6px;
-    border: 1px solid #ccc;
-    background-color: white;
+	font-size: 10px;
+	padding: 2px 6px 2px 6px;
+	border: 1px solid #ccc;
+	background-color: white;
 }
 
 .navigator em {
-    font-size: 10px;    
-    padding: 2px 6px 2px 6px;
-    border: 1px solid #ccc;
-    font-weight: bold;
-    background-color: white;
+	font-size: 10px;
+	padding: 2px 6px 2px 6px;
+	border: 1px solid #ccc;
+	font-weight: bold;
+	background-color: white;
 }
 
 .navigatorLabel {
-    font-weight: bold;  
-    text-align: center;  
+	font-weight: bold;
+	text-align: center;
 }
 
 tr.navigation {
-    background-color: #f0f0f0;
+	background-color: #f0f0f0;
 }
 
 td.norecords-td {
-    font-weight: bold;
-    background-color: #f0f0f0;
-    text-align: center;
+	font-weight: bold;
+	background-color: #f0f0f0;
+	text-align: center;
 }
 
+/* Directory menu css*/
+ul.dm,ul.dm_2 {
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
 
+li.dm_i {
+	float: left;
+	position: relative;
+}
+
+li.dm_i ul.dm_2 {
+	display: none;
+	position: absolute;
+}
+
+/* on hover display child*/
+li:hover ul.dm_2 {
+	display: block;
+}

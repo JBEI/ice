@@ -1,0 +1,59 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<table cellpadding="1" cellspacing="0" width="100%"
+		style="border: 1px solid #BBB;">
+		<tr>
+			<td colspan="4"
+				style="border-bottom: 1px solid #BBB; padding: 4px; background-color: #F0F0F0"><b>Folders</b>
+			| <a href wicket:id="add_folder">Add New Folder</a></td>
+		</tr>
+		<tr>
+			<td colspan="4"><span wicket:id="new_folder_panel"></span></td>
+		</tr>
+
+		<tr wicket:id="directory">
+			<td>
+			<table width="100%" style="border-bottom: 1px solid #BBB">
+				<tr>
+					<td><a style="display: block" href wicket:id="direction_link"><img
+						style="float: left" wicket:id="arrow_direction" /><span
+						style="padding-left: 19px" wicket:id="directory_label">[Directory]</span></a></td>
+				</tr>
+				<tr>
+					<td colspan="2" style="padding-left: 31px"><span
+						wicket:id="entry_count"></span></td>
+				</tr>
+				<tr>
+					<td colspan="2" style="padding-left: 31px"><span
+						wicket:id="column_panel">[test]</span></td>
+				</tr>
+			</table>
+			</td>
+		</tr>
+	</table>
+</wicket:panel>
+
+<wicket:fragment wicket:id="folder_fragment">
+	<form wicket:id="new_folder_form">
+	<table width="100%" style="border-bottom: 1px solid #BBB">
+		<tr>
+			<td><img style="float: left" wicket:id="arrow_direction" />
+			&nbsp; <input type="text" class="inputbox" wicket:id="folderName" /></td>
+		</tr>
+		<tr>
+			<td colspan="2" style="padding-left: 29px"><span
+				wicket:id="entry_count"></span></td>
+		</tr>
+		<tr>
+			<td colspan="2" style="padding-left: 29px"><input
+				wicket:id="fileUpload" type="file" /></td>
+		</tr>
+		<tr>
+			<td style="padding-left: 29px;" colspan="2"><input type="button"
+				wicket:id="submit" value="Submit" /> <input type="button"
+				wicket:id="cancel" value="Cancel" /></td>
+		</tr>
+	</table>
+	</form>
+</wicket:fragment>
+</html>

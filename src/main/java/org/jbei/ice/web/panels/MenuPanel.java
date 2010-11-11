@@ -10,15 +10,14 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.jbei.ice.web.pages.EntriesPage;
 import org.jbei.ice.web.pages.EntryNewPage;
+import org.jbei.ice.web.pages.FoldersPage;
 import org.jbei.ice.web.pages.HomePage;
-import org.jbei.ice.web.pages.UserPage;
 
 public class MenuPanel extends Panel {
     private static final long serialVersionUID = 1L;
 
-    public class MenuItem implements Serializable {
+    public static class MenuItem implements Serializable {
         private static final long serialVersionUID = 1L;
 
         protected BookmarkablePageLink<WebPage> pageLink = null;
@@ -44,8 +43,9 @@ public class MenuPanel extends Panel {
         super(id);
 
         addPageLinkMenuItem(HomePage.class, "Home");
-        addPageLinkMenuItem(UserPage.class, "My Entries");
-        addPageLinkMenuItem(EntriesPage.class, "All Entries");
+        addPageLinkMenuItem(FoldersPage.class, "Collections");
+        //        addPageLinkMenuItem(UserPage.class, "My Entries");
+        //        addPageLinkMenuItem(EntriesPage.class, "All Entries");
         addPageLinkMenuItem(EntryNewPage.class, "Add new entry");
 
         ListView<MenuItem> menuList = new ListView<MenuItem>("menuList", menuItems) {
@@ -63,8 +63,7 @@ public class MenuPanel extends Panel {
         add(menuList);
     }
 
-    @SuppressWarnings("unchecked")
-    public void addPageLinkMenuItem(Class webPage, String label) {
+    public void addPageLinkMenuItem(Class<? extends WebPage> webPage, String label) {
         MenuItem menuItem = new MenuItem(new BookmarkablePageLink<WebPage>("menuItem", webPage),
                 new Label("label", label));
         menuItems.add(menuItem);

@@ -9,6 +9,7 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.WorkspaceManager;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.panels.AdminFoldersEditPanel;
 import org.jbei.ice.web.panels.EmptyWorkspaceMessagePanel;
 import org.jbei.ice.web.panels.UserEntriesViewPanel;
 import org.jbei.ice.web.panels.UserProjectsViewPanel;
@@ -29,11 +30,15 @@ public class UserPage extends ProtectedPage {
     public BookmarkablePageLink<Object> workspaceLink;
     public BookmarkablePageLink<Object> recentlyViewedLink;
     public BookmarkablePageLink<Object> projectsLink;
+    public BookmarkablePageLink<Object> directoriesLink;
+
+    private static final String DIRECTORIES_URL = "directories";
 
     public String currentPage = null;
 
     public UserPage(PageParameters parameters) {
         super(parameters);
+        setResponsePage(FoldersPage.class);
 
         initialize(parameters);
     }
@@ -63,6 +68,10 @@ public class UserPage extends ProtectedPage {
 
         projectsLink.setVisible(false); // TODO: Comment this to see projects tab
 
+        directoriesLink = new BookmarkablePageLink<Object>("directoriesLink", UserPage.class,
+                new PageParameters("0=" + DIRECTORIES_URL));
+        directoriesLink.setOutputMarkupId(true);
+
         updateTab();
 
         add(entriesLink);
@@ -70,6 +79,7 @@ public class UserPage extends ProtectedPage {
         add(workspaceLink);
         add(recentlyViewedLink);
         add(projectsLink);
+        add(directoriesLink);
 
         if (currentPage != null && currentPage.equals("samples")) {
             currentPanel = createSamplesPanel();
@@ -79,6 +89,8 @@ public class UserPage extends ProtectedPage {
             currentPanel = createRecentlyViewedPanel();
         } else if (currentPage != null && currentPage.equals("projects")) {
             currentPanel = createProjectsPanel();
+        } else if (currentPage != null && DIRECTORIES_URL.equals(currentPage)) {
+            currentPanel = createDirectoriesPanel();
         } else {
             currentPanel = createEntriesPanel();
         }
@@ -93,6 +105,8 @@ public class UserPage extends ProtectedPage {
         recentlyViewedLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(
             true);
         projectsLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(true);
+        directoriesLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(
+            true);
 
         if (currentPage != null && currentPage.equals("samples")) {
             samplesLink.add(new SimpleAttributeModifier("class", "active")).setOutputMarkupId(true);
@@ -105,6 +119,9 @@ public class UserPage extends ProtectedPage {
         } else if (currentPage != null && currentPage.equals("projects")) {
             projectsLink.add(new SimpleAttributeModifier("class", "active"))
                     .setOutputMarkupId(true);
+        } else if (currentPage != null && DIRECTORIES_URL.equals(currentPage)) {
+            directoriesLink.add(new SimpleAttributeModifier("class", "active")).setOutputMarkupId(
+                true);
         } else {
             entriesLink.add(new SimpleAttributeModifier("class", "active")).setOutputMarkupId(true);
         }
@@ -164,6 +181,12 @@ public class UserPage extends ProtectedPage {
         UserRecentlyViewedPanel userRecentlyViewedPanel = new UserRecentlyViewedPanel("centerPanel");
         userRecentlyViewedPanel.setOutputMarkupId(true);
         return userRecentlyViewedPanel;
+    }
+
+    private Panel createDirectoriesPanel() {
+        AdminFoldersEditPanel panel = new AdminFoldersEditPanel("centerPanel");
+        panel.setOutputMarkupId(true);
+        return panel;
     }
 
     @Override

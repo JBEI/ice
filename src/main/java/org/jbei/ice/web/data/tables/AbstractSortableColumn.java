@@ -37,7 +37,8 @@ public abstract class AbstractSortableColumn<T> implements IStyledColumn<T> {
         }
 
         // custom component created by sub-classes
-        Component component = evaluate(componentId, rowModel.getObject());
+        @SuppressWarnings("rawtypes")
+        Component component = evaluate(componentId, rowModel.getObject(), ((Item)item.getParent().getParent()).getIndex());
         item.add(component);
     }
 
@@ -47,9 +48,11 @@ public abstract class AbstractSortableColumn<T> implements IStyledColumn<T> {
      * 
      * @param componentId
      * @param object
+     * @param index
+     *            the index assigned to item
      * @return component for rendering in the cell
      */
-    protected Component evaluate(String componentId, T object) {
+    protected Component evaluate(String componentId, T object, int index) {
         return new Label(componentId, "");
     }
 

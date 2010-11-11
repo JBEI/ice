@@ -13,22 +13,28 @@ import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.panels.AdminFoldersEditPanel;
 import org.jbei.ice.web.panels.adminpage.AdminAccountUpdatePanel;
 import org.jbei.ice.web.panels.adminpage.AdminUpdateGroupPanel;
-import org.jbei.ice.web.panels.adminpage.StorageSchemeChoicePanel;
 import org.jbei.ice.web.panels.adminpage.EditGroupPanel;
 import org.jbei.ice.web.panels.adminpage.EditPartsPanel;
 import org.jbei.ice.web.panels.adminpage.EditUserAccountPanel;
+import org.jbei.ice.web.panels.adminpage.StorageSchemeChoicePanel;
 
+/**
+ * Page for performing administrative tasks. Requires "Moderator" privileges
+ * 
+ * @author Hector Plahar
+ */
 public class AdminPage extends ProtectedPage {
     private static final String MAIN_PANEL_ID = "centerPanel";
 
     private Component currentPanel;
-
-    private BookmarkablePageLink<Object> editUsersLink;
-    private BookmarkablePageLink<Object> editPartsLink;
-    private BookmarkablePageLink<Object> editGroupsLink;
-    private BookmarkablePageLink<Object> editStorageSchemeLink;
+    private BookmarkablePageLink<AdminPage> editUsersLink;
+    private BookmarkablePageLink<AdminPage> editPartsLink;
+    private BookmarkablePageLink<AdminPage> editGroupsLink;
+    private BookmarkablePageLink<AdminPage> editStorageSchemeLink;
+    private BookmarkablePageLink<AdminPage> editFoldersLink;
 
     private String currentPage;
 
@@ -44,7 +50,7 @@ public class AdminPage extends ProtectedPage {
         }
 
         if (!isModerator) {
-            setResponsePage(WelcomePage.class);
+            setResponsePage(FoldersPage.class);
         }
 
         initializeControls(parameters);
@@ -60,24 +66,28 @@ public class AdminPage extends ProtectedPage {
         currentPage = parameters.getString("0");
 
         // edit users tab
-        editUsersLink = new BookmarkablePageLink<Object>("editUsersLink", AdminPage.class,
+        editUsersLink = new BookmarkablePageLink<AdminPage>("editUsersLink", AdminPage.class,
                 new PageParameters("0=users"));
         editUsersLink.setOutputMarkupId(true);
 
         // edit parts tab
-        editPartsLink = new BookmarkablePageLink<Object>("editPartsLink", AdminPage.class,
+        editPartsLink = new BookmarkablePageLink<AdminPage>("editPartsLink", AdminPage.class,
                 new PageParameters("0=parts"));
         editPartsLink.setOutputMarkupId(true);
 
         // edit groups tab
-        editGroupsLink = new BookmarkablePageLink<Object>("editGroupsLink", AdminPage.class,
+        editGroupsLink = new BookmarkablePageLink<AdminPage>("editGroupsLink", AdminPage.class,
                 new PageParameters("0=groups"));
         editGroupsLink.setOutputMarkupId(true);
 
         // edit location scheme tab
-        editStorageSchemeLink = new BookmarkablePageLink<Object>("editStorageSchemeLink",
+        editStorageSchemeLink = new BookmarkablePageLink<AdminPage>("editStorageSchemeLink",
                 AdminPage.class, new PageParameters("0=locations"));
-        editStorageSchemeLink.setOutputMarkupId(true);
+
+        // edit folders tab
+        editFoldersLink = new BookmarkablePageLink<AdminPage>("editFoldersLink", AdminPage.class,
+                new PageParameters("0=folders"));
+        editFoldersLink.setOutputMarkupId(true);
 
         // set tabs css
         editUsersLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(true);
@@ -86,11 +96,14 @@ public class AdminPage extends ProtectedPage {
                 .setOutputMarkupId(true);
         editStorageSchemeLink.add(new SimpleAttributeModifier("class", "inactive"))
                 .setOutputMarkupId(true);
+        editFoldersLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(
+            true);
 
         add(editUsersLink);
         add(editPartsLink);
         add(editGroupsLink);
         add(editStorageSchemeLink);
+        add(editFoldersLink);
 
         if (currentPage != null) {
             if ("users".equals(currentPage)) {
@@ -130,6 +143,10 @@ public class AdminPage extends ProtectedPage {
             } else if ("locations".equals(currentPage)) {
                 currentPanel = new StorageSchemeChoicePanel(MAIN_PANEL_ID);
                 editStorageSchemeLink.add(new SimpleAttributeModifier("class", "active"))
+                        .setOutputMarkupId(true);
+            } else if ("folders".equals(currentPage)) {
+                currentPanel = new AdminFoldersEditPanel(MAIN_PANEL_ID);
+                editFoldersLink.add(new SimpleAttributeModifier("class", "active"))
                         .setOutputMarkupId(true);
             } else {
                 currentPanel = createDefaultPanel();

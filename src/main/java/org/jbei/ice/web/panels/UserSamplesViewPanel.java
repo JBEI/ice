@@ -2,85 +2,113 @@ package org.jbei.ice.web.panels;
 
 import java.text.SimpleDateFormat;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
-import org.apache.wicket.markup.html.CSSPackageResource;
-import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.markup.repeater.data.DataView;
-import org.jbei.ice.lib.models.Entry;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.jbei.ice.lib.models.Location;
-import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.web.IceSession;
+import org.jbei.ice.web.data.tables.LabelHeaderColumn;
 import org.jbei.ice.web.dataProviders.UserSamplesDataProvider;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
-import org.jbei.ice.web.pages.UnprotectedPage;
 import org.jbei.ice.web.utils.WebUtils;
 
-public class UserSamplesViewPanel extends Panel {
+public class UserSamplesViewPanel extends SortableDataTablePanel<Sample> {
     private static final long serialVersionUID = 1L;
-
-    private UserSamplesDataProvider sortableDataProvider;
-    private DataView<Sample> dataView;
 
     public UserSamplesViewPanel(String id) {
         super(id);
 
-        sortableDataProvider = new UserSamplesDataProvider(IceSession.get().getAccount());
+        dataProvider = new UserSamplesDataProvider(IceSession.get().getAccount());
 
-        add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-            UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
-        add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
-            UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
+        addColumns();
+        renderTable();
+    }
 
-        dataView = new DataView<Sample>("samplesDataView", sortableDataProvider, 15) {
+    protected void addColumns() {
+        super.addIndexColumn();
+        super.addTypeColumn("entry.recordType", true);
+        addPartIDColumn();
+        super.addLabelHeaderColumn("Name", "entry.oneName.name", "entry.oneName.name");
+        super.addLabelHeaderColumn("Label", "label", "label");
+        addNotesColumn();
+        addLocationColumn();
+        addCreationTimeColumn();
+    }
+
+    protected void addCreationTimeColumn() {
+        addColumn(new LabelHeaderColumn<Sample>("Created", "creationTime") {
             private static final long serialVersionUID = 1L;
 
             @Override
-            protected void populateItem(Item<Sample> item) {
-                Sample sample = item.getModelObject();
-                Entry entry = sample.getEntry();
+            protected Component evaluate(String componentId, Sample sample, int row) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
+                String dateString = dateFormat.format(sample.getCreationTime());
+                return new Label(componentId, dateString);
+            }
+        });
+    }
 
-                item.add(new SimpleAttributeModifier("class", item.getIndex() % 2 == 0 ? "odd_row"
-                        : "even_row"));
-                item.add(new Label("index", ""
-                        + (getItemsPerPage() * getCurrentPage() + item.getIndex() + 1)));
-                item.add(new Label("label", sample.getLabel()));
-                item.add(new Label("notes", WebUtils.linkifyText(sample.getNotes()))
-                        .setEscapeModelStrings(false));
+    protected void addLocationColumn() {
+        addColumn(new LabelHeaderColumn<Sample>("Location") {
 
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected Component evaluate(String componentId, Sample sample, int row) {
                 StringBuilder locations = new StringBuilder();
+
                 if (sample.getLocations() != null && sample.getLocations().size() > 0) {
                     for (Location location : sample.getLocations()) {
                         locations.append(location.toOneLineString()).append("\n");
                     }
                 }
 
-                item.add(new MultiLineLabel("location", locations.toString()));
-                item.add(new Label("type", entry.getRecordType()));
-                Name temp = (Name) entry.getNames().toArray()[0];
-                item.add(new Label("name", temp.getName()));
-                BookmarkablePageLink<Object> entryLink = new BookmarkablePageLink<Object>(
-                        "partIdLink", EntryViewPage.class, new PageParameters("0=" + entry.getId()));
-                entryLink.add(new Label("partNumber", entry.getOnePartNumber().getPartNumber()));
-                String tipUrl = (String) urlFor(EntryTipPage.class, new PageParameters());
-                entryLink.add(new SimpleAttributeModifier("rel", tipUrl + "/" + entry.getId()));
-                item.add(entryLink);
-
-                SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
-                String dateString = dateFormat.format(entry.getCreationTime());
-                item.add(new Label("date", dateString));
+                return new MultiLineLabel(componentId, locations.toString());
             }
-        };
+        });
+    }
 
-        add(dataView);
+    protected void addNotesColumn() {
 
-        add(new JbeiPagingNavigator("navigator", dataView));
+        addColumn(new LabelHeaderColumn<Sample>("Notes") {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected Component evaluate(String componentId, Sample sample, int row) {
+                return new Label(componentId, WebUtils.linkifyText(sample.getNotes()))
+                        .setEscapeModelStrings(false);
+            }
+        });
+    }
+
+    protected void addPartIDColumn() {
+        addColumn(new LabelHeaderColumn<Sample>("Part ID", "entry.onePartNumber.partNumber") {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected Component evaluate(String componentId, Sample sample, int row) {
+                Fragment fragment = new Fragment(componentId, "part_id_cell",
+                        UserSamplesViewPanel.this);
+
+                BookmarkablePageLink<String> entryLink = new BookmarkablePageLink<String>(
+                        "partIdLink", EntryViewPage.class, new PageParameters("0="
+                                + sample.getEntry().getId()));
+
+                entryLink.add(new Label("partNumber", sample.getEntry().getOnePartNumber()
+                        .getPartNumber()));
+                String tipUrl = (String) urlFor(EntryTipPage.class, new PageParameters());
+                entryLink.add(new SimpleAttributeModifier("rel", tipUrl + "/"
+                        + sample.getEntry().getId()));
+                fragment.add(entryLink);
+                return fragment;
+            }
+        });
     }
 }

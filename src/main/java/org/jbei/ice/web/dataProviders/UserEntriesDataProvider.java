@@ -23,7 +23,7 @@ public class UserEntriesDataProvider extends AbstractEntriesDataProvider {
         super();
 
         this.account = account;
-        
+
         // default sort
         setSort("creationTime", false);
     }
@@ -67,22 +67,22 @@ public class UserEntriesDataProvider extends AbstractEntriesDataProvider {
         public int compare(Entry o1, Entry o2) {
 
             int result = 0;
-            if(getSort() == null)
+            if (getSort() == null)
                 return result;
-            
+
             String property = getSort().getProperty();
-            
-            PropertyModel<Comparable<Object>> model1 = new PropertyModel<Comparable<Object>>(o1, property);
-            PropertyModel<Comparable<Object>> model2 = new PropertyModel<Comparable<Object>>(o2, property);
-            
+
+            PropertyModel<Comparable<Object>> model1 = new PropertyModel<Comparable<Object>>(o1,
+                    property);
+            PropertyModel<Comparable<Object>> model2 = new PropertyModel<Comparable<Object>>(o2,
+                    property);
+
             result = model1.getObject().compareTo(model2.getObject());
-            
+
             if (!getSort().isAscending())
                 result *= -1;
 
             return result;
         }
-
     }
-
 }
