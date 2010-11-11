@@ -22,82 +22,95 @@ import org.jbei.ice.web.pages.AdminPage;
 
 public class AdminUpdateGroupPanel extends Panel {
 
-	private static final long serialVersionUID = 1L;
-	private final boolean isNewGroup;
+    private static final long serialVersionUID = 1L;
+    private final boolean isNewGroup;
+    private List<Group> allGroups;
 
-	public AdminUpdateGroupPanel(String id) {
-		this(id, null);
-	}
-	
-	public AdminUpdateGroupPanel(String id, Group group) {
-		super(id);
-		this.isNewGroup = (group == null);
-		add(new AddGroupForm("add_group_form", group));
-	}
-	
-	private class AddGroupForm extends StatelessForm<Object> {
+    public AdminUpdateGroupPanel(String id) {
+        this(id, null);
+    }
 
-		private static final long serialVersionUID = 1L;
-		private Group group;
-		
-		public AddGroupForm(String id, Group group) {
-			super(id);
-			if (group != null) {
-				this.group = group;
-			} 
-			else {
-				this.group = new Group();
-			}
-			
-			CompoundPropertyModel<Object> model = new CompoundPropertyModel<Object>(this);
-			setModel(model);
-			
-			// add form components 
-			TextField<String> labelField = new RequiredTextField<String>("label", new PropertyModel<String>(this.group, "label" ));
-			add(labelField);
-			
-			TextField<String> descriptionField = new RequiredTextField<String>("description", new PropertyModel<String>(this.group, "description"));
-			add(descriptionField);
-			
-			List<Group> allGroups;
-			try {
-				allGroups = new LinkedList<Group>(GroupManager.getAll());
-			} catch (ManagerException e) {
-				throw new ViewException(e);
-			}
-			
-			DropDownChoice<Group> choice = new DropDownChoice<Group>("parent", new PropertyModel<Group>(this.group, "parent"), allGroups, new ChoiceRenderer<Group>("label"));
-			add(choice);	
-			
-			// buttons 
-			Button submitButton = new Button("submit_button", new Model<String>("Save"));
-			add(submitButton);
-			
-			Button cancelButton = new Button("cancel_button", new Model<String>("Cancel")) {			
-				private static final long serialVersionUID = 1L;
+    public AdminUpdateGroupPanel(String id, Group group) {
+        super(id);
+        this.isNewGroup = (group == null);
+        add(new AddGroupForm("add_group_form", group));
+    }
 
-				@Override
-				public void onSubmit() {
-					setResponsePage(AdminPage.class, new PageParameters("0=groups"));
-				}
-			};
-			cancelButton.setDefaultFormProcessing(false);
-			add(cancelButton);
-		}
-		
-		@Override
-		protected void onSubmit() {	
-			try {
-				if (isNewGroup){
-					String uuid = java.util.UUID.randomUUID().toString();
-					group.setUuid(uuid);
-				}
-				
-				GroupManager.save(group);
-			} catch (ManagerException e) {
-				throw new ViewException(e);
-			}
-			setResponsePage(AdminPage.class, new PageParameters("0=groups"));
-		}
-	}
+    private class AddGroupForm extends StatelessForm<Group> {
+
+        private static final long serialVersionUID = 1L;
+        private Group group;
+
+        public AddGroupForm(String id, Group group) {
+            super(id);
+            try {
+                allGroups = new LinkedList<Group>(GroupManager.getAll());
+            } catch (ManagerException e) {
+                throw new ViewException(e);
+            }
+            if (group != null) {
+                if (allGroups != null && !allGroups.isEmpty()) {
+                    for (Group g : allGroups) {
+                        if (g.getUuid().equals(group.getUuid())) {
+                            this.group = g;
+                            break;
+                        }
+                    }
+                }
+
+                if (this.group == null)
+                    this.group = group;
+
+            } else {
+                this.group = new Group();
+            }
+
+            CompoundPropertyModel<Group> model = new CompoundPropertyModel<Group>(this.group);
+            setModel(model);
+
+            // add form components 
+            TextField<String> labelField = new RequiredTextField<String>("label",
+                    new PropertyModel<String>(this.group, "label"));
+            add(labelField);
+
+            TextField<String> descriptionField = new RequiredTextField<String>("description",
+                    new PropertyModel<String>(this.group, "description"));
+            add(descriptionField);
+
+            DropDownChoice<Group> choice = new DropDownChoice<Group>("parent",
+                    new PropertyModel<Group>(this.group, "parent"), allGroups,
+                    new ChoiceRenderer<Group>("label"));
+            add(choice);
+
+            // buttons 
+            Button submitButton = new Button("submit_button", new Model<String>("Save"));
+            add(submitButton);
+
+            Button cancelButton = new Button("cancel_button", new Model<String>("Cancel")) {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public void onSubmit() {
+                    setResponsePage(AdminPage.class, new PageParameters("0=groups"));
+                }
+            };
+            cancelButton.setDefaultFormProcessing(false);
+            add(cancelButton);
+        }
+
+        @Override
+        protected void onSubmit() {
+            try {
+                if (isNewGroup) {
+                    String uuid = java.util.UUID.randomUUID().toString();
+                    group.setUuid(uuid);
+                }
+
+                GroupManager.save(group);
+            } catch (ManagerException e) {
+                throw new ViewException(e);
+            }
+            setResponsePage(AdminPage.class, new PageParameters("0=groups"));
+        }
+    }
 }
