@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.models;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -50,7 +51,7 @@ public class Folder implements IModel {
 
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "folder_entry", joinColumns = { @JoinColumn(name = "folder_id") }, inverseJoinColumns = { @JoinColumn(name = "entry_id") })
-    private List<Entry> contents;
+    private List<Entry> contents = new LinkedList<Entry>();
 
     public Folder() {
     }

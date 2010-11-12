@@ -2,7 +2,6 @@ package org.jbei.ice.web.panels;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -53,7 +52,7 @@ public class AdminFoldersEditPanel extends Panel {
             protected void populateItem(final ListItem<Folder> item) {
 
                 final Folder directory = item.getModelObject();
-                Folder folder = null;
+                Folder folder;
                 try {
                     folder = FolderManager.get(directory.getId());
                 } catch (ManagerException e) {
@@ -74,7 +73,39 @@ public class AdminFoldersEditPanel extends Panel {
 
                     @Override
                     protected void processFile(File file) throws IOException {
+                        // process input and add to folder
+                        BufferedReader reader = null;
 
+                        try {
+                            reader = new BufferedReader(new FileReader(file));
+                            String text = null;
+                            List<Entry> entries = new LinkedList<Entry>();
+
+                            while ((text = reader.readLine()) != null) {
+                                if (text.startsWith("#"))
+                                    continue;
+                                // get by uuid, or partId
+                                Entry entry = EntryManager.getByPartNumber(text);
+                                if (entry == null)
+                                    entry = EntryManager.getByRecordId(text);
+                                if (entry != null)
+                                    entries.add(entry);
+                            }
+
+                            Folder folder = FolderManager.get(directory.getId());
+                            folder.getContents().addAll(entries);
+                            FolderManager.save(folder);
+
+                        } catch (Exception e) {
+                            throw new ViewException(e);
+                        } finally {
+                            try {
+                                if (reader != null) {
+                                    reader.close();
+                                }
+                            } catch (IOException e) {
+                            }
+                        }
                     }
                 };
                 panel.setVisible(false);
@@ -269,10 +300,8 @@ public class AdminFoldersEditPanel extends Panel {
                                 if (entry != null)
                                     entries.add(entry);
                             }
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        } catch (Exception e) {
+                            throw new ViewException(e);
                         } finally {
                             try {
                                 if (reader != null) {
