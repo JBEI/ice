@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ResourceReference;
@@ -279,7 +281,7 @@ public class AdminFoldersEditPanel extends Panel {
                     Folder folder = new Folder(folderName);
                     Account systemAccount = AccountManager.getSystemAccount();
                     folder.setOwnerEmail(systemAccount.getEmail());
-                    List<Entry> entries = new LinkedList<Entry>();
+                    Set<Entry> entries = new LinkedHashSet<Entry>();
 
                     if (upload != null) {
                         // process input and add to folder

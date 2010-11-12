@@ -63,29 +63,19 @@ public class FolderManager {
         return folders;
     }
 
-    public static Folder update(Folder directory) throws ManagerException {
+    public static Folder update(Folder folder) throws ManagerException {
         try {
-            DAO.save(directory);
+            DAO.save(folder);
         } catch (DAOException e) {
-            String msg = "Could not save folder: " + directory.getName() + " " + e.toString();
+            String msg = "Could not save folder: " + folder.getName() + " " + e.toString();
             Logger.error(msg, e);
             throw new ManagerException(msg);
         }
 
-        return directory;
+        return folder;
     }
 
-    public static Folder save(Folder directory) throws ManagerException {
-        return update(directory);
-    }
-
-    public static void delete(Folder location) throws ManagerException {
-        try {
-            DAO.delete(location);
-        } catch (DAOException e) {
-            String msg = "Could not delete folder " + location.getName() + ":" + e.toString();
-            Logger.error(msg, e);
-            throw new ManagerException(msg, e);
-        }
+    public static Folder save(Folder folder) throws ManagerException {
+        return update(folder);
     }
 }

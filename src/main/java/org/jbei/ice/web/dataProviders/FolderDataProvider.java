@@ -2,6 +2,7 @@ package org.jbei.ice.web.dataProviders;
 
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.wicket.model.PropertyModel;
@@ -39,7 +40,7 @@ public class FolderDataProvider extends AbstractEntriesDataProvider {
     public Iterator<Entry> iterator(int first, int count) {
         try {
             Folder folder = FolderManager.get(this.folder.getId());
-            List<Entry> subList = folder.getContents().subList(first, first + count);
+            List<Entry> subList = new LinkedList<Entry>(folder.getContents()).subList(first, first + count);
             Collections.sort(subList, new Comparator<Entry>() {
 
                 @Override

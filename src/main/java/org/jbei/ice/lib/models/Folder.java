@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.models;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -50,8 +50,8 @@ public class Folder implements IModel {
     private String ownerEmail;
 
     @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "folder_entry", joinColumns = { @JoinColumn(name = "folder_id") }, inverseJoinColumns = { @JoinColumn(name = "entry_id") })
-    private List<Entry> contents = new LinkedList<Entry>();
+    @JoinTable(name = "folder_entry", joinColumns = { @JoinColumn(name = "folder_id", nullable = false) }, inverseJoinColumns = { @JoinColumn(name = "entry_id", nullable = false) })
+    private Set<Entry> contents = new LinkedHashSet<Entry>();
 
     public Folder() {
     }
@@ -60,7 +60,7 @@ public class Folder implements IModel {
         this.name = name;
     }
 
-    public Folder(String name, List<Entry> contents) {
+    public Folder(String name, Set<Entry> contents) {
         this.name = name;
         this.contents = contents;
     }
@@ -85,7 +85,7 @@ public class Folder implements IModel {
         this.ownerEmail = ownerEmail;
     }
 
-    public void setContents(List<Entry> contents) {
+    public void setContents(Set<Entry> contents) {
         this.contents = contents;
     }
 
@@ -109,7 +109,7 @@ public class Folder implements IModel {
         return ownerEmail;
     }
 
-    public List<Entry> getContents() {
+    public Set<Entry> getContents() {
         return this.contents;
     }
 }
