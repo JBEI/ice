@@ -3,7 +3,7 @@ package org.jbei.ice.web.panels.adminpage;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ResourceReference;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.CSSPackageResource;
 import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.basic.Label;
@@ -91,9 +91,11 @@ public class AdminPartsDataViewPanel extends Panel {
 			final Entry entry = item.getModelObject();
 			final String prevOwner = parseOutPreviousOwner(entry).trim();
 			
-			AjaxFallbackLink deleteLink = new AjaxFallbackLink("undelete_link") {
+			AjaxLink<Object> deleteLink = new AjaxLink<Object>("undelete_link") {
 				
-				@Override
+                private static final long serialVersionUID = 1L;
+
+                @Override
 				public void onClick(AjaxRequestTarget target) {
 					
 					if (prevOwner == null)

@@ -2,7 +2,7 @@ package org.jbei.ice.web.panels;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.extensions.ajax.markup.html.modal.ModalWindow;
 import org.apache.wicket.markup.html.basic.Label;
@@ -10,7 +10,6 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.data.DataView;
 import org.apache.wicket.markup.repeater.data.IDataProvider;
-import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
@@ -64,9 +63,11 @@ public class UserAccountsDataView extends DataView<Account> {
 	
 	protected void renderEditLink(final Item<Account> item) {
 		
-		AjaxFallbackLink editLink = new AjaxFallbackLink("edit_link") {
+		AjaxLink<Object> editLink = new AjaxLink<Object>("edit_link") {
 
-			@Override
+            private static final long serialVersionUID = 1L;
+
+            @Override
 			public void onClick(AjaxRequestTarget target) {
 				setResponsePage(AdminPage.class, new PageParameters("0=users,1=" + item.getModelObject().getEmail()));
 			}
@@ -77,8 +78,10 @@ public class UserAccountsDataView extends DataView<Account> {
 	}
 	
 	protected void renderDeleteLink(final Item<Account> item) {
-		AjaxFallbackLink deleteLink = new AjaxFallbackLink("delete_link") {
-			@Override
+		AjaxLink<Object> deleteLink = new AjaxLink<Object>("delete_link") {
+            private static final long serialVersionUID = 1L;
+
+            @Override
 			public void onClick(AjaxRequestTarget target) {
 
 				try {

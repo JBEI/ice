@@ -1,7 +1,7 @@
 package org.jbei.ice.web.panels.adminpage;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -13,7 +13,7 @@ public class EditUserAccountPanel extends Panel {
 	private Panel panel;	
 	private Label headerLinkLabel;
 	private Label headerLabel;
-	private AjaxFallbackLink headerLink;
+	private AjaxLink<Object> headerLink;
 	
 	public EditUserAccountPanel(String id) {
 		super(id);
@@ -37,7 +37,7 @@ public class EditUserAccountPanel extends Panel {
 		add(new TextField<String>("accountFilter"));
 	}
 	
-	private class AddUserLink extends AjaxFallbackLink {
+	private class AddUserLink extends AjaxLink<Object> {
 
 		private static final long serialVersionUID = 1L;
 
@@ -78,7 +78,7 @@ public class EditUserAccountPanel extends Panel {
 		}
 	}
 	
-	private class ShowAllAccountsLink extends AjaxFallbackLink {
+	private class ShowAllAccountsLink extends AjaxLink<Object> {
 		
 		private static final long serialVersionUID = 1L;
 
