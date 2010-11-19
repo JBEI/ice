@@ -1,5 +1,7 @@
 Welcome to the JBEI Registry Software Version 2 (ICE). I hope you find
-our tools useful.
+our tools useful. More information, feature requests, bug reports, as
+well as discussions are available from our google project page:
+http://code.google.com/p/gd-ice/
 
 CONTENTS:
 
@@ -13,10 +15,13 @@ CONTENTS:
 1. Requirements
 ===============
 
-JBEIR dependns on external software. The only requirement to run JBEIR
+JBEIR dependns on external software. The minimum requirement to run JBEIR
 is Postgres and a java based web server like Tomcat or Jetty. To make
 significant modifications or customizations, we use the optional
 development tools below.
+
+To use BLAST to search sequences, it must be installed on your system.
+Then update the jbeir.properties file to tell jbeir where it is.
 
 1.1 Postgres
 ------------
@@ -32,7 +37,9 @@ TODO: Write walkthrough here.
 
 We include a compiled version of our Flex based application in our
 sources.  However, if you would like to build your own, you need
-Adobe's SDK. The SDK is open source. Sadly, the IDE plug-ins are not.
+Adobe's SDK. The SDK is mostly open source and freely available, which
+means you can compile our Flex tools without buying anything.  The IDE
+is sadly not free.
 
 1.3 Maven (For Development only)
 ----------------------------
@@ -49,12 +56,12 @@ We use Eclipse as our IDE. For debugging, we use run-jetty-run plugin.
 ===================
 
 2.1. Install maven2 (via apt-get or download).
-2.2. JBEIR ICE's pom.xml has all the dependencies defined. However,
-      there are some libraries that are not in any public maven repos,
-      namely biojava and flex components. So these have to be
-      installed to your local maven repo.
+2.2. JBEIR ICE's pom.xml has all the dependencies defined. However, there
+     are some libraries that are not in any public maven repositories,
+     namely biojava and flex components. We have provided these in the lib/
+     directory so they can be installed to your local maven repository.
 
-Run the following command in the lib/ directory of your sources (Section 3.1):
+Run the following commands in the lib/ directory of your sources (Section 3.1):
 
 # cd lib
 
@@ -97,16 +104,37 @@ Now you should have all the necessary libraries in your local maven cache.
       checksome for the last version is the same between checkouts
       before continuing (by running git log)]
     
-3.1.2 [git] Let's create a build branch that's separate from the svn.
+      Let's create a build branch that's separate from the svn.
       $ git checkout -b build
 
 3.2. Now, edit the relavent config and settings files:
-     src/main/java/hibernate.cfg.xml
-     src/main/java/jbeir.properties
-     src/main/resources/log4j.properties
-     src/main/webapp/WEB-INF/web.xml
-    
-3.2.1 [git] Commit those changes to your local branch:
+3.2.1 src/main/java/hibernate.cfg.xml
+3.2.1.1 Change this line:
+        <property name="hibernate.connection.url">jdbc:postgresql://localhost/test_registry</property>
+        to point to your database by replacing "test_registry" with the name
+        of your database.
+3.2.1.2 Change this line:
+        <property name="hibernate.connection.username">test_user</property>
+        Replace "test_user" with the name of the database user.
+3.2.1.3 Change this line:
+        <property name="hibernate.connection.password">t@stuz@r</property>
+        Replace the string with your database password for your database
+        user.
+3.2.2 src/main/java/jbeir.properties
+      At minimum, change SMTP_HOST to use your mail host, and change
+      ADMIN_EMAIL and MODERATOR_EMAIL to your address. Please change
+      SITE_SECRET and SECRET_KEY. These strings are used as cryptographic
+      salts in various places.
+      Any *_DIRECTORY setting with /tmp/ should be changed if you want to
+      use these features. Hopefully, other settings are self explanatory.
+3.2.3 src/main/resources/log4j.properties
+      Change the file location if you want to keep log files between
+      server reboots.
+3.2.4 src/main/webapp/WEB-INF/web.xml
+      This setting can be left alone. If you must run your site on
+      http instead of https (we do not recommend this), comment out
+      the <security-constraint> section.
+3.2.5 [git] Commit those changes to your local branch:
       $ git add -u
       $ git commit -m "build: productions settings"
 
@@ -117,9 +145,9 @@ Now you should have all the necessary libraries in your local maven cache.
      target/gd-ice-1.0-SNAPSHOT. Deploy these to your webserver install.
    
 3.5. Updating
-3.6.1 If using svn, just svn update and hope / check that your local settings
+3.5.1 If using svn, just svn update and hope / check that your local settings
       are not over written by new defaults or new options.
-3.7.2 [git] If using git:
+3.5.2 [git] If using git:
 
       $ git svn fetch
       $ git svn rebase
@@ -136,8 +164,8 @@ Now you should have all the necessary libraries in your local maven cache.
 ====================
 When the site is installed and deployed, log in using the default 
 Administrator account. It is 'Administrator' with the password 
-'Administrator'.
-    
+'Administrator'. Please change the default password.
+
 ====================
 5. Contributing Code
 ====================
