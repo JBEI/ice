@@ -46,7 +46,7 @@ is sadly not free.
 
 We use Maven to help manage our dependencies. You can run a functional
 server from the sources by running "mvn jetty:run" from the command line.
-This requires that a .keystore file is configured. 
+By default a .keystore file must be configured (for https). 
 
 1.4 Eclipse (For Development only)
 -----------------------------
@@ -64,7 +64,7 @@ but somewhat cumbersome way is to use the maven jetty plugin directly:
     MAVEN_OPTS: -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4000,server=y,suspend=y
 3. In Eclipse, go to Run->Debug Configurations and create a new debug
    configuration of the type Remote Java Application. Use the standard
-   connection and port 4000 (as specified in 3.1 above). Check Allow
+   connection and port 4000 (as specified in 2.1 above). Check Allow
    termination of remote VM. In the Source tab, add the jbeir src directory.
 4. This will create what looks like another workspace. Click its properties,
    Java Build Path, select the Projects tab, and add the gd-ice project. This
