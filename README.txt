@@ -44,13 +44,37 @@ is sadly not free.
 1.3 Maven (For Development only)
 ----------------------------
 
-We use Maven to help manage our dependencies. 
+We use Maven to help manage our dependencies. You can run a functional
+server from the sources by running "mvn jetty:run" from the command line.
+This requires that a .keystore file is configured. 
 
 1.4 Eclipse (For Development only)
 -----------------------------
 
-We use Eclipse as our IDE. For debugging, we use run-jetty-run plugin. 
+We use Eclipse as our IDE. There are different ways to debug jbeir
+in Eclipse, which are changing constantly. The most straight forward
+but somewhat cumbersome way is to use the maven jetty plugin directly:
 
+1. Adjust jetty-debug.xml for your keystore file and password.
+
+2. In Eclipse, go to Run-> External Tools->External Tools Configuration
+   and create a new setup. Enter your mvn location (/usr/bin/mvn for linux)
+   and the arguments jetty:run
+2.1 Select the Environment tab and add a new variable.
+    MAVEN_OPTS: -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4000,server=y,suspend=y
+3. In Eclipse, go to Run->Debug Configurations and create a new debug
+   configuration of the type Remote Java Application. Use the standard
+   connection and port 4000 (as specified in 3.1 above). Check Allow
+   termination of remote VM. In the Source tab, add the jbeir src directory.
+4. This will create what looks like another workspace. Click its properties,
+   Java Build Path, select the Projects tab, and add the gd-ice project. This
+   will link the sources.
+5. Select Run->External Tools and run jetty
+6. Select Run->Debug Configurations and select your debug configuration.
+
+If run once, they can be launched by pushing the Run External and Debug
+buttons.
+   
 ===================
 2. Setting up Maven
 ===================
