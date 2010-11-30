@@ -6,6 +6,7 @@ import org.apache.wicket.ajax.markup.html.AjaxFallbackLink;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.controllers.SampleController;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -23,12 +24,11 @@ public class SampleItemViewPanel extends Panel {
     private Integer index = null;
     private Sample sample = null;
 
-    @SuppressWarnings("unchecked")
     public SampleItemViewPanel(String id, Integer counter, Sample sample) {
         super(id);
 
-        this.setSample(sample);
-        this.setIndex(counter);
+        setSample(sample);
+        setIndex(counter);
 
         add(new Label("counter", counter.toString()));
         add(new Label("label", sample.getLabel()));
@@ -36,7 +36,7 @@ public class SampleItemViewPanel extends Panel {
         add(new Label("notes", WebUtils.linkifyText(sample.getNotes()))
                 .setEscapeModelStrings(false));
 
-        class DeleteSampleLink extends AjaxFallbackLink {
+        class DeleteSampleLink extends AjaxFallbackLink<String> {
             private static final long serialVersionUID = 1L;
 
             public DeleteSampleLink(String id) {
@@ -67,7 +67,7 @@ public class SampleItemViewPanel extends Panel {
             }
         }
 
-        class EditSampleLink extends AjaxFallbackLink {
+        class EditSampleLink extends AjaxFallbackLink<String> {
             private static final long serialVersionUID = 1L;
 
             public EditSampleLink(String id) {
@@ -91,8 +91,8 @@ public class SampleItemViewPanel extends Panel {
                 if (edit) {
                     Sample sample = thisPanel.getSample();
                     int myIndex = sampleViewPanel.getPanels().indexOf(thisPanel);
-                    Panel newSampleEditPanel = new SampleItemEditPanel("sampleItemPanel", sample,
-                            true);
+                    Panel newSampleEditPanel = new SampleItemEditPanel("sampleItemPanel",
+                            sample, true);
                     sampleViewPanel.getPanels().remove(myIndex);
                     sampleViewPanel.getPanels().add(myIndex, newSampleEditPanel);
                     getPage().replace(sampleViewPanel);
@@ -112,18 +112,24 @@ public class SampleItemViewPanel extends Panel {
             throw new ViewException(e);
         }
 
-        AjaxFallbackLink deleteSampleLink = new DeleteSampleLink("deleteSampleLink");
+        AjaxFallbackLink<String> deleteSampleLink = new DeleteSampleLink("deleteSampleLink");
         deleteSampleLink.setOutputMarkupId(true);
         sampleEditDeleteContainer.add(deleteSampleLink);
         add(sampleEditDeleteContainer);
 
-        AjaxFallbackLink editSampleLink = new EditSampleLink("editSampleLink");
+        AjaxFallbackLink<String> editSampleLink = new EditSampleLink("editSampleLink");
         editSampleLink.setOutputMarkupId(true);
         sampleEditDeleteContainer.add(editSampleLink);
 
-        LocationViewPanel locationViewPanel = new LocationViewPanel("locationPanel", sample);
+        Panel locationViewPanel = null;
+        if (sample.getStorage() != null) {
+            locationViewPanel = new StorageLineViewPanel("locationPanel", sample.getStorage());
+        } else {
+            locationViewPanel = new EmptyPanel("locationPanel");
+        }
         locationViewPanel.setOutputMarkupId(true);
         add(locationViewPanel);
+
     }
 
     public void setIndex(Integer index) {

@@ -10,7 +10,6 @@ import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.web.pages.ProfilePage;
 
 public class BriefSampleViewItemPanel extends Panel {
-    // very similar to StorageLineViewPanel in storage links rendering.
     private static final long serialVersionUID = 1L;
 
     public BriefSampleViewItemPanel(String id, Sample sample, int index) {

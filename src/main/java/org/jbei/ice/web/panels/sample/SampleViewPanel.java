@@ -43,12 +43,12 @@ public class SampleViewPanel extends Panel {
                 SampleViewPanel thisPanel = (SampleViewPanel) getParent();
                 ArrayList<Panel> thisPanelsPanels = thisPanel.getPanels();
                 if (thisPanelsPanels.size() > 0
-                        && thisPanelsPanels.get(0) instanceof NewSampleItemEditPanel) {
+                        && thisPanelsPanels.get(0) instanceof SampleItemEditPanel) {
                     // If the first item is already an edit form, do nothing.
                 } else {
                     Sample newSample = new Sample();
                     newSample.setEntry(thisPanel.getEntry());
-                    Panel newSampleEditPanel = new NewSampleItemEditPanel("sampleItemPanel",
+                    Panel newSampleEditPanel = new SampleItemEditPanel("sampleItemPanel",
                             newSample, false);
                     newSampleEditPanel.setOutputMarkupId(true);
 
@@ -88,7 +88,7 @@ public class SampleViewPanel extends Panel {
         Integer counter = 1;
         panels.clear();
         for (Sample sample : samples) {
-            Panel sampleItemPanel = new NewSampleItemViewPanel("sampleItemPanel", counter, sample);
+            Panel sampleItemPanel = new SampleItemViewPanel("sampleItemPanel", counter, sample);
             sampleItemPanel.setOutputMarkupId(true);
             panels.add(sampleItemPanel);
             counter = counter + 1;

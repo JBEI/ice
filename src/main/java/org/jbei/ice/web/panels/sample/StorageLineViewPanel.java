@@ -51,9 +51,8 @@ public class StorageLineViewPanel extends Panel {
 
         if (scheme != null) {
             schemeLink.add(new Label("schemeLinkLabel", scheme.toString()));
-        } else {
-            schemeLink.add(new Label("schemeLinkLabel", ""));
         }
+
         add(schemeLink);
     }
 }

@@ -104,7 +104,7 @@ public class StoragePage extends ProtectedPage {
             // add entry view sample link
             BookmarkablePageLink<ProtectedPage> link = new BookmarkablePageLink<ProtectedPage>(
                     "itemLink", EntryViewPage.class, new PageParameters("0="
-                            + sample.getEntry().getId() + ",1=" + EntryViewPage.SAMPLES_URL_KEY));
+                            + sample.getEntry().getId()));
             link.add(new Label("itemLinkLabel", sample.getEntry().getOnePartNumber()
                     .getPartNumber()));
             pageLinks.add(link);
