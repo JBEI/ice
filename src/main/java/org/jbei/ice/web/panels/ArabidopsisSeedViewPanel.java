@@ -21,6 +21,7 @@ public class ArabidopsisSeedViewPanel extends AbstractEntryViewPanel<Arabidopsis
         renderHarvestDate();
         renderParents();
         renderGeneration();
+        renderPlantType();
     }
 
     protected void renderHomozygosity() {
@@ -39,8 +40,15 @@ public class ArabidopsisSeedViewPanel extends AbstractEntryViewPanel<Arabidopsis
     }
 
     protected void renderGeneration() {
-        add(new Label("generation", String.valueOf(getEntry().getGeneration()))
-                .setEscapeModelStrings(false));
+        String labelString = ArabidopsisSeed.getGenerationOptionsMap().get(
+            getEntry().getGeneration().name());
+        add(new Label("generation", labelString).setEscapeModelStrings(false));
+    }
+
+    protected void renderPlantType() {
+        String labelString = ArabidopsisSeed.getPlantTypeOptionsMap().get(
+            getEntry().getPlantType().name());
+        add(new Label("plantType", labelString).setEscapeModelStrings(false));
     }
 
     protected void renderHarvestDate() {

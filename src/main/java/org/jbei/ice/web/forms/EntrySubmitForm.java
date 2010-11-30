@@ -539,7 +539,7 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
         if (getSampleName() == null) {
             if (nullCounter == getSchemeValues().size()) {
                 // No sample and no location. Skip sample handling
-            } else if (nullCounter != 0) {
+            } else {
                 error("Must enter Sample Name to enter Location");
             }
         } else {
@@ -584,8 +584,11 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
     @Override
     protected void onSubmit() {
         populateEntry();
-
-        submitEntry();
+        if (this.hasError()) {
+            // redisplay form with message
+        } else {
+            submitEntry();
+        }
     }
 
     protected void submitEntry() {
@@ -596,12 +599,12 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
 
             if (sample != null) {
                 sample.setEntry(newEntry);
+                if (sample.getStorage() != null) {
+                    Storage storage = StorageManager.update(sample.getStorage());
+                    sample.setStorage(storage);
+                }
+                sampleController.saveSample(sample);
             }
-            if (sample.getStorage() != null) {
-                Storage storage = StorageManager.update(sample.getStorage());
-                sample.setStorage(storage);
-            }
-            sampleController.saveSample(sample);
 
             setResponsePage(EntryViewPage.class, new PageParameters("0=" + newEntry.getId()));
         } catch (ControllerException e) {

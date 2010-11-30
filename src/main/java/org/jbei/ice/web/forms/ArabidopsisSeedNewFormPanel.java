@@ -18,6 +18,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.jbei.ice.lib.models.ArabidopsisSeed;
 import org.jbei.ice.lib.models.ArabidopsisSeed.Generation;
+import org.jbei.ice.lib.models.ArabidopsisSeed.PlantType;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.web.common.CommaSeparatedField;
 import org.jbei.ice.web.common.CustomChoice;
@@ -67,9 +68,10 @@ public class ArabidopsisSeedNewFormPanel extends Panel {
         private String ecotype;
         private String parents;
         private CustomChoice generation;
+        private CustomChoice plantType;
         private String harvestDate;
 
-        protected  ArabidopsisSeedNewForm(String id) {
+        protected ArabidopsisSeedNewForm(String id) {
             super(id);
 
             setEntry(new ArabidopsisSeed());
@@ -79,6 +81,7 @@ public class ArabidopsisSeedNewFormPanel extends Panel {
             add(new TextField<String>("ecotype", new PropertyModel<String>(this, "ecotype")));
             add(new TextField<String>("parents", new PropertyModel<String>(this, "parents")));
             renderGeneration();
+            renderPlantType();
             add(new TextField<String>("selectionMarkers", new PropertyModel<String>(this,
                     "selectionMarkers")));
             add(new TextField<String>("harvestDate", new PropertyModel<String>(this, "harvestDate")));
@@ -112,11 +115,14 @@ public class ArabidopsisSeedNewFormPanel extends Panel {
                 arabidopsisSeed.setParents("");
             }
             arabidopsisSeed.setGeneration(Generation.valueOf(getGeneration().getValue()));
+            arabidopsisSeed.setPlantType(PlantType.valueOf(getPlantType().getValue()));
             SimpleDateFormat dateFormat = new SimpleDateFormat("M/d/yyyy");
-            try {
-                arabidopsisSeed.setHarvestDate(dateFormat.parse(getHarvestDate()));
-            } catch (ParseException e) {
-                error("Could not interpret Harvest Date");
+            if (getHarvestDate() != null) {
+                try {
+                    arabidopsisSeed.setHarvestDate(dateFormat.parse(getHarvestDate()));
+                } catch (ParseException e) {
+                    error("Could not interpret Harvest Date");
+                }
             }
 
         }
@@ -139,6 +145,15 @@ public class ArabidopsisSeedNewFormPanel extends Panel {
             }
 
             return results;
+        }
+
+        protected void renderPlantType() {
+            ArrayList<CustomChoice> plantTypeChoices = generateCustomChoicesList(ArabidopsisSeed
+                    .getPlantTypeOptionsMap());
+            add(new DropDownChoice<CustomChoice>("plantType", new PropertyModel<CustomChoice>(this,
+                    "plantType"), new Model<ArrayList<CustomChoice>>(plantTypeChoices),
+                    new ChoiceRenderer<CustomChoice>("name", "value")).setRequired(true));
+            setPlantType(plantTypeChoices.get(0));
         }
 
         protected void initializeDatePicker() {
@@ -191,6 +206,14 @@ public class ArabidopsisSeedNewFormPanel extends Panel {
 
         public void setGeneration(CustomChoice generation) {
             this.generation = generation;
+        }
+
+        public CustomChoice getPlantType() {
+            return plantType;
+        }
+
+        public void setPlantType(CustomChoice plantType) {
+            this.plantType = plantType;
         }
 
         public String getHarvestDate() {

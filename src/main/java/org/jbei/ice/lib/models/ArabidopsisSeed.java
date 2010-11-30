@@ -24,6 +24,10 @@ public class ArabidopsisSeed extends Entry {
         M0, M1, M2, T0, T1, T2, T3, T4, T5
     }
 
+    public enum PlantType {
+        EMS, OVER_EXPRESSION, RNAI, REPORTER, T_DNA, OTHER
+    }
+
     @Column(name = "homozygosity", nullable = false)
     private String homozygosity;
 
@@ -41,6 +45,10 @@ public class ArabidopsisSeed extends Entry {
     @Enumerated(EnumType.STRING)
     private Generation generation;
 
+    @Column(name = "plant_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private PlantType plantType;
+
     public static Map<String, String> getGenerationOptionsMap() {
         Map<String, String> resultMap = new LinkedHashMap<String, String>();
         for (Generation generation : Generation.values()) {
@@ -49,6 +57,19 @@ public class ArabidopsisSeed extends Entry {
 
         return resultMap;
 
+    }
+
+    public static Map<String, String> getPlantTypeOptionsMap() {
+        Map<String, String> resultMap = new LinkedHashMap<String, String>();
+
+        resultMap.put(PlantType.EMS.toString(), "EMS");
+        resultMap.put(PlantType.OVER_EXPRESSION.toString(), "Over Expression");
+        resultMap.put(PlantType.RNAI.toString(), "RNAi");
+        resultMap.put(PlantType.REPORTER.toString(), "Reporter");
+        resultMap.put(PlantType.T_DNA.toString(), "T-DNA");
+        resultMap.put(PlantType.OTHER.toString(), "Other");
+
+        return resultMap;
     }
 
     // getters and setters
@@ -90,6 +111,14 @@ public class ArabidopsisSeed extends Entry {
 
     public void setGeneration(Generation generation) {
         this.generation = generation;
+    }
+
+    public void setPlantType(PlantType plantType) {
+        this.plantType = plantType;
+    }
+
+    public PlantType getPlantType() {
+        return plantType;
     }
 
 }
