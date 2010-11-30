@@ -48,6 +48,14 @@ We use Maven to help manage our dependencies. You can run a functional
 server from the sources by running "mvn jetty:run" from the command line.
 By default a .keystore file must be configured (for https). 
 
+To create a .keystore file, run:
+Windows:
+%JAVA_HOME%\bin\keytool -genkey -alias tomcat -keyalg RSA /path/to/keystore
+Unix:
+$JAVA_HOME/bin/keytool -genkey -alias tomcat -keyalg RSA /path/to/keystore 
+
+The default password is "changeit" as can be seen in jetty-debug.xml
+
 1.4 Eclipse (For Development only)
 -----------------------------
 
