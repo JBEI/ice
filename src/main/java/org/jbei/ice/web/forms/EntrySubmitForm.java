@@ -150,7 +150,13 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
             new Model<String>("Principal Investigator")));
 
         renderNotes();
-        renderSample();
+
+        // only new forms get scheme choices
+        if (this instanceof PlasmidNewForm || this instanceof StrainNewForm
+                || this instanceof PartNewForm || this instanceof ArabidopsisSeedNewForm) {
+            renderSample();
+        }
+
         renderMarkupPanel();
 
         //renderMarkupAttachmentsPanel();
@@ -436,7 +442,6 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
             }
         };
 
-        dropDownChoice.setRedirect(true);
         add(dropDownChoice);
     }
 
