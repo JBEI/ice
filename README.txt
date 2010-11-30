@@ -217,6 +217,7 @@ Now you should have all the necessary libraries in your local maven cache.
 When the site is installed and deployed, log in using the default
 Administrator account. It is 'Administrator' with the password
 'Administrator'. Please change the default password.
+Administrator's page is located at https://yoursite/admin.
 
 
 ====================
