@@ -1,6 +1,7 @@
 package org.jbei.ice.web.dataProviders;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 
@@ -15,13 +16,11 @@ import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-
 public class UserSamplesDataProvider extends SortableDataProvider<Sample> {
     private static final long serialVersionUID = 1L;
 
-    private Account account;
-    private ArrayList<Sample> samples = new ArrayList<Sample>();
+    private final Account account;
+    private final ArrayList<Sample> samples = new ArrayList<Sample>();
 
     public UserSamplesDataProvider(Account account) {
         super();
@@ -30,6 +29,7 @@ public class UserSamplesDataProvider extends SortableDataProvider<Sample> {
         setSort("creationTime", false);
     }
 
+    @Override
     public Iterator<Sample> iterator(int first, int count) {
         samples.clear();
 
@@ -68,6 +68,9 @@ public class UserSamplesDataProvider extends SortableDataProvider<Sample> {
                 PropertyModel<Comparable<Object>> model2 = new PropertyModel<Comparable<Object>>(
                         o2, property);
 
+                if (model1.getObject() == null || model2.getObject() == null) {
+                    return 0;
+                }
                 result = model1.getObject().compareTo(model2.getObject());
 
                 if (!getSort().isAscending())
@@ -78,10 +81,12 @@ public class UserSamplesDataProvider extends SortableDataProvider<Sample> {
         });
     }
 
+    @Override
     public IModel<Sample> model(Sample object) {
         return new Model<Sample>(object);
     }
 
+    @Override
     public int size() {
         int numberOfSamples = 0;
 

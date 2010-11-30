@@ -22,7 +22,6 @@ public class StoragePage extends ProtectedPage {
     public String storageTitle = "";
 
     private Storage storage = null;
-    private Sample sample = null;
 
     public StoragePage(PageParameters parameters) {
         super(parameters);
@@ -56,39 +55,47 @@ public class StoragePage extends ProtectedPage {
             @Override
             public int compare(Storage o1, Storage o2) {
 
-                long indexO1 = 0;
-                if (o1.getIndex() != null) {
-                    indexO1 = Long.valueOf(o1.getIndex());
-                }
-                long indexO2 = 0;
-                if (o2.getIndex() != null) {
-                    indexO2 = Long.valueOf(o2.getIndex());
-                }
-                if (indexO1 < indexO2)
-                    return -1;
-                else if (indexO1 > indexO2)
-                    return 1;
-                else
-                    return 0;
+                // storage index can be a string or number. Be optimistic 
+                // and compare as numbers first, then as strings.
+                try {
+                    long indexO1 = 0;
+                    long indexO2 = 0;
+                    if (o1.getIndex() != null) {
+                        indexO1 = Long.valueOf(o1.getIndex());
+                    }
 
+                    if (o2.getIndex() != null) {
+                        indexO2 = Long.valueOf(o2.getIndex());
+                    }
+                    if (indexO1 < indexO2)
+                        return -1;
+                    else if (indexO1 > indexO2)
+                        return 1;
+                    else
+                        return 0;
+
+                } catch (NumberFormatException e) {
+                    // it's not a number. Compare strings
+                    return o1.getIndex().compareToIgnoreCase(o2.getIndex());
+                }
             }
         };
 
         Collections.sort(siblings, storageComparator);
         ArrayList<Storage> children = new ArrayList<Storage>();
         children.addAll(storage.getChildren());
-
+        ArrayList<Sample> samples = null;
         Collections.sort(children, storageComparator);
         if (children.size() == 0) {
             try {
-                sample = SampleManager.getSampleByStorage(storage);
+                samples = SampleManager.getSamplesByStorage(storage);
             } catch (ManagerException e) {
                 throw new ViewException(e);
             }
         }
 
         ListView<BookmarkablePageLink<ProtectedPage>> childrenListView = makeListView(
-            "childrenListView", children, sample);
+            "childrenListView", children, samples);
         ListView<BookmarkablePageLink<ProtectedPage>> siblingListView = makeListView(
             "siblingListView", siblings, null);
 
@@ -98,16 +105,18 @@ public class StoragePage extends ProtectedPage {
     }
 
     protected ListView<BookmarkablePageLink<ProtectedPage>> makeListView(String id,
-            List<Storage> items, Sample sample) {
+            List<Storage> items, List<Sample> samples) {
         ArrayList<BookmarkablePageLink<ProtectedPage>> pageLinks = new ArrayList<BookmarkablePageLink<ProtectedPage>>();
-        if (sample != null) {
-            // add entry view sample link
-            BookmarkablePageLink<ProtectedPage> link = new BookmarkablePageLink<ProtectedPage>(
-                    "itemLink", EntryViewPage.class, new PageParameters("0="
-                            + sample.getEntry().getId()));
-            link.add(new Label("itemLinkLabel", sample.getEntry().getOnePartNumber()
-                    .getPartNumber()));
-            pageLinks.add(link);
+        if (samples != null) {
+            // add entry view samples link
+            for (Sample sample : samples) {
+                BookmarkablePageLink<ProtectedPage> link = new BookmarkablePageLink<ProtectedPage>(
+                        "itemLink", EntryViewPage.class, new PageParameters("0="
+                                + sample.getEntry().getId()));
+                link.add(new Label("itemLinkLabel", sample.getEntry().getOnePartNumber()
+                        .getPartNumber()));
+                pageLinks.add(link);
+            }
         }
         if (items.size() == 0) {
             // add an empty, disabled link

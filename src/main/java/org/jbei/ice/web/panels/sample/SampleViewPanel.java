@@ -22,8 +22,8 @@ public class SampleViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
 
     private Entry entry = null;
-    private ArrayList<Sample> samples = new ArrayList<Sample>();
-    private ArrayList<Panel> panels = new ArrayList<Panel>();
+    private final ArrayList<Sample> samples = new ArrayList<Sample>();
+    private final ArrayList<Panel> panels = new ArrayList<Panel>();
 
     public SampleViewPanel(String id, Entry entry) {
         super(id);
@@ -46,7 +46,10 @@ public class SampleViewPanel extends Panel {
                         && thisPanelsPanels.get(0) instanceof SampleItemEditPanel) {
                     // If the first item is already an edit form, do nothing.
                 } else {
-                    Sample newSample = new Sample();
+                    SampleController sampleController = new SampleController(IceSession.get()
+                            .getAccount());
+
+                    Sample newSample = sampleController.createSample("", "", "");
                     newSample.setEntry(thisPanel.getEntry());
                     Panel newSampleEditPanel = new SampleItemEditPanel("sampleItemPanel",
                             newSample, false);

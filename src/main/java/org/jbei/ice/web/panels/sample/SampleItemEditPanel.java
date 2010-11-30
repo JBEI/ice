@@ -216,6 +216,7 @@ public class SampleItemEditPanel extends Panel {
                         .getAccount());
 
                 try {
+
                     sampleController.saveSample(sampleItemEditPanel.getSample());
 
                     setRedirect(true);

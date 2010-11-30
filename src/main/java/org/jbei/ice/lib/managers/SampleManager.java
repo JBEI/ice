@@ -73,8 +73,9 @@ public class SampleManager {
         return samples;
     }
 
-    public static Sample getSampleByStorage(Storage storage) throws ManagerException {
-        Sample sample = null;
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Sample> getSamplesByStorage(Storage storage) throws ManagerException {
+        ArrayList<Sample> samples = null;
         Session session = DAO.newSession();
         try {
             String queryString = "from " + Sample.class.getName()
@@ -84,7 +85,11 @@ public class SampleManager {
 
             query.setEntity("storage", storage);
 
-            sample = (Sample) query.uniqueResult();
+            @SuppressWarnings("rawtypes")
+            List list = query.list();
+            if (list != null) {
+                samples = (ArrayList<Sample>) list;
+            }
 
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve sample by storage: " + storage.getId(),
@@ -94,7 +99,7 @@ public class SampleManager {
                 session.close();
             }
         }
-        return sample;
+        return samples;
     }
 
     @SuppressWarnings("unchecked")
