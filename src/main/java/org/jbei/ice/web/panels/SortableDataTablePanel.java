@@ -79,7 +79,7 @@ public class SortableDataTablePanel<T> extends Panel {
             private static final long serialVersionUID = 1L;
 
             @Override
-            protected Component evaluate(String componentId, final T t, int index) {
+            protected Component evaluate(String componentId, final T t, int index) {               
                 return new Label(componentId, String.valueOf(table.getPageCount()
                         * table.getCurrentPage() + index + 1));
             }
@@ -94,7 +94,7 @@ public class SortableDataTablePanel<T> extends Panel {
         addLabelHeaderColumn("Type", sortProperty, propertyExpression);
     }
 
-    // / COLUMNS
+    // COLUMNS
 
     void setEntries(ArrayList<Entry> entries) {
         this.entries = entries;

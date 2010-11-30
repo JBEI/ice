@@ -247,6 +247,39 @@ public class EntryManager {
 
         return entries;
     }
+    
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Long> getEntriesByOwnerSort(String owner, String field, boolean ascending) throws ManagerException {
+        ArrayList<Long> entries = null;
+
+        Session session = DAO.newSession();
+        try {
+            String orderSuffix = (field == null) ? ""
+                    : (" ORDER BY e." + field + " " + (ascending ? "ASC" : "DESC"));
+            
+            String queryString = "select id from " + Entry.class.getName()
+                    + " e where ownerEmail = :ownerEmail" + orderSuffix;
+
+            Query query = session.createQuery(queryString);
+
+            query.setParameter("ownerEmail", owner);
+
+            @SuppressWarnings("rawtypes")
+            List list = query.list();
+
+            if (list != null) {
+                entries = (ArrayList<Long>) list;
+            }
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve entries by owner: " + owner, e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+
+        return entries;
+    }
 
     @SuppressWarnings("unchecked")
     public static ArrayList<Entry> getEntriesByIdSetSort(List<Long> ids, String field,

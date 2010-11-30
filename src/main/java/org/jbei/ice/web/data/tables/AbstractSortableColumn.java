@@ -35,12 +35,12 @@ public abstract class AbstractSortableColumn<T> implements IStyledColumn<T> {
             }
             return;
         }
-
-        // custom component created by sub-classes
+        
         @SuppressWarnings("rawtypes")
         Component component = evaluate(componentId, rowModel.getObject(), ((Item)item.getParent().getParent()).getIndex());
         item.add(component);
-    }
+    }   
+
 
     /**
      * override if a custom component is to be used instead of a

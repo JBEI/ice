@@ -260,17 +260,17 @@ public class EntryController extends Controller {
         return entries;
     }
 
-    public ArrayList<Entry> getEntriesByOwner(String owner, int offset, int limit)
+    public ArrayList<Entry> getEntriesByOwner(String owner, int offset, int limit, String field, boolean ascending)
             throws ControllerException {
         ArrayList<Entry> entries = null;
 
         try {
-            entries = EntryManager.getEntriesByIdSet(filterEntriesByPermissionAndOffsetLimit(
-                EntryManager.getEntriesByOwner(owner), offset, limit));
+            ArrayList<Long> ownerEntries = EntryManager.getEntriesByOwnerSort(owner, field, ascending);
+            ArrayList<Long> filteredEntries = filterEntriesByPermissionAndOffsetLimit(ownerEntries,
+                offset, limit);
+            
+            entries = EntryManager.getEntriesByIdSetSort(filteredEntries, field, ascending);
 
-            if (entries != null) {
-                Collections.reverse(entries);
-            }
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }

@@ -1,11 +1,10 @@
 package org.jbei.ice.web.pages;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.wicket.PageParameters;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -44,14 +43,14 @@ public class FoldersPage extends ProtectedPage {
     private static final String RECENTLY_VIEWED = "recent";
     private static final String WORKSPACE_ENTRIES = "workspace";
     private static final String SAMPLES = "samples";
+    private static final String FOLDERS = "id";
 
     private BookmarkablePageLink<FoldersPage> myEntriesLink;
     private BookmarkablePageLink<FoldersPage> allEntriesLink;
     private BookmarkablePageLink<FoldersPage> recentEntriesLink;
     private BookmarkablePageLink<FoldersPage> workspaceLink;
     private BookmarkablePageLink<FoldersPage> samplesLink;
-
-    private final List<AjaxLink<Folder>> links = new LinkedList<AjaxLink<Folder>>();
+    private List<FolderLink> folderLinks;
 
     public FoldersPage(PageParameters params) {
         super(params);
@@ -77,75 +76,86 @@ public class FoldersPage extends ProtectedPage {
                 new PageParameters("0=" + SAMPLES));
         samplesLink.setOutputMarkupId(true);
 
-        initialize(params);
-
         add(myEntriesLink);
         add(allEntriesLink);
         add(recentEntriesLink);
         add(workspaceLink);
         add(samplesLink);
 
-        // list of folders
-        addFolderList();
+        // collection links
+        FolderListModel model = new FolderListModel(this.getClass());
+        addFolderList(model);
+
+        folderLinks = model.getObject();
+
+        initialize(params);
     }
 
-    protected void addFolderList() {
-        links.clear();
-        ListView<Folder> listView = new ListView<Folder>("folders", new FolderListModel()) {
+    protected void addFolderList(FolderListModel model) {
+
+        ListView<FolderLink> listView = new ListView<FolderLink>("folders", model) {
 
             private static final long serialVersionUID = 1L;
 
             @Override
-            protected void populateItem(ListItem<Folder> item) {
-                final Folder dir = item.getModelObject();
-                FolderLink link = new FolderLink("link", currentPanel, dir);
-                link.add(new Label("link_caption", dir.getName()));
-                links.add(link);
-                item.add(link);
+            protected void populateItem(ListItem<FolderLink> item) {
+                item.add(item.getModelObject().getLink());
             }
         };
 
         add(listView);
     }
 
-    private class FolderLink extends AjaxLink<Folder> {
+    /**
+     * Detachable model for retrieving the system folders.
+     */
+    private static class FolderListModel extends LoadableDetachableModel<List<FolderLink>> {
 
         private static final long serialVersionUID = 1L;
-        private Panel panel;
-        private Folder folder;
+        private final Class<? extends FoldersPage> clazz;
 
-        public FolderLink(String id, Panel panel, Folder folder) {
-            super(id);
-            this.panel = panel;
-            this.folder = folder;
+        public FolderListModel(Class<? extends FoldersPage> class1) {
+            super();
+            this.clazz = class1;
         }
 
         @Override
-        public void onClick(AjaxRequestTarget target) {
-            clearEntriesLinksCSS(target);
-            panel = new FolderDataTablePanel("panel", folder);
-            panel.setOutputMarkupId(true);
-            addActiveLink2(this);
-            FoldersPage.this.replace(panel);
-            target.addComponent(panel);
-
-            for (AjaxLink<Folder> link : links)
-                target.addComponent(link);
-        }
-    }
-
-    private static class FolderListModel extends LoadableDetachableModel<List<Folder>> {
-
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        protected List<Folder> load() {
+        protected List<FolderLink> load() {
             try {
+                List<FolderLink> links = new LinkedList<FolderLink>();
+
                 Account systemAccount = AccountManager.getSystemAccount();
-                return FolderManager.getFoldersByOwner(systemAccount);
+                int i = 0;
+                for (Folder folder : FolderManager.getFoldersByOwner(systemAccount)) {
+                    links.add(new FolderLink(folder, this.clazz, i));
+                    i += 1;
+                }
+                return links;
             } catch (ManagerException e) {
                 throw new ViewException(e);
             }
+        }
+    }
+
+    private static class FolderLink implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+        private final Folder folder;
+        private final BookmarkablePageLink<FoldersPage> link;
+
+        public FolderLink(Folder folder, Class<? extends FoldersPage> clazz, int index) {
+            this.folder = folder;
+            link = new BookmarkablePageLink<FoldersPage>("link", clazz, new PageParameters("0="
+                    + FOLDERS + ", 1=" + index));
+            link.add(new Label("link_caption", folder.getName()));
+        }
+
+        public BookmarkablePageLink<FoldersPage> getLink() {
+            return link;
+        }
+
+        public Folder getFolder() {
+            return this.folder;
         }
     }
 
@@ -166,6 +176,9 @@ public class FoldersPage extends ProtectedPage {
                 currentPanel = createWorkspacePanel();
             } else if (SAMPLES.equals(dataType)) {
                 currentPanel = createSamplesPanel();
+            } else if (FOLDERS.equals(dataType)) {
+                String linkIndex = params.getString("1");
+                currentPanel = createFolderPanel(linkIndex);
             } else {
                 currentPanel = new UserEntriesViewPanel("panel");
                 addActiveLink(myEntriesLink);
@@ -174,15 +187,6 @@ public class FoldersPage extends ProtectedPage {
 
         currentPanel.setOutputMarkupId(true);
         add(currentPanel);
-    }
-
-    private void clearEntriesLinksCSS(AjaxRequestTarget target) {
-
-        target.addComponent(recentEntriesLink);
-        target.addComponent(allEntriesLink);
-        target.addComponent(workspaceLink);
-        target.addComponent(myEntriesLink);
-        target.addComponent(samplesLink);
     }
 
     private void addActiveLink(BookmarkablePageLink<FoldersPage> link) {
@@ -197,17 +201,26 @@ public class FoldersPage extends ProtectedPage {
         link.add(modifier);
     }
 
-    private void addActiveLink2(FolderLink link) { // TODO fold into method above. near duplicate
-        SimpleAttributeModifier modifier = new SimpleAttributeModifier("class", "active") {
-            private static final long serialVersionUID = 1L;
+    private Panel createFolderPanel(String linkIndex) {
 
-            @Override
-            public boolean isTemporary() {
-                return true;
-            }
-        };
-        link.setOutputMarkupId(true);
-        link.add(modifier);
+        int index = 0;
+
+        try {
+            index = Integer.decode(linkIndex);
+        } catch (NumberFormatException nfe) {
+            return new UserEntriesViewPanel("panel");
+        }
+
+        Folder folder = folderLinks.get(index).getFolder();
+        BookmarkablePageLink<FoldersPage> activeLink = folderLinks.get(index).getLink();
+
+        if (folder == null)
+            return new UserEntriesViewPanel("panel");
+
+        addActiveLink(activeLink);
+        Panel panel = new FolderDataTablePanel("panel", folder);
+        panel.setOutputMarkupId(true);
+        return panel;
     }
 
     private Panel createUserEntriesPanel() {

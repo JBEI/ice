@@ -31,7 +31,7 @@ public class FolderDataTablePanel extends SortableDataTablePanel<Entry> {
 
         dataProvider = new FolderDataProvider(folder);
 
-        addIndexColumn();
+        super.addIndexColumn();
         super.addTypeColumn("recordType", true);
         addPartIDColumn();
         super.addLabelHeaderColumn("Name", "oneName.name", "oneName.name");
@@ -41,6 +41,8 @@ public class FolderDataTablePanel extends SortableDataTablePanel<Entry> {
         addHasSampleColumn();
         addHasSequenceColumn();
         addCreationTimeColumn();
+        
+        this.setEntries(((FolderDataProvider)dataProvider).getEntries());
 
         renderTable();
     }
