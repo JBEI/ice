@@ -5,7 +5,6 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.StorageManager;
 import org.jbei.ice.lib.models.Configuration.ConfigurationKey;
 import org.jbei.ice.lib.models.Storage;
-import org.jbei.ice.lib.models.StorageScheme;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.junit.Assert;
@@ -21,45 +20,36 @@ public class TestStorageManager {
 
         PopulateInitialDatabase.initializeDatabase();
 
-        Storage plasmidHead = StorageManager.get(ConfigurationManager.get(
-            ConfigurationKey.DEFAULT_PLASMID_STORAGE_HEAD).getValue());
-        StorageScheme plasmidScheme = StorageManager
-                .getStorageScheme(PopulateInitialDatabase.DEFAULT_PLASMID_STORAGE_SCHEME_NAME);
-        String[] labels1 = { "1", "2", "3", "4" };
-        String[] labels2 = { "1", "2", "3", "5" };
+        Storage plasmidScheme = StorageManager.get(ConfigurationManager.get(
+            ConfigurationKey.PLASMID_STORAGE_DEFAULT).getValue());
+        String[] labels1 = { "1", "2", "3" };
+        String[] labels2 = { "1", "2", "4" };
 
-        location1 = StorageManager.getLocation(plasmidScheme, labels1, plasmidHead);
-        location2 = StorageManager.getLocation(plasmidScheme, labels2, plasmidHead);
+        location1 = StorageManager.getLocation(plasmidScheme, labels1);
+        location2 = StorageManager.getLocation(plasmidScheme, labels2);
         Assert.assertTrue(location1.getParent().getId() == location2.getParent().getId());
 
-        Storage strainHead = StorageManager.get(ConfigurationManager.get(
-            ConfigurationKey.DEFAULT_STRAIN_STORAGE_HEAD).getValue());
-        StorageScheme strainScheme = StorageManager
-                .getStorageScheme(PopulateInitialDatabase.DEFAULT_STRAIN_STORAGE_SCHEME_NAME);
+        Storage strainScheme = StorageManager.get(ConfigurationManager.get(
+            ConfigurationKey.STRAIN_STORAGE_DEFAULT).getValue());
 
-        location1 = StorageManager.getLocation(strainScheme, labels1, strainHead);
-        location2 = StorageManager.getLocation(strainScheme, labels2, strainHead);
+        location1 = StorageManager.getLocation(strainScheme, labels1);
+        location2 = StorageManager.getLocation(strainScheme, labels2);
         Assert.assertTrue(location1.getParent().getId() == location2.getParent().getId());
 
-        Storage partHead = StorageManager.get(ConfigurationManager.get(
-            ConfigurationKey.DEFAULT_PART_STORAGE_HEAD).getValue());
-        StorageScheme partScheme = StorageManager
-                .getStorageScheme(PopulateInitialDatabase.DEFAULT_PART_STORAGE_SCHEME_NAME);
-        if (partHead != null) {
-            location1 = StorageManager.getLocation(partScheme, labels1, partHead);
-            location2 = StorageManager.getLocation(partScheme, labels2, partHead);
-            Assert.assertTrue(location1.getParent().getId() == location2.getParent().getId());
-        }
+        Storage partScheme = StorageManager.get(ConfigurationManager.get(
+            ConfigurationKey.PART_STORAGE_DEFAULT).getValue());
 
-        Storage arabidopsisHead = StorageManager.get(ConfigurationManager.get(
-            ConfigurationKey.DEFAULT_ARABIDOPSIS_STORAGE_HEAD).getValue());
-        StorageScheme arabidopsisScheme = StorageManager
-                .getStorageScheme(PopulateInitialDatabase.DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME);
+        location1 = StorageManager.getLocation(partScheme, labels1);
+        location2 = StorageManager.getLocation(partScheme, labels2);
+        Assert.assertTrue(location1.getParent().getId() == location2.getParent().getId());
+
+        Storage arabidopsisScheme = StorageManager.get(ConfigurationManager.get(
+            ConfigurationKey.PART_STORAGE_DEFAULT).getValue());
         String[] labels3 = { "1", "2", "3" };
         String[] labels4 = { "1", "2", "4" };
 
-        location1 = StorageManager.getLocation(arabidopsisScheme, labels3, arabidopsisHead);
-        location2 = StorageManager.getLocation(arabidopsisScheme, labels4, arabidopsisHead);
+        location1 = StorageManager.getLocation(arabidopsisScheme, labels3);
+        location2 = StorageManager.getLocation(arabidopsisScheme, labels4);
         Assert.assertTrue(location1.getParent().getId() == location2.getParent().getId());
 
     }

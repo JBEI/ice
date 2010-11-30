@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.models;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +15,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
@@ -31,7 +33,7 @@ public class Storage implements IModel {
     private static final long serialVersionUID = 1L;
 
     public enum StorageType {
-        GENERIC, FREEZER, SHELF, BOX_INDEXED, BOX_UNINDEXED, PLATE96, WELL, TUBE
+        GENERIC, FREEZER, SHELF, BOX_INDEXED, BOX_UNINDEXED, PLATE96, WELL, TUBE, SCHEME
     }
 
     @Id
@@ -45,6 +47,9 @@ public class Storage implements IModel {
     @Column(name = "name", length = 255, nullable = false)
     private String name;
 
+    @Column(name = "index", length = 31, nullable = true)
+    private String index;
+
     @Column(name = "description", length = 1023)
     private String description;
 
@@ -57,6 +62,10 @@ public class Storage implements IModel {
 
     @Column(name = "owner_email", length = 255, nullable = false)
     private String ownerEmail;
+
+    @Column(name = "schemes")
+    @Lob
+    private ArrayList<Storage> schemes;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "parent")
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
@@ -99,6 +108,14 @@ public class Storage implements IModel {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getIndex() {
+        return index;
+    }
+
+    public void setIndex(String index) {
+        this.index = index;
     }
 
     public String getDescription() {
@@ -155,5 +172,22 @@ public class Storage implements IModel {
         result.put(StorageType.TUBE.toString(), "Labeled Tube");
 
         return result;
+    }
+
+    public void setSchemes(ArrayList<Storage> schemes) {
+        this.schemes = schemes;
+    }
+
+    public ArrayList<Storage> getSchemes() {
+        return schemes;
+    }
+
+    @Override
+    public String toString() {
+        if (getStorageType().equals(StorageType.SCHEME)) {
+            return getName();
+        } else {
+            return getName() + " " + getIndex();
+        }
     }
 }

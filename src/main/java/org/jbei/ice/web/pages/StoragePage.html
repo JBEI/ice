@@ -1,0 +1,40 @@
+<html xmlns:wicket>
+<body>
+<wicket:extend>
+	<span class="panel_header">Storage Location:</span>&nbsp;<span wicket:id="storageName"></span>
+	<table class="data_table" width="100%" cellspacing="1" cellpadding="3" border="0">
+		<tr bgcolor="#f0f0f0">
+			<th>Parent:</th>
+			<th>Siblings:</th>
+			<th>Children:</th>
+		</tr>
+		<tr class="odd_row">
+			<td>
+			<table>
+					<tr>
+						<td><a href="#" wicket:id="parentLink"><span wicket:id="parentLinkLabel"></span></a>
+						</td>
+					</tr>
+				</table>
+			</td>
+			<td>
+				<table>
+					<tr wicket:id="siblingListView">
+						<td><a href="#" wicket:id="itemLink"><span wicket:id="itemLinkLabel"></span></a>
+						</td>
+					</tr>
+				</table>
+			</td>
+			<td>
+				<table>
+					<tr wicket:id="childrenListView">
+						<td><a href="#" wicket:id="itemLink"><span wicket:id="itemLinkLabel"></span></a>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+	</wicket:extend>
+</body>
+</html>

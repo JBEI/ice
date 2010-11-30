@@ -10,6 +10,7 @@ import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sample;
+import org.jbei.ice.lib.models.Storage;
 
 public class SampleManager {
     public static Sample saveSample(Sample sample) throws ManagerException {
@@ -70,6 +71,30 @@ public class SampleManager {
         }
 
         return samples;
+    }
+
+    public static Sample getSampleByStorage(Storage storage) throws ManagerException {
+        Sample sample = null;
+        Session session = DAO.newSession();
+        try {
+            String queryString = "from " + Sample.class.getName()
+                    + " as sample where sample.storage = :storage";
+
+            Query query = session.createQuery(queryString);
+
+            query.setEntity("storage", storage);
+
+            sample = (Sample) query.uniqueResult();
+
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve sample by storage: " + storage.getId(),
+                    e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+        return sample;
     }
 
     @SuppressWarnings("unchecked")

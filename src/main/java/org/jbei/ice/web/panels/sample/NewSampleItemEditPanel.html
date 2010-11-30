@@ -1,0 +1,53 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<div class="error" wicket:id="feedback"></div>
+	<form wicket:id="sampleEditForm">
+	<table width="100%" border="0" cellpadding="0" cellspacing="3">
+		<tr>
+			<td valign="top" width="10">&nbsp;</td>
+			<td>
+			<table width="100%" border="0" cellpadding="3" cellspacing="0">
+				<tr>
+					<td class="title_column">Label: <span class="required">*</span></td>
+					<td class="value_column"><input type="text" class="inputbox" wicket:id="label" /></td>
+				</tr>
+				<tr>
+					<td class="title_column">Depositor: <span class="required">*</span></td>
+					<td><input type="text" class="inputbox" wicket:id="depositor" readonly="readonly" /></td>
+				</tr>
+				<tr>
+					<td class="title_column">Notes:</td>
+					<td><textarea class="inputarea" style="width: 100%; height: 100%;" wicket:id="notes"></textarea></td>
+				</tr>
+				<tr>
+					<td class="title_column">&nbsp;</td>
+					<td width="100%">
+						<wicket:panel wicket:id="alertPanel"></wicket:panel>
+					</td>
+				</tr>
+				<tr>
+					<td class="title_column">Locations:</td>
+					<td><select wicket:id="schemeChoices" class="inputbox"></select><button wicket:id="clearButton">Clear</button></td>
+					<td><span class="form_help_text">(Optional)</span></td>
+				</tr>
+				<tr>
+					<td class="title_column">&nbsp;</td>
+					<td>
+						<table>
+							<tr wicket:id="schemeValueListView" >
+								<td><span wicket:id="itemLabel"></span></td>
+								<td><input wicket:id="itemValue" type="text" class="inputbox"/></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+			</td>
+			<td width="150px" align="right" valign="top"><nobr> <input type="submit"
+				class="button" wicket:id="saveSampleButton" /> <input type="submit" class="button"
+				wicket:id="cancelButton" /> </nobr></td>
+		</tr>
+	</table>
+	</form>
+</wicket:panel>
+</html>

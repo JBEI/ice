@@ -1,4 +1,4 @@
-package org.jbei.ice.web.panels;
+package org.jbei.ice.web.panels.sample;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.form.Button;

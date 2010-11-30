@@ -15,14 +15,13 @@ public class StrainNewFormPanel extends Panel {
     public StrainNewFormPanel(String id) {
         super(id);
 
-        StrainForm form = new StrainForm("strainForm");
+        StrainNewForm form = new StrainNewForm("strainForm");
         form.add(new Button("submitButton"));
         add(form);
         add(new FeedbackPanel("feedback"));
     }
 
-    @SuppressWarnings("unused")
-    private class StrainForm extends EntrySubmitForm<Strain> {
+    protected class StrainNewForm extends EntrySubmitForm<Strain> {
         private static final long serialVersionUID = 1L;
 
         // strain only fields
@@ -31,7 +30,7 @@ public class StrainNewFormPanel extends Panel {
         private String genotypePhenotype;
         private String plasmids;
 
-        public StrainForm(String id) {
+        public StrainNewForm(String id) {
             super(id);
 
             setEntry(new Strain());

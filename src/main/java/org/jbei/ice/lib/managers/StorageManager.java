@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.managers;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -9,8 +10,10 @@ import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.models.Configuration.ConfigurationKey;
+import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Storage;
-import org.jbei.ice.lib.models.StorageScheme;
+import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.utils.Utils;
 
 public class StorageManager {
@@ -90,59 +93,19 @@ public class StorageManager {
         }
     }
 
-    // storage scheme methods
-
-    public static StorageScheme getStorageScheme(long id) throws ManagerException {
-        StorageScheme result = null;
-        Session session = DAO.newSession();
-        try {
-            Query query = session.createQuery("from " + StorageScheme.class.getName()
-                    + " where id = :id");
-            query.setLong("id", id);
-            result = (StorageScheme) query.uniqueResult();
-        } catch (Exception e) {
-            String msg = "Could not get StorageScheme by id: " + id + " " + e.toString();
-            Logger.error(msg, e);
-            throw new ManagerException(msg);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
-        }
-        return result;
-    }
-
-    public static StorageScheme getStorageScheme(String label) throws ManagerException {
-        StorageScheme result = null;
-        Session session = DAO.newSession();
-        try {
-            Query query = session.createQuery("from " + StorageScheme.class.getName()
-                    + " where label = :label");
-            query.setString("label", label);
-            result = (StorageScheme) query.uniqueResult();
-        } catch (Exception e) {
-            String msg = "Could not get StorageScheme by label: " + label + " " + e.toString();
-            Logger.error(msg, e);
-            throw new ManagerException(msg);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
-        }
-        return result;
-    }
-
     @SuppressWarnings("unchecked")
-    public static List<StorageScheme> getAllStorageSchemes() throws ManagerException {
-        ArrayList<StorageScheme> result = null;
+    public static List<Storage> getAllStorageSchemes() throws ManagerException {
+        ArrayList<Storage> result = null;
         Session session = DAO.newSession();
         try {
-            Query query = session.createQuery("from " + StorageScheme.class.getName());
+            Query query = session.createQuery("from " + Storage.class.getName()
+                    + " storage where storage.storageType = :storageType");
+            query.setParameter("storageType", StorageType.SCHEME);
 
             @SuppressWarnings("rawtypes")
             List list = query.list();
             if (list != null) {
-                result = (ArrayList<StorageScheme>) list;
+                result = (ArrayList<Storage>) list;
             }
         } catch (Exception e) {
             String msg = "Could not get all schemes " + e.toString();
@@ -156,32 +119,47 @@ public class StorageManager {
         return result;
     }
 
-    public static StorageScheme update(StorageScheme scheme) throws ManagerException {
+    @SuppressWarnings("unchecked")
+    public static List<Storage> getStorageSchemesForEntryType(String entryType) {
+        ArrayList<Storage> result = new ArrayList<Storage>();
+        Session session = DAO.newSession();
         try {
-            DAO.save(scheme);
-        } catch (DAOException e) {
-            String msg = "Could not save location: " + e.toString();
-            Logger.error(msg, e);
-            throw new ManagerException(msg);
-        }
+            String uuid = null;
+            if (Entry.STRAIN_ENTRY_TYPE.equals(entryType)) {
+                uuid = ConfigurationManager.get(ConfigurationKey.STRAIN_STORAGE_ROOT).getValue();
 
-        return scheme;
+            } else if (Entry.PLASMID_ENTRY_TYPE.equals(entryType)) {
+                uuid = ConfigurationManager.get(ConfigurationKey.PLASMID_STORAGE_ROOT).getValue();
+
+            } else if (Entry.PART_ENTRY_TYPE.equals(entryType)) {
+                uuid = ConfigurationManager.get(ConfigurationKey.PART_STORAGE_ROOT).getValue();
+
+            } else if (Entry.ARABIDOPSIS_SEED_ENTRY_TYPE.equals(entryType)) {
+                uuid = ConfigurationManager.get(ConfigurationKey.ARABIDOPSIS_STORAGE_ROOT)
+                        .getValue();
+            }
+
+            if (uuid != null) {
+                Storage parent = get(uuid);
+                Query query = session
+                        .createQuery("from "
+                                + Storage.class.getName()
+                                + " storage where storage.parent = :parent AND storage.storageType = :storageType");
+                query.setParameter("parent", parent);
+                query.setParameter("storageType", StorageType.SCHEME);
+                result.addAll(query.list());
+
+            }
+        } catch (ManagerException e) {
+            // log error and pass
+            Logger.error(e.toString());
+        }
+        return result;
     }
 
-    public static void delete(StorageScheme scheme) throws ManagerException {
-        try {
-            DAO.delete(scheme);
-        } catch (DAOException e) {
-            String msg = "Could not delete storage scheme " + e.toString();
-            Logger.error(msg, e);
-            throw new ManagerException(msg, e);
-        }
-    }
-
-    public static Storage getLocation(StorageScheme scheme, String[] labels, Storage head)
-            throws ManagerException {
+    public static Storage getLocation(Storage scheme, String[] labels) throws ManagerException {
         Storage result = null;
-        Storage parent = head;
+        Storage parent = scheme;
         List<Storage> schemes = scheme.getSchemes();
 
         if (schemes.size() != labels.length) {
@@ -210,10 +188,10 @@ public class StorageManager {
             return null;
         }
         Set<Storage> children = parent.getChildren();
-        String constructedName = template.getName() + " " + itemLabel;
 
         for (Storage child : children) {
-            if (constructedName.equals(child.getName())) {
+
+            if (template.getName().equals(child.getName()) && itemLabel.equals(child.getIndex())) {
                 result = child;
                 break;
             }
@@ -221,11 +199,85 @@ public class StorageManager {
 
         if (result == null) {
             result = new Storage();
-            result.setName(constructedName);
+            result.setName(template.getName());
+            result.setIndex(itemLabel);
             result.setParent(parent);
             result.setStorageType(template.getStorageType());
             result.setOwnerEmail(parent.getOwnerEmail());
             result = StorageManager.save(result);
+        }
+        return result;
+    }
+
+    public static Storage getSchemeContainingParentStorage(Storage storage) {
+        if (storage == null) {
+            return null;
+        }
+        Storage result = null;
+        Storage current = storage;
+        while (true) {
+            if (current.getStorageType() == StorageType.SCHEME) {
+                result = current;
+                break;
+            } else {
+                current = current.getParent();
+            }
+        }
+
+        return result;
+    }
+
+    public static List<Storage> getStoragesUptoScheme(Storage storage) {
+        if (storage == null) {
+            return null;
+        }
+        ArrayList<Storage> result = new ArrayList<Storage>();
+        Storage current = storage;
+        while (current.getStorageType() != StorageType.SCHEME) {
+            result.add(current);
+            current = current.getParent();
+        }
+        return result;
+    }
+
+    public static boolean isStorageSchemeInAgreement(Storage storage) {
+        boolean result = true;
+        if (storage.getStorageType() == StorageType.SCHEME) {
+            // should not compare scheme to itself
+            return false;
+        }
+        Storage supposedScheme = StorageManager.getSchemeContainingParentStorage(storage);
+
+        ArrayList<String> schemeNames = new ArrayList<String>();
+        for (Storage item : supposedScheme.getSchemes()) {
+            schemeNames.add(item.getName());
+        }
+
+        ArrayList<String> actualNames = new ArrayList<String>();
+        Storage currentStorage = storage;
+        while (currentStorage.getId() != supposedScheme.getId()) {
+            actualNames.add(currentStorage.getName());
+            currentStorage = currentStorage.getParent();
+        }
+        Collections.reverse(actualNames);
+
+        String schemeName = null;
+        String actualName = null;
+        if (schemeNames.size() == actualNames.size()) {
+            int index = 0;
+            while (index < actualNames.size()) {
+                schemeName = schemeNames.get(index);
+                actualName = actualNames.get(index);
+                if (actualName.equals(schemeName)) {
+                    index++;
+                } else {
+                    // name doesn't match
+                    result = false;
+                    break;
+                }
+            }
+        } else { // sizes don't match
+            result = false;
         }
         return result;
     }

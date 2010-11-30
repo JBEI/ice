@@ -18,7 +18,7 @@ public class PartNewFormPanel extends Panel {
         add(new FeedbackPanel("feedback"));
     }
 
-    private class PartNewForm extends EntrySubmitForm<Part> {
+    protected class PartNewForm extends EntrySubmitForm<Part> {
         private static final long serialVersionUID = 1L;
 
         public PartNewForm(String id) {

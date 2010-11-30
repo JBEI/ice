@@ -32,7 +32,7 @@ public class ArabidopsisSeedNewFormPanel extends Panel {
     public ArabidopsisSeedNewFormPanel(String id) {
         super(id);
 
-        ArabidopsisSeedForm form = new ArabidopsisSeedForm("arabidopsisSeedForm");
+        ArabidopsisSeedNewForm form = new ArabidopsisSeedNewForm("arabidopsisSeedForm");
         form.add(new Button("submitButton"));
         add(form);
 
@@ -57,8 +57,7 @@ public class ArabidopsisSeedNewFormPanel extends Panel {
         add(markupAttachmentsPanel);
     }
 
-    @SuppressWarnings("unused")
-    private class ArabidopsisSeedForm extends EntrySubmitForm<ArabidopsisSeed> {
+    protected class ArabidopsisSeedNewForm extends EntrySubmitForm<ArabidopsisSeed> {
         private static final long serialVersionUID = 1L;
 
         private String selectionMarkers;
@@ -70,7 +69,7 @@ public class ArabidopsisSeedNewFormPanel extends Panel {
         private CustomChoice generation;
         private String harvestDate;
 
-        public ArabidopsisSeedForm(String id) {
+        protected  ArabidopsisSeedNewForm(String id) {
             super(id);
 
             setEntry(new ArabidopsisSeed());

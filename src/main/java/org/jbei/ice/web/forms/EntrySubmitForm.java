@@ -2,6 +2,7 @@ package org.jbei.ice.web.forms;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -15,6 +16,8 @@ import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.panel.EmptyPanel;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
@@ -23,20 +26,30 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.collections.MiniMap;
 import org.apache.wicket.util.template.TextTemplateHeaderContributor;
 import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.SampleController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.managers.StorageManager;
 import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.Link;
 import org.jbei.ice.lib.models.Name;
+import org.jbei.ice.lib.models.Sample;
+import org.jbei.ice.lib.models.Storage;
+import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.CommaSeparatedField;
 import org.jbei.ice.web.common.CustomChoice;
 import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.forms.ArabidopsisSeedNewFormPanel.ArabidopsisSeedNewForm;
+import org.jbei.ice.web.forms.PartNewFormPanel.PartNewForm;
+import org.jbei.ice.web.forms.PlasmidNewFormPanel.PlasmidNewForm;
+import org.jbei.ice.web.forms.StrainNewFormPanel.StrainNewForm;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.pages.UnprotectedPage;
 import org.jbei.ice.web.panels.AbstractMarkupPanel;
@@ -44,6 +57,8 @@ import org.jbei.ice.web.panels.ConfluenceMarkupPanel;
 import org.jbei.ice.web.panels.MarkupAttachmentsPanel;
 import org.jbei.ice.web.panels.TextMarkupPanel;
 import org.jbei.ice.web.panels.WikiMarkupPanel;
+import org.jbei.ice.web.panels.sample.SchemeValue;
+import org.jbei.ice.web.panels.sample.SchemeValueEditPanel;
 
 public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
     private MarkupAttachmentsPanel markupAttachmentsPanel;
@@ -67,6 +82,7 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
     private static final long serialVersionUID = 1L;
 
     private T entry;
+    private Sample sample;
 
     private AbstractMarkupPanel markupPanel;
 
@@ -85,6 +101,14 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
     private String intellectualProperty;
     private String fundingSource;
     private String principalInvestigator;
+    private String sampleName;
+    private String sampleNotes;
+    private ArrayList<String> sampleLocation = new ArrayList<String>();
+    private ArrayList<CustomChoice> schemeChoices = new ArrayList<CustomChoice>();
+    private CustomChoice schemeChoice;
+    private ArrayList<SchemeValue> schemeValues = new ArrayList<SchemeValue>();
+
+    private Panel sampleLocationPanel;
 
     public EntrySubmitForm(String id) {
         super(id);
@@ -126,7 +150,7 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
             new Model<String>("Principal Investigator")));
 
         renderNotes();
-
+        renderSample();
         renderMarkupPanel();
 
         //renderMarkupAttachmentsPanel();
@@ -201,13 +225,9 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
         add(TextTemplateHeaderContributor.forJavaScript(UnprotectedPage.class,
             UnprotectedPage.JS_RESOURCE_LOCATION + "autocompleteDataTemplate.js",
             autocompleteDataMap));
-        /*
+
         add(new Label("initializeCollectionsScript",
                 "try {initializeCollections();} catch (err) { }").setEscapeModelStrings(false));
-                */
-        add(new Label("initializeCollectionsScript",
-                "try {initializeCollections();} catch (err) {alert(err); }")
-                .setEscapeModelStrings(false));
     }
 
     protected void renderStatuses() {
@@ -346,6 +366,113 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
         setMarkupPanel(markupPanel);
     }
 
+    protected void renderSample() {
+        add(new TextField<String>("sampleName", new PropertyModel<String>(this, "sampleName")));
+        add(new TextArea<String>("sampleNotes", new PropertyModel<String>(this, "sampleNotes")));
+
+        renderSchemeChoices();
+        renderSchemeValues();
+    }
+
+    protected void renderSchemeChoices() {
+        String id = "schemeChoices";
+        DropDownChoice<CustomChoice> dropDownChoice = null;
+        String recordType = "";
+
+        if (this instanceof PlasmidNewForm) {
+            recordType = Entry.PLASMID_ENTRY_TYPE;
+        } else if (this instanceof StrainNewForm) {
+            recordType = Entry.STRAIN_ENTRY_TYPE;
+        } else if (this instanceof PartNewForm) {
+            recordType = Entry.PART_ENTRY_TYPE;
+        } else if (this instanceof ArabidopsisSeedNewForm) {
+            recordType = Entry.ARABIDOPSIS_SEED_ENTRY_TYPE;
+        }
+
+        List<Storage> schemes = StorageManager.getStorageSchemesForEntryType(recordType);
+        for (Storage scheme : schemes) {
+            CustomChoice schemeChoice1 = new CustomChoice(scheme.getName(), String.valueOf(scheme
+                    .getId()));
+            schemeChoices.add(schemeChoice1);
+            if (PopulateInitialDatabase.DEFAULT_PLASMID_STORAGE_SCHEME_NAME
+                    .equals(scheme.getName())) {
+                setSchemeChoice(schemeChoice1);
+
+            } else if (PopulateInitialDatabase.DEFAULT_STRAIN_STORAGE_SCHEME_NAME.equals(scheme
+                    .getName())) {
+                setSchemeChoice(schemeChoice1);
+
+            } else if (PopulateInitialDatabase.DEFAULT_PART_STORAGE_SCHEME_NAME.equals(scheme
+                    .getName())) {
+                setSchemeChoice(schemeChoice1);
+
+            } else if (PopulateInitialDatabase.DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME
+                    .equals(scheme.getName())) {
+                setSchemeChoice(schemeChoice1);
+            }
+        }
+        if (getSchemeChoices().size() == 0) {
+            // TODO render nothing
+        }
+        dropDownChoice = new DropDownChoice<CustomChoice>(id, new PropertyModel<CustomChoice>(this,
+                "schemeChoice"), new Model<ArrayList<CustomChoice>>(getSchemeChoices()),
+                new ChoiceRenderer<CustomChoice>("name", "value")) {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected boolean wantOnSelectionChangedNotifications() {
+                return true;
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            protected void onSelectionChanged(final CustomChoice choice) {
+                EntrySubmitForm<T> form = (EntrySubmitForm<T>) getParent();
+                form.setSchemeChoice(choice);
+                form.getSampleLocation().clear();
+
+                form.renderSchemeValues();
+            }
+        };
+
+        dropDownChoice.setRedirect(true);
+        add(dropDownChoice);
+    }
+
+    protected void renderSchemeValues() {
+        String id = "schemeValueChoices";
+        Storage currentScheme = null;
+        Panel schemeValueEditPanel = null;
+        schemeValues.clear();
+
+        try {
+            currentScheme = StorageManager.get(Long.parseLong(getSchemeChoice().getValue()));
+        } catch (NumberFormatException e) {
+            // log and pass
+            Logger.error(e);
+        } catch (ManagerException e) {
+            // log and pass
+            Logger.error(e);
+        }
+
+        if (currentScheme != null) {
+            List<Storage> schemeList = currentScheme.getSchemes();
+
+            for (Storage item : schemeList) {
+                schemeValues.add(new SchemeValue(item.getName(), null));
+
+            }
+            schemeValueEditPanel = new SchemeValueEditPanel(id, schemeValues);
+        } else {
+            schemeValueEditPanel = new EmptyPanel(id);
+        }
+
+        schemeValueEditPanel.setOutputMarkupId(true);
+        setSampleLocationPanel(schemeValueEditPanel);
+        addOrReplace(schemeValueEditPanel);
+    }
+
     protected void populateEntry() {
         CommaSeparatedField<Link> linksField = new CommaSeparatedField<Link>(Link.class, "getLink",
                 "setLink");
@@ -396,6 +523,52 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
         Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
         entryFundingSources.add(newEntryFundingSource);
         entry.setEntryFundingSources(entryFundingSources);
+
+        int nullCounter = 0;
+        for (SchemeValue item : getSchemeValues()) {
+            if (item.getIndex() == null) {
+                nullCounter++;
+            }
+        }
+
+        if (getSampleName() == null) {
+            if (nullCounter == getSchemeValues().size()) {
+                // No sample and no location. Skip sample handling
+            } else if (nullCounter != 0) {
+                error("Must enter Sample Name to enter Location");
+            }
+        } else {
+            SampleController sampleController = new SampleController(IceSession.get().getAccount());
+            if (nullCounter == getSchemeValues().size()) {
+                // create sample, but not location
+                sample = sampleController.createSample(getSampleName(), IceSession.get()
+                        .getAccount().getEmail(), getSampleNotes());
+            } else if (nullCounter != 0) {
+                error("Location cannot be partially filled.");
+            } else if (nullCounter == 0) {
+                // create sample and location
+                sample = sampleController.createSample(getSampleName(), IceSession.get()
+                        .getAccount().getEmail(), getSampleNotes());
+                String[] labels = new String[getSchemeValues().size()];
+                for (int i = 0; i < labels.length; i++) {
+                    labels[i] = getSchemeValues().get(i).getIndex();
+                }
+
+                Storage storage = null;
+                try {
+                    Storage scheme = StorageManager.get(Long
+                            .parseLong(getSchemeChoice().getValue()));
+                    storage = StorageManager.getLocation(scheme, labels);
+                } catch (NumberFormatException e) {
+                    throw new ViewException(e);
+                } catch (ManagerException e) {
+                    throw new ViewException(e);
+                }
+
+                sample.setStorage(storage);
+            }
+        }
+
     }
 
     protected void populateEntryOwner() {
@@ -412,12 +585,25 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
 
     protected void submitEntry() {
         EntryController entryController = new EntryController(IceSession.get().getAccount());
-
+        SampleController sampleController = new SampleController(IceSession.get().getAccount());
         try {
             Entry newEntry = entryController.createEntry(entry);
 
+            if (sample != null) {
+                sample.setEntry(newEntry);
+            }
+            if (sample.getStorage() != null) {
+                Storage storage = StorageManager.update(sample.getStorage());
+                sample.setStorage(storage);
+            }
+            sampleController.saveSample(sample);
+
             setResponsePage(EntryViewPage.class, new PageParameters("0=" + newEntry.getId()));
         } catch (ControllerException e) {
+            throw new ViewException(e);
+        } catch (PermissionException e) {
+            throw new ViewException(e);
+        } catch (ManagerException e) {
             throw new ViewException(e);
         }
     }
@@ -534,6 +720,14 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
         return principalInvestigator;
     }
 
+    public void setSampleName(String sampleName) {
+        this.sampleName = sampleName;
+    }
+
+    public String getSampleName() {
+        return sampleName;
+    }
+
     public T getEntry() {
         return entry;
     }
@@ -542,11 +736,67 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
         this.entry = entry;
     }
 
+    public void setSample(Sample sample) {
+        this.sample = sample;
+    }
+
+    public Sample getSample() {
+        return sample;
+    }
+
     public AbstractMarkupPanel getMarkupPanel() {
         return markupPanel;
     }
 
     public void setMarkupPanel(AbstractMarkupPanel markupPanel) {
         this.markupPanel = markupPanel;
+    }
+
+    public void setSampleNotes(String sampleNotes) {
+        this.sampleNotes = sampleNotes;
+    }
+
+    public String getSampleNotes() {
+        return sampleNotes;
+    }
+
+    public void setSampleLocation(ArrayList<String> sampleLocation) {
+        this.sampleLocation = sampleLocation;
+    }
+
+    public ArrayList<String> getSampleLocation() {
+        return sampleLocation;
+    }
+
+    public void setSampleLocationPanel(Panel sampleLocationPanel) {
+        this.sampleLocationPanel = sampleLocationPanel;
+    }
+
+    public Panel getSampleLocationPanel() {
+        return sampleLocationPanel;
+    }
+
+    public void setSchemeChoices(ArrayList<CustomChoice> schemeChoices) {
+        this.schemeChoices = schemeChoices;
+    }
+
+    public ArrayList<CustomChoice> getSchemeChoices() {
+        return schemeChoices;
+    }
+
+    public void setSchemeChoice(CustomChoice schemeChoice) {
+        this.schemeChoice = schemeChoice;
+    }
+
+    public CustomChoice getSchemeChoice() {
+        return schemeChoice;
+    }
+
+    public ArrayList<SchemeValue> getSchemeValues() {
+        return schemeValues;
+    }
+
+    public void setSchemeValues(ArrayList<SchemeValue> schemeValues) {
+        this.schemeValues = schemeValues;
     }
 }

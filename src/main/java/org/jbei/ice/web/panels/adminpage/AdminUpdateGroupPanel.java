@@ -24,7 +24,6 @@ public class AdminUpdateGroupPanel extends Panel {
 
     private static final long serialVersionUID = 1L;
     private final boolean isNewGroup;
-    private List<Group> allGroups;
 
     public AdminUpdateGroupPanel(String id) {
         this(id, null);
@@ -36,36 +35,20 @@ public class AdminUpdateGroupPanel extends Panel {
         add(new AddGroupForm("add_group_form", group));
     }
 
-    private class AddGroupForm extends StatelessForm<Group> {
+    private class AddGroupForm extends StatelessForm<Object> {
 
         private static final long serialVersionUID = 1L;
         private Group group;
 
         public AddGroupForm(String id, Group group) {
             super(id);
-            try {
-                allGroups = new LinkedList<Group>(GroupManager.getAll());
-            } catch (ManagerException e) {
-                throw new ViewException(e);
-            }
             if (group != null) {
-                if (allGroups != null && !allGroups.isEmpty()) {
-                    for (Group g : allGroups) {
-                        if (g.getUuid().equals(group.getUuid())) {
-                            this.group = g;
-                            break;
-                        }
-                    }
-                }
-
-                if (this.group == null)
-                    this.group = group;
-
+                this.group = group;
             } else {
                 this.group = new Group();
             }
 
-            CompoundPropertyModel<Group> model = new CompoundPropertyModel<Group>(this.group);
+            CompoundPropertyModel<Object> model = new CompoundPropertyModel<Object>(this);
             setModel(model);
 
             // add form components 
@@ -76,6 +59,13 @@ public class AdminUpdateGroupPanel extends Panel {
             TextField<String> descriptionField = new RequiredTextField<String>("description",
                     new PropertyModel<String>(this.group, "description"));
             add(descriptionField);
+
+            List<Group> allGroups;
+            try {
+                allGroups = new LinkedList<Group>(GroupManager.getAll());
+            } catch (ManagerException e) {
+                throw new ViewException(e);
+            }
 
             DropDownChoice<Group> choice = new DropDownChoice<Group>("parent",
                     new PropertyModel<Group>(this.group, "parent"), allGroups,

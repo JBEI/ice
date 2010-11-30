@@ -28,6 +28,7 @@ import org.jbei.ice.web.pages.ProfilePage;
 import org.jbei.ice.web.pages.QueryPage;
 import org.jbei.ice.web.pages.RegistrationPage;
 import org.jbei.ice.web.pages.SearchResultPage;
+import org.jbei.ice.web.pages.StoragePage;
 import org.jbei.ice.web.pages.UpdateAccountPage;
 import org.jbei.ice.web.pages.UserPage;
 import org.jbei.ice.web.pages.WelcomePage;
@@ -103,6 +104,7 @@ public class WicketApplication extends WebApplication {
         mount(new IndexedParamUrlCodingStrategy("/entry/attachments",
                 EntryDownloadAttachmentPage.class));
         mount(new IndexedParamUrlCodingStrategy("/folders", FoldersPage.class));
+        mount(new IndexedParamUrlCodingStrategy("/storage", StoragePage.class));
     }
 
     private void initializeQueueingSystem() {

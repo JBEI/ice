@@ -70,6 +70,27 @@
 					<td><input wicket:id="principalInvestigator" class="inputbox" maxlength="255"/></td>
 				</tr>
 				<tr>
+					<td style="width: 150px">Sample Name:</td>
+					<td><input wicket:id="sampleName" class="inputbox" maxlength="255"/>
+					&nbsp;<span class="form_help_text">(Optional)</span></td>
+				</tr>
+				<tr>
+					<td style="width: 150px">Sample Notes:</td>
+					<td><textarea wicket:id="sampleNotes" class="inputarea" rows="3"></textarea>
+					</td>
+				</tr>
+				<tr>
+					<td style="width: 150px">Sample Location:</td>
+					<td><select wicket:id="schemeChoices" class="inputbox"></select>
+					</td>
+				</tr>
+				<tr>
+					<td style="width:150px">&nbsp;</td>
+					<td><span class="form_help_text">(Must specify Sample Name above)</span>
+					<span wicket:id=schemeValueChoices></span>
+					</td>
+				</tr>
+				<tr>
 					<td colspan="2">&nbsp;</td>
 				</tr>
 				<tr>

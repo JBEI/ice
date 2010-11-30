@@ -1,4 +1,4 @@
-package org.jbei.ice.web.panels;
+package org.jbei.ice.web.panels.sample;
 
 import java.util.ArrayList;
 import java.util.Collections;

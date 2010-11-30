@@ -14,7 +14,7 @@ public class EditPartsPanel extends Panel {
     private static final long serialVersionUID = 1L;
     private Panel contentPanel;
     private Label editPartsHeader;
-    private AjaxFallbackLink<?> headerLink;
+    private AjaxFallbackLink<Object> headerLink;
     private Label headerLabel;
 
     public EditPartsPanel(String id) {
@@ -28,7 +28,7 @@ public class EditPartsPanel extends Panel {
 
         headerLabel = new Label("edit_link_text", "Edit Part");
         headerLabel.setOutputMarkupId(true);
-        headerLink = new EditEntryLink("edit_link");
+        headerLink = new EditEntryLink<Object>("edit_link");
         headerLink.add(headerLabel);
 
         add(editPartsHeader);
@@ -71,7 +71,7 @@ public class EditPartsPanel extends Panel {
         }
     }
 
-    class EditEntryLink extends AjaxFallbackLink<Object> {
+    class EditEntryLink<T> extends AjaxFallbackLink<T> {
 
         private static final long serialVersionUID = 1L;
 
@@ -97,7 +97,7 @@ public class EditPartsPanel extends Panel {
             headerLabel.replaceWith(newLabel);
             headerLabel = newLabel;
 
-            ShowDeletedPartsLink link = new ShowDeletedPartsLink("edit_link");
+            ShowDeletedPartsLink<Object> link = new ShowDeletedPartsLink<Object>("edit_link");
             link.setOutputMarkupId(true);
             link.add(newLabel);
             headerLink.replaceWith(link);
@@ -110,7 +110,7 @@ public class EditPartsPanel extends Panel {
         }
     }
 
-    class ShowDeletedPartsLink extends AjaxFallbackLink<Object> {
+    class ShowDeletedPartsLink<T> extends AjaxFallbackLink<T> {
 
         private static final long serialVersionUID = 1L;
 
@@ -136,7 +136,7 @@ public class EditPartsPanel extends Panel {
             headerLabel.replaceWith(newLabel);
             headerLabel = newLabel;
 
-            EditEntryLink link = new EditEntryLink("edit_link");
+            EditEntryLink<Object> link = new EditEntryLink<Object>("edit_link");
             link.setOutputMarkupId(true);
             link.add(newLabel);
             headerLink.replaceWith(link);

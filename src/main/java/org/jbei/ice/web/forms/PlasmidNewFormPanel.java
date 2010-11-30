@@ -19,7 +19,7 @@ public class PlasmidNewFormPanel extends Panel {
     public PlasmidNewFormPanel(String id) {
         super(id);
 
-        PlasmidForm form = new PlasmidForm("plasmidForm");
+        PlasmidNewForm form = new PlasmidNewForm("plasmidForm");
         form.add(new Button("submitButton"));
         add(form);
 
@@ -44,8 +44,7 @@ public class PlasmidNewFormPanel extends Panel {
         add(markupAttachmentsPanel);
     }
 
-    @SuppressWarnings("unused")
-    private class PlasmidForm extends EntrySubmitForm<Plasmid> {
+    protected class PlasmidNewForm extends EntrySubmitForm<Plasmid> {
         private static final long serialVersionUID = 1L;
 
         // plasmid only fields
@@ -55,7 +54,7 @@ public class PlasmidNewFormPanel extends Panel {
         private String promoters;
         private boolean circular = true;
 
-        public PlasmidForm(String id) {
+        public PlasmidNewForm(String id) {
             super(id);
 
             setEntry(new Plasmid());

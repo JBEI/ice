@@ -1,6 +1,7 @@
 package org.jbei.ice.web.panels;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import org.apache.wicket.PageParameters;
@@ -14,12 +15,17 @@ import org.apache.wicket.model.Model;
 import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.EntryUpdatePage;
 import org.jbei.ice.web.pages.ProfilePage;
+import org.jbei.ice.web.panels.sample.BriefSampleViewPanel;
 import org.jbei.ice.web.utils.WebUtils;
 
 public class AbstractEntryViewPanel<T extends Entry> extends Panel {
@@ -49,6 +55,7 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
         renderIntellectualProperty();
         renderFundingSource();
         renderPrincipalInvestigator();
+        renderBriefSampleView();
     }
 
     protected T getEntry() {
@@ -212,6 +219,26 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
 
     protected void renderFundingSource() {
         add(new Label("fundingSource", getEntry().fundingSourceToString()));
+    }
+
+    protected void renderBriefSampleView() {
+        ArrayList<Sample> samples = null;
+        Panel sampleViewPanel = null;
+        try {
+            samples = SampleManager.getSamplesByEntry(getEntry());
+        } catch (ManagerException e) {
+            // it's ok. show blank. Log and continue
+            Logger.error(e.toString());
+        }
+        if (samples == null) {
+            sampleViewPanel = new EmptyMessagePanel("sampleLocation", "");
+        } else if (samples.size() == 0) {
+            sampleViewPanel = new EmptyMessagePanel("sampleLocation", "");
+        } else {
+            sampleViewPanel = new BriefSampleViewPanel("sampleLocation", samples);
+        }
+        add(sampleViewPanel);
+
     }
 
     protected String trimLongField(String value, int maxLength) {

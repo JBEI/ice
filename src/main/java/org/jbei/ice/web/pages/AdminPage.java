@@ -30,6 +30,7 @@ public class AdminPage extends ProtectedPage {
     private static final String MAIN_PANEL_ID = "centerPanel";
 
     private Component currentPanel;
+
     private BookmarkablePageLink<AdminPage> editUsersLink;
     private BookmarkablePageLink<AdminPage> editPartsLink;
     private BookmarkablePageLink<AdminPage> editGroupsLink;

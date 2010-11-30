@@ -39,10 +39,10 @@ import org.jbei.ice.web.panels.NotesViewPanel;
 import org.jbei.ice.web.panels.PartViewPanel;
 import org.jbei.ice.web.panels.PermissionEditPanel;
 import org.jbei.ice.web.panels.PlasmidViewPanel;
-import org.jbei.ice.web.panels.SampleViewPanel;
 import org.jbei.ice.web.panels.SequenceAnalysisViewPanel;
 import org.jbei.ice.web.panels.SequenceViewPanel;
 import org.jbei.ice.web.panels.StrainViewPanel;
+import org.jbei.ice.web.panels.sample.SampleViewPanel;
 
 public class EntryViewPage extends ProtectedPage {
     public Entry entry = null;
@@ -57,10 +57,10 @@ public class EntryViewPage extends ProtectedPage {
     public String subPage = null;
     public String entryTitle = "";
 
-    private final String SAMPLES_URL_KEY = "samples";
-    private final String SEQUENCE_ANALYSIS_URL_KEY = "seqanalysis";
-    private final String ATTACHMENTS_URL_KEY = "attachments";
-    private final String PERMISSIONS_URL_KEY = "permission";
+    public final static String SAMPLES_URL_KEY = "samples";
+    public final static String SEQUENCE_ANALYSIS_URL_KEY = "seqanalysis";
+    public final static String ATTACHMENTS_URL_KEY = "attachments";
+    public final static String PERMISSIONS_URL_KEY = "permission";
 
     public EntryViewPage(PageParameters parameters) {
         super(parameters);
@@ -81,12 +81,13 @@ public class EntryViewPage extends ProtectedPage {
         if (subPage == null) {
             sequencePanel = makeSequencePanel(entry);
             add(sequencePanel);
+            Component notesPanel = makeNotesPanel(entry);
+            add(notesPanel);
+
         } else {
             add(new EmptyPanel("sequencePanel"));
+            add(new EmptyPanel("notesPanel"));
         }
-
-        Component notesPanel = makeNotesPanel(entry);
-        add(notesPanel);
 
         ArrayList<Panel> sidePanels = new ArrayList<Panel>();
         try {

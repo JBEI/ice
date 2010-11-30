@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.markup.html.form.ChoiceRenderer;
+import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -14,17 +16,24 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.jbei.ice.lib.managers.ConfigurationManager;
+import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.managers.StorageManager;
+import org.jbei.ice.lib.models.Configuration.ConfigurationKey;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
-import org.jbei.ice.lib.models.StorageScheme;
+import org.jbei.ice.lib.utils.PopulateInitialDatabase;
+import org.jbei.ice.web.common.CustomChoice;
+import org.jbei.ice.web.common.ViewException;
 
 public class StorageSchemeEditPanel extends Panel {
 
     private static final long serialVersionUID = 1L;
 
     private LinkedList<StorageSchemeEditItemPanel> locationItems = new LinkedList<StorageSchemeEditItemPanel>();
-    private StorageScheme scheme = null;
+    private Storage scheme = null;
     private String schemeName = null;
+    private CustomChoice rootTypeChoice = null;
     private Panel parentPanel = null;
 
     public StorageSchemeEditPanel(String id, StorageSchemeChoicePanel parentPanel) {
@@ -34,11 +43,11 @@ public class StorageSchemeEditPanel extends Panel {
         initializeComponents();
     }
 
-    public StorageSchemeEditPanel(String id, StorageScheme storageScheme,
+    public StorageSchemeEditPanel(String id, Storage storageScheme,
             StorageSchemeChoicePanel parentPanel) {
         super(id);
         scheme = storageScheme;
-        schemeName = storageScheme.getLabel();
+        schemeName = storageScheme.getName();
         setParentPanel(parentPanel);
 
         List<Storage> schemes = storageScheme.getSchemes();
@@ -79,6 +88,10 @@ public class StorageSchemeEditPanel extends Panel {
         feedbackPanel.setOutputMarkupId(true);
         editStorageSchemeForm.add(feedbackPanel);
 
+        DropDownChoice<CustomChoice> rootTypeDropdown = renderRootTypeChoices("rootTypeDropDown");
+
+        editStorageSchemeForm.add(rootTypeDropdown);
+
         editStorageSchemeForm.add(new AjaxButton("evaluateButton") {
             private static final long serialVersionUID = 1L;
 
@@ -94,9 +107,19 @@ public class StorageSchemeEditPanel extends Panel {
                 }
                 StorageSchemeChoicePanel originalPanel = (StorageSchemeChoicePanel) thisPanel
                         .getParentPanel();
-                StorageScheme scheme = thisPanel.getScheme();
-                scheme.setLabel(getSchemeName());
+                Storage scheme = thisPanel.getScheme();
+                scheme.setName(getSchemeName());
                 scheme.setSchemes(schemes);
+                scheme.setOwnerEmail(PopulateInitialDatabase.systemAccountEmail);
+                scheme.setStorageType(StorageType.SCHEME);
+                int i = Integer.valueOf(thisPanel.getRootTypeChoice().getValue());
+                Storage root;
+                try {
+                    root = StorageManager.get(Integer.valueOf(i));
+                } catch (ManagerException e) {
+                    throw new ViewException(e);
+                }
+                scheme.setParent(root);
                 originalPanel.saveScheme(scheme);
 
                 target.addComponent(originalPanel);
@@ -110,6 +133,48 @@ public class StorageSchemeEditPanel extends Panel {
 
         });
         add(editStorageSchemeForm);
+    }
+
+    protected DropDownChoice<CustomChoice> renderRootTypeChoices(String id) {
+        DropDownChoice<CustomChoice> dropDownChoice = null;
+        ArrayList<CustomChoice> choicesArray = new ArrayList<CustomChoice>();
+        Storage storage;
+        try {
+            storage = StorageManager.get(ConfigurationManager.get(
+                ConfigurationKey.STRAIN_STORAGE_ROOT).getValue());
+            choicesArray.add(new CustomChoice(storage.getName(), String.valueOf(storage.getId())));
+            storage = StorageManager.get(ConfigurationManager.get(
+                ConfigurationKey.PLASMID_STORAGE_ROOT).getValue());
+            choicesArray.add(new CustomChoice(storage.getName(), String.valueOf(storage.getId())));
+            storage = StorageManager.get(ConfigurationManager.get(
+                ConfigurationKey.PART_STORAGE_ROOT).getValue());
+            choicesArray.add(new CustomChoice(storage.getName(), String.valueOf(storage.getId())));
+            storage = StorageManager.get(ConfigurationManager.get(
+                ConfigurationKey.ARABIDOPSIS_STORAGE_ROOT).getValue());
+            choicesArray.add(new CustomChoice(storage.getName(), String.valueOf(storage.getId())));
+
+        } catch (ManagerException e) {
+            throw new ViewException(e);
+        }
+
+        // set existing
+        if (getScheme().getParent() != null) {
+            long existingId = getScheme().getParent().getId();
+            for (CustomChoice choice : choicesArray) {
+                if (Long.valueOf(choice.getValue()) == existingId) {
+                    setRootTypeChoice(choice);
+                    break;
+                }
+            }
+        }
+
+        dropDownChoice = new DropDownChoice<CustomChoice>(id, new PropertyModel<CustomChoice>(this,
+                "rootTypeChoice"), new Model<ArrayList<CustomChoice>>(choicesArray),
+                new ChoiceRenderer<CustomChoice>("name", "value"));
+        dropDownChoice.setRequired(true);
+        dropDownChoice.setLabel(new Model<String>("Storage Type Root"));
+        return dropDownChoice;
+
     }
 
     public void setParentPanel(Panel parentPanel) {
@@ -128,11 +193,11 @@ public class StorageSchemeEditPanel extends Panel {
         return locationItems;
     }
 
-    public void setScheme(StorageScheme scheme) {
+    public void setScheme(Storage scheme) {
         this.scheme = scheme;
     }
 
-    public StorageScheme getScheme() {
+    public Storage getScheme() {
         return scheme;
     }
 
@@ -142,6 +207,14 @@ public class StorageSchemeEditPanel extends Panel {
 
     public String getSchemeName() {
         return schemeName;
+    }
+
+    public void setRootTypeChoice(CustomChoice rootTypeChoice) {
+        this.rootTypeChoice = rootTypeChoice;
+    }
+
+    public CustomChoice getRootTypeChoice() {
+        return rootTypeChoice;
     }
 
 }

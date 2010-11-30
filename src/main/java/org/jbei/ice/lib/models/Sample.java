@@ -68,7 +68,7 @@ public class Sample implements ISampleValueObject, IModel {
     @OrderBy("id DESC")
     private Set<Location> locations = new LinkedHashSet<Location>();
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "location_id")
     private Storage storage;
 

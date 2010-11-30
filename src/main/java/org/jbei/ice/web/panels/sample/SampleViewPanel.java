@@ -1,4 +1,4 @@
-package org.jbei.ice.web.panels;
+package org.jbei.ice.web.panels.sample;
 
 import java.util.ArrayList;
 
@@ -16,6 +16,7 @@ import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.EntryViewPage;
+import org.jbei.ice.web.panels.EmptyMessagePanel;
 
 public class SampleViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -42,12 +43,12 @@ public class SampleViewPanel extends Panel {
                 SampleViewPanel thisPanel = (SampleViewPanel) getParent();
                 ArrayList<Panel> thisPanelsPanels = thisPanel.getPanels();
                 if (thisPanelsPanels.size() > 0
-                        && thisPanelsPanels.get(0) instanceof SampleItemEditPanel) {
+                        && thisPanelsPanels.get(0) instanceof NewSampleItemEditPanel) {
                     // If the first item is already an edit form, do nothing.
                 } else {
                     Sample newSample = new Sample();
                     newSample.setEntry(thisPanel.getEntry());
-                    Panel newSampleEditPanel = new SampleItemEditPanel("sampleItemPanel",
+                    Panel newSampleEditPanel = new NewSampleItemEditPanel("sampleItemPanel",
                             newSample, false);
                     newSampleEditPanel.setOutputMarkupId(true);
 
@@ -87,7 +88,7 @@ public class SampleViewPanel extends Panel {
         Integer counter = 1;
         panels.clear();
         for (Sample sample : samples) {
-            Panel sampleItemPanel = new SampleItemViewPanel("sampleItemPanel", counter, sample);
+            Panel sampleItemPanel = new NewSampleItemViewPanel("sampleItemPanel", counter, sample);
             sampleItemPanel.setOutputMarkupId(true);
             panels.add(sampleItemPanel);
             counter = counter + 1;

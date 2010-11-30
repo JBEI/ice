@@ -1,4 +1,4 @@
-package org.jbei.ice.web.panels;
+package org.jbei.ice.web.panels.sample;
 
 import java.util.ArrayList;
 
@@ -14,15 +14,16 @@ import org.jbei.ice.lib.models.Location;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
+import org.jbei.ice.web.panels.EmptyMessagePanel;
 
-public class LocationViewPanel extends Panel {
+public class StorageViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
 
     Sample sample = null;
     ArrayList<Location> locations = new ArrayList<Location>();
     ArrayList<Panel> panels = new ArrayList<Panel>();
 
-    public LocationViewPanel(String id, Sample sample) {
+    public StorageViewPanel(String id, Sample sample) {
         super(id);
 
         this.sample = sample;
@@ -36,7 +37,7 @@ public class LocationViewPanel extends Panel {
 
             @Override
             public void onClick(AjaxRequestTarget target) {
-                LocationViewPanel thisPanel = (LocationViewPanel) getParent().getParent();
+                StorageViewPanel thisPanel = (StorageViewPanel) getParent().getParent();
                 ArrayList<Panel> thisPanelsPanels = thisPanel.getPanels();
                 if (thisPanelsPanels.size() > 0
                         && thisPanelsPanels.get(0) instanceof LocationItemEditPanel) {
@@ -105,6 +106,7 @@ public class LocationViewPanel extends Panel {
         ListView<Object> locationsListView = new ListView<Object>(id, panels) {
             private static final long serialVersionUID = 1L;
 
+            @Override
             protected void populateItem(ListItem<Object> item) {
                 Panel panel = (Panel) item.getModelObject();
                 item.add(panel);
