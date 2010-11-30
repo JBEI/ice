@@ -21,8 +21,8 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.FolderManager;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.models.Folder;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.Folder;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
@@ -211,6 +211,7 @@ public class UserEntriesViewPanel extends SortableDataTablePanel<Entry> {
                 "attachment.gif", null, "Has Attachment", this) {
             private static final long serialVersionUID = 1L;
 
+            @Override
             protected Component evaluate(String id, Entry entry, int row) {
 
                 EntryController entryController = new EntryController(IceSession.get().getAccount());
@@ -235,13 +236,14 @@ public class UserEntriesViewPanel extends SortableDataTablePanel<Entry> {
                 null, "Has Samples", this) {
             private static final long serialVersionUID = 1L;
 
+            @Override
             protected Component evaluate(String id, Entry entry, int row) {
                 Fragment fragment = new Fragment(id, "has_sample_fragment",
                         UserEntriesViewPanel.this);
 
                 EntryController entryController = new EntryController(IceSession.get().getAccount());
                 try {
-                    if (entryController.hasAttachments(entry))
+                    if (entryController.hasSamples(entry))
                         fragment.add(new Image("has_sample", hasSampleImage));
                     else
                         fragment.add(new Image("has_sample", blankImage));
@@ -259,13 +261,14 @@ public class UserEntriesViewPanel extends SortableDataTablePanel<Entry> {
                 "sequence.gif", null, "Has Sequence", this) {
             private static final long serialVersionUID = 1L;
 
+            @Override
             protected Component evaluate(String id, Entry entry, int row) {
                 Fragment fragment = new Fragment(id, "has_sequence_fragment",
                         UserEntriesViewPanel.this);
 
                 EntryController entryController = new EntryController(IceSession.get().getAccount());
                 try {
-                    if (entryController.hasAttachments(entry))
+                    if (entryController.hasSequence(entry))
                         fragment.add(new Image("has_sequence", hasSequenceImage));
                     else
                         fragment.add(new Image("has_sequence", blankImage));
