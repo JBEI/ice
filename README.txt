@@ -1,15 +1,16 @@
 Welcome to the JBEI Registry Software Version 2 (ICE). We hope you
 find our tools useful. More information, feature requests, bug
-reports, as well as discussions are available from our google project
+reports, as well as discussions are available from our Google Project
 page: http://code.google.com/p/gd-ice/
 
 CONTENTS:
 
 1. Requirements
 2. Getting the Source Code
-3. Using maven to build
+3. Using Maven
 4. Setup
 5. Contributing Code
+6. Credits
 
 ===============
 1. Requirements
@@ -17,11 +18,11 @@ CONTENTS:
 
 ICE depends on external software. The minimum requirement to run ICE
 is Postgres and a java based web server like Tomcat or Jetty. To use
-BLAST to search sequences, it must be installed on your system. Then
+BLAST to search sequences, it must be installed on your system. Then,
 update the jbeir.properties file to tell ICE where it is.
 
 To make significant modifications or customizations, we use the
-optional development tools below.
+optional development tools mentioned below.
 
 
 1.1 Postgres
@@ -34,11 +35,11 @@ TODO: Write walkthrough here.
 
 1.2 Adobe Flex SDK (For Development only)
 
-We include a compiled version of our Flex based application in our
-sources.  However, if you would like to build your own, you need
-Adobe's SDK. The SDK is mostly open source and freely available, which
-means you can compile our Flex tools without buying anything.  The IDE
-is sadly not free.
+We include compiled versions of our Flex applications in our sources.
+However, if you would like to build your own, you need Adobe's
+SDK. The SDK is mostly open source and freely available, which means
+you can compile our Flex tools without buying anything.  The IDE is
+sadly not free.
 
 1.3 Maven (For Development only)
 
@@ -50,28 +51,27 @@ We use Eclipse as our IDE. There are different ways to debug ICE in
 Eclipse, which are changing constantly. The most reliable but somewhat
 cumbersome way is to use the included maven jetty plugin:
 
-1.4.1. Download sources and set up maven (see below).
+1.4.1. Download sources and set up Maven (see below).
 1.4.2. Import as Existing Project in Eclipse.
-1.4.3. In Eclipse, go to Run-> External Tools->External Tools
-       Configuration and create a new setup. Enter your mvn location
+1.4.3. Go to Run-> External Tools->External Tools Configuration and
+       create a new setup. Enter your mvn location
        (/usr/bin/mvn for linux) and the arguments "jetty:run"
 1.4.3.1 Select the Environment tab and add a new variable.
     MAVEN_OPTS: -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4000,server=y,suspend=y
 1.4.4. Go to Run->Debug Configurations and create a new debug
-       configuration of the type Remote Java Application. Use the standard
-       connection and port 4000 (as specified in 2.1 above). Check Allow
-       termination of remote VM. In the Source tab, add the ice src
-       directory.
-1.4.5. This will create what looks like another workspace. Click its
+       configuration of the type Remote Java Application. Use the
+       standard connection and port 4000 (as specified in 2.1 above).
+       Check Allow Termination of remote VM. In the Source tab, add
+       the ice src directory.
+1.4.5. This will create what looks like another project. Click its
        properties, Java Build Path, select the Projects tab, and add
-       the gd-ice project. This
-       will link the sources.
+       the gd-ice project. This will link the sources.
 1.4.6. Select Run->External Tools and run jetty
 1.4.7. Select Run->Debug Configurations and select your debug
        configuration.
 
-If run once, they can be launched by pushing the Run External and
-Debug buttons.
+If run once, they can be launched again by clicking the Run External
+and then the Debug buttons.
 
 
 ==========================
@@ -83,18 +83,19 @@ Debug buttons.
      Download sources from svn:
      $ svn checkout http://gd-ice.googlecode.com/svn/trunk/ice gd-ice-build
 
-2.1.1 [optional: git] I prefer to use git-svn to talk to the svn repo, as git
-      gives me greater flexibility in managing local branches.  With
-      git, the commands are:
+2.1.1 [optional: git] I prefer to use git-svn to talk to the svn repo,
+      as git gives me greater flexibility in managing local branches.
+      With git, the commands are:
 
       $ git svn init http://gd-ice.googlecode.com/svn/trunk/ice gd-ice-build
       $ cd gd-ice-build
       $ git svn fetch
       $ git checkout -f
-    
-      [Note: I also recommend running this command a few times in
-      different directories, because svn doesn't give identical
-      results every time (Yes, svn is *unreliable*). Make sure the git
+
+      [Note: Sometimes google's svn server returns strange results to
+      git-svn, including missing commits, squashed commits, etc.  I
+      recommend running this command a few times in different
+      directories, from different ip addresses. Make sure the git
       checksome for the last version is the same between checkouts
       before continuing (by running git log)]
     
@@ -105,8 +106,9 @@ Debug buttons.
 2.2.1 src/main/java/hibernate.cfg.xml
 2.2.1.1 Change this line:
         <property name="hibernate.connection.url">jdbc:postgresql://localhost/test_registry</property>
-        to point to your database by replacing "test_registry" with the name
-        of your database.
+        to point to your database by replacing "test_registry" with
+        the name of your database.
+        
 2.2.1.2 Change this line:
         <property name="hibernate.connection.username">test_user</property>
         Replace "test_user" with the name of the database user.
@@ -117,15 +119,16 @@ Debug buttons.
 2.2.2 src/main/java/jbeir.properties
       At minimum, change SMTP_HOST to use your mail host, and change
       ADMIN_EMAIL and MODERATOR_EMAIL to your address. Please change
-      SITE_SECRET and SECRET_KEY. These strings are used as cryptographic
-      salts in various places.
-      Any *_DIRECTORY setting with /tmp/ should be changed if you want to
-      use these features. Hopefully, other settings are self explanatory.
+      SITE_SECRET and SECRET_KEY. These strings are used as
+      cryptographic salts in various places.
+      Any *_DIRECTORY setting with /tmp/ should be changed if you want
+      to use these features. Hopefully, other settings are self
+      explanatory.
 2.2.3 src/main/resources/log4j.properties
       Change the file location if you want to keep log files between
       server reboots.
 2.2.4 src/main/webapp/WEB-INF/web.xml
-      This setting can be left alone. If you must run your site on
+      This file can be left alone. If you must run your site on
       http instead of https (we do not recommend this), comment out
       the <security-constraint> section. By default, all the flex
       components are built with the assumption of using https. If
@@ -135,23 +138,23 @@ Debug buttons.
       $ git commit -m "build: productions settings"
    
 2.3. Updating
-2.3.1 If using svn, just svn update and hope / check that your local settings
-      are not over written by new defaults or new options.
+2.3.1 If using svn, just svn update and hope / check that your local
+      settings are not over written by new defaults or new options.
 2.3.2 [git] If using git:
 
       $ git svn fetch
       $ git svn rebase
 
-      Git will tell you if your settings don't apply. Fix those conflicts
-      and git add -u, git rebase --continue.
+      Git will tell you if your settings don't apply. Fix those
+      conflicts and git add -u, git rebase --continue.
 
       For best results, instead of adding all the changes to a single
       git branch commit, commit each file change into individual
       commits, so they can be individually tracked.
 
-===================
-3. Setting up Maven
-===================
+==============
+3. Using Maven
+==============
 
 Maven provides a convenient way to download dependencies and build
 packages.
@@ -159,8 +162,9 @@ packages.
 3.1. Install maven2 (via apt-get or download).
 3.2. ICE's pom.xml has all the dependencies defined. However, there
      are some libraries that are not in any public maven repositories,
-     namely biojava and flex components. We have provided these in the lib/
-     directory so they can be installed to your local maven repository.
+     namely biojava and flex components. We have provided these in the
+     lib/ directory so they can be installed to your local maven
+     repository.
 
 Run the following commands in the lib/ directory of your sources:
 
@@ -179,7 +183,8 @@ mvn install:install-file -Dfile=org.eclipse.mylyn.wikitext.core_1.4.0.I20100805-
 mvn install:install-file -Dfile=org.eclipse.mylyn.wikitext.mediawiki.core_1.4.0.I20100805-0500-e3x.jar -DgroupId=org.jbei.ice -DartifactId=org.eclipse.mylyn.wikitext.mediawiki.core -Dversion=SNAPSHOT -Dpackaging=jar
 mvn install:install-file -Dfile=org.eclipse.mylyn.wikitext.confluence.core_1.4.0.I20100805-0500-e3x.jar -DgroupId=org.jbei.ice -DartifactId=org.eclipse.mylyn.wikitext.confluence.core -Dversion=SNAPSHOT -Dpackaging=jar
 
-Now you should have all the necessary libraries in your local maven cache.
+Now you should have all the necessary libraries in your local maven
+cache.
 
 2.3 You can run a functional server from the sources.
 
@@ -199,25 +204,29 @@ Now you should have all the necessary libraries in your local maven cache.
     $ mvn jetty:run
 
     If everything is set up properly, this command will populate your
-    database with the appropriate tables, and run a server on port 8443
-    (https). Point your browser to https://localhost:8443. Don't forget
-    the https bit.
+    database with the appropriate tables, and run a server on port
+    8443 (https). Point your browser to https://localhost:8443. Don't
+    forget the https bit.
+
+    The first time maven is run, it will download all the dependent
+    packages, which can take a long time.
 
 2.4. You can try to build a deployable war file by typing
      $ mvn package
 
      Now you should have target/gd-ice-1.0-SNAPSHOT.war and
-     target/gd-ice-1.0-SNAPSHOT. Deploy these to your webserver install.
+     target/gd-ice-1.0-SNAPSHOT. Deploy these to your webserver
+     install.
 
       
-====================
+========
 4. Setup
-====================
+========
 
 When the site is installed and deployed, log in using the default
 Administrator account. It is 'Administrator' with the password
-'Administrator'. Please change the default password.
-Administrator's page is located at https://yoursite/admin.
+'Administrator'. Please change the default password.  Administrator's
+page is located at https://yoursite/admin.
 
 
 ====================
@@ -230,3 +239,14 @@ and/or a patch file.
 We ask that you conform to our formatting guidelines. Simply set up
 your Eclipse to use the included "Registry Team Formatter.xml", and
 auto format your file.
+
+
+==========
+6. Credits
+==========
+
+Project Lead: Timothy Ham <tsham@lbl.gov>
+Developer: Hector Plahar <haplahar@lbl.gov>
+
+Alumni:
+Developer: Zinovii Dmytriv
