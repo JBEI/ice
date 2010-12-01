@@ -19,6 +19,7 @@ public class ArabidopsisSeedSimpleViewPanel extends SimpleEntryViewPanel<Arabido
         renderHarvestDate();
         renderParents();
         renderGeneration();
+        renderPlantType();
     }
 
     protected void renderHomozygosity() {
@@ -50,6 +51,12 @@ public class ArabidopsisSeedSimpleViewPanel extends SimpleEntryViewPanel<Arabido
         } else {
             add(new Label("harvestDate", ""));
         }
+    }
+
+    protected void renderPlantType() {
+        String labelString = ArabidopsisSeed.getPlantTypeOptionsMap().get(
+            getEntry().getPlantType().name());
+        add(new Label("plantType", labelString).setEscapeModelStrings(false));
     }
 
 }
