@@ -6,16 +6,15 @@ import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.jbei.ice.lib.models.Location;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.data.tables.LabelHeaderColumn;
 import org.jbei.ice.web.dataProviders.UserSamplesDataProvider;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
+import org.jbei.ice.web.pages.StoragePage;
 import org.jbei.ice.web.utils.WebUtils;
 
 public class UserSamplesViewPanel extends SortableDataTablePanel<Sample> {
@@ -61,15 +60,15 @@ public class UserSamplesViewPanel extends SortableDataTablePanel<Sample> {
 
             @Override
             protected Component evaluate(String componentId, Sample sample, int row) {
-                StringBuilder locations = new StringBuilder();
+                Fragment fragment = new Fragment(componentId, "location_id_cell",
+                        UserSamplesViewPanel.this);
 
-                if (sample.getLocations() != null && sample.getLocations().size() > 0) {
-                    for (Location location : sample.getLocations()) {
-                        locations.append(location.toOneLineString()).append("\n");
-                    }
-                }
-
-                return new MultiLineLabel(componentId, locations.toString());
+                BookmarkablePageLink<StoragePage> storagePageLink = new BookmarkablePageLink<StoragePage>(
+                        "storageLink", StoragePage.class, new PageParameters("0="
+                                + sample.getStorage().getId()));
+                storagePageLink.add(new Label("storageLinkLabel", sample.getStorage().toString()));
+                fragment.add(storagePageLink);
+                return fragment;
             }
         });
     }

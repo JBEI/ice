@@ -7,7 +7,6 @@ import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.CSSPackageResource;
 import org.apache.wicket.markup.html.JavascriptPackageResource;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
@@ -16,20 +15,20 @@ import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Location;
 import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.dataProviders.UserSamplesDataProvider;
 import org.jbei.ice.web.pages.EntryTipPage;
 import org.jbei.ice.web.pages.EntryViewPage;
+import org.jbei.ice.web.pages.StoragePage;
 import org.jbei.ice.web.pages.UnprotectedPage;
 
 public class ProfileSamplesPanel extends Panel {
     private static final long serialVersionUID = 1L;
 
-    private UserSamplesDataProvider sortableDataProvider;
-    private DataView<Sample> dataView;
+    private final UserSamplesDataProvider sortableDataProvider;
+    private final DataView<Sample> dataView;
 
     public ProfileSamplesPanel(String id, String accountEmail) {
         super(id);
@@ -44,9 +43,9 @@ public class ProfileSamplesPanel extends Panel {
         sortableDataProvider = new UserSamplesDataProvider(account);
 
         add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-                UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
+            UnprotectedPage.JS_RESOURCE_LOCATION + "jquery.cluetip.js"));
         add(CSSPackageResource.getHeaderContribution(UnprotectedPage.class,
-                UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
+            UnprotectedPage.STYLES_RESOURCE_LOCATION + "jquery.cluetip.css"));
 
         dataView = new DataView<Sample>("samplesDataView", sortableDataProvider, 15) {
             private static final long serialVersionUID = 1L;
@@ -63,14 +62,12 @@ public class ProfileSamplesPanel extends Panel {
                 item.add(new Label("label", sample.getLabel()));
                 item.add(new Label("notes", sample.getNotes()));
 
-                StringBuilder locations = new StringBuilder();
-                if (sample.getLocations() != null && sample.getLocations().size() > 0) {
-                    for (Location location : sample.getLocations()) {
-                        locations.append(location.toOneLineString()).append("\n");
-                    }
-                }
+                BookmarkablePageLink<StoragePage> storagePageLink = new BookmarkablePageLink<StoragePage>(
+                        "storageLink", StoragePage.class, new PageParameters("0="
+                                + sample.getStorage().getId()));
+                storagePageLink.add(new Label("storageLinkLabel", sample.getStorage().toString()));
 
-                item.add(new MultiLineLabel("location", locations.toString()));
+                item.add(storagePageLink);
                 item.add(new Label("type", entry.getRecordType()));
                 Name temp = (Name) entry.getNames().toArray()[0];
                 item.add(new Label("name", temp.getName()));

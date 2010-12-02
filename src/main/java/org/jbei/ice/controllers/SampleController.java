@@ -194,58 +194,6 @@ public class SampleController extends Controller {
         return numberOfSamples;
     }
 
-    public Location saveLocation(Location location) throws ControllerException, PermissionException {
-        return saveLocation(location, true);
-    }
-
-    public Location saveLocation(Location location, boolean scheduleIndexRebuild)
-            throws ControllerException, PermissionException {
-        if (!hasLocationWritePermission(location)) {
-            throw new PermissionException("No permissions to save location!");
-        }
-
-        try {
-            Sample sample = location.getSample();
-
-            sample.getLocations().add(location);
-
-            sample = SampleManager.saveSample(sample);
-
-            if (scheduleIndexRebuild) {
-                ApplicationContoller.scheduleSearchIndexRebuildJob();
-            }
-        } catch (ManagerException e) {
-            throw new ControllerException(e);
-        }
-
-        return location;
-    }
-
-    public void deleteLocation(Location location) throws ControllerException, PermissionException {
-        deleteLocation(location, true);
-    }
-
-    public void deleteLocation(Location location, boolean scheduleIndexRebuild)
-            throws ControllerException, PermissionException {
-        if (!hasLocationWritePermission(location)) {
-            throw new PermissionException("No permissions to delete location!");
-        }
-
-        try {
-            Sample sample = location.getSample();
-
-            sample.getLocations().remove(location);
-
-            SampleManager.saveSample(sample);
-
-            if (scheduleIndexRebuild) {
-                ApplicationContoller.scheduleSearchIndexRebuildJob();
-            }
-        } catch (ManagerException e) {
-            throw new ControllerException(e);
-        }
-    }
-
     protected SamplePermissionVerifier getSamplePermissionVerifier() {
         return (SamplePermissionVerifier) getPermissionVerifier();
     }
