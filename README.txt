@@ -54,8 +54,9 @@ cumbersome way is to use the included maven jetty plugin:
 1.4.1. Download sources and set up Maven (see below).
 1.4.2. Import as Existing Project in Eclipse.
 1.4.3. Go to Run-> External Tools->External Tools Configuration and
-       create a new setup. Enter your mvn location
-       (/usr/bin/mvn for linux) and the arguments "jetty:run"
+       create a new Program setup. Enter your mvn location
+       (/usr/bin/mvn for linux) and the arguments "jetty:run".
+       Use your workspace root as the Working Directory.
 1.4.3.1 Select the Environment tab and add a new variable.
     MAVEN_OPTS: -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4000,server=y,suspend=y
 1.4.4. Go to Run->Debug Configurations and create a new debug
