@@ -100,7 +100,7 @@ public class UserRecentlyViewedPanel extends SortableDataTablePanel<Workspace> {
     }
 
     protected void addPartIDColumn() {
-        addColumn(new LabelHeaderColumn<Workspace>("Part ID", "entry.onePartNumber.partNumber") {
+        addColumn(new LabelHeaderColumn<Workspace>("Part ID") {
 
             private static final long serialVersionUID = 1L;
 

@@ -1,31 +1,19 @@
 package org.jbei.ice.web.panels;
 
 import java.text.SimpleDateFormat;
-import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
 import org.apache.wicket.behavior.SimpleAttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.managers.AccountManager;
-import org.jbei.ice.lib.managers.FolderManager;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Folder;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.web.IceSession;
-import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.data.tables.ImageHeaderColumn;
 import org.jbei.ice.web.data.tables.LabelHeaderColumn;
 import org.jbei.ice.web.dataProviders.UserEntriesDataProvider;
@@ -44,11 +32,10 @@ public class UserEntriesViewPanel extends SortableDataTablePanel<Entry> {
         dataProvider = provider;
 
         // table columns
-        // addDirectorySelectionColumn();
         addIndexColumn();
         super.addTypeColumn("recordType", true);
         addPartIDColumn();
-        super.addLabelHeaderColumn("Name", "oneName.name", "oneName.name");
+        super.addLabelHeaderColumn("Name", null, "oneName.name"); 
         addSummaryColumn();
         addStatusColumn();
         addHasAttachmentColumn();
@@ -60,106 +47,8 @@ public class UserEntriesViewPanel extends SortableDataTablePanel<Entry> {
         renderTable();
     }
 
-    private static class DirectoryModel extends LoadableDetachableModel<List<Folder>> {
-
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        protected List<Folder> load() {
-            try {
-                return FolderManager.getFoldersByOwner(AccountManager.getSystemAccount());
-            } catch (ManagerException e) {
-                throw new ViewException(e);
-            }
-        }
-    }
-
-    protected void addDirectorySelectionColumn() {
-        addColumn(new LabelHeaderColumn<Entry>("") {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Component getHeader(String componentId) {
-                Fragment fragment = new Fragment(componentId, "directory_header_fragment",
-                        UserEntriesViewPanel.this);
-
-                fragment.add(new AjaxCheckBox("select_all", new Model<Boolean>()) {
-
-                    private static final long serialVersionUID = 1L;
-
-                    @Override
-                    protected void onUpdate(AjaxRequestTarget target) {
-                        table.setSelectAllColumns(getModelObject().booleanValue());
-                        target.addComponent(table);
-                    }
-                });
-
-                // add list view for <li>
-                ListView<Folder> list = new ListView<Folder>("directory", new DirectoryModel()) {
-                    private static final long serialVersionUID = 1L;
-
-                    @Override
-                    protected void populateItem(ListItem<Folder> item) {
-                        String label = item.getModelObject().getName();
-
-                        AjaxCheckBox checkbox = new AjaxCheckBox("directory_selection",
-                                new Model<Boolean>()) {
-
-                            private static final long serialVersionUID = 1L;
-
-                            @Override
-                            protected void onUpdate(AjaxRequestTarget target) {
-                                // TODO Auto-generated method stub
-                            }
-                        };
-
-                        item.add(checkbox);
-                        item.add(new Label("directory_label", label));
-                    }
-                };
-                fragment.add(list);
-                return fragment;
-            }
-
-            @Override
-            protected Component evaluate(String componentId, final Entry entry, int row) {
-                Fragment fragment = new Fragment(componentId, "checkbox_fragment",
-                        UserEntriesViewPanel.this);
-
-                Model<Boolean> model = new Model<Boolean>();
-                Boolean value;
-                if (table.isSelectAllColumns())
-                    value = Boolean.TRUE;
-                else {
-                    if (table.isSelected(entry.getRecordId()))
-                        value = Boolean.TRUE;
-                    else
-                        value = Boolean.FALSE;
-                }
-                model.setObject(value);
-
-                fragment.add(new AjaxCheckBox("checkbox", model) {
-
-                    private static final long serialVersionUID = 1L;
-
-                    @Override
-                    protected void onUpdate(AjaxRequestTarget target) {
-                        String recordId = entry.getRecordId();
-                        if (getModelObject().booleanValue())
-                            table.addSelection(recordId);
-                        else
-                            table.removeSelection(recordId);
-                    }
-                });
-
-                return fragment;
-            }
-        });
-    }
-
     protected void addPartIDColumn() {
-        addColumn(new LabelHeaderColumn<Entry>("Part ID", "onePartNumber.partNumber") {
+        addColumn(new LabelHeaderColumn<Entry>("Part ID") {
 
             private static final long serialVersionUID = 1L;
 
