@@ -121,7 +121,7 @@ public class SortableDataTablePanel<T> extends Panel {
         table = new SortableDataTable<T>("data_table", tableColumns, dataProvider, 15);
         addOrReplace(table);
 
-        if (entries != null && !entries.isEmpty())
+        if (entries != null)
             addOrReplace(new DataTableExportOptionsPanel("export_options", entries));
         else
             addOrReplace(new EmptyPanel("export_options"));
