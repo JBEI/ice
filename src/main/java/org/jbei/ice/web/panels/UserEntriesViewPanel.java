@@ -30,12 +30,13 @@ public class UserEntriesViewPanel extends SortableDataTablePanel<Entry> {
         UserEntriesDataProvider provider = new UserEntriesDataProvider(IceSession.get()
                 .getAccount());
         dataProvider = provider;
+        setEntries(provider.getEntries());
 
         // table columns
         addIndexColumn();
         super.addTypeColumn("recordType", true);
         addPartIDColumn();
-        super.addLabelHeaderColumn("Name", null, "oneName.name"); 
+        super.addLabelHeaderColumn("Name", null, "oneName.name");
         addSummaryColumn();
         addStatusColumn();
         addHasAttachmentColumn();
@@ -43,8 +44,20 @@ public class UserEntriesViewPanel extends SortableDataTablePanel<Entry> {
         addHasSequenceColumn();
         addCreationTimeColumn();
 
-        setEntries(provider.getEntries());
         renderTable();
+    }
+
+    protected void addIndexColumn() {
+        addColumn(new LabelHeaderColumn<Entry>("#") {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected Component evaluate(String componentId, final Entry entry, int index) {
+                return new Label(componentId, String.valueOf((table.getCurrentPage() * table
+                        .getRowsPerPage()) + index + 1));
+            }
+        });
     }
 
     protected void addPartIDColumn() {

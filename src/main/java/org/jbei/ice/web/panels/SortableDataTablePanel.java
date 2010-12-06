@@ -3,12 +3,10 @@ package org.jbei.ice.web.panels;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.ResourceReference;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.html.CSSPackageResource;
 import org.apache.wicket.markup.html.JavascriptPackageResource;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.lib.models.Entry;
@@ -73,18 +71,6 @@ public class SortableDataTablePanel<T> extends Panel {
     }
 
     // COLUMNS
-    protected void addIndexColumn() {
-        addColumn(new LabelHeaderColumn<T>("#") {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected Component evaluate(String componentId, final T t, int index) {               
-                return new Label(componentId, String.valueOf(table.getPageCount()
-                        * table.getCurrentPage() + index + 1));
-            }
-        });
-    }
 
     protected void addTypeColumn(String propertyExpression, boolean sort) {
         String sortProperty = null;

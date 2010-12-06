@@ -31,7 +31,7 @@ public class FolderDataTablePanel extends SortableDataTablePanel<Entry> {
 
         dataProvider = new FolderDataProvider(folder);
 
-        super.addIndexColumn();
+        addIndexColumn();
         super.addTypeColumn("recordType", true);
         addPartIDColumn();
         super.addLabelHeaderColumn("Name", "oneName.name", "oneName.name");
@@ -41,10 +41,23 @@ public class FolderDataTablePanel extends SortableDataTablePanel<Entry> {
         addHasSampleColumn();
         addHasSequenceColumn();
         addCreationTimeColumn();
-        
-        this.setEntries(((FolderDataProvider)dataProvider).getEntries());
+
+        this.setEntries(((FolderDataProvider) dataProvider).getEntries());
 
         renderTable();
+    }
+
+    protected void addIndexColumn() {
+        addColumn(new LabelHeaderColumn<Entry>("#") {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected Component evaluate(String componentId, final Entry entry, int index) {
+                return new Label(componentId, String.valueOf((table.getCurrentPage() * table
+                        .getRowsPerPage()) + index + 1));
+            }
+        });
     }
 
     protected void addHasAttachmentColumn() {
@@ -52,6 +65,7 @@ public class FolderDataTablePanel extends SortableDataTablePanel<Entry> {
                 "attachment.gif", null, "Has Attachment", this) {
             private static final long serialVersionUID = 1L;
 
+            @Override
             protected Component evaluate(String id, Entry entry, int row) {
 
                 EntryController entryController = new EntryController(IceSession.get().getAccount());
@@ -76,6 +90,7 @@ public class FolderDataTablePanel extends SortableDataTablePanel<Entry> {
                 null, "Has Samples", this) {
             private static final long serialVersionUID = 1L;
 
+            @Override
             protected Component evaluate(String id, Entry entry, int row) {
                 Fragment fragment = new Fragment(id, "has_sample_fragment",
                         FolderDataTablePanel.this);
@@ -100,6 +115,7 @@ public class FolderDataTablePanel extends SortableDataTablePanel<Entry> {
                 "sequence.gif", null, "Has Sequence", this) {
             private static final long serialVersionUID = 1L;
 
+            @Override
             protected Component evaluate(String id, Entry entry, int row) {
                 Fragment fragment = new Fragment(id, "has_sequence_fragment",
                         FolderDataTablePanel.this);

@@ -30,7 +30,7 @@ public class UserSamplesViewPanel extends SortableDataTablePanel<Sample> {
     }
 
     protected void addColumns() {
-        super.addIndexColumn();
+        addIndexColumn();
         super.addTypeColumn("entry.recordType", true);
         addPartIDColumn();
         super.addLabelHeaderColumn("Name", "entry.oneName.name", "entry.oneName.name");
@@ -38,6 +38,19 @@ public class UserSamplesViewPanel extends SortableDataTablePanel<Sample> {
         addNotesColumn();
         addLocationColumn();
         addCreationTimeColumn();
+    }
+
+    protected void addIndexColumn() {
+        addColumn(new LabelHeaderColumn<Sample>("#") {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected Component evaluate(String componentId, final Sample entry, int index) {
+                return new Label(componentId, String.valueOf((table.getCurrentPage() * table
+                        .getRowsPerPage()) + index + 1));
+            }
+        });
     }
 
     protected void addCreationTimeColumn() {
