@@ -38,6 +38,8 @@ public class FolderDataProvider extends AbstractEntriesDataProvider {
 
     @Override
     public Iterator<Entry> iterator(int first, int count) {
+        this.entries.clear();
+        
         try {
             Folder folder = FolderManager.get(this.folder.getId());
             List<Entry> list = new LinkedList<Entry>(folder.getContents());
@@ -67,7 +69,10 @@ public class FolderDataProvider extends AbstractEntriesDataProvider {
                 }
             });
             
-            return list.subList(first, first + count).iterator();
+            List<Entry> sublist = list.subList(first, first + count);
+            this.entries.addAll(sublist);
+            
+            return sublist.iterator();
         } catch (ManagerException e) {
             throw new ViewException(e);
         }
