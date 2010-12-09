@@ -44,6 +44,7 @@ public class MostRecentEntriesPanel extends SortableDataTablePanel<Entry> {
         renderTable();
     }
 
+    @Override
     protected void addIndexColumn() {
         addColumn(new LabelHeaderColumn<Entry>("#") {
 
@@ -118,6 +119,7 @@ public class MostRecentEntriesPanel extends SortableDataTablePanel<Entry> {
                 "attachment.gif", null, "Has Attachment", this) {
             private static final long serialVersionUID = 1L;
 
+            @Override
             protected Component evaluate(String id, Entry entry, int row) {
 
                 EntryController entryController = new EntryController(IceSession.get().getAccount());
@@ -142,13 +144,14 @@ public class MostRecentEntriesPanel extends SortableDataTablePanel<Entry> {
                 null, "Has Samples", this) {
             private static final long serialVersionUID = 1L;
 
+            @Override
             protected Component evaluate(String id, Entry entry, int row) {
                 Fragment fragment = new Fragment(id, "has_sample_fragment",
                         MostRecentEntriesPanel.this);
 
                 EntryController entryController = new EntryController(IceSession.get().getAccount());
                 try {
-                    if (entryController.hasAttachments(entry))
+                    if (entryController.hasSamples(entry))
                         fragment.add(new Image("has_sample", hasSampleImage));
                     else
                         fragment.add(new Image("has_sample", blankImage));
@@ -166,13 +169,14 @@ public class MostRecentEntriesPanel extends SortableDataTablePanel<Entry> {
                 "sequence.gif", null, "Has Sequence", this) {
             private static final long serialVersionUID = 1L;
 
+            @Override
             protected Component evaluate(String id, Entry entry, int row) {
                 Fragment fragment = new Fragment(id, "has_sequence_fragment",
                         MostRecentEntriesPanel.this);
 
                 EntryController entryController = new EntryController(IceSession.get().getAccount());
                 try {
-                    if (entryController.hasAttachments(entry))
+                    if (entryController.hasSequence(entry))
                         fragment.add(new Image("has_sequence", hasSequenceImage));
                     else
                         fragment.add(new Image("has_sequence", blankImage));

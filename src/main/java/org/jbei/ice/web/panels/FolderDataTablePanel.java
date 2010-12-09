@@ -97,7 +97,7 @@ public class FolderDataTablePanel extends SortableDataTablePanel<Entry> {
 
                 EntryController entryController = new EntryController(IceSession.get().getAccount());
                 try {
-                    if (entryController.hasAttachments(entry))
+                    if (entryController.hasSamples(entry))
                         fragment.add(new Image("has_sample", hasSampleImage));
                     else
                         fragment.add(new Image("has_sample", blankImage));
@@ -122,10 +122,11 @@ public class FolderDataTablePanel extends SortableDataTablePanel<Entry> {
 
                 EntryController entryController = new EntryController(IceSession.get().getAccount());
                 try {
-                    if (entryController.hasAttachments(entry))
+                    if (entryController.hasSequence(entry))
                         fragment.add(new Image("has_sequence", hasSequenceImage));
                     else
                         fragment.add(new Image("has_sequence", blankImage));
+
                 } catch (ControllerException e) {
                     fragment.add(new Image("has_sequence", blankImage));
                 }
