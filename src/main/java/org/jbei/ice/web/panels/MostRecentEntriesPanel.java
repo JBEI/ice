@@ -44,7 +44,6 @@ public class MostRecentEntriesPanel extends SortableDataTablePanel<Entry> {
         renderTable();
     }
 
-    @Override
     protected void addIndexColumn() {
         addColumn(new LabelHeaderColumn<Entry>("#") {
 
