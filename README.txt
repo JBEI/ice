@@ -209,37 +209,39 @@ page is located at https://yoursite/admin.
 5. Configuring for Development
 ==============================
 
-We use Eclipse IDE for ICE development. Go to http://www.eclipse.org
-and download the JAVA EE Edition of Eclipse. After Eclipse installation,
-install the Sonatype M2Eclipse plugin (http://m2eclipse.sonatype.org/).
-Go to the Help menu, select "Install New Software", and add a new
-software site (currently http://m2eclipse.sonatype.org/sites/m2e),
-then follow the prompts. 
+5.1 We use Eclipse IDE for ICE development. Go to
+    http://www.eclipse.org and download the JAVA EE Edition of
+    Eclipse. After Eclipse installation, install the Sonatype
+    M2Eclipse plugin (http://m2eclipse.sonatype.org/).  Go to the Help
+    menu, select "Install New Software", and add a new software site
+    (currently http://m2eclipse.sonatype.org/sites/m2e), then follow
+    the prompts.
 
-Once Eclipse is installed, import the main ICE directory (the one with
-.project file) as an existing project. Select File from the menu, choose
-Import, then select General -> Existing Projects into Workspace.
+5.2 Once Eclipse is installed, import the main ICE directory (the one
+    with .project file) as an existing project. Select File from the
+    menu, choose Import, then select General -> Existing Projects into
+    Workspace.
 
-There are different ways to debug ICE in Eclipse, which are changing
-constantly. The most reliable but somewhat cumbersome way is to use the
-included maven jetty plugin:
+5.3 There are different ways to debug ICE in Eclipse, which are
+    changing constantly. The most reliable but somewhat cumbersome way
+    is to use the included maven jetty plugin:
 
-5.4.1. Go to Run-> External Tools->External Tools Configuration and
+5.3.1. Go to Run-> External Tools->External Tools Configuration and
        create a new Program setup. Enter your mvn location
        (/usr/bin/mvn for linux) and the arguments "jetty:run".
        Use your workspace root as the Working Directory.
-5.4.1.1 Select the Environment tab and add a new variable.
+5.3.1.1 Select the Environment tab and add a new variable.
     MAVEN_OPTS: -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4000,server=y,suspend=y
-5.4.2. Go to Run->Debug Configurations and create a new debug
+5.3.2. Go to Run->Debug Configurations and create a new debug
        configuration of the type Remote Java Application. Use the
-       standard connection and port 4000 (as specified in 2.1 above).
+       standard connection and port 4000 (as specified in 5.3.1.1 above).
        Check Allow Termination of remote VM. In the Source tab, add
        the ice src directory.
-5.4.3. This will create what looks like another project. Click its
+5.3.3. This will create what looks like another project. Click its
        properties, Java Build Path, select the Projects tab, and add
        the gd-ice project. This will link the sources.
-5.4.4. Select Run->External Tools and run jetty
-5.4.5. Select Run->Debug Configurations and select your debug
+5.3.4. Select Run->External Tools and run jetty
+5.3.5. Select Run->Debug Configurations and select your debug
        configuration.
 
 If run once, they can be launched again by clicking the Run External
