@@ -18,21 +18,58 @@ CONTENTS:
 ===============
 
 ICE depends on external software. The minimum requirement to run ICE
-is Postgres and a java based web server like Tomcat or Jetty. To use
+is Postgres and a Java based web server like Tomcat or Jetty. To use
 BLAST to search sequences, it must be installed on your system. Then,
 update the jbeir.properties file to tell ICE where it is.
 
 To make significant modifications or customizations, we use the
 optional development tools mentioned below.
 
+1.1 Java
 
-1.1 Postgres
+ICE requires Java 1.6 (also known as Java 6). Please download the
+Sun/Oracle SDK version, instead of the open source versions.
+
+1.1.1 Debian/Ubuntu intall instructions
+The package name is "sun-java6-jdk". You may have to add external software
+repositories to be able to install it. To use sun java as default, you
+may have to run as root (type 'sudo su' or just 'su' depending on system)
+    # update-alternatives --list java
+to see the available java on your system. To change it, run
+    # update-alternatives --config java
+and choose "java-6-sun".
+
+1.2 Postgres
 
 ICE requires postgres to run. It is relatively easy to set up and use.
 There are plenty of walk throughs on the internet to guide you.  We
-recommend (and use) the pgadmin software.
+recommend (and use) the pgadmin3 software. Please be ware: If different
+versions of postgres is installed on your machine, they may be listening
+on different ports (5432 and/or 5433).
 
-TODO: Write walkthrough here. 
+1.2.1 Debian/Ubuntu install instructions
+
+1.2.1.1 Install the postgresql package:
+        # apt-get install postgresql
+1.2.1.2 Configure root password for the root database user (called postgres)
+        # su postgres
+        $ psql postgres
+        postgres=# 
+        Type in '\password postgres' without the quotes to change the
+        password. Follow the prompts. Type '\q' to quit.
+1.2.1.3 Create a new database user
+        $ createuser --pwprompt test_user
+        [ type in the password. Select no to all options ]
+1.2.1.4 Create a new database and assign it to the user
+        $ createdb --owner test_user test_registry
+1.2.1.4 PgadminIII (Optional)
+        # apt-get install pgadmin3
+        Make sure to configure the correct port (see above).
+
+1.2 BLAST
+    ICE needs to have ncbi-blast installed to use the nice BLAST features.
+    On Ubuntu/Debian systems run
+    # apt-get install blast2
 
 1.2 Adobe Flex SDK (For Development only)
 
@@ -57,9 +94,12 @@ We use Eclipse as our IDE. See Section 5 for setup instructions.
 
 2.1. If you would like to keep track of current development, building
      from sources is a must.
-     Download sources from svn:
+     Download the sources from the subversion repository:
      $ svn checkout http://gd-ice.googlecode.com/svn/trunk/ice gd-ice-build
 
+     From now on, the gd-ice-build directory will be referred to as
+     the Root ICE directory.
+     
 2.1.1 [optional: git] I prefer to use git-svn to talk to the svn repo,
       as git gives me greater flexibility in managing local branches.
       With git, the commands are:
@@ -99,8 +139,8 @@ We use Eclipse as our IDE. See Section 5 for setup instructions.
       SITE_SECRET and SECRET_KEY. These strings are used as
       cryptographic salts in various places.
       Any *_DIRECTORY setting with /tmp/ should be changed if you want
-      to use these features. Hopefully, other settings are self
-      explanatory.
+      to use these features. Double check the location of blast programs.
+      Hopefully, other settings are self explanatory.
 2.2.3 src/main/resources/log4j.properties
       Change the file location if you want to keep log files between
       server reboots.
@@ -136,7 +176,7 @@ We use Eclipse as our IDE. See Section 5 for setup instructions.
 Maven provides a convenient way to download dependencies and build
 packages.
 
-3.1. Install maven2 (via apt-get or download).
+3.1. Install maven2 (via 'apt-get install maven2' or download).
 3.2. ICE's pom.xml has all the dependencies defined. However, there
      are some libraries that are not in any public maven repositories,
      namely biojava and flex components. We have provided these in the
@@ -169,13 +209,14 @@ cache.
     To generate a *temporary* self-signed certificate, run
 
     For Windows:
-    %JAVA_HOME%\bin\keytool -genkey -alias tomcat -keyalg RSA /path/to/.keystore
+    %JAVA_HOME%\bin\keytool -genkey -alias tomcat -keyalg RSA -keystore .keystore
     For Unix:
-    $JAVA_HOME/bin/keytool -genkey -alias tomcat -keyalg RSA /path/to/.keystore 
+    keytool -genkey -alias tomcat -keyalg RSA -keystore .keystore 
 
-    The default file name is ".keystore", and the default password is
-    "changeit", as can be seen in jetty-debug.xml. Update the file to
-    reflect the actual location of the file and the password.
+    By default, the path to the .keystore file is where this
+    README.txt is, and the default password is "changeit", as can be
+    seen in jetty-debug.xml. Update the file to reflect the actual
+    location of the file and the password.
 
     Now try to run the ICE server:
     $ mvn jetty:run
@@ -188,12 +229,21 @@ cache.
     The first time maven is run, it will download all the dependent
     packages, which can take a long time.
 
-3.4. You can try to build a deployable war file by typing
-     $ mvn package
+    Hint: To capture all the output that pass by use the 'script'
+    utility:
+    $ script capturefile.txt
+    $ mvn jetty:run
+    $ exit
+    
+    Now all the output has been captured to a file, which can be
+    examined.
+    
+3.4 You can try to build a deployable war file by typing
+    $ mvn package
 
-     Now you should have target/gd-ice-1.0-SNAPSHOT.war and
-     target/gd-ice-1.0-SNAPSHOT. Deploy these to your webserver
-     install.
+    Now you should have target/gd-ice-1.0-SNAPSHOT.war and
+    target/gd-ice-1.0-SNAPSHOT. Deploy one of these to your webserver
+    install.
 
       
 ================
@@ -212,42 +262,99 @@ page is located at https://yoursite/admin.
 5.1 We use Eclipse IDE for ICE development. Go to
     http://www.eclipse.org and download the JAVA EE Edition of
     Eclipse. After Eclipse installation, install the Sonatype
-    M2Eclipse plugin (http://m2eclipse.sonatype.org/).  Go to the Help
-    menu, select "Install New Software", and add a new software site
-    (currently http://m2eclipse.sonatype.org/sites/m2e), then follow
-    the prompts.
+    M2Eclipse plugin (website: http://m2eclipse.sonatype.org/): Go to
+    the Help menu, select "Install New Software", select "Add...", and
+    add a new software site (currently
+    http://m2eclipse.sonatype.org/sites/m2e), then follow the prompts.
 
-5.2 Once Eclipse is installed, import the main ICE directory (the one
-    with .project file) as an existing project. Select File from the
-    menu, choose Import, then select General -> Existing Projects into
-    Workspace.
+5.2 Once Eclipse is installed, import the root ICE directory (the one
+    with .project, and this README.txt file) as an existing
+    project. Select File from the menu, choose Import, then select
+    General -> Existing Projects into Workspace.
 
+    It may take a while for Eclipse to "update indexes" when run for
+    the first time. Be patient.
+    
 5.3 There are different ways to debug ICE in Eclipse, which are
     changing constantly. The most reliable but somewhat cumbersome way
     is to use the included maven jetty plugin:
 
-5.3.1. Go to Run-> External Tools->External Tools Configuration and
-       create a new Program setup. Enter your mvn location
-       (/usr/bin/mvn for linux) and the arguments "jetty:run".
-       Use your workspace root as the Working Directory.
+5.3.1. Go to Run-> 'External Tools' -> 'External Tools Configuration'
+       and select 'Program', and click the new button. Use 'run jetty'
+       as the Name. For Location, enter your maven program location
+       (/usr/bin/mvn for linux). For the Working Directory, select
+       'Browse Workspace', and choose gd-ice. Enter jetty:run into the
+       Arguments field.
+       
 5.3.1.1 Select the Environment tab and add a new variable.
-    MAVEN_OPTS: -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4000,server=y,suspend=y
-5.3.2. Go to Run->Debug Configurations and create a new debug
-       configuration of the type Remote Java Application. Use the
-       standard connection and port 4000 (as specified in 5.3.1.1 above).
-       Check Allow Termination of remote VM. In the Source tab, add
-       the ice src directory.
-5.3.3. This will create what looks like another project. Click its
-       properties, Java Build Path, select the Projects tab, and add
-       the gd-ice project. This will link the sources.
-5.3.4. Select Run->External Tools and run jetty
-5.3.5. Select Run->Debug Configurations and select your debug
-       configuration.
+        Name: MAVEN_OPTS
+        Value: -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4000,server=y,suspend=y
+        Select Apply, then Run.
+        
+5.3.2. Go to Run->'Debug Configurations' and select 'Remote Java
+       Application' and click the New button. For Name, use 'gd-ice'.
+       For Project, browse and select gd-ice. Use the Standard for
+       Connection Type and port 4000 (as specified in 5.3.1.1 above).
+       Check Allow Termination of remote VM.  Select Apply then Run.
+       This should launch jetty, the same way as in Section 3.
 
-If run once, they can be launched again by clicking the Run External
-and then the Debug buttons.
+5.3.3. From now on, gd-ice can be launched by using the launch
+       buttons.  First press the green Play button with the red
+       toolbox (which is the external program launcher), then the
+       green Bug button (which is the debug launch). To stop the
+       program, press the red square in the Console window. 
 
+5.3.4. To test a functioning debug set up, open up
+       WicketApplication.java file by pressing Shift-Ctrl-R, and type
+       in WicketApplication.java in the search box. Set a breakpoint
+       on the line "mountPages();" (around line 53) by double clicking
+       on the left margin, below the green triangle. Launch the
+       application, and Eclipse should stop at the specified line
+       waiting for your input. Press the green Play button in the
+       Debug pane to continue, red square to stop the program. 
 
+5.3.5 Eclipse Tips
+      Eclipse is a large and powerful program for software development.
+      It has a large learning curve, so here are some tips.
+
+      Perspectives: These are groups of windows. They can be selected
+      from the top right of the screen. Initially, Java EE is available,
+      and when one starts to debug, a Debug perspective opens up. Each
+      perspective can display whatever kinds of windows.
+
+      Views: Views are kinds of windows. Editor, Project Explorer, Console,
+      and Debug are some of these views. Any View can be added to any
+      Perspective by selecting the Window menu -> Show View -> etc.
+      When Eclipse is closed, the position and the layout of Views
+      is preserved for each Perspective. 
+
+      Sometimes Perspectives get confused. Select Window -> Reset
+      Perspective to reset a customized Perspective.
+
+      Sometimes Eclipse itself gets confused. It is a good idea to
+      make a backup copy of a working version of the eclipse
+      installation (directory containing the eclipse program)
+      periodically. Same goes with eclipse Workspace directory
+      as well as the project directory.
+
+      Eclipse has a very nice svn plugin.
+
+      To show line numbers in the editor, go to Window -> Preferences ->
+      General -> Editors -> Text Editors and select 'Show line numbers'.
+
+      Eclipse has a very powerful automatic completion. Press
+      Ctrl-Space to get context assistance, and Ctrl-1 for "quick
+      fix", which can fix many different types of compilation errors
+      almost automatically. 
+      
+      Use the ICE source formatter. Go to Window -> Preferences ->
+      Java -> Code Style -> Formatter and import the Registry Team
+      Formatter.xml file. Format can then be performed by pressing
+      Ctrl-Shift-F. Eclipse can be configured to automatically format
+      Java code all the time by selecting Preferences -> Java ->
+      Editor -> Save Actions and selecting Format source code on save.
+      
+      
 ====================
 6. Contributing Code
 ====================
