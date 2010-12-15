@@ -1,0 +1,152 @@
+<?xml version='1.0'?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "file:/mnt/jbei-filer/nfs/users/tsham/workspaces/java/gd-ice/docs/Manual/manual.xml">
+<book id="gdIceManual" lang="en">
+	<bookinfo>
+		<author>
+			<firstname>TImothy</firstname>
+			<surname>Ham</surname>
+		</author>
+		<title>GD-ICE Manual</title>
+	</bookinfo>
+	<chapter id="introduction">
+		<title>Introduction</title>
+		<sect1 id="welcome">
+			<title>Welcome</title>
+			<para>
+				Welcome to the JBEI Registry Software Version 2 (ICE). We hope you
+				find our tools useful. More information, feature requests, bug
+				reports, as well as discussions are available from our Google
+				Project
+				page:
+				<ulink url="http://code.google.com/p/gd-ice/">http://code.google.com/p/gd-ice/</ulink>
+			</para>
+		</sect1>
+	</chapter>
+	<chapter id="installation">
+		<title>Installation and Setup</title>
+		<para>Currently the primary method of ICE distribution is via source
+			code.
+			Because it is a server side software, knowledge of underlying systems is
+			required.  
+  	</para>
+		<para>
+			End users may use a publicly available installation, available at:
+			<ulink url="https://public.jbeir.org">https://public.jbeir.org</ulink>
+			.
+		</para>
+
+		<sect1 id="requirements"><title>Requirements</title>
+			<para>ICE depends on external software. The minimum requirement to
+				run ICE
+				is Postgres and a Java based web server like Tomcat or Jetty. To use
+				BLAST to search sequences, it must be installed on your system.
+				Then,
+				update the jbeir.properties file to tell ICE where it is.
+			</para>
+			<para>
+				To make significant modifications or customizations, we use the
+				optional development tools mentioned below.
+  			</para>
+  			<sect2 id="requirements-java"><title>Java</title>
+  				<para>ICE requires Java 1.6 SE (also known as Java 6). Please download the
+Sun/Oracle SDK version, instead of the open source versions.
+  				</para>
+  				<sect3 id="java-linux"><title>Debian/Ubuntu</title>
+  					<para>The package name is "sun-java6-jdk". You may have to add external software
+						repositories to be able to install it. To use sun java as default, you
+						may have to run as root (type 'sudo su' or just 'su' depending on system)
+						<screen><prompt>#</prompt><command>update-alternatives --list java</command></screen>
+						to see the available java on your system. To change it, run
+    					<screen><prompt>#</prompt><command>update-alternatives --config java</command></screen>
+						and choose "java-6-sun".
+  					</para>
+  				</sect3>
+  				<sect3 id="java-windows"><title>Windows</title>
+  					<para>Download from:
+  					
+					<ulink url="http://www.oracle.com/technetwork/java/javase/downloads/index.html">http://www.oracle.com/technetwork/java/javase/downloads/index.html</ulink>
+  					</para></sect3>
+  			</sect2>
+  			<sect2 id="requirements-postgresql"><title>Postgresql</title>
+  				<para>ICE requires postgres to run. It is relatively easy to set up and use.
+There are plenty of walk throughs on the internet to guide you.  We
+recommend (and use) the pgadmin3 software. Please be ware: If different
+versions of postgres is installed on your machine, they may be listening
+on different ports (5432 and/or 5433).
+  				</para>
+  				<sect3 id="postgres-linux"><title>Debian/Ubuntu</title>
+  					<para>
+  					Install the postgresql package:
+  					<screen><prompt>#</prompt><command>apt-get install postgresql</command></screen>
+  					Configure the root password for the root database user (called postgres)
+  					<screen><prompt>#</prompt><command>su postgres</command>
+<prompt>$</prompt><command>psql <replaceable>postgres</replaceable></command>
+<prompt>postgres=#</prompt><command>\password postgres</command></screen>
+  					After changing the password, type \q to quit.
+  					</para><para>It is possible the database is named template1 instead of postgres. In this case type
+  					<screen><prompt>$</prompt><command>psql <replaceable>template1</replaceable></command></screen>
+  					</para>
+  					<para>Create a new database user
+  					<screen><prompt>$</prompt><command>createuser --pwprompt test_user</command></screen>
+  					Type in the password, and select no to all options.
+  					</para>
+  					<para>
+  					Create a new database and assign it to the user
+  					<screen><prompt>$</prompt><command>createdb --owner test_user test_registry</command></screen>
+  					</para>
+  					<para>
+  					Install pgAdmin3 (optional)
+  					<screen><prompt>#</prompt><command>apt-get install pgadmin3</command></screen>
+  					When using pgadmin to connect to the database, make sure to use the correct port (see above).
+  					</para>
+  				</sect3>
+  				<sect3 id="postgres-windows"><title>Windows</title>
+  					<para>
+  					Postgresql has a Windows version with pgAdmin3 built in. See <ulink url="http://www.postgresql.org/download/windows">http://www.postgresql.org/download/windows</ulink>
+  					</para>
+  					<para>Choose the latest 8.x series (currently 8.4).
+  					</para>
+  					<para>Follow the prompts and set up the administrator password, and use the default port (5432).
+  					</para>
+  					<para>After the installation, launch pgAdmin III program, and connect to the 
+database using the administrator password. Right click on Login Roles,
+select New Login Role, and enter test_user as the Role name and enter a
+password. 
+  					</para>
+  					<para>To create a new database, right click on Databases, select New Database.
+Name it test_registry, and change the owner to test_user, then click Ok.
+  					</para>
+  				</sect3> 
+  			</sect2>
+  			<sect2 id="requirements-blast"><title>BLAST</title>
+  				<para>ICE needs to have ncbi-blast installed to use the nice BLAST features.
+  				</para>
+  				<para>
+  				On Ubuntu/Debian systems run:
+  				<screen><prompt>#</prompt><command>apt-get install blast2</command></screen>
+  				</para>
+  				<para>TODO: Blast on Windows?</para>
+  			</sect2>
+  			<sect2 id="requirements-maven"><title>Maven (for building and development)</title>
+  				<para>We use Maven to help manage our dependencies.
+  				</para>
+  			</sect2>
+  			<sect2 id="requirements-eclipse"><title>Eclipse IDE</title>
+  			<para>We use Eclipse as our IDE. See <xref linkend="development"></xref> for setup instructions.</para>
+  			</sect2>
+			<sect2 id="requirements-flex"><title>Adobe Flex SDK (for development only)</title>
+				<para>We include compiled versions of our Flex applications in our sources.
+However, if you would like to build your own, you need Adobe's
+SDK. The SDK is mostly open source and freely available, which means
+you can compile our Flex tools without buying anything.  The IDE is
+sadly not free.</para>
+			</sect2>	
+		</sect1>
+		<sect1 id="source-code"><title>Getting the Source Code</title><para></para></sect1>
+		<sect1 id="maven"><title>Using Maven</title><para></para></sect1>
+		<sect1 id="website"><title>Website Setup</title><para></para></sect1>
+		<sect1 id="development"><title>Setup for Development</title><para></para></sect1>
+		<sect1 id="contributing"><title>Contributing Code</title><para></para></sect1>
+		<sect1 id="credits"><title>Credits</title><para></para></sect1>
+	</chapter>
+</book>
