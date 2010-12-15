@@ -27,7 +27,7 @@ optional development tools mentioned below.
 
 1.1 Java
 
-ICE requires Java 1.6 (also known as Java 6). Please download the
+ICE requires Java 1.6 SE (also known as Java 6). Please download the
 Sun/Oracle SDK version, instead of the open source versions.
 
 1.1.1 Debian/Ubuntu intall instructions
@@ -38,6 +38,10 @@ may have to run as root (type 'sudo su' or just 'su' depending on system)
 to see the available java on your system. To change it, run
     # update-alternatives --config java
 and choose "java-6-sun".
+
+1.1.2 Windows
+Download from 
+http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
 1.2 Postgres
 
@@ -57,6 +61,9 @@ on different ports (5432 and/or 5433).
         postgres=# 
         Type in '\password postgres' without the quotes to change the
         password. Follow the prompts. Type '\q' to quit.
+
+	It is possible the database is named template1 instead of postgres.
+	In this case, type psql template1
 1.2.1.3 Create a new database user
         $ createuser --pwprompt test_user
         [ type in the password. Select no to all options ]
@@ -66,10 +73,28 @@ on different ports (5432 and/or 5433).
         # apt-get install pgadmin3
         Make sure to configure the correct port (see above).
 
-1.2 BLAST
+1.2.2 Windows instructions
+Postgresql has a windows download link with pgAdmin3 built in. See 
+http://www.postgresql.org/download/windows
+Choose the latest 8.x series (currently 8.4)
+
+Follow the prompts and set up the administrator password, and use the default
+port (5432). 
+
+After the installation, launch pgAdmin III program, and connect to the 
+database using the administrator password. Right click on Login Roles,
+select New Login Role, and enter test_user as the Role name and enter a
+password. 
+
+To create a new database, right click on Databases, select New Database.
+Name it test_registry, and change the owner to test_user, then click Ok.
+
+1.3 BLAST
     ICE needs to have ncbi-blast installed to use the nice BLAST features.
     On Ubuntu/Debian systems run
     # apt-get install blast2
+
+    TODO: Blast on Windows?
 
 1.2 Adobe Flex SDK (For Development only)
 
@@ -100,6 +125,8 @@ We use Eclipse as our IDE. See Section 5 for setup instructions.
      From now on, the gd-ice-build directory will be referred to as
      the Root ICE directory.
      
+     Under Windows, TortoiseSVN is a nice client.
+
 2.1.1 [optional: git] I prefer to use git-svn to talk to the svn repo,
       as git gives me greater flexibility in managing local branches.
       With git, the commands are:
@@ -141,9 +168,13 @@ We use Eclipse as our IDE. See Section 5 for setup instructions.
       Any *_DIRECTORY setting with /tmp/ should be changed if you want
       to use these features. Double check the location of blast programs.
       Hopefully, other settings are self explanatory.
+      For Windows, replace the directory names with Windows style folder
+      names. For example, /tmp/attachments becomes c:\tmp\attachments
+      Make sure c:\tmp exists.
 2.2.3 src/main/resources/log4j.properties
       Change the file location if you want to keep log files between
-      server reboots.
+      server reboots. The FILE directive should be in unix format, even
+      for Windows. 
 2.2.4 src/main/webapp/WEB-INF/web.xml
       This file can be left alone. If you must run your site on
       http instead of https (we do not recommend this), comment out
@@ -177,13 +208,18 @@ Maven provides a convenient way to download dependencies and build
 packages.
 
 3.1. Install maven2 (via 'apt-get install maven2' or download).
+3.1.1 For Windows, follow the installation instructions on the maven
+      website. Add the appropriate environment variables. 
+
 3.2. ICE's pom.xml has all the dependencies defined. However, there
      are some libraries that are not in any public maven repositories,
      namely biojava and flex components. We have provided these in the
      lib/ directory so they can be installed to your local maven
      repository.
 
-Run the following commands in the lib/ directory of your sources:
+Run the following commands in the lib/ directory of your sources. Make 
+sure the long commands are not broken up into multiple lines. (both linux
+and Windows)
 
 $ cd lib
 
@@ -209,7 +245,7 @@ cache.
     To generate a *temporary* self-signed certificate, run
 
     For Windows:
-    %JAVA_HOME%\bin\keytool -genkey -alias tomcat -keyalg RSA -keystore .keystore
+    %JAVA_HOME%\bin\keytool.exe -genkey -alias tomcat -keyalg RSA -keystore .keystore
     For Unix:
     keytool -genkey -alias tomcat -keyalg RSA -keystore .keystore 
 
@@ -229,8 +265,10 @@ cache.
     The first time maven is run, it will download all the dependent
     packages, which can take a long time.
 
-    Hint: To capture all the output that pass by use the 'script'
-    utility:
+    To stop the server, press Ctrl-C
+
+    Hint (unix): To capture all the output that pass by use the 'script'
+    utility 
     $ script capturefile.txt
     $ mvn jetty:run
     $ exit
@@ -295,7 +333,7 @@ page is located at https://yoursite/admin.
        Application' and click the New button. For Name, use 'gd-ice'.
        For Project, browse and select gd-ice. Use the Standard for
        Connection Type and port 4000 (as specified in 5.3.1.1 above).
-       Check Allow Termination of remote VM.  Select Apply then Run.
+       Check Allow Termination of remote VM.  Select Apply then Debug.
        This should launch jetty, the same way as in Section 3.
 
 5.3.3. From now on, gd-ice can be launched by using the launch
