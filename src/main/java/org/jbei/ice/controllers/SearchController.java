@@ -30,12 +30,16 @@ public class SearchController extends Controller {
             return results;
         }
         String cleanedQuery = query.replace(":", " ");
+        cleanedQuery = cleanedQuery.replace("[", "\\[");
+        cleanedQuery = cleanedQuery.replace("]", "\\]");
+        cleanedQuery = cleanedQuery.replace("{", "\\{");
+        cleanedQuery = cleanedQuery.replace("}", "\\}");
         cleanedQuery = cleanedQuery.replace("(", "\\(");
         cleanedQuery = cleanedQuery.replace(")", "\\)");
         cleanedQuery = cleanedQuery.replace("+", "\\+");
 
-        cleanedQuery = (cleanedQuery.endsWith("\\") ? cleanedQuery.substring(0, cleanedQuery
-                .length() - 1) : cleanedQuery);
+        cleanedQuery = (cleanedQuery.endsWith("\\") ? cleanedQuery.substring(0,
+            cleanedQuery.length() - 1) : cleanedQuery);
         if (cleanedQuery.startsWith("*")) {
             cleanedQuery = cleanedQuery.substring(1);
         }
@@ -103,8 +107,8 @@ public class SearchController extends Controller {
                 }
             }
 
-            Logger.info(String.format("Blast found %d results", (results == null) ? 0 : results
-                    .size()));
+            Logger.info(String.format("Blast found %d results",
+                (results == null) ? 0 : results.size()));
         } catch (BlastException e) {
             throw new ControllerException(e);
         } catch (ManagerException e) {
