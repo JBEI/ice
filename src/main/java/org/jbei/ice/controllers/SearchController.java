@@ -30,6 +30,7 @@ public class SearchController extends Controller {
             return results;
         }
         String cleanedQuery = query.replace(":", " ");
+        cleanedQuery = cleanedQuery.replace("\\", " ");
         cleanedQuery = cleanedQuery.replace("[", "\\[");
         cleanedQuery = cleanedQuery.replace("]", "\\]");
         cleanedQuery = cleanedQuery.replace("{", "\\{");
@@ -42,7 +43,6 @@ public class SearchController extends Controller {
         cleanedQuery = cleanedQuery.replace("\"", "\\\"");
         cleanedQuery = cleanedQuery.replace("^", "\\^");
         cleanedQuery = cleanedQuery.replace("&", "\\&");
-        cleanedQuery = cleanedQuery.replace("\\", " ");
 
         cleanedQuery = (cleanedQuery.endsWith("\\") ? cleanedQuery.substring(0,
             cleanedQuery.length() - 1) : cleanedQuery);
