@@ -329,20 +329,20 @@ page is located at https://yoursite/admin.
         Value: -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4000,server=y,suspend=y
         Select Apply, then Run.
         
-5.3.2. Go to Run->'Debug Configurations' and select 'Remote Java
+5.3.1.2. Go to Run->'Debug Configurations' and select 'Remote Java
        Application' and click the New button. For Name, use 'gd-ice'.
        For Project, browse and select gd-ice. Use the Standard for
        Connection Type and port 4000 (as specified in 5.3.1.1 above).
        Check Allow Termination of remote VM.  Select Apply then Debug.
        This should launch jetty, the same way as in Section 3.
 
-5.3.3. From now on, gd-ice can be launched by using the launch
+5.3.1.3. From now on, gd-ice can be launched by using the launch
        buttons.  First press the green Play button with the red
        toolbox (which is the external program launcher), then the
        green Bug button (which is the debug launch). To stop the
        program, press the red square in the Console window. 
 
-5.3.4. To test a functioning debug set up, open up
+5.3.1.4. To test a functioning debug set up, open up
        WicketApplication.java file by pressing Shift-Ctrl-R, and type
        in WicketApplication.java in the search box. Set a breakpoint
        on the line "mountPages();" (around line 53) by double clicking
@@ -351,7 +351,25 @@ page is located at https://yoursite/admin.
        waiting for your input. Press the green Play button in the
        Debug pane to continue, red square to stop the program. 
 
-5.3.5 Eclipse Tips
+5.3.2 Alternative debug using maven plugin
+      This method is simpler, and may work for you.
+      Select Run->Debug Configurations... Select Maven Build from 
+      the left, and create a new configuration. Type "jetty run" 
+      into the Name field. For Base Directory, select Browse Workspace
+      and select gd-ice. Type "jetty:run" into the Goal field. You 
+      may select Skip Tests.  Select Apply and Debug. If it launches
+      correctly, and you can view the web page, then it is working.
+      However, for some reason the sources are not connected. Set a
+      breakpoint in the file UnprotectedPage.java in the sources, where
+      initializeStyles() runs. If you refresh the page in the browser,
+      the program should stop running at that line. In the Debug pane,
+      (Window->Show View->Debug), double click on the first item
+      with the line number. Here, Eclipse will try to open the 
+      source file and fail. Select Edit Source Lookup Path button,
+      select Add, select Workspace Folder, select gd-ice/src, and
+      make sure Search subfolders is checked. 
+
+5.3.3 Eclipse Tips
       Eclipse is a large and powerful program for software development.
       It has a large learning curve, so here are some tips.
 
