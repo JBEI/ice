@@ -3,6 +3,7 @@ package org.jbei.ice.services.blazeds;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.jbei.ice.bio.enzymes.RestrictionEnzyme;
@@ -20,6 +21,8 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountPreferences;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.Part;
+import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.models.Project;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
@@ -996,4 +999,41 @@ public class RegistryAMFAPI extends BaseService {
         return vectorEditorProject;
     }
 
+    /**
+     * @return Entry types supported for bulk import
+     */
+    public Entry.EntryType[] getSupportedEntryTypes() {
+        return Entry.EntryType.values();
+    }
+
+    public List<Part> saveParts(String sessionId, List<Part> parts) {
+        if (sessionId == null || sessionId.isEmpty())
+            return null;
+
+        Account account = getAccountBySessionId(sessionId);
+
+        if (account == null) {
+            return null;
+        }
+
+        EntryController entryController = new EntryController(account);
+
+        try {
+            List<Part> savedParts = new LinkedList<Part>();
+
+            for (Part part : parts) {
+                part.setPackageFormat(AssemblyStandard.RAW);
+                part.setCreator(account.getFullName());
+                part.setCreatorEmail(account.getEmail());
+                Entry newEntry = entryController.createEntry(part);
+                System.out.println("Saved Record: " + newEntry.getRecordId());
+                savedParts.add((Part) newEntry);
+            }
+            return savedParts;
+        } catch (ControllerException e) {
+            Logger.error(getLoggerPrefix(), e);
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

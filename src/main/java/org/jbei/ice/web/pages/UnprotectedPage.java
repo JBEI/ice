@@ -24,6 +24,7 @@ public class UnprotectedPage extends WebPage {
     public static final String SA_RESOURCE_LOCATION = "static/sa/";
     public static final String SCT_RESOURCE_LOCATION = "static/sct/";
     public static final String VET_RESOURCE_LOCATION = "static/vet/";
+    public static final String BI_RESOURCE_LOCATION = "static/bi/";
 
     protected static final long serialVersionUID = 1L;
 

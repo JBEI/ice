@@ -10,6 +10,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.jbei.ice.web.pages.BulkImportPage;
 import org.jbei.ice.web.pages.EntryNewPage;
 import org.jbei.ice.web.pages.FoldersPage;
 import org.jbei.ice.web.pages.HomePage;
@@ -37,7 +38,7 @@ public class MenuPanel extends Panel {
         }
     }
 
-    private List<MenuItem> menuItems = new ArrayList<MenuItem>();
+    private final List<MenuItem> menuItems = new ArrayList<MenuItem>();
 
     public MenuPanel(String id) {
         super(id);
@@ -47,6 +48,7 @@ public class MenuPanel extends Panel {
         //        addPageLinkMenuItem(UserPage.class, "My Entries");
         //        addPageLinkMenuItem(EntriesPage.class, "All Entries");
         addPageLinkMenuItem(EntryNewPage.class, "Add new entry");
+        addPageLinkMenuItem(BulkImportPage.class, "Bulk Import");
 
         ListView<MenuItem> menuList = new ListView<MenuItem>("menuList", menuItems) {
             private static final long serialVersionUID = 1L;

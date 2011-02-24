@@ -15,6 +15,7 @@ import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.web.pages.AdminPage;
 import org.jbei.ice.web.pages.BlastPage;
+import org.jbei.ice.web.pages.BulkImportPage;
 import org.jbei.ice.web.pages.EntriesPage;
 import org.jbei.ice.web.pages.EntryDownloadAttachmentPage;
 import org.jbei.ice.web.pages.EntryNewPage;
@@ -93,6 +94,7 @@ public class WicketApplication extends WebApplication {
         mount(new IndexedParamUrlCodingStrategy("/entry/view", EntryViewPage.class));
         mount(new IndexedParamUrlCodingStrategy("/entry/update", EntryUpdatePage.class));
         mountBookmarkablePage("/entry/new", EntryNewPage.class);
+        mountBookmarkablePage("/entry/bulk", BulkImportPage.class);
         mount(new IndexedParamUrlCodingStrategy("/entry/tip", EntryTipPage.class));
         mount(new IndexedParamUrlCodingStrategy("/entries", EntriesPage.class));
         mount(new IndexedParamUrlCodingStrategy("/user", UserPage.class));
