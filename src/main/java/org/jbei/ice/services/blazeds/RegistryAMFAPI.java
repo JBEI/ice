@@ -1,10 +1,15 @@
 package org.jbei.ice.services.blazeds;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.jbei.ice.bio.enzymes.RestrictionEnzyme;
 import org.jbei.ice.bio.enzymes.RestrictionEnzymesManager;
@@ -20,6 +25,7 @@ import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountPreferences;
+import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Project;
 import org.jbei.ice.lib.models.Sequence;
@@ -997,20 +1003,61 @@ public class RegistryAMFAPI extends BaseService {
         return vectorEditorProject;
     }
 
-    /**
-     * @return Entry types supported for bulk import
-     */
-    public Entry.EntryType[] getSupportedEntryTypes() {
-        return Entry.EntryType.values();
+    public List<Attachment> saveAttachments(String sessionId, List<Attachment> attachments,
+            Byte[] byteArray) {
+        Account account = this.sessionToAccount(sessionId);
+        if (account == null) {
+            return null;
+        }
+
+        byte[] input = new byte[byteArray.length];
+        for (int i = 0; i < byteArray.length; i += 1) {
+            input[i] = byteArray[i].byteValue();
+        }
+
+        String filename = "temp.zip";
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ZipOutputStream zos = new ZipOutputStream(baos);
+        ZipEntry entry = new ZipEntry(filename);
+        entry.setSize(input.length);
+        try {
+            zos.putNextEntry(entry);
+            zos.write(input);
+            zos.closeEntry();
+            zos.close();
+
+            File file = new File(filename);
+
+            System.out.println(file.canRead());
+        } catch (IOException e1) {
+            e1.printStackTrace();
+            return null;
+        }
+
+        return null;
+
+        //        AttachmentController controller = new AttachmentController(account);
+        //        try {
+        //            List<Attachment> savedAttachments = new LinkedList<Attachment>();
+        //            //            controller.save(attachment, inputStream)
+        //            return savedAttachments;
+        //        } catch (ControllerException e) {
+        //            Logger.error(getLoggerPrefix(), e);
+        //            e.printStackTrace();
+        //            return null;
+        //        }
     }
 
-    public List<Entry> saveParts(String sessionId, List<Entry> parts) {
-        System.out.println("Received save notification with " + parts.size());
+    private Account sessionToAccount(String sessionId) {
         if (sessionId == null || sessionId.isEmpty())
             return null;
 
-        Account account = getAccountBySessionId(sessionId);
+        return getAccountBySessionId(sessionId);
+    }
 
+    public List<Entry> saveParts(String sessionId, List<Entry> parts) {
+
+        Account account = this.sessionToAccount(sessionId);
         if (account == null) {
             return null;
         }
@@ -1021,10 +1068,12 @@ public class RegistryAMFAPI extends BaseService {
             List<Entry> savedParts = new LinkedList<Entry>();
 
             for (Entry part : parts) {
+                part.setCreatorEmail(account.getEmail());
                 part.setCreator(account.getFullName());
+
                 part.setOwner(account.getFullName());
-                part.setCreatorEmail(account.getEmail());
-                part.setCreatorEmail(account.getEmail());
+                part.setOwnerEmail(account.getEmail());
+
                 Entry newEntry = entryController.createEntry(part);
                 savedParts.add(newEntry);
             }
