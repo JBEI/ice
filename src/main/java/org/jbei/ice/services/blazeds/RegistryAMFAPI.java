@@ -21,8 +21,6 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountPreferences;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Part;
-import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.models.Project;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
@@ -1006,7 +1004,8 @@ public class RegistryAMFAPI extends BaseService {
         return Entry.EntryType.values();
     }
 
-    public List<Part> saveParts(String sessionId, List<Part> parts) {
+    public List<Entry> saveParts(String sessionId, List<Entry> parts) {
+        System.out.println("Received save notification with " + parts.size());
         if (sessionId == null || sessionId.isEmpty())
             return null;
 
@@ -1019,15 +1018,15 @@ public class RegistryAMFAPI extends BaseService {
         EntryController entryController = new EntryController(account);
 
         try {
-            List<Part> savedParts = new LinkedList<Part>();
+            List<Entry> savedParts = new LinkedList<Entry>();
 
-            for (Part part : parts) {
-                part.setPackageFormat(AssemblyStandard.RAW);
+            for (Entry part : parts) {
                 part.setCreator(account.getFullName());
+                part.setOwner(account.getFullName());
+                part.setCreatorEmail(account.getEmail());
                 part.setCreatorEmail(account.getEmail());
                 Entry newEntry = entryController.createEntry(part);
-                System.out.println("Saved Record: " + newEntry.getRecordId());
-                savedParts.add((Part) newEntry);
+                savedParts.add(newEntry);
             }
             return savedParts;
         } catch (ControllerException e) {
