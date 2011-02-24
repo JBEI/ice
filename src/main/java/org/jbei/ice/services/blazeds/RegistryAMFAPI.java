@@ -1,20 +1,28 @@
 package org.jbei.ice.services.blazeds;
 
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.util.zip.ZipFile;
 
 import org.jbei.ice.bio.enzymes.RestrictionEnzyme;
 import org.jbei.ice.bio.enzymes.RestrictionEnzymesManager;
 import org.jbei.ice.bio.enzymes.RestrictionEnzymesManagerException;
 import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.AttachmentController;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.ProjectController;
 import org.jbei.ice.controllers.SequenceAnalysisController;
@@ -23,10 +31,13 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.composers.SequenceComposerException;
 import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountPreferences;
 import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Project;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
@@ -1003,51 +1014,6 @@ public class RegistryAMFAPI extends BaseService {
         return vectorEditorProject;
     }
 
-    public List<Attachment> saveAttachments(String sessionId, List<Attachment> attachments,
-            Byte[] byteArray) {
-        Account account = this.sessionToAccount(sessionId);
-        if (account == null) {
-            return null;
-        }
-
-        byte[] input = new byte[byteArray.length];
-        for (int i = 0; i < byteArray.length; i += 1) {
-            input[i] = byteArray[i].byteValue();
-        }
-
-        String filename = "temp.zip";
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ZipOutputStream zos = new ZipOutputStream(baos);
-        ZipEntry entry = new ZipEntry(filename);
-        entry.setSize(input.length);
-        try {
-            zos.putNextEntry(entry);
-            zos.write(input);
-            zos.closeEntry();
-            zos.close();
-
-            File file = new File(filename);
-
-            System.out.println(file.canRead());
-        } catch (IOException e1) {
-            e1.printStackTrace();
-            return null;
-        }
-
-        return null;
-
-        //        AttachmentController controller = new AttachmentController(account);
-        //        try {
-        //            List<Attachment> savedAttachments = new LinkedList<Attachment>();
-        //            //            controller.save(attachment, inputStream)
-        //            return savedAttachments;
-        //        } catch (ControllerException e) {
-        //            Logger.error(getLoggerPrefix(), e);
-        //            e.printStackTrace();
-        //            return null;
-        //        }
-    }
-
     private Account sessionToAccount(String sessionId) {
         if (sessionId == null || sessionId.isEmpty())
             return null;
@@ -1055,7 +1021,82 @@ public class RegistryAMFAPI extends BaseService {
         return getAccountBySessionId(sessionId);
     }
 
-    public List<Entry> saveParts(String sessionId, List<Entry> parts) {
+    private ZipFile createZipFile(Byte[] byteArray, String filename) throws IOException {
+        byte[] input = new byte[byteArray.length];
+        for (int i = 0; i < byteArray.length; i += 1) {
+            input[i] = byteArray[i].byteValue();
+        }
+
+        FileOutputStream outputStream = new FileOutputStream(System.getProperty("java.io.tmpdir")
+                + File.separatorChar + filename);
+        outputStream.write(input);
+        outputStream.close();
+
+        File file = new File(System.getProperty("java.io.tmpdir"), filename);
+        return new ZipFile(file);
+    }
+
+    public List<Attachment> saveAttachments(String sessionId, List<Attachment> attachments,
+            Byte[] byteArray) {
+
+        Account account = this.sessionToAccount(sessionId);
+        if (account == null || byteArray == null) {
+            return null;
+        }
+        List<Attachment> saved = new LinkedList<Attachment>();
+
+        // restore attachment zip file
+        try {
+            ZipFile zipFile = this.createZipFile(byteArray, "attachment.zip");
+
+            // extract
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            AttachmentController controller = new AttachmentController(account);
+
+            while (entries.hasMoreElements()) {
+                ZipEntry zipEntry = entries.nextElement();
+                if (zipEntry.isDirectory())
+                    continue;
+
+                for (Attachment attachment : attachments) {
+                    if (zipEntry.getName().endsWith(attachment.getFileName())) {
+                        InputStream in = zipFile.getInputStream(zipEntry);
+                        try {
+                            if (attachment.getDescription() == null)
+                                attachment.setDescription("");
+                            Attachment savedAtt = controller.save(attachment, in, false);
+                            saved.add(savedAtt);
+                        } catch (ControllerException e) {
+                            Logger.error(getLoggerPrefix(), e);
+                        } catch (PermissionException e) {
+                            Logger.error(getLoggerPrefix(), e);
+                        }
+                    }
+                }
+
+                break;
+            }
+            zipFile.close();
+        } catch (IOException ioe) {
+            Logger.error(getLoggerPrefix(), ioe);
+            return saved;
+        }
+
+        return saved;
+    }
+
+    /**
+     * Saves "Entry"s and sequence files if any
+     * 
+     * @param sessionId
+     * @param parts
+     * @param sequences
+     * @param byteArray
+     * @param filename
+     * @return
+     */
+    public List<Entry> saveEntries(String sessionId, List<Entry> parts, List<Sequence> sequences,
+            Byte[] byteArray, String filename) {
 
         Account account = this.sessionToAccount(sessionId);
         if (account == null) {
@@ -1063,25 +1104,158 @@ public class RegistryAMFAPI extends BaseService {
         }
 
         EntryController entryController = new EntryController(account);
+        ZipFile zip = null;
 
         try {
+            if (sequences != null && sequences.size() > 0) {
+                zip = this.createZipFile(byteArray, filename);
+            }
+
             List<Entry> savedParts = new LinkedList<Entry>();
 
-            for (Entry part : parts) {
+            for (int i = 0; i < parts.size(); i += 1) {
+                Entry part = parts.get(i);
+
                 part.setCreatorEmail(account.getEmail());
                 part.setCreator(account.getFullName());
 
                 part.setOwner(account.getFullName());
                 part.setOwnerEmail(account.getEmail());
+                if (Entry.PART_ENTRY_TYPE.equals(part.getRecordType()))
+                    ((Part) part).setPackageFormat(Part.AssemblyStandard.RAW);
 
                 Entry newEntry = entryController.createEntry(part);
                 savedParts.add(newEntry);
+
+                if (zip != null) {
+                    Sequence sequence = (sequences.size() > i) ? sequences.get(i) : null;
+                    this.createSequence(account, part, sequence, zip);
+                }
             }
             return savedParts;
         } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
-            e.printStackTrace();
+            return null;
+        } catch (IOException e) {
+            Logger.error(getLoggerPrefix(), e);
             return null;
         }
+    }
+
+    private void createSequence(Account account, Entry entry, Sequence sequence, ZipFile zip)
+            throws IOException {
+        if (sequence == null)
+            return;
+
+        String sequenceFileName = sequence.getSequenceUser();
+
+        if (zip == null || sequenceFileName == null || "".equals(sequenceFileName))
+            return;
+
+        // create sequence entry
+        Enumeration<? extends ZipEntry> entries = zip.entries();
+
+        while (entries.hasMoreElements()) {
+            ZipEntry zipEntry = entries.nextElement();
+            if (zipEntry.isDirectory() || !zipEntry.getName().endsWith(sequenceFileName))
+                continue;
+
+            InputStream in = zip.getInputStream(zipEntry);
+
+            int count;
+            byte data[] = new byte[1000];
+            BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(
+                    System.getProperty("java.io.tmpdir") + File.separatorChar + sequenceFileName),
+                    1000);
+            while ((count = in.read(data, 0, 1000)) != -1) {
+                out.write(data, 0, count);
+            }
+            out.flush();
+            out.close();
+
+            break;
+        }
+        zip.close();
+
+        File seqFile = new File(System.getProperty("java.io.tmpdir"), sequenceFileName);
+        if (!seqFile.exists()) {
+            Logger.info("Sequence file not found. Looked in \"" + seqFile.getAbsolutePath() + "\"");
+            return;
+        }
+
+        // set sequence
+        SequenceController sequenceController = new SequenceController(account);
+
+        String sequenceUser = this.readSequenceFile(seqFile).toString();
+        IDNASequence dnaSequence = null;
+        if (sequenceUser != null) {
+            dnaSequence = SequenceController.parse(sequenceUser);
+        }
+
+        if (dnaSequence == null) {
+            Logger.info("Could not parse sequence file. Perhaps file is not supported");
+        } else {
+            try {
+                sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+                sequence.setSequenceUser(sequenceUser);
+                sequence.setEntry(entry);
+                sequenceController.save(sequence);
+            } catch (ControllerException e) {
+                Logger.error(getLoggerPrefix(), e);
+            } catch (PermissionException e) {
+                Logger.error(getLoggerPrefix(), e);
+            }
+        }
+    }
+
+    private StringBuilder readSequenceFile(File seqFile) {
+        StringBuilder sequenceStringBuilder = new StringBuilder();
+        if (seqFile.canRead()) {
+            BufferedReader br = null;
+            try {
+                br = new BufferedReader(new FileReader(seqFile));
+
+                while (true) {
+                    try {
+                        String temp = br.readLine();
+                        if (temp != null) {
+                            sequenceStringBuilder.append(temp + '\n');
+                        } else {
+                            break;
+                        }
+
+                    } catch (IOException e) {
+                        return null;
+                    }
+                }
+            } catch (FileNotFoundException e1) {
+                Logger.error(getLoggerPrefix(), e1);
+            } finally {
+                if (br != null)
+                    try {
+                        br.close();
+                    } catch (IOException e) {
+                    }
+            }
+        }
+
+        return sequenceStringBuilder;
+    }
+
+    public TreeSet<String> getUniqueOriginOfReplications() {
+        return UtilsManager.getUniqueOriginOfReplications();
+    }
+
+    public TreeSet<String> getUniqueSelectionMarkers() {
+        try {
+            return UtilsManager.getUniqueSelectionMarkers();
+        } catch (ManagerException e) {
+            Logger.error(getLoggerPrefix(), e);
+            return null;
+        }
+    }
+
+    public TreeSet<String> getUniquePromoters() {
+        return UtilsManager.getUniquePromoters();
     }
 }

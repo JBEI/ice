@@ -23,11 +23,11 @@ public class RichTextRenderer {
         if (type == null) {
             result = text;
         }
-        if (type.equals(WIKI)) {
+        if (WIKI.equals(type)) {
             MarkupParser markupParser = new MarkupParser(new MediaWikiLanguage());
 
             result = markupParser.parseToHtml(text);
-        } else if (type.equals(CONFLUENCE)) {
+        } else if (CONFLUENCE.equals(type)) {
             MarkupParser markupParser = new MarkupParser(new ConfluenceLanguage());
 
             result = markupParser.parseToHtml(text);
