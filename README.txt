@@ -127,22 +127,12 @@ We use Eclipse as our IDE. See Section 5 for setup instructions.
      
      Under Windows, TortoiseSVN is a nice client.
 
-2.1.1 [optional: git] I prefer to use git-svn to talk to the svn repo,
-      as git gives me greater flexibility in managing local branches.
-      With git, the commands are:
+2.1.1 [optional: git] 
+      If you are using git, you can clone from our git-svn mirror:
+      $ git clone http://loche.lbl.gov/tmp/gd-ice/.git gd-ice-build
 
-      $ git svn init http://gd-ice.googlecode.com/svn/trunk/ice gd-ice-build
-      $ cd gd-ice-build
-      $ git svn fetch
-      $ git checkout -f
+      (The strange url is due to git-svn needing a working copy) 
 
-      [Note: Sometimes google's svn server returns strange results to
-      git-svn, including missing commits, squashed commits, etc.  I
-      recommend running this command a few times in different
-      directories, from different ip addresses. Make sure the git
-      checksome for the last version is the same between checkouts
-      before continuing (by running git log)]
-    
       Let's create a build branch that's separate from the svn.
       $ git checkout -b build
 
@@ -188,10 +178,10 @@ We use Eclipse as our IDE. See Section 5 for setup instructions.
 2.3. Updating
 2.3.1 If using svn, just svn update and hope / check that your local
       settings are not over written by new defaults or new options.
-2.3.2 [git] If using git:
+2.3.2 [git] If using git, 
 
-      $ git svn fetch
-      $ git svn rebase
+      $ git fetch origin
+      $ git rebase origin
 
       Git will tell you if your settings don't apply. Fix those
       conflicts and git add -u, git rebase --continue.
