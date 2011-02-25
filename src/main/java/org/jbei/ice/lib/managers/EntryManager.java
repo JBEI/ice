@@ -496,7 +496,7 @@ public class EntryManager {
         } catch (NonUniqueResultException e) {
             // dirty funding source. There are multiple of these. Clean up.
             FundingSource duplicateFundingSource = (FundingSource) query.list().get(0);
-            result = duplicateFundingSource;
+            existingFundingSource = duplicateFundingSource;
         } finally {
             if (session.isOpen()) {
                 session.close();
