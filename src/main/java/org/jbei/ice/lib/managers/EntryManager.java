@@ -247,16 +247,17 @@ public class EntryManager {
 
         return entries;
     }
-    
+
     @SuppressWarnings("unchecked")
-    public static ArrayList<Long> getEntriesByOwnerSort(String owner, String field, boolean ascending) throws ManagerException {
+    public static ArrayList<Long> getEntriesByOwnerSort(String owner, String field,
+            boolean ascending) throws ManagerException {
         ArrayList<Long> entries = null;
 
         Session session = DAO.newSession();
         try {
             String orderSuffix = (field == null) ? ""
                     : (" ORDER BY e." + field + " " + (ascending ? "ASC" : "DESC"));
-            
+
             String queryString = "select id from " + Entry.class.getName()
                     + " e where ownerEmail = :ownerEmail" + orderSuffix;
 
@@ -519,6 +520,7 @@ public class EntryManager {
             String queryString = "from " + PartNumber.class.getName() + " where partNumber LIKE '"
                     + prefix + "%' ORDER BY partNumber DESC";
             Query query = session.createQuery(queryString);
+            query.setMaxResults(2);
 
             ArrayList<PartNumber> tempList = new ArrayList<PartNumber>(query.list());
             PartNumber entryPartNumber = null;
