@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	elementFormDefault="qualified"
+	targetNamespace="http://jbei.org/sequence"
+	xmlns:seq="http://jbei.org/sequence">
+<xs:element name="seq">
+	<xs:complexType>
+		<xs:sequence>
+			<xs:element ref="seq:name" />
+			<xs:element ref="seq:circular" />
+			<xs:element ref="seq:features"/>
+			<xs:element ref="seq:sequence" />
+		</xs:sequence>
+	</xs:complexType>
+</xs:element>
+<xs:element name="features">
+	<xs:complexType>
+		<xs:sequence>
+			<xs:element ref="seq:feature" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+</xs:element>
+<xs:element name="feature">
+	<xs:complexType>
+		<xs:sequence>
+			<xs:element ref="seq:start" />
+			<xs:element ref="seq:end" />
+			<xs:element ref="seq:label"/>
+			<xs:element ref="seq:attribute" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+</xs:element>
+<xs:element name="attribute">
+	<xs:complexType>
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute name="name"  use="required" type="xs:string"/>
+				<xs:attribute name="quoted" type="xs:boolean"/>	
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+</xs:element>
+<xs:element name="name" type="xs:string"/>
+<xs:element name="circular" type="xs:boolean"/>
+<xs:element name="start" type="xs:integer"/>
+<xs:element name="end" type="xs:integer"/>
+<xs:element name="label" type="xs:string"/>
+<xs:element name="sequence" type="xs:string"/>
+</xs:schema>

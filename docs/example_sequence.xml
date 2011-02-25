@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<seq:seq 
+  xmlns:seq="http://jbei.org/sequence"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xsi:schemaLocation="http://jbei.org/sequence seq.xsd"
+>
+<seq:name>AAURRA</seq:name>
+<seq:circular>true</seq:circular>
+<seq:features>
+	<seq:feature>
+		<seq:start>1</seq:start>
+		<seq:end>23</seq:end>
+		<seq:label>CDS</seq:label>
+		<seq:attribute name="translation">MATHRLVM</seq:attribute>
+	</seq:feature>
+</seq:features>
+<seq:sequence>atccacggccataggactctgaaagcactgcatcccgtccgatctgcaaagttaaccagagtaccgcccagttagtaccacggtgggggaccacgcgggaatcctgggtgctgtggtt</seq:sequence>
+</seq:seq>
