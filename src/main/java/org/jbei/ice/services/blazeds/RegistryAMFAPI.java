@@ -1,21 +1,18 @@
 package org.jbei.ice.services.blazeds;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.jbei.ice.bio.enzymes.RestrictionEnzyme;
@@ -38,8 +35,10 @@ import org.jbei.ice.lib.models.AccountPreferences;
 import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
+import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Project;
 import org.jbei.ice.lib.models.Sequence;
+import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
@@ -1036,153 +1035,149 @@ public class RegistryAMFAPI extends BaseService {
         return new ZipFile(file);
     }
 
-    public List<Attachment> saveAttachments(String sessionId, List<Attachment> attachments,
-            Byte[] byteArray) {
-
-        Account account = this.sessionToAccount(sessionId);
-        if (account == null || byteArray == null) {
-            return null;
-        }
-        List<Attachment> saved = new LinkedList<Attachment>();
-
-        // restore attachment zip file
-        try {
-            ZipFile zipFile = this.createZipFile(byteArray, "attachment.zip");
-
-            // extract
-            Enumeration<? extends ZipEntry> entries = zipFile.entries();
-            AttachmentController controller = new AttachmentController(account);
-
-            while (entries.hasMoreElements()) {
-                ZipEntry zipEntry = entries.nextElement();
-                if (zipEntry.isDirectory())
-                    continue;
-
-                for (Attachment attachment : attachments) {
-                    if (zipEntry.getName().endsWith(attachment.getFileName())) {
-                        InputStream in = zipFile.getInputStream(zipEntry);
-                        try {
-                            if (attachment.getDescription() == null)
-                                attachment.setDescription("");
-                            Attachment savedAtt = controller.save(attachment, in, false);
-                            saved.add(savedAtt);
-                        } catch (ControllerException e) {
-                            Logger.error(getLoggerPrefix(), e);
-                        } catch (PermissionException e) {
-                            Logger.error(getLoggerPrefix(), e);
-                        }
-                    }
-                }
-
-                break;
-            }
-            zipFile.close();
-        } catch (IOException ioe) {
-            Logger.error(getLoggerPrefix(), ioe);
-            return saved;
-        }
-
-        return saved;
-    }
-
-    /**
-     * Saves "Entry"s and sequence files if any
-     * 
-     * @param sessionId
-     * @param parts
-     * @param sequences
-     * @param byteArray
-     * @param filename
-     * @return
-     */
-    public List<Entry> saveEntries(String sessionId, List<Entry> parts, List<Sequence> sequences,
-            Byte[] byteArray, String filename) {
+    public Entry saveEntry(String sessionId, Entry entry, Byte[] sequenceFile,
+            Byte[] attachmentFile, String attachmentFilename) {
 
         Account account = this.sessionToAccount(sessionId);
         if (account == null) {
             return null;
         }
 
+        entry.setCreatorEmail(account.getEmail());
+        entry.setCreator(account.getFullName());
+        entry.setOwner(account.getFullName());
+        entry.setOwnerEmail(account.getEmail());
+
+        if (Entry.PART_ENTRY_TYPE.equals(entry.getRecordType()))
+            ((Part) entry).setPackageFormat(Part.AssemblyStandard.RAW);
+
         EntryController entryController = new EntryController(account);
-        ZipFile zip = null;
-
+        Entry saved = null;
         try {
-            if (sequences != null && sequences.size() > 0) {
-                zip = this.createZipFile(byteArray, filename);
-            }
-
-            List<Entry> savedParts = new LinkedList<Entry>();
-
-            for (int i = 0; i < parts.size(); i += 1) {
-                Entry part = parts.get(i);
-
-                part.setCreatorEmail(account.getEmail());
-                part.setCreator(account.getFullName());
-
-                part.setOwner(account.getFullName());
-                part.setOwnerEmail(account.getEmail());
-                if (Entry.PART_ENTRY_TYPE.equals(part.getRecordType()))
-                    ((Part) part).setPackageFormat(Part.AssemblyStandard.RAW);
-
-                Entry newEntry = entryController.createEntry(part);
-                savedParts.add(newEntry);
-
-                if (zip != null) {
-                    Sequence sequence = (sequences.size() > i) ? sequences.get(i) : null;
-                    this.createSequence(account, part, sequence, zip);
-                }
-            }
-            return savedParts;
+            saved = entryController.createEntry(entry);
         } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
             return null;
-        } catch (IOException e) {
+        }
+
+        // save sequence
+        saveEntrySequence(account, entry, sequenceFile, "seq.gb");
+
+        // save attachment
+        saveEntryAttachment(account, entry, attachmentFile, attachmentFilename);
+
+        return saved;
+    }
+
+    public List<Entry> saveStrainWithPlasmid(String sessionId, Strain strain, Plasmid plasmid,
+            Byte[] strainSequenceFile, Byte[] strainAttachmentFile,
+            String strainAttachmentFilename, Byte[] plasmidSequenceFile,
+            Byte[] plasmidAttachmentFile, String plasmidAttachmentFilename) {
+
+        Account account = this.sessionToAccount(sessionId);
+        if (account == null) {
+            return null;
+        }
+
+        // strain
+        strain.setCreatorEmail(account.getEmail());
+        strain.setCreator(account.getFullName());
+        strain.setOwner(account.getFullName());
+        strain.setOwnerEmail(account.getEmail());
+
+        // plasmid
+        plasmid.setCreatorEmail(account.getEmail());
+        plasmid.setCreator(account.getFullName());
+        plasmid.setOwner(account.getFullName());
+        plasmid.setOwnerEmail(account.getEmail());
+
+        EntryController entryController = new EntryController(account);
+
+        // save plasmid
+        Plasmid newPlasmid = null;
+        Strain newStrain = null;
+
+        try {
+            newPlasmid = (Plasmid) entryController.createEntry(plasmid);
+            String plasmidPartNumberString = "[[jbei:"
+                    + newPlasmid.getOnePartNumber().getPartNumber() + "|"
+                    + newPlasmid.getOneName().getName() + "]]";
+            strain.setPlasmids(plasmidPartNumberString);
+            newStrain = (Strain) entryController.createEntry(strain);
+        } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
             return null;
         }
+
+        List<Entry> saved = new LinkedList<Entry>();
+        if (newPlasmid != null)
+            saved.add(newPlasmid);
+        if (newStrain != null)
+            saved.add(newStrain);
+
+        // save sequences
+        saveEntrySequence(account, newPlasmid, plasmidSequenceFile, "plasmid_seq.gb");
+        saveEntrySequence(account, newStrain, strainSequenceFile, "strain_seq.gb");
+
+        // save attachments
+        saveEntryAttachment(account, newPlasmid, plasmidAttachmentFile, plasmidAttachmentFilename);
+        saveEntryAttachment(account, newStrain, strainAttachmentFile, strainAttachmentFilename);
+
+        return saved;
     }
 
-    private void createSequence(Account account, Entry entry, Sequence sequence, ZipFile zip)
-            throws IOException {
-        if (sequence == null)
+    private void saveEntrySequence(Account account, Entry entry, Byte[] fileBytes, String filename) {
+        if (fileBytes == null || entry == null) {
             return;
-
-        String sequenceFileName = sequence.getSequenceUser();
-
-        if (zip == null || sequenceFileName == null || "".equals(sequenceFileName))
-            return;
-
-        // create sequence entry
-        Enumeration<? extends ZipEntry> entries = zip.entries();
-
-        while (entries.hasMoreElements()) {
-            ZipEntry zipEntry = entries.nextElement();
-            if (zipEntry.isDirectory() || !zipEntry.getName().endsWith(sequenceFileName))
-                continue;
-
-            InputStream in = zip.getInputStream(zipEntry);
-
-            int count;
-            byte data[] = new byte[1000];
-            BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(
-                    System.getProperty("java.io.tmpdir") + File.separatorChar + sequenceFileName),
-                    1000);
-            while ((count = in.read(data, 0, 1000)) != -1) {
-                out.write(data, 0, count);
-            }
-            out.flush();
-            out.close();
-
-            break;
         }
-        zip.close();
+        byte[] input = new byte[fileBytes.length];
+        for (int i = 0; i < fileBytes.length; i += 1) {
+            input[i] = fileBytes[i].byteValue();
+        }
 
-        File seqFile = new File(System.getProperty("java.io.tmpdir"), sequenceFileName);
-        if (!seqFile.exists()) {
-            Logger.info("Sequence file not found. Looked in \"" + seqFile.getAbsolutePath() + "\"");
+        FileOutputStream outputStream;
+        try {
+            outputStream = new FileOutputStream(System.getProperty("java.io.tmpdir")
+                    + File.separatorChar + filename);
+            outputStream.write(input);
+            outputStream.close();
+
+            File file = new File(System.getProperty("java.io.tmpdir"), filename);
+            createSequence(account, entry, file);
+        } catch (FileNotFoundException e) {
+            Logger.error(getLoggerPrefix(), e);
+        } catch (IOException e) {
+            Logger.error(getLoggerPrefix(), e);
+        }
+    }
+
+    private void saveEntryAttachment(Account account, Entry entry, Byte[] fileBytes, String filename) {
+        if (fileBytes == null) {
             return;
         }
 
+        byte[] inputBytes = new byte[fileBytes.length];
+        for (int i = 0; i < fileBytes.length; i += 1) {
+            inputBytes[i] = fileBytes[i].byteValue();
+        }
+
+        AttachmentController controller = new AttachmentController(account);
+        ByteArrayInputStream bais = new ByteArrayInputStream(inputBytes);
+        Attachment attachment = new Attachment();
+        attachment.setFileName(filename);
+        attachment.setDescription("");
+        attachment.setEntry(entry);
+
+        try {
+            controller.save(attachment, bais);
+        } catch (ControllerException e) {
+            Logger.error(getLoggerPrefix(), e);
+        } catch (PermissionException e) {
+            Logger.error(getLoggerPrefix(), e);
+        }
+    }
+
+    private void createSequence(Account account, Entry entry, File seqFile) throws IOException {
         // set sequence
         SequenceController sequenceController = new SequenceController(account);
 
@@ -1196,7 +1191,7 @@ public class RegistryAMFAPI extends BaseService {
             Logger.info("Could not parse sequence file. Perhaps file is not supported");
         } else {
             try {
-                sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+                Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
                 sequence.setSequenceUser(sequenceUser);
                 sequence.setEntry(entry);
                 sequenceController.save(sequence);
