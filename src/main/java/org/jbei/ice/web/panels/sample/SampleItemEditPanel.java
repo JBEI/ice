@@ -187,6 +187,9 @@ public class SampleItemEditPanel extends Panel {
                 for (SchemeValue schemeValue : getSchemeValues()) {
                     if (schemeValue.getIndex() == null) {
                         nullCounter += 1;
+                    } else if (schemeValue.getIndex().length() > 31) { //Storage.index limit
+                        error("Location field is too long");
+                        return;
                     }
                     valueHolder.add(schemeValue.getIndex());
                 }
