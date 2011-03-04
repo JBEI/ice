@@ -20,7 +20,8 @@ public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Ser
 
     private static final long serialVersionUID = 1L;
 
-    public Account authenticate(String loginId, String password, String ip)
+    @Override
+    public Account authenticate(String loginId, String password)
             throws AuthenticationBackendException, InvalidCredentialsException {
         if (loginId == null || password == null) {
             throw new InvalidCredentialsException("Username and Password are mandatory!");
@@ -38,8 +39,11 @@ public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Ser
 
                 account = AccountController.getByEmail(loginId + LBL_LDAP_EMAIL_SUFFIX);
 
+                Date currentTime = Calendar.getInstance().getTime();
+
                 if (account == null) {
                     account = new Account();
+                    account.setCreationTime(currentTime);
                 }
 
                 account.setEmail(lblLdapAuthenticationWrapper.geteMail());
@@ -50,11 +54,8 @@ public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Ser
                 account.setPassword("");
                 account.setIsSubscribed(1);
                 account.setInitials("");
-
-                Date currentTime = Calendar.getInstance().getTime();
-                account.setCreationTime(currentTime);
+                account.setIp("");
                 account.setModificationTime(currentTime);
-                account.setIp(ip);
 
                 AccountController.save(account);
             } else {
@@ -69,11 +70,5 @@ public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Ser
         }
 
         return account;
-    }
-
-    @Override
-    public Account authenticate(String loginId, String password)
-            throws AuthenticationBackendException, InvalidCredentialsException {
-        return authenticate(loginId, password, "");
     }
 }
