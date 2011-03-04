@@ -62,12 +62,22 @@ public class ProfileSamplesPanel extends Panel {
                 item.add(new Label("label", sample.getLabel()));
                 item.add(new Label("notes", sample.getNotes()));
 
-                BookmarkablePageLink<StoragePage> storagePageLink = new BookmarkablePageLink<StoragePage>(
-                        "storageLink", StoragePage.class, new PageParameters("0="
-                                + sample.getStorage().getId()));
-                storagePageLink.add(new Label("storageLinkLabel", sample.getStorage().toString()));
+                String pageParam;
+                String storageStr;
 
+                if (sample.getStorage() != null) {
+                    pageParam = "0=" + sample.getStorage().getId();
+                    storageStr = sample.getStorage().toString();
+
+                } else {
+                    pageParam = storageStr = "";
+                }
+
+                BookmarkablePageLink<StoragePage> storagePageLink = new BookmarkablePageLink<StoragePage>(
+                        "storageLink", StoragePage.class, new PageParameters(pageParam));
+                storagePageLink.add(new Label("storageLinkLabel", storageStr));
                 item.add(storagePageLink);
+
                 item.add(new Label("type", entry.getRecordType()));
                 Name temp = (Name) entry.getNames().toArray()[0];
                 item.add(new Label("name", temp.getName()));
