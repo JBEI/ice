@@ -86,7 +86,7 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
     public List<SequenceFeature> getFeaturesAt(int position) {
         ArrayList<SequenceFeature> result = new ArrayList<SequenceFeature>();
         for (SequenceFeature sequenceFeature : sequenceFeatures) {
-            if (sequenceFeature.getStart() >= position && position <= sequenceFeature.getEnd()) {
+            if (sequenceFeature.getGenbankStart() >= position && position <= sequenceFeature.getEnd()) {
                 result.add(sequenceFeature);
             }
         }

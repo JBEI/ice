@@ -212,7 +212,7 @@ public class SequenceController extends Controller {
                 }
 
                 dnaFeature.setEnd(sequenceFeature.getEnd());
-                dnaFeature.setStart(sequenceFeature.getStart());
+                dnaFeature.setGenbankStart(sequenceFeature.getGenbankStart());
                 dnaFeature.setType(sequenceFeature.getGenbankType());
                 dnaFeature.setName(sequenceFeature.getName());
                 dnaFeature.setStrand(sequenceFeature.getStrand());
@@ -251,13 +251,13 @@ public class SequenceController extends Controller {
             if (featuredDNASequence.getFeatures() != null
                     && featuredDNASequence.getFeatures().size() > 0) {
                 for (DNAFeature dnaFeature : featuredDNASequence.getFeatures()) {
-                    int start = dnaFeature.getStart();
+                    int genbankStart = dnaFeature.getGenbankStart();
                     int end = dnaFeature.getEnd();
 
-                    if (start < 1) {
-                        start = 1;
-                    } else if (start > featuredDNASequence.getSequence().length()) {
-                        start = featuredDNASequence.getSequence().length();
+                    if (genbankStart < 1) {
+                        genbankStart = 1;
+                    } else if (genbankStart > featuredDNASequence.getSequence().length()) {
+                        genbankStart = featuredDNASequence.getSequence().length();
                     }
 
                     if (end < 1) {
@@ -268,12 +268,12 @@ public class SequenceController extends Controller {
 
                     String featureSequence = "";
 
-                    if (start > end) { // over zero case
-                        featureSequence = featuredDNASequence.getSequence().substring(start - 1,
+                    if (genbankStart > end) { // over zero case
+                        featureSequence = featuredDNASequence.getSequence().substring(genbankStart - 1,
                             featuredDNASequence.getSequence().length());
                         featureSequence += featuredDNASequence.getSequence().substring(0, end);
                     } else { // normal
-                        featureSequence = featuredDNASequence.getSequence().substring(start - 1,
+                        featureSequence = featuredDNASequence.getSequence().substring(genbankStart - 1,
                             end);
                     }
 
@@ -308,7 +308,7 @@ public class SequenceController extends Controller {
                         annotationType = AnnotationType.valueOf(dnaFeature.getAnnotationType());
                     }
 
-                    SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature, start,
+                    SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature, genbankStart,
                             end, dnaFeature.getStrand(), dnaFeature.getName(), descriptionNotes
                                     .toString(), dnaFeature.getType(), annotationType);
 

@@ -129,7 +129,7 @@ public class GenbankParser extends AbstractParser {
 
                     int strand = featureLocation.getStrand().intValue();
 
-                    dnaFeature.setStart(start + 1);
+                    dnaFeature.setGenbankStart(start + 1);
                     dnaFeature.setEnd(end + 1);
                     dnaFeature.setStrand(strand);
                     dnaFeature.setType(genbankType);

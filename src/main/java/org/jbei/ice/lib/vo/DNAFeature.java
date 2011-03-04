@@ -7,7 +7,7 @@ import java.util.List;
 public class DNAFeature implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private int start = 0;
+    private int genbankStart = 0;
     private int end = 0;
     private String type = "";
     private String name = "";
@@ -19,11 +19,11 @@ public class DNAFeature implements Serializable {
         super();
     }
 
-    public DNAFeature(int start, int end, String type, String name, int strand,
+    public DNAFeature(int genbankStart, int end, String type, String name, int strand,
             List<DNAFeatureNote> notes, String annotationType) {
         super();
 
-        this.start = start;
+        this.genbankStart = genbankStart;
         this.end = end;
         this.type = type;
         this.name = name;
@@ -32,12 +32,12 @@ public class DNAFeature implements Serializable {
         this.annotationType = annotationType;
     }
 
-    public int getStart() {
-        return start;
+    public int getGenbankStart() {
+        return genbankStart;
     }
 
-    public void setStart(int start) {
-        this.start = start;
+    public void setGenbankStart(int genbankStart) {
+        this.genbankStart = genbankStart;
     }
 
     public int getEnd() {

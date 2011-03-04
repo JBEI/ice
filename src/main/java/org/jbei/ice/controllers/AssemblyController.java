@@ -231,7 +231,7 @@ public class AssemblyController extends Controller {
                     + part2Sequence.getSequence().length());
             for (SequenceFeature item : temp) {
 
-                System.out.println(item.getName() + ": " + item.getStart() + ":" + item.getEnd());
+                System.out.println(item.getName() + ": " + item.getGenbankStart() + ":" + item.getEnd());
             }
 
             //sequenceFeatures.addAll(determineAssemblyFeatures(part2));

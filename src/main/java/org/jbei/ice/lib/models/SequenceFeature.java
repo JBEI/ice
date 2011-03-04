@@ -38,7 +38,7 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
     private Feature feature;
 
     @Column(name = "feature_start")
-    private int start;
+    private int genbankStart;
 
     @Column(name = "feature_end")
     private int end;
@@ -67,12 +67,13 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         super();
     }
 
-    public SequenceFeature(Sequence sequence, Feature feature, int start, int end, int strand,
-            String name, String description, String genbankType, AnnotationType annotationType) {
+    public SequenceFeature(Sequence sequence, Feature feature, int genbankStart, int end,
+            int strand, String name, String description, String genbankType,
+            AnnotationType annotationType) {
         super();
         this.sequence = sequence;
         this.feature = feature;
-        this.start = start;
+        this.genbankStart = genbankStart;
         this.end = end;
         this.strand = strand;
         this.name = name;
@@ -85,6 +86,7 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         PREFIX, SUFFIX, SCAR, INNER, SUBINNER;
     }
 
+    @Override
     public void setId(long id) {
         this.id = id;
     }
@@ -120,13 +122,13 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
      * This is 1 based ala Genbank
      */
     @Override
-    public int getStart() {
-        return start;
+    public int getGenbankStart() {
+        return genbankStart;
     }
 
     @Override
-    public void setStart(int start) {
-        this.start = start;
+    public void setGenbankStart(int genbankStart) {
+        this.genbankStart = genbankStart;
     }
 
     @Override

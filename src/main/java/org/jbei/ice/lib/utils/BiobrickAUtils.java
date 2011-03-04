@@ -338,7 +338,7 @@ public class BiobrickAUtils implements AssemblyUtils {
         if (partSequence != null) {
             Set<SequenceFeature> existingSequenceFeatures = partSequence.getSequenceFeatures();
             for (SequenceFeature sequenceFeature : existingSequenceFeatures) {
-                int start = sequenceFeature.getStart() - 1;
+                int start = sequenceFeature.getGenbankStart() - 1;
                 int end = sequenceFeature.getEnd() - 1;
                 if ((start < minimumFeatureStart) && (start > absoluteMinimumFeatureStart)) {
                     minimumFeatureStart = start;
@@ -371,7 +371,7 @@ public class BiobrickAUtils implements AssemblyUtils {
         List<SequenceFeature> innerFeature = sequenceFeatures
                 .get(SequenceFeature.AnnotationType.INNER);
         if (prefixFeature.size() == 1) {
-            if (prefixFeature.get(0).getStart() == 1) {
+            if (prefixFeature.get(0).getGenbankStart() == 1) {
                 temp = temp + 1;
             }
         }
@@ -486,7 +486,7 @@ public class BiobrickAUtils implements AssemblyUtils {
             temp.setName(part1InnerFeature.getName());
             temp.setAnnotationType(SequenceFeature.AnnotationType.SUBINNER);
             temp.setGenbankType("misc_feature");
-            temp.setStart(part1InnerFeature.getStart());
+            temp.setGenbankStart(part1InnerFeature.getGenbankStart());
             temp.setEnd(part1InnerFeature.getEnd());
             temp.setStrand(part1InnerFeature.getStrand());
             newFeatures.add(temp);
@@ -498,7 +498,7 @@ public class BiobrickAUtils implements AssemblyUtils {
             temp.setAnnotationType(SequenceFeature.AnnotationType.SUBINNER);
             temp.setGenbankType("misc_feature");
             int secondPartFeatureOffset = scarStartPosition - prefixChopPosition + 2;
-            temp.setStart(part2InnerFeature.getStart() + secondPartFeatureOffset);
+            temp.setGenbankStart(part2InnerFeature.getGenbankStart() + secondPartFeatureOffset);
             temp.setEnd(part2InnerFeature.getEnd() + secondPartFeatureOffset);
             temp.setStrand(part2InnerFeature.getStrand());
             newFeatures.add(temp);
@@ -507,7 +507,7 @@ public class BiobrickAUtils implements AssemblyUtils {
             temp.setSequence(newPartSequence);
             temp.setAnnotationType(SequenceFeature.AnnotationType.SCAR);
             temp.setGenbankType("misc_feature");
-            temp.setStart(scarStartPosition + 1);
+            temp.setGenbankStart(scarStartPosition + 1);
             temp.setEnd(scarStartPosition + scarLength);
             temp.setStrand(1);
             if (scarLength == 8) {

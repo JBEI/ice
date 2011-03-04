@@ -123,7 +123,7 @@ public class GenbankFormatter extends AbstractFormatter {
                     RichFeature.Template featureTemplate = new RichFeature.Template();
                     featureTemplate.annotation = getAnnotations(sequenceFeature);
                     featureTemplate.location = new SimpleRichLocation(new SimplePosition(
-                            sequenceFeature.getStart()), new SimplePosition(sequenceFeature
+                            sequenceFeature.getGenbankStart()), new SimplePosition(sequenceFeature
                             .getEnd()), 1, getStrand(sequenceFeature));
 
                     featureTemplate.source = getDefaultFeatureSource();
