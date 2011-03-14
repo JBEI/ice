@@ -101,6 +101,7 @@ public class IceGenbankParser extends AbstractParser {
         }
     }
 
+    // TODO parse source feature tag with xdb_ref
     @Override
     public IDNASequence parse(String textSequence) throws InvalidFormatParserException {
         textSequence = cleanSequence(textSequence);
@@ -266,7 +267,7 @@ public class IceGenbankParser extends AbstractParser {
         int end = 0;
         String type = null;
 
-        int strand = 1;
+        int strand;
 
         for (int i = 1; i < lines.length; i++) {
             line = lines[i];
@@ -289,6 +290,8 @@ public class IceGenbankParser extends AbstractParser {
                     if (chunk[1].startsWith("complement")) {
                         strand = -1;
                         chunk[1] = chunk[1].substring(11, chunk[1].length() - 1);
+                    } else {
+                        strand = 1;
                     }
                     String[] startStop = chunk[1].split("\\.\\.");
                     genbankStart = Integer.parseInt(startStop[0]);
@@ -310,6 +313,7 @@ public class IceGenbankParser extends AbstractParser {
         // last qualifier
         dnaFeature = parseQualifiers(qualifierBlock.toString(), dnaFeature);
         result.getFeatures().add(dnaFeature);
+
         return result;
     }
 
@@ -504,9 +508,10 @@ public class IceGenbankParser extends AbstractParser {
 
     public static void main(String[] args) throws IOException {
         File file = new File(
-        //        "src/main/java/org/jbei/ice/lib/parsers/examples/AcrR_geneart_badlocus_badsequence.gb");
+                "src/main/java/org/jbei/ice/lib/parsers/examples/AcrR_geneart_badlocus_badsequence.gb");
         //         "src/main/java/org/jbei/ice/lib/parsers/examples/pcI-LasI_ape_no_locusname.ape");
-                "src/main/java/org/jbei/ice/lib/parsers/examples/pUC19.gb");
+        //        "src/main/java/org/jbei/ice/lib/parsers/examples/pUC19.gb");
+
         if (file.canRead()) {
             BufferedReader br = null;
             try {
