@@ -36,14 +36,14 @@ public class ApeParser extends GenbankParser {
             return dnaSequence;
         }
 
-        List<String> strings = (List<String>) Arrays.asList(textSequence.split("\n"));
+        List<String> strings = Arrays.asList(textSequence.split("\n"));
 
         Pattern locusLineStartPattern = Pattern.compile("^LOCUS(.*)");
 
         String locusLine = null;
         int locusLineIndex = -1;
         for (int i = 0; i < strings.size(); i++) {
-            String currentLine = strings.get(i);
+            String currentLine = strings.get(i).trim();
 
             Matcher locusLineMatch = locusLineStartPattern.matcher(currentLine);
             if (locusLineMatch.matches()) {

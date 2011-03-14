@@ -7,7 +7,7 @@ import org.jbei.ice.lib.vo.IDNASequence;
 
 public class GeneralParser {
     private static GeneralParser instance = null;
-    private ArrayList<AbstractParser> parsers = new ArrayList<AbstractParser>();
+    private final ArrayList<AbstractParser> parsers = new ArrayList<AbstractParser>();
 
     protected GeneralParser() {
         registerParsers();
@@ -76,10 +76,14 @@ public class GeneralParser {
     }
 
     private void registerParsers() {
-        parsers.add(new GenbankParser());
+        // TODO: Depricate some of these old parsers. The new 
+        // IceGenbankParser should replace all of these parsers. 
+        // However, maintain these for backward compatibility for now.
+        parsers.add(new IceGenbankParser());
+        parsers.add(new GenbankParser()); // TODO depricate
         parsers.add(new FastaParser());
-        parsers.add(new ApeParser());
-        parsers.add(new GenbankLocusFriendlyParser());
+        parsers.add(new ApeParser()); // TODO depricate
+        parsers.add(new GenbankLocusFriendlyParser()); // TODO depricate
         parsers.add(new PlainParser());
     }
 }

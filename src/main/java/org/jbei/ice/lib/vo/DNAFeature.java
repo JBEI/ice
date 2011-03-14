@@ -29,7 +29,7 @@ public class DNAFeature implements Serializable {
         this.name = name;
         this.strand = strand;
         this.notes = notes;
-        this.annotationType = annotationType;
+        this.annotationType = annotationType; // Is this used?
     }
 
     public int getGenbankStart() {
