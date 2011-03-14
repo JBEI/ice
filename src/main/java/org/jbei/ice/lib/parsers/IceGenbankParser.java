@@ -25,9 +25,6 @@ import org.jbei.ice.lib.vo.IDNASequence;
  * 
  * This parser also handles some incorrectly formatted and obsolete genbank files.
  * 
- * TODO handle forgivable errors cleanly
- * TODO throw unforgivable errors
- * 
  * @author Timothy Ham
  * 
  * */
@@ -85,8 +82,23 @@ public class IceGenbankParser extends AbstractParser {
     @Override
     public IDNASequence parse(File file) throws FileNotFoundException, IOException,
             InvalidFormatParserException {
+        if (file.canRead()) {
+            BufferedReader br = null;
 
-        return null;
+            br = new BufferedReader(new FileReader(file));
+
+            StringBuilder sb = new StringBuilder();
+            while (br.ready()) {
+                sb.append((char) br.read());
+            }
+
+            IceGenbankParser iceGenbankParser = new IceGenbankParser();
+
+            return iceGenbankParser.parse(sb.toString());
+
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -282,8 +294,9 @@ public class IceGenbankParser extends AbstractParser {
                     genbankStart = Integer.parseInt(startStop[0]);
                     end = Integer.parseInt((startStop[1]));
 
-                } catch (Exception e) {
+                } catch (NumberFormatException e) {
                     System.err.println("Could not parse feature " + line);
+                    continue;
                 }
                 dnaFeature.setGenbankStart(genbankStart);
                 dnaFeature.setEnd(end);
@@ -396,6 +409,13 @@ public class IceGenbankParser extends AbstractParser {
         return dnaFeature;
     }
 
+    /**
+     * Tries to determine the feature name, from a list of possible qualifier keywords that might
+     * contain it.
+     * 
+     * @param dnaFeature
+     * @return
+     */
     private static DNAFeature populateName(DNAFeature dnaFeature) {
         String LABEL_QUALIFIER = "label";
         String APE_LABEL_QUALIFIER = "apeinfo_label";
@@ -533,6 +553,7 @@ public class IceGenbankParser extends AbstractParser {
             this.rawBody = rawBody;
         }
 
+        @SuppressWarnings("unused")
         public String getValue() {
             return value;
         }
@@ -557,10 +578,12 @@ public class IceGenbankParser extends AbstractParser {
     private class ReferenceTag extends Tag {
         private ArrayList<Tag> references = new ArrayList<Tag>();
 
+        @SuppressWarnings("unused")
         public void setReferences(ArrayList<Tag> references) {
             this.references = references;
         }
 
+        @SuppressWarnings("unused")
         public ArrayList<Tag> getReferences() {
             return references;
         }
@@ -570,6 +593,7 @@ public class IceGenbankParser extends AbstractParser {
     private class FeaturesTag extends Tag {
         private List<DNAFeature> features = new ArrayList<DNAFeature>();
 
+        @SuppressWarnings("unused")
         public void setFeatures(List<DNAFeature> features) {
             this.features = features;
         }
@@ -604,30 +628,37 @@ public class IceGenbankParser extends AbstractParser {
             this.isCircular = isCircular;
         }
 
+        @SuppressWarnings("unused")
         public String getNaType() {
             return naType;
         }
 
+        @SuppressWarnings("unused")
         public void setNaType(String naType) {
             this.naType = naType;
         }
 
+        @SuppressWarnings("unused")
         public String getStrandType() {
             return strandType;
         }
 
+        @SuppressWarnings("unused")
         public void setStrandType(String strandType) {
             this.strandType = strandType;
         }
 
+        @SuppressWarnings("unused")
         public String getDivisionCode() {
             return divisionCode;
         }
 
+        @SuppressWarnings("unused")
         public void setDivisionCode(String divisionCode) {
             this.divisionCode = divisionCode;
         }
 
+        @SuppressWarnings("unused")
         public Date getDate() {
             return date;
         }
