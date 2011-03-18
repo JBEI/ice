@@ -7,6 +7,10 @@ import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.query.Query;
+import org.jbei.ice.lib.query.QueryException;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * Combine different searches into one interface, with heuristics built in to
@@ -28,8 +32,14 @@ public class AggregateSearch {
             LinkedHashSet<Entry> exactNameMatches = new LinkedHashSet<Entry>();
             ArrayList<SearchResult> exactNameResult = new ArrayList<SearchResult>();
             queries.add(new String[] { "name_or_alias", "=" + queryString });
-
-            ArrayList<Entry> matchedEntries = entryController.getEntriesByQueries(queries, 0, -1);
+            ArrayList<Long> queryResultIds = Query.getInstance().query(queries);
+            for (Long id : queryResultIds) {
+                if (!entryController.hasReadPermissionById(id)) {
+                    queryResultIds.remove(id);
+                }
+            }
+            Collections.reverse(queryResultIds);
+            ArrayList<Entry> matchedEntries = entryController.getEntriesByIdSet(queryResultIds);
 
             if (matchedEntries != null) {
                 exactNameMatches.addAll(matchedEntries);
@@ -37,8 +47,14 @@ public class AggregateSearch {
 
             queries = new ArrayList<String[]>();
             queries.add(new String[] { "part_number", "=" + queryString });
-
-            matchedEntries = entryController.getEntriesByQueries(queries, 0, -1);
+            queryResultIds = Query.getInstance().query(queries);
+            for (Long id : queryResultIds) {
+                if (!entryController.hasReadPermissionById(id)) {
+                    queryResultIds.remove(id);
+                }
+            }
+            Collections.reverse(queryResultIds);
+            matchedEntries = entryController.getEntriesByIdSet(queryResultIds);
             if (matchedEntries != null) {
                 exactNameMatches.addAll(matchedEntries);
             }
@@ -51,17 +67,29 @@ public class AggregateSearch {
             ArrayList<SearchResult> substringResults = new ArrayList<SearchResult>();
             queries = new ArrayList<String[]>();
             queries.add(new String[] { "name_or_alias", "~" + queryString });
-
-            ArrayList<Entry> matchedSubstringEntries = entryController.getEntriesByQueries(queries,
-                0, -1);
+            queryResultIds = Query.getInstance().query(queries);
+            for (Long id : queryResultIds) {
+                if (!entryController.hasReadPermissionById(id)) {
+                    queryResultIds.remove(id);
+                }
+            }
+            Collections.reverse(queryResultIds);
+            ArrayList<Entry> matchedSubstringEntries = entryController
+                    .getEntriesByIdSet(queryResultIds);
             if (matchedSubstringEntries != null) {
                 substringMatches.addAll(matchedSubstringEntries);
             }
 
             queries = new ArrayList<String[]>();
             queries.add(new String[] { "part_number", "~" + queryString });
-
-            matchedSubstringEntries = entryController.getEntriesByQueries(queries, 0, -1);
+            queryResultIds = Query.getInstance().query(queries);
+            for (Long id : queryResultIds) {
+                if (!entryController.hasReadPermissionById(id)) {
+                    queryResultIds.remove(id);
+                }
+            }
+            Collections.reverse(queryResultIds);
+            matchedSubstringEntries = entryController.getEntriesByIdSet(queryResultIds);
             if (matchedSubstringEntries != null) {
                 substringMatches.addAll(matchedSubstringEntries);
             }
@@ -88,6 +116,8 @@ public class AggregateSearch {
 
             SearchResult.sumSearchResults(result, substringResults);
         } catch (ControllerException e) {
+            throw new SearchException(e);
+        } catch (QueryException e) {
             throw new SearchException(e);
         }
 
