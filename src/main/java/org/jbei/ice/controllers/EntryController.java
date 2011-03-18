@@ -2,8 +2,8 @@ package org.jbei.ice.controllers;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -22,8 +22,6 @@ import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionManager;
-import org.jbei.ice.lib.query.Query;
-import org.jbei.ice.lib.query.QueryException;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 
 public class EntryController extends Controller {
@@ -279,44 +277,21 @@ public class EntryController extends Controller {
         return entries;
     }
 
-    public ArrayList<Entry> getEntriesByQueries(ArrayList<String[]> filters, long offset, long limit)
-            throws ControllerException {
+    public ArrayList<Entry> getEntriesByIdSet(List<Long> ids) throws ControllerException {
         ArrayList<Entry> entries = null;
-
         try {
-            ArrayList<Long> queryResultIds = Query.getInstance().query(filters);
-
-            entries = EntryManager.getEntriesByIdSet(filterEntriesByPermissionAndOffsetLimit(
-                queryResultIds, offset, limit));
-
-            if (entries != null) {
-                Collections.reverse(entries);
+            for (Long id : ids) {
+                if (!hasReadPermissionById(id)) {
+                    ids.remove(id);
+                }
             }
-        } catch (QueryException e) {
-            throw new ControllerException(e);
+            entries = EntryManager.getEntriesByIdSet(ids);
+
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
-
         return entries;
-    }
 
-    public long getNumberOfEntriesByQueries(ArrayList<String[]> filters) throws ControllerException {
-        long numberOfEntriesByQueries = 0;
-
-        try {
-            ArrayList<Long> queryResultIds = Query.getInstance().query(filters);
-
-            for (Long entryId : queryResultIds) {
-                if (hasReadPermissionById(entryId)) {
-                    numberOfEntriesByQueries++;
-                }
-            }
-        } catch (QueryException e) {
-            throw new ControllerException(e);
-        }
-
-        return numberOfEntriesByQueries;
     }
 
     public long getNumberOfVisibleEntries() throws ControllerException {

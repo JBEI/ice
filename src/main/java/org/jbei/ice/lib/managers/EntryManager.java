@@ -319,7 +319,7 @@ public class EntryManager {
     }
 
     @SuppressWarnings("unchecked")
-    public static ArrayList<Entry> getEntriesByIdSet(ArrayList<Long> ids) throws ManagerException {
+    public static ArrayList<Entry> getEntriesByIdSet(List<Long> ids) throws ManagerException {
         ArrayList<Entry> entries = null;
 
         if (ids.size() == 0) {
