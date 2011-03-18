@@ -13,12 +13,21 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.Part;
+import org.jbei.ice.lib.search.blast.Blast;
+import org.jbei.ice.lib.search.blast.BlastException;
+import org.jbei.ice.lib.search.blast.BlastResult;
+import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 
+/*
+ * TODO This class was written as a translation from a dynamic language. A cleaner 
+ * refactoring would be beneficial.
+ */
 @SuppressWarnings("unchecked")
 public class Query {
 
@@ -111,6 +120,7 @@ public class Query {
         filters.add(new SelectionFilter("package_format", "Package Format (Parts only)",
                 "filterPackageFormat", Part.getPackageFormatOptionsMap()));
         filters.add(new StringFilter("record_id", "Record Id", "filterRecordId"));
+        filters.add(new BlastFilter("blastn", "blastn", "filterBlastn"));
     }
 
     private Filter filterByKey(String key) {
@@ -241,7 +251,7 @@ public class Query {
 
     }
 
-    protected HashSet<Integer> filterName(String queryString) {
+    protected HashSet<Long> filterName(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
 
         String criteria = makeCriterion("lower(name.name)", parsedQuery.get("operator"),
@@ -251,7 +261,7 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterStrainPlasmids(String queryString) {
+    protected HashSet<Long> filterStrainPlasmids(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
 
         String criteria = makeCriterion("lower(strain.plasmids)", parsedQuery.get("operator"),
@@ -261,7 +271,7 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterType(String queryString) {
+    protected HashSet<Long> filterType(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.recordType)", parsedQuery.get("operator"),
             parsedQuery.get("value"));
@@ -270,7 +280,7 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterAlias(String queryString) {
+    protected HashSet<Long> filterAlias(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.alias)", parsedQuery.get("operator"),
             parsedQuery.get("value"));
@@ -279,7 +289,7 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterPartNumber(String queryString) {
+    protected HashSet<Long> filterPartNumber(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(partNumber.partNumber)",
             parsedQuery.get("operator"), parsedQuery.get("value"));
@@ -289,10 +299,10 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterHasAttachment(String queryString) {
-        HashSet<Integer> result = null;
-        HashSet<Integer> allEntriesWithAttachment = null;
-        HashSet<Integer> allEntries = null;
+    protected HashSet<Long> filterHasAttachment(String queryString) {
+        HashSet<Long> result = null;
+        HashSet<Long> allEntriesWithAttachment = null;
+        HashSet<Long> allEntries = null;
         String query = "select distinct attachment.entry.id from Attachment attachment";
         allEntriesWithAttachment = hibernateQuery(query);
 
@@ -310,10 +320,10 @@ public class Query {
         return result;
     }
 
-    protected HashSet<Integer> filterHasSample(String queryString) {
-        HashSet<Integer> result = null;
-        HashSet<Integer> allEntriesWithSample = null;
-        HashSet<Integer> allEntries = null;
+    protected HashSet<Long> filterHasSample(String queryString) {
+        HashSet<Long> result = null;
+        HashSet<Long> allEntriesWithSample = null;
+        HashSet<Long> allEntries = null;
 
         String query = "select distinct sample.entry.id from Sample sample";
         allEntriesWithSample = hibernateQuery(query);
@@ -331,10 +341,10 @@ public class Query {
         return result;
     }
 
-    protected HashSet<Integer> filterHasSequence(String queryString) {
-        HashSet<Integer> result = null;
-        HashSet<Integer> allEntriesWithSequence = null;
-        HashSet<Integer> allEntries = null;
+    protected HashSet<Long> filterHasSequence(String queryString) {
+        HashSet<Long> result = null;
+        HashSet<Long> allEntriesWithSequence = null;
+        HashSet<Long> allEntries = null;
 
         String query = "select distinct sequence.entry.id from Sequence sequence";
         allEntriesWithSequence = hibernateQuery(query);
@@ -352,7 +362,7 @@ public class Query {
         return result;
     }
 
-    protected HashSet<Integer> filterRecordId(String queryString) {
+    protected HashSet<Long> filterRecordId(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.recordId) ", parsedQuery.get("operator"),
             parsedQuery.get("value"));
@@ -361,16 +371,16 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterOwnerCombined(String queryString) {
-        HashSet<Integer> ownerResults = filterOwner(queryString);
-        HashSet<Integer> ownerEmailResults = filterOwnerEmail(queryString);
+    protected HashSet<Long> filterOwnerCombined(String queryString) {
+        HashSet<Long> ownerResults = filterOwner(queryString);
+        HashSet<Long> ownerEmailResults = filterOwnerEmail(queryString);
 
         ownerResults.addAll(ownerEmailResults);
 
         return ownerResults;
     }
 
-    protected HashSet<Integer> filterOwner(String queryString) {
+    protected HashSet<Long> filterOwner(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.owner) ", parsedQuery.get("operator"),
             parsedQuery.get("value"));
@@ -379,7 +389,7 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterOwnerEmail(String queryString) {
+    protected HashSet<Long> filterOwnerEmail(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.ownerEmail) ", parsedQuery.get("operator"),
             parsedQuery.get("value"));
@@ -388,16 +398,16 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterCreatorCombined(String queryString) {
-        HashSet<Integer> creatorResults = filterCreator(queryString);
-        HashSet<Integer> creatorEmailResults = filterCreatorEmail(queryString);
+    protected HashSet<Long> filterCreatorCombined(String queryString) {
+        HashSet<Long> creatorResults = filterCreator(queryString);
+        HashSet<Long> creatorEmailResults = filterCreatorEmail(queryString);
 
         creatorResults.addAll(creatorEmailResults);
 
         return creatorResults;
     }
 
-    protected HashSet<Integer> filterCreator(String queryString) {
+    protected HashSet<Long> filterCreator(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.creator) ", parsedQuery.get("operator"),
             parsedQuery.get("value"));
@@ -406,7 +416,7 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterCreatorEmail(String queryString) {
+    protected HashSet<Long> filterCreatorEmail(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
 
         String criteria = makeCriterion("lower(entry.creatorEmail) ", parsedQuery.get("operator"),
@@ -416,7 +426,7 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterKeywords(String queryString) {
+    protected HashSet<Long> filterKeywords(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.keywords)", parsedQuery.get("operator"),
             parsedQuery.get("value"));
@@ -425,10 +435,10 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterSummaryNotesReferences(String queryString) {
-        HashSet<Integer> summaryResults = filterShortDescription(queryString);
-        HashSet<Integer> notesResults = filterLongDescription(queryString);
-        HashSet<Integer> referencesResults = filterReferences(queryString);
+    protected HashSet<Long> filterSummaryNotesReferences(String queryString) {
+        HashSet<Long> summaryResults = filterShortDescription(queryString);
+        HashSet<Long> notesResults = filterLongDescription(queryString);
+        HashSet<Long> referencesResults = filterReferences(queryString);
 
         summaryResults.addAll(notesResults);
         summaryResults.addAll(referencesResults);
@@ -436,7 +446,7 @@ public class Query {
         return summaryResults;
     }
 
-    protected HashSet<Integer> filterShortDescription(String queryString) {
+    protected HashSet<Long> filterShortDescription(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.shortDescription)",
             parsedQuery.get("operator"), parsedQuery.get("value"));
@@ -445,7 +455,7 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterLongDescription(String queryString) {
+    protected HashSet<Long> filterLongDescription(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.longDescription)",
             parsedQuery.get("operator"), parsedQuery.get("value"));
@@ -454,7 +464,7 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterReferences(String queryString) {
+    protected HashSet<Long> filterReferences(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.references)", parsedQuery.get("operator"),
             parsedQuery.get("value"));
@@ -463,7 +473,7 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterBackbone(String queryString) {
+    protected HashSet<Long> filterBackbone(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(plasmid.backbone)", parsedQuery.get("operator"),
             parsedQuery.get("value"));
@@ -472,7 +482,7 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterPromoters(String queryString) {
+    protected HashSet<Long> filterPromoters(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(plasmid.promoters)", parsedQuery.get("operator"),
             parsedQuery.get("value"));
@@ -481,7 +491,7 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterOriginOfReplication(String queryString) {
+    protected HashSet<Long> filterOriginOfReplication(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(plasmid.originOfReplication)",
             parsedQuery.get("operator"), parsedQuery.get("value"));
@@ -490,7 +500,7 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterHost(String queryString) {
+    protected HashSet<Long> filterHost(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(strain.host)", parsedQuery.get("operator"),
             parsedQuery.get("value"));
@@ -499,7 +509,7 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterGenotypePhenotype(String queryString) {
+    protected HashSet<Long> filterGenotypePhenotype(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(strain.genotypePhenotype)",
             parsedQuery.get("operator"), parsedQuery.get("value"));
@@ -508,7 +518,7 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterPackageFormat(String queryString) {
+    protected HashSet<Long> filterPackageFormat(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(part.packageFormat)", parsedQuery.get("operator"),
             parsedQuery.get("value"));
@@ -517,7 +527,7 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterSelectionMarker(String queryString) {
+    protected HashSet<Long> filterSelectionMarker(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(marker.name)", parsedQuery.get("operator"),
             parsedQuery.get("value"));
@@ -527,7 +537,7 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterStatus(String queryString) {
+    protected HashSet<Long> filterStatus(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.status)", parsedQuery.get("operator"),
             parsedQuery.get("value"));
@@ -536,7 +546,7 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterStrainPlasmid(String queryString) {
+    protected HashSet<Long> filterStrainPlasmid(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(strain.plasmids)", parsedQuery.get("operator"),
             parsedQuery.get("value"));
@@ -545,16 +555,16 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterNameOrAlias(String queryString) {
-        HashSet<Integer> nameResults = filterName(queryString);
-        HashSet<Integer> aliasResults = filterAlias(queryString);
+    protected HashSet<Long> filterNameOrAlias(String queryString) {
+        HashSet<Long> nameResults = filterName(queryString);
+        HashSet<Long> aliasResults = filterAlias(queryString);
 
         nameResults.addAll(aliasResults);
 
         return nameResults;
     }
 
-    protected HashSet<Integer> filterPrincipalInvestigator(String queryString) {
+    protected HashSet<Long> filterPrincipalInvestigator(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
 
         String criteria = makeCriterion(
@@ -566,7 +576,7 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterFundingSource(String queryString) {
+    protected HashSet<Long> filterFundingSource(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
 
         String criteria = makeCriterion("lower(entryFundingSource.fundingSource.fundingSource)",
@@ -577,7 +587,7 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterIntelectualProperty(String queryString) {
+    protected HashSet<Long> filterIntelectualProperty(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
 
         String criteria = makeCriterion("lower(entry.intellectualProperty)",
@@ -589,7 +599,7 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Integer> filterBioSafetyLevel(String queryString) {
+    protected HashSet<Long> filterBioSafetyLevel(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
 
         String operator = parsedQuery.get("operator");
@@ -607,14 +617,28 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    private HashSet<Integer> hibernateQuery(String queryString) {
-        HashSet<Integer> rawResults = new HashSet<Integer>();
+    protected HashSet<Long> filterBlastn(String queryString) {
+        String[] parameters = queryString.split(","); //query, %ident, minLength
+        String query = parameters[0];
+        double minPercentIdentity = 90.0;
+        int minLength = 10;
+        try {
+            minPercentIdentity = Double.parseDouble(parameters[1]);
+            minLength = Integer.parseInt(parameters[2]);
+        } catch (NumberFormatException e) {
+            // could not format numbers. Continue with defaults
+        }
+        return blastnQuery(query, minPercentIdentity, minLength);
+    }
+
+    private HashSet<Long> hibernateQuery(String queryString) {
+        HashSet<Long> rawResults = new HashSet<Long>();
         Session session = DAO.newSession();
         session.beginTransaction();
         org.hibernate.Query query = session.createQuery(queryString);
 
         try {
-            rawResults = new HashSet<Integer>(query.list());
+            rawResults = new HashSet<Long>(query.list());
         } catch (HibernateException e) {
             Logger.error("Could not query ", e);
         } finally {
@@ -623,6 +647,37 @@ public class Query {
                 session.close();
             }
         }
+        return rawResults;
+    }
+
+    private HashSet<Long> blastnQuery(String queryString, double minPercentIdentity, int minLength) {
+        HashSet<Long> rawResults = new HashSet<Long>();
+        Blast b = new Blast();
+
+        try {
+            ArrayList<BlastResult> blastResults = b.query(queryString, "blastn");
+
+            if (blastResults != null) {
+                for (BlastResult blastResult : blastResults) {
+                    if (blastResult.getPercentId() >= minPercentIdentity
+                            && blastResult.getAlignmentLength() >= minLength) {
+                        Entry entry = EntryManager.getByRecordId(blastResult.getSubjectId());
+                        rawResults.add(entry.getId());
+                    }
+                }
+            }
+
+        } catch (ProgramTookTooLongException e) {
+            // return empty result for this query
+            Logger.info("Could not run advanced blastn: " + e.toString());
+        } catch (BlastException e) {
+            // return empty result for this query
+            Logger.info("Could not run advanced blastn: " + e.toString());
+        } catch (ManagerException e) {
+            // return empty result for this query
+            Logger.info("Could not run advanced blastn: " + e.toString());
+        }
+
         return rawResults;
     }
 

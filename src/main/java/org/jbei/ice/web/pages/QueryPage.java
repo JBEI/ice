@@ -106,11 +106,21 @@ public class QueryPage extends ProtectedPage {
                         String value = radioChoicesValues.getRawInput();
 
                         queries.add(new String[] { filter, value });
+                    } else if (fragmentType.getObject().equals("blast")) {
+                        queryFragment.get(0);
+                        String value = ((TextField<String>) queryFragment.get("blastQuery"))
+                                .getRawInput().trim();
+                        String minPercentIdentity = ((TextField<String>) queryFragment
+                                .get("blastMinimumPercentIdentity")).getRawInput().trim();
+                        String minMatchLength = ((TextField<String>) queryFragment
+                                .get("blastMinimumMatchLength")).getRawInput().trim();
+                        queries.add(new String[] { filter,
+                                value + "," + minPercentIdentity + "," + minMatchLength });
                     }
                 }
 
                 QueryResultPanel queryResultPanel = (QueryResultPanel) getPage().get(
-                        "queryResultPanel");
+                    "queryResultPanel");
 
                 queryResultPanel.setVisible(true);
                 queryResultPanel.updateView(queries);
@@ -119,8 +129,8 @@ public class QueryPage extends ProtectedPage {
             }
         }.setDefaultFormProcessing(false));
 
-        add(new QueryResultPanel("queryResultPanel", new ArrayList<String[]>()).setOutputMarkupId(
-                true).setVisible(false).setOutputMarkupPlaceholderTag(true));
+        add(new QueryResultPanel("queryResultPanel", new ArrayList<String[]>())
+                .setOutputMarkupId(true).setVisible(false).setOutputMarkupPlaceholderTag(true));
     }
 
     public List<QueryItemPanel> getFilterPanels() {

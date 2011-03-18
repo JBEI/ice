@@ -14,26 +14,29 @@ public class EntriesQueryDataProvider extends AbstractEntriesDataProvider {
     private static final long serialVersionUID = 1L;
 
     private final ArrayList<String[]> queries;
+    private long size;
 
     public EntriesQueryDataProvider(ArrayList<String[]> queries) {
         super();
 
         this.queries = queries;
+        this.size = -1;
     }
 
     @Override
     public int size() {
-        long numberOfQueryEntries = 0;
+        if (this.size == -1) {
+            EntryController entryController = new EntryController(IceSession.get().getAccount());
 
-        EntryController entryController = new EntryController(IceSession.get().getAccount());
+            try {
+                size = entryController.getNumberOfEntriesByQueries(queries);
+            } catch (ControllerException e) {
+                throw new ViewException(e);
+            }
+        } else {
 
-        try {
-            numberOfQueryEntries = entryController.getNumberOfEntriesByQueries(queries);
-        } catch (ControllerException e) {
-            throw new ViewException(e);
         }
-
-        return Utils.safeLongToInt(numberOfQueryEntries);
+        return Utils.safeLongToInt(size);
     }
 
     @Override

@@ -260,15 +260,16 @@ public class EntryController extends Controller {
         return entries;
     }
 
-    public ArrayList<Entry> getEntriesByOwner(String owner, int offset, int limit, String field, boolean ascending)
-            throws ControllerException {
+    public ArrayList<Entry> getEntriesByOwner(String owner, int offset, int limit, String field,
+            boolean ascending) throws ControllerException {
         ArrayList<Entry> entries = null;
 
         try {
-            ArrayList<Long> ownerEntries = EntryManager.getEntriesByOwnerSort(owner, field, ascending);
+            ArrayList<Long> ownerEntries = EntryManager.getEntriesByOwnerSort(owner, field,
+                ascending);
             ArrayList<Long> filteredEntries = filterEntriesByPermissionAndOffsetLimit(ownerEntries,
                 offset, limit);
-            
+
             entries = EntryManager.getEntriesByIdSetSort(filteredEntries, field, ascending);
 
         } catch (ManagerException e) {
@@ -300,6 +301,24 @@ public class EntryController extends Controller {
         return entries;
     }
 
+    public long getNumberOfEntriesByQueries(ArrayList<String[]> filters) throws ControllerException {
+        long numberOfEntriesByQueries = 0;
+
+        try {
+            ArrayList<Long> queryResultIds = Query.getInstance().query(filters);
+
+            for (Long entryId : queryResultIds) {
+                if (hasReadPermissionById(entryId)) {
+                    numberOfEntriesByQueries++;
+                }
+            }
+        } catch (QueryException e) {
+            throw new ControllerException(e);
+        }
+
+        return numberOfEntriesByQueries;
+    }
+
     public long getNumberOfVisibleEntries() throws ControllerException {
         long numberOfVisibleEntries = 0;
 
@@ -328,24 +347,6 @@ public class EntryController extends Controller {
         }
 
         return numberOfEntriesByOwner;
-    }
-
-    public long getNumberOfEntriesByQueries(ArrayList<String[]> filters) throws ControllerException {
-        long numberOfEntriesByQueries = 0;
-
-        try {
-            ArrayList<Long> queryResultIds = Query.getInstance().query(filters);
-
-            for (Long entryId : queryResultIds) {
-                if (hasReadPermissionById(entryId)) {
-                    numberOfEntriesByQueries++;
-                }
-            }
-        } catch (QueryException e) {
-            throw new ControllerException(e);
-        }
-
-        return numberOfEntriesByQueries;
     }
 
     public Entry save(Entry entry) throws ControllerException, PermissionException {

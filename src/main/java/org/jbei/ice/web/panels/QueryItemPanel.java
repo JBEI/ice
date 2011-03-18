@@ -1,10 +1,8 @@
 package org.jbei.ice.web.panels;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -19,6 +17,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
+import org.jbei.ice.lib.query.BlastFilter;
 import org.jbei.ice.lib.query.Filter;
 import org.jbei.ice.lib.query.Query;
 import org.jbei.ice.lib.query.RadioFilter;
@@ -49,30 +48,28 @@ public class QueryItemPanel extends Panel {
 
                         if (this.getComponent().getDefaultModelObject() instanceof StringFilter) {
                             queryItemPanel.visibleFilterFragment = createStringFilterFragment();
-
                             queryItemPanel.replace(queryItemPanel.visibleFilterFragment);
                             target.addComponent(visibleFilterFragment);
                         } else if (this.getComponent().getDefaultModelObject() instanceof SelectionFilter) {
                             SelectionFilter filter = (SelectionFilter) this.getComponent()
                                     .getDefaultModelObject();
-
                             queryItemPanel.visibleFilterFragment = createSelectionFilterFragment(filter
                                     .getChoices());
-
                             queryItemPanel.replace(queryItemPanel.visibleFilterFragment);
                             target.addComponent(visibleFilterFragment);
                         } else if (this.getComponent().getDefaultModelObject() instanceof RadioFilter) {
                             RadioFilter filter = (RadioFilter) this.getComponent()
                                     .getDefaultModelObject();
-
                             queryItemPanel.visibleFilterFragment = createRadioFilterFragment(filter
                                     .getChoices());
-
+                            queryItemPanel.replace(queryItemPanel.visibleFilterFragment);
+                            target.addComponent(visibleFilterFragment);
+                        } else if (this.getComponent().getDefaultModelObject() instanceof BlastFilter) {
+                            queryItemPanel.visibleFilterFragment = createBlastFilterFragment();
                             queryItemPanel.replace(queryItemPanel.visibleFilterFragment);
                             target.addComponent(visibleFilterFragment);
                         } else {
                             queryItemPanel.visibleFilterFragment = createEmptyFilterFragment();
-
                             queryItemPanel.replace(queryItemPanel.visibleFilterFragment);
                             target.addComponent(visibleFilterFragment);
                         }
@@ -86,11 +83,8 @@ public class QueryItemPanel extends Panel {
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 QueryPage queryPage = (QueryPage) getPage();
                 MarkupContainer queryFiltersForm = getParent().getParent().getParent().getParent();
-
                 List<QueryItemPanel> panels = queryPage.getFilterPanels();
-
                 panels.add(new QueryItemPanel("queryItemPanel"));
-
                 target.addComponent(queryFiltersForm);
             }
         }.setDefaultFormProcessing(false));
@@ -104,7 +98,6 @@ public class QueryItemPanel extends Panel {
                 MarkupContainer queryForm = getParent().getParent().getParent().getParent();
 
                 List<QueryItemPanel> panels = queryPage.getFilterPanels();
-
                 if (panels.size() == 1) { // shouldn't remove last panel
                     return;
                 }
@@ -117,17 +110,13 @@ public class QueryItemPanel extends Panel {
         }.setDefaultFormProcessing(false));
 
         visibleFilterFragment = createEmptyFilterFragment();
-
         add(visibleFilterFragment);
-
         visibleFilterFragment.setVisible(true);
     }
 
     private Fragment createEmptyFilterFragment() {
         Fragment fragment = new Fragment("filterPanel", "emptyFilterFragment", this);
-
         fragment.add(new HiddenField<String>("fragmentType", new Model<String>("empty")));
-
         fragment.setOutputMarkupPlaceholderTag(true);
         fragment.setOutputMarkupId(true);
 
@@ -178,10 +167,7 @@ public class QueryItemPanel extends Panel {
         fragment.add(selectionFilterPrefixDropDownChoice);
 
         ArrayList<CustomChoice> values = new ArrayList<CustomChoice>();
-        for (Iterator<Entry<String, String>> iterator = data.entrySet().iterator(); iterator
-                .hasNext();) {
-            Entry<String, String> pairs = iterator.next();
-
+        for (java.util.Map.Entry<String, String> pairs : data.entrySet()) {
             values.add(new CustomChoice(pairs.getKey(), pairs.getValue()));
         }
 
@@ -204,10 +190,7 @@ public class QueryItemPanel extends Panel {
         Fragment fragment = new Fragment("filterPanel", "radioFilterFragment", this);
 
         ArrayList<CustomChoice> values = new ArrayList<CustomChoice>();
-        for (Iterator<Entry<String, String>> iterator = data.entrySet().iterator(); iterator
-                .hasNext();) {
-            Entry<String, String> pairs = iterator.next();
-
+        for (java.util.Map.Entry<String, String> pairs : data.entrySet()) {
             values.add(new CustomChoice(pairs.getKey(), pairs.getValue()));
         }
 
@@ -222,6 +205,21 @@ public class QueryItemPanel extends Panel {
         fragment.setOutputMarkupPlaceholderTag(true);
         fragment.setOutputMarkupId(true);
 
+        return fragment;
+    }
+
+    private Fragment createBlastFilterFragment() {
+        Fragment fragment = new Fragment("filterPanel", "blastFilterFragment", this);
+        fragment.add(new HiddenField<String>("fragmentType", new Model<String>("blast")));
+
+        TextField<String> temp = new TextField<String>("blastMinimumPercentIdentity");
+        fragment.add(temp);
+        temp = new TextField<String>("blastMinimumMatchLength");
+        fragment.add(temp);
+        fragment.add(new TextField<String>("blastQuery"));
+
+        fragment.setOutputMarkupPlaceholderTag(true);
+        fragment.setOutputMarkupId(true);
         return fragment;
     }
 }
