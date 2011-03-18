@@ -65,7 +65,13 @@ public class QueryItemPanel extends Panel {
                             queryItemPanel.replace(queryItemPanel.visibleFilterFragment);
                             target.addComponent(visibleFilterFragment);
                         } else if (this.getComponent().getDefaultModelObject() instanceof BlastFilter) {
-                            queryItemPanel.visibleFilterFragment = createBlastFilterFragment();
+                            BlastFilter temp = (BlastFilter) this.getComponent()
+                                    .getDefaultModelObject();
+                            if ("blastn".equals(temp.key)) {
+                                queryItemPanel.visibleFilterFragment = createBlastnFilterFragment();
+                            } else {
+                                queryItemPanel.visibleFilterFragment = createBlasttxFilterFragment();
+                            }
                             queryItemPanel.replace(queryItemPanel.visibleFilterFragment);
                             target.addComponent(visibleFilterFragment);
                         } else {
@@ -208,9 +214,24 @@ public class QueryItemPanel extends Panel {
         return fragment;
     }
 
-    private Fragment createBlastFilterFragment() {
+    private Fragment createBlastnFilterFragment() {
         Fragment fragment = new Fragment("filterPanel", "blastFilterFragment", this);
-        fragment.add(new HiddenField<String>("fragmentType", new Model<String>("blast")));
+        fragment.add(new HiddenField<String>("fragmentType", new Model<String>("blastn")));
+
+        TextField<String> temp = new TextField<String>("blastMinimumPercentIdentity");
+        fragment.add(temp);
+        temp = new TextField<String>("blastMinimumMatchLength");
+        fragment.add(temp);
+        fragment.add(new TextField<String>("blastQuery"));
+
+        fragment.setOutputMarkupPlaceholderTag(true);
+        fragment.setOutputMarkupId(true);
+        return fragment;
+    }
+
+    private Fragment createBlasttxFilterFragment() {
+        Fragment fragment = new Fragment("filterPanel", "blastFilterFragment", this);
+        fragment.add(new HiddenField<String>("fragmentType", new Model<String>("tblastx")));
 
         TextField<String> temp = new TextField<String>("blastMinimumPercentIdentity");
         fragment.add(temp);

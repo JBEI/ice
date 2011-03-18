@@ -106,7 +106,7 @@ public class QueryPage extends ProtectedPage {
                         String value = radioChoicesValues.getRawInput();
 
                         queries.add(new String[] { filter, value });
-                    } else if (fragmentType.getObject().equals("blast")) {
+                    } else if (fragmentType.getObject().equals("blastn")) {
                         queryFragment.get(0);
                         String value = ((TextField<String>) queryFragment.get("blastQuery"))
                                 .getRawInput().trim();
@@ -114,8 +114,22 @@ public class QueryPage extends ProtectedPage {
                                 .get("blastMinimumPercentIdentity")).getRawInput().trim();
                         String minMatchLength = ((TextField<String>) queryFragment
                                 .get("blastMinimumMatchLength")).getRawInput().trim();
-                        queries.add(new String[] { filter,
-                                value + "," + minPercentIdentity + "," + minMatchLength });
+                        queries.add(new String[] {
+                                filter,
+                                value + "," + "blastn" + "," + minPercentIdentity + ","
+                                        + minMatchLength });
+                    } else if (fragmentType.getObject().equals("tblastx")) {
+                        queryFragment.get(0);
+                        String value = ((TextField<String>) queryFragment.get("blastQuery"))
+                                .getRawInput().trim();
+                        String minPercentIdentity = ((TextField<String>) queryFragment
+                                .get("blastMinimumPercentIdentity")).getRawInput().trim();
+                        String minMatchLength = ((TextField<String>) queryFragment
+                                .get("blastMinimumMatchLength")).getRawInput().trim();
+                        queries.add(new String[] {
+                                filter,
+                                value + "," + "tblastx" + "," + minPercentIdentity + ","
+                                        + minMatchLength });
                     }
                 }
 

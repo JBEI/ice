@@ -120,7 +120,8 @@ public class Query {
         filters.add(new SelectionFilter("package_format", "Package Format (Parts only)",
                 "filterPackageFormat", Part.getPackageFormatOptionsMap()));
         filters.add(new StringFilter("record_id", "Record Id", "filterRecordId"));
-        filters.add(new BlastFilter("blastn", "blastn", "filterBlastn"));
+        filters.add(new BlastFilter("blastn", "BLAST-Nucleotide", "filterBlast"));
+        filters.add(new BlastFilter("tblastx", "BLAST-Translate", "filterBlast"));
     }
 
     private Filter filterByKey(String key) {
@@ -617,18 +618,19 @@ public class Query {
         return hibernateQuery(query);
     }
 
-    protected HashSet<Long> filterBlastn(String queryString) {
-        String[] parameters = queryString.split(","); //query, %ident, minLength
+    protected HashSet<Long> filterBlast(String queryString) {
+        String[] parameters = queryString.split(","); //query, type, %ident, minLength
         String query = parameters[0];
+        String type = parameters[1];
         double minPercentIdentity = 90.0;
         int minLength = 10;
         try {
-            minPercentIdentity = Double.parseDouble(parameters[1]);
-            minLength = Integer.parseInt(parameters[2]);
+            minPercentIdentity = Double.parseDouble(parameters[2]);
+            minLength = Integer.parseInt(parameters[3]);
         } catch (NumberFormatException e) {
             // could not format numbers. Continue with defaults
         }
-        return blastnQuery(query, minPercentIdentity, minLength);
+        return blastQuery(query, type, minPercentIdentity, minLength);
     }
 
     private HashSet<Long> hibernateQuery(String queryString) {
@@ -650,12 +652,13 @@ public class Query {
         return rawResults;
     }
 
-    private HashSet<Long> blastnQuery(String queryString, double minPercentIdentity, int minLength) {
+    private HashSet<Long> blastQuery(String queryString, String type, double minPercentIdentity,
+            int minLength) {
         HashSet<Long> rawResults = new HashSet<Long>();
         Blast b = new Blast();
 
         try {
-            ArrayList<BlastResult> blastResults = b.query(queryString, "blastn");
+            ArrayList<BlastResult> blastResults = b.query(queryString, type);
 
             if (blastResults != null) {
                 for (BlastResult blastResult : blastResults) {
