@@ -280,11 +280,7 @@ public class EntryController extends Controller {
     public ArrayList<Entry> getEntriesByIdSet(List<Long> ids) throws ControllerException {
         ArrayList<Entry> entries = null;
         try {
-            for (Long id : ids) {
-                if (!hasReadPermissionById(id)) {
-                    ids.remove(id);
-                }
-            }
+            ids = filterEntriesByPermission(ids);
             entries = EntryManager.getEntriesByIdSet(ids);
 
         } catch (ManagerException e) {
@@ -429,5 +425,15 @@ public class EntryController extends Controller {
         }
 
         return entryIds;
+    }
+
+    public List<Long> filterEntriesByPermission(List<Long> ids) throws ControllerException {
+        ArrayList<Long> result = new ArrayList<Long>();
+        for (Long id : ids) {
+            if (hasReadPermissionById(id)) {
+                result.add(id);
+            }
+        }
+        return result;
     }
 }

@@ -33,11 +33,8 @@ public class AggregateSearch {
             ArrayList<SearchResult> exactNameResult = new ArrayList<SearchResult>();
             queries.add(new String[] { "name_or_alias", "=" + queryString });
             ArrayList<Long> queryResultIds = Query.getInstance().query(queries);
-            for (Long id : queryResultIds) {
-                if (!entryController.hasReadPermissionById(id)) {
-                    queryResultIds.remove(id);
-                }
-            }
+            queryResultIds = new ArrayList<Long>(
+                    entryController.filterEntriesByPermission(queryResultIds));
             Collections.reverse(queryResultIds);
             ArrayList<Entry> matchedEntries = entryController.getEntriesByIdSet(queryResultIds);
 
@@ -68,11 +65,8 @@ public class AggregateSearch {
             queries = new ArrayList<String[]>();
             queries.add(new String[] { "name_or_alias", "~" + queryString });
             queryResultIds = Query.getInstance().query(queries);
-            for (Long id : queryResultIds) {
-                if (!entryController.hasReadPermissionById(id)) {
-                    queryResultIds.remove(id);
-                }
-            }
+            queryResultIds = new ArrayList<Long>(
+                    entryController.filterEntriesByPermission(queryResultIds));
             Collections.reverse(queryResultIds);
             ArrayList<Entry> matchedSubstringEntries = entryController
                     .getEntriesByIdSet(queryResultIds);
@@ -83,11 +77,8 @@ public class AggregateSearch {
             queries = new ArrayList<String[]>();
             queries.add(new String[] { "part_number", "~" + queryString });
             queryResultIds = Query.getInstance().query(queries);
-            for (Long id : queryResultIds) {
-                if (!entryController.hasReadPermissionById(id)) {
-                    queryResultIds.remove(id);
-                }
-            }
+            queryResultIds = new ArrayList<Long>(
+                    entryController.filterEntriesByPermission(queryResultIds));
             Collections.reverse(queryResultIds);
             matchedSubstringEntries = entryController.getEntriesByIdSet(queryResultIds);
             if (matchedSubstringEntries != null) {
