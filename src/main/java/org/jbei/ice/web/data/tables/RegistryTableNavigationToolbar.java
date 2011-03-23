@@ -42,7 +42,8 @@ public class RegistryTableNavigationToolbar extends AbstractToolbar {
             private static final long serialVersionUID = 1L;
 
             /**
-             * Implement our own ajax event handling in order to update the data table itself, as the
+             * Implement our own ajax event handling in order to update the data table itself, as
+             * the
              * default implementation doesn't support DataViews.
              * 
              * @see AjaxPagingNavigator#onAjaxEvent(AjaxRequestTarget)
@@ -50,6 +51,7 @@ public class RegistryTableNavigationToolbar extends AbstractToolbar {
             @Override
             protected void onAjaxEvent(AjaxRequestTarget target) {
                 target.addComponent(table);
+                target.appendJavascript("try {	assignClueTips();	} catch (err) {	alert(err);	};");
             }
         };
     }

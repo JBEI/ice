@@ -39,6 +39,7 @@ class RegistryTablePagingControl extends Panel {
             public void onClick(AjaxRequestTarget target) {
                 RegistryTablePagingControl.this.table.setRowsPerPage(pageSize);
                 target.addComponent(RegistryTablePagingControl.this.table);
+                target.appendJavascript("try {	assignClueTips();	} catch (err) {	alert(err);	};");
                 modifyLinksCSS();
             }
         };
