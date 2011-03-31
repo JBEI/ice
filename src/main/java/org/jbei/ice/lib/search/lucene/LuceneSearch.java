@@ -34,6 +34,7 @@ import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Job;
 import org.jbei.ice.lib.utils.JobCue;
+import org.jbei.ice.lib.utils.ParameterGeneratorParser;
 import org.jbei.ice.lib.utils.Utils;
 
 /**
@@ -122,8 +123,8 @@ public class LuceneSearch {
                 IndexSearcher searcher = getIndexSearcher();
                 TopDocs hits = searcher.search(query, SEARCH_MAX_RESULT);
 
-                ArrayList<ScoreDoc> hitsArray = new ArrayList<ScoreDoc>(Arrays
-                        .asList(hits.scoreDocs));
+                ArrayList<ScoreDoc> hitsArray = new ArrayList<ScoreDoc>(
+                        Arrays.asList(hits.scoreDocs));
 
                 for (ScoreDoc scoreDoc : hitsArray) {
                     float score = scoreDoc.score;
@@ -235,6 +236,8 @@ public class LuceneSearch {
                 .getIntellectualProperty() : "";
         String fundingSources = Utils.toCommaSeparatedStringFromEntryFundingSources(entry
                 .getEntryFundingSources());
+        String parameters = ParameterGeneratorParser
+                .generateParametersString(entry.getParameters());
 
         document.add(new Field("Record ID", recordId, Field.Store.YES, Field.Index.ANALYZED));
         content = content + recordId + " ";
@@ -246,8 +249,7 @@ public class LuceneSearch {
         content = content + ownerEmail + " ";
         document.add(new Field("Creator", creator, Field.Store.YES, Field.Index.ANALYZED));
         content = content + creator + " ";
-        document
-                .add(new Field("Creator Email", creatorEmail, Field.Store.YES, Field.Index.ANALYZED));
+        document.add(new Field("Creator Email", creatorEmail, Field.Store.YES, Field.Index.ANALYZED));
         content = content + creatorEmail + " ";
         document.add(new Field("Alias", alias, Field.Store.YES, Field.Index.ANALYZED));
         content = content + alias + " ";
@@ -281,6 +283,9 @@ public class LuceneSearch {
                 Field.Index.ANALYZED));
         content = content + fundingSources + " ";
 
+        document.add(new Field("Parameters", parameters, Field.Store.YES, Field.Index.ANALYZED));
+        content = content + parameters + " ";
+
         ArrayList<Sample> samples = null;
         try {
             samples = SampleManager.getSamplesByEntry(entry);
@@ -299,8 +304,7 @@ public class LuceneSearch {
                 samplesArray.add(Utils.join(", ", temp));
             }
             String samplesString = Utils.join("; ", samplesArray);
-            document
-                    .add(new Field("Samples", samplesString, Field.Store.YES, Field.Index.ANALYZED));
+            document.add(new Field("Samples", samplesString, Field.Store.YES, Field.Index.ANALYZED));
             content = content + samplesString + " ";
         }
 
@@ -352,8 +356,7 @@ public class LuceneSearch {
             Part part = (Part) entry;
             String format = (part.getPackageFormat().toString() != null) ? part.getPackageFormat()
                     .toString() : "";
-            document
-                    .add(new Field("Package Format", format, Field.Store.YES, Field.Index.ANALYZED));
+            document.add(new Field("Package Format", format, Field.Store.YES, Field.Index.ANALYZED));
             content = content + format + " ";
         }
 
