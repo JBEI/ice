@@ -27,6 +27,7 @@
 			<xs:element ref="seq:end" />
 			<xs:element ref="seq:type" />
 			<xs:element ref="seq:label"/>
+			<xs:element ref="seq:complement" />
 			<xs:element ref="seq:attribute" maxOccurs="unbounded"/>
 		</xs:sequence>
 	</xs:complexType>
@@ -116,5 +117,6 @@
 	</xs:simpleType>
 </xs:element>
 <xs:element name="label" type="xs:string"/>
+<xs:element name="complement" type ="xs:boolean" />
 <xs:element name="sequence" type="xs:string"/>
 </xs:schema>

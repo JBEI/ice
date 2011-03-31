@@ -12,6 +12,7 @@
 		<seq:end>23</seq:end>
 		<seq:type>CDS</seq:type>
 		<seq:label>beta-lactamase</seq:label>
+		<seq:complement>false</seq:complement>
 		<seq:attribute name="translation">MATHRLVM</seq:attribute>
 	</seq:feature>
 </seq:features>
