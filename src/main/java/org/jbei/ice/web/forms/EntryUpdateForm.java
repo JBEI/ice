@@ -12,6 +12,7 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.utils.ParameterGeneratorParser;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.common.ViewPermissionException;
@@ -55,6 +56,7 @@ public class EntryUpdateForm<T extends Entry> extends EntrySubmitForm<T> {
         setBioSafetyLevel(lookupCustomChoice(
             customChoicesList(Entry.getBioSafetyLevelOptionsMap()),
             String.valueOf(entry.getBioSafetyLevel())));
+        setParameters(ParameterGeneratorParser.generateParametersString(entry.getParameters()));
         setNotesMarkupType(lookupCustomChoice(customChoicesList(Entry.getMarkupTypeMap()),
             String.valueOf(entry.getLongDescriptionType())));
 
@@ -109,8 +111,7 @@ public class EntryUpdateForm<T extends Entry> extends EntrySubmitForm<T> {
                 } catch (PermissionException e) {
                     throw new ViewException(e);
                 }
-                setResponsePage(
-                    DeletionMessagePage.class,
+                setResponsePage(DeletionMessagePage.class,
                     new PageParameters("number=" + entry.getOnePartNumber().getPartNumber()
                             + ",recordId=" + entry.getRecordId()));
             }
@@ -118,6 +119,6 @@ public class EntryUpdateForm<T extends Entry> extends EntrySubmitForm<T> {
 
         deleteButton.add(new JavascriptEventConfirmation("onclick", "Delete this Entry?"));
         return deleteButton;
-    }   
-    
+    }
+
 }

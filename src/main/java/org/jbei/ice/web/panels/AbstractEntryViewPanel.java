@@ -55,6 +55,7 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
         renderIntellectualProperty();
         renderFundingSource();
         renderPrincipalInvestigator();
+        renderParameters();
         renderBriefSampleView();
     }
 
@@ -221,6 +222,16 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
         add(new Label("fundingSource", getEntry().fundingSourceToString()));
     }
 
+    protected void renderParameters() {
+        Panel parameterViewPanel = null;
+        if (getEntry().getParameters().size() == 0) {
+            parameterViewPanel = new EmptyMessagePanel("parameters", "");
+        } else {
+            parameterViewPanel = new ParameterViewPanel("parameters", getEntry().getParameters());
+        }
+        add(parameterViewPanel);
+    }
+
     protected void renderBriefSampleView() {
         ArrayList<Sample> samples = null;
         Panel sampleViewPanel = null;
@@ -238,7 +249,6 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
             sampleViewPanel = new BriefSampleViewPanel("sampleLocation", samples);
         }
         add(sampleViewPanel);
-
     }
 
     protected String trimLongField(String value, int maxLength) {

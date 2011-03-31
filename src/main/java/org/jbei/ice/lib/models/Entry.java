@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -153,6 +154,12 @@ public class Entry implements IEntryValueObject, IModel {
     @JoinColumn(name = "entries_id")
     @OrderBy("id")
     private final Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
+
+    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER, mappedBy = "entry")
+    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
+    @JoinColumn(name = "entries_id")
+    @OrderBy("id")
+    private final List<Parameter> parameters = new ArrayList<Parameter>();
 
     public Entry() {
     }
@@ -528,6 +535,24 @@ public class Entry implements IEntryValueObject, IModel {
 
     public Set<EntryFundingSource> getEntryFundingSources() {
         return entryFundingSources;
+    }
+
+    public void setParameters(List<Parameter> inputParameters) {
+        if (inputParameters == null) {
+            parameters.clear();
+            return;
+        }
+        if (inputParameters != parameters) {
+            for (Parameter parameter : inputParameters) {
+                parameter.setEntry(this);
+            }
+            parameters.clear();
+            parameters.addAll(inputParameters);
+        }
+    }
+
+    public List<Parameter> getParameters() {
+        return parameters;
     }
 
     public String principalInvestigatorToString() {

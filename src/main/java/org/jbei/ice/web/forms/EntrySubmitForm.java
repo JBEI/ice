@@ -37,9 +37,11 @@ import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.Link;
 import org.jbei.ice.lib.models.Name;
+import org.jbei.ice.lib.models.Parameter;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.utils.ParameterGeneratorParser;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.IceSession;
@@ -101,6 +103,7 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
     private String intellectualProperty;
     private String fundingSource;
     private String principalInvestigator;
+    private String parameters;
     private String sampleName;
     private String sampleNotes;
     private ArrayList<String> sampleLocation = new ArrayList<String>();
@@ -148,7 +151,7 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
         add(new TextField<String>("principalInvestigator", new PropertyModel<String>(this,
                 "principalInvestigator")).setRequired(true).setLabel(
             new Model<String>("Principal Investigator")));
-
+        add(new TextField<String>("parameters", new PropertyModel<String>(this, "parameters")));
         renderNotes();
 
         // only new forms get scheme choices
@@ -502,6 +505,11 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
         entry.setIntellectualProperty(getIntellectualProperty());
         entry.setLongDescriptionType(getNotesMarkupType().getValue());
 
+        if (getParameters() != null) {
+            List<Parameter> parametersList = ParameterGeneratorParser
+                    .parseParameterString(getParameters());
+            entry.setParameters(parametersList);
+        }
         AbstractMarkupPanel markupPanel = getMarkupPanel();
 
         String notesString = "";
@@ -584,7 +592,7 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
     @Override
     protected void onSubmit() {
         populateEntry();
-        if (this.hasError()) {
+        if (hasError()) {
             // redisplay form with message
         } else {
             submitEntry();
@@ -726,6 +734,14 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
 
     public String getPrincipalInvestigator() {
         return principalInvestigator;
+    }
+
+    public void setParameters(String parameters) {
+        this.parameters = parameters;
+    }
+
+    public String getParameters() {
+        return parameters;
     }
 
     public void setSampleName(String sampleName) {
