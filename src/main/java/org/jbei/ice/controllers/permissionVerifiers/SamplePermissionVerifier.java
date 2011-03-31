@@ -3,7 +3,6 @@ package org.jbei.ice.controllers.permissionVerifiers;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Location;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.permissions.PermissionManager;
 
@@ -26,9 +25,7 @@ public class SamplePermissionVerifier implements IPermissionVerifier {
             return false;
         }
 
-        if (model instanceof Location) {
-            return hasWritePermissionLocation((Location) model, account);
-        } else if (model instanceof Sample) {
+        if (model instanceof Sample) {
             return hasWritePermissionSample((Sample) model, account);
         } else {
             return false;
@@ -51,25 +48,4 @@ public class SamplePermissionVerifier implements IPermissionVerifier {
         }
     }
 
-    private boolean hasWritePermissionLocation(Location location, Account account) {
-        Sample sample = location.getSample();
-
-        if (sample == null) {
-            return false;
-        }
-
-        Entry entry = sample.getEntry();
-
-        if (entry != null && PermissionManager.hasWritePermission(entry, account)) {
-            return true;
-        }
-
-        if (sample == null || sample.getDepositor() == null) {
-            return false;
-        } else if (sample.getDepositor().equals(account.getEmail())) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 }

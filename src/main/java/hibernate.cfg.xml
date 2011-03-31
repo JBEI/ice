@@ -44,7 +44,6 @@
 		<mapping class="org.jbei.ice.lib.models.AccountEntryRelationship" />
 		<mapping class="org.jbei.ice.lib.models.Attachment" />
 		<mapping class="org.jbei.ice.lib.models.Sample" />
-		<mapping class="org.jbei.ice.lib.models.Location" />
 		<mapping class="org.jbei.ice.lib.models.Label" />
 		<mapping class="org.jbei.ice.lib.models.EntryLabel" />
 		<mapping class="org.jbei.ice.lib.models.AccountPreferences" />

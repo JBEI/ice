@@ -11,7 +11,6 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Location;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Utils;
@@ -40,28 +39,6 @@ public class SampleController extends Controller {
         return sample;
     }
 
-    public Location createLocation(String location, String barcode, String notes, String wells,
-            int nRows, int nColumns) {
-        return createLocation(location, barcode, notes, wells, nRows, nColumns, Calendar
-                .getInstance().getTime(), null);
-    }
-
-    public Location createLocation(String location, String barcode, String notes, String wells,
-            int nRows, int nColumns, Date creationTime, Date modificationTime) {
-        Location sampleLocation = new Location();
-
-        sampleLocation.setLocation(location);
-        sampleLocation.setBarcode(barcode);
-        sampleLocation.setNotes(notes);
-        sampleLocation.setWells(wells);
-        sampleLocation.setnRows(nRows);
-        sampleLocation.setnColumns(nColumns);
-        sampleLocation.setCreationTime(creationTime);
-        sampleLocation.setModificationTime(modificationTime);
-
-        return sampleLocation;
-    }
-
     public boolean hasReadPermission(Sample sample) throws ControllerException {
         if (sample == null) {
             throw new ControllerException("Failed to check read permissions for null sample!");
@@ -76,22 +53,6 @@ public class SampleController extends Controller {
         }
 
         return getSamplePermissionVerifier().hasWritePermissions(sample, getAccount());
-    }
-
-    public boolean hasLocationReadPermission(Location location) throws ControllerException {
-        if (location == null) {
-            throw new ControllerException("Failed to check read permissions for null location!");
-        }
-
-        return getSamplePermissionVerifier().hasReadPermissions(location, getAccount());
-    }
-
-    public boolean hasLocationWritePermission(Location location) throws ControllerException {
-        if (location == null) {
-            throw new ControllerException("Failed to check write permissions for null location!");
-        }
-
-        return getSamplePermissionVerifier().hasWritePermissions(location, getAccount());
     }
 
     public Sample saveSample(Sample sample) throws ControllerException, PermissionException {
