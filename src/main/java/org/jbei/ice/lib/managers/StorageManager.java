@@ -3,7 +3,6 @@ package org.jbei.ice.lib.managers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -60,14 +59,45 @@ public class StorageManager {
         return result;
     }
 
-    public static Storage retrieveStorageByIndex(String index) throws ManagerException {
-        Storage result = null;
+    /**
+     * Retrieves Storage representing a tube. The 2Dbarcode for a tube is unique across plates so
+     * this method is expected to return
+     * a single results. Compare to wells in 96 well plate that have same type and index across
+     * multiple plates
+     * 
+     * @param barcode
+     *            unique identifier for storage tube
+     * @return retrieved Storage
+     * @throws ManagerException
+     *             on exception
+     */
+    public static Storage retrieveStorageTube(String barcode) throws ManagerException {
+        List<Storage> results = StorageManager.retrieveStorageByIndex(barcode, StorageType.TUBE);
+
+        if (results == null || results.isEmpty())
+            return null;
+
+        if (results.size() > 1)
+            throw new ManagerException("Expecting single result, received " + results.size());
+
+        return results.get(0);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<Storage> retrieveStorageByIndex(String index, StorageType type)
+            throws ManagerException {
+        List<Storage> result = null;
         Session session = DAO.newSession();
         try {
             Query query = session.createQuery("from " + Storage.class.getName()
-                    + " where index = :index");
-            query.setString("index", index);
-            result = (Storage) query.uniqueResult();
+                    + " where index = :index and storage_type = :type");
+            query.setParameter("index", index);
+            query.setParameter("type", type);
+
+            List<Storage> list = query.list();
+            if (list != null) {
+                result = list;
+            }
         } catch (Exception e) {
             String msg = "Could not get Location by index: " + index + " " + e.toString();
             Logger.error(msg, e);
@@ -202,21 +232,9 @@ public class StorageManager {
 
     private static Storage getOrCreateChildLocation(Storage template, String itemLabel,
             Storage parent) throws ManagerException {
-        Storage result = null;
-        parent = StorageManager.get(parent.getId());
 
-        if (parent == null) {
-            return null;
-        }
-        Set<Storage> children = parent.getChildren();
-
-        for (Storage child : children) {
-
-            if (template.getName().equals(child.getName()) && itemLabel.equals(child.getIndex())) {
-                result = child;
-                break;
-            }
-        }
+        Storage result = retrieveStorageBy(template.getName(), itemLabel,
+            template.getStorageType(), parent.getId());
 
         if (result == null) {
             result = new Storage();
@@ -228,6 +246,33 @@ public class StorageManager {
             result = StorageManager.save(result);
         }
         return result;
+    }
+
+    public static Storage retrieveStorageBy(String name, String index, StorageType type,
+            long parentId) throws ManagerException {
+        Session session = DAO.newSession();
+        try {
+            Query query = session
+                    .createQuery("from "
+                            + Storage.class.getName()
+                            + " storage where storage.name = :name and storage.index = :index and storage.storageType = :storageType and parent_id = :parentId");
+            query.setString("index", index);
+            query.setString("name", name);
+            query.setParameter("storageType", type);
+            query.setLong("parentId", parentId);
+
+            Storage result = (Storage) query.uniqueResult();
+
+            return result;
+        } catch (Exception e) {
+            String msg = "Could not retrieve storage " + e.toString();
+            Logger.error(msg, e);
+            throw new ManagerException(msg);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
     }
 
     public static Storage getSchemeContainingParentStorage(Storage storage) {

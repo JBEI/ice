@@ -67,7 +67,7 @@ public class Storage implements IModel {
     @Lob
     private ArrayList<Storage> schemes;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "parent")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "parent")
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @OrderBy("id")
     @JoinColumn(name = "parent_id")
