@@ -139,6 +139,18 @@ public class SampleController extends Controller {
         return samples;
     }
 
+    public ArrayList<Sample> retrieveSamplesByIndex(String index) throws ControllerException {
+        ArrayList<Sample> samples = null;
+
+        try {
+            samples = SampleManager.retrieveSamplesByIndex(index);
+        } catch (ManagerException e) {
+            throw new ControllerException(e);
+        }
+
+        return samples;
+    }
+
     public int getNumberOfSamplesByDepositor(String depositorEmail) throws ControllerException {
         int numberOfSamples = 0;
 

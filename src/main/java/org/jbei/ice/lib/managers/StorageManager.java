@@ -60,6 +60,27 @@ public class StorageManager {
         return result;
     }
 
+    public static Storage retrieveStorageByIndex(String index) throws ManagerException {
+        Storage result = null;
+        Session session = DAO.newSession();
+        try {
+            Query query = session.createQuery("from " + Storage.class.getName()
+                    + " where index = :index");
+            query.setString("index", index);
+            result = (Storage) query.uniqueResult();
+        } catch (Exception e) {
+            String msg = "Could not get Location by index: " + index + " " + e.toString();
+            Logger.error(msg, e);
+            throw new ManagerException(msg);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+        return result;
+
+    }
+
     public static Storage update(Storage location) throws ManagerException {
         if (location == null) {
             return null;

@@ -8,6 +8,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.models.Storage;
@@ -100,6 +101,22 @@ public class SampleManager {
             }
         }
         return samples;
+    }
+
+    public static ArrayList<Sample> retrieveSamplesByIndex(String code) throws ManagerException {
+        Session session = DAO.newSession();
+        String queryString = "from " + Storage.class.getName()
+                + " as storage where storage.index = :code";
+        try {
+            Query query = session.createQuery(queryString);
+            query.setParameter("code", code);
+            Storage storage = (Storage) query.uniqueResult();
+            return getSamplesByStorage(storage);
+        } catch (Exception e) {
+            String msg = "Could not get Storage by code: " + code + " " + e.toString();
+            Logger.error(msg, e);
+            throw new ManagerException(msg);
+        }
     }
 
     @SuppressWarnings("unchecked")

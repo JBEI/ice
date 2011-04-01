@@ -1,6 +1,8 @@
 package org.jbei.ice.services.webservices;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -9,8 +11,10 @@ import javax.jws.WebService;
 import org.apache.commons.lang.NotImplementedException;
 import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.SampleController;
 import org.jbei.ice.controllers.SearchController;
 import org.jbei.ice.controllers.SequenceController;
+import org.jbei.ice.controllers.StorageController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.composers.formatters.FastaFormatter;
@@ -25,9 +29,11 @@ import org.jbei.ice.lib.models.Link;
 import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
+import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SessionData;
+import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
@@ -1103,6 +1109,97 @@ public class RegistryAPI {
         }
 
         return savedFeaturedDNASequence;
+    }
+
+    public ArrayList<Sample> retrieveEntrySamples(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
+            ServicePermissionException {
+        SampleController sampleController = this.getSampleController(sessionId);
+        EntryController entryController = this.getEntryController(sessionId);
+
+        try {
+            Entry entry = entryController.getByRecordId(entryId);
+            return sampleController.getSamples(entry);
+        } catch (ControllerException e) {
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
+        } catch (PermissionException e) {
+            throw new ServicePermissionException("No permissions to view entry");
+        }
+    }
+
+    public ArrayList<Sample> retrieveSamplesByBarcode(
+            @WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "barcode") String barcode) throws SessionException, ServiceException {
+        SampleController sampleController = getSampleController(sessionId);
+        try {
+            return sampleController.retrieveSamplesByIndex(barcode);
+        } catch (ControllerException e) {
+            Logger.error(e);
+            throw new ServiceException(e);
+        }
+    }
+
+    /**
+     * 
+     * @param sessionId
+     * @param codes
+     *            indexed by location. null values indicate no samples
+     * @throws SessionException
+     * @throws ServiceException
+     * @return list of samples
+     */
+    public List<Sample> checkAndUpdateSamplesStorage(
+            @WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "samples") Sample[] samples) throws SessionException, ServiceException {
+
+        StorageController storageController = this.getStorageController(sessionId);
+        SampleController sampleController = this.getSampleController(sessionId);
+
+        List<Sample> retSamples = new LinkedList<Sample>();
+
+        for (Sample sample : samples) {
+
+            Storage tube = sample.getStorage();
+            Storage well = tube.getParent();
+            String barcode = tube.getIndex();
+
+            try {
+                Storage recordedTube = storageController.retrieveStorageByIndex(barcode);
+                Storage recordedWell = recordedTube.getParent();
+
+                // we expect both to be the same
+                if (!well.equals(recordedWell.getIndex())) {
+
+                    well = storageController.retrieveStorageByIndex(well.getIndex());
+                    recordedTube.setParent(well);
+                    storageController.update(recordedTube);
+                }
+
+                // retrieve sample
+                List<Sample> indexSamples = sampleController.retrieveSamplesByIndex(barcode);
+                if (indexSamples != null && !indexSamples.isEmpty())
+                    retSamples.add(indexSamples.get(0));
+            } catch (ControllerException e) {
+                //                throw new ServiceException(e);
+                Logger.error(e.getMessage());
+                continue;
+            }
+        }
+        return retSamples;
+    }
+
+    protected StorageController getStorageController(@WebParam(name = "sessionId") String sessionId)
+            throws ServiceException, SessionException {
+        Account account = validateAccount(sessionId);
+        return new StorageController(account);
+    }
+
+    protected SampleController getSampleController(@WebParam(name = "sessionId") String sessionId)
+            throws SessionException, ServiceException {
+        Account account = validateAccount(sessionId);
+        return new SampleController(account);
     }
 
     protected EntryController getEntryController(@WebParam(name = "sessionId") String sessionId)
