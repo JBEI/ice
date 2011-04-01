@@ -1,6 +1,7 @@
 package org.jbei.ice.services.webservices;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -34,6 +35,7 @@ import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.models.Storage;
+import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
@@ -1142,8 +1144,81 @@ public class RegistryAPI {
     }
 
     /**
+     * Checks if all samples have a common plate. If not, it determines which plate
+     * is the most likely.
      * 
      * @param sessionId
+     * @param samples
+     *            samples containing tube storage location with well parent
+     * @return null if samples have a common plate, if not plate id (storage index) of most likely
+     *         plate is returned
+     * @throws SessionException
+     * @throws ServiceException
+     */
+    public String samplePlate(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "samples") Sample[] samples) throws SessionException, ServiceException {
+
+        StorageController storageController = this.getStorageController(sessionId);
+        HashMap<String, Integer> plateIndex = new HashMap<String, Integer>();
+
+        Sample initial = samples[0];
+        Storage tube = initial.getStorage();
+
+        // get tube by barcode and parent
+        try {
+            tube = storageController.retrieveStorageTube(tube.getIndex());
+        } catch (ControllerException e) {
+            Logger.error(e.getMessage());
+            throw new ServiceException("Error retrieving storage location for tube "
+                    + tube.getIndex());
+        }
+        if (tube == null)
+            throw new ServiceException("Error retrieving storage location for tube");
+
+        Storage plate = tube.getParent().getParent();
+        String highestFreqPlate = plate.getIndex();
+        int highestFreqCount = 1;
+        plateIndex.put(highestFreqPlate, highestFreqCount);
+
+        for (int i = 1; i < samples.length; i += 1) {
+
+            Sample sample = samples[i];
+
+            String barcode = sample.getStorage().getIndex();
+            try {
+                tube = storageController.retrieveStorageTube(barcode);
+            } catch (ControllerException e) {
+                Logger.error(e.getMessage());
+                throw new ServiceException("Error retrieving storage location for tube");
+            }
+            plate = tube.getParent().getParent();
+
+            // check if this is new (not in plates map)
+            Integer value = plateIndex.get(plate.getIndex());
+            if (value == null) {
+                // new
+                plateIndex.put(plate.getIndex(), 1);
+            } else {
+                // update count
+                value += 1;
+                plateIndex.put(plate.getIndex(), value);
+                if (value > highestFreqCount) {
+                    highestFreqCount = value;
+                    highestFreqPlate = plate.getIndex();
+                }
+            }
+        }
+
+        if (plateIndex.keySet().size() == 1)
+            return null;
+
+        return highestFreqPlate;
+    }
+
+    /**
+     * 
+     * @param sessionId
+     *            valid session id
      * @param codes
      *            indexed by location. null values indicate no samples
      * @throws SessionException
@@ -1152,40 +1227,79 @@ public class RegistryAPI {
      */
     public List<Sample> checkAndUpdateSamplesStorage(
             @WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "samples") Sample[] samples) throws SessionException, ServiceException {
+            @WebParam(name = "samples") Sample[] samples, @WebParam(name = "plateId") String plateId)
+            throws SessionException, ServiceException {
 
         StorageController storageController = this.getStorageController(sessionId);
-        SampleController sampleController = this.getSampleController(sessionId);
 
+        // count of plates seen so far
         List<Sample> retSamples = new LinkedList<Sample>();
+        List<Storage> update = new LinkedList<Storage>();
 
+        // for each sample (unique elements are the barcode (tube index))
         for (Sample sample : samples) {
 
-            Storage tube = sample.getStorage();
-            Storage well = tube.getParent();
-            String barcode = tube.getIndex();
+            // sent storage location. note that barcode can be no read or no tube
+            String barcode = sample.getStorage().getIndex();
+            if ("No Tube".equals(barcode)) {
+                //TODO : clear the tube in that location
 
-            try {
-                Storage recordedTube = storageController.retrieveStorageByIndex(barcode);
-                Storage recordedWell = recordedTube.getParent();
-
-                // we expect both to be the same
-                if (!well.equals(recordedWell.getIndex())) {
-
-                    well = storageController.retrieveStorageByIndex(well.getIndex());
-                    recordedTube.setParent(well);
-                    storageController.update(recordedTube);
-                }
-
-                // retrieve sample
-                List<Sample> indexSamples = sampleController.retrieveSamplesByIndex(barcode);
-                if (indexSamples != null && !indexSamples.isEmpty())
-                    retSamples.add(indexSamples.get(0));
-            } catch (ControllerException e) {
-                //                throw new ServiceException(e);
-                Logger.error(e.getMessage());
                 continue;
             }
+
+            String location = sample.getStorage().getParent().getIndex();
+
+            Storage recordedTube = null;
+            try {
+                // stored storage location
+                recordedTube = storageController.retrieveStorageTube(barcode);
+                Storage recordedWell = recordedTube.getParent();
+                Storage recordedPlate = recordedWell.getParent();
+                Storage parentScheme = recordedPlate.getParent();
+
+                boolean samePlate = (plateId == null);
+                boolean sameWell = recordedWell.getIndex().equals(location);
+
+                if (samePlate) {
+                    if (sameWell) {
+                        continue; // no changes needed
+                    } else {
+                        // same plate but different well                        
+                        Storage well = storageController.retrieveStorageBy("Well", location,
+                            StorageType.WELL, recordedPlate.getId());
+                        if (well == null)
+                            throw new ServiceException(
+                                    "Could not retrieve new location for storage");
+                        recordedTube.setParent(well);
+
+                        // TODO : Update
+                    }
+                } else {
+                    // different plate (update using the passed parameter)
+                    Storage newPlate = storageController.retrieveStorageBy("Plate", plateId,
+                        StorageType.PLATE96, parentScheme.getId());
+                    if (sameWell) {
+                        // update plate only
+                        recordedWell.setParent(newPlate);
+
+                        // TODO : update
+
+                    } else {
+                        // update plate and well
+                        Storage well = storageController.retrieveStorageBy("Well", location,
+                            StorageType.WELL, newPlate.getId());
+                        recordedTube.setParent(well);
+
+                        // TODO : update
+                    }
+                }
+            } catch (ControllerException e) {
+                Logger.error(e);
+                throw new ServiceException("Error retrieving/updating some records!");
+            }
+
+            sample.setStorage(recordedTube);
+            retSamples.add(sample);
         }
         return retSamples;
     }
