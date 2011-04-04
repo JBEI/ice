@@ -20,6 +20,7 @@ import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.models.Vote;
+import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 
 @SuppressWarnings("unchecked")
@@ -168,9 +169,12 @@ public class UtilsManager {
             }
         }
 
-        Pattern basicJbeiPattern = Pattern.compile("\\[\\[jbei:.*?\\]\\]");
-        Pattern partNumberPattern = Pattern.compile("\\[\\[jbei:(.*)\\]\\]");
-        Pattern descriptivePattern = Pattern.compile("\\[\\[jbei:(.*)\\|(.*)\\]\\]");
+        Pattern basicWikiLinkPattern = Pattern.compile("\\[\\["
+                + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":.*?\\]\\]");
+        Pattern partNumberPattern = Pattern.compile("\\[\\["
+                + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":(.*)\\]\\]");
+        Pattern descriptivePattern = Pattern.compile("\\[\\["
+                + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":(.*)\\|(.*)\\]\\]");
 
         for (long strainId : strainIds) {
             Strain strain;
@@ -183,11 +187,11 @@ public class UtilsManager {
             String[] strainPlasmids = strain.getPlasmids().split(",");
             for (String strainPlasmid : strainPlasmids) {
                 strainPlasmid = strainPlasmid.trim();
-                Matcher basicJbeiMatcher = basicJbeiPattern.matcher(strainPlasmid);
+                Matcher basicWikiLinkMatcher = basicWikiLinkPattern.matcher(strainPlasmid);
                 String strainPlasmidNumber = null;
-                if (basicJbeiMatcher.matches()) {
-                    Matcher partNumberMatcher = partNumberPattern.matcher(basicJbeiMatcher.group());
-                    Matcher descriptivePatternMatcher = descriptivePattern.matcher(basicJbeiMatcher
+                if (basicWikiLinkMatcher.matches()) {
+                    Matcher partNumberMatcher = partNumberPattern.matcher(basicWikiLinkMatcher.group());
+                    Matcher descriptivePatternMatcher = descriptivePattern.matcher(basicWikiLinkMatcher
                             .group());
 
                     if (descriptivePatternMatcher.find()) {

@@ -39,6 +39,7 @@ import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.CommaSeparatedField;
@@ -541,8 +542,8 @@ public class PlasmidStrainNewFormPanel extends Panel {
             // persist
             try {
                 Plasmid newPlasmid = (Plasmid) entryController.createEntry(plasmid, true, true);
-                String plasmidPartNumberString = "[[jbei:"
-                        + newPlasmid.getOnePartNumber().getPartNumber() + "|"
+                String plasmidPartNumberString = "[[" + JbeirSettings.getSetting("WIKILINK_PREFIX")
+                        + ":" + newPlasmid.getOnePartNumber().getPartNumber() + "|"
                         + newPlasmid.getOneName().getName() + "]]";
                 strain.setPlasmids(plasmidPartNumberString);
                 entryController.createEntry(strain, true, true);

@@ -43,6 +43,7 @@ import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.AssemblyHelper;
+import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.utils.SerializationUtils.SerializationUtilsException;
 import org.jbei.ice.lib.utils.TraceAlignmentHelper;
@@ -1099,8 +1100,8 @@ public class RegistryAMFAPI extends BaseService {
 
         try {
             newPlasmid = (Plasmid) entryController.createEntry(plasmid);
-            String plasmidPartNumberString = "[[jbei:"
-                    + newPlasmid.getOnePartNumber().getPartNumber() + "|"
+            String plasmidPartNumberString = "[[" + JbeirSettings.getSetting("WIKILINK_PREFIX")
+                    + ":" + newPlasmid.getOnePartNumber().getPartNumber() + "|"
                     + newPlasmid.getOneName().getName() + "]]";
             strain.setPlasmids(plasmidPartNumberString);
             newStrain = (Strain) entryController.createEntry(strain);

@@ -13,6 +13,7 @@ import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.EntryViewPage;
@@ -170,37 +171,40 @@ public class WebUtils {
     }
 
     public static String linkifyText(String text) {
-        String newText = jbeiLinkifyText(text);
+        String newText = wikiLinkifyText(text);
         newText = urlLinkifyText(newText);
 
         return newText;
     }
 
-    private static String jbeiLinkifyText(String text) {
+    private static String wikiLinkifyText(String text) {
         String newText = "";
 
         try {
             EntryController entryController = new EntryController(IceSession.get().getAccount());
 
-            Pattern basicJbeiPattern = Pattern.compile("\\[\\[jbei:.*?\\]\\]");
-            Pattern partNumberPattern = Pattern.compile("\\[\\[jbei:(.*)\\]\\]");
-            Pattern descriptivePattern = Pattern.compile("\\[\\[jbei:(.*)\\|(.*)\\]\\]");
+            Pattern basicWikiLinkPattern = Pattern.compile("\\[\\["
+                    + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":.*?\\]\\]");
+            Pattern partNumberPattern = Pattern.compile("\\[\\["
+                    + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":(.*)\\]\\]");
+            Pattern descriptivePattern = Pattern.compile("\\[\\["
+                    + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":(.*)\\|(.*)\\]\\]");
 
             if (text == null) {
                 return "";
             }
-            Matcher basicJbeiMatcher = basicJbeiPattern.matcher(text);
+            Matcher basicWikiLinkMatcher = basicWikiLinkPattern.matcher(text);
 
             ArrayList<JbeiLink> jbeiLinks = new ArrayList<JbeiLink>();
             ArrayList<Integer> starts = new ArrayList<Integer>();
             ArrayList<Integer> ends = new ArrayList<Integer>();
 
-            while (basicJbeiMatcher.find()) {
+            while (basicWikiLinkMatcher.find()) {
                 String partNumber = null;
                 String descriptive = null;
 
-                Matcher partNumberMatcher = partNumberPattern.matcher(basicJbeiMatcher.group());
-                Matcher descriptivePatternMatcher = descriptivePattern.matcher(basicJbeiMatcher
+                Matcher partNumberMatcher = partNumberPattern.matcher(basicWikiLinkMatcher.group());
+                Matcher descriptivePatternMatcher = descriptivePattern.matcher(basicWikiLinkMatcher
                         .group());
 
                 if (descriptivePatternMatcher.find()) {
@@ -216,8 +220,8 @@ public class WebUtils {
 
                     if (entry != null) {
                         jbeiLinks.add(new JbeiLink(partNumber, descriptive));
-                        starts.add(basicJbeiMatcher.start());
-                        ends.add(basicJbeiMatcher.end());
+                        starts.add(basicWikiLinkMatcher.start());
+                        ends.add(basicWikiLinkMatcher.end());
                     }
                 }
             }
