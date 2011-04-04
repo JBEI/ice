@@ -124,7 +124,8 @@ public class IceGenbankParser extends AbstractParser {
         return sequence;
     }
 
-    private ArrayList<Tag> splitTags(String block, String[] acceptedTags, String[] ignoredTags) {
+    private ArrayList<Tag> splitTags(String block, String[] acceptedTags, String[] ignoredTags)
+            throws InvalidFormatParserException {
         ArrayList<Tag> result = new ArrayList<Tag>();
 
         StringBuilder rawBlock = new StringBuilder();
@@ -132,8 +133,14 @@ public class IceGenbankParser extends AbstractParser {
         String[] lineChunks = null;
         Tag currentTag = null;
 
-        for (int i = 0; i < lines.length; i++) {
-            String line = lines[i];
+        // see if first two lines contain the "LOCUS" keyword. If not, don't even bother
+        if (lines[0].indexOf("LOCUS") == -1) {
+            if (lines[1].indexOf("LOCUS") == -1) {
+                throw new InvalidFormatParserException("Not a valid Genbank format: No Locus line.");
+            }
+        }
+
+        for (String line : lines) {
             lineChunks = line.trim().split(" +");
             if (lineChunks.length == 0) {
                 continue;
@@ -348,8 +355,8 @@ public class IceGenbankParser extends AbstractParser {
 
         int apparentQualifierColumn = lines[0].indexOf(lines[0].split("\\/")[1]) - 1;
 
-        for (int i = 0; i < lines.length; i++) {
-            line = lines[i];
+        for (String line2 : lines) {
+            line = line2;
 
             if ('/' == line.charAt(apparentQualifierColumn)) { // new tag starts
                 if (dnaFeatureNote != null) { // flush previous note
@@ -434,8 +441,8 @@ public class IceGenbankParser extends AbstractParser {
         String newLabel = null;
 
         if (dnaFeatureContains(notes, LABEL_QUALIFIER) == -1) {
-            for (int i = 0; i < QUALIFIERS.length; i++) {
-                int foundId = dnaFeatureContains(notes, QUALIFIERS[i]);
+            for (String element : QUALIFIERS) {
+                int foundId = dnaFeatureContains(notes, element);
                 if (foundId != -1) {
                     newLabel = notes.get(foundId).getValue();
                 }
@@ -463,7 +470,7 @@ public class IceGenbankParser extends AbstractParser {
     }
 
     // TODO 
-    private ReferenceTag parseReferenceTag(Tag tag) {
+    private ReferenceTag parseReferenceTag(Tag tag) throws InvalidFormatParserException {
 
         String lines[] = tag.getRawBody().split("\n");
         String putativeValue = lines[0].split(" +")[1];
