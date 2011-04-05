@@ -1135,8 +1135,13 @@ public class RegistryAPI {
             @WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "barcode") String barcode) throws SessionException, ServiceException {
         SampleController sampleController = getSampleController(sessionId);
+        StorageController storageController = getStorageController(sessionId);
+
         try {
-            return sampleController.retrieveSamplesByIndex(barcode);
+            Storage storage = storageController.retrieveStorageTube(barcode);
+            if (storage == null)
+                throw new ServiceException("Could not look up " + barcode);
+            return sampleController.getSamplesByStorage(storage);
         } catch (ControllerException e) {
             Logger.error(e);
             throw new ServiceException(e);
@@ -1234,7 +1239,6 @@ public class RegistryAPI {
 
         // count of plates seen so far
         List<Sample> retSamples = new LinkedList<Sample>();
-        List<Storage> update = new LinkedList<Storage>();
 
         // for each sample (unique elements are the barcode (tube index))
         for (Sample sample : samples) {
@@ -1271,8 +1275,7 @@ public class RegistryAPI {
                             throw new ServiceException(
                                     "Could not retrieve new location for storage");
                         recordedTube.setParent(well);
-
-                        // TODO : Update
+                        storageController.update(recordedTube);
                     }
                 } else {
                     // different plate (update using the passed parameter)
@@ -1281,16 +1284,14 @@ public class RegistryAPI {
                     if (sameWell) {
                         // update plate only
                         recordedWell.setParent(newPlate);
-
-                        // TODO : update
+                        storageController.update(recordedWell);
 
                     } else {
                         // update plate and well
                         Storage well = storageController.retrieveStorageBy("Well", location,
                             StorageType.WELL, newPlate.getId());
                         recordedTube.setParent(well);
-
-                        // TODO : update
+                        storageController.update(recordedTube);
                     }
                 }
             } catch (ControllerException e) {
@@ -1339,7 +1340,7 @@ public class RegistryAPI {
     protected Account validateAccount(@WebParam(name = "sessionId") String sessionId)
             throws ServiceException, SessionException {
         if (!isAuthenticated(sessionId)) {
-            throw new SessionException("Unauthorized access! Autorize first!");
+            throw new SessionException("Unauthorized access! Authorize first!");
         }
 
         Account account = null;

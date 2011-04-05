@@ -12,6 +12,7 @@ import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sample;
+import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Utils;
 
@@ -139,16 +140,13 @@ public class SampleController extends Controller {
         return samples;
     }
 
-    public ArrayList<Sample> retrieveSamplesByIndex(String index) throws ControllerException {
-        ArrayList<Sample> samples = null;
+    public ArrayList<Sample> getSamplesByStorage(Storage storage) throws ControllerException {
 
         try {
-            samples = SampleManager.retrieveSamplesByIndex(index);
+            return SampleManager.getSamplesByStorage(storage);
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
-
-        return samples;
     }
 
     public int getNumberOfSamplesByDepositor(String depositorEmail) throws ControllerException {
