@@ -93,15 +93,15 @@ public class StorageManager {
         try {
             Query query = session.createQuery("from " + Storage.class.getName()
                     + " where index = :index and storage_type = :type");
-            query.setParameter("index", index);
-            query.setParameter("type", type);
+            query.setString("index", index);
+            query.setString("type", type.name());
 
             List<Storage> list = query.list();
             if (list != null) {
                 result = list;
             }
         } catch (Exception e) {
-            String msg = "Could not get Location by index: " + index + " " + e.toString();
+            String msg = "Could not get Storage by index: " + index + " " + e.toString();
             Logger.error(msg, e);
             throw new ManagerException(msg);
         } finally {

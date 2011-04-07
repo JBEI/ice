@@ -1138,7 +1138,7 @@ public class RegistryAPI {
         StorageController storageController = getStorageController(sessionId);
 
         try {
-            Storage storage = storageController.retrieveStorageTube(barcode);
+            Storage storage = storageController.retrieveStorageTube(barcode.trim());
             if (storage == null)
                 throw new ServiceException("Could not look up " + barcode);
             return sampleController.getSamplesByStorage(storage);
