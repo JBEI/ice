@@ -274,6 +274,7 @@ public class KeioStrainImportHelper {
         int index = 0;
         Storage workingCopyScheme = null;
         Storage backupScheme = null;
+        int count = 0;
 
         try {
             workingCopyScheme = createKeioWorkingCopyScheme();
@@ -281,8 +282,6 @@ public class KeioStrainImportHelper {
         } catch (ManagerException m) {
             throw new UtilityException(m);
         }
-
-        long time = System.currentTimeMillis();
 
         for (StrainRow row : parsedContent) {
             Account account = null;
@@ -293,9 +292,6 @@ public class KeioStrainImportHelper {
 
             if (index == 96) {
                 index = 0;
-                long completed = (System.currentTimeMillis() - time) / 1000;
-                System.out.println("Completed 3 racks in " + completed + "s");
-                time = System.currentTimeMillis();
             }
 
             try {
@@ -304,6 +300,9 @@ public class KeioStrainImportHelper {
             } catch (ManagerException e2) {
                 throw new UtilityException(e2);
             }
+
+            if (account == null)
+                throw new UtilityException("Null Account");
 
             EntryController entryController = new EntryController(account);
             SampleController sampleController = new SampleController(account);
@@ -363,11 +362,17 @@ public class KeioStrainImportHelper {
             }
 
             index += 1;
+            count += 1;
+
+            if (count % 1000 == 0)
+                System.out.println("Completed " + count);
         }
+
+        System.out.println("Completed " + count);
     }
 
     public static void main(String[] args) {
-        String fileName = "/home/hector/Downloads/Keio_Collection_fake.csv";
+        String fileName = "/home/Keio_Collection.csv";
         File csvFile = new File(fileName);
 
         if (csvFile.canRead()) {
