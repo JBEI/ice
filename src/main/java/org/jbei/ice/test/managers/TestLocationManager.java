@@ -1,7 +1,7 @@
 package org.jbei.ice.test.managers;
 
-import org.jbei.ice.lib.managers.StorageManager;
 import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.managers.StorageManager;
 import org.jbei.ice.lib.models.Storage;
 import org.junit.Assert;
 import org.junit.Test;
@@ -36,7 +36,7 @@ public class TestLocationManager {
         Assert.assertTrue(temp.getId() != 0);
 
         long tempId = temp.getId();
-        Storage temp2 = StorageManager.get(tempId);
+        Storage temp2 = StorageManager.get(tempId, false);
         Assert.assertTrue(temp.getId() == temp2.getId());
 
         temp2.setName("changed name");
@@ -44,7 +44,7 @@ public class TestLocationManager {
 
         StorageManager.delete(temp2);
 
-        Storage temp3 = StorageManager.get(tempId);
+        Storage temp3 = StorageManager.get(tempId, false);
         Assert.assertTrue(temp3 == null);
     }
 
@@ -99,11 +99,11 @@ public class TestLocationManager {
         parentId = location1.getId();
         child1c1Id = location1c1.getId();
 
-        Storage temp1 = StorageManager.get(location1.getId());
+        Storage temp1 = StorageManager.get(location1.getId(), false);
 
         StorageManager.delete(temp1);
 
-        Storage temp = StorageManager.get(child1c1Id);
+        Storage temp = StorageManager.get(child1c1Id, false);
         Assert.assertNull(temp);
 
     }
