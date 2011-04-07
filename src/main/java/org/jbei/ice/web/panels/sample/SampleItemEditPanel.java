@@ -74,7 +74,8 @@ public class SampleItemEditPanel extends Panel {
                 alertPanel = new EmptyPanel("alertPanel");
 
                 try {
-                    currentScheme = StorageManager.get(Long.valueOf(schemeChoice.getValue()));
+                    currentScheme = StorageManager
+                            .get(Long.valueOf(schemeChoice.getValue()), false);
                 } catch (NumberFormatException e) {
                     // ok to pass
                 } catch (ManagerException e) {
@@ -175,7 +176,7 @@ public class SampleItemEditPanel extends Panel {
                 Storage scheme = null;
                 long schemeId = Long.parseLong(getSchemeChoice().getValue());
                 try {
-                    scheme = StorageManager.get(schemeId);
+                    scheme = StorageManager.get(schemeId, false);
                 } catch (ManagerException e1) {
                     throw new ViewException(e1);
                 }
@@ -288,8 +289,8 @@ public class SampleItemEditPanel extends Panel {
                         form.getSchemeValues().clear();
 
                         try {
-                            currentScheme = StorageManager
-                                    .get(Long.valueOf(schemeChoice.getValue()));
+                            currentScheme = StorageManager.get(
+                                Long.valueOf(schemeChoice.getValue()), false);
                         } catch (NumberFormatException e) {
                             // ok to pass
                         } catch (ManagerException e) {

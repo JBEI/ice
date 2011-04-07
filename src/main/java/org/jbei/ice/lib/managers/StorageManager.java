@@ -17,7 +17,7 @@ import org.jbei.ice.lib.utils.Utils;
 
 public class StorageManager {
 
-    public static Storage get(long id) throws ManagerException {
+    public static Storage get(long id, boolean fetchChildren) throws ManagerException {
         Storage result = null;
         Session session = DAO.newSession();
         try {
@@ -25,6 +25,8 @@ public class StorageManager {
                     .createQuery("from " + Storage.class.getName() + " where id = :id");
             query.setLong("id", id);
             result = (Storage) query.uniqueResult();
+            if (fetchChildren && result != null)
+                result.getChildren().size();
         } catch (Exception e) {
             String msg = "Could not get Location by id: " + id + " " + e.toString();
             Logger.error(msg, e);

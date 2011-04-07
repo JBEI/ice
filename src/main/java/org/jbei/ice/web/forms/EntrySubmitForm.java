@@ -455,7 +455,7 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
         schemeValues.clear();
 
         try {
-            currentScheme = StorageManager.get(Long.parseLong(getSchemeChoice().getValue()));
+            currentScheme = StorageManager.get(Long.parseLong(getSchemeChoice().getValue()), false);
         } catch (NumberFormatException e) {
             // log and pass
             Logger.error(e);
@@ -569,8 +569,8 @@ public class EntrySubmitForm<T extends Entry> extends StatelessForm<Object> {
 
                 Storage storage = null;
                 try {
-                    Storage scheme = StorageManager.get(Long
-                            .parseLong(getSchemeChoice().getValue()));
+                    Storage scheme = StorageManager.get(
+                        Long.parseLong(getSchemeChoice().getValue()), false);
                     storage = StorageManager.getLocation(scheme, labels);
                 } catch (NumberFormatException e) {
                     throw new ViewException(e);

@@ -48,6 +48,11 @@ public class StoragePage extends ProtectedPage {
 
         ArrayList<Storage> siblings = new ArrayList<Storage>();
         if (parent != null) {
+            try {
+                parent = StorageManager.get(parent.getId(), true);
+            } catch (ManagerException e) {
+                throw new ViewException(e);
+            }
             siblings.addAll(parent.getChildren());
         }
 
@@ -165,7 +170,7 @@ public class StoragePage extends ProtectedPage {
         }
         String id = parameters.getString("0");
         try {
-            storage = StorageManager.get(Long.valueOf(id));
+            storage = StorageManager.get(Long.valueOf(id), true);
         } catch (NumberFormatException e) {
             throw new ViewException(e);
         } catch (ManagerException e) {

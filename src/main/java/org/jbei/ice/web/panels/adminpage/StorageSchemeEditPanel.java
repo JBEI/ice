@@ -115,7 +115,7 @@ public class StorageSchemeEditPanel extends Panel {
                 int i = Integer.valueOf(thisPanel.getRootTypeChoice().getValue());
                 Storage root;
                 try {
-                    root = StorageManager.get(Integer.valueOf(i));
+                    root = StorageManager.get(Integer.valueOf(i), false);
                 } catch (ManagerException e) {
                     throw new ViewException(e);
                 }
