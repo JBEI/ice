@@ -1245,7 +1245,7 @@ public class RegistryAPI {
 
             // sent storage location. note that barcode can be no read or no tube
             String barcode = sample.getStorage().getIndex();
-            if ("No Tube".equals(barcode)) {
+            if ("No Tube".equals(barcode) || "No Read".equals(barcode)) {
                 //TODO : clear the tube in that location
 
                 continue;
