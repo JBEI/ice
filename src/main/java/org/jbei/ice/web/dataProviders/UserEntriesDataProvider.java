@@ -1,7 +1,7 @@
 package org.jbei.ice.web.dataProviders;
 
-import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -33,8 +33,8 @@ public class UserEntriesDataProvider extends AbstractEntriesDataProvider {
         try {
             String sort = getSort().getProperty();
             boolean asc = getSort().isAscending();
-            
-            ArrayList<Entry> results = entryController.getEntriesByOwner(account.getEmail(), first,
+
+            List<Entry> results = entryController.getEntriesByOwner(account.getEmail(), first,
                 count, sort, asc);
             if (results != null) {
                 entries.addAll(results);

@@ -283,8 +283,8 @@ public class EntryManager {
     }
 
     @SuppressWarnings("unchecked")
-    public static ArrayList<Entry> getEntriesByIdSetSort(List<Long> ids, String field,
-            boolean ascending) throws ManagerException {
+    public static List<Entry> getEntriesByIdSetSort(List<Long> ids, String field, boolean ascending)
+            throws ManagerException {
         ArrayList<Entry> entries = null;
 
         if (ids.size() == 0) {

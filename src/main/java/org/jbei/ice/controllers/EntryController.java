@@ -238,13 +238,13 @@ public class EntryController extends Controller {
         return result;
     }
 
-    public ArrayList<Entry> getEntries() throws ControllerException {
+    public List<Entry> getEntries() throws ControllerException {
         return getEntries(0, -1, null, true);
     }
 
-    public ArrayList<Entry> getEntries(int offset, int limit, String field, boolean ascending)
+    public List<Entry> getEntries(int offset, int limit, String field, boolean ascending)
             throws ControllerException {
-        ArrayList<Entry> entries = null;
+        List<Entry> entries = null;
 
         try {
             ArrayList<Long> entryIds = EntryManager.getEntries(field, ascending);
@@ -258,9 +258,9 @@ public class EntryController extends Controller {
         return entries;
     }
 
-    public ArrayList<Entry> getEntriesByOwner(String owner, int offset, int limit, String field,
+    public List<Entry> getEntriesByOwner(String owner, int offset, int limit, String field,
             boolean ascending) throws ControllerException {
-        ArrayList<Entry> entries = null;
+        List<Entry> entries = null;
 
         try {
             ArrayList<Long> ownerEntries = EntryManager.getEntriesByOwnerSort(owner, field,

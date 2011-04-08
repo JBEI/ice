@@ -2,6 +2,7 @@ package org.jbei.ice.web.dataProviders;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -34,7 +35,7 @@ public class EntriesDataProvider extends AbstractEntriesDataProvider {
             String sortParam = getSort().getProperty();
             boolean asc = getSort().isAscending();
 
-            ArrayList<Entry> results = entryController.getEntries(first, count, sortParam, asc);
+            List<Entry> results = entryController.getEntries(first, count, sortParam, asc);
 
             if (results != null) {
                 entries.addAll(results);
@@ -69,6 +70,7 @@ public class EntriesDataProvider extends AbstractEntriesDataProvider {
         return result;
     }
 
+    @Override
     public ArrayList<Entry> getEntries() {
         return entries;
     }

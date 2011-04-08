@@ -35,6 +35,70 @@ public class FolderManager {
         return result;
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * Retrieves the count of the number of contents in the folder
+     * if the folder contains other folders, the it returns the number of sub-folders
+     * 
+     * @param id
+     *            unique folder identifier
+     * @return number of child contents in the folder
+     * @throws ManagerException
+     *             on any exception retrieving the folder or its contents
+     * 
+     */
+    public static int getFolderSize(long id) throws ManagerException {
+        Session session = DAO.newSession();
+        try {
+            SQLQuery query = session
+                    .createSQLQuery("select count(*) from folder_entry where folder_id = :id ");
+            query.setLong("id", id);
+            return ((BigInteger) query.uniqueResult()).intValue();
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+    }
+
+    /**
+     * Retrieves the entry contents of a folder starting from <code>first</code> up to a maximum of
+     * <code>count</code>
+     * 
+     * @param id
+     *            unique folder identifier
+     * @param first
+     *            folder content to start from
+     * @param count
+     *            maximum number of entries to return
+     * @return list of entries retrieved
+     * @throws ManagerException
+     *             on any exception accessing the folder or its contents
+     */
+    public static ArrayList<Long> getFolderContents(long id, boolean asc) throws ManagerException {
+        ArrayList<Long> results = new ArrayList<Long>();
+        Session session = DAO.newSession();
+        try {
+
+            SQLQuery query = session
+                    .createSQLQuery("SELECT entry_id FROM folder_entry WHERE folder_id = :id");
+            query.setLong("id", id);
+
+            @SuppressWarnings("unchecked")
+            List<BigInteger> l = query.list();
+            for (BigInteger bi : l)
+                results.add(bi.longValue());
+
+            return results;
+
+        } finally {
+            if (session.isOpen())
+                session.close();
+        }
+    }
+
+>>>>>>> 3528420... REGISTRY-585: fix slow loading of large collections
     @SuppressWarnings("unchecked")
     public static List<Folder> getFoldersByOwner(Account account) throws ManagerException {
 
