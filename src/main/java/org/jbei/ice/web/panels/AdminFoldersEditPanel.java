@@ -43,7 +43,7 @@ public class AdminFoldersEditPanel extends Panel {
 
     private static final long serialVersionUID = 1L;
     private static ResourceReference arrowDown;
-    private ResourceReference arrowRight;
+    private final ResourceReference arrowRight;
     private Fragment fragment;
 
     private ListView<Folder> getAvailableFoldersView(String id) {
@@ -54,18 +54,15 @@ public class AdminFoldersEditPanel extends Panel {
             protected void populateItem(final ListItem<Folder> item) {
 
                 final Folder directory = item.getModelObject();
-                Folder folder;
+                long folderSize;
                 try {
-                    folder = FolderManager.get(directory.getId());
+                    folderSize = FolderManager.getFolderSize(directory.getId());
                 } catch (ManagerException e) {
                     throw new ViewException(e);
                 }
 
-                if (folder != null)
-                    item.add(new Label("entry_count", "Contains "
-                            + String.valueOf(folder.getContents().size()) + " entries."));
-                else
-                    item.add(new Label("entry_count"));
+                item.add(new Label("entry_count", "Contains " + String.valueOf(folderSize)
+                        + " entries."));
 
                 final String label = directory.getName();
 

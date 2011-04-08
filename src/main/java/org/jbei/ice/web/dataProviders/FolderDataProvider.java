@@ -43,10 +43,8 @@ public class FolderDataProvider extends AbstractEntriesDataProvider {
             List<Entry> results = null;
 
             if (list.size() > 1000) {
-                List<Long> allEntries = EntryManager.getEntries(sortParam, asc);
-                allEntries.retainAll(list);
-                allEntries = allEntries.subList(first, first + count);
-                results = EntryManager.getEntriesByIdSetSort(allEntries, sortParam, asc);
+                list = list.subList(first, first + count);
+                results = EntryManager.getEntriesByIdSetSort(list, sortParam, asc);
                 this.entries.addAll(results);
 
                 return results.iterator();
