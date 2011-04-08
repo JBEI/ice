@@ -1236,6 +1236,7 @@ public class RegistryAPI {
             throws SessionException, ServiceException {
 
         StorageController storageController = this.getStorageController(sessionId);
+        SampleController sampleController = this.getSampleController(sessionId);
 
         // count of plates seen so far
         List<Sample> retSamples = new LinkedList<Sample>();
@@ -1266,6 +1267,10 @@ public class RegistryAPI {
 
                 if (samePlate) {
                     if (sameWell) {
+                        ArrayList<Sample> ret = sampleController.getSamplesByStorage(recordedTube);
+                        if (ret != null && !ret.isEmpty())
+                            retSamples.add(ret.get(0));
+
                         continue; // no changes needed
                     } else {
                         // same plate but different well                        
@@ -1299,8 +1304,18 @@ public class RegistryAPI {
                 throw new ServiceException("Error retrieving/updating some records!");
             }
 
-            sample.setStorage(recordedTube);
-            retSamples.add(sample);
+            ArrayList<Sample> ret;
+            try {
+                ret = sampleController.getSamplesByStorage(recordedTube);
+                if (ret != null && !ret.isEmpty())
+                    retSamples.add(ret.get(0));
+            } catch (ControllerException e) {
+
+                Logger.error(e);
+                sample.setStorage(recordedTube);
+                retSamples.add(sample);
+            }
+
         }
         return retSamples;
     }
