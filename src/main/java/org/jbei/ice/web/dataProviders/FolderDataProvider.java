@@ -23,13 +23,11 @@ public class FolderDataProvider extends AbstractEntriesDataProvider {
 
     @Override
     public int size() {
-        Folder folder;
         try {
-            folder = FolderManager.get(this.folder.getId());
+            return FolderManager.getFolderSize(this.folder.getId());
         } catch (ManagerException e) {
             throw new ViewException(e);
         }
-        return folder.getContents().size();
     }
 
     @Override
