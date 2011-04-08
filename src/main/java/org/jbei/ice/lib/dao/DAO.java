@@ -2,6 +2,7 @@ package org.jbei.ice.lib.dao;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.jbei.ice.lib.logging.Logger;
 
 public class DAO {
 
@@ -31,6 +32,12 @@ public class DAO {
             session.getTransaction().rollback();
 
             throw new DAOException("dbDelete failed!", e);
+        } catch (Exception e1) {
+            // Something really bad happened.
+            session.getTransaction().rollback();
+            e1.printStackTrace();
+            resetSessionFactory(session);
+            throw new DAOException("Unkown database exception ", e1);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -61,6 +68,12 @@ public class DAO {
             session.getTransaction().rollback();
 
             throw new DAOException("dbSave failed!", e);
+        } catch (Exception e1) {
+            // Something really bad happened.
+            session.getTransaction().rollback();
+            e1.printStackTrace();
+            resetSessionFactory(session);
+            throw new DAOException("Unkown database exception ", e1);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -80,6 +93,12 @@ public class DAO {
         } catch (HibernateException e) {
             throw new DAOException("dbGet failed for " + theClass.getCanonicalName() + " and id="
                     + id, e);
+        } catch (Exception e1) {
+            // Something really bad happened.
+            session.getTransaction().rollback();
+            e1.printStackTrace();
+            resetSessionFactory(session);
+            throw new DAOException("Unkown database exception ", e1);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -101,6 +120,12 @@ public class DAO {
             result = session.merge(model);
         } catch (HibernateException e) {
             throw new DAOException("Merge failed: ", e);
+        } catch (Exception e1) {
+            // Something really bad happened.
+            session.getTransaction().rollback();
+            e1.printStackTrace();
+            resetSessionFactory(session);
+            throw new DAOException("Unkown database exception ", e1);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -108,5 +133,12 @@ public class DAO {
         }
 
         return result;
+    }
+
+    private static void resetSessionFactory(Session session) {
+        Logger.error("Closing session factory in DAO.java.");
+        session.disconnect();
+        session.close();
+        session.getSessionFactory().close();
     }
 }
