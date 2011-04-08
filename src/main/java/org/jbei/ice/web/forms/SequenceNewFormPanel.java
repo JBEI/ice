@@ -81,7 +81,7 @@ public class SequenceNewFormPanel extends Panel {
 
             IDNASequence dnaSequence = SequenceController.parse(sequenceUser);
 
-            if (dnaSequence == null) {
+            if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
                 error("Couldn't parse sequence file! Supported formats: "
                         + GeneralParser.getInstance().availableParsersToString()
                         + ". "
