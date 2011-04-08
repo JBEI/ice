@@ -23,23 +23,22 @@
 <xs:element name="feature">
 	<xs:complexType>
 		<xs:sequence>
-			<xs:element ref="seq:genbank_start" />
-			<xs:element ref="seq:end" />
-			<xs:element ref="seq:type" />
 			<xs:element ref="seq:label"/>
 			<xs:element ref="seq:complement" />
+			<xs:element ref="seq:type" />
+			<xs:element ref="seq:location" maxOccurs="unbounded" />
 			<xs:element ref="seq:attribute" maxOccurs="unbounded"/>
 		</xs:sequence>
 	</xs:complexType>
 </xs:element>
-<xs:element name="attribute">
+<xs:element name="location">
 	<xs:complexType>
-		<xs:simpleContent>
-			<xs:extension base="xs:string">
-				<xs:attribute name="name"  use="required" type="xs:string"/>
-				<xs:attribute name="quoted" type="xs:boolean"/>	
-			</xs:extension>
-		</xs:simpleContent>
+		<xs:sequence>
+			<xs:element ref="seq:genbank_start" />
+			<xs:element ref="seq:end" />
+		</xs:sequence>
+		<xs:attribute name="site_inbetween" type="xs:boolean"/>
+		<xs:attribute name="single_residue" type="xs:boolean"/>
 	</xs:complexType>
 </xs:element>
 <xs:element name="name" type="xs:string"/>
@@ -118,5 +117,15 @@
 </xs:element>
 <xs:element name="label" type="xs:string"/>
 <xs:element name="complement" type ="xs:boolean" />
+<xs:element name="attribute">
+	<xs:complexType>
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute name="name"  use="required" type="xs:string"/>
+				<xs:attribute name="quoted" type="xs:boolean"/>	
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+</xs:element>
 <xs:element name="sequence" type="xs:string"/>
 </xs:schema>

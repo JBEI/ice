@@ -8,11 +8,13 @@
 <seq:circular>true</seq:circular>
 <seq:features>
 	<seq:feature>
-		<seq:genbank_start>1</seq:genbank_start>
-		<seq:end>23</seq:end>
-		<seq:type>CDS</seq:type>
 		<seq:label>beta-lactamase</seq:label>
 		<seq:complement>false</seq:complement>
+		<seq:type>CDS</seq:type>
+		<seq:location>
+			<seq:genbank_start>1</seq:genbank_start>
+			<seq:end>23</seq:end>
+		</seq:location>
 		<seq:attribute name="translation">MATHRLVM</seq:attribute>
 	</seq:feature>
 </seq:features>
