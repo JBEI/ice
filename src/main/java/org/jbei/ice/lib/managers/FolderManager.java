@@ -1,10 +1,12 @@
 package org.jbei.ice.lib.managers;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
@@ -35,8 +37,6 @@ public class FolderManager {
         return result;
     }
 
-<<<<<<< HEAD
-=======
     /**
      * Retrieves the count of the number of contents in the folder
      * if the folder contains other folders, the it returns the number of sub-folders
@@ -98,7 +98,6 @@ public class FolderManager {
         }
     }
 
->>>>>>> 3528420... REGISTRY-585: fix slow loading of large collections
     @SuppressWarnings("unchecked")
     public static List<Folder> getFoldersByOwner(Account account) throws ManagerException {
 

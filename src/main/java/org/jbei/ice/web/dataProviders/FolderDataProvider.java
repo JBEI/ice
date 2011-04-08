@@ -1,18 +1,14 @@
 package org.jbei.ice.web.dataProviders;
 
-import java.util.Comparator;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.wicket.model.PropertyModel;
+import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.FolderManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Folder;
 import org.jbei.ice.web.common.ViewException;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class FolderDataProvider extends AbstractEntriesDataProvider {
 
@@ -40,47 +36,12 @@ public class FolderDataProvider extends AbstractEntriesDataProvider {
     public Iterator<Entry> iterator(int first, int count) {
 
         this.entries.clear();
-<<<<<<< HEAD
-        
-        try {
-            Folder folder = FolderManager.get(this.folder.getId());
-            List<Entry> list = new LinkedList<Entry>(folder.getContents());
-            
-            Collections.sort(list, new Comparator<Entry>() {
 
-                @Override
-                public int compare(Entry o1, Entry o2) {
-
-                    int result = 0;
-                    if (getSort() == null)
-                        return result;
-
-                    String property = getSort().getProperty();
-
-                    PropertyModel<Comparable<Object>> model1 = new PropertyModel<Comparable<Object>>(
-                            o1, property);
-                    PropertyModel<Comparable<Object>> model2 = new PropertyModel<Comparable<Object>>(
-                            o2, property);
-
-                    result = model1.getObject().compareTo(model2.getObject());
-
-                    if (!getSort().isAscending())
-                        result *= -1;
-
-                    return result;
-                }
-            });
-            
-            List<Entry> sublist = list.subList(first, first + count);
-            this.entries.addAll(sublist);
-            
-            return sublist.iterator();
-=======
         String sortParam = this.getSort().getProperty();
         boolean asc = this.getSort().isAscending();
 
         try {
-            ArrayList<Long> list = FolderManager.getFolderContents(this.folder.getId(), asc);
+            List<Long> list = FolderManager.getFolderContents(this.folder.getId(), asc);
             List<Entry> results = null;
 
             if (list.size() > 1000) {
@@ -101,7 +62,6 @@ public class FolderDataProvider extends AbstractEntriesDataProvider {
                 return sublist.iterator();
             }
 
->>>>>>> 3528420... REGISTRY-585: fix slow loading of large collections
         } catch (ManagerException e) {
             throw new ViewException(e);
         }
