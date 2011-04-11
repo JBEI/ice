@@ -41,22 +41,28 @@ public class FolderDataProvider extends AbstractEntriesDataProvider {
         try {
             List<Long> list = FolderManager.getFolderContents(this.folder.getId(), asc);
             List<Entry> results = null;
+            if ("oneName.name".equals(sortParam)) {
+                List<Long> sortedEntries = EntryManager.getEntriesSortByName(asc);
+                sortedEntries.retainAll(list);
+                sortedEntries = sortedEntries.subList(first, first + count);
+                results = EntryManager.getEntriesByIdSetSort(sortedEntries, "id", asc);
 
-            if (list.size() > 1000) {
-                list = list.subList(first, first + count);
-                results = EntryManager.getEntriesByIdSetSort(list, sortParam, asc);
-                this.entries.addAll(results);
-
-                return results.iterator();
-
+            } else if ("onePartNumber.partNumber".equals(sortParam)) {
+                List<Long> sortedEntries = EntryManager.getEntriesSortByPartNumber(asc);
+                sortedEntries.retainAll(list);
+                sortedEntries = sortedEntries.subList(first, first + count);
+                results = EntryManager.getEntriesByIdSetSort(sortedEntries, "id", asc);
             } else {
 
-                results = EntryManager.getEntriesByIdSetSort(list, sortParam, asc);
-                List<Entry> sublist = results.subList(first, first + count);
-                this.entries.addAll(sublist);
-
-                return sublist.iterator();
+                // sort all the records and get count from main list
+                List<Long> sortedEntries = EntryManager.getEntries(sortParam, asc);
+                sortedEntries.retainAll(list);
+                sortedEntries = sortedEntries.subList(first, first + count);
+                results = EntryManager.getEntriesByIdSetSort(sortedEntries, sortParam, asc);
             }
+
+            this.entries.addAll(results);
+            return results.iterator();
 
         } catch (ManagerException e) {
             throw new ViewException(e);

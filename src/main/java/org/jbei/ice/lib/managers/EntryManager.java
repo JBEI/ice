@@ -285,7 +285,7 @@ public class EntryManager {
     @SuppressWarnings("unchecked")
     public static List<Entry> getEntriesByIdSetSort(List<Long> ids, String field, boolean ascending)
             throws ManagerException {
-        ArrayList<Entry> entries = null;
+        ArrayList<Entry> entries = new ArrayList<Entry>();
 
         if (ids.size() == 0) {
             return entries;
@@ -305,7 +305,7 @@ public class EntryManager {
             ArrayList list = (ArrayList) query.list();
 
             if (list != null) {
-                entries = list;
+                entries.addAll(list);
             }
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve entries!", e);
@@ -313,6 +313,58 @@ public class EntryManager {
             if (session.isOpen()) {
                 session.close();
             }
+        }
+
+        return entries;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<Long> getEntriesSortByName(boolean ascending) throws ManagerException {
+        ArrayList<Long> entries = new ArrayList<Long>();
+
+        Session session = DAO.newSession();
+        try {
+
+            String queryString = "SELECT entries_id FROM names ORDER BY name "
+                    + (ascending ? "ASC" : "DESC");
+
+            Query query = session.createSQLQuery(queryString);
+
+            List<Integer> list = query.list();
+
+            if (list != null) {
+                for (Integer val : list)
+                    entries.add(val.longValue());
+            }
+        } finally {
+            if (session.isOpen())
+                session.close();
+        }
+
+        return entries;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<Long> getEntriesSortByPartNumber(boolean ascending) throws ManagerException {
+        ArrayList<Long> entries = new ArrayList<Long>();
+
+        Session session = DAO.newSession();
+        try {
+
+            String queryString = "SELECT entries_id FROM part_numbers ORDER BY part_number "
+                    + (ascending ? "ASC" : "DESC");
+
+            Query query = session.createSQLQuery(queryString);
+
+            List<Integer> list = query.list();
+
+            if (list != null) {
+                for (Integer val : list)
+                    entries.add(val.longValue());
+            }
+        } finally {
+            if (session.isOpen())
+                session.close();
         }
 
         return entries;
