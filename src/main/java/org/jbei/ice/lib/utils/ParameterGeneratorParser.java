@@ -22,46 +22,46 @@ public class ParameterGeneratorParser {
         String newKey = null;
         String newValue = null;
         for (String commaSplit : commaSplits) {
-            colonSplits = commaSplit.split(":");
+            colonSplits = commaSplit.split("=");
             if (colonSplits.length == 2) {
                 newKey = colonSplits[0].trim();
                 newValue = colonSplits[1].trim();
                 if (newKey.startsWith("\"") && newKey.endsWith("\"")) {
                     newKey = newKey.substring(1, newKey.length() - 1);
                     newKey = newKey.replaceAll("\\s", "_");
-                    if (newValue.startsWith("\"") && newValue.endsWith("\"")) {
-                        newValue = newValue.substring(1, newValue.length() - 1);
-                        parameter = new Parameter();
-                        parameter.setKey(newKey);
-                        parameter.setValue(newValue);
-                        parameter.setParameterType(Parameter.ParameterType.TEXT);
+                }
+
+                if (newValue.startsWith("\"") && newValue.endsWith("\"")) {
+                    newValue = newValue.substring(1, newValue.length() - 1);
+                    parameter = new Parameter();
+                    parameter.setKey(newKey);
+                    parameter.setValue(newValue);
+                    parameter.setParameterType(Parameter.ParameterType.TEXT);
+                    result.add(parameter);
+                } else {
+                    parameter = new Parameter();
+                    parameter.setKey(newKey);
+                    if ("true".equals(newValue.toLowerCase())) {
+                        parameter.setValue("true");
+                        parameter.setParameterType(Parameter.ParameterType.BOOLEAN);
+                        result.add(parameter);
+                    } else if ("false".equals(newValue.toLowerCase())) {
+                        parameter.setValue("false");
+                        parameter.setParameterType(Parameter.ParameterType.BOOLEAN);
                         result.add(parameter);
                     } else {
-                        parameter = new Parameter();
-                        parameter.setKey(newKey);
-                        if ("true".equals(newValue.toLowerCase())) {
-                            parameter.setValue("true");
-                            parameter.setParameterType(Parameter.ParameterType.BOOLEAN);
+                        try {
+                            @SuppressWarnings("unused")
+                            Double tempDouble = null;
+                            tempDouble = Double.parseDouble(newValue);
+                            parameter.setValue(newValue);
+                            parameter.setParameterType(ParameterType.NUMBER);
                             result.add(parameter);
-                        } else if ("false".equals(newValue.toLowerCase())) {
-                            parameter.setValue("false");
-                            parameter.setParameterType(Parameter.ParameterType.BOOLEAN);
+                        } catch (NumberFormatException e) {
+                            parameter.setValue(newValue);
+                            parameter.setParameterType(Parameter.ParameterType.TEXT);
                             result.add(parameter);
-                        } else {
-                            try {
-                                @SuppressWarnings("unused")
-                                Double tempDouble = null;
-                                tempDouble = Double.parseDouble(newValue);
-                                parameter.setValue(newValue);
-                                parameter.setParameterType(ParameterType.NUMBER);
-                                result.add(parameter);
-                            } catch (NumberFormatException e) {
-                                parameter.setValue(newValue);
-                                parameter.setParameterType(Parameter.ParameterType.TEXT);
-                                result.add(parameter);
-                            }
                         }
-
                     }
                 }
                 parameter = null;
@@ -80,7 +80,7 @@ public class ParameterGeneratorParser {
             } else {
                 tempValue = parameter.getValue();
             }
-            parameterStringList.add("\"" + parameter.getKey() + "\":" + tempValue);
+            parameterStringList.add(parameter.getKey() + "=" + tempValue);
         }
         result = Utils.join(",", parameterStringList);
         return result;

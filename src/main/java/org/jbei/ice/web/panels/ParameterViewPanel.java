@@ -27,6 +27,8 @@ public class ParameterViewPanel extends Panel {
         ListView<Parameter> listView = new ListView<Parameter>("parameterList", parameters) {
             private static final long serialVersionUID = 1L;
 
+            private int counter = 1;
+
             @Override
             protected void populateItem(ListItem<Parameter> item) {
                 Parameter parameter = item.getModelObject();
@@ -36,9 +38,16 @@ public class ParameterViewPanel extends Panel {
                 } else {
                     valueString = parameter.getValue();
                 }
+
                 item.add(new Label("key", parameter.getKey()));
                 item.add(new Label("value", valueString));
-                item.add(new Label("separator", ";"));
+                if (counter == getViewSize()) {
+                    item.add(new Label("separator", ""));
+                } else {
+                    item.add(new Label("separator", ","));
+
+                    counter += 1;
+                }
             }
         };
         add(listView);
