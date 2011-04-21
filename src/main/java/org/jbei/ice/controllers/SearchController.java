@@ -30,6 +30,7 @@ public class SearchController extends Controller {
             return results;
         }
         String cleanedQuery = query.replace(":", " ");
+        cleanedQuery = query.replace(";", " ");
         cleanedQuery = cleanedQuery.replace("\\", " ");
         cleanedQuery = cleanedQuery.replace("[", "\\[");
         cleanedQuery = cleanedQuery.replace("]", "\\]");

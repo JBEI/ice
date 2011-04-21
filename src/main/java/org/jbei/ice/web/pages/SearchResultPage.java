@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import org.apache.wicket.PageParameters;
 import org.jbei.ice.controllers.SearchController;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.search.lucene.SearchResult;
 import org.jbei.ice.web.IceSession;
-import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.panels.EmptyMessagePanel;
 import org.jbei.ice.web.panels.SearchResultPanel;
 
@@ -35,7 +35,11 @@ public class SearchResultPage extends ProtectedPage {
                             NUMBER_OF_ENTRIES_PER_PAGE));
                 }
             } catch (ControllerException e) {
-                throw new ViewException(e);
+                add(new EmptyMessagePanel(SEARCH_RESULT_PANEL_NAME,
+                        "There was an error processing your query. The search term used was "
+                                + queryString));
+                Logger.error("Search error with query >>>" + queryString + "<<<\n");
+                Logger.error(e);
             }
         } else {
             add(new EmptyMessagePanel(SEARCH_RESULT_PANEL_NAME, "No results found"));
