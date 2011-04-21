@@ -629,6 +629,8 @@ public class Query {
             minLength = Integer.parseInt(parameters[3]);
         } catch (NumberFormatException e) {
             // could not format numbers. Continue with defaults
+        } catch (ArrayIndexOutOfBoundsException e1) {
+            // could not find numbers. Continue with defaults
         }
         return blastQuery(query, type, minPercentIdentity, minLength);
     }
