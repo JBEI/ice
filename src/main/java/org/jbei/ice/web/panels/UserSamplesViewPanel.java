@@ -76,11 +76,22 @@ public class UserSamplesViewPanel extends SortableDataTablePanel<Sample> {
                 Fragment fragment = new Fragment(componentId, "location_id_cell",
                         UserSamplesViewPanel.this);
 
-                BookmarkablePageLink<StoragePage> storagePageLink = new BookmarkablePageLink<StoragePage>(
-                        "storageLink", StoragePage.class, new PageParameters("0="
-                                + sample.getStorage().getId()));
-                storagePageLink.add(new Label("storageLinkLabel", sample.getStorage().toString()));
-                fragment.add(storagePageLink);
+                BookmarkablePageLink<StoragePage> storagePageLink = null;
+
+                if (sample.getStorage() != null) {
+                    storagePageLink = new BookmarkablePageLink<StoragePage>("storageLink",
+                            StoragePage.class, new PageParameters("0="
+                                    + sample.getStorage().getId()));
+                    storagePageLink.add(new Label("storageLinkLabel", sample.getStorage()
+                            .toString()));
+                    fragment.add(storagePageLink);
+                } else {
+                    storagePageLink = new BookmarkablePageLink<StoragePage>("storageLink",
+                            StoragePage.class);
+                    storagePageLink.setEnabled(false);
+                    storagePageLink.setVisible(false);
+                    fragment.add(storagePageLink);
+                }
                 return fragment;
             }
         });
