@@ -1,6 +1,11 @@
 package org.jbei.ice.web.forms;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.form.Button;
@@ -16,7 +21,6 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.web.IceSession;
-import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.EntryViewPage;
 import org.jbei.ice.web.panels.SequenceAnalysisViewPanel;
 
@@ -25,6 +29,30 @@ public class TraceFileNewFormPanel extends Panel {
 
     private SequenceAnalysisViewPanel sequenceAnalysisViewPanel;
     private Entry entry;
+
+    private class ByteHolder implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        private byte[] bytes = null;
+        private String name = null;
+
+        public void setBytes(byte[] bytes) {
+            this.bytes = bytes;
+        }
+
+        public byte[] getBytes() {
+            return bytes;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+    }
 
     public TraceFileNewFormPanel(String id, SequenceAnalysisViewPanel sequenceAnalysisViewPanel,
             Entry entry) {
@@ -47,7 +75,7 @@ public class TraceFileNewFormPanel extends Panel {
         public TraceFileNewForm(String id) {
             super(id);
 
-            this.setModel(new CompoundPropertyModel<Object>(this));
+            setModel(new CompoundPropertyModel<Object>(this));
 
             setMultiPart(true);
 
@@ -75,35 +103,69 @@ public class TraceFileNewFormPanel extends Panel {
 
             assert (fileUpload != null);
 
-            String traceFileName = fileUpload.getClientFileName();
-
+            String uploadFileName = fileUpload.getClientFileName();
             SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController(
                     IceSession.get().getAccount());
 
             IDNASequence dnaSequence = null;
 
-            try {
-                dnaSequence = sequenceAnalysisController.parse(fileUpload.getBytes());
-            } catch (ControllerException e) {
-                throw new ViewException(e);
+            ArrayList<ByteHolder> byteHolders = new ArrayList<ByteHolder>();
+            byte[] traceData = null;
+
+            if ((uploadFileName.endsWith(".zip")) || uploadFileName.endsWith(".ZIP")) {
+                try {
+                    ZipInputStream zis = new ZipInputStream(fileUpload.getInputStream());
+                    ZipEntry zipEntry = null;
+
+                    while (true) {
+                        zipEntry = zis.getNextEntry();
+
+                        if (zipEntry != null) {
+                            if (!zipEntry.isDirectory()) {
+
+                                traceData = new byte[(int) zipEntry.getSize()];
+                                int counter = 0;
+                                int c;
+                                while ((c = zis.read()) != -1) {
+                                    traceData[counter] = (byte) c;
+                                    counter += 1;
+                                }
+                                ByteHolder byteHolder = new ByteHolder();
+                                byteHolder.setBytes(traceData);
+                                byteHolder.setName(zipEntry.getName());
+                                byteHolders.add(byteHolder);
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                } catch (IOException e) {
+                    error("Could not parse zip file.");
+                }
+            } else {
+                ByteHolder byteHolder = new ByteHolder();
+                byteHolder.setBytes(fileUpload.getBytes());
+                byteHolder.setName(fileUpload.getClientFileName());
+                byteHolders.add(byteHolder);
             }
-
-            if (dnaSequence == null || dnaSequence.getSequence() == null) {
-                error("Couldn't parse sequence file! Supported formats: Fasta, GenBank, ABI");
-
-                return;
-            }
-
+            String currentFileName = "";
             try {
-                sequenceAnalysisController.uploadTraceSequence(entry, traceFileName, IceSession
-                        .get().getAccount().getEmail(), dnaSequence.getSequence().toLowerCase(),
-                    fileUpload.getInputStream());
-
+                for (ByteHolder byteHolder : byteHolders) {
+                    currentFileName = byteHolder.getName();
+                    dnaSequence = sequenceAnalysisController.parse(byteHolder.getBytes());
+                    if (dnaSequence == null || dnaSequence.getSequence() == null) {
+                        error("Could not parse file: " + currentFileName
+                                + ". Only Fasta, GenBank, or ABI files are supported.");
+                        return;
+                    }
+                    sequenceAnalysisController.uploadTraceSequence(entry, byteHolder.getName(),
+                        IceSession.get().getAccount().getEmail(), dnaSequence.getSequence()
+                                .toLowerCase(), new ByteArrayInputStream(byteHolder.getBytes()));
+                }
                 sequenceAnalysisController.rebuildAllAlignments(entry);
-            } catch (ControllerException e) {
-                throw new ViewException(e);
-            } catch (IOException e) {
-                throw new ViewException(e);
+            } catch (ControllerException e) { // 
+                error("Could not parse file: " + currentFileName
+                        + ". Only Fasta, GenBank, or ABI files are supported.");
             }
 
             setResponsePage(EntryViewPage.class, new PageParameters("0=" + entry.getId()

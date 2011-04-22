@@ -80,9 +80,9 @@ public class SequenceAnalysisViewPanel extends Panel {
 
     private WebComponent renderSequenceCheckerEmbededObject() {
         add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-                UnprotectedPage.JS_RESOURCE_LOCATION + "extMouseWheel.js"));
+            UnprotectedPage.JS_RESOURCE_LOCATION + "extMouseWheel.js"));
         add(JavascriptPackageResource.getHeaderContribution(UnprotectedPage.class,
-                UnprotectedPage.JS_RESOURCE_LOCATION + "hookMouseWheel.js"));
+            UnprotectedPage.JS_RESOURCE_LOCATION + "hookMouseWheel.js"));
 
         WebComponent flashComponent = new WebComponent("sequenceChecker");
 
@@ -133,7 +133,7 @@ public class SequenceAnalysisViewPanel extends Panel {
                 renderCreationTime(item);
             }
 
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings("rawtypes")
             private void renderNameDownloadLink(final ListItem<TraceSequence> item) {
                 TraceSequence traceSequence = item.getModelObject();
 
@@ -144,8 +144,8 @@ public class SequenceAnalysisViewPanel extends Panel {
 
                 try {
                     nameDownloadLink = new DownloadLink("nameDownloadLink",
-                            sequenceAnalysisController.getFile(traceSequence), traceSequence
-                                    .getFilename());
+                            sequenceAnalysisController.getFile(traceSequence),
+                            traceSequence.getFilename());
                 } catch (ControllerException e) {
                     nameDownloadLink = new Link("nameDownloadLink") {
                         private static final long serialVersionUID = 1L;
@@ -221,8 +221,8 @@ public class SequenceAnalysisViewPanel extends Panel {
 
                             sequenceAnalysisController.removeTraceSequence(traceSequence);
 
-                            setResponsePage(EntryViewPage.class, new PageParameters("0="
-                                    + entry.getId() + ",1=seqanalysis"));
+                            setResponsePage(EntryViewPage.class,
+                                new PageParameters("0=" + entry.getId() + ",1=seqanalysis"));
                         } catch (ControllerException e) {
                             throw new ViewException(e);
                         } catch (PermissionException e) {
