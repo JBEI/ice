@@ -1,6 +1,7 @@
 package org.jbei.ice.web.forms;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -110,7 +111,6 @@ public class TraceFileNewFormPanel extends Panel {
             IDNASequence dnaSequence = null;
 
             ArrayList<ByteHolder> byteHolders = new ArrayList<ByteHolder>();
-            byte[] traceData = null;
 
             if ((uploadFileName.endsWith(".zip")) || uploadFileName.endsWith(".ZIP")) {
                 try {
@@ -121,17 +121,17 @@ public class TraceFileNewFormPanel extends Panel {
                         zipEntry = zis.getNextEntry();
 
                         if (zipEntry != null) {
-                            if (!zipEntry.isDirectory()) {
 
-                                traceData = new byte[(int) zipEntry.getSize()];
-                                int counter = 0;
+                            if (!zipEntry.isDirectory()
+                                    && !zipEntry.getName().startsWith("__MACOSX")) {
+
+                                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                                 int c;
                                 while ((c = zis.read()) != -1) {
-                                    traceData[counter] = (byte) c;
-                                    counter += 1;
+                                    byteArrayOutputStream.write(c);
                                 }
                                 ByteHolder byteHolder = new ByteHolder();
-                                byteHolder.setBytes(traceData);
+                                byteHolder.setBytes(byteArrayOutputStream.toByteArray());
                                 byteHolder.setName(zipEntry.getName());
                                 byteHolders.add(byteHolder);
                             }
