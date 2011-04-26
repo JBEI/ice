@@ -13,9 +13,9 @@ import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
+import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
-import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.AssemblyUtils;
 import org.jbei.ice.lib.utils.BiobrickAUtils;
@@ -231,7 +231,7 @@ public class AssemblyController extends Controller {
                     + part2Sequence.getSequence().length());
             for (SequenceFeature item : temp) {
 
-                System.out.println(item.getName() + ": " + item.getGenbankStart() + ":" + item.getEnd());
+                System.out.println(item.getName() + ": ");
             }
 
             //sequenceFeatures.addAll(determineAssemblyFeatures(part2));

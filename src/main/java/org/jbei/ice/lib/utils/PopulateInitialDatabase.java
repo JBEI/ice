@@ -3,6 +3,7 @@ package org.jbei.ice.lib.utils;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -23,6 +24,7 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.StorageManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountFundingSource;
+import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Configuration;
 import org.jbei.ice.lib.models.Configuration.ConfigurationKey;
 import org.jbei.ice.lib.models.Entry;
@@ -47,8 +49,8 @@ public class PopulateInitialDatabase {
     // naming scheme "custom-[your institute]-[your version]", as
     // the system will try to upgrade schemas of known older versions.
     // Setting the correct parent schema version may help you in the future.
-    public static final String DATABASE_SCHEMA_VERSION = "0.8.1";
-    public static final String PARENT_DATABASE_SCHEMA_VERSION = "0.8.0";
+    public static final String DATABASE_SCHEMA_VERSION = "0.9.0";
+    public static final String PARENT_DATABASE_SCHEMA_VERSION = "0.8.1";
 
     // This is a global "everyone" uuid
     public static String everyoneGroup = "8746a64b-abd5-4838-a332-02c356bbeac0";
@@ -220,21 +222,21 @@ public class PopulateInitialDatabase {
 
             if (databaseSchema.getValue().equals(PARENT_DATABASE_SCHEMA_VERSION)) {
                 // do schema upgrade
-                boolean error = migrateFrom080To081();
+                boolean error = migrateFrom081To090();
                 if (!error) {
                     databaseSchema.setValue(DATABASE_SCHEMA_VERSION);
                     ConfigurationManager.save(databaseSchema);
                 }
             }
+
         } catch (ManagerException e) {
             throw new UtilityException(e);
         }
-
     }
 
     /**
      * Check for, and create first admin account
-     *
+     * 
      * @throws UtilityException
      */
     private static void createAdminAccount() throws UtilityException {
@@ -481,7 +483,7 @@ public class PopulateInitialDatabase {
 
     /**
      * parse SequenceFeature.description and populate SequenceFeatureAttribute.
-     *
+     * 
      */
     @SuppressWarnings("deprecation")
     public static boolean migrateFrom080To081() {
@@ -532,6 +534,41 @@ public class PopulateInitialDatabase {
         }
         if (error) {
             Logger.error("Error converting database schema from 0.8.0 to 0.8.1. Restore from backup!");
+        }
+
+        return error;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static boolean migrateFrom081To090() {
+        Logger.warn("Updating database schema from 0.8.1 to 0.9.0. Please wait...");
+        Logger.info("reading database");
+        boolean error = false;
+
+        /* Changes: Creation of new AnnotationLocation table. Move all 
+        SequenceFeature genbankStart/end to AnnotationLocations */
+        String queryString = "from " + SequenceFeature.class.getName();
+        Session session = DAO.newSession();
+        Query query = session.createQuery(queryString);
+        LinkedList<SequenceFeature> sequenceFeatures = null;
+        sequenceFeatures = new LinkedList<SequenceFeature>(query.list());
+        session.close();
+
+        Logger.info("parsing fields");
+        for (SequenceFeature sequenceFeature : sequenceFeatures) {
+            @SuppressWarnings("deprecation")
+            AnnotationLocation location = new AnnotationLocation(sequenceFeature.getGenbankStart(),
+                    sequenceFeature.getEnd(), sequenceFeature);
+            try {
+                DAO.save(location);
+            } catch (DAOException e) {
+                Logger.error("Error saving new locations", e);
+                error = true;
+            }
+        }
+
+        if (error) {
+            Logger.error("Error converting database schema from 0.8.1 to 0.9.0. Restore from backup!");
         }
 
         return error;

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
 
 import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -14,6 +15,7 @@ import org.jbei.ice.lib.composers.formatters.IFormatter;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
+import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Part;
@@ -28,6 +30,7 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.SequenceFeatureCollection;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.vo.DNAFeature;
+import org.jbei.ice.lib.vo.DNAFeatureLocation;
 import org.jbei.ice.lib.vo.DNAFeatureNote;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
@@ -193,8 +196,12 @@ public class SequenceController extends Controller {
                     dnaFeature.addNote(dnaFeatureNote);
                 }
 
-                dnaFeature.setEnd(sequenceFeature.getEnd());
-                dnaFeature.setGenbankStart(sequenceFeature.getGenbankStart());
+                SortedSet<AnnotationLocation> locations = sequenceFeature.getAnnotationLocations();
+                for (AnnotationLocation location : locations) {
+                    dnaFeature.getLocations().add(
+                        new DNAFeatureLocation(location.getGenbankStart(), location.getEnd()));
+                }
+
                 dnaFeature.setType(sequenceFeature.getGenbankType());
                 dnaFeature.setName(sequenceFeature.getName());
                 dnaFeature.setStrand(sequenceFeature.getStrand());
@@ -233,48 +240,65 @@ public class SequenceController extends Controller {
             if (featuredDNASequence.getFeatures() != null
                     && featuredDNASequence.getFeatures().size() > 0) {
                 for (DNAFeature dnaFeature : featuredDNASequence.getFeatures()) {
-                    int genbankStart = dnaFeature.getGenbankStart();
-                    int end = dnaFeature.getEnd();
-
-                    if (genbankStart < 1) {
-                        genbankStart = 1;
-                    } else if (genbankStart > featuredDNASequence.getSequence().length()) {
-                        genbankStart = featuredDNASequence.getSequence().length();
-                    }
-
-                    if (end < 1) {
-                        end = 1;
-                    } else if (end > featuredDNASequence.getSequence().length()) {
-                        end = featuredDNASequence.getSequence().length();
-                    }
-
+                    List<DNAFeatureLocation> locations = dnaFeature.getLocations();
                     String featureSequence = "";
 
-                    if (genbankStart > end) { // over zero case
-                        featureSequence = featuredDNASequence.getSequence().substring(
-                            genbankStart - 1, featuredDNASequence.getSequence().length());
-                        featureSequence += featuredDNASequence.getSequence().substring(0, end);
-                    } else { // normal
-                        featureSequence = featuredDNASequence.getSequence().substring(
-                            genbankStart - 1, end);
-                    }
+                    for (DNAFeatureLocation location : locations) {
+                        int genbankStart = location.getGenbankStart();
+                        int end = location.getEnd();
 
-                    if (dnaFeature.getStrand() == -1) {
-                        featureSequence = SequenceUtils.reverseComplement(featureSequence);
+                        if (genbankStart < 1) {
+                            genbankStart = 1;
+                        } else if (genbankStart > featuredDNASequence.getSequence().length()) {
+                            genbankStart = featuredDNASequence.getSequence().length();
+                        }
+
+                        if (end < 1) {
+                            end = 1;
+                        } else if (end > featuredDNASequence.getSequence().length()) {
+                            end = featuredDNASequence.getSequence().length();
+                        }
+                        if (genbankStart > end) { // over zero case
+                            featureSequence += featuredDNASequence.getSequence().substring(
+                                genbankStart - 1, featuredDNASequence.getSequence().length());
+                            featureSequence += featuredDNASequence.getSequence().substring(0, end);
+                        } else { // normal
+                            featureSequence += featuredDNASequence.getSequence().substring(
+                                genbankStart - 1, end);
+                        }
+
+                        if (genbankStart > end) { // over zero case
+                            featureSequence = featuredDNASequence.getSequence().substring(
+                                genbankStart - 1, featuredDNASequence.getSequence().length());
+                            featureSequence += featuredDNASequence.getSequence().substring(0, end);
+                        } else { // normal
+                            featureSequence = featuredDNASequence.getSequence().substring(
+                                genbankStart - 1, end);
+                        }
+
+                        if (dnaFeature.getStrand() == -1) {
+                            featureSequence = SequenceUtils.reverseComplement(featureSequence);
+                        }
                     }
 
                     AnnotationType annotationType = null;
-                    Feature feature = new Feature(dnaFeature.getName(), "", featureSequence, 0,
-                            dnaFeature.getType());
-
                     if (dnaFeature.getAnnotationType() != null
                             && !dnaFeature.getAnnotationType().isEmpty()) {
                         annotationType = AnnotationType.valueOf(dnaFeature.getAnnotationType());
                     }
 
+                    Feature feature = new Feature(dnaFeature.getName(), "", featureSequence, 0,
+                            dnaFeature.getType());
+
                     SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature,
-                            genbankStart, end, dnaFeature.getStrand(), dnaFeature.getName(),
-                            dnaFeature.getType(), annotationType);
+                            dnaFeature.getStrand(), dnaFeature.getName(), dnaFeature.getType(),
+                            annotationType);
+
+                    for (DNAFeatureLocation location1 : locations) {
+                        sequenceFeature.getAnnotationLocations().add(
+                            new AnnotationLocation(location1.getGenbankStart(), location1.getEnd(),
+                                    sequenceFeature));
+                    }
 
                     ArrayList<SequenceFeatureAttribute> sequenceFeatureAttributes = new ArrayList<SequenceFeatureAttribute>();
                     if (dnaFeature.getNotes() != null && dnaFeature.getNotes().size() > 0) {
@@ -291,7 +315,6 @@ public class SequenceController extends Controller {
                     sequenceFeature.getSequenceFeatureAttributes()
                             .addAll(sequenceFeatureAttributes);
                     sequenceFeatures.add(sequenceFeature);
-
                 }
             }
         }

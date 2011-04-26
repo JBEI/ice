@@ -2,19 +2,23 @@ package org.jbei.ice.lib.composers.formatters;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.seq.Feature;
 import org.biojava.bio.symbol.IllegalSymbolException;
+import org.biojava.bio.symbol.Location;
 import org.biojava.ontology.InvalidTermException;
 import org.biojava.utils.ChangeVetoException;
 import org.biojavax.RichAnnotation;
 import org.biojavax.RichObjectFactory;
 import org.biojavax.SimpleNote;
 import org.biojavax.SimpleRichAnnotation;
+import org.biojavax.bio.seq.CompoundRichLocation;
 import org.biojavax.bio.seq.RichFeature;
 import org.biojavax.bio.seq.RichLocation.Strand;
 import org.biojavax.bio.seq.RichSequence;
@@ -23,13 +27,14 @@ import org.biojavax.bio.seq.SimpleRichFeature;
 import org.biojavax.bio.seq.SimpleRichLocation;
 import org.biojavax.bio.seq.SimpleRichSequence;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.models.SequenceFeatureAttribute;
 
 public class GenbankFormatter extends AbstractFormatter {
-    private String name;
-    private String accessionNumber;
+    private final String name;
+    private final String accessionNumber;
     private int version = 1;
     private double seqVersion = 1.0;
     private boolean circular = false;
@@ -121,9 +126,25 @@ public class GenbankFormatter extends AbstractFormatter {
 
                     RichFeature.Template featureTemplate = new RichFeature.Template();
                     featureTemplate.annotation = getAnnotations(sequenceFeature);
-                    featureTemplate.location = new SimpleRichLocation(new SimplePosition(
-                            sequenceFeature.getGenbankStart()), new SimplePosition(
-                            sequenceFeature.getEnd()), 1, getStrand(sequenceFeature));
+
+                    SortedSet<AnnotationLocation> locations = sequenceFeature
+                            .getAnnotationLocations();
+
+                    if (locations.size() == 1) {
+                        featureTemplate.location = new SimpleRichLocation(new SimplePosition(
+                                locations.first().getGenbankStart()), new SimplePosition(locations
+                                .first().getGenbankStart()), 1, getStrand(sequenceFeature));
+                    } else {
+
+                        ArrayList<Location> members = new ArrayList<Location>();
+
+                        for (AnnotationLocation location : locations) {
+                            members.add(new SimpleRichLocation(new SimplePosition(location
+                                    .getGenbankStart()), new SimplePosition(location.getEnd()), 1,
+                                    getStrand(sequenceFeature)));
+                        }
+                        featureTemplate.location = new CompoundRichLocation(members);
+                    }
 
                     featureTemplate.source = getDefaultFeatureSource();
                     featureTemplate.type = getFeatureType(sequenceFeature);
@@ -172,7 +193,6 @@ public class GenbankFormatter extends AbstractFormatter {
         for (SequenceFeatureAttribute attribute : sequenceFeature.getSequenceFeatureAttributes()) {
             String key = attribute.getKey();
             String value = attribute.getValue();
-
             if (key == null || key.isEmpty() || key.toLowerCase().equals("label")) { // skip invalid or feature with "label" note
                 continue;
             }

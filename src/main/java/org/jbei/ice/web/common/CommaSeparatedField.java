@@ -34,7 +34,7 @@ public class CommaSeparatedField<T> implements Serializable {
         this.setterName = setterName;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public CommaSeparatedField(Class<T> k, Collection<Object> c, String getterName,
             String setterName) {
         items = new ArrayList(c);
@@ -90,13 +90,12 @@ public class CommaSeparatedField<T> implements Serializable {
 
         String[] itemsAsString = string.split("\\s*,+\\s*");
 
-        for (int i = 0; i < itemsAsString.length; i++) {
-            String currentItem = itemsAsString[i];
+        for (String currentItem : itemsAsString) {
             if (currentItem.length() > 0) {
                 try {
                     T instance = klass.newInstance();
                     Method setMethod = klass.getDeclaredMethod(setterName,
-                            new Class[] { String.class });
+                        new Class[] { String.class });
                     setMethod.invoke(instance, currentItem);
                     result.add(instance);
 

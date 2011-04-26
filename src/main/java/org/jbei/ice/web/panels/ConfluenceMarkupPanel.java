@@ -17,12 +17,16 @@ public class ConfluenceMarkupPanel extends AbstractMarkupPanel {
     private Fragment markupFragment;
     private Fragment previewFragment;
 
+    @SuppressWarnings("rawtypes")
     private AjaxLink confluenceMarkupLink;
+    @SuppressWarnings("rawtypes")
     private AjaxLink previewMarkupLink;
 
+    @SuppressWarnings("rawtypes")
     private TextArea markupTextArea;
     private MultiLineLabel renderedLabel;
 
+    @SuppressWarnings("rawtypes")
     public ConfluenceMarkupPanel(String id) {
         super(id);
 
@@ -93,6 +97,9 @@ public class ConfluenceMarkupPanel extends AbstractMarkupPanel {
         markupTextArea.setEscapeModelStrings(false);
 
         OnChangeAjaxBehavior onChangeAjaxBehavior = new OnChangeAjaxBehavior() {
+
+            private static final long serialVersionUID = 1L;
+
             @Override
             protected void onUpdate(AjaxRequestTarget target) {
                 markupData = markupTextArea.getDefaultModelObjectAsString();
@@ -133,6 +140,7 @@ public class ConfluenceMarkupPanel extends AbstractMarkupPanel {
         return markupTextArea;
     }
 
+    @Override
     public void setData(String data) {
         markupTextArea.setDefaultModel(new Model<String>(data));
         markupData = data;

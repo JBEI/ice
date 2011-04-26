@@ -20,6 +20,7 @@ import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
+import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Name;
@@ -270,26 +271,26 @@ public class BiobrickBUtils implements AssemblyUtils {
             SimpleFeature prefixMatch = findBiobrickBPrefix(partSequenceString);
             if (prefixMatch != null) {
                 Feature feature = new Feature(biobrickBPrefixFeatureName, "",
-                        prefixMatch.getSequence(), 0,
-                        "misc_feature");
-                SequenceFeature sequenceFeature = new SequenceFeature(partSequence, feature,
-                        prefixMatch.getStart() + 1, prefixMatch.getEnd() + 1, +1,
+                        prefixMatch.getSequence(), 0, "misc_feature");
+                SequenceFeature sequenceFeature = new SequenceFeature(partSequence, feature, +1,
                         feature.getName(), feature.getGenbankType(),
                         SequenceFeature.AnnotationType.PREFIX);
-
+                sequenceFeature.getAnnotationLocations().add(
+                    new AnnotationLocation(prefixMatch.getStart() + 1, prefixMatch.getEnd() + 1,
+                            sequenceFeature));
                 sequenceFeatures.add(sequenceFeature);
             }
             // suffix
             SimpleFeature suffixMatch = findBiobrickBSuffix(partSequenceString);
             if (suffixMatch != null) {
                 Feature feature = new Feature(biobrickBSuffixFeatureName, "",
-                        suffixMatch.getSequence(), 0,
-                        "misc_feature");
-                SequenceFeature sequenceFeature = new SequenceFeature(partSequence, feature,
-                        suffixMatch.getStart() + 1, suffixMatch.getEnd() + 1, +1,
+                        suffixMatch.getSequence(), 0, "misc_feature");
+                SequenceFeature sequenceFeature = new SequenceFeature(partSequence, feature, +1,
                         feature.getName(), feature.getGenbankType(),
                         SequenceFeature.AnnotationType.SUFFIX);
-
+                sequenceFeature.getAnnotationLocations().add(
+                    new AnnotationLocation(suffixMatch.getStart() + 1, suffixMatch.getEnd() + 1,
+                            sequenceFeature));
                 sequenceFeatures.add(sequenceFeature);
             }
 
@@ -301,8 +302,8 @@ public class BiobrickBUtils implements AssemblyUtils {
             int maximumFeatureEnd = suffixMatch.getStart() - 1;
             Set<SequenceFeature> existingSequenceFeatures = partSequence.getSequenceFeatures();
             for (SequenceFeature sequenceFeature : existingSequenceFeatures) {
-                int start = sequenceFeature.getGenbankStart() - 1;
-                int end = sequenceFeature.getEnd() - 1;
+                int start = sequenceFeature.getUniqueGenbankStart() - 1;
+                int end = sequenceFeature.getUniqueEnd() - 1;
                 if ((start < minimumFeatureStart) && (start > absoluteMinimumFeatureStart)) {
                     minimumFeatureStart = start;
                 }
@@ -313,13 +314,15 @@ public class BiobrickBUtils implements AssemblyUtils {
             Entry part = partSequence.getEntry();
             String featureName = part.getRecordId(); // uuid of the given part
             String featureIdentification = part.getRecordId();
-            Feature innerPartFeature = new Feature(featureName,
-                    featureIdentification, partSequenceString.substring(minimumFeatureStart,
-                        maximumFeatureEnd + 1), 0, "misc_feature");
+            Feature innerPartFeature = new Feature(featureName, featureIdentification,
+                    partSequenceString.substring(minimumFeatureStart, maximumFeatureEnd + 1), 0,
+                    "misc_feature");
             SequenceFeature sequenceFeature = new SequenceFeature(partSequence, innerPartFeature,
-                    minimumFeatureStart + 1, maximumFeatureEnd + 1, +1, innerPartFeature.getName(),
-                    innerPartFeature.getGenbankType(), SequenceFeature.AnnotationType.INNER);
-
+                    +1, innerPartFeature.getName(), innerPartFeature.getGenbankType(),
+                    SequenceFeature.AnnotationType.INNER);
+            sequenceFeature.getAnnotationLocations().add(
+                new AnnotationLocation(minimumFeatureStart + 1, maximumFeatureEnd + 1,
+                        sequenceFeature));
             sequenceFeatures.add(sequenceFeature);
             // check if part has at least prefix, suffix, and one inner feature
             //
@@ -331,12 +334,12 @@ public class BiobrickBUtils implements AssemblyUtils {
             List<SequenceFeature> innerFeature = sequenceFeatures
                     .get(SequenceFeature.AnnotationType.INNER);
             if (prefixFeature.size() == 1) {
-                if (prefixFeature.get(0).getGenbankStart() == 1) {
+                if (prefixFeature.get(0).getUniqueGenbankStart() == 1) {
                     temp = temp + 1;
                 }
             }
             if (suffixFeature.size() == 1) {
-                if (suffixFeature.get(0).getEnd() == partSequenceLength) {
+                if (suffixFeature.get(0).getUniqueEnd() == partSequenceLength) {
                     temp = temp + 1;
                 }
             }
@@ -392,8 +395,7 @@ public class BiobrickBUtils implements AssemblyUtils {
             newPart.setNames(inputNames);
             newPart.setShortDescription("Assembly of " + newPartNameString);
             newPart.setStatus("in progress");
-            newPart.setBioSafetyLevel(Math
-                    .max(part1.getBioSafetyLevel(), part2.getBioSafetyLevel()));
+            newPart.setBioSafetyLevel(Math.max(part1.getBioSafetyLevel(), part2.getBioSafetyLevel()));
             newPart.setOwner("System");
             newPart.setOwnerEmail("System");
             newPart.setCreator("System");
@@ -432,8 +434,9 @@ public class BiobrickBUtils implements AssemblyUtils {
             temp.setName(part1InnerFeature.getName());
             temp.setAnnotationType(SequenceFeature.AnnotationType.SUBINNER);
             temp.setGenbankType("misc_feature");
-            temp.setGenbankStart(part1InnerFeature.getGenbankStart());
-            temp.setEnd(part1InnerFeature.getEnd());
+            temp.getAnnotationLocations().add(
+                new AnnotationLocation(part1InnerFeature.getUniqueGenbankStart(), part1InnerFeature
+                        .getUniqueEnd(), temp));
             temp.setStrand(part1InnerFeature.getStrand());
             newFeatures.add(temp);
             // part 2 inner feature as subinner feature
@@ -444,18 +447,21 @@ public class BiobrickBUtils implements AssemblyUtils {
             temp.setAnnotationType(SequenceFeature.AnnotationType.SUBINNER);
             temp.setGenbankType("misc_feature");
             int secondPartFeatureOffset = scarStartPosition - prefixChopPosition + 1;
-            temp.setGenbankStart(part2InnerFeature.getGenbankStart() + secondPartFeatureOffset);
-            temp.setEnd(part2InnerFeature.getEnd() + secondPartFeatureOffset);
+            temp.getAnnotationLocations().add(
+                new AnnotationLocation(part2InnerFeature.getUniqueGenbankStart()
+                        + secondPartFeatureOffset, part2InnerFeature.getUniqueEnd()
+                        + secondPartFeatureOffset, temp));
             temp.setStrand(part2InnerFeature.getStrand());
-
             newFeatures.add(temp);
             // scar
             temp = new SequenceFeature();
             temp.setSequence(newPartSequence);
             temp.setAnnotationType(SequenceFeature.AnnotationType.SCAR);
             temp.setGenbankType("misc_feature");
-            temp.setGenbankStart(scarStartPosition + 1);
-            temp.setEnd(scarStartPosition + scarLength);
+            temp.getAnnotationLocations()
+                    .add(
+                        new AnnotationLocation(scarStartPosition + 1, scarStartPosition
+                                + scarLength, temp));
             temp.setStrand(1);
             try {
                 temp.setFeature(getBiobrickBScarFeature());

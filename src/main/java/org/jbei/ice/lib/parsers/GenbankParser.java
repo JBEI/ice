@@ -16,6 +16,7 @@ import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.seq.RichSequence.IOTools;
 import org.biojavax.bio.seq.RichSequenceIterator;
 import org.jbei.ice.lib.vo.DNAFeature;
+import org.jbei.ice.lib.vo.DNAFeatureLocation;
 import org.jbei.ice.lib.vo.DNAFeatureNote;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
@@ -138,8 +139,7 @@ public class GenbankParser extends AbstractParser {
 
                     int strand = featureLocation.getStrand().intValue();
 
-                    dnaFeature.setGenbankStart(start + 1);
-                    dnaFeature.setEnd(end + 1);
+                    dnaFeature.getLocations().add(new DNAFeatureLocation(start + 1, end + 1));
                     dnaFeature.setStrand(strand);
                     dnaFeature.setType(genbankType);
                     dnaFeature.setName(featureName);

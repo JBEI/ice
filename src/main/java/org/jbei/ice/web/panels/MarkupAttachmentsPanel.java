@@ -32,6 +32,8 @@ public class MarkupAttachmentsPanel extends Panel {
                     "markupFileName")));
 
             add(new AjaxButton("ajaxSubmit") {
+                private static final long serialVersionUID = 1L;
+
                 @Override
                 protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                     System.out.print("asdasd");
@@ -57,10 +59,12 @@ public class MarkupAttachmentsPanel extends Panel {
             }
         }
 
+        @SuppressWarnings("unused")
         public String getMarkupFileName() {
             return markupFileName;
         }
 
+        @SuppressWarnings("unused")
         public void setMarkupFileName(String markupFileName) {
             this.markupFileName = markupFileName;
         }

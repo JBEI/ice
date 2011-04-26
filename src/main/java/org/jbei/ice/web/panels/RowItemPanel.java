@@ -18,7 +18,7 @@ public class RowItemPanel extends Panel {
         super(id);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public RowItemPanel(String id, String name, String description, boolean checkBox, Date date) {
 
         super(id);

@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.SequenceFeature;
 
@@ -83,12 +84,18 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
      * @param 1 based position
      * @return
      */
-    public List<SequenceFeature> getFeaturesAt(int position) {
+    public List<SequenceFeature> getFeaturesAt(int genbankPosition) {
         ArrayList<SequenceFeature> result = new ArrayList<SequenceFeature>();
         for (SequenceFeature sequenceFeature : sequenceFeatures) {
-            if (sequenceFeature.getGenbankStart() >= position && position <= sequenceFeature.getEnd()) {
-                result.add(sequenceFeature);
+            for (AnnotationLocation location : sequenceFeature.getAnnotationLocations()) {
+                if (location.getGenbankStart() >= genbankPosition
+                        && genbankPosition <= location.getEnd()) {
+                    if (!result.contains(sequenceFeature)) {
+                        result.add(sequenceFeature);
+                    }
+                }
             }
+
         }
         return result;
     }

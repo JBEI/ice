@@ -2,6 +2,8 @@ package org.jbei.ice.lib.models;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -23,6 +25,8 @@ import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.ISequenceFeatureValueObject;
 
@@ -47,9 +51,25 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
     @JoinColumn(name = "feature_id")
     private Feature feature;
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "sequenceFeature")
+    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
+    @JoinColumn(name = "sequence_feature_id")
+    @Sort(type = SortType.NATURAL)
+    private final SortedSet<AnnotationLocation> annotationLocations = new TreeSet<AnnotationLocation>();
+
+    /**
+     * Use locations instead. This field exists to allow scripted migration of data using
+     * the new database schema.
+     */
+    @Deprecated
     @Column(name = "feature_start")
     private int genbankStart;
 
+    /**
+     * Use locations instead. This field exists to allow scripted migration of data using
+     * the new database schema.
+     */
+    @Deprecated
     @Column(name = "feature_end")
     private int end;
 
@@ -87,14 +107,11 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         super();
     }
 
-    public SequenceFeature(Sequence sequence, Feature feature, int genbankStart, int end,
-            int strand, String name, String genbankType,
-            AnnotationType annotationType) {
+    public SequenceFeature(Sequence sequence, Feature feature, int strand, String name,
+            String genbankType, AnnotationType annotationType) {
         super();
         this.sequence = sequence;
         this.feature = feature;
-        this.genbankStart = genbankStart;
-        this.end = end;
         this.strand = strand;
         this.name = name;
         this.genbankType = genbankType;
@@ -137,25 +154,38 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         this.feature = feature;
     }
 
-    /**
-     * This is 1 based ala Genbank
-     */
-    @Override
+    public void setAnnotationLocations(Set<AnnotationLocation> annotationLocations) {
+        // for JAXB web services
+        if (annotationLocations == null) {
+            this.annotationLocations.clear();
+            return;
+        }
+        if (annotationLocations != this.annotationLocations) {
+            annotationLocations.clear();
+            this.annotationLocations.addAll(annotationLocations);
+        }
+    }
+
+    public SortedSet<AnnotationLocation> getAnnotationLocations() {
+        return annotationLocations;
+    }
+
+    @Deprecated
     public int getGenbankStart() {
         return genbankStart;
     }
 
-    @Override
+    @Deprecated
     public void setGenbankStart(int genbankStart) {
         this.genbankStart = genbankStart;
     }
 
-    @Override
+    @Deprecated
     public int getEnd() {
         return end;
     }
 
-    @Override
+    @Deprecated
     public void setEnd(int end) {
         this.end = end;
     }
@@ -182,7 +212,7 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
 
     /**
      * Deprecated since schema > 0.8.0. Use SequenceFeatureAttribute with "description" as key
-     *
+     * 
      * @return
      */
     @Deprecated
@@ -192,7 +222,7 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
 
     /**
      * Deprecated since schema > 0.8.0. Use SequenceFeatureAttribute with "description" as key
-     *
+     * 
      * @param description
      */
     @Deprecated
@@ -232,4 +262,21 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         }
 
     }
+
+    public Integer getUniqueGenbankStart() {
+        Integer result = null;
+        if (getAnnotationLocations() != null && getAnnotationLocations().size() == 1) {
+            result = getAnnotationLocations().first().getGenbankStart();
+        }
+        return result;
+    }
+
+    public Integer getUniqueEnd() {
+        Integer result = null;
+        if (getAnnotationLocations() != null && getAnnotationLocations().size() == 1) {
+            result = getAnnotationLocations().first().getEnd();
+        }
+        return result;
+    }
+
 }

@@ -27,7 +27,7 @@ public class LoginStatusPanel extends Panel {
         add(postLoginFragment);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private Fragment createPreLoginFragment() {
         Fragment preLogin = new Fragment("preLoginPanel", "preLogin", this) {
             private static final long serialVersionUID = 1L;
@@ -44,7 +44,7 @@ public class LoginStatusPanel extends Panel {
         return preLogin;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private Fragment createPostLoginFragment() {
         Fragment postLogin = new Fragment("postLoginPanel", "postLogin", LoginStatusPanel.this) {
             private static final long serialVersionUID = 1L;

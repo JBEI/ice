@@ -21,6 +21,9 @@ public class TextMarkupPanel extends AbstractMarkupPanel {
         notesTextArea.setEscapeModelStrings(false);
 
         OnChangeAjaxBehavior onChangeAjaxBehavior = new OnChangeAjaxBehavior() {
+
+            private static final long serialVersionUID = 1L;
+
             @Override
             protected void onUpdate(AjaxRequestTarget target) {
                 markupData = notesTextArea.getDefaultModelObjectAsString();
@@ -38,6 +41,7 @@ public class TextMarkupPanel extends AbstractMarkupPanel {
         return notesTextArea;
     }
 
+    @Override
     public void setData(String data) {
         markupData = data;
 
