@@ -1190,6 +1190,10 @@ public class RegistryAPI {
             Sample sample = samples[i];
 
             String barcode = sample.getStorage().getIndex();
+            if ("No Tube".equals(barcode) || "No Read".equals(barcode)) {
+                continue;
+            }
+
             try {
                 tube = storageController.retrieveStorageTube(barcode);
             } catch (ControllerException e) {
@@ -1247,8 +1251,8 @@ public class RegistryAPI {
             // sent storage location. note that barcode can be no read or no tube
             String barcode = sample.getStorage().getIndex();
             if ("No Tube".equals(barcode) || "No Read".equals(barcode)) {
-                //TODO : clear the tube in that location
 
+                retSamples.add(sample);
                 continue;
             }
 
