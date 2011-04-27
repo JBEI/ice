@@ -38,6 +38,14 @@ public class PopulateInitialDatabase {
     public static final String DEFAULT_PART_STORAGE_SCHEME_NAME = "Part Storage (Default)";
     public static final String DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME = "Arabidopsis Storage (Default)";
 
+    // Database schema version.
+    // If you are extending the existing schema to suit your needs, we suggest using the 
+    // naming scheme "custom-[your institute]-[your version]", as 
+    // the system will try to upgrade schemas of known oder versions. 
+    // Setting the correct parent schema version may help you in the future.
+    public static final String DATABASE_SCHEMA_VERSION = "0.8.0";
+    public static final String PARENT_DATABASE_SCHEMA_VERSION = "0.0.0";
+
     // This is a global "everyone" uuid
     public static String everyoneGroup = "8746a64b-abd5-4838-a332-02c356bbeac0";
 
@@ -76,6 +84,7 @@ public class PopulateInitialDatabase {
         createAdminAccount();
 
         populateDefaultStorageLocationsAndSchemes();
+        updateDatabaseSchema();
     }
 
     /**
@@ -187,6 +196,26 @@ public class PopulateInitialDatabase {
                 ConfigurationManager
                         .save(new Configuration(ConfigurationKey.ARABIDOPSIS_STORAGE_DEFAULT,
                                 defaultArabidopsis.getUuid()));
+            }
+        } catch (ManagerException e) {
+            throw new UtilityException(e);
+        }
+
+    }
+
+    private static void updateDatabaseSchema() throws UtilityException {
+        Configuration databaseSchema = null;
+
+        try {
+            databaseSchema = ConfigurationManager.get(ConfigurationKey.DATABASE_SCHEMA_VERSION);
+            if (databaseSchema == null) {
+                databaseSchema = new Configuration(ConfigurationKey.DATABASE_SCHEMA_VERSION,
+                        DATABASE_SCHEMA_VERSION);
+                ConfigurationManager.save(databaseSchema);
+            }
+
+            if (databaseSchema.getValue().equals(PARENT_DATABASE_SCHEMA_VERSION)) {
+                // do schema upgrade
             }
         } catch (ManagerException e) {
             throw new UtilityException(e);
