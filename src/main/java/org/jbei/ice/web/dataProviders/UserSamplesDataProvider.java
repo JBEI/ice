@@ -39,9 +39,7 @@ public class UserSamplesDataProvider extends SortableDataProvider<Sample> {
             ArrayList<Sample> results = sampleController.getSamplesByDepositor(account.getEmail(),
                 first, count);
 
-            for (Sample sample : results) {
-                samples.add(sample);
-            }
+            samples.addAll(results);
 
             if (getSort() != null)
                 sort();

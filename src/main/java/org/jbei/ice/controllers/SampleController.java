@@ -150,19 +150,12 @@ public class SampleController extends Controller {
     }
 
     public int getNumberOfSamplesByDepositor(String depositorEmail) throws ControllerException {
-        int numberOfSamples = 0;
 
         try {
-            ArrayList<Sample> samples = SampleManager.getSamplesByDepositor(depositorEmail, 0, -1);
-
-            if (samples != null) {
-                numberOfSamples = samples.size();
-            }
+            return SampleManager.getSampleCountBy(depositorEmail);
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
-
-        return numberOfSamples;
     }
 
     protected SamplePermissionVerifier getSamplePermissionVerifier() {

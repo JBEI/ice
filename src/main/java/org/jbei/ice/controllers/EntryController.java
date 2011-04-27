@@ -303,21 +303,12 @@ public class EntryController extends Controller {
     }
 
     public long getNumberOfEntriesByOwner(String owner) throws ControllerException {
-        long numberOfEntriesByOwner = 0;
 
         try {
-            ArrayList<Long> allEntries = EntryManager.getEntriesByOwner(owner);
-
-            for (Long entryId : allEntries) {
-                if (hasReadPermissionById(entryId)) {
-                    numberOfEntriesByOwner++;
-                }
-            }
+            return EntryManager.getEntriesByOwner(owner).size();
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
-
-        return numberOfEntriesByOwner;
     }
 
     public Entry save(Entry entry) throws ControllerException, PermissionException {

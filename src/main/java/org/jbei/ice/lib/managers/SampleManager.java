@@ -1,10 +1,12 @@
 package org.jbei.ice.lib.managers;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
@@ -152,5 +154,19 @@ public class SampleManager {
         }
 
         return samples;
+    }
+
+    public static int getSampleCountBy(String depositor) throws ManagerException {
+        Session session = DAO.newSession();
+        try {
+            SQLQuery query = session
+                    .createSQLQuery("SELECT COUNT(id) FROM samples WHERE depositor = :depositor ");
+            query.setString("depositor", depositor);
+            return ((BigInteger) query.uniqueResult()).intValue();
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
     }
 }
