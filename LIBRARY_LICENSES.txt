@@ -2,7 +2,7 @@ JBEIR uses and or includes the following software, according to their
 licensing terms. The JBEIR Team would like to thank the developers of
 these great software and for making them available as open source.
 
-* Adobe BlazeDS: BlazeDS License (GPL3)
+* Adobe BlazeDS: BlazeDS License (LGPL3)
 * Adobe Flex sDK: MPL 1.1
 * Apache Commons: Apache License Version 2.0
 * Apache Maven: Apache License Version 2.0
