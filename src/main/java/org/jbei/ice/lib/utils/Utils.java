@@ -175,6 +175,10 @@ public class Utils {
         return encrypt(string, "MD5");
     }
 
+    public static String encryptSha256(String string) {
+        return encrypt(string, "SHA-256");
+    }
+
     private static String encrypt(String string, String algorithm) {
         String result = "";
 

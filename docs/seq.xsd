@@ -8,8 +8,8 @@
 		<xs:sequence>
 			<xs:element ref="seq:name" />
 			<xs:element ref="seq:circular" />
-			<xs:element ref="seq:features"/>
 			<xs:element ref="seq:sequence" />
+			<xs:element ref="seq:features" minOccurs="0" />
 		</xs:sequence>
 	</xs:complexType>
 </xs:element>
@@ -28,22 +28,23 @@
 			<xs:element ref="seq:type" />
 			<xs:element ref="seq:location" maxOccurs="unbounded" />
 			<xs:element ref="seq:attribute" maxOccurs="unbounded"/>
+			<xs:element ref="seq:seqHash" />
 		</xs:sequence>
 	</xs:complexType>
 </xs:element>
 <xs:element name="location">
 	<xs:complexType>
 		<xs:sequence>
-			<xs:element ref="seq:genbank_start" />
+			<xs:element ref="seq:genbankStart" />
 			<xs:element ref="seq:end" />
 		</xs:sequence>
-		<xs:attribute name="site_inbetween" type="xs:boolean"/>
-		<xs:attribute name="single_residue" type="xs:boolean"/>
+		<xs:attribute name="siteInbetween" type="xs:boolean"/>
+		<xs:attribute name="singleResidue" type="xs:boolean"/>
 	</xs:complexType>
 </xs:element>
 <xs:element name="name" type="xs:string"/>
 <xs:element name="circular" type="xs:boolean"/>
-<xs:element name="genbank_start" type="xs:integer"/>
+<xs:element name="genbankStart" type="xs:integer"/>
 <xs:element name="end" type="xs:integer"/>
 <xs:element name="type">
 	<xs:simpleType>
@@ -127,5 +128,6 @@
 		</xs:simpleContent>
 	</xs:complexType>
 </xs:element>
+<xs:element name="seqHash" type="xs:string" />
 <xs:element name="sequence" type="xs:string"/>
 </xs:schema>

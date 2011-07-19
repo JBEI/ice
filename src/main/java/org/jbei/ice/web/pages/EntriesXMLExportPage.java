@@ -1,19 +1,14 @@
 package org.jbei.ice.web.pages;
 
-import java.text.SimpleDateFormat;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Iterator;
 
-import org.jbei.ice.controllers.EntryController;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Link;
-import org.jbei.ice.lib.models.Name;
-import org.jbei.ice.lib.models.Part;
-import org.jbei.ice.lib.models.PartNumber;
-import org.jbei.ice.lib.models.Plasmid;
-import org.jbei.ice.lib.models.Strain;
-import org.jbei.ice.web.IceSession;
+import org.jbei.ice.lib.utils.IceXmlSerializer;
+import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.web.common.ViewException;
 
 public class EntriesXMLExportPage extends XMLExportPage {
@@ -27,145 +22,22 @@ public class EntriesXMLExportPage extends XMLExportPage {
 
     @Override
     public String getContent() {
-        int index = 1;
 
-        EntryController entryController = new EntryController(IceSession.get().getAccount());
+        try {
+            //return IceXmlSerializer.serializeToJbeiXml(entries).asXML();
+            OutputFormat format = OutputFormat.createPrettyPrint();
+            XMLWriter xmlWriter;
+            StringWriter stringWriter = new StringWriter();
 
-        StringBuilder stringBuilder = new StringBuilder();
+            xmlWriter = new XMLWriter(stringWriter, format);
+            xmlWriter.write(IceXmlSerializer.serializeToJbeiXml(entries));
 
-        stringBuilder.append("<entries>");
+            return stringWriter.toString();
 
-        for (Iterator<Entry> iterator = entries.iterator(); iterator.hasNext();) {
-            stringBuilder.append("<entry>");
-
-            Entry entry = iterator.next();
-
-            stringBuilder.append("<index>").append(index).append("</index>");
-            stringBuilder.append("<type>").append(escapeXMLValue(entry.getRecordType())).append(
-                    "</type>");
-
-            stringBuilder.append("<partIds>");
-            for (PartNumber partNumber : entry.getPartNumbers()) {
-                stringBuilder.append("<partId>").append(escapeXMLValue(partNumber.getPartNumber()))
-                        .append("</partId>");
-            }
-            stringBuilder.append("</partIds>");
-
-            stringBuilder.append("<names>");
-            for (Name name : entry.getNames()) {
-                stringBuilder.append("<name>").append(escapeXMLValue(name.getName())).append(
-                        "</name>");
-            }
-            stringBuilder.append("</names>");
-            stringBuilder.append("<owner>");
-            stringBuilder.append("<name>").append(escapeXMLValue(entry.getOwner())).append(
-                    "</name>");
-            stringBuilder.append("<email>").append(escapeXMLValue(entry.getOwnerEmail())).append(
-                    "</email>");
-            stringBuilder.append("</owner>");
-            stringBuilder.append("<creator>");
-            stringBuilder.append("<name>").append(escapeXMLValue(entry.getCreator())).append(
-                    "</name>");
-            stringBuilder.append("<email>").append(escapeXMLValue(entry.getCreatorEmail())).append(
-                    "</email>");
-            stringBuilder.append("</creator>");
-
-            stringBuilder.append("<alias>").append(escapeXMLValue(entry.getAlias())).append(
-                    "</alias>");
-            stringBuilder.append("<keywords>").append(escapeXMLValue(entry.getKeywords())).append(
-                    "</keywords>");
-
-            stringBuilder.append("<links>");
-            for (Link link : entry.getLinks()) {
-                stringBuilder.append("<link>").append(escapeXMLValue(link.getLink())).append(
-                        "</link>");
-                stringBuilder.append("<url>").append(escapeXMLValue(link.getUrl()))
-                        .append("</url>");
-            }
-            stringBuilder.append("</links>");
-
-            stringBuilder.append("<status>").append(escapeXMLValue(entry.getStatus())).append(
-                    "</status>");
-            stringBuilder.append("<summary>").append(escapeXMLValue(entry.getShortDescription()))
-                    .append("</summary>");
-            stringBuilder.append("<notes>").append(escapeXMLValue(entry.getLongDescription()))
-                    .append("</notes>");
-            stringBuilder.append("<references>").append(escapeXMLValue(entry.getReferences()))
-                    .append("</references>");
-
-            if (entry instanceof Plasmid) {
-                Plasmid plasmid = (Plasmid) entry;
-
-                stringBuilder.append("<selectionMarkers>").append(
-                        escapeXMLValue(plasmid.getSelectionMarkersAsString())).append(
-                        "</selectionMarkers>");
-                stringBuilder.append("<backbone>").append(escapeXMLValue(plasmid.getBackbone()))
-                        .append("</backbone>");
-                stringBuilder.append("<originOfReplication>").append(
-                        escapeXMLValue(plasmid.getOriginOfReplication())).append(
-                        "</originOfReplication>");
-                stringBuilder.append("<promoters>").append(escapeXMLValue(plasmid.getPromoters()))
-                        .append("</promoters>");
-                stringBuilder.append("<isCircular>").append(plasmid.getCircular() ? "Yes" : "No")
-                        .append("</isCircular>");
-            } else if (entry instanceof Strain) {
-                Strain strain = (Strain) entry;
-
-                stringBuilder.append("<selectionMarkers>").append(
-                        escapeXMLValue(strain.getSelectionMarkersAsString())).append(
-                        "</selectionMarkers>");
-                stringBuilder.append("<host>").append(escapeXMLValue(strain.getHost())).append(
-                        "</host>");
-                stringBuilder.append("<genotypePhenotype>").append(
-                        escapeXMLValue(strain.getGenotypePhenotype())).append(
-                        "</genotypePhenotype>");
-                stringBuilder.append("<plasmids>").append(escapeXMLValue(strain.getPlasmids()))
-                        .append("</plasmids>");
-            } else if (entry instanceof Part) {
-                Part part = (Part) entry;
-
-                stringBuilder.append("<packageFormat>").append(
-                        escapeXMLValue(part.getPackageFormat())).append("</packageFormat>");
-            }
-
-            stringBuilder.append("<bioSafetyLevel>").append(
-                    escapeXMLValue(entry.getBioSafetyLevel())).append("</bioSafetyLevel>");
-            stringBuilder.append("<intellectualProperty>").append(
-                    escapeXMLValue(entry.getIntellectualProperty())).append(
-                    "</intellectualProperty>");
-            stringBuilder.append("<principalInvestigator>").append(
-                    escapeXMLValue(entry.principalInvestigatorToString())).append(
-                    "</principalInvestigator>");
-            stringBuilder.append("<fundingSource>").append(
-                    escapeXMLValue(entry.fundingSourceToString())).append("</fundingSource>");
-
-            try {
-                stringBuilder.append("<hasAttachments>").append(
-                        (entryController.hasAttachments(entry)) ? "Yes" : "No").append(
-                        "</hasAttachments>");
-                stringBuilder.append("<hasSamples>").append(
-                        (entryController.hasSamples(entry)) ? "Yes" : "No").append("</hasSamples>");
-                stringBuilder.append("<hasSequence>").append(
-                        (entryController.hasSequence(entry)) ? "Yes" : "No").append(
-                        "</hasSequence>");
-            } catch (ControllerException e) {
-                throw new ViewException(e);
-            }
-
-            SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
-
-            stringBuilder.append("<created>").append(
-                    (entry.getCreationTime() == null) ? "" : dateFormat.format(entry
-                            .getCreationTime())).append("</created>");
-            stringBuilder.append("<updated>").append(
-                    (entry.getModificationTime() == null) ? "" : dateFormat.format(entry
-                            .getModificationTime())).append("</updated>");
-
-            stringBuilder.append("</entry>");
-            index++;
+        } catch (UtilityException e) {
+            throw new ViewException(e);
+        } catch (IOException e) {
+            throw new ViewException(e);
         }
-        stringBuilder.append("</entries>");
-
-        return stringBuilder.toString();
     }
 }
