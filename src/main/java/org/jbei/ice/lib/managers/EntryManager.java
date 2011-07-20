@@ -124,6 +124,30 @@ public class EntryManager {
         return entry;
     }
 
+    public static Entry getByJbeiName(String name) throws ManagerException {
+        Entry entry = null;
+        Session session = DAO.newSession();
+
+        try {
+            Query query = session.createQuery("from " + Name.class.getName()
+                    + " where name = :name");
+            query.setParameter("name", name);
+            Object queryResult = query.uniqueResult();
+            if (queryResult == null)
+                return null;
+
+            entry = ((Name) queryResult).getEntry();
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve entry by JBEI name: " + name, e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+
+        return entry;
+    }
+
     @SuppressWarnings("unchecked")
     public static long getNumberOfVisibleEntries() throws ManagerException {
         Group everybodyGroup;

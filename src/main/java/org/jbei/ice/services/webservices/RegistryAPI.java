@@ -21,8 +21,10 @@ import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.composers.formatters.FastaFormatter;
 import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.managers.StorageManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
@@ -107,6 +109,44 @@ public class RegistryAPI {
         }
 
         return authenticated;
+    }
+
+    /**
+     * Ideally this must be folded into login() by using an extra param
+     * 
+     * @param sessionId
+     *            valid session id to ensure user successfully logged in.
+     * @param login
+     *            user login being checked for moderator status
+     * @return true if user is a designated moderator, false otherwise
+     */
+    public boolean isModerator(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "login") String login) throws SessionException, ServiceException {
+        Account account = validateAccount(sessionId);
+
+        try {
+            return AccountController.isModerator(account);
+        } catch (ControllerException e) {
+            Logger.error(e);
+            throw new ServiceException("Error accessing account for " + login);
+        }
+    }
+
+    public Entry getEntryByName(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "name") String name) throws ServiceException {
+        try {
+            EntryController entryController = getEntryController(sessionId);
+            return entryController.getByName(name);
+        } catch (ControllerException e) {
+            Logger.error(e);
+            throw new ServiceException("Registry Service Internal Error!");
+        } catch (PermissionException e) {
+            Logger.error(e);
+            throw new ServiceException("No permission to view entry with name " + name);
+        } catch (Exception e) {
+            Logger.error(e);
+            throw new ServiceException("Registry Service Internal Error!");
+        }
     }
 
     public long getNumberOfPublicEntries() throws ServiceException {
@@ -1222,6 +1262,67 @@ public class RegistryAPI {
             return null;
 
         return highestFreqPlate;
+    }
+
+    // Need moderator privileges to run this
+    public void createStrainSample(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "recordId") String recordId, @WebParam(name = "rack") String rack,
+            @WebParam(name = "location") String location,
+            @WebParam(name = "barcode") String barcode, @WebParam(name = "label") String label)
+            throws ServiceException, PermissionException, SessionException {
+
+        Account account = null;
+
+        try {
+            account = AccountController.getAccountBySessionKey(sessionId);
+        } catch (ControllerException e) {
+            Logger.error(e);
+            throw new ServiceException("Registry Service Internal Error!");
+        }
+
+        try {
+            if (!AccountManager.isModerator(account)) {
+                log("Account " + account.getEmail() + " attempting to access createStrainSample()");
+                throw new PermissionException("Account does not have permissions");
+            }
+        } catch (ManagerException e) {
+            log(e.getMessage());
+            throw new ServiceException("Registry Service Internal Error!");
+        }
+
+        StorageController controller = getStorageController(sessionId);
+        // TODO : this is a hack till we migrate to a single strain default
+        Storage strainScheme = null;
+        try {
+            List<Storage> schemes = controller.retrieveAllStorageSchemes();
+            for (Storage storage : schemes) {
+                if (storage.getStorageType() == StorageType.SCHEME
+                        && "Strain Storage New".equals(storage.getName())) {
+                    strainScheme = storage;
+                    break;
+                }
+            }
+
+            Storage newLocation = StorageManager.getLocation(strainScheme, new String[] { rack,
+                    location, barcode });
+
+            Entry entry = getEntryController(sessionId).getByRecordId(recordId);
+            if (entry == null)
+                throw new ServiceException("Could not retrieve entry with id " + recordId);
+
+            SampleController sampleController = getSampleController(sessionId);
+            Sample sample = sampleController.createSample(label, account.getEmail(), "");
+            sample.setEntry(entry);
+            sample.setStorage(newLocation);
+            sampleController.saveSample(sample, false);
+        } catch (ControllerException ce) {
+            log(ce.getMessage());
+            throw new ServiceException(ce.getMessage());
+        } catch (ManagerException e) {
+            log(e.getMessage());
+            throw new ServiceException(e.getMessage());
+        }
+
     }
 
     /**

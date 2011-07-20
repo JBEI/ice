@@ -1,5 +1,7 @@
 package org.jbei.ice.controllers;
 
+import java.util.List;
+
 import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.SamplePermissionVerifier;
@@ -19,6 +21,14 @@ public class StorageController extends Controller {
             throws ControllerException {
         try {
             return StorageManager.retrieveStorageBy(name, index, type, parentId);
+        } catch (ManagerException e) {
+            throw new ControllerException(e);
+        }
+    }
+
+    public List<Storage> retrieveAllStorageSchemes() throws ControllerException {
+        try {
+            return StorageManager.getAllStorageSchemes();
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }

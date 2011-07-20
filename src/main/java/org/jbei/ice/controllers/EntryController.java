@@ -107,6 +107,23 @@ public class EntryController extends Controller {
         return entry;
     }
 
+    public Entry getByName(String name) throws ControllerException, PermissionException {
+
+        Entry entry = null;
+
+        try {
+            entry = EntryManager.getByJbeiName(name);
+        } catch (ManagerException e) {
+            throw new ControllerException(e);
+        }
+
+        if (entry != null && !hasReadPermission(entry)) {
+            throw new PermissionException("No read permission for entry!");
+        }
+
+        return entry;
+    }
+
     public Entry getByIdentifier(String identifier) throws ControllerException, PermissionException {
         long entryId = 0;
 
