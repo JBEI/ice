@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.utils;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,7 +23,9 @@ import org.dom4j.ElementHandler;
 import org.dom4j.ElementPath;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
+import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
+import org.dom4j.io.XMLWriter;
 import org.dom4j.tree.DefaultElement;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AttachmentManager;
@@ -112,7 +115,7 @@ public class IceXmlSerializer {
             "http://www.w3.org/2001/XMLSchema-instance");
     private ArrayList<CompleteEntry> completeEntries = new ArrayList<CompleteEntry>();
 
-    public static Document serializeToJbeiXml(List<Entry> entries) throws UtilityException {
+    public static String serializeToJbeiXml(List<Entry> entries) throws UtilityException {
         ArrayList<Sequence> sequences = new ArrayList<Sequence>();
         for (Entry entry : entries) {
             try {
@@ -121,7 +124,22 @@ public class IceXmlSerializer {
                 throw new UtilityException(e);
             }
         }
-        return serializeToJbeiXml(entries, sequences);
+
+        OutputFormat format = OutputFormat.createPrettyPrint();
+        XMLWriter writer;
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        try {
+
+            writer = new XMLWriter(byteArrayOutputStream, format);
+            writer.write(serializeToJbeiXml(entries, sequences));
+            return byteArrayOutputStream.toString("utf8");
+        } catch (UnsupportedEncodingException e) {
+            throw new UtilityException(e);
+        } catch (IOException e) {
+            throw new UtilityException(e);
+        }
+
     }
 
     public static Document serializeToJbeiXml(List<Entry> entries, List<Sequence> sequences)

@@ -1,0 +1,27 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<form wicket:id="importExportForm">
+		<table style="border: 3px solid orange; width: 100%; cellpadding: 1px; cellspacing: 1px;">
+			<tr>
+				<td><div class="error" wicket:id="feedback">feedback panel</div>
+				</td>
+			</tr>
+			<tr style="vertical-align: top;">
+				<td width="50%">
+					Enter part numbers, database ids, or uuids as comma or white space separated values:<br/>
+					<textarea style="width:98%; height: 250px;" wicket:id="exportList">
+					</textarea><br/>
+					<button wicket:id="submitExportListButton">Export Xml</button>
+				</td>
+				<td width="50%">
+					<h3>Importing unknown entries will assign new part numbers local to this installation. You will have the option to override existing entries
+					</h3><br/>
+					<input wicket:id="importXmlFile" type="file" class="inputbox" size="50" /><br/>
+					<textarea style="width:98%; height: 250px;" wicket:id="importXml"></textarea><br/>
+					<button wicket:id="submitImportXmlButton">Import Xml</button>
+				</td>
+			</tr>
+		</table>
+	</form>
+</wicket:panel>
+</html>

@@ -15,6 +15,7 @@ import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.panels.AdminFoldersEditPanel;
 import org.jbei.ice.web.panels.adminpage.AdminAccountUpdatePanel;
+import org.jbei.ice.web.panels.adminpage.AdminImportExportPanel;
 import org.jbei.ice.web.panels.adminpage.AdminUpdateGroupPanel;
 import org.jbei.ice.web.panels.adminpage.EditGroupPanel;
 import org.jbei.ice.web.panels.adminpage.EditPartsPanel;
@@ -36,6 +37,7 @@ public class AdminPage extends ProtectedPage {
     private BookmarkablePageLink<AdminPage> editGroupsLink;
     private BookmarkablePageLink<AdminPage> editStorageSchemeLink;
     private BookmarkablePageLink<AdminPage> editFoldersLink;
+    private BookmarkablePageLink<AdminPage> importExportLink;
 
     private String currentPage;
 
@@ -90,6 +92,11 @@ public class AdminPage extends ProtectedPage {
                 new PageParameters("0=folders"));
         editFoldersLink.setOutputMarkupId(true);
 
+        // import export tab
+        importExportLink = new BookmarkablePageLink<AdminPage>("importExportLink", AdminPage.class,
+                new PageParameters("0=import"));
+        importExportLink.setOutputMarkupId(true);
+
         // set tabs css
         editUsersLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(true);
         editPartsLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(true);
@@ -99,12 +106,15 @@ public class AdminPage extends ProtectedPage {
                 .setOutputMarkupId(true);
         editFoldersLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(
             true);
+        importExportLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(
+            true);
 
         add(editUsersLink);
         add(editPartsLink);
         add(editGroupsLink);
         add(editStorageSchemeLink);
         add(editFoldersLink);
+        add(importExportLink);
 
         if (currentPage != null) {
             if ("users".equals(currentPage)) {
@@ -148,6 +158,10 @@ public class AdminPage extends ProtectedPage {
             } else if ("folders".equals(currentPage)) {
                 currentPanel = new AdminFoldersEditPanel(MAIN_PANEL_ID);
                 editFoldersLink.add(new SimpleAttributeModifier("class", "active"))
+                        .setOutputMarkupId(true);
+            } else if ("import".equals(currentPage)) {
+                currentPanel = new AdminImportExportPanel(MAIN_PANEL_ID);
+                importExportLink.add(new SimpleAttributeModifier("class", "active"))
                         .setOutputMarkupId(true);
             } else {
                 currentPanel = createDefaultPanel();
