@@ -8,6 +8,7 @@ import org.apache.wicket.markup.MarkupStream;
 import org.apache.wicket.protocol.http.WebResponse;
 
 public abstract class ExportPage extends Page {
+    @Override
     protected void onRender(MarkupStream markupStream) {
         doExport();
     }
@@ -64,6 +65,7 @@ public abstract class ExportPage extends Page {
         }
 
         response.setContentType(mimeType);
+        servletResponse.setCharacterEncoding("UTF-8");
 
         if ((filename != null) && (filename.trim().length() > 0)) {
             servletResponse.setHeader("Content-Disposition", "attachment; filename=\"" + filename
