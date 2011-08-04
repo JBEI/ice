@@ -14,11 +14,15 @@
 					<button wicket:id="submitExportListButton">Export Xml</button>
 				</td>
 				<td width="50%">
-					<h3>Importing unknown entries will assign new part numbers local to this installation. You will have the option to override existing entries
-					</h3><br/>
+					<h3><s>Importing unknown entries (by record id) will assign new part numbers local to this installation. You will have the option to override existing entries</s>
+					</h3><br/><h3>TODO Implement checking. Currently just import</h3>
 					<input wicket:id="importXmlFile" type="file" class="inputbox" size="50" /><br/>
 					<textarea style="width:98%; height: 250px;" wicket:id="importXml"></textarea><br/>
-					<button wicket:id="submitImportXmlButton">Import Xml</button>
+					New Owner Email (Optional)<textarea wicket:id="ownerEmail"></textarea><br/>
+					New Owner Name (if Email is provided)<textarea wicket:id="ownerName"></textarea><br/>
+					Set Default Permission <input type="checkbox" wicket:id="applyDefaultPermission"><br/>
+					<button wicket:id="submitImportXmlButton">Import Xml</button><br/>
+					<div wicket:id="selectionPanel"></div>
 				</td>
 			</tr>
 		</table>
