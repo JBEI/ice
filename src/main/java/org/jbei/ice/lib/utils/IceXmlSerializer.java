@@ -482,10 +482,10 @@ public class IceXmlSerializer {
                 }
                 plasmid.getSelectionMarkers().addAll(selectionMarkers);
             }
-            plasmid.setBackbone(entryDocument.elementText(BACKBONE));
-            plasmid.setOriginOfReplication(entryDocument.elementText(ORIGIN_OF_REPLICATION));
-            plasmid.setPromoters(entryDocument.elementText(PROMOTERS));
-            String circular = entryDocument.elementText(IS_CIRCULAR);
+            plasmid.setBackbone(plasmidFields.elementText(BACKBONE));
+            plasmid.setOriginOfReplication(plasmidFields.elementText(ORIGIN_OF_REPLICATION));
+            plasmid.setPromoters(plasmidFields.elementText(PROMOTERS));
+            String circular = plasmidFields.elementText(IS_CIRCULAR);
             plasmid.setCircular("true".equals(circular) ? true : false);
         } else if (STRAIN.equals(recordType)) {
             Strain strain = new Strain();
@@ -499,9 +499,9 @@ public class IceXmlSerializer {
                 }
                 strain.getSelectionMarkers().addAll(selectionMarkers);
             }
-            strain.setHost(entryDocument.elementText(HOST));
-            strain.setGenotypePhenotype(entryDocument.elementText(GENOTYPE_PHENOTYPE));
-            strain.setPlasmids(entryDocument.elementText(PLASMIDS));
+            strain.setHost(strainFields.elementText(HOST));
+            strain.setGenotypePhenotype(strainFields.elementText(GENOTYPE_PHENOTYPE));
+            strain.setPlasmids(strainFields.elementText(PLASMIDS));
         } else if (PART.equals(recordType)) {
             Part part = new Part();
             completeEntry.setEntry(part);
@@ -511,19 +511,20 @@ public class IceXmlSerializer {
         } else if (ARABIDOPSIS.equals(recordType)) {
             ArabidopsisSeed arabidopsis = new ArabidopsisSeed();
             completeEntry.setEntry(arabidopsis);
-            arabidopsis.setHomozygosity(entryDocument.elementText(HOMOZYGOSITY));
-            arabidopsis.setEcotype(entryDocument.elementText(ECOTYPE));
+            Element arabidopsisFields = entryDocument.element(ARABIDOPSIS_SEED_FIELDS);
+            arabidopsis.setHomozygosity(arabidopsisFields.elementText(HOMOZYGOSITY));
+            arabidopsis.setEcotype(arabidopsisFields.elementText(ECOTYPE));
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyy-MM-ddTHH:mm:ssZ");
             simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             Date date = null;
             try {
-                date = simpleDateFormat.parse(entryDocument.elementText(HARVEST_DATE));
+                date = simpleDateFormat.parse(arabidopsisFields.elementText(HARVEST_DATE));
             } catch (ParseException e) {
                 throw new UtilityException(e);
             }
             arabidopsis.setHarvestDate(date);
-            arabidopsis.setParents(entryDocument.elementText(PARENTS));
-            Generation generation = Generation.valueOf(entryDocument.elementText(GENERATION));
+            arabidopsis.setParents(arabidopsisFields.elementText(PARENTS));
+            Generation generation = Generation.valueOf(arabidopsisFields.elementText(GENERATION));
             arabidopsis.setGeneration(generation);
         } else {
             throw new UtilityException("Unrecognized recordType " + recordType);
