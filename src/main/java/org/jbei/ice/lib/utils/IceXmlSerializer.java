@@ -56,6 +56,7 @@ import org.jbei.ice.lib.utils.SerializationUtils.SerializationUtilsException;
  */
 public class IceXmlSerializer {
 
+    private static final String DESCRIPTION = "description";
     private static final String FILE_ID = "fileId";
     private static final String URL = "url";
     private static final String PLASMID = "plasmid";
@@ -133,7 +134,8 @@ public class IceXmlSerializer {
 
             writer = new XMLWriter(byteArrayOutputStream, format);
             writer.write(serializeToJbeiXml(entries, sequences));
-            return byteArrayOutputStream.toString("utf8");
+            String temp = byteArrayOutputStream.toString("utf8");
+            return temp;
         } catch (UnsupportedEncodingException e) {
             throw new UtilityException(e);
         } catch (IOException e) {
@@ -272,7 +274,8 @@ public class IceXmlSerializer {
                 }
                 attachmentsRoot.add(new DefaultElement(ATTACHMENT, iceNamespace)
                         .addText(fileString).addAttribute(FILENAME, attachment.getFileName())
-                        .addAttribute(FILE_ID, attachment.getFileId()));
+                        .addAttribute(FILE_ID, attachment.getFileId())
+                        .addAttribute(DESCRIPTION, attachment.getDescription()));
             }
         }
 
@@ -358,6 +361,9 @@ public class IceXmlSerializer {
 
     public static class AttachmentData {
         private String base64Data;
+        private String fileName;
+        private String fileId;
+        private String description;
 
         public String getBase64Data() {
             return base64Data;
@@ -383,8 +389,14 @@ public class IceXmlSerializer {
             this.fileId = fileId;
         }
 
-        private String fileName;
-        private String fileId;
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
     }
 
     public static class CompleteEntry {
@@ -588,6 +600,7 @@ public class IceXmlSerializer {
                 attachmentData.setBase64Data(((Element) element).getText());
                 attachmentData.setFileName(((Element) element).attributeValue(FILENAME));
                 attachmentData.setFileId(((Element) element).attributeValue(FILE_ID));
+                attachmentData.setDescription(((Element) element).attributeValue(DESCRIPTION));
                 completeEntry.getAttachments().add(attachmentData);
             }
         }

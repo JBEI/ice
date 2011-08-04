@@ -258,6 +258,7 @@
 			<xs:extension base="xs:base64Binary">
 				<xs:attribute name="filename" type="xs:string" />
 				<xs:attribute name="fileId" type="xs:string" />
+				<xs:attribute name="description" type="xs:string" />
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
