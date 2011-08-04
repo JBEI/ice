@@ -544,10 +544,16 @@ public class EntryManager {
         partNumber.setPartNumber(number);
         Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
         partNumbers.add(partNumber);
-        newEntry.setPartNumbers(partNumbers);
-        newEntry.setRecordId(Utils.generateUUID());
-        newEntry.setVersionId(newEntry.getRecordId());
-        newEntry.setCreationTime(Calendar.getInstance().getTime());
+        newEntry.getPartNumbers().add(partNumber);
+        if (newEntry.getRecordId() == null || "".equals(newEntry.getRecordId())) {
+            newEntry.setRecordId(Utils.generateUUID());
+        }
+        if (newEntry.getVersionId() == null || "".equals(newEntry.getVersionId())) {
+            newEntry.setVersionId(newEntry.getRecordId());
+        }
+        if (newEntry.getCreationTime() == null) {
+            newEntry.setCreationTime(Calendar.getInstance().getTime());
+        }
 
         return newEntry;
     }
