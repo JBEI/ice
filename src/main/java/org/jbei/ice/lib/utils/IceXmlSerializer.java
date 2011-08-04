@@ -160,6 +160,7 @@ public class IceXmlSerializer {
         root.addAttribute(new QName("schemaLocation", xsiNamespace), "http://jbei.org/ice ice.xsd");
 
         for (int index = 0; index < entries.size(); index++) {
+            Logger.debug("Serialize to XML " + entries.get(index).getRecordId());
             Element entryElement = toEntryElement(entries.get(index), sequences.get(index));
             entryElement.addAttribute(INDEX, Integer.toString(index));
             root.add(entryElement);
@@ -241,6 +242,7 @@ public class IceXmlSerializer {
                             emptyStringify(fundingSource.getFundingSource()
                                     .getPrincipalInvestigator())));
             }
+            entryRoot.add(fundingSources);
         }
 
         if (sequence != null) {
@@ -260,8 +262,10 @@ public class IceXmlSerializer {
                 String fileString;
                 try {
                     file = AttachmentManager.getFile(attachment);
-                    fileString = SerializationUtils.serializeToString(FileUtils
-                            .readFileToString(file));
+                    fileString = SerializationUtils
+                            .serializeToString(org.apache.commons.io.FileUtils
+                                    .readFileToByteArray(file));
+
                 } catch (FileNotFoundException e) {
                     throw new UtilityException(e);
 
@@ -277,6 +281,7 @@ public class IceXmlSerializer {
                         .addAttribute(FILE_ID, attachment.getFileId())
                         .addAttribute(DESCRIPTION, attachment.getDescription()));
             }
+            entryRoot.add(attachmentsRoot);
         }
 
         return entryRoot;

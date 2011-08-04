@@ -22,13 +22,20 @@ public class SerializationUtils {
         }
     }
 
+    /**
+     * deserialize to a java object
+     * 
+     * @param serializedObject
+     * @return
+     * @throws SerializationUtilsException
+     */
     public static Serializable deserializeFromString(String serializedObject)
             throws SerializationUtilsException {
         try {
-            byte[] data = new Base64().decode(serializedObject);
 
             ObjectInputStream objectInputStream;
-            objectInputStream = new ObjectInputStream(new ByteArrayInputStream(data));
+            objectInputStream = new ObjectInputStream(new ByteArrayInputStream(
+                    deserializeFromStringToByteArray(serializedObject)));
             Serializable result = (Serializable) objectInputStream.readObject();
             objectInputStream.close();
 
@@ -39,6 +46,11 @@ public class SerializationUtils {
             throw new SerializationUtilsException("Deserialization failed! ClassNotFoundException",
                     e);
         }
+    }
+
+    private static byte[] deserializeFromStringToByteArray(String serializedObject) {
+        byte[] data = new Base64().decode(serializedObject);
+        return data;
     }
 
     public static String serializeToString(Serializable object) throws SerializationUtilsException {

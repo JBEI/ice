@@ -16,7 +16,6 @@ import org.apache.wicket.markup.html.panel.EmptyPanel;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
-import org.apache.xerces.impl.dv.util.Base64;
 import org.jbei.ice.controllers.AttachmentController;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SequenceController;
@@ -30,6 +29,9 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.IceXmlSerializer;
 import org.jbei.ice.lib.utils.IceXmlSerializer.AttachmentData;
 import org.jbei.ice.lib.utils.IceXmlSerializer.CompleteEntry;
+import org.jbei.ice.lib.utils.PopulateInitialDatabase;
+import org.jbei.ice.lib.utils.SerializationUtils;
+import org.jbei.ice.lib.utils.SerializationUtils.SerializationUtilsException;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
@@ -50,9 +52,9 @@ public class AdminImportExportPanel extends Panel {
         private String exportList = null;
         private String importXml = null;
         private FileUpload importXmlFile = null;
-        private String ownerEmail = null;
-        private String ownerName = null;
-        private boolean applyDefaultPermission = false;
+        private String ownerEmail = PopulateInitialDatabase.systemAccountEmail;
+        private String ownerName = PopulateInitialDatabase.systemAccountEmail;
+        private boolean applyDefaultPermission = true;
 
         public ImportExportForm(String id) {
             super(id);
@@ -120,7 +122,6 @@ public class AdminImportExportPanel extends Panel {
             ArrayList<String> entryRecordIds = new ArrayList<String>();
             ArrayList<String> failedIds = new ArrayList<String>();
             for (String identifier : startingSet) {
-                System.out.println(identifier);
                 Entry item = null;
 
                 try {
@@ -220,8 +221,6 @@ public class AdminImportExportPanel extends Panel {
 
             // new owner, if specified
             if (getOwnerEmail() != null && getOwnerEmail().length() != 0) {
-                //pass
-            } else {
                 for (CompleteEntry completeEntry : completeEntries) {
                     completeEntry.getEntry().setOwnerEmail(getOwnerEmail().trim());
                     completeEntry.getEntry().setOwner(getOwnerName().trim());
@@ -236,17 +235,14 @@ public class AdminImportExportPanel extends Panel {
 
             for (CompleteEntry completeEntry : completeEntries) {
                 Entry newEntry = null;
-                Logger.debug("saving " + completeEntry.getEntry().getRecordId());
+                Logger.info("Importing from xml " + completeEntry.getEntry().getRecordId());
                 try {
-                    newEntry = entryController.createEntry(completeEntry.getEntry(), true, true);
+                    newEntry = entryController.createEntry(completeEntry.getEntry(), true,
+                        isApplyDefaultPermission());
                 } catch (ControllerException e) {
                     error("Controller error saving " + completeEntry.getEntry().getRecordId());
                 }
                 if (newEntry != null) {
-                    // set permissions
-                    if (isApplyDefaultPermission()) {
-
-                    }
                     // add sequence
                     if (completeEntry.getSequence() != null) {
                         completeEntry.getSequence().setEntry(newEntry);
@@ -264,17 +260,22 @@ public class AdminImportExportPanel extends Panel {
                         Attachment attachment = new Attachment();
                         attachment.setDescription(attachmentData.getDescription());
                         attachment.setFileId(attachmentData.getFileId());
-                        attachment.setFileName(attachmentData.getFileId());
+                        attachment.setFileName(attachmentData.getFileName());
                         attachment.setEntry(newEntry);
-                        ByteArrayInputStream inputStream = new ByteArrayInputStream(
-                                Base64.decode(attachmentData.getBase64Data()));
                         try {
+                            byte[] bytes = (byte[]) SerializationUtils
+                                    .deserializeFromString(attachmentData.getBase64Data());
+                            ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+
                             attachmentController.save(attachment, inputStream);
                         } catch (ControllerException e) {
                             error("Controller error saving attachment for "
                                     + newEntry.getRecordId());
                         } catch (PermissionException e) {
                             error("Permission Error saving attachment for "
+                                    + newEntry.getRecordId());
+                        } catch (SerializationUtilsException e) {
+                            error("Deserialization Error while saving attachment for "
                                     + newEntry.getRecordId());
                         }
                     }

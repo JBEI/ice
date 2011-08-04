@@ -26,6 +26,19 @@ import org.jbei.ice.lib.vo.FeaturedDNASequence;
  */
 public class SeqXmlSerializer {
 
+    private static final String SEQ_HASH = "seqHash";
+    private static final String QUOTED = "quoted";
+    private static final String NAME = "name";
+    private static final String ATTRIBUTE = "attribute";
+    private static final String END = "end";
+    private static final String GENBANK_START = "genbankStart";
+    private static final String LOCATION = "location";
+    private static final String SEQUENCE = "sequence";
+    private static final String LABEL = "label";
+    private static final String CIRCULAR = "circular";
+    private static final String FEATURE = "feature";
+    private static final String FEATURES = "features";
+    private static final String COMPLEMENT = "complement";
     public static Namespace seqNamespace = new Namespace("seq", "http://jbei.org/sequence");
     public static Namespace xsiNamespace = new Namespace("xsi",
             "http://www.w3.org/2001/XMLSchema-instance");
@@ -50,7 +63,7 @@ public class SeqXmlSerializer {
             "http://jbei.org/sequence seq.xsd");
         Entry entry = sequence.getEntry();
 
-        seq.add(new DefaultElement("name", seqNamespace).addText(entry.getNamesAsString()));
+        seq.add(new DefaultElement(NAME, seqNamespace).addText(entry.getNamesAsString()));
 
         Boolean circular = false;
         if (entry.getRecordType().equals("plasmid")) {
@@ -58,16 +71,16 @@ public class SeqXmlSerializer {
             circular = plasmid.getCircular();
         }
 
-        seq.add(new DefaultElement("circular", seqNamespace).addText(circular.toString()));
+        seq.add(new DefaultElement(CIRCULAR, seqNamespace).addText(circular.toString()));
 
-        seq.add(new DefaultElement("sequence", seqNamespace).addText(sequence.getSequence()));
+        seq.add(new DefaultElement(SEQUENCE, seqNamespace).addText(sequence.getSequence()));
 
         if (sequence.getSequenceFeatures().size() != 0) {
-            DefaultElement features = new DefaultElement("features", seqNamespace);
+            DefaultElement features = new DefaultElement(FEATURES, seqNamespace);
 
             for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
-                DefaultElement feature = new DefaultElement("feature", seqNamespace);
-                feature.add(new DefaultElement("label", seqNamespace).addText(sequenceFeature
+                DefaultElement feature = new DefaultElement(FEATURE, seqNamespace);
+                feature.add(new DefaultElement(LABEL, seqNamespace).addText(sequenceFeature
                         .getName()));
                 String complement;
                 if (sequenceFeature.getStrand() == -1) {
@@ -75,7 +88,7 @@ public class SeqXmlSerializer {
                 } else {
                     complement = "false";
                 }
-                feature.add(new DefaultElement("complement", seqNamespace).addText(complement));
+                feature.add(new DefaultElement(COMPLEMENT, seqNamespace).addText(complement));
                 String unRecognizedGenbankType = null;
                 if (validGenbankTypes.contains(sequenceFeature.getGenbankType())) {
                     feature.add(new DefaultElement("type", seqNamespace).addText(sequenceFeature
@@ -85,17 +98,35 @@ public class SeqXmlSerializer {
                     unRecognizedGenbankType = sequenceFeature.getGenbankType();
                 }
 
-                DefaultElement locations = new DefaultElement("location", seqNamespace);
-                locations.add(new DefaultElement("genbankStart", seqNamespace).addText(String
+                DefaultElement locations = new DefaultElement(LOCATION, seqNamespace);
+                locations.add(new DefaultElement(GENBANK_START, seqNamespace).addText(String
                         .valueOf(sequenceFeature.getGenbankStart())));
-                locations.add(new DefaultElement("end", seqNamespace).addText(String
+                locations.add(new DefaultElement(END, seqNamespace).addText(String
                         .valueOf(sequenceFeature.getEnd())));
                 feature.add(locations);
 
-                feature.add(new DefaultElement("attribute", seqNamespace).addText(
-                    sequenceFeature.getDescription()).addAttribute("name", "unparsed_attribute"));
-                String seqHash = Utils.encryptSha256(sequenceFeature.getFeature().getSequence());
-                feature.add(new DefaultElement("seqHash", seqNamespace).addText(seqHash));
+                feature.add(new DefaultElement(ATTRIBUTE, seqNamespace).addText(
+                    sequenceFeature.getDescription()).addAttribute(NAME, "unparsed_attribute"));
+                sequence.getSequence();
+                String tempSequence = sequenceFeature.getFeature().getSequence();
+                int genbankStart = sequenceFeature.getGenbankStart();
+                int end = sequenceFeature.getEnd();
+
+                // this is needed because sometimes sequence stored in this local database
+                // is the reverse complement of what's being exported, and thus must be recalculated.
+                if (genbankStart > end) {
+                    tempSequence = sequence.getSequence().trim()
+                            .substring(genbankStart - 1, sequence.getSequence().length());
+                    tempSequence += sequence.getSequence().trim().substring(0, end);
+                } else {
+                    tempSequence = sequence.getSequence().trim().substring(genbankStart - 1, end);
+                }
+                if ("true".equals(complement)) {
+                    tempSequence = SequenceUtils.reverseComplement(tempSequence);
+                }
+
+                String seqHash = Utils.encryptSha256(tempSequence);
+                feature.add(new DefaultElement(SEQ_HASH, seqNamespace).addText(seqHash));
                 features.add(feature);
             }
             seq.add(features);
@@ -121,16 +152,19 @@ public class SeqXmlSerializer {
     public static Sequence parseSeqXml(Element seqElement) throws UtilityException {
 
         FeaturedDNASequence featuredDNASequence = new FeaturedDNASequence();
-        featuredDNASequence.setSequence(seqElement.elementText("sequence"));
+        featuredDNASequence.setSequence(seqElement.elementText(SEQUENCE));
 
-        if (seqElement.element("features") != null) {
-            for (Object feature : seqElement.element("features").elements("feature")) {
+        String circular = seqElement.elementText(CIRCULAR);
+        featuredDNASequence.setIsCircular(CIRCULAR.equals(circular) ? true : false);
+
+        if (seqElement.element(FEATURES) != null) {
+            for (Object feature : seqElement.element(FEATURES).elements(FEATURE)) {
                 DNAFeature dnaFeature = new DNAFeature();
 
                 Element featureElement = (Element) feature;
 
-                dnaFeature.setName(featureElement.elementText("label"));
-                if ("true".equals(featureElement.elementText("complement"))) {
+                dnaFeature.setName(featureElement.elementText(LABEL));
+                if ("true".equals(featureElement.elementText(COMPLEMENT))) {
                     dnaFeature.setStrand(-1);
                 } else {
                     dnaFeature.setStrand(1);
@@ -139,13 +173,13 @@ public class SeqXmlSerializer {
 
                 // TODO handle multilocation
                 @SuppressWarnings("unchecked")
-                List<Element> locations = featureElement.elements("location");
+                List<Element> locations = featureElement.elements(LOCATION);
                 int genbankStart = 0;
                 int end = 0;
                 Element location = locations.get(0);
                 try {
-                    genbankStart = Integer.parseInt(location.elementText("genbankStart"));
-                    end = Integer.parseInt(location.elementText("end"));
+                    genbankStart = Integer.parseInt(location.elementText(GENBANK_START));
+                    end = Integer.parseInt(location.elementText(END));
                     dnaFeature.setGenbankStart(genbankStart);
                     dnaFeature.setEnd(end);
                 } catch (NumberFormatException e) {
@@ -153,12 +187,12 @@ public class SeqXmlSerializer {
                 }
 
                 @SuppressWarnings("unchecked")
-                List<Element> attributes = featureElement.elements("attribute");
+                List<Element> attributes = featureElement.elements(ATTRIBUTE);
                 for (Element attribute : attributes) {
                     DNAFeatureNote featureNote = new DNAFeatureNote();
-                    featureNote.setName(attribute.attributeValue("name"));
+                    featureNote.setName(attribute.attributeValue(NAME));
                     featureNote.setValue(attribute.getText());
-                    if ("true".equals(attribute.attributeValue("quoted"))) {
+                    if ("true".equals(attribute.attributeValue(QUOTED))) {
                         featureNote.setValue("\"" + featureNote.getValue() + "\"");
                     }
                     dnaFeature.addNote(featureNote);

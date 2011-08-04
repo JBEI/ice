@@ -32,6 +32,7 @@ import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.IEntryValueObject;
 import org.jbei.ice.lib.utils.JbeiConstants;
+import org.jbei.ice.lib.utils.JbeirSettings;
 
 @Entity
 @Table(name = "entries")
@@ -290,9 +291,17 @@ public class Entry implements IEntryValueObject, IModel {
 
     public PartNumber getOnePartNumber() {
         PartNumber result = null;
-
+        // prefer local part number prefix over other prefixes
         if (partNumbers.size() > 0) {
-            result = (PartNumber) partNumbers.toArray()[0];
+            for (PartNumber partNumber : partNumbers) {
+                if (partNumber.getPartNumber().contains(
+                    JbeirSettings.getSetting("PART_NUMBER_PREFIX"))) {
+                    result = partNumber;
+                }
+            }
+            if (result == null) {
+                result = (PartNumber) partNumbers.toArray()[0];
+            }
         }
         return result;
     }

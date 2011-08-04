@@ -17,10 +17,10 @@ import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Part;
+import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
-import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.models.SequenceFeature.AnnotationType;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
@@ -269,12 +269,12 @@ public class SequenceController extends Controller {
                     String featureSequence = "";
 
                     if (genbankStart > end) { // over zero case
-                        featureSequence = featuredDNASequence.getSequence().substring(genbankStart - 1,
-                            featuredDNASequence.getSequence().length());
+                        featureSequence = featuredDNASequence.getSequence().substring(
+                            genbankStart - 1, featuredDNASequence.getSequence().length());
                         featureSequence += featuredDNASequence.getSequence().substring(0, end);
                     } else { // normal
-                        featureSequence = featuredDNASequence.getSequence().substring(genbankStart - 1,
-                            end);
+                        featureSequence = featuredDNASequence.getSequence().substring(
+                            genbankStart - 1, end);
                     }
 
                     if (dnaFeature.getStrand() == -1) {
@@ -290,16 +290,21 @@ public class SequenceController extends Controller {
                                 descriptionNotes.append("\n");
                             }
 
-                            descriptionNotes.append(dnaFeatureNote.getName()).append("=").append(
-                                dnaFeatureNote.getValue());
+                            // TODO: remove this when sequencefeature gets proper attributes.
+                            if (dnaFeatureNote.getName().startsWith("unparsed_attribute")) {
+                                descriptionNotes.append(dnaFeatureNote.getValue());
+                            } else {
+                                descriptionNotes.append(dnaFeatureNote.getName()).append("=")
+                                        .append(dnaFeatureNote.getValue());
+                            }
 
                             index++;
                         }
                     }
 
                     Feature feature = new Feature(dnaFeature.getName(),
-                            descriptionNotes.toString(), "", featureSequence, 0, dnaFeature
-                                    .getType());
+                            descriptionNotes.toString(), "", featureSequence, 0,
+                            dnaFeature.getType());
 
                     AnnotationType annotationType = null;
 
@@ -308,9 +313,9 @@ public class SequenceController extends Controller {
                         annotationType = AnnotationType.valueOf(dnaFeature.getAnnotationType());
                     }
 
-                    SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature, genbankStart,
-                            end, dnaFeature.getStrand(), dnaFeature.getName(), descriptionNotes
-                                    .toString(), dnaFeature.getType(), annotationType);
+                    SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature,
+                            genbankStart, end, dnaFeature.getStrand(), dnaFeature.getName(),
+                            descriptionNotes.toString(), dnaFeature.getType(), annotationType);
 
                     sequenceFeatures.add(sequenceFeature);
                 }

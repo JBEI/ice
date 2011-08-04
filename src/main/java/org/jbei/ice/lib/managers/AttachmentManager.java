@@ -27,14 +27,15 @@ public class AttachmentManager {
             throw new ManagerException("Failed to save null attachment!");
         }
 
-        String fileId = Utils.generateUUID();
-
-        attachment.setFileId(fileId);
+        if (attachment.getFileId() == null || attachment.getFileId() == "") {
+            String fileId = Utils.generateUUID();
+            attachment.setFileId(fileId);
+        }
 
         Attachment result = null;
 
         try {
-            writeAttachmentToFile(fileId, inputStream);
+            writeAttachmentToFile(attachment.getFileId(), inputStream);
 
             result = (Attachment) DAO.save(attachment);
         } catch (IOException e) {

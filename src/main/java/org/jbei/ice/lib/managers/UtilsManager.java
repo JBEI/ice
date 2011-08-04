@@ -153,19 +153,18 @@ public class UtilsManager {
 
         Set<PartNumber> plasmidPartNumbers = plasmid.getPartNumbers();
         Session session = DAO.newSession();
-
-        for (PartNumber plasmidPartNumber : plasmidPartNumbers) {
-            Query query = session
-                    .createQuery("select strain.id from Strain strain where strain.plasmids like :partNumber");
-            query.setString("partNumber", "%" + plasmidPartNumber.getPartNumber() + "%");
-            try {
+        try {
+            for (PartNumber plasmidPartNumber : plasmidPartNumbers) {
+                Query query = session
+                        .createQuery("select strain.id from Strain strain where strain.plasmids like :partNumber");
+                query.setString("partNumber", "%" + plasmidPartNumber.getPartNumber() + "%");
                 strainIds.addAll(query.list());
-            } catch (HibernateException e) {
-                Logger.error("Could not get strains for plasmid " + e.toString(), e);
-            } finally {
-                if (session.isOpen()) {
-                    session.close();
-                }
+            }
+        } catch (HibernateException e) {
+            Logger.error("Could not get strains for plasmid " + e.toString(), e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
             }
         }
 
@@ -190,9 +189,10 @@ public class UtilsManager {
                 Matcher basicWikiLinkMatcher = basicWikiLinkPattern.matcher(strainPlasmid);
                 String strainPlasmidNumber = null;
                 if (basicWikiLinkMatcher.matches()) {
-                    Matcher partNumberMatcher = partNumberPattern.matcher(basicWikiLinkMatcher.group());
-                    Matcher descriptivePatternMatcher = descriptivePattern.matcher(basicWikiLinkMatcher
+                    Matcher partNumberMatcher = partNumberPattern.matcher(basicWikiLinkMatcher
                             .group());
+                    Matcher descriptivePatternMatcher = descriptivePattern
+                            .matcher(basicWikiLinkMatcher.group());
 
                     if (descriptivePatternMatcher.find()) {
                         strainPlasmidNumber = descriptivePatternMatcher.group(1).trim();
