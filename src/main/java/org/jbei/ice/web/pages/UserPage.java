@@ -17,6 +17,7 @@ import org.jbei.ice.web.panels.UserRecentlyViewedPanel;
 import org.jbei.ice.web.panels.UserSamplesViewPanel;
 import org.jbei.ice.web.panels.WorkspaceTablePanel;
 
+// TODO obsolete???
 public class UserPage extends ProtectedPage {
     public Component currentPanel;
     public Component entriesPanel;
