@@ -119,21 +119,16 @@ We use Eclipse as our IDE. See Section 5 for setup instructions.
 
 2.1. If you would like to keep track of current development, building
      from sources is a must.
-     Download the sources from the subversion repository:
-     $ svn checkout http://gd-ice.googlecode.com/svn/trunk/ice gd-ice-build
+     Download the sources from the git repository:
+     $ git clone https://code.google.com/p/gd-ice gd-ice-build
 
      From now on, the gd-ice-build directory will be referred to as
      the Root ICE directory.
      
-     Under Windows, TortoiseSVN is a nice client.
+     Under Windows, TortoiseGit is a nice client.
 
-2.1.1 [optional: git] 
-      If you are using git, you can clone from our git-svn mirror:
-      $ git clone http://loche.lbl.gov/tmp/gd-ice/.git gd-ice-build
-
-      (The strange url is due to git-svn needing a working copy) 
-
-      Let's create a build branch that's separate from the svn.
+2.1.1 
+      Let's create a build branch that's separate from the main.
       $ git checkout -b build
 
 2.2. Now, edit the relavent config and settings files:
@@ -171,15 +166,12 @@ We use Eclipse as our IDE. See Section 5 for setup instructions.
       the <security-constraint> section. By default, all the flex
       components are built with the assumption of using https. If
       you are using http only, they must be rebuilt from sources.
-2.2.5 [git] Commit those changes to your local branch:
+2.2.5 Commit those changes to your local branch:
       $ git add -u
       $ git commit -m "build: productions settings"
    
 2.3. Updating
-2.3.1 If using svn, just svn update and hope / check that your local
-      settings are not over written by new defaults or new options.
-2.3.2 [git] If using git, 
-
+2.3.1 
       $ git fetch origin
       $ git rebase origin
 
