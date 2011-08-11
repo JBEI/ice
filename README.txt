@@ -28,7 +28,8 @@ optional development tools mentioned below.
 1.1 Java
 
 ICE requires Java 1.6 SE (also known as Java 6). Please download the
-Sun/Oracle SDK version, instead of the open source versions.
+Oracle SDK version (or OpenJDK), instead of the GJC version. Most
+of our testing is done against the Oracle version.  
 
 1.1.1 Debian/Ubuntu intall instructions
 The package name is "sun-java6-jdk". You may have to add external software
