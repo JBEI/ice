@@ -1,0 +1,32 @@
+<html xmlns:wicket>
+<wicket:panel>
+	<table width="100%" cellspacing="0" cellpadding="0" style="border: 3px solid orange;">
+	    <tr>
+	        <td style="border-top: 1px solid #aaa; border-left: 1px solid #aaa; border-right: 1px solid #aaa">
+	            <table border="0" cellpadding="3" cellspacing="0" width="100%"> 
+	            <tr class="title_row_header">
+	                <td><span wicket:id="current_panel_header" style="font-weight:bold">[header]</span> </td>                
+	            </tr>       
+	            </table>        
+	        </td>
+	    </tr>
+	    <tr>
+	        <td height="500px">
+	            <div style="width: 100%; height: 100%" id="flashContainerDiv">
+			        <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" id="EntryBulkImport" width="100%"
+			                   height="100%" codebase="https://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
+			            <param name="movie" value="EntryBulkImport.swf" />
+			            <param name="quality" value="high" />
+			            <param name="bgcolor" value="#869ca7" />
+			            <param name="wmode" value="window" />
+			            <param name="allowScriptAccess" value="sameDomain" />
+			            <embed wicket:id="bulkImport" />
+			         </object>
+	           </div>
+	        </td>
+        </tr>
+    </table>
+    
+    
+</wicket:panel>
+</html>

@@ -13,7 +13,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
-import java.util.zip.ZipFile;
 
 import org.jbei.ice.bio.enzymes.RestrictionEnzyme;
 import org.jbei.ice.bio.enzymes.RestrictionEnzymesManager;
@@ -28,11 +27,13 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.composers.SequenceComposerException;
 import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.BulkImportManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountPreferences;
 import org.jbei.ice.lib.models.Attachment;
+import org.jbei.ice.lib.models.BulkImport;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
@@ -43,6 +44,7 @@ import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.AssemblyHelper;
+import org.jbei.ice.lib.utils.BulkImportEntryData;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.utils.SerializationUtils.SerializationUtilsException;
@@ -58,6 +60,10 @@ import org.jbei.ice.lib.vo.TraceData;
 import org.jbei.ice.lib.vo.VectorEditorProject;
 import org.jbei.ice.services.blazeds.vo.UserPreferences;
 import org.jbei.ice.services.blazeds.vo.UserRestrictionEnzymes;
+
+import flex.messaging.io.ArrayCollection;
+import flex.messaging.io.amf.ASObject;
+import flex.messaging.io.amf.translator.ASTranslator;
 
 public class RegistryAMFAPI extends BaseService {
     public Entry getEntry(String sessionId, String entryId) {
@@ -1021,19 +1027,155 @@ public class RegistryAMFAPI extends BaseService {
         return getAccountBySessionId(sessionId);
     }
 
-    private ZipFile createZipFile(Byte[] byteArray, String filename) throws IOException {
-        byte[] input = new byte[byteArray.length];
-        for (int i = 0; i < byteArray.length; i += 1) {
-            input[i] = byteArray[i].byteValue();
+    //    private ZipFile createZipFile(final Byte[] byteArray, final String filename) throws IOException {
+    //        byte[] input = new byte[byteArray.length];
+    //        for (int i = 0; i < byteArray.length; i += 1) {
+    //            input[i] = byteArray[i].byteValue();
+    //        }
+    //
+    //        FileOutputStream outputStream = new FileOutputStream(System.getProperty("java.io.tmpdir")
+    //                + File.separatorChar + filename);
+    //        outputStream.write(input);
+    //        outputStream.close();
+    //
+    //        File file = new File(System.getProperty("java.io.tmpdir"), filename);
+    //        return new ZipFile(file);
+    //    }
+
+    // TODO : the following need to be folded into a single call
+    public String retrieveBulkImportEntryType(String sessionId, String importId) {
+
+        Account account = this.sessionToAccount(sessionId);
+        if (account == null) {
+            System.out.println("Session is invalid");
+            return null;
         }
 
-        FileOutputStream outputStream = new FileOutputStream(System.getProperty("java.io.tmpdir")
-                + File.separatorChar + filename);
-        outputStream.write(input);
-        outputStream.close();
+        Logger.info("RetrieveBulkImportEntryType: " + importId);
+        long id = Long.decode(importId);
+        try {
+            return BulkImportManager.retrieveType(id);
+        } catch (ManagerException e) {
+            Logger.error(getLoggerPrefix(), e);
+            return null;
+        }
+    }
 
-        File file = new File(System.getProperty("java.io.tmpdir"), filename);
-        return new ZipFile(file);
+    @SuppressWarnings("unchecked")
+    public ASObject retrieveImportData(String sessionId, String importId) {
+        Account account = this.sessionToAccount(sessionId);
+        if (account == null) {
+            System.out.println("Session is invalid");
+            return null;
+        }
+
+        Logger.info("RetrieveImportData: " + importId);
+
+        long id = Long.decode(importId);
+        try {
+            ASObject results = new ASObject();
+            BulkImport bi = BulkImportManager.retrieveById(id);
+            results.put("type", bi.getType());
+
+            // primary data
+            ArrayCollection primaryData = new ArrayCollection();
+            List<BulkImportEntryData> data = bi.getPrimaryData();
+            for (BulkImportEntryData datum : data) {
+                ASObject obj = new ASObject();
+                obj.put("entry", datum.getEntry());
+                obj.put("attachmentFilename", datum.getAttachmentFilename());
+                obj.put("sequenceFilename", datum.getSequenceFilename());
+                primaryData.add(obj);
+            }
+            results.put("primaryData", primaryData);
+
+            // secondary data (if any)
+            List<BulkImportEntryData> data2 = bi.getSecondaryData();
+            if (data2 != null && !data2.isEmpty()) {
+                ArrayCollection secondaryData = new ArrayCollection();
+                for (BulkImportEntryData datum : data2) {
+                    ASObject obj = new ASObject();
+                    obj.put("entry", datum.getEntry());
+                    obj.put("attachmentFilename", datum.getAttachmentFilename());
+                    obj.put("sequenceFilename", datum.getSequenceFilename());
+                    secondaryData.add(obj);
+                }
+                results.put("secondaryData", secondaryData);
+            }
+
+            return results;
+        } catch (ManagerException e) {
+            Logger.error(getLoggerPrefix(), e);
+            return null;
+        }
+    }
+
+    // end TODO 
+
+    public void saveEntries(String sessionId, ArrayCollection primaryData,
+            ArrayCollection secondaryData, Byte[] sequenceZipFile, Byte[] attachmentZipFile,
+            String sequenceFilename, String attachmentFilename) {
+
+        Account account = this.sessionToAccount(sessionId);
+        if (account == null) {
+            Logger.error("Invalid session");
+            return;
+        }
+
+        BulkImport bulkImport = new BulkImport();
+        bulkImport.setAccount(account);
+        bulkImport.setAttachmentFile(attachmentZipFile);
+        bulkImport.setAttachmentFilename(attachmentFilename);
+        bulkImport.setSequenceFilename(sequenceFilename);
+        bulkImport.setSequenceFile(sequenceZipFile);
+
+        try {
+            // to account for blaze ds issues. change if a solution is found
+            ArrayList<BulkImportEntryData> data = new ArrayList<BulkImportEntryData>(
+                    primaryData.size());
+            ArrayList<BulkImportEntryData> data2 = new ArrayList<BulkImportEntryData>(
+                    secondaryData.size());
+            ASTranslator ast = new ASTranslator();
+            BulkImportEntryData importData;
+            ASObject aso;
+            String type = "";
+
+            System.out.println("Primary: " + primaryData.size());
+            System.out.println("Secondary: " + secondaryData.size());
+
+            for (int i = 0; i < primaryData.size(); i++) {
+                aso = (ASObject) primaryData.get(i);
+                aso.setType("org.jbei.ice.lib.utils.BulkImportEntryData");
+                importData = (BulkImportEntryData) ast.convert(aso, BulkImportEntryData.class);
+                data.add(importData);
+                type = importData.getEntry().getRecordType();
+            }
+
+            bulkImport.setPrimaryData(data);
+
+            // secondary data
+            if (secondaryData != null && !secondaryData.isEmpty()) {
+                for (int i = 0; i < secondaryData.size(); i += 1) {
+                    aso = (ASObject) secondaryData.get(i);
+                    aso.setType("org.jbei.ice.lib.utils.BulkImportEntryData");
+                    importData = (BulkImportEntryData) ast.convert(aso, BulkImportEntryData.class);
+                    data2.add(importData);
+                }
+
+                bulkImport.setSecondaryData(data2);
+                bulkImport.setType("strain w/ plasmid");
+            } else {
+                System.out.println("No secondary data");
+                bulkImport.setType(type);
+            }
+
+            BulkImportManager.createBulkImportRecord(bulkImport);
+            System.out.println("Save Successful");
+        } catch (ManagerException e) {
+            Logger.error(getLoggerPrefix(), e);
+        } catch (Exception e) {
+            Logger.error(getLoggerPrefix(), e);
+        }
     }
 
     public Entry saveEntry(String sessionId, Entry entry, Byte[] sequenceFile,
@@ -1051,6 +1193,9 @@ public class RegistryAMFAPI extends BaseService {
 
         if (Entry.PART_ENTRY_TYPE.equals(entry.getRecordType()))
             ((Part) entry).setPackageFormat(Part.AssemblyStandard.RAW);
+
+        if (entry.getLongDescriptionType() == null)
+            entry.setLongDescriptionType(Entry.MarkupType.text.name());
 
         EntryController entryController = new EntryController(account);
         Entry saved = null;
@@ -1085,12 +1230,16 @@ public class RegistryAMFAPI extends BaseService {
         strain.setCreator(account.getFullName());
         strain.setOwner(account.getFullName());
         strain.setOwnerEmail(account.getEmail());
+        if (strain.getLongDescriptionType() == null)
+            strain.setLongDescriptionType(Entry.MarkupType.text.name());
 
         // plasmid
         plasmid.setCreatorEmail(account.getEmail());
         plasmid.setCreator(account.getFullName());
         plasmid.setOwner(account.getFullName());
         plasmid.setOwnerEmail(account.getEmail());
+        if (plasmid.getLongDescriptionType() == null)
+            plasmid.setLongDescriptionType(Entry.MarkupType.text.name());
 
         EntryController entryController = new EntryController(account);
 

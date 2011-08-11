@@ -83,7 +83,7 @@ public class AccountController {
     public static Boolean isValidPassword(Account account, String password)
             throws ControllerException {
         if (account == null) {
-            throw new ControllerException("Failed ot verify password for null Account!");
+            throw new ControllerException("Failed to verify password for null Account!");
         }
 
         Boolean result = false;

@@ -14,6 +14,8 @@ import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.panels.AdminFoldersEditPanel;
+import org.jbei.ice.web.panels.VerifyBulkImportPanel;
+import org.jbei.ice.web.panels.VerifyUserBulkImportPanel;
 import org.jbei.ice.web.panels.adminpage.AdminAccountUpdatePanel;
 import org.jbei.ice.web.panels.adminpage.AdminImportExportPanel;
 import org.jbei.ice.web.panels.adminpage.AdminUpdateGroupPanel;
@@ -23,7 +25,7 @@ import org.jbei.ice.web.panels.adminpage.EditUserAccountPanel;
 import org.jbei.ice.web.panels.adminpage.StorageSchemeChoicePanel;
 
 /**
- * Page for performing administrative tasks. Requires "Moderator" privileges
+ * Page for performing administrative tasks. Requires "Moderator" privilege
  * 
  * @author Hector Plahar
  */
@@ -38,6 +40,7 @@ public class AdminPage extends ProtectedPage {
     private BookmarkablePageLink<AdminPage> editStorageSchemeLink;
     private BookmarkablePageLink<AdminPage> editFoldersLink;
     private BookmarkablePageLink<AdminPage> importExportLink;
+    private BookmarkablePageLink<AdminPage> editBulkImportLink;
 
     private String currentPage;
 
@@ -97,6 +100,11 @@ public class AdminPage extends ProtectedPage {
                 new PageParameters("0=import"));
         importExportLink.setOutputMarkupId(true);
 
+        // edit bulk import
+        editBulkImportLink = new BookmarkablePageLink<AdminPage>("editBulkImportLink",
+                AdminPage.class, new PageParameters("0=bulk_import"));
+        editBulkImportLink.setOutputMarkupId(true);
+
         // set tabs css
         editUsersLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(true);
         editPartsLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(true);
@@ -109,12 +117,16 @@ public class AdminPage extends ProtectedPage {
         importExportLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(
             true);
 
+        editBulkImportLink.add(new SimpleAttributeModifier("class", "inactive")).setOutputMarkupId(
+            true);
+
         add(editUsersLink);
         add(editPartsLink);
         add(editGroupsLink);
         add(editStorageSchemeLink);
         add(editFoldersLink);
         add(importExportLink);
+        add(editBulkImportLink);
 
         if (currentPage != null) {
             if ("users".equals(currentPage)) {
@@ -161,7 +173,15 @@ public class AdminPage extends ProtectedPage {
                         .setOutputMarkupId(true);
             } else if ("import".equals(currentPage)) {
                 currentPanel = new AdminImportExportPanel(MAIN_PANEL_ID);
-                importExportLink.add(new SimpleAttributeModifier("class", "active"))
+                importExportLink.add(new SimpleAttributeModifier("class", "active"));
+            } else if ("bulk_import".equals(currentPage)) {
+                String importId = parameters.getString("1");
+                if (importId == null || importId.isEmpty())
+                    currentPanel = new VerifyBulkImportPanel(MAIN_PANEL_ID);
+                else
+                    currentPanel = new VerifyUserBulkImportPanel(MAIN_PANEL_ID, importId);
+
+                editBulkImportLink.add(new SimpleAttributeModifier("class", "active"))
                         .setOutputMarkupId(true);
             } else {
                 currentPanel = createDefaultPanel();

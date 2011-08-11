@@ -1291,6 +1291,7 @@ public class RegistryAPI {
         }
 
         StorageController controller = getStorageController(sessionId);
+        log("Creating new strain samples");
         // TODO : this is a hack till we migrate to a single strain default
         Storage strainScheme = null;
         try {
@@ -1301,6 +1302,10 @@ public class RegistryAPI {
                     strainScheme = storage;
                     break;
                 }
+            }
+            if (strainScheme == null) {
+                log("Could not locate default strain");
+                throw new ServiceException("Registry Service Internal Error!");
             }
 
             Storage newLocation = StorageManager.getLocation(strainScheme, new String[] { rack,
