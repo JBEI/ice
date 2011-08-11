@@ -31,7 +31,6 @@ import org.jbei.ice.lib.utils.IceXmlSerializer.AttachmentData;
 import org.jbei.ice.lib.utils.IceXmlSerializer.CompleteEntry;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.lib.utils.SerializationUtils;
-import org.jbei.ice.lib.utils.SerializationUtils.SerializationUtilsException;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
@@ -263,8 +262,8 @@ public class AdminImportExportPanel extends Panel {
                         attachment.setFileName(attachmentData.getFileName());
                         attachment.setEntry(newEntry);
                         try {
-                            byte[] bytes = (byte[]) SerializationUtils
-                                    .deserializeFromString(attachmentData.getBase64Data());
+                            byte[] bytes = SerializationUtils
+                                    .deserializeStringToBytes(attachmentData.getBase64Data());
                             ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
 
                             attachmentController.save(attachment, inputStream);
@@ -273,9 +272,6 @@ public class AdminImportExportPanel extends Panel {
                                     + newEntry.getRecordId());
                         } catch (PermissionException e) {
                             error("Permission Error saving attachment for "
-                                    + newEntry.getRecordId());
-                        } catch (SerializationUtilsException e) {
-                            error("Deserialization Error while saving attachment for "
                                     + newEntry.getRecordId());
                         }
                     }

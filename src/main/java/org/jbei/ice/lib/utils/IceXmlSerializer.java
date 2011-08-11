@@ -46,7 +46,6 @@ import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.Strain;
-import org.jbei.ice.lib.utils.SerializationUtils.SerializationUtilsException;
 
 /**
  * 
@@ -263,14 +262,12 @@ public class IceXmlSerializer {
                 try {
                     file = AttachmentManager.getFile(attachment);
                     fileString = SerializationUtils
-                            .serializeToString(org.apache.commons.io.FileUtils
+                            .serializeBytesToString(org.apache.commons.io.FileUtils
                                     .readFileToByteArray(file));
 
                 } catch (FileNotFoundException e) {
                     throw new UtilityException(e);
 
-                } catch (SerializationUtilsException e) {
-                    throw new UtilityException(e);
                 } catch (IOException e) {
                     throw new UtilityException(e);
                 } catch (ManagerException e) {
