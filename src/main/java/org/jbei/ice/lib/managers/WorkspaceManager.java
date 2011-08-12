@@ -70,7 +70,8 @@ public class WorkspaceManager {
         return hasEntry(account, entry);
     }
 
-    public static void setVisited(Account account, Entry entry) throws ManagerException {
+    public synchronized static void setVisited(Account account, Entry entry)
+            throws ManagerException {
         try {
             Workspace queryResult = get(account, entry);
             if (queryResult == null) {
