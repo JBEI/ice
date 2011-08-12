@@ -282,79 +282,52 @@ page is located at https://yoursite/admin.
 
 5.1 We use Eclipse IDE for ICE development. Go to
     http://www.eclipse.org and download the JAVA EE Edition of
-    Eclipse. After Eclipse installation, install the Sonatype
-    M2Eclipse plugin (website: http://m2eclipse.sonatype.org/): Go to
-    the Help menu, select "Install New Software", select "Add...", and
-    add a new software site (currently
-    http://m2eclipse.sonatype.org/sites/m2e), then follow the prompts.
+    Eclipse. After Eclipse installation, install the M2Eclipse plugin:
+    Go to the Help menu, select "Install New Software", select
+    "Add...", and add a new software site (location is
+    http://download.eclipse.org/technology/m2e/releases), then follow
+    the prompts.
 
 5.2 Once Eclipse is installed, import the root ICE directory (the one
     with .project, and this README.txt file) as an existing
     project. Select File from the menu, choose Import, then select
-    General -> Existing Projects into Workspace.
+    Maven -> Existing Maven Projects, then select gd-ice as the Root.
 
     It may take a while for Eclipse to "update indexes" when run for
-    the first time. Be patient.
+    the first time. You can see it's progress by clicking on the
+    button next to the small progress bar. Be patient.
     
-5.3 There are different ways to debug ICE in Eclipse, which are
-    changing constantly. The most reliable but somewhat cumbersome way
-    is to use the included maven jetty plugin:
+5.3 Debugging
+    Select Run from the menu, then select Debug Configurations...
+    Click on Maven Build, and click the New button.  Put "jetty run"
+    in the name field, select the ICE root as the base directory by
+    clicking on Browse Workspace, and put "jetty:run" as the
+    goal. Select Apply then Debug. This should launch jetty, the same
+    way as in Section 3.
 
-5.3.1. Go to Run-> 'External Tools' -> 'External Tools Configuration'
-       and select 'Program', and click the new button. Use 'run jetty'
-       as the Name. For Location, enter your maven program location
-       (/usr/bin/mvn for linux). For the Working Directory, select
-       'Browse Workspace', and choose gd-ice. Enter jetty:run into the
-       Arguments field.
-       
-5.3.1.1 Select the Environment tab and add a new variable.
-        Name: MAVEN_OPTS
-        Value: -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4000,server=y,suspend=y
-        Select Apply, then Run.
-        
-5.3.1.2. Go to Run->'Debug Configurations' and select 'Remote Java
-       Application' and click the New button. For Name, use 'gd-ice'.
-       For Project, browse and select gd-ice. Use the Standard for
-       Connection Type and port 4000 (as specified in 5.3.1.1 above).
-       Check Allow Termination of remote VM.  Select Apply then Debug.
-       This should launch jetty, the same way as in Section 3.
-
-5.3.1.3. From now on, gd-ice can be launched by using the launch
-       buttons.  First press the green Play button with the red
-       toolbox (which is the external program launcher), then the
-       green Bug button (which is the debug launch). To stop the
-       program, press the red square in the Console window. 
-
-5.3.1.4. To test a functioning debug set up, open up
+5.3.1. To test a functioning debug set up, open up
        WicketApplication.java file by pressing Shift-Ctrl-R, and type
        in WicketApplication.java in the search box. Set a breakpoint
        on the line "mountPages();" (around line 53) by double clicking
-       on the left margin, below the green triangle. Launch the
-       application, and Eclipse should stop at the specified line
-       waiting for your input. Press the green Play button in the
-       Debug pane to continue, red square to stop the program. 
+       on the left margin, below the green triangle. Launch jetty run
+       again, and Eclipse should stop at the specified line waiting
+       for your input. Press the green Play button in the Debug pane
+       to continue, red square to stop the program.  If you see the
+       "Source not Found" error, click on the Edit Source Lookup Path
+       button, click Add, select Project, then check the gd-ice
+       project. Use F6 button to step through the source code.
 
-5.3.2 Alternative debug using maven plugin
-      This method is simpler, and may work for you.
-      Select Run->Debug Configurations... Select Maven Build from 
-      the left, and create a new configuration. Type "jetty run" 
-      into the Name field. For Base Directory, select Browse Workspace
-      and select gd-ice. Type "jetty:run" into the Goal field. You 
-      may select Skip Tests.  Select Apply and Debug. If it launches
-      correctly, and you can view the web page, then it is working.
-      However, for some reason the sources are not connected. Set a
-      breakpoint in the file UnprotectedPage.java in the sources, where
-      initializeStyles() runs. If you refresh the page in the browser,
-      the program should stop running at that line. In the Debug pane,
-      (Window->Show View->Debug), double click on the first item
-      with the line number. Here, Eclipse will try to open the 
-      source file and fail. Select Edit Source Lookup Path button,
-      select Add, select Workspace Folder, select gd-ice/src, and
-      make sure Search subfolders is checked. 
+5.3.2 Perspectives in Eclipse
+      If you chose to allow Eclipse to "change to the debug
+      perspective", you will see a very differently layed out
+      screen. Perspectives can be changed by pressing the perspective
+      buttons on the top right, (button tray can be resized) or by
+      going to the Window-> Open Perspective menu. Typically, the
+      JavaEE perspective and the Debug perspective are the most used.
 
 5.3.3 Eclipse Tips
       Eclipse is a large and powerful program for software development.
-      It has a large learning curve, so here are some tips.
+      It has a steep learning curve, so here are some tips.
 
       Perspectives: These are groups of windows. They can be selected
       from the top right of the screen. Initially, Java EE is available,
@@ -371,20 +344,18 @@ page is located at https://yoursite/admin.
       Perspective to reset a customized Perspective.
 
       Sometimes Eclipse itself gets confused. It is a good idea to
-      make a backup copy of a working version of the eclipse
-      installation (directory containing the eclipse program)
-      periodically. Same goes with eclipse Workspace directory
-      as well as the project directory.
+      make a backup copy of a working version of the eclipse settings
+      (.metadata folder in the workspace folder) periodically.  Same
+      goes with .settings folder in the project directory.
 
-      Eclipse has a very nice svn plugin.
-
-      To show line numbers in the editor, go to Window -> Preferences ->
-      General -> Editors -> Text Editors and select 'Show line numbers'.
+      To show line numbers in the editor, go to Window -> Preferences
+      -> General -> Editors -> Text Editors and select 'Show line
+      numbers'.
 
       Eclipse has a very powerful automatic completion. Press
       Ctrl-Space to get context assistance, and Ctrl-1 for "quick
       fix", which can fix many different types of compilation errors
-      almost automatically. 
+      almost automatically.
       
       Use the ICE source formatter. Go to Window -> Preferences ->
       Java -> Code Style -> Formatter and import the Registry Team
