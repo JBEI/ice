@@ -1065,7 +1065,7 @@ public class RegistryAMFAPI extends BaseService {
     public ASObject retrieveImportData(String sessionId, String importId) {
         Account account = this.sessionToAccount(sessionId);
         if (account == null) {
-            System.out.println("Session is invalid");
+            Logger.info("Session is invalid");
             return null;
         }
 
@@ -1076,6 +1076,8 @@ public class RegistryAMFAPI extends BaseService {
             ASObject results = new ASObject();
             BulkImport bi = BulkImportManager.retrieveById(id);
             results.put("type", bi.getType());
+            results.put("sequenceZipfile", bi.getSequenceFile());
+            results.put("attachmentZipfile", bi.getAttachmentFile());
 
             // primary data
             ArrayCollection primaryData = new ArrayCollection();
@@ -1140,9 +1142,6 @@ public class RegistryAMFAPI extends BaseService {
             ASObject aso;
             String type = "";
 
-            System.out.println("Primary: " + primaryData.size());
-            System.out.println("Secondary: " + secondaryData.size());
-
             for (int i = 0; i < primaryData.size(); i++) {
                 aso = (ASObject) primaryData.get(i);
                 aso.setType("org.jbei.ice.lib.utils.BulkImportEntryData");
@@ -1165,12 +1164,10 @@ public class RegistryAMFAPI extends BaseService {
                 bulkImport.setSecondaryData(data2);
                 bulkImport.setType("strain w/ plasmid");
             } else {
-                System.out.println("No secondary data");
                 bulkImport.setType(type);
             }
 
             BulkImportManager.createBulkImportRecord(bulkImport);
-            System.out.println("Save Successful");
         } catch (ManagerException e) {
             Logger.error(getLoggerPrefix(), e);
         } catch (Exception e) {
@@ -1178,8 +1175,8 @@ public class RegistryAMFAPI extends BaseService {
         }
     }
 
-    public Entry saveEntry(String sessionId, Entry entry, Byte[] sequenceFile,
-            Byte[] attachmentFile, String attachmentFilename) {
+    public Entry saveEntry(String sessionId, Entry entry, Byte[] attachmentFile,
+            String attachmentFilename, Byte[] sequenceFile, String sequenceFilename) {
 
         Account account = this.sessionToAccount(sessionId);
         if (account == null) {
@@ -1207,7 +1204,7 @@ public class RegistryAMFAPI extends BaseService {
         }
 
         // save sequence
-        saveEntrySequence(account, entry, sequenceFile, "seq.gb");
+        saveEntrySequence(account, entry, sequenceFile, sequenceFilename);
 
         // save attachment
         saveEntryAttachment(account, entry, attachmentFile, attachmentFilename);
