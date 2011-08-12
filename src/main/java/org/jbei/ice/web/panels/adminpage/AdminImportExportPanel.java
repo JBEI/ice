@@ -18,6 +18,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.jbei.ice.controllers.AttachmentController;
 import org.jbei.ice.controllers.EntryController;
+import org.jbei.ice.controllers.SequenceAnalysisController;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.logging.Logger;
@@ -27,11 +28,13 @@ import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.IceXmlSerializer;
-import org.jbei.ice.lib.utils.IceXmlSerializer.AttachmentData;
-import org.jbei.ice.lib.utils.IceXmlSerializer.CompleteEntry;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.utils.UtilityException;
+import org.jbei.ice.lib.vo.AttachmentData;
+import org.jbei.ice.lib.vo.CompleteEntry;
+import org.jbei.ice.lib.vo.IDNASequence;
+import org.jbei.ice.lib.vo.SequenceTraceFile;
 import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.DownloadPage;
@@ -184,6 +187,9 @@ public class AdminImportExportPanel extends Panel {
                 }
                 if (xmlString != null) {
                     completeEntries = iceXmlSerializer.deserializeJbeiXml(xmlString);
+                    if (completeEntries == null) {
+                        error("Could not parse file");
+                    }
                 } else {
                     error("Please upload a file or paste in the xml content");
                 }
@@ -252,6 +258,35 @@ public class AdminImportExportPanel extends Panel {
                         } catch (PermissionException e) {
                             error("Permission error saving sequence  for " + newEntry.getRecordId());
                         }
+                    }
+
+                    // add sequence traces
+                    SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController(
+                            IceSession.get().getAccount());
+                    for (SequenceTraceFile traceFile : completeEntry.getTraceFiles()) {
+                        try {
+                            byte[] bytes = SerializationUtils.deserializeStringToBytes(traceFile
+                                    .getBase64Data());
+                            IDNASequence dnaSequence = sequenceAnalysisController.parse(bytes);
+                            if (dnaSequence == null || dnaSequence.getSequence() == null) {
+                                // parsing failed, continue.
+                                Logger.info("Trace file parsing failed");
+                            }
+                            sequenceAnalysisController.importTraceSequence(newEntry, traceFile
+                                    .getFileName(), traceFile.getDepositorEmail(), dnaSequence
+                                    .getSequence().toLowerCase(), traceFile.getFileId(), traceFile
+                                    .getTimeStamp(), new ByteArrayInputStream(bytes));
+                        } catch (ControllerException e) {
+                            // parsing failed. Continue.
+                            Logger.info("Trace file parsing failed: " + e.toString());
+                        }
+                    }
+
+                    try {
+                        sequenceAnalysisController.rebuildAllAlignments(newEntry);
+                    } catch (ControllerException e1) {
+                        Logger.error("Could not rebuild sequence alignments from trace files");
+                        throw new ViewException(e1);
                     }
 
                     // add attachments

@@ -10,6 +10,7 @@
 		<xs:sequence>
 			<xs:element ref="ice:entry" maxOccurs="unbounded" />
 		</xs:sequence>
+		<xs:attribute name="schemaVersion" type="xs:string" /> <!-- "2011.08.2" year.month.revision -->
 	</xs:complexType>
 </xs:element>
 <xs:element name="entry">
@@ -17,6 +18,8 @@
 		<xs:sequence>
 			<xs:element ref="ice:recordId"/>
 			<xs:element ref="ice:recordType" />
+			<xs:element ref="ice:creationTimeStamp" />
+			<xs:element ref="ice:modificationTimeStamp" />
 			<xs:element ref="ice:partNumbers" minOccurs="0" />
 			<xs:element ref="ice:partNames" minOccurs="0" />
 			<xs:element ref="ice:owner" minOccurs="0" />
@@ -53,6 +56,8 @@
 		</xs:restriction>
 	</xs:simpleType>
 </xs:element>
+<xs:element name="creationTimeStamp" type="xs:dateTime" />
+<xs:element name="modificationTimeStamp" type="xs:dateTime" />
 <xs:element name="partNumbers">
 	<xs:complexType>
 		<xs:sequence>
@@ -256,7 +261,7 @@
 	<xs:complexType>
 		<xs:simpleContent>
 			<xs:extension base="xs:base64Binary">
-				<xs:attribute name="filename" type="xs:string" />
+				<xs:attribute name="fileName" type="xs:string" />
 				<xs:attribute name="fileId" type="xs:string" />
 				<xs:attribute name="description" type="xs:string" />
 			</xs:extension>
