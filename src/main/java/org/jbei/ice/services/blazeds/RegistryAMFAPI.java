@@ -1027,21 +1027,6 @@ public class RegistryAMFAPI extends BaseService {
         return getAccountBySessionId(sessionId);
     }
 
-    //    private ZipFile createZipFile(final Byte[] byteArray, final String filename) throws IOException {
-    //        byte[] input = new byte[byteArray.length];
-    //        for (int i = 0; i < byteArray.length; i += 1) {
-    //            input[i] = byteArray[i].byteValue();
-    //        }
-    //
-    //        FileOutputStream outputStream = new FileOutputStream(System.getProperty("java.io.tmpdir")
-    //                + File.separatorChar + filename);
-    //        outputStream.write(input);
-    //        outputStream.close();
-    //
-    //        File file = new File(System.getProperty("java.io.tmpdir"), filename);
-    //        return new ZipFile(file);
-    //    }
-
     // TODO : the following need to be folded into a single call
     public String retrieveBulkImportEntryType(String sessionId, String importId) {
 

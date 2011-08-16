@@ -28,6 +28,15 @@ public class BulkImportManager {
         }
     }
 
+    public static void delete(BulkImport bulkImport) throws ManagerException {
+        try {
+            DAO.delete(bulkImport);
+        } catch (DAOException e) {
+
+            throw new ManagerException("Failed to delete bulk import", e);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public static List<BulkImport> retrieveAll() throws ManagerException {
         Session session = DAO.newSession();
