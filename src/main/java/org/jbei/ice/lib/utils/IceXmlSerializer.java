@@ -31,6 +31,7 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
+import org.jbei.ice.lib.managers.TraceSequenceManager;
 import org.jbei.ice.lib.models.ArabidopsisSeed;
 import org.jbei.ice.lib.models.ArabidopsisSeed.Generation;
 import org.jbei.ice.lib.models.Attachment;
@@ -46,7 +47,12 @@ import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.Strain;
-import org.jbei.ice.lib.utils.SerializationUtils.SerializationUtilsException;
+import org.jbei.ice.lib.models.TraceSequence;
+import org.jbei.ice.lib.vo.AttachmentData;
+import org.jbei.ice.lib.vo.CompleteEntry;
+import org.jbei.ice.lib.vo.SequenceTraceFile;
+
+import com.ibm.icu.util.Calendar;
 
 /**
  * 
@@ -56,6 +62,13 @@ import org.jbei.ice.lib.utils.SerializationUtils.SerializationUtilsException;
  */
 public class IceXmlSerializer {
 
+    private static final String MODIFICATION_TIME_STAMP = "modificationTimeStamp";
+    private static final String CREATION_TIME_STAMP = "creationTimeStamp";
+    private static final String TIME_STAMP = "timeStamp";
+    private static final String DEPOSITOR_EMAIL = "depositorEmail";
+    private static final String SEQUENCE_TRACE_FILE = "sequenceTraceFile";
+    private static final String SEQUENCE_TRACES = "sequenceTraces";
+    private static final String EXP = "exp";
     private static final String DESCRIPTION = "description";
     private static final String FILE_ID = "fileId";
     private static final String URL = "url";
@@ -83,7 +96,7 @@ public class IceXmlSerializer {
     private static final String PROMOTERS = "promoters";
     private static final String ORIGIN_OF_REPLICATION = "originOfReplication";
     private static final String BACKBONE = "backbone";
-    private static final String FILENAME = "filename";
+    private static final String FILE_NAME = "fileName";
     private static final String ATTACHMENT = "attachment";
     private static final String ATTACHMENTS = "attachments";
     private static final String PRINCIPAL_INVESTIGATOR = "principalInvestigator";
@@ -114,6 +127,11 @@ public class IceXmlSerializer {
     public static Namespace iceNamespace = new Namespace("ice", "http://jbei.org/ice");
     public static Namespace xsiNamespace = new Namespace("xsi",
             "http://www.w3.org/2001/XMLSchema-instance");
+    public static Namespace expNamespace = new Namespace(EXP, "http://jbei.org/exp");
+
+    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
+            "yyyy-MM-dd'T'HH:mm:ss'Z'");
+
     private ArrayList<CompleteEntry> completeEntries = new ArrayList<CompleteEntry>();
 
     public static String serializeToJbeiXml(List<Entry> entries) throws UtilityException {
@@ -177,7 +195,10 @@ public class IceXmlSerializer {
 
         entryRoot.add(new DefaultElement(RECORD_ID, iceNamespace).addText(entry.getRecordId()));
         entryRoot.add(new DefaultElement(RECORD_TYPE, iceNamespace).addText(entry.getRecordType()));
-
+        entryRoot.add(new DefaultElement(CREATION_TIME_STAMP, iceNamespace)
+                .addText(simpleDateFormat.format(entry.getCreationTime())));
+        entryRoot.add(new DefaultElement(MODIFICATION_TIME_STAMP, iceNamespace)
+                .addText(simpleDateFormat.format(entry.getModificationTime())));
         DefaultElement partNumbers = new DefaultElement(PART_NUMBERS, iceNamespace);
         for (PartNumber partNumber : entry.getPartNumbers()) {
             partNumbers.add(new DefaultElement(PART_NUMBER, iceNamespace).addText(partNumber
@@ -263,27 +284,29 @@ public class IceXmlSerializer {
                 try {
                     file = AttachmentManager.getFile(attachment);
                     fileString = SerializationUtils
-                            .serializeToString(org.apache.commons.io.FileUtils
+                            .serializeBytesToString(org.apache.commons.io.FileUtils
                                     .readFileToByteArray(file));
 
                 } catch (FileNotFoundException e) {
                     throw new UtilityException(e);
 
-                } catch (SerializationUtilsException e) {
-                    throw new UtilityException(e);
                 } catch (IOException e) {
                     throw new UtilityException(e);
                 } catch (ManagerException e) {
                     throw new UtilityException(e);
                 }
                 attachmentsRoot.add(new DefaultElement(ATTACHMENT, iceNamespace)
-                        .addText(fileString).addAttribute(FILENAME, attachment.getFileName())
+                        .addCDATA(fileString).addAttribute(FILE_NAME, attachment.getFileName())
                         .addAttribute(FILE_ID, attachment.getFileId())
                         .addAttribute(DESCRIPTION, attachment.getDescription()));
             }
             entryRoot.add(attachmentsRoot);
         }
 
+        Element expElement = getExperimentElement(entry);
+        if (expElement != null) {
+            entryRoot.add(expElement);
+        }
         return entryRoot;
     }
 
@@ -335,7 +358,6 @@ public class IceXmlSerializer {
             fields.add(new DefaultElement(ECOTYPE, iceNamespace).addText(emptyStringify(seed
                     .getEcotype())));
 
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyy-MM-ddTHH:mm:ssZ");
             simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             fields.add(new DefaultElement(HARVEST_DATE, iceNamespace).addText(simpleDateFormat
                     .format(seed.getHarvestDate())));
@@ -364,75 +386,63 @@ public class IceXmlSerializer {
         return selectionMarkers;
     }
 
-    public static class AttachmentData {
-        private String base64Data;
-        private String fileName;
-        private String fileId;
-        private String description;
+    /**
+     * Currently generates sequence traces. They use a different schema called exp.xsd. Move this
+     * out as experimental data schema develops
+     * 
+     * @param entry
+     * @return
+     * @throws UtilityException
+     */
+    private static Element getExperimentElement(Entry entry) throws UtilityException {
+        Element result = null;
+        DefaultElement expElement = new DefaultElement(EXP, expNamespace);
+        DefaultElement tracesElement = new DefaultElement(SEQUENCE_TRACES, expNamespace);
+        List<TraceSequence> traces = null;
+        try {
+            traces = TraceSequenceManager.getByEntry(entry);
+        } catch (ManagerException e) {
+            throw new UtilityException(e);
+        }
+        if (traces != null) {
+            int counter = 0;
+            for (TraceSequence trace : traces) {
 
-        public String getBase64Data() {
-            return base64Data;
+                File traceFile;
+                String traceString;
+                try {
+                    traceFile = TraceSequenceManager.getFile(trace);
+                    traceString = SerializationUtils
+                            .serializeBytesToString(org.apache.commons.io.FileUtils
+                                    .readFileToByteArray(traceFile));
+                } catch (ManagerException e) {
+                    // skip this one
+                    Logger.error("Could not read trace file " + trace.getFileId());
+                    continue;
+                } catch (IOException e) {
+                    // skip this one
+                    Logger.error("Could not serialize trace file " + trace.getFileId());
+                    continue;
+                }
+
+                Element traceElement = new DefaultElement(SEQUENCE_TRACE_FILE, expNamespace)
+                        .addCDATA(traceString).addAttribute(FILE_NAME, trace.getFilename())
+                        .addAttribute(FILE_ID, trace.getFileId());
+                traceElement.addAttribute(DEPOSITOR_EMAIL, trace.getDepositor());
+                simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                traceElement.addAttribute(TIME_STAMP,
+                    simpleDateFormat.format(trace.getCreationTime()));
+                tracesElement.add(traceElement);
+                counter++;
+            }
+
+            if (counter > 0) {
+                expElement.add(tracesElement);
+                result = expElement;
+            }
         }
 
-        public void setBase64Data(String base64Data) {
-            this.base64Data = base64Data;
-        }
-
-        public String getFileName() {
-            return fileName;
-        }
-
-        public void setFileName(String fileName) {
-            this.fileName = fileName;
-        }
-
-        public String getFileId() {
-            return fileId;
-        }
-
-        public void setFileId(String fileId) {
-            this.fileId = fileId;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
-        }
-
-    }
-
-    public static class CompleteEntry {
-        private Entry entry;
-        private ArrayList<AttachmentData> attachments = new ArrayList<AttachmentData>();;
-        private Sequence sequence;
-
-        public Entry getEntry() {
-            return entry;
-        }
-
-        public void setEntry(Entry entry) {
-            this.entry = entry;
-        }
-
-        public Sequence getSequence() {
-            return sequence;
-        }
-
-        public void setSequence(Sequence sequence) {
-            this.sequence = sequence;
-        }
-
-        public ArrayList<AttachmentData> getAttachments() {
-            return attachments;
-        }
-
-        public void setAttachments(ArrayList<AttachmentData> attachments) {
-            this.attachments = attachments;
-        }
-
+        return result;
     }
 
     public List<CompleteEntry> deserializeJbeiXml(String xml) throws UtilityException {
@@ -467,6 +477,32 @@ public class IceXmlSerializer {
         }
 
         return completeEntries;
+    }
+
+    private static List<SequenceTraceFile> parseSequenceTraces(Element tracesElement) {
+        ArrayList<SequenceTraceFile> traceFileList = new ArrayList<SequenceTraceFile>();
+
+        for (Object element : tracesElement.elements(SEQUENCE_TRACE_FILE)) {
+            SequenceTraceFile traceFile = new SequenceTraceFile();
+            traceFile.setBase64Data(((Element) element).getText());
+            traceFile.setDepositorEmail(((Element) element).attributeValue(DEPOSITOR_EMAIL));
+            traceFile.setFileName(((Element) element).attributeValue(FILE_NAME));
+            traceFile.setFileId(((Element) element).attributeValue(FILE_ID));
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+            try {
+                traceFile.setTimeStamp(simpleDateFormat.parse(((Element) element)
+                        .attributeValue(TIME_STAMP)));
+            } catch (ParseException e) {
+                traceFile.setTimeStamp(Calendar.getInstance().getTime());
+            }
+
+            traceFileList.add(traceFile);
+        }
+        if (traceFileList.size() == 0) {
+            traceFileList = null;
+        }
+
+        return traceFileList;
     }
 
     private static CompleteEntry parseEntry(Element entryDocument) throws UtilityException {
@@ -540,6 +576,18 @@ public class IceXmlSerializer {
 
         entry.setRecordId(entryDocument.elementText(RECORD_ID));
         entry.setRecordType(entryDocument.elementText(RECORD_TYPE));
+        Date creationTime = Calendar.getInstance().getTime();
+        Date modificationTime = Calendar.getInstance().getTime();
+        try {
+            creationTime = simpleDateFormat.parse(entryDocument.elementText(CREATION_TIME_STAMP));
+            modificationTime = simpleDateFormat.parse(entryDocument
+                    .elementText(MODIFICATION_TIME_STAMP));
+        } catch (ParseException e) {
+            // could not parse time stamps. Continue
+        }
+        entry.setCreationTime(creationTime);
+        entry.setModificationTime(modificationTime);
+
         HashSet<PartNumber> partNumbers = new HashSet<PartNumber>();
         if (entryDocument.element(PART_NUMBERS) != null) {
             for (Object element : entryDocument.element(PART_NUMBERS).elements(PART_NUMBER)) {
@@ -601,19 +649,21 @@ public class IceXmlSerializer {
         }
 
         if (entryDocument.element(ATTACHMENTS) != null) {
-            for (Object element : entryDocument.element(ATTACHMENTS).elements(ATTACHMENT)) {
-                AttachmentData attachmentData = new AttachmentData();
-                attachmentData.setBase64Data(((Element) element).getText());
-                attachmentData.setFileName(((Element) element).attributeValue(FILENAME));
-                attachmentData.setFileId(((Element) element).attributeValue(FILE_ID));
-                attachmentData.setDescription(((Element) element).attributeValue(DESCRIPTION));
-                completeEntry.getAttachments().add(attachmentData);
+            completeEntry.getAttachments().addAll(
+                parseAttachments(entryDocument.element(ATTACHMENTS)));
+        }
+
+        if (entryDocument.element(EXP) != null) {
+            Element tracesElement = entryDocument.element(EXP).element(SEQUENCE_TRACES);
+            if (tracesElement != null) {
+                completeEntry.getTraceFiles().addAll(parseSequenceTraces(tracesElement));
             }
         }
 
         if (entryDocument.element(SEQ) != null) {
             completeEntry.setSequence(SeqXmlSerializer.parseSeqXml(entryDocument.element(SEQ)));
         }
+
         return completeEntry;
     }
 
@@ -632,6 +682,24 @@ public class IceXmlSerializer {
         }
 
         return result;
+    }
+
+    private static List<AttachmentData> parseAttachments(Element attachments) {
+        ArrayList<AttachmentData> attachmentsList = new ArrayList<AttachmentData>();
+
+        for (Object element : attachments.elements(ATTACHMENT)) {
+            AttachmentData attachmentData = new AttachmentData();
+            attachmentData.setBase64Data(((Element) element).getText());
+            attachmentData.setFileName(((Element) element).attributeValue(FILE_NAME));
+            attachmentData.setFileId(((Element) element).attributeValue(FILE_ID));
+            attachmentData.setDescription(((Element) element).attributeValue(DESCRIPTION));
+            attachmentsList.add(attachmentData);
+        }
+
+        if (attachmentsList.size() == 0) {
+            attachmentsList = null;
+        }
+        return attachmentsList;
     }
 
     private static String emptyStringify(String string) {

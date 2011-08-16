@@ -553,6 +553,8 @@ public class EntryManager {
         }
         if (newEntry.getCreationTime() == null) {
             newEntry.setCreationTime(Calendar.getInstance().getTime());
+        } else {
+            newEntry.setModificationTime(Calendar.getInstance().getTime());
         }
 
         return newEntry;

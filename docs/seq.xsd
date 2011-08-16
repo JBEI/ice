@@ -11,6 +11,7 @@
 			<xs:element ref="seq:sequence" />
 			<xs:element ref="seq:features" minOccurs="0" />
 		</xs:sequence>
+		<xs:attribute name="schemaVersion" type="xs:string" /> <!-- "2011.08.0" year.month.revision -->
 	</xs:complexType>
 </xs:element>
 <xs:element name="features">

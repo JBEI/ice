@@ -292,7 +292,7 @@ public class RegistryAMFAPI extends BaseService {
                     && !accountPreferences.getPreferences().isEmpty()) {
                 try {
                     userPreferences = (UserPreferences) SerializationUtils
-                            .deserializeFromString(accountPreferences.getPreferences());
+                            .deserializeStringToObject(accountPreferences.getPreferences());
                 } catch (SerializationUtils.SerializationUtilsException e) {
                     Logger.error(getLoggerPrefix(), e);
 
@@ -327,7 +327,7 @@ public class RegistryAMFAPI extends BaseService {
 
             String serializedPreferences = "";
             try {
-                serializedPreferences = SerializationUtils.serializeToString(preferences);
+                serializedPreferences = SerializationUtils.serializeObjectToString(preferences);
             } catch (SerializationUtils.SerializationUtilsException e) {
                 Logger.error(getLoggerPrefix(), e);
 
@@ -371,7 +371,7 @@ public class RegistryAMFAPI extends BaseService {
             if (accountPreferences != null && accountPreferences.getRestrictionEnzymes() != null
                     && !accountPreferences.getRestrictionEnzymes().isEmpty()) {
                 userRestrictionEnzymes = (UserRestrictionEnzymes) SerializationUtils
-                        .deserializeFromString(accountPreferences.getRestrictionEnzymes());
+                        .deserializeStringToObject(accountPreferences.getRestrictionEnzymes());
             } else {
                 userRestrictionEnzymes = new UserRestrictionEnzymes();
             }
@@ -405,7 +405,7 @@ public class RegistryAMFAPI extends BaseService {
                     .getAccountPreferences(account);
 
             String serializedUserRestrictionEnzymes = SerializationUtils
-                    .serializeToString(userRestrictionEnzymes);
+                    .serializeObjectToString(userRestrictionEnzymes);
 
             if (accountPreferences != null) {
                 accountPreferences.setRestrictionEnzymes(serializedUserRestrictionEnzymes);
@@ -505,7 +505,7 @@ public class RegistryAMFAPI extends BaseService {
         String serializedAssemblyTable = "";
 
         try {
-            serializedAssemblyTable = SerializationUtils.serializeToString(assemblyProject
+            serializedAssemblyTable = SerializationUtils.serializeObjectToString(assemblyProject
                     .getAssemblyTable());
         } catch (SerializationUtilsException e) {
             Logger.error(getLoggerPrefix(), e);
@@ -560,7 +560,7 @@ public class RegistryAMFAPI extends BaseService {
             Project project = projectController.getProjectByUUID(projectId);
 
             AssemblyTable assemblyTable = (AssemblyTable) SerializationUtils
-                    .deserializeFromString(project.getData());
+                    .deserializeStringToObject(project.getData());
 
             assemblyProject = new AssemblyProject(project.getName(), project.getDescription(),
                     project.getUuid(), account.getEmail(), account.getFullName(),
@@ -599,7 +599,7 @@ public class RegistryAMFAPI extends BaseService {
             project.setName(assemblyProject.getName());
             project.setDescription(assemblyProject.getDescription());
             project.setModificationTime(new Date());
-            project.setData(SerializationUtils.serializeToString(assemblyProject.getAssemblyTable()));
+            project.setData(SerializationUtils.serializeObjectToString(assemblyProject.getAssemblyTable()));
 
             Project savedProject = projectController.save(project);
 
@@ -658,7 +658,7 @@ public class RegistryAMFAPI extends BaseService {
 
         try {
             serializedSequenceCheckerData = SerializationUtils
-                    .serializeToString(sequenceCheckerProject.getSequenceCheckerData());
+                    .serializeObjectToString(sequenceCheckerProject.getSequenceCheckerData());
         } catch (SerializationUtilsException e) {
             Logger.error(getLoggerPrefix(), e);
 
@@ -717,7 +717,7 @@ public class RegistryAMFAPI extends BaseService {
             project.setName(sequenceCheckerProject.getName());
             project.setDescription(sequenceCheckerProject.getDescription());
             project.setModificationTime(new Date());
-            project.setData(SerializationUtils.serializeToString(sequenceCheckerProject
+            project.setData(SerializationUtils.serializeObjectToString(sequenceCheckerProject
                     .getSequenceCheckerData()));
 
             Project savedProject = projectController.save(project);
@@ -762,7 +762,7 @@ public class RegistryAMFAPI extends BaseService {
             Project project = projectController.getProjectByUUID(projectId);
 
             SequenceCheckerData sequenceCheckerData = (SequenceCheckerData) SerializationUtils
-                    .deserializeFromString(project.getData());
+                    .deserializeStringToObject(project.getData());
 
             sequenceCheckerProject = new SequenceCheckerProject(project.getName(),
                     project.getDescription(), project.getUuid(), account.getEmail(),
@@ -897,7 +897,7 @@ public class RegistryAMFAPI extends BaseService {
         String serializedVectorEditorData = "";
 
         try {
-            serializedVectorEditorData = SerializationUtils.serializeToString(vectorEditorProject
+            serializedVectorEditorData = SerializationUtils.serializeObjectToString(vectorEditorProject
                     .getFeaturedDNASequence());
         } catch (SerializationUtilsException e) {
             Logger.error(getLoggerPrefix(), e);
@@ -956,7 +956,7 @@ public class RegistryAMFAPI extends BaseService {
             project.setName(vectorEditorProject.getName());
             project.setDescription(vectorEditorProject.getDescription());
             project.setModificationTime(new Date());
-            project.setData(SerializationUtils.serializeToString(vectorEditorProject
+            project.setData(SerializationUtils.serializeObjectToString(vectorEditorProject
                     .getFeaturedDNASequence()));
 
             Project savedProject = projectController.save(project);
@@ -1001,7 +1001,7 @@ public class RegistryAMFAPI extends BaseService {
             Project project = projectController.getProjectByUUID(projectId);
 
             FeaturedDNASequence featuredDNASequence = (FeaturedDNASequence) SerializationUtils
-                    .deserializeFromString(project.getData());
+                    .deserializeStringToObject(project.getData());
 
             vectorEditorProject = new VectorEditorProject(project.getName(),
                     project.getDescription(), project.getUuid(), account.getEmail(),

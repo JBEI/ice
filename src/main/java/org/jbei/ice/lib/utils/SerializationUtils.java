@@ -29,7 +29,7 @@ public class SerializationUtils {
      * @return
      * @throws SerializationUtilsException
      */
-    public static Serializable deserializeFromString(String serializedObject)
+    public static Serializable deserializeStringToObject(String serializedObject)
             throws SerializationUtilsException {
         try {
 
@@ -53,7 +53,8 @@ public class SerializationUtils {
         return data;
     }
 
-    public static String serializeToString(Serializable object) throws SerializationUtilsException {
+    public static String serializeObjectToString(Serializable object)
+            throws SerializationUtilsException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ObjectOutputStream objectOutputStream;
         try {
@@ -65,5 +66,13 @@ public class SerializationUtils {
         }
 
         return new Base64().encodeToString(byteArrayOutputStream.toByteArray());
+    }
+
+    public static String serializeBytesToString(byte[] bytes) {
+        return new Base64().encodeToString(bytes);
+    }
+
+    public static byte[] deserializeStringToBytes(String data) {
+        return new Base64().decode(data);
     }
 }

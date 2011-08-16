@@ -42,8 +42,9 @@ public class SequenceAnalysisController extends Controller {
         return getPermissionVerifier().hasWritePermissions(traceSequence, getAccount());
     }
 
-    public TraceSequence uploadTraceSequence(Entry entry, String filename, String depositor,
-            String sequence, InputStream inputStream) throws ControllerException {
+    public TraceSequence importTraceSequence(Entry entry, String filename, String depositor,
+            String sequence, String uuid, Date date, InputStream inputStream)
+            throws ControllerException {
         if (entry == null) {
             throw new ControllerException("Failed to save trace sequence with null entry!");
         }
@@ -56,8 +57,8 @@ public class SequenceAnalysisController extends Controller {
             throw new ControllerException("Failed to save trace sequence without sequence!");
         }
 
-        TraceSequence traceSequence = new TraceSequence(entry, Utils.generateUUID(), filename,
-                depositor, sequence, new Date());
+        TraceSequence traceSequence = new TraceSequence(entry, uuid, filename, depositor, sequence,
+                date);
 
         TraceSequence savedTraceSequence = null;
         try {
@@ -67,6 +68,13 @@ public class SequenceAnalysisController extends Controller {
         }
 
         return savedTraceSequence;
+    }
+
+    public TraceSequence uploadTraceSequence(Entry entry, String filename, String depositor,
+            String sequence, InputStream inputStream) throws ControllerException {
+
+        return importTraceSequence(entry, filename, depositor, sequence, Utils.generateUUID(),
+            new Date(), inputStream);
     }
 
     public void removeTraceSequence(TraceSequence traceSequence) throws ControllerException,
