@@ -5,6 +5,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -28,6 +30,8 @@ import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.models.Moderator;
+import org.jbei.ice.lib.models.SequenceFeature;
+import org.jbei.ice.lib.models.SequenceFeatureAttribute;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.permissions.PermissionManager;
@@ -41,10 +45,10 @@ public class PopulateInitialDatabase {
     // Database schema version.
     // If you are extending the existing schema to suit your needs, we suggest using the 
     // naming scheme "custom-[your institute]-[your version]", as 
-    // the system will try to upgrade schemas of known oder versions. 
+    // the system will try to upgrade schemas of known older versions. 
     // Setting the correct parent schema version may help you in the future.
-    public static final String DATABASE_SCHEMA_VERSION = "0.8.0";
-    public static final String PARENT_DATABASE_SCHEMA_VERSION = "0.0.0";
+    public static final String DATABASE_SCHEMA_VERSION = "0.8.1";
+    public static final String PARENT_DATABASE_SCHEMA_VERSION = "0.8.0";
 
     // This is a global "everyone" uuid
     public static String everyoneGroup = "8746a64b-abd5-4838-a332-02c356bbeac0";
@@ -216,6 +220,11 @@ public class PopulateInitialDatabase {
 
             if (databaseSchema.getValue().equals(PARENT_DATABASE_SCHEMA_VERSION)) {
                 // do schema upgrade
+                boolean error = migrateFrom080To081();
+                if (!error) {
+                    databaseSchema.setValue(DATABASE_SCHEMA_VERSION);
+                    ConfigurationManager.save(databaseSchema);
+                }
             }
         } catch (ManagerException e) {
             throw new UtilityException(e);
@@ -468,5 +477,94 @@ public class PopulateInitialDatabase {
                 Logger.error(msg, e);
             }
         }
+    }
+
+    /**
+     * parse SequenceFeature.description and populate SequenceFeatureAttribute.
+     * 
+     */
+    @SuppressWarnings("deprecation")
+    public static boolean migrateFrom080To081() {
+        Logger.warn("Updating database schema from 0.8.0 to 0.8.1. Please wait...");
+        boolean error = false;
+        // get all sequence features
+        Session session = DAO.newSession();
+        String queryString = "from " + SequenceFeature.class.getName();
+        Query query = session.createQuery(queryString);
+
+        @SuppressWarnings("rawtypes")
+        List queryResults = query.list();
+        session.close();
+
+        ArrayList<SequenceFeature> sequenceFeatures = new ArrayList<SequenceFeature>();
+        for (Object item : queryResults) {
+            sequenceFeatures.add((SequenceFeature) item);
+        }
+
+        // parse description as attributes
+        for (SequenceFeature sequenceFeature : sequenceFeatures) {
+            List<SequenceFeatureAttribute> parsedAttributes = parseDescription(sequenceFeature
+                    .getDescription());
+
+            for (SequenceFeatureAttribute attribute : parsedAttributes) {
+                attribute.setSequenceFeature(sequenceFeature);
+                try {
+                    // save
+                    DAO.save(attribute);
+                } catch (DAOException e) {
+                    Logger.error("Error saving parsed SequenceFeatureAttribute", e);
+                    error = true;
+                }
+            }
+            // delete description and save
+            if (!error) {
+                sequenceFeature.setDescription("");
+                try {
+                    DAO.save(sequenceFeature);
+                } catch (DAOException e) {
+                    Logger.error("Error saving cleaned SequenceFeature", e);
+                    error = true;
+                }
+            }
+
+        }
+        if (error) {
+            Logger.error("Error converting database schema from 0.8.0 to 0.8.1. Restore from backup!");
+        }
+
+        return error;
+    }
+
+    private static List<SequenceFeatureAttribute> parseDescription(String row) {
+        Pattern uuidPattern = Pattern.compile("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}");
+        Pattern keyValuePattern = Pattern.compile("\"?(\\w+)=\"*([^\"]+)\"*");
+
+        ArrayList<SequenceFeatureAttribute> result = new ArrayList<SequenceFeatureAttribute>();
+        if ("\"\"".equals(row) || "note=\"\"\"\"".equals(row) || "note=\"\"\"".equals(row)
+                || "description=".equals(row) || "description=\"".equals(row)) {
+            return result;
+        }
+
+        Matcher uuidMatcher = uuidPattern.matcher(row);
+        Matcher keyValueMatcher = keyValuePattern.matcher(row);
+        SequenceFeatureAttribute sfa;
+
+        if (uuidMatcher.find()) {
+            sfa = new SequenceFeatureAttribute();
+            sfa.setKey("record_id");
+            sfa.setValue(uuidMatcher.group());
+            sfa.setQuoted(false);
+            result.add(sfa);
+        }
+
+        while (keyValueMatcher.find()) {
+            sfa = new SequenceFeatureAttribute();
+            sfa.setKey(keyValueMatcher.group(1).trim());
+            sfa.setValue(keyValueMatcher.group(2).trim());
+            sfa.setQuoted(false);
+            result.add(sfa);
+        }
+
+        return result;
     }
 }

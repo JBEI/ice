@@ -1,5 +1,9 @@
 package org.jbei.ice.lib.models;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -11,11 +15,14 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 
+import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.ISequenceFeatureValueObject;
 
@@ -23,6 +30,9 @@ import org.jbei.ice.lib.models.interfaces.ISequenceFeatureValueObject;
 @Table(name = "sequence_feature")
 @SequenceGenerator(name = "sequence", sequenceName = "sequence_feature_id_seq", allocationSize = 1)
 public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
+
+    public static final String DESCRIPTION = "description";
+
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -52,6 +62,10 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
     @Column(name = "name", length = 127)
     private String name;
 
+    /**
+     * Deprecated since schema 0.8.0. Use SequenceFeatureAttribute with "description" as key
+     */
+    @Deprecated
     @Column(name = "description")
     @Lob
     private String description;
@@ -62,6 +76,12 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
     @Column(name = "flag")
     @Enumerated(EnumType.STRING)
     private AnnotationType annotationType;
+
+    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER, mappedBy = "sequenceFeature")
+    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
+    @JoinColumn(name = "sequence_feature_id")
+    @OrderBy("id")
+    private Set<SequenceFeatureAttribute> sequenceFeatureAttributes = new LinkedHashSet<SequenceFeatureAttribute>();
 
     public SequenceFeature() {
         super();
@@ -161,10 +181,22 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         this.name = name;
     }
 
+    /**
+     * Deprecated since schema > 0.8.0. Use SequenceFeatureAttribute with "description" as key
+     * 
+     * @return
+     */
+    @Deprecated
     public String getDescription() {
         return description;
     }
 
+    /**
+     * Deprecated since schema > 0.8.0. Use SequenceFeatureAttribute with "description" as key
+     * 
+     * @param description
+     */
+    @Deprecated
     public void setDescription(String description) {
         this.description = description;
     }
@@ -183,5 +215,22 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
 
     public AnnotationType getAnnotationType() {
         return annotationType;
+    }
+
+    public Set<SequenceFeatureAttribute> getSequenceFeatureAttributes() {
+        return sequenceFeatureAttributes;
+    }
+
+    public void setSequenceFeatureAttributes(Set<SequenceFeatureAttribute> sequenceFeatureAttributes) {
+        if (sequenceFeatureAttributes == null) {
+            this.sequenceFeatureAttributes.clear();
+            return;
+        }
+
+        if (this.sequenceFeatureAttributes != sequenceFeatureAttributes) {
+            sequenceFeatureAttributes.clear();
+            sequenceFeatureAttributes.addAll(sequenceFeatureAttributes);
+        }
+
     }
 }

@@ -1,6 +1,5 @@
 package org.jbei.ice.controllers;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -22,6 +21,7 @@ import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.models.SequenceFeature.AnnotationType;
+import org.jbei.ice.lib.models.SequenceFeatureAttribute;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.SequenceFeatureCollection;
@@ -183,32 +183,13 @@ public class SequenceController extends Controller {
             for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
                 DNAFeature dnaFeature = new DNAFeature();
 
-                if (sequenceFeature.getDescription() != null
-                        && !sequenceFeature.getDescription().isEmpty()) {
-
-                    List<String> noteLines = Arrays.asList(sequenceFeature.getDescription().split(
-                        "\n"));
-
-                    if (noteLines != null && noteLines.size() > 0) {
-                        for (int i = 0; i < noteLines.size(); i++) {
-                            String line = noteLines.get(i);
-
-                            String key = "";
-                            String value = "";
-                            for (int j = 0; j < line.length(); j++) {
-                                if (line.charAt(j) == '=') {
-                                    key = line.substring(0, j);
-                                    value = line.substring(j + 1, line.length());
-
-                                    break;
-                                }
-                            }
-
-                            DNAFeatureNote dnaFeatureNote = new DNAFeatureNote(key, value);
-
-                            dnaFeature.addNote(dnaFeatureNote);
-                        }
-                    }
+                for (SequenceFeatureAttribute attribute : sequenceFeature
+                        .getSequenceFeatureAttributes()) {
+                    String key = attribute.getKey();
+                    String value = attribute.getValue();
+                    DNAFeatureNote dnaFeatureNote = new DNAFeatureNote(key, value);
+                    dnaFeatureNote.setQuoted(attribute.getQuoted());
+                    dnaFeature.addNote(dnaFeatureNote);
                 }
 
                 dnaFeature.setEnd(sequenceFeature.getEnd());
