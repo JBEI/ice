@@ -599,7 +599,8 @@ public class RegistryAMFAPI extends BaseService {
             project.setName(assemblyProject.getName());
             project.setDescription(assemblyProject.getDescription());
             project.setModificationTime(new Date());
-            project.setData(SerializationUtils.serializeObjectToString(assemblyProject.getAssemblyTable()));
+            project.setData(SerializationUtils.serializeObjectToString(assemblyProject
+                    .getAssemblyTable()));
 
             Project savedProject = projectController.save(project);
 
@@ -897,8 +898,8 @@ public class RegistryAMFAPI extends BaseService {
         String serializedVectorEditorData = "";
 
         try {
-            serializedVectorEditorData = SerializationUtils.serializeObjectToString(vectorEditorProject
-                    .getFeaturedDNASequence());
+            serializedVectorEditorData = SerializationUtils
+                    .serializeObjectToString(vectorEditorProject.getFeaturedDNASequence());
         } catch (SerializationUtilsException e) {
             Logger.error(getLoggerPrefix(), e);
 
@@ -1099,14 +1100,14 @@ public class RegistryAMFAPI extends BaseService {
 
     // end TODO 
 
-    public void saveEntries(String sessionId, ArrayCollection primaryData,
+    public int saveEntries(String sessionId, ArrayCollection primaryData,
             ArrayCollection secondaryData, Byte[] sequenceZipFile, Byte[] attachmentZipFile,
             String sequenceFilename, String attachmentFilename) {
 
         Account account = this.sessionToAccount(sessionId);
         if (account == null) {
             Logger.error("Invalid session");
-            return;
+            return 0;
         }
 
         BulkImport bulkImport = new BulkImport();
@@ -1152,11 +1153,14 @@ public class RegistryAMFAPI extends BaseService {
                 bulkImport.setType(type);
             }
 
-            BulkImportManager.createBulkImportRecord(bulkImport);
+            BulkImport savedImport = BulkImportManager.createBulkImportRecord(bulkImport);
+            return savedImport.getPrimaryData().size();
         } catch (ManagerException e) {
             Logger.error(getLoggerPrefix(), e);
+            return 0;
         } catch (Exception e) {
             Logger.error(getLoggerPrefix(), e);
+            return 0;
         }
     }
 
