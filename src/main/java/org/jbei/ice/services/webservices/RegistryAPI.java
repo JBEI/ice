@@ -1180,7 +1180,7 @@ public class RegistryAPI {
         try {
             Storage storage = storageController.retrieveStorageTube(barcode.trim());
             if (storage == null)
-                throw new ServiceException("Could not look up " + barcode);
+                return null;
             return sampleController.getSamplesByStorage(storage);
         } catch (ControllerException e) {
             Logger.error(e);
@@ -1291,7 +1291,7 @@ public class RegistryAPI {
         }
 
         StorageController controller = getStorageController(sessionId);
-        log("Creating new strain samples");
+        log("Creating new strain sample for entry \"" + recordId + "\" and label \"" + label + "\"");
         // TODO : this is a hack till we migrate to a single strain default
         Storage strainScheme = null;
         try {
@@ -1304,7 +1304,7 @@ public class RegistryAPI {
                 }
             }
             if (strainScheme == null) {
-                log("Could not locate default strain");
+                log("Could not locate default strain scheme (Strain Storage New[rack, location, barcode])");
                 throw new ServiceException("Registry Service Internal Error!");
             }
 
@@ -1319,7 +1319,9 @@ public class RegistryAPI {
             Sample sample = sampleController.createSample(label, account.getEmail(), "");
             sample.setEntry(entry);
             sample.setStorage(newLocation);
-            sampleController.saveSample(sample, false);
+            Sample saved = sampleController.saveSample(sample, false);
+            if (saved == null)
+                throw new ServiceException("Unable to create sample");
         } catch (ControllerException ce) {
             log(ce.getMessage());
             throw new ServiceException(ce.getMessage());
