@@ -1064,6 +1064,7 @@ public class RegistryAMFAPI extends BaseService {
             results.put("type", bi.getType());
             results.put("sequenceZipfile", bi.getSequenceFile());
             results.put("attachmentZipfile", bi.getAttachmentFile());
+            //            results.put("ownerEmail", bi.getAccount().getEmail());
 
             // primary data
             ArrayCollection primaryData = new ArrayCollection();
@@ -1133,7 +1134,10 @@ public class RegistryAMFAPI extends BaseService {
                 aso.setType("org.jbei.ice.lib.utils.BulkImportEntryData");
                 importData = (BulkImportEntryData) ast.convert(aso, BulkImportEntryData.class);
                 data.add(importData);
-                type = importData.getEntry().getRecordType();
+                Entry entry = importData.getEntry();
+                type = entry.getRecordType();
+                entry.setOwnerEmail(account.getEmail());
+                entry.setOwner(account.getFullName());
             }
 
             bulkImport.setPrimaryData(data);
@@ -1145,6 +1149,9 @@ public class RegistryAMFAPI extends BaseService {
                     aso.setType("org.jbei.ice.lib.utils.BulkImportEntryData");
                     importData = (BulkImportEntryData) ast.convert(aso, BulkImportEntryData.class);
                     data2.add(importData);
+                    Entry entry = importData.getEntry();
+                    entry.setOwnerEmail(account.getEmail());
+                    entry.setOwner(account.getFullName());
                 }
 
                 bulkImport.setSecondaryData(data2);
@@ -1164,6 +1171,36 @@ public class RegistryAMFAPI extends BaseService {
         }
     }
 
+    /**
+     * Helper method for verifying that the entry owner is valid.
+     * If not, then the account in the param is set as owner
+     * 
+     * @param account
+     * @param entry
+     * @return modified entry
+     */
+    private Entry verifyOwner(Account account, Entry entry) {
+        if (account == null || entry == null)
+            return null;
+
+        String ownerEmail = entry.getOwnerEmail();
+        if (ownerEmail == null || ownerEmail.isEmpty()) {
+            entry.setOwner(account.getFullName());
+            entry.setOwnerEmail(account.getEmail());
+        } else {
+            try {
+                Account owner = AccountController.getByEmail(ownerEmail);
+                entry.setOwner(owner.getFullName());
+                entry.setOwnerEmail(owner.getEmail());
+            } catch (ControllerException e) {
+                Logger.error(e.getMessage());
+                entry.setOwner(account.getFullName());
+                entry.setOwnerEmail(account.getEmail());
+            }
+        }
+        return entry;
+    }
+
     public Entry saveEntry(String sessionId, Entry entry, Byte[] attachmentFile,
             String attachmentFilename, Byte[] sequenceFile, String sequenceFilename) {
 
@@ -1174,8 +1211,7 @@ public class RegistryAMFAPI extends BaseService {
 
         entry.setCreatorEmail(account.getEmail());
         entry.setCreator(account.getFullName());
-        entry.setOwner(account.getFullName());
-        entry.setOwnerEmail(account.getEmail());
+        entry = verifyOwner(account, entry);
 
         if (Entry.PART_ENTRY_TYPE.equals(entry.getRecordType()))
             ((Part) entry).setPackageFormat(Part.AssemblyStandard.RAW);
@@ -1202,9 +1238,10 @@ public class RegistryAMFAPI extends BaseService {
     }
 
     public List<Entry> saveStrainWithPlasmid(String sessionId, Strain strain, Plasmid plasmid,
-            Byte[] strainSequenceFile, Byte[] strainAttachmentFile,
+            Byte[] strainSequenceFile, String strainSequenceFilename, Byte[] strainAttachmentFile,
             String strainAttachmentFilename, Byte[] plasmidSequenceFile,
-            Byte[] plasmidAttachmentFile, String plasmidAttachmentFilename) {
+            String plasmidSequenceFilename, Byte[] plasmidAttachmentFile,
+            String plasmidAttachmentFilename) {
 
         Account account = this.sessionToAccount(sessionId);
         if (account == null) {
@@ -1214,16 +1251,15 @@ public class RegistryAMFAPI extends BaseService {
         // strain
         strain.setCreatorEmail(account.getEmail());
         strain.setCreator(account.getFullName());
-        strain.setOwner(account.getFullName());
-        strain.setOwnerEmail(account.getEmail());
+        strain = (Strain) verifyOwner(account, strain);
+
         if (strain.getLongDescriptionType() == null)
             strain.setLongDescriptionType(Entry.MarkupType.text.name());
 
         // plasmid
         plasmid.setCreatorEmail(account.getEmail());
         plasmid.setCreator(account.getFullName());
-        plasmid.setOwner(account.getFullName());
-        plasmid.setOwnerEmail(account.getEmail());
+        plasmid = (Plasmid) verifyOwner(account, plasmid);
         if (plasmid.getLongDescriptionType() == null)
             plasmid.setLongDescriptionType(Entry.MarkupType.text.name());
 
@@ -1252,8 +1288,8 @@ public class RegistryAMFAPI extends BaseService {
             saved.add(newStrain);
 
         // save sequences
-        saveEntrySequence(account, newPlasmid, plasmidSequenceFile, "plasmid_seq.gb");
-        saveEntrySequence(account, newStrain, strainSequenceFile, "strain_seq.gb");
+        saveEntrySequence(account, newPlasmid, plasmidSequenceFile, plasmidSequenceFilename);
+        saveEntrySequence(account, newStrain, strainSequenceFile, strainSequenceFilename);
 
         // save attachments
         saveEntryAttachment(account, newPlasmid, plasmidAttachmentFile, plasmidAttachmentFilename);
