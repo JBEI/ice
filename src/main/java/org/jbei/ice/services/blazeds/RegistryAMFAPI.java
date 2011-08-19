@@ -1058,20 +1058,24 @@ public class RegistryAMFAPI extends BaseService {
         Logger.info("RetrieveImportData: " + importId);
 
         long id = Long.decode(importId);
+
         try {
             ASObject results = new ASObject();
             BulkImport bi = BulkImportManager.retrieveById(id);
+            String ownerEmail = bi.getAccount().getEmail();
             results.put("type", bi.getType());
             results.put("sequenceZipfile", bi.getSequenceFile());
             results.put("attachmentZipfile", bi.getAttachmentFile());
-            //            results.put("ownerEmail", bi.getAccount().getEmail());
+            results.put("ownerEmail", bi.getAccount().getEmail());
 
             // primary data
             ArrayCollection primaryData = new ArrayCollection();
             List<BulkImportEntryData> data = bi.getPrimaryData();
             for (BulkImportEntryData datum : data) {
                 ASObject obj = new ASObject();
-                obj.put("entry", datum.getEntry());
+                Entry entry = datum.getEntry();
+                entry.setOwnerEmail(ownerEmail);
+                obj.put("entry", entry);
                 obj.put("attachmentFilename", datum.getAttachmentFilename());
                 obj.put("sequenceFilename", datum.getSequenceFilename());
                 primaryData.add(obj);
@@ -1084,7 +1088,9 @@ public class RegistryAMFAPI extends BaseService {
                 ArrayCollection secondaryData = new ArrayCollection();
                 for (BulkImportEntryData datum : data2) {
                     ASObject obj = new ASObject();
-                    obj.put("entry", datum.getEntry());
+                    Entry entry2 = datum.getEntry();
+                    entry2.setOwnerEmail(ownerEmail);
+                    obj.put("entry", entry2);
                     obj.put("attachmentFilename", datum.getAttachmentFilename());
                     obj.put("sequenceFilename", datum.getSequenceFilename());
                     secondaryData.add(obj);
@@ -1201,12 +1207,19 @@ public class RegistryAMFAPI extends BaseService {
         return entry;
     }
 
-    public Entry saveEntry(String sessionId, Entry entry, Byte[] attachmentFile,
+    public Entry saveEntry(String sessionId, String importId, Entry entry, Byte[] attachmentFile,
             String attachmentFilename, Byte[] sequenceFile, String sequenceFilename) {
 
         Account account = this.sessionToAccount(sessionId);
         if (account == null) {
             return null;
+        }
+
+        try {
+            BulkImport bi = BulkImportManager.retrieveById(Integer.decode(importId));
+            String email = bi.getAccount().getEmail();
+            entry.setOwnerEmail(email);
+        } catch (Exception e1) {
         }
 
         entry.setCreatorEmail(account.getEmail());
@@ -1237,15 +1250,23 @@ public class RegistryAMFAPI extends BaseService {
         return saved;
     }
 
-    public List<Entry> saveStrainWithPlasmid(String sessionId, Strain strain, Plasmid plasmid,
-            Byte[] strainSequenceFile, String strainSequenceFilename, Byte[] strainAttachmentFile,
-            String strainAttachmentFilename, Byte[] plasmidSequenceFile,
-            String plasmidSequenceFilename, Byte[] plasmidAttachmentFile,
-            String plasmidAttachmentFilename) {
+    public List<Entry> saveStrainWithPlasmid(String sessionId, String importId, Strain strain,
+            Plasmid plasmid, Byte[] strainSequenceFile, String strainSequenceFilename,
+            Byte[] strainAttachmentFile, String strainAttachmentFilename,
+            Byte[] plasmidSequenceFile, String plasmidSequenceFilename,
+            Byte[] plasmidAttachmentFile, String plasmidAttachmentFilename) {
 
         Account account = this.sessionToAccount(sessionId);
         if (account == null) {
             return null;
+        }
+
+        try {
+            BulkImport bi = BulkImportManager.retrieveById(Integer.decode(importId));
+            String email = bi.getAccount().getEmail();
+            strain.setOwnerEmail(email);
+            plasmid.setOwnerEmail(email);
+        } catch (Exception e1) {
         }
 
         // strain

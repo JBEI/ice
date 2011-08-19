@@ -32,12 +32,18 @@ public class BulkImportDataView extends DataView<BulkImport> {
     @Override
     protected void populateItem(Item<BulkImport> item) {
 
+        renderImportId(item);
         renderOwnerName(item);
         renderOwnerEmail(item);
         renderRecordType(item);
         renderRecordCount(item);
         renderCreated(item);
         renderActionLink(item);
+    }
+
+    protected void renderImportId(Item<BulkImport> item) {
+        BulkImport bi = item.getModelObject();
+        item.add(new Label("id", "" + bi.getId()));
     }
 
     protected void renderOwnerName(Item<BulkImport> item) {
