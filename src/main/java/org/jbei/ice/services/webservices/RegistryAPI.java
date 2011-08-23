@@ -1290,12 +1290,29 @@ public class RegistryAPI {
             throw new ServiceException("Registry Service Internal Error!");
         }
 
-        StorageController controller = getStorageController(sessionId);
+        // check if there is an existing sample with barcode
+        StorageController storageController = getStorageController(sessionId);
+        SampleController sampleController = getSampleController(sessionId);
+
+        try {
+            Storage storage = storageController.retrieveStorageTube(barcode.trim());
+            if (storage != null) {
+                ArrayList<Sample> samples = sampleController.getSamplesByStorage(storage);
+                if (samples != null && !samples.isEmpty()) {
+                    log("Barcode \"" + barcode + "\" already has a sample associated with it");
+                    return;
+                }
+            }
+        } catch (ControllerException e) {
+            Logger.error(e);
+            throw new ServiceException(e);
+        }
+
         log("Creating new strain sample for entry \"" + recordId + "\" and label \"" + label + "\"");
         // TODO : this is a hack till we migrate to a single strain default
         Storage strainScheme = null;
         try {
-            List<Storage> schemes = controller.retrieveAllStorageSchemes();
+            List<Storage> schemes = storageController.retrieveAllStorageSchemes();
             for (Storage storage : schemes) {
                 if (storage.getStorageType() == StorageType.SCHEME
                         && "Strain Storage New".equals(storage.getName())) {
@@ -1315,7 +1332,6 @@ public class RegistryAPI {
             if (entry == null)
                 throw new ServiceException("Could not retrieve entry with id " + recordId);
 
-            SampleController sampleController = getSampleController(sessionId);
             Sample sample = sampleController.createSample(label, account.getEmail(), "");
             sample.setEntry(entry);
             sample.setStorage(newLocation);
