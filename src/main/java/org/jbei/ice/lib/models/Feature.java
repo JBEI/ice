@@ -27,10 +27,6 @@ public class Feature implements IFeatureValueObject, IModel {
     @Column(name = "name", length = 127)
     private String name;
 
-    @Column(name = "description")
-    @Lob
-    private String description;
-
     @Column(name = "identification", length = 127)
     private String identification;
 
@@ -51,12 +47,11 @@ public class Feature implements IFeatureValueObject, IModel {
         super();
     }
 
-    public Feature(String name, String description, String identification, String sequence,
+    public Feature(String name, String identification, String sequence,
             int autoFind, String genbankType) {
         super();
 
         this.name = name;
-        this.description = description;
         this.identification = identification;
         this.autoFind = autoFind;
         this.genbankType = genbankType;
@@ -73,16 +68,6 @@ public class Feature implements IFeatureValueObject, IModel {
     @Override
     public void setName(String name) {
         this.name = name;
-    }
-
-    @Override
-    public String getDescription() {
-        return description;
-    }
-
-    @Override
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     @Override
@@ -116,6 +101,7 @@ public class Feature implements IFeatureValueObject, IModel {
         this.genbankType = genbankType;
     }
 
+    @Override
     public void setId(long id) {
         this.id = id;
     }

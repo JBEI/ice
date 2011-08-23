@@ -81,14 +81,14 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @JoinColumn(name = "sequence_feature_id")
     @OrderBy("id")
-    private Set<SequenceFeatureAttribute> sequenceFeatureAttributes = new LinkedHashSet<SequenceFeatureAttribute>();
+    private final Set<SequenceFeatureAttribute> sequenceFeatureAttributes = new LinkedHashSet<SequenceFeatureAttribute>();
 
     public SequenceFeature() {
         super();
     }
 
     public SequenceFeature(Sequence sequence, Feature feature, int genbankStart, int end,
-            int strand, String name, String description, String genbankType,
+            int strand, String name, String genbankType,
             AnnotationType annotationType) {
         super();
         this.sequence = sequence;
@@ -97,7 +97,6 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         this.end = end;
         this.strand = strand;
         this.name = name;
-        this.description = description;
         this.genbankType = genbankType;
         this.annotationType = annotationType;
     }
@@ -183,7 +182,7 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
 
     /**
      * Deprecated since schema > 0.8.0. Use SequenceFeatureAttribute with "description" as key
-     * 
+     *
      * @return
      */
     @Deprecated
@@ -193,7 +192,7 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
 
     /**
      * Deprecated since schema > 0.8.0. Use SequenceFeatureAttribute with "description" as key
-     * 
+     *
      * @param description
      */
     @Deprecated

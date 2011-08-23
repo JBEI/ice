@@ -40,6 +40,15 @@ public class SequenceFeatureAttribute implements IModel {
         super();
     }
 
+    public SequenceFeatureAttribute(String key, String value, Boolean quoted,
+            SequenceFeature sequenceFeature) {
+        super();
+        setKey(key);
+        setValue(value);
+        setQuoted(quoted);
+        setSequenceFeature(sequenceFeature);
+    }
+
     public long getId() {
         return id;
     }
