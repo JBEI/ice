@@ -15,6 +15,7 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
+import org.jbei.ice.lib.models.SequenceFeatureAttribute;
 import org.jbei.ice.lib.vo.DNAFeature;
 import org.jbei.ice.lib.vo.DNAFeatureNote;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
@@ -89,7 +90,8 @@ public class SeqXmlSerializer {
                     complement = "false";
                 }
                 feature.add(new DefaultElement(COMPLEMENT, seqNamespace).addText(complement));
-                String unRecognizedGenbankType = null;
+                @SuppressWarnings("unused")
+                String unRecognizedGenbankType = null; // TODO for future use.
                 if (validGenbankTypes.contains(sequenceFeature.getGenbankType())) {
                     feature.add(new DefaultElement("type", seqNamespace).addText(sequenceFeature
                             .getGenbankType()));
@@ -105,8 +107,15 @@ public class SeqXmlSerializer {
                         .valueOf(sequenceFeature.getEnd())));
                 feature.add(locations);
 
-                feature.add(new DefaultElement(ATTRIBUTE, seqNamespace).addText(
-                    sequenceFeature.getDescription()).addAttribute(NAME, "unparsed_attribute"));
+                for (SequenceFeatureAttribute sequenceFeatureAttribute : sequenceFeature
+                        .getSequenceFeatureAttributes()) {
+                    DefaultElement newAttribute = new DefaultElement(ATTRIBUTE, seqNamespace);
+                    newAttribute.addText(sequenceFeatureAttribute.getValue());
+                    newAttribute.addAttribute(NAME, sequenceFeatureAttribute.getKey());
+                    newAttribute.addAttribute(QUOTED, sequenceFeatureAttribute.getQuoted()
+                            .toString());
+                    feature.add(newAttribute);
+                }
                 sequence.getSequence();
                 String tempSequence = sequenceFeature.getFeature().getSequence();
                 int genbankStart = sequenceFeature.getGenbankStart();
@@ -193,10 +202,13 @@ public class SeqXmlSerializer {
                     featureNote.setName(attribute.attributeValue(NAME));
                     featureNote.setValue(attribute.getText());
                     if ("true".equals(attribute.attributeValue(QUOTED))) {
-                        featureNote.setValue("\"" + featureNote.getValue() + "\"");
+                        featureNote.setQuoted(true);
+                    } else {
+                        featureNote.setQuoted(false);
                     }
                     dnaFeature.addNote(featureNote);
                 }
+
                 featuredDNASequence.getFeatures().add(dnaFeature);
             } // end feature loop
         }

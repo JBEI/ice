@@ -197,8 +197,13 @@ public class IceXmlSerializer {
         entryRoot.add(new DefaultElement(RECORD_TYPE, iceNamespace).addText(entry.getRecordType()));
         entryRoot.add(new DefaultElement(CREATION_TIME_STAMP, iceNamespace)
                 .addText(simpleDateFormat.format(entry.getCreationTime())));
-        entryRoot.add(new DefaultElement(MODIFICATION_TIME_STAMP, iceNamespace)
-                .addText(simpleDateFormat.format(entry.getModificationTime())));
+        if (entry.getModificationTime() != null) {
+            entryRoot.add(new DefaultElement(MODIFICATION_TIME_STAMP, iceNamespace)
+                    .addText(simpleDateFormat.format(entry.getModificationTime())));
+        } else {
+            entryRoot.add(new DefaultElement(MODIFICATION_TIME_STAMP, iceNamespace)
+                    .addText(simpleDateFormat.format(entry.getCreationTime())));
+        }
         DefaultElement partNumbers = new DefaultElement(PART_NUMBERS, iceNamespace);
         for (PartNumber partNumber : entry.getPartNumbers()) {
             partNumbers.add(new DefaultElement(PART_NUMBER, iceNamespace).addText(partNumber

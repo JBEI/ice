@@ -8,9 +8,9 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
+import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
-import org.jbei.ice.lib.models.Part.AssemblyStandard;
 
 public class RawAssemblyUtils implements AssemblyUtils {
 
@@ -97,13 +97,12 @@ public class RawAssemblyUtils implements AssemblyUtils {
         String partSequenceString = partSequence.getSequence();
         Entry part = partSequence.getEntry();
         String featureName = part.getRecordId(); // uuid of the given part
-        String featureDescription = featureName;
         String featureIdentification = part.getRecordId();
-        Feature innerPartFeature = new Feature(featureName, featureDescription,
-                featureIdentification, partSequenceString, 0, "misc_feature");
+        Feature innerPartFeature = new Feature(featureName, featureIdentification,
+                partSequenceString, 0, "misc_feature");
         SequenceFeature sequenceFeature = new SequenceFeature(partSequence, innerPartFeature, 1,
-                partSequenceString.length(), +1, innerPartFeature.getName(), innerPartFeature
-                        .getDescription(), innerPartFeature.getGenbankType(),
+                partSequenceString.length(), +1, innerPartFeature.getName(),
+                innerPartFeature.getGenbankType(),
                 SequenceFeature.AnnotationType.INNER);
 
         sequenceFeatures.add(sequenceFeature);

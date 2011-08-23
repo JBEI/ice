@@ -1,6 +1,6 @@
 package org.jbei.ice.controllers;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -22,6 +22,7 @@ import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.models.SequenceFeature.AnnotationType;
+import org.jbei.ice.lib.models.SequenceFeatureAttribute;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.SequenceFeatureCollection;
@@ -183,32 +184,13 @@ public class SequenceController extends Controller {
             for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
                 DNAFeature dnaFeature = new DNAFeature();
 
-                if (sequenceFeature.getDescription() != null
-                        && !sequenceFeature.getDescription().isEmpty()) {
-
-                    List<String> noteLines = Arrays.asList(sequenceFeature.getDescription().split(
-                        "\n"));
-
-                    if (noteLines != null && noteLines.size() > 0) {
-                        for (int i = 0; i < noteLines.size(); i++) {
-                            String line = noteLines.get(i);
-
-                            String key = "";
-                            String value = "";
-                            for (int j = 0; j < line.length(); j++) {
-                                if (line.charAt(j) == '=') {
-                                    key = line.substring(0, j);
-                                    value = line.substring(j + 1, line.length());
-
-                                    break;
-                                }
-                            }
-
-                            DNAFeatureNote dnaFeatureNote = new DNAFeatureNote(key, value);
-
-                            dnaFeature.addNote(dnaFeatureNote);
-                        }
-                    }
+                for (SequenceFeatureAttribute attribute : sequenceFeature
+                        .getSequenceFeatureAttributes()) {
+                    String key = attribute.getKey();
+                    String value = attribute.getValue();
+                    DNAFeatureNote dnaFeatureNote = new DNAFeatureNote(key, value);
+                    dnaFeatureNote.setQuoted(attribute.getQuoted());
+                    dnaFeature.addNote(dnaFeatureNote);
                 }
 
                 dnaFeature.setEnd(sequenceFeature.getEnd());
@@ -281,32 +263,9 @@ public class SequenceController extends Controller {
                         featureSequence = SequenceUtils.reverseComplement(featureSequence);
                     }
 
-                    StringBuilder descriptionNotes = new StringBuilder();
-
-                    if (dnaFeature.getNotes() != null && dnaFeature.getNotes().size() > 0) {
-                        int index = 0;
-                        for (DNAFeatureNote dnaFeatureNote : dnaFeature.getNotes()) {
-                            if (index > 0) {
-                                descriptionNotes.append("\n");
-                            }
-
-                            // TODO: remove this when sequencefeature gets proper attributes.
-                            if (dnaFeatureNote.getName().startsWith("unparsed_attribute")) {
-                                descriptionNotes.append(dnaFeatureNote.getValue());
-                            } else {
-                                descriptionNotes.append(dnaFeatureNote.getName()).append("=")
-                                        .append(dnaFeatureNote.getValue());
-                            }
-
-                            index++;
-                        }
-                    }
-
-                    Feature feature = new Feature(dnaFeature.getName(),
-                            descriptionNotes.toString(), "", featureSequence, 0,
-                            dnaFeature.getType());
-
                     AnnotationType annotationType = null;
+                    Feature feature = new Feature(dnaFeature.getName(), "", featureSequence, 0,
+                            dnaFeature.getType());
 
                     if (dnaFeature.getAnnotationType() != null
                             && !dnaFeature.getAnnotationType().isEmpty()) {
@@ -315,9 +274,24 @@ public class SequenceController extends Controller {
 
                     SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature,
                             genbankStart, end, dnaFeature.getStrand(), dnaFeature.getName(),
-                            descriptionNotes.toString(), dnaFeature.getType(), annotationType);
+                            dnaFeature.getType(), annotationType);
 
+                    ArrayList<SequenceFeatureAttribute> sequenceFeatureAttributes = new ArrayList<SequenceFeatureAttribute>();
+                    if (dnaFeature.getNotes() != null && dnaFeature.getNotes().size() > 0) {
+                        for (DNAFeatureNote dnaFeatureNote : dnaFeature.getNotes()) {
+                            SequenceFeatureAttribute sequenceFeatureAttribute = new SequenceFeatureAttribute();
+                            sequenceFeatureAttribute.setSequenceFeature(sequenceFeature);
+                            sequenceFeatureAttribute.setKey(dnaFeatureNote.getName());
+                            sequenceFeatureAttribute.setValue(dnaFeatureNote.getValue());
+                            sequenceFeatureAttribute.setQuoted(dnaFeatureNote.isQuoted());
+                            sequenceFeatureAttributes.add(sequenceFeatureAttribute);
+                        }
+                    }
+
+                    sequenceFeature.getSequenceFeatureAttributes()
+                            .addAll(sequenceFeatureAttributes);
                     sequenceFeatures.add(sequenceFeature);
+
                 }
             }
         }

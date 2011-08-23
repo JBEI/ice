@@ -5,10 +5,6 @@ public interface IFeatureValueObject {
 
     public abstract void setName(String name);
 
-    String getDescription();
-
-    void setDescription(String description);
-
     String getHash();
 
     void setHash(String hash);
