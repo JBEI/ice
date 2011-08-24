@@ -1177,36 +1177,6 @@ public class RegistryAMFAPI extends BaseService {
         }
     }
 
-    /**
-     * Helper method for verifying that the entry owner is valid.
-     * If not, then the account in the param is set as owner
-     * 
-     * @param account
-     * @param entry
-     * @return modified entry
-     */
-    private Entry verifyOwner(Account account, Entry entry) {
-        if (account == null || entry == null)
-            return null;
-
-        String ownerEmail = entry.getOwnerEmail();
-        if (ownerEmail == null || ownerEmail.isEmpty()) {
-            entry.setOwner(account.getFullName());
-            entry.setOwnerEmail(account.getEmail());
-        } else {
-            try {
-                Account owner = AccountController.getByEmail(ownerEmail);
-                entry.setOwner(owner.getFullName());
-                entry.setOwnerEmail(owner.getEmail());
-            } catch (ControllerException e) {
-                Logger.error(e.getMessage());
-                entry.setOwner(account.getFullName());
-                entry.setOwnerEmail(account.getEmail());
-            }
-        }
-        return entry;
-    }
-
     public Entry saveEntry(String sessionId, String importId, Entry entry, Byte[] attachmentFile,
             String attachmentFilename, Byte[] sequenceFile, String sequenceFilename) {
 
@@ -1219,12 +1189,11 @@ public class RegistryAMFAPI extends BaseService {
             BulkImport bi = BulkImportManager.retrieveById(Integer.decode(importId));
             String email = bi.getAccount().getEmail();
             entry.setOwnerEmail(email);
+            entry.setOwner(bi.getAccount().getFullName());
+            entry.setCreatorEmail(bi.getAccount().getEmail());
+            entry.setCreator(bi.getAccount().getFullName());
         } catch (Exception e1) {
         }
-
-        entry.setCreatorEmail(account.getEmail());
-        entry.setCreator(account.getFullName());
-        entry = verifyOwner(account, entry);
 
         if (Entry.PART_ENTRY_TYPE.equals(entry.getRecordType()))
             ((Part) entry).setPackageFormat(Part.AssemblyStandard.RAW);
@@ -1261,26 +1230,29 @@ public class RegistryAMFAPI extends BaseService {
             return null;
         }
 
+        // set accounts
         try {
             BulkImport bi = BulkImportManager.retrieveById(Integer.decode(importId));
             String email = bi.getAccount().getEmail();
+            String owner = bi.getAccount().getFullName();
+
             strain.setOwnerEmail(email);
+            strain.setOwner(owner);
             plasmid.setOwnerEmail(email);
+            plasmid.setOwner(owner);
+
+            strain.setCreatorEmail(email);
+            strain.setCreator(owner);
+            plasmid.setCreatorEmail(email);
+            plasmid.setCreator(owner);
         } catch (Exception e1) {
         }
 
         // strain
-        strain.setCreatorEmail(account.getEmail());
-        strain.setCreator(account.getFullName());
-        strain = (Strain) verifyOwner(account, strain);
-
         if (strain.getLongDescriptionType() == null)
             strain.setLongDescriptionType(Entry.MarkupType.text.name());
 
         // plasmid
-        plasmid.setCreatorEmail(account.getEmail());
-        plasmid.setCreator(account.getFullName());
-        plasmid = (Plasmid) verifyOwner(account, plasmid);
         if (plasmid.getLongDescriptionType() == null)
             plasmid.setLongDescriptionType(Entry.MarkupType.text.name());
 
