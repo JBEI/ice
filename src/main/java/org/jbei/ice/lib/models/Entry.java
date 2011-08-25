@@ -54,7 +54,27 @@ public class Entry implements IEntryValueObject, IModel {
 
     // TODO actually use these types
     public enum EntryType {
-        strain, plasmid, part, arabidopsis
+        strain(STRAIN_ENTRY_TYPE), plasmid(PLASMID_ENTRY_TYPE), part(PART_ENTRY_TYPE), arabidopsis(
+                ARABIDOPSIS_SEED_ENTRY_TYPE);
+
+        private String name;
+
+        EntryType(String name) {
+            this.name = name;
+        }
+
+        public static EntryType nameToType(String name) {
+            for (EntryType type : EntryType.values()) {
+                if (name.equals(type.getName()))
+                    return type;
+            }
+
+            return null;
+        }
+
+        public String getName() {
+            return this.name;
+        }
     }
 
     // TODO use these enums. Currently "in progress" with a space is used. 

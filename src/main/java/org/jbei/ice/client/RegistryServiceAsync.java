@@ -17,8 +17,13 @@ public interface RegistryServiceAsync {
 
     void logout(String sessionId, AsyncCallback<Boolean> callback);
 
-    void getSearchResults(ArrayList<FilterTrans> filters,
-            AsyncCallback<ArrayList<EntryDataView>> asyncCallback);
+    void retrieveSearchResults(ArrayList<FilterTrans> filters,
+            AsyncCallback<ArrayList<Long>> asyncCallback);
+
+    void retrieveEntryViews(ArrayList<Long> entries,
+            AsyncCallback<ArrayList<EntryDataView>> callback);
+
+    void retrieveEntryView(long id, AsyncCallback<EntryDataView> callback);
 
     void retrieveCollections(String sessionId, AsyncCallback<ArrayList<Folder>> callback);
 

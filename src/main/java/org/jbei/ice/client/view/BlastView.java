@@ -27,14 +27,13 @@ public class BlastView extends Composite implements BlastPresenter.Display {
 
     public BlastView() {
 
+        // page layout
         FlexTable layout = new FlexTable();
         layout.setCellPadding(0);
         layout.setCellSpacing(0);
         layout.setWidth("100%");
-        initWidget(layout);
-
-        layout.setWidth("100%");
         layout.setHeight("98%");
+        initWidget(layout);
 
         // components
         sequence = new TextArea();

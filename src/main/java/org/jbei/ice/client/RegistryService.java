@@ -13,7 +13,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 /**
  * The client side stub for the RPC service.
  */
-@RemoteServiceRelativePath("greet")
+@RemoteServiceRelativePath("ice")
 public interface RegistryService extends RemoteService {
 
     /**
@@ -27,7 +27,14 @@ public interface RegistryService extends RemoteService {
 
     boolean logout(String sessionId);
 
-    ArrayList<EntryDataView> getSearchResults(ArrayList<FilterTrans> filters);
+    //
+    // Search
+    //
+    ArrayList<Long> retrieveSearchResults(ArrayList<FilterTrans> filters);
+
+    ArrayList<EntryDataView> retrieveEntryViews(ArrayList<Long> entries);
+
+    EntryDataView retrieveEntryView(long id);
 
     /**
      * Returns list of folders as seen on the collections page

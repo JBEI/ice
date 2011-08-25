@@ -51,7 +51,7 @@ public class LoginView extends Composite implements LoginPresenter.Display {
         pass.setWidth("200px");
 
         loginButton = new Button("Log In");
-        rememberUserCheckBox = new CheckBox("Remember me on this computer");
+        rememberUserCheckBox = new CheckBox("Remember me  d on this computer");
 
         // add login to page
         main.setWidget(1, 0, this.createLogin());

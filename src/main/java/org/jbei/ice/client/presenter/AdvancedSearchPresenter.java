@@ -4,7 +4,9 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.Presenter;
 import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.event.EvaluateQueryEvent;
+import org.jbei.ice.client.component.EntryTableDataProvider;
+import org.jbei.ice.client.component.EntryTablePager;
+import org.jbei.ice.client.component.ExportAsPanel;
 import org.jbei.ice.client.util.Utils;
 import org.jbei.ice.shared.EntryDataView;
 import org.jbei.ice.shared.FilterTrans;
@@ -25,6 +27,7 @@ public class AdvancedSearchPresenter implements Presenter {
     private final RegistryServiceAsync rpcService;
     private final HandlerManager eventBus;
     private final Display display;
+    private EntryTableDataProvider dataProvider;
 
     public AdvancedSearchPresenter(RegistryServiceAsync rpcService, HandlerManager eventBus,
             Display view) {
@@ -38,15 +41,23 @@ public class AdvancedSearchPresenter implements Presenter {
         this.display.getResultsTable().setVisible(false);
 
         bind();
+
+        this.display.getResultsTable().setVisible(false);
+        this.display.getPager().setVisible(false);
+        this.display.getExportOptions().setVisible(false);
     }
 
     public interface Display {
 
         ArrayList<FilterTrans> getSearchFilters();
 
+        Button getEvaluateButton();
+
         CellTable<EntryDataView> getResultsTable();
 
-        Button getEvaluateButton();
+        EntryTablePager getPager();
+
+        ExportAsPanel getExportOptions();
 
         Widget asWidget();
     }
@@ -76,19 +87,28 @@ public class AdvancedSearchPresenter implements Presenter {
 
             // here to illustrate app wide event broadcast but not really needed
             // we do no need to let the system know that a query is being run
-            eventBus.fireEvent(new EvaluateQueryEvent());
+            //            eventBus.fireEvent(new EvaluateQueryEvent());
 
             // get search results
             ArrayList<FilterTrans> filters = display.getSearchFilters();
 
-            rpcService.getSearchResults(filters, new AsyncCallback<ArrayList<EntryDataView>>() {
+            rpcService.retrieveSearchResults(filters, new AsyncCallback<ArrayList<Long>>() {
 
                 @Override
-                public void onSuccess(ArrayList<EntryDataView> result) {
-                    display.getResultsTable().setVisible(true);
-                    //                    EntryDataProvider dataProvider = new EntryDataProvider();
+                public void onSuccess(ArrayList<Long> result) {
+                    CellTable<EntryDataView> table = display.getResultsTable();
+
+                    // TODO : instead of this, just update the result in the data provider
+                    // which should then take care of updating the display settings (row count etc)
+                    // e.g. dataProvider.getList().addAll(result);
+
+                    if (dataProvider != null)
+                        dataProvider.removeDataDisplay(table);
+
+                    dataProvider = new EntryTableDataProvider(result, rpcService);
+                    dataProvider.addDataDisplay(table);
+                    table.setVisible(true);
                     ListDataProvider<EntryDataView> dataProvider = new ListDataProvider<EntryDataView>();
-                    dataProvider.getList().addAll(result);
 
                     //                    display.getResultsTable().setRowData(0, result);
                     dataProvider.addDataDisplay(display.getResultsTable());
@@ -103,6 +123,10 @@ public class AdvancedSearchPresenter implements Presenter {
 
                     // TODO: Hide the table and show a red error msg in the position where it states
                     // "no records found"
+
+                    display.getResultsTable().setVisible(false);
+                    display.getPager().setVisible(false);
+                    display.getExportOptions().setVisible(false);
 
                     reset();
                 }

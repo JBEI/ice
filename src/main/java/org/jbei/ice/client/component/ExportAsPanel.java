@@ -1,17 +1,16 @@
 package org.jbei.ice.client.component;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class ExportAsPanel extends Composite {
+public class ExportAsPanel extends Composite implements ValueChangeHandler<String> {
 
     private final HorizontalPanel panel;
     private final EntryTable table;
@@ -30,6 +29,8 @@ public class ExportAsPanel extends Composite {
 
         initWidget(layout);
         init();
+
+        History.addValueChangeHandler(this);
     }
 
     protected void init() {
@@ -38,8 +39,7 @@ public class ExportAsPanel extends Composite {
         panel.add(label);
 
         // current content
-        //        Hyperlink currentContent = new Hyperlink("Current Content", "current_content");
-        Button currentContent = createCurrentContent();
+        Hyperlink currentContent = new Hyperlink("Current Content", "current_content");
         panel.add(currentContent);
 
         panel.add(new HTML("&nbsp;|&nbsp;"));
@@ -63,23 +63,30 @@ public class ExportAsPanel extends Composite {
 
         Hyperlink xml = new Hyperlink("XML", "xml");
         panel.add(xml);
-
     }
 
-    private Button createCurrentContent() {
+    public void onValueChange(ValueChangeEvent<String> event) {
 
-        Button button = new Button("Current Content");
-        button.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-
-                widget = RootPanel.get("foo").getWidget(0);
-                RootPanel.get("foo").remove(0);
-                RootPanel.get("foo").add(table);
-            }
-        });
-        return button;
+        //        widget = RootPanel.get("foo").getWidget(0);
+        //
+        //        RootPanel.get("foo").remove(0);
+        //        RootPanel.get("foo").add(table);
     }
+
+    //    private Button createCurrentContent() {
+    //
+    //        Button button = new Button("Current Content");
+    //        button.addClickHandler(new ClickHandler() {
+    //
+    //            @Override
+    //            public void onClick(ClickEvent event) {
+    //
+    //                widget = RootPanel.get("foo").getWidget(0);
+    //                RootPanel.get("foo").remove(0);
+    //                RootPanel.get("foo").add(table);
+    //            }
+    //        });
+    //        return button;
+    //    }
 
 }

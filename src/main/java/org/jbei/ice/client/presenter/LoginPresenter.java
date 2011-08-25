@@ -18,8 +18,8 @@ import com.google.gwt.user.client.ui.Widget;
  * TODO : validation
  * 
  * @author hector
- * 
  */
+
 public class LoginPresenter implements Presenter {
 
     public interface Display {
