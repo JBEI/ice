@@ -1,0 +1,2 @@
+serviceClass: org.jbei.ice.client.RegistryService
+path: DF9F011FDCABD3652CE4B20007C35F45.gwt.rpc
