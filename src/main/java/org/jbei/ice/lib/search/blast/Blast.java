@@ -26,6 +26,7 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Feature;
+import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.SequenceUtils;
@@ -415,8 +416,23 @@ public class Blast {
             if (columns.length == 12) {
                 BlastResult blastResult = new BlastResult();
 
+                String idLine = columns[1];
+                String[] idLineFields = idLine.split(":");
+                int sLength = 0;
+                boolean circular = false;
+                if (idLineFields.length == 1) {
+                    Logger.info("Old Blast db format detected. Schedule rebuild");
+                    ApplicationContoller.scheduleBlastIndexRebuildJob(5000);
+                } else if (idLineFields.length == 3) {
+                    idLine = idLineFields[0].trim();
+                    sLength = Integer.parseInt(idLineFields[1]);
+                    if ("circular".equals(idLineFields[2])) {
+                        circular = true;
+                    }
+                }
+
                 blastResult.setQueryId(columns[0]);
-                blastResult.setSubjectId(columns[1]);
+                blastResult.setSubjectId(idLine);
                 blastResult.setPercentId(Float.parseFloat(columns[2]));
                 blastResult.setAlignmentLength(Integer.parseInt(columns[3]));
                 blastResult.setMismatches(Integer.parseInt(columns[4]));
@@ -429,7 +445,27 @@ public class Blast {
                 blastResult.setBitScore(Float.parseFloat(columns[11]));
                 blastResult.setRelativeScore(blastResult.getPercentId()
                         * blastResult.getAlignmentLength() * blastResult.getBitScore());
-                blastResults.add(blastResult);
+
+                if (blastResult.getsStart() > sLength || blastResult.getsEnd() > sLength) {
+                    if (circular) {
+                        if (blastResult.getsStart() > sLength && blastResult.getsEnd() > sLength) {
+                            // both start and end are longer than the length. Skip this
+                            blastResult = null;
+                        } else if (blastResult.getsEnd() > sLength) {
+                            blastResult.setsEnd(blastResult.getsEnd() - sLength);
+                        } else if (blastResult.getsStart() > sLength) {
+                            blastResult.setsStart(blastResult.getsStart() - sLength);
+                        }
+                    } else {
+                        // skip this match.
+                        blastResult = null;
+                    }
+                } else {
+
+                }
+                if (blastResult != null) {
+                    blastResults.add(blastResult);
+                }
             }
         }
         return blastResults;
@@ -510,8 +546,13 @@ public class Blast {
         }
         for (Sequence sequence : sequencesList) {
             String recordId = sequence.getEntry().getRecordId();
+            boolean circular = false;
+            if (sequence.getEntry() instanceof Plasmid) {
+                circular = ((Plasmid) sequence.getEntry()).getCircular();
+            }
             String sequenceString = "";
             String temp = sequence.getSequence();
+            int sequenceLength = 0;
             if (temp != null) {
                 SymbolList symL = null;
                 try {
@@ -528,12 +569,17 @@ public class Blast {
                     }
                 }
                 if (symL != null) {
-                    sequenceString = SequenceUtils.breakUpLines(symL.seqString());
+                    sequenceLength = symL.seqString().length();
+                    sequenceString = SequenceUtils
+                            .breakUpLines(symL.seqString() + symL.seqString());
                 }
             }
             if (sequenceString.length() > 0) {
                 try {
-                    bigFastaWriter.write(">" + recordId + "\n");
+                    String idString = ">" + recordId + ":" + sequenceLength;
+                    idString += ":" + (circular ? "circular" : "linear");
+                    idString += "\n";
+                    bigFastaWriter.write(idString);
                     bigFastaWriter.write(sequenceString + "\n");
                 } catch (IOException e) {
                     throw new BlastException(e);

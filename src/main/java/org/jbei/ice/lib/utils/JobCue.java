@@ -74,7 +74,7 @@ public class JobCue implements Runnable {
                     Logger.error("Failed to rebuild blast database!", e);
                 }
             }
-
+            Logger.info("Completed job");
             cue.remove(jobType);
         }
     }
@@ -96,6 +96,7 @@ public class JobCue implements Runnable {
         getInstance().setCounter(interval);
     }
 
+    @Override
     public void run() {
         try {
             while (!Thread.currentThread().isInterrupted()) {
