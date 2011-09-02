@@ -6,8 +6,8 @@ import java.util.LinkedList;
 
 import org.biojava.bio.BioException;
 import org.biojavax.bio.seq.RichSequence;
-import org.biojavax.bio.seq.RichSequenceIterator;
 import org.biojavax.bio.seq.RichSequence.IOTools;
+import org.biojavax.bio.seq.RichSequenceIterator;
 import org.jbei.ice.lib.vo.DNAFeature;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
@@ -18,6 +18,14 @@ public class FastaParser extends AbstractParser {
     @Override
     public String getName() {
         return FASTA_PARSER;
+    }
+
+    /**
+     * This parser cannot succeed with errors, so always return false, or fail.
+     */
+    @Override
+    public Boolean hasErrors() {
+        return false;
     }
 
     @Override

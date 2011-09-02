@@ -79,11 +79,11 @@ public class GeneralParser {
         // TODO: Depricate some of these old parsers. The new 
         // IceGenbankParser should replace all of these parsers. 
         // However, maintain these for backward compatibility for now.
-        parsers.add(new GenbankParser()); // TODO depricate
         parsers.add(new IceGenbankParser());
         parsers.add(new FastaParser());
-        parsers.add(new ApeParser()); // TODO depricate
-        parsers.add(new GenbankLocusFriendlyParser()); // TODO depricate
+        //parsers.add(new ApeParser()); // TODO depricate
+        //parsers.add(new GenbankLocusFriendlyParser()); // TODO depricate
+        //parsers.add(new GenbankParser()); // TODO depricate
         parsers.add(new PlainParser());
     }
 }

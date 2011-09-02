@@ -14,6 +14,14 @@ public class ABIParser extends AbstractParser {
         return ABI_PARSER;
     }
 
+    /**
+     * This parser cannot succeed with errors, so always return false, or fail.
+     */
+    @Override
+    public Boolean hasErrors() {
+        return false;
+    }
+
     @Override
     public IDNASequence parse(byte[] bytes) throws InvalidFormatParserException {
         SimpleDNASequence simpleDNASequence = null;

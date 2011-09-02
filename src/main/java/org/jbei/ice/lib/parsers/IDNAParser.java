@@ -9,6 +9,8 @@ import org.jbei.ice.lib.vo.IDNASequence;
 public interface IDNAParser {
     String getName();
 
+    Boolean hasErrors();
+
     IDNASequence parse(byte[] bytes) throws InvalidFormatParserException;
 
     IDNASequence parse(File file) throws FileNotFoundException, IOException,

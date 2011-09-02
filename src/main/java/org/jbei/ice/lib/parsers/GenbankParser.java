@@ -13,8 +13,8 @@ import org.biojavax.RankedCrossRef;
 import org.biojavax.bio.seq.RichFeature;
 import org.biojavax.bio.seq.RichLocation;
 import org.biojavax.bio.seq.RichSequence;
-import org.biojavax.bio.seq.RichSequenceIterator;
 import org.biojavax.bio.seq.RichSequence.IOTools;
+import org.biojavax.bio.seq.RichSequenceIterator;
 import org.jbei.ice.lib.vo.DNAFeature;
 import org.jbei.ice.lib.vo.DNAFeatureNote;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
@@ -23,8 +23,17 @@ import org.jbei.ice.lib.vo.IDNASequence;
 public class GenbankParser extends AbstractParser {
     private static final String GENBANK_PARSER = "GenBank";
 
+    @Override
     public String getName() {
         return GENBANK_PARSER;
+    }
+
+    /**
+     * This parser cannot succeed with errors, so always return false, or fail.
+     */
+    @Override
+    public Boolean hasErrors() {
+        return false;
     }
 
     @Override

@@ -11,6 +11,14 @@ import org.jbei.ice.lib.vo.SimpleDNASequence;
 public class PlainParser extends AbstractParser {
     private static final String PLAIN_PARSER = "Plain";
 
+    /**
+     * This parser cannot succeed with errors, so always return false, or fail.
+     */
+    @Override
+    public Boolean hasErrors() {
+        return false;
+    }
+
     @Override
     public IDNASequence parse(String textSequence) throws InvalidFormatParserException {
         textSequence = cleanSequence(textSequence);
