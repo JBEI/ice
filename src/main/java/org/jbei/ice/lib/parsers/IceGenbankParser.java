@@ -560,9 +560,6 @@ public class IceGenbankParser extends AbstractParser {
         String putativeValue = lines[0].split(" +")[1];
         tag.setValue(putativeValue);
 
-        ArrayList<Tag> temp = splitTags(tag.getRawBody(), REFERENCE_TAGS,
-            new String[] { REFERENCE_TAG });
-
         return null;
     }
 
