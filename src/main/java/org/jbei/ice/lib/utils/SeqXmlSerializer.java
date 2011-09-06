@@ -11,12 +11,14 @@ import org.dom4j.Namespace;
 import org.dom4j.QName;
 import org.dom4j.tree.DefaultElement;
 import org.jbei.ice.controllers.SequenceController;
+import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.models.SequenceFeatureAttribute;
 import org.jbei.ice.lib.vo.DNAFeature;
+import org.jbei.ice.lib.vo.DNAFeatureLocation;
 import org.jbei.ice.lib.vo.DNAFeatureNote;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
@@ -90,23 +92,21 @@ public class SeqXmlSerializer {
                     complement = "false";
                 }
                 feature.add(new DefaultElement(COMPLEMENT, seqNamespace).addText(complement));
-                @SuppressWarnings("unused")
-                String unRecognizedGenbankType = null; // TODO for future use.
                 if (validGenbankTypes.contains(sequenceFeature.getGenbankType())) {
                     feature.add(new DefaultElement("type", seqNamespace).addText(sequenceFeature
                             .getGenbankType()));
                 } else {
                     feature.add(new DefaultElement("type", seqNamespace).addText("misc_feature"));
-                    unRecognizedGenbankType = sequenceFeature.getGenbankType();
                 }
 
-                DefaultElement locations = new DefaultElement(LOCATION, seqNamespace);
-                locations.add(new DefaultElement(GENBANK_START, seqNamespace).addText(String
-                        .valueOf(sequenceFeature.getGenbankStart())));
-                locations.add(new DefaultElement(END, seqNamespace).addText(String
-                        .valueOf(sequenceFeature.getEnd())));
-                feature.add(locations);
-
+                for (AnnotationLocation location : sequenceFeature.getAnnotationLocations()) {
+                    DefaultElement locations = new DefaultElement(LOCATION, seqNamespace);
+                    locations.add(new DefaultElement(GENBANK_START, seqNamespace).addText(String
+                            .valueOf(location.getGenbankStart())));
+                    locations.add(new DefaultElement(END, seqNamespace).addText(String
+                            .valueOf(location.getEnd())));
+                    feature.add(locations);
+                }
                 for (SequenceFeatureAttribute sequenceFeatureAttribute : sequenceFeature
                         .getSequenceFeatureAttributes()) {
                     DefaultElement newAttribute = new DefaultElement(ATTRIBUTE, seqNamespace);
@@ -118,8 +118,8 @@ public class SeqXmlSerializer {
                 }
                 sequence.getSequence();
                 String tempSequence = sequenceFeature.getFeature().getSequence();
-                int genbankStart = sequenceFeature.getGenbankStart();
-                int end = sequenceFeature.getEnd();
+                int genbankStart = sequenceFeature.getUniqueGenbankStart();
+                int end = sequenceFeature.getUniqueEnd();
 
                 // this is needed because sometimes sequence stored in this local database
                 // is the reverse complement of what's being exported, and thus must be recalculated.
@@ -180,19 +180,19 @@ public class SeqXmlSerializer {
                 }
                 dnaFeature.setType(featureElement.elementText("type"));
 
-                // TODO handle multilocation
                 @SuppressWarnings("unchecked")
                 List<Element> locations = featureElement.elements(LOCATION);
                 int genbankStart = 0;
                 int end = 0;
-                Element location = locations.get(0);
-                try {
-                    genbankStart = Integer.parseInt(location.elementText(GENBANK_START));
-                    end = Integer.parseInt(location.elementText(END));
-                    dnaFeature.setGenbankStart(genbankStart);
-                    dnaFeature.setEnd(end);
-                } catch (NumberFormatException e) {
-                    throw new UtilityException(e);
+                List<DNAFeatureLocation> dnaFeatureLocations = dnaFeature.getLocations();
+                for (Element location : locations) {
+                    try {
+                        genbankStart = Integer.parseInt(location.elementText(GENBANK_START));
+                        end = Integer.parseInt(location.elementText(END));
+                        dnaFeatureLocations.add(new DNAFeatureLocation(genbankStart, end));
+                    } catch (NumberFormatException e) {
+                        throw new UtilityException(e);
+                    }
                 }
 
                 @SuppressWarnings("unchecked")
