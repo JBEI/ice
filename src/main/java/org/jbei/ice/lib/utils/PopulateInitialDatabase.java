@@ -539,7 +539,7 @@ public class PopulateInitialDatabase {
         return error;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "deprecation" })
     public static boolean migrateFrom081To090() {
         Logger.warn("Updating database schema from 0.8.1 to 0.9.0. Please wait...");
         Logger.info("reading database");
@@ -556,11 +556,13 @@ public class PopulateInitialDatabase {
 
         Logger.info("parsing fields");
         for (SequenceFeature sequenceFeature : sequenceFeatures) {
-            @SuppressWarnings("deprecation")
             AnnotationLocation location = new AnnotationLocation(sequenceFeature.getGenbankStart(),
                     sequenceFeature.getEnd(), sequenceFeature);
+            sequenceFeature.setGenbankStart(1);
+            sequenceFeature.setEnd(1);
             try {
                 DAO.save(location);
+                DAO.save(sequenceFeature);
             } catch (DAOException e) {
                 Logger.error("Error saving new locations", e);
                 error = true;
