@@ -11,16 +11,17 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
-import org.jbei.ice.shared.EntryDataView;
-import org.jbei.ice.shared.PartTipView;
+import org.jbei.ice.shared.EntryData;
+import org.jbei.ice.shared.PartData;
 import org.jbei.ice.shared.PlasmidTipView;
 import org.jbei.ice.shared.SeedTipView;
 import org.jbei.ice.shared.StrainTipView;
 
 public class EntryViewFactory {
 
-    private static void getCommon(EntryDataView view, Entry entry) {
+    private static void getCommon(EntryData view, Entry entry) {
 
+        view.setRecordId(entry.getId());
         view.setType(entry.getRecordType());
         view.setPartId(entry.getPartNumbersAsString());
         view.setName(entry.getNamesAsString());
@@ -39,7 +40,7 @@ public class EntryViewFactory {
             view.setModified(modification.getTime());
     }
 
-    public static EntryDataView createTipView(Entry entry) throws ManagerException {
+    public static EntryData createTipView(Entry entry) {
 
         Entry.EntryType type = Entry.EntryType.nameToType(entry.getRecordType());
         switch (type) {
@@ -49,23 +50,7 @@ public class EntryViewFactory {
 
             // common
             getCommon(view, entry);
-            //            view.setType(entry.getRecordType());
-            //            view.setPartId(entry.getPartNumbersAsString());
-            //            view.setName(entry.getNamesAsString());
-            //            view.setAlias(entry.getAlias());
-            //            view.setCreator(entry.getCreator());
-            //            view.setStatus(entry.getStatus());
-            //            view.setOwner(entry.getOwner());
-            //            view.setOwnerId(entry.getOwnerEmail());
-            //            view.setKeywords(entry.getKeywords());
-            //            view.setSummary(entry.getShortDescription());
-            //
-            //            Date creationDate = entry.getCreationTime();
-            //            if (creationDate != null)
-            //                view.setCreated(creationDate.getTime());
-            //            Date modification = entry.getModificationTime();
-            //            if (modification != null)
-            //                view.setModified(modification.getTime());
+
             // strain specific
             Strain strain = (Strain) entry;
             view.setHost(strain.getHost());
@@ -73,34 +58,23 @@ public class EntryViewFactory {
             view.setPlasmids(strain.getPlasmids());
             view.setMarkers(strain.getSelectionMarkersAsString());
 
-            boolean hasAttachment = (AttachmentManager.getByEntry(entry).size() > 0);
-            view.setHasAttachment(hasAttachment);
-            boolean hasSample = (SampleManager.getSamplesByEntry(entry).size() > 0);
-            view.setHasSample(hasSample);
-            boolean hasSequence = (SequenceManager.getByEntry(entry) != null);
-            view.setHasSequence(hasSequence);
+            try {
+                boolean hasAttachment = (AttachmentManager.getByEntry(entry).size() > 0);
+                view.setHasAttachment(hasAttachment);
+                boolean hasSample = (SampleManager.getSamplesByEntry(entry).size() > 0);
+                view.setHasSample(hasSample);
+                boolean hasSequence = (SequenceManager.getByEntry(entry) != null);
+                view.setHasSequence(hasSequence);
+            } catch (ManagerException e) {
+                return null;
+            }
             return view;
         }
 
         case arabidopsis: {
 
             SeedTipView view = new SeedTipView();
-            view.setType(entry.getRecordType());
-            view.setPartId(entry.getPartNumbersAsString());
-            view.setName(entry.getNamesAsString());
-            view.setAlias(entry.getAlias());
-            view.setCreator(entry.getCreator());
-            view.setStatus(entry.getStatus());
-            view.setOwner(entry.getOwner());
-            view.setOwnerId(entry.getOwnerEmail());
-            view.setKeywords(entry.getKeywords());
-            view.setSummary(entry.getShortDescription());
-            Date creationDate = entry.getCreationTime();
-            if (creationDate != null)
-                view.setCreated(creationDate.getTime());
-            Date modification = entry.getModificationTime();
-            if (modification != null)
-                view.setModified(modification.getTime());
+            getCommon(view, entry);
 
             ArabidopsisSeed seed = (ArabidopsisSeed) entry;
             seed.getPlantType();
@@ -114,23 +88,9 @@ public class EntryViewFactory {
         }
 
         case part: {
-            PartTipView view = new PartTipView();
-            view.setType(entry.getRecordType());
-            view.setPartId(entry.getPartNumbersAsString());
-            view.setName(entry.getNamesAsString());
-            view.setAlias(entry.getAlias());
-            view.setCreator(entry.getCreator());
-            view.setStatus(entry.getStatus());
-            view.setOwner(entry.getOwner());
-            view.setOwnerId(entry.getOwnerEmail());
-            view.setKeywords(entry.getKeywords());
-            view.setSummary(entry.getShortDescription());
-            Date creationDate = entry.getCreationTime();
-            if (creationDate != null)
-                view.setCreated(creationDate.getTime());
-            Date modification = entry.getModificationTime();
-            if (modification != null)
-                view.setModified(modification.getTime());
+            PartData view = new PartData();
+
+            getCommon(view, entry);
 
             Part part = (Part) entry;
             view.setPackagingFormat(part.getPackageFormat().toString());
@@ -139,23 +99,7 @@ public class EntryViewFactory {
 
         case plasmid: {
             PlasmidTipView view = new PlasmidTipView();
-            view.setType(entry.getRecordType());
-            view.setPartId(entry.getPartNumbersAsString());
-            view.setName(entry.getNamesAsString());
-            view.setAlias(entry.getAlias());
-            view.setCreator(entry.getCreator());
-            view.setStatus(entry.getStatus());
-            view.setOwner(entry.getOwner());
-            view.setOwnerId(entry.getOwnerEmail());
-            view.setKeywords(entry.getKeywords());
-            view.setSummary(entry.getShortDescription());
-            view.setMarkers(entry.getSelectionMarkersAsString());
-            Date creationDate = entry.getCreationTime();
-            if (creationDate != null)
-                view.setCreated(creationDate.getTime());
-            Date modification = entry.getModificationTime();
-            if (modification != null)
-                view.setModified(modification.getTime());
+            getCommon(view, entry);
 
             Plasmid plasmid = (Plasmid) entry;
             view.setBackbone(plasmid.getBackbone());

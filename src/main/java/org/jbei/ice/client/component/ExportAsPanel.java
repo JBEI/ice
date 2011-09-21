@@ -1,31 +1,36 @@
 package org.jbei.ice.client.component;
 
+<<<<<<< HEAD
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
+=======
+>>>>>>> aa6fb0c... Latest gwt changes
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
+<<<<<<< HEAD
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
+=======
+>>>>>>> aa6fb0c... Latest gwt changes
 
 public class ExportAsPanel extends Composite {
 
     private final HorizontalPanel panel;
-    private final EntryTable table;
-    private Widget widget;
 
-    public ExportAsPanel(EntryTable table) {
+    public ExportAsPanel() {
 
         panel = new HorizontalPanel();
         panel.setHorizontalAlignment(HasAlignment.ALIGN_CENTER);
-        this.table = table;
-
-        HorizontalPanel layout = new HorizontalPanel();
-        layout.add(panel);
-        layout.setHorizontalAlignment(HasAlignment.ALIGN_CENTER);
+        FlexTable layout = new FlexTable();
+        layout.setWidget(0, 0, panel);
+        layout.getFlexCellFormatter().setHorizontalAlignment(0, 0,
+            HasHorizontalAlignment.ALIGN_CENTER);
         layout.setWidth("100%");
 
         initWidget(layout);
@@ -66,6 +71,7 @@ public class ExportAsPanel extends Composite {
 
     }
 
+<<<<<<< HEAD
     private Button createCurrentContent() {
 
         Button button = new Button("Current Content");
@@ -82,4 +88,6 @@ public class ExportAsPanel extends Composite {
         return button;
     }
 
+=======
+>>>>>>> aa6fb0c... Latest gwt changes
 }

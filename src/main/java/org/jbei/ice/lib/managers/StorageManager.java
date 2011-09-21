@@ -173,6 +173,32 @@ public class StorageManager {
     }
 
     @SuppressWarnings("unchecked")
+    public static List<Storage> getAllStorageRoot() throws ManagerException {
+        ArrayList<Storage> result = null;
+        Session session = DAO.newSession();
+        try {
+            Query query = session.createQuery("FROM " + Storage.class.getName()
+                    + " storage WHERE storage.storageType = :storageType");
+            query.setParameter("storageType", StorageType.GENERIC);
+
+            @SuppressWarnings("rawtypes")
+            List list = query.list();
+            if (list != null)
+                result = (ArrayList<Storage>) list;
+
+        } catch (Exception e) {
+            String msg = "Could not get all generic types: " + e.toString();
+            Logger.error(msg, e);
+            throw new ManagerException(msg);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
     public static List<Storage> getStorageSchemesForEntryType(String entryType) {
         ArrayList<Storage> result = new ArrayList<Storage>();
         Session session = DAO.newSession();

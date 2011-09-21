@@ -71,10 +71,12 @@
 }
 
 .cellTableSortedHeaderAscending {
+	/* color: red; */
 
 }
 
 .cellTableSortedHeaderDescending {
+	/* color: green; */
 
 }
 

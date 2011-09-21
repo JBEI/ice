@@ -7,6 +7,7 @@ import org.jbei.ice.client.event.LogoutEvent;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
@@ -33,7 +34,11 @@ public class HomePagePresenter implements Presenter {
     }
 
     protected void bind() {
-        this.display.getLogoutHandler().getClickHandler().addClickHandler(new ClickHandler() {
+        HasClickHandlers handler = this.display.getLogoutHandler().getClickHandler();
+        if (handler == null)
+            return; // TODO fire logout event?
+
+        handler.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {

@@ -1,19 +1,48 @@
 package org.jbei.ice.client.view.form;
 
-import org.jbei.ice.shared.BioSafetyOptions;
-import org.jbei.ice.shared.EntryType;
+import java.util.ArrayList;
+import java.util.HashMap;
 
+import org.jbei.ice.shared.AutoCompleteField;
+import org.jbei.ice.shared.PlasmidInfo;
+import org.jbei.ice.shared.dto.EntryInfo;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
-import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 
 public class NewPlasmidForm extends NewEntryForm {
 
-    public NewPlasmidForm() {
+    private final PlasmidInfo plasmid;
+
+    interface PlasmidUiBinder extends UiBinder<Widget, NewPlasmidForm> {
+    };
+
+    private static PlasmidUiBinder uiBinder = GWT.create(PlasmidUiBinder.class);
+
+    @UiField
+    SuggestBox selectionMarkerBox;
+
+    @UiField
+    Button submitButton;
+
+    public NewPlasmidForm(HashMap<AutoCompleteField, ArrayList<String>> data, Button saveButton) {
+
+        super(data);
+        plasmid = new PlasmidInfo();
+        initWidget(uiBinder.createAndBindUi(this));
+        init(saveButton);
+    }
+
+    /*
+    protected void init() {
 
         layout.setWidth("800px");
         layout.addStyleName("gray_border");
@@ -71,26 +100,18 @@ public class NewPlasmidForm extends NewEntryForm {
 
         // selection markers
         layout.setHTML(9, 0, "&nbsp;Selection Markers:");
-        //        TextBox markers = createTextBox("300px");
-        //        layout.setWidget(9, 1, createWidgetWithHelpText(markers, "Comma Separated", true));
-
-        MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
-        oracle.add("foo");
-        oracle.add("bar");
-        SuggestBox box = new SuggestBox(oracle);
-        box.setWidth("300px");
-        box.addStyleName("inputbox");
-        layout.setWidget(9, 1, createWidgetWithHelpText(box, "Comma Separated", true));
+        Widget markerBox = createAutoCompleteForSelectionMarkers("300px");
+        layout.setWidget(9, 1, createWidgetWithHelpText(markerBox, "Comma Separated", true));
 
         // origin of replication
         layout.setHTML(10, 0, "&nbsp;Origin of Replication:");
-        TextBox origin = createTextBox("300px");
-        layout.setWidget(10, 1, createWidgetWithHelpText(origin, "Comma Separated", true));
+        Widget originBox = createAutoCompleteForOriginOfReplication("300px");
+        layout.setWidget(10, 1, createWidgetWithHelpText(originBox, "Comma Separated", true));
 
         // promoters
         layout.setHTML(11, 0, "&nbsp;Promoters:");
-        TextBox promoters = createTextBox("300px");
-        layout.setWidget(11, 1, createWidgetWithHelpText(promoters, "Comma Separated", true));
+        Widget promotersBox = createAutoCompleteForPromoters("300px");
+        layout.setWidget(11, 1, createWidgetWithHelpText(promotersBox, "Comma Separated", true));
 
         // keywords
         layout.setHTML(12, 0, "&nbsp;Keywords:");
@@ -169,6 +190,7 @@ public class NewPlasmidForm extends NewEntryForm {
         layout.setWidget(22, 1, button);
     }
 
+    */
     protected TextBox createTextBox() {
         return this.createTextBox(null);
     }
@@ -182,4 +204,22 @@ public class NewPlasmidForm extends NewEntryForm {
             textBox.setWidth(width);
         return textBox;
     }
+
+    @Override
+    public EntryInfo getEntry() {
+        return plasmid;
+    }
+
+    @Override
+    protected void init(Button button) {
+        selectionMarkerBox = createAutoCompleteForSelectionMarkers("300px");
+    }
+
+    @UiHandler("submitButton")
+    void handleSubmit(ClickEvent event) {
+        Window.alert("Clicked: " + selectionMarkerBox.getText());
+    }
+
+    //    @UiHandler("selectionMarkerBox")
+    //    void handleText
 }

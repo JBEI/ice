@@ -1,5 +1,7 @@
 package org.jbei.ice.client.event;
 
+import org.jbei.ice.shared.dto.AccountInfo;
+
 import com.google.gwt.event.shared.GwtEvent;
 
 /**
@@ -15,9 +17,27 @@ public class LoginEvent extends GwtEvent<ILoginEventHandler> {
 
     private final String sessionId;
     private final boolean rememberUser;
+    private final String userName;
+    private final String userId;
+    private AccountInfo info;
 
-    public LoginEvent(String sid, boolean rememberUser) {
+    public LoginEvent(AccountInfo info, boolean rememberUser) {
+        this(info.getSessionId(), (info.getFirstName() + " " + info.getLastName()),
+                info.getEmail(), rememberUser);
+        this.info = info;
+    }
+
+    /**
+     * @deprecated
+     * @param sid
+     * @param userName
+     * @param userId
+     * @param rememberUser
+     */
+    public LoginEvent(String sid, String userName, String userId, boolean rememberUser) {
         this.sessionId = sid;
+        this.userName = userName;
+        this.userId = userId;
         this.rememberUser = rememberUser;
     }
 
@@ -27,6 +47,18 @@ public class LoginEvent extends GwtEvent<ILoginEventHandler> {
 
     public boolean isRememberUser() {
         return this.rememberUser;
+    }
+
+    public String getUserName() {
+        return this.userName;
+    }
+
+    public String getUserId() {
+        return this.userId;
+    }
+
+    public AccountInfo getAccountInfo() {
+        return this.info;
     }
 
     @Override

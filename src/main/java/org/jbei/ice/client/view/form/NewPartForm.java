@@ -1,7 +1,12 @@
 package org.jbei.ice.client.view.form;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BioSafetyOptions;
 import org.jbei.ice.shared.EntryType;
+import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ListBox;
@@ -10,7 +15,14 @@ import com.google.gwt.user.client.ui.TextBox;
 
 public class NewPartForm extends NewEntryForm {
 
-    public NewPartForm() {
+    public NewPartForm(HashMap<AutoCompleteField, ArrayList<String>> data, Button saveButton) {
+
+        super(data);
+        initWidget(layout);
+        init(saveButton);
+    }
+
+    protected void init(Button saveButton) {
 
         layout.setWidth("800px");
         layout.addStyleName("gray_border");
@@ -144,5 +156,11 @@ public class NewPartForm extends NewEntryForm {
         if (width != null)
             textBox.setWidth(width);
         return textBox;
+    }
+
+    @Override
+    public EntryInfo getEntry() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

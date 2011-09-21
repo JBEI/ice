@@ -1,6 +1,6 @@
 package org.jbei.ice.client.view;
 
-import org.jbei.ice.client.EntryMenu;
+import org.jbei.ice.shared.EntryMenu;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;

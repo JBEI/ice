@@ -1,9 +1,9 @@
 package org.jbei.ice.client.view;
 
 import org.jbei.ice.client.ILogoutHandler;
-import org.jbei.ice.client.panel.Footer;
-import org.jbei.ice.client.panel.Header;
-import org.jbei.ice.client.panel.HeaderMenu;
+import org.jbei.ice.client.common.Footer;
+import org.jbei.ice.client.common.Header;
+import org.jbei.ice.client.common.HeaderMenu;
 import org.jbei.ice.client.presenter.HomePagePresenter;
 
 import com.google.gwt.user.client.ui.Composite;

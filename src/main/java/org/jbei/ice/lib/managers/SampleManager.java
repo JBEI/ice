@@ -2,6 +2,7 @@ package org.jbei.ice.lib.managers;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.hibernate.HibernateException;
@@ -14,6 +15,7 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.models.Storage;
+import org.jbei.ice.lib.utils.Utils;
 
 public class SampleManager {
     public static Sample saveSample(Sample sample) throws ManagerException {
@@ -168,5 +170,67 @@ public class SampleManager {
                 session.close();
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static LinkedList<Long> retrieveSamplesByDepositorSortByCreated(String depositor,
+            boolean ascending) throws ManagerException {
+        Session session = DAO.newSession();
+        LinkedList<Long> results = null;
+
+        try {
+            String queryString = "SELECT id FROM " + Sample.class.getName()
+                    + " WHERE depositor = :depositor ORDER BY creationTime "
+                    + ((ascending ? "ASC" : "DESC"));
+            Query query = session.createQuery(queryString);
+            query.setParameter("depositor", depositor);
+
+            @SuppressWarnings("rawtypes")
+            List list = query.list();
+
+            if (list != null)
+                results = new LinkedList<Long>(list);
+            return results;
+
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static LinkedList<Sample> getSamplesByIdSet(LinkedList<Long> ids, boolean asc)
+            throws ManagerException {
+        LinkedList<Sample> samples = new LinkedList<Sample>();
+
+        if (ids.size() == 0) {
+            return samples;
+        }
+
+        String filter = Utils.join(", ", ids);
+        String suffix = "ORDER BY id " + (asc ? "ASC" : "DESC");
+
+        Session session = DAO.newSession();
+        try {
+
+            Query query = session.createQuery("from " + Sample.class.getName() + " e WHERE id in ("
+                    + filter + ") " + suffix);
+
+            @SuppressWarnings("rawtypes")
+            ArrayList list = (ArrayList) query.list();
+
+            if (list != null) {
+                samples.addAll(list);
+            }
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve samples!", e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+
+        return samples;
     }
 }

@@ -3,10 +3,12 @@ package org.jbei.ice.controllers;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedList;
 
 import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.SamplePermissionVerifier;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.models.Account;
@@ -15,6 +17,7 @@ import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.shared.ColumnField;
 
 public class SampleController extends Controller {
     public SampleController(Account account) {
@@ -155,6 +158,36 @@ public class SampleController extends Controller {
             return SampleManager.getSampleCountBy(depositorEmail);
         } catch (ManagerException e) {
             throw new ControllerException(e);
+        }
+    }
+
+    public LinkedList<Long> retrieveSamplesByDepositor(String email, ColumnField field, boolean asc)
+            throws ControllerException {
+
+        LinkedList<Long> results = null;
+        try {
+            switch (field) {
+
+            default:
+            case CREATED:
+                results = SampleManager.retrieveSamplesByDepositorSortByCreated(email, asc);
+                //                getSamplePermissionVerifier().hasReadPermissions(model, account)
+                break;
+            }
+        } catch (ManagerException e) {
+            throw new ControllerException(e);
+        }
+
+        return results;
+    }
+
+    public LinkedList<Sample> retrieveSamplesByIdSet(LinkedList<Long> ids, boolean asc)
+            throws ControllerException {
+        try {
+            return SampleManager.getSamplesByIdSet(ids, asc);
+        } catch (ManagerException e) {
+            Logger.error(e);
+            return null;
         }
     }
 

@@ -63,16 +63,13 @@ public class FolderManager {
     }
 
     /**
-     * Retrieves the entry contents of a folder starting from <code>first</code> up to a maximum of
-     * <code>count</code>
+     * Retrieves the entry contents of a folder
      * 
      * @param id
      *            unique folder identifier
-     * @param first
-     *            folder content to start from
-     * @param count
-     *            maximum number of entries to return
-     * @return list of entries retrieved
+     * @param asc
+     *            return order
+     * @return list of entry ids retrieved
      * @throws ManagerException
      *             on any exception accessing the folder or its contents
      */

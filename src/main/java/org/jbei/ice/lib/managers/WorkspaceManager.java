@@ -1,9 +1,11 @@
 package org.jbei.ice.lib.managers;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
@@ -178,6 +180,30 @@ public class WorkspaceManager {
         }
 
         return size;
+    }
+
+    public static ArrayList<Long> getRecentlyViewedByAccount(Account account)
+            throws ManagerException {
+        Session session = DAO.newSession();
+        try {
+            String queryString = "SELECT entry_id FROM workspace WHERE account_id = :id order by workspace.date_visited desc";
+            SQLQuery query = session.createSQLQuery(queryString);
+            query.setLong("id", account.getId());
+
+            @SuppressWarnings("unchecked")
+            List<Integer> list = (List<Integer>) query.list();
+
+            ArrayList<Long> result = new ArrayList<Long>();
+            for (Integer i : list)
+                result.add(i.longValue());
+            return result;
+        } catch (HibernateException e) {
+            throw new ManagerException(e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
     }
 
     public static Workspace save(Workspace workspace) throws ManagerException {

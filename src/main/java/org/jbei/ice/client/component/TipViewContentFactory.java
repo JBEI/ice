@@ -2,8 +2,8 @@ package org.jbei.ice.client.component;
 
 import java.util.Date;
 
-import org.jbei.ice.shared.EntryDataView;
-import org.jbei.ice.shared.PartTipView;
+import org.jbei.ice.shared.EntryData;
+import org.jbei.ice.shared.PartData;
 import org.jbei.ice.shared.PlasmidTipView;
 import org.jbei.ice.shared.SeedTipView;
 import org.jbei.ice.shared.StrainTipView;
@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class TipViewContentFactory {
 
-    public static Widget getContents(EntryDataView entry) {
+    public static Widget getContents(EntryData entry) {
 
         FlexTable parent = new FlexTable();
         parent.setStyleName("entry_table");
@@ -39,7 +39,7 @@ public class TipViewContentFactory {
             SeedTipView view = (SeedTipView) entry;
             widget = getSeedContent(view);
         } else if ("part".equals(type)) {
-            PartTipView view = (PartTipView) entry;
+            PartData view = (PartData) entry;
             widget = getPartContent(view);
         } else
             return null;
@@ -104,7 +104,7 @@ public class TipViewContentFactory {
         return table;
     }
 
-    private static Widget getPartContent(PartTipView view) {
+    private static Widget getPartContent(PartData view) {
 
         FlexTable table = new FlexTable();
         table.setCellPadding(3);
@@ -234,7 +234,7 @@ public class TipViewContentFactory {
         return table;
     }
 
-    private static void setLeftColumn(FlexTable table, EntryDataView entry) {
+    private static void setLeftColumn(FlexTable table, EntryData entry) {
 
         table.setHTML(0, 0, "<b>Part ID</b>");
         table.setText(0, 1, entry.getPartId());
@@ -247,19 +247,19 @@ public class TipViewContentFactory {
         table.setText(2, 1, entry.getAlias());
 
         table.setHTML(3, 0, "<b>Creator</b>");
-        table.setText(3, 1, "");
+        table.setText(3, 1, entry.getCreator());
 
         table.setHTML(4, 0, "<b>Status</b>");
-        table.setText(4, 1, "");
+        table.setText(4, 1, entry.getStatus());
 
         table.setHTML(5, 0, "<b>Owner</b>");
-        table.setText(5, 1, "");
+        table.setText(5, 1, entry.getOwner());
 
         table.setHTML(6, 0, "<b>Links</b>");
         table.setText(6, 1, "");
 
         table.setHTML(7, 0, "<b>Principal Investigator</b>");
-        table.setText(7, 1, "");
+        table.setText(7, 1, entry.getpI());
         table.getFlexCellFormatter().setColSpan(7, 1, 3);
         table.getFlexCellFormatter().setWidth(7, 0, "300px");
 

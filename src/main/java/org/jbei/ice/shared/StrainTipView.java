@@ -1,6 +1,6 @@
 package org.jbei.ice.shared;
 
-public class StrainTipView extends EntryDataView {
+public class StrainTipView extends EntryData {
 
     private static final long serialVersionUID = 1L;
 

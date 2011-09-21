@@ -9,16 +9,13 @@ public class Folder extends MenuItem {
     private long id;
 
     public Folder() {
-        super("");
-    }
-
-    public Folder(String name, int id) {
-        super(name);
-        this.id = id;
     }
 
     public long getId() {
-        return this.id;
+        return id;
     }
 
+    public void setId(long id) {
+        this.id = id;
+    }
 }

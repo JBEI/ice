@@ -275,6 +275,14 @@ public class EntryController extends Controller {
         return entries;
     }
 
+    public ArrayList<Long> getAllEntryIDs() throws ControllerException {
+        try {
+            return EntryManager.getEntries();
+        } catch (ManagerException e) {
+            throw new ControllerException(e);
+        }
+    }
+
     public List<Entry> getEntriesByOwner(String owner, int offset, int limit, String field,
             boolean ascending) throws ControllerException {
         List<Entry> entries = null;
@@ -323,6 +331,14 @@ public class EntryController extends Controller {
 
         try {
             return EntryManager.getEntriesByOwner(owner).size();
+        } catch (ManagerException e) {
+            throw new ControllerException(e);
+        }
+    }
+
+    public ArrayList<Long> getEntryIdsByOwner(String ownerEmail) throws ControllerException {
+        try {
+            return EntryManager.getEntriesByOwner(ownerEmail);
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }

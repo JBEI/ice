@@ -1,7 +1,12 @@
 package org.jbei.ice.client.view.form;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BioSafetyOptions;
 import org.jbei.ice.shared.EntryType;
+import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -15,7 +20,14 @@ import com.google.gwt.user.datepicker.client.DateBox;
 
 public class NewArabidopsisForm extends NewEntryForm {
 
-    public NewArabidopsisForm() {
+    public NewArabidopsisForm(HashMap<AutoCompleteField, ArrayList<String>> data, Button saveButton) {
+
+        super(data);
+        initWidget(layout);
+        init(saveButton);
+    }
+
+    protected void init(Button saveButton) {
 
         layout.setWidth("800px");
         layout.addStyleName("gray_border");
@@ -210,5 +222,11 @@ public class NewArabidopsisForm extends NewEntryForm {
         if (width != null)
             textBox.setWidth(width);
         return textBox;
+    }
+
+    @Override
+    public EntryInfo getEntry() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

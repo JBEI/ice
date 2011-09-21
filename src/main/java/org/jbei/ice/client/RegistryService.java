@@ -1,11 +1,20 @@
 package org.jbei.ice.client;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 
-import org.jbei.ice.shared.EntryDataView;
+import org.jbei.ice.shared.AutoCompleteField;
+import org.jbei.ice.shared.BlastProgram;
+import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.shared.EntryData;
 import org.jbei.ice.shared.FilterTrans;
-import org.jbei.ice.shared.Folder;
-import org.jbei.ice.shared.ProfileInfo;
+import org.jbei.ice.shared.FolderDetails;
+import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.BlastResultInfo;
+import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.shared.dto.StorageInfo;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -16,36 +25,54 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("ice")
 public interface RegistryService extends RemoteService {
 
-    /**
-     * @param name
-     * @param pass
-     * @return valid session id if the login was sucessful
-     */
-    String login(String name, String pass);
+    AccountInfo login(String name, String pass);
 
     boolean sessionValid(String sid);
 
     boolean logout(String sessionId);
 
-    ArrayList<EntryDataView> getSearchResults(ArrayList<FilterTrans> filters);
+    //
+    // Search
+    //
+    ArrayList<Long> retrieveSearchResults(ArrayList<FilterTrans> filters);
+
+    ArrayList<EntryData> retrieveEntryData(String sid, ArrayList<Long> entries, ColumnField field,
+            boolean asc);
+
+    EntryData retrieveEntryView(long id);
 
     /**
      * Returns list of folders as seen on the collections page
      * collections menu
      */
-    ArrayList<Folder> retrieveCollections(String sessionId);
+    ArrayList<FolderDetails> retrieveCollections(String sessionId);
 
-    /**
-     * returns a list of entry data views representing entries which are stored
-     * in the folder specified in the param. can return null
-     */
-    ArrayList<EntryDataView> retrieveEntriesForFolder(String sessionId, Folder folder);
+    ArrayList<Long> retrieveEntriesForFolder(String sessionId, FolderDetails folder);
 
-    ArrayList<EntryDataView> retrieveEntriesForMenu(String string, EntryMenu selection);
+    long retrieveAvailableEntryCount(String sessionId);
 
-    //
-    // profile page methods
-    //
-    ProfileInfo retrieveProfileInfo(String sessionId, String email);
+    ArrayList<Long> retrieveUserEntries(String sid, String userId);
 
+    ArrayList<Long> retrieveAllEntryIDs(String sid);
+
+    ArrayList<Long> retrieveRecentlyViewed(String sid);
+
+    ArrayList<Long> retrieveWorkspaceEntries(String sid);
+
+    HashMap<AutoCompleteField, ArrayList<String>> retrieveAutoCompleteData(String sid);
+
+    EntryInfo retrieveEntryDetails(String sid, long id);
+
+    AccountInfo retrieveAccountInfo(String sid, String userId);
+
+    AccountInfo retrieveAccountInfoForSession(String sid);
+
+    ArrayList<BlastResultInfo> blastSearch(String sid, String searchString, BlastProgram program);
+
+    ArrayList<StorageInfo> retrieveChildren(String sid, long id);
+
+    LinkedList<Long> retrieveSamplesByDepositor(String sid, String email, ColumnField field,
+            boolean asc);
+
+    LinkedList<SampleInfo> retrieveSampleInfo(String sid, LinkedList<Long> sampleIds, boolean asc);
 }

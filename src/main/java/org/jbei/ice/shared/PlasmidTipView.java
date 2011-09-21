@@ -1,6 +1,6 @@
 package org.jbei.ice.shared;
 
-public class PlasmidTipView extends EntryDataView {
+public class PlasmidTipView extends EntryData {
 
     private static final long serialVersionUID = 1L;
 

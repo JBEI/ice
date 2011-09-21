@@ -9,15 +9,13 @@ public class MenuItem implements Serializable {
     private String name;
 
     public MenuItem() {
-
-    }
-
-    public MenuItem(String name) {
-        this.name = name;
     }
 
     public String getName() {
         return this.name;
+    }
 
+    public void setName(String name) {
+        this.name = name;
     }
 }

@@ -426,6 +426,45 @@ public class EntryManager {
         return entries;
     }
 
+    public static List<Entry> getEntriesByIdSetSortByType(List<Long> ids, boolean ascending)
+            throws ManagerException {
+
+        ArrayList<Entry> entries = new ArrayList<Entry>();
+
+        if (ids.size() == 0) {
+            return entries;
+        }
+
+        String filter = Utils.join(", ", ids);
+        String orderSuffix = (" ORDER BY record_type " + (ascending ? "ASC" : "DESC"));
+        String queryString = "from " + Entry.class.getName() + " WHERE id in (" + filter + ")"
+                + orderSuffix;
+        return retrieveEntriesByQuery(queryString);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected static List<Entry> retrieveEntriesByQuery(String queryString) throws ManagerException {
+        Session session = DAO.newSession();
+        try {
+            Query query = session.createQuery(queryString);
+            ArrayList<Entry> entries = new ArrayList<Entry>();
+
+            @SuppressWarnings("rawtypes")
+            ArrayList list = (ArrayList) query.list();
+
+            if (list != null) {
+                entries.addAll(list);
+            }
+            return entries;
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve entries!", e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+    }
+
     public static void delete(Entry entry) throws ManagerException {
         if (entry == null) {
             throw new ManagerException("Failed to delete null entry!");

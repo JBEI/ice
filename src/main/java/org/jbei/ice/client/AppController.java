@@ -3,33 +3,39 @@ package org.jbei.ice.client;
 import java.util.Date;
 import java.util.HashMap;
 
+import org.jbei.ice.client.collection.CollectionsPresenter;
+import org.jbei.ice.client.collection.CollectionsView;
 import org.jbei.ice.client.event.ILoginEventHandler;
 import org.jbei.ice.client.event.ILogoutEventHandler;
 import org.jbei.ice.client.event.LoginEvent;
 import org.jbei.ice.client.event.LogoutEvent;
-import org.jbei.ice.client.presenter.AdvancedSearchPresenter;
-import org.jbei.ice.client.presenter.BlastPresenter;
-import org.jbei.ice.client.presenter.CollectionsPresenter;
+import org.jbei.ice.client.login.LoginPresenter;
+import org.jbei.ice.client.login.LoginView;
+import org.jbei.ice.client.presenter.BulkImportPresenter;
+import org.jbei.ice.client.presenter.DebugPresenter;
 import org.jbei.ice.client.presenter.EntryAddPresenter;
 import org.jbei.ice.client.presenter.EntryPresenter;
 import org.jbei.ice.client.presenter.HomePagePresenter;
-import org.jbei.ice.client.presenter.LoginPresenter;
-import org.jbei.ice.client.presenter.ProfilePresenter;
-import org.jbei.ice.client.view.AdvancedSearchView;
-import org.jbei.ice.client.view.BlastView;
-import org.jbei.ice.client.view.CollectionsView;
+import org.jbei.ice.client.presenter.StoragePresenter;
+import org.jbei.ice.client.profile.ProfilePresenter;
+import org.jbei.ice.client.profile.ProfileView;
+import org.jbei.ice.client.search.AdvancedSearchPresenter;
+import org.jbei.ice.client.search.AdvancedSearchView;
+import org.jbei.ice.client.search.BlastPresenter;
+import org.jbei.ice.client.search.BlastView;
+import org.jbei.ice.client.view.BulkImportView;
 import org.jbei.ice.client.view.EntryAddView;
 import org.jbei.ice.client.view.EntryView;
 import org.jbei.ice.client.view.HomePageView;
-import org.jbei.ice.client.view.LoginView;
-import org.jbei.ice.client.view.ProfileView;
+import org.jbei.ice.client.view.StorageView;
+import org.jbei.ice.shared.dto.AccountInfo;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 
@@ -44,6 +50,7 @@ public class AppController implements Presenter, ValueChangeHandler<String> {
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
     public static String sessionId;
+    public static AccountInfo accountInfo;
 
     public AppController(RegistryServiceAsync service, HandlerManager eventBus) {
 
@@ -61,6 +68,8 @@ public class AppController implements Presenter, ValueChangeHandler<String> {
             @Override
             public void onLogin(LoginEvent event) {
                 AppController.sessionId = event.getSessionId();
+                accountInfo = event.getAccountInfo();
+
                 if (event.isRememberUser()) {
                     Date expires = new Date(System.currentTimeMillis() + COOKIE_TIMEOUT);
                     // TODO : set the domain ? and change secure to true?
@@ -70,11 +79,12 @@ public class AppController implements Presenter, ValueChangeHandler<String> {
             }
         });
 
+        // add log out handler
         this.eventBus.addHandler(LogoutEvent.TYPE, new AppLogoutHandler());
     }
 
     private void goToMainPage() {
-        if (sessionId == null)
+        if (sessionId == null) // TODO check the cookie
             History.newItem("page=" + Page.LOGIN.getToken());
 
         Page currentPage = getPage(History.getToken());
@@ -94,11 +104,29 @@ public class AppController implements Presenter, ValueChangeHandler<String> {
 
         String token = event.getValue();
         Page page = getPage(token);
+        String param = getParam("id", token);
         Presenter presenter;
 
         switch (page) {
 
+        // TODO : cache the views and call reset() in the presenter when displaying them. they are apparently expensive to create or sum such
+        // TODO : presenters are cheap however
         case MAIN:
+            // illustrates code splitting
+            //            GWT.runAsync(new RunAsyncCallback() {
+            //                
+            //                @Override
+            //                public void onSuccess() {
+            //                    new HomePagePresenter(service, eventBus, new HomePageView());
+            //                    
+            //                }
+            //                
+            //                @Override
+            //                public void onFailure(Throwable reason) {
+            //                    // TODO Auto-generated method stub
+            //                    
+            //                }
+            //            });
             presenter = new HomePagePresenter(this.service, this.eventBus, new HomePageView());
             break;
 
@@ -107,11 +135,14 @@ public class AppController implements Presenter, ValueChangeHandler<String> {
             break;
 
         case ENTRY_VIEW:
-            presenter = new EntryPresenter(this.service, this.eventBus, new EntryView());
+            if (param == null)
+                presenter = new EntryPresenter(this.service, this.eventBus, new EntryView());
+            else
+                presenter = new EntryPresenter(this.service, this.eventBus, new EntryView(), param);
             break;
 
         case PROFILE:
-            presenter = new ProfilePresenter(this.service, this.eventBus, new ProfileView());
+            presenter = new ProfilePresenter(this.service, this.eventBus, new ProfileView(), param);
             break;
 
         case COLLECTIONS:
@@ -125,6 +156,18 @@ public class AppController implements Presenter, ValueChangeHandler<String> {
         case QUERY:
             presenter = new AdvancedSearchPresenter(this.service, this.eventBus,
                     new AdvancedSearchView());
+            break;
+
+        case BULK_IMPORT:
+            presenter = new BulkImportPresenter(this.service, this.eventBus, new BulkImportView());
+            break;
+
+        case STORAGE:
+            presenter = new StoragePresenter(this.service, this.eventBus, new StorageView());
+            break;
+
+        case DEBUG:
+            presenter = new DebugPresenter(this.service, this.eventBus);
             break;
 
         case LOGIN:
@@ -153,6 +196,10 @@ public class AppController implements Presenter, ValueChangeHandler<String> {
         return page;
     }
 
+    private String getParam(String key, String token) {
+        return parseToken(token).get(key);
+    }
+
     private HashMap<String, String> parseToken(String token) {
         HashMap<String, String> tokens = new HashMap<String, String>();
         for (String string : token.split(";")) {
@@ -171,6 +218,8 @@ public class AppController implements Presenter, ValueChangeHandler<String> {
         this.container = container;
 
         // check if there is a stored session that is valid
+        // TODO : what if sessionId is still set and is different
+
         final String sessionId = Cookies.getCookie(COOKIE_NAME);
         if (sessionId != null) {
 
@@ -180,7 +229,8 @@ public class AppController implements Presenter, ValueChangeHandler<String> {
                 public void onSuccess(Boolean result) {
                     if (result.booleanValue()) {
                         AppController.sessionId = sessionId;
-                        goToMainPage();
+                        fetchAccountInfo();
+                        //                        
                     } else {
                         History.newItem("page=" + Page.LOGIN.getToken());
                     }
@@ -190,7 +240,6 @@ public class AppController implements Presenter, ValueChangeHandler<String> {
                 public void onFailure(Throwable caught) {
                     // technically this is not the result of an invalid sessionId
                     // an attempt to login may cause another failure. punting dealing with that
-                    GWT.log("Error checking for session validity", caught);
                     if (Page.LOGIN.getToken().equals(History.getToken()))
                         History.fireCurrentHistoryState();
                     else
@@ -199,15 +248,35 @@ public class AppController implements Presenter, ValueChangeHandler<String> {
             });
         } else {
 
-            if ("".equals(History.getToken())) {
-                History.newItem("page=" + Page.LOGIN.getToken());
-            } else {
-                History.fireCurrentHistoryState();
-            }
+            //            if ("".equals(History.getToken())) {
+            History.newItem("page=" + Page.LOGIN.getToken());
+            //            } else {
+            //                History.fireCurrentHistoryState(); // TODO : only use this to redirect
+            //            }
         }
     }
 
-    // handler implementations
+    protected void fetchAccountInfo() {
+        service.retrieveAccountInfoForSession(AppController.sessionId,
+            new AsyncCallback<AccountInfo>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert("Failure to retrieve user account info for session");
+                }
+
+                @Override
+                public void onSuccess(AccountInfo result) {
+                    AppController.accountInfo = result;
+                    goToMainPage();
+                }
+            });
+    }
+
+    /**
+     * Logout handler implementation. Clears cookies and session id
+     * and redirects user to login page
+     */
     private final class AppLogoutHandler implements ILogoutEventHandler {
 
         @Override
@@ -216,6 +285,7 @@ public class AppController implements Presenter, ValueChangeHandler<String> {
 
                 @Override
                 public void onFailure(Throwable caught) {
+                    History.newItem("page=" + Page.LOGIN.getToken());
                 }
 
                 @Override
