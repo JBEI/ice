@@ -1,7 +1,7 @@
 package org.jbei.ice.client.view;
 
 import org.jbei.ice.client.common.Footer;
-import org.jbei.ice.client.common.Header;
+import org.jbei.ice.client.common.HeaderView;
 import org.jbei.ice.client.common.HeaderMenu;
 import org.jbei.ice.client.model.StorageTreeModel;
 import org.jbei.ice.client.presenter.StoragePresenter;
@@ -27,7 +27,7 @@ public class StorageView extends Composite implements StoragePresenter.Display {
         main.setHeight("98%");
         initWidget(main);
 
-        main.setWidget(0, 0, new Header());
+        main.setWidget(0, 0, new HeaderView());
         main.setWidget(1, 0, new HeaderMenu());
         main.setHTML(2, 0, "No contents");
         main.getFlexCellFormatter().setVerticalAlignment(2, 0, HasVerticalAlignment.ALIGN_TOP);

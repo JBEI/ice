@@ -4,8 +4,6 @@ import org.jbei.ice.client.MenuItem;
 
 public class Folder extends MenuItem {
 
-    private static final long serialVersionUID = 1L;
-
     private long id;
 
     public Folder() {

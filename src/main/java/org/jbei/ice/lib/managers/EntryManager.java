@@ -442,6 +442,20 @@ public class EntryManager {
         return retrieveEntriesByQuery(queryString);
     }
 
+    public static List<Entry> getEntriesByIdSetSortByCreated(List<Long> ids, boolean ascending)
+            throws ManagerException {
+        ArrayList<Entry> entries = new ArrayList<Entry>();
+
+        if (ids.size() == 0)
+            return entries;
+
+        String filter = Utils.join(", ", ids);
+        String orderSuffix = (" ORDER BY creation_time " + (ascending ? "ASC" : "DESC"));
+        String queryString = "from " + Entry.class.getName() + " WHERE id in (" + filter + ")"
+                + orderSuffix;
+        return retrieveEntriesByQuery(queryString);
+    }
+
     @SuppressWarnings("unchecked")
     protected static List<Entry> retrieveEntriesByQuery(String queryString) throws ManagerException {
         Session session = DAO.newSession();

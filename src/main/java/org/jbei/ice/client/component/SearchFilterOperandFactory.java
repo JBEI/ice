@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.model.OperandValue;
 import org.jbei.ice.shared.BioSafetyOptions;
-import org.jbei.ice.shared.EntryType;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
 import org.jbei.ice.shared.StatusType;
+import org.jbei.ice.shared.dto.EntryInfo;
 
 /**
  * Factory for retrieving the operands and operations for
@@ -33,8 +33,8 @@ public class SearchFilterOperandFactory {
 
         case TYPE:
             operands.clear();
-            for (EntryType value : EntryType.values())
-                operands.add(new OperandValue(value.getDisplay(), value.getDisplay()));
+            for (EntryInfo.EntryType value : EntryInfo.EntryType.values())
+                operands.add(new OperandValue(value.getDisplay(), value.getName()));
             return new TypeOperand(type, operands, QueryOperator.IS, QueryOperator.IS_NOT);
 
         case STATUS:

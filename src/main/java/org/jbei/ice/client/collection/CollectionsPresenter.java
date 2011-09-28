@@ -26,7 +26,7 @@ import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-public class CollectionsPresenter implements Presenter {
+public class CollectionsPresenter extends Presenter {
 
     public interface Display {
 
@@ -272,7 +272,8 @@ public class CollectionsPresenter implements Presenter {
                     break;
 
                 case SAMPLES:
-                    service.retrieveSamplesByDepositor(sid, null, null, false,
+                    String email = AppController.accountInfo.getEmail();
+                    service.retrieveSamplesByDepositor(sid, email, ColumnField.CREATED, false, // TODO : these params should be synced samples data provider
                         new AsyncCallback<LinkedList<Long>>() {
 
                             @Override

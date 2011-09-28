@@ -6,20 +6,20 @@ import java.util.HashMap;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Presenter;
 import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.shared.BlastOption;
+import org.jbei.ice.client.util.Utils;
 import org.jbei.ice.shared.BlastProgram;
 import org.jbei.ice.shared.dto.BlastResultInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
-public class BlastPresenter implements Presenter {
+public class BlastPresenter extends Presenter {
 
     public interface Display {
 
@@ -29,7 +29,9 @@ public class BlastPresenter implements Presenter {
 
         BlastProgram getProgram();
 
-        HasClickHandlers getSubmit();
+        Button getSubmit();
+
+        void setResultsDisplayVisible(boolean visible);
 
         void setProgramOptions(HashMap<String, String> options);
 
@@ -49,10 +51,12 @@ public class BlastPresenter implements Presenter {
 
         // set program options
         HashMap<String, String> options = new HashMap<String, String>();
-        for (BlastOption option : BlastOption.values()) {
-            options.put(option.getDisplay(), option.name());
+        for (BlastProgram option : BlastProgram.values()) {
+            options.put(option.getName() + " (" + option.getDetails() + ")", option.name());
         }
         display.setProgramOptions(options);
+
+        display.setResultsDisplayVisible(false);
 
         // submit handler
         this.display.getSubmit().addClickHandler(new BlastSearchHandler());
@@ -68,8 +72,14 @@ public class BlastPresenter implements Presenter {
 
         @Override
         public void onClick(ClickEvent event) {
+
             String sequence = display.getSequence();
             BlastProgram program = display.getProgram();
+            display.getResultsTable().setVisibleRangeAndClearData(
+                display.getResultsTable().getVisibleRange(), false);
+            display.setResultsDisplayVisible(true);
+            display.getSubmit().setEnabled(false);
+            Utils.showWaitCursor(display.getSubmit().getElement());
 
             // make service call, get results an assign to table of results 
             service.blastSearch(AppController.sessionId, sequence, program,
@@ -78,6 +88,9 @@ public class BlastPresenter implements Presenter {
                     @Override
                     public void onFailure(Throwable caught) {
                         Window.alert("Failure: " + caught.getMessage());
+                        display.setResultsDisplayVisible(false);
+                        display.getSubmit().setEnabled(true);
+                        Utils.showDefaultCursor(display.getSubmit().getElement());
                     }
 
                     @Override
@@ -86,6 +99,8 @@ public class BlastPresenter implements Presenter {
                             return;
 
                         new BlastSearchDataProvider(display.getResultsTable(), result, service);
+                        display.getSubmit().setEnabled(true);
+                        Utils.showDefaultCursor(display.getSubmit().getElement());
                     }
                 });
         }

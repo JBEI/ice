@@ -12,6 +12,7 @@ import org.jbei.ice.shared.EntryData;
 
 import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList;
+import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.AsyncDataProvider;
@@ -25,28 +26,34 @@ import com.google.gwt.view.client.Range;
 
 public class EntryDataViewDataProvider extends AsyncDataProvider<EntryData> {
 
-    protected final List<Long> values;
+    protected final List<Long> valuesIds;
     protected LinkedList<EntryData> results;
     private RegistryServiceAsync service;
     private final DataTable<EntryData> table;
+    private ColumnField lastSortField = ColumnField.CREATED;
+    private boolean lastSortAsc = false;
 
     public EntryDataViewDataProvider(DataTable<EntryData> view, List<Long> data,
             RegistryServiceAsync service) {
 
-        this.values = new LinkedList<Long>(data);
-        this.service = service;
-
-        // set total number available
-        //        updateRowCount(data.size(), true);
-        results = new LinkedList<EntryData>();
         this.table = view;
+        this.service = service;
+        this.valuesIds = new LinkedList<Long>();
+        results = new LinkedList<EntryData>();
+
+        this.table.addColumnSortHandler(new AsyncHandler(this.table));
+        DataTable<EntryData>.DataTableColumn<?> defaultSortField = this.table
+                .getColumn(lastSortField);
+
+        if (defaultSortField != null) {
+            ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, false);
+            this.table.getColumnSortList().push(info);
+        }
+
+        if (!data.isEmpty())
+            this.setValues(data);
+
         this.addDataDisplay(this.table);
-        AsyncHandler columnSortHandler = new AsyncHandler(this.table);
-        this.table.addColumnSortHandler(columnSortHandler);
-        DataTable<EntryData>.DataTableColumn<?> createdField = this.table
-                .getColumn(ColumnField.CREATED);
-        if (createdField != null)
-            this.table.getColumnSortList().push(createdField);
     }
 
     public EntryDataViewDataProvider(DataTable<EntryData> view, RegistryServiceAsync service) {
@@ -57,9 +64,9 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryData> {
     private void resetTableAndData(List<Long> data) {
 
         this.results.clear();
-        this.values.clear();
+        this.valuesIds.clear();
         this.table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
-        this.values.addAll(data);
+        this.valuesIds.addAll(data);
         updateRowCount(data.size(), true);
         // TODO : reset sort by clearing or just maintain the last one
         //        this.table.getColumnSortList().clear();
@@ -74,8 +81,8 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryData> {
         final int rangeStart = range.getStart();
         final int rangeEnd;
 
-        if ((rangeStart + range.getLength()) > values.size())
-            rangeEnd = values.size();
+        if ((rangeStart + range.getLength()) > valuesIds.size())
+            rangeEnd = valuesIds.size();
         else
             rangeEnd = (rangeStart + range.getLength());
 
@@ -85,25 +92,15 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryData> {
     }
 
     @Override
-    public void updateRowCount(int size, boolean exact) {
-        super.updateRowCount(size, exact);
-    }
-
-    @Override
-    public void updateRowData(int start, List<EntryData> values) {
-        super.updateRowData(start, values);
-    }
-
-    @Override
     protected void onRangeChanged(final HasData<EntryData> display) {
 
         // values of range to display from view
         final Range range = display.getVisibleRange();
         final int rangeStart = range.getStart();
-        final int rangeEnd = (rangeStart + range.getLength()) > values.size() ? values.size()
+        final int rangeEnd = (rangeStart + range.getLength()) > valuesIds.size() ? valuesIds.size()
                 : (rangeStart + range.getLength());
 
-        boolean sorted = sort(this.table.getColumnSortList(), rangeStart, rangeEnd);
+        boolean sorted = sort(rangeStart, rangeEnd);
         if (!sorted) {
 
             // check if it has been pre-fetched/cached
@@ -114,12 +111,11 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryData> {
                 updateRowData(rangeStart, show);
             } else {
 
-                fetchEntryData(null, false, rangeStart, rangeEnd);
+                fetchEntryData(lastSortField, lastSortAsc, rangeStart, rangeEnd);
             }
         }
     }
 
-    // TODO : check if data is already sorted to prevent retrieving
     /**
      * 
      * @param sortList
@@ -127,33 +123,49 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryData> {
      * @param rangeEnd
      * @return
      */
-    protected boolean sort(ColumnSortList sortList, int rangeStart, int rangeEnd) {
+    protected boolean sort(int rangeStart, int rangeEnd) {
+
+        ColumnSortList sortList = this.table.getColumnSortList();
+        final boolean sortAsc;
+        final ColumnField sortField;
 
         if (sortList == null || sortList.size() == 0) {
-            return false;
+            sortAsc = lastSortAsc;
+            sortField = lastSortField;
+        } else {
+
+            sortAsc = sortList.get(0).isAscending();
+
+            int colIndex = this.table.getColumns().indexOf(sortList.get(0).getColumn());
+            if (colIndex < 0)
+                sortField = lastSortField;
+            else
+                sortField = this.table.getColumns().get(colIndex).getField();
         }
 
-        // get sort data
-        boolean asc = sortList.get(0).isAscending();
+        if (sortAsc == lastSortAsc && sortField == lastSortField)
+            return false;
 
-        int colIndex = this.table.getColumns().indexOf(sortList.get(0).getColumn());
-        if (colIndex == -1)
-            return false; // TODO : this will be pretty unusual
-
-        ColumnField field = this.table.getColumns().get(colIndex).getField();
-        fetchEntryData(field, asc, rangeStart, rangeEnd);
+        results.clear();
+        lastSortAsc = sortAsc;
+        lastSortField = sortField;
+        fetchEntryData(sortField, sortAsc, rangeStart, rangeEnd);
         return true;
     }
 
     protected void fetchEntryData(ColumnField field, boolean ascending, final int rangeStart,
             final int rangeEnd) {
 
-        if (values == null || values.isEmpty())
+        if (valuesIds == null || valuesIds.isEmpty())
             return;
 
+        // TODO : index out of bounds exception here when we page to the last page and sort
+        // TODO : this is because we clear results and when we do not retrieve enough (factor below) 
+        // TODO : solution is to go to page one when user sorts
+
         int factor = (rangeEnd - rangeStart) * 9; // get nine pages in advance
-        factor = (factor + rangeEnd) > values.size() ? values.size() : (factor + rangeEnd);
-        List<Long> subList = values.subList(rangeStart, factor);
+        factor = (factor + rangeEnd) > valuesIds.size() ? valuesIds.size() : (factor + rangeEnd);
+        List<Long> subList = valuesIds.subList(rangeStart, factor);
         final ArrayList<Long> realValues = new ArrayList<Long>(subList);
 
         service.retrieveEntryData(AppController.sessionId, realValues, field, ascending,
@@ -166,6 +178,7 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryData> {
 
                 @Override
                 public void onSuccess(ArrayList<EntryData> result) {
+
                     results.addAll(result);
                     updateRowData(rangeStart, results.subList(rangeStart, rangeEnd));
                 }

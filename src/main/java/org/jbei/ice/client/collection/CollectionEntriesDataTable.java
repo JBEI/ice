@@ -15,7 +15,6 @@ public class CollectionEntriesDataTable extends EntryDataTable<EntryData> {
         columns.add(super.addPartIdColumn(true));
         columns.add(super.addNameColumn());
         columns.add(super.addSummaryColumn());
-        //        super.addOwnerColumn();
         columns.add(super.addStatusColumn());
         super.addHasAttachmentColumn();
         super.addHasSampleColumn();

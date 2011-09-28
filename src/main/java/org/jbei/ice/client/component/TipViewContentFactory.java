@@ -67,7 +67,7 @@ public class TipViewContentFactory {
         table.setCellPadding(3);
         table.setCellSpacing(2);
         table.setBorderWidth(0);
-        table.setStyleName("bg_white");
+        table.setStyleName("background_white");
 
         // left column
         setLeftColumn(table, view);
@@ -253,7 +253,7 @@ public class TipViewContentFactory {
         table.setText(4, 1, entry.getStatus());
 
         table.setHTML(5, 0, "<b>Owner</b>");
-        table.setText(5, 1, entry.getOwner());
+        table.setText(5, 1, entry.getOwnerName());
 
         table.setHTML(6, 0, "<b>Links</b>");
         table.setText(6, 1, "");

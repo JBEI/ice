@@ -31,7 +31,7 @@ public abstract class HasEntryDataTable<T extends HasEntryData> extends DataTabl
 
             @Override
             public String getValue(T entry) {
-                return entry.getDataView().getType();
+                return toUppercaseFully(entry.getDataView().getType());
             }
         };
         typeCol.setSortable(sortable);
@@ -67,6 +67,7 @@ public abstract class HasEntryDataTable<T extends HasEntryData> extends DataTabl
             }
         };
 
+        nameColumn.setSortable(true);
         this.addColumn(nameColumn, "Name");
         this.setColumnWidth(nameColumn, 150, Unit.PX);
         return nameColumn;
@@ -93,4 +94,11 @@ public abstract class HasEntryDataTable<T extends HasEntryData> extends DataTabl
         this.setColumnWidth(createdColumn, 120, Unit.PX);
         return createdColumn;
     }
+
+    private String toUppercaseFully(String value) {
+        if (value == null || value.isEmpty())
+            return "";
+        return (value.substring(0, 1).toUpperCase() + value.substring(1));
+    }
+
 }

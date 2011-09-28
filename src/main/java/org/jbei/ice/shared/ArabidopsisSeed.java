@@ -8,8 +8,6 @@ import org.jbei.ice.shared.dto.EntryInfo;
 
 public class ArabidopsisSeed extends EntryInfo {
 
-    private static final long serialVersionUID = 1L;
-
     public enum Generation {
         M0, M1, M2, T0, T1, T2, T3, T4, T5
     }

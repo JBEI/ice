@@ -3,13 +3,12 @@ package org.jbei.ice.client.search;
 import java.util.HashMap;
 
 import org.jbei.ice.client.common.Footer;
-import org.jbei.ice.client.common.Header;
+import org.jbei.ice.client.common.HeaderView;
 import org.jbei.ice.client.common.HeaderMenu;
 import org.jbei.ice.client.component.ExportAsPanel;
 import org.jbei.ice.client.component.table.EntryTablePager;
 import org.jbei.ice.shared.BlastProgram;
 
-import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -28,6 +27,8 @@ public class BlastView extends Composite implements BlastPresenter.Display {
     private final ListBox program;
     private final Button submit;
     private BlastResultsTable resultsTable;
+    private EntryTablePager pager;
+    private ExportAsPanel exportPanel;
 
     public BlastView() {
 
@@ -54,7 +55,7 @@ public class BlastView extends Composite implements BlastPresenter.Display {
         resultsTable.setWidth("100%", true);
 
         // layout contents, including headers and footer
-        layout.setWidget(0, 0, new Header());
+        layout.setWidget(0, 0, new HeaderView());
         layout.setWidget(1, 0, new HeaderMenu());
         layout.setWidget(2, 0, createPageComponents());
         layout.getCellFormatter().setVerticalAlignment(2, 0, HasVerticalAlignment.ALIGN_TOP);
@@ -90,7 +91,7 @@ public class BlastView extends Composite implements BlastPresenter.Display {
     }
 
     @Override
-    public HasClickHandlers getSubmit() {
+    public Button getSubmit() {
         return this.submit;
     }
 
@@ -113,10 +114,11 @@ public class BlastView extends Composite implements BlastPresenter.Display {
         contents.setHTML(1, 0, "<br />");
 
         // table pager
-        EntryTablePager pager = new EntryTablePager();
+        pager = new EntryTablePager();
         pager.setDisplay(resultsTable);
         panel.add(pager);
-        ExportAsPanel exportPanel = new ExportAsPanel();
+
+        exportPanel = new ExportAsPanel();
         panel.add(exportPanel);
         contents.setWidget(2, 0, panel);
 
@@ -176,5 +178,12 @@ public class BlastView extends Composite implements BlastPresenter.Display {
     @Override
     public Widget asWidget() {
         return this;
+    }
+
+    @Override
+    public void setResultsDisplayVisible(boolean visible) {
+        this.resultsTable.setVisible(visible);
+        this.exportPanel.setVisible(visible);
+        this.pager.setVisible(visible);
     }
 }

@@ -1,9 +1,9 @@
 package org.jbei.ice.client.view;
 
 import org.jbei.ice.client.common.Footer;
-import org.jbei.ice.client.common.Header;
+import org.jbei.ice.client.common.HeaderView;
 import org.jbei.ice.client.common.HeaderMenu;
-import org.jbei.ice.client.component.EntryDetailView;
+import org.jbei.ice.client.component.entryview.EntryDetailView;
 import org.jbei.ice.client.presenter.EntryPresenter;
 
 import com.google.gwt.event.dom.client.MouseDownEvent;
@@ -31,6 +31,7 @@ public class EntryView extends Composite implements EntryPresenter.Display {
     private final Label general;
     private final Label seqAnalysis;
     private EntryDetailView view;
+    private FlexTable contents;
 
     public EntryView() {
 
@@ -66,7 +67,7 @@ public class EntryView extends Composite implements EntryPresenter.Display {
         contentsLayout.getFlexCellFormatter().setRowSpan(0, 1, 3);
 
         // set main page contents
-        page.setWidget(0, 0, new Header());
+        page.setWidget(0, 0, new HeaderView());
         page.setWidget(1, 0, new HeaderMenu());
         page.setWidget(2, 0, createTitleHeader());
         page.setWidget(3, 0, createContentTabHeaders());
@@ -77,7 +78,7 @@ public class EntryView extends Composite implements EntryPresenter.Display {
     }
 
     protected Widget createTitleHeader() {
-        Label header = new Label("[Strain]:[JBEI-FOO]");
+        Label header = new Label("[Header]");
         header.addStyleName("panel_header");
         header.addStyleName("pad_top");
         return header;
@@ -102,40 +103,6 @@ public class EntryView extends Composite implements EntryPresenter.Display {
         seqAnalysis.addMouseOverHandler(new TabOverMouseHandler(seqAnalysis));
         seqAnalysis.addMouseOutHandler(new TabMouseOutHandler(seqAnalysis));
         seqAnalysis.addMouseDownHandler(new TabMouseClickHandler(seqAnalysis, general));
-    }
-
-    protected Widget createGeneralWidget() {
-
-        FlexTable contents = new FlexTable();
-        contents.setCellPadding(3);
-        contents.setCellSpacing(1);
-        contents.setWidth("800px");
-        contents.setHTML(0, 0, "<b>Name:</b>");
-        contents.getCellFormatter().setWidth(0, 0, "150px");
-        contents.setHTML(0, 1, "[Hector Plahar]");
-
-        // password
-        contents.setHTML(1, 0, "<b>Email:</b>");
-        contents.setHTML(1, 1, "[haplahar@lbl.gov]");
-
-        contents.setHTML(2, 0, "<b>Member since:</b>");
-        contents.setHTML(2, 1, "[Mar 8 2011]");
-
-        contents.setHTML(3, 0, "<b>Institution:</b>");
-        contents.setHTML(3, 1, "[Lawrence Berkeley Laboratory]");
-
-        contents.setHTML(4, 0, "<b>Description:</b>");
-        contents.setHTML(4, 1, "[Physical Biosciences, (510)486-6754, Mail-Stop 978R4121]");
-
-        FlexTable layout = new FlexTable();
-        layout.addStyleName("data_table");
-        layout.setCellPadding(3);
-        layout.setCellSpacing(1);
-        layout.setHTML(0, 0, "General Information");
-        layout.getCellFormatter().addStyleName(0, 0, "title_row_header");
-        layout.getCellFormatter().addStyleName(1, 0, "background_white");
-        layout.setWidget(1, 0, contents);
-        return layout;
     }
 
     /**
@@ -170,26 +137,8 @@ public class EntryView extends Composite implements EntryPresenter.Display {
         return layout;
     }
 
-    protected Widget createNotesWidget() {
-        FlexTable layout = new FlexTable();
-        layout.addStyleName("data_table");
-        layout.setCellPadding(3);
-        layout.setCellSpacing(1);
-        layout.setHTML(0, 0, "Notes");
-        layout.getCellFormatter().addStyleName(0, 0, "title_row_header");
-        layout.getCellFormatter().addStyleName(1, 0, "background_white");
-
-        // contents
-        FlexTable contents = new FlexTable();
-        contents.setCellPadding(0);
-        contents.setCellSpacing(2);
-        layout.setWidget(1, 0, contents);
-
-        return layout;
-    }
-
     protected Widget createLeftContents() {
-        final FlexTable contents = new FlexTable();
+        contents = new FlexTable();
         contents.setWidth("100%");
         contents.setCellPadding(0);
         contents.setCellSpacing(0);
@@ -223,6 +172,7 @@ public class EntryView extends Composite implements EntryPresenter.Display {
     protected FlexTable rightCol() {
 
         FlexTable rightCol = new FlexTable();
+        rightCol.addStyleName("pad_left");
         rightCol.setWidth("200px");
         rightCol.setCellPadding(0);
         rightCol.setCellSpacing(0);
@@ -240,7 +190,6 @@ public class EntryView extends Composite implements EntryPresenter.Display {
     protected Widget createAttachmentsWidget() {
 
         FlexTable attachments = new FlexTable();
-
         attachments.addStyleName("data_table");
         attachments.setCellPadding(3);
         attachments.setCellSpacing(1);
@@ -252,7 +201,7 @@ public class EntryView extends Composite implements EntryPresenter.Display {
         FlexTable contents = new FlexTable();
         contents.setCellPadding(0);
         contents.setCellSpacing(2);
-        contents.setHTML(1, 0, "<i>No Attachments</i>");
+        contents.setHTML(0, 0, "<i>No Attachments</i>");
         attachments.setWidget(1, 0, contents);
 
         return attachments;
@@ -272,7 +221,7 @@ public class EntryView extends Composite implements EntryPresenter.Display {
         FlexTable contents = new FlexTable();
         contents.setCellPadding(0);
         contents.setCellSpacing(2);
-        contents.setHTML(1, 0, "<i>No Samples</i>");
+        contents.setHTML(0, 0, "<i>No Samples</i>");
         samples.setWidget(1, 0, contents);
 
         return samples;
@@ -280,7 +229,6 @@ public class EntryView extends Composite implements EntryPresenter.Display {
 
     protected Widget createPermissionsWidget() {
         FlexTable permissions = new FlexTable();
-
         permissions.addStyleName("data_table");
         permissions.setCellPadding(3);
         permissions.setCellSpacing(1);
@@ -306,6 +254,7 @@ public class EntryView extends Composite implements EntryPresenter.Display {
     @Override
     public void setEntryDetailView(EntryDetailView view) {
         this.view = view;
+        contents.setWidget(0, 0, view);
     }
 
     private static class TabOverMouseHandler implements MouseOverHandler {

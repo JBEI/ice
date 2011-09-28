@@ -1,7 +1,7 @@
 package org.jbei.ice.client.collection;
 
 import org.jbei.ice.client.common.Footer;
-import org.jbei.ice.client.common.Header;
+import org.jbei.ice.client.common.HeaderView;
 import org.jbei.ice.client.common.HeaderMenu;
 import org.jbei.ice.client.component.ExportAsPanel;
 import org.jbei.ice.client.component.table.DataTable;
@@ -43,7 +43,7 @@ public class CollectionsView extends Composite implements CollectionsPresenter.D
 
         VerticalPanel panel = new VerticalPanel();
         panel.setWidth("100%");
-        panel.add(new Header());
+        panel.add(new HeaderView());
         panel.add(new HeaderMenu());
         return panel;
     }

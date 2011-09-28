@@ -1,27 +1,25 @@
 package org.jbei.ice.shared.dto;
 
-import java.util.Date;
-
 public class SampleInfo extends HasEntryData {
 
-    private static final long serialVersionUID = 1L;
-
-    private long id;
+    //    private long id;
+    private String id;
     private String label;
     private String notes;
     private String location;
-    private long locationId;
-    private Date creationTime;
+    private String locationId;
+    //    private long locationId;
+    private String creationTime;
 
     public String getLabel() {
         return label;
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -45,19 +43,19 @@ public class SampleInfo extends HasEntryData {
         this.location = location;
     }
 
-    public Date getCreationTime() {
+    public String getCreationTime() {
         return creationTime;
     }
 
-    public void setCreationTime(Date creationTime) {
+    public void setCreationTime(String creationTime) {
         this.creationTime = creationTime;
     }
 
-    public void setLocationId(long id) {
+    public void setLocationId(String id) {
         this.locationId = id;
     }
 
-    public long getLocationId() {
+    public String getLocationId() {
         return this.locationId;
     }
 }

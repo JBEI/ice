@@ -1,9 +1,15 @@
 package org.jbei.ice.client.collection;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.jbei.ice.client.component.table.EntryDataTable;
+import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.EntryData;
+
+import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.i18n.client.DateTimeFormat;
 
 public class RecentlyViewedDataTable extends EntryDataTable<EntryData> {
 
@@ -11,31 +17,60 @@ public class RecentlyViewedDataTable extends EntryDataTable<EntryData> {
     protected ArrayList<DataTableColumn<?>> createColumns() {
         ArrayList<DataTableColumn<?>> columns = new ArrayList<DataTableColumn<?>>();
 
-        this.addStarColumn();
-
         columns.add(super.addTypeColumn(true));
         columns.add(super.addPartIdColumn(true));
-        super.addNameColumn();
-        super.addSummaryColumn();
-
-        this.addLastAddedColumn();
-        this.addLastVisitedColumn();
+        columns.add(super.addNameColumn());
+        columns.add(super.addSummaryColumn());
+        columns.add(this.addLastAddedColumn());
+        columns.add(this.addLastVisitedColumn());
 
         return columns;
     }
 
-    private void addLastVisitedColumn() {
-        // TODO Auto-generated method stub
+    private DataTableColumn<String> addLastVisitedColumn() {
+        DataTableColumn<String> createdColumn = new DataTableColumn<String>(new TextCell(),
+                ColumnField.LAST_VISITED) {
+
+            @Override
+            public String getValue(EntryData object) {
+
+                DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yyyy");
+                Date date = new Date(object.getCreated());
+                String value = format.format(date);
+                if (value.length() >= 13)
+                    value = (value.substring(0, 9) + "...");
+                return value;
+            }
+        };
+
+        createdColumn.setSortable(true);
+        this.addColumn(createdColumn, "Created");
+        this.setColumnWidth(createdColumn, 120, Unit.PX);
+        return createdColumn;
 
     }
 
-    private void addLastAddedColumn() {
-        // TODO Auto-generated method stub
+    private DataTableColumn<String> addLastAddedColumn() {
+        DataTableColumn<String> createdColumn = new DataTableColumn<String>(new TextCell(),
+                ColumnField.LAST_ADDED) {
+
+            @Override
+            public String getValue(EntryData object) {
+
+                DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yyyy");
+                Date date = new Date(object.getCreated());
+                String value = format.format(date);
+                if (value.length() >= 13)
+                    value = (value.substring(0, 9) + "...");
+                return value;
+            }
+        };
+
+        createdColumn.setSortable(true);
+        this.addColumn(createdColumn, "Created");
+        this.setColumnWidth(createdColumn, 120, Unit.PX);
+        return createdColumn;
 
     }
 
-    private void addStarColumn() {
-        // TODO Auto-generated method stub
-
-    }
 }

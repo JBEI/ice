@@ -1,18 +1,20 @@
 package org.jbei.ice.shared.dto;
 
-import java.io.Serializable;
 import java.util.Date;
 
-public class EntryInfo implements Serializable {
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-    private static final long serialVersionUID = 1L;
+public class EntryInfo implements IsSerializable {
 
-    public enum EntryType {
-        strain("strain"), plasmid("plasmid"), part("part"), arabidopsis("arabidopsis");
+    public enum EntryType implements IsSerializable {
+        STRAIN("Strain", "strain"), PLASMID("Plasmid", "plasmid"), PART("Part", "part"), ARABIDOPSIS(
+                "Arabidopsis Seed", "arabidopsis");
 
         private String name;
+        private String display;
 
-        EntryType(String name) {
+        EntryType(String display, String name) {
+            this.display = display;
             this.name = name;
         }
 
@@ -27,6 +29,10 @@ public class EntryInfo implements Serializable {
 
         public String getName() {
             return this.name;
+        }
+
+        public String getDisplay() {
+            return this.display;
         }
     }
 
@@ -49,6 +55,9 @@ public class EntryInfo implements Serializable {
     private Date modificationTime;
     private Integer bioSafetyLevel;
     private String intellectualProperty;
+    private String partId;
+    private String link; // comma separated list of links
+    private String principalInvestigator;
 
     //    private Set<SelectionMarker> selectionMarkers = new LinkedHashSet<SelectionMarker>();
     //    private final Set<Link> links = new LinkedHashSet<Link>();
@@ -232,5 +241,21 @@ public class EntryInfo implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getPartId() {
+        return partId;
+    }
+
+    public void setPartId(String partId) {
+        this.partId = partId;
+    }
+
+    public String getPrincipalInvestigator() {
+        return principalInvestigator;
+    }
+
+    public void setPrincipalInvestigator(String principalInvestigator) {
+        this.principalInvestigator = principalInvestigator;
     }
 }

@@ -17,7 +17,7 @@ public class CollectionsDataTable extends EntryDataTable<EntryData> {
     protected ArrayList<DataTableColumn<?>> createColumns() {
         ArrayList<DataTableColumn<?>> columns = new ArrayList<DataTableColumn<?>>();
 
-        columns.add(super.addSelectionColumn(30));
+        columns.add(super.addSelectionColumn());
         columns.add(super.addTypeColumn(true));
         columns.add(super.addPartIdColumn(true));
         columns.add(super.addNameColumn());

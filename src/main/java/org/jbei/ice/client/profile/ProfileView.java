@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.collection.SamplesDataTable;
 import org.jbei.ice.client.common.Footer;
-import org.jbei.ice.client.common.Header;
+import org.jbei.ice.client.common.HeaderView;
 import org.jbei.ice.client.common.HeaderMenu;
 import org.jbei.ice.client.component.ExportAsPanel;
 import org.jbei.ice.client.component.table.DataTable;
@@ -84,7 +84,7 @@ public class ProfileView extends Composite implements ProfilePresenter.Display {
         header.addStyleName("panel_header");
         header.addStyleName("pad_top");
 
-        layout.setWidget(0, 0, new Header());
+        layout.setWidget(0, 0, new HeaderView());
         layout.setWidget(1, 0, new HeaderMenu());
         layout.setWidget(2, 0, header);// header should be moved to the contents
         layout.setWidget(3, 0, table);

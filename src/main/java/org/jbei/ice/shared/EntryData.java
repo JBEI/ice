@@ -1,13 +1,11 @@
 package org.jbei.ice.shared;
 
-import java.io.Serializable;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-public abstract class EntryData implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public abstract class EntryData implements IsSerializable {
 
     private long recordId;
-    private String type;
+    private String type; // TODO : use existing enum
     private String partId;
     private String name;
     private String alias;
@@ -140,14 +138,6 @@ public abstract class EntryData implements Serializable {
 
     public void setSummary(String summary) {
         this.summary = summary;
-    }
-
-    public String getOwner() {
-        return ownerName;
-    }
-
-    public void setOwner(String owner) {
-        this.ownerName = owner;
     }
 
     public String getStatus() {

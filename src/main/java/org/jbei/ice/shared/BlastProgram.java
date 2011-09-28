@@ -1,8 +1,8 @@
 package org.jbei.ice.shared;
 
-import java.io.Serializable;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-public enum BlastProgram implements Serializable {
+public enum BlastProgram implements IsSerializable {
 
     BLAST_N("blastn", "nucleotide search"), TBLAST_X("tblastx", "translated search");
 

@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @author hector
  */
 
-public class LoginPresenter implements Presenter {
+public class LoginPresenter extends Presenter {
 
     public interface Display {
 
@@ -52,7 +52,7 @@ public class LoginPresenter implements Presenter {
     private final HandlerManager eventBus;
     private final Display display;
 
-    // TODO : check if session is still valid and redirect user to the main page
+    // TODO : check if session is still valid and re-direct user to the main page
     public LoginPresenter(RegistryServiceAsync service, HandlerManager eventBus, Display display) {
 
         this.service = service;

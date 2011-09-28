@@ -1,6 +1,6 @@
 package org.jbei.ice.shared;
 
-import java.io.Serializable;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * Folder Transfer Object
@@ -8,12 +8,11 @@ import java.io.Serializable;
  * @author Hector Plahar
  */
 
-public class FolderDetails implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class FolderDetails implements IsSerializable {
 
     private long id;
     private String folderName;
+    private long count;
 
     public FolderDetails() {
     }
@@ -21,7 +20,6 @@ public class FolderDetails implements Serializable {
     public FolderDetails(long id, String name) {
         this.id = id;
         this.folderName = name;
-
     }
 
     public long getId() {
@@ -30,6 +28,14 @@ public class FolderDetails implements Serializable {
 
     public String getName() {
         return this.folderName;
+    }
+
+    public long getCount() {
+        return count;
+    }
+
+    public void setCount(long count) {
+        this.count = count;
     }
 
 }

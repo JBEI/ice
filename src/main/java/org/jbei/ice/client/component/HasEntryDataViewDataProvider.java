@@ -3,7 +3,6 @@ package org.jbei.ice.client.component;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.component.table.DataTable;
 import org.jbei.ice.client.component.table.HasEntryDataTable;
@@ -14,8 +13,6 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
@@ -30,32 +27,37 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryData> exten
 
     // default values
     private boolean lastSortAsc = false;
-    private ColumnField lastSortField = ColumnField.CREATED;
+    private ColumnField lastSortField;
+    private final ColumnField defaultSort;
 
     public HasEntryDataViewDataProvider(HasEntryDataTable<T> view, List<Long> data,
-            RegistryServiceAsync service) {
+            RegistryServiceAsync service, ColumnField defaultSort) {
 
         this.dataTable = view;
         this.service = service;
         this.valueIds = new LinkedList<Long>();
-        //        updateRowCount(data.size(), true);
         results = new LinkedList<T>();
-        this.addDataDisplay(this.dataTable);
 
         // sorting. set created sort as the default
         this.dataTable.addColumnSortHandler(new AsyncHandler(this.dataTable));
-        DataTable<T>.DataTableColumn<?> createdField = this.dataTable
-                .getColumn(ColumnField.CREATED);
+        DataTable<T>.DataTableColumn<?> defaultSortField = this.dataTable.getColumn(defaultSort);
+        lastSortField = defaultSort;
+        this.defaultSort = defaultSort;
 
-        ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(createdField, false);
-        this.dataTable.getColumnSortList().push(info);
+        if (defaultSortField != null) {
+            ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, false);
+            this.dataTable.getColumnSortList().push(info);
+        }
 
         if (!data.isEmpty())
             this.setValues(data);
+
+        this.addDataDisplay(this.dataTable);
     }
 
-    public HasEntryDataViewDataProvider(HasEntryDataTable<T> view, RegistryServiceAsync service) {
-        this(view, new LinkedList<Long>(), service);
+    public HasEntryDataViewDataProvider(HasEntryDataTable<T> view, RegistryServiceAsync service,
+            ColumnField defaultSort) {
+        this(view, new LinkedList<Long>(), service, defaultSort);
     }
 
     // clears all table data but does not reset the 
@@ -68,7 +70,7 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryData> exten
         updateRowCount(this.valueIds.size(), true);
 
         lastSortAsc = false;
-        lastSortField = ColumnField.CREATED;
+        lastSortField = this.defaultSort;
     }
 
     /**
@@ -92,16 +94,6 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryData> exten
         // TODO : this goes with the above todo. if we clear all the sort info then we use default else use the top sort
         // TODO : look at the sort method for an example of how to do this
         fetchHasEntryData(rangeStart, rangeEnd);
-    }
-
-    @Override
-    public void updateRowCount(int size, boolean exact) {
-        super.updateRowCount(size, exact);
-    }
-
-    @Override
-    public void updateRowData(int start, List<T> values) {
-        super.updateRowData(start, values);
     }
 
     // when a user sorts a column, setVisibleRangeAndclearData is called which
@@ -149,25 +141,26 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryData> exten
         if (sortAsc == lastSortAsc && sortField == lastSortField)
             return false;
 
-        service.retrieveSamplesByDepositor(AppController.sessionId, null, sortField, sortAsc,
-            new AsyncCallback<LinkedList<Long>>() {
-
-                // re-sorting
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert(caught.getMessage());
-                }
-
-                @Override
-                public void onSuccess(LinkedList<Long> result) {
-                    if (result == null)
-                        return;
-
-                    setValues(result);
-                    lastSortAsc = sortAsc;
-                    lastSortField = sortField;
-                }
-            });
+        // TODO : why is this here? this belongs in a SamplesDataProvider
+        //        service.retrieveSamplesByDepositor(AppController.sessionId, null, sortField, sortAsc,
+        //            new AsyncCallback<LinkedList<Long>>() {
+        //
+        //                // re-sorting
+        //                @Override
+        //                public void onFailure(Throwable caught) {
+        //                    Window.alert(caught.getMessage());
+        //                }
+        //
+        //                @Override
+        //                public void onSuccess(LinkedList<Long> result) {
+        //                    if (result == null)
+        //                        return;
+        //
+        //                    setValues(result);
+        //                    lastSortAsc = sortAsc;
+        //                    lastSortField = sortField;
+        //                }
+        //            });
 
         return true;
     }
@@ -190,6 +183,16 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryData> exten
             asc = sortList.get(0).isAscending();
 
         retrieveValues(realValues, rangeStart, rangeEnd, asc);
+    }
+
+    protected ColumnField getSortField() {
+        ColumnSortList sortList = this.dataTable.getColumnSortList();
+        int colIndex = this.dataTable.getColumns().indexOf(sortList.get(0).getColumn());
+        if (colIndex == -1)
+            return null; // TODO : this will be pretty unusual
+
+        ColumnField field = this.dataTable.getColumns().get(colIndex).getField();
+        return field;
     }
 
     /**

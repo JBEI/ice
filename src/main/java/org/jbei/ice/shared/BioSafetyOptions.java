@@ -1,6 +1,8 @@
 package org.jbei.ice.shared;
 
-public enum BioSafetyOptions {
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+public enum BioSafetyOptions implements IsSerializable {
 
     LEVEL_ONE("Level 1", "1"), LEVEL_TWO("Level 2", "2");
 

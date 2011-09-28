@@ -3,14 +3,11 @@ package org.jbei.ice.client.search;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.common.Footer;
-import org.jbei.ice.client.common.Header;
+import org.jbei.ice.client.common.HeaderView;
 import org.jbei.ice.client.common.HeaderMenu;
 import org.jbei.ice.client.component.ExportAsPanel;
 import org.jbei.ice.client.component.SearchFilterPanel;
-import org.jbei.ice.client.component.table.DataTable;
-import org.jbei.ice.client.component.table.EntryDataTable;
 import org.jbei.ice.client.component.table.EntryTablePager;
-import org.jbei.ice.shared.EntryData;
 import org.jbei.ice.shared.FilterTrans;
 
 import com.google.gwt.user.client.ui.Button;
@@ -25,7 +22,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class AdvancedSearchView extends Composite implements AdvancedSearchPresenter.Display {
 
     private SearchFilterPanel filterPanel;
-    private EntryDataTable<EntryData> table;
+    private AdvancedSearchResultsTable table;
     private EntryTablePager pager;
     private ExportAsPanel exportPanel;
 
@@ -40,7 +37,7 @@ public class AdvancedSearchView extends Composite implements AdvancedSearchPrese
         initWidget(layout);
 
         // headers
-        layout.setWidget(0, 0, new Header());
+        layout.setWidget(0, 0, new HeaderView());
         layout.setWidget(1, 0, new HeaderMenu());
 
         // contents
@@ -105,7 +102,7 @@ public class AdvancedSearchView extends Composite implements AdvancedSearchPrese
     }
 
     @Override
-    public DataTable<EntryData> getResultsTable() {
+    public AdvancedSearchResultsTable getResultsTable() {
         return this.table;
     }
 
@@ -115,12 +112,9 @@ public class AdvancedSearchView extends Composite implements AdvancedSearchPrese
     }
 
     @Override
-    public EntryTablePager getPager() {
-        return pager;
-    }
-
-    @Override
-    public ExportAsPanel getExportOptions() {
-        return exportPanel;
+    public void setResultsVisibility(boolean visible) {
+        this.table.setVisible(visible);
+        this.exportPanel.setVisible(visible);
+        this.pager.setVisible(visible);
     }
 }

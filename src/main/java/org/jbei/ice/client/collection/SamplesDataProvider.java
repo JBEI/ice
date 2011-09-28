@@ -6,6 +6,7 @@ import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.component.HasEntryDataViewDataProvider;
 import org.jbei.ice.client.component.table.HasEntryDataTable;
+import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.SampleInfo;
 
 import com.google.gwt.user.client.Window;
@@ -14,7 +15,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public class SamplesDataProvider extends HasEntryDataViewDataProvider<SampleInfo> {
 
     public SamplesDataProvider(HasEntryDataTable<SampleInfo> view, RegistryServiceAsync service) {
-        super(view, service);
+        super(view, service, ColumnField.CREATED);
     }
 
     @Override
@@ -34,10 +35,6 @@ public class SamplesDataProvider extends HasEntryDataViewDataProvider<SampleInfo
                     @Override
                     public void onSuccess(LinkedList<SampleInfo> result) {
                         results.addAll(result);
-                        //                        Window.alert("Retrieved samples from [" + rangeStart + " to " + rangeEnd
-                        //                                + "]. Data size is " + result.size() + ". First - "
-                        //                                + result.get(0).getId() + ", Last - "
-                        //                                + result.get(result.size() - 1).getId());
                         updateRowData(rangeStart, results.subList(rangeStart, rangeEnd));
                     }
 

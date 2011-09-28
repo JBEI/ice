@@ -19,7 +19,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
-public class EntryAddPresenter implements Presenter {
+public class EntryAddPresenter extends Presenter {
 
     public interface Display {
 

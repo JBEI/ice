@@ -2,35 +2,39 @@ package org.jbei.ice.client.view;
 
 import org.jbei.ice.client.ILogoutHandler;
 import org.jbei.ice.client.common.Footer;
-import org.jbei.ice.client.common.Header;
 import org.jbei.ice.client.common.HeaderMenu;
+import org.jbei.ice.client.common.HeaderView;
 import org.jbei.ice.client.presenter.HomePagePresenter;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HeaderPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class HomePageView extends Composite implements HomePagePresenter.Display {
 
-    private final FlexTable layout;
-    private final Header header;
+    private final HeaderView header;
 
     public HomePageView() {
-        layout = new FlexTable();
-        initWidget(layout);
+        HeaderPanel layout = new HeaderPanel();
         layout.setWidth("100%");
-        header = new Header();
+        initWidget(layout);
 
-        // add login to page
-        layout.setWidget(0, 0, header);
-        layout.setWidget(1, 0, new HeaderMenu());
-        layout.setWidget(2, 0, getContents());
-        layout.getCellFormatter().setHeight(2, 0, "100%");
-        layout.getCellFormatter().setVerticalAlignment(2, 0, HasVerticalAlignment.ALIGN_TOP);
+        layout.setHeaderWidget(getHeader());
+        layout.setContentWidget(getContents());
+        layout.setFooterWidget(getFooter());
 
-        // footer
-        layout.setWidget(3, 0, Footer.getInstance());
+        header = new HeaderView();
+    }
+
+    private Widget getHeader() {
+
+        VerticalPanel panel = new VerticalPanel();
+        panel.setWidth("100%");
+        panel.add(header);
+        panel.add(new HeaderMenu());
+        return panel;
     }
 
     protected Widget getContents() {
@@ -42,6 +46,10 @@ public class HomePageView extends Composite implements HomePagePresenter.Display
 
     public ILogoutHandler getLogoutHandler() {
         return header;
+    }
+
+    private Widget getFooter() {
+        return Footer.getInstance();
     }
 
     @Override

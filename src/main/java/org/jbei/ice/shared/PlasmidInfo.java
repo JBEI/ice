@@ -2,10 +2,7 @@ package org.jbei.ice.shared;
 
 import org.jbei.ice.shared.dto.EntryInfo;
 
-
 public class PlasmidInfo extends EntryInfo {
-
-    private static final long serialVersionUID = 1L;
 
     private String backbone;
     private String originOfReplication;
@@ -13,6 +10,7 @@ public class PlasmidInfo extends EntryInfo {
     private boolean circular;
 
     public PlasmidInfo() {
+        this.setType(EntryType.PLASMID);
     }
 
     //    public Plasmid(String recordId, String versionId, String recordType, String owner,

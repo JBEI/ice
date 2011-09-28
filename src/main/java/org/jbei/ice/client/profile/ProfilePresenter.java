@@ -21,7 +21,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
-public class ProfilePresenter implements Presenter {
+public class ProfilePresenter extends Presenter {
 
     private final String sid = AppController.sessionId;
     private final EntryDataViewDataProvider provider; // entries tab view data provider
@@ -58,6 +58,8 @@ public class ProfilePresenter implements Presenter {
 
             @Override
             public void onSuccess(AccountInfo info) {
+                // TODO : some accounts do not have registered accounts and so need to check for that and disable link
+                // TODO : e.g. filemaker 
                 String fullName = info.getFirstName() + " " + info.getLastName();
                 display.setData(fullName, info.getEmail(), info.getSince(), info.getInstitution(),
                     info.getDescription());

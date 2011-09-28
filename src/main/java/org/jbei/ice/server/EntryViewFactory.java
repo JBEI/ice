@@ -28,7 +28,7 @@ public class EntryViewFactory {
         view.setAlias(entry.getAlias());
         view.setCreator(entry.getCreator());
         view.setStatus(entry.getStatus());
-        view.setOwner(entry.getOwner());
+        view.setOwnerName(entry.getOwner());
         view.setOwnerId(entry.getOwnerEmail());
         view.setKeywords(entry.getKeywords());
         view.setSummary(entry.getShortDescription());

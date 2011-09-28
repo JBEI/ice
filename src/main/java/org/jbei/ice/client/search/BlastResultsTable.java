@@ -3,10 +3,11 @@ package org.jbei.ice.client.search;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.component.table.HasEntryDataTable;
+import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.BlastResultInfo;
 
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.user.cellview.client.TextColumn;
 
 public class BlastResultsTable extends HasEntryDataTable<BlastResultInfo> {
 
@@ -22,66 +23,72 @@ public class BlastResultsTable extends HasEntryDataTable<BlastResultInfo> {
         columns.add(super.addTypeColumn(true));
         columns.add(super.addPartIdColumn(true));
         columns.add(super.addNameColumn());
-
-        addAlignedColumn();
-        addAlignedIdentityColumn();
-        addBitScoreColumn();
-        addEValueColumn();
+        columns.add(addAlignedColumn());
+        columns.add(addAlignedIdentityColumn());
+        columns.add(addBitScoreColumn());
+        columns.add(addEValueColumn());
 
         return columns;
     }
 
-    protected void addAlignedColumn() {
-        TextColumn<BlastResultInfo> column = new TextColumn<BlastResultInfo>() {
+    protected DataTableColumn<String> addAlignedColumn() {
+
+        DataTableColumn<String> alignedCol = new DataTableColumn<String>(new TextCell(),
+                ColumnField.ALIGNED_BP) {
 
             @Override
             public String getValue(BlastResultInfo info) {
-                return ""; // TODO
-
+                return info.getAlignmentLength() + " / " + info.getQueryLength();
             }
         };
-
-        this.addColumn(column, "Aligned (BP)");
-        this.setColumnWidth(column, 200, Unit.PX);
+        alignedCol.setSortable(true);
+        this.addColumn(alignedCol, "Aligned (BP)");
+        this.setColumnWidth(alignedCol, 200, Unit.PX);
+        return alignedCol;
     }
 
-    protected void addAlignedIdentityColumn() {
-        TextColumn<BlastResultInfo> column = new TextColumn<BlastResultInfo>() {
+    protected DataTableColumn<String> addAlignedIdentityColumn() {
+        DataTableColumn<String> alignedCol = new DataTableColumn<String>(new TextCell(),
+                ColumnField.ALIGNED_IDENTITY) {
 
             @Override
             public String getValue(BlastResultInfo info) {
-                return ""; // TODO
+                return String.valueOf(info.getPercentId());
             }
         };
-
-        this.addColumn(column, "Aligned % Identity");
-        this.setColumnWidth(column, 200, Unit.PX);
+        alignedCol.setSortable(true);
+        this.addColumn(alignedCol, "Aligned % Identity");
+        this.setColumnWidth(alignedCol, 200, Unit.PX);
+        return alignedCol;
     }
 
-    protected void addBitScoreColumn() {
-        TextColumn<BlastResultInfo> column = new TextColumn<BlastResultInfo>() {
+    protected DataTableColumn<String> addBitScoreColumn() {
+        DataTableColumn<String> col = new DataTableColumn<String>(new TextCell(),
+                ColumnField.BIT_SCORE) {
 
             @Override
             public String getValue(BlastResultInfo info) {
                 return String.valueOf(info.getBitScore());
             }
         };
-
-        this.addColumn(column, "Bit Score");
-        this.setColumnWidth(column, 200, Unit.PX);
+        col.setSortable(true);
+        this.addColumn(col, ColumnField.BIT_SCORE.getName());
+        this.setColumnWidth(col, 200, Unit.PX);
+        return col;
     }
 
-    protected void addEValueColumn() {
-        TextColumn<BlastResultInfo> column = new TextColumn<BlastResultInfo>() {
+    protected DataTableColumn<String> addEValueColumn() {
+        DataTableColumn<String> col = new DataTableColumn<String>(new TextCell(),
+                ColumnField.E_VALUE) {
 
             @Override
             public String getValue(BlastResultInfo info) {
                 return String.valueOf(info.geteValue());
             }
         };
-
-        this.addColumn(column, "E-Value");
-        this.setColumnWidth(column, 200, Unit.PX);
+        col.setSortable(true);
+        this.addColumn(col, ColumnField.E_VALUE.getName());
+        this.setColumnWidth(col, 200, Unit.PX);
+        return col;
     }
-
 }

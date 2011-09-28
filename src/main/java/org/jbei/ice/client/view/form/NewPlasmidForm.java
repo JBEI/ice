@@ -4,45 +4,36 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.jbei.ice.shared.AutoCompleteField;
+import org.jbei.ice.shared.BioSafetyOptions;
+import org.jbei.ice.shared.EntryType;
 import org.jbei.ice.shared.PlasmidInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class NewPlasmidForm extends NewEntryForm {
 
     private final PlasmidInfo plasmid;
 
-    interface PlasmidUiBinder extends UiBinder<Widget, NewPlasmidForm> {
-    };
-
-    private static PlasmidUiBinder uiBinder = GWT.create(PlasmidUiBinder.class);
-
-    @UiField
-    SuggestBox selectionMarkerBox;
-
-    @UiField
-    Button submitButton;
-
     public NewPlasmidForm(HashMap<AutoCompleteField, ArrayList<String>> data, Button saveButton) {
 
         super(data);
         plasmid = new PlasmidInfo();
-        initWidget(uiBinder.createAndBindUi(this));
+        initWidget(layout);
         init(saveButton);
     }
 
-    /*
-    protected void init() {
+    @Override
+    protected void init(Button saveButton) {
 
         layout.setWidth("800px");
         layout.addStyleName("gray_border");
@@ -138,7 +129,7 @@ public class NewPlasmidForm extends NewEntryForm {
         bioSafety.setVisibleItemCount(1);
         bioSafety.addItem(BioSafetyOptions.LEVEL_ONE.getDisplayName());
         bioSafety.addItem(BioSafetyOptions.LEVEL_TWO.getDisplayName());
-        status.setStyleName("inputbox");
+        bioSafety.setStyleName("inputbox");
         layout.setWidget(15, 1, bioSafety);
 
         // intellectual property
@@ -184,13 +175,62 @@ public class NewPlasmidForm extends NewEntryForm {
         sampleNotes.setStyleName("inputbox");
         layout.setWidget(21, 1, sampleNotes);
 
+        // sample location
+        layout.setHTML(22, 0, "&nbsp;Sample Location");
+        Widget location = createListBoxWithHelpText("(Must specify Sample Name above)",
+            "Plasmid Storage (Default)");
+        layout.setWidget(22, 1, location);
+
+        // sample location places
+        layout.setHTML(23, 0, "&nbsp;");
+        layout.setWidget(23, 1, createSampleLocationOptions());
+
+        // notes
+        layout.setHTML(24, 0, "&nbsp;Notes");
+        layout.setWidget(24, 1, createNotes());
+
         // save
-        layout.setHTML(22, 0, "&nbsp;");
-        Button button = new Button("Save");
-        layout.setWidget(22, 1, button);
+        layout.setHTML(25, 0, "&nbsp;");
+        saveButton = new Button("Save");
+        layout.setWidget(25, 1, saveButton);
     }
 
-    */
+    protected Widget createNotes() {
+        VerticalPanel panel = new VerticalPanel();
+        HorizontalPanel horiPanel = new HorizontalPanel();
+        horiPanel.add(new HTML("Markup Type:"));
+        horiPanel.add(this.createListBox());
+        panel.add(horiPanel);
+
+        TextArea notesArea = new TextArea();
+        notesArea.addStyleName("inputbox");
+        notesArea.setWidth("640px");
+        notesArea.setHeight("480px");
+        panel.add(notesArea);
+        return panel;
+    }
+
+    protected Widget createListBox() {
+        ListBox box = new ListBox();
+        box.setStyleName("inputbox");
+        box.setVisibleItemCount(1);
+        box.addItem("Text");
+        box.addItem("Wiki");
+        box.addItem("Confluence");
+        return box;
+    }
+
+    protected Widget createSampleLocationOptions() {
+        FlexTable table = new FlexTable();
+        table.setHTML(0, 0, "Shelf");
+        table.setWidget(0, 1, createTextBox());
+        table.setHTML(1, 0, "Box");
+        table.setWidget(1, 1, createTextBox());
+        table.setHTML(2, 0, "Tube");
+        table.setWidget(2, 1, createTextBox());
+        return table;
+    }
+
     protected TextBox createTextBox() {
         return this.createTextBox(null);
     }
@@ -210,16 +250,4 @@ public class NewPlasmidForm extends NewEntryForm {
         return plasmid;
     }
 
-    @Override
-    protected void init(Button button) {
-        selectionMarkerBox = createAutoCompleteForSelectionMarkers("300px");
-    }
-
-    @UiHandler("submitButton")
-    void handleSubmit(ClickEvent event) {
-        Window.alert("Clicked: " + selectionMarkerBox.getText());
-    }
-
-    //    @UiHandler("selectionMarkerBox")
-    //    void handleText
 }

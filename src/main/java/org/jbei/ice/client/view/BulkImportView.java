@@ -1,7 +1,7 @@
 package org.jbei.ice.client.view;
 
 import org.jbei.ice.client.common.Footer;
-import org.jbei.ice.client.common.Header;
+import org.jbei.ice.client.common.HeaderView;
 import org.jbei.ice.client.common.HeaderMenu;
 import org.jbei.ice.client.presenter.BulkImportPresenter;
 
@@ -32,7 +32,7 @@ public class BulkImportView extends Composite implements BulkImportPresenter.Dis
     protected void bind() {
 
         // headers
-        layout.setWidget(0, 0, new Header());
+        layout.setWidget(0, 0, new HeaderView());
         layout.setWidget(1, 0, new HeaderMenu());
 
         // contents

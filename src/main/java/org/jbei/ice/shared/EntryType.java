@@ -1,6 +1,8 @@
 package org.jbei.ice.shared;
 
-public enum EntryType {
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+public enum EntryType implements IsSerializable {
 
     PLASMID("Plasmid"), STRAIN("Strain"), PART("Part"), STRAIN_WITH_PLASMID(
             "Strain with One Plasmid"), ARABIDOPSIS("Arabidopsis Seed");

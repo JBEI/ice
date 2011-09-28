@@ -6,7 +6,7 @@ import org.jbei.ice.client.FeedbackType;
 import org.jbei.ice.client.IFeedbackHandler;
 import org.jbei.ice.client.ILogoutHandler;
 import org.jbei.ice.client.common.Footer;
-import org.jbei.ice.client.common.Header;
+import org.jbei.ice.client.common.HeaderView;
 
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.dom.client.KeyPressHandler;
@@ -31,7 +31,7 @@ public class LoginView extends Composite implements LoginPresenter.Display {
     private final TextBox pass;
     private final Button loginButton;
     private final CheckBox rememberUserCheckBox;
-    private final Header header;
+    private final HeaderView header;
     private final FeedbackLabel feedback;
     private FlexTable loginTable;
 
@@ -45,7 +45,7 @@ public class LoginView extends Composite implements LoginPresenter.Display {
         initWidget(main);
 
         // header
-        header = new Header();
+        header = new HeaderView();
         main.setWidget(0, 0, header);
 
         // initialize components for login box

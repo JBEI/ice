@@ -14,8 +14,7 @@
   
 }
 
-@sprite .cellTableFooter {
-	
+@sprite .cellTableFooter {	
   gwt-image: 'cellTableFooterBackground';
   background-color: #b4d0f8;
   border-top: 1px solid #88b0f2;
@@ -34,16 +33,16 @@
     font-size: 12px;
     white-space: nowrap;
     border-right: 1px solid #ccc;
+    border-top: 1px solid #ccc; /* ADDED later */
     padding-left: 4px;
 }
 
 .cellTableCell {
-  padding-left: 4px;
+  padding: 4px; /* previously padding-left*/
   overflow: hidden;
   border-right: 1px solid #ccc;
   border-top: 1px solid #ccc;  
 }
-
 
 .cellTableFirstColumnFooter {
   border-left: 0px;

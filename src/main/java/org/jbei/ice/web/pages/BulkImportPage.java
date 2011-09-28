@@ -37,7 +37,6 @@ public class BulkImportPage extends ProtectedPage {
         flashComponent.add(new SimpleAttributeModifier("pluginspage",
                 "http://www.adobe.com/go/getflashplayer"));
 
-        System.out.println(flashComponent.toString(true));
         this.add(flashComponent);
     }
 }

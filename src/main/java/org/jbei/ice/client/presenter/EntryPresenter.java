@@ -3,9 +3,7 @@ package org.jbei.ice.client.presenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Presenter;
 import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.component.EntryDetailView;
-import org.jbei.ice.client.component.PlasmidDetailView;
-import org.jbei.ice.shared.PlasmidInfo;
+import org.jbei.ice.client.component.entryview.EntryDetailView;
 import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.event.shared.HandlerManager;
@@ -14,7 +12,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
-public class EntryPresenter implements Presenter {
+public class EntryPresenter extends Presenter {
 
     public interface Display {
 
@@ -46,17 +44,14 @@ public class EntryPresenter implements Presenter {
 
             @Override
             public void onFailure(Throwable caught) {
-                Window.alert("Failed to retrieve entry details");
-
+                Window.alert("Failed to retrieve entry details: " + caught.getMessage());
             }
 
             @Override
             public void onSuccess(EntryInfo result) {
-                //TODO : instanceof
-                if (result instanceof PlasmidInfo) {
-                    display.setEntryDetailView(new PlasmidDetailView((PlasmidInfo) result));
-                }
-
+                if (result == null)
+                    Window.alert("Received null entry"); // TODO
+                display.setEntryDetailView(new EntryDetailView(result));
             }
         });
     }

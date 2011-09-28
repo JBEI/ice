@@ -17,17 +17,18 @@ public class AdvancedSearchResultsTable extends EntryDataTable<EntryData> {
 
         ArrayList<DataTableColumn<?>> columns = new ArrayList<DataTableColumn<?>>();
 
+        columns.add(super.addSelectionColumn());
         columns.add(super.addTypeColumn(true));
         columns.add(super.addPartIdColumn(true));
-
-        super.addNameColumn();
-        super.addSummaryColumn();
-        super.addOwnerColumn();
-        super.addStatusColumn();
+        columns.add(super.addNameColumn());
+        columns.add(super.addSummaryColumn());
+        columns.add(super.addOwnerColumn());
+        columns.add(super.addStatusColumn());
         super.addHasAttachmentColumn();
         super.addHasSampleColumn();
         super.addHasSequenceColumn();
-        super.addCreatedColumn();
+        columns.add(super.addCreatedColumn());
+
         return columns;
     }
 }

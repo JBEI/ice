@@ -6,7 +6,7 @@ import java.util.HashMap;
 import org.jbei.ice.client.FeedbackType;
 import org.jbei.ice.client.IFeedbackHandler;
 import org.jbei.ice.client.common.Footer;
-import org.jbei.ice.client.common.Header;
+import org.jbei.ice.client.common.HeaderView;
 import org.jbei.ice.client.common.HeaderMenu;
 import org.jbei.ice.client.presenter.EntryAddPresenter;
 import org.jbei.ice.client.view.form.NewArabidopsisForm;
@@ -57,7 +57,7 @@ public class EntryAddView extends Composite implements EntryAddPresenter.Display
         contents.add(newEntryWidget());
         contents.setWidth("100%");
 
-        table.setWidget(0, 0, new Header());
+        table.setWidget(0, 0, new HeaderView());
         table.setWidget(1, 0, new HeaderMenu());
 
         // contents
@@ -116,8 +116,8 @@ public class EntryAddView extends Composite implements EntryAddPresenter.Display
         if (entryForm == null) {
             // widget is null, create a new one
             entryForm = entryForm(formType);
-            //            if (entryForm != null)
-            //                formsCache.put(formType, entryForm);
+            if (entryForm != null)
+                formsCache.put(formType, entryForm);
         }
 
         if (contents.getWidgetCount() > 1) {

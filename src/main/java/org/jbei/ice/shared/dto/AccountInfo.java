@@ -1,10 +1,8 @@
 package org.jbei.ice.shared.dto;
 
-import java.io.Serializable;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class AccountInfo implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class AccountInfo implements IsSerializable {
 
     private String sessionId;
     private String email;
@@ -16,17 +14,6 @@ public class AccountInfo implements Serializable {
 
     public AccountInfo() {
     }
-
-    //    public AccountInfo(String email, String firstName, String lastName, String institution,
-    //            String description, String since) {
-    //        super();
-    //        this.email = email;
-    //        this.firstName = firstName;
-    //        this.lastName = lastName;
-    //        this.institution = institution;
-    //        this.description = description;
-    //        this.since = since;
-    //    }
 
     public String getEmail() {
         return email;

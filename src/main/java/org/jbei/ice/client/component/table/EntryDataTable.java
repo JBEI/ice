@@ -2,14 +2,14 @@ package org.jbei.ice.client.component.table;
 
 import java.util.Date;
 
+import org.jbei.ice.client.Page;
 import org.jbei.ice.client.component.table.cell.PartIDCell;
+import org.jbei.ice.client.component.table.cell.UrlCell;
 import org.jbei.ice.client.component.table.column.ImageColumn;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.EntryData;
 
 import com.google.gwt.cell.client.CheckboxCell;
-import com.google.gwt.cell.client.ClickableTextCell;
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
@@ -19,7 +19,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.cellview.client.Header;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.History;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
@@ -45,7 +45,7 @@ public abstract class EntryDataTable<T extends EntryData> extends DataTable<T> {
             DefaultSelectionEventManager.<T> createCheckboxManager());
     }
 
-    protected DataTableColumn<Boolean> addSelectionColumn(final int columnWidth) {
+    protected DataTableColumn<Boolean> addSelectionColumn() {
         final CheckboxCell columnCell = new CheckboxCell(true, false) {
             @Override
             public void onBrowserEvent(Context context, Element parent, Boolean value,
@@ -78,7 +78,7 @@ public abstract class EntryDataTable<T extends EntryData> extends DataTable<T> {
         SelectionColumnHeader header = new SelectionColumnHeader();
 
         this.addColumn(selectionColumn, header);
-        this.setColumnWidth(selectionColumn, columnWidth, Unit.PX);
+        this.setColumnWidth(selectionColumn, 30, Unit.PX);
 
         return selectionColumn;
     }
@@ -126,6 +126,7 @@ public abstract class EntryDataTable<T extends EntryData> extends DataTable<T> {
         };
 
         this.addColumn(nameColumn, "Name");
+        nameColumn.setSortable(true);
         this.setColumnWidth(nameColumn, 150, Unit.PX);
         return nameColumn;
     }
@@ -145,32 +146,33 @@ public abstract class EntryDataTable<T extends EntryData> extends DataTable<T> {
         return summaryColumn;
     }
 
-    protected DataTableColumn<String> addOwnerColumn() {
-        DataTableColumn<String> ownerColumn = new DataTableColumn<String>(new ClickableTextCell(),
-                ColumnField.OWNER) {
+    protected DataTableColumn<EntryData> addOwnerColumn() {
+        UrlCell<EntryData> cell = new UrlCell<EntryData>() {
 
             @Override
-            public String getValue(T object) {
-                // TODO Auto-generated method stub
-                return "Click";
+            protected String getCellValue(EntryData object) {
+                return object.getOwnerName();
+            }
+
+            @Override
+            protected void onClick(EntryData object) {
+                History.newItem(Page.PROFILE.getLink() + ";id=" + object.getOwnerId());
             }
         };
 
-        ownerColumn.setFieldUpdater(new FieldUpdater<T, String>() {
+        DataTableColumn<EntryData> ownerColumn = new DataTableColumn<EntryData>(cell,
+                ColumnField.OWNER) {
 
             @Override
-            public void update(int index, T object, String value) {
-                Window.alert("history : " + object.getOwnerId());
+            public EntryData getValue(T object) {
+                return object;
             }
-        });
+        };
 
         this.addColumn(ownerColumn, "Owner");
+        ownerColumn.setSortable(true);
+        this.setColumnWidth(ownerColumn, 110, Unit.PX);
         return ownerColumn;
-
-        //        URLColumn<T> column = new URLColumn<T>();
-        //
-        //        this.addColumn(column, "Owner");
-        //        this.setColumnWidth(column, 180, Unit.PX);
     }
 
     protected DataTableColumn<String> addStatusColumn() {
@@ -184,11 +186,12 @@ public abstract class EntryDataTable<T extends EntryData> extends DataTable<T> {
         };
 
         this.addColumn(statusColumn, "Status");
+        statusColumn.setSortable(true);
         this.setColumnWidth(statusColumn, 110, Unit.PX);
         return statusColumn;
     }
 
-    private String toUppercaseFully(String value) {
+    protected String toUppercaseFully(String value) {
         if (value == null || value.isEmpty())
             return "";
         return (value.substring(0, 1).toUpperCase() + value.substring(1));

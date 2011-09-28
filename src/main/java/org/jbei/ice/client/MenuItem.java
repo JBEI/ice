@@ -1,10 +1,8 @@
 package org.jbei.ice.client;
 
-import java.io.Serializable;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class MenuItem implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class MenuItem implements IsSerializable {
 
     private String name;
 

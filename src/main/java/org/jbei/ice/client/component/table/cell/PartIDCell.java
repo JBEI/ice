@@ -1,5 +1,6 @@
 package org.jbei.ice.client.component.table.cell;
 
+import org.jbei.ice.client.Page;
 import org.jbei.ice.client.component.TipViewContentFactory;
 import org.jbei.ice.client.util.Utils;
 import org.jbei.ice.shared.EntryData;
@@ -9,6 +10,7 @@ import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -26,10 +28,10 @@ public class PartIDCell<T extends EntryData> extends AbstractCell<T> {
     private static final String MOUSEOVER_EVENT_NAME = "mouseover";
     private static final String MOUSEOUT_EVENT_NAME = "mouseout";
     private static final String MOUSEOVER_STYLE = "mouseover_color";
+    private static final String MOUSE_CLICK = "click";
 
     public PartIDCell() {
-
-        super(MOUSEOVER_EVENT_NAME, MOUSEOUT_EVENT_NAME);
+        super(MOUSEOVER_EVENT_NAME, MOUSEOUT_EVENT_NAME, MOUSE_CLICK);
     }
 
     @Override
@@ -38,7 +40,6 @@ public class PartIDCell<T extends EntryData> extends AbstractCell<T> {
         if (view == null || view.getPartId() == null)
             return;
 
-        // entry/tip/4380
         sb.appendHtmlConstant("<a>" + view.getPartId() + "</a>");
     }
 
@@ -60,6 +61,15 @@ public class PartIDCell<T extends EntryData> extends AbstractCell<T> {
         if (MOUSEOUT_EVENT_NAME.equalsIgnoreCase(eventType)) {
             onMouseOut(parent);
         }
+
+        if (MOUSE_CLICK.equalsIgnoreCase(eventType)) {
+            if (withinBounds(parent, event))
+                onMouseClick(value.getRecordId());
+        }
+    }
+
+    protected void onMouseClick(long recordId) {
+        History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + recordId);
     }
 
     protected void onMouseOut(Element parent) {
@@ -102,10 +112,11 @@ public class PartIDCell<T extends EntryData> extends AbstractCell<T> {
         popup = new PopupPanel(true);
         popup.setStyleName("popup");
 
-        Widget contents = getTipViewContents(value); // TipViewContentFactory.getContents(value);
+        Widget contents = getTipViewContents(value);
         popup.add(contents);
 
-        int bounds = 450 + y; // 450 is expected height of popup. adjust accordingly or the bottom will be hidden
+        // 450 is expected height of popup. adjust accordingly or the bottom will be hidden
+        int bounds = 450 + y;
         int yPos = y;
         if (bounds > Window.getClientHeight()) {
             // move it up;

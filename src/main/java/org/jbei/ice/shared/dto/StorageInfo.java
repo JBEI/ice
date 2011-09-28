@@ -1,10 +1,8 @@
 package org.jbei.ice.shared.dto;
 
-import java.io.Serializable;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class StorageInfo implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class StorageInfo implements IsSerializable {
 
     private String display;
     private long id;

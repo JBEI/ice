@@ -48,7 +48,7 @@ import org.jbei.ice.shared.dto.StorageInfo;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
-// TODO : this whole class needs to be redone
+// TODO : this whole class needs to be redone. The logic needs to be moved to controllers/managers
 public class RegistryServiceImpl extends RemoteServiceServlet implements RegistryService {
 
     private static final long serialVersionUID = 1L;
@@ -117,7 +117,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public ArrayList<EntryData> retrieveEntryData(String sid, ArrayList<Long> entryIds,
             ColumnField type, boolean asc) {
 
-        // TODO Use Controller
+        // TODO Use Controller and put all of this logic in there
         if (type == null)
             type = ColumnField.CREATED;
 
@@ -137,8 +137,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 //                entries = controller.
                 break;
 
-            //            case CREATED:
-            //                entries = EntryManager.
+            case CREATED:
+                entries = EntryManager.getEntriesByIdSetSortByCreated(entryIds, asc);
+                break;
 
             default:
                 entries = EntryManager.getEntriesByIdSet(entryIds);
@@ -413,6 +414,16 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             info.setAlias(plasmid.getAlias());
             info.setBackbone(plasmid.getBackbone());
             info.setCreator(plasmid.getCreator());
+            info.setCreatorEmail(plasmid.getCreatorEmail());
+            info.setPartId(plasmid.getOnePartNumber().getPartNumber());
+            info.setName(plasmid.getNamesAsString());
+            info.setAlias(plasmid.getAlias());
+            info.setBackbone(plasmid.getBackbone());
+            info.setBioSafetyLevel(plasmid.getBioSafetyLevel());
+            info.setOwner(plasmid.getOwner());
+            info.setOwnerEmail(plasmid.getOwnerEmail());
+            info.setCircular(plasmid.getCircular());
+            info.setShortDescription(plasmid.getShortDescription());
 
             return info;
         }
@@ -436,12 +447,34 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 blastResults.addAll(searchController.tblastx(query));
             }
 
+            //            if (blastResults != null && blastResults.size() > 0) {
+            //                Panel resultPanel;
+            //                if (program.equals("tblastx")) {
+            //                    String proteinQuery;
+            //                    try {
+            //                        proteinQuery = SequenceUtils.translateToProtein(query);
+            //                    } catch (Exception e) {
+            //                        proteinQuery = "";
+            //
+            //                        Logger.error("Failed to translate dna to protein!", e);
+            //                    }
+            //
+            //                    resultPanel = new BlastResultPanel(BLAST_RESULT_PANEL_NAME,
+            //                            proteinQuery, blastResults, NUMBER_OF_ENTRIES_PER_PAGE, false);
+            //                } else {
+            //                    resultPanel = new BlastResultPanel(BLAST_RESULT_PANEL_NAME, query,
+            //                            blastResults, NUMBER_OF_ENTRIES_PER_PAGE, true);
+            //                }
+
             for (BlastResult blastResult : blastResults) {
                 BlastResultInfo info = new BlastResultInfo();
                 info.setBitScore(blastResult.getBitScore());
                 EntryData view = EntryViewFactory.createTipView(blastResult.getEntry());
                 info.setDataView(view);
                 info.seteValue(blastResult.geteValue());
+                info.setAlignmentLength(blastResult.getAlignmentLength());
+                info.setPercentId(blastResult.getPercentId());
+                info.setQueryLength(query.length());
                 results.add(info);
             }
 
@@ -540,16 +573,18 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
                 for (Sample sample : results) { // TODO
                     SampleInfo info = new SampleInfo();
-                    info.setId(sample.getId());
-                    info.setCreationTime(sample.getCreationTime());
+                    info.setId(String.valueOf(sample.getId()));
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d yyyy");
+                    Date memberSinceDate = sample.getCreationTime();
+                    info.setCreationTime(dateFormat.format(memberSinceDate));
                     EntryData view = EntryViewFactory.createTipView(sample.getEntry());
                     info.setDataView(view);
                     info.setLabel(sample.getLabel());
                     info.setNotes(sample.getNotes());
                     Storage storage = sample.getStorage();
                     if (storage != null) {
-                        info.setLocationId(sample.getStorage().getId());
-                        info.setLocation(sample.getStorage().getIndex());
+                        info.setLocationId(String.valueOf(storage.getId()));
+                        info.setLocation(storage.getIndex());
                     }
                     data.add(info);
                 }

@@ -2,13 +2,11 @@ package org.jbei.ice.client.common;
 
 import org.jbei.ice.client.Page;
 
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -39,17 +37,9 @@ public class HeaderMenu extends Composite {
         // add content
         table.setWidget(0, 0, createMenus());
 
-        // regular search
-        table.setWidget(0, 1, createRegularSearch());
-        table.getFlexCellFormatter().setWidth(0, 1, "330px");
-
-        // advanced searches
-        table.setWidget(0, 2, createAdvancedSearchLinks());
-        table.getFlexCellFormatter().setWidth(0, 2, "120px");
-
         // below menu line
         table.setWidget(1, 0, getLine());
-        table.getFlexCellFormatter().setColSpan(1, 0, 3);
+        table.getFlexCellFormatter().setColSpan(1, 0, 2);
     }
 
     protected Widget createMenus() {
@@ -57,44 +47,16 @@ public class HeaderMenu extends Composite {
         table.setCellPadding(0);
         table.setCellSpacing(0);
 
-        Hyperlink home = new Hyperlink("Home", "page=main;sid=[email]");
-        Hyperlink collections = new Hyperlink("Collections", "page=collections;id=[email]");
-        Hyperlink add = new Hyperlink("Add new entry", "page=add;id=[email]");
-        Hyperlink bulk = new Hyperlink("Bulk Import", "page=bulk;id=[email]");
+        Hyperlink home = new Hyperlink("Home", Page.MAIN.getLink());
+        Hyperlink collections = new Hyperlink("Collections", Page.COLLECTIONS.getLink());
+        Hyperlink add = new Hyperlink("Add new entry", Page.ADD_ENTRY.getLink());
+        Hyperlink bulk = new Hyperlink("Bulk Import", Page.BULK_IMPORT.getLink());
 
         table.setWidget(0, 0, home);
         table.setWidget(0, 1, collections);
         table.setWidget(0, 2, add);
         table.setWidget(0, 3, bulk);
 
-        return table;
-    }
-
-    protected Widget createRegularSearch() {
-        FlexTable table = new FlexTable();
-        table.setCellPadding(0);
-        table.setCellSpacing(0);
-
-        TextBox input = new TextBox();
-        //        input.setStyleName("inputbox");
-        input.setWidth("250px");
-        table.setWidget(0, 0, input);
-
-        Button search = new Button("Search");
-        table.setWidget(0, 1, search);
-        return table;
-    }
-
-    protected Widget createAdvancedSearchLinks() {
-        FlexTable table = new FlexTable();
-        table.setCellPadding(0);
-        table.setCellSpacing(0);
-
-        Hyperlink search = new Hyperlink("Advanced Search", Page.QUERY.getLink());
-        Hyperlink blast = new Hyperlink("Blast", Page.BLAST.getLink());
-
-        table.setWidget(0, 0, search);
-        table.setWidget(1, 0, blast);
         return table;
     }
 

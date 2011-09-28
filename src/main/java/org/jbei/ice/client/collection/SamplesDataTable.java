@@ -1,16 +1,16 @@
 package org.jbei.ice.client.collection;
 
 import java.util.ArrayList;
-import java.util.Date;
 
+import org.jbei.ice.client.Page;
 import org.jbei.ice.client.component.table.HasEntryDataTable;
+import org.jbei.ice.client.component.table.cell.UrlCell;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.SampleInfo;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.History;
 
 public class SamplesDataTable extends HasEntryDataTable<SampleInfo> {
 
@@ -27,11 +27,12 @@ public class SamplesDataTable extends HasEntryDataTable<SampleInfo> {
 
         columns.add(super.addTypeColumn(true));
         columns.add(super.addPartIdColumn(true));
-        super.addNameColumn();
-        this.addLabelColumn();
-        this.addNotesColumn();
-        this.addLocationColumn();
+        columns.add(super.addNameColumn());
+        columns.add(this.addLabelColumn());
+        columns.add(this.addNotesColumn());
+        columns.add(this.addLocationColumn());
         columns.add(this.addCreatedColumn());
+
         return columns;
     }
 
@@ -42,13 +43,7 @@ public class SamplesDataTable extends HasEntryDataTable<SampleInfo> {
 
             @Override
             public String getValue(SampleInfo object) {
-
-                DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yyyy");
-                Date date = object.getCreationTime();
-                String value = format.format(date);
-                if (value.length() >= 13)
-                    value = (value.substring(0, 9) + "...");
-                return value;
+                return object.getCreationTime();
             }
         };
 
@@ -58,21 +53,25 @@ public class SamplesDataTable extends HasEntryDataTable<SampleInfo> {
         return createdColumn;
     }
 
-    protected void addLabelColumn() {
-        TextColumn<SampleInfo> created = new TextColumn<SampleInfo>() {
+    protected DataTableColumn<String> addLabelColumn() {
+        DataTableColumn<String> labelColumn = new DataTableColumn<String>(new TextCell(),
+                ColumnField.LABEL) {
 
             @Override
-            public String getValue(SampleInfo info) {
-                return info.getLabel();
+            public String getValue(SampleInfo object) {
+                return object.getLabel();
             }
         };
 
-        this.addColumn(created, "Label");
-        this.setColumnWidth(created, WIDTH, Unit.PX);
+        this.addColumn(labelColumn, "Label");
+        labelColumn.setSortable(true);
+        this.setColumnWidth(labelColumn, WIDTH, Unit.PX);
+        return labelColumn;
     }
 
-    protected void addNotesColumn() {
-        TextColumn<SampleInfo> created = new TextColumn<SampleInfo>() {
+    protected DataTableColumn<String> addNotesColumn() {
+        DataTableColumn<String> notesCol = new DataTableColumn<String>(new TextCell(),
+                ColumnField.NOTES) {
 
             @Override
             public String getValue(SampleInfo info) {
@@ -80,20 +79,37 @@ public class SamplesDataTable extends HasEntryDataTable<SampleInfo> {
             }
         };
 
-        this.addColumn(created, "Notes");
-        this.setColumnWidth(created, WIDTH, Unit.PX);
+        this.addColumn(notesCol, ColumnField.NOTES.getName());
+        this.setColumnWidth(notesCol, WIDTH, Unit.PX);
+        return notesCol;
     }
 
-    protected void addLocationColumn() {
-        TextColumn<SampleInfo> created = new TextColumn<SampleInfo>() {
+    protected DataTableColumn<SampleInfo> addLocationColumn() {
+        UrlCell<SampleInfo> cell = new UrlCell<SampleInfo>() {
 
             @Override
-            public String getValue(SampleInfo info) {
+            protected String getCellValue(SampleInfo info) {
                 return info.getLocation();
+            }
+
+            @Override
+            protected void onClick(SampleInfo info) {
+                History.newItem(Page.STORAGE.getLink() + ";id=" + info.getLocationId());
             }
         };
 
-        this.addColumn(created, "Location");
-        this.setColumnWidth(created, WIDTH, Unit.PX);
+        DataTableColumn<SampleInfo> locationColumn = new DataTableColumn<SampleInfo>(cell,
+                ColumnField.LOCATION) {
+
+            @Override
+            public SampleInfo getValue(SampleInfo object) {
+                return object;
+            }
+        };
+
+        locationColumn.setSortable(true);
+        this.setColumnWidth(locationColumn, WIDTH, Unit.PX);
+        this.addColumn(locationColumn, "Location");
+        return locationColumn;
     }
 }

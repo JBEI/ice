@@ -1,12 +1,11 @@
 package org.jbei.ice.shared.dto;
 
-import java.io.Serializable;
-
 import org.jbei.ice.shared.EntryData;
 
-public abstract class HasEntryData implements Serializable {
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-    private static final long serialVersionUID = 1L;
+public abstract class HasEntryData implements IsSerializable {
+
     private EntryData dataView;
 
     public HasEntryData() {

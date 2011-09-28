@@ -4,8 +4,6 @@ import org.jbei.ice.shared.dto.EntryInfo;
 
 public class StrainInfo extends EntryInfo {
 
-    private static final long serialVersionUID = 1L;
-
     private String host;
     private String genotypePhenotype;
     private String plasmids;

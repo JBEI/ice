@@ -12,7 +12,6 @@ import org.jbei.ice.client.event.LogoutEvent;
 import org.jbei.ice.client.login.LoginPresenter;
 import org.jbei.ice.client.login.LoginView;
 import org.jbei.ice.client.presenter.BulkImportPresenter;
-import org.jbei.ice.client.presenter.DebugPresenter;
 import org.jbei.ice.client.presenter.EntryAddPresenter;
 import org.jbei.ice.client.presenter.EntryPresenter;
 import org.jbei.ice.client.presenter.HomePagePresenter;
@@ -39,14 +38,14 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 
-public class AppController implements Presenter, ValueChangeHandler<String> {
+public class AppController extends Presenter implements ValueChangeHandler<String> {
 
     // cookie times out in three days (current value set in Ice
     private static final int COOKIE_TIMEOUT = (1000 * 60 * 60 * 24) * 3;
     private static final String COOKIE_NAME = "gd-ice";
     private static final String COOKIE_PATH = "/";
 
-    private HasWidgets container;
+    private HasWidgets container; // rootpanel
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
     public static String sessionId;
@@ -166,10 +165,6 @@ public class AppController implements Presenter, ValueChangeHandler<String> {
             presenter = new StoragePresenter(this.service, this.eventBus, new StorageView());
             break;
 
-        case DEBUG:
-            presenter = new DebugPresenter(this.service, this.eventBus);
-            break;
-
         case LOGIN:
         default:
             presenter = new LoginPresenter(this.service, this.eventBus, new LoginView());
@@ -273,6 +268,10 @@ public class AppController implements Presenter, ValueChangeHandler<String> {
             });
     }
 
+    //
+    // Inner classes
+    //
+
     /**
      * Logout handler implementation. Clears cookies and session id
      * and redirects user to login page
@@ -295,6 +294,7 @@ public class AppController implements Presenter, ValueChangeHandler<String> {
             });
 
             AppController.sessionId = null;
+            AppController.accountInfo = null;
             Cookies.removeCookie(COOKIE_NAME, COOKIE_PATH);
         }
     }

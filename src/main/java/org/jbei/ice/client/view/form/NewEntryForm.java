@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -48,6 +49,22 @@ public abstract class NewEntryForm extends Composite {
         Label help = new Label(helpText);
         help.setStyleName("help_text");
         panel.add(help);
+        return panel;
+    }
+
+    public Widget createListBoxWithHelpText(String helpText, String... options) {
+        VerticalPanel panel = new VerticalPanel();
+        ListBox box = new ListBox();
+        box.setStyleName("inputbox");
+        box.setVisibleItemCount(1);
+        for (String item : options)
+            box.addItem(item);
+
+        panel.add(box);
+        Label help = new Label(helpText);
+        help.setStyleName("help_text");
+        panel.add(help);
+
         return panel;
     }
 
