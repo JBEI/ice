@@ -436,7 +436,7 @@ public class IceGenbankParser extends AbstractParser {
         StringBuilder qualifierItem = new StringBuilder();
         String qualifierValue = null;
 
-        int apparentQualifierColumn = lines[0].indexOf(lines[0].split("\\/")[1]) - 1;
+        int apparentQualifierColumn = lines[0].indexOf("/");
 
         for (String line2 : lines) {
             line = line2;
