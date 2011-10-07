@@ -1315,13 +1315,13 @@ public class RegistryAPI {
             List<Storage> schemes = storageController.retrieveAllStorageSchemes();
             for (Storage storage : schemes) {
                 if (storage.getStorageType() == StorageType.SCHEME
-                        && "Strain Storage New".equals(storage.getName())) {
+                        && "Strain Storage Matrix Tubes".equals(storage.getName())) {
                     strainScheme = storage;
                     break;
                 }
             }
             if (strainScheme == null) {
-                log("Could not locate default strain scheme (Strain Storage New[rack, location, barcode])");
+                log("Could not locate default strain scheme (Strain Storage Matrix Tubes[Plate, Well, Tube])");
                 throw new ServiceException("Registry Service Internal Error!");
             }
 
