@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -310,6 +311,24 @@ public class IceGenbankParser extends AbstractParser {
                 dnaFeature = new DNAFeature();
                 qualifierBlock = new StringBuilder();
 
+                /*
+                 * Locations are generated differently by different implementations. Given
+                 * the following two features:
+                 * feature1: (1..3, 5..10) on the + strand |-|.|---->
+                 * feature2: (1..3, 5..10) on the - strand <-|.|----|
+                 * 
+                 *  biojava follows the letter of the standard (gbrel.txt)
+                 *  feature1: join(1..3,5..10)
+                 *  feature2: complement(join(5..10,1..3))
+                 *  
+                 *  However, VectorNTI generates the following
+                 *  feature1: join(1..3,5..10)
+                 *  feature2: complement(1..3,5..10)
+                 *  
+                 *  This of course is incorrect, but we must parse them. 
+                 * 
+                 */
+
                 // grab type, genbankStart, end, and strand
                 List<GenbankLocation> genbankLocations = null;
                 try {
@@ -317,13 +336,19 @@ public class IceGenbankParser extends AbstractParser {
                     type = chunk[0].trim();
 
                     chunk[1] = chunk[1].trim();
+                    boolean reversedLocations = false;
+                    if (chunk[1].startsWith("complement(join")) {
+                        reversedLocations = true; //standard compliant complement(join(location, location))
+                    }
                     if (chunk[1].startsWith("complement")) {
                         complement = true;
                         chunk[1] = chunk[1].substring(11, chunk[1].length() - 2).trim();
                     }
 
                     genbankLocations = parseGenbankLocation(chunk[1]);
-
+                    if (reversedLocations) {
+                        Collections.reverse(genbankLocations);
+                    }
                 } catch (NumberFormatException e) {
                     getErrors().add("Could not parse feature " + line);
                     System.out.println(line);
@@ -368,7 +393,7 @@ public class IceGenbankParser extends AbstractParser {
         int end = 1;
 
         if (input.startsWith("join")) {
-            input = input.substring(5, input.length() - 2).trim();
+            input = input.substring(5, input.length() - 1).trim();
         }
 
         String[] chunks = input.split(",");

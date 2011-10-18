@@ -148,7 +148,9 @@ public class GenbankFormatter extends AbstractFormatter {
                     featureTemplate.type = getFeatureType(sequenceFeature);
                     featureTemplate.rankedCrossRefs = new TreeSet<Object>();
 
-                    featureSet.add(new SimpleRichFeature(simpleRichSequence, featureTemplate));
+                    SimpleRichFeature simpleRichFeature = new SimpleRichFeature(simpleRichSequence,
+                            featureTemplate);
+                    featureSet.add(simpleRichFeature);
                 }
 
                 simpleRichSequence.setFeatureSet(featureSet);
