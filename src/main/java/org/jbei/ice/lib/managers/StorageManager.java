@@ -25,8 +25,9 @@ public class StorageManager {
                     .createQuery("from " + Storage.class.getName() + " where id = :id");
             query.setLong("id", id);
             result = (Storage) query.uniqueResult();
-            if (fetchChildren && result != null)
+            if (fetchChildren && result != null) {
                 result.getChildren().size();
+            }
         } catch (Exception e) {
             String msg = "Could not get Location by id: " + id + " " + e.toString();
             Logger.error(msg, e);
@@ -76,11 +77,13 @@ public class StorageManager {
     public static Storage retrieveStorageTube(String barcode) throws ManagerException {
         List<Storage> results = StorageManager.retrieveStorageByIndex(barcode, StorageType.TUBE);
 
-        if (results == null || results.isEmpty())
+        if (results == null || results.isEmpty()) {
             return null;
+        }
 
-        if (results.size() > 1)
+        if (results.size() > 1) {
             throw new ManagerException("Expecting single result, received " + results.size());
+        }
 
         return results.get(0);
     }
@@ -289,6 +292,9 @@ public class StorageManager {
                 break;
             } else {
                 current = current.getParent();
+                if (current == null) {
+                    break;
+                }
             }
         }
 
@@ -301,7 +307,7 @@ public class StorageManager {
         }
         ArrayList<Storage> result = new ArrayList<Storage>();
         Storage current = storage;
-        while (current.getStorageType() != StorageType.SCHEME) {
+        while (current != null && current.getStorageType() != StorageType.SCHEME) {
             result.add(current);
             current = current.getParent();
         }

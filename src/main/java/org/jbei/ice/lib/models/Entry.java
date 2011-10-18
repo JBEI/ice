@@ -66,7 +66,7 @@ public class Entry implements IEntryValueObject, IModel {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
     private long id;
 
-    @Column(name = "record_id", length = 36, nullable = false)
+    @Column(name = "record_id", length = 36, nullable = false, unique = true)
     private String recordId;
 
     @Column(name = "version_id", length = 36, nullable = false)

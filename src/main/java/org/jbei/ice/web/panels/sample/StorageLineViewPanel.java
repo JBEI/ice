@@ -46,13 +46,17 @@ public class StorageLineViewPanel extends Panel {
 
         add(listView);
 
-        BookmarkablePageLink<StoragePage> schemeLink = new BookmarkablePageLink<StoragePage>(
-                "schemeLink", StoragePage.class, new PageParameters("0=" + scheme.getId()));
-
+        BookmarkablePageLink<StoragePage> schemeLink = null;
         if (scheme != null) {
+            schemeLink = new BookmarkablePageLink<StoragePage>("schemeLink", StoragePage.class,
+                    new PageParameters("0=" + scheme.getId()));
             schemeLink.add(new Label("schemeLinkLabel", scheme.toString()));
+        } else {
+            schemeLink = new BookmarkablePageLink<StoragePage>("schemeLink", StoragePage.class,
+                    new PageParameters("0=null"));
+            schemeLink.add(new Label("schemeLinkLabel", "Error"));
+            schemeLink.setEnabled(false);
         }
-
         add(schemeLink);
     }
 }
