@@ -14,8 +14,8 @@ import javax.persistence.Table;
 import org.jbei.ice.lib.dao.IModel;
 
 @Entity
-@Table(name = "annotation_location")
-@SequenceGenerator(name = "sequence", sequenceName = "annotation_location_id_seq", allocationSize = 1)
+@Table(name = "sequence_annotation_location")
+@SequenceGenerator(name = "sequence", sequenceName = "sequence_annotation_location_id_seq", allocationSize = 1)
 public class AnnotationLocation implements IModel {
     private static final long serialVersionUID = 1L;
 

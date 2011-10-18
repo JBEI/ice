@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.SortedSet;
 
 import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -196,7 +195,7 @@ public class SequenceController extends Controller {
                     dnaFeature.addNote(dnaFeatureNote);
                 }
 
-                SortedSet<AnnotationLocation> locations = sequenceFeature.getAnnotationLocations();
+                Set<AnnotationLocation> locations = sequenceFeature.getAnnotationLocations();
                 for (AnnotationLocation location : locations) {
                     dnaFeature.getLocations().add(
                         new DNAFeatureLocation(location.getGenbankStart(), location.getEnd()));

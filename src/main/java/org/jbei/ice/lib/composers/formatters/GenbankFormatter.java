@@ -5,7 +5,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.biojava.bio.seq.DNATools;
@@ -127,13 +126,12 @@ public class GenbankFormatter extends AbstractFormatter {
                     RichFeature.Template featureTemplate = new RichFeature.Template();
                     featureTemplate.annotation = getAnnotations(sequenceFeature);
 
-                    SortedSet<AnnotationLocation> locations = sequenceFeature
-                            .getAnnotationLocations();
+                    Set<AnnotationLocation> locations = sequenceFeature.getAnnotationLocations();
 
                     if (locations.size() == 1) {
                         featureTemplate.location = new SimpleRichLocation(new SimplePosition(
-                                locations.first().getGenbankStart()), new SimplePosition(locations
-                                .first().getGenbankStart()), 1, getStrand(sequenceFeature));
+                                sequenceFeature.getUniqueGenbankStart()), new SimplePosition(
+                                sequenceFeature.getUniqueEnd()), 1, getStrand(sequenceFeature));
                     } else {
 
                         ArrayList<Location> members = new ArrayList<Location>();

@@ -2,8 +2,6 @@ package org.jbei.ice.lib.models;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -25,8 +23,6 @@ import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.Sort;
-import org.hibernate.annotations.SortType;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.ISequenceFeatureValueObject;
 
@@ -54,8 +50,8 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "sequenceFeature")
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @JoinColumn(name = "sequence_feature_id")
-    @Sort(type = SortType.NATURAL)
-    private final SortedSet<AnnotationLocation> annotationLocations = new TreeSet<AnnotationLocation>();
+    @OrderBy("id")
+    private final Set<AnnotationLocation> annotationLocations = new LinkedHashSet<AnnotationLocation>();
 
     /**
      * Use locations instead. This field exists to allow scripted migration of data using
@@ -166,7 +162,7 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         }
     }
 
-    public SortedSet<AnnotationLocation> getAnnotationLocations() {
+    public Set<AnnotationLocation> getAnnotationLocations() {
         return annotationLocations;
     }
 
@@ -266,7 +262,7 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
     public Integer getUniqueGenbankStart() {
         Integer result = null;
         if (getAnnotationLocations() != null && getAnnotationLocations().size() == 1) {
-            result = getAnnotationLocations().first().getGenbankStart();
+            result = ((AnnotationLocation) getAnnotationLocations().toArray()[0]).getGenbankStart();
         }
         return result;
     }
@@ -274,7 +270,8 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
     public Integer getUniqueEnd() {
         Integer result = null;
         if (getAnnotationLocations() != null && getAnnotationLocations().size() == 1) {
-            result = getAnnotationLocations().first().getEnd();
+            result = ((AnnotationLocation) getAnnotationLocations().toArray()[getAnnotationLocations()
+                    .size() - 1]).getEnd();
         }
         return result;
     }
