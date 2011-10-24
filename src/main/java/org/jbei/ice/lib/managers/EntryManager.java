@@ -133,8 +133,9 @@ public class EntryManager {
                     + " where name = :name");
             query.setParameter("name", name);
             Object queryResult = query.uniqueResult();
-            if (queryResult == null)
+            if (queryResult == null) {
                 return null;
+            }
 
             entry = ((Name) queryResult).getEntry();
         } catch (HibernateException e) {
@@ -211,6 +212,16 @@ public class EntryManager {
         return getEntries(null, false);
     }
 
+    /**
+     * Retrieve {@link Entry} id's sorted by the given field.
+     * 
+     * @param field
+     *            The field to sort on.
+     * @param ascending
+     *            True if ascending
+     * @return ArrayList of ids.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static ArrayList<Long> getEntries(String field, boolean ascending)
             throws ManagerException {
@@ -357,12 +368,14 @@ public class EntryManager {
             List<Integer> list = query.list();
 
             if (list != null) {
-                for (Integer val : list)
+                for (Integer val : list) {
                     entries.add(val.longValue());
+                }
             }
         } finally {
-            if (session.isOpen())
+            if (session.isOpen()) {
                 session.close();
+            }
         }
 
         return entries;
@@ -383,12 +396,14 @@ public class EntryManager {
             List<Integer> list = query.list();
 
             if (list != null) {
-                for (Integer val : list)
+                for (Integer val : list) {
                     entries.add(val.longValue());
+                }
             }
         } finally {
-            if (session.isOpen())
+            if (session.isOpen()) {
                 session.close();
+            }
         }
 
         return entries;

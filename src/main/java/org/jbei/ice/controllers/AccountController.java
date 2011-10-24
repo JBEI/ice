@@ -19,7 +19,25 @@ import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.PersistentSessionDataWrapper;
 
+/**
+ * ABI to manipulate {@link Account} objects.
+ * <p>
+ * This class contains methods that wrap {@link AccountManager} to manipulate {@link Account}
+ * objects.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ */
+
 public class AccountController {
+
+    /**
+     * Retrieve account from the database by database id.
+     * 
+     * @param id
+     *            Database id of account
+     * @return Account for the id
+     * @throws ControllerException
+     */
     public static Account get(long id) throws ControllerException {
         Account account = null;
 
@@ -32,6 +50,12 @@ public class AccountController {
         return account;
     }
 
+    /**
+     * Retrieve all account from the database, sorted by Given (First) Name.
+     * 
+     * @return Accounts
+     * @throws ControllerException
+     */
     public static Set<Account> getAllByFirstName() throws ControllerException {
         Set<Account> accounts = null;
 
@@ -44,6 +68,14 @@ public class AccountController {
         return accounts;
     }
 
+    /**
+     * Retrieve {@link Account} by email.
+     * 
+     * @param email
+     *            of the account
+     * @return {@link Account}
+     * @throws ControllerException
+     */
     public static Account getByEmail(String email) throws ControllerException {
         Account account = null;
 
@@ -56,6 +88,13 @@ public class AccountController {
         return account;
     }
 
+    /**
+     * Store {@link Account} into the database.
+     * 
+     * @param account
+     * @return {@link Account} that has been saved.
+     * @throws ControllerException
+     */
     public static Account save(Account account) throws ControllerException {
         Account result = null;
 
@@ -68,6 +107,13 @@ public class AccountController {
         return result;
     }
 
+    /**
+     * Check in the database if an account is a moderator.
+     * 
+     * @param account
+     * @return True, if the account is a moderator.
+     * @throws ControllerException
+     */
     public static Boolean isModerator(Account account) throws ControllerException {
         Boolean result = false;
 
@@ -80,6 +126,14 @@ public class AccountController {
         return result;
     }
 
+    /**
+     * Check if the given password is valid for the account.
+     * 
+     * @param account
+     * @param password
+     * @return True if correct password.
+     * @throws ControllerException
+     */
     public static Boolean isValidPassword(Account account, String password)
             throws ControllerException {
         if (account == null) {
@@ -95,6 +149,13 @@ public class AccountController {
         return result;
     }
 
+    /**
+     * Retrieve the {@link Account} by session key.
+     * 
+     * @param sessionKey
+     * @return Account associated with the session key.
+     * @throws ControllerException
+     */
     public static Account getAccountBySessionKey(String sessionKey) throws ControllerException {
         Account account = null;
 
@@ -107,10 +168,23 @@ public class AccountController {
         return account;
     }
 
+    /**
+     * Return the encrypted version of the given password, using the salt from the settings file.
+     * 
+     * @param password
+     * @return 40 character encrypted string.
+     */
     public static String encryptPassword(String password) {
         return Utils.encryptSHA(JbeirSettings.getSetting("SECRET_KEY") + password);
     }
 
+    /**
+     * Return the {@link AccountPreferences} of the given account.
+     * 
+     * @param account
+     * @return accountPreference
+     * @throws ControllerException
+     */
     public static AccountPreferences getAccountPreferences(Account account)
             throws ControllerException {
         AccountPreferences accountPreferences;
@@ -124,6 +198,20 @@ public class AccountController {
         return accountPreferences;
     }
 
+    /**
+     * Authenticate a user in the database.
+     * <p>
+     * Using the {@link IAuthenticationBackend} specified in the settings file, authenticate the
+     * user, and return the sessionData
+     * 
+     * @param login
+     * @param password
+     * @param ip
+     *            IP Address of the user.
+     * @return {@link SessionData}
+     * @throws InvalidCredentialsException
+     * @throws ControllerException
+     */
     public static SessionData authenticate(String login, String password, String ip)
             throws InvalidCredentialsException, ControllerException {
         SessionData result = null;
@@ -173,11 +261,30 @@ public class AccountController {
         return result;
     }
 
+    /**
+     * Authenticate a user in the database.
+     * <p>
+     * Using the {@link IAuthenticationBackend} specified in the settings file, authenticate the
+     * user, and return the sessionData
+     * 
+     * @param login
+     * @param password
+     * @return {@link SessionData}
+     * @throws InvalidCredentialsException
+     * @throws ControllerException
+     */
     public static SessionData authenticate(String login, String password)
             throws InvalidCredentialsException, ControllerException {
         return authenticate(login, password, "");
     }
 
+    /**
+     * See if the given sessionKey is still authenticated with the system.
+     * 
+     * @param sessionKey
+     * @return True if sessionKey is still authenticated (active) to the system.
+     * @throws ControllerException
+     */
     public static boolean isAuthenticated(String sessionKey) throws ControllerException {
         boolean result = false;
         try {
@@ -192,6 +299,12 @@ public class AccountController {
         return result;
     }
 
+    /**
+     * Deauthentcate the given sessionKey. The user is logged out from the system.
+     * 
+     * @param sessionKey
+     * @throws ControllerException
+     */
     public static void deauthenticate(String sessionKey) throws ControllerException {
         if (isAuthenticated(sessionKey)) {
             try {
@@ -202,6 +315,12 @@ public class AccountController {
         }
     }
 
+    /**
+     * Save {@link AccountPreferences} to the database.
+     * 
+     * @param accountPreferences
+     * @throws ControllerException
+     */
     public static void saveAccountPreferences(AccountPreferences accountPreferences)
             throws ControllerException {
         try {
@@ -211,6 +330,12 @@ public class AccountController {
         }
     }
 
+    /**
+     * Retrieve the System account from the database.
+     * 
+     * @return Account for the system account.
+     * @throws ControllerException
+     */
     public static Account getSystemAccount() throws ControllerException {
         Account account = null;
         try {

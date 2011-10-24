@@ -14,11 +14,24 @@ import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.permissions.PermissionException;
 
+/**
+ * ABI to manipulate {@link Attachment}s.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv.
+ * 
+ */
 public class AttachmentController extends Controller {
     public AttachmentController(Account account) {
         super(account, new AttachmentPermissionVerifier());
     }
 
+    /**
+     * Determine if the user has read permission to the attachment.
+     * 
+     * @param attachment
+     * @return True if user has read permission to the attachment.
+     * @throws ControllerException
+     */
     public boolean hasReadPermission(Attachment attachment) throws ControllerException {
         if (attachment == null) {
             throw new ControllerException("Failed to check read permissions for null attachment!");
@@ -27,6 +40,13 @@ public class AttachmentController extends Controller {
         return getAttachmentPermissionVerifier().hasReadPermissions(attachment, getAccount());
     }
 
+    /**
+     * Determine if the user has write permission to the attachment.
+     * 
+     * @param attachment
+     * @return True if user has write permission to the attachment.
+     * @throws ControllerException
+     */
     public boolean hasWritePermission(Attachment attachment) throws ControllerException {
         if (attachment == null) {
             throw new ControllerException("Failed to check write permissions for null attachment!");
@@ -35,11 +55,33 @@ public class AttachmentController extends Controller {
         return getAttachmentPermissionVerifier().hasWritePermissions(attachment, getAccount());
     }
 
+    /**
+     * Save attachment to the database, and the disk, then rebuild the search index.
+     * 
+     * @param attachment
+     * @param inputStream
+     *            The data stream of the file.
+     * @return Saved attachment.
+     * @throws ControllerException
+     * @throws PermissionException
+     */
     public Attachment save(Attachment attachment, InputStream inputStream)
             throws ControllerException, PermissionException {
         return save(attachment, inputStream, true);
     }
 
+    /**
+     * Save attachment to the database and the disk.
+     * 
+     * @param attachment
+     * @param inputStream
+     *            The data stream of the file.
+     * @param scheduleIndexRebuild
+     *            set true to rebuild the search index.
+     * @return Saved attachment.
+     * @throws ControllerException
+     * @throws PermissionException
+     */
     public Attachment save(Attachment attachment, InputStream inputStream,
             boolean scheduleIndexRebuild) throws ControllerException, PermissionException {
         if (!hasWritePermission(attachment)) {
@@ -61,10 +103,26 @@ public class AttachmentController extends Controller {
         return savedAttachment;
     }
 
+    /**
+     * Delete the attachment from the database and the disk. Rebuild the search index.
+     * 
+     * @param attachment
+     * @throws ControllerException
+     * @throws PermissionException
+     */
     public void delete(Attachment attachment) throws ControllerException, PermissionException {
         delete(attachment, true);
     }
 
+    /**
+     * Delete the attachment from the database and the disk.
+     * 
+     * @param attachment
+     * @param scheduleIndexRebuild
+     *            Set true to rebuild search index.
+     * @throws ControllerException
+     * @throws PermissionException
+     */
     public void delete(Attachment attachment, boolean scheduleIndexRebuild)
             throws ControllerException, PermissionException {
         if (!hasWritePermission(attachment)) {
@@ -82,6 +140,13 @@ public class AttachmentController extends Controller {
         }
     }
 
+    /**
+     * Retrieve all the attachments associated with the given {@link Entry entry}.
+     * 
+     * @param entry
+     * @return List of Attachments or null.
+     * @throws ControllerException
+     */
     public ArrayList<Attachment> getAttachments(Entry entry) throws ControllerException {
         ArrayList<Attachment> attachments = null;
 
@@ -94,6 +159,13 @@ public class AttachmentController extends Controller {
         return attachments;
     }
 
+    /**
+     * Retrieve the number of attachments associated with the given {@link Entry entry}.
+     * 
+     * @param entry
+     * @return number of attachments.
+     * @throws ControllerException
+     */
     public long getNumberOfAttachments(Entry entry) throws ControllerException {
         long result = 0;
 
@@ -108,6 +180,14 @@ public class AttachmentController extends Controller {
         return result;
     }
 
+    /**
+     * Retrieve the file associated with the {@link Attachment}.
+     * 
+     * @param attachment
+     * @return file associated with the Attachment.
+     * @throws ControllerException
+     * @throws PermissionException
+     */
     public File getFile(Attachment attachment) throws ControllerException, PermissionException {
         if (!hasReadPermission(attachment)) {
             throw new PermissionException("No permissions to read attachment file!");
@@ -124,6 +204,11 @@ public class AttachmentController extends Controller {
         return result;
     }
 
+    /**
+     * Return the {@link AttachmentPermissionVerifier}.
+     * 
+     * @return permssionVerifier
+     */
     protected AttachmentPermissionVerifier getAttachmentPermissionVerifier() {
         return (AttachmentPermissionVerifier) getPermissionVerifier();
     }

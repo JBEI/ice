@@ -24,6 +24,12 @@ import org.jbei.ice.lib.utils.RawAssemblyUtils;
 import org.jbei.ice.lib.utils.SequenceFeatureCollection;
 import org.jbei.ice.lib.utils.UtilityException;
 
+/**
+ * ABI to manipulate DNA Assembly sequences (BioBricks).
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 public class AssemblyController extends Controller {
     private ArrayList<AssemblyUtils> assemblyUtils = new ArrayList<AssemblyUtils>();
 
@@ -34,6 +40,13 @@ public class AssemblyController extends Controller {
         getAssemblyUtils().add(new RawAssemblyUtils());
     }
 
+    /**
+     * Determine the {@link AssemblyStandard} of the given sequence.
+     * 
+     * @param partSequence
+     * @return assemblyStandard
+     * @throws ControllerException
+     */
     public AssemblyStandard determineAssemblyStandard(Sequence partSequence)
             throws ControllerException {
         AssemblyStandard result = null;
@@ -42,6 +55,13 @@ public class AssemblyController extends Controller {
         return result;
     }
 
+    /**
+     * Determine the {@link AssemblyStandard} of the given sequence String.
+     * 
+     * @param partSequenceString
+     * @return assemblyStandard
+     * @throws ControllerException
+     */
     public AssemblyStandard determineAssemblyStandard(String partSequenceString)
             throws ControllerException {
         AssemblyStandard result = null;
@@ -58,6 +78,12 @@ public class AssemblyController extends Controller {
         return result;
     }
 
+    /**
+     * 
+     * @param partSequence
+     * @return
+     * @throws ControllerException
+     */
     public SequenceFeatureCollection determineAssemblyFeatures(Sequence partSequence)
             throws ControllerException {
 
@@ -83,7 +109,9 @@ public class AssemblyController extends Controller {
     }
 
     /**
-     * Comparator for assembly basic sequence features
+     * Comparator for assembly basic sequence features.
+     * <p>
+     * Uses Assembly Annotations the system knows about to compare identity.
      * 
      * @param sequenceFeatures1
      * @param sequenceFeatures2
@@ -105,6 +133,16 @@ public class AssemblyController extends Controller {
         return result;
     }
 
+    /**
+     * Automatically annotate BioBrick parts.
+     * <p>
+     * Annotates prefixes, suffixes, and scar sequences by calling populateAssemblyFeatures for
+     * assembly methods known to the system.
+     * 
+     * @param partSequence
+     * @return True if
+     * @throws ControllerException
+     */
     public boolean populateAssemblyAnnotations(Sequence partSequence) throws ControllerException {
         Sequence result = null;
         AssemblyStandard standard = determineAssemblyStandard(partSequence);
@@ -126,6 +164,17 @@ public class AssemblyController extends Controller {
         }
     }
 
+    /**
+     * Join two BioBrick sequences together.
+     * <p>
+     * Join using the proper BioBrick assembly algorithm and saves the result into the database as a
+     * new {@link Entry}.
+     * 
+     * @param sequence1
+     * @param sequence2
+     * @return New joined Sequence. Null if join failed.
+     * @throws ControllerException
+     */
     public Sequence joinBiobricks(Sequence sequence1, Sequence sequence2)
             throws ControllerException {
         AssemblyStandard part1Standard = determineAssemblyStandard(sequence1);

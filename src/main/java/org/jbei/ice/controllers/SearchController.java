@@ -19,11 +19,24 @@ import org.jbei.ice.lib.search.lucene.AggregateSearch;
 import org.jbei.ice.lib.search.lucene.SearchException;
 import org.jbei.ice.lib.search.lucene.SearchResult;
 
+/**
+ * ABI to perform searches in the full text and blast indexes.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 public class SearchController extends Controller {
     public SearchController(Account account) {
         super(account, new EntryPermissionVerifier());
     }
 
+    /**
+     * Perform full text search on the query.
+     * 
+     * @param query
+     * @return ArrayList of {@link SearchResult}s.
+     * @throws ControllerException
+     */
     public ArrayList<SearchResult> find(String query) throws ControllerException {
         ArrayList<SearchResult> results = new ArrayList<SearchResult>();
         if (query == null) {
@@ -79,16 +92,42 @@ public class SearchController extends Controller {
         return results;
     }
 
+    /**
+     * Perform a blastn search of the query.
+     * 
+     * @param query
+     * @return ArrayList of {@link BlastResult}s.
+     * @throws ProgramTookTooLongException
+     * @throws ControllerException
+     */
     public ArrayList<BlastResult> blastn(String query) throws ProgramTookTooLongException,
             ControllerException {
         return blast(query, "blastn");
     }
 
+    /**
+     * Perform a translated blast search of the query (tblastx).
+     * 
+     * @param query
+     * @return ArrayList of {@BlastResult}s.
+     * @throws ProgramTookTooLongException
+     * @throws ControllerException
+     */
     public ArrayList<BlastResult> tblastx(String query) throws ProgramTookTooLongException,
             ControllerException {
         return blast(query, "tblastx");
     }
 
+    /**
+     * Perform a blast search of the query given the program name.
+     * 
+     * @param query
+     * @param program
+     *            Blast program name.
+     * @return ArrayList of {@link BlastResult}s.
+     * @throws ProgramTookTooLongException
+     * @throws ControllerException
+     */
     protected ArrayList<BlastResult> blast(String query, String program)
             throws ProgramTookTooLongException, ControllerException {
 
