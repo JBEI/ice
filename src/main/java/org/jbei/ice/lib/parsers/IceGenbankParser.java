@@ -628,7 +628,8 @@ public class IceGenbankParser extends AbstractParser {
         String locusLine = tag.getRawBody();
         String[] locusChunks = locusLine.split(" +");
 
-        if (Arrays.asList(locusChunks).contains("circular")) {
+        if (Arrays.asList(locusChunks).contains("circular")
+                || Arrays.asList(locusChunks).contains("CIRCULAR")) {
             result.setCircular(true);
         } else {
             result.setCircular(false);
