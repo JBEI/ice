@@ -6,6 +6,12 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionManager;
 
+/**
+ * Permission Verifier for {@link TraceSequence}s.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class SequenceAnalysisPermissionVerifier implements IPermissionVerifier {
     @Override
     public boolean hasReadPermissions(IModel model, Account account) {

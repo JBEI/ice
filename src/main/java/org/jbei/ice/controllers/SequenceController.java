@@ -26,7 +26,6 @@ import org.jbei.ice.lib.models.SequenceFeature.AnnotationType;
 import org.jbei.ice.lib.models.SequenceFeatureAttribute;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.utils.SequenceFeatureCollection;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.vo.DNAFeature;
 import org.jbei.ice.lib.vo.DNAFeatureLocation;
@@ -34,19 +33,44 @@ import org.jbei.ice.lib.vo.DNAFeatureNote;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
 
+/**
+ * ABI to manipulate {@link Sequence}s.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 public class SequenceController extends Controller {
     public SequenceController(Account account) {
         super(account, new SequencePermissionVerifier());
     }
 
+    /**
+     * Check if the user has read permission to the given {@link Sequence}.
+     * 
+     * @param sequence
+     * @return True if user has read permission.
+     */
     public boolean hasReadPermission(Sequence sequence) {
         return getSequencePermissionVerifier().hasReadPermissions(sequence, getAccount());
     }
 
+    /**
+     * Check if the user has write permission to the given {@link Sequence}.
+     * 
+     * @param sequence
+     * @return True if user has write permission.
+     */
     public boolean hasWritePermission(Sequence sequence) {
         return getSequencePermissionVerifier().hasWritePermissions(sequence, getAccount());
     }
 
+    /**
+     * Retrieve the {@link Sequence} associated with the given {@link Entry} from the database.
+     * 
+     * @param entry
+     * @return Sequence
+     * @throws ControllerException
+     */
     public Sequence getByEntry(Entry entry) throws ControllerException {
         Sequence sequence = null;
 
@@ -59,10 +83,28 @@ public class SequenceController extends Controller {
         return sequence;
     }
 
+    /**
+     * Save the given {@link Sequence} into the database, then rebuild the search index.
+     * 
+     * @param sequence
+     * @return Saved Sequence
+     * @throws ControllerException
+     * @throws PermissionException
+     */
     public Sequence save(Sequence sequence) throws ControllerException, PermissionException {
         return save(sequence, true);
     }
 
+    /**
+     * Save the given {@link Sequence} into the database, with the option to rebuild the search
+     * index.
+     * 
+     * @param sequence
+     * @param scheduleIndexRebuild
+     * @return Saved Sequence
+     * @throws ControllerException
+     * @throws PermissionException
+     */
     public Sequence save(Sequence sequence, boolean scheduleIndexRebuild)
             throws ControllerException, PermissionException {
         Sequence result = null;
@@ -97,10 +139,29 @@ public class SequenceController extends Controller {
         return result;
     }
 
+    /**
+     * Update the {@link Sequence} in the database, then rebuild the search index.
+     * <p>
+     * Replace the existing sequence with a new one.
+     * 
+     * @param sequence
+     * @return Saved Sequence.
+     * @throws ControllerException
+     * @throws PermissionException
+     */
     public Sequence update(Sequence sequence) throws ControllerException, PermissionException {
         return update(sequence, true);
     }
 
+    /**
+     * Update the {@link Sequence} in the database, with the option to rebuild the search index.
+     * 
+     * @param sequence
+     * @param scheduleIndexRebuild
+     * @return Saved Sequence.
+     * @throws ControllerException
+     * @throws PermissionException
+     */
     public Sequence update(Sequence sequence, boolean scheduleIndexRebuild)
             throws ControllerException, PermissionException {
         Sequence result = null;
@@ -141,10 +202,25 @@ public class SequenceController extends Controller {
         return result;
     }
 
+    /**
+     * Delete the {@link Sequence} in the database, then rebuild the search index.
+     * 
+     * @param sequence
+     * @throws ControllerException
+     * @throws PermissionException
+     */
     public void delete(Sequence sequence) throws ControllerException, PermissionException {
         delete(sequence, true);
     }
 
+    /**
+     * Delete the {@link Sequence} in the database, with the option to rebuild the search index.
+     * 
+     * @param sequence
+     * @param scheduleIndexRebuild
+     * @throws ControllerException
+     * @throws PermissionException
+     */
     public void delete(Sequence sequence, boolean scheduleIndexRebuild) throws ControllerException,
             PermissionException {
         if (sequence == null) {
@@ -166,15 +242,35 @@ public class SequenceController extends Controller {
         }
     }
 
+    /**
+     * Parse the given String into an {@link IDNASequence} object.
+     * 
+     * @param sequence
+     * @return
+     */
     public static IDNASequence parse(String sequence) {
         return GeneralParser.getInstance().parse(sequence);
     }
 
+    /**
+     * Generate a formatted text of a given {@link IFormatter} from the given {@link Sequence}.
+     * 
+     * @param sequence
+     * @param formatter
+     * @return Text of a formatted sequence.
+     * @throws SequenceComposerException
+     */
     public static String compose(Sequence sequence, IFormatter formatter)
             throws SequenceComposerException {
         return SequenceComposer.compose(sequence, formatter);
     }
 
+    /**
+     * Generate a {@link FeaturedDNASequence} from a given {@link Sequence} object.
+     * 
+     * @param sequence
+     * @return FeaturedDNASequence
+     */
     public static FeaturedDNASequence sequenceToDNASequence(Sequence sequence) {
         if (sequence == null) {
             return null;
@@ -221,6 +317,12 @@ public class SequenceController extends Controller {
         return featuredDNASequence;
     }
 
+    /**
+     * Create a {@link Sequence} object from an {@link IDNASequence} object.
+     * 
+     * @param dnaSequence
+     * @return Translated Sequence object.
+     */
     public static Sequence dnaSequenceToSequence(IDNASequence dnaSequence) {
         if (dnaSequence == null) {
             return null;
@@ -321,12 +423,11 @@ public class SequenceController extends Controller {
         return sequence;
     }
 
-    public SequenceFeatureCollection annotateBiobrickPart(Sequence sequence) {
-        // TODO
-        SequenceFeatureCollection result = null;
-        return result;
-    }
-
+    /**
+     * Return the {@link SequencePermissionVerifier}.
+     * 
+     * @return sequencePermissionVerifier.
+     */
     protected SequencePermissionVerifier getSequencePermissionVerifier() {
         return (SequencePermissionVerifier) getPermissionVerifier();
     }
