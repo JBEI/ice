@@ -5,6 +5,12 @@ import java.io.OutputStream;
 
 import org.jbei.ice.lib.models.Sequence;
 
+/**
+ * Formatter to output plain text sequence.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class PlainFormatter extends AbstractFormatter {
     public PlainFormatter() {
     }
