@@ -4,12 +4,29 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.jbei.ice.lib.logging.Logger;
 
+/**
+ * Helper class to wrap database calls.
+ * 
+ * @author Zinovii Dmytriv, Timothy Ham
+ * 
+ */
 public class DAO {
 
+    /**
+     * Start a new Hibernate {@link Session}.
+     * 
+     * @return {@link Session}
+     */
     public static Session newSession() {
         return HibernateHelper.newSession();
     }
 
+    /**
+     * Delete an {@link IModel} object from the database.
+     * 
+     * @param model
+     * @throws DAOException
+     */
     public static void delete(IModel model) throws DAOException {
         if (model == null) {
             throw new DAOException("Failed to delete null model!");
@@ -45,6 +62,13 @@ public class DAO {
         }
     }
 
+    /**
+     * Save an {@link IModel} object into the database.
+     * 
+     * @param model
+     * @return Object saved.
+     * @throws DAOException
+     */
     public static Object save(IModel model) throws DAOException {
         if (model == null) {
             throw new DAOException("Failed to save null model!");
@@ -83,6 +107,14 @@ public class DAO {
         return result;
     }
 
+    /**
+     * Retrieve an {@link IModel} object from the database by Class and database id.
+     * 
+     * @param theClass
+     * @param id
+     * @return IModel object from the database.
+     * @throws DAOException
+     */
     public static Object get(Class<? extends IModel> theClass, int id) throws DAOException {
         Object result = null;
 
@@ -108,6 +140,13 @@ public class DAO {
         return result;
     }
 
+    /**
+     * Perform Hibernate merge operation on the {@link IModel} model.
+     * 
+     * @param model
+     * @return
+     * @throws DAOException
+     */
     public static Object merge(IModel model) throws DAOException {
         if (model == null) {
             throw new DAOException("Failed to merge null model!");
@@ -135,6 +174,11 @@ public class DAO {
         return result;
     }
 
+    /**
+     * Disconnect the session and reset the SessionFactory.
+     * 
+     * @param session
+     */
     private static void resetSessionFactory(Session session) {
         Logger.error("Closing session factory in DAO.java.");
         session.disconnect();
