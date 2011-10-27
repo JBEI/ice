@@ -178,7 +178,7 @@ public class EntryController extends Controller {
         Entry entry = null;
 
         try {
-            entry = EntryManager.getByJbeiName(name);
+            entry = EntryManager.getByName(name);
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }

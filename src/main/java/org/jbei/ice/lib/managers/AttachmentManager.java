@@ -18,9 +18,23 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 
+/**
+ * Manager to manipulate {@link Attachment} objects in the database.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 public class AttachmentManager {
     private static String attachmentDirectory = JbeirSettings.getSetting("ATTACHMENTS_DIRECTORY");
 
+    /**
+     * Save the {@link Attachment} in the databse, and {@link InputStream} to the disk.
+     * 
+     * @param attachment
+     * @param inputStream
+     * @return Saved Attachment.
+     * @throws ManagerException
+     */
     public static Attachment save(Attachment attachment, InputStream inputStream)
             throws ManagerException {
         if (attachment == null) {
@@ -53,6 +67,12 @@ public class AttachmentManager {
         return result;
     }
 
+    /**
+     * Delete the given {@link Attachment} from the database, and the file from the disk.
+     * 
+     * @param attachment
+     * @throws ManagerException
+     */
     public static void delete(Attachment attachment) throws ManagerException {
         if (attachment == null) {
             throw new ManagerException("Failed to delete null attachment!");
@@ -69,6 +89,13 @@ public class AttachmentManager {
         }
     }
 
+    /**
+     * Retrieve all {@link Attachment}s associated with the given {@link Entry}.
+     * 
+     * @param entry
+     * @return ArrayList of Attachments.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static ArrayList<Attachment> getByEntry(Entry entry) throws ManagerException {
         ArrayList<Attachment> attachments = null;
@@ -100,6 +127,13 @@ public class AttachmentManager {
         return attachments;
     }
 
+    /**
+     * Retrieve the {@link File} from the disk of the given {@link Attachment}.
+     * 
+     * @param attachment
+     * @return File
+     * @throws ManagerException
+     */
     public static File getFile(Attachment attachment) throws ManagerException {
         File file = new File(attachmentDirectory + File.separator + attachment.getFileId());
 
@@ -110,6 +144,14 @@ public class AttachmentManager {
         return file;
     }
 
+    /**
+     * Write the given {@link InputStream} to the file with the given fileName.
+     * 
+     * @param fileName
+     * @param inputStream
+     * @throws IOException
+     * @throws ManagerException
+     */
     private static void writeAttachmentToFile(String fileName, InputStream inputStream)
             throws IOException, ManagerException {
         try {
@@ -141,6 +183,13 @@ public class AttachmentManager {
         }
     }
 
+    /**
+     * Delete the file on disk associated with the {@link Attachment}.
+     * 
+     * @param attachment
+     * @throws IOException
+     * @throws ManagerException
+     */
     private static void deleteAttachmentFile(Attachment attachment) throws IOException,
             ManagerException {
         try {

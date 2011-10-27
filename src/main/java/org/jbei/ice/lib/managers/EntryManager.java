@@ -28,7 +28,20 @@ import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 
+/**
+ * Manager to manipulate {@link Entry} objects in the database.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
+ * 
+ */
 public class EntryManager {
+    /**
+     * Create a new {@link Entry} object in the database.
+     * 
+     * @param entry
+     * @return
+     * @throws ManagerException
+     */
     public static Entry createEntry(Entry entry) throws ManagerException {
         Entry result = null;
 
@@ -47,6 +60,13 @@ public class EntryManager {
         return result;
     }
 
+    /**
+     * Retrieve an {@link Entry} object from the database by id.
+     * 
+     * @param id
+     * @return Entry.
+     * @throws ManagerException
+     */
     public static Entry get(long id) throws ManagerException {
         Entry entry = null;
 
@@ -72,6 +92,13 @@ public class EntryManager {
         return entry;
     }
 
+    /**
+     * Retrieve an {@link Entry} object in the database by recordId field.
+     * 
+     * @param recordId
+     * @return Entry.
+     * @throws ManagerException
+     */
     public static Entry getByRecordId(String recordId) throws ManagerException {
         Entry entry = null;
 
@@ -98,6 +125,15 @@ public class EntryManager {
         return entry;
     }
 
+    /**
+     * Retrieve an {@link Entry} by it's part number.
+     * <p>
+     * If multiple Entries exist with the same part number, this method throws an exception.
+     * 
+     * @param partNumber
+     * @return Entry.
+     * @throws ManagerException
+     */
     public static Entry getByPartNumber(String partNumber) throws ManagerException {
         Entry entry = null;
 
@@ -124,7 +160,14 @@ public class EntryManager {
         return entry;
     }
 
-    public static Entry getByJbeiName(String name) throws ManagerException {
+    /**
+     * Retrieve an {@link Entry} by it's name.
+     * 
+     * @param name
+     * @return Entry.
+     * @throws ManagerException
+     */
+    public static Entry getByName(String name) throws ManagerException {
         Entry entry = null;
         Session session = DAO.newSession();
 
@@ -149,6 +192,12 @@ public class EntryManager {
         return entry;
     }
 
+    /**
+     * Retrieve the number of {@link Entry Entries} visible to everyone.
+     * 
+     * @return Number of visible entries.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static long getNumberOfVisibleEntries() throws ManagerException {
         Group everybodyGroup;
@@ -183,6 +232,12 @@ public class EntryManager {
         return result;
     }
 
+    /**
+     * Retrieve all entries in the database.
+     * 
+     * @return ArrayList of Entries.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static ArrayList<Entry> getAllEntries() throws ManagerException {
         ArrayList<Entry> entries = null;
@@ -208,12 +263,8 @@ public class EntryManager {
         return entries;
     }
 
-    public static ArrayList<Long> getEntries() throws ManagerException {
-        return getEntries(null, false);
-    }
-
     /**
-     * Retrieve {@link Entry} id's sorted by the given field.
+     * Retrieve {@link Entry} id's sorted by the given field, with option to sort ascending.
      * 
      * @param field
      *            The field to sort on.
@@ -253,6 +304,13 @@ public class EntryManager {
         return entries;
     }
 
+    /**
+     * Retrieve {@link Entry} ids of the given owner email.
+     * 
+     * @param owner
+     * @return ArrayList of ids.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static ArrayList<Long> getEntriesByOwner(String owner) throws ManagerException {
         ArrayList<Long> entries = null;

@@ -12,12 +12,26 @@ import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.BulkImport;
 
+/**
+ * Manage {@link BulkImport} objects in the database.
+ * 
+ * @author Hector Plahar
+ * 
+ */
 public class BulkImportManager {
 
+    /**
+     * Create a new {@link BulkImport} object in the database.
+     * 
+     * @param data
+     * @return Saved BulkImport
+     * @throws ManagerException
+     */
     public static BulkImport createBulkImportRecord(BulkImport data) throws ManagerException {
 
-        if (data == null)
+        if (data == null) {
             throw new ManagerException("Cannot create record from null data");
+        }
 
         try {
             Date creationDate = new Date(System.currentTimeMillis());
@@ -28,6 +42,12 @@ public class BulkImportManager {
         }
     }
 
+    /**
+     * Delete the given {@link BulkImport} object in the database.
+     * 
+     * @param bulkImport
+     * @throws ManagerException
+     */
     public static void delete(BulkImport bulkImport) throws ManagerException {
         try {
             DAO.delete(bulkImport);
@@ -37,6 +57,12 @@ public class BulkImportManager {
         }
     }
 
+    /**
+     * Retrieve all {@link BulkImport} objects in the database.
+     * 
+     * @return
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static List<BulkImport> retrieveAll() throws ManagerException {
         Session session = DAO.newSession();
@@ -48,8 +74,9 @@ public class BulkImportManager {
         } catch (HibernateException he) {
             throw new ManagerException("Error retrieving list of bulk imports", he);
         } finally {
-            if (session.isOpen())
+            if (session.isOpen()) {
                 session.close();
+            }
         }
 
         return list;
@@ -65,8 +92,9 @@ public class BulkImportManager {
             throw new ManagerException("Error retrieving bulk import record", e);
         } finally {
 
-            if (session != null && session.isOpen())
+            if (session != null && session.isOpen()) {
                 session.close();
+            }
         }
     }
 
@@ -79,8 +107,9 @@ public class BulkImportManager {
         } catch (Exception e) {
             throw new ManagerException("Error retrieving bulk import record type", e);
         } finally {
-            if (session != null && session.isOpen())
+            if (session != null && session.isOpen()) {
                 session.close();
+            }
         }
     }
 }
