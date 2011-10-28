@@ -341,6 +341,16 @@ public class EntryManager {
         return entries;
     }
 
+    /**
+     * Retrieve {@link Entry} ids of the given ownerEmail sorted by field.
+     * 
+     * @param owner
+     * @param field
+     * @param ascending
+     *            True if ascending.
+     * @return ArrayList of ids.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static ArrayList<Long> getEntriesByOwnerSort(String owner, String field,
             boolean ascending) throws ManagerException {
@@ -375,6 +385,16 @@ public class EntryManager {
         return entries;
     }
 
+    /**
+     * Retrieve {@link Entry} objects from the database given a list of id's, sorted by the given
+     * field.
+     * 
+     * @param ids
+     * @param field
+     * @param ascending
+     * @return List of Entry objects
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static List<Entry> getEntriesByIdSetSort(List<Long> ids, String field, boolean ascending)
             throws ManagerException {
@@ -411,6 +431,13 @@ public class EntryManager {
         return entries;
     }
 
+    /**
+     * Retrieve {@link Entry} ids sorted by name.
+     * 
+     * @param ascending
+     * @return List of Entry ids.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static List<Long> getEntriesSortByName(boolean ascending) throws ManagerException {
         ArrayList<Long> entries = new ArrayList<Long>();
@@ -439,6 +466,13 @@ public class EntryManager {
         return entries;
     }
 
+    /**
+     * Retrieve {@link Entry} ids sorted by their {@link PartNumber}.
+     * 
+     * @param ascending
+     * @return List of Entry ids.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static List<Long> getEntriesSortByPartNumber(boolean ascending) throws ManagerException {
         ArrayList<Long> entries = new ArrayList<Long>();
@@ -467,6 +501,13 @@ public class EntryManager {
         return entries;
     }
 
+    /**
+     * Retrieve {@link Entry} objects of the given list of ids.
+     * 
+     * @param ids
+     * @return ArrayList of Entry objects.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static ArrayList<Entry> getEntriesByIdSet(List<Long> ids) throws ManagerException {
         ArrayList<Entry> entries = null;
@@ -499,6 +540,12 @@ public class EntryManager {
         return entries;
     }
 
+    /**
+     * Delete an {@link Entry} object in the database.
+     * 
+     * @param entry
+     * @throws ManagerException
+     */
     public static void delete(Entry entry) throws ManagerException {
         if (entry == null) {
             throw new ManagerException("Failed to delete null entry!");
@@ -511,6 +558,13 @@ public class EntryManager {
         }
     }
 
+    /**
+     * Save the {@ink Entry} object into the database.
+     * 
+     * @param entry
+     * @return Saved Entry object.
+     * @throws ManagerException
+     */
     public static Entry save(Entry entry) throws ManagerException {
         if (entry == null) {
             throw new ManagerException("Failed to save null entry!");
@@ -566,6 +620,13 @@ public class EntryManager {
         return savedEntry;
     }
 
+    /**
+     * Create a new {@link Plasmid} object in the database.
+     * 
+     * @param newPlasmid
+     * @return Saved Plasmid object.
+     * @throws ManagerException
+     */
     private static Plasmid createPlasmid(Plasmid newPlasmid) throws ManagerException {
         Plasmid savedPlasmid = null;
 
@@ -577,6 +638,13 @@ public class EntryManager {
         return savedPlasmid;
     }
 
+    /**
+     * create a new {@link Strain} object in the database.
+     * 
+     * @param newStrain
+     * @return saved Strain object.
+     * @throws ManagerException
+     */
     private static Strain createStrain(Strain newStrain) throws ManagerException {
         Strain savedStrain = null;
 
@@ -588,6 +656,13 @@ public class EntryManager {
         return savedStrain;
     }
 
+    /**
+     * Create a new {@link Part} object in the database.
+     * 
+     * @param newPart
+     * @return Saved Part object.
+     * @throws ManagerException
+     */
     private static Part createPart(Part newPart) throws ManagerException {
         Part savedPart = null;
 
@@ -599,6 +674,13 @@ public class EntryManager {
         return savedPart;
     }
 
+    /**
+     * Create a new {@link ArabidopsisSeed} object in the database.
+     * 
+     * @param newArabidopsisSeed
+     * @return Saved ArabidopsisSeed object.
+     * @throws ManagerException
+     */
     private static ArabidopsisSeed createArabidopsisSeed(ArabidopsisSeed newArabidopsisSeed)
             throws ManagerException {
         ArabidopsisSeed savedArabidopsisSeed = null;
@@ -611,6 +693,17 @@ public class EntryManager {
         return savedArabidopsisSeed;
     }
 
+    /**
+     * Create an {@link Entry} object in the database.
+     * <p>
+     * Call to this method assigning the next {@link PartNumber}, and a random recordId, sets the
+     * creationTime or the modificationTime. It does not set the recordType, which are handled by
+     * the appropriate create methods for each recordType.
+     * 
+     * @param newEntry
+     * @return Saved Entry object.
+     * @throws ManagerException
+     */
     private static Entry createGenericEntry(Entry newEntry) throws ManagerException {
         String number = getNextPartNumber();
         PartNumber partNumber = new PartNumber();
@@ -634,7 +727,11 @@ public class EntryManager {
     }
 
     /**
-     * Updates or Inserts unique funding source and returns the result
+     * Save {@link FundingSource} object into the database.
+     * 
+     * @param fundingSource
+     * @return Saved FundingSource object.
+     * @throws DAOException
      */
     private static FundingSource saveFundingSource(FundingSource fundingSource) throws DAOException {
         FundingSource result;
@@ -669,6 +766,18 @@ public class EntryManager {
         return result;
     }
 
+    /**
+     * Generate the next PartNumber available in the database.
+     * 
+     * @param prefix
+     *            Part number prefix. For example, "JBx".
+     * @param delimiter
+     *            Character between the prefix and the part number, For example, "_".
+     * @param suffix
+     *            Example digits, for example "000000" to represent a six digit part number.
+     * @return New part umber string, for example "JBx_000001".
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     private static String generateNextPartNumber(String prefix, String delimiter, String suffix)
             throws ManagerException {
@@ -717,6 +826,12 @@ public class EntryManager {
         }
     }
 
+    /**
+     * Generate the next part number string using system settings.
+     * 
+     * @return The next part number.
+     * @throws ManagerException
+     */
     private static String getNextPartNumber() throws ManagerException {
         return generateNextPartNumber(JbeirSettings.getSetting("PART_NUMBER_PREFIX"),
             JbeirSettings.getSetting("PART_NUMBER_DELIMITER"),

@@ -11,7 +11,20 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Project;
 
+/**
+ * Manager to manipulate {@link Project} objects.
+ * 
+ * @author Zinovii Dmytriv, Timothy Ham
+ * 
+ */
 public class ProjectManager {
+    /**
+     * Save the given {@link Project} object in the database.
+     * 
+     * @param project
+     * @return Saved Project object.
+     * @throws ManagerException
+     */
     public static Project saveProject(Project project) throws ManagerException {
         if (project == null) {
             throw new ManagerException("Failed to save null project!");
@@ -30,6 +43,12 @@ public class ProjectManager {
         return project;
     }
 
+    /**
+     * Delete the given {@link Project} object in the database.
+     * 
+     * @param project
+     * @throws ManagerException
+     */
     public static void deleteProject(Project project) throws ManagerException {
         if (project == null) {
             throw new ManagerException("Failed to delete null project!");
@@ -42,6 +61,13 @@ public class ProjectManager {
         }
     }
 
+    /**
+     * Retrieve the {@link Project} by its id.
+     * 
+     * @param id
+     * @return Project object.
+     * @throws ManagerException
+     */
     public static Project get(long id) throws ManagerException {
         Project project = null;
 
@@ -68,6 +94,13 @@ public class ProjectManager {
         return project;
     }
 
+    /**
+     * Retrieve the {@link Project} by its uuid.
+     * 
+     * @param uuid
+     * @return Project object.
+     * @throws ManagerException
+     */
     public static Project getByUUID(String uuid) throws ManagerException {
         Project project = null;
 
@@ -94,6 +127,13 @@ public class ProjectManager {
         return project;
     }
 
+    /**
+     * Retrieve all {@link Project} objects associated with the given {@link Account}.
+     * 
+     * @param account
+     * @return ArrayList of Projects.
+     * @throws ManagerException
+     */
     @SuppressWarnings("rawtypes")
     public static ArrayList<Project> getByAccount(Account account) throws ManagerException {
         ArrayList<Project> projects = new ArrayList<Project>();

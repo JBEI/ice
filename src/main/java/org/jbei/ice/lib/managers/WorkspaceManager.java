@@ -13,7 +13,21 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Workspace;
 import org.jbei.ice.web.IceSession;
 
+/**
+ * Manager to manipulate {@link Workspace} objects.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 public class WorkspaceManager {
+    /**
+     * Create a new {@link Workspace} object using the given {@link Account} and {@link Entry}.
+     * 
+     * @param account
+     * @param entry
+     * @return Workspace object.
+     * @throws ManagerException
+     */
     public static Workspace create(Account account, Entry entry) throws ManagerException {
         Workspace result = new Workspace(account, entry);
         try {
@@ -24,6 +38,13 @@ public class WorkspaceManager {
         return result;
     }
 
+    /**
+     * Save the given {@link Workspace} object into the database.
+     * 
+     * @param workspace
+     * @return
+     * @throws ManagerException
+     */
     public static Workspace addOrUpdate(Workspace workspace) throws ManagerException {
         Workspace result = get(workspace.getAccount(), workspace.getEntry());
         if (result == null) {
@@ -37,6 +58,13 @@ public class WorkspaceManager {
         return result;
     }
 
+    /**
+     * Determine if the given {@link Account} and {@link Entry} has an associated {@link Workspace}.
+     * 
+     * @param account
+     * @param entry
+     * @return True if a Workspace exists.
+     */
     public static boolean hasEntry(Account account, Entry entry) {
         boolean result = false;
 
@@ -64,12 +92,31 @@ public class WorkspaceManager {
         return result;
     }
 
+    /**
+     * Determine if the given {@link Entry} has an associated {@link Workspace} for the currently
+     * active user.
+     * <p>
+     * TODO Because this method invokes the current session, perhaps it needs to be moved to a
+     * controller.
+     * 
+     * @param entry
+     * @return
+     * @throws ManagerException
+     */
     public static boolean hasEntry(Entry entry) throws ManagerException {
         Account account = IceSession.get().getAccount();
 
         return hasEntry(account, entry);
     }
 
+    /**
+     * Update the number visited statistic for the {@link Workspace} associated with {@link Account}
+     * and the {@link Entry}.
+     * 
+     * @param account
+     * @param entry
+     * @throws ManagerException
+     */
     public synchronized static void setVisited(Account account, Entry entry)
             throws ManagerException {
         try {
@@ -87,11 +134,25 @@ public class WorkspaceManager {
         }
     }
 
+    /**
+     * Record that an {@link Entry} object has been visited.
+     * 
+     * @param entry
+     * @throws ManagerException
+     */
     public static void setVisited(Entry entry) throws ManagerException {
         Account account = IceSession.get().getAccount();
         setVisited(account, entry);
     }
 
+    /**
+     * Retrieve all the {@link} Workspace objects associated with the currently logged in user.
+     * <p>
+     * TODO Perhaps this method should be in a controller.
+     * 
+     * @return ArrayList of Workspace objects.
+     * @throws ManagerException
+     */
     public static ArrayList<Workspace> get() throws ManagerException {
         ArrayList<Workspace> result = null;
         Account account = IceSession.get().getAccount();
@@ -117,6 +178,16 @@ public class WorkspaceManager {
         return result;
     }
 
+    /**
+     * Retrieve {@link Workspace} objects by the given {@link Account} object, with offset and limit
+     * options.
+     * 
+     * @param account
+     * @param offset
+     * @param limit
+     * @return ArrayList of Workspace objects.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static ArrayList<Workspace> getByAccount(Account account, int offset, int limit)
             throws ManagerException {
@@ -141,6 +212,14 @@ public class WorkspaceManager {
         return result;
     }
 
+    /**
+     * Retrieve {@link Workspace} objects by the given {@link Account} and {@link Entry} objects.
+     * 
+     * @param account
+     * @param entry
+     * @return Workspace object.
+     * @throws ManagerException
+     */
     public static Workspace get(Account account, Entry entry) throws ManagerException {
         String queryString = "from Workspace workspace where entry=:entry and account=:account";
         Session session = DAO.newSession();
@@ -160,6 +239,13 @@ public class WorkspaceManager {
         return result;
     }
 
+    /**
+     * Retrieve the number of {@link Workspace} objects associated with the given {@link Account}.
+     * 
+     * @param account
+     * @return Number.
+     * @throws ManagerException
+     */
     public static int getCountByAccount(Account account) throws ManagerException {
         int size = 0;
         Session session = DAO.newSession();
@@ -180,6 +266,13 @@ public class WorkspaceManager {
         return size;
     }
 
+    /**
+     * Save the given {@link Workspace} object into the database.
+     * 
+     * @param workspace
+     * @return Saved Workspace object.
+     * @throws ManagerException
+     */
     public static Workspace save(Workspace workspace) throws ManagerException {
         Workspace result = null;
 
@@ -203,6 +296,16 @@ public class WorkspaceManager {
         return result;
     }
 
+    /**
+     * Retrieve the {@link Workspace} objects recently viewed by the given {@link Account}, with
+     * offset and limit options.
+     * 
+     * @param account
+     * @param offset
+     * @param limit
+     * @return ArrayList of Workspace objects.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static ArrayList<Workspace> getRecentlyViewedByAccount(Account account, int offset,
             int limit) throws ManagerException {
@@ -228,6 +331,16 @@ public class WorkspaceManager {
         return result;
     }
 
+    /**
+     * Retrieve the number of recently viewed entries from {@link Workspace} object associated with
+     * the given {@link Account} object.
+     * <p>
+     * Maximum value returned is 50.
+     * 
+     * @param account
+     * @return Number, limited to 50.
+     * @throws ManagerException
+     */
     public static int getRecentlyViewedCount(Account account) throws ManagerException {
         int size = 0;
         Session session = DAO.newSession();

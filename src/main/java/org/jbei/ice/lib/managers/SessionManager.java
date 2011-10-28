@@ -10,7 +10,20 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.SessionData;
 
+/**
+ * Manipulate {@link SessionData} objects in the database.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 public class SessionManager {
+    /**
+     * Retrieve {@link SessionData} object by its sessionKey.
+     * 
+     * @param sessionKey
+     * @return SessionData object.
+     * @throws ManagerException
+     */
     public static SessionData get(String sessionKey) throws ManagerException {
         SessionData sessionData = null;
         Session session = DAO.newSession();
@@ -41,6 +54,14 @@ public class SessionManager {
         return sessionData;
     }
 
+    /**
+     * Retrieve the {@link SessionData} object associated with the given {@link Account}.
+     * 
+     * @param account
+     * @return SessionData object. Null if the session does not exist, the user has logged out, or
+     *         session has expired.
+     * @throws ManagerException
+     */
     public static SessionData get(Account account) throws ManagerException {
         SessionData sessionData = null;
         Session session = DAO.newSession();
@@ -71,6 +92,13 @@ public class SessionManager {
         return sessionData;
     }
 
+    /**
+     * Save the given {@link SessionData} object in the database.
+     * 
+     * @param sessionData
+     * @return Saved SessionData object.
+     * @throws ManagerException
+     */
     public static SessionData save(SessionData sessionData) throws ManagerException {
         SessionData result = null;
         try {
@@ -82,12 +110,18 @@ public class SessionManager {
             throw new ManagerException(msg, e);
         }
 
-        flush(); //clear expired sessions here because there is no chron mechanism.
+        flush(); //TODO: Move flush mechanism into cron mechanism.
 
         return result;
 
     }
 
+    /**
+     * Delete the given {@link SessionData} object in the database.
+     * 
+     * @param sessionData
+     * @throws ManagerException
+     */
     public static void delete(SessionData sessionData) throws ManagerException {
         try {
             DAO.delete(sessionData);
@@ -99,9 +133,8 @@ public class SessionManager {
     }
 
     /**
-     * Flush the database of expired session's
+     * Flush the database of expired sessions.
      */
-
     public static void flush() {
         Session session = DAO.newSession();
         try {

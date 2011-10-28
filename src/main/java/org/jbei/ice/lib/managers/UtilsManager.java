@@ -18,13 +18,31 @@ import org.jbei.ice.lib.models.Comment;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.models.Plasmid;
+import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.models.Vote;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 
+/**
+ * Manager to deal with various objects in the database for utility purposes.
+ * <p>
+ * Methods here do not clearly belong with the manipulation of objects.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv, Joanna Chen
+ * 
+ */
 @SuppressWarnings("unchecked")
 public class UtilsManager {
+
+    /**
+     * Retrieve all the unique {@link SelectionMarker}s as collection of Strings.
+     * <p>
+     * This method is useful for fetching auto-complete list of selection markers.
+     * 
+     * @return
+     * @throws ManagerException
+     */
     public static TreeSet<String> getUniqueSelectionMarkers() throws ManagerException {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
         Session session = DAO.newSession();
@@ -57,6 +75,13 @@ public class UtilsManager {
         return results;
     }
 
+    /**
+     * Retrieve unique, publicly visible plasmid names from the database.
+     * <p>
+     * This method is useful for fetching auto-complete list of plasmid names.
+     * 
+     * @return
+     */
     public static TreeSet<String> getUniquePublicPlasmidNames() {
         TreeSet<String> results = new TreeSet<String>();
         Session session = DAO.newSession();
@@ -80,6 +105,13 @@ public class UtilsManager {
         return results;
     }
 
+    /**
+     * Retrieve unique promoters from the database.
+     * <p>
+     * This method is useful for fetching auto-complete list of promoters.
+     * 
+     * @return
+     */
     public static TreeSet<String> getUniquePromoters() {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
         Session session = DAO.newSession();
@@ -112,6 +144,13 @@ public class UtilsManager {
         return results;
     }
 
+    /**
+     * Retrieve unique origin of replications from the database.
+     * <p>
+     * This method is useful for fetching auto-complete list of origin of replications.
+     * 
+     * @return
+     */
     public static TreeSet<String> getUniqueOriginOfReplications() {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
         Session session = DAO.newSession();
@@ -146,6 +185,22 @@ public class UtilsManager {
         return results;
     }
 
+    /**
+     * Retrieve the {@link Strain} objects associated with the given {@link Plasmid}.
+     * <p>
+     * Strain objects have a field "plasmids", which is maybe wiki text of plasmids that the strain
+     * may harbor. However, since plasmids can be harbored in multiple strains, the reverse lookup
+     * must be computed in order to find which strains harbor a plasmid. And since it is possible to
+     * import/export strains separately from plasmids, it is possible that even though the strain
+     * claims to have a plasmid, that plasmid may not be in this system, but some other. So, in
+     * order to find out which strains actually harbor the given plasmid, we must query the strains
+     * table for the plasmid, parse the wiki text, and check that those plasmids actually exist
+     * before being certain that strain actually harbors this plasmid.
+     * 
+     * @param plasmid
+     * @return LinkedHashSet of Strain objects.
+     * @throws ManagerException
+     */
     public static LinkedHashSet<Strain> getStrainsForPlasmid(Plasmid plasmid)
             throws ManagerException {
         LinkedHashSet<Strain> resultStrains = new LinkedHashSet<Strain>();
@@ -220,6 +275,16 @@ public class UtilsManager {
         return resultStrains;
     }
 
+    /**
+     * TODO: remove.
+     * 
+     * @param entry
+     * @param account
+     * @param body
+     * @return
+     * @throws ManagerException
+     */
+    @Deprecated
     public static Comment addComment(Entry entry, Account account, String body)
             throws ManagerException {
         Comment comment = new Comment(entry, account, body);
@@ -233,6 +298,17 @@ public class UtilsManager {
         return comment;
     }
 
+    /**
+     * TODO: remove.
+     * 
+     * @param entry
+     * @param account
+     * @param score
+     * @param comment
+     * @return
+     * @throws ManagerException
+     */
+    @Deprecated
     public static Vote addVote(Entry entry, Account account, int score, String comment)
             throws ManagerException {
         if (!((score == 1) || (score == -1))) {
@@ -252,11 +328,12 @@ public class UtilsManager {
     }
 
     /**
-     * Count number of up votes for an entry
+     * TODO Remove.
      * 
      * @param entry
      * @return upVotes
      */
+    @Deprecated
     public static int countUpVotes(Entry entry) {
         LinkedHashSet<Vote> votes;
         int result = 0;
@@ -278,11 +355,12 @@ public class UtilsManager {
     }
 
     /**
-     * Count number of down votes for entry
+     * TODO Remove.
      * 
      * @param entry
      * @return downVotes
      */
+    @Deprecated
     public static int countDownVotes(Entry entry) {
         LinkedHashSet<Vote> votes;
         int result = 0;
@@ -304,6 +382,14 @@ public class UtilsManager {
         return result;
     }
 
+    /**
+     * TODO remove
+     * 
+     * @param entry
+     * @return
+     * @throws ManagerException
+     */
+    @Deprecated
     public static LinkedHashSet<Comment> getComments(Entry entry) throws ManagerException {
         LinkedHashSet<Comment> result = null;
         Session session = DAO.newSession();
@@ -324,6 +410,14 @@ public class UtilsManager {
         return result;
     }
 
+    /**
+     * TODO remove.
+     * 
+     * @param account
+     * @return
+     * @throws ManagerException
+     */
+    @Deprecated
     public static LinkedHashSet<Comment> getComments(Account account) throws ManagerException {
         LinkedHashSet<Comment> result = null;
         Session session = DAO.newSession();
@@ -344,6 +438,14 @@ public class UtilsManager {
         return result;
     }
 
+    /**
+     * TODO Remove
+     * 
+     * @param entry
+     * @return
+     * @throws ManagerException
+     */
+    @Deprecated
     public static LinkedHashSet<Vote> getVotes(Entry entry) throws ManagerException {
         LinkedHashSet<Vote> result = null;
         Session session = DAO.newSession();
@@ -364,6 +466,13 @@ public class UtilsManager {
         return result;
     }
 
+    /**
+     * TODO Remove
+     * 
+     * @param account
+     * @return
+     * @throws ManagerException
+     */
     public static LinkedHashSet<Vote> getVotes(Account account) throws ManagerException {
         LinkedHashSet<Vote> result = null;
         Session session = DAO.newSession();
@@ -384,6 +493,14 @@ public class UtilsManager {
         return result;
     }
 
+    /**
+     * TODO Remove
+     * 
+     * @param entry
+     * @param account
+     * @return
+     * @throws ManagerException
+     */
     public static Vote getVote(Entry entry, Account account) throws ManagerException {
         Vote vote = null;
         Session session = DAO.newSession();
@@ -406,7 +523,7 @@ public class UtilsManager {
     }
 
     /**
-     * Updates an existing vote
+     * TODO Remove
      * 
      * @param vote
      * @param score
@@ -429,6 +546,12 @@ public class UtilsManager {
         return vote;
     }
 
+    /**
+     * TODO Remove
+     * 
+     * @return
+     * @throws ManagerException
+     */
     public static LinkedHashSet<Entry> getMostVoted() throws ManagerException {
         LinkedHashSet<Entry> result = new LinkedHashSet<Entry>();
         Session session = DAO.newSession();
@@ -455,6 +578,12 @@ public class UtilsManager {
         return result;
     }
 
+    /**
+     * TODO Remove
+     * 
+     * @return
+     * @throws ManagerException
+     */
     public static LinkedHashSet<Entry> getMostCommented() throws ManagerException {
         LinkedHashSet<Entry> result = new LinkedHashSet<Entry>();
         Session session = DAO.newSession();

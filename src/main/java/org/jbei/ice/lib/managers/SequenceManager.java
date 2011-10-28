@@ -16,7 +16,20 @@ import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.utils.SequenceUtils;
 
+/**
+ * Manipulate {@link Sequence} and associated objects in the database.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 public class SequenceManager {
+    /**
+     * Save the given {@link Sequence} object in the database.
+     * 
+     * @param sequence
+     * @return Saved Sequence object
+     * @throws ManagerException
+     */
     public static Sequence saveSequence(Sequence sequence) throws ManagerException {
         if (sequence == null) {
             throw new ManagerException("Failed to save null sequence!");
@@ -55,6 +68,12 @@ public class SequenceManager {
         return sequence;
     }
 
+    /**
+     * Delete the given {@link Sequence} object in the database.
+     * 
+     * @param sequence
+     * @throws ManagerException
+     */
     public static void deleteSequence(Sequence sequence) throws ManagerException {
         if (sequence == null) {
             throw new ManagerException("Failed to delete null sequence!");
@@ -69,6 +88,13 @@ public class SequenceManager {
         }
     }
 
+    /**
+     * Save the given {@link Feature} object in the database.
+     * 
+     * @param feature
+     * @return Saved Feature object.
+     * @throws ManagerException
+     */
     public static Feature saveFeature(Feature feature) throws ManagerException {
         if (feature == null) {
             throw new ManagerException("Failed to save null feature!");
@@ -83,6 +109,12 @@ public class SequenceManager {
         return feature;
     }
 
+    /**
+     * Delete the give {@link Feature} object in the database.
+     * 
+     * @param feature
+     * @throws ManagerException
+     */
     public static void deleteFeature(Feature feature) throws ManagerException {
         if (feature == null) {
             throw new ManagerException("Failed to delete null feature!");
@@ -95,6 +127,13 @@ public class SequenceManager {
         }
     }
 
+    /**
+     * Retrieve the {@link Sequence} object associated with the given {@link Entry} object.
+     * 
+     * @param entry
+     * @return Sequence object.
+     * @throws ManagerException
+     */
     public static Sequence getByEntry(Entry entry) throws ManagerException {
         Sequence sequence = null;
 
@@ -123,6 +162,12 @@ public class SequenceManager {
         return sequence;
     }
 
+    /**
+     * Retrieve all {@link Sequence} objects in the database.
+     * 
+     * @return ArrayList of Sequence objects.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static ArrayList<Sequence> getAllSequences() throws ManagerException {
         ArrayList<Sequence> sequences = null;
@@ -148,6 +193,97 @@ public class SequenceManager {
         return sequences;
     }
 
+    /**
+     * Retrieve the {@link Feature} object for the given Feature object. Since only one Feature
+     * object should exist for a given unique sequence, this method is used to prevent creation of
+     * duplicate features.
+     * <p>
+     * Use this to look for a reference feature that should exist in the features table, such as
+     * known biobrick prefix/suffix/scar sequence. This method creates the feature if it doesn't
+     * exist, using the values passed.
+     * <p>
+     * 
+     * 
+     * @param feature
+     * @return
+     * @throws ControllerException
+     * @throws ManagerException
+     */
+    public static Feature getReferenceFeature(Feature feature) throws ControllerException {
+        try {
+            Feature oldFeature = getFeatureBySequence(feature.getSequence());
+            if (oldFeature == null) {
+                Feature newFeature = SequenceManager.saveFeature(feature);
+                return newFeature;
+            } else {
+                return oldFeature;
+            }
+        } catch (ManagerException e) {
+            throw new ControllerException(e);
+        }
+
+    }
+
+    /**
+     * Retrieve a {@link Fetaure} object by its id.
+     * 
+     * @param id
+     * @return Feature object.
+     */
+    public static Feature getFeature(long id) {
+        Feature result = null;
+        Session session = DAO.newSession();
+        try {
+            String queryString = "from " + Feature.class.getName() + " where id = :id";
+            Query query = session.createQuery(queryString);
+            query.setParameter("id", id);
+            Object queryResult = query.uniqueResult();
+            if (true) {
+                result = (Feature) queryResult;
+            }
+        } catch (HibernateException e) {
+            e.printStackTrace();
+        }
+        return result;
+
+    }
+
+    /**
+     * Retrieve all {@link Feature} objects in the database.
+     * 
+     * @return ArrayList of Feature objects.
+     * @throws ManagerException
+     */
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Feature> getAllFeatures() throws ManagerException {
+        ArrayList<Feature> features = null;
+        Session session = DAO.newSession();
+        try {
+            Query query = session.createQuery("from " + Feature.class.getName());
+            @SuppressWarnings("rawtypes")
+            List list = query.list();
+
+            if (list != null) {
+                features = (ArrayList<Feature>) list;
+            }
+        } catch (HibernateException e) {
+            throw new ManagerException(e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+
+        return features;
+    }
+
+    /**
+     * Retrieve the {@link Feature} object with the given DNA sequence string.
+     * 
+     * @param featureDnaSequence
+     * @return Feature object.
+     * @throws ManagerException
+     */
     private static Feature getFeatureBySequence(String featureDnaSequence) throws ManagerException {
         featureDnaSequence = featureDnaSequence.toLowerCase();
         Feature result = null;
@@ -183,71 +319,5 @@ public class SequenceManager {
         }
 
         return result;
-    }
-
-    /**
-     * Use this to look for a reference feature that should exist in the features table,
-     * such as known biobrick prefix/suffix/scar sequence.
-     * This method creates the feature if it doesn't exist, using the values passed.
-     * 
-     * @param feature
-     * @return
-     * @throws ControllerException
-     * @throws ManagerException
-     */
-    public static Feature getReferenceFeature(Feature feature) throws ControllerException {
-        try {
-            Feature oldFeature = getFeatureBySequence(feature.getSequence());
-            if (oldFeature == null) {
-                Feature newFeature = SequenceManager.saveFeature(feature);
-                return newFeature;
-            } else {
-                return oldFeature;
-            }
-        } catch (ManagerException e) {
-            throw new ControllerException(e);
-        }
-
-    }
-
-    public static Feature getFeature(long id) {
-        Feature result = null;
-        Session session = DAO.newSession();
-        try {
-            String queryString = "from " + Feature.class.getName() + " where id = :id";
-            Query query = session.createQuery(queryString);
-            query.setParameter("id", id);
-            Object queryResult = query.uniqueResult();
-            if (true) {
-                result = (Feature) queryResult;
-            }
-        } catch (HibernateException e) {
-            e.printStackTrace();
-        }
-        return result;
-
-    }
-
-    @SuppressWarnings("unchecked")
-    public static ArrayList<Feature> getAllFeatures() throws ManagerException {
-        ArrayList<Feature> features = null;
-        Session session = DAO.newSession();
-        try {
-            Query query = session.createQuery("from " + Feature.class.getName());
-            @SuppressWarnings("rawtypes")
-            List list = query.list();
-
-            if (list != null) {
-                features = (ArrayList<Feature>) list;
-            }
-        } catch (HibernateException e) {
-            throw new ManagerException(e);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
-        }
-
-        return features;
     }
 }

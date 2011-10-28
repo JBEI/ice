@@ -17,9 +17,23 @@ import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.models.TraceSequenceAlignment;
 import org.jbei.ice.lib.utils.JbeirSettings;
 
+/**
+ * Manager to manipulate {@link TraceSequence} objects.
+ * 
+ * @author Zinovii Dmytriv, Timothy Ham
+ * 
+ */
 public class TraceSequenceManager {
     private static String traceFilesDirectory = JbeirSettings.getSetting("TRACE_FILES_DIRECTORY");
 
+    /**
+     * Create a new {@link TraceSequence} object in the database, and write the file data to disk.
+     * 
+     * @param traceSequence
+     * @param inputStream
+     * @return Saved TraceSequence object.
+     * @throws ManagerException
+     */
     public static TraceSequence create(TraceSequence traceSequence, InputStream inputStream)
             throws ManagerException {
         if (traceSequence == null) {
@@ -50,6 +64,13 @@ public class TraceSequenceManager {
         return result;
     }
 
+    /**
+     * Save the given {@link TraceSequence} object in the database.
+     * 
+     * @param traceSequence
+     * @return Saved TraceSequence object.
+     * @throws ManagerException
+     */
     public static TraceSequence save(TraceSequence traceSequence) throws ManagerException {
         TraceSequence result = null;
 
@@ -67,6 +88,13 @@ public class TraceSequenceManager {
         return result;
     }
 
+    /**
+     * Retrieve the {@link TraceSequence} object by its fileId.
+     * 
+     * @param fileId
+     * @return TraceSequence object.
+     * @throws ManagerException
+     */
     public static TraceSequence getByFileId(String fileId) throws ManagerException {
         TraceSequence traceSequence = null;
 
@@ -93,6 +121,13 @@ public class TraceSequenceManager {
         return traceSequence;
     }
 
+    /**
+     * Delete the given {@link TraceSequence} object in the database, and remove the file data from
+     * disk.
+     * 
+     * @param traceSequence
+     * @throws ManagerException
+     */
     public static void delete(TraceSequence traceSequence) throws ManagerException {
         if (traceSequence == null) {
             throw new ManagerException("Failed to delete null Trace Sequence!");
@@ -109,6 +144,16 @@ public class TraceSequenceManager {
         }
     }
 
+    /**
+     * Write the given file data to disk.
+     * 
+     * @param fileName
+     *            Name of file written to disk.
+     * @param inputStream
+     *            File data.
+     * @throws IOException
+     * @throws ManagerException
+     */
     private static void writeTraceSequenceToFile(String fileName, InputStream inputStream)
             throws IOException, ManagerException {
         try {
@@ -140,6 +185,13 @@ public class TraceSequenceManager {
         }
     }
 
+    /**
+     * Delete the file data on disk associated with the {@link TraceSequence} object given.
+     * 
+     * @param traceSequence
+     * @throws IOException
+     * @throws ManagerException
+     */
     private static void deleteTraceSequenceToFile(TraceSequence traceSequence) throws IOException,
             ManagerException {
         try {
@@ -151,6 +203,13 @@ public class TraceSequenceManager {
         }
     }
 
+    /**
+     * Retrieve all {@link TraceSequence} objects associated with the given {@link Entry} object.
+     * 
+     * @param entry
+     * @return List of TraceSequence objects.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static List<TraceSequence> getByEntry(Entry entry) throws ManagerException {
         if (entry == null) {
@@ -182,6 +241,14 @@ public class TraceSequenceManager {
         return result;
     }
 
+    /**
+     * Retrieve the {@link File} object from disk associated with the given {@link TraceSequence}
+     * object.
+     * 
+     * @param traceSequence
+     * @return
+     * @throws ManagerException
+     */
     public static File getFile(TraceSequence traceSequence) throws ManagerException {
         File file = new File(traceFilesDirectory + File.separator + traceSequence.getFileId());
 
@@ -192,6 +259,14 @@ public class TraceSequenceManager {
         return file;
     }
 
+    /**
+     * Retrieve the number of {@link TraceSequence} object associated with the given {@link Entry}
+     * object.
+     * 
+     * @param entry
+     * @return Number of TraceSequence objects.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static long getNumberOfTraceSequences(Entry entry) throws ManagerException {
         int result = 0;
@@ -214,59 +289,4 @@ public class TraceSequenceManager {
 
         return result;
     }
-
-    /*public static TraceSequenceAlignment saveAlignment(TraceSequenceAlignment traceSequenceAlignment)
-            throws ManagerException {
-        if (traceSequenceAlignment == null) {
-            throw new ManagerException(
-                    "Couldn't save TraceSequenceAlignment. TraceSequenceAlignment is null!");
-        }
-
-        TraceSequenceAlignment result;
-        try {
-            result = (TraceSequenceAlignment) DAO.save(traceSequenceAlignment);
-        } catch (DAOException e) {
-            throw new ManagerException("Failed to save TraceSequenceAlignment!", e);
-        }
-
-        return result;
-    }
-
-    public static void deleteAlignment(TraceSequenceAlignment traceSequenceAlignment)
-            throws ManagerException {
-        if (traceSequenceAlignment == null) {
-            throw new ManagerException(
-                    "Couldn't delete TraceSequenceAlignment. TraceSequenceAlignment is null!");
-        }
-
-        try {
-            DAO.delete(traceSequenceAlignment);
-        } catch (DAOException e) {
-            throw new ManagerException("Failed to delete TraceSequenceAlignment!", e);
-        }
-    }
-
-    public static TraceSequenceAlignment getAlignment(TraceSequence traceSequence)
-            throws ManagerException {
-        TraceSequenceAlignment traceSequenceAlignment = null;
-
-        Session session = DAO.newSession();
-
-        try {
-            String queryString = "from " + TraceSequenceAlignment.class.getName()
-                    + " where traceSequence = :traceSequence";
-            Query query = session.createQuery(queryString);
-            query.setParameter("traceSequence", traceSequence);
-
-            traceSequenceAlignment = (TraceSequenceAlignment) query.uniqueResult();
-        } catch (HibernateException e) {
-            throw new ManagerException(e);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
-        }
-
-        return traceSequenceAlignment;
-    }*/
 }
