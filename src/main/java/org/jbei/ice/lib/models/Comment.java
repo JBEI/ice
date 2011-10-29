@@ -19,6 +19,12 @@ import javax.persistence.TemporalType;
 
 import org.jbei.ice.lib.dao.IModel;
 
+/**
+ * Store comments about an {@link Entry} object, with the associated {@link Account}.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "comments")
 @SequenceGenerator(name = "sequence", sequenceName = "comments_id_seq", allocationSize = 1)

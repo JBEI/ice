@@ -21,6 +21,18 @@ import javax.persistence.TemporalType;
 
 import org.jbei.ice.lib.dao.IModel;
 
+/**
+ * Store the account information for a single user.
+ * <p>
+ * Because gd-ice is able to import an {@link Entry} object from another gd-ice instance, but the
+ * Account associated with the entry is not imported, Entries may point to an Account that may not
+ * exist. To work around this possibility, Entries are associated with an Account object via the
+ * email field (Entry.ownerEmail to Account.email). This of course means that as far as the system
+ * is concerned, email is the identifying value of a user, not the Account's id.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "accounts")
 @SequenceGenerator(name = "sequence", sequenceName = "accounts_id_seq", allocationSize = 1)
@@ -75,10 +87,29 @@ public class Account implements IModel {
     @JoinTable(name = "account_group", joinColumns = @JoinColumn(name = "account_id"), inverseJoinColumns = @JoinColumn(name = "group_id"))
     private Set<Group> groups = new LinkedHashSet<Group>();
 
+    /**
+     * Constructor.
+     */
     public Account() {
         super();
     }
 
+    /**
+     * Constructor with parameters.
+     * 
+     * @param firstName
+     * @param lastName
+     * @param initials
+     * @param email
+     * @param password
+     * @param institution
+     * @param isSubscribed
+     * @param description
+     * @param ip
+     * @param creationTime
+     * @param modificationTime
+     * @param lastLoginTime
+     */
     public Account(String firstName, String lastName, String initials, String email,
             String password, String institution, int isSubscribed, String description, String ip,
             Date creationTime, Date modificationTime, Date lastLoginTime) {
@@ -98,6 +129,17 @@ public class Account implements IModel {
         this.lastLoginTime = lastLoginTime;
     }
 
+    /**
+     * Constructor with simplified parameters.
+     * 
+     * @param firstName
+     * @param lastName
+     * @param initials
+     * @param email
+     * @param password
+     * @param institution
+     * @param description
+     */
     public Account(String firstName, String lastName, String initials, String email,
             String password, String institution, String description) {
         super();

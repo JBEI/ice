@@ -12,6 +12,12 @@ import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
 
+/**
+ * Represents the many-to-many table between {@link Account} and {@link FundingSource}.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "accounts_funding_source")
 @SequenceGenerator(name = "sequence", sequenceName = "accounts_funding_source_id_seq", allocationSize = 1)

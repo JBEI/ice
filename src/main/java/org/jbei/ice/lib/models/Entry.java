@@ -34,6 +34,15 @@ import org.jbei.ice.lib.models.interfaces.IEntryValueObject;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.lib.utils.JbeirSettings;
 
+/**
+ * Entry class is the most important class in gd-ice. Other record types extend this class.
+ * <p>
+ * Entry class represent the unique handle for each record in the system. It provides the common
+ * fields, such as the recordId (uuid), timestamps, owner and creator information, etc.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "entries")
 @SequenceGenerator(name = "sequence", sequenceName = "entries_id_seq", allocationSize = 1)
@@ -48,16 +57,34 @@ public class Entry implements IEntryValueObject, IModel {
     public static final String ARABIDOPSIS_SEED_ENTRY_TYPE = "arabidopsis";
 
     //TODO actually use these types
+    /**
+     * Mark up types for longDescription.
+     * 
+     * @author Timothy Ham
+     * 
+     */
     public enum MarkupType {
         text, wiki, confluence
     }
 
     // TODO actually use these types
+    /**
+     * Available recordTypes.
+     * 
+     * @author Timothy Ham
+     * 
+     */
     public enum EntryType {
         strain, plasmid, part, arabidopsis
     }
 
     // TODO use these enums. Currently "in progress" with a space is used. 
+    /**
+     * Available status options.
+     * 
+     * @author Timothy Ham
+     * 
+     */
     public enum StatusOptions {
         complete, in_progress, planned
     }
@@ -78,6 +105,10 @@ public class Entry implements IEntryValueObject, IModel {
     @Column(name = "owner", length = 127)
     private String owner;
 
+    /**
+     * Because Entry objects can be imported between gd-ice instances, but Account objects may not,
+     * each entry's owner is specified by this field.
+     */
     @Column(name = "owner_email", length = 127)
     private String ownerEmail;
 

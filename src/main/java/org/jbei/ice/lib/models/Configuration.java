@@ -13,9 +13,9 @@ import javax.persistence.Table;
 import org.jbei.ice.lib.dao.IModel;
 
 /**
- * Place to store site specific values. For example, uuids for default site install groups.
+ * Place to store installation specific values. For example, uuids for default site install groups.
  * 
- * @author tham
+ * @author Timothy Ham
  * 
  */
 @Entity
@@ -35,6 +35,12 @@ public class Configuration implements IModel {
     @Column(name = "value", length = 1024, nullable = false)
     private String value;
 
+    /**
+     * Possible configuration key values.
+     * 
+     * @author Timothy Ham
+     * 
+     */
     public enum ConfigurationKey {
         PLASMID_STORAGE_ROOT, STRAIN_STORAGE_ROOT, PART_STORAGE_ROOT, ARABIDOPSIS_STORAGE_ROOT, PLASMID_STORAGE_DEFAULT, STRAIN_STORAGE_DEFAULT, PART_STORAGE_DEFAULT, ARABIDOPSIS_STORAGE_DEFAULT, DATABASE_SCHEMA_VERSION
     }

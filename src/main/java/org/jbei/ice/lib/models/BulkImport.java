@@ -19,6 +19,12 @@ import javax.persistence.Table;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.utils.BulkImportEntryData;
 
+/**
+ * Store Bulk import data.
+ * 
+ * @author Hector Plahar
+ * 
+ */
 @Entity
 @Table(name = "bulk_import")
 @SequenceGenerator(name = "sequence", sequenceName = "bulk_import_id_seq", allocationSize = 1)
@@ -64,7 +70,7 @@ public class BulkImport implements IModel {
     }
 
     public long getId() {
-        return this.id;
+        return id;
     }
 
     public void setId(long id) {
@@ -72,7 +78,7 @@ public class BulkImport implements IModel {
     }
 
     public Account getAccount() {
-        return this.account;
+        return account;
     }
 
     public void setAccount(Account account) {
@@ -84,15 +90,15 @@ public class BulkImport implements IModel {
     }
 
     public void setPrimaryData(ArrayList<BulkImportEntryData> wrapper) {
-        this.data = wrapper;
+        data = wrapper;
     }
 
     public List<BulkImportEntryData> getSecondaryData() {
-        return this.data2;
+        return data2;
     }
 
     public void setSecondaryData(ArrayList<BulkImportEntryData> data) {
-        this.data2 = data;
+        data2 = data;
     }
 
     public String getSequenceFilename() {
@@ -128,7 +134,7 @@ public class BulkImport implements IModel {
     }
 
     public String getType() {
-        return this.type;
+        return type;
     }
 
     public void setType(String type) {
@@ -136,10 +142,10 @@ public class BulkImport implements IModel {
     }
 
     public Date getCreationTime() {
-        return this.creationTime;
+        return creationTime;
     }
 
     public void setCreationTime(Date date) {
-        this.creationTime = date;
+        creationTime = date;
     }
 }

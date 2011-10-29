@@ -13,8 +13,17 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.models.interfaces.IAttachmentValueObject;
 
+/**
+ * Store information about attachments.
+ * <p>
+ * The actual bytes are written to a file on disk. See {@link AttachmentManager}.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "attachments")
 @SequenceGenerator(name = "sequence", sequenceName = "attachments_id_seq", allocationSize = 1)
@@ -30,9 +39,15 @@ public class Attachment implements IAttachmentValueObject, IModel {
     @Lob
     private String description;
 
+    /**
+     * The original name of the file.
+     */
     @Column(name = "filename", length = 255, nullable = false)
     private String fileName;
 
+    /**
+     * Randomly generated UUID assigned to the file on disk.
+     */
     @Column(name = "file_id", length = 36, nullable = false)
     private String fileId;
 
@@ -44,16 +59,14 @@ public class Attachment implements IAttachmentValueObject, IModel {
     }
 
     /**
-     * Attachment constructor
+     * Attachment constructor.
      * 
      * @param description
-     *            description
+     *            Description.
      * @param fileName
-     *            file name
+     *            Original file name.
      * @param entry
-     *            Entry instance
-     * @param data
-     *            base64 encoded string
+     *            Entry instance.
      */
     public Attachment(String description, String fileName, Entry entry) {
         this.description = description;
@@ -66,6 +79,7 @@ public class Attachment implements IAttachmentValueObject, IModel {
         return id;
     }
 
+    @Override
     public void setId(long id) {
         this.id = id;
     }

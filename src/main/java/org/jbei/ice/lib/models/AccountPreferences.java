@@ -14,6 +14,12 @@ import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
 
+/**
+ * Store preferences for a user for an {@link Account} object.
+ * 
+ * @author Zinovii Dmytriv, Timothy Ham
+ * 
+ */
 @Entity
 @Table(name = "account_preferences")
 @SequenceGenerator(name = "sequence", sequenceName = "account_preferences_id_seq", allocationSize = 1)

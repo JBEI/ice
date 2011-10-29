@@ -13,6 +13,14 @@ import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
 
+/**
+ * Store the basepair location annotation for a {@link SequenceFeature} object.
+ * <p>
+ * Is able to record single residue or inbetween annotations.
+ * 
+ * @author Timothy Ham
+ * 
+ */
 @Entity
 @Table(name = "sequence_annotation_location")
 @SequenceGenerator(name = "sequence", sequenceName = "sequence_annotation_location_id_seq", allocationSize = 1)
