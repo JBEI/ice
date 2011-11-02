@@ -198,6 +198,18 @@ public class SequenceAnalysisController extends Controller {
         return traces;
     }
 
+    public TraceSequence getTraceSequenceByFileId(String fileId) throws ControllerException {
+        TraceSequence traceSequence = null;
+        try {
+            traceSequence = TraceSequenceManager.getByFileId(fileId);
+        } catch (ManagerException e) {
+            throw new ControllerException(e);
+        }
+
+        return traceSequence;
+
+    }
+
     /**
      * Parses a given sequence file (Genbank, Fasta, ABI) and return an {@link IDNASequence}.
      * 

@@ -1,5 +1,6 @@
 package org.jbei.ice.services.webservices;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -14,6 +15,7 @@ import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SampleController;
 import org.jbei.ice.controllers.SearchController;
+import org.jbei.ice.controllers.SequenceAnalysisController;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.StorageController;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -39,12 +41,15 @@ import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.search.blast.BlastResult;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.search.lucene.SearchResult;
+import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
+import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.web.common.ViewException;
 
 @WebService(targetNamespace = "https://api.registry.jbei.org/")
@@ -1156,8 +1161,8 @@ public class RegistryAPI {
     public ArrayList<Sample> retrieveEntrySamples(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
-        SampleController sampleController = this.getSampleController(sessionId);
-        EntryController entryController = this.getEntryController(sessionId);
+        SampleController sampleController = getSampleController(sessionId);
+        EntryController entryController = getEntryController(sessionId);
 
         try {
             Entry entry = entryController.getByRecordId(entryId);
@@ -1179,8 +1184,9 @@ public class RegistryAPI {
 
         try {
             Storage storage = storageController.retrieveStorageTube(barcode.trim());
-            if (storage == null)
+            if (storage == null) {
                 return null;
+            }
             return sampleController.getSamplesByStorage(storage);
         } catch (ControllerException e) {
             Logger.error(e);
@@ -1203,7 +1209,7 @@ public class RegistryAPI {
     public String samplePlate(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "samples") Sample[] samples) throws SessionException, ServiceException {
 
-        StorageController storageController = this.getStorageController(sessionId);
+        StorageController storageController = getStorageController(sessionId);
         HashMap<String, Integer> plateIndex = new HashMap<String, Integer>();
 
         Sample initial = samples[0];
@@ -1217,8 +1223,9 @@ public class RegistryAPI {
             throw new ServiceException("Error retrieving storage location for tube "
                     + tube.getIndex());
         }
-        if (tube == null)
+        if (tube == null) {
             throw new ServiceException("Error retrieving storage location for tube");
+        }
 
         Storage plate = tube.getParent().getParent();
         String highestFreqPlate = plate.getIndex();
@@ -1258,8 +1265,9 @@ public class RegistryAPI {
             }
         }
 
-        if (plateIndex.keySet().size() == 1)
+        if (plateIndex.keySet().size() == 1) {
             return null;
+        }
 
         return highestFreqPlate;
     }
@@ -1329,15 +1337,17 @@ public class RegistryAPI {
                     location, barcode });
 
             Entry entry = getEntryController(sessionId).getByRecordId(recordId);
-            if (entry == null)
+            if (entry == null) {
                 throw new ServiceException("Could not retrieve entry with id " + recordId);
+            }
 
             Sample sample = sampleController.createSample(label, account.getEmail(), "");
             sample.setEntry(entry);
             sample.setStorage(newLocation);
             Sample saved = sampleController.saveSample(sample, false);
-            if (saved == null)
+            if (saved == null) {
                 throw new ServiceException("Unable to create sample");
+            }
         } catch (ControllerException ce) {
             log(ce.getMessage());
             throw new ServiceException(ce.getMessage());
@@ -1363,8 +1373,8 @@ public class RegistryAPI {
             @WebParam(name = "samples") Sample[] samples, @WebParam(name = "plateId") String plateId)
             throws SessionException, ServiceException {
 
-        StorageController storageController = this.getStorageController(sessionId);
-        SampleController sampleController = this.getSampleController(sessionId);
+        StorageController storageController = getStorageController(sessionId);
+        SampleController sampleController = getSampleController(sessionId);
 
         // count of plates seen so far
         List<Sample> retSamples = new LinkedList<Sample>();
@@ -1396,17 +1406,19 @@ public class RegistryAPI {
                 if (samePlate) {
                     if (sameWell) {
                         ArrayList<Sample> ret = sampleController.getSamplesByStorage(recordedTube);
-                        if (ret != null && !ret.isEmpty())
+                        if (ret != null && !ret.isEmpty()) {
                             retSamples.add(ret.get(0));
+                        }
 
                         continue; // no changes needed
                     } else {
                         // same plate but different well                        
                         Storage well = storageController.retrieveStorageBy("Well", location,
                             StorageType.WELL, recordedPlate.getId());
-                        if (well == null)
+                        if (well == null) {
                             throw new ServiceException(
                                     "Could not retrieve new location for storage");
+                        }
                         recordedTube.setParent(well);
                         storageController.update(recordedTube);
                     }
@@ -1435,8 +1447,9 @@ public class RegistryAPI {
             ArrayList<Sample> ret;
             try {
                 ret = sampleController.getSamplesByStorage(recordedTube);
-                if (ret != null && !ret.isEmpty())
+                if (ret != null && !ret.isEmpty()) {
                     retSamples.add(ret.get(0));
+                }
             } catch (ControllerException e) {
 
                 Logger.error(e);
@@ -1446,6 +1459,151 @@ public class RegistryAPI {
 
         }
         return retSamples;
+    }
+
+    /**
+     * Get a list of trace file associated with an entry.
+     * 
+     * @param sessionId
+     * @param recordId
+     * @return
+     * @throws ServiceException
+     * @throws SessionException
+     */
+    public List<String> listTraceSequenceFiles(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "recordId") String recordId) throws ServiceException, SessionException {
+        List<String> result = new ArrayList<String>();
+        SequenceAnalysisController sequenceAnalysisController = getSequenceAnalysisController(sessionId);
+        EntryController entryController = getEntryController(sessionId);
+
+        Entry entry = null;
+        try {
+            entry = entryController.getByRecordId(recordId);
+            if (entry == null) {
+                throw new ServiceException("Could not retrieve entry");
+            }
+        } catch (ControllerException e) {
+            log(e.getMessage());
+            throw new ServiceException("Could not retrieve entry: " + e.getMessage());
+        } catch (PermissionException e) {
+            log(e.getMessage());
+            throw new ServiceException("No permission to view entry: " + recordId);
+        }
+        List<TraceSequence> traces = null;
+        try {
+            traces = sequenceAnalysisController.getTraceSequences(entry);
+            if (traces == null) {
+                return result;
+            }
+        } catch (ControllerException e) {
+            throw new ServiceException("Could not retrieve traces: " + e.getMessage());
+        }
+        for (TraceSequence trace : traces) {
+            result.add(trace.getFileId());
+        }
+
+        return result;
+    }
+
+    public String uploadTraceSequenceFile(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "recordId") String recordId,
+            @WebParam(name = "fileName") String fileName,
+            @WebParam(name = "base64FileData") String base64FileData) throws ServiceException,
+            SessionException {
+        TraceSequence result = null;
+
+        SequenceAnalysisController sequenceAnalysisController = getSequenceAnalysisController(sessionId);
+        EntryController entryController = getEntryController(sessionId);
+        byte[] bytes = SerializationUtils.deserializeStringToBytes(base64FileData);
+        if (bytes == null) {
+            throw new ServiceException("Invalid File Data!");
+        }
+        Account account = validateAccount(sessionId);
+        String depositor = account.getEmail();
+        Entry entry = null;
+        try {
+            entry = entryController.getByRecordId(recordId);
+            if (entry == null) {
+                throw new ServiceException("Could not retrieve entry!");
+            }
+        } catch (ControllerException e1) {
+            log(e1.getMessage());
+            throw new ServiceException("Could not retrieve entry!");
+        } catch (PermissionException e1) {
+            log(e1.getMessage());
+            throw new ServiceException("You do not have permission to view entry!");
+        }
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+        String sequence = null;
+        try {
+            IDNASequence temp = sequenceAnalysisController.parse(bytes);
+
+            if (temp == null) {
+                throw new ServiceException("Could not parse trace file!");
+            } else {
+                sequence = temp.getSequence();
+            }
+        } catch (ControllerException e) {
+            log(e.getMessage());
+            throw new ServiceException("Could not parse trace file!: " + e.getMessage());
+        }
+        try {
+            result = sequenceAnalysisController.uploadTraceSequence(entry, fileName, depositor,
+                sequence, inputStream);
+            sequenceAnalysisController.rebuildAllAlignments(entry);
+        } catch (ControllerException e) {
+            log(e.getMessage());
+            throw new ServiceException("Could not upload trace seqence!: " + e.getMessage());
+        }
+
+        return result.getFileId();
+    }
+
+    public TraceSequence getTraceSequenceFile(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "fileId") String fileId) throws ServiceException, SessionException {
+        SequenceAnalysisController sequenceAnalysisController = getSequenceAnalysisController(sessionId);
+        TraceSequence traceSequence = null;
+        try {
+            traceSequence = sequenceAnalysisController.getTraceSequenceByFileId(fileId);
+            if (traceSequence == null) {
+                throw new ServiceException("Could not retrieve Trace Sequence");
+            }
+        } catch (ControllerException e) {
+            log(e.getMessage());
+            throw new ServiceException(e.getMessage());
+        }
+
+        return traceSequence;
+    }
+
+    public void deleteTraceSequenceFile(@WebParam(name = "sessionId") String sessionId,
+            @WebParam(name = "fileId") String fileId) throws ServiceException, SessionException {
+
+        SequenceAnalysisController sequenceAnalysisController = getSequenceAnalysisController(sessionId);
+
+        TraceSequence traceSequence;
+        try {
+            traceSequence = sequenceAnalysisController.getTraceSequenceByFileId(fileId);
+            if (traceSequence == null) {
+                throw new ServiceException("No such fileId found");
+            }
+            Entry entry = traceSequence.getEntry();
+            sequenceAnalysisController.removeTraceSequence(traceSequence);
+            sequenceAnalysisController.rebuildAllAlignments(entry);
+        } catch (ControllerException e) {
+            log(e.getMessage());
+            throw new ServiceException("Could not delete TraceSequence: " + e.getMessage());
+        } catch (PermissionException e) {
+            log(e.getMessage());
+            throw new ServiceException("Deletion of this trace is not permitted");
+        }
+
+    }
+
+    protected SequenceAnalysisController getSequenceAnalysisController(String sessionId)
+            throws ServiceException, SessionException {
+        Account account = validateAccount(sessionId);
+        return new SequenceAnalysisController(account);
     }
 
     protected StorageController getStorageController(@WebParam(name = "sessionId") String sessionId)
