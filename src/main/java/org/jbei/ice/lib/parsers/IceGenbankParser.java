@@ -342,7 +342,8 @@ public class IceGenbankParser extends AbstractParser {
                     }
                     if (chunk[1].startsWith("complement")) {
                         complement = true;
-                        chunk[1] = chunk[1].substring(11, chunk[1].length() - 2).trim();
+                        chunk[1] = chunk[1].trim();
+                        chunk[1] = chunk[1].substring(11, chunk[1].length() - 1).trim();
                     }
 
                     genbankLocations = parseGenbankLocation(chunk[1]);
