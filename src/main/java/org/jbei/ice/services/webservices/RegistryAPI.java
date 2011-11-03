@@ -1486,10 +1486,11 @@ public class RegistryAPI {
      * @throws ServiceException
      * @throws SessionException
      */
-    public List<String> listTraceSequenceFiles(@WebParam(name = "sessionId") String sessionId,
+    public List<TraceSequence> listTraceSequenceFiles(
+            @WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "recordId") String recordId) throws ServiceException, SessionException {
         log(sessionId, "listTraceSequenceFiles: " + recordId);
-        List<String> result = new ArrayList<String>();
+        List<TraceSequence> result = new ArrayList<TraceSequence>();
         SequenceAnalysisController sequenceAnalysisController = getSequenceAnalysisController(sessionId);
         EntryController entryController = getEntryController(sessionId);
 
@@ -1516,7 +1517,11 @@ public class RegistryAPI {
             throw new ServiceException("Could not retrieve traces: " + e.getMessage());
         }
         for (TraceSequence trace : traces) {
-            result.add(trace.getFileId());
+            //null out entry to reduce output.
+            trace.setEntry(null);
+            // null out traceSequenceAlignment.traceSequence, as it causes infinite nesting  in xml for some reason.
+            trace.getTraceSequenceAlignment().setTraceSequence(null);
+            result.add(trace);
         }
 
         return result;
