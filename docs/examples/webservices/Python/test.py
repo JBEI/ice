@@ -109,7 +109,7 @@ if __name__ == "__main__":
     portType = registryAPIServiceLocator.getRegistryAPIPort(**kw)
     
     request = login()
-    request._login = 'tsham@lbl.gov'
+    request._login = 'YOUR_LOGIN_GOES_HERE'
     request._password = 'YOUR_PASSWORD_GOES_HERE'
     
     response = portType.login(request)
