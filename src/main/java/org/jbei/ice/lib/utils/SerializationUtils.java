@@ -68,6 +68,12 @@ public class SerializationUtils {
         return new Base64().encodeToString(byteArrayOutputStream.toByteArray());
     }
 
+    /**
+     * Convert byte array into base64 encoded string.
+     * 
+     * @param bytes
+     * @return base64 encoded string
+     */
     public static String serializeBytesToString(byte[] bytes) {
         return new Base64().encodeToString(bytes);
     }
