@@ -14,6 +14,10 @@ import org.jbei.ice.lib.dao.IModel;
 
 /**
  * Represents the many-to-many table between {@link Account} and {@link FundingSource}.
+ * <p>
+ * This class explicitly spells out the many-to-many representation instead of relying on
+ * Hibernate's automatic intermediate table generation due to historical database compatibility with
+ * the python version.
  * 
  * @author Timothy Ham, Zinovii Dmytriv
  * 

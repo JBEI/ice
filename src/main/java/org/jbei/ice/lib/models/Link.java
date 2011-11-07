@@ -15,6 +15,12 @@ import javax.xml.bind.annotation.XmlTransient;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.ILinkValueObject;
 
+/**
+ * Store url link information.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "links")
 @SequenceGenerator(name = "sequence", sequenceName = "links_id_seq", allocationSize = 1)
@@ -51,6 +57,7 @@ public class Link implements ILinkValueObject, IModel {
         return id;
     }
 
+    @Override
     public void setId(long id) {
         this.id = id;
     }

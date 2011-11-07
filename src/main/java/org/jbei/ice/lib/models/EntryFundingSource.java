@@ -13,6 +13,16 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
 
+/**
+ * Many-to-Many representation between {@link Entry} and {@link FundingSource}.
+ * <p>
+ * This class explicitly spells out the many-to-many representation instead of relying on
+ * Hibernate's automatic intermediate table generation due to historical database compatibility with
+ * the python version.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "entries_funding_source")
 @SequenceGenerator(name = "sequence", sequenceName = "entries_funding_source_id_seq", allocationSize = 1)
