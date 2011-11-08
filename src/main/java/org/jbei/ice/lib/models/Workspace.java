@@ -13,6 +13,12 @@ import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
 
+/**
+ * Store view history information about an {@link Entry}.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "workspace")
 @SequenceGenerator(name = "sequence", sequenceName = "workspace_id_seq", allocationSize = 1)

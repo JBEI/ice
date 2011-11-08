@@ -21,6 +21,12 @@ import javax.xml.bind.annotation.XmlTransient;
 import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
 
+/**
+ * Store sequence trace file information.
+ * 
+ * @author Zinovii Dmytriv, Timothy Ham
+ * 
+ */
 @Entity
 @Table(name = "trace_sequence")
 @SequenceGenerator(name = "sequence", sequenceName = "trace_sequence_id_seq", allocationSize = 1)

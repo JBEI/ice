@@ -19,6 +19,12 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
 
+/**
+ * Store computed trace alignment information.
+ * 
+ * @author Zinovii Dmytrv, Timothy Ham
+ * 
+ */
 @Entity
 @Table(name = "trace_sequence_alignments")
 @SequenceGenerator(name = "sequence", sequenceName = "trace_sequence_alignments_id_seq", allocationSize = 1)
