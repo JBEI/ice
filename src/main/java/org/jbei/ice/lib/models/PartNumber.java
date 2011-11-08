@@ -15,6 +15,15 @@ import javax.xml.bind.annotation.XmlTransient;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.IPartNumberValueObject;
 
+/**
+ * Stores the part number of an entry.
+ * <p>
+ * There can be multiple part numbers for one entry, and part numbers can come from outside gd-ice
+ * instances.
+ * 
+ * @author Timothy Ham, Ziovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "part_numbers")
 @SequenceGenerator(name = "sequence", sequenceName = "part_numbers_id_seq", allocationSize = 1)
@@ -46,6 +55,7 @@ public class PartNumber implements IPartNumberValueObject, IModel {
         return id;
     }
 
+    @Override
     public void setId(long id) {
         this.id = id;
     }

@@ -26,6 +26,16 @@ import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.ISequenceFeatureValueObject;
 
+/**
+ * Stores the sequence annotation information, and associates {@link Feature} objects to a
+ * {@link Sequence} object.
+ * <p>
+ * SequenceFeature represents is a many-to-many mapping. In addition, this class has fields to store
+ * sequence specific annotation information.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "sequence_feature")
 @SequenceGenerator(name = "sequence", sequenceName = "sequence_feature_id_seq", allocationSize = 1)
@@ -53,18 +63,10 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
     @OrderBy("id")
     private final Set<AnnotationLocation> annotationLocations = new LinkedHashSet<AnnotationLocation>();
 
-    /**
-     * Use locations instead. This field exists to allow scripted migration of data using
-     * the new database schema.
-     */
     @Deprecated
     @Column(name = "feature_start")
     private int genbankStart;
 
-    /**
-     * Use locations instead. This field exists to allow scripted migration of data using
-     * the new database schema.
-     */
     @Deprecated
     @Column(name = "feature_end")
     private int end;
@@ -166,21 +168,37 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         return annotationLocations;
     }
 
+    /**
+     * Use locations instead. This field exists to allow scripted migration of data using
+     * the new database schema.
+     */
     @Deprecated
     public int getGenbankStart() {
         return genbankStart;
     }
 
+    /**
+     * Use locations instead. This field exists to allow scripted migration of data using
+     * the new database schema.
+     */
     @Deprecated
     public void setGenbankStart(int genbankStart) {
         this.genbankStart = genbankStart;
     }
 
+    /**
+     * Use locations instead. This field exists to allow scripted migration of data using
+     * the new database schema.
+     */
     @Deprecated
     public int getEnd() {
         return end;
     }
 
+    /**
+     * Use locations instead. This field exists to allow scripted migration of data using
+     * the new database schema.
+     */
     @Deprecated
     public void setEnd(int end) {
         this.end = end;
@@ -191,6 +209,9 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         return strand;
     }
 
+    /**
+     * +1 for forward, -1 for reverse.
+     */
     @Override
     public void setStrand(int strand) {
         this.strand = strand;

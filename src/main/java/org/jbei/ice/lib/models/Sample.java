@@ -20,6 +20,15 @@ import javax.persistence.TemporalType;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.ISampleValueObject;
 
+/**
+ * Store Sample information.
+ * <p>
+ * Each sample is a uniquely identified (via UUIDv4) object representing a physical sample. Storage
+ * locations are handled by {@link Storage} objects.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "samples")
 @SequenceGenerator(name = "sequence", sequenceName = "samples_id_seq", allocationSize = 1)

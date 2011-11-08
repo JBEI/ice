@@ -10,6 +10,19 @@ import javax.persistence.Table;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.IPlasmidValueObject;
 
+/**
+ * Store Plasmid specific fields.
+ * <p>
+ * <ul>
+ * <li><b>backbone: </b>Parent backbone of the plasmid, comma separated.</li>
+ * <li><b>originOfReplication: </b>The origin of replication for this plasmid, comma separated.</li>
+ * <li><b>promoters: </b>Promoters that are on this plasmid, comma separated.</li>
+ * <li><b>circular: </b>True if plasmid is circular.</li>
+ * </ul>
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @PrimaryKeyJoinColumn(name = "entries_id")
 @Table(name = "plasmids")
@@ -47,34 +60,42 @@ public class Plasmid extends Entry implements IPlasmidValueObject, IModel {
         this.circular = circular;
     }
 
+    @Override
     public String getBackbone() {
         return backbone;
     }
 
+    @Override
     public void setBackbone(String backbone) {
         this.backbone = backbone;
     }
 
+    @Override
     public String getOriginOfReplication() {
         return originOfReplication;
     }
 
+    @Override
     public void setOriginOfReplication(String originOfReplication) {
         this.originOfReplication = originOfReplication;
     }
 
+    @Override
     public String getPromoters() {
         return promoters;
     }
 
+    @Override
     public void setPromoters(String promoters) {
         this.promoters = promoters;
     }
 
+    @Override
     public boolean getCircular() {
         return circular;
     }
 
+    @Override
     public void setCircular(boolean circular) {
         this.circular = circular;
     }

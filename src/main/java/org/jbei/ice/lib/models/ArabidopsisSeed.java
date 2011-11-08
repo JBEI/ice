@@ -15,6 +15,15 @@ import javax.persistence.TemporalType;
 
 /**
  * Store Arabidopsis Seed specific fields.
+ * <p>
+ * <ul>
+ * <li><b>hobozygosity: </b></li>
+ * <li><b>ecotype: </b></li>
+ * <li><b>harvestDate: </b></li>
+ * <li><b>parents:</b></li>
+ * <li><b>generation:</b></li>
+ * <li><b>plantType</b></li>
+ * </ul>
  * 
  * @author Timothy Ham
  * 

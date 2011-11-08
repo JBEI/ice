@@ -21,14 +21,16 @@ import org.jbei.ice.lib.dao.IModel;
 // TODO Make advanced search filter for parameters
 
 /**
- * Parameter should be used sparingly. If a parameter seems universal to entry or to part type,
- * that is, many entries have the same parameters, then they should become a field in the
- * appropriate object.
+ * Stores key-value information for {@link Entry}.
+ * <p>
+ * Parameter should be used sparingly. If a parameter seems universal to entry or to part type, that
+ * is, many entries have the same parameters, then they should become a field in the appropriate
+ * object.
+ * <p>
+ * Parameters should be serialized for full text search as "parameter name=parameter value", so they
+ * can be searched for as key-value pairs (e.g. "key=value").
  * 
- * Parameters should be serialized for full text search as "parameter name=parameter value",
- * so they can be searched for as key-value pairs (e.g. "key=value").
- * 
- * @author tsham
+ * @author Timothy Ham
  * 
  */
 @Entity

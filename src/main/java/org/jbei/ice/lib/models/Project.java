@@ -18,6 +18,12 @@ import javax.persistence.TemporalType;
 
 import org.jbei.ice.lib.dao.IModel;
 
+/**
+ * Store Project information for user.
+ * 
+ * @author Zinovii Dmytriv, Timothy Ham
+ * 
+ */
 @Entity
 @Table(name = "projects")
 @SequenceGenerator(name = "sequence", sequenceName = "projects_id_seq", allocationSize = 1)

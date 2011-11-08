@@ -25,6 +25,14 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
 
+/**
+ * Store sample storage location information as well as the hierarchical structure.
+ * <p>
+ * 
+ * 
+ * @author Timothy Ham, Hector Plahar
+ * 
+ */
 @Entity
 @Table(name = "storage")
 @SequenceGenerator(name = "sequence", sequenceName = "storage_id_seq", allocationSize = 1)
