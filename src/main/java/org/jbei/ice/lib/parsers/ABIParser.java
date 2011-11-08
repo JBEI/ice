@@ -6,6 +6,12 @@ import org.biojava.bio.symbol.SymbolList;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.SimpleDNASequence;
 
+/**
+ * Parse ABI sequence trace file by wrappying BioJava.
+ * 
+ * @author Zinovii Dmytriv, Timothy Ham
+ * 
+ */
 public class ABIParser extends AbstractParser {
     private static final String ABI_PARSER = "ABI";
 
@@ -14,11 +20,9 @@ public class ABIParser extends AbstractParser {
         return ABI_PARSER;
     }
 
-    /**
-     * This parser cannot succeed with errors, so always return false, or fail.
-     */
     @Override
     public Boolean hasErrors() {
+        // This parser cannot succeed with errors, so always return false, or fail.
         return false;
     }
 

@@ -21,6 +21,13 @@ import org.jbei.ice.lib.vo.DNAFeatureNote;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
 
+/**
+ * Parse genbank files using the BioJava parser.
+ * 
+ * @author Zinovii Dmytriv, Timothy Ham
+ * 
+ */
+@Deprecated
 public class GenbankParser extends AbstractParser {
     private static final String GENBANK_PARSER = "GenBank";
 
@@ -29,11 +36,9 @@ public class GenbankParser extends AbstractParser {
         return GENBANK_PARSER;
     }
 
-    /**
-     * This parser cannot succeed with errors, so always return false, or fail.
-     */
     @Override
     public Boolean hasErrors() {
+        // This parser cannot succeed with errors, so always return false, or fail.
         return false;
     }
 

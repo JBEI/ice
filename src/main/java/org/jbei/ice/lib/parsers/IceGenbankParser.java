@@ -420,6 +420,12 @@ public class IceGenbankParser extends AbstractParser {
         return result;
     }
 
+    /**
+     * Represent a contiguous Genbank location, including a single base pair.
+     * 
+     * @author Timothy Ham
+     * 
+     */
     public class GenbankLocation {
         private int genbankStart = -1;
         private int end = -1;

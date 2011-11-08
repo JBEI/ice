@@ -5,6 +5,12 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Parse output of bl2seq sequence comparison program.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class Bl2SeqParser {
     private static int MIN_SCORE = 10;
     private static Pattern SCORE_REGEXP_PATTERN = Pattern.compile("Score = .+\\((\\d+)\\)");
@@ -40,8 +46,9 @@ public class Bl2SeqParser {
                             Bl2SeqResult bl2seqResult = new Bl2SeqResult(score, new Integer(
                                     queryDataSequence.get(0)),
                                     new Integer(queryDataSequence.get(1)),
-                                    queryDataSequence.get(2), new Integer(subjectDataSequence
-                                            .get(0)), new Integer(subjectDataSequence.get(1)),
+                                    queryDataSequence.get(2), new Integer(
+                                            subjectDataSequence.get(0)), new Integer(
+                                            subjectDataSequence.get(1)),
                                     subjectDataSequence.get(2), orientation);
 
                             results.add(bl2seqResult);
@@ -76,8 +83,8 @@ public class Bl2SeqParser {
                     } else {
                         ArrayList<String> queryDataSequencePartial = parseSequenceLine(line);
 
-                        queryDataSequence.set(2, ((String) queryDataSequence.get(2))
-                                .concat((String) queryDataSequencePartial.get(2)));
+                        queryDataSequence.set(2,
+                            queryDataSequence.get(2).concat(queryDataSequencePartial.get(2)));
                         queryDataSequence.set(1, queryDataSequencePartial.get(1));
                     }
 
@@ -89,8 +96,8 @@ public class Bl2SeqParser {
                     } else {
                         ArrayList<String> subjectDataSequencePartial = parseSequenceLine(line);
 
-                        subjectDataSequence.set(2, ((String) subjectDataSequence.get(2))
-                                .concat((String) subjectDataSequencePartial.get(2)));
+                        subjectDataSequence.set(2,
+                            subjectDataSequence.get(2).concat(subjectDataSequencePartial.get(2)));
                         subjectDataSequence.set(1, subjectDataSequencePartial.get(1));
                     }
 

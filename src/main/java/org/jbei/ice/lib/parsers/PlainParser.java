@@ -8,14 +8,19 @@ import org.biojava.bio.symbol.SymbolList;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.SimpleDNASequence;
 
+/**
+ * Parser to handle file with simply nucleotide sequences. Technically these files are not FASTA
+ * files, even though some people think they are.
+ * 
+ * @author Zinovii Dmytriv, Timothy Ham
+ * 
+ */
 public class PlainParser extends AbstractParser {
     private static final String PLAIN_PARSER = "Plain";
 
-    /**
-     * This parser cannot succeed with errors, so always return false, or fail.
-     */
     @Override
     public Boolean hasErrors() {
+        // This parser cannot succeed with errors, so always return false, or fail.
         return false;
     }
 

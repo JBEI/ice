@@ -8,6 +8,13 @@ import java.util.regex.Pattern;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
 
+/**
+ * Parse genbank style file with a non-standard LOCUS line.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
+@Deprecated
 public class GenbankLocusFriendlyParser extends GenbankParser {
     private static final String LOCUS_FRIENDLY_GenBank_PARSER = "GenBank-NoLocus";
 
@@ -36,7 +43,7 @@ public class GenbankLocusFriendlyParser extends GenbankParser {
             return dnaSequence;
         }
 
-        List<String> strings = (List<String>) Arrays.asList(textSequence.split("\n"));
+        List<String> strings = Arrays.asList(textSequence.split("\n"));
 
         Pattern locusLineStartPattern = Pattern.compile("^LOCUS(.*)");
 

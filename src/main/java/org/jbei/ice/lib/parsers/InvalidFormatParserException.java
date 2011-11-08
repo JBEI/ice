@@ -1,5 +1,11 @@
 package org.jbei.ice.lib.parsers;
 
+/**
+ * Exception class for parsers.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class InvalidFormatParserException extends Exception {
     private static final long serialVersionUID = 1L;
 

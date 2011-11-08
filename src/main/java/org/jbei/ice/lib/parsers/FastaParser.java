@@ -12,6 +12,12 @@ import org.jbei.ice.lib.vo.DNAFeature;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
 
+/**
+ * Parse FASTA files.
+ * 
+ * @author Zinovii Dmytriv, Timothy Ham
+ * 
+ */
 public class FastaParser extends AbstractParser {
     private static final String FASTA_PARSER = "FASTA";
 
@@ -20,11 +26,9 @@ public class FastaParser extends AbstractParser {
         return FASTA_PARSER;
     }
 
-    /**
-     * This parser cannot succeed with errors, so always return false, or fail.
-     */
     @Override
     public Boolean hasErrors() {
+        //This parser cannot succeed with errors, so always return false, or fail.
         return false;
     }
 
@@ -44,7 +48,7 @@ public class FastaParser extends AbstractParser {
                 sequence = new FeaturedDNASequence(richSequence.seqString(),
                         new LinkedList<DNAFeature>());
             } else {
-                throw new InvalidFormatParserException("None sequence found in sequence file!");
+                throw new InvalidFormatParserException("No sequence found in sequence file!");
             }
         } catch (BioException e) {
             throw new InvalidFormatParserException("Couln't parse FASTA sequence!", e);

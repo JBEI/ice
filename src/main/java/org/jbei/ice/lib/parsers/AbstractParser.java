@@ -7,6 +7,12 @@ import java.io.IOException;
 
 import org.jbei.ice.lib.vo.IDNASequence;
 
+/**
+ * This class provides skeletal implementation of {@link IDNAParser} interface.
+ * 
+ * @author Zinovii Dmytriv, Timothy Ham
+ * 
+ */
 public abstract class AbstractParser implements IDNAParser {
     @Override
     public abstract IDNASequence parse(String textSequence) throws InvalidFormatParserException;
@@ -26,6 +32,13 @@ public abstract class AbstractParser implements IDNAParser {
         return parse(bytes);
     }
 
+    /**
+     * Replace different line termination characters with the newline character (\n).
+     * 
+     * @param sequence
+     *            - Text to clean.
+     * @return String with only newline character (\n).
+     */
     protected String cleanSequence(String sequence) {
         sequence = sequence.trim();
         sequence = sequence.replace("\n\n", "\n"); // *nix
