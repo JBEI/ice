@@ -13,6 +13,15 @@ import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Group;
 
+/**
+ * Give a {@link Group} write permission to an {@link Entry}.
+ * <p>
+ * If WriteGroup object exists for a given Entry:Group pair, then the Group has write permission to
+ * the Entry.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "permission_write_groups")
 @SequenceGenerator(name = "sequence", sequenceName = "permission_write_groups_id_seq", allocationSize = 1)

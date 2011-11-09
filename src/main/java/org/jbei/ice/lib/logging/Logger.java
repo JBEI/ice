@@ -62,13 +62,9 @@ public class Logger {
 
     /**
      * Log a message at the ERROR level.
-     * <p>
-     * Since this is a serious error, the error method below that takes the Throwable e is
-     * preferred.
      * 
      * @param msg
      */
-    @Deprecated
     public static void error(String msg) {
         sendEmail(msg);
         logger.error(msg);

@@ -13,6 +13,15 @@ import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 
+/**
+ * Give an {@link Account} write permission to an {@link Entry}.
+ * <p>
+ * If WriteUser object exists for a given Entry:Account pair, then the Account has write permission
+ * to the Entry.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "permission_write_users")
 @SequenceGenerator(name = "sequence", sequenceName = "permission_write_users_id_seq", allocationSize = 1)
