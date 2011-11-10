@@ -4,6 +4,12 @@ import java.io.Serializable;
 
 import org.jbei.ice.lib.models.Entry;
 
+/**
+ * Store blast output result.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class BlastResult implements Serializable, Comparable<BlastResult> {
 
     private static final long serialVersionUID = 1L;
@@ -144,11 +150,12 @@ public class BlastResult implements Serializable, Comparable<BlastResult> {
         this.bitScore = bitScore;
     }
 
+    @Override
     public int compareTo(BlastResult o) {
         // FindBugs recommend that compareTo(...) return zero iff equals(...) return true.
         // However, in this particular case we are only sorting by relativeScore, so this method is 
         // acceptable. 
-        Float temp = o.relativeScore - this.getRelativeScore();
+        Float temp = o.relativeScore - getRelativeScore();
         return temp.intValue();
     }
 }
