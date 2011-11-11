@@ -2,8 +2,6 @@ package org.jbei.ice.lib.utils;
 
 import java.io.Serializable;
 
-import org.postgresql.util.Base64;
-
 /**
  * Class to hold a base64 string.
  * 
@@ -21,7 +19,7 @@ public class Base64String implements Serializable {
      * @param bytes
      */
     public void putBytes(byte[] bytes) {
-        this.data = Base64.encodeBytes(bytes);
+        data = SerializationUtils.serializeBytesToString(bytes);
     }
 
     /**
@@ -30,7 +28,7 @@ public class Base64String implements Serializable {
      * @return bytes.
      */
     public byte[] getBytes() {
-        byte[] bytes = Base64.decode(this.data);
+        byte[] bytes = SerializationUtils.deserializeStringToBytes(data);
 
         return bytes;
     }
