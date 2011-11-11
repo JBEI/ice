@@ -29,7 +29,13 @@ import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.models.SequenceFeature.AnnotationType;
 import org.jbei.ice.lib.permissions.PermissionException;
 
-public class BiobrickAUtils implements AssemblyUtils {
+/**
+ * Biobrick (BBF RFC10, RFC20) assembly standard.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
+public class BiobrickAUtils implements IAssemblyUtils {
 
     /*
      * Biobrick A Assembly Standard (BBF RFC10, RFC20)
@@ -185,6 +191,16 @@ public class BiobrickAUtils implements AssemblyUtils {
         return result;
     }
 
+    /**
+     * Determine whether the given sequence string conforms to the proper Biobrick assembly format.
+     * <p>
+     * It checks for prefix, suffix, and scans for incomaptible restriction sites.
+     * 
+     * @param partSequenceString
+     *            - sequence string to test.
+     * @return {@link AssemblyStandard}.
+     * @throws UtilityException
+     */
     private static AssemblyStandard determineBiobrickAAssemblyStandard(String partSequenceString)
             throws UtilityException {
         AssemblyStandard result = null;
@@ -207,6 +223,15 @@ public class BiobrickAUtils implements AssemblyUtils {
         return result;
     }
 
+    /**
+     * Check if the given sequence string can be assembled as a biobrick by having the correct
+     * restriction sites.
+     * 
+     * @param sequenceString
+     *            - query string.
+     * @return True if the given sequence is biobrick compatible.
+     * @throws UtilityException
+     */
     private static boolean isBiobrickACompatible(String sequenceString) throws UtilityException {
         boolean result = false;
         org.biojava.bio.seq.Sequence sequence = null;
@@ -245,6 +270,15 @@ public class BiobrickAUtils implements AssemblyUtils {
         return result;
     }
 
+    /**
+     * Annotate the given sequence string with biobrick format features, such as the prefix, suffix,
+     * and the inner feature.
+     * 
+     * @param partSequence
+     *            - sequence to query.
+     * @return {@link SequenceFeatureCollection}.
+     * @throws UtilityException
+     */
     private static SequenceFeatureCollection determineBiobrickAFeatures(Sequence partSequence)
             throws UtilityException {
         //all positions are 0 based positions, not offsets
@@ -401,6 +435,16 @@ public class BiobrickAUtils implements AssemblyUtils {
         return sequenceFeatures;
     }
 
+    /**
+     * Assemble two biobrick sequences together.
+     * 
+     * @param part1Sequence
+     *            - first sequence
+     * @param part2Sequence
+     *            - second sequence
+     * @return Assembled {@link Sequence}.
+     * @throws UtilityException
+     */
     public Sequence joinBiobrickA(Sequence part1Sequence, Sequence part2Sequence)
             throws UtilityException {
         Sequence result = null;
@@ -556,6 +600,12 @@ public class BiobrickAUtils implements AssemblyUtils {
         return result;
     }
 
+    /**
+     * Retrieve biobrick short scar {@link Feature}.
+     * 
+     * @return {@link Feature}.
+     * @throws ControllerException
+     */
     private static Feature getBiobrickAShortScarFeature() throws ControllerException {
         Feature feature = new Feature();
         feature.setAutoFind(1);
@@ -567,6 +617,12 @@ public class BiobrickAUtils implements AssemblyUtils {
         return feature;
     }
 
+    /**
+     * Retrieve biobrick long scar {@link Feature}.
+     * 
+     * @return {@link Feature}.
+     * @throws ControllerException
+     */
     private static Feature getBiobrickALongScarFeature() throws ControllerException {
         Feature feature = new Feature();
         feature.setAutoFind(1);

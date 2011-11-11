@@ -17,7 +17,7 @@ import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.utils.AssemblyUtils;
+import org.jbei.ice.lib.utils.IAssemblyUtils;
 import org.jbei.ice.lib.utils.BiobrickAUtils;
 import org.jbei.ice.lib.utils.BiobrickBUtils;
 import org.jbei.ice.lib.utils.RawAssemblyUtils;
@@ -31,7 +31,7 @@ import org.jbei.ice.lib.utils.UtilityException;
  * 
  */
 public class AssemblyController extends Controller {
-    private ArrayList<AssemblyUtils> assemblyUtils = new ArrayList<AssemblyUtils>();
+    private ArrayList<IAssemblyUtils> assemblyUtils = new ArrayList<IAssemblyUtils>();
 
     public AssemblyController(Account account) {
         super(account, new EntryPermissionVerifier());
@@ -310,11 +310,11 @@ public class AssemblyController extends Controller {
         }
     }
 
-    public void setAssemblyUtils(ArrayList<AssemblyUtils> assemblyUtils) {
+    public void setAssemblyUtils(ArrayList<IAssemblyUtils> assemblyUtils) {
         this.assemblyUtils = assemblyUtils;
     }
 
-    public ArrayList<AssemblyUtils> getAssemblyUtils() {
+    public ArrayList<IAssemblyUtils> getAssemblyUtils() {
         return assemblyUtils;
     }
 }

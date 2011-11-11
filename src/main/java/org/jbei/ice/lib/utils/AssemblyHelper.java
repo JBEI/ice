@@ -6,6 +6,13 @@ import org.jbei.ice.lib.vo.AssemblyTable;
 import org.jbei.ice.lib.vo.Permutation;
 import org.jbei.ice.lib.vo.PermutationSet;
 
+/**
+ * Help Biobrick Permutation Assembly.
+ * 
+ * @author Timothy Ham
+ * 
+ */
+@Deprecated
 public class AssemblyHelper {
     private static AssemblyTable assemblyTable;
     private static PermutationSet permutationSet;

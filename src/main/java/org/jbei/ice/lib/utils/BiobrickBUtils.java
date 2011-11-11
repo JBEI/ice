@@ -31,7 +31,13 @@ import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.models.SequenceFeature.AnnotationType;
 import org.jbei.ice.lib.permissions.PermissionException;
 
-public class BiobrickBUtils implements AssemblyUtils {
+/**
+ * BglBrick assembly standard.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
+public class BiobrickBUtils implements IAssemblyUtils {
 
     public static final String biobrickBPrefix = "gaattc\\w*agatct";
     public static final String biobrickBPrefixFeatureName = "Biobrick B Prefix";
@@ -163,6 +169,16 @@ public class BiobrickBUtils implements AssemblyUtils {
         return result;
     }
 
+    /**
+     * Determine whether the given sequence string conforms to the proper BglBrick assembly format.
+     * <p>
+     * It checks for prefix, suffix, and scans for incomaptible restriction sites.
+     * 
+     * @param partSequenceString
+     *            - sequence string to test.
+     * @return {@link AssemblyStandard}.
+     * @throws UtilityException
+     */
     private static AssemblyStandard determineBiobrickBAssemblyStandard(String partSequenceString)
             throws UtilityException {
         AssemblyStandard result = null;
@@ -180,6 +196,14 @@ public class BiobrickBUtils implements AssemblyUtils {
         return result;
     }
 
+    /**
+     * Check if the given sequence string can be assembled as a BglBrick by having the correct
+     * restriction sites.
+     * 
+     * @param sequenceString
+     * @return
+     * @throws UtilityException
+     */
     private static boolean isBiobrickBCompatible(String sequenceString) throws UtilityException {
         boolean result = false;
         org.biojava.bio.seq.Sequence sequence = null;
@@ -215,6 +239,14 @@ public class BiobrickBUtils implements AssemblyUtils {
         return result;
     }
 
+    /**
+     * Search for BglBrick prefix in the given sequence string.
+     * 
+     * @param sequenceString
+     *            - query sequence.
+     * @return - {@link SimpleFeature}.
+     * @throws ControllerException
+     */
     private static SimpleFeature findBiobrickBPrefix(String sequenceString)
             throws ControllerException {
         SimpleFeature result = null;
@@ -236,6 +268,14 @@ public class BiobrickBUtils implements AssemblyUtils {
         return result;
     }
 
+    /**
+     * Search for BglBrick suffix in the given sequence string.
+     * 
+     * @param sequenceString
+     *            - query sequence.
+     * @return {@link SimpleFeature}.
+     * @throws ControllerException
+     */
     private static SimpleFeature findBiobrickBSuffix(String sequenceString)
             throws ControllerException {
         SimpleFeature result = null;
@@ -257,6 +297,14 @@ public class BiobrickBUtils implements AssemblyUtils {
         return result;
     }
 
+    /**
+     * Annotate the given sequence string with bglbrick format features, such as the prefix, suffix,
+     * and the inner feature.
+     * 
+     * @param partSequence
+     * @return
+     * @throws UtilityException
+     */
     private static SequenceFeatureCollection determineBiobrickBFeatures(Sequence partSequence)
             throws UtilityException {
         // all positions are 0 based positions, not offsets
@@ -355,6 +403,16 @@ public class BiobrickBUtils implements AssemblyUtils {
         return sequenceFeatures;
     }
 
+    /**
+     * Assemble two bglbrick sequences together.
+     * 
+     * @param part1Sequence
+     *            - first sequence.
+     * @param part2Sequence
+     *            - second sequence.
+     * @return Assembled {@link Sequence}.
+     * @throws UtilityException
+     */
     private Sequence joinBiobrickB(Sequence part1Sequence, Sequence part2Sequence)
             throws UtilityException {
         Sequence result = null;
@@ -484,6 +542,12 @@ public class BiobrickBUtils implements AssemblyUtils {
         return result;
     }
 
+    /**
+     * Retrieve BglBrick scar {@link Feature}.
+     * 
+     * @return {@link Feature}.
+     * @throws ControllerException
+     */
     private static Feature getBiobrickBScarFeature() throws ControllerException {
         Feature feature = new Feature();
         feature.setAutoFind(1);

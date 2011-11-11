@@ -13,7 +13,7 @@ import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 
-public class RawAssemblyUtils implements AssemblyUtils {
+public class RawAssemblyUtils implements IAssemblyUtils {
 
     @Override
     public SequenceFeatureCollection determineAssemblyFeatures(Sequence partSequence)
