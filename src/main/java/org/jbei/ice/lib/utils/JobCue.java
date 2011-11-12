@@ -10,13 +10,23 @@ import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.lucene.LuceneSearch;
 import org.jbei.ice.lib.search.lucene.SearchException;
 
+/**
+ * Job cue that wakes up, checks for pending jobs, and runs them.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 public class JobCue implements Runnable {
     private final Hashtable<Integer, Long> cue = new Hashtable<Integer, Long>();
+    /**
+     * Counts towards the next job run.
+     */
     private long counter = 0L;
+    /**
+     * wakeupInterval: Time elapsed before checking if something needs immediate attention. Usually
+     * one second.
+     */
     private static long wakeupInterval = 1000L;
-
-    // wakeupInterval: Time elapsed before checking if something needs immediate 
-    // attention. Usually one second.
 
     private static class SingletonHolder {
         private static final JobCue INSTANCE = new JobCue();
@@ -27,19 +37,39 @@ public class JobCue implements Runnable {
     private JobCue() {
     }
 
+    /**
+     * Get an instance of the singleton.
+     * 
+     * @return JobCue object.
+     */
     public static JobCue getInstance() {
         return SingletonHolder.INSTANCE;
     }
 
+    /**
+     * Add a job to the cue.
+     * 
+     * @param job
+     */
     public void addJob(Job job) {
         Logger.info("adding job: " + job.toString());
         getCue().put(job.getJob(), Calendar.getInstance().getTimeInMillis());
     }
 
+    /**
+     * Retrieve the job cue.
+     * 
+     * @return Hashtable of Integer and Long.
+     */
     public Hashtable<Integer, Long> getCue() {
         return cue;
     }
 
+    /**
+     * Look through the job cue and process them.
+     * <p>
+     * Aggregate duplicate jobs. For example, two scheduled blast rebuild will be run only once.
+     */
     @SuppressWarnings("unchecked")
     private synchronized void processCue() {
         // TODO: Tim; use reflection or something
@@ -80,7 +110,7 @@ public class JobCue implements Runnable {
     }
 
     /**
-     * I hope you know what you are doing
+     * Process the job cue RIGHT NOW. I hope you know what you are doing.
      */
     public void processNow() {
         getInstance().setCounter(wakeupInterval);
@@ -119,10 +149,20 @@ public class JobCue implements Runnable {
         }
     }
 
+    /**
+     * Set the job cue delay counter.
+     * 
+     * @param counter
+     */
     public void setCounter(long counter) {
         this.counter = counter;
     }
 
+    /**
+     * Retrieve the job cue delay counter.
+     * 
+     * @return
+     */
     public long getCounter() {
         return counter;
     }

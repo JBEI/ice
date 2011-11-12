@@ -34,7 +34,7 @@ import au.com.bytecode.opencsv.CSVReader;
 /**
  * Bulk creation of new entries from csv files.
  * 
- * @author tham
+ * @author Timothy Ham
  * 
  */
 public class ImportHelper {
@@ -49,6 +49,14 @@ public class ImportHelper {
      * Don't forgot to populate the strain's 'plasmid' field. 
      */
 
+    /**
+     * Parse the given {@link File} specifying strains into key-value {@link HashMap}.
+     * 
+     * @param file
+     *            - File to parse.
+     * @return List of HashMaps.
+     * @throws UtilityException
+     */
     public static List<HashMap<String, String>> parseStrainFile(File file) throws UtilityException {
         BufferedReader bufferedReader = null;
         CSVReader csvReader = null;
@@ -98,6 +106,12 @@ public class ImportHelper {
         return result;
     }
 
+    /**
+     * Create new strains in the database given the parsed HashMap of key-values.
+     * 
+     * @param parsedContent
+     * @throws UtilityException
+     */
     public static void createNewStrains(List<HashMap<String, String>> parsedContent)
             throws UtilityException {
         for (HashMap<String, String> item : parsedContent) {
@@ -174,6 +188,14 @@ public class ImportHelper {
         } // item for loop
     }
 
+    /**
+     * Parse the given {@link File} specifying strains with single plasmid into key-value
+     * {@link HashMap}.
+     * 
+     * @param file
+     * @return List of HashMaps.
+     * @throws UtilityException
+     */
     public static List<HashMap<String, String>> parseStrainPlasmidFile(File file)
             throws UtilityException {
         BufferedReader bufferedReader = null;
@@ -347,6 +369,20 @@ public class ImportHelper {
 
     }
 
+    /**
+     * Read the Sequence File and insert into parsed key-value HashMap.
+     * <p>
+     * Some parsed hashmap specifies the name of the sequence file.
+     * 
+     * @param parsedContent
+     *            -parsed Hashmap.
+     * @param filePath
+     *            - file Path.
+     * @param filePostFix
+     *            - file extension.
+     * @return
+     * @throws UtilityException
+     */
     public static List<HashMap<String, String>> readSequenceFiles(
             List<HashMap<String, String>> parsedContent, String filePath, String filePostFix)
             throws UtilityException {

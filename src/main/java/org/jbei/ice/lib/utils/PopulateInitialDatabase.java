@@ -38,6 +38,12 @@ import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.permissions.PermissionManager;
 
+/**
+ * Populate an empty database with necessary objects and values.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 public class PopulateInitialDatabase {
     public static final String DEFAULT_PLASMID_STORAGE_SCHEME_NAME = "Plasmid Storage (Default)";
     public static final String DEFAULT_STRAIN_STORAGE_SCHEME_NAME = "Strain Storage (Default)";
@@ -72,6 +78,19 @@ public class PopulateInitialDatabase {
         }
     }
 
+    /**
+     * Populate an empty database with necessary objects and values.
+     * <p>
+     * <ul>
+     * <li>Create the everyone group.</li>
+     * <li>Create the System account.</li>
+     * <li>Create the Admin account.</li>
+     * <li>Create default storage schemes.</li>
+     * <li>Update the database schema, if necessary.</li>
+     * </ul>
+     * 
+     * @throws UtilityException
+     */
     public static void initializeDatabase() throws UtilityException {
         Group group1 = null;
         try {
@@ -209,6 +228,11 @@ public class PopulateInitialDatabase {
 
     }
 
+    /**
+     * Update the database schema.
+     * 
+     * @throws UtilityException
+     */
     private static void updateDatabaseSchema() throws UtilityException {
         Configuration databaseSchema = null;
 
@@ -277,6 +301,11 @@ public class PopulateInitialDatabase {
         }
     }
 
+    /**
+     * Check for and create the System account.
+     * 
+     * @throws UtilityException
+     */
     private static void createSystemAccount() throws UtilityException {
         // Check for, and create system account
         Account systemAccount = null;
@@ -311,6 +340,11 @@ public class PopulateInitialDatabase {
         }
     }
 
+    /**
+     * Check for and create the everyone group.
+     * 
+     * @return
+     */
     public static Group createFirstGroup() {
         Group group1 = null;
         try {
@@ -341,6 +375,9 @@ public class PopulateInitialDatabase {
         return group1;
     }
 
+    /**
+     * Populate the permission read group. For schema upgrade only.
+     */
     public static void populatePermissionReadGroup() {
         Group group1 = null;
         try {
@@ -375,6 +412,11 @@ public class PopulateInitialDatabase {
         }
     }
 
+    /**
+     * Process funding sources. For schema update only.
+     * 
+     * @throws DAOException
+     */
     public static void normalizeAllFundingSources() throws DAOException {
         ArrayList<Entry> allEntries = null;
 
@@ -393,6 +435,12 @@ public class PopulateInitialDatabase {
         }
     }
 
+    /**
+     * Process funding sources. For schema update.
+     * 
+     * @param dupeFundingSource
+     * @throws DAOException
+     */
     @SuppressWarnings("unchecked")
     public static void normalizeFundingSources(FundingSource dupeFundingSource) throws DAOException {
 
@@ -539,6 +587,11 @@ public class PopulateInitialDatabase {
         return error;
     }
 
+    /**
+     * Convert SequenceFeature.start and ends to locations.
+     * 
+     * @return
+     */
     @SuppressWarnings({ "unchecked", "deprecation" })
     public static boolean migrateFrom081To090() {
         Logger.warn("Updating database schema from 0.8.1 to 0.9.0. Please wait...");
@@ -576,6 +629,12 @@ public class PopulateInitialDatabase {
         return error;
     }
 
+    /**
+     * Clean up and parse the description field into SequenceFeature attributes.
+     * 
+     * @param row
+     * @return
+     */
     private static List<SequenceFeatureAttribute> parseDescription(String row) {
         Pattern uuidPattern = Pattern.compile("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}");
         Pattern keyValuePattern = Pattern.compile("\"*(\\w+)=\"*\\s{0,1}([^\"]+)\\s{0,1}\"*");

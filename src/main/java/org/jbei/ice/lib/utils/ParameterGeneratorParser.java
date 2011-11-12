@@ -7,13 +7,20 @@ import org.jbei.ice.lib.models.Parameter;
 import org.jbei.ice.lib.models.Parameter.ParameterType;
 
 /**
- * Converts parameters to and from text
+ * Converts {@link Parameter} to and from text.
  * 
- * @author tsham
+ * @author Timothy ham
  * 
  */
 public class ParameterGeneratorParser {
 
+    /**
+     * Generate a List of {@link Parameter}s from string.
+     * 
+     * @param input
+     *            - string input.
+     * @return List of Parameters.
+     */
     public static List<Parameter> parseParameterString(String input) {
         List<Parameter> result = new ArrayList<Parameter>();
         String[] commaSplits = input.trim().split(",");
@@ -70,6 +77,12 @@ public class ParameterGeneratorParser {
         return result;
     }
 
+    /**
+     * Generate string representation of {@link Parameter}s.
+     * 
+     * @param parameters
+     * @return
+     */
     public static String generateParametersString(List<Parameter> parameters) {
         String result = null;
         ArrayList<String> parameterStringList = new ArrayList<String>();

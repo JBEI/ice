@@ -27,7 +27,7 @@ import org.jbei.ice.lib.logging.Logger;
  * }
  * }
  * 
- * @author tham
+ * @author Zinovii Dmytriv, Timothy Ham
  * 
  */
 public class LblLdapAuthenticationWrapper {
@@ -47,10 +47,21 @@ public class LblLdapAuthenticationWrapper {
     public String org = "";
     public String description = "";
 
+    /**
+     * Constructor.
+     */
     public LblLdapAuthenticationWrapper() {
         initialize();
     }
 
+    /**
+     * Authenticate user to the ldap server.
+     * 
+     * @param userName
+     * @param passWord
+     * @return True if successfully authenticated.
+     * @throws LblLdapAuthenticationWrapperException
+     */
     public boolean authenticate(String userName, String passWord)
             throws LblLdapAuthenticationWrapperException {
         DirContext authContext = null;
@@ -114,6 +125,13 @@ public class LblLdapAuthenticationWrapper {
         return authenticated;
     }
 
+    /**
+     * Check if the user is in the settings file specified ldap group before authenticating.
+     * 
+     * @param loginName
+     * @return True if user is in the specified ldap group.
+     * @throws LblLdapAuthenticationWrapperException
+     */
     public boolean isWikiUser(String loginName) throws LblLdapAuthenticationWrapperException {
         boolean result = false;
 
@@ -194,6 +212,12 @@ public class LblLdapAuthenticationWrapper {
         return description;
     }
 
+    /**
+     * Get unauthenticated ldap context.
+     * 
+     * @return
+     * @throws NamingException
+     */
     protected DirContext getContext() throws NamingException {
         Hashtable<String, String> env = new Hashtable<String, String>();
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
@@ -217,6 +241,14 @@ public class LblLdapAuthenticationWrapper {
         return result;
     }
 
+    /**
+     * Get authenticated context from the ldap server. Failure means bad user or password.
+     * 
+     * @param lblEmployeeNumber
+     * @param passWord
+     * @return
+     * @throws NamingException
+     */
     protected DirContext getAuthenticatedContext(String lblEmployeeNumber, String passWord)
             throws NamingException {
 
@@ -249,6 +281,12 @@ public class LblLdapAuthenticationWrapper {
         }
     }
 
+    /**
+     * Exception
+     * 
+     * @author Zinovii Dmytriv
+     * 
+     */
     public class LblLdapAuthenticationWrapperException extends Exception {
         private static final long serialVersionUID = 1L;
 
