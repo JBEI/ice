@@ -13,7 +13,20 @@ import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.vo.TraceData;
 
+/**
+ * Utility methods for sequence trace alignments.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class TraceAlignmentHelper {
+    /**
+     * Convert {@link TraceSequenee} to {@link TraceData} value object.
+     * 
+     * @param traceSequence
+     *            - TraceSequence to convert.
+     * @return TraceData object.
+     */
     public static TraceData traceSequenceToTraceData(TraceSequence traceSequence) {
         TraceData resultTraceData = new TraceData();
 
@@ -43,6 +56,18 @@ public class TraceAlignmentHelper {
         return resultTraceData;
     }
 
+    /**
+     * Convert {@link TraceData} value object into {@link TraceSequence} object with the given
+     * depositor and {@link Entry}.
+     * 
+     * @param traceData
+     *            - TraceData object to convert.
+     * @param depositor
+     *            - Depositor email.
+     * @param entry
+     *            - Entry to associate.
+     * @return TraceSequence object.
+     */
     public static TraceSequence traceDataToTraceSequence(TraceData traceData, String depositor,
             Entry entry) {
         TraceSequence resultTraceSequence = new TraceSequence();
@@ -73,10 +98,31 @@ public class TraceAlignmentHelper {
         return resultTraceSequence;
     }
 
+    /**
+     * Convert the given {@link TraceData} value object into {@link TraceSequence}. Set the
+     * depositor to "" and {@link Entry} to null.
+     * 
+     * @param traceData
+     *            - TraceData to convert.
+     * @return TraceSequence object.
+     */
     public static TraceSequence traceDataToTraceSequence(TraceData traceData) {
         return traceDataToTraceSequence(traceData, "", null);
     }
 
+    /**
+     * Align two sequences, querySequence and traceSequence.
+     * 
+     * @param querySequence
+     *            - Reference sequence.
+     * @param traceSequence
+     *            - Trace sequence.
+     * @param traceFileName
+     *            - Trace file name, for identification.
+     * @param isCircular
+     *            - True if circular.
+     * @return {@link TraceData} object.
+     */
     public static TraceData alignSequences(String querySequence, String traceSequence,
             String traceFileName, boolean isCircular) {
         int querySequenceLength = querySequence.length();

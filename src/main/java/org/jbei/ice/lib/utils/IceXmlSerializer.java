@@ -56,6 +56,8 @@ import com.ibm.icu.util.Calendar;
 
 /**
  * IceXML serializer/deserializer.
+ * <p>
+ * See ice.xsd and seq.xsd in the /docs directory for the xml schema.
  * 
  * @author Timothy Ham
  * 
@@ -217,8 +219,9 @@ public class IceXmlSerializer {
      * @throws UtilityException
      */
     private static Element toEntryElement(Entry entry, Sequence sequence) throws UtilityException {
-        if (entry == null)
+        if (entry == null) {
             return null;
+        }
 
         DefaultElement entryRoot = new DefaultElement("entry", iceNamespace);
 
@@ -318,7 +321,7 @@ public class IceXmlSerializer {
                 try {
                     file = AttachmentManager.getFile(attachment);
                     fileString = SerializationUtils
-                            .serializeBytesToString(org.apache.commons.io.FileUtils
+                            .serializeBytesToBase64String(org.apache.commons.io.FileUtils
                                     .readFileToByteArray(file));
 
                 } catch (FileNotFoundException e) {
@@ -464,7 +467,7 @@ public class IceXmlSerializer {
                 try {
                     traceFile = TraceSequenceManager.getFile(trace);
                     traceString = SerializationUtils
-                            .serializeBytesToString(org.apache.commons.io.FileUtils
+                            .serializeBytesToBase64String(org.apache.commons.io.FileUtils
                                     .readFileToByteArray(traceFile));
                 } catch (ManagerException e) {
                     // skip this one

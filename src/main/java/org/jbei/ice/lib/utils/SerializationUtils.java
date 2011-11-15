@@ -9,24 +9,48 @@ import java.io.Serializable;
 
 import org.apache.commons.codec.binary.Base64;
 
+/**
+ * Utility methods for serialization/deserialization.
+ * 
+ * @author Zinovii Dmytriv, Timothy Ham
+ * 
+ */
 public class SerializationUtils {
+    /**
+     * Exception class for SerializationUtils.
+     * 
+     * @author Zinovii Dmytriv
+     * 
+     */
     public static class SerializationUtilsException extends Exception {
         private static final long serialVersionUID = -6597529889622775652L;
 
+        /**
+         * Default constructor.
+         */
         public SerializationUtilsException() {
             super();
         }
 
+        /**
+         * Constructor using message and cause.
+         * 
+         * @param message
+         *            - Message.
+         * @param cause
+         *            - Throwable.
+         */
         public SerializationUtilsException(String message, Throwable cause) {
             super(message, cause);
         }
     }
 
     /**
-     * deserialize to a java object
+     * Deserialize Base64 encoded string to a java object.
      * 
      * @param serializedObject
-     * @return
+     *            - Base64 encoded string of a java object.
+     * @return Deserialized java object.
      * @throws SerializationUtilsException
      */
     public static Serializable deserializeStringToObject(String serializedObject)
@@ -35,7 +59,7 @@ public class SerializationUtils {
 
             ObjectInputStream objectInputStream;
             objectInputStream = new ObjectInputStream(new ByteArrayInputStream(
-                    deserializeFromStringToByteArray(serializedObject)));
+                    deserializeBase64StringToBytes(serializedObject)));
             Serializable result = (Serializable) objectInputStream.readObject();
             objectInputStream.close();
 
@@ -48,11 +72,14 @@ public class SerializationUtils {
         }
     }
 
-    private static byte[] deserializeFromStringToByteArray(String serializedObject) {
-        byte[] data = new Base64().decode(serializedObject);
-        return data;
-    }
-
+    /**
+     * Serialize java {@link Serializable} object into base64 encoded string.
+     * 
+     * @param object
+     *            - Object to serialize.
+     * @return Base64 encoded string of object.
+     * @throws SerializationUtilsException
+     */
     public static String serializeObjectToString(Serializable object)
             throws SerializationUtilsException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -65,20 +92,28 @@ public class SerializationUtils {
             throw new SerializationUtilsException("Serialization failed! IOException", e);
         }
 
-        return new Base64().encodeToString(byteArrayOutputStream.toByteArray());
+        return serializeBytesToBase64String(byteArrayOutputStream.toByteArray());
     }
 
     /**
-     * Convert byte array into base64 encoded string.
+     * Convert the given byte array into base64 encoded string.
      * 
      * @param bytes
-     * @return base64 encoded string
+     *            - bytes to encdode.
+     * @return Base64 encoded string
      */
-    public static String serializeBytesToString(byte[] bytes) {
+    public static String serializeBytesToBase64String(byte[] bytes) {
         return new Base64().encodeToString(bytes);
     }
 
-    public static byte[] deserializeStringToBytes(String data) {
-        return new Base64().decode(data);
+    /**
+     * Convert the given base64 encoded string into byte array.
+     * 
+     * @param base64String
+     *            - base64 encoded string.
+     * @return Byte array
+     */
+    public static byte[] deserializeBase64StringToBytes(String base64String) {
+        return new Base64().decode(base64String);
     }
 }

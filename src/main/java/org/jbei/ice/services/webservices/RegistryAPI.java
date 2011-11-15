@@ -1537,7 +1537,7 @@ public class RegistryAPI {
 
         SequenceAnalysisController sequenceAnalysisController = getSequenceAnalysisController(sessionId);
         EntryController entryController = getEntryController(sessionId);
-        byte[] bytes = SerializationUtils.deserializeStringToBytes(base64FileData);
+        byte[] bytes = SerializationUtils.deserializeBase64StringToBytes(base64FileData);
         if (bytes == null) {
             throw new ServiceException("Invalid File Data!");
         }

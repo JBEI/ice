@@ -13,6 +13,12 @@ import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 
+/**
+ * Assembly Utils for sequences without any assembly format.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 public class RawAssemblyUtils implements IAssemblyUtils {
 
     @Override
@@ -93,6 +99,12 @@ public class RawAssemblyUtils implements IAssemblyUtils {
         return result;
     }
 
+    /**
+     * Assign the sequence itself as the inner feature.
+     * 
+     * @param partSequence
+     * @return
+     */
     private SequenceFeatureCollection determineRawAssemblyFeatures(Sequence partSequence) {
         SequenceFeatureCollection sequenceFeatures = new SequenceFeatureCollection();
         String partSequenceString = partSequence.getSequence();

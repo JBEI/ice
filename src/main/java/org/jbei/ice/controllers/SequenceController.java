@@ -27,6 +27,7 @@ import org.jbei.ice.lib.models.SequenceFeatureAttribute;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.SequenceUtils;
+import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.vo.DNAFeature;
 import org.jbei.ice.lib.vo.DNAFeatureLocation;
 import org.jbei.ice.lib.vo.DNAFeatureNote;
@@ -330,8 +331,13 @@ public class SequenceController extends Controller {
 
         String sequenceString = dnaSequence.getSequence().toLowerCase();
         String fwdHash = SequenceUtils.calculateSequenceHash(sequenceString);
-        String revHash = SequenceUtils.calculateSequenceHash(SequenceUtils
-                .reverseComplement(sequenceString));
+        String revHash;
+        try {
+            revHash = SequenceUtils.calculateSequenceHash(SequenceUtils
+                    .reverseComplement(sequenceString));
+        } catch (UtilityException e) {
+            revHash = "";
+        }
 
         Sequence sequence = new Sequence(sequenceString, "", fwdHash, revHash, null);
         Set<SequenceFeature> sequenceFeatures = sequence.getSequenceFeatures();
@@ -378,7 +384,11 @@ public class SequenceController extends Controller {
                         }
 
                         if (dnaFeature.getStrand() == -1) {
-                            featureSequence = SequenceUtils.reverseComplement(featureSequence);
+                            try {
+                                featureSequence = SequenceUtils.reverseComplement(featureSequence);
+                            } catch (UtilityException e) {
+                                featureSequence = "";
+                            }
                         }
                     }
 

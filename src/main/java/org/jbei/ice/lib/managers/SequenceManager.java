@@ -15,6 +15,7 @@ import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.utils.SequenceUtils;
+import org.jbei.ice.lib.utils.UtilityException;
 
 /**
  * Manipulate {@link Sequence} and associated objects in the database.
@@ -311,6 +312,8 @@ public class SequenceManager {
                 }
             }
         } catch (HibernateException e) {
+            throw new ManagerException("Failed to get Feature by sequence!", e);
+        } catch (UtilityException e) {
             throw new ManagerException("Failed to get Feature by sequence!", e);
         } finally {
             if (session.isOpen()) {

@@ -23,6 +23,7 @@ import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.ISequenceValueObject;
 import org.jbei.ice.lib.utils.SequenceFeatureCollection;
 import org.jbei.ice.lib.utils.SequenceUtils;
+import org.jbei.ice.lib.utils.UtilityException;
 
 /**
  * Stores the unique sequence for an {@link Entry} object.
@@ -107,7 +108,11 @@ public class Sequence implements ISequenceValueObject, IModel {
     public void setSequence(String sequence) {
         this.sequence = sequence;
         setFwdHash(SequenceUtils.calculateSequenceHash(sequence));
-        setRevHash(SequenceUtils.calculateReverseComplementSequenceHash(sequence));
+        try {
+            setRevHash(SequenceUtils.calculateReverseComplementSequenceHash(sequence));
+        } catch (UtilityException e) {
+            setRevHash("");
+        }
 
     }
 

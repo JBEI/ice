@@ -265,7 +265,7 @@ public class AdminImportExportPanel extends Panel {
                             IceSession.get().getAccount());
                     for (SequenceTraceFile traceFile : completeEntry.getTraceFiles()) {
                         try {
-                            byte[] bytes = SerializationUtils.deserializeStringToBytes(traceFile
+                            byte[] bytes = SerializationUtils.deserializeBase64StringToBytes(traceFile
                                     .getBase64Data());
                             IDNASequence dnaSequence = sequenceAnalysisController.parse(bytes);
                             if (dnaSequence == null || dnaSequence.getSequence() == null) {
@@ -298,7 +298,7 @@ public class AdminImportExportPanel extends Panel {
                         attachment.setEntry(newEntry);
                         try {
                             byte[] bytes = SerializationUtils
-                                    .deserializeStringToBytes(attachmentData.getBase64Data());
+                                    .deserializeBase64StringToBytes(attachmentData.getBase64Data());
                             ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
 
                             attachmentController.save(attachment, inputStream);

@@ -23,6 +23,9 @@ import org.jbei.ice.lib.vo.DNAFeatureNote;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
 /**
+ * SeqXML serializer/deserializer.
+ * <p>
+ * See seq.xsd in the /docs directory for xml schema.
  * 
  * @author Timothy Ham
  * 
@@ -46,7 +49,15 @@ public class SeqXmlSerializer {
     public static Namespace xsiNamespace = new Namespace("xsi",
             "http://www.w3.org/2001/XMLSchema-instance");
 
-    public static Document serializeToSeqXml(Sequence sequence) {
+    /**
+     * Generate seq-xml from the given {@link Sequence}.
+     * 
+     * @param sequence
+     *            - Sequence to sereialize.
+     * @return Xml document.
+     * @throws UtilityException
+     */
+    public static Document serializeToSeqXml(Sequence sequence) throws UtilityException {
         Document document = DocumentHelper.createDocument();
 
         document.setRootElement(serializeToSeqXmlAsElement(sequence));
@@ -54,7 +65,15 @@ public class SeqXmlSerializer {
         return document;
     }
 
-    public static Element serializeToSeqXmlAsElement(Sequence sequence) {
+    /**
+     * Generate seq xml {@link Element} from the give {@link Sequence}.
+     * 
+     * @param sequence
+     *            - Sequence to serialize.
+     * @return Xml Element.
+     * @throws UtilityException
+     */
+    public static Element serializeToSeqXmlAsElement(Sequence sequence) throws UtilityException {
         Element seq = new DefaultElement("seq", seqNamespace);
 
         HashSet<String> validGenbankTypes = new HashSet<String>();
@@ -143,6 +162,14 @@ public class SeqXmlSerializer {
         return seq;
     }
 
+    /**
+     * Deserialize given xml to {@link Sequence} object.
+     * 
+     * @param xml
+     *            - xml to parse.
+     * @return Sequence object.
+     * @throws UtilityException
+     */
     public static Sequence parseSeqXml(String xml) throws UtilityException {
         Document seqDocument = null;
 
@@ -158,6 +185,14 @@ public class SeqXmlSerializer {
 
     }
 
+    /**
+     * Deserialize given seq xml {@link Element} to {@link Sequence} object.
+     * 
+     * @param seqElement
+     *            - xml Element to parse.
+     * @return Sequence object.
+     * @throws UtilityException
+     */
     public static Sequence parseSeqXml(Element seqElement) throws UtilityException {
 
         FeaturedDNASequence featuredDNASequence = new FeaturedDNASequence();
@@ -218,6 +253,11 @@ public class SeqXmlSerializer {
         return sequence;
     }
 
+    /**
+     * Add valid Genbank feature type keywords to the given HashSet.
+     * 
+     * @param validGenbankTypes
+     */
     private static void initializeValidGenbankTypes(HashSet<String> validGenbankTypes) {
         validGenbankTypes.add("allele");
         validGenbankTypes.add("attenuator");

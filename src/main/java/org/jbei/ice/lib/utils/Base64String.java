@@ -19,7 +19,7 @@ public class Base64String implements Serializable {
      * @param bytes
      */
     public void putBytes(byte[] bytes) {
-        data = SerializationUtils.serializeBytesToString(bytes);
+        data = SerializationUtils.serializeBytesToBase64String(bytes);
     }
 
     /**
@@ -28,7 +28,7 @@ public class Base64String implements Serializable {
      * @return bytes.
      */
     public byte[] getBytes() {
-        byte[] bytes = SerializationUtils.deserializeStringToBytes(data);
+        byte[] bytes = SerializationUtils.deserializeBase64StringToBytes(data);
 
         return bytes;
     }

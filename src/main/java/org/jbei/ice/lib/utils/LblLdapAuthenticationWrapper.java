@@ -16,16 +16,9 @@ import org.jbei.ice.lib.logging.Logger;
 
 /**
  * Little wrapper for lbl ldap.
- * 
- * Simple usage:
- * LdapAuthl = new LdapAuth();
- * if (l.isWikiUser(String Username)) {
- * try {
- * l.authenticate(Username, password);
- * } except {
- * //auth failed
- * }
- * }
+ * <p>
+ * Simple usage: LdapAuthl = new LdapAuth(); if (l.isWikiUser(String Username)) { try {
+ * l.authenticate(Username, password); } except { //auth failed } }
  * 
  * @author Zinovii Dmytriv, Timothy Ham
  * 

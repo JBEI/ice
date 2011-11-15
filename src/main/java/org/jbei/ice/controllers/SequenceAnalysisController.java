@@ -295,7 +295,7 @@ public class SequenceAnalysisController extends Controller {
             throw new ControllerException(e);
         }
 
-        base64Data = SerializationUtils.serializeBytesToString(bytes);
+        base64Data = SerializationUtils.serializeBytesToBase64String(bytes);
         SequenceTraceFile result = new SequenceTraceFile();
 
         result.setDepositorEmail(traceSequence.getDepositor());

@@ -1,9 +1,26 @@
 package org.jbei.ice.lib.utils;
 
+import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
 
+/**
+ * Utility methods for manipulation of {@link Storage}.
+ * 
+ * @author Hector Plahar
+ * 
+ */
 public class StorageUtils {
 
+    /**
+     * Convert storage index to human readable index.
+     * <p>
+     * 
+     * @param index
+     *            - numerical index.
+     * @param type
+     *            - {@link StorageType}.
+     * @return String representation of the index.
+     */
     public static String indexToWell(int index, StorageType type) {
         // wrap around is determined by storage type
         int factor;
@@ -51,6 +68,14 @@ public class StorageUtils {
         return (pos += colStr);
     }
 
+    /**
+     * Convert human readable storage index to a numerical index.
+     * <p>
+     * Not yet implemented. TODO.
+     * 
+     * @param well
+     * @return -1
+     */
     public static int wellToIndex(String well) {
         return -1;
     }
