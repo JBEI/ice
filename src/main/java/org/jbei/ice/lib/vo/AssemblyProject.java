@@ -2,6 +2,12 @@ package org.jbei.ice.lib.vo;
 
 import java.util.Date;
 
+/**
+ * Value Object for storing AssemblyProject information.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class AssemblyProject extends Project {
     private static final long serialVersionUID = 1L;
 
@@ -28,6 +34,7 @@ public class AssemblyProject extends Project {
         this.assemblyTable = assemblyTable;
     }
 
+    @Override
     public String typeName() {
         return "assembly";
     }

@@ -2,6 +2,12 @@ package org.jbei.ice.lib.vo;
 
 import java.io.Serializable;
 
+/**
+ * Value object for storing sequence assembly item.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class AssemblyItem implements Serializable {
     private static final long serialVersionUID = 1L;
 
