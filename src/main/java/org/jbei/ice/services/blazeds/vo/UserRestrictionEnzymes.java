@@ -3,6 +3,12 @@ package org.jbei.ice.services.blazeds.vo;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Value object to store {@link UserRestrictionEnzymeGroup}s, and active enzymes for flex apps.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class UserRestrictionEnzymes implements Serializable {
     private static final long serialVersionUID = -4363772779483195780L;
 

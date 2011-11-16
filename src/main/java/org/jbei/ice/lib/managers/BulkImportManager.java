@@ -82,6 +82,14 @@ public class BulkImportManager {
         return list;
     }
 
+    /**
+     * Retrieve a {@link BulkImport} object by its id.
+     * 
+     * @param importId
+     *            - BulkImport's id.
+     * @return BulkImport object.
+     * @throws ManagerException
+     */
     public static BulkImport retrieveById(long importId) throws ManagerException {
         Session session = DAO.newSession();
         Query query = session.createQuery("from " + BulkImport.class.getName() + " where id = :id");
@@ -98,6 +106,14 @@ public class BulkImportManager {
         }
     }
 
+    /**
+     * Retrieve a {@link BulkImport} type by its id.
+     * 
+     * @param id
+     *            - BulkImport's id.
+     * @return Type
+     * @throws ManagerException
+     */
     public static String retrieveType(long id) throws ManagerException {
         Session session = DAO.newSession();
         try {
