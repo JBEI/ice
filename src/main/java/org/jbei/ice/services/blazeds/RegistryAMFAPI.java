@@ -43,17 +43,13 @@ import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.utils.AssemblyHelper;
 import org.jbei.ice.lib.utils.BulkImportEntryData;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.utils.SerializationUtils.SerializationUtilsException;
 import org.jbei.ice.lib.utils.TraceAlignmentHelper;
-import org.jbei.ice.lib.vo.AssemblyProject;
-import org.jbei.ice.lib.vo.AssemblyTable;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
-import org.jbei.ice.lib.vo.PermutationSet;
 import org.jbei.ice.lib.vo.SequenceCheckerData;
 import org.jbei.ice.lib.vo.SequenceCheckerProject;
 import org.jbei.ice.lib.vo.TraceData;
@@ -491,158 +487,6 @@ public class RegistryAMFAPI extends BaseService {
         return result;
     }
 
-    public AssemblyProject createAssemblyProject(String sessionId, AssemblyProject assemblyProject) {
-        if (assemblyProject == null || sessionId == null) {
-            return null;
-        }
-
-        Account account = getAccountBySessionId(sessionId);
-
-        if (account == null) {
-            return null;
-        }
-
-        String serializedAssemblyTable = "";
-
-        try {
-            serializedAssemblyTable = SerializationUtils.serializeObjectToString(assemblyProject
-                    .getAssemblyTable());
-        } catch (SerializationUtilsException e) {
-            Logger.error(getLoggerPrefix(), e);
-
-            return null;
-        }
-
-        ProjectController projectController = new ProjectController(account);
-
-        Project project = projectController.createProject(account, assemblyProject.getName(),
-            assemblyProject.getDescription(), serializedAssemblyTable, assemblyProject.typeName(),
-            new Date(), new Date());
-
-        try {
-            Project savedProject = projectController.save(project);
-
-            assemblyProject.setName(savedProject.getName());
-            assemblyProject.setDescription(savedProject.getDescription());
-            assemblyProject.setUuid(savedProject.getUuid());
-            assemblyProject.setOwnerEmail(savedProject.getAccount().getEmail());
-            assemblyProject.setOwnerName(savedProject.getAccount().getFullName());
-            assemblyProject.setCreationTime(savedProject.getCreationTime());
-            assemblyProject.setModificationTime(savedProject.getModificationTime());
-        } catch (ControllerException e) {
-            Logger.error(getLoggerPrefix(), e);
-
-            return null;
-        } catch (PermissionException e) {
-            Logger.error(getLoggerPrefix(), e);
-
-            return null;
-        }
-
-        return assemblyProject;
-    }
-
-    public AssemblyProject getAssemblyProject(String sessionId, String projectId) {
-        if (projectId == null || sessionId == null || sessionId.isEmpty() || projectId.isEmpty()) {
-            return null;
-        }
-
-        Account account = getAccountBySessionId(sessionId);
-
-        if (account == null) {
-            return null;
-        }
-
-        AssemblyProject assemblyProject = null;
-
-        ProjectController projectController = new ProjectController(account);
-        try {
-            Project project = projectController.getProjectByUUID(projectId);
-
-            AssemblyTable assemblyTable = (AssemblyTable) SerializationUtils
-                    .deserializeStringToObject(project.getData());
-
-            assemblyProject = new AssemblyProject(project.getName(), project.getDescription(),
-                    project.getUuid(), account.getEmail(), account.getFullName(),
-                    project.getCreationTime(), project.getModificationTime(), assemblyTable);
-        } catch (ControllerException e) {
-            Logger.error(getLoggerPrefix(), e);
-
-            return null;
-        } catch (SerializationUtilsException e) {
-            Logger.error(getLoggerPrefix(), e);
-
-            return null;
-        }
-
-        return assemblyProject;
-    }
-
-    public AssemblyProject saveAssemblyProject(String sessionId, AssemblyProject assemblyProject) {
-        if (sessionId == null || sessionId.isEmpty() || assemblyProject == null
-                || assemblyProject.getUuid() == null) {
-            return null;
-        }
-
-        Account account = getAccountBySessionId(sessionId);
-
-        if (account == null) {
-            return null;
-        }
-
-        AssemblyProject resultAssemblyProject = null;
-
-        ProjectController projectController = new ProjectController(account);
-        try {
-            Project project = projectController.getProjectByUUID(assemblyProject.getUuid());
-
-            project.setName(assemblyProject.getName());
-            project.setDescription(assemblyProject.getDescription());
-            project.setModificationTime(new Date());
-            project.setData(SerializationUtils.serializeObjectToString(assemblyProject
-                    .getAssemblyTable()));
-
-            Project savedProject = projectController.save(project);
-
-            resultAssemblyProject = new AssemblyProject(savedProject.getName(),
-                    savedProject.getDescription(), savedProject.getUuid(), savedProject
-                            .getAccount().getEmail(), savedProject.getAccount().getFullName(),
-                    savedProject.getCreationTime(), savedProject.getModificationTime(),
-                    assemblyProject.getAssemblyTable());
-        } catch (ControllerException e) {
-            Logger.error(getLoggerPrefix(), e);
-
-            return null;
-        } catch (SerializationUtilsException e) {
-            Logger.error(getLoggerPrefix(), e);
-
-            return null;
-        } catch (PermissionException e) {
-            Logger.error(getLoggerPrefix(), e);
-
-            return null;
-        }
-
-        return resultAssemblyProject;
-    }
-
-    public PermutationSet assembleAssemblyProject(String sessionId, AssemblyProject assemblyProject) {
-        if (sessionId == null || sessionId.isEmpty() || assemblyProject == null) {
-            return null;
-        }
-
-        Account account = getAccountBySessionId(sessionId);
-
-        if (account == null) {
-            return null;
-        }
-
-        PermutationSet permutationSet = AssemblyHelper.buildPermutationSet(assemblyProject
-                .getAssemblyTable());
-
-        return permutationSet;
-    }
-
     public SequenceCheckerProject createSequenceCheckerProject(String sessionId,
             SequenceCheckerProject sequenceCheckerProject) {
         if (sequenceCheckerProject == null || sessionId == null) {
@@ -1022,8 +866,9 @@ public class RegistryAMFAPI extends BaseService {
     }
 
     private Account sessionToAccount(String sessionId) {
-        if (sessionId == null || sessionId.isEmpty())
+        if (sessionId == null || sessionId.isEmpty()) {
             return null;
+        }
 
         return getAccountBySessionId(sessionId);
     }
@@ -1031,7 +876,7 @@ public class RegistryAMFAPI extends BaseService {
     // TODO : the following need to be folded into a single call
     public String retrieveBulkImportEntryType(String sessionId, String importId) {
 
-        Account account = this.sessionToAccount(sessionId);
+        Account account = sessionToAccount(sessionId);
         if (account == null) {
             System.out.println("Session is invalid");
             return null;
@@ -1049,7 +894,7 @@ public class RegistryAMFAPI extends BaseService {
 
     @SuppressWarnings("unchecked")
     public ASObject retrieveImportData(String sessionId, String importId) {
-        Account account = this.sessionToAccount(sessionId);
+        Account account = sessionToAccount(sessionId);
         if (account == null) {
             Logger.info("Session is invalid");
             return null;
@@ -1111,7 +956,7 @@ public class RegistryAMFAPI extends BaseService {
             ArrayCollection secondaryData, Byte[] sequenceZipFile, Byte[] attachmentZipFile,
             String sequenceFilename, String attachmentFilename) {
 
-        Account account = this.sessionToAccount(sessionId);
+        Account account = sessionToAccount(sessionId);
         if (account == null) {
             Logger.error("Invalid session");
             return 0;
@@ -1180,7 +1025,7 @@ public class RegistryAMFAPI extends BaseService {
     public Entry saveEntry(String sessionId, String importId, Entry entry, Byte[] attachmentFile,
             String attachmentFilename, Byte[] sequenceFile, String sequenceFilename) {
 
-        Account account = this.sessionToAccount(sessionId);
+        Account account = sessionToAccount(sessionId);
         if (account == null) {
             return null;
         }
@@ -1195,11 +1040,13 @@ public class RegistryAMFAPI extends BaseService {
         } catch (Exception e1) {
         }
 
-        if (Entry.PART_ENTRY_TYPE.equals(entry.getRecordType()))
+        if (Entry.PART_ENTRY_TYPE.equals(entry.getRecordType())) {
             ((Part) entry).setPackageFormat(Part.AssemblyStandard.RAW);
+        }
 
-        if (entry.getLongDescriptionType() == null)
+        if (entry.getLongDescriptionType() == null) {
             entry.setLongDescriptionType(Entry.MarkupType.text.name());
+        }
 
         EntryController entryController = new EntryController(account);
         Entry saved = null;
@@ -1225,7 +1072,7 @@ public class RegistryAMFAPI extends BaseService {
             Byte[] plasmidSequenceFile, String plasmidSequenceFilename,
             Byte[] plasmidAttachmentFile, String plasmidAttachmentFilename) {
 
-        Account account = this.sessionToAccount(sessionId);
+        Account account = sessionToAccount(sessionId);
         if (account == null) {
             return null;
         }
@@ -1249,12 +1096,14 @@ public class RegistryAMFAPI extends BaseService {
         }
 
         // strain
-        if (strain.getLongDescriptionType() == null)
+        if (strain.getLongDescriptionType() == null) {
             strain.setLongDescriptionType(Entry.MarkupType.text.name());
+        }
 
         // plasmid
-        if (plasmid.getLongDescriptionType() == null)
+        if (plasmid.getLongDescriptionType() == null) {
             plasmid.setLongDescriptionType(Entry.MarkupType.text.name());
+        }
 
         EntryController entryController = new EntryController(account);
 
@@ -1275,10 +1124,12 @@ public class RegistryAMFAPI extends BaseService {
         }
 
         List<Entry> saved = new LinkedList<Entry>();
-        if (newPlasmid != null)
+        if (newPlasmid != null) {
             saved.add(newPlasmid);
-        if (newStrain != null)
+        }
+        if (newStrain != null) {
             saved.add(newStrain);
+        }
 
         // save sequences
         saveEntrySequence(account, newPlasmid, plasmidSequenceFile, plasmidSequenceFilename);
@@ -1346,7 +1197,7 @@ public class RegistryAMFAPI extends BaseService {
         // set sequence
         SequenceController sequenceController = new SequenceController(account);
 
-        String sequenceUser = this.readSequenceFile(seqFile).toString();
+        String sequenceUser = readSequenceFile(seqFile).toString();
         IDNASequence dnaSequence = null;
         if (sequenceUser != null) {
             dnaSequence = SequenceController.parse(sequenceUser);
@@ -1391,11 +1242,12 @@ public class RegistryAMFAPI extends BaseService {
             } catch (FileNotFoundException e1) {
                 Logger.error(getLoggerPrefix(), e1);
             } finally {
-                if (br != null)
+                if (br != null) {
                     try {
                         br.close();
                     } catch (IOException e) {
                     }
+                }
             }
         }
 
