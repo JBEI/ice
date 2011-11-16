@@ -2,6 +2,12 @@ package org.jbei.ice.lib.vo;
 
 import java.util.Date;
 
+/**
+ * Value object for sequence trace data.
+ * 
+ * @author Timothy Ham
+ * 
+ */
 public class SequenceTraceFile {
     private String base64Data;
     private String fileName;
@@ -46,7 +52,7 @@ public class SequenceTraceFile {
     }
 
     public void setTimeStamp(Date timestamp) {
-        this.timeStamp = timestamp;
+        timeStamp = timestamp;
     }
 
 }

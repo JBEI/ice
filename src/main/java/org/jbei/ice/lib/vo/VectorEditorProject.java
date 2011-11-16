@@ -2,6 +2,12 @@ package org.jbei.ice.lib.vo;
 
 import java.util.Date;
 
+/**
+ * Value object to hold VectorEditor project files.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class VectorEditorProject extends Project {
     private static final long serialVersionUID = 1L;
 

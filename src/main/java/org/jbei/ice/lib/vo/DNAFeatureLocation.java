@@ -2,6 +2,14 @@ package org.jbei.ice.lib.vo;
 
 import java.io.Serializable;
 
+import org.jbei.ice.lib.models.AnnotationLocation;
+
+/**
+ * Value object to hold {@link AnnotationLocation} data.
+ * 
+ * @author Timothy Ham
+ * 
+ */
 public class DNAFeatureLocation implements Serializable {
 
     private static final long serialVersionUID = 1L;

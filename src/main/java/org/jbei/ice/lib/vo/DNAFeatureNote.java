@@ -2,8 +2,14 @@ package org.jbei.ice.lib.vo;
 
 import java.io.Serializable;
 
+import org.jbei.ice.lib.models.SequenceFeatureAttribute;
+
 /**
+ * Value object to hold {@link SequenceFeatureAttribute} data.
+ * <p>
  * This is called a Qualifier in genbank reference parlance.
+ * 
+ * @author Zinovii Dmytriv, Timothy Ham
  */
 public class DNAFeatureNote implements Serializable {
     private static final long serialVersionUID = 1L;

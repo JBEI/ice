@@ -3,6 +3,12 @@ package org.jbei.ice.lib.vo;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * Value object to store user projects
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public abstract class Project implements Serializable {
     private static final long serialVersionUID = 1L;
 
