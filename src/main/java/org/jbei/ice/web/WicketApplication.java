@@ -85,6 +85,9 @@ public class WicketApplication extends WebApplication {
         return WelcomePage.class;
     }
 
+    /**
+     * Mount pages to fixed urls.
+     */
     private void mountPages() {
         mountBookmarkablePage("/login", WelcomePage.class);
         mountBookmarkablePage("/logout", LogOutPage.class);
@@ -109,6 +112,9 @@ public class WicketApplication extends WebApplication {
         mount(new IndexedParamUrlCodingStrategy("/storage", StoragePage.class));
     }
 
+    /**
+     * Start the job cue thread.
+     */
     private void initializeQueueingSystem() {
         JobCue jobCue = JobCue.getInstance();
         Thread jobThread = new Thread(jobCue);
