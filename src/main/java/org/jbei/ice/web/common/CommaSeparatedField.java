@@ -15,7 +15,7 @@ import org.jbei.ice.lib.utils.Utils;
  * TODO: Tim; Wicket has a nice dynamic getter/setter generation from field name.
  * Implement something similar. Right now, it must be passed the method names
  * 
- * @author tham
+ * @author Zinovii Dmytriv, Timothy Ham
  * @param <T>
  * 
  */

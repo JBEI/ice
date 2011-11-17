@@ -19,7 +19,7 @@ import org.jbei.ice.lib.utils.JbeirSettings;
  * sized cache for performance, at the risk of using a too small of a cache which will result in
  * strange session data errors.
  * 
- * @author Timothy Ham
+ * @author Timothy Ham, Zinovii Dmytriv
  * 
  */
 public class PersistentSessionDataWrapper {

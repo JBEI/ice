@@ -39,6 +39,7 @@ import org.jbei.ice.web.pages.WelcomePage;
  * application without deploying, run the Start class.
  * 
  * @see org.jbei.Start#main(String[])
+ * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 public class WicketApplication extends WebApplication {
 
