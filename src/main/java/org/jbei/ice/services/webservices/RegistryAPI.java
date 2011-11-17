@@ -1303,7 +1303,7 @@ public class RegistryAPI {
     }
 
     /**
-     * Give the specified {@link Entry} a new {@link Sequence} object.
+     * Assign the specified {@link Entry} a new {@link Sequence} object.
      * 
      * @param sessionId
      *            - Session key.
@@ -1369,12 +1369,29 @@ public class RegistryAPI {
         return savedFeaturedDNASequence;
     }
 
+    /**
+     * Update Sequence. Not implemented on purpose: Remove and create a new one.
+     * 
+     * @param sequence
+     * @return
+     */
     @WebMethod(exclude = true)
     public FeaturedDNASequence updateSequence(FeaturedDNASequence sequence) {
         throw new NotImplementedException(
                 "this method not implemented on purpose; remove and create new one");
     }
 
+    /**
+     * Remove the {@link Sequence} object associated with the specified {@link Entry}.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param entryId
+     *            - RecordId of the entry.
+     * @throws SessionException
+     * @throws ServiceException
+     * @throws ServicePermissionException
+     */
     public void removeSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -1415,6 +1432,20 @@ public class RegistryAPI {
         }
     }
 
+    /**
+     * Upload a sequence file (genbank, fasta, etc) and associate with the specified {@link Entry}.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param entryId
+     *            - RecordId of the desired Entry.
+     * @param sequence
+     *            - Text of sequence file to parse.
+     * @return {@link FeaturedDNASequence} object.
+     * @throws SessionException
+     * @throws ServiceException
+     * @throws ServicePermissionException
+     */
     public FeaturedDNASequence uploadSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId, @WebParam(name = "sequence") String sequence)
             throws SessionException, ServiceException, ServicePermissionException {
@@ -1471,6 +1502,18 @@ public class RegistryAPI {
         return savedFeaturedDNASequence;
     }
 
+    /**
+     * Retrieve all the {@link Sample}s of the specified {@link Entry}.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param entryId
+     *            - RecordId of the Entry.
+     * @return List of Samples.
+     * @throws SessionException
+     * @throws ServiceException
+     * @throws ServicePermissionException
+     */
     public ArrayList<Sample> retrieveEntrySamples(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -1490,6 +1533,17 @@ public class RegistryAPI {
         }
     }
 
+    /**
+     * Retrieve the {@link Sample} object associated with a barcode.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param barcode
+     *            - Barcode string.
+     * @return List of Samples.
+     * @throws SessionException
+     * @throws ServiceException
+     */
     public ArrayList<Sample> retrieveSamplesByBarcode(
             @WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "barcode") String barcode) throws SessionException, ServiceException {
@@ -1588,6 +1642,27 @@ public class RegistryAPI {
     }
 
     // Need moderator privileges to run this
+    /**
+     * Create a {@link Sample} object for the specified {@link Strain}.
+     * <p>
+     * This assumes a plate->well->tube storage scheme.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param recordId
+     *            - RecordId of the Strain.
+     * @param rack
+     *            -Rack number.
+     * @param location
+     *            - Location number.
+     * @param barcode
+     *            - Barcode number.
+     * @param label
+     *            - Label.
+     * @throws ServiceException
+     * @throws PermissionException
+     * @throws SessionException
+     */
     public void createStrainSample(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "recordId") String recordId, @WebParam(name = "rack") String rack,
             @WebParam(name = "location") String location,
@@ -1674,14 +1749,17 @@ public class RegistryAPI {
     }
 
     /**
+     * Check and automagically update sample storage for the given
      * 
      * @param sessionId
-     *            valid session id
-     * @param codes
-     *            indexed by location. null values indicate no samples
+     *            - Session key.
+     * @param samples
+     *            - Samples
+     * @param plateId
+     *            - plateId
+     * @return List of {@link Sample}s.
      * @throws SessionException
      * @throws ServiceException
-     * @return list of samples
      */
     public List<Sample> checkAndUpdateSamplesStorage(
             @WebParam(name = "sessionId") String sessionId,
@@ -1777,11 +1855,13 @@ public class RegistryAPI {
     }
 
     /**
-     * Get a list of trace file associated with an entry.
+     * Retrieve a list of {@link TraceSequence}s associated with the specified entry.
      * 
      * @param sessionId
+     *            - Session key.
      * @param recordId
-     * @return
+     *            - RecordId of the desired Entry.
+     * @return List of TraceSequences.
      * @throws ServiceException
      * @throws SessionException
      */
@@ -1826,6 +1906,21 @@ public class RegistryAPI {
         return result;
     }
 
+    /**
+     * Upload a sequence trace (abi) file.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param recordId
+     *            - RecordId of the desired {@link Entry}.
+     * @param fileName
+     *            - Name of the trace file.
+     * @param base64FileData
+     *            - Base64 encoded content of the file.
+     * @return File ID as saved on the server.
+     * @throws ServiceException
+     * @throws SessionException
+     */
     public String uploadTraceSequenceFile(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "recordId") String recordId,
             @WebParam(name = "fileName") String fileName,
@@ -1881,6 +1976,17 @@ public class RegistryAPI {
         return result.getFileId();
     }
 
+    /**
+     * Retrieve the specified trace sequence file.
+     * 
+     * @param sessionId
+     *            - Session Key.
+     * @param fileId
+     *            - File ID to retrieve.
+     * @return {@link TraceSequenceFile} object.
+     * @throws ServiceException
+     * @throws SessionException
+     */
     public SequenceTraceFile getTraceSequenceFile(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "fileId") String fileId) throws ServiceException, SessionException {
         log(sessionId, "getTraceSequenceFile: " + fileId);
@@ -1902,6 +2008,16 @@ public class RegistryAPI {
         return traceFile;
     }
 
+    /**
+     * Delete the specified trace sequence file.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param fileId
+     *            - ID of the file to delete.
+     * @throws ServiceException
+     * @throws SessionException
+     */
     public void deleteTraceSequenceFile(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "fileId") String fileId) throws ServiceException, SessionException {
         log(sessionId, "deleteTraceSequenceFile: " + fileId);
@@ -1926,24 +2042,60 @@ public class RegistryAPI {
 
     }
 
+    /**
+     * Retrieve the {@link SequenceAnalysisController} instance for the given session key.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @return SequenceAnalysisController object.
+     * @throws ServiceException
+     * @throws SessionException
+     */
     protected SequenceAnalysisController getSequenceAnalysisController(String sessionId)
             throws ServiceException, SessionException {
         Account account = validateAccount(sessionId);
         return new SequenceAnalysisController(account);
     }
 
+    /**
+     * Retrieve the {@link StorageController} instance for the given session key.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @return StorageController object.
+     * @throws ServiceException
+     * @throws SessionException
+     */
     protected StorageController getStorageController(@WebParam(name = "sessionId") String sessionId)
             throws ServiceException, SessionException {
         Account account = validateAccount(sessionId);
         return new StorageController(account);
     }
 
+    /**
+     * Retrieve the {@link SampleController} instance for the given session key.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @return SampleController object.
+     * @throws SessionException
+     * @throws ServiceException
+     */
     protected SampleController getSampleController(@WebParam(name = "sessionId") String sessionId)
             throws SessionException, ServiceException {
         Account account = validateAccount(sessionId);
         return new SampleController(account);
     }
 
+    /**
+     * Retrieve the {@link EntryController} instance for the given session key.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @return EntryController object.
+     * @throws SessionException
+     * @throws ServiceException
+     */
     protected EntryController getEntryController(@WebParam(name = "sessionId") String sessionId)
             throws SessionException, ServiceException {
         Account account = validateAccount(sessionId);
@@ -1951,6 +2103,15 @@ public class RegistryAPI {
         return new EntryController(account);
     }
 
+    /**
+     * Retrieve the {@link SequenceController} instance for the given session key.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @return Sequence Controller object.
+     * @throws ServiceException
+     * @throws SessionException
+     */
     protected SequenceController getSequenceController(
             @WebParam(name = "sessionId") String sessionId) throws ServiceException,
             SessionException {
@@ -1959,11 +2120,30 @@ public class RegistryAPI {
         return new SequenceController(account);
     }
 
+    /**
+     * Retrieve the {@link SearchController} instance for the given session key.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @return SearchController object.
+     * @throws SessionException
+     * @throws ServiceException
+     */
     protected SearchController getSearchController(@WebParam(name = "sessionId") String sessionId)
             throws SessionException, ServiceException {
         return new SearchController(validateAccount(sessionId));
     }
 
+    /**
+     * Retrieve the user {@link Account} associated with the given session key, if user is logged
+     * in.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @return {@link Account} if user is logged in.
+     * @throws ServiceException
+     * @throws SessionException
+     */
     protected Account validateAccount(@WebParam(name = "sessionId") String sessionId)
             throws ServiceException, SessionException {
         if (!isAuthenticated(sessionId)) {
@@ -1989,10 +2169,25 @@ public class RegistryAPI {
         return account;
     }
 
+    /**
+     * Write into the log at the INFO level, using the RegistryAPI prefix.
+     * 
+     * @param message
+     *            - Log message.
+     */
     private void log(String message) {
         Logger.info("RegistryAPI: " + message);
     }
 
+    /**
+     * Write into the log at the INFO level, using the RegistryAPI prefix and the account email
+     * associated with the given session key.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param message
+     *            - Log message.
+     */
     private void log(String sessionId, String message) {
         Account account = null;
         try {
