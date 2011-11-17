@@ -53,8 +53,26 @@ import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
 import org.jbei.ice.web.common.ViewException;
 
+/**
+ * SOAP API methods.
+ * 
+ * @author Zinovii Dmytriv, Hector Plahar, Timothy Ham
+ * 
+ */
 @WebService(targetNamespace = "https://api.registry.jbei.org/")
 public class RegistryAPI {
+    /**
+     * Login to the ICE SOAP service, with the given login and password. Returns a session key for
+     * future authentication.
+     * 
+     * @param login
+     *            - Login.
+     * @param password
+     *            - Password.
+     * @return Session key.
+     * @throws SessionException
+     * @throws ServiceException
+     */
     public String login(@WebParam(name = "login") String login,
             @WebParam(name = "password") String password) throws SessionException, ServiceException {
         String sessionId = null;
@@ -82,6 +100,13 @@ public class RegistryAPI {
         return sessionId;
     }
 
+    /**
+     * Logout out of the ICE SOAP service.
+     * 
+     * @param sessionId
+     *            - Session key to log out.
+     * @throws ServiceException
+     */
     public void logout(@WebParam(name = "sessionId") String sessionId) throws ServiceException {
         try {
             AccountController.deauthenticate(sessionId);
@@ -97,6 +122,14 @@ public class RegistryAPI {
         }
     }
 
+    /**
+     * Check if the session key is still authenticated.
+     * 
+     * @param sessionId
+     *            - Session key to check.
+     * @return True if still authenticated.
+     * @throws ServiceException
+     */
     public boolean isAuthenticated(@WebParam(name = "sessionId") String sessionId)
             throws ServiceException {
         boolean authenticated = false;
@@ -117,6 +150,8 @@ public class RegistryAPI {
     }
 
     /**
+     * Check if the Account associated with the session key is a moderator.
+     * <p>
      * Ideally this must be folded into login() by using an extra param
      * 
      * @param sessionId
@@ -137,6 +172,16 @@ public class RegistryAPI {
         }
     }
 
+    /**
+     * Retrieve an {@link Entry} by its name.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param name
+     *            - Name of the Entry to retrieve.
+     * @return Entry object.
+     * @throws ServiceException
+     */
     public Entry getEntryByName(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "name") String name) throws ServiceException {
         log(sessionId, "getEntryByName: " + name);
@@ -155,6 +200,12 @@ public class RegistryAPI {
         }
     }
 
+    /**
+     * Retrieve the number of publicly viewable entries.
+     * 
+     * @return Number of publicly viewable entries on the server.
+     * @throws ServiceException
+     */
     public long getNumberOfPublicEntries() throws ServiceException {
         long result = 0;
 
@@ -173,6 +224,17 @@ public class RegistryAPI {
         return result;
     }
 
+    /**
+     * Perform full text search on the server.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param query
+     *            - Query string.
+     * @return List of {@link SearchResult}s.
+     * @throws ServiceException
+     * @throws SessionException
+     */
     public ArrayList<SearchResult> search(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "query") String query) throws ServiceException, SessionException {
         ArrayList<SearchResult> results = null;
@@ -195,6 +257,17 @@ public class RegistryAPI {
         return results;
     }
 
+    /**
+     * Perform blastn search on the server.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param querySequence
+     *            - Sequence to query.
+     * @return List of {@link BlastResult}s.
+     * @throws SessionException
+     * @throws ServiceException
+     */
     public ArrayList<BlastResult> blastn(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "querySequence") String querySequence) throws SessionException,
             ServiceException {
@@ -224,6 +297,17 @@ public class RegistryAPI {
         return results;
     }
 
+    /**
+     * Perform tblastx on the server.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param querySequence
+     *            - Sequence to query.
+     * @return List of {@link BlastResult}s.
+     * @throws SessionException
+     * @throws ServiceException
+     */
     public ArrayList<BlastResult> tblastx(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "querySequence") String querySequence) throws SessionException,
             ServiceException {
@@ -253,6 +337,18 @@ public class RegistryAPI {
         return results;
     }
 
+    /**
+     * Retrieve {@link Entry} by its recordId.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param entryId
+     *            - recordId of the Entry.
+     * @return Entry object.
+     * @throws SessionException
+     * @throws ServiceException
+     * @throws ServicePermissionException
+     */
     public Entry getByRecordId(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -279,6 +375,18 @@ public class RegistryAPI {
         return entry;
     }
 
+    /**
+     * Retrieve an {@link Entry} by its part number.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param partNumber
+     *            - Part number of the desired Entry.
+     * @return Entry object.
+     * @throws SessionException
+     * @throws ServiceException
+     * @throws ServicePermissionException
+     */
     public Entry getByPartNumber(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "partNumber") String partNumber) throws SessionException,
             ServiceException, ServicePermissionException {
@@ -305,6 +413,18 @@ public class RegistryAPI {
         return entry;
     }
 
+    /**
+     * Check if the session user has read permission to the specified {@link Entry}.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param entryId
+     *            - recordId of the Entry.
+     * @return True if the session user has read permission.
+     * @throws SessionException
+     * @throws ServiceException
+     * @throws ServicePermissionException
+     */
     public boolean hasReadPermissions(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -328,6 +448,17 @@ public class RegistryAPI {
         return result;
     }
 
+    /**
+     * Check if the session user has write permission to the specified {@link Entry}.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param entryId
+     *            - recordId of the Entry.
+     * @return True if the session user has write permission.
+     * @throws SessionException
+     * @throws ServiceException
+     */
     public boolean hasWritePermissions(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException {
         log(sessionId, "hasWritePermissions: " + entryId);
@@ -350,6 +481,17 @@ public class RegistryAPI {
         return result;
     }
 
+    /**
+     * Create a new {@link Plasmid} on the server.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param plasmid
+     *            - Plasmid to create.
+     * @return New Plasmid object from the database.
+     * @throws SessionException
+     * @throws ServiceException
+     */
     public Plasmid createPlasmid(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "plasmid") Plasmid plasmid) throws SessionException, ServiceException {
         log(sessionId, "createPlasmid");
@@ -376,6 +518,17 @@ public class RegistryAPI {
         return (Plasmid) newEntry;
     }
 
+    /**
+     * Create a new {@link Strain} on the server.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param strain
+     *            - Strain to create.
+     * @return New Strain object from the database.
+     * @throws SessionException
+     * @throws ServiceException
+     */
     public Strain createStrain(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "strain") Strain strain) throws SessionException, ServiceException {
         log(sessionId, "createStrain");
@@ -402,6 +555,17 @@ public class RegistryAPI {
         return (Strain) newEntry;
     }
 
+    /**
+     * Create a new {@link Part} on the server.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param part
+     *            - Part to create.
+     * @return New Part object from the database.
+     * @throws SessionException
+     * @throws ServiceException
+     */
     public Part createPart(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "part") Part part) throws SessionException, ServiceException {
         log(sessionId, "createPart");
@@ -428,6 +592,18 @@ public class RegistryAPI {
         return (Part) newEntry;
     }
 
+    /**
+     * Save the given {@link Plasmid} on the server.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param plasmid
+     *            - Plasmid to save.
+     * @return Saved Plasmid object.
+     * @throws SessionException
+     * @throws ServiceException
+     * @throws ServicePermissionException
+     */
     public Plasmid updatePlasmid(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "plasmid") Plasmid plasmid) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -456,6 +632,18 @@ public class RegistryAPI {
         return (Plasmid) savedEntry;
     }
 
+    /**
+     * Save the given {@link Strain} on the server.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param strain
+     *            - Strain to save.
+     * @return Saved Strain object.
+     * @throws SessionException
+     * @throws ServiceException
+     * @throws ServicePermissionException
+     */
     public Strain updateStrain(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "strain") Strain strain) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -484,6 +672,18 @@ public class RegistryAPI {
         return (Strain) savedEntry;
     }
 
+    /**
+     * Save the given {@link Part} on the server.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param part
+     *            - Part to save.
+     * @return Saved Part object.
+     * @throws SessionException
+     * @throws ServiceException
+     * @throws ServicePermissionException
+     */
     public Part updatePart(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "part") Part part) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -512,6 +712,19 @@ public class RegistryAPI {
         return (Part) savedEntry;
     }
 
+    /**
+     * Create a generic {@link Entry} on the server.
+     * <p>
+     * Perform validation for a generic Entry.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param entry
+     *            - Entry to save.
+     * @return Saved Entry object.
+     * @throws SessionException
+     * @throws ServiceException
+     */
     protected Entry createEntry(String sessionId, Entry entry) throws SessionException,
             ServiceException {
         if (entry == null) {
@@ -624,6 +837,18 @@ public class RegistryAPI {
         return entry;
     }
 
+    /**
+     * Save a generic {@link Entry} on the server.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param entry
+     *            - Entry to save.
+     * @return Saved Entry object.
+     * @throws SessionException
+     * @throws ServiceException
+     * @throws ServicePermissionException
+     */
     protected Entry updateEntry(String sessionId, Entry entry) throws SessionException,
             ServiceException, ServicePermissionException {
         Entry currentEntry = null;
@@ -848,6 +1073,17 @@ public class RegistryAPI {
         return currentEntry;
     }
 
+    /**
+     * Delete the specified {@link Entry} from the server.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param entryId
+     *            - RecordId of the Entry.
+     * @throws SessionException
+     * @throws ServiceException
+     * @throws ServicePermissionException
+     */
     public void removeEntry(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -874,6 +1110,18 @@ public class RegistryAPI {
         }
     }
 
+    /**
+     * Get the {@link FeaturedDNASequence} of the specified {@link Entry}.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param entryId
+     *            - RecordId of the desired Entry.
+     * @return FeaturedDNASequence object.
+     * @throws SessionException
+     * @throws ServiceException
+     * @throws ServicePermissionException
+     */
     public FeaturedDNASequence getSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -906,6 +1154,19 @@ public class RegistryAPI {
         return sequence;
     }
 
+    /**
+     * Retrieve the original uploaded sequence (Sequence.sequenceUser) of the specified
+     * {@link Entry}.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param entryId
+     *            - RecordId of the desired Entry.
+     * @return Content of the original uploaded sequence file as String.
+     * @throws SessionException
+     * @throws ServiceException
+     * @throws ServicePermissionException
+     */
     public String getOriginalGenBankSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -941,6 +1202,18 @@ public class RegistryAPI {
         return genbankSequence;
     }
 
+    /**
+     * Genbank formatted {@link Sequence} of the specified {@link Entry}.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param entryId
+     *            - RecordId of the desired Entry.
+     * @return Genbank file formatted string.
+     * @throws SessionException
+     * @throws ServiceException
+     * @throws ServicePermissionException
+     */
     public String getGenBankSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -981,6 +1254,18 @@ public class RegistryAPI {
         return genbankSequence;
     }
 
+    /**
+     * Fasta formatted {@link Sequence} for the specified {@link Entry}.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param entryId
+     *            - RecordId of the desired Entry.
+     * @return Fasta formatted sequence.
+     * @throws SessionException
+     * @throws ServiceException
+     * @throws ServicePermissionException
+     */
     public String getFastaSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
@@ -1017,6 +1302,20 @@ public class RegistryAPI {
         return fastaSequence;
     }
 
+    /**
+     * Give the specified {@link Entry} a new {@link Sequence} object.
+     * 
+     * @param sessionId
+     *            - Session key.
+     * @param entryId
+     *            RecordId of the desired Entry.
+     * @param featuredDNASequence
+     *            - Annotated DNA Sequence.
+     * @return {@link FeaturedDNASequence} as saved on the server.
+     * @throws SessionException
+     * @throws ServiceException
+     * @throws ServicePermissionException
+     */
     public FeaturedDNASequence createSequence(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "entryId") String entryId,
             @WebParam(name = "sequence") FeaturedDNASequence featuredDNASequence)
