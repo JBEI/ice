@@ -161,7 +161,7 @@ public class JobCue implements Runnable {
     /**
      * Retrieve the job cue delay counter.
      * 
-     * @return
+     * @return Delay counter.
      */
     public long getCounter() {
         return counter;

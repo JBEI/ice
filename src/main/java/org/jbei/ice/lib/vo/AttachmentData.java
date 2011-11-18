@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.vo;
 
 /**
- * Value object to hold Attachment data.
+ * Value object to hold Attachment data, including file content.
  * 
  * @author Timothy Ham
  * 

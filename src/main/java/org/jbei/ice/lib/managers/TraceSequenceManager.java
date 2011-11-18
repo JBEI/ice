@@ -246,7 +246,7 @@ public class TraceSequenceManager {
      * object.
      * 
      * @param traceSequence
-     * @return
+     * @return Trace file.
      * @throws ManagerException
      */
     public static File getFile(TraceSequence traceSequence) throws ManagerException {

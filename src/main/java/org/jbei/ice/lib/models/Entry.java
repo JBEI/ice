@@ -715,7 +715,7 @@ public class Entry implements IEntryValueObject, IModel {
      * Generate the options map of the bioSafetyLevel field containing friendly names for the
      * fields.
      * 
-     * @return
+     * @return Map of biosafety levels and names.
      */
     public static Map<String, String> getBioSafetyLevelOptionsMap() {
         Map<String, String> resultMap = new LinkedHashMap<String, String>();
@@ -730,7 +730,7 @@ public class Entry implements IEntryValueObject, IModel {
      * Generate the options map of markupTypes containing friendly names for
      * {@link Entry.MarkupType}.
      * 
-     * @return
+     * @return Map of markup types and names.
      */
     public static Map<String, String> getMarkupTypeMap() {
         Map<String, String> resultMap = new LinkedHashMap<String, String>();
@@ -745,7 +745,7 @@ public class Entry implements IEntryValueObject, IModel {
     /**
      * Generate the options map of status options containing friendly names for status field.
      * 
-     * @return
+     * @return Map of options and names.
      */
     public static Map<String, String> getStatusOptionsMap() {
         Map<String, String> resultMap = new LinkedHashMap<String, String>();
@@ -760,7 +760,7 @@ public class Entry implements IEntryValueObject, IModel {
     /**
      * Generate the options map of entry types containing friendly names for entryType field.
      * 
-     * @return
+     * @return Map of entry types and names.
      */
     public static Map<String, String> getEntryTypeOptionsMap() {
         Map<String, String> resultMap = new LinkedHashMap<String, String>();

@@ -206,7 +206,7 @@ public class SequenceManager {
      * 
      * 
      * @param feature
-     * @return
+     * @return Feature object.
      * @throws ControllerException
      * @throws ManagerException
      */
@@ -226,7 +226,7 @@ public class SequenceManager {
     }
 
     /**
-     * Retrieve a {@link Fetaure} object by its id.
+     * Retrieve a {@link Feature} object by its id.
      * 
      * @param id
      * @return Feature object.

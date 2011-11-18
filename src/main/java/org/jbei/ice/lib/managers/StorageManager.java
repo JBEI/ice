@@ -379,7 +379,7 @@ public class StorageManager {
      * {@link Storage} object.
      * 
      * @param storage
-     * @return
+     * @return Root level Storage object.
      */
     public static Storage getSchemeContainingParentStorage(Storage storage) {
         if (storage == null) {
@@ -410,7 +410,7 @@ public class StorageManager {
      * object.
      * 
      * @param storage
-     * @return
+     * @return parent storage object.
      */
     public static List<Storage> getStoragesUptoScheme(Storage storage) {
         if (storage == null) {

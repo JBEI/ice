@@ -39,7 +39,7 @@ public class EntryManager {
      * Create a new {@link Entry} object in the database.
      * 
      * @param entry
-     * @return
+     * @return Saved Entry object.
      * @throws ManagerException
      */
     public static Entry createEntry(Entry entry) throws ManagerException {
@@ -559,7 +559,7 @@ public class EntryManager {
     }
 
     /**
-     * Save the {@ink Entry} object into the database.
+     * Save the {@link Entry} object into the database.
      * 
      * @param entry
      * @return Saved Entry object.

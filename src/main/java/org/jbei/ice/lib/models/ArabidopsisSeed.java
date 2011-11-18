@@ -79,7 +79,7 @@ public class ArabidopsisSeed extends Entry {
     /**
      * Return a Map to look up {@link Generation} to its string representation.
      * 
-     * @return
+     * @return Map of generation to names.
      */
     public static Map<String, String> getGenerationOptionsMap() {
         Map<String, String> resultMap = new LinkedHashMap<String, String>();

@@ -56,8 +56,6 @@ public class IceIpFilter implements Filter {
      * adapted from org.apache.catalina.valves.RequestFilterValve.process
      * 
      * @param property
-     * @param request
-     * @param response
      */
     protected boolean isAllowed(String property) {
         boolean result = false;
@@ -73,7 +71,7 @@ public class IceIpFilter implements Filter {
      * adapted from org.apache.catalina.valves.RequestFilterValve
      * 
      * @param allowedList
-     * @return
+     * @return {@link Pattern} array.
      * @throws UtilityException
      */
     protected Pattern[] calculateAllow(String allowedList) throws UtilityException {

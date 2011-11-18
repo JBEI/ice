@@ -40,7 +40,7 @@ public class UtilsManager {
      * <p>
      * This method is useful for fetching auto-complete list of selection markers.
      * 
-     * @return
+     * @return Set of selection markers.
      * @throws ManagerException
      */
     public static TreeSet<String> getUniqueSelectionMarkers() throws ManagerException {
@@ -80,7 +80,7 @@ public class UtilsManager {
      * <p>
      * This method is useful for fetching auto-complete list of plasmid names.
      * 
-     * @return
+     * @return Set of plasmid names.
      */
     public static TreeSet<String> getUniquePublicPlasmidNames() {
         TreeSet<String> results = new TreeSet<String>();
@@ -110,7 +110,7 @@ public class UtilsManager {
      * <p>
      * This method is useful for fetching auto-complete list of promoters.
      * 
-     * @return
+     * @return Set of promoters.
      */
     public static TreeSet<String> getUniquePromoters() {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
@@ -149,7 +149,7 @@ public class UtilsManager {
      * <p>
      * This method is useful for fetching auto-complete list of origin of replications.
      * 
-     * @return
+     * @return Set of origin of replications.
      */
     public static TreeSet<String> getUniqueOriginOfReplications() {
         TreeSet<String> results = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
@@ -281,7 +281,7 @@ public class UtilsManager {
      * @param entry
      * @param account
      * @param body
-     * @return
+     * @return Comment object.
      * @throws ManagerException
      */
     @Deprecated
@@ -305,7 +305,7 @@ public class UtilsManager {
      * @param account
      * @param score
      * @param comment
-     * @return
+     * @return Vote object.
      * @throws ManagerException
      */
     @Deprecated
@@ -386,7 +386,7 @@ public class UtilsManager {
      * TODO remove
      * 
      * @param entry
-     * @return
+     * @return Set of Comments.
      * @throws ManagerException
      */
     @Deprecated
@@ -414,7 +414,7 @@ public class UtilsManager {
      * TODO remove.
      * 
      * @param account
-     * @return
+     * @return Set of Comments.
      * @throws ManagerException
      */
     @Deprecated
@@ -442,7 +442,7 @@ public class UtilsManager {
      * TODO Remove
      * 
      * @param entry
-     * @return
+     * @return LinkedHashSet of Votes.
      * @throws ManagerException
      */
     @Deprecated
@@ -470,7 +470,7 @@ public class UtilsManager {
      * TODO Remove
      * 
      * @param account
-     * @return
+     * @return LinkedHashSet of Votes.
      * @throws ManagerException
      */
     public static LinkedHashSet<Vote> getVotes(Account account) throws ManagerException {
@@ -498,7 +498,7 @@ public class UtilsManager {
      * 
      * @param entry
      * @param account
-     * @return
+     * @return Vote object.
      * @throws ManagerException
      */
     public static Vote getVote(Entry entry, Account account) throws ManagerException {
@@ -549,7 +549,7 @@ public class UtilsManager {
     /**
      * TODO Remove
      * 
-     * @return
+     * @return Set of Entries.
      * @throws ManagerException
      */
     public static LinkedHashSet<Entry> getMostVoted() throws ManagerException {
@@ -581,7 +581,7 @@ public class UtilsManager {
     /**
      * TODO Remove
      * 
-     * @return
+     * @return Set of Entries.
      * @throws ManagerException
      */
     public static LinkedHashSet<Entry> getMostCommented() throws ManagerException {

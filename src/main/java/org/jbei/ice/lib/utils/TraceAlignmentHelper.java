@@ -21,7 +21,7 @@ import org.jbei.ice.lib.vo.TraceData;
  */
 public class TraceAlignmentHelper {
     /**
-     * Convert {@link TraceSequenee} to {@link TraceData} value object.
+     * Convert {@link TraceSequence} to {@link TraceData} value object.
      * 
      * @param traceSequence
      *            TraceSequence to convert.

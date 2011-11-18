@@ -685,7 +685,7 @@ public class EntryController extends Controller {
      * Given a List of entry id's, keep only id's that user has read access to.
      * 
      * @param ids
-     * @return
+     * @return List of Entry ids.
      * @throws ControllerException
      */
     public List<Long> filterEntriesByPermission(List<Long> ids) throws ControllerException {

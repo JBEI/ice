@@ -7,7 +7,8 @@ import java.util.List;
 import org.jbei.ice.lib.models.SequenceFeature;
 
 /**
- * Value object to hold a combination of {@link SequenceFeature} and {@link Feature} data.
+ * Value object to hold a combination of {@link SequenceFeature} and
+ * {@link org.jbei.ice.lib.models.Feature Feature} data.
  * 
  * @author Zinovii Dmytriv, Timothy Ham
  * 

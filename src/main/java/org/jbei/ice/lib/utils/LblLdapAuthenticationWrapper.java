@@ -208,7 +208,7 @@ public class LblLdapAuthenticationWrapper {
     /**
      * Get unauthenticated ldap context.
      * 
-     * @return
+     * @return {@link DirContext} object.
      * @throws NamingException
      */
     protected DirContext getContext() throws NamingException {
@@ -239,7 +239,7 @@ public class LblLdapAuthenticationWrapper {
      * 
      * @param lblEmployeeNumber
      * @param passWord
-     * @return
+     * @return {@link DirContext} object.
      * @throws NamingException
      */
     protected DirContext getAuthenticatedContext(String lblEmployeeNumber, String passWord)

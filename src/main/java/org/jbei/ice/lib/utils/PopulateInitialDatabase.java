@@ -343,7 +343,7 @@ public class PopulateInitialDatabase {
     /**
      * Check for and create the everyone group.
      * 
-     * @return
+     * @return Everyone group.
      */
     public static Group createFirstGroup() {
         Group group1 = null;
@@ -590,7 +590,7 @@ public class PopulateInitialDatabase {
     /**
      * Convert SequenceFeature.start and ends to locations.
      * 
-     * @return
+     * @return True if error exists..
      */
     @SuppressWarnings({ "unchecked", "deprecation" })
     public static boolean migrateFrom081To090() {

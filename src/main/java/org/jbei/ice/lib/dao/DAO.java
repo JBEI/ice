@@ -144,7 +144,7 @@ public class DAO {
      * Perform Hibernate merge operation on the {@link IModel} model.
      * 
      * @param model
-     * @return
+     * @return Returns an Object. Cast as necessary.
      * @throws DAOException
      */
     public static Object merge(IModel model) throws DAOException {

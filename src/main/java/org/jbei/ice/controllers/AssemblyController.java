@@ -17,9 +17,9 @@ import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.utils.IAssemblyUtils;
 import org.jbei.ice.lib.utils.BiobrickAUtils;
 import org.jbei.ice.lib.utils.BiobrickBUtils;
+import org.jbei.ice.lib.utils.IAssemblyUtils;
 import org.jbei.ice.lib.utils.RawAssemblyUtils;
 import org.jbei.ice.lib.utils.SequenceFeatureCollection;
 import org.jbei.ice.lib.utils.UtilityException;
@@ -79,9 +79,11 @@ public class AssemblyController extends Controller {
     }
 
     /**
+     * Test for different assembly standards, and return the assembly features appropriate for that
+     * standard, if any.
      * 
      * @param partSequence
-     * @return
+     * @return SequenceFeatureCollection object.
      * @throws ControllerException
      */
     public SequenceFeatureCollection determineAssemblyFeatures(Sequence partSequence)

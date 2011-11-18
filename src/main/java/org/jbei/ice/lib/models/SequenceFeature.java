@@ -116,6 +116,15 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         this.annotationType = annotationType;
     }
 
+    /**
+     * Annotation type for "parts".
+     * <p>
+     * Parts can have a PREFIX, a SUFFIX, a SCAR features. The INNER and SUBINNER features indicate
+     * part sequence excluding the prefix and suffix.
+     * 
+     * @author Timothy Ham
+     * 
+     */
     public enum AnnotationType {
         PREFIX, SUFFIX, SCAR, INNER, SUBINNER;
     }
@@ -230,7 +239,7 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
     /**
      * Deprecated since schema > 0.8.0. Use SequenceFeatureAttribute with "description" as key
      * 
-     * @return
+     * @return Description.
      */
     @Deprecated
     public String getDescription() {

@@ -12,9 +12,9 @@ import org.jbei.ice.web.pages.WelcomePage;
 /**
  * Authorization Strategy for gd-ice.
  * <p>
- * Overrides {@link isInstantiationAuthorized} method to protect pages.
+ * Overrides {@link #isInstantiationAuthorized(Class)} method to protect pages.
  * 
- * @see isInstantiationAuthorized
+ * @see #isActionAuthorized(Component, Action)
  * 
  * @author Timothy Ham, Zinovii Dmytriv
  * 
@@ -42,7 +42,7 @@ public class IceAuthorizationStrategy implements IAuthorizationStrategy,
      * Display the {@link WelcomePage} if Component instantiation is not authorized.
      * <p>
      * 
-     * @see isInstantiationAuthorized
+     * @see #isActionAuthorized(Component, Action)
      */
     @Override
     public void onUnauthorizedInstantiation(Component component) {

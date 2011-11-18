@@ -9,7 +9,7 @@ import org.biojava.bio.BioException;
 import org.biojava.bio.molbio.RestrictionEnzymeManager;
 
 /**
- * Methods for dealing with {@link RestrictionENzyme}s.
+ * Methods for dealing with {@link RestrictionEnzyme}s.
  * 
  * @author Zinovii Dmytriv
  * 

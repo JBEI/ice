@@ -14,7 +14,7 @@ public abstract class PackageAssembler {
      * 
      * @param part1
      * @param part2
-     * @return
+     * @return joined Part object.
      * @throws UtilityException
      */
     public abstract Part join(Part part1, Part part2) throws UtilityException;
@@ -24,7 +24,7 @@ public abstract class PackageAssembler {
      * 
      * @param part1Sequence
      * @param part2Sequence
-     * @return
+     * @return joined Part object.
      * @throws UtilityException
      */
     protected abstract String concatSequence(String part1Sequence, String part2Sequence)

@@ -47,7 +47,7 @@ public class PersistentSessionDataWrapper {
      * Synchronized.
      * 
      * @param sessionKey
-     * @return
+     * @return SessionData object.
      * @throws ManagerException
      */
     public synchronized SessionData getSessionData(String sessionKey) throws ManagerException {
@@ -62,7 +62,7 @@ public class PersistentSessionDataWrapper {
      * <p>
      * Save into the database and put into the cache.
      * 
-     * @return
+     * @return Saved SessionData object.
      * @throws ManagerException
      */
     public SessionData newSessionData() throws ManagerException {
@@ -207,7 +207,7 @@ public class PersistentSessionDataWrapper {
     /**
      * Get the time stamp cache.
      * 
-     * @return
+     * @return time stamp cache.
      */
     public HashMap<String, Long> getTimeStampCache() {
         return timeStampCache;

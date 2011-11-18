@@ -146,7 +146,7 @@ public class IceSession extends WebSession {
     }
 
     /**
-     * Retrieve the {@Link SessionData} for this session.
+     * Retrieve the {@link SessionData} for this session.
      * 
      * @return SessionData object.
      */
@@ -190,7 +190,7 @@ public class IceSession extends WebSession {
     /**
      * Retrieve the {@link Account} for this session.
      * 
-     * @return
+     * @return Account object.
      */
     public Account getAccount() {
         Account account = null;
@@ -220,7 +220,7 @@ public class IceSession extends WebSession {
     /**
      * Retrieve the {@link AccountPreferences} from the database.
      * 
-     * @return
+     * @return AccountPreferences.
      */
     public AccountPreferences getAccountPreferences() {
         AccountPreferences result = null;

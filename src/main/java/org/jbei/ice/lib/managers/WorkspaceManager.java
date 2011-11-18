@@ -42,7 +42,8 @@ public class WorkspaceManager {
      * Save the given {@link Workspace} object into the database.
      * 
      * @param workspace
-     * @return
+     *            Workspace object to save.
+     * @return Saved Workspace object.
      * @throws ManagerException
      */
     public static Workspace addOrUpdate(Workspace workspace) throws ManagerException {
@@ -100,7 +101,7 @@ public class WorkspaceManager {
      * controller.
      * 
      * @param entry
-     * @return
+     * @return True if the entry has a workspace.
      * @throws ManagerException
      */
     public static boolean hasEntry(Entry entry) throws ManagerException {
@@ -146,7 +147,7 @@ public class WorkspaceManager {
     }
 
     /**
-     * Retrieve all the {@link} Workspace objects associated with the currently logged in user.
+     * Retrieve all the {@link Workspace} objects associated with the currently logged in user.
      * <p>
      * TODO Perhaps this method should be in a controller.
      * 

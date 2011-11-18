@@ -100,7 +100,7 @@ public class Part extends Entry implements IPartValueObject, IModel {
     /**
      * Generate a map between {@link AssemblyStandard} types and user friendly string.
      * 
-     * @return
+     * @return Map of types and names.
      */
     public static Map<String, String> getPackageFormatOptionsMap() {
         Map<String, String> resultMap = new LinkedHashMap<String, String>();

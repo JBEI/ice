@@ -380,7 +380,7 @@ public class ImportHelper {
      *            file Path.
      * @param filePostFix
      *            file extension.
-     * @return
+     * @return List of hashmaps.
      * @throws UtilityException
      */
     public static List<HashMap<String, String>> readSequenceFiles(

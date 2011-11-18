@@ -317,7 +317,7 @@ public class Query {
     }
 
     /**
-     * Filter by {@link Name}.name field.
+     * Filter by {@link org.jbei.ice.lib.models.Name Name}.name field.
      * 
      * @param queryString
      * @return HashSet of {link Entry} ids.
@@ -395,7 +395,7 @@ public class Query {
     }
 
     /**
-     * Filter for existence of any {@link Attachment}s.
+     * Filter for existence of any {@link org.jbei.ice.lib.models.Attachment Attachment}s.
      * 
      * @param queryString
      * @return HashSet of {link Entry} ids.
@@ -422,7 +422,7 @@ public class Query {
     }
 
     /**
-     * Filter for existence of any {@link Sample}s.
+     * Filter for existence of any {@link org.jbei.ice.lib.models.Sample Sample}s.
      * 
      * @param queryString
      * @return HashSet of {link Entry} ids.
@@ -449,10 +449,10 @@ public class Query {
     }
 
     /**
-     * Filter existence of any {@link Sequence}s.
+     * Filter existence of any {@link org.jbei.ice.lib.models.Sequence Sequence}s.
      * 
      * @param queryString
-     * @return HashSet of {link Entry} ids.
+     * @return HashSet of {@link Entry} ids.
      */
     protected HashSet<Long> filterHasSequence(String queryString) {
         HashSet<Long> result = null;
@@ -796,7 +796,7 @@ public class Query {
     }
 
     /**
-     * Filter by {@link Name}.name or {@link Entry}.alias fields.
+     * Filter by {@link org.jbei.ice.lib.models.Name Name}.name or {@link Entry}.alias fields.
      * 
      * @param queryString
      * @return HashSet of {link Entry} ids.

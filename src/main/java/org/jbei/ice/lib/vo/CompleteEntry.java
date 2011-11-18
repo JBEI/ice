@@ -7,7 +7,7 @@ import org.jbei.ice.lib.models.Sequence;
 
 /**
  * Value object to hold complete {@link Entry} data, including {@link Sequence} and
- * {@link Attachment}s and its files and {@link SequenceTrace}s.
+ * {@link AttachmentData}, and {@link SequenceTraceFile}.
  * 
  * @author Timothy Ham
  * 

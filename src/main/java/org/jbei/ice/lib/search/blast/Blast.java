@@ -91,7 +91,7 @@ public class Blast {
      *            Sequence to be queried
      * @param blastProgram
      *            blast program to use.
-     * @return
+     * @return List of {@link BlastResult}s.
      * @throws ProgramTookTooLongException
      * @throws BlastException
      */

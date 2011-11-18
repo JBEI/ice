@@ -202,7 +202,7 @@ public class Storage implements IModel {
     /**
      * Make sure to get a copy from database before calling this method
      * 
-     * @return
+     * @return Set of Storages.
      */
     public Set<Storage> getChildren() {
         return children;

@@ -77,7 +77,7 @@ public class CommaSeparatedField<T> implements Serializable {
     /**
      * Generates an ArrayList of objects of type created from input string
      * 
-     * @param Input
+     * @param string
      *            comma separated string
      * @return ArrayList of objects with its property set
      * @throws FormException

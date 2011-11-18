@@ -66,7 +66,7 @@ public class LuceneSearch {
     /**
      * Retrieve the singleton instance of this classe.
      * 
-     * @return
+     * @return LuceneSearch instance.
      */
     public static LuceneSearch getInstance() {
         return SingletonHolder.INSTANCE;
@@ -251,8 +251,8 @@ public class LuceneSearch {
     /**
      * Create a new lucene {@link Document} from the given {@link Entry}.
      * <p>
-     * Related objects, such as {@link PartNumber} or {@link Name}s or {@link FundingSource}s are
-     * also put into the document.
+     * Related objects, such as {@link PartNumber} or {@link org.jbei.ice.lib.models.Name Name}s or
+     * {@link FundingSource}s are also put into the document.
      * 
      * @param entry
      * @return Document.

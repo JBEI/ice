@@ -35,7 +35,7 @@ public class ProjectController extends Controller {
      * @param type
      * @param creationTime
      * @param modificationTime
-     * @return
+     * @return Project.
      */
     public Project createProject(Account account, String name, String description, String data,
             String type, Date creationTime, Date modificationTime) {

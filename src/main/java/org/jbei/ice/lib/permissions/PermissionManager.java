@@ -720,7 +720,7 @@ public class PermissionManager {
     }
 
     /**
-     * Check if the given {@link Account} has read permission to the specified {@link entry}.
+     * Check if the given {@link Account} has read permission to the specified {@link Entry}.
      * 
      * @param entryId
      *            id of Entry to query on.
@@ -777,7 +777,7 @@ public class PermissionManager {
     }
 
     /**
-     * Check if the given {@link Account} has read permission to the specified {@link entry}.
+     * Check if the given {@link Account} has read permission to the specified {@link Entry}.
      * 
      * @param recordId
      *            id of Entry to query on.
@@ -1030,7 +1030,7 @@ public class PermissionManager {
      *            Group to query on.
      * @param groupIds
      *            optional set of group ids. Can be empty.
-     * @return
+     * @return Set of Parent group ids.
      */
     protected static HashSet<Long> getParentGroups(Group group, HashSet<Long> groupIds) {
         if (groupIds.contains(group.getId())) {

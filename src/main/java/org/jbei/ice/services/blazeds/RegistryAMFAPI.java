@@ -145,7 +145,7 @@ public class RegistryAMFAPI extends BaseService {
     }
 
     /**
-     * Retrieve the {@link FeaturedDnaSequence} of the specified {@link Entry}.
+     * Retrieve the {@link FeaturedDNASequence} of the specified {@link Entry}.
      * 
      * @param sessionId
      *            session key.
@@ -521,7 +521,7 @@ public class RegistryAMFAPI extends BaseService {
     }
 
     /**
-     * Retrieve {@link RestrictionEnzym}s for the given user.
+     * Retrieve {@link RestrictionEnzyme}s for the given user.
      * 
      * @param sessionId
      *            session key.
@@ -1018,7 +1018,7 @@ public class RegistryAMFAPI extends BaseService {
      *            session key.
      * @param projectId
      *            UUID of the desired VectorEditorProject.
-     * @return
+     * @return VectorEditorProject.
      */
     public VectorEditorProject getVectorEditorProject(String sessionId, String projectId) {
         if (projectId == null || sessionId == null || sessionId.isEmpty() || projectId.isEmpty()) {
@@ -1430,7 +1430,7 @@ public class RegistryAMFAPI extends BaseService {
      * Save the given sequence file with the given {@link Entry}.
      * 
      * @param account
-     *            @{link Account} to save as.
+     * @{link Account} to save as.
      * @param entry
      *            Entry to associate with.
      * @param fileBytes

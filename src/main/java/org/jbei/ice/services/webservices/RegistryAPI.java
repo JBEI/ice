@@ -1373,7 +1373,7 @@ public class RegistryAPI {
      * Update Sequence. Not implemented on purpose: Remove and create a new one.
      * 
      * @param sequence
-     * @return
+     * @return Always throws Exception.
      */
     @WebMethod(exclude = true)
     public FeaturedDNASequence updateSequence(FeaturedDNASequence sequence) {
@@ -1983,7 +1983,7 @@ public class RegistryAPI {
      *            Session Key.
      * @param fileId
      *            File ID to retrieve.
-     * @return {@link TraceSequenceFile} object.
+     * @return {@link SequenceTraceFile} object.
      * @throws ServiceException
      * @throws SessionException
      */

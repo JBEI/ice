@@ -23,7 +23,7 @@ public interface IDNAParser {
     /**
      * Return true if parsing was completed, but there maybe errors in the parsing.
      * 
-     * @return
+     * @return True if parsing has errors.
      */
     Boolean hasErrors();
 
@@ -53,7 +53,7 @@ public interface IDNAParser {
      * Parse the given string to {@link IDNASequence} annotated sequence.
      * 
      * @param textSequence
-     * @return
+     * @return parsed IDNASequence.
      * @throws InvalidFormatParserException
      */
     IDNASequence parse(String textSequence) throws InvalidFormatParserException;

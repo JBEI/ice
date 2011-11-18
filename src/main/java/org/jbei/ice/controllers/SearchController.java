@@ -109,7 +109,7 @@ public class SearchController extends Controller {
      * Perform a translated blast search of the query (tblastx).
      * 
      * @param query
-     * @return ArrayList of {@BlastResult}s.
+     * @return ArrayList of {@link BlastResult}s.
      * @throws ProgramTookTooLongException
      * @throws ControllerException
      */

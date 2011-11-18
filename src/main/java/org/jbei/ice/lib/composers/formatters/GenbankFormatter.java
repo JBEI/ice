@@ -189,7 +189,7 @@ public class GenbankFormatter extends AbstractFormatter {
      * Get the strand of the {@link SequenceFeature} feature.
      * 
      * @param sequenceFeature
-     * @return
+     * @return Strand of the feature.
      */
     protected Strand getStrand(SequenceFeature sequenceFeature) {
         Strand strand;
@@ -209,7 +209,7 @@ public class GenbankFormatter extends AbstractFormatter {
      * Convert {@link SequenceFeature} into a {@link RichAnnotation}.
      * 
      * @param sequenceFeature
-     * @return
+     * @return RichAnnotation object.
      */
     protected RichAnnotation getAnnotations(SequenceFeature sequenceFeature) {
         RichAnnotation richAnnotation = new SimpleRichAnnotation();

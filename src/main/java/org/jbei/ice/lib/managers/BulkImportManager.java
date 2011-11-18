@@ -60,7 +60,7 @@ public class BulkImportManager {
     /**
      * Retrieve all {@link BulkImport} objects in the database.
      * 
-     * @return
+     * @return List of BulkImport objects.
      * @throws ManagerException
      */
     @SuppressWarnings("unchecked")

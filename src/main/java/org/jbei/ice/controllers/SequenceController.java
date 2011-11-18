@@ -247,7 +247,7 @@ public class SequenceController extends Controller {
      * Parse the given String into an {@link IDNASequence} object.
      * 
      * @param sequence
-     * @return
+     * @return parsed IDNASequence object.
      */
     public static IDNASequence parse(String sequence) {
         return GeneralParser.getInstance().parse(sequence);

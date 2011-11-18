@@ -253,7 +253,7 @@ public class SampleController extends Controller {
     }
 
     /**
-     * Retrieve the number of {@link Samples} by the given depositor's email.
+     * Retrieve the number of {@link Sample}s by the given depositor's email.
      * 
      * @param depositorEmail
      * @return Number of {@link Sample}s.

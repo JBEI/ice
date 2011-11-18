@@ -17,7 +17,7 @@ public class JbeiConstants {
      * Return friendly names for {@link Entry}.status field.
      * 
      * @param key
-     * @return
+     * @return friendly name.
      */
     public final static String getStatus(String key) {
         String result = "";
@@ -35,7 +35,7 @@ public class JbeiConstants {
      * Return friendly names for assembly format.
      * 
      * @param key
-     * @return
+     * @return friendly name.
      */
     public final static String getPackageFormat(String key) {
         Map<String, String> map = Part.getPackageFormatOptionsMap();
@@ -51,7 +51,7 @@ public class JbeiConstants {
      * Return friendly names for {@link Entry}.recordType.
      * 
      * @param key
-     * @return
+     * @return friendly name.
      */
     public final static String getRecordType(String key) {
         String result = "";

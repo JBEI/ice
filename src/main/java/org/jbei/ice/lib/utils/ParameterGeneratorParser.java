@@ -81,7 +81,7 @@ public class ParameterGeneratorParser {
      * Generate string representation of {@link Parameter}s.
      * 
      * @param parameters
-     * @return
+     * @return parameters as string.
      */
     public static String generateParametersString(List<Parameter> parameters) {
         String result = null;

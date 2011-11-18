@@ -65,7 +65,8 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
     }
 
     /**
-     * Determine if the given {@link SequenceFeature.AnnotationType} exists.
+     * Determine if the given {@link org.jbei.ice.lib.models.SequenceFeature.AnnotationType
+     * SequenceFeature.AnnotationType} exists.
      * 
      * @param flag
      *            AnnotationType to find.
@@ -99,7 +100,8 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
 
     /**
      * Retrieve a list of {@link SequenceFeature}s with the given
-     * {@link SequenceFeature.AnnotationType}.
+     * {@link org.jbei.ice.lib.models.SequenceFeature.AnnotationType SequenceFeature.AnnotationType}
+     * .
      * 
      * @param flag
      *            AnnotationType to search for.
@@ -136,7 +138,8 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
     /**
      * Retrieve the {@link SequenceFeature}s that contain the given sequence position.
      * 
-     * @param 1 based position
+     * @param genbankPosition
+     *            1 based position
      * @return List of SequeceFeatures.
      */
     public List<SequenceFeature> getFeaturesAt(int genbankPosition) {

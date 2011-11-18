@@ -76,18 +76,14 @@ public class FolderManager {
     }
 
     /**
-     * Retrieves the entry contents of a folder starting from <code>first</code> up to a maximum of
-     * <code>count</code>
+     * Retrieves the entry contents of a folder contents.
      * 
      * @param id
-     *            unique folder identifier
-     * @param first
-     *            folder content to start from
-     * @param count
-     *            maximum number of entries to return
-     * @return list of entries retrieved
+     *            folder id.
+     * @param asc
+     *            true if ascending.
+     * @return List of Entry ids.
      * @throws ManagerException
-     *             on any exception accessing the folder or its contents
      */
     public static ArrayList<Long> getFolderContents(long id, boolean asc) throws ManagerException {
         ArrayList<Long> results = new ArrayList<Long>();

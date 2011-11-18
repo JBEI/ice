@@ -59,11 +59,11 @@ public interface IAssemblyUtils {
     public Sequence join(Sequence part1, Sequence part2) throws UtilityException;
 
     /**
-     * Compare two {@link SequenceFeatureCollections} to determine if they are equal.
+     * Compare two {@link SequenceFeatureCollection}s to determine if they are equal.
      * 
      * @param sequenceFeatures1
      * @param sequenceFeatures2
-     * @return
+     * @return Joined sequence.
      */
     public int compareAssemblyAnnotations(SequenceFeatureCollection sequenceFeatures1,
             SequenceFeatureCollection sequenceFeatures2);
