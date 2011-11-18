@@ -8,17 +8,29 @@ import java.util.Set;
 import org.biojava.bio.BioException;
 import org.biojava.bio.molbio.RestrictionEnzymeManager;
 
+/**
+ * Methods for dealing with {@link RestrictionENzyme}s.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class RestrictionEnzymesManager {
     private static final String REBASE_DATABASE_RESOURCE_FILE = "/org/jbei/ice/bio/enzymes/link_withrefm";
 
-    public static RestrictionEnzymesManager instance = null;
+    private static RestrictionEnzymesManager instance = null;
 
-    private HashMap<String, RestrictionEnzyme> enzymesMap = new HashMap<String, RestrictionEnzyme>();
+    private final HashMap<String, RestrictionEnzyme> enzymesMap = new HashMap<String, RestrictionEnzyme>();
 
     private RestrictionEnzymesManager() throws RestrictionEnzymesManagerException {
         loadEnzymes();
     }
 
+    /**
+     * Retrieve a singleton instance of RestrictionEnzymesManager.
+     * 
+     * @return RestrictionEnzymesManager instance.
+     * @throws RestrictionEnzymesManagerException
+     */
     public static RestrictionEnzymesManager getInstance() throws RestrictionEnzymesManagerException {
         if (instance == null) {
             instance = new RestrictionEnzymesManager();
@@ -27,10 +39,22 @@ public class RestrictionEnzymesManager {
         return instance;
     }
 
+    /**
+     * Retrieve known {@link RestrictionEnzyme}s.
+     * 
+     * @return Collection of RestrictionEnzymes.
+     */
     public Collection<RestrictionEnzyme> getEnzymes() {
         return enzymesMap.values();
     }
 
+    /**
+     * Retrieve {@link RestrictionEnzyme} by its name.
+     * 
+     * @param enzymeName
+     *            - Name of the enzyme to query.
+     * @return RestrictionEnzyme. Null if not found.
+     */
     public RestrictionEnzyme getEnzymeByName(String enzymeName) {
         if (enzymeName == null || enzymeName.isEmpty()) {
             return null;
@@ -45,10 +69,24 @@ public class RestrictionEnzymesManager {
         return lookupEnzyme;
     }
 
+    /**
+     * Retrieve biojava RestrictionEnzyme by name.
+     * 
+     * @param name
+     *            - Name of the enzyme to query.
+     * @return biojava RestrictionEnzyme.
+     */
     public org.biojava.bio.molbio.RestrictionEnzyme getBioJavaEnzyme(String name) {
         return RestrictionEnzymeManager.getEnzyme(name);
     }
 
+    /**
+     * Load enzymes into memory.
+     * <p>
+     * Read the REBASE database from file.
+     * 
+     * @throws RestrictionEnzymesManagerException
+     */
     @SuppressWarnings("unchecked")
     private void loadEnzymes() throws RestrictionEnzymesManagerException {
         InputStream is = RestrictionEnzymesManager.class
@@ -65,14 +103,15 @@ public class RestrictionEnzymesManager {
 
                 if (re.getCutType() == org.biojava.bio.molbio.RestrictionEnzyme.CUT_COMPOUND) {
                     restrictionEnzyme = new RestrictionEnzyme(re.getName(), re.getRecognitionSite()
-                            .seqString(), re.getCutType(), re.getForwardRegex(), re
-                            .getReverseRegex(), re.getDownstreamCut()[0], re.getDownstreamCut()[1],
-                            re.getUpstreamCut()[0], re.getUpstreamCut()[1]);
+                            .seqString(), re.getCutType(), re.getForwardRegex(),
+                            re.getReverseRegex(), re.getDownstreamCut()[0],
+                            re.getDownstreamCut()[1], re.getUpstreamCut()[0],
+                            re.getUpstreamCut()[1]);
                 } else {
                     restrictionEnzyme = new RestrictionEnzyme(re.getName(), re.getRecognitionSite()
-                            .seqString(), re.getCutType(), re.getForwardRegex(), re
-                            .getReverseRegex(), re.getDownstreamCut()[0], re.getDownstreamCut()[1],
-                            -1, -1);
+                            .seqString(), re.getCutType(), re.getForwardRegex(),
+                            re.getReverseRegex(), re.getDownstreamCut()[0],
+                            re.getDownstreamCut()[1], -1, -1);
                 }
 
                 enzymesMap.put(restrictionEnzyme.getName(), restrictionEnzyme);

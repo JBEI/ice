@@ -1,5 +1,11 @@
 package org.jbei.ice.bio.enzymes;
 
+/**
+ * Exception class for enzymes.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class RestrictionEnzymesManagerException extends Exception {
     private static final long serialVersionUID = -7985110598540062855L;
 
