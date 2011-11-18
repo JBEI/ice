@@ -4,18 +4,18 @@
 	<groupId>org.jbei</groupId>
 	<artifactId>gd-ice</artifactId>
 	<packaging>war</packaging>
-	<version>1.0-SNAPSHOT</version>
+	<version>2.0-SNAPSHOT</version>
 	<!-- TODO project name  -->
-	<name>quickstart</name>
+	<name>gd-ice</name>
 	<description></description>
-	<!--
-		TODO <organization> <name>company name</name> <url>company url</url>
-		</organization>
-	-->
+	<organization>
+		<name>Joint BioEnergy Institute</name>
+		<url>http://code.google.com/p/gd-ice/</url>
+	</organization>
 	<licenses>
 		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<name>The new BSD License</name>
+			<url>http://code.google.com/p/gd-ice/source/browse/LICENSE.txt</url>
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
@@ -58,6 +58,7 @@
 			<version>${jetty.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		<!--  Other dependencies -->
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-core</artifactId>

@@ -6,7 +6,6 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.jbei.ice.web.pages.FeedbackPage;
 import org.jbei.ice.web.pages.UnprotectedPage;
-import org.jbei.ice.web.pages.WelcomePage;
 
 public class FooterPanel extends Panel {
     private static final long serialVersionUID = 1L;
@@ -37,7 +36,6 @@ public class FooterPanel extends Panel {
         add(new Image("sponsorImage6", sponsorImage6));
         add(new Image("sponsorImage7", sponsorImage7));
 
-        add(new BookmarkablePageLink<WelcomePage>("homeLink", WelcomePage.class));
         add(new BookmarkablePageLink<FeedbackPage>("feedbackLink", FeedbackPage.class));
     }
 }
