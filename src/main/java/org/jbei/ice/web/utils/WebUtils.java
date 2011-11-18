@@ -31,7 +31,7 @@ public class WebUtils {
      * If the partnumber referred in the link does not exist, it creates a non-clickable text.
      * 
      * @param iceLink
-     *            - link to create.
+     *            link to create.
      * @return Html of the link.
      */
     private static String makeEntryLink(IceLink iceLink) {
@@ -75,7 +75,7 @@ public class WebUtils {
      * Generate a clickable &lt;a&gt; link from the specified {@link Entry} id.
      * 
      * @param id
-     *            - id of the Entry.
+     *            id of the Entry.
      * @return Html of the clickable link.
      */
     private static String makeEntryLink(long id) {
@@ -120,7 +120,7 @@ public class WebUtils {
      * Generate an html &lt;a&gt; link from the given url.
      * 
      * @param text
-     *            - Url to linkify.
+     *            Url to linkify.
      * @return Html &lt;a&gt; link.
      */
     public static String urlLinkifyText(String text) {
@@ -216,7 +216,7 @@ public class WebUtils {
      * Generate an html &lt;a&gt; link from the given {@link IceLink} text.
      * 
      * @param text
-     *            - IceLink text.
+     *            IceLink text.
      * @return Html &lt;a&gt; link.
      */
     private static String wikiLinkifyText(String text) {
@@ -302,9 +302,9 @@ public class WebUtils {
          * Contructor.
          * 
          * @param partNumber
-         *            - Part number.
+         *            Part number.
          * @param descriptiveLabel
-         *            - Descriptive label.
+         *            Descriptive label.
          */
         public IceLink(String partNumber, String descriptiveLabel) {
             this.partNumber = partNumber;
@@ -315,7 +315,7 @@ public class WebUtils {
          * Set the descriptive label string.
          * 
          * @param descriptiveLabel
-         *            - descriptive label.
+         *            descriptive label.
          */
         public void setDescriptiveLabel(String descriptiveLabel) {
             this.descriptiveLabel = descriptiveLabel;

@@ -73,9 +73,9 @@ public class RegistryAMFAPI extends BaseService {
      * Retrieve {@link Entry} by its recordId.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @param entryId
-     *            - recordId.
+     *            recordId.
      * @return Entry object.
      */
     public Entry getEntry(String sessionId, String entryId) {
@@ -108,9 +108,9 @@ public class RegistryAMFAPI extends BaseService {
      * Determine if the session has write permission to the specified {@link Entry}.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @param entryId
-     *            - recordId.
+     *            recordId.
      * @return True if session has write permission to the Entry.
      */
     public boolean hasWritablePermissions(String sessionId, String entryId) {
@@ -148,9 +148,9 @@ public class RegistryAMFAPI extends BaseService {
      * Retrieve the {@link FeaturedDnaSequence} of the specified {@link Entry}.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @param entryId
-     *            - recordIf of the desired Entry.
+     *            recordIf of the desired Entry.
      * @return FeaturedDNASequence object.
      */
     public FeaturedDNASequence getSequence(String sessionId, String entryId) {
@@ -195,11 +195,11 @@ public class RegistryAMFAPI extends BaseService {
      * Save the given {@link FeaturedDNASequence} with the specified {@link Entry}.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @param entryId
-     *            - recordId of the desired Entry.
+     *            recordId of the desired Entry.
      * @param featuredDNASequence
-     *            - featuredDNASequence object to save.
+     *            featuredDNASequence object to save.
      * @return True if successful.
      */
     public boolean saveSequence(String sessionId, String entryId,
@@ -247,9 +247,9 @@ public class RegistryAMFAPI extends BaseService {
      * Retrieve {@link TraceSequence}s of the specified {@link Entry}.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @param entryId
-     *            - recordId of the desired Entry.
+     *            recordId of the desired Entry.
      * @return - List of TraceSequence objects.
      */
     public ArrayList<TraceSequence> getTraces(String sessionId, String entryId) {
@@ -294,13 +294,13 @@ public class RegistryAMFAPI extends BaseService {
      * Generate a Genbank file from the given {@link FeaturedDNASequence}.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @param featuredDNASequence
-     *            - FeaturedDNASequence object.
+     *            FeaturedDNASequence object.
      * @param name
-     *            - Locus name to be used.
+     *            Locus name to be used.
      * @param isCircular
-     *            - True if circular.
+     *            True if circular.
      * @return Generated Genbank file as a String.
      */
     public String generateGenBank(String sessionId, FeaturedDNASequence featuredDNASequence,
@@ -343,7 +343,7 @@ public class RegistryAMFAPI extends BaseService {
      * Retrieve {@link UserPreferences} for the given session.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @return UserPreferences object for the specified user.
      */
     public UserPreferences getUserPreferences(String sessionId) {
@@ -388,9 +388,9 @@ public class RegistryAMFAPI extends BaseService {
      * Save {@link UserPreferences} object to the server.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @param preferences
-     *            - UserPreferences obect.
+     *            UserPreferences obect.
      * @return True if successful.
      */
     public boolean saveUserPreferences(String sessionId, UserPreferences preferences) {
@@ -438,7 +438,7 @@ public class RegistryAMFAPI extends BaseService {
      * Retrieve {@link UserRestrictionEnzymes} for the given session.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @return UserRestrictionEnzymes object for the current user.
      */
     public UserRestrictionEnzymes getUserRestrictionEnzymes(String sessionId) {
@@ -482,7 +482,7 @@ public class RegistryAMFAPI extends BaseService {
      * Save the given {@link UserRestrictionEnzymes} to the database.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @param userRestrictionEnzymes
      *            UserRestrictionEnzymes object to save.
      */
@@ -524,7 +524,7 @@ public class RegistryAMFAPI extends BaseService {
      * Retrieve {@link RestrictionEnzym}s for the given user.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @return Collection of RestrictionEnzymes for the specified user.
      */
     public Collection<RestrictionEnzyme> getRestrictionEnzymes(String sessionId) {
@@ -553,7 +553,7 @@ public class RegistryAMFAPI extends BaseService {
      * Parse the given string data into a {@link FeaturedDNASequence} object.
      * 
      * @param data
-     *            - data to parse.
+     *            data to parse.
      * @return FeaturedDNASequence object.
      */
     public FeaturedDNASequence parseSequenceFile(String data) {
@@ -578,7 +578,7 @@ public class RegistryAMFAPI extends BaseService {
      * Generate a new Genbank file from the given {@link FeaturedDNASequence}.
      * 
      * @param featuredDNASequence
-     *            - FeaturedDNASequence object to convert to genbank.
+     *            FeaturedDNASequence object to convert to genbank.
      * @return Genbank file as string.
      */
     public String generateSequenceFile(FeaturedDNASequence featuredDNASequence) {
@@ -610,9 +610,9 @@ public class RegistryAMFAPI extends BaseService {
      * Create a new {@link SequenceCheckerProject} in the database.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @param sequenceCheckerProject
-     *            - SequenceCheckerProject to save.
+     *            SequenceCheckerProject to save.
      * @return SequenceCheckerProject that was saved in the database.
      */
     public SequenceCheckerProject createSequenceCheckerProject(String sessionId,
@@ -673,9 +673,9 @@ public class RegistryAMFAPI extends BaseService {
      * 
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @param sequenceCheckerProject
-     *            - SequenceCheckerProject to save.
+     *            SequenceCheckerProject to save.
      * @return SequenceCheckerProject that was saved in the database.
      */
     public SequenceCheckerProject saveSequenceCheckerProject(String sessionId,
@@ -731,9 +731,9 @@ public class RegistryAMFAPI extends BaseService {
      * Retrieve the specified {@link SequenceCheckerProject} in the database.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @param projectId
-     *            - uuid of the SequenceCheckerProject to retrieve.
+     *            uuid of the SequenceCheckerProject to retrieve.
      * @return SequenceCheckerProject object.
      */
     public SequenceCheckerProject getSequenceCheckerProject(String sessionId, String projectId) {
@@ -777,9 +777,9 @@ public class RegistryAMFAPI extends BaseService {
      * Perform sequence trace alignment on the given {@link SequenceCheckerProject}.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @param sequenceCheckerProject
-     *            - SequenceCheckerProject
+     *            SequenceCheckerProject
      * @return SequenceCheckerPorject with updated alignment information.
      */
     public SequenceCheckerProject alignSequenceCheckerProject(String sessionId,
@@ -864,9 +864,9 @@ public class RegistryAMFAPI extends BaseService {
      * Parse the given byte array data into {@link TraceData}.
      * 
      * @param traceFileName
-     *            - name of the trace file.
+     *            name of the trace file.
      * @param data
-     *            - byte array data.
+     *            byte array data.
      * @return TraceData object.
      */
     public TraceData parseTraceFile(String traceFileName, byte[] data) {
@@ -896,9 +896,9 @@ public class RegistryAMFAPI extends BaseService {
      * Create a new {@link VectorEditorProject} in the database.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @param vectorEditorProject
-     *            - VectorEditorProject to create.
+     *            VectorEditorProject to create.
      * @return Saved VectorEditorProject.
      */
     public VectorEditorProject createVectorEditorProject(String sessionId,
@@ -957,9 +957,9 @@ public class RegistryAMFAPI extends BaseService {
      * Save the given {@link VectorEditorProject} into the database.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @param vectorEditorProject
-     *            - VectorEditorProject to save.
+     *            VectorEditorProject to save.
      * @return Saved VectorEditorProject.
      */
     public VectorEditorProject saveVectorEditorProject(String sessionId,
@@ -1015,9 +1015,9 @@ public class RegistryAMFAPI extends BaseService {
      * Retrieve the specified {@link VectorEditorProject}.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @param projectId
-     *            - UUID of the desired VectorEditorProject.
+     *            UUID of the desired VectorEditorProject.
      * @return
      */
     public VectorEditorProject getVectorEditorProject(String sessionId, String projectId) {
@@ -1061,7 +1061,7 @@ public class RegistryAMFAPI extends BaseService {
      * Retrieve the {@link Account} associated with the given session key.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @return Account object for the session key.
      */
     private Account sessionToAccount(String sessionId) {
@@ -1076,9 +1076,9 @@ public class RegistryAMFAPI extends BaseService {
      * Retrieve the BulkImportEntry type.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @param importId
-     *            - id of the BulkImport object.
+     *            id of the BulkImport object.
      * @return String representation of BulkImport.
      */
     // TODO : the following need to be folded into a single call
@@ -1104,9 +1104,9 @@ public class RegistryAMFAPI extends BaseService {
      * Retrieve the BulkImport object by its id.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @param importId
-     *            - id of the BulkImport object.
+     *            id of the BulkImport object.
      * @return BulkImport object.
      */
     @SuppressWarnings("unchecked")
@@ -1173,19 +1173,19 @@ public class RegistryAMFAPI extends BaseService {
      * Save entries using the bulk import mechanism.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @param primaryData
-     *            - BulkImport data
+     *            BulkImport data
      * @param secondaryData
-     *            - More BulkImport data
+     *            More BulkImport data
      * @param sequenceZipFile
-     *            - Zip file containing sequences.
+     *            Zip file containing sequences.
      * @param attachmentZipFile
-     *            - Zip file containing attachments.
+     *            Zip file containing attachments.
      * @param sequenceFilename
-     *            - Sequence file name.
+     *            Sequence file name.
      * @param attachmentFilename
-     *            - Attachment file name.
+     *            Attachment file name.
      * @return Number of entries saved.
      */
     public int saveEntries(String sessionId, ArrayCollection primaryData,
@@ -1262,19 +1262,19 @@ public class RegistryAMFAPI extends BaseService {
      * Save the specified {@link Entry} into the database.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @param importId
-     *            - ImportId if using bulk import
+     *            ImportId if using bulk import
      * @param entry
-     *            - Entry to be saved.
+     *            Entry to be saved.
      * @param attachmentFile
-     *            - Attachment file contents as bytes.
+     *            Attachment file contents as bytes.
      * @param attachmentFilename
-     *            - Attachment file name.
+     *            Attachment file name.
      * @param sequenceFile
-     *            - Sequence file as bytes.
+     *            Sequence file as bytes.
      * @param sequenceFilename
-     *            - Sequence file name.
+     *            Sequence file name.
      * @return saved Entry.
      */
     public Entry saveEntry(String sessionId, String importId, Entry entry, Byte[] attachmentFile,
@@ -1325,29 +1325,29 @@ public class RegistryAMFAPI extends BaseService {
      * Save a {@link Strain} with a single {@link Plasmid}.
      * 
      * @param sessionId
-     *            - session key.
+     *            session key.
      * @param importId
-     *            - BulkImport id, if any.
+     *            BulkImport id, if any.
      * @param strain
-     *            - Strain object.
+     *            Strain object.
      * @param plasmid
-     *            - Plasmid object.
+     *            Plasmid object.
      * @param strainSequenceFile
-     *            - Sequence file content for Strain.
+     *            Sequence file content for Strain.
      * @param strainSequenceFilename
-     *            - Sequence file name for Strain.
+     *            Sequence file name for Strain.
      * @param strainAttachmentFile
-     *            - Attachment file content for Strain.
+     *            Attachment file content for Strain.
      * @param strainAttachmentFilename
-     *            - Attachment file name for Strain.
+     *            Attachment file name for Strain.
      * @param plasmidSequenceFile
-     *            - Sequence file content for Plasmid.
+     *            Sequence file content for Plasmid.
      * @param plasmidSequenceFilename
-     *            - Sequence file name for Plasmid.
+     *            Sequence file name for Plasmid.
      * @param plasmidAttachmentFile
-     *            - Attachment file content for Plasmid.
+     *            Attachment file content for Plasmid.
      * @param plasmidAttachmentFilename
-     *            - Attachment file name for Plasmid.
+     *            Attachment file name for Plasmid.
      * @return List of saved Entries.
      */
     public List<Entry> saveStrainWithPlasmid(String sessionId, String importId, Strain strain,
@@ -1430,13 +1430,13 @@ public class RegistryAMFAPI extends BaseService {
      * Save the given sequence file with the given {@link Entry}.
      * 
      * @param account
-     *            - @{link Account} to save as.
+     *            @{link Account} to save as.
      * @param entry
-     *            - Entry to associate with.
+     *            Entry to associate with.
      * @param fileBytes
-     *            - Sequence file content.
+     *            Sequence file content.
      * @param filename
-     *            - Sequence file name.
+     *            Sequence file name.
      */
     private void saveEntrySequence(Account account, Entry entry, Byte[] fileBytes, String filename) {
         if (fileBytes == null || entry == null) {
@@ -1467,13 +1467,13 @@ public class RegistryAMFAPI extends BaseService {
      * Save the given attachment to the server.
      * 
      * @param account
-     *            - {@link Account} to save as.
+     *            {@link Account} to save as.
      * @param entry
-     *            - {@link Entry} to associate attachment with.
+     *            {@link Entry} to associate attachment with.
      * @param fileBytes
-     *            - Attachment file content.
+     *            Attachment file content.
      * @param filename
-     *            - Attachment file name.
+     *            Attachment file name.
      */
     private void saveEntryAttachment(Account account, Entry entry, Byte[] fileBytes, String filename) {
         if (fileBytes == null) {
@@ -1505,9 +1505,9 @@ public class RegistryAMFAPI extends BaseService {
      * Save the given sequence file with the given {@link Entry}.
      * 
      * @param account
-     *            - {@link Account} to save as.
+     *            {@link Account} to save as.
      * @param entry
-     *            - Entry to associate with.
+     *            Entry to associate with.
      * @param seqFile
      *            -Sequence file.
      * @throws IOException
@@ -1542,7 +1542,7 @@ public class RegistryAMFAPI extends BaseService {
      * Convert the given file to StringBuilder.
      * 
      * @param seqFile
-     *            - file to convert.
+     *            file to convert.
      * @return StringBuilder object with the content of the file.
      */
     private StringBuilder readSequenceFile(File seqFile) {

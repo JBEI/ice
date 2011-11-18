@@ -80,7 +80,7 @@ public class PersistentSessionDataWrapper {
      * Create a new {@link SessionData} with the given {@link Account}.
      * 
      * @param account
-     *            - Account to associate with the new SessionData.
+     *            Account to associate with the new SessionData.
      * @return SessionData.
      * @throws ManagerException
      */
@@ -112,7 +112,7 @@ public class PersistentSessionDataWrapper {
      * Synchronized.
      * 
      * @param sessionKey
-     *            - Session key to delete.
+     *            Session key to delete.
      * @throws ManagerException
      */
     public synchronized void delete(String sessionKey) throws ManagerException {

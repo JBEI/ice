@@ -19,7 +19,7 @@ public class AuthenticatedPermissionManager {
      * Retrieve {@link Account}s with read permissions set for the specified {@link Entry}.
      * 
      * @param entry
-     *            - Entry to get ReadUsers about.
+     *            Entry to get ReadUsers about.
      * @return Set of Accounts with read permission for the given Entry.
      * @throws ManagerException
      * @throws PermissionException
@@ -37,7 +37,7 @@ public class AuthenticatedPermissionManager {
      * Retrieve {@link Account}s with write permissions set for the specified {@link Entry}.
      * 
      * @param entry
-     *            - entry to query on.
+     *            entry to query on.
      * @return Set of Accounts.
      * @throws ManagerException
      * @throws PermissionException
@@ -55,7 +55,7 @@ public class AuthenticatedPermissionManager {
      * Retrieve {@link Group}s with read permissions set for the specified {@link Entry}.
      * 
      * @param entry
-     *            - Entry to query on.
+     *            Entry to query on.
      * @return Set of Groups.
      * @throws ManagerException
      * @throws PermissionException
@@ -72,7 +72,7 @@ public class AuthenticatedPermissionManager {
      * Retrieve {@link Group}s with write permissions set for the specified {@link Entry}.
      * 
      * @param entry
-     *            - Entry to query on.
+     *            Entry to query on.
      * @return Set of Groups.
      * @throws ManagerException
      * @throws PermissionException
@@ -92,9 +92,9 @@ public class AuthenticatedPermissionManager {
      * This method creates new {@link ReadUser} objects using the given {@link Account}s.
      * 
      * @param entry
-     *            - Entry to give read permission to.
+     *            Entry to give read permission to.
      * @param accounts
-     *            - Accounts to give read permission to.
+     *            Accounts to give read permission to.
      * @throws ManagerException
      * @throws PermissionException
      */
@@ -113,9 +113,9 @@ public class AuthenticatedPermissionManager {
      * This method creates new {@link WriteUser} objects using the given {@link Account}s.
      * 
      * @param entry
-     *            - Entry to give permission to.
+     *            Entry to give permission to.
      * @param accounts
-     *            - Accounts to give write permission to.
+     *            Accounts to give write permission to.
      * @throws ManagerException
      * @throws PermissionException
      */
@@ -134,9 +134,9 @@ public class AuthenticatedPermissionManager {
      * This method creates new {@link ReadGroup} objects using the given {@link Group}s.
      * 
      * @param entry
-     *            - Entry to give permission to.
+     *            Entry to give permission to.
      * @param groups
-     *            - Groups to give read permission to.
+     *            Groups to give read permission to.
      * @throws ManagerException
      * @throws PermissionException
      */
@@ -155,9 +155,9 @@ public class AuthenticatedPermissionManager {
      * This method creates new {@link WriteGroup} objects using the given {@link Group}s.
      * 
      * @param entry
-     *            - Entry to give permission to.
+     *            Entry to give permission to.
      * @param groups
-     *            - Groups to give write permission to.
+     *            Groups to give write permission to.
      * @throws ManagerException
      * @throws PermissionException
      */

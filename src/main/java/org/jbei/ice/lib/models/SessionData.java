@@ -17,6 +17,7 @@ import org.jbei.ice.lib.utils.Utils;
 /**
  * Store session information for a logged in user.
  * 
+ * @see org.jbei.ice.web.IceSession
  * @author Timothy Ham, Zinovii Dmytriv
  * 
  */
@@ -86,7 +87,7 @@ public class SessionData implements IModel {
      * Generate a new session key, and set the expiration time.
      * 
      * @param secret
-     *            - salt used to generate the random sessionKey.
+     *            salt used to generate the random sessionKey.
      */
     public SessionData(String secret) {
         String sha = generateSessionKey(secret);

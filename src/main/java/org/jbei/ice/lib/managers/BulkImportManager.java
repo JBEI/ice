@@ -86,7 +86,7 @@ public class BulkImportManager {
      * Retrieve a {@link BulkImport} object by its id.
      * 
      * @param importId
-     *            - BulkImport's id.
+     *            BulkImport's id.
      * @return BulkImport object.
      * @throws ManagerException
      */
@@ -110,7 +110,7 @@ public class BulkImportManager {
      * Retrieve a {@link BulkImport} type by its id.
      * 
      * @param id
-     *            - BulkImport's id.
+     *            BulkImport's id.
      * @return Type
      * @throws ManagerException
      */

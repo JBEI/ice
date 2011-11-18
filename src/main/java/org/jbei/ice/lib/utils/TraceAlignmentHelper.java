@@ -24,7 +24,7 @@ public class TraceAlignmentHelper {
      * Convert {@link TraceSequenee} to {@link TraceData} value object.
      * 
      * @param traceSequence
-     *            - TraceSequence to convert.
+     *            TraceSequence to convert.
      * @return TraceData object.
      */
     public static TraceData traceSequenceToTraceData(TraceSequence traceSequence) {
@@ -61,11 +61,11 @@ public class TraceAlignmentHelper {
      * depositor and {@link Entry}.
      * 
      * @param traceData
-     *            - TraceData object to convert.
+     *            TraceData object to convert.
      * @param depositor
-     *            - Depositor email.
+     *            Depositor email.
      * @param entry
-     *            - Entry to associate.
+     *            Entry to associate.
      * @return TraceSequence object.
      */
     public static TraceSequence traceDataToTraceSequence(TraceData traceData, String depositor,
@@ -103,7 +103,7 @@ public class TraceAlignmentHelper {
      * depositor to "" and {@link Entry} to null.
      * 
      * @param traceData
-     *            - TraceData to convert.
+     *            TraceData to convert.
      * @return TraceSequence object.
      */
     public static TraceSequence traceDataToTraceSequence(TraceData traceData) {
@@ -114,13 +114,13 @@ public class TraceAlignmentHelper {
      * Align two sequences, querySequence and traceSequence.
      * 
      * @param querySequence
-     *            - Reference sequence.
+     *            Reference sequence.
      * @param traceSequence
-     *            - Trace sequence.
+     *            Trace sequence.
      * @param traceFileName
-     *            - Trace file name, for identification.
+     *            Trace file name, for identification.
      * @param isCircular
-     *            - True if circular.
+     *            True if circular.
      * @return {@link TraceData} object.
      */
     public static TraceData alignSequences(String querySequence, String traceSequence,

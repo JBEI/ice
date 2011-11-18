@@ -18,7 +18,7 @@ public class ParameterGeneratorParser {
      * Generate a List of {@link Parameter}s from string.
      * 
      * @param input
-     *            - string input.
+     *            string input.
      * @return List of Parameters.
      */
     public static List<Parameter> parseParameterString(String input) {

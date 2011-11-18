@@ -16,9 +16,9 @@ public class StorageUtils {
      * <p>
      * 
      * @param index
-     *            - numerical index.
+     *            numerical index.
      * @param type
-     *            - {@link StorageType}.
+     *            {@link StorageType}.
      * @return String representation of the index.
      */
     public static String indexToWell(int index, StorageType type) {

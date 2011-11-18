@@ -16,7 +16,7 @@ public class JbeirSettings {
      * Retrieve the configuration from file.
      * 
      * @param key
-     *            - key of the configuration.
+     *            key of the configuration.
      * @return - value associated with the given key.
      */
     public static String getSetting(String key) {

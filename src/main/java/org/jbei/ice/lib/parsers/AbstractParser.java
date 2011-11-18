@@ -36,7 +36,7 @@ public abstract class AbstractParser implements IDNAParser {
      * Replace different line termination characters with the newline character (\n).
      * 
      * @param sequence
-     *            - Text to clean.
+     *            Text to clean.
      * @return String with only newline character (\n).
      */
     protected String cleanSequence(String sequence) {

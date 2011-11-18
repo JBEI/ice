@@ -122,7 +122,7 @@ public class LuceneSearch {
      * If the database does not exist, create one.
      * 
      * @param queryString
-     *            - query to be performed.
+     *            query to be performed.
      * @return ArrayList of {@link SearchResult}s.
      * @throws SearchException
      */

@@ -28,9 +28,9 @@ public class AggregateSearch {
      * {@link PartNumber}.partNumber.
      * 
      * @param queryString
-     *            - string to query
+     *            string to query
      * @param account
-     *            - Account of the query
+     *            Account of the query
      * @return - ArrayList of {@link SearchResult}s.
      * @throws SearchException
      */

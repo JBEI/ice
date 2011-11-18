@@ -197,7 +197,7 @@ public class BiobrickAUtils implements IAssemblyUtils {
      * It checks for prefix, suffix, and scans for incomaptible restriction sites.
      * 
      * @param partSequenceString
-     *            - sequence string to test.
+     *            sequence string to test.
      * @return {@link AssemblyStandard}.
      * @throws UtilityException
      */
@@ -228,7 +228,7 @@ public class BiobrickAUtils implements IAssemblyUtils {
      * restriction sites.
      * 
      * @param sequenceString
-     *            - query string.
+     *            query string.
      * @return True if the given sequence is biobrick compatible.
      * @throws UtilityException
      */
@@ -275,7 +275,7 @@ public class BiobrickAUtils implements IAssemblyUtils {
      * and the inner feature.
      * 
      * @param partSequence
-     *            - sequence to query.
+     *            sequence to query.
      * @return {@link SequenceFeatureCollection}.
      * @throws UtilityException
      */
@@ -439,9 +439,9 @@ public class BiobrickAUtils implements IAssemblyUtils {
      * Assemble two biobrick sequences together.
      * 
      * @param part1Sequence
-     *            - first sequence
+     *            first sequence
      * @param part2Sequence
-     *            - second sequence
+     *            second sequence
      * @return Assembled {@link Sequence}.
      * @throws UtilityException
      */
@@ -487,7 +487,7 @@ public class BiobrickAUtils implements IAssemblyUtils {
             String firstPart = part1SequenceString.substring(0, suffixChopPosition);
             String secondPart = part2SequenceString.substring(prefixChopPosition);
             //            concatSequence = part1SequenceString.substring(0, part1SequenceString.length()
-            //                    - suffixOffset);
+            //                    suffixOffset);
             //            concatSequence = concatSequence + part2SequenceString.substring(prefixOffset - 1);
             joinedSequence = firstPart + secondPart;
             // end concat sequence

@@ -66,9 +66,9 @@ public class RegistryAPI {
      * future authentication.
      * 
      * @param login
-     *            - Login.
+     *            Login.
      * @param password
-     *            - Password.
+     *            Password.
      * @return Session key.
      * @throws SessionException
      * @throws ServiceException
@@ -104,7 +104,7 @@ public class RegistryAPI {
      * Logout out of the ICE SOAP service.
      * 
      * @param sessionId
-     *            - Session key to log out.
+     *            Session key to log out.
      * @throws ServiceException
      */
     public void logout(@WebParam(name = "sessionId") String sessionId) throws ServiceException {
@@ -126,7 +126,7 @@ public class RegistryAPI {
      * Check if the session key is still authenticated.
      * 
      * @param sessionId
-     *            - Session key to check.
+     *            Session key to check.
      * @return True if still authenticated.
      * @throws ServiceException
      */
@@ -176,9 +176,9 @@ public class RegistryAPI {
      * Retrieve an {@link Entry} by its name.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param name
-     *            - Name of the Entry to retrieve.
+     *            Name of the Entry to retrieve.
      * @return Entry object.
      * @throws ServiceException
      */
@@ -228,9 +228,9 @@ public class RegistryAPI {
      * Perform full text search on the server.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param query
-     *            - Query string.
+     *            Query string.
      * @return List of {@link SearchResult}s.
      * @throws ServiceException
      * @throws SessionException
@@ -261,9 +261,9 @@ public class RegistryAPI {
      * Perform blastn search on the server.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param querySequence
-     *            - Sequence to query.
+     *            Sequence to query.
      * @return List of {@link BlastResult}s.
      * @throws SessionException
      * @throws ServiceException
@@ -301,9 +301,9 @@ public class RegistryAPI {
      * Perform tblastx on the server.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param querySequence
-     *            - Sequence to query.
+     *            Sequence to query.
      * @return List of {@link BlastResult}s.
      * @throws SessionException
      * @throws ServiceException
@@ -341,9 +341,9 @@ public class RegistryAPI {
      * Retrieve {@link Entry} by its recordId.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param entryId
-     *            - recordId of the Entry.
+     *            recordId of the Entry.
      * @return Entry object.
      * @throws SessionException
      * @throws ServiceException
@@ -379,9 +379,9 @@ public class RegistryAPI {
      * Retrieve an {@link Entry} by its part number.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param partNumber
-     *            - Part number of the desired Entry.
+     *            Part number of the desired Entry.
      * @return Entry object.
      * @throws SessionException
      * @throws ServiceException
@@ -417,9 +417,9 @@ public class RegistryAPI {
      * Check if the session user has read permission to the specified {@link Entry}.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param entryId
-     *            - recordId of the Entry.
+     *            recordId of the Entry.
      * @return True if the session user has read permission.
      * @throws SessionException
      * @throws ServiceException
@@ -452,9 +452,9 @@ public class RegistryAPI {
      * Check if the session user has write permission to the specified {@link Entry}.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param entryId
-     *            - recordId of the Entry.
+     *            recordId of the Entry.
      * @return True if the session user has write permission.
      * @throws SessionException
      * @throws ServiceException
@@ -485,9 +485,9 @@ public class RegistryAPI {
      * Create a new {@link Plasmid} on the server.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param plasmid
-     *            - Plasmid to create.
+     *            Plasmid to create.
      * @return New Plasmid object from the database.
      * @throws SessionException
      * @throws ServiceException
@@ -522,9 +522,9 @@ public class RegistryAPI {
      * Create a new {@link Strain} on the server.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param strain
-     *            - Strain to create.
+     *            Strain to create.
      * @return New Strain object from the database.
      * @throws SessionException
      * @throws ServiceException
@@ -559,9 +559,9 @@ public class RegistryAPI {
      * Create a new {@link Part} on the server.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param part
-     *            - Part to create.
+     *            Part to create.
      * @return New Part object from the database.
      * @throws SessionException
      * @throws ServiceException
@@ -596,9 +596,9 @@ public class RegistryAPI {
      * Save the given {@link Plasmid} on the server.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param plasmid
-     *            - Plasmid to save.
+     *            Plasmid to save.
      * @return Saved Plasmid object.
      * @throws SessionException
      * @throws ServiceException
@@ -636,9 +636,9 @@ public class RegistryAPI {
      * Save the given {@link Strain} on the server.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param strain
-     *            - Strain to save.
+     *            Strain to save.
      * @return Saved Strain object.
      * @throws SessionException
      * @throws ServiceException
@@ -676,9 +676,9 @@ public class RegistryAPI {
      * Save the given {@link Part} on the server.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param part
-     *            - Part to save.
+     *            Part to save.
      * @return Saved Part object.
      * @throws SessionException
      * @throws ServiceException
@@ -718,9 +718,9 @@ public class RegistryAPI {
      * Perform validation for a generic Entry.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param entry
-     *            - Entry to save.
+     *            Entry to save.
      * @return Saved Entry object.
      * @throws SessionException
      * @throws ServiceException
@@ -841,9 +841,9 @@ public class RegistryAPI {
      * Save a generic {@link Entry} on the server.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param entry
-     *            - Entry to save.
+     *            Entry to save.
      * @return Saved Entry object.
      * @throws SessionException
      * @throws ServiceException
@@ -1077,9 +1077,9 @@ public class RegistryAPI {
      * Delete the specified {@link Entry} from the server.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param entryId
-     *            - RecordId of the Entry.
+     *            RecordId of the Entry.
      * @throws SessionException
      * @throws ServiceException
      * @throws ServicePermissionException
@@ -1114,9 +1114,9 @@ public class RegistryAPI {
      * Get the {@link FeaturedDNASequence} of the specified {@link Entry}.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param entryId
-     *            - RecordId of the desired Entry.
+     *            RecordId of the desired Entry.
      * @return FeaturedDNASequence object.
      * @throws SessionException
      * @throws ServiceException
@@ -1159,9 +1159,9 @@ public class RegistryAPI {
      * {@link Entry}.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param entryId
-     *            - RecordId of the desired Entry.
+     *            RecordId of the desired Entry.
      * @return Content of the original uploaded sequence file as String.
      * @throws SessionException
      * @throws ServiceException
@@ -1206,9 +1206,9 @@ public class RegistryAPI {
      * Genbank formatted {@link Sequence} of the specified {@link Entry}.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param entryId
-     *            - RecordId of the desired Entry.
+     *            RecordId of the desired Entry.
      * @return Genbank file formatted string.
      * @throws SessionException
      * @throws ServiceException
@@ -1258,9 +1258,9 @@ public class RegistryAPI {
      * Fasta formatted {@link Sequence} for the specified {@link Entry}.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param entryId
-     *            - RecordId of the desired Entry.
+     *            RecordId of the desired Entry.
      * @return Fasta formatted sequence.
      * @throws SessionException
      * @throws ServiceException
@@ -1306,11 +1306,11 @@ public class RegistryAPI {
      * Assign the specified {@link Entry} a new {@link Sequence} object.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param entryId
      *            RecordId of the desired Entry.
      * @param featuredDNASequence
-     *            - Annotated DNA Sequence.
+     *            Annotated DNA Sequence.
      * @return {@link FeaturedDNASequence} as saved on the server.
      * @throws SessionException
      * @throws ServiceException
@@ -1385,9 +1385,9 @@ public class RegistryAPI {
      * Remove the {@link Sequence} object associated with the specified {@link Entry}.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param entryId
-     *            - RecordId of the entry.
+     *            RecordId of the entry.
      * @throws SessionException
      * @throws ServiceException
      * @throws ServicePermissionException
@@ -1436,11 +1436,11 @@ public class RegistryAPI {
      * Upload a sequence file (genbank, fasta, etc) and associate with the specified {@link Entry}.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param entryId
-     *            - RecordId of the desired Entry.
+     *            RecordId of the desired Entry.
      * @param sequence
-     *            - Text of sequence file to parse.
+     *            Text of sequence file to parse.
      * @return {@link FeaturedDNASequence} object.
      * @throws SessionException
      * @throws ServiceException
@@ -1506,9 +1506,9 @@ public class RegistryAPI {
      * Retrieve all the {@link Sample}s of the specified {@link Entry}.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param entryId
-     *            - RecordId of the Entry.
+     *            RecordId of the Entry.
      * @return List of Samples.
      * @throws SessionException
      * @throws ServiceException
@@ -1537,9 +1537,9 @@ public class RegistryAPI {
      * Retrieve the {@link Sample} object associated with a barcode.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param barcode
-     *            - Barcode string.
+     *            Barcode string.
      * @return List of Samples.
      * @throws SessionException
      * @throws ServiceException
@@ -1648,17 +1648,17 @@ public class RegistryAPI {
      * This assumes a plate->well->tube storage scheme.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param recordId
-     *            - RecordId of the Strain.
+     *            RecordId of the Strain.
      * @param rack
      *            -Rack number.
      * @param location
-     *            - Location number.
+     *            Location number.
      * @param barcode
-     *            - Barcode number.
+     *            Barcode number.
      * @param label
-     *            - Label.
+     *            Label.
      * @throws ServiceException
      * @throws PermissionException
      * @throws SessionException
@@ -1752,11 +1752,11 @@ public class RegistryAPI {
      * Check and automagically update sample storage for the given
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param samples
-     *            - Samples
+     *            Samples
      * @param plateId
-     *            - plateId
+     *            plateId
      * @return List of {@link Sample}s.
      * @throws SessionException
      * @throws ServiceException
@@ -1858,9 +1858,9 @@ public class RegistryAPI {
      * Retrieve a list of {@link TraceSequence}s associated with the specified entry.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param recordId
-     *            - RecordId of the desired Entry.
+     *            RecordId of the desired Entry.
      * @return List of TraceSequences.
      * @throws ServiceException
      * @throws SessionException
@@ -1910,13 +1910,13 @@ public class RegistryAPI {
      * Upload a sequence trace (abi) file.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param recordId
-     *            - RecordId of the desired {@link Entry}.
+     *            RecordId of the desired {@link Entry}.
      * @param fileName
-     *            - Name of the trace file.
+     *            Name of the trace file.
      * @param base64FileData
-     *            - Base64 encoded content of the file.
+     *            Base64 encoded content of the file.
      * @return File ID as saved on the server.
      * @throws ServiceException
      * @throws SessionException
@@ -1980,9 +1980,9 @@ public class RegistryAPI {
      * Retrieve the specified trace sequence file.
      * 
      * @param sessionId
-     *            - Session Key.
+     *            Session Key.
      * @param fileId
-     *            - File ID to retrieve.
+     *            File ID to retrieve.
      * @return {@link TraceSequenceFile} object.
      * @throws ServiceException
      * @throws SessionException
@@ -2012,9 +2012,9 @@ public class RegistryAPI {
      * Delete the specified trace sequence file.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param fileId
-     *            - ID of the file to delete.
+     *            ID of the file to delete.
      * @throws ServiceException
      * @throws SessionException
      */
@@ -2046,7 +2046,7 @@ public class RegistryAPI {
      * Retrieve the {@link SequenceAnalysisController} instance for the given session key.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @return SequenceAnalysisController object.
      * @throws ServiceException
      * @throws SessionException
@@ -2061,7 +2061,7 @@ public class RegistryAPI {
      * Retrieve the {@link StorageController} instance for the given session key.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @return StorageController object.
      * @throws ServiceException
      * @throws SessionException
@@ -2076,7 +2076,7 @@ public class RegistryAPI {
      * Retrieve the {@link SampleController} instance for the given session key.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @return SampleController object.
      * @throws SessionException
      * @throws ServiceException
@@ -2091,7 +2091,7 @@ public class RegistryAPI {
      * Retrieve the {@link EntryController} instance for the given session key.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @return EntryController object.
      * @throws SessionException
      * @throws ServiceException
@@ -2107,7 +2107,7 @@ public class RegistryAPI {
      * Retrieve the {@link SequenceController} instance for the given session key.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @return Sequence Controller object.
      * @throws ServiceException
      * @throws SessionException
@@ -2124,7 +2124,7 @@ public class RegistryAPI {
      * Retrieve the {@link SearchController} instance for the given session key.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @return SearchController object.
      * @throws SessionException
      * @throws ServiceException
@@ -2139,7 +2139,7 @@ public class RegistryAPI {
      * in.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @return {@link Account} if user is logged in.
      * @throws ServiceException
      * @throws SessionException
@@ -2173,7 +2173,7 @@ public class RegistryAPI {
      * Write into the log at the INFO level, using the RegistryAPI prefix.
      * 
      * @param message
-     *            - Log message.
+     *            Log message.
      */
     private void log(String message) {
         Logger.info("RegistryAPI: " + message);
@@ -2184,9 +2184,9 @@ public class RegistryAPI {
      * associated with the given session key.
      * 
      * @param sessionId
-     *            - Session key.
+     *            Session key.
      * @param message
-     *            - Log message.
+     *            Log message.
      */
     private void log(String sessionId, String message) {
         Account account = null;

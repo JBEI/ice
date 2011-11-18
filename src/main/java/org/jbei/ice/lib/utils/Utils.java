@@ -31,7 +31,7 @@ public class Utils {
      * Parse comma separated data into a LinkedHashSet.
      * 
      * @param data
-     *            - Data to parse.
+     *            Data to parse.
      * @return LinkedHashSet of strings.
      * */
     public final static LinkedHashSet<String> toHashSetFromCommaSeparatedString(String data) {
@@ -53,7 +53,7 @@ public class Utils {
      * Convert a Collection of {@link SelectionMarker}s into a comma separated list.
      * 
      * @param selectionMarkers
-     *            - Collection of SelectionMarkers.
+     *            Collection of SelectionMarkers.
      * @return Comma separated string.
      */
     public final static String toCommaSeparatedStringFromSelectionMarkers(
@@ -75,7 +75,7 @@ public class Utils {
      * Convert a Collection of {@link Link}s into a comma separated list.
      * 
      * @param links
-     *            - Collection of Links.
+     *            Collection of Links.
      * @return Comma separated string.
      */
     public final static String toCommaSeparatedStringFromLinks(Collection<Link> links) {
@@ -94,7 +94,7 @@ public class Utils {
      * Convert a Collection of {@link Name}s into a comma separated list.
      * 
      * @param names
-     *            - Collection of Names
+     *            Collection of Names
      * @return Comma separated string.
      */
     public final static String toCommaSeparatedStringFromNames(Collection<Name> names) {
@@ -114,7 +114,7 @@ public class Utils {
      * Convert a Collection of {@link PartNumber}s into a comma separated list.
      * 
      * @param partNumbers
-     *            - Collection of PartNumbers.
+     *            Collection of PartNumbers.
      * @return Comma separated string.
      */
     public final static String toCommaSeparatedStringFromPartNumbers(
@@ -136,7 +136,7 @@ public class Utils {
      * Convert a Collection of {@link EntryFundingSource}s into a comma separated list.
      * 
      * @param entryFundingSources
-     *            - Collection of EntryFundingSources
+     *            Collection of EntryFundingSources
      * @return Comma separated string.
      */
     public final static String toCommaSeparatedStringFromEntryFundingSources(
@@ -162,9 +162,9 @@ public class Utils {
      * Analogous to python's string.join method
      * 
      * @param s
-     *            - Collection to work on
+     *            Collection to work on
      * @param delimiter
-     *            - Delimiter to use to join
+     *            Delimiter to use to join
      * @return Joined string.
      */
     public static String join(String delimiter, Collection<?> s) {
@@ -189,7 +189,7 @@ public class Utils {
      * From a forum answer.
      * 
      * @param bytes
-     *            - bytes to convert.
+     *            bytes to convert.
      * @return String of Hex representation
      * @throws UnsupportedEncodingException
      */
@@ -215,7 +215,7 @@ public class Utils {
      * Retrieve the stack trace from the given Throwable, and output the string.
      * 
      * @param throwable
-     *            - Throwable to process.
+     *            Throwable to process.
      * @return String output of the thorwable's stack trace.
      */
     public static String stackTraceToString(Throwable throwable) {
@@ -231,7 +231,7 @@ public class Utils {
      * Calculate the SHA-1 hash of the given string.
      * 
      * @param string
-     *            - Plain text to hash.
+     *            Plain text to hash.
      * @return Hex digest of give string.
      */
     public static String encryptSHA(String string) {
@@ -242,7 +242,7 @@ public class Utils {
      * Calculate the MD5 hash of the given string.
      * 
      * @param string
-     *            - Plain text to hash.
+     *            Plain text to hash.
      * @return Hex digest of the given string.
      */
     @Deprecated
@@ -254,7 +254,7 @@ public class Utils {
      * Calculate the SHA-256 hash of the given string.
      * 
      * @param string
-     *            - plain text to hash.
+     *            plain text to hash.
      * @return Hex digest of the given string.
      */
     public static String encryptSha256(String string) {
@@ -265,9 +265,9 @@ public class Utils {
      * Calculate the message digest of the given message string using the given algorithm.
      * 
      * @param string
-     *            - Plain text message.
+     *            Plain text message.
      * @param algorithm
-     *            - Algorithm to be used.
+     *            Algorithm to be used.
      * @return Hex digest of the given string.
      */
     private static String encrypt(String string, String algorithm) {
@@ -303,7 +303,7 @@ public class Utils {
      * Escape special javascript characters.
      * 
      * @param stringValue
-     *            - input.
+     *            input.
      * @return Escaped input.
      */
     public static String escapeSpecialJavascriptCharacters(String stringValue) {
@@ -322,7 +322,7 @@ public class Utils {
      * Convert a long value into int, safely.
      * 
      * @param l
-     *            - long value to convert.
+     *            long value to convert.
      * @return int value.
      */
     public static int safeLongToInt(long l) {

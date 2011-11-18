@@ -52,7 +52,7 @@ public class RestrictionEnzymesManager {
      * Retrieve {@link RestrictionEnzyme} by its name.
      * 
      * @param enzymeName
-     *            - Name of the enzyme to query.
+     *            Name of the enzyme to query.
      * @return RestrictionEnzyme. Null if not found.
      */
     public RestrictionEnzyme getEnzymeByName(String enzymeName) {
@@ -73,7 +73,7 @@ public class RestrictionEnzymesManager {
      * Retrieve biojava RestrictionEnzyme by name.
      * 
      * @param name
-     *            - Name of the enzyme to query.
+     *            Name of the enzyme to query.
      * @return biojava RestrictionEnzyme.
      */
     public org.biojava.bio.molbio.RestrictionEnzyme getBioJavaEnzyme(String name) {

@@ -40,7 +40,7 @@ public interface IDNAParser {
      * Parse the given file to {@link IDNASequence} annotated sequence.
      * 
      * @param file
-     *            - File to parse.
+     *            File to parse.
      * @return Annotated sequence.
      * @throws FileNotFoundException
      * @throws IOException

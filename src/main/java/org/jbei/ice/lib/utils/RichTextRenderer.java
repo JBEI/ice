@@ -41,9 +41,9 @@ public class RichTextRenderer {
      * Render given text to html using the given type.
      * 
      * @param type
-     *            - Markup type: Mediawiki, Confluence, or Text.
+     *            Markup type: Mediawiki, Confluence, or Text.
      * @param text
-     *            - markup text.
+     *            markup text.
      * @return Html rendering of given text.
      */
     public static String richTextToHtml(String type, String text) {

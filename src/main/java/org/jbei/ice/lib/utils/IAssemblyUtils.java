@@ -15,7 +15,7 @@ public interface IAssemblyUtils {
      * Determine the assembly standard of given sequence string.
      * 
      * @param partSequenceString
-     *            - Sequence string to evaluate.
+     *            Sequence string to evaluate.
      * @return {@link AssemblyStandard}.
      * @throws UtilityException
      */
@@ -27,7 +27,7 @@ public interface IAssemblyUtils {
      * scars for a given {@link Sequence}.
      * 
      * @param partSequence
-     *            - Sequence to evaluate.
+     *            Sequence to evaluate.
      * @return {@link SequenceFeatureCollection}.
      * @throws UtilityException
      */
@@ -39,7 +39,7 @@ public interface IAssemblyUtils {
      * prefixes, suffixes and scars.
      * 
      * @param partSequence
-     *            - Sequence to evaluate.
+     *            Sequence to evaluate.
      * @return Sequence with new annotations.
      * @throws UtilityException
      */
@@ -50,9 +50,9 @@ public interface IAssemblyUtils {
      * sequences.
      * 
      * @param part1
-     *            - First part.
+     *            First part.
      * @param part2
-     *            - Second part.
+     *            Second part.
      * @return {@link Sequence} of the joined assembly.
      * @throws UtilityException
      */

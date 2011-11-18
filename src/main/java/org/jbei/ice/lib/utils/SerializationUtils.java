@@ -36,9 +36,9 @@ public class SerializationUtils {
          * Constructor using message and cause.
          * 
          * @param message
-         *            - Message.
+         *            Message.
          * @param cause
-         *            - Throwable.
+         *            Throwable.
          */
         public SerializationUtilsException(String message, Throwable cause) {
             super(message, cause);
@@ -49,7 +49,7 @@ public class SerializationUtils {
      * Deserialize Base64 encoded string to a java object.
      * 
      * @param serializedObject
-     *            - Base64 encoded string of a java object.
+     *            Base64 encoded string of a java object.
      * @return Deserialized java object.
      * @throws SerializationUtilsException
      */
@@ -76,7 +76,7 @@ public class SerializationUtils {
      * Serialize java {@link Serializable} object into base64 encoded string.
      * 
      * @param object
-     *            - Object to serialize.
+     *            Object to serialize.
      * @return Base64 encoded string of object.
      * @throws SerializationUtilsException
      */
@@ -99,7 +99,7 @@ public class SerializationUtils {
      * Convert the given byte array into base64 encoded string.
      * 
      * @param bytes
-     *            - bytes to encdode.
+     *            bytes to encdode.
      * @return Base64 encoded string
      */
     public static String serializeBytesToBase64String(byte[] bytes) {
@@ -110,7 +110,7 @@ public class SerializationUtils {
      * Convert the given base64 encoded string into byte array.
      * 
      * @param base64String
-     *            - base64 encoded string.
+     *            base64 encoded string.
      * @return Byte array
      */
     public static byte[] deserializeBase64StringToBytes(String base64String) {

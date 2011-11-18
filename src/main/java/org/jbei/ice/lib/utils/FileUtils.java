@@ -20,7 +20,7 @@ public class FileUtils {
      * Read file specified by the path into a string.
      * 
      * @param path
-     *            - Path of the file.
+     *            Path of the file.
      * @return Content of file as String.
      * @throws IOException
      * @throws FileNotFoundException
@@ -33,7 +33,7 @@ public class FileUtils {
      * Read the given {@link File} into a string.
      * 
      * @param file
-     *            - File to read.
+     *            File to read.
      * @return File content as string.
      * @throws IOException
      * @throws FileNotFoundException
@@ -66,9 +66,9 @@ public class FileUtils {
      * Write the given string content into a file with the specified path.
      * 
      * @param path
-     *            - Path of the file to be written.
+     *            Path of the file to be written.
      * @param content
-     *            - Content of the file.
+     *            Content of the file.
      * @throws FileNotFoundException
      * @throws IOException
      * @throws IllegalArgumentException
@@ -82,9 +82,9 @@ public class FileUtils {
      * Write the given string content into the given {@link File}.
      * 
      * @param file
-     *            - File to write.
+     *            File to write.
      * @param content
-     *            - Content of the file.
+     *            Content of the file.
      * @throws FileNotFoundException
      * @throws IOException
      * @throws IllegalArgumentException

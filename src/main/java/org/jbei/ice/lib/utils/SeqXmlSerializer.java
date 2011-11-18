@@ -53,7 +53,7 @@ public class SeqXmlSerializer {
      * Generate seq-xml from the given {@link Sequence}.
      * 
      * @param sequence
-     *            - Sequence to sereialize.
+     *            Sequence to sereialize.
      * @return Xml document.
      * @throws UtilityException
      */
@@ -69,7 +69,7 @@ public class SeqXmlSerializer {
      * Generate seq xml {@link Element} from the give {@link Sequence}.
      * 
      * @param sequence
-     *            - Sequence to serialize.
+     *            Sequence to serialize.
      * @return Xml Element.
      * @throws UtilityException
      */
@@ -166,7 +166,7 @@ public class SeqXmlSerializer {
      * Deserialize given xml to {@link Sequence} object.
      * 
      * @param xml
-     *            - xml to parse.
+     *            xml to parse.
      * @return Sequence object.
      * @throws UtilityException
      */
@@ -189,7 +189,7 @@ public class SeqXmlSerializer {
      * Deserialize given seq xml {@link Element} to {@link Sequence} object.
      * 
      * @param seqElement
-     *            - xml Element to parse.
+     *            xml Element to parse.
      * @return Sequence object.
      * @throws UtilityException
      */

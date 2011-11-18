@@ -141,7 +141,7 @@ public class IceXmlSerializer {
      * Generate ice-xml from given List of {@link Entry}s.
      * 
      * @param entries
-     *            - Entries to serialize.
+     *            Entries to serialize.
      * @return xml document as string.
      * @throws UtilityException
      */
@@ -177,9 +177,9 @@ public class IceXmlSerializer {
      * Generate ice-xml from the given List of {@link Entry}s and {@link Sequence}s.
      * 
      * @param entries
-     *            - Entries to serialize.
+     *            Entries to serialize.
      * @param sequences
-     *            - Corresponding sequences to serialize.
+     *            Corresponding sequences to serialize.
      * @return xml {@link Document}.
      * @throws UtilityException
      */
@@ -212,9 +212,9 @@ public class IceXmlSerializer {
      * Generate single "entry" xml {@link Element} from the given {@link Entry} and {@link Sequence}
      * 
      * @param entry
-     *            - Entry to serialize.
+     *            Entry to serialize.
      * @param sequence
-     *            - Sequence to serialize.
+     *            Sequence to serialize.
      * @return xml Element.
      * @throws UtilityException
      */
@@ -351,7 +351,7 @@ public class IceXmlSerializer {
      * Generate type specific fields as xml {@link Element} from the given {@link Entry}.
      * 
      * @param entry
-     *            - Entry to serialize.
+     *            Entry to serialize.
      * @return xml Element containing type specific fields.
      */
     private static Element getEntryTypeSpecificFields(Entry entry) {
@@ -421,7 +421,7 @@ public class IceXmlSerializer {
      * Generate selection marker xml {@link Element} from the given {@link Entry}.
      * 
      * @param entry
-     *            - Entry to serialize.
+     *            Entry to serialize.
      * @return xml Element containing selection markers.
      */
     private static Element getSelectionMarkers(Entry entry) {
@@ -444,7 +444,7 @@ public class IceXmlSerializer {
      * out as experimental data schema develops.
      * 
      * @param entry
-     *            - Entry to serialize.
+     *            Entry to serialize.
      * @return xml Element.
      * @throws UtilityException
      */
@@ -503,7 +503,7 @@ public class IceXmlSerializer {
      * Deserialize given xml to list of {@link CompleteEntry}s.
      * 
      * @param xml
-     *            - xml to parse.
+     *            xml to parse.
      * @return List of CompleteEntries.
      * @throws UtilityException
      */
@@ -578,7 +578,7 @@ public class IceXmlSerializer {
      * Deserialize given entry xml element into {@link CompleteEntry}.
      * 
      * @param entryDocument
-     *            - xml element to parse.
+     *            xml element to parse.
      * @return CompleteEntry.
      * @throws UtilityException
      */
@@ -748,7 +748,7 @@ public class IceXmlSerializer {
      * Deserialize selection marker xml Element into a set of {@link SelectionMarker}s.
      * 
      * @param selectionMarkers
-     *            - xml element.
+     *            xml element.
      * @return Set of SelectionMarkers
      */
     private static Set<SelectionMarker> parseSelectionMarkers(Element selectionMarkers) {
@@ -766,7 +766,7 @@ public class IceXmlSerializer {
      * Deserialize attachment xml Element into a List of {@link AttachmentData}.
      * 
      * @param attachments
-     *            - xml element.
+     *            xml element.
      * @return List of AttachmentData.
      */
     private static List<AttachmentData> parseAttachments(Element attachments) {

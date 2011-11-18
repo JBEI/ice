@@ -18,7 +18,7 @@ public class SequenceUtils {
      * Normalize by trimming and converting to lower case. Does not verify valid symbol.
      * 
      * @param sequence
-     *            - sequence to hash.
+     *            sequence to hash.
      * @return Hex digest of SHA-1 hash.
      */
     public static String calculateSequenceHash(String sequence) {
@@ -31,7 +31,7 @@ public class SequenceUtils {
      * Normalize by trimming and converting to lower case. Does not verify valid symbol.
      * 
      * @param sequence
-     *            - sequence to hash.
+     *            sequence to hash.
      * @return Hex digest of SHA-1 hash.
      * @throws UtilityException
      */
@@ -44,7 +44,7 @@ public class SequenceUtils {
      * Calculate the reverse complement of the given DNA sequence.
      * 
      * @param sequence
-     *            - DNA sequence to reverse complement.
+     *            DNA sequence to reverse complement.
      * @return Reversed, complemented sequence.
      * @throws UtilityException
      */
@@ -67,7 +67,7 @@ public class SequenceUtils {
      * Calculate the amino acid translation of the given dnaSequence string.
      * 
      * @param dnaSequence
-     *            - DNA sequence to translate.
+     *            DNA sequence to translate.
      * @return String of amino acid symbols.
      * @throws UtilityException
      */
@@ -90,7 +90,7 @@ public class SequenceUtils {
      * Format into 6 column, 10 basepairs per column display.
      * 
      * @param input
-     *            - sequence string.
+     *            sequence string.
      * @return Formatted sequence output.
      */
     public static String breakUpLines(String input) {

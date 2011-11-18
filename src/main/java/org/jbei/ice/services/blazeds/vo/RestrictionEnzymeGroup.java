@@ -30,9 +30,9 @@ public class RestrictionEnzymeGroup implements Serializable {
      * Constuctor setting the name and the {@link RestrictionEnzyme}s.
      * 
      * @param name
-     *            - name of the group to create.
+     *            name of the group to create.
      * @param enzymes
-     *            - Set of RestrictionEnzymes.
+     *            Set of RestrictionEnzymes.
      */
     public RestrictionEnzymeGroup(String name, Set<RestrictionEnzyme> enzymes) {
         super();

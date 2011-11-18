@@ -175,7 +175,7 @@ public class BiobrickBUtils implements IAssemblyUtils {
      * It checks for prefix, suffix, and scans for incomaptible restriction sites.
      * 
      * @param partSequenceString
-     *            - sequence string to test.
+     *            sequence string to test.
      * @return {@link AssemblyStandard}.
      * @throws UtilityException
      */
@@ -243,7 +243,7 @@ public class BiobrickBUtils implements IAssemblyUtils {
      * Search for BglBrick prefix in the given sequence string.
      * 
      * @param sequenceString
-     *            - query sequence.
+     *            query sequence.
      * @return - {@link SimpleFeature}.
      * @throws ControllerException
      */
@@ -272,7 +272,7 @@ public class BiobrickBUtils implements IAssemblyUtils {
      * Search for BglBrick suffix in the given sequence string.
      * 
      * @param sequenceString
-     *            - query sequence.
+     *            query sequence.
      * @return {@link SimpleFeature}.
      * @throws ControllerException
      */
@@ -407,9 +407,9 @@ public class BiobrickBUtils implements IAssemblyUtils {
      * Assemble two bglbrick sequences together.
      * 
      * @param part1Sequence
-     *            - first sequence.
+     *            first sequence.
      * @param part2Sequence
-     *            - second sequence.
+     *            second sequence.
      * @return Assembled {@link Sequence}.
      * @throws UtilityException
      */

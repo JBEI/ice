@@ -37,7 +37,7 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
      * Constructor that takes a Collection of {@link SequenceFeature}s.
      * 
      * @param c
-     *            - Collection of SequenceFeatures.
+     *            Collection of SequenceFeatures.
      */
     public SequenceFeatureCollection(Collection<SequenceFeature> c) {
         if (c == null) {
@@ -52,7 +52,7 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
      * Determine if the given {@link Feature} exists.
      * 
      * @param feature
-     *            - Feature to find.
+     *            Feature to find.
      * @return True if a feature with the same sequence as the given feature exists.
      */
     public boolean exists(Feature feature) {
@@ -68,7 +68,7 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
      * Determine if the given {@link SequenceFeature.AnnotationType} exists.
      * 
      * @param flag
-     *            - AnnotationType to find.
+     *            AnnotationType to find.
      * @return True if a feature with the given AnnotationType exists.
      */
     public boolean exists(SequenceFeature.AnnotationType flag) {
@@ -84,7 +84,7 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
      * Retrieve a list of {@link SequenceFeature}s with the identical hash as the given feature.
      * 
      * @param feature
-     *            - Feature to find.
+     *            Feature to find.
      * @return List of {@link SequenceFeature}s.
      */
     public List<SequenceFeature> get(Feature feature) {
@@ -102,7 +102,7 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
      * {@link SequenceFeature.AnnotationType}.
      * 
      * @param flag
-     *            - AnnotationType to search for.
+     *            AnnotationType to search for.
      * @return List of SequenceFeatures.
      */
     public List<SequenceFeature> get(SequenceFeature.AnnotationType flag) {
@@ -119,7 +119,7 @@ public class SequenceFeatureCollection implements Cloneable, Collection<Sequence
      * Retrieve a list of {@link SequenceFeature}s with the given sequence string.
      * 
      * @param sequenceString
-     *            - sequence to search for.
+     *            sequence to search for.
      * @return List of SequenceFeatures.
      */
     public List<SequenceFeature> getBySequence(String sequenceString) {

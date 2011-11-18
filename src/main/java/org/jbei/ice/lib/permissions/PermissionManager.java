@@ -31,7 +31,7 @@ public class PermissionManager {
      * Check if the logged in user has read permission to the given {@link Entry} by entryId.
      * 
      * @param entryId
-     *            - id of the Entry.
+     *            id of the Entry.
      * @return True if user has read permission to the specified entry.
      */
     public static boolean hasReadPermission(long entryId) {
@@ -43,9 +43,9 @@ public class PermissionManager {
      * given {@link Entry} by recordId.
      * 
      * @param recordId
-     *            - recordId of the Entry.
+     *            recordId of the Entry.
      * @param sessionKey
-     *            - session key.
+     *            session key.
      * @return True if the given session account has read permission to the specified entry.
      */
     public static boolean hasReadPermission(String recordId, String sessionKey) {
@@ -72,9 +72,9 @@ public class PermissionManager {
      * Check if the {@link Account} has read permission to the specified {@link Entry} by entryId.
      * 
      * @param recordId
-     *            - recordId of the Entry.
+     *            recordId of the Entry.
      * @param account
-     *            - Account
+     *            Account
      * @return True if the given Account has read permission to the specified Entry.
      */
     public static boolean hasReadPermission(String recordId, Account account) {
@@ -100,7 +100,7 @@ public class PermissionManager {
      * Check if the {@link Account} has read permission to the specified {@link Entry}.
      * 
      * @param entryId
-     *            - id of the specified Entry.
+     *            id of the specified Entry.
      * @param account
      *            Account
      * @return True if given Account has read permission to the specified Entry.
@@ -128,7 +128,7 @@ public class PermissionManager {
      * Check if the current {@link Account} has write permission to the specified {@link Entry}.
      * 
      * @param entryId
-     *            - id of the specified Entry.
+     *            id of the specified Entry.
      * @return True if current user has write permission to the specified Entry.
      */
     public static boolean hasWritePermission(long entryId) {
@@ -153,9 +153,9 @@ public class PermissionManager {
      * the specified {@link Entry}.
      * 
      * @param entryId
-     *            - id of the Entry
+     *            id of the Entry
      * @param sessionKey
-     *            - session key
+     *            session key
      * @return True if the user has write permission.
      */
     public static boolean hasWritePermission(long entryId, String sessionKey) {
@@ -181,9 +181,9 @@ public class PermissionManager {
      * the specified {@link Entry}.
      * 
      * @param recordId
-     *            - recordId of the Entry.
+     *            recordId of the Entry.
      * @param account
-     *            - Account to be queried.
+     *            Account to be queried.
      * @return True if the account has write permission to the specified Entry.
      */
     public static boolean hasWritePermission(String recordId, Account account) {
@@ -210,9 +210,9 @@ public class PermissionManager {
      * the specified {@link Entry}.
      * 
      * @param entryId
-     *            - id of the Entry.
+     *            id of the Entry.
      * @param account
-     *            - Account to be queried.
+     *            Account to be queried.
      * @return True if the account has write permission to the specified Entry.
      */
     public static boolean hasWritePermission(long entryId, Account account) {
@@ -239,7 +239,7 @@ public class PermissionManager {
      * {@link Entry}.
      * 
      * @param entry
-     *            - Entry to be queried.
+     *            Entry to be queried.
      * @return True if the current user has read permission.
      */
     public static boolean hasReadPermission(Entry entry) {
@@ -268,7 +268,7 @@ public class PermissionManager {
      * {@link Entry}.
      * 
      * @param entry
-     *            - Entry to be queried.
+     *            Entry to be queried.
      * @return True if the current user has wrte permission.
      */
     public static boolean hasWritePermission(Entry entry) {
@@ -296,9 +296,9 @@ public class PermissionManager {
      * Checks if the given {@link Account} has write permission to the given {@link Entry}.
      * 
      * @param entry
-     *            - Entry to be queried.
+     *            Entry to be queried.
      * @param account
-     *            - Account to be queried.
+     *            Account to be queried.
      * @return True if the given account has write permission to the given Entry.
      */
     public static boolean hasWritePermission(Entry entry, Account account) {
@@ -324,9 +324,9 @@ public class PermissionManager {
      * This method creates new {@link ReadUser} objects using the given {@link Account}s.
      * 
      * @param entry
-     *            - Entry to give read permission to.
+     *            Entry to give read permission to.
      * @param accounts
-     *            - Accounts to give read permission to.
+     *            Accounts to give read permission to.
      * @throws ManagerException
      */
     public static void setReadUser(Entry entry, Set<Account> accounts) throws ManagerException {
@@ -380,7 +380,7 @@ public class PermissionManager {
      * Retrieve {@link Account}s with read permissions set for the specified {@link Entry}.
      * 
      * @param entry
-     *            - Entry to get ReadUsers about.
+     *            Entry to get ReadUsers about.
      * @return Set of Accounts with read permission for the given Entry.
      * @throws ManagerException
      */
@@ -413,9 +413,9 @@ public class PermissionManager {
      * This method creates new {@link ReadGroup} objects using the given {@link Group}s.
      * 
      * @param entry
-     *            - Entry to give permission to.
+     *            Entry to give permission to.
      * @param groups
-     *            - Groups to give read permission to.
+     *            Groups to give read permission to.
      * @throws ManagerException
      */
     public static void setReadGroup(Entry entry, Set<Group> groups) throws ManagerException {
@@ -448,9 +448,9 @@ public class PermissionManager {
      * This method adds a new {@link ReadGroup} object to the database..
      * 
      * @param entry
-     *            - Entry to give read permission to.
+     *            Entry to give read permission to.
      * @param group
-     *            - Group to give read permission to.
+     *            Group to give read permission to.
      * @throws ManagerException
      */
     public static void addReadGroup(Entry entry, Group group) throws ManagerException {
@@ -472,7 +472,7 @@ public class PermissionManager {
      * Retrieve {@link Group}s with read permissions set for the specified {@link Entry}.
      * 
      * @param entry
-     *            - Entry to query on.
+     *            Entry to query on.
      * @return Set of Groups.
      * @throws ManagerException
      */
@@ -506,9 +506,9 @@ public class PermissionManager {
      * This method creates new {@link WriteUser} objects using the given {@link Account}s.
      * 
      * @param entry
-     *            - Entry to give permission to.
+     *            Entry to give permission to.
      * @param accounts
-     *            - Accounts to give write permission to.
+     *            Accounts to give write permission to.
      * @throws ManagerException
      */
     public static void setWriteUser(Entry entry, Set<Account> accounts) throws ManagerException {
@@ -544,9 +544,9 @@ public class PermissionManager {
      * This method adds a new {@link WriteUser} object to the database..
      * 
      * @param entry
-     *            - Entry to give write permission to.
+     *            Entry to give write permission to.
      * @param account
-     *            - Account to give write permission to.
+     *            Account to give write permission to.
      * @throws ManagerException
      */
     public static void addWriteUser(Entry entry, Account account) throws ManagerException {
@@ -568,7 +568,7 @@ public class PermissionManager {
      * Retrieve {@link Account}s with write permissions set for the specified {@link Entry}.
      * 
      * @param entry
-     *            - entry to query on.
+     *            entry to query on.
      * @return Set of Accounts.
      * @throws ManagerException
      */
@@ -602,9 +602,9 @@ public class PermissionManager {
      * This method creates new {@link WriteGroup} objects using the given {@link Group}s.
      * 
      * @param entry
-     *            - Entry to give permission to.
+     *            Entry to give permission to.
      * @param groups
-     *            - Groups to give write permission to.
+     *            Groups to give write permission to.
      * @throws ManagerException
      */
     public static void setWriteGroup(Entry entry, Set<Group> groups) throws ManagerException {
@@ -635,9 +635,9 @@ public class PermissionManager {
      * This method adds a new {@link WriteGroup} object to the database..
      * 
      * @param entry
-     *            - Entry to give write permission to.
+     *            Entry to give write permission to.
      * @param group
-     *            - Group to give write permission to.
+     *            Group to give write permission to.
      * @throws ManagerException
      */
     public static void addWriteGroup(Entry entry, Group group) throws ManagerException {
@@ -659,7 +659,7 @@ public class PermissionManager {
      * Retrieve {@link Group}s with write permissions set for the specified {@link Entry}.
      * 
      * @param entry
-     *            - Entry to query on.
+     *            Entry to query on.
      * @return Set of Groups.
      * @throws ManagerException
      */
@@ -689,9 +689,9 @@ public class PermissionManager {
      * Check if the given {@link Account} has read permission to the given {@link Entry}.
      * 
      * @param entry
-     *            - Entry to query on.
+     *            Entry to query on.
      * @param account
-     *            - Account to query on.
+     *            Account to query on.
      * @return True if given Account has read permission to the given Entry.
      */
     @SuppressWarnings("unchecked")
@@ -723,9 +723,9 @@ public class PermissionManager {
      * Check if the given {@link Account} has read permission to the specified {@link entry}.
      * 
      * @param entryId
-     *            - id of Entry to query on.
+     *            id of Entry to query on.
      * @param account
-     *            - Account to query on.
+     *            Account to query on.
      * @return True if given Account has read permission to the specified Entry.
      */
     @SuppressWarnings("unchecked")
@@ -780,9 +780,9 @@ public class PermissionManager {
      * Check if the given {@link Account} has read permission to the specified {@link entry}.
      * 
      * @param recordId
-     *            - id of Entry to query on.
+     *            id of Entry to query on.
      * @param account
-     *            - Account to query on.
+     *            Account to query on.
      * @return True if given Account has read permission to the specified Entry.
      */
     @SuppressWarnings("unchecked")
@@ -837,9 +837,9 @@ public class PermissionManager {
      * Check if the given {@link Account} has write permission to the given {@link Entry}.
      * 
      * @param entry
-     *            - Entry to query on.
+     *            Entry to query on.
      * @param account
-     *            - Account to query on.
+     *            Account to query on.
      * @return True if given Account has write permission to the given Entry.
      */
     protected static boolean userHasWritePermission(Entry entry, Account account) {
@@ -876,9 +876,9 @@ public class PermissionManager {
      * comparing the permissible {@link Group} hierarchy with groups the user belongs to.
      * 
      * @param entry
-     *            - Entry to query on.
+     *            Entry to query on.
      * @param account
-     *            - Account to query on.
+     *            Account to query on.
      * @return True if the Account has read permission to the Entry.
      */
     @SuppressWarnings("unchecked")
@@ -913,9 +913,9 @@ public class PermissionManager {
      * comparing the permissible {@link Group} hierarchy with groups the user belongs to.
      * 
      * @param entryId
-     *            - id of the Entry.
+     *            id of the Entry.
      * @param account
-     *            - Account to be queried.
+     *            Account to be queried.
      * @return True if the Account has read permission to the Entry.
      */
     @SuppressWarnings("unchecked")
@@ -951,9 +951,9 @@ public class PermissionManager {
      * comparing the permissible {@link Group} hierarchy with groups the user belongs to.
      * 
      * @param recordId
-     *            - recordId of Entry.
+     *            recordId of Entry.
      * @param account
-     *            - Account to query on.
+     *            Account to query on.
      * @return True if the Account has read permission to the Entry.
      */
     @SuppressWarnings("unchecked")
@@ -990,9 +990,9 @@ public class PermissionManager {
      * *
      * 
      * @param entry
-     *            - Entry to query on.
+     *            Entry to query on.
      * @param account
-     *            - Account to query on.
+     *            Account to query on.
      * @return True if the Account has write permission to the Entry.
      */
     @SuppressWarnings("unchecked")
@@ -1027,9 +1027,9 @@ public class PermissionManager {
      * Retrieve all parent {@link Group}s of a given group.
      * 
      * @param group
-     *            - Group to query on.
+     *            Group to query on.
      * @param groupIds
-     *            - optional set of group ids. Can be empty.
+     *            optional set of group ids. Can be empty.
      * @return
      */
     protected static HashSet<Long> getParentGroups(Group group, HashSet<Long> groupIds) {
@@ -1050,7 +1050,7 @@ public class PermissionManager {
      * Retrieve all parent {@link Group}s of a given {@link Account}.
      * 
      * @param account
-     *            - Account to query on.
+     *            Account to query on.
      * @return Set of Group ids.
      */
     protected static Set<Long> getAllAccountGroups(Account account) {

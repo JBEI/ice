@@ -168,9 +168,9 @@ public class Query {
      * Query using the filter specified by the key.
      * 
      * @param key
-     *            - name of the filter to query.
+     *            name of the filter to query.
      * @param value
-     *            - query value.
+     *            query value.
      * @return
      * @throws QueryException
      */
@@ -201,7 +201,7 @@ public class Query {
      * Search using filter syntax given by data.
      * 
      * @param data
-     *            - filter syntax.
+     *            filter syntax.
      * @return List of {@link Entry} ids
      * @throws QueryException
      */
@@ -240,12 +240,12 @@ public class Query {
      * Convert filter selection options into hql query terms.
      * 
      * @param field
-     *            - field to operate on.
+     *            field to operate on.
      * @param operator
-     *            - ~ is contains, !~ is not contain, = is exact equal, ! is exact not, ^ is matches
+     *            ~ is contains, !~ is not contain, = is exact equal, ! is exact not, ^ is matches
      *            start, $ is matches end.
      * @param term
-     *            - query term.
+     *            query term.
      * @return HQL query term for field.
      */
     protected String makeCriterion(String field, String operator, String term) {
@@ -279,7 +279,7 @@ public class Query {
      * Parse the syntax in value into operator and the query string.
      * 
      * @param value
-     *            - query syntax.
+     *            query syntax.
      * @return HashMap containing operator and value.
      */
     protected HashMap<String, String> parseQuery(String value) {
@@ -939,13 +939,13 @@ public class Query {
      * Perform blast query.
      * 
      * @param queryString
-     *            - sequence to be queried.
+     *            sequence to be queried.
      * @param type
-     *            - blast program name.
+     *            blast program name.
      * @param minPercentIdentity
-     *            - lower bound percent identity filter.
+     *            lower bound percent identity filter.
      * @param minLength
-     *            - lower bound length filter.
+     *            lower bound length filter.
      * @return HashSet of {link Entry} ids.
      */
     private HashSet<Long> blastQuery(String queryString, String type, double minPercentIdentity,

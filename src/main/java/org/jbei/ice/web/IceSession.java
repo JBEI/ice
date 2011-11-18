@@ -72,9 +72,9 @@ public class IceSession extends WebSession {
      * Authenticate the user using authentication method specified in the settings file.
      * 
      * @param login
-     *            - Login name.
+     *            Login name.
      * @param password
-     *            - Password
+     *            Password
      * @return - {@link SessionData} object.
      * @throws IceSessionException
      * @throws InvalidCredentialsException
@@ -169,7 +169,7 @@ public class IceSession extends WebSession {
      * Set a cookie in the user's browser.
      * 
      * @param sessionKey
-     *            - session key to set into the cookie.
+     *            session key to set into the cookie.
      */
     private void setSessionKeyCookie(String sessionKey) {
         Cookie cookie = new Cookie(COOKIE_NAME, sessionKey);
@@ -206,7 +206,7 @@ public class IceSession extends WebSession {
      * Save the {@link AccountPreferences} into the database.
      * 
      * @param accountPreferences
-     *            - AccountPreferences.
+     *            AccountPreferences.
      */
     public void setAccountPreferences(AccountPreferences accountPreferences) {
         try {

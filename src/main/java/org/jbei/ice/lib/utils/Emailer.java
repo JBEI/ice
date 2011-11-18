@@ -25,13 +25,13 @@ public class Emailer {
      * Send an email.
      * 
      * @param receiverEmail
-     *            - Address to send email to.
+     *            Address to send email to.
      * @param ccEmail
-     *            - Address to send carbon copy to.
+     *            Address to send carbon copy to.
      * @param subject
-     *            - Text of subject.
+     *            Text of subject.
      * @param body
-     *            - Text of body.
+     *            Text of body.
      */
     public static void send(String receiverEmail, String ccEmail, String subject, String body) {
         Properties props = new Properties();
@@ -64,11 +64,11 @@ public class Emailer {
      * Send an email, and cc to the administrator.
      * 
      * @param receiverEmail
-     *            - Address to send email to.
+     *            Address to send email to.
      * @param subject
-     *            - Subject text.
+     *            Subject text.
      * @param body
-     *            - Body text.
+     *            Body text.
      */
     public static void send(String receiverEmail, String subject, String body) {
         send(receiverEmail, JbeirSettings.getSetting("ADMIN_EMAIL"), subject, body);
@@ -78,9 +78,9 @@ public class Emailer {
      * Send an email to the administrator.
      * 
      * @param subject
-     *            - Subject text.
+     *            Subject text.
      * @param body
-     *            - Body text.
+     *            Body text.
      */
     public static void error(String subject, String body) {
         send(JbeirSettings.getSetting("ADMIN_EMAIL"), subject, body);

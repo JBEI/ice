@@ -53,7 +53,7 @@ public class ImportHelper {
      * Parse the given {@link File} specifying strains into key-value {@link HashMap}.
      * 
      * @param file
-     *            - File to parse.
+     *            File to parse.
      * @return List of HashMaps.
      * @throws UtilityException
      */
@@ -377,9 +377,9 @@ public class ImportHelper {
      * @param parsedContent
      *            -parsed Hashmap.
      * @param filePath
-     *            - file Path.
+     *            file Path.
      * @param filePostFix
-     *            - file extension.
+     *            file extension.
      * @return
      * @throws UtilityException
      */

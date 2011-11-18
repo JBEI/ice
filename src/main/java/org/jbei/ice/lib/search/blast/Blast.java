@@ -88,9 +88,9 @@ public class Blast {
      * Get only the longest distinct matches. No partial matches for the same record.
      * 
      * @param queryString
-     *            - Sequence to be queried
+     *            Sequence to be queried
      * @param blastProgram
-     *            - blast program to use.
+     *            blast program to use.
      * @return
      * @throws ProgramTookTooLongException
      * @throws BlastException
@@ -125,9 +125,9 @@ public class Blast {
      * This method requires disk space write temporary files. It tries to clean up after itself.
      * 
      * @param query
-     *            - reference sequence.
+     *            reference sequence.
      * @param subjects
-     *            - query sequences.
+     *            query sequences.
      * @return List of output string from bl2seq program.
      * @throws BlastException
      * @throws ProgramTookTooLongException
@@ -205,7 +205,7 @@ public class Blast {
      * If the database does not exist, create it.
      * 
      * @param queryString
-     *            - sequence to be blasted.
+     *            sequence to be blasted.
      * @return ArrayList of {@link BlastResult}s.
      * @throws ProgramTookTooLongException
      * @throws BlastException
@@ -298,13 +298,13 @@ public class Blast {
      * Create a new blast database on disk using formatdb program.
      * 
      * @param fastaFileDir
-     *            - directory where the fasta file is located.
+     *            directory where the fasta file is located.
      * @param fastaFileName
-     *            - name of the fasta file.
+     *            name of the fasta file.
      * @param logFileName
-     *            - name of the log output file.
+     *            name of the log output file.
      * @param databaseName
-     *            - name of the blast database.
+     *            name of the blast database.
      * @throws BlastException
      */
     private static void formatBlastDb(File fastaFileDir, String fastaFileName, String logFileName,
@@ -358,7 +358,7 @@ public class Blast {
      * Wrapper to run an external program, and collect its output.
      * 
      * @param commandString
-     *            - command to run.
+     *            command to run.
      * @return Output string from the program.
      * @throws BlastException
      */
@@ -387,9 +387,9 @@ public class Blast {
      * Wrapper to run an external program, feeding it inputs and collecting its output.
      * 
      * @param inputString
-     *            - input to the program.
+     *            input to the program.
      * @param commandString
-     *            - external command to run.
+     *            external command to run.
      * @return Output from the program as string.
      * @throws ProgramTookTooLongException
      * @throws BlastException
@@ -656,7 +656,7 @@ public class Blast {
      * Retrieve all the sequences from the database, and writes it out to a fasta file on disk.
      * 
      * @param bigFastaWriter
-     *            - filewriter to write to.
+     *            filewriter to write to.
      * @throws BlastException
      */
     private void writeBigFastaFile(FileWriter bigFastaWriter) throws BlastException {
@@ -720,7 +720,7 @@ public class Blast {
      * Retrieve all the feature sequences from the database, and write it out to disk.
      * 
      * @param fastaFileWriter
-     *            - filewrite to write to.
+     *            filewrite to write to.
      * @throws BlastException
      */
     private void writeFeatureFastaFile(FileWriter fastaFileWriter) throws BlastException {
