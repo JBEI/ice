@@ -2,6 +2,7 @@
 <module rename-to='gwt_ice'>
   <!-- Inherit the core Web Toolkit stuff.                        -->
   <inherits name='com.google.gwt.user.User'/>
+  <inherits name="gwtupload.GWTUpload"/>
   
   <!--<set-configuration-property name="UiBinder.useSafeHtmlTemplates" value="true" />
 

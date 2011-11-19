@@ -1,69 +1,245 @@
 html {
-    height: 98%;
+	height: 98%;
 }
 
 body {
-    color: #454545;
-    font: 0.8em/1.5em Arial,sans-serif;
-    background: #ffffff;
-    padding: 0;
-    margin-top: 5;
-    margin-bottom: 5;
-    margin-left: 5;
-    margin-right: 5;
-    height: 100%;
+	color: #454545;
+	/* font: 0.8em/1.5em Arial, sans-serif; */
+	font: normal 100% Arial, sans-serif;
+	background: #ffffff;
+	padding: 0;
+	margin-top: 5;
+	margin-bottom: 5;
+	margin-left: 5;
+	margin-right: 5;
+	height: 100%;
 }
 
-a {
-    color: #185DA0;
+.collection_menu_header {
+	
+}
+
+/* style for the number in the menu e.g. Sample   8*/
+.menu_count {
+	color: #ccc;
+	float: right;
+	font-family: arial, ‘Arial Narrow’, sans-serif;
+}
+
+.action_button {
+	border: 1px solid #3565b2;
+	background-color: #4787ED;
+	color: white;
+	font-weight: bold;
+	font-size: 0.75em;
+	width: 40px;
+	padding: 3px;
+}
+
+.action_button:hover {
+    cursor: pointer;
+}
+
+a.cell_mouseover:hover {
+	cursor: pointer;
+}
+
+/* ENTRY DETAIL VIEW */
+.entry_view_left_menu {
+	border-top: 2px solid #4787ED; 
+    width: 250px; 
+    border-bottom: 1px solid #4787ED;
+}
+
+.entry_view_right_menu_2 {
+	border-top: 2px solid #999; 
+    width: 250px; 
+    border-bottom: 1px solid #999;
+}
+
+.entry_view_right_menu {
+    float: right; 
+    padding-left: 10px;
+}
+
+.entry_view_sub_menu_header {
+    background-color: #F1F1F1;
+    font-weight: bold;
+    font-size: 0.95em;
+    font-family: arial;
+    padding: 8px;
+}
+
+/* HEADER MENU */
+#dark {
+    background: none repeat scroll 0 0 #444;
+    color: #FFFFFF;
+}
+
+#indented ul {
+    list-style: none;
+    height: 40px;
+}
+
+#indented ul li {
+    border-left: 1px solid #555;
+    border-right: 1px solid #222;
+    float: left;
+    position: relative;
+}
+
+#indented ul li:first-child {
+	border-left: none;
+}
+
+#indented ul li:last-child {
+	border-right: none;
+}
+
+#indented ul li a {
+    padding: 10px;
+    display: block;
+    color: #fff;
     text-decoration: none;
 }
 
-a:hover {
+#indented ul li a:hover {background: #111;}
+
+/* COLLECTIONS */
+.collection_user_menu:hover {
+    background-color: #FAFAFA;
     color: #9EC068;
 }
 
+/* BULK IMPORT*/
+.cell {
+	padding: 2;
+	border-right: 1px solid #ccc;
+	border-top: 1px solid #ccc;
+	
+	width: 130px;
+	height: 17px;
+}
+
+.cell_resize:hover {
+	background-color: #333;
+	cursor: e-resize;
+}
+
+.cell_col_header {
+	padding: 2;
+	background-color: #eee;
+}
+
+.cell_selected {
+	border: 2px solid blue;
+}
+
+.cell_input {
+	padding: 2;
+    border: 1px solid #000;
+    width: 100px;
+    height: 15px;
+}
+
+.attachment_small_text {
+	color: #999;
+	font-size: 9px;
+}
+
+.entry_view_content {
+	border-right: 1px solid #ccc; 
+	border-top: 1px solid #ccc;
+}
+
+
+
+/* LOGIN */
+.login_text {	
+}
+
+.quick_search_btn, .login_button {
+	color: white;
+	background-color: #4787ED;
+	padding: 4px 15px;
+	border: 1px solid #4787ED;
+	font-weight: bold;
+	font: arial, sans-serif;
+}
+
+.login_input {
+	border: 1px solid #EEE;
+	width: 300px;
+	padding: 5px;
+}
+
+.login_input_error {
+    border: 1px solid red;
+    width: 300px;
+    padding: 5px;
+}
+
+.login_error_msg {
+	font-family: arial;
+	font-size: 12px;
+	color: red;
+}
+
+.quick_search_input {
+	border: 1px solid #ccc;
+	padding: 4px;
+}
+
+a {
+	color: #185DA0;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #9EC068;
+}
+
 .footer {
-	float:bottom;
+	float: bottom;
 }
 
-.header_info {
+.float_right {
 	float: right;
-    padding: 0 0 4px;
-    width: 570px;
 }
 
-.header_info_right {
-    border-left: 1px solid #EEEEEE;
-    float: right;
-    padding: 0 0 0 35px;
-    width: 290px;
+.small_text {
+	font-size: 0.90em;
+	font: arial;
+}
+
+.color_eee {
+	color: #EEE;
 }
 
 .header_info_left {
-    float: left;
-    width: 240px;
+	float: left;
+	width: 240px;
 }
 
 .base_tabs {
 	position: relative;
-    top: 0;
-    margin: 2px 2px 0 0;
-    float: left;
-    /* background: #F0F0F0; */
-    border-right: 1px solid #AAA;
-    border-top: 1px solid #AAA;
-    border-left: 1px solid #AAA;
-    padding: 2px 10px 2px 10px;
-    text-decoration: none;
-    color: #333;
-    cursor: pointer;
+	top: 0;
+	margin: 2px 2px 0 0;
+	float: left;
+	/* background: #F0F0F0; */
+	border-right: 1px solid #AAA;
+	border-top: 1px solid #AAA;
+	border-left: 1px solid #AAA;
+	padding: 2px 10px 2px 10px;
+	text-decoration: none;
+	color: #333;
+	cursor: pointer;
 }
 
 .tabs_hover {
-    padding: 3px 10px 3px 10px;
-    margin-top: 0px;
-    background: #FFFFFF;
+	padding: 3px 10px 3px 10px;
+	margin-top: 0px;
+	background: #FFFFFF;
 }
 
 .tabs_active {
@@ -74,20 +250,24 @@ a:hover {
 }
 
 .footer {
-    float: bottom; 
+	float: bottom;
 	width: 99%;
-    position:absolute;
-    bottom:0px;   
-    height:60px;   
+	position: absolute;
+	bottom: 0px;
+	height: 60px;
 }
 
 .pad_right {
 	padding-right: 10px;
 }
 
-.pad_top {	
-    padding-top: 10px; 
-    vertical-align: top;
+.pad_top {
+	padding-top: 10px;
+	vertical-align: top;
+}
+
+.pad_left {
+	padding-left: 10px;
 }
 
 .footer_line {
@@ -100,31 +280,31 @@ a:hover {
 }
 
 .help_text {
-    color: #777777;
-    font-size: 9px;    
-    padding-left: 3px;
+	color: #777777;
+	font-size: 9px;
+	padding-left: 3px;
 }
 
 .panel_header {
-    font-size: 14px;
-    font-weight: bold;
+	font-size: 14px;
+	font-weight: bold;
 }
 
-.title_row_header, .headers {
-    background-color: #F0F0F0;
-    font-family: Arial,Helvetica,sans-serif;
-    font-size: 12px;
-    white-space: nowrap;
+.title_row_header,.headers {
+	background-color: #F0F0F0;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	white-space: nowrap;
 }
 
 .blue_underline {
 	height: 2px;
-	background-color: #6C95C9;	
-	}
+	background-color: #6C95C9;
+}
 
 .data_table {
-    background-color: #BBBBBB;
-    width: 100%;
+	background-color: #BBBBBB;
+	width: 100%;
 }
 
 .background_white {
@@ -134,130 +314,126 @@ a:hover {
 .form_textarea {
 	height: 50px;
 	width: 640px;
-	}
+}
 
 .gray_border {
-	border: 1px solid #BBBBBB;	
+	border: 1px solid #BBBBBB;
 }
 
 .collections_header {
-    background-color: #F0F0F0; 
-    font-size: 13px; 
-    border-bottom: 1px solid #BBB; 
-    font-weight: bold; 
-    padding: 3px;
+	background-color: #F0F0F0;
+	font-size: 13px;
+	border-bottom: 1px solid #BBB;
+	font-weight: bold;
+	padding: 3px;
 }
 
 .gwt-Button {
 	margin-left: 2px;
-    margin-right: 2px;
+	margin-right: 2px;
 }
 
-.gwt-TextBox, .inputbox {
+.gwt-TextBox,.inputbox {
 	background: none repeat scroll 0 0 #FFFFFF;
-    border: 1px solid #BBBBBB;
+	border: 1px solid #BBBBBB;
 }
 
 .pager {
-    border: 1px solid #CCC; 
-    width: 100%;
-    font-family: Arial,Helvetica,sans-serif;    
-    background-color: #F0F0F0;
-    padding: 2px;
+	border: 1px solid #CCC;
+	width: 100%;
+	font-family: Arial, Helvetica, sans-serif;
+	background-color: #F0F0F0;
+	padding: 2px;
 }
 
 .pager_nav {
-    font-weight: bold;  
-    font-size: 12px;
-    font-family: Arial,Helvetica,sans-serif;   
-    color: #5a4545;
+	font-weight: bold;
+	font-size: 12px;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #5a4545;
 }
 
 .button_to_link {
-    padding: 2px 6px 2px 6px; 
-    border: 1px solid #ccc;
-    background-color: white;
-    color: #185DA0;
-    font-size: 0.85em;
-    cursor: default;
+	padding: 2px 6px 2px 6px;
+	border: 1px solid #ccc;
+	background-color: white;
+	color: #185DA0;
+	font-size: 0.85em;
+	cursor: default;
 }
 
 .button_to_link_hover {
-    
-    padding: 2px 6px 2px 6px; 
-    border: 1px solid #ccc;
-    background-color: white;
-    color: #9EC068;
-    font-size: 0.85em;
-    cursor: pointer;
+	padding: 2px 6px 2px 6px;
+	border: 1px solid #ccc;
+	background-color: white;
+	color: #9EC068;
+	font-size: 0.85em;
+	cursor: pointer;
 }
 
 .button_to_link_disabled {
-    
-    padding: 2px 6px 2px 6px; 
-    border: 1px solid #ccc;
-    background-color: white;
-    font-size: 0.85em;
-    color: #555;
-    cursor: default;    
-    font-weight: bold;
+	padding: 2px 6px 2px 6px;
+	border: 1px solid #ccc;
+	background-color: white;
+	font-size: 0.85em;
+	color: #555;
+	cursor: default;
+	font-weight: bold;
 }
 
 .entry_table {
-    background-color: #BBBBBB;
-    width: 800px;
+	background-color: #BBBBBB;
+	width: 800px;
 }
 
-.bg_white {
-    background-color: #FFFFFF;
+.bg_gray {
+	background-color: #BBBBBB;
 }
 
 .popup {
-    border: 0px;
+	border: 0px;
 }
+
 .cursor_hand {
-    cursor: pointer;
+	cursor: pointer;
 }
 
 .cursor_default {
-    cursor: default;
+	cursor: default;
 }
 
-.collections_menu_hover {
-	background-color: #FAFAFA;
-	color: #9EC068;
-}
+
 
 /* TABS */
-
 /* the panel itself */
-.gwt-TabLayoutPanel { 
+.gwt-TabLayoutPanel {
+	
 }
 
 /* the tab bar element */
-.gwt-TabLayoutPanel .gwt-TabLayoutPanelTabs { 
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelTabs {
 	
 }
 
 /* applied to all child content widgets */
-.gwt-TabLayoutPanel .gwt-TabLayoutPanelContent { 
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelContent {
+	
 }
 
 /* an individual tab */
-.gwt-TabLayoutPanel .gwt-TabLayoutPanelTab { 
-	
-    background: none repeat scroll 0 0 #FFFFFF;
-    border-left: 1px solid #AAAAAA;
-    border-right: 1px solid #AAAAAA;
-    border-top: 1px solid #AAAAAA;
-    color: #333333;
-    float: left;
-    margin: 2px 2px 0 0;
-    padding: 2px 10px;
-    position: relative;
-    text-decoration: none;
-    top: 0;
-    cursor: pointer;
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelTab {
+	background: none repeat scroll 0 0 #FFFFFF;
+	border-left: 1px solid #AAAAAA;
+	border-right: 1px solid #AAAAAA;
+	border-top: 1px solid #AAAAAA;
+	color: #333333;
+	float: left;
+	margin: 2px 2px 0 0;
+	padding: 2px 10px;
+	position: relative;
+	text-decoration: none;
+	top: 0;
+	cursor: pointer;
 }
 
 /* an element nested in each tab (useful for styling) */
@@ -267,122 +443,223 @@ a:hover {
 
 /* applied to all child content widgets */
 .gwt-TabLayoutPanel .gwt-TabLayoutPanelTab-selected {
-	 
-    background: none repeat scroll 0 0 #F0F0F0;
-    border-left: 1px solid #AAAAAA;
-    border-right: 1px solid #AAAAAA;
-    border-top: 1px solid #AAAAAA;
-    color: #333333;
-    float: left;
-    margin: 0 2px 0 0;
-    padding: 3px 10px;
-    position: relative;
-    text-decoration: none;
-    top: 0;
-    font-weight: bold;
-    cursor: default;
+	background: none repeat scroll 0 0 #F0F0F0;
+	border-left: 1px solid #AAAAAA;
+	border-right: 1px solid #AAAAAA;
+	border-top: 1px solid #AAAAAA;
+	color: #333333;
+	float: left;
+	margin: 0 2px 0 0;
+	padding: 3px 10px;
+	position: relative;
+	text-decoration: none;
+	top: 0;
+	font-weight: bold;
+	cursor: default;
 }
 
 /* DATE PICKER */
 .gwt-DatePicker {
-  border: 1px solid #ccc;
-  border-top:1px solid #999;
-  cursor: default;
+	border: 1px solid #ccc;
+	border-top: 1px solid #999;
+	cursor: default;
 }
-.gwt-DatePicker td, .datePickerMonthSelector td:focus {
-  outline: none;
+
+.gwt-DatePicker td,.datePickerMonthSelector td:focus {
+	outline: none;
 }
+
 .datePickerMonthSelector td:focus {
-  outline: none;
+	outline: none;
 }
+
 .datePickerDays {
-  width: 100%;
-  background: white;
+	width: 100%;
+	background: white;
 }
-.datePickerDay, .datePickerWeekdayLabel, .datePickerWeekendLabel {
-  font-size: 85%;
-  text-align: center;
-  padding: 4px;
-  outline: none;
-  font-weight:bold;
-  color:#333;
-  border-right: 1px solid #EDEDED;
-  border-bottom: 1px solid #EDEDED;
+
+.datePickerDay,.datePickerWeekdayLabel,.datePickerWeekendLabel {
+	font-size: 85%;
+	text-align: center;
+	padding: 4px;
+	outline: none;
+	font-weight: bold;
+	color: #333;
+	border-right: 1px solid #EDEDED;
+	border-bottom: 1px solid #EDEDED;
 }
-.datePickerWeekdayLabel, .datePickerWeekendLabel {
-  background: #fff;
-  padding: 0px 4px 2px;
-  cursor: default;
-  color:#666;
-  font-size:70%;
-  font-weight:normal;
+
+.datePickerWeekdayLabel,.datePickerWeekendLabel {
+	background: #fff;
+	padding: 0px 4px 2px;
+	cursor: default;
+	color: #666;
+	font-size: 70%;
+	font-weight: normal;
 }
+
 .datePickerDay {
-  padding: 4px 7px;
-  cursor: hand;
-  cursor: pointer;
+	padding: 4px 7px;
+	cursor: hand;
+	cursor: pointer;
 }
+
 .datePickerDayIsWeekend {
-  background: #f7f7f7;
+	background: #f7f7f7;
 }
+
 .datePickerDayIsFiller {
-  color: #999;
-  font-weight:normal;
+	color: #999;
+	font-weight: normal;
 }
+
 .datePickerDayIsValue {
-  background: #d7dfe8;
+	background: #d7dfe8;
 }
+
 .datePickerDayIsDisabled {
-  color: #AAAAAA;
-  font-style: italic;
+	color: #AAAAAA;
+	font-style: italic;
 }
+
 .datePickerDayIsHighlighted {
-  background: #F0E68C;
+	background: #F0E68C;
 }
+
 .datePickerDayIsValueAndHighlighted {
-  background: #d7dfe8;
+	background: #d7dfe8;
 }
+
 .datePickerDayIsToday {
-  padding: 3px;
-  color: #fff;
-  background: blue;
+	padding: 3px;
+	color: #fff;
+	background: blue;
 }
 
 .datePickerMonthSelector {
-  width: 100%;
-  padding: 1px 0 5px 0;
-  background: #fff;
+	width: 100%;
+	padding: 1px 0 5px 0;
+	background: #fff;
 }
-.datePickerPreviousButton, .datePickerNextButton {
-  font-size: 120%;
-  line-height: 1em;
-  color: #3a6aad;
-  cursor: hand;
-  cursor: pointer;
-  font-weight: bold;
-  padding: 0px 4px;
-  outline: none;
+
+.datePickerPreviousButton,.datePickerNextButton {
+	font-size: 120%;
+	line-height: 1em;
+	color: #3a6aad;
+	cursor: hand;
+	cursor: pointer;
+	font-weight: bold;
+	padding: 0px 4px;
+	outline: none;
 }
 
 td.datePickerMonth {
-  text-align: center;
-  vertical-align: middle;
-  white-space: nowrap;
-  font-size: 100%;
-  font-weight: bold;
-  color: #333;
+	text-align: center;
+	vertical-align: middle;
+	white-space: nowrap;
+	font-size: 100%;
+	font-weight: bold;
+	color: #333;
 }
-.gwt-DateBox {
-  /* padding: 5px 4px;
+
+.gwt-DateBox { /* padding: 5px 4px;
   border: 1px solid #ccc;
   border-top: 1px solid #999;
   font-size: 100%; */
+	
 }
+
 .gwt-DateBox input {
-  width: 8em;
+	width: 8em;
 }
+
 .dateBoxFormatError {
-  background: #ffcccc;
+	background: #ffcccc;
 }
+
 .dateBoxPopup {
 }
+/* ADD */
+.add_new_entry_main_content_wrapper {
+	border-top: 2px solid #4787ED; 
+    border-bottom: 1px solid #4787ED;
+}
+
+.add_new_entry_main_content_header {
+	background-color: #cecece;
+}
+
+/* COLLECTIONS */
+.collection_menu_table {
+	border-top: 2px solid #4787ED; 
+	width: 220px; 
+	border-bottom: 1px solid #4787ED;
+}
+
+.collections_menu_header {
+	background-color: #cecece;
+}
+
+/* END COLLECTIONS */
+
+/* MENU BAR*/
+
+.gwt-MenuBar {
+	
+}
+.gwt-MenuBar-horizontal {
+    color: #999;
+}
+.gwt-MenuBar-vertical {
+	
+}
+    
+.gwt-MenuBar .gwt-MenuItem {
+	background-color: #FFF;
+	width: 150px;
+	
+}
+.gwt-MenuBar .gwt-MenuItem-selected {
+	
+}
+    /*
+.gwt-MenuBar .gwt-MenuItemSeparator
+    section breaks between menu items
+.gwt-MenuBar .gwt-MenuItemSeparator .menuSeparatorInner
+    inner component of section separators
+.gwt-MenuBarPopup .menuPopupTopLeft
+    the top left cell
+.gwt-MenuBarPopup .menuPopupTopLeftInner
+    the inner element of the cell
+.gwt-MenuBarPopup .menuPopupTopCenter
+    the top center cell
+.gwt-MenuBarPopup .menuPopupTopCenterInner
+    the inner element of the cell
+.gwt-MenuBarPopup .menuPopupTopRight
+    the top right cell
+.gwt-MenuBarPopup .menuPopupTopRightInner
+    the inner element of the cell
+.gwt-MenuBarPopup .menuPopupMiddleLeft
+    the middle left cell
+.gwt-MenuBarPopup .menuPopupMiddleLeftInner
+    the inner element of the cell
+.gwt-MenuBarPopup .menuPopupMiddleCenter
+    the middle center cell
+.gwt-MenuBarPopup .menuPopupMiddleCenterInner
+    the inner element of the cell
+.gwt-MenuBarPopup .menuPopupMiddleRight
+    the middle right cell
+.gwt-MenuBarPopup .menuPopupMiddleRightInner
+    the inner element of the cell
+.gwt-MenuBarPopup .menuPopupBottomLeft
+    the bottom left cell
+.gwt-MenuBarPopup .menuPopupBottomLeftInner
+    the inner element of the cell
+.gwt-MenuBarPopup .menuPopupBottomCenter
+    the bottom center cell
+.gwt-MenuBarPopup .menuPopupBottomCenterInner
+    the inner element of the cell
+.gwt-MenuBarPopup .menuPopupBottomRight
+    the bottom right cell
+.gwt-MenuBarPopup .menuPopupBottomRightInner
+    the inner element of the cell  */
