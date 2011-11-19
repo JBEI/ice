@@ -336,6 +336,17 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+	<reporting>
+		<plugins>
+	      	<plugin>
+	        	<groupId>org.apache.maven.plugins</groupId>
+	        	<artifactId>maven-javadoc-plugin</artifactId>
+	        	<version>2.8</version>
+	        	<configuration>
+	        	</configuration>
+	      </plugin>
+    </plugins>
+	</reporting>
 	<properties>
 		<wicket.version>1.4.8</wicket.version>
 		<jetty.version>6.1.26</jetty.version>

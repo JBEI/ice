@@ -238,7 +238,7 @@ cache.
     location of the file and the password.
 
     Now try to run the ICE server:
-    $ mvn jetty:run
+    $ mvn jetty:run -Dmaven.test.skip=true
 
     If everything is set up properly, this command will populate your
     database with the appropriate tables, and run a server on port
