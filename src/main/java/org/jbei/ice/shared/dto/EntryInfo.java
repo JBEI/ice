@@ -1,10 +1,13 @@
 package org.jbei.ice.shared.dto;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class EntryInfo implements IsSerializable {
+public class EntryInfo implements IsSerializable { // TODO : this needs to be folded in EntryData
 
     public enum EntryType implements IsSerializable {
         STRAIN("Strain", "strain"), PLASMID("Plasmid", "plasmid"), PART("Part", "part"), ARABIDOPSIS(
@@ -56,40 +59,20 @@ public class EntryInfo implements IsSerializable {
     private Integer bioSafetyLevel;
     private String intellectualProperty;
     private String partId;
-    private String link; // comma separated list of links
+    private String links; // comma separated list of links
     private String principalInvestigator;
-
-    //    private Set<SelectionMarker> selectionMarkers = new LinkedHashSet<SelectionMarker>();
-    //    private final Set<Link> links = new LinkedHashSet<Link>();
-    //    private final Set<Name> names = new LinkedHashSet<Name>();
-    //    private final Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
-    //    private final Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
-    //    private final List<Parameter> parameters = new ArrayList<Parameter>();
+    private String selectionMarkers;
+    private String fundingSource;
+    private boolean hasAttachment;
+    private boolean hasSample;
+    private boolean hasSequence;
+    private ArrayList<AttachmentInfo> attachments;
+    private HashMap<SampleInfo, LinkedList<StorageInfo>> sampleMap;
+    private ArrayList<SequenceAnalysisInfo> sequenceAnalysis;
+    private ArrayList<ParameterInfo> parameters;
 
     public EntryInfo() {
     }
-
-    //    public Entry(String recordId, String versionId, String recordType, String owner,
-    //            String ownerEmail, String creator, String creatorEmail, String status, String alias,
-    //            String keywords, String shortDescription, String longDescription,
-    //            String longDescriptionType, String references, Date creationTime, Date modificationTime) {
-    //        this.recordId = recordId;
-    //        this.versionId = versionId;
-    //        this.recordType = recordType;
-    //        this.owner = owner;
-    //        this.ownerEmail = ownerEmail;
-    //        this.creator = creator;
-    //        this.creatorEmail = creatorEmail;
-    //        this.status = status;
-    //        this.alias = alias;
-    //        this.keywords = keywords;
-    //        this.shortDescription = shortDescription;
-    //        this.longDescription = longDescription;
-    //        this.longDescriptionType = longDescriptionType;
-    //        this.references = references;
-    //        this.creationTime = creationTime;
-    //        this.modificationTime = modificationTime;
-    //    }
 
     public String getRecordId() {
         return recordId;
@@ -257,5 +240,85 @@ public class EntryInfo implements IsSerializable {
 
     public void setPrincipalInvestigator(String principalInvestigator) {
         this.principalInvestigator = principalInvestigator;
+    }
+
+    public void setSelectionMarkers(String markers) {
+        this.selectionMarkers = markers;
+    }
+
+    public String getSelectionMarkers() {
+        return this.selectionMarkers;
+    }
+
+    public ArrayList<AttachmentInfo> getAttachments() {
+        return this.attachments;
+    }
+
+    public void setAttachments(ArrayList<AttachmentInfo> attachments) {
+        this.attachments = attachments;
+    }
+
+    public ArrayList<SequenceAnalysisInfo> getSequenceAnalysis() {
+        return this.sequenceAnalysis;
+    }
+
+    public void setSequenceAnalysis(ArrayList<SequenceAnalysisInfo> analyses) {
+        this.sequenceAnalysis = analyses;
+    }
+
+    public ArrayList<ParameterInfo> getParameters() {
+        return this.parameters;
+    }
+
+    public void setParameters(ArrayList<ParameterInfo> parameters) {
+        this.parameters = parameters;
+    }
+
+    public String getFundingSource() {
+        return this.fundingSource;
+    }
+
+    public void setFundingSource(String fundingSource) {
+        this.fundingSource = fundingSource;
+    }
+
+    public String getLinks() {
+        return this.links;
+    }
+
+    public void setLinks(String links) {
+        this.links = links;
+    }
+
+    public HashMap<SampleInfo, LinkedList<StorageInfo>> getSampleMap() {
+        return sampleMap;
+    }
+
+    public void setSampleMap(HashMap<SampleInfo, LinkedList<StorageInfo>> sampleMap) {
+        this.sampleMap = sampleMap;
+    }
+
+    public boolean isHasAttachment() {
+        return hasAttachment;
+    }
+
+    public void setHasAttachment(boolean hasAttachment) {
+        this.hasAttachment = hasAttachment;
+    }
+
+    public boolean isHasSample() {
+        return hasSample;
+    }
+
+    public void setHasSample(boolean hasSample) {
+        this.hasSample = hasSample;
+    }
+
+    public boolean isHasSequence() {
+        return hasSequence;
+    }
+
+    public void setHasSequence(boolean hasSequence) {
+        this.hasSequence = hasSequence;
     }
 }

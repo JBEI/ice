@@ -1,112 +1,65 @@
 package org.jbei.ice.client.login;
 
-import java.util.ArrayList;
-
-import org.jbei.ice.client.FeedbackType;
-import org.jbei.ice.client.ILogoutHandler;
-import org.jbei.ice.client.Presenter;
+import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.event.LoginEvent;
+import org.jbei.ice.client.util.Utils;
 import org.jbei.ice.shared.dto.AccountInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
- * TODO : validation
+ * Submits user entered login credentials for validation
  * 
- * @author hector
+ * @author Hector Plahar
  */
 
-public class LoginPresenter extends Presenter {
-
-    public interface Display {
-
-        HasClickHandlers getLoginButton();
-
-        void setKeyPressHandler(KeyPressHandler handler);
-
-        String getLoginName();
-
-        String getLoginPass();
-
-        boolean rememberUserOnComputer();
-
-        ILogoutHandler getLogoutHandler();
-
-        void setFeedback(ArrayList<String> msgs, FeedbackType type);
-
-        Widget asWidget();
-    }
+public class LoginPresenter extends AbstractPresenter {
 
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
-    private final Display display;
+    private final ILoginView display;
 
-    // TODO : check if session is still valid and re-direct user to the main page
-    public LoginPresenter(RegistryServiceAsync service, HandlerManager eventBus, Display display) {
-
+    public LoginPresenter(RegistryServiceAsync service, HandlerManager eventBus, ILoginView display) {
         this.service = service;
         this.eventBus = eventBus;
         this.display = display;
-        bind();
+        setHandler();
     }
 
-    protected final void bind() {
-
-        HasClickHandlers loginBtn = this.display.getLoginButton();
-        loginBtn.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                login();
-            }
-        });
-
-        display.setKeyPressHandler(new KeyPressHandler() {
-
-            @Override
-            public void onKeyPress(KeyPressEvent event) {
-                if (event.getCharCode() == KeyCodes.KEY_ENTER)
-                    login();
-            }
-        });
-    }
-
-    @Override
-    public void go(HasWidgets container) {
-
-        container.clear();
-        container.add(this.display.asWidget());
-    }
-
-    // use the service to login and send event
     protected void login() {
+        this.display.clearLoginNameError();
+        this.display.clearLoginPassError();
 
         String loginName = this.display.getLoginName();
         String loginPass = this.display.getLoginPass();
 
-        ArrayList<String> err = validate(loginName, loginPass);
-        if (!err.isEmpty()) {
-            this.display.setFeedback(err, FeedbackType.ERROR);
+        if (loginName == null || loginName.isEmpty()) {
+            this.display.setLoginNameError("Username is required and cannot be left empty!");
             return;
         }
 
+        if (loginPass == null || loginPass.isEmpty()) {
+            this.display.setLoginPassError("Password is required and cannot be left empty!");
+            return;
+        }
+
+        // client validation passed. attempt to login
+        Utils.showWaitCursor(null);
         service.login(loginName, loginPass, new AsyncCallback<AccountInfo>() {
 
             @Override
             public void onSuccess(AccountInfo result) {
+                resetCursor();
                 if (result == null) {
-                    Window.alert("Could not log in");
+                    display.setLoginPassError("The username and/or password you entered is incorrect!");
                     return;
                 }
 
@@ -115,23 +68,44 @@ public class LoginPresenter extends Presenter {
 
             @Override
             public void onFailure(Throwable caught) {
-                ArrayList<String> msg = new ArrayList<String>();
-                msg.add("Server error: " + caught.getMessage());
-                display.setFeedback(msg, FeedbackType.ERROR);
+                resetCursor();
+                display.setLoginPassError("There was an error validating your account. Please try again.");
             }
-
         });
     }
 
-    protected ArrayList<String> validate(String name, String pass) {
-        ArrayList<String> errors = new ArrayList<String>();
+    private void resetCursor() {
+        Utils.showDefaultCursor(null);
+    }
 
-        if (name == null || name.isEmpty())
-            errors.add("Field 'Login' is required.");
+    protected final void setHandler() {
+        SubmitHandler handler = new SubmitHandler();
 
-        if (pass == null || pass.isEmpty())
-            errors.add("Field 'Password' is required.");
+        this.display.setSubmitHandler(handler);
+        this.display.getSubmitButton().addKeyPressHandler(handler);
+        this.display.getSubmitButton().addClickHandler(new ClickHandler() {
 
-        return errors;
+            @Override
+            public void onClick(ClickEvent event) {
+                login();
+            }
+        });
+    }
+
+    @Override
+    public void go(HasWidgets container) {
+        container.clear();
+        container.add(this.display.asWidget());
+    }
+
+    public class SubmitHandler implements KeyPressHandler {
+
+        @Override
+        public void onKeyPress(KeyPressEvent event) {
+            if (event.getCharCode() != KeyCodes.KEY_ENTER)
+                return;
+
+            login();
+        }
     }
 }

@@ -215,6 +215,11 @@
 			<version>2.4.0</version>
 			<type>pom</type>
 		</dependency>
+		<dependency>
+			<groupId>com.googlecode.gwtupload</groupId>
+			<artifactId>gwtupload</artifactId>
+			<version>0.6.3-compat</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<outputDirectory>target</outputDirectory>

@@ -90,4 +90,15 @@
         <servlet-name>gwtIceServlet</servlet-name>
         <url-pattern>/gwt_ice/ice</url-pattern>
     </servlet-mapping>
+    
+    <!-- file upload from gwt -->
+    <servlet>
+        <servlet-name>fileUploaderServlet</servlet-name>
+        <servlet-class>org.jbei.ice.server.FileUploadServlet</servlet-class>
+    </servlet>
+    
+    <servlet-mapping>
+        <servlet-name>fileUploaderServlet</servlet-name>
+        <url-pattern>*.gupld</url-pattern>
+    </servlet-mapping>
 </web-app>

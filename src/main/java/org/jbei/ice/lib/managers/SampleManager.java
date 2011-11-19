@@ -49,6 +49,37 @@ public class SampleManager {
     }
 
     @SuppressWarnings("unchecked")
+    public static ArrayList<Long> getSampleIdsByOwner(String ownerId) throws ManagerException {
+
+        ArrayList<Long> results = null;
+        Session session = DAO.newSession();
+
+        try {
+
+            String queryString = "select id from " + Sample.class.getName()
+                    + " where depositor = :depositor";
+
+            Query query = session.createQuery(queryString);
+
+            query.setParameter("depositor", ownerId);
+
+            @SuppressWarnings("rawtypes")
+            List list = query.list();
+
+            if (list != null) {
+                results = (ArrayList<Long>) list;
+            }
+        } catch (HibernateException he) {
+            throw new ManagerException("Failed to retrieve samples for owner " + ownerId, he);
+        } finally {
+            if (session.isOpen())
+                session.close();
+        }
+
+        return results;
+    }
+
+    @SuppressWarnings("unchecked")
     public static ArrayList<Sample> getSamplesByEntry(Entry entry) throws ManagerException {
         ArrayList<Sample> samples = null;
 

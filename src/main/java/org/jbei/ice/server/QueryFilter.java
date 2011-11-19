@@ -2,9 +2,9 @@ package org.jbei.ice.server;
 
 import java.util.List;
 
-import org.jbei.ice.shared.FilterTrans;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
+import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 /**
  * Created from the transmitted filter info
@@ -20,7 +20,7 @@ public class QueryFilter {
     private final String operand;
     private List<QueryFilterParams> params;
 
-    public QueryFilter(FilterTrans trans) {
+    public QueryFilter(SearchFilterInfo trans) {
 
         if (trans == null)
             throw new IllegalArgumentException("Null parameter for QueryFilter");

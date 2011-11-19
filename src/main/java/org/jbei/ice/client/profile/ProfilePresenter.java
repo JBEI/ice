@@ -1,51 +1,56 @@
 package org.jbei.ice.client.profile;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 import org.jbei.ice.client.AppController;
-import org.jbei.ice.client.Presenter;
+import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.SamplesDataProvider;
-import org.jbei.ice.client.collection.SamplesDataTable;
-import org.jbei.ice.client.component.EntryDataViewDataProvider;
-import org.jbei.ice.client.component.table.DataTable;
+import org.jbei.ice.client.common.EntryDataViewDataProvider;
+import org.jbei.ice.client.common.table.EntryDataTable;
+import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.shared.EntryData;
 import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.ProfileInfo;
+import org.jbei.ice.shared.dto.SampleInfo;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.google.gwt.view.client.SingleSelectionModel;
 
-public class ProfilePresenter extends Presenter {
+public class ProfilePresenter extends AbstractPresenter {
 
     private final String sid = AppController.sessionId;
     private final EntryDataViewDataProvider provider; // entries tab view data provider
     private final SamplesDataProvider samplesDataProvider;
-    private AccountInfo info;
 
     public interface Display {
 
         Widget asWidget();
 
-        void setData(String name, String email, String since, String institution, String description);
+        void setContents(Widget widget);
 
-        DataTable<EntryData> getEntriesDataView();
+        CellList<CellEntry> getMenu();
 
-        SamplesDataTable getSamplesDataTable();
+        void setHeaderText(String text);
 
-        void addEntryClickHandler(ClickHandler handler);
+        HasEntryDataTable<SampleInfo> getSamplesTable();
 
-        void addSamplesClickHandler(ClickHandler handler);
+        EntryDataTable<EntryData> getEntryDataTable();
     }
 
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
     private final Display display;
+    private final SingleSelectionModel<CellEntry> selectionModel;
+    private Widget accountWidget;
 
     public ProfilePresenter(final RegistryServiceAsync service, HandlerManager eventBus,
             final Display display, final String userId) {
@@ -54,16 +59,59 @@ public class ProfilePresenter extends Presenter {
         this.eventBus = eventBus;
         this.display = display;
 
-        this.service.retrieveAccountInfo(sid, userId, new AsyncCallback<AccountInfo>() {
+        // selection model
+        selectionModel = new SingleSelectionModel<CellEntry>();
+        selectionModel.addSelectionChangeHandler(new Handler() {
 
             @Override
-            public void onSuccess(AccountInfo info) {
+            public void onSelectionChange(SelectionChangeEvent event) {
+                CellEntry selected = selectionModel.getSelectedObject();
+                switch (selected.getType()) {
+                default:
+                case ABOUT:
+                    display.setContents(accountWidget);
+                    break;
+                case ENTRIES:
+                    display.setContents(display.getEntryDataTable());
+                    break;
+                case SAMPLES:
+                    display.setContents(display.getSamplesTable());
+                    break;
+                }
+            }
+        });
+
+        this.display.getMenu().setSelectionModel(selectionModel);
+        this.service.retrieveProfileInfo(sid, userId, new AsyncCallback<ProfileInfo>() {
+
+            @Override
+            public void onSuccess(ProfileInfo profileInfo) {
                 // TODO : some accounts do not have registered accounts and so need to check for that and disable link
                 // TODO : e.g. filemaker 
-                String fullName = info.getFirstName() + " " + info.getLastName();
-                display.setData(fullName, info.getEmail(), info.getSince(), info.getInstitution(),
-                    info.getDescription());
-                ProfilePresenter.this.info = info;
+
+                if (profileInfo == null) {
+                    Label label = new Label(
+                            "Could not retrieve user account information. Please try again.");
+                    display.setContents(label);
+                    return;
+                }
+
+                AccountInfo info = profileInfo.getAccountInfo();
+                display.setHeaderText(info.getFirstName() + " " + info.getLastName());
+                accountWidget = new AboutWidget(info);
+
+                // set menu
+                ArrayList<CellEntry> menu = new ArrayList<CellEntry>();
+                CellEntry about = new CellEntry(MenuType.ABOUT, -1);
+                menu.add(about);
+                menu.add(new CellEntry(MenuType.ENTRIES, info.getUserEntryCount()));
+                menu.add(new CellEntry(MenuType.SAMPLES, info.getUserSampleCount()));
+                display.getMenu().setRowData(menu);
+                selectionModel.setSelected(about, true);
+
+                // set data
+                provider.setValues(profileInfo.getUserEntries());
+                samplesDataProvider.setValues(profileInfo.getUserSamples());
             }
 
             @Override
@@ -72,57 +120,8 @@ public class ProfilePresenter extends Presenter {
             }
         });
 
-        provider = new EntryDataViewDataProvider(display.getEntriesDataView(), service);
-
-        // click handlers
-        display.addEntryClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                service.retrieveUserEntries(sid, ProfilePresenter.this.info.getEmail(),
-                    new AsyncCallback<ArrayList<Long>>() {
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            Window.alert(caught.getMessage());
-                        }
-
-                        @Override
-                        public void onSuccess(ArrayList<Long> result) {
-                            if (result == null)
-                                return;
-
-                            provider.setValues(result);
-                        }
-                    });
-            }
-        });
-
-        samplesDataProvider = new SamplesDataProvider(display.getSamplesDataTable(), service);
-
-        display.addSamplesClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                service.retrieveSamplesByDepositor(sid, ProfilePresenter.this.info.getEmail(),
-                    null, false, new AsyncCallback<LinkedList<Long>>() {
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            Window.alert(caught.getMessage());
-                        }
-
-                        @Override
-                        public void onSuccess(LinkedList<Long> result) {
-                            if (result == null)
-                                return;
-
-                            // TODO : need to get the sort info from the display table
-                            samplesDataProvider.setValues(result);
-                        }
-                    });
-            }
-        });
+        provider = new EntryDataViewDataProvider(display.getEntryDataTable(), service);
+        samplesDataProvider = new SamplesDataProvider(display.getSamplesTable(), service);
     }
 
     @Override

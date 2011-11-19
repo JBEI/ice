@@ -1,5 +1,6 @@
 .cellListWidget {
     color: #185DA0;
+    width: 100%;
 }
 
 .cellListEvenItem {
@@ -17,7 +18,7 @@
 }
 
 .cellListSelectedItem {
-  background-color: #FAFAFA;
+  /* background-color: #FAFAFA; */
   color: #9EC068;
   height: auto;
   overflow: visible;

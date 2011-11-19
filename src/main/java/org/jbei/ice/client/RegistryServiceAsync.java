@@ -8,12 +8,14 @@ import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BlastProgram;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.EntryData;
-import org.jbei.ice.shared.FilterTrans;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BlastResultInfo;
+import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.ProfileInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.shared.dto.SearchFilterInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -22,10 +24,7 @@ public interface RegistryServiceAsync {
 
     void login(String name, String pass, AsyncCallback<AccountInfo> callback);
 
-    /**
-     * checks for session validity
-     */
-    void sessionValid(String sid, AsyncCallback<Boolean> callback);
+    void sessionValid(String sid, AsyncCallback<AccountInfo> callback);
 
     /**
      * logs user out and clears all session information.
@@ -33,7 +32,7 @@ public interface RegistryServiceAsync {
      */
     void logout(String sessionId, AsyncCallback<Boolean> callback);
 
-    void retrieveSearchResults(ArrayList<FilterTrans> filters,
+    void retrieveSearchResults(ArrayList<SearchFilterInfo> filters,
             AsyncCallback<ArrayList<Long>> asyncCallback);
 
     void retrieveEntryData(String sid, ArrayList<Long> entries, ColumnField field, boolean asc,
@@ -48,7 +47,7 @@ public interface RegistryServiceAsync {
     /**
      * retrieves the list of entries for the folder
      */
-    void retrieveEntriesForFolder(String sessionId, FolderDetails folder,
+    void retrieveEntriesForFolder(String sessionId, long folderId,
             AsyncCallback<ArrayList<Long>> callback);
 
     void retrieveAvailableEntryCount(String sessionId, AsyncCallback<Long> callback);
@@ -78,4 +77,28 @@ public interface RegistryServiceAsync {
             AsyncCallback<LinkedList<SampleInfo>> callback);
 
     void retrieveAccountInfoForSession(String sid, AsyncCallback<AccountInfo> callback);
+
+    void retrieveFolderDetails(String sid, long folderId, AsyncCallback<FolderDetails> callback);
+
+    void retrieveImportDraftData(String sid, String email,
+            AsyncCallback<ArrayList<BulkImportDraftInfo>> callback);
+
+    /**
+     * Profile
+     */
+    void retrieveProfileInfo(String sid, String userId, AsyncCallback<ProfileInfo> callback);
+
+    /**
+     * Collections
+     */
+
+    void createUserCollection(String sid, String name, String description,
+            AsyncCallback<Long> callback);
+
+    void moveToUserCollection(String sid, ArrayList<Long> source, ArrayList<Long> destination,
+            ArrayList<Long> entryIds, AsyncCallback<Boolean> callback);
+
+    void retrieveStorageRoot(String sid, AsyncCallback<ArrayList<StorageInfo>> callback);
+
+    void createEntry(String sid, EntryInfo info, AsyncCallback<Long> callback);
 }

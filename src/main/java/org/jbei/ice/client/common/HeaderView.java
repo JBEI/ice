@@ -2,11 +2,11 @@ package org.jbei.ice.client.common;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.ILogoutHandler;
-import org.jbei.ice.client.Page;
 import org.jbei.ice.shared.dto.AccountInfo;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -32,9 +32,12 @@ public class HeaderView extends Composite implements ILogoutHandler {
 
     private final Resources resources = GWT.create(Resources.class);
     private Anchor logout;
+    private final HeaderPresenter presenter;
+    private TextBox searchInput;
 
     public HeaderView() {
 
+        this.presenter = new HeaderPresenter(this);
         FlexTable table = new FlexTable();
         table.setCellPadding(0);
         table.setCellSpacing(0);
@@ -52,7 +55,7 @@ public class HeaderView extends Composite implements ILogoutHandler {
         horizontal.add(vertical);
 
         table.setWidget(0, 0, horizontal);
-        table.setWidget(1, 0, getUnderLine());
+        //        table.setWidget(1, 0, getUnderLine());
     }
 
     private Widget getImageHeader() {
@@ -64,11 +67,14 @@ public class HeaderView extends Composite implements ILogoutHandler {
         FlexTable layout = new FlexTable();
         layout.setCellPadding(0);
         layout.setCellSpacing(0);
+        if (!isUserLoggedIn()) {
+            return layout;
+        }
 
-        TextBox input = new TextBox();
-        input.setWidth("250px");
-        input.setStyleName("quick_search_input");
-        layout.setWidget(0, 0, input);
+        searchInput = new TextBox();
+        searchInput.setWidth("250px");
+        searchInput.setStyleName("quick_search_input");
+        layout.setWidget(0, 0, searchInput);
         layout.getFlexCellFormatter().setRowSpan(0, 0, 2);
 
         Button searchBtn = new Button("Search");
@@ -77,14 +83,19 @@ public class HeaderView extends Composite implements ILogoutHandler {
         layout.getFlexCellFormatter().setRowSpan(0, 1, 2);
         layout.setStyleName("float_right");
 
-        Hyperlink searchLink = new Hyperlink("Advanced Search", Page.QUERY.getLink());
-        searchLink.addStyleName("small_text");
-        layout.setWidget(0, 2, searchLink);
-
-        Hyperlink blastLink = new Hyperlink("Blast Search", Page.BLAST.getLink());
-        blastLink.addStyleName("small_text");
-        layout.setWidget(1, 0, blastLink);
+        //        Hyperlink searchLink = new Hyperlink("Advanced Search", Page.QUERY.getLink());
+        //        searchLink.addStyleName("small_text");
+        //        layout.setWidget(0, 2, searchLink);
+        //
+        //        Hyperlink blastLink = new Hyperlink("Blast Search", Page.BLAST.getLink());
+        //        blastLink.addStyleName("small_text");
+        //        layout.setWidget(1, 0, blastLink);
         return layout;
+    }
+
+    // TODO : move to controller
+    protected boolean isUserLoggedIn() {
+        return AppController.sessionId != null;
     }
 
     /**
@@ -116,7 +127,9 @@ public class HeaderView extends Composite implements ILogoutHandler {
         panel.add(pipe);
 
         // Entries Available
-        HTML entriesAvailable = new HTML("[xxx] Entries Available");
+        String formattedEntries = NumberFormat.getDecimalFormat().format(
+            info.getVisibleEntryCount());
+        HTML entriesAvailable = new HTML(formattedEntries + " entries available");
         panel.add(entriesAvailable);
 
         // pipe
@@ -129,6 +142,10 @@ public class HeaderView extends Composite implements ILogoutHandler {
         panel.add(logout);
 
         return panel;
+    }
+
+    public TextBox getSearchInput() {
+        return this.searchInput;
     }
 
     private Widget getUnderLine() {

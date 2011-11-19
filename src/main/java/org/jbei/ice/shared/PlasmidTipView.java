@@ -2,8 +2,6 @@ package org.jbei.ice.shared;
 
 public class PlasmidTipView extends EntryData {
 
-    private static final long serialVersionUID = 1L;
-
     private String markers;
     private String backbone;
     private String origin;
@@ -11,7 +9,6 @@ public class PlasmidTipView extends EntryData {
     private String strains;
 
     public PlasmidTipView() {
-
     }
 
     public String getMarkers() {

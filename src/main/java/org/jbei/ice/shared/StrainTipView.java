@@ -2,15 +2,13 @@ package org.jbei.ice.shared;
 
 public class StrainTipView extends EntryData {
 
-    private static final long serialVersionUID = 1L;
-
     private String markers;
     private String host;
     private String genPhen;
     private String plasmids;
 
     public StrainTipView() {
-        this.setType(EntryType.STRAIN.getDisplay());
+        this.setType(EntryAddType.STRAIN.getDisplay());
     }
 
     public String getMarkers() {
@@ -44,9 +42,4 @@ public class StrainTipView extends EntryData {
     public void setPlasmids(String plasmids) {
         this.plasmids = plasmids;
     }
-
-    public static long getSerialversionuid() {
-        return serialVersionUID;
-    }
-
 }

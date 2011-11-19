@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jbei.ice.lib.models.EntryFundingSource;
-import org.jbei.ice.shared.FilterTrans;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
+import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 /**
  * A search filter is represented by the filter type (e.g. NAME_OR_ALIAS),
@@ -19,7 +19,7 @@ import org.jbei.ice.shared.SearchFilterType;
  */
 public class SearchFilterCallbackFactory {
 
-    public static List<QueryFilterParams> getFilterParameters(FilterTrans trans) {
+    public static List<QueryFilterParams> getFilterParameters(SearchFilterInfo trans) {
 
         ArrayList<QueryFilterParams> params = new ArrayList<QueryFilterParams>();
         SearchFilterType type = SearchFilterType.valueOf(trans.getType());

@@ -67,5 +67,6 @@
 		<mapping class="org.jbei.ice.lib.models.Folder" />		
 		<mapping class="org.jbei.ice.lib.models.Parameter" />	
 		<mapping class="org.jbei.ice.lib.models.BulkImport" />	
+		<mapping class="org.jbei.ice.lib.models.BulkImportDraft" />
 	</session-factory>
 </hibernate-configuration>

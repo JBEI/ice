@@ -1,7 +1,7 @@
 package org.jbei.ice.client.presenter;
 
 import org.jbei.ice.client.ILogoutHandler;
-import org.jbei.ice.client.Presenter;
+import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.event.LogoutEvent;
 
@@ -12,7 +12,7 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
-public class HomePagePresenter extends Presenter {
+public class HomePagePresenter extends AbstractPresenter {
 
     public interface Display {
 

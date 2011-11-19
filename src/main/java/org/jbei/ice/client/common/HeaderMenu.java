@@ -1,13 +1,7 @@
 package org.jbei.ice.client.common;
 
-import org.jbei.ice.client.Page;
-
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.HTMLPanel;
 
 /**
  * Menu right below main header on top of all protected pages
@@ -28,44 +22,12 @@ public class HeaderMenu extends Composite {
     }
 
     public HeaderMenu() {
-        FlexTable table = new FlexTable();
-        table.setCellPadding(0);
-        table.setCellSpacing(0);
-        table.setWidth("100%");
-        initWidget(table);
-
-        // add content
-        table.setWidget(0, 0, createMenus());
-
-        // below menu line
-        table.setWidget(1, 0, getLine());
-        table.getFlexCellFormatter().setColSpan(1, 0, 2);
-    }
-
-    protected Widget createMenus() {
-        FlexTable table = new FlexTable();
-        table.setCellPadding(0);
-        table.setCellSpacing(0);
-
-        Hyperlink home = new Hyperlink("Home", Page.MAIN.getLink());
-        Hyperlink collections = new Hyperlink("Collections", Page.COLLECTIONS.getLink());
-        Hyperlink add = new Hyperlink("Add new entry", Page.ADD_ENTRY.getLink());
-        Hyperlink bulk = new Hyperlink("Bulk Import", Page.BULK_IMPORT.getLink());
-
-        table.setWidget(0, 0, home);
-        table.setWidget(0, 1, collections);
-        table.setWidget(0, 2, add);
-        table.setWidget(0, 3, bulk);
-
-        return table;
-    }
-
-    private Widget getLine() {
-
-        HorizontalPanel panel = new HorizontalPanel();
-        panel.setStyleName("footer_line");
-        panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_BOTTOM);
-        panel.setWidth("100%");
-        return panel;
+        String html = "<div id=\"dark\"><div id=\"indented\"><ul><li><a href=\"#page=main\">Home</a></li><li>"
+                + "<a href=\"#page=collections\">Collections</a></li><li><a href=\"#page=add\">Add New Entry</a></li><li><a href=\"#page=bulk\">"
+                + "Bulk Import</a></li><li><a href=\"#page=query\">"
+                + "Advanced Search</a></li><li><a href=\"#page=blast\">"
+                + "Blast</a></li></ul></div></div>";
+        HTMLPanel panel = new HTMLPanel(html);
+        initWidget(panel);
     }
 }

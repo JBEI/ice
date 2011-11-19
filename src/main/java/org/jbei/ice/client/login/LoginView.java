@@ -1,214 +1,177 @@
 package org.jbei.ice.client.login;
 
-import java.util.ArrayList;
-
-import org.jbei.ice.client.FeedbackType;
-import org.jbei.ice.client.IFeedbackHandler;
-import org.jbei.ice.client.ILogoutHandler;
 import org.jbei.ice.client.common.Footer;
 import org.jbei.ice.client.common.HeaderView;
 
-import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HeaderPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * View of the login page
- * 
  * @author Hector Plahar
  */
-public class LoginView extends Composite implements LoginPresenter.Display {
+public class LoginView extends Composite implements ILoginView {
 
-    private final TextBox login;
-    private final TextBox pass;
-    private final Button loginButton;
-    private final CheckBox rememberUserCheckBox;
-    private final HeaderView header;
-    private final FeedbackLabel feedback;
-    private FlexTable loginTable;
+    private Button submitButton;
+    private TextBox loginInput;
+    private VerticalPanel loginPanel;
+    private Label loginErrorLabel;
+
+    private TextBox passwordInput;
+    private VerticalPanel passwordPanel;
+    private Label passwordErrorLabel;
+    private CheckBox remember;
 
     public LoginView() {
+        HeaderPanel layout = new HeaderPanel();
+        layout.setWidth("100%");
+        layout.setHeight("100%");
+        initWidget(layout);
 
-        FlexTable main = new FlexTable();
-        main.setCellPadding(0);
-        main.setCellSpacing(0);
-        main.setWidth("100%");
-        main.setHeight("98%");
-        initWidget(main);
-
-        // header
-        header = new HeaderView();
-        main.setWidget(0, 0, header);
-
-        // initialize components for login box
-        login = new TextBox();
-        login.setStyleName("inputbox");
-        login.setWidth("200px");
-
-        pass = new PasswordTextBox();
-        pass.setStyleName("inputbox");
-        pass.setWidth("200px");
-
-        loginButton = new Button("Log In");
-        rememberUserCheckBox = new CheckBox("Remember me on this computer");
-
-        // feedback
-        feedback = new FeedbackLabel();
-
-        // add login to page
-        main.setWidget(1, 0, this.createLogin());
-        main.getCellFormatter().setHeight(1, 0, "100%");
-        main.getCellFormatter().setVerticalAlignment(1, 0, HasVerticalAlignment.ALIGN_TOP);
-
-        // footer
-        main.setWidget(2, 0, Footer.getInstance());
+        layout.setHeaderWidget(createHeader());
+        layout.setContentWidget(createContents());
+        layout.setFooterWidget(createFooter());
     }
 
-    protected Widget createLogin() {
-
-        FlexTable wrapper = new FlexTable();
-        wrapper.setCellPadding(10);
-        wrapper.setWidth("100%");
-
-        // left
-        wrapper.setHTML(0, 0, "&nbsp;");
-        wrapper.getCellFormatter().setHeight(0, 0, "100%");
-
-        // right cell contents
-        //        FormPanel form = new FormPanel();
-        loginTable = new FlexTable();
-        loginTable.addStyleName("data_table");
-        loginTable.setWidth("100%");
-        loginTable.setCellPadding(3);
-        loginTable.setCellSpacing(1);
-
-        loginTable.setHTML(0, 0, "<span class=\"panel_header\">Login</span>");
-        loginTable.getCellFormatter().addStyleName(0, 0, "title_row_header");
-
-        loginTable.setWidget(1, 0, loginContents());
-        loginTable.getCellFormatter().addStyleName(1, 0, "background_white");
-
-        // format right cell
-        //        form.setWidget(loginTable);
-        wrapper.setWidget(0, 1, loginTable);
-        wrapper.getCellFormatter().setWidth(0, 1, "380px");
-        wrapper.getCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
-
-        //        form.addSubmitHandler(new SubmitHandler() {
-        //
-        //            @Override
-        //            public void onSubmit(SubmitEvent event) {
-        //                Window.alert("form submitted");
-        //
-        //            }
-        //        });
-        return wrapper;
+    protected Widget createHeader() {
+        HeaderView header = new HeaderView();
+        header.setWidth("100%");
+        return header;
     }
 
-    protected Widget loginContents() {
+    protected Widget createContents() {
 
-        FlexTable contents = new FlexTable();
-        contents.setCellPadding(0);
-        contents.setCellSpacing(2);
+        //        VerticalPanel panel = new VerticalPanel();
+        FlowPanel panel = new FlowPanel();
 
-        // feedback Panel
-        contents.setWidget(0, 0, feedback);
-        contents.getFlexCellFormatter().setColSpan(0, 0, 2);
+        // login text
+        Label loginLabel = new Label("LOG IN");
+        loginLabel.setStyleName("login_header_label");
+        panel.add(loginLabel);
 
-        contents.setHTML(1, 0, "Login: <span class=\"required\">*</span>");
-        contents.getCellFormatter().setWidth(1, 0, "150px");
-        contents.setWidget(1, 1, login);
+        // line 
+        HorizontalPanel underline = new HorizontalPanel();
+        underline.setStyleName("blue_underline");
+        underline.setWidth("100%");
+        panel.add(underline);
 
-        // password
-        contents.setHTML(2, 0, "Password: <span class=\"required\">*</span>");
-        contents.setWidget(2, 1, pass);
+        // username text
+        Label usernameLabel = new Label("Username");
+        usernameLabel.addStyleName("login_text");
+        panel.add(usernameLabel);
 
-        // cookies
-        contents.setHTML(3, 0, "&nbsp;");
-        contents.setWidget(3, 1, rememberUserCheckBox);
+        // username input
+        loginInput = new TextBox();
+        loginInput.setStyleName("login_input");
+        loginPanel = new VerticalPanel();
+        loginPanel.add(loginInput);
+        panel.add(loginPanel);
 
-        // login button
-        contents.setHTML(4, 0, "&nbsp;");
-        contents.setWidget(4, 1, loginButton);
+        // password text
+        Label passwordLabel = new Label("Password");
+        passwordLabel.addStyleName("login_text");
+        panel.add(passwordLabel);
 
-        contents.setHTML(5, 0, "&nbsp;");
-        contents.setHTML(5, 1, "&nbsp;");
+        // password input
+        passwordInput = new PasswordTextBox();
+        passwordInput.setStyleName("login_input");
+        passwordPanel = new VerticalPanel();
+        passwordPanel.add(passwordInput);
+        panel.add(passwordPanel);
 
-        contents.setHTML(6, 0, "&nbsp;");
-        contents.setHTML(6, 1, "&nbsp;");
+        // login button and "remember me link"
+        HorizontalPanel submitPanel = new HorizontalPanel();
+        submitButton = new Button("Login");
+        submitButton.setStyleName("login_button");
+        submitPanel.add(submitButton);
 
-        return contents;
+        remember = new CheckBox();
+        submitPanel.add(remember);
+
+        Label rememberLabel = new Label("Remember me on this computer");
+        submitPanel.add(rememberLabel);
+
+        panel.add(submitPanel);
+        return panel;
+    }
+
+    protected Widget createFooter() {
+        return Footer.getInstance();
     }
 
     @Override
-    public HasClickHandlers getLoginButton() {
-        return loginButton;
+    public void setSubmitHandler(KeyPressHandler handler) {
+        submitButton.addKeyPressHandler(handler);
+        passwordInput.addKeyPressHandler(handler);
+        loginInput.addKeyPressHandler(handler);
     }
 
     @Override
     public String getLoginName() {
-        return this.login.getText();
+        return loginInput.getText();
     }
 
     @Override
     public String getLoginPass() {
-        return this.pass.getText();
-    }
-
-    @Override
-    public Widget asWidget() {
-        return this;
+        return passwordInput.getText();
     }
 
     @Override
     public boolean rememberUserOnComputer() {
-        return rememberUserCheckBox.getValue();
+        return remember.getValue();
     }
 
     @Override
-    public ILogoutHandler getLogoutHandler() {
-        return header;
+    public void setLoginNameError(String errorMsg) {
+        if (loginErrorLabel == null)
+            loginErrorLabel = new Label();
+
+        loginErrorLabel.setText(errorMsg);
+        loginErrorLabel.setStyleName("login_error_msg");
+        loginPanel.add(loginErrorLabel);
+        loginInput.setStyleName("login_input_error");
     }
 
     @Override
-    public void setFeedback(ArrayList<String> msgs, FeedbackType type) {
-        feedback.setText(msgs, type);
-    }
+    public void setLoginPassError(String errorMsg) {
+        if (passwordErrorLabel == null)
+            passwordErrorLabel = new Label();
 
-    private class FeedbackLabel extends HTML implements IFeedbackHandler {
-
-        @Override
-        public void setText(ArrayList<String> msgs, FeedbackType type) {
-
-            switch (type) {
-            case ERROR:
-                this.setStyleName("feedback_panel_err");
-                break;
-
-            case FEEDBACK:
-                break;
-            }
-
-            String html = "<ul>";
-            for (String msg : msgs) {
-                html += "<li>" + msg + "</li>";
-            }
-            html += "</ul>";
-            setHTML(html);
-        }
+        passwordErrorLabel.setText(errorMsg);
+        passwordErrorLabel.setStyleName("login_error_msg");
+        passwordPanel.add(passwordErrorLabel);
+        passwordInput.setStyleName("login_input_error");
     }
 
     @Override
-    public void setKeyPressHandler(KeyPressHandler handler) {
-        this.login.addKeyPressHandler(handler);
-        this.pass.addKeyPressHandler(handler);
+    public void clearLoginNameError() {
+        if (loginErrorLabel == null)
+            return;
+
+        loginPanel.remove(loginErrorLabel);
+        loginInput.setStyleName("login_input");
+    }
+
+    @Override
+    public void clearLoginPassError() {
+        if (passwordErrorLabel == null)
+            return;
+
+        passwordPanel.remove(passwordErrorLabel);
+        passwordInput.setStyleName("login_input");
+    }
+
+    @Override
+    public Button getSubmitButton() {
+        return this.submitButton;
     }
 }

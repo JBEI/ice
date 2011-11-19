@@ -1,15 +1,16 @@
 package org.jbei.ice.shared.dto;
 
+import java.util.Date;
+
 public class SampleInfo extends HasEntryData {
 
-    //    private long id;
     private String id;
     private String label;
     private String notes;
     private String location;
     private String locationId;
-    //    private long locationId;
-    private String creationTime;
+    private String depositor;
+    private Date creationTime;
 
     public String getLabel() {
         return label;
@@ -43,11 +44,11 @@ public class SampleInfo extends HasEntryData {
         this.location = location;
     }
 
-    public String getCreationTime() {
+    public Date getCreationTime() {
         return creationTime;
     }
 
-    public void setCreationTime(String creationTime) {
+    public void setCreationTime(Date creationTime) {
         this.creationTime = creationTime;
     }
 
@@ -57,5 +58,13 @@ public class SampleInfo extends HasEntryData {
 
     public String getLocationId() {
         return this.locationId;
+    }
+
+    public void setDepositor(String depositor) {
+        this.depositor = depositor;
+    }
+
+    public String getDepositor() {
+        return this.depositor;
     }
 }

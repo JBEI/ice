@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.managers;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashSet;
@@ -10,6 +11,7 @@ import javax.persistence.NonUniqueResultException;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
@@ -270,6 +272,22 @@ public class EntryManager {
         }
 
         return entries;
+    }
+
+    public static int getEntryCountBy(String owner) throws ManagerException {
+        Session session = DAO.newSession();
+        try {
+            SQLQuery query = session
+                    .createSQLQuery("SELECT COUNT(id) FROM entries WHERE owner_email = :owner ");
+            query.setString("owner", owner);
+            return ((BigInteger) query.uniqueResult()).intValue();
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve entry count by owner " + owner, e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")

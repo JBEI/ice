@@ -3,30 +3,32 @@ package org.jbei.ice.client;
 import java.util.Date;
 import java.util.HashMap;
 
-import org.jbei.ice.client.collection.CollectionsPresenter;
-import org.jbei.ice.client.collection.CollectionsView;
+import org.jbei.ice.client.bulkimport.BulkImportPresenter;
+import org.jbei.ice.client.bulkimport.BulkImportView;
+import org.jbei.ice.client.collection.presenter.CollectionsEntriesPresenter;
+import org.jbei.ice.client.collection.presenter.CollectionsListPresenter;
+import org.jbei.ice.client.collection.view.CollectionsEntriesView;
+import org.jbei.ice.client.collection.view.CollectionsListView;
+import org.jbei.ice.client.entry.add.EntryAddPresenter;
+import org.jbei.ice.client.entry.add.EntryAddView;
+import org.jbei.ice.client.entry.view.EntryPresenter;
+import org.jbei.ice.client.entry.view.view.EntryView;
 import org.jbei.ice.client.event.ILoginEventHandler;
 import org.jbei.ice.client.event.ILogoutEventHandler;
 import org.jbei.ice.client.event.LoginEvent;
 import org.jbei.ice.client.event.LogoutEvent;
 import org.jbei.ice.client.login.LoginPresenter;
 import org.jbei.ice.client.login.LoginView;
-import org.jbei.ice.client.presenter.BulkImportPresenter;
-import org.jbei.ice.client.presenter.EntryAddPresenter;
-import org.jbei.ice.client.presenter.EntryPresenter;
 import org.jbei.ice.client.presenter.HomePagePresenter;
-import org.jbei.ice.client.presenter.StoragePresenter;
 import org.jbei.ice.client.profile.ProfilePresenter;
 import org.jbei.ice.client.profile.ProfileView;
-import org.jbei.ice.client.search.AdvancedSearchPresenter;
-import org.jbei.ice.client.search.AdvancedSearchView;
-import org.jbei.ice.client.search.BlastPresenter;
-import org.jbei.ice.client.search.BlastView;
-import org.jbei.ice.client.view.BulkImportView;
-import org.jbei.ice.client.view.EntryAddView;
-import org.jbei.ice.client.view.EntryView;
+import org.jbei.ice.client.search.advanced.AdvancedSearchPresenter;
+import org.jbei.ice.client.search.advanced.AdvancedSearchView;
+import org.jbei.ice.client.search.blast.BlastPresenter;
+import org.jbei.ice.client.search.blast.BlastView;
+import org.jbei.ice.client.storage.StoragePresenter;
+import org.jbei.ice.client.storage.StorageView;
 import org.jbei.ice.client.view.HomePageView;
-import org.jbei.ice.client.view.StorageView;
 import org.jbei.ice.shared.dto.AccountInfo;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -34,13 +36,12 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 
-public class AppController extends Presenter implements ValueChangeHandler<String> {
+public class AppController extends AbstractPresenter implements ValueChangeHandler<String> {
 
-    // cookie times out in three days (current value set in Ice
+    // cookie times out in three days (current value set in Ice)
     private static final int COOKIE_TIMEOUT = (1000 * 60 * 60 * 24) * 3;
     private static final String COOKIE_NAME = "gd-ice";
     private static final String COOKIE_PATH = "/";
@@ -51,10 +52,10 @@ public class AppController extends Presenter implements ValueChangeHandler<Strin
     public static String sessionId;
     public static AccountInfo accountInfo;
 
-    public AppController(RegistryServiceAsync service, HandlerManager eventBus) {
+    public AppController(RegistryServiceAsync service, HandlerManager eB) {
 
         this.service = service;
-        this.eventBus = eventBus;
+        eventBus = eB;
         bind();
     }
 
@@ -72,7 +73,7 @@ public class AppController extends Presenter implements ValueChangeHandler<Strin
                 if (event.isRememberUser()) {
                     Date expires = new Date(System.currentTimeMillis() + COOKIE_TIMEOUT);
                     // TODO : set the domain ? and change secure to true?
-                    Cookies.setCookie(COOKIE_NAME, sessionId, expires, null, COOKIE_PATH, false);
+                    Cookies.setCookie(COOKIE_NAME, sessionId, expires, null, COOKIE_PATH, true);
                 }
                 goToMainPage();
             }
@@ -83,14 +84,11 @@ public class AppController extends Presenter implements ValueChangeHandler<Strin
     }
 
     private void goToMainPage() {
-        if (sessionId == null) // TODO check the cookie
-            History.newItem("page=" + Page.LOGIN.getToken());
-
         Page currentPage = getPage(History.getToken());
         if (Page.LOGIN != currentPage)
             History.fireCurrentHistoryState();
         else
-            History.newItem("page=" + Page.MAIN.getToken());
+            History.newItem(Page.MAIN.getLink());
     }
 
     /**
@@ -100,11 +98,18 @@ public class AppController extends Presenter implements ValueChangeHandler<Strin
      */
     @Override
     public void onValueChange(ValueChangeEvent<String> event) {
-
         String token = event.getValue();
-        Page page = getPage(token);
+        goToPage(token);
+    }
+
+    private void goToPage(String token) {
+        Page page;
+        if (token == null || token.isEmpty())
+            page = Page.MAIN;
+        else
+            page = getPage(token);
         String param = getParam("id", token);
-        Presenter presenter;
+        AbstractPresenter presenter;
 
         switch (page) {
 
@@ -145,7 +150,12 @@ public class AppController extends Presenter implements ValueChangeHandler<Strin
             break;
 
         case COLLECTIONS:
-            presenter = new CollectionsPresenter(this.service, this.eventBus, new CollectionsView());
+            if (param != null && !param.isEmpty())
+                presenter = new CollectionsEntriesPresenter(this.service, this.eventBus,
+                        new CollectionsEntriesView(), param);
+            else
+                presenter = new CollectionsListPresenter(this.service, this.eventBus,
+                        new CollectionsListView());
             break;
 
         case BLAST:
@@ -162,7 +172,7 @@ public class AppController extends Presenter implements ValueChangeHandler<Strin
             break;
 
         case STORAGE:
-            presenter = new StoragePresenter(this.service, this.eventBus, new StorageView());
+            presenter = new StoragePresenter(this.service, this.eventBus, new StorageView(), param);
             break;
 
         case LOGIN:
@@ -218,16 +228,22 @@ public class AppController extends Presenter implements ValueChangeHandler<Strin
         final String sessionId = Cookies.getCookie(COOKIE_NAME);
         if (sessionId != null) {
 
-            service.sessionValid(sessionId, new AsyncCallback<Boolean>() {
+            service.sessionValid(sessionId, new AsyncCallback<AccountInfo>() {
 
                 @Override
-                public void onSuccess(Boolean result) {
-                    if (result.booleanValue()) {
+                public void onSuccess(AccountInfo result) {// TODO : this does not return session Id
+                    if (result != null) {
+                        AppController.accountInfo = result;
                         AppController.sessionId = sessionId;
-                        fetchAccountInfo();
-                        //                        
+                        goToPage(History.getToken());
                     } else {
-                        History.newItem("page=" + Page.LOGIN.getToken());
+                        AppController.sessionId = null;
+                        AppController.accountInfo = null;
+                        Cookies.removeCookie(COOKIE_NAME);
+                        if (Page.LOGIN.getToken().equals(History.getToken()))
+                            History.fireCurrentHistoryState();
+                        else
+                            History.newItem(Page.LOGIN.getLink());
                     }
                 }
 
@@ -235,37 +251,19 @@ public class AppController extends Presenter implements ValueChangeHandler<Strin
                 public void onFailure(Throwable caught) {
                     // technically this is not the result of an invalid sessionId
                     // an attempt to login may cause another failure. punting dealing with that
-                    if (Page.LOGIN.getToken().equals(History.getToken()))
+                    if (Page.LOGIN.getLink().equals(History.getToken()))
                         History.fireCurrentHistoryState();
                     else
-                        History.newItem("page=" + Page.LOGIN.getToken());
+                        History.newItem(Page.LOGIN.getLink());
                 }
             });
         } else {
 
-            //            if ("".equals(History.getToken())) {
-            History.newItem("page=" + Page.LOGIN.getToken());
-            //            } else {
-            //                History.fireCurrentHistoryState(); // TODO : only use this to redirect
-            //            }
+            if (Page.LOGIN.getLink().equals(History.getToken()))
+                History.fireCurrentHistoryState();
+            else
+                History.newItem(Page.LOGIN.getLink());
         }
-    }
-
-    protected void fetchAccountInfo() {
-        service.retrieveAccountInfoForSession(AppController.sessionId,
-            new AsyncCallback<AccountInfo>() {
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert("Failure to retrieve user account info for session");
-                }
-
-                @Override
-                public void onSuccess(AccountInfo result) {
-                    AppController.accountInfo = result;
-                    goToMainPage();
-                }
-            });
     }
 
     //

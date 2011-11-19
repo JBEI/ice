@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jbei.ice.client.RegistryService;
@@ -17,33 +18,42 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AccountManager;
+import org.jbei.ice.lib.managers.AttachmentManager;
+import org.jbei.ice.lib.managers.BulkImportManager;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.FolderManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.QueryManager;
+import org.jbei.ice.lib.managers.SampleManager;
+import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.managers.StorageManager;
+import org.jbei.ice.lib.managers.TraceSequenceManager;
 import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.managers.WorkspaceManager;
 import org.jbei.ice.lib.models.Account;
+import org.jbei.ice.lib.models.Attachment;
+import org.jbei.ice.lib.models.BulkImportDraft;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Folder;
-import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.models.Storage;
+import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.search.blast.BlastResult;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BlastProgram;
 import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.EntryData;
-import org.jbei.ice.shared.FilterTrans;
 import org.jbei.ice.shared.FolderDetails;
-import org.jbei.ice.shared.PlasmidInfo;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BlastResultInfo;
+import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.ProfileInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.shared.dto.SearchFilterInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -56,18 +66,17 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public AccountInfo login(String name, String pass) {
 
-        String sessionId = null;
-
         try {
             SessionData sessionData = AccountController.authenticate(name, pass);
-            sessionId = sessionData.getSessionKey();
             log("User by login '" + name + "' successfully logged in");
 
-            AccountInfo info = new AccountInfo();
-            info.setSessionId(sessionId);
-            info.setFirstName(sessionData.getAccount().getFirstName());
-            info.setLastName(sessionData.getAccount().getLastName());
-            info.setEmail(sessionData.getAccount().getEmail());
+            AccountInfo info = this.accountToInfo(sessionData.getAccount());
+            if (info == null)
+                return null;
+
+            info.setSessionId(sessionData.getSessionKey());
+            long visibleEntryCount = EntryManager.getNumberOfVisibleEntries();
+            info.setVisibleEntryCount(visibleEntryCount);
             return info;
         } catch (InvalidCredentialsException e) {
             Logger.warn("Invalid credentials provided by user: " + name);
@@ -80,13 +89,21 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean sessionValid(String sid) {
+    public AccountInfo sessionValid(String sid) {
         try {
-            return AccountController.isAuthenticated(sid);
+            if (AccountController.isAuthenticated(sid)) {
+                Account account = AccountController.getAccountBySessionKey(sid);
+                AccountInfo info = this.accountToInfo(account);
+                long visibleEntryCount = EntryManager.getNumberOfVisibleEntries();
+                info.setVisibleEntryCount(visibleEntryCount);
+                return info;
+            }
         } catch (ControllerException e) {
             Logger.error(e);
-            return false;
+        } catch (ManagerException e) {
+            Logger.error(e);
         }
+        return null;
     }
 
     @Override
@@ -96,9 +113,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<Long> retrieveSearchResults(ArrayList<FilterTrans> filters) {
+    public ArrayList<Long> retrieveSearchResults(ArrayList<SearchFilterInfo> filters) {
         ArrayList<QueryFilter> queryFilters = new ArrayList<QueryFilter>();
-        for (FilterTrans filter : filters) {
+        for (SearchFilterInfo filter : filters) {
             QueryFilter queryFilter = new QueryFilter(filter);
             queryFilters.add(queryFilter);
         }
@@ -178,32 +195,34 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
         try {
-            //            Account account = retrieveAccountForSid(sessionId);
-            //            if (account == null)
-            //                return null;
+            Account account = retrieveAccountForSid(sessionId);
+            if (account == null)
+                return null;
 
-            // TODO : this needs to be in a manager and another data transfer object 
-            // TODO : FolderDetails, used
             Account system = AccountController.getSystemAccount();
             List<Folder> folders = FolderManager.getFoldersByOwner(system);
 
             for (Folder folder : folders) {
                 long id = folder.getId();
-                String name = folder.getName();
-                FolderDetails details = new FolderDetails(id, name);
+                FolderDetails details = new FolderDetails(id, folder.getName(), true);
+                int folderSize = FolderManager.getFolderSize(id);
+                details.setCount(folderSize);
+                details.setDescription(folder.getDescription());
                 results.add(details);
             }
 
-            // get user accounts also
-            //            List<Folder> userFolders = FolderManager.getFoldersByOwner(account);
-            //            if (userFolders != null) {
-            //                for (Folder folder : userFolders) {
-            //                    long id = folder.getId();
-            //                    String name = folder.getName();
-            //                    FolderDetails details = new FolderDetails(id, name);
-            //                    results.add(details);
-            //                }
-            //            }
+            // get user folder
+            List<Folder> userFolders = FolderManager.getFoldersByOwner(account);
+            if (userFolders != null) {
+                for (Folder folder : userFolders) {
+                    long id = folder.getId();
+                    FolderDetails details = new FolderDetails(id, folder.getName(), false);
+                    int folderSize = FolderManager.getFolderSize(id);
+                    details.setCount(folderSize);
+                    details.setDescription(folder.getDescription());
+                    results.add(details);
+                }
+            }
 
             return results;
 
@@ -217,7 +236,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<Long> retrieveEntriesForFolder(String sessionId, FolderDetails folder) {
+    public ArrayList<Long> retrieveEntriesForFolder(String sessionId, long folderId) {
         // TODO :
 
         //        Account account = this.retrieveAccountForSid(sessionId);
@@ -225,7 +244,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         //            return null;
 
         try {
-            return FolderManager.getFolderContents(folder.getId(), false);
+            return FolderManager.getFolderContents(folderId, false);
         } catch (ManagerException e) {
             Logger.error(e);
             return null;
@@ -311,6 +330,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         return new ArrayList<Long>();
     }
 
+    @Override
     public HashMap<AutoCompleteField, ArrayList<String>> retrieveAutoCompleteData(String sid) {
         HashMap<AutoCompleteField, ArrayList<String>> data = new HashMap<AutoCompleteField, ArrayList<String>>();
 
@@ -347,16 +367,41 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Entry entry = EntryManager.get(id);
             if (entry == null)
                 return null;
-            return entryToInfo(entry);
+
+            ArrayList<Attachment> attachments = AttachmentManager.getByEntry(entry);
+            ArrayList<Sample> samples = SampleManager.getSamplesByEntry(entry);
+            List<TraceSequence> sequences = TraceSequenceManager.getByEntry(entry);
+
+            Map<Sample, LinkedList<Storage>> sampleMap = new HashMap<Sample, LinkedList<Storage>>();
+            for (Sample sample : samples) {
+                Storage storage = sample.getStorage();
+
+                LinkedList<Storage> storageList = new LinkedList<Storage>();
+
+                List<Storage> storages = StorageManager.getStoragesUptoScheme(storage);
+                if (storages != null)
+                    storageList.addAll(storages);
+                Storage scheme = StorageManager.getSchemeContainingParentStorage(storage);
+                if (scheme != null)
+                    storageList.add(scheme);
+
+                sampleMap.put(sample, storageList);
+            }
+
+            boolean hasSequence = (SequenceManager.getByEntry(entry) != null);
+
+            return EntryToInfoFactory
+                    .getInfo(entry, attachments, sampleMap, sequences, hasSequence);
         } catch (ManagerException e) {
             Logger.error(e);
+            return null;
         }
-        return null;
     }
 
     @Override
     public AccountInfo retrieveAccountInfo(String sid, String userId) {
         try {
+            this.retrieveAccountForSid(sid);
             Account account = retrieveAccountForSid(sid);
             if (account == null)
                 return null;
@@ -365,14 +410,24 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            return accountToInfo(account);
+            AccountInfo info = accountToInfo(account);
+
+            // get the count for samples
+            int sampleCount = SampleManager.getSampleCountBy(info.getEmail());
+            info.setUserSampleCount(sampleCount);
+            long visibleEntryCount = EntryManager.getNumberOfVisibleEntries();
+            info.setVisibleEntryCount(visibleEntryCount);
+            int entryCount = EntryManager.getEntryCountBy(info.getEmail());
+            info.setUserEntryCount(entryCount);
+
+            return info;
         } catch (ManagerException e) {
             Logger.error(e);
+            return null;
         } catch (ControllerException e) {
             Logger.error(e);
+            return null;
         }
-
-        return null;
     }
 
     @Override
@@ -404,30 +459,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         info.setSince(dateFormat.format(memberSinceDate));
 
         return info;
-    }
-
-    private EntryInfo entryToInfo(Entry entry) {
-        if (entry instanceof Plasmid) {
-            PlasmidInfo info = new PlasmidInfo();
-            Plasmid plasmid = (Plasmid) entry;
-
-            info.setAlias(plasmid.getAlias());
-            info.setBackbone(plasmid.getBackbone());
-            info.setCreator(plasmid.getCreator());
-            info.setCreatorEmail(plasmid.getCreatorEmail());
-            info.setPartId(plasmid.getOnePartNumber().getPartNumber());
-            info.setName(plasmid.getNamesAsString());
-            info.setAlias(plasmid.getAlias());
-            info.setBackbone(plasmid.getBackbone());
-            info.setBioSafetyLevel(plasmid.getBioSafetyLevel());
-            info.setOwner(plasmid.getOwner());
-            info.setOwnerEmail(plasmid.getOwnerEmail());
-            info.setCircular(plasmid.getCircular());
-            info.setShortDescription(plasmid.getShortDescription());
-
-            return info;
-        }
-        return null;
     }
 
     @Override
@@ -489,33 +520,70 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         return null;
     }
 
+    //
+    // STORAGE
+    //
+
     @Override
     public ArrayList<StorageInfo> retrieveChildren(String sid, long id) {
         ArrayList<StorageInfo> result = new ArrayList<StorageInfo>();
-        List<Storage> list = null;
+        List<Storage> children = null;
 
-        // if id == 0 returns root
         try {
-            if (id == 0) {
-                list = StorageManager.getAllStorageSchemes();
-            } else {
-                Storage storage = StorageManager.get(id, true);
-                list = new LinkedList<Storage>(storage.getChildren());
+            Storage currentStorage = StorageManager.get(id, true);
+            children = new LinkedList<Storage>(currentStorage.getChildren());
+
+            for (Storage storage : children) {
+
+                StorageInfo info = new StorageInfo();
+                String index = storage.getIndex();
+                if (index == null || index.isEmpty())
+                    info.setDisplay(storage.getName());
+                else
+                    info.setDisplay(storage.getName() + " " + index);
+                info.setId(storage.getId());
+                result.add(info);
+
+                ArrayList<Sample> samples = SampleManager.getSamplesByStorage(storage);
+                if (samples == null || samples.isEmpty())
+                    continue;
+
+                ArrayList<SampleInfo> sampleInfos = new ArrayList<SampleInfo>();
+                for (Sample sample : samples) {
+                    SampleInfo sampleInfo = new SampleInfo();
+                    sampleInfo.setLabel(sample.getLabel());
+                    sampleInfo.setId("" + sample.getId());
+                    sampleInfos.add(sampleInfo);
+                }
+                info.setSamples(sampleInfos);
             }
+
+            return result;
         } catch (ManagerException e) {
             Logger.error(e);
-        }
-        if (list == null)
             return null;
-
-        for (Storage storage : list) {
-            StorageInfo info = new StorageInfo();
-            info.setDisplay(storage.getName());
-            info.setId(storage.getId());
-            result.add(info);
         }
+    }
 
-        return result;
+    @Override
+    public ArrayList<StorageInfo> retrieveStorageRoot(String sid) {
+        try {
+
+            ArrayList<StorageInfo> result = new ArrayList<StorageInfo>();
+
+            for (Storage storage : StorageManager.getAllStorageRoot()) {
+                StorageInfo info = new StorageInfo();
+                info.setDisplay(storage.getName());
+                info.setId(storage.getId());
+                result.add(info);
+            }
+
+            return result;
+
+        } catch (ManagerException e) {
+            Logger.error(e);
+            return null;
+        }
     }
 
     //
@@ -574,9 +642,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 for (Sample sample : results) { // TODO
                     SampleInfo info = new SampleInfo();
                     info.setId(String.valueOf(sample.getId()));
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d yyyy");
-                    Date memberSinceDate = sample.getCreationTime();
-                    info.setCreationTime(dateFormat.format(memberSinceDate));
+                    info.setCreationTime(sample.getCreationTime());
                     EntryData view = EntryViewFactory.createTipView(sample.getEntry());
                     info.setDataView(view);
                     info.setLabel(sample.getLabel());
@@ -594,6 +660,156 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
+        }
+    }
+
+    @Override
+    public FolderDetails retrieveFolderDetails(String sid, long folderId) {
+        try {
+            Folder folder = FolderManager.get(folderId);
+            long id = folder.getId();
+            boolean isSystemFolder = folder.getOwnerEmail().equals(
+                AccountManager.getSystemAccount().getEmail());
+            FolderDetails details = new FolderDetails(id, folder.getName(), isSystemFolder);
+            int folderSize = FolderManager.getFolderSize(id);
+            details.setCount(folderSize);
+            details.setDescription(folder.getDescription());
+            return details;
+
+        } catch (ManagerException e) {
+            Logger.error(e.getMessage());
+            return null;
+        }
+    }
+
+    @Override
+    public long createUserCollection(String sid, String name, String description) {
+        try {
+            Account account = this.retrieveAccountForSid(sid);
+            Folder folder = new Folder(name);
+            folder.setOwnerEmail(account.getEmail());
+            folder.setDescription(description);
+            return FolderManager.save(folder).getId();
+        } catch (ControllerException e) {
+            Logger.error(e.getMessage());
+            return 0;
+        } catch (ManagerException e) {
+            Logger.error(e.getMessage());
+            return 0;
+        }
+    }
+
+    // TODO : this is currently working just as "Add to"
+    @Override
+    public boolean moveToUserCollection(String sid, ArrayList<Long> source,
+            ArrayList<Long> destination, ArrayList<Long> entryIds) {
+
+        // TODO:  this needs to be done in a single transaction, set list of folders in manager instead of iterating here
+        try {
+            for (long folderId : destination) {
+                FolderManager.addFolderContents(folderId, entryIds);
+            }
+            return true;
+        } catch (ManagerException e) {
+            Logger.error(e);
+            return false;
+        }
+    }
+
+    @Override
+    public ProfileInfo retrieveProfileInfo(String sid, String userId) {
+
+        try {
+            Account account = retrieveAccountForSid(sid);
+            if (account == null)
+                return null;
+
+            account = AccountManager.getByEmail(userId);
+            if (account == null)
+                return null;
+
+            AccountInfo accountInfo = accountToInfo(account);
+
+            // get the count for samples
+            int sampleCount = SampleManager.getSampleCountBy(accountInfo.getEmail());
+            accountInfo.setUserSampleCount(sampleCount);
+            long visibleEntryCount = EntryManager.getNumberOfVisibleEntries();
+            accountInfo.setVisibleEntryCount(visibleEntryCount);
+            int entryCount = EntryManager.getEntryCountBy(accountInfo.getEmail());
+            accountInfo.setUserEntryCount(entryCount);
+
+            ProfileInfo profile = new ProfileInfo();
+            profile.setAccountInfo(accountInfo);
+
+            if (entryCount > 0) {
+                // get user entries
+                ArrayList<Long> entries = EntryManager.getEntriesByOwner(userId);
+                profile.setUserEntries(entries);
+            }
+
+            if (sampleCount > 0) {
+                // get user samples
+                ArrayList<Long> samples = SampleManager.getSampleIdsByOwner(userId);
+                profile.setUserSamples(samples);
+            }
+
+            return profile;
+
+        } catch (ManagerException e) {
+            Logger.error(e);
+            return null;
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return null;
+        }
+    }
+
+    @Override
+    public ArrayList<BulkImportDraftInfo> retrieveImportDraftData(String sid, String email) {
+        try {
+            Account account = retrieveAccountForSid(sid);
+            if (account == null)
+                return null;
+
+            ArrayList<BulkImportDraft> results = BulkImportManager.retrieveUserDrafts(account);
+            ArrayList<BulkImportDraftInfo> info = new ArrayList<BulkImportDraftInfo>();
+
+            if (results != null) {
+                for (BulkImportDraft draft : results) {
+                    BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
+                    draftInfo.setCount(draft.getContents().size());
+                    draftInfo.setCreated(draft.getCreationTime());
+                    draftInfo.setName(draft.getName());
+                    draftInfo.setType(EntryAddType.valueOf(draft.getType()));
+                }
+            }
+
+            return info;
+
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+            return null;
+        } catch (ManagerException me) {
+            Logger.error(me);
+            return null;
+        }
+    }
+
+    @Override
+    public long createEntry(String sid, EntryInfo info) {
+        Account account;
+        try {
+            account = retrieveAccountForSid(sid);
+            if (account == null)
+                return 0;
+
+            EntryController controller = new EntryController(account);
+            Entry entry = InfoToModelFactory.infoToEntry(info);
+            entry = controller.createEntry(entry);
+            return entry.getId();
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return 0;
         }
     }
 }

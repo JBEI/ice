@@ -4,8 +4,8 @@ import java.util.LinkedList;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.component.HasEntryDataViewDataProvider;
-import org.jbei.ice.client.component.table.HasEntryDataTable;
+import org.jbei.ice.client.common.HasEntryDataViewDataProvider;
+import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.SampleInfo;
 

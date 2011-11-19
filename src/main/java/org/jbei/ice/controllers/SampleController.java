@@ -171,7 +171,7 @@ public class SampleController extends Controller {
             default:
             case CREATED:
                 results = SampleManager.retrieveSamplesByDepositorSortByCreated(email, asc);
-                //                getSamplePermissionVerifier().hasReadPermissions(model, account)
+                //                getSamplePermissionVerifier().hasReadPermissions(model, account) // TODO 
                 break;
             }
         } catch (ManagerException e) {

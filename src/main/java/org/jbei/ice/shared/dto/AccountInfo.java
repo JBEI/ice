@@ -11,6 +11,10 @@ public class AccountInfo implements IsSerializable {
     private String institution;
     private String description;
     private String since;
+    private int entriesAvailable;
+    private int userEntryCount;
+    private int userSampleCount;
+    private long visibleEntryCount;
 
     public AccountInfo() {
     }
@@ -51,6 +55,10 @@ public class AccountInfo implements IsSerializable {
         return lastName;
     }
 
+    public String getFullName() {
+        return this.firstName + " " + this.lastName;
+    }
+
     public String getInstitution() {
         return institution;
     }
@@ -71,4 +79,35 @@ public class AccountInfo implements IsSerializable {
         this.sessionId = sessionId;
     }
 
+    public int getEntriesAvailable() {
+        return entriesAvailable;
+    }
+
+    public void setEntriesAvailable(int entriesAvailable) {
+        this.entriesAvailable = entriesAvailable;
+    }
+
+    public int getUserEntryCount() {
+        return userEntryCount;
+    }
+
+    public void setUserEntryCount(int userEntryCount) {
+        this.userEntryCount = userEntryCount;
+    }
+
+    public int getUserSampleCount() {
+        return userSampleCount;
+    }
+
+    public void setUserSampleCount(int userSampleCount) {
+        this.userSampleCount = userSampleCount;
+    }
+
+    public long getVisibleEntryCount() {
+        return visibleEntryCount;
+    }
+
+    public void setVisibleEntryCount(long visibleEntryCount) {
+        this.visibleEntryCount = visibleEntryCount;
+    }
 }

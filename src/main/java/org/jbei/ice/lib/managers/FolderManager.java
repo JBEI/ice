@@ -2,6 +2,7 @@ package org.jbei.ice.lib.managers;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.hibernate.HibernateException;
@@ -95,6 +96,35 @@ public class FolderManager {
         }
     }
 
+    public static boolean removeFolderContents(long folderId, ArrayList<Long> entryIds)
+            throws ManagerException {
+        Session session = DAO.newSession();
+        try {
+            Folder folder = get(folderId);
+            folder.getContents().removeAll(EntryManager.getEntriesByIdSet(entryIds));
+            update(folder);
+            return true;
+
+        } finally {
+            if (session.isOpen())
+                session.close();
+        }
+    }
+
+    public static boolean addFolderContents(long folderId, ArrayList<Long> entryIds)
+            throws ManagerException {
+        Session session = DAO.newSession();
+        try {
+            Folder folder = get(folderId);
+            folder.getContents().addAll(EntryManager.getEntriesByIdSet(entryIds));
+            update(folder);
+            return true;
+        } finally {
+            if (session.isOpen())
+                session.close();
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public static List<Folder> getFoldersByOwner(Account account) throws ManagerException {
 
@@ -125,6 +155,7 @@ public class FolderManager {
 
     public static Folder update(Folder folder) throws ManagerException {
         try {
+            folder.setModificationTime(new Date(System.currentTimeMillis()));
             DAO.save(folder);
         } catch (DAOException e) {
             String msg = "Could not save folder: " + folder.getName() + " " + e.toString();
@@ -136,6 +167,7 @@ public class FolderManager {
     }
 
     public static Folder save(Folder folder) throws ManagerException {
+        folder.setCreationTime(new Date(System.currentTimeMillis()));
         return update(folder);
     }
 }

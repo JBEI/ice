@@ -8,12 +8,14 @@ import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BlastProgram;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.EntryData;
-import org.jbei.ice.shared.FilterTrans;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BlastResultInfo;
+import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.ProfileInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.shared.dto.SearchFilterInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -27,14 +29,14 @@ public interface RegistryService extends RemoteService {
 
     AccountInfo login(String name, String pass);
 
-    boolean sessionValid(String sid);
+    AccountInfo sessionValid(String sid);
 
     boolean logout(String sessionId);
 
     //
     // Search
     //
-    ArrayList<Long> retrieveSearchResults(ArrayList<FilterTrans> filters);
+    ArrayList<Long> retrieveSearchResults(ArrayList<SearchFilterInfo> filters);
 
     ArrayList<EntryData> retrieveEntryData(String sid, ArrayList<Long> entries, ColumnField field,
             boolean asc);
@@ -47,7 +49,7 @@ public interface RegistryService extends RemoteService {
      */
     ArrayList<FolderDetails> retrieveCollections(String sessionId);
 
-    ArrayList<Long> retrieveEntriesForFolder(String sessionId, FolderDetails folder);
+    ArrayList<Long> retrieveEntriesForFolder(String sessionId, long folderId);
 
     long retrieveAvailableEntryCount(String sessionId);
 
@@ -71,8 +73,25 @@ public interface RegistryService extends RemoteService {
 
     ArrayList<StorageInfo> retrieveChildren(String sid, long id);
 
+    ArrayList<StorageInfo> retrieveStorageRoot(String sid);
+
     LinkedList<Long> retrieveSamplesByDepositor(String sid, String email, ColumnField field,
             boolean asc);
 
     LinkedList<SampleInfo> retrieveSampleInfo(String sid, LinkedList<Long> sampleIds, boolean asc);
+
+    FolderDetails retrieveFolderDetails(String sid, long folderId);
+
+    // collections
+
+    long createUserCollection(String sid, String name, String description);
+
+    boolean moveToUserCollection(String sid, ArrayList<Long> source, ArrayList<Long> destination,
+            ArrayList<Long> entryIds);
+
+    ProfileInfo retrieveProfileInfo(String sid, String userId);
+
+    ArrayList<BulkImportDraftInfo> retrieveImportDraftData(String sid, String email);
+
+    long createEntry(String sid, EntryInfo info);
 }

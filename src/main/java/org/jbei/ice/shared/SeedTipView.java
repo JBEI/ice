@@ -1,10 +1,6 @@
 package org.jbei.ice.shared;
 
-import java.io.Serializable;
-
-public class SeedTipView extends EntryData implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class SeedTipView extends EntryData {
 
     private String plantType;
     private String generation;
