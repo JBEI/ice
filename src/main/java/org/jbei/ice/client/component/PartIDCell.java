@@ -1,6 +1,5 @@
 package org.jbei.ice.client.component;
 
-import org.jbei.ice.client.util.Utils;
 import org.jbei.ice.shared.EntryDataView;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -52,7 +51,7 @@ public class PartIDCell extends AbstractCell<EntryDataView> {
         if (MOUSEOVER_EVENT_NAME.equalsIgnoreCase(eventType)) {
 
             parent.setClassName(MOUSEOVER_STYLE);
-            Utils.showPointerCursor(parent);
+            //            Utils.showPointerCursor(parent);
             final int x = event.getClientX() + 30 + Window.getScrollLeft();
             final int y = event.getClientY() + Window.getScrollTop();
 
@@ -79,7 +78,7 @@ public class PartIDCell extends AbstractCell<EntryDataView> {
             if (popup != null) {
                 popup.hide();
                 popup = null;
-                Utils.showDefaultCursor(parent);
+                //                Utils.showDefaultCursor(parent);
                 parent.removeClassName(MOUSEOVER_STYLE);
             }
         }

@@ -2,19 +2,9 @@ package org.jbei.ice.server;
 
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.Set;
 
 import org.jbei.ice.client.EntryMenu;
 import org.jbei.ice.client.RegistryService;
-import org.jbei.ice.controllers.AccountController;
-import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.authentication.InvalidCredentialsException;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.EntryManager;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.QueryManager;
-import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.shared.EntryDataView;
 import org.jbei.ice.shared.FilterTrans;
 import org.jbei.ice.shared.Folder;
@@ -30,23 +20,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public String login(String name, String pass) {
-
-        String sessionId = null;
-
         try {
-            SessionData sessionData = AccountController.authenticate(name, pass);
-            sessionId = sessionData.getSessionKey();
-            log("User by login '" + name + "' successfully logged in");
-            return sessionId;
-        } catch (InvalidCredentialsException e) {
-            Logger.warn("Invalid credentials provided by user: " + name);
-        } catch (ControllerException e) {
-            Logger.error(e);
-        } catch (Exception e) {
-            Logger.error(e);
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
-
-        return null;
+        return "THIS_IS_A_FAKE_SESSION_dfsafsfas2345435mkldnmg";
     }
 
     @Override
@@ -56,62 +36,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public boolean logout(String sessionId) {
-        try {
-            AccountController.deauthenticate(sessionId);
-            log("User by sessionId '" + sessionId + "' successfully logged out");
-            return true;
-        } catch (ControllerException e) {
-            Logger.error(e);
-        } catch (Exception e) {
-            Logger.error(e);
-        }
+        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public ArrayList<Long> retrieveSearchResults(ArrayList<FilterTrans> filters) {
-        ArrayList<QueryFilter> queryFilters = new ArrayList<QueryFilter>();
-        for (FilterTrans filter : filters) {
-            QueryFilter queryFilter = new QueryFilter(filter);
-            queryFilters.add(queryFilter);
-        }
-
-        try {
-            Set<Long> filterResults = QueryManager.runFilters(queryFilters);
-            ArrayList<Long> results = new ArrayList<Long>(filterResults);
-            return results;
-        } catch (ManagerException e) {
-            Logger.error(e);
-            return null;
-        }
-    }
-
-    @Override
-    public ArrayList<EntryDataView> retrieveEntryViews(ArrayList<Long> entryIds) {
-
-        // TODO Use Controller
-        try {
-            ArrayList<EntryDataView> results = new ArrayList<EntryDataView>();
-            ArrayList<Entry> entries = EntryManager.getEntriesByIdSet(entryIds);
-
-            for (Entry entry : entries) {
-
-                EntryDataView view = EntryViewFactory.createTipView(entry);
-                if (view == null)
-                    continue;
-
-                results.add(view);
-            }
-
-            return results;
-        } catch (ManagerException e) {
-            Logger.error("Error retrieving entry id set", e);
-            return null;
-        }
-    }
-
-    @Override
-    public EntryDataView retrieveEntryView(long id) {
+    public ArrayList<EntryDataView> getSearchResults(ArrayList<FilterTrans> filters) {
         // TODO Auto-generated method stub
         return null;
     }

@@ -1,5 +1,6 @@
 package org.jbei.ice.client.util;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -8,6 +9,7 @@ public class Utils {
     public static void showWaitCursor(Element element) {
 
         if (element == null) {
+            GWT.log("element was null");
             element = RootPanel.getBodyElement();
         }
 
@@ -17,6 +19,7 @@ public class Utils {
     public static void showDefaultCursor(Element element) {
 
         if (element == null) {
+            GWT.log("element was null");
             element = RootPanel.getBodyElement();
         }
 
@@ -33,12 +36,4 @@ public class Utils {
         DOM.setStyleAttribute(RootPanel.getBodyElement(), "cursor", "not-allowed");
     }
 
-    public static void showPointerCursor(Element element) {
-
-        if (element == null) {
-            element = RootPanel.getBodyElement();
-        }
-
-        DOM.setStyleAttribute((com.google.gwt.user.client.Element) element, "cursor", "pointer");
-    }
 }

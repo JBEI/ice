@@ -27,14 +27,7 @@ public interface RegistryService extends RemoteService {
 
     boolean logout(String sessionId);
 
-    //
-    // Search
-    //
-    ArrayList<Long> retrieveSearchResults(ArrayList<FilterTrans> filters);
-
-    ArrayList<EntryDataView> retrieveEntryViews(ArrayList<Long> entries);
-
-    EntryDataView retrieveEntryView(long id);
+    ArrayList<EntryDataView> getSearchResults(ArrayList<FilterTrans> filters);
 
     /**
      * Returns list of folders as seen on the collections page
