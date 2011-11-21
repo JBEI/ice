@@ -2,7 +2,7 @@ package org.jbei.ice.client.storage;
 
 import org.jbei.ice.client.common.Footer;
 import org.jbei.ice.client.common.HeaderMenu;
-import org.jbei.ice.client.common.HeaderView;
+import org.jbei.ice.client.common.header.HeaderView;
 
 import com.google.gwt.user.cellview.client.CellTree;
 import com.google.gwt.user.client.ui.Composite;

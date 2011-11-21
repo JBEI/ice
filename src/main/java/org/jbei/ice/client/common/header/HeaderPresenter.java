@@ -1,4 +1,4 @@
-package org.jbei.ice.client.common;
+package org.jbei.ice.client.common.header;
 
 import org.jbei.ice.client.event.SearchEvent;
 import org.jbei.ice.client.event.SearchEventHandler;

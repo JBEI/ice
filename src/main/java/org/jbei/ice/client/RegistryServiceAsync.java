@@ -93,7 +93,7 @@ public interface RegistryServiceAsync {
      */
 
     void createUserCollection(String sid, String name, String description,
-            AsyncCallback<Long> callback);
+            AsyncCallback<FolderDetails> callback);
 
     void moveToUserCollection(String sid, ArrayList<Long> source, ArrayList<Long> destination,
             ArrayList<Long> entryIds, AsyncCallback<Boolean> callback);

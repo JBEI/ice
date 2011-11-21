@@ -5,7 +5,7 @@ import java.util.HashMap;
 import org.jbei.ice.client.common.ExportAsPanel;
 import org.jbei.ice.client.common.Footer;
 import org.jbei.ice.client.common.HeaderMenu;
-import org.jbei.ice.client.common.HeaderView;
+import org.jbei.ice.client.common.header.HeaderView;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.shared.BlastProgram;
 

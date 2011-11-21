@@ -1,5 +1,7 @@
 package org.jbei.ice.client.common;
 
+import org.jbei.ice.client.common.header.HeaderView;
+
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;

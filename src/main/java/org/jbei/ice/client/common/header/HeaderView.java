@@ -1,4 +1,4 @@
-package org.jbei.ice.client.common;
+package org.jbei.ice.client.common.header;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.ILogoutHandler;

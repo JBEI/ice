@@ -683,19 +683,22 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public long createUserCollection(String sid, String name, String description) {
+    public FolderDetails createUserCollection(String sid, String name, String description) {
         try {
             Account account = this.retrieveAccountForSid(sid);
             Folder folder = new Folder(name);
             folder.setOwnerEmail(account.getEmail());
             folder.setDescription(description);
-            return FolderManager.save(folder).getId();
+            folder = FolderManager.save(folder);
+            FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), false);
+            details.setDescription(folder.getDescription());
+            return details;
         } catch (ControllerException e) {
             Logger.error(e.getMessage());
-            return 0;
+            return null;
         } catch (ManagerException e) {
             Logger.error(e.getMessage());
-            return 0;
+            return null;
         }
     }
 

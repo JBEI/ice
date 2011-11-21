@@ -1,4 +1,4 @@
-package org.jbei.ice.client.view;
+package org.jbei.ice.client.home;
 
 import gwtupload.client.BaseUploadStatus;
 import gwtupload.client.Uploader;
@@ -6,8 +6,7 @@ import gwtupload.client.Uploader;
 import org.jbei.ice.client.ILogoutHandler;
 import org.jbei.ice.client.common.Footer;
 import org.jbei.ice.client.common.HeaderMenu;
-import org.jbei.ice.client.common.HeaderView;
-import org.jbei.ice.client.presenter.HomePagePresenter;
+import org.jbei.ice.client.common.header.HeaderView;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;

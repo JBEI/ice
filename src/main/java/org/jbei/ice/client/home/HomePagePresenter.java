@@ -1,4 +1,4 @@
-package org.jbei.ice.client.presenter;
+package org.jbei.ice.client.home;
 
 import org.jbei.ice.client.ILogoutHandler;
 import org.jbei.ice.client.AbstractPresenter;

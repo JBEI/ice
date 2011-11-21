@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.jbei.ice.client.collection.table.SamplesDataTable;
 import org.jbei.ice.client.common.Footer;
 import org.jbei.ice.client.common.HeaderMenu;
-import org.jbei.ice.client.common.HeaderView;
+import org.jbei.ice.client.common.header.HeaderView;
 import org.jbei.ice.client.common.table.EntryDataTable;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
