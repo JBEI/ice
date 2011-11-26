@@ -49,6 +49,8 @@ public interface RegistryService extends RemoteService {
      */
     ArrayList<FolderDetails> retrieveCollections(String sessionId);
 
+    ArrayList<FolderDetails> retrieveUserCollections(String sessionId, String userId);
+
     ArrayList<Long> retrieveEntriesForFolder(String sessionId, long folderId);
 
     long retrieveAvailableEntryCount(String sessionId);
@@ -94,4 +96,6 @@ public interface RegistryService extends RemoteService {
     ArrayList<BulkImportDraftInfo> retrieveImportDraftData(String sid, String email);
 
     long createEntry(String sid, EntryInfo info);
+
+    boolean addEntriesToCollection(String sid, ArrayList<Long> destination, ArrayList<Long> entryIds);
 }

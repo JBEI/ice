@@ -2,10 +2,12 @@ package org.jbei.ice.client.collection.presenter;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.AbstractPresenter;
+import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.collection.menu.SelectionMenu;
+import org.jbei.ice.client.collection.ICollectionEntriesView;
+import org.jbei.ice.client.collection.menu.EntrySelectionModelMenu;
+import org.jbei.ice.client.collection.menu.UserCollectionMultiSelect;
 import org.jbei.ice.client.collection.table.CollectionEntriesDataTable;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.common.table.DataTable;
@@ -19,8 +21,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.ProvidesKey;
@@ -30,45 +30,29 @@ import com.google.gwt.view.client.SingleSelectionModel;
 // TODO : show table of collections on click, change view
 public class CollectionsEntriesPresenter extends AbstractPresenter {
 
-    public interface Display {
-
-        HasData<FolderDetails> getSystemCollectionMenu();
-
-        HasData<FolderDetails> getUserCollectionMenu();
-
-        Widget asWidget();
-
-        void setSelectionMenu(Widget widget);
-
-        TextBox getQuickAddBox();
-
-        Button getQuickAddButton();
-
-        // active data view
-        void setDataView(DataTable<?> table);
-    }
-
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
-    private final Display display;
+    private final ICollectionEntriesView display;
 
-    private EntryDataViewDataProvider entryDataProvider;
+    private final EntryDataViewDataProvider entryDataProvider;
 
-    private CollectionEntriesDataTable collectionsDataTable;
-    private SingleSelectionModel<FolderDetails> systemFolderSelectionModel;
-    private SingleSelectionModel<FolderDetails> userFolderSelectionModel;
+    private final CollectionEntriesDataTable collectionsDataTable;
+    private final SingleSelectionModel<FolderDetails> systemFolderSelectionModel;
+    private final SingleSelectionModel<FolderDetails> userFolderSelectionModel;
 
     // data providers
-    private ListDataProvider<FolderDetails> userListProvider;
-    private ListDataProvider<FolderDetails> menuListProvider;
+    private final ListDataProvider<FolderDetails> userListProvider;
+    private final ListDataProvider<FolderDetails> systemListProvider;
 
     private final String param;
 
     // selection menu
-    private SelectionMenu menu;
+    private final EntrySelectionModelMenu subMenu;
+    private final Button addToSubmit;
+    private final Button moveToSubmit;
 
     public CollectionsEntriesPresenter(RegistryServiceAsync service, HandlerManager eventBus,
-            Display display, String param) {
+            ICollectionEntriesView display, String param) {
 
         this.service = service;
         this.eventBus = eventBus;
@@ -80,8 +64,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         this.systemFolderSelectionModel = new SingleSelectionModel<FolderDetails>();
         this.userFolderSelectionModel = new SingleSelectionModel<FolderDetails>();
         this.userListProvider = new ListDataProvider<FolderDetails>(new KeyProvider());
-        this.menuListProvider = new ListDataProvider<FolderDetails>(new KeyProvider());
-        this.menu = new SelectionMenu(this.userListProvider);
+        this.systemListProvider = new ListDataProvider<FolderDetails>(new KeyProvider());
         this.entryDataProvider = new EntryDataViewDataProvider(collectionsDataTable, service);
 
         // Collections
@@ -92,15 +75,45 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
 
         setMenuOptions();
 
-        // adds handlers for the selection menu "add to" and "move to" buttons
-        initSelectionMenuHandlers();
-
         // init text box
         initCreateCollectionHandlers();
 
         initDataProviders();
 
         display.setDataView(collectionsDataTable);
+
+        // collection sub menu
+        addToSubmit = new Button("Submit");
+        moveToSubmit = new Button("Submit");
+
+        UserCollectionMultiSelect add = new UserCollectionMultiSelect(addToSubmit,
+                this.userListProvider);
+        UserCollectionMultiSelect move = new UserCollectionMultiSelect(moveToSubmit,
+                this.userListProvider);
+
+        subMenu = new EntrySelectionModelMenu(add, move);
+        this.display.setCollectionSubMenu(subMenu.asWidget());
+
+        // handlers for the collection sub menu
+        addToSubmit.addClickHandler(new AddToFolderHandler(this.service) {
+
+            @Override
+            protected ArrayList<FolderDetails> getDestination() {
+                ArrayList<FolderDetails> list = new ArrayList<FolderDetails>();
+                list.addAll(subMenu.getCollectionMenu().getAddToDestination());
+                return list;
+            }
+
+            @Override
+            protected ArrayList<Long> getEntryIds() {
+                // TODO : inefficient
+                ArrayList<Long> ids = new ArrayList<Long>();
+                for (EntryData datum : collectionsDataTable.getSelectedEntries()) {
+                    ids.add(datum.getRecordId());
+                }
+                return ids;
+            }
+        });
     }
 
     private void initDataProviders() {
@@ -110,46 +123,8 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         this.display.getUserCollectionMenu().setSelectionModel(userFolderSelectionModel);
 
         // system list
-        this.menuListProvider.addDataDisplay(this.display.getSystemCollectionMenu());
+        this.systemListProvider.addDataDisplay(this.display.getSystemCollectionMenu());
         this.display.getSystemCollectionMenu().setSelectionModel(systemFolderSelectionModel);
-    }
-
-    private void initSelectionMenuHandlers() {
-
-        menu.getAddToSubmit().addClickHandler(new SubmitHandler(this.service) {
-
-            @Override
-            protected ArrayList<FolderDetails> getSource() {
-                ArrayList<FolderDetails> selections = new ArrayList<FolderDetails>();
-                FolderDetails selected = systemFolderSelectionModel.getSelectedObject();
-                if (selected != null)
-                    selections.add(selected);
-                else {
-                    selections.add(userFolderSelectionModel.getSelectedObject());
-                }
-                return selections;
-            }
-
-            @Override
-            protected ArrayList<FolderDetails> getDestination() {
-                // TODO : how to distinguish between the two. empty set is not a stringent enough test
-                ArrayList<FolderDetails> destination = new ArrayList<FolderDetails>();
-                if (menu.getMoveToDestination() != null)
-                    destination.addAll(menu.getMoveToDestination()); // TODO : let never return null
-                if (menu.getAddToDestination() != null)
-                    destination.addAll(menu.getAddToDestination());
-                return destination;
-            }
-
-            @Override
-            protected ArrayList<Long> getEntryIds() {
-                ArrayList<Long> ids = new ArrayList<Long>();
-                for (EntryData datum : collectionsDataTable.getSelectedEntries()) {
-                    ids.add(datum.getRecordId());
-                }
-                return ids;
-            }
-        });
     }
 
     private void initCreateCollectionHandlers() {
@@ -306,7 +281,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                     userListProvider.getList().addAll(userFolders);
 
                     // selection menu
-                    display.setSelectionMenu(menu);
+                    //                    display.setSelectionMenu(menu);
                 }
 
                 @Override

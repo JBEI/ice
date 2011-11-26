@@ -191,6 +191,40 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public ArrayList<FolderDetails> retrieveUserCollections(String sessionId, String userId) {
+        ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
+
+        try {
+            Account account = retrieveAccountForSid(sessionId);
+            if (account == null)
+                return null;
+
+            Account userAccount = AccountController.getByEmail(userId);
+
+            // get user folder
+            List<Folder> userFolders = FolderManager.getFoldersByOwner(userAccount);
+            if (userFolders != null) {
+                for (Folder folder : userFolders) {
+                    long id = folder.getId();
+                    FolderDetails details = new FolderDetails(id, folder.getName(), false);
+                    int folderSize = FolderManager.getFolderSize(id);
+                    details.setCount(folderSize);
+                    details.setDescription(folder.getDescription());
+                    results.add(details);
+                }
+            }
+
+            return results;
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+            return null;
+        } catch (ManagerException me) {
+            Logger.error(me);
+            return null;
+        }
+    }
+
+    @Override
     public ArrayList<FolderDetails> retrieveCollections(String sessionId) {
 
         ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
@@ -708,6 +742,21 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             ArrayList<Long> destination, ArrayList<Long> entryIds) {
 
         // TODO:  this needs to be done in a single transaction, set list of folders in manager instead of iterating here
+        try {
+            for (long folderId : destination) {
+                FolderManager.addFolderContents(folderId, entryIds);
+            }
+            return true;
+        } catch (ManagerException e) {
+            Logger.error(e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean addEntriesToCollection(String sid, ArrayList<Long> destination,
+            ArrayList<Long> entryIds) {
+
         try {
             for (long folderId : destination) {
                 FolderManager.addFolderContents(folderId, entryIds);

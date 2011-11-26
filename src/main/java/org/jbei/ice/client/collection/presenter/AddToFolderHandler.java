@@ -7,28 +7,30 @@ import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.shared.FolderDetails;
 
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-// TODO : currently this just supports "Move To". Sub-class to support both
-public abstract class SubmitHandler implements ClickHandler {
+/**
+ * Submit handler that is only concerned with destination folder
+ * and the list of entries
+ * 
+ * @author Hector Plahar
+ * 
+ */
+public abstract class AddToFolderHandler extends SubmitHandler {
 
     private final RegistryServiceAsync service;
 
-    public SubmitHandler(RegistryServiceAsync service) {
+    public AddToFolderHandler(RegistryServiceAsync service) {
+        super(service);
         this.service = service;
     }
 
     @Override
     public void onClick(ClickEvent event) {
-        ArrayList<Long> sourceFolderIds = new ArrayList<Long>();
-        if (getSource() != null) {
-            for (FolderDetails folderDetail : getSource()) {
-                sourceFolderIds.add(folderDetail.getId());
-            }
-        }
 
+        // TODO : might be slower to iterate and get the ids, as opposed to 
+        // TODO : sending the list of folder details across the wire
         ArrayList<Long> destinationFolderIds = new ArrayList<Long>();
         if (getDestination() != null) {
             for (FolderDetails detail : getDestination()) {
@@ -38,8 +40,8 @@ public abstract class SubmitHandler implements ClickHandler {
 
         ArrayList<Long> entryIds = getEntryIds();
 
-        service.moveToUserCollection(AppController.sessionId, sourceFolderIds,
-            destinationFolderIds, entryIds, new AsyncCallback<Boolean>() {
+        service.addEntriesToCollection(AppController.sessionId, destinationFolderIds, entryIds,
+            new AsyncCallback<Boolean>() {
 
                 @Override
                 public void onSuccess(Boolean result) {
@@ -56,19 +58,8 @@ public abstract class SubmitHandler implements ClickHandler {
             });
     }
 
-    /**
-     * @return List of folders that the entries are originating from. When performing
-     *         a move, the entries are removed from this folder
-     */
-    protected abstract ArrayList<FolderDetails> getSource();
-
-    /**
-     * @return List of folders that the entries are to be added to
-     */
-    protected abstract ArrayList<FolderDetails> getDestination();
-
-    /**
-     * @return List of entry identifiers that are to be moved or added
-     */
-    protected abstract ArrayList<Long> getEntryIds();
+    @Override
+    protected ArrayList<FolderDetails> getSource() {
+        return null;
+    }
 }

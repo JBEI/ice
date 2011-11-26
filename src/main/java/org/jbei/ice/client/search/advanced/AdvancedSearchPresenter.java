@@ -3,56 +3,44 @@ package org.jbei.ice.client.search.advanced;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.AbstractPresenter;
+import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.collection.menu.ExportAsMenu;
+import org.jbei.ice.client.collection.menu.UserCollectionMultiSelect;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.event.SearchEvent;
 import org.jbei.ice.client.event.SearchSelectionHandler;
 import org.jbei.ice.client.util.Utils;
+import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.ListDataProvider;
 
 public class AdvancedSearchPresenter extends AbstractPresenter {
 
-    public interface Display {
-
-        ArrayList<SearchFilterInfo> getSearchFilters();
-
-        Button getEvaluateButton();
-
-        AdvancedSearchResultsTable getResultsTable();
-
-        void setResultsVisibility(boolean visible);
-
-        void setSelectionMenu(Widget menu);
-
-        void setFilterPanelChangeHandler(SearchSelectionHandler handler);
-
-        Widget asWidget();
-    }
-
     private final RegistryServiceAsync rpcService;
     private final HandlerManager eventBus;
-    private final Display display;
-    private EntryDataViewDataProvider dataProvider;
-
-    //    private SelectionMenu menu; // TODO : advanced Search needs its own menu
+    private final IAdvancedSearchView display;
+    private final EntryDataViewDataProvider dataProvider;
+    private final ListDataProvider<FolderDetails> userCollectionDataProvider;
 
     public AdvancedSearchPresenter(RegistryServiceAsync rpcService, HandlerManager eventBus,
-            Display view) {
+            IAdvancedSearchView view) {
 
         this.rpcService = rpcService;
         this.eventBus = eventBus;
         this.display = view;
+        userCollectionDataProvider = new ListDataProvider<FolderDetails>();
+
+        retrieveUserCollections();
 
         bind();
 
@@ -72,9 +60,30 @@ public class AdvancedSearchPresenter extends AbstractPresenter {
             @Override
             public void onChange(SearchEvent event) {
                 // TODO Auto-generated method stub
-
             }
         };
+    }
+
+    public void retrieveUserCollections() {
+        this.rpcService.retrieveUserCollections(AppController.sessionId,
+            AppController.accountInfo.getEmail(), new AsyncCallback<ArrayList<FolderDetails>>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert("Call for user collection failed: " + caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(ArrayList<FolderDetails> result) {
+                    Button submit = new Button("Submit");
+                    userCollectionDataProvider.setList(result);
+                    UserCollectionMultiSelect selection = new UserCollectionMultiSelect(submit,
+                            userCollectionDataProvider);
+                    AddToMenu addToMenu = new AddToMenu(selection);
+                    HeaderMenu header = new HeaderMenu(new ExportAsMenu(), addToMenu);
+                    display.setSelectionMenu(header);
+                }
+            });
     }
 
     public void bind() {
@@ -98,8 +107,7 @@ public class AdvancedSearchPresenter extends AbstractPresenter {
         public void onClick(ClickEvent event) {
 
             display.getEvaluateButton().setEnabled(false);
-            final Element element = display.getEvaluateButton().getElement();
-            Utils.showWaitCursor(element);
+            Utils.showWaitCursor(null);
 
             // get search results
             ArrayList<SearchFilterInfo> filters = display.getSearchFilters();
@@ -124,7 +132,7 @@ public class AdvancedSearchPresenter extends AbstractPresenter {
 
                 public void reset() {
                     display.getEvaluateButton().setEnabled(true);
-                    Utils.showDefaultCursor(element);
+                    Utils.showDefaultCursor(null);
                 }
             });
         }

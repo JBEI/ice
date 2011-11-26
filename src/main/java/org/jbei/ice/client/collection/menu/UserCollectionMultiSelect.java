@@ -1,6 +1,5 @@
 package org.jbei.ice.client.collection.menu;
 
-import java.util.ArrayList;
 import java.util.Set;
 
 import org.jbei.ice.shared.FolderDetails;
@@ -22,11 +21,11 @@ import com.google.gwt.view.client.MultiSelectionModel;
  * 
  * @author Hector Plahar
  */
-class UserCollectionMultiSelect extends Composite {
+public class UserCollectionMultiSelect extends Composite { // TODO : split model and ui
 
-    private CellTable<FolderDetails> table;
-    private ListDataProvider<FolderDetails> dataProvider;
-    private MultiSelectionModel<FolderDetails> model;
+    private final CellTable<FolderDetails> table;
+    private final ListDataProvider<FolderDetails> dataProvider;
+    private final MultiSelectionModel<FolderDetails> model;
 
     public UserCollectionMultiSelect(Button submitButton,
             ListDataProvider<FolderDetails> dataProvider) {
@@ -50,10 +49,6 @@ class UserCollectionMultiSelect extends Composite {
 
         addSelectionColumn();
         addNameColumn();
-    }
-
-    public void setData(ArrayList<FolderDetails> data) {
-        this.dataProvider.setList(data);
     }
 
     public Set<FolderDetails> getSelected() {

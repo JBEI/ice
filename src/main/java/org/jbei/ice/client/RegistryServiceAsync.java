@@ -98,7 +98,13 @@ public interface RegistryServiceAsync {
     void moveToUserCollection(String sid, ArrayList<Long> source, ArrayList<Long> destination,
             ArrayList<Long> entryIds, AsyncCallback<Boolean> callback);
 
+    void addEntriesToCollection(String sid, ArrayList<Long> destination, ArrayList<Long> entryIds,
+            AsyncCallback<Boolean> callback);
+
     void retrieveStorageRoot(String sid, AsyncCallback<ArrayList<StorageInfo>> callback);
 
     void createEntry(String sid, EntryInfo info, AsyncCallback<Long> callback);
+
+    void retrieveUserCollections(String sessionId, String userId,
+            AsyncCallback<ArrayList<FolderDetails>> callback);
 }

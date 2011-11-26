@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Set;
 
 import org.jbei.ice.client.Page;
+import org.jbei.ice.client.common.entry.IHasEntrySelection;
 import org.jbei.ice.client.common.table.cell.PartIDCell;
 import org.jbei.ice.client.common.table.cell.UrlCell;
 import org.jbei.ice.client.common.table.column.ImageColumn;
@@ -36,7 +37,8 @@ import com.google.gwt.view.client.ProvidesKey;
  */
 
 // TODO : allow specializations to specify column widths
-public abstract class EntryDataTable<T extends EntryData> extends DataTable<T> {
+public abstract class EntryDataTable<T extends EntryData> extends DataTable<T> implements
+        IHasEntrySelection<T> {
 
     private final EntrySelection selectionModel;
 
@@ -239,6 +241,7 @@ public abstract class EntryDataTable<T extends EntryData> extends DataTable<T> {
         return createdColumn;
     }
 
+    @Override
     public Set<T> getSelectedEntries() {
         //        if( selectionModel.isAllSelected() )
         //            this.e

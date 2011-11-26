@@ -1,7 +1,7 @@
 package org.jbei.ice.client.collection.view;
 
+import org.jbei.ice.client.collection.ICollectionEntriesView;
 import org.jbei.ice.client.collection.menu.CollectionListMenu;
-import org.jbei.ice.client.collection.presenter.CollectionsEntriesPresenter;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.table.DataTable;
 import org.jbei.ice.client.common.table.EntryTablePager;
@@ -18,8 +18,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.HasData;
 
-public class CollectionsEntriesView extends AbstractLayout implements
-        CollectionsEntriesPresenter.Display {
+public class CollectionsEntriesView extends AbstractLayout implements ICollectionEntriesView {
 
     private DataTable<?> table;
     private CollectionListMenu systemMenu;
@@ -33,6 +32,7 @@ public class CollectionsEntriesView extends AbstractLayout implements
     public CollectionsEntriesView() {
     }
 
+    @Override
     protected void initComponents() {
         tablePanel = new VerticalPanel();
         tablePanel.setWidth("100%");
@@ -144,12 +144,8 @@ public class CollectionsEntriesView extends AbstractLayout implements
         return this.userMenu;
     }
 
-    public Button getAddToCollectionButton() {
-        return addCollectionButton;
-    }
-
     @Override
-    public void setSelectionMenu(Widget widget) {
+    public void setCollectionSubMenu(Widget widget) {
         selectionWidget = widget;
     }
 
