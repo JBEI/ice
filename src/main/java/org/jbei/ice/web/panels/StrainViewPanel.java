@@ -11,8 +11,6 @@ public class StrainViewPanel extends AbstractEntryViewPanel<Strain> {
     public StrainViewPanel(String id, Strain entry) {
         super(id, new Model<Strain>(entry));
 
-        renderTopLink();
-
         renderSelectionMarkers();
         renderHost();
         renderGenotypePhenotype();

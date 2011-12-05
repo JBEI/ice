@@ -13,8 +13,6 @@ public class ArabidopsisSeedViewPanel extends AbstractEntryViewPanel<Arabidopsis
     public ArabidopsisSeedViewPanel(String id, ArabidopsisSeed entry) {
         super(id, new Model<ArabidopsisSeed>(entry));
 
-        renderTopLink();
-
         renderSelectionMarkers();
         renderHomozygosity();
         renderEcotype();

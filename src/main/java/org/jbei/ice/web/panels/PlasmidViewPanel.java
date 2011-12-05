@@ -17,8 +17,6 @@ public class PlasmidViewPanel extends AbstractEntryViewPanel<Plasmid> {
     public PlasmidViewPanel(String id, Plasmid entry) {
         super(id, new Model<Plasmid>(entry));
 
-        renderTopLink();
-
         renderSelectionMarkers();
         renderOriginOfReplication();
         renderPromoters();
