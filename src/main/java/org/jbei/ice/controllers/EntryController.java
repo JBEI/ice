@@ -434,6 +434,33 @@ public class EntryController extends Controller {
     }
 
     /**
+     * Retrieve the number of entries viewable by the user.
+     * <p>
+     * This number is accurate when the number of visible entries by everyone on the system is less
+     * than 100. After that, it is approximate (number of visible entries to everyone) for
+     * performance reasons.
+     * 
+     * @return number of Entries viewable by the user.
+     * @throws ControllerException
+     */
+    public long getEntriesSize() throws ControllerException {
+        long result = getNumberOfVisibleEntries();
+
+        if (result < 100) {
+            ArrayList<Long> entryIds;
+            try {
+                entryIds = EntryManager.getEntries("id", true);
+                List<Long> filteredEntries = filterEntriesByPermission(entryIds);
+                result = filteredEntries.size();
+            } catch (ManagerException e) {
+                throw new ControllerException(e);
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Retrieve from the database entries owned the owner's email.
      * 
      * @param owner
