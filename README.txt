@@ -260,7 +260,8 @@ cache.
     examined.
     
 3.4 You can try to build a deployable war file by typing
-    $ mvn package
+    $ mvn clean
+    $ mvn package -Dmaven.test.skip=true
 
     Now you should have target/gd-ice-1.0-SNAPSHOT.war and
     target/gd-ice-1.0-SNAPSHOT. Deploy one of these to your webserver
