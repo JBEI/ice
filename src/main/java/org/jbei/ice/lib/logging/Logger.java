@@ -98,12 +98,10 @@ public class Logger {
 
     /**
      * Log a message at the fatal level.
-     * <p>
-     * Since this is a serious error, the fatal method below that takes Throwable e is preferred.
      * 
      * @param msg
      */
-    @Deprecated
+
     public static void fatal(String msg) {
         sendEmail(msg);
         logger.fatal(msg);
