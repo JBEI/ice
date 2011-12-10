@@ -16,25 +16,13 @@
 				find our tools useful. More information, feature requests, bug
 				reports, as well as discussions are available from our Google
 				Project
-				page:
-				<ulink url="http://code.google.com/p/gd-ice/">http://code.google.com/p/gd-ice/</ulink>
+				page:<ulink url="http://code.google.com/p/gd-ice/">http://code.google.com/p/gd-ice/</ulink>
 			</para>
 		</sect1>
 	</chapter>
 	<chapter id="installation">
-		<title>Installation and Setup</title>
-		<para>Currently the primary method of ICE distribution is via source
-			code.
-			Because it is a server side software, knowledge of underlying systems is
-			required.  
-  	</para>
-		<para>
-			End users may use a publicly available installation, available at:
-			<ulink url="https://public.jbeir.org">https://public.jbeir.org</ulink>
-			.
-		</para>
-
-		<sect1 id="requirements"><title>Requirements</title>
+		<title>Installation</title>
+			<sect1 id="requirements"><title>Requirements</title>
 			<para>ICE depends on external software. The minimum requirement to
 				run ICE
 				is Postgres and a Java based web server like Tomcat or Jetty. To use
@@ -42,59 +30,55 @@
 				Then,
 				update the jbeir.properties file to tell ICE where it is.
 			</para>
-			<para>
-				To make significant modifications or customizations, we use the
-				optional development tools mentioned below.
-  			</para>
   			<sect2 id="requirements-java"><title>Java</title>
-  				<para>ICE requires Java 1.6 SE (also known as Java 6). Please download SDK version, either the OpenJDK or the Oracle version.
-  				</para>
-  				<sect3 id="java-linux"><title>Debian/Ubuntu</title>
+  				<para>ICE requires Java 1.6 SE (also known as Java 6). Please download SDK version, either 
+  				the OpenJDK or the Oracle version, instead of the GJC version. Most of our testing is done against the Oracle version.
+   				</para>
+  				<sect3 id="java-linux"><title>Debian Instructions</title>
   					<para>The package name is "sun-java6-jdk". You may have to add external software
 						repositories to be able to install it. To use sun java as default, you
 						may have to run as root (type 'sudo su' or just 'su' depending on system)
-						<screen><prompt>#</prompt><command>update-alternatives --list java</command></screen>
+						<screen><prompt>#</prompt> <command>update-alternatives --list java</command></screen>
 						to see the available java on your system. To change it, run
-    					<screen><prompt>#</prompt><command>update-alternatives --config java</command></screen>
+    					<screen><prompt>#</prompt> <command>update-alternatives --config java</command></screen>
 						and choose "java-6-sun".
   					</para>
   				</sect3>
   				<sect3 id="java-windows"><title>Windows</title>
-  					<para>Download from:
-  					
+  					<para>Download Java from:
 					<ulink url="http://www.oracle.com/technetwork/java/javase/downloads/index.html">http://www.oracle.com/technetwork/java/javase/downloads/index.html</ulink>
   					</para></sect3>
   			</sect2>
   			<sect2 id="requirements-postgresql"><title>Postgresql</title>
-  				<para>ICE requires postgres to run. It is relatively easy to set up and use.
+  				<para>ICE requires postgres 8.x to run. It is relatively easy to set up and use.
 There are plenty of walk throughs on the internet to guide you.  We
 recommend (and use) the pgadmin3 software. Please be ware: If different
 versions of postgres is installed on your machine, they may be listening
 on different ports (5432 and/or 5433).
   				</para>
-  				<sect3 id="postgres-linux"><title>Debian/Ubuntu</title>
+  				<sect3 id="postgres-linux"><title>Debian</title>
   					<para>
   					Install the postgresql package:
   					<screen><prompt>#</prompt><command>apt-get install postgresql</command></screen>
   					Configure the root password for the root database user (called postgres)
-  					<screen><prompt>#</prompt><command>su postgres</command>
-<prompt>$</prompt><command>psql <replaceable>postgres</replaceable></command>
-<prompt>postgres=#</prompt><command>\password postgres</command></screen>
+  					<screen><prompt>#</prompt> <command>su postgres</command>
+<prompt>$</prompt> <command>psql <replaceable>postgres</replaceable></command>
+<prompt>postgres=#</prompt> <command>\password postgres</command></screen>
   					After changing the password, type \q to quit.
   					</para><para>It is possible the database is named template1 instead of postgres. In this case type
   					<screen><prompt>$</prompt><command>psql <replaceable>template1</replaceable></command></screen>
   					</para>
   					<para>Create a new database user
-  					<screen><prompt>$</prompt><command>createuser --pwprompt test_user</command></screen>
+  					<screen><prompt>$</prompt> <command>createuser --pwprompt test_user</command></screen>
   					Type in the password, and select no to all options.
   					</para>
   					<para>
   					Create a new database and assign it to the user
-  					<screen><prompt>$</prompt><command>createdb --owner test_user test_registry</command></screen>
+  					<screen><prompt>$</prompt> <command>createdb --owner test_user test_registry</command></screen>
   					</para>
   					<para>
   					Install pgAdmin3 (optional)
-  					<screen><prompt>#</prompt><command>apt-get install pgadmin3</command></screen>
+  					<screen><prompt>#</prompt> <command>apt-get install pgadmin3</command></screen>
   					When using pgadmin to connect to the database, make sure to use the correct port (see above).
   					</para>
   				</sect3>
@@ -125,26 +109,225 @@ Name it test_registry, and change the owner to test_user, then click Ok.
   				</para>
   				<para>TODO: Blast on Windows?</para>
   			</sect2>
-  			<sect2 id="requirements-maven"><title>Maven (for building and development)</title>
-  				<para>We use Maven to help manage our dependencies.
+  			<sect2 id="requirements-maven"><title>Maven (optional, for development only)</title>
+  				<para>We use Maven to help manage our dependencies. See <xref linkend="maven-setup"></xref> for details.
   				</para>
   			</sect2>
-  			<sect2 id="requirements-eclipse"><title>Eclipse IDE</title>
-  			<para>We use Eclipse as our IDE. See <xref linkend="development"></xref> for setup instructions.</para>
+  			<sect2 id="requirements-eclipse"><title>Eclipse IDE (optional, for development only)</title>
+  			<para>We use Eclipse as our IDE. See <xref linkend="development">Development</xref> section for instructions.</para>
   			</sect2>
-			<sect2 id="requirements-flex"><title>Adobe Flex SDK (for development only)</title>
+			<sect2 id="requirements-flex"><title>Adobe Flex SDK (optional, for development only)</title>
 				<para>We include compiled versions of our Flex applications in our sources.
 However, if you would like to build your own, you need Adobe's
-SDK. The SDK is mostly open source and freely available, which means
-you can compile our Flex tools without buying anything.  The IDE is
-sadly not free.</para>
-			</sect2>	
+SDK. The SDK is open source and freely available, which means
+you can compile our Flex tools without buying anything.  The IDE for Windows and Mac is
+sadly not free. There is an unsupported version of the Linux IDE called fb4linux on google code which is what we use.</para>
+			</sect2>
 		</sect1>
-		<sect1 id="source-code"><title>Getting the Source Code</title><para></para></sect1>
-		<sect1 id="maven"><title>Using Maven</title><para></para></sect1>
-		<sect1 id="website"><title>Website Setup</title><para></para></sect1>
-		<sect1 id="development"><title>Setup for Development</title><para></para></sect1>
-		<sect1 id="contributing"><title>Contributing Code</title><para></para></sect1>
-		<sect1 id="credits"><title>Credits</title><para></para></sect1>
+		<sect1 id="install-from-war"><title>Installing from the war file</title>
+			<para>For the most simple setup, one can run the pre-compiled war file available from the <ulink url="http://code.google.com/p/gd-ice/downloads/list">download site</ulink>.
+			Because gd-ice needs to talk to a postgres database, one must change some settings. 
+			</para>
+			<para>
+			<sect2 id="configure-war"><title>Configuration</title>
+			<para>First, unzip the war file using any unzip utility (a war file is just a zip file with another name). The configuration files
+			are located in the 'gd-ice-2.0-SNAPSHOT/WEB-INF/classes' directory. See the <xref linked="configuration">Configuration</xref> section for details.
+			</para>
+			</sect2>
+			<sect2 id="install-war"><title>Installation</title>
+			<para>
+			After configuration has bee properly changed in the 'gd-ice-2.0-SNASHOPT' directory, 
+			one deploy gd-ice to an application server as an "exploded war". See
+			the <xref liked="tomcat-setup"></xref> for detailed tomcat instructions.
+			</para>
+			</sect2>
+			</para>
+		</sect1>
+		<sect1 id="install-from-sources"><title>Installing from source code</title>
+			<sect2 id="get-sources"><title>Getting the Source Code</title>
+				<para>The best way to install gd-ice is to build from the source code, as there are two 
+				major benefits over installing from the war file. First is the ability to keep up-to-date with 
+				the latest bug fixes and updates. The second is the ability to customize gd-ice, letting
+				you replace logos, themes, and page text. 
+				</para>
+				<para>
+				To download the sources from the git repository, run:
+				<screen><prompt>$</prompt> <command>git clone https://code.google.com/p/gd-ice gd-ice-build</command></screen>
+				</para>
+				<para>
+				Under Windows, TortoiseGit is a nice client.
+				</para>
+			</sect2>
+			<sect2 id="source-prep"><title>Preparing the source directory</title>
+				<para>Git has powerful features to allow management of different branches of source code.
+				Because you'll be making changes to the source code (configurations or customizations), it
+				would be wise to create a separate directory. Here, we will create a local branch called 'build'. This
+				branch will only exist on your disk.
+				<screen><prompt>$</prompt> <command>cd gd-ice-build</command></screen>
+				<screen><prompt>$</prompt> <command>git checkout -b build</command></screen>
+				</para>
+				<para>
+				Now you can make changes to the configuration files, or any file in the source code. See 
+				the <xref linked="configuration">Configuration</xref> section for details.
+				</para>
+				<para>
+				After you made changes to the configuration files you can commit the changes you have made to your local branch. To see the changes, run
+				<screen><prompt>$</prompt> <command>git status</command></screen>
+				Now stage the changes to be commited ('add to index' in git parlance):
+				<screen><prompt>$</prompt> <command>git add -u</command></screen>
+				Commit these changes to your local branch, with a message:
+				<screen><prompt>$</prompt> <command>git commit -m "build: production settings"</command></screen>
+				If you make additional changes, you can repeat the 'git add' and 'git commit' commands. Use 'git log' to see
+				the list of commits that have been made.
+				</para>
+			</sect2>
+			<sect2 id="source-update"><title>Updating sources</title>
+				<para>
+				With git you can keep up-to-date with the latest developments. First you fetch the latest version into your repository. 
+				This does not make changes to the files yet:
+				<screen><prompt>$</prompt> <command>git fetch origin</command></screen>
+				No you can tell git to take the changes in your 'build' branch, and put it at the top (tip) of the development branch:
+				<screen><prompt>$</prompt> <command>git rebase origin</command></screen>
+				In most cases this will succeed. If the main sources and your configurations altered the same line, git will
+				prompt you to resolve any conflicts at this time. Fix these conflicts and run 'git add -u' and 'git rebase --continue'.
+				</para>
+				<para>
+				For best results, instead of adding all the changes to a single git commit, commit each file change into
+				individual commits, so they can be individually tracked. 
+				</para>
+			</sect2>
+			<sect2 id="maven-setup"><title>Setting up Maven</title>
+			<para>
+			We use Maven as our dependency and build manager. As gd-ice uses external libraries, with dependencies of their own,
+			Maven allows us to take care of these dependencies automatically.
+			</para>
+			<para>
+			First, install maven on your system. For Debian linux, run 'apt-get install maven2'. For Windows, follow the installation instructions on 
+			the Maven website. Remember to add the appropriate environmental variables. 
+			</para>
+			<para>
+			Maven is configured via the pom.xml file, ad most dependencies are defined there. However, there are some external
+			libraries that maven does not know about, namely biojava and Flex components. We have provided these in the
+			lib/ directory, and maven has to be told about these.
+			</para>
+			<para>Run the following commands in the lib/ directory of your sources. Make 
+sure the long commands are not broken up into multiple lines. (both linux
+and Windows)
+<screen>
+<command>cd lib</command>
+<command>mvn install:install-file -Dfile=bytecode.jar -DgroupId=org.jbei.ice -DartifactId=bytecode -Dversion=SNAPSHOT -Dpackaging=jar
+</command>
+<command>mvn install:install-file -Dfile=biojava-1.7-all.jar -DgroupId=org.jbei.ice -DartifactId=biojava-all -Dversion=SNAPSHOT -Dpackaging=jar
+</command>
+<command>mvn install:install-file -Dfile=biojava.jar -DgroupId=org.jbei.ice -DartifactId=biojava -Dversion=SNAPSHOT -Dpackaging=jar
+</command>
+<command>mvn install:install-file -Dfile=backport-util-concurrent.jar -DgroupId=org.jbei.ice -DartifactId=backport-util-concurrent -Dversion=SNAPSHOT -Dpackaging=jar
+</command>
+<command>mvn install:install-file -Dfile=flex-messaging-common.jar -DgroupId=org.jbei.ice -DartifactId=flex-messaging-common -Dversion=SNAPSHOT -Dpackaging=jar
+</command>
+<command>mvn install:install-file -Dfile=flex-messaging-core.jar -DgroupId=org.jbei.ice -DartifactId=flex-messaging-core -Dversion=SNAPSHOT -Dpackaging=jar
+</command>
+<command>mvn install:install-file -Dfile=flex-messaging-opt.jar -DgroupId=org.jbei.ice -DartifactId=flex-messaging-opt -Dversion=SNAPSHOT -Dpackaging=jar
+</command>
+<command>mvn install:install-file -Dfile=flex-messaging-proxy.jar -DgroupId=org.jbei.ice -DartifactId=flex-messaging-proxy -Dversion=SNAPSHOT -Dpackaging=jar
+</command>
+<command>mvn install:install-file -Dfile=flex-messaging-remoting.jar -DgroupId=org.jbei.ice -DartifactId=flex-messaging-remoting -Dversion=SNAPSHOT -Dpackaging=jar
+</command>
+<command>mvn install:install-file -Dfile=org.eclipse.mylyn.wikitext.core_1.4.0.I20100805-0500-e3x.jar -DgroupId=org.jbei.ice -DartifactId=org.eclipse.mylyn.wikitext.core -Dversion=SNAPSHOT -Dpackaging=jar
+</command>
+<command>mvn install:install-file -Dfile=org.eclipse.mylyn.wikitext.mediawiki.core_1.4.0.I20100805-0500-e3x.jar -DgroupId=org.jbei.ice -DartifactId=org.eclipse.mylyn.wikitext.mediawiki.core -Dversion=SNAPSHOT -Dpackaging=jar
+</command>
+<command>mvn install:install-file -Dfile=org.eclipse.mylyn.wikitext.confluence.core_1.4.0.I20100805-0500-e3x.jar -DgroupId=org.jbei.ice -DartifactId=org.eclipse.mylyn.wikitext.confluence.core -Dversion=SNAPSHOT -Dpackaging=jar
+</command>
+</screen>
+			</para>
+			<para>
+			Now you should have all the necessary librares in your local maven cache.
+			</para>
+			</sect2>
+			<sect2 id="maven-build"><title>Building with Maven</title>
+			<para>
+			After adjusting your configuration files as described in <xref linkend="configuration"></xref>, gd-ice can be built as a war package by runinng:
+			<screen><prompt>$</prompt> <command>mvn clean</command></screen>
+			<screen><prompt>$</prompt> <command>mvn package -Dmaven.test.skip=true</command></screen>
+			You will have to be patient, as maven will try to contact the library repositories, download all the dependent packages, and build 
+			gd-ice. Depending on how much the repository is overloaded, some packages may fail to download. If this happens, just
+			re-run the above command. Eventually it will succeed. Once the packages are downloaded, they are saved to disk
+			($home/.m2), so the next time it wouldn't take so long. 
+			</para>
+			<para>
+			The exploded war and the compressed war file will be located in the target/ directory. You can deploy either to your webserver.
+			</para>
+			</sect2>
+			<sect2 id="maven-jetty"><title>Running a test server without Tomcat</title>
+			<para>Gd-ice includes a jetty webserver, which can be used test out your compiled package without deploying it to tomcat. The jetty settings are
+			defined in jetty-debug.xml.
+			</para>
+			<para>
+			First, generate a self-signed certificate as described in <xref linkend="ssl-setup"></xref>, and copy the .keystore file to the
+			root build directory (where LICENSE.txt is). Now you can start a server instance by running:
+			<screen><prompt>$</prompt> <command>mvn jetty:run -Dmaven.test.skip=true</command></screen>
+			If everything is set up properly, this command will populate your
+    database with the appropriate tables, and run a server on port
+    8443 (https). Point your browser to https://localhost:8443. Don't
+    forget the https bit.
+			</para>
+			<para>
+			To stop the server, press Ctrl-C
+			</para> 
+			<para>
+			    Hint (unix): To capture all the output that pass by use the 'script' utility 
+    		<screen><prompt>$</prompt> <command>script capturefile.txt</command></screen>
+  			<screen><prompt>$</prompt> <command>mvn jetty:run -Dmaven.test.skip=true</command></screen>
+			<screen><prompt>$</prompt> <command>exit</command></screen>
+    
+    Now all the output has been captured to a file, which can be examined.
+			</para>
+			</sect2>
+		</sect1>
+		<sect1 id="ssl-setup"><title>Setting up SSL</title>
+		<para>
+		Gd-ice uses https secure connections by default. To use https, one must have an SSL certificate, either purchased from
+		a commercial Certificate Authority or created by you. The advantage of a purchased certificate is that browsers will
+		not complain about "invalid certificate" or "security warnings" about the self-generated certificate.
+		</para>
+		<para>
+		One can generate a self-signed certificate using the following commands:
+		<screen><prompt>$</prompt> <command>keytool -genkey -alias tomcat -keyalg RSA -keystore .keystore</command></screen>
+		For Windows:
+		<screen><prompt>$</prompt> <command>%JAVA_HOME%\bin\keytool.exe -genkey -alias tomcat -keyalg RSA -keystore .keystore</command></screen>
+		The password for the keystore should be "changeit" (without the quotes).
+		</para>
+		<para>
+		The SSL certificate is used by tomcat. See <xref linkend="tomcat-configuration"></xref> for more information.
+		</para>
+		</sect1>
+		
+		<sect1 id="doc-build"><title>Building documentation</title>
+		<para>
+		The online documentation is built by running:
+		<screen><prompt>$</prompt> <command>mvn site -Dmaven.test.skip=true</command></screen>
+		The javadoc will be in 'target/site/apidocs', and this manual will be in 'target/docbkx/html' directories.
+		</para>
+		<para>
+		To build the javadoc separately, run
+		<screen><prompt>$</prompt> <command>mvn javadoc:javadoc</command></screen>
+		To build the manual separately, run
+		<screen><prompt>$</prompt> <command>mvn pre-site</command></screen>
+		
+		</para>
+		</sect1>
+		
 	</chapter>
+	<chapter id="configuration"><title>Configuration</title>
+			<sect1 id="website"><title>Website Setup</title><para></para></sect1>
+	</chapter>
+	<chapter id="development"><title>Development</title>
+			<sect1 id="development-setup"><title>Setup for Development</title><para></para></sect1>
+			<sect1 id="contributing"><title>Contributing Code</title><para></para></sect1>
+	</chapter>
+	<chapter id="Credits"><title>Credits</title>
+	<sect1 id="credits"><title>Credits</title><para></para></sect1>
+	</chapter>
+	
 </book>
