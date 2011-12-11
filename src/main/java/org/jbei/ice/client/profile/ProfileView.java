@@ -9,7 +9,7 @@ import org.jbei.ice.client.common.header.HeaderView;
 import org.jbei.ice.client.common.table.EntryDataTable;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
-import org.jbei.ice.shared.EntryData;
+import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 
 import com.google.gwt.user.cellview.client.CellList;
@@ -24,12 +24,12 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class ProfileView extends Composite implements ProfilePresenter.Display {
 
-    private EntryDataTable<EntryData> entriesTable;
+    private EntryDataTable<EntryInfo> entriesTable;
     private SamplesDataTable samplesTable;
 
     private final Label contentHeader;
     private CellList<CellEntry> menu;
-    private FlexTable mainContent;
+    private final FlexTable mainContent;
 
     public ProfileView() {
         FlexTable layout = new FlexTable();
@@ -118,13 +118,14 @@ public class ProfileView extends Composite implements ProfilePresenter.Display {
         return this.menu;
     }
 
+    @Override
     public void setHeaderText(String text) {
         contentHeader.setText(text);
     }
 
     private VerticalPanel createEntriesTablePanel() {
 
-        entriesTable = new EntryDataTable<EntryData>() {
+        entriesTable = new EntryDataTable<EntryInfo>() {
 
             @Override
             protected ArrayList<DataTableColumn<?>> createColumns() {
@@ -175,7 +176,7 @@ public class ProfileView extends Composite implements ProfilePresenter.Display {
     }
 
     @Override
-    public EntryDataTable<EntryData> getEntryDataTable() {
+    public EntryDataTable<EntryInfo> getEntryDataTable() {
         return this.entriesTable;
     }
 }

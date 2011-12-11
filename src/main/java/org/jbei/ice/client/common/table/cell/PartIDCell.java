@@ -2,7 +2,7 @@ package org.jbei.ice.client.common.table.cell;
 
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.common.TipViewContentFactory;
-import org.jbei.ice.shared.EntryData;
+import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Hector Plahar
  */
 
-public class PartIDCell<T extends EntryData> extends AbstractCell<T> {
+public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> {
 
     private PopupPanel popup;
     private static final String MOUSEOVER_EVENT_NAME = "mouseover";
@@ -67,7 +67,7 @@ public class PartIDCell<T extends EntryData> extends AbstractCell<T> {
         }
     }
 
-    protected void onMouseClick(long recordId) {
+    protected void onMouseClick(String recordId) {
         History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + recordId);
     }
 
@@ -100,7 +100,7 @@ public class PartIDCell<T extends EntryData> extends AbstractCell<T> {
         return true;
     }
 
-    protected void onMouseOver(Element parent, NativeEvent event, EntryData value) {
+    protected void onMouseOver(Element parent, NativeEvent event, EntryInfo value) {
 
         parent.setClassName(MOUSEOVER_STYLE);
         final int x = event.getClientX() + 30 + Window.getScrollLeft();
@@ -125,7 +125,7 @@ public class PartIDCell<T extends EntryData> extends AbstractCell<T> {
         popup.show();
     }
 
-    protected Widget getTipViewContents(EntryData value) {
+    protected Widget getTipViewContents(EntryInfo value) {
         return TipViewContentFactory.getContents(value);
     }
 }

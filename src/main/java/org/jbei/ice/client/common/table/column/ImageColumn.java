@@ -1,6 +1,6 @@
 package org.jbei.ice.client.common.table.column;
 
-import org.jbei.ice.shared.EntryData;
+import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.cell.client.ImageResourceCell;
 import com.google.gwt.core.client.GWT;
@@ -17,7 +17,7 @@ import com.google.gwt.user.cellview.client.Header;
  * @author Hector Plahar
  */
 
-public class ImageColumn<T extends EntryData> extends Column<T, ImageResource> {
+public class ImageColumn<T extends EntryInfo> extends Column<T, ImageResource> {
 
     private final static Resources resources = GWT.create(Resources.class);
 

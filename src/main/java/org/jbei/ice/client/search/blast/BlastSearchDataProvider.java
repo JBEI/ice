@@ -94,8 +94,8 @@ class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastResultIn
 
                 switch (field) {
                 case TYPE:
-                    diff = o1.getDataView().getType()
-                            .compareToIgnoreCase(o2.getDataView().getType());
+                    diff = o1.getDataView().getType().toString()
+                            .compareToIgnoreCase(o2.getDataView().getType().toString());
                     break;
 
                 case PART_ID:

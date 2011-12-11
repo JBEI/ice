@@ -3,7 +3,7 @@ package org.jbei.ice.client.collection.table;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.common.table.EntryDataTable;
-import org.jbei.ice.shared.EntryData;
+import org.jbei.ice.shared.dto.EntryInfo;
 
 /**
  * Data table for displaying the details of entries in a specified collection
@@ -11,7 +11,7 @@ import org.jbei.ice.shared.EntryData;
  * @author Hector Plahar
  */
 
-public class CollectionEntriesDataTable extends EntryDataTable<EntryData> {
+public class CollectionEntriesDataTable extends EntryDataTable<EntryInfo> {
 
     @Override
     protected ArrayList<DataTableColumn<?>> createColumns() {

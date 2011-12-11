@@ -2,10 +2,12 @@ package org.jbei.ice.client.entry.add.form;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BioSafetyOptions;
+import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -33,7 +35,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Hector Plahar
  */
 
-public class NewPlasmidForm extends NewEntryForm<PlasmidInfo> {
+public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
 
     private TextBox name;
     private TextBox alias;
@@ -395,8 +397,8 @@ public class NewPlasmidForm extends NewEntryForm<PlasmidInfo> {
     }
 
     @Override
-    public void populateEntry() {
-        super.populateEntry();
+    public void populateEntries() {
+        super.populateEntries();
 
         PlasmidInfo info = super.getEntryInfo();
 
@@ -567,5 +569,11 @@ public class NewPlasmidForm extends NewEntryForm<PlasmidInfo> {
     @Override
     public Button getCancel() {
         return cancel;
+    }
+
+    @Override
+    public Set<EntryInfo> getEntries() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

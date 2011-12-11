@@ -45,7 +45,6 @@ import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BlastProgram;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.EntryData;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BlastResultInfo;
@@ -131,7 +130,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<EntryData> retrieveEntryData(String sid, ArrayList<Long> entryIds,
+    public ArrayList<EntryInfo> retrieveEntryData(String sid, ArrayList<Long> entryIds,
             ColumnField type, boolean asc) {
 
         // TODO Use Controller and put all of this logic in there
@@ -139,7 +138,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             type = ColumnField.CREATED;
 
         try {
-            ArrayList<EntryData> results = new ArrayList<EntryData>();
+            ArrayList<EntryInfo> results = new ArrayList<EntryInfo>();
             List<Entry> entries = null;
 
             Account account = this.retrieveAccountForSid(sid);
@@ -167,7 +166,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             for (Entry entry : entries) {
 
-                EntryData view = EntryViewFactory.createTipView(entry);
+                EntryInfo view = EntryViewFactory.createTipView(entry);
                 if (view == null)
                     continue;
 
@@ -185,7 +184,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public EntryData retrieveEntryView(long id) {
+    public EntryInfo retrieveEntryView(long id) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -534,7 +533,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             for (BlastResult blastResult : blastResults) {
                 BlastResultInfo info = new BlastResultInfo();
                 info.setBitScore(blastResult.getBitScore());
-                EntryData view = EntryViewFactory.createTipView(blastResult.getEntry());
+                EntryInfo view = EntryViewFactory.createTipView(blastResult.getEntry());
                 info.setDataView(view);
                 info.seteValue(blastResult.geteValue());
                 info.setAlignmentLength(blastResult.getAlignmentLength());
@@ -677,7 +676,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                     SampleInfo info = new SampleInfo();
                     info.setId(String.valueOf(sample.getId()));
                     info.setCreationTime(sample.getCreationTime());
-                    EntryData view = EntryViewFactory.createTipView(sample.getEntry());
+                    EntryInfo view = EntryViewFactory.createTipView(sample.getEntry());
                     info.setDataView(view);
                     info.setLabel(sample.getLabel());
                     info.setNotes(sample.getNotes());

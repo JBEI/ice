@@ -7,7 +7,7 @@ import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.table.DataTable;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.HasEntryData;
+import org.jbei.ice.shared.dto.HasEntryInfo;
 
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;
@@ -17,7 +17,7 @@ import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
 
-public abstract class HasEntryDataViewDataProvider<T extends HasEntryData> extends
+public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> extends
         AsyncDataProvider<T> {
 
     protected final LinkedList<Long> valueIds;

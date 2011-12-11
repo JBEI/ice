@@ -12,8 +12,8 @@ import org.jbei.ice.client.collection.table.CollectionEntriesDataTable;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.common.table.DataTable;
 import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.EntryData;
 import org.jbei.ice.shared.FolderDetails;
+import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;
@@ -108,8 +108,8 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
             protected ArrayList<Long> getEntryIds() {
                 // TODO : inefficient
                 ArrayList<Long> ids = new ArrayList<Long>();
-                for (EntryData datum : collectionsDataTable.getSelectedEntries()) {
-                    ids.add(datum.getRecordId());
+                for (EntryInfo datum : collectionsDataTable.getEntries()) {
+                    ids.add(Long.decode(datum.getRecordId()));
                 }
                 return ids;
             }
@@ -138,12 +138,12 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
 
         // collections table view. single view used for all collections
         collectionsDataTable.addColumnSortHandler(new AsyncHandler(collectionsDataTable));
-        DataTable<EntryData>.DataTableColumn<?> createdField = collectionsDataTable
+        DataTable<EntryInfo>.DataTableColumn<?> createdField = collectionsDataTable
                 .getColumn(ColumnField.CREATED);
         collectionsDataTable.getColumnSortList().push(createdField);
     }
 
-    private void checkAndAddEntryTable(DataTable<EntryData> display) {
+    private void checkAndAddEntryTable(DataTable<EntryInfo> display) {
         if (this.entryDataProvider.getDataDisplays().contains(display))
             return;
 
@@ -296,7 +296,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 || entryDataProvider.getDataDisplays().isEmpty())
             return;
 
-        for (HasData<EntryData> view : entryDataProvider.getDataDisplays()) {
+        for (HasData<EntryInfo> view : entryDataProvider.getDataDisplays()) {
             entryDataProvider.removeDataDisplay(view);
         }
     }

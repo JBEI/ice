@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BlastProgram;
 import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.EntryData;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BlastResultInfo;
@@ -36,9 +35,9 @@ public interface RegistryServiceAsync {
             AsyncCallback<ArrayList<Long>> asyncCallback);
 
     void retrieveEntryData(String sid, ArrayList<Long> entries, ColumnField field, boolean asc,
-            AsyncCallback<ArrayList<EntryData>> callback);
+            AsyncCallback<ArrayList<EntryInfo>> callback);
 
-    void retrieveEntryView(long id, AsyncCallback<EntryData> callback);
+    void retrieveEntryView(long id, AsyncCallback<EntryInfo> callback);
 
     void retrieveEntryDetails(String sessionId, long id, AsyncCallback<EntryInfo> callback);
 

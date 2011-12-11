@@ -1,7 +1,5 @@
 package org.jbei.ice.server;
 
-import java.util.Date;
-
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
@@ -11,42 +9,40 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
-import org.jbei.ice.shared.EntryData;
-import org.jbei.ice.shared.PartData;
-import org.jbei.ice.shared.PlasmidTipView;
-import org.jbei.ice.shared.SeedTipView;
-import org.jbei.ice.shared.StrainTipView;
+import org.jbei.ice.shared.ArabidopsisSeedInfo;
+import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.EntryInfo.EntryType;
+import org.jbei.ice.shared.dto.PartInfo;
+import org.jbei.ice.shared.dto.PlasmidInfo;
+import org.jbei.ice.shared.dto.StrainInfo;
 
 public class EntryViewFactory {
 
-    private static void getCommon(EntryData view, Entry entry) {
+    private static void getCommon(EntryInfo view, Entry entry) {
 
-        view.setRecordId(entry.getId());
-        view.setType(entry.getRecordType());
+        view.setRecordId(String.valueOf(entry.getId()));
+        EntryType type = EntryType.nameToType(entry.getRecordType());
+        view.setType(type);
         view.setPartId(entry.getPartNumbersAsString());
         view.setName(entry.getNamesAsString());
         view.setAlias(entry.getAlias());
         view.setCreator(entry.getCreator());
         view.setStatus(entry.getStatus());
-        view.setOwnerName(entry.getOwner());
-        view.setOwnerId(entry.getOwnerEmail());
+        view.setOwner(entry.getOwner());
+        view.setOwnerEmail(entry.getOwnerEmail());
         view.setKeywords(entry.getKeywords());
-        view.setSummary(entry.getShortDescription());
-        Date creationDate = entry.getCreationTime();
-        if (creationDate != null)
-            view.setCreated(creationDate.getTime());
-        Date modification = entry.getModificationTime();
-        if (modification != null && modification.getTime() > 0)
-            view.setModified(modification.getTime());
+        view.setShortDescription(entry.getShortDescription());
+        view.setCreationTime(entry.getCreationTime());
+        view.setModificationTime(entry.getModificationTime());
     }
 
-    public static EntryData createTipView(Entry entry) {
+    public static EntryInfo createTipView(Entry entry) {
 
         Entry.EntryType type = Entry.EntryType.nameToType(entry.getRecordType());
         switch (type) {
 
         case strain: {
-            StrainTipView view = new StrainTipView();
+            StrainInfo view = new StrainInfo();
 
             // common
             getCommon(view, entry);
@@ -54,9 +50,9 @@ public class EntryViewFactory {
             // strain specific
             Strain strain = (Strain) entry;
             view.setHost(strain.getHost());
-            view.setGenPhen(strain.getGenotypePhenotype());
+            view.setGenotypePhenotype(strain.getGenotypePhenotype());
             view.setPlasmids(strain.getPlasmids());
-            view.setMarkers(strain.getSelectionMarkersAsString());
+            view.setSelectionMarkers(strain.getSelectionMarkersAsString());
 
             try {
                 boolean hasAttachment = (AttachmentManager.getByEntry(entry).size() > 0);
@@ -73,7 +69,7 @@ public class EntryViewFactory {
 
         case arabidopsis: {
 
-            SeedTipView view = new SeedTipView();
+            ArabidopsisSeedInfo view = new ArabidopsisSeedInfo();
             getCommon(view, entry);
 
             ArabidopsisSeed seed = (ArabidopsisSeed) entry;
@@ -88,22 +84,22 @@ public class EntryViewFactory {
         }
 
         case part: {
-            PartData view = new PartData();
+            PartInfo view = new PartInfo();
 
             getCommon(view, entry);
 
             Part part = (Part) entry;
-            view.setPackagingFormat(part.getPackageFormat().toString());
+            view.setPackageFormat(part.getPackageFormat().toString());
             return view;
         }
 
         case plasmid: {
-            PlasmidTipView view = new PlasmidTipView();
+            PlasmidInfo view = new PlasmidInfo();
             getCommon(view, entry);
 
             Plasmid plasmid = (Plasmid) entry;
             view.setBackbone(plasmid.getBackbone());
-            view.setOrigin(plasmid.getOriginOfReplication());
+            view.setOriginOfReplication(plasmid.getOriginOfReplication());
             view.setPromoters(plasmid.getPromoters());
 
             return view;
@@ -113,12 +109,4 @@ public class EntryViewFactory {
             return null;
         }
     }
-
-    //    private static String generateDate(long time) {
-    //
-    //        DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yyyy");
-    //        Date date = new Date(time);
-    //        String value = format.format(date);
-    //        return value;
-    //    }
 }

@@ -10,7 +10,6 @@ public abstract class UrlCell<T> extends AbstractCell<T> {
 
     private static final String MOUSEOVER_EVENT_NAME = "mouseover";
     private static final String MOUSEOUT_EVENT_NAME = "mouseout";
-    private static final String MOUSEOVER_STYLE = "mouseover_color";
     private static final String MOUSE_CLICK = "click";
 
     public UrlCell() {
@@ -33,21 +32,6 @@ public abstract class UrlCell<T> extends AbstractCell<T> {
         super.onBrowserEvent(context, parent, value, event, valueUpdater);
 
         final String eventType = event.getType();
-
-        //        if (MOUSEOVER_EVENT_NAME.equalsIgnoreCase(eventType)) {
-        //            if (withinBounds(parent, event)) {
-        //                parent.setClassName(MOUSEOVER_STYLE);
-        //                Utils.showPointerCursor(parent);
-        //            } else {
-        //                parent.removeClassName(MOUSEOVER_STYLE);
-        //                Utils.showDefaultCursor(parent);
-        //            }
-        //        }
-        //
-        //        if (MOUSEOUT_EVENT_NAME.equalsIgnoreCase(eventType)) {
-        //            parent.removeClassName(MOUSEOVER_STYLE);
-        //            Utils.showDefaultCursor(parent);
-        //        }
 
         if (MOUSE_CLICK.equalsIgnoreCase(eventType)) {
             if (withinBounds(parent, event))

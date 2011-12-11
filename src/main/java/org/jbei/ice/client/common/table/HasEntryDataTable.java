@@ -1,11 +1,9 @@
 package org.jbei.ice.client.common.table;
 
-import java.util.Date;
-
 import org.jbei.ice.client.common.table.cell.PartIDCell;
 import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.EntryData;
-import org.jbei.ice.shared.dto.HasEntryData;
+import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.HasEntryInfo;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.dom.client.Style.Unit;
@@ -15,12 +13,12 @@ import com.google.gwt.i18n.client.DateTimeFormat;
  * Table whose elements consists of a type that
  * has a @see EntryDataView
  * 
- * @see HasEntryData
+ * @see HasEntryInfo
  * 
  * @author Hector Plahar
  * 
  */
-public abstract class HasEntryDataTable<T extends HasEntryData> extends DataTable<T> {
+public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTable<T> {
 
     public HasEntryDataTable() {
     }
@@ -31,7 +29,7 @@ public abstract class HasEntryDataTable<T extends HasEntryData> extends DataTabl
 
             @Override
             public String getValue(T entry) {
-                return toUppercaseFully(entry.getDataView().getType());
+                return toUppercaseFully(entry.getDataView().getType().getDisplay());
             }
         };
         typeCol.setSortable(sortable);
@@ -40,13 +38,13 @@ public abstract class HasEntryDataTable<T extends HasEntryData> extends DataTabl
         return typeCol;
     }
 
-    protected DataTableColumn<EntryData> addPartIdColumn(boolean sortable) {
+    protected DataTableColumn<EntryInfo> addPartIdColumn(boolean sortable) {
 
-        DataTableColumn<EntryData> partIdColumn = new DataTableColumn<EntryData>(
-                new PartIDCell<EntryData>(), ColumnField.PART_ID) {
+        DataTableColumn<EntryInfo> partIdColumn = new DataTableColumn<EntryInfo>(
+                new PartIDCell<EntryInfo>(), ColumnField.PART_ID) {
 
             @Override
-            public EntryData getValue(T object) {
+            public EntryInfo getValue(T object) {
                 return object.getDataView();
             }
         };
@@ -78,11 +76,10 @@ public abstract class HasEntryDataTable<T extends HasEntryData> extends DataTabl
                 ColumnField.CREATED) {
 
             @Override
-            public String getValue(HasEntryData object) {
+            public String getValue(HasEntryInfo object) {
 
                 DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yyyy");
-                Date date = new Date(object.getDataView().getCreated());
-                String value = format.format(date);
+                String value = format.format(object.getDataView().getCreationTime());
                 if (value.length() >= 13)
                     value = (value.substring(0, 9) + "...");
                 return value;

@@ -1,15 +1,14 @@
 package org.jbei.ice.client.common.table;
 
-import java.util.Date;
 import java.util.Set;
 
 import org.jbei.ice.client.Page;
-import org.jbei.ice.client.common.entry.IHasEntrySelection;
+import org.jbei.ice.client.common.entry.IHasEntry;
 import org.jbei.ice.client.common.table.cell.PartIDCell;
 import org.jbei.ice.client.common.table.cell.UrlCell;
 import org.jbei.ice.client.common.table.column.ImageColumn;
 import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.EntryData;
+import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.TextCell;
@@ -37,8 +36,8 @@ import com.google.gwt.view.client.ProvidesKey;
  */
 
 // TODO : allow specializations to specify column widths
-public abstract class EntryDataTable<T extends EntryData> extends DataTable<T> implements
-        IHasEntrySelection<T> {
+public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> implements
+        IHasEntry<T> {
 
     private final EntrySelection selectionModel;
 
@@ -93,7 +92,7 @@ public abstract class EntryDataTable<T extends EntryData> extends DataTable<T> i
 
             @Override
             public String getValue(T entry) {
-                return toUppercaseFully(entry.getType());
+                return toUppercaseFully(entry.getType().getDisplay());
             }
         };
         typeCol.setSortable(sortable);
@@ -102,13 +101,13 @@ public abstract class EntryDataTable<T extends EntryData> extends DataTable<T> i
         return typeCol;
     }
 
-    protected DataTableColumn<EntryData> addPartIdColumn(boolean sortable) {
+    protected DataTableColumn<EntryInfo> addPartIdColumn(boolean sortable) {
 
-        DataTableColumn<EntryData> partIdColumn = new DataTableColumn<EntryData>(
-                new PartIDCell<EntryData>(), ColumnField.PART_ID) {
+        DataTableColumn<EntryInfo> partIdColumn = new DataTableColumn<EntryInfo>(
+                new PartIDCell<EntryInfo>(), ColumnField.PART_ID) {
 
             @Override
-            public EntryData getValue(T object) {
+            public EntryInfo getValue(T object) {
                 return object;
             }
         };
@@ -142,7 +141,7 @@ public abstract class EntryDataTable<T extends EntryData> extends DataTable<T> i
             @Override
             public String getValue(T object) {
                 // TODO : limit length of returned string
-                return object.getSummary();
+                return object.getShortDescription();
             }
         };
 
@@ -150,25 +149,25 @@ public abstract class EntryDataTable<T extends EntryData> extends DataTable<T> i
         return summaryColumn;
     }
 
-    protected DataTableColumn<EntryData> addOwnerColumn() {
-        UrlCell<EntryData> cell = new UrlCell<EntryData>() {
+    protected DataTableColumn<EntryInfo> addOwnerColumn() {
+        UrlCell<EntryInfo> cell = new UrlCell<EntryInfo>() {
 
             @Override
-            protected String getCellValue(EntryData object) {
-                return object.getOwnerName();
+            protected String getCellValue(EntryInfo object) {
+                return object.getOwner();
             }
 
             @Override
-            protected void onClick(EntryData object) {
-                History.newItem(Page.PROFILE.getLink() + ";id=" + object.getOwnerId());
+            protected void onClick(EntryInfo object) {
+                History.newItem(Page.PROFILE.getLink() + ";id=" + object.getOwnerEmail());
             }
         };
 
-        DataTableColumn<EntryData> ownerColumn = new DataTableColumn<EntryData>(cell,
+        DataTableColumn<EntryInfo> ownerColumn = new DataTableColumn<EntryInfo>(cell,
                 ColumnField.OWNER) {
 
             @Override
-            public EntryData getValue(T object) {
+            public EntryInfo getValue(T object) {
                 return object;
             }
         };
@@ -224,11 +223,10 @@ public abstract class EntryDataTable<T extends EntryData> extends DataTable<T> i
                 ColumnField.CREATED) {
 
             @Override
-            public String getValue(EntryData object) {
+            public String getValue(EntryInfo object) {
 
                 DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yyyy");
-                Date date = new Date(object.getCreated());
-                String value = format.format(date);
+                String value = format.format(object.getCreationTime());
                 if (value.length() >= 13)
                     value = (value.substring(0, 9) + "...");
                 return value;
@@ -242,9 +240,7 @@ public abstract class EntryDataTable<T extends EntryData> extends DataTable<T> i
     }
 
     @Override
-    public Set<T> getSelectedEntries() {
-        //        if( selectionModel.isAllSelected() )
-        //            this.e
+    public Set<T> getEntries() {
         return selectionModel.getSelectedSet();
     }
 
@@ -260,7 +256,7 @@ public abstract class EntryDataTable<T extends EntryData> extends DataTable<T> i
 
                 @Override
                 public Long getKey(T item) {
-                    return item.getRecordId();
+                    return Long.decode(item.getRecordId());
                 }
             });
         }

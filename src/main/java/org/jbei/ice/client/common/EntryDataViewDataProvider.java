@@ -8,7 +8,7 @@ import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.table.DataTable;
 import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.EntryData;
+import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList;
@@ -24,25 +24,25 @@ import com.google.gwt.view.client.Range;
 
 // Takes care of retrieving all data page, by page
 
-public class EntryDataViewDataProvider extends AsyncDataProvider<EntryData> {
+public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> {
 
     protected final List<Long> valuesIds;
-    protected LinkedList<EntryData> results;
-    private RegistryServiceAsync service;
-    private final DataTable<EntryData> table;
+    protected LinkedList<EntryInfo> results;
+    private final RegistryServiceAsync service;
+    private final DataTable<EntryInfo> table;
     private ColumnField lastSortField = ColumnField.CREATED;
     private boolean lastSortAsc = false;
 
-    public EntryDataViewDataProvider(DataTable<EntryData> view, List<Long> data,
+    public EntryDataViewDataProvider(DataTable<EntryInfo> view, List<Long> data,
             RegistryServiceAsync service) {
 
         this.table = view;
         this.service = service;
         this.valuesIds = new LinkedList<Long>();
-        results = new LinkedList<EntryData>();
+        results = new LinkedList<EntryInfo>();
 
         this.table.addColumnSortHandler(new AsyncHandler(this.table));
-        DataTable<EntryData>.DataTableColumn<?> defaultSortField = this.table
+        DataTable<EntryInfo>.DataTableColumn<?> defaultSortField = this.table
                 .getColumn(lastSortField);
 
         if (defaultSortField != null) {
@@ -56,7 +56,7 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryData> {
         this.addDataDisplay(this.table);
     }
 
-    public EntryDataViewDataProvider(DataTable<EntryData> view, RegistryServiceAsync service) {
+    public EntryDataViewDataProvider(DataTable<EntryInfo> view, RegistryServiceAsync service) {
         this(view, new LinkedList<Long>(), service);
     }
 
@@ -92,7 +92,7 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryData> {
     }
 
     @Override
-    protected void onRangeChanged(final HasData<EntryData> display) {
+    protected void onRangeChanged(final HasData<EntryInfo> display) {
 
         // values of range to display from view
         final Range range = display.getVisibleRange();
@@ -106,7 +106,7 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryData> {
             // check if it has been pre-fetched/cached
             if (results.size() >= rangeEnd) {
 
-                ArrayList<EntryData> show = new ArrayList<EntryData>();
+                ArrayList<EntryInfo> show = new ArrayList<EntryInfo>();
                 show.addAll(results.subList(rangeStart, rangeEnd));
                 updateRowData(rangeStart, show);
             } else {
@@ -169,7 +169,7 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryData> {
         final ArrayList<Long> realValues = new ArrayList<Long>(subList);
 
         service.retrieveEntryData(AppController.sessionId, realValues, field, ascending,
-            new AsyncCallback<ArrayList<EntryData>>() {
+            new AsyncCallback<ArrayList<EntryInfo>>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
@@ -177,7 +177,7 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryData> {
                 }
 
                 @Override
-                public void onSuccess(ArrayList<EntryData> result) {
+                public void onSuccess(ArrayList<EntryInfo> result) {
 
                     results.addAll(result);
                     updateRowData(rangeStart, results.subList(rangeStart, rangeEnd));

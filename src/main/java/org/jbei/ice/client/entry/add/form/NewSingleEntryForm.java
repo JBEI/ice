@@ -27,11 +27,11 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Parent class for forms used to create new entries
+ * Parent class for forms used to create single entries
  * 
  * @author Hector Plahar
  */
-public abstract class NewEntryForm<T extends EntryInfo> extends Composite implements
+public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite implements
         IEntryFormSubmit {
 
     protected final FlexTable layout;
@@ -43,8 +43,8 @@ public abstract class NewEntryForm<T extends EntryInfo> extends Composite implem
     private final T entryInfo;
     private ParametersPanel parametersPanel;
 
-    public NewEntryForm(HashMap<AutoCompleteField, ArrayList<String>> data, String creatorName,
-            String creatorEmail, T entryInfo) {
+    public NewSingleEntryForm(HashMap<AutoCompleteField, ArrayList<String>> data,
+            String creatorName, String creatorEmail, T entryInfo) {
         layout = new FlexTable();
         this.data = data;
         initComponents();
@@ -324,6 +324,7 @@ public abstract class NewEntryForm<T extends EntryInfo> extends Composite implem
     // Abstract Methods
     // 
 
+    @Override
     public FocusWidget validateForm() {
         LinkedHashMap<Integer, Parameter> map = parametersPanel.getParameterMap();
         for (Integer key : map.keySet()) {
@@ -349,8 +350,11 @@ public abstract class NewEntryForm<T extends EntryInfo> extends Composite implem
      * populates the entry info fields that are common to all. this is meant to be sub-classed so
      * that the specializations can
      * input their class specific fields.
+     * 
+     * @return
      */
-    public void populateEntry() {
+    @Override
+    public void populateEntries() {
         // parameters
         ArrayList<ParameterInfo> parameters = new ArrayList<ParameterInfo>();
         LinkedHashMap<Integer, Parameter> map = parametersPanel.getParameterMap();

@@ -2,10 +2,12 @@ package org.jbei.ice.client.entry.add.form;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 import org.jbei.ice.shared.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BioSafetyOptions;
+import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -22,7 +24,7 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-public class NewArabidopsisForm extends NewEntryForm<ArabidopsisSeedInfo> {
+public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> {
 
     private TextBox name;
     private TextBox alias;
@@ -344,6 +346,12 @@ public class NewArabidopsisForm extends NewEntryForm<ArabidopsisSeedInfo> {
 
     @Override
     public FocusWidget validateForm() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Set<EntryInfo> getEntries() {
         // TODO Auto-generated method stub
         return null;
     }

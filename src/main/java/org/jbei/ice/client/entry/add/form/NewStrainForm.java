@@ -2,9 +2,12 @@ package org.jbei.ice.client.entry.add.form;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BioSafetyOptions;
+import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
 
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -22,7 +25,7 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-public class NewStrainForm extends NewEntryForm<StrainInfo> {
+public class NewStrainForm extends NewSingleEntryForm<StrainInfo> {
 
     private TextBox name;
     private TextBox creator;
@@ -306,7 +309,8 @@ public class NewStrainForm extends NewEntryForm<StrainInfo> {
     }
 
     @Override
-    public void populateEntry() {
+    public void populateEntries() {
+        super.populateEntries();
         StrainInfo strain = getEntryInfo();
         strain.setName(name.getText());
         strain.setCreator(creator.getText());
@@ -325,7 +329,16 @@ public class NewStrainForm extends NewEntryForm<StrainInfo> {
 
     @Override
     public FocusWidget validateForm() {
-        // TODO Auto-generated method stub
+        FocusWidget widget = super.validateForm();
+        if (widget != null)
+            return widget;
         return null;
+    }
+
+    @Override
+    public Set<EntryInfo> getEntries() {
+        Set<EntryInfo> entries = new HashSet<EntryInfo>();
+        entries.add(getEntryInfo());
+        return entries;
     }
 }

@@ -2,7 +2,7 @@ package org.jbei.ice.shared.dto;
 
 import java.util.Date;
 
-public class SampleInfo extends HasEntryData {
+public class SampleInfo extends HasEntryInfo {
 
     private String id;
     private String label;

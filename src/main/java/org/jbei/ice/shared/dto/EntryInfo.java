@@ -7,7 +7,7 @@ import java.util.LinkedList;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class EntryInfo implements IsSerializable { // TODO : this needs to be folded in EntryData
+public class EntryInfo implements IsSerializable {
 
     public enum EntryType implements IsSerializable {
         STRAIN("Strain", "strain"), PLASMID("Plasmid", "plasmid"), PART("Part", "part"), ARABIDOPSIS(
@@ -23,7 +23,7 @@ public class EntryInfo implements IsSerializable { // TODO : this needs to be fo
 
         public static EntryType nameToType(String name) {
             for (EntryType type : EntryType.values()) {
-                if (name.equals(type.getName()))
+                if (name.equalsIgnoreCase(type.getName()))
                     return type;
             }
 
@@ -35,6 +35,11 @@ public class EntryInfo implements IsSerializable { // TODO : this needs to be fo
         }
 
         public String getDisplay() {
+            return this.display;
+        }
+
+        @Override
+        public String toString() {
             return this.display;
         }
     }
@@ -66,7 +71,7 @@ public class EntryInfo implements IsSerializable { // TODO : this needs to be fo
     private boolean hasAttachment;
     private boolean hasSample;
     private boolean hasSequence;
-    private ArrayList<AttachmentInfo> attachments;
+    private ArrayList<AttachmentInfo> attachments; // TODO : create another object that HAS A EntryInfo and contains these as well
     private HashMap<SampleInfo, LinkedList<StorageInfo>> sampleMap;
     private ArrayList<SequenceAnalysisInfo> sequenceAnalysis;
     private ArrayList<ParameterInfo> parameters;

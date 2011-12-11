@@ -3,12 +3,14 @@ package org.jbei.ice.client.entry.add;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Set;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.entry.add.form.NewEntryForm;
+import org.jbei.ice.client.entry.add.form.EntryCreateWidget;
+import org.jbei.ice.client.entry.add.form.IEntryFormSubmit;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -31,7 +33,7 @@ public class EntryAddPresenter extends AbstractPresenter {
     private final HandlerManager eventBus;
     private final IEntryAddView display;
     private SingleSelectionModel<EntryAddType> menuSelectionModel;
-    private final HashMap<EntryAddType, NewEntryForm> formsCache;
+    private final HashMap<EntryAddType, EntryCreateWidget> formsCache;
     private HashMap<AutoCompleteField, ArrayList<String>> autoCompleteData;
 
     public EntryAddPresenter(RegistryServiceAsync service, HandlerManager eventBus,
@@ -41,7 +43,7 @@ public class EntryAddPresenter extends AbstractPresenter {
         this.eventBus = eventBus;
         this.display = display;
 
-        formsCache = new HashMap<EntryAddType, NewEntryForm>();
+        formsCache = new HashMap<EntryAddType, EntryCreateWidget>();
 
         bind();
 
@@ -57,7 +59,7 @@ public class EntryAddPresenter extends AbstractPresenter {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 EntryAddType selected = menuSelectionModel.getSelectedObject();
-                NewEntryForm form = getEntryForm(selected);
+                EntryCreateWidget form = getEntryForm(selected);
                 display.setCurrentForm(form, ("New " + selected.getDisplay()));
             }
         });
@@ -81,26 +83,28 @@ public class EntryAddPresenter extends AbstractPresenter {
             });
     }
 
-    protected void save(EntryInfo entry) {
-        if (entry == null)
+    protected void save(Set<EntryInfo> hasEntry) {
+        if (hasEntry == null)
             return;
 
-        this.service.createEntry(AppController.sessionId, entry, new AsyncCallback<Long>() {
+        for (EntryInfo entry : hasEntry) {
+            this.service.createEntry(AppController.sessionId, entry, new AsyncCallback<Long>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert("Failure to create entry");
-            }
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert("Failure to create entry");
+                }
 
-            @Override
-            public void onSuccess(Long result) {
+                @Override
+                public void onSuccess(Long result) {
 
-                if (result > 0) {
-                    History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + result.longValue());
-                } else
-                    Window.alert("There was an error creating your entry");
-            }
-        });
+                    if (result > 0) {
+                        History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + result.longValue());
+                    } else
+                        Window.alert("There was an error creating your entry");
+                }
+            });
+        }
     }
 
     /**
@@ -111,7 +115,7 @@ public class EntryAddPresenter extends AbstractPresenter {
      *            EntryType
      * @return form specific to type
      */
-    protected NewEntryForm getEntryForm(EntryAddType type) {
+    protected EntryCreateWidget getEntryForm(EntryAddType type) {
 
         if (formsCache.containsKey(type))
             return formsCache.get(type);
@@ -119,24 +123,25 @@ public class EntryAddPresenter extends AbstractPresenter {
         String creatorName = AppController.accountInfo.getFullName();
         String creatorEmail = AppController.accountInfo.getEmail();
 
-        final NewEntryForm form = EntryFormFactory.entryForm(type, autoCompleteData, creatorName,
-            creatorEmail);
+        final EntryCreateWidget form = EntryFormFactory.entryForm(type, autoCompleteData,
+            creatorName, creatorEmail);
 
         if (form == null)
             return null;
 
-        form.getSubmit().addClickHandler(new ClickHandler() {
+        final IEntryFormSubmit formSubmit = form.getEntrySubmitForm();
+        formSubmit.getSubmit().addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                FocusWidget focus = form.validateForm();
+                FocusWidget focus = formSubmit.validateForm();
                 if (focus != null) {
                     focus.setFocus(true);
                     return;
                 }
 
-                form.populateEntry();
-                save(form.getEntryInfo());
+                formSubmit.populateEntries();
+                save(formSubmit.getEntries());
             }
         });
 

@@ -3,14 +3,14 @@ package org.jbei.ice.client.search.advanced;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.common.table.EntryDataTable;
-import org.jbei.ice.shared.EntryData;
+import org.jbei.ice.shared.dto.EntryInfo;
 
 /**
  * Advanced search results table.
  * 
  * @author Hector Plahar
  */
-public class AdvancedSearchResultsTable extends EntryDataTable<EntryData> {
+public class AdvancedSearchResultsTable extends EntryDataTable<EntryInfo> {
 
     @Override
     protected ArrayList<DataTableColumn<?>> createColumns() {

@@ -2,15 +2,15 @@ package org.jbei.ice.client.profile;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.AbstractPresenter;
+import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.SamplesDataProvider;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.common.table.EntryDataTable;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
-import org.jbei.ice.shared.EntryData;
 import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.ProfileInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 
@@ -43,7 +43,7 @@ public class ProfilePresenter extends AbstractPresenter {
 
         HasEntryDataTable<SampleInfo> getSamplesTable();
 
-        EntryDataTable<EntryData> getEntryDataTable();
+        EntryDataTable<EntryInfo> getEntryDataTable();
     }
 
     private final RegistryServiceAsync service;

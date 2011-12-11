@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BlastProgram;
 import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.EntryData;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BlastResultInfo;
@@ -38,10 +37,10 @@ public interface RegistryService extends RemoteService {
     //
     ArrayList<Long> retrieveSearchResults(ArrayList<SearchFilterInfo> filters);
 
-    ArrayList<EntryData> retrieveEntryData(String sid, ArrayList<Long> entries, ColumnField field,
+    ArrayList<EntryInfo> retrieveEntryData(String sid, ArrayList<Long> entries, ColumnField field,
             boolean asc);
 
-    EntryData retrieveEntryView(long id);
+    EntryInfo retrieveEntryView(long id);
 
     /**
      * Returns list of folders as seen on the collections page

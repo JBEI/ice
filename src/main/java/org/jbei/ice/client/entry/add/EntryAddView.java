@@ -1,9 +1,8 @@
 package org.jbei.ice.client.entry.add;
 
 import org.jbei.ice.client.common.AbstractLayout;
-import org.jbei.ice.client.entry.add.form.NewEntryForm;
+import org.jbei.ice.client.entry.add.form.EntryCreateWidget;
 import org.jbei.ice.client.entry.add.menu.NewEntryMenu;
-import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -16,7 +15,7 @@ public class EntryAddView extends AbstractLayout implements IEntryAddView {
 
     private Label contentHeader;
     private NewEntryMenu menu;
-    private NewEntryForm<EntryInfo> currentForm;
+    private EntryCreateWidget currentForm;
     private VerticalPanel subContent;
 
     public EntryAddView() {
@@ -73,7 +72,7 @@ public class EntryAddView extends AbstractLayout implements IEntryAddView {
     }
 
     @Override
-    public void setCurrentForm(NewEntryForm<EntryInfo> form, String title) {
+    public void setCurrentForm(EntryCreateWidget form, String title) {
         this.currentForm = form;
         subContent.clear();
         subContent.add(this.currentForm);
@@ -81,7 +80,7 @@ public class EntryAddView extends AbstractLayout implements IEntryAddView {
     }
 
     @Override
-    public NewEntryForm<EntryInfo> getCurrentForm() {
+    public EntryCreateWidget getCurrentForm() {
         return this.currentForm;
     }
 

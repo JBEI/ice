@@ -1,17 +1,16 @@
 package org.jbei.ice.client.collection.table;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 import org.jbei.ice.client.common.table.EntryDataTable;
 import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.EntryData;
+import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.DateTimeFormat;
 
-public class RecentlyViewedDataTable extends EntryDataTable<EntryData> {
+public class RecentlyViewedDataTable extends EntryDataTable<EntryInfo> {
 
     @Override
     protected ArrayList<DataTableColumn<?>> createColumns() {
@@ -32,11 +31,10 @@ public class RecentlyViewedDataTable extends EntryDataTable<EntryData> {
                 ColumnField.LAST_VISITED) {
 
             @Override
-            public String getValue(EntryData object) {
+            public String getValue(EntryInfo object) {
 
                 DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yyyy");
-                Date date = new Date(object.getCreated());
-                String value = format.format(date);
+                String value = format.format(object.getCreationTime());
                 if (value.length() >= 13)
                     value = (value.substring(0, 9) + "...");
                 return value;
@@ -55,11 +53,10 @@ public class RecentlyViewedDataTable extends EntryDataTable<EntryData> {
                 ColumnField.LAST_ADDED) {
 
             @Override
-            public String getValue(EntryData object) {
+            public String getValue(EntryInfo object) {
 
                 DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yyyy");
-                Date date = new Date(object.getCreated());
-                String value = format.format(date);
+                String value = format.format(object.getCreationTime());
                 if (value.length() >= 13)
                     value = (value.substring(0, 9) + "...");
                 return value;

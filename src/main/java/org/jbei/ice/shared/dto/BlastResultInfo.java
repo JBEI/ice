@@ -1,6 +1,6 @@
 package org.jbei.ice.shared.dto;
 
-public class BlastResultInfo extends HasEntryData {
+public class BlastResultInfo extends HasEntryInfo {
 
     private float bitScore;
     private float eValue;

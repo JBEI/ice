@@ -2,9 +2,11 @@ package org.jbei.ice.client.entry.add.form;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BioSafetyOptions;
+import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.PartInfo;
 
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -22,7 +24,7 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-public class NewPartForm extends NewEntryForm<PartInfo> {
+public class NewPartForm extends NewSingleEntryForm<PartInfo> {
 
     private TextBox name;
     private TextBox alias;
@@ -281,6 +283,12 @@ public class NewPartForm extends NewEntryForm<PartInfo> {
 
     @Override
     public FocusWidget validateForm() {
+        return null;
+    }
+
+    @Override
+    public Set<EntryInfo> getEntries() {
+        // TODO Auto-generated method stub
         return null;
     }
 }

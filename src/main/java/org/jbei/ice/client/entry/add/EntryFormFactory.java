@@ -3,11 +3,12 @@ package org.jbei.ice.client.entry.add;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.jbei.ice.client.entry.add.form.EntryCreateWidget;
 import org.jbei.ice.client.entry.add.form.NewArabidopsisForm;
-import org.jbei.ice.client.entry.add.form.NewEntryForm;
 import org.jbei.ice.client.entry.add.form.NewPartForm;
 import org.jbei.ice.client.entry.add.form.NewPlasmidForm;
 import org.jbei.ice.client.entry.add.form.NewStrainForm;
+import org.jbei.ice.client.entry.add.form.NewStrainWithPlasmidForm;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.EntryInfo.EntryType;
@@ -21,29 +22,41 @@ public class EntryFormFactory {
      *            EntryType
      * @return form specific to type
      */
-    public static NewEntryForm entryForm(EntryAddType type,
+    public static EntryCreateWidget entryForm(EntryAddType type,
             HashMap<AutoCompleteField, ArrayList<String>> autoCompleteData, String creatorName,
             String creatorEmail) {
+
+        EntryCreateWidget widget;
 
         switch (type) {
 
         case PLASMID:
-            return new NewPlasmidForm(autoCompleteData, creatorName, creatorEmail);
+            NewPlasmidForm plasmidForm = new NewPlasmidForm(autoCompleteData, creatorName,
+                    creatorEmail);
+            widget = new EntryCreateWidget(plasmidForm);
+            return widget;
 
         case STRAIN:
-            return new NewStrainForm(autoCompleteData, creatorName, creatorEmail);
+            widget = new EntryCreateWidget(new NewStrainForm(autoCompleteData, creatorName,
+                    creatorEmail));
+            return widget;
 
         case PART:
-            return new NewPartForm(autoCompleteData, creatorName, creatorEmail);
+            widget = new EntryCreateWidget(new NewPartForm(autoCompleteData, creatorName,
+                    creatorEmail));
+            return widget;
 
-            //        case STRAIN_WITH_PLASMID:
-            //            return new NewStrainWithPlasmidForm(autoCompleteData, saveButton);
+        case STRAIN_WITH_PLASMID:
+            widget = new EntryCreateWidget(new NewStrainWithPlasmidForm(autoCompleteData,
+                    creatorName, creatorEmail));
+            return widget;
 
         case ARABIDOPSIS:
-            return new NewArabidopsisForm(autoCompleteData, creatorName, creatorEmail);
+            widget = new EntryCreateWidget(new NewArabidopsisForm(autoCompleteData, creatorName,
+                    creatorEmail));
+            return widget;
 
         default:
-            //            layout.setHTML(1, 0, "Part not recognized");
             return null;
         }
     }
