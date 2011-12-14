@@ -381,11 +381,15 @@
 						<scope>runtime</scope>  
 					</dependency>  
 				</dependencies>  
+				<configuration>
+          			<htmlStylesheet>/usr/share/xml/docbook/stylesheet/docbook-xsl/html/docbook.xsl</htmlStylesheet>
+        		</configuration>
  				<executions>  
 					<execution>  
 						<phase>pre-site</phase>  
 						<goals>  
 						<goal>generate-html</goal>  
+						<goal>generate-pdf</goal>
 						</goals>  
 					</execution>  
 				</executions>
