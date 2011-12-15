@@ -34,9 +34,9 @@
   					<para>The package name is "sun-java6-jdk". You may have to add external software
 						repositories to be able to install it. To use sun java as default, you
 						may have to run as root (type 'sudo su' or just 'su' depending on system)
-						<screen><prompt>#</prompt> <command>update-alternatives --list java</command></screen>
+						<screen><prompt># </prompt><command>update-alternatives --list java</command></screen>
 						to see the available java on your system. To change it, run
-    					<screen><prompt>#</prompt> <command>update-alternatives --config java</command></screen>
+    					<screen><prompt># </prompt><command>update-alternatives --config java</command></screen>
 						and choose "java-6-sun".
   					</para>
   				</sect3>
@@ -55,26 +55,26 @@ on different ports (5432 and/or 5433).
   				<sect3 id="postgres-linux"><title>Debian</title>
   					<para>
   					Install the postgresql package:
-  					<screen><prompt>#</prompt><command>apt-get install postgresql</command></screen>
+  					<screen><prompt># </prompt><command>apt-get install postgresql</command></screen>
   					Configure the root password for the root database user (called postgres)
-  					<screen><prompt>#</prompt> <command>su postgres</command>
-<prompt>$</prompt> <command>psql <replaceable>postgres</replaceable></command>
-<prompt>postgres=#</prompt> <command>\password postgres</command></screen>
+  					<screen><prompt># </prompt><command>su postgres</command>
+<prompt>$ </prompt><command>psql <replaceable>postgres</replaceable></command>
+<prompt>postgres=# </prompt><command>\password postgres</command></screen>
   					After changing the password, type \q to quit.
   					</para><para>It is possible the database is named template1 instead of postgres. In this case type
-  					<screen><prompt>$</prompt> <command>psql <replaceable>template1</replaceable></command></screen>
+  					<screen><prompt>$ </prompt><command>psql <replaceable>template1</replaceable></command></screen>
   					</para>
   					<para>Create a new database user
-  					<screen><prompt>$</prompt> <command>createuser --pwprompt test_user</command></screen>
+  					<screen><prompt>$ </prompt><command>createuser --pwprompt test_user</command></screen>
   					Type in the password, and select no to all options.
   					</para>
   					<para>
   					Create a new database and assign it to the user
-  					<screen><prompt>$</prompt> <command>createdb --owner test_user test_registry</command></screen>
+  					<screen><prompt>$ </prompt><command>createdb --owner test_user test_registry</command></screen>
   					</para>
   					<para>
   					Install pgAdmin3 (optional)
-  					<screen><prompt>#</prompt> <command>apt-get install pgadmin3</command></screen>
+  					<screen><prompt># </prompt><command>apt-get install pgadmin3</command></screen>
   					When using pgadmin to connect to the database, make sure to use the correct port (see above).
   					</para>
   				</sect3>
@@ -101,7 +101,7 @@ Name it test_registry, and change the owner to test_user, then click Ok.
   				</para>
   				<para>
   				On Ubuntu/Debian systems run:
-  				<screen><prompt>#</prompt><command>apt-get install blast2</command></screen>
+  				<screen><prompt># </prompt><command>apt-get install blast2</command></screen>
   				</para>
   				<para>TODO: Blast on Windows?</para>
   			</sect2>
@@ -134,7 +134,7 @@ See <xref linkend="development">Development</xref> section for instructions.</pa
 			<sect2 id="install-war"><title>Installation</title>
 			<para>
 			After configuration has bee properly changed in the 'gd-ice-2.0-SNASHOPT' directory, 
-			you can deploy gd-ice to an application server as an "exploded war". First, configure SSL, see <xref linkend="ssl-configuration"></xref>. Then  
+			you can deploy gd-ice to an application server as an "exploded war". First, configure SSL, see <xref linkend="ssl-setup"></xref>. Then  
 			see 
 			<xref linkend="tomcat-configuration"></xref> for detailed tomcat instructions. 
 			</para>
@@ -150,7 +150,7 @@ See <xref linkend="development">Development</xref> section for instructions.</pa
 				</para>
 				<para>
 				To download the sources from the git repository, run:
-				<screen><prompt>$</prompt> <command>git clone https://code.google.com/p/gd-ice gd-ice-build</command></screen>
+				<screen><prompt>$ </prompt><command>git clone https://code.google.com/p/gd-ice gd-ice-build</command></screen>
 				</para>
 				<para>
 				Under Windows, TortoiseGit is a nice client.
@@ -161,8 +161,8 @@ See <xref linkend="development">Development</xref> section for instructions.</pa
 				Because you'll be making changes to the source code (configurations or customizations), it
 				would be wise to create a separate directory. Here, we will create a local branch called 'build'. This
 				branch will only exist on your disk.
-				<screen><prompt>$</prompt> <command>cd gd-ice-build</command></screen>
-				<screen><prompt>$</prompt> <command>git checkout -b build</command></screen>
+				<screen><prompt>$ </prompt><command>cd gd-ice-build</command></screen>
+				<screen><prompt>$ </prompt><command>git checkout -b build</command></screen>
 				</para>
 				<para>
 				Now you can make changes to the configuration files, or any file in the source code. See 
@@ -170,11 +170,11 @@ See <xref linkend="development">Development</xref> section for instructions.</pa
 				</para>
 				<para>
 				After you made changes to the configuration files you can commit the changes you have made to your local branch. To see the changes, run
-				<screen><prompt>$</prompt> <command>git status</command></screen>
+				<screen><prompt>$ </prompt><command>git status</command></screen>
 				Now stage the changes to be commited ('add to index' in git parlance):
-				<screen><prompt>$</prompt> <command>git add -u</command></screen>
+				<screen><prompt>$ </prompt><command>git add -u</command></screen>
 				Commit these changes to your local branch, with a message:
-				<screen><prompt>$</prompt> <command>git commit -m "build: production settings"</command></screen>
+				<screen><prompt>$ </prompt><command>git commit -m "build: production settings"</command></screen>
 				If you make additional changes, you can repeat the 'git add' and 'git commit' commands. Use 'git log' to see
 				the list of commits that have been made.
 				</para>
@@ -183,9 +183,9 @@ See <xref linkend="development">Development</xref> section for instructions.</pa
 				<para>
 				With git you can keep up-to-date with the latest developments. First you fetch the latest version into your repository. 
 				This does not make changes to the files yet:
-				<screen><prompt>$</prompt> <command>git fetch origin</command></screen>
+				<screen><prompt>$ </prompt><command>git fetch origin</command></screen>
 				No you can tell git to take the changes in your 'build' branch, and put it at the top (tip) of the development branch:
-				<screen><prompt>$</prompt> <command>git rebase origin</command></screen>
+				<screen><prompt>$ </prompt><command>git rebase origin</command></screen>
 				In most cases this will succeed. If the main sources and your configurations altered the same line, git will
 				prompt you to resolve any conflicts at this time. Fix these conflicts and run 'git add -u' and 'git rebase --continue'.
 				</para>
@@ -234,8 +234,8 @@ mvn install:install-file -Dfile=org.eclipse.mylyn.wikitext.confluence.core_1.4.0
 			<sect2 id="maven-build"><title>Building with Maven</title>
 			<para>
 			After adjusting your configuration files as described in <xref linkend="ice-configuration"></xref>, gd-ice can be built as a war package by runinng:
-			<screen><prompt>$</prompt> <command>mvn clean</command></screen>
-			<screen><prompt>$</prompt> <command>mvn package -Dmaven.test.skip=true</command></screen>
+			<screen><prompt>$ </prompt><command>mvn clean</command></screen>
+			<screen><prompt>$ </prompt><command>mvn package -Dmaven.test.skip=true</command></screen>
 			You will have to be patient, as maven will try to contact the library repositories, download all the dependent packages, and build 
 			gd-ice. Depending on how much the repository is overloaded, some packages may fail to download. If this happens, just
 			re-run the above command. Eventually it will succeed. Once the packages are downloaded, they are saved to disk
@@ -252,7 +252,7 @@ mvn install:install-file -Dfile=org.eclipse.mylyn.wikitext.confluence.core_1.4.0
 			<para>
 			First, generate a self-signed certificate as described in <xref linkend="ssl-setup"></xref>, and copy the .keystore file to the
 			root build directory (where LICENSE.txt is). Now you can start a server instance by running:
-			<screen><prompt>$</prompt> <command>mvn jetty:run -Dmaven.test.skip=true</command></screen>
+			<screen><prompt>$ </prompt><command>mvn jetty:run -Dmaven.test.skip=true</command></screen>
 			If everything is set up properly, this command will populate your
     database with the appropriate tables, and run a server on port
     8443 (https). Point your browser to https://localhost:8443. Don't
@@ -263,9 +263,9 @@ mvn install:install-file -Dfile=org.eclipse.mylyn.wikitext.confluence.core_1.4.0
 			</para> 
 			<para>
 			    Hint (unix): To capture all the output that pass by use the 'script' utility 
-    		<screen><prompt>$</prompt> <command>script capturefile.txt</command></screen>
-  			<screen><prompt>$</prompt> <command>mvn jetty:run -Dmaven.test.skip=true</command></screen>
-			<screen><prompt>$</prompt> <command>exit</command></screen>
+    		<screen><prompt>$ </prompt><command>script capturefile.txt</command></screen>
+  			<screen><prompt>$ </prompt><command>mvn jetty:run -Dmaven.test.skip=true</command></screen>
+			<screen><prompt>$ </prompt><command>exit</command></screen>
     Now all the output has been captured to a file, which can be examined.
 			</para>
 			</sect2>
@@ -273,14 +273,14 @@ mvn install:install-file -Dfile=org.eclipse.mylyn.wikitext.confluence.core_1.4.0
 			<sect2 id="doc-build"><title>Building documentation</title>
 			<para>
 			The online documentation is built by running:
-			<screen><prompt>$</prompt> <command>mvn site -Dmaven.test.skip=true</command></screen>
+			<screen><prompt>$ </prompt><command>mvn site -Dmaven.test.skip=true</command></screen>
 			The javadoc will be in 'target/site/apidocs', and this manual will be in 'target/docbkx/html' directories.
 			</para>
 			<para>
 			To build the javadoc separately, run
-			<screen><prompt>$</prompt> <command>mvn javadoc:javadoc</command></screen>
+			<screen><prompt>$ </prompt><command>mvn javadoc:javadoc</command></screen>
 			To build the manual separately, run
-			<screen><prompt>$</prompt> <command>mvn pre-site</command></screen>
+			<screen><prompt>$ </prompt><command>mvn pre-site</command></screen>
 			</para>
 			</sect2>
 		</sect1>
@@ -292,9 +292,9 @@ mvn install:install-file -Dfile=org.eclipse.mylyn.wikitext.confluence.core_1.4.0
 		</para>
 		<para>
 		One can generate a self-signed certificate using the following commands:
-		<screen><prompt>$</prompt> <command>keytool -genkey -alias tomcat -keyalg RSA -keystore .keystore</command></screen>
+		<screen><prompt>$ </prompt><command>keytool -genkey -alias tomcat -keyalg RSA -keystore .keystore</command></screen>
 		For Windows:
-		<screen><prompt>$</prompt> <command>%JAVA_HOME%\bin\keytool.exe -genkey -alias tomcat -keyalg RSA -keystore .keystore</command></screen>
+		<screen><prompt>$ </prompt><command>%JAVA_HOME%\bin\keytool.exe -genkey -alias tomcat -keyalg RSA -keystore .keystore</command></screen>
 		The password for the keystore should be "changeit" (without the quotes).
 		</para>
 		<para>
@@ -490,14 +490,14 @@ mvn install:install-file -Dfile=org.eclipse.mylyn.wikitext.confluence.core_1.4.0
 			</para>
 			<para>
 			You can obtain the source code by running
-			<screen><prompt>$</prompt> <command>git clone https://code.google.com/p/vectoreditor/</command>
-<prompt>$</prompt> <command>git clone https://code.google.com/p/bioflex/</command>
+			<screen><prompt>$ </prompt><command>git clone https://code.google.com/p/vectoreditor/</command>
+<prompt>$ </prompt><command>git clone https://code.google.com/p/bioflex/</command>
 			</screen>
 			</para>
 			<para>
 			To build a standalone version of VectorEditor, use the following commands to compile it:
-			<screen><prompt>$</prompt> <command>cd vectoreditor/VectorEditorStandalone</command>
-<prompt>$</prompt> <command>../../flex_3_sdk/bin/mxmlc -locale en_US \
+			<screen><prompt>$ </prompt><command>cd vectoreditor/VectorEditorStandalone</command>
+<prompt>$ </prompt><command>../../flex_3_sdk/bin/mxmlc -locale en_US \
 -define=CONFIG::standalone,true -define=CONFIG::registryEdition,false \
 -define=CONFIG::entryEdition,false \
 -compiler.include-libraries=./libs/PureMVC_AS3_2_0_4.swc \

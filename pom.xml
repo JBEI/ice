@@ -382,14 +382,21 @@
 					</dependency>  
 				</dependencies>  
 				<configuration>
-          			<htmlStylesheet>/usr/share/xml/docbook/stylesheet/docbook-xsl/html/docbook.xsl</htmlStylesheet>
+					<sectionAutolabel>true</sectionAutolabel>
+					<chunkedOutput>true</chunkedOutput>
+          			<htmlStylesheet>docbook.css</htmlStylesheet>
+                   	<postProcess>
+                        <copy todir="target/docbkx/html/manual/">
+                            <fileset dir="src/docbkx/static/">
+                            </fileset>
+                        </copy>
+                    </postProcess>
         		</configuration>
  				<executions>  
 					<execution>  
 						<phase>pre-site</phase>  
 						<goals>  
 						<goal>generate-html</goal>  
-						<goal>generate-pdf</goal>
 						</goals>  
 					</execution>  
 				</executions>
