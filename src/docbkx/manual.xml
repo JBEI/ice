@@ -204,7 +204,7 @@ See <xref linkend="development">Development</xref> section for instructions.</pa
 			the Maven website. Remember to add the appropriate environmental variables. 
 			</para>
 			<para>
-			Maven is configured via the pom.xml file, ad most dependencies are defined there. However, there are some external
+			Maven is configured via the pom.xml file, and most dependencies are defined there. However, there are some external
 			libraries that maven does not know about, namely biojava and Flex components. We have provided these in the
 			lib/ directory, and maven has to be told about these.
 			</para>
@@ -311,8 +311,7 @@ mvn install:install-file -Dfile=org.eclipse.mylyn.wikitext.confluence.core_1.4.0
 			'gd-ice-2.0-SNAPSHOT/WEB-INF/classes/hibernate.cfg.xml' in the exploded war file.</para>
 			<para>
 			Tell gd-ice the name of your database by changing this line and replacing "test_registry" with the name of your database.
-			<programlisting><![CDATA[<property name="hibernate.connection.url">jdbc:postgresql://localhost/test_registry</property>]]>
-       		</programlisting>
+			<programlisting><![CDATA[<property name="hibernate.connection.url">jdbc:postgresql://localhost/test_registry</property>]]></programlisting>
   			</para>
   			<para>
   			Update the password of your database by replacing the password string in this line.
@@ -367,8 +366,7 @@ mvn install:install-file -Dfile=org.eclipse.mylyn.wikitext.confluence.core_1.4.0
     keystorePass="changeit" keystoreType="pkcs12"
     maxThreads="150" schema="https" secure="true"
     compression="on"
-    clientAuth="false" sslProtocol="TLS" />
-			]]></programlisting>
+    clientAuth="false" sslProtocol="TLS" />]]></programlisting>
 			</para>
 			<para>
 			Once SSL has been configured, deploy the exploded war file to your tomcat webapps directory. Usually it is /var/lib/tomcat6/webapps. 
@@ -542,8 +540,7 @@ mvn install:install-file -Dfile=org.eclipse.mylyn.wikitext.confluence.core_1.4.0
 			java ide, launch gd-ice on the java ide, then launch the flex app by having the flex ide load the 
 			webpage where the java ide is serving the flex app. For example to launch VectorEditor in entryEdition mode, the debug launch
 			dialog has this in the launch URL field: 
-			<programlisting><![CDATA[https://localhost:8443/?wicket:bookmarkablePage=:org.jbei.ice.web.pages.VectorEditorPage&entryId=3e6eb5a1-6ce0-4476-a474-338be106394f]]> 
-			</programlisting>
+			<programlisting><![CDATA[https://localhost:8443/?wicket:bookmarkablePage=:org.jbei.ice.web.pages.VectorEditorPage&entryId=3e6eb5a1-6ce0-4476-a474-338be106394f]]></programlisting>
 			Replace the entryId field as appropriate.
 			</para>
 			<para>
