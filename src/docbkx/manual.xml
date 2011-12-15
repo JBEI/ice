@@ -381,7 +381,7 @@ mvn install:install-file -Dfile=org.eclipse.mylyn.wikitext.confluence.core_1.4.0
 	<chapter id="administration"><title>Administration</title>
 		<sect1 id="basic-administration"><title>Basic Administration</title>
 		<para>This feature is still being developed. There are a few basic functions available from the the Administrator's 
-		paga located at https://yoursite/admin.
+		page located at https://yoursite/admin.
 		</para>
 		</sect1>
 	</chapter>
