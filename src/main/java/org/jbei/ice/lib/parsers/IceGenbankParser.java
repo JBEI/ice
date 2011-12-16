@@ -331,6 +331,7 @@ public class IceGenbankParser extends AbstractParser {
 
                 // grab type, genbankStart, end, and strand
                 List<GenbankLocation> genbankLocations = null;
+                complement = false;
                 try {
                     chunk = line.trim().split(" +");
                     type = chunk[0].trim();
