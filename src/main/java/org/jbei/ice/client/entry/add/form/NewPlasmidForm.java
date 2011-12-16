@@ -2,6 +2,7 @@ package org.jbei.ice.client.entry.add.form;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.jbei.ice.client.AppController;
@@ -400,14 +401,9 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
     public void populateEntries() {
         super.populateEntries();
 
+        // plasmid specific fields
         PlasmidInfo info = super.getEntryInfo();
-
-        //        CommaSeparatedField<SelectionMarker> selectionMarkersField = new CommaSeparatedField<SelectionMarker>(
-        //                SelectionMarker.class, "getName", "setName");
-        //        selectionMarkersField.setString(getSelectionMarkers());
-        //        info.setSelectionMarkers(selectionMarkersField.getItemsAsSet());
-
-        // TODO : general fields
+        info.setSelectionMarkers(markers.getText());
         info.setLinks(getLinks());
         info.setName(getName());
         info.setSelectionMarkers(getMarkers());
@@ -422,30 +418,7 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
         info.setShortDescription(getSummary());
         info.setReferences(getReferences());
         info.setBioSafetyLevel(Integer.parseInt(getBioSafetyLevel()));
-        //        info.setIntellectualProperty(getIntellectualProperty());
-        //        info.setLongDescriptionType(getNotesMarkupType().getValue());
-        //
-        //        if (getParameters() != null) {
-        //            List<Parameter> parametersList = ParameterGeneratorParser
-        //                    .parseParameterString(getParameters());
-        //            entry.setParameters(parametersList);
-        //        }
-        //        AbstractMarkupPanel markupPanel = getMarkupPanel();
-        //
-        //        String notesString = "";
-        //        if (markupPanel instanceof TextMarkupPanel) {
-        //            notesString = ((TextMarkupPanel) markupPanel).getNotesTextArea()
-        //                    .getDefaultModelObjectAsString();
-        //        } else if (markupPanel instanceof WikiMarkupPanel) {
-        //            notesString = ((WikiMarkupPanel) markupPanel).getMarkupTextArea()
-        //                    .getDefaultModelObjectAsString();
-        //        } else if (markupPanel instanceof ConfluenceMarkupPanel) {
-        //            notesString = ((ConfluenceMarkupPanel) markupPanel).getMarkupTextArea()
-        //                    .getDefaultModelObjectAsString();
-        //        }
-        //
-        //        entry.setLongDescription(notesString);
-        //
+        info.setIntellectualProperty(this.ip.getText());
         info.setFundingSource(getFundingSource());
         info.setPrincipalInvestigator(getPrincipalInvestigator());
 
@@ -573,7 +546,9 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
 
     @Override
     public Set<EntryInfo> getEntries() {
-        // TODO Auto-generated method stub
-        return null;
+        EntryInfo info = this.getEntryInfo();
+        Set<EntryInfo> result = new HashSet<EntryInfo>();
+        result.add(info);
+        return result;
     }
 }

@@ -40,8 +40,11 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
     protected Button submit;
     protected TextBox creator;
     protected TextBox creatorEmail;
+
     private final T entryInfo;
     private ParametersPanel parametersPanel;
+    private ListBox markupOptions;
+    private TextArea notesText;
 
     public NewSingleEntryForm(HashMap<AutoCompleteField, ArrayList<String>> data,
             String creatorName, String creatorEmail, T entryInfo) {
@@ -93,7 +96,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
 
         notes.setWidget(2, 0, new Label("Markup Type"));
         notes.getFlexCellFormatter().setStyleName(2, 0, "entry_add_sub_label");
-        ListBox markupOptions = new ListBox();
+        markupOptions = new ListBox();
         markupOptions.setVisibleItemCount(1);
         markupOptions.addItem("Text");
         markupOptions.addItem("Wiki");
@@ -105,9 +108,9 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         notes.setWidget(3, 0, new Label(""));
         notes.getFlexCellFormatter().setWidth(3, 0, "170px");
 
-        TextArea area = new TextArea();
-        area.setStyleName("entry_add_notes_input");
-        notes.setWidget(3, 1, area);
+        notesText = new TextArea();
+        notesText.setStyleName("entry_add_notes_input");
+        notes.setWidget(3, 1, notesText);
 
         return notes;
     }
@@ -355,6 +358,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
      */
     @Override
     public void populateEntries() {
+
         // parameters
         ArrayList<ParameterInfo> parameters = new ArrayList<ParameterInfo>();
         LinkedHashMap<Integer, Parameter> map = parametersPanel.getParameterMap();
@@ -373,6 +377,9 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
 
         // TODO : samples
 
-        // TODO : notes
+        // notes
+        this.entryInfo.setLongDescription(this.notesText.getText());
+        String longDescType = this.markupOptions.getItemText(this.markupOptions.getSelectedIndex());
+        this.entryInfo.setLongDescriptionType(longDescType);
     }
 }
