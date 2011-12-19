@@ -42,8 +42,9 @@ public class SearchController extends Controller {
         if (query == null) {
             return results;
         }
-        String cleanedQuery = query.replace(":", " ");
-        cleanedQuery = query.replace(";", " ");
+        String cleanedQuery = query;
+        cleanedQuery = cleanedQuery.replace(":", " ");
+        cleanedQuery = cleanedQuery.replace(";", " ");
         cleanedQuery = cleanedQuery.replace("\\", " ");
         cleanedQuery = cleanedQuery.replace("[", "\\[");
         cleanedQuery = cleanedQuery.replace("]", "\\]");
