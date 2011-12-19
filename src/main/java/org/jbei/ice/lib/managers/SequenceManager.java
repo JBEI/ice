@@ -10,6 +10,7 @@ import org.hibernate.Session;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Sequence;
@@ -41,6 +42,7 @@ public class SequenceManager {
         }
 
         try {
+            normalizeAnnotationLocations(sequence);
             Set<SequenceFeature> sequenceFeatureSet = sequence.getSequenceFeatures();
 
             if (sequenceFeatureSet != null && sequenceFeatureSet.size() > 0) {
@@ -159,7 +161,7 @@ public class SequenceManager {
                 session.close();
             }
         }
-
+        normalizeAnnotationLocations(sequence);
         return sequence;
     }
 
@@ -322,5 +324,38 @@ public class SequenceManager {
         }
 
         return result;
+    }
+
+    /**
+     * Normalize {@link AnnotationLocation}s by fixing strangely defined annotationLocations.
+     * <p>
+     * Fix locations that encompass the entire sequence, but defined strangely. This causes problems
+     * elsewhere.
+     * 
+     * @param sequence
+     * @return
+     */
+    private static Sequence normalizeAnnotationLocations(Sequence sequence) {
+        if (sequence == null) {
+            return null;
+        }
+        int length = sequence.getSequence().length();
+        boolean wholeSequence = false;
+        for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
+            wholeSequence = false;
+            Set<AnnotationLocation> locations = sequenceFeature.getAnnotationLocations();
+            for (AnnotationLocation location : locations) {
+                if (location.getGenbankStart() == location.getEnd() + 1) {
+                    wholeSequence = true;
+                }
+            }
+            if (wholeSequence) {
+                sequenceFeature.setStrand(1);
+                sequenceFeature.getAnnotationLocations().clear();
+                sequenceFeature.getAnnotationLocations().add(
+                    new AnnotationLocation(1, length, sequenceFeature));
+            }
+        }
+        return sequence;
     }
 }
