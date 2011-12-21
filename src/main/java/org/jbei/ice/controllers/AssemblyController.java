@@ -6,6 +6,7 @@ import java.util.Set;
 import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.EntryPermissionVerifier;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
@@ -157,7 +158,10 @@ public class AssemblyController extends Controller {
                 result = getAssemblyUtils().get(2).populateAssemblyFeatures(partSequence);
             }
         } catch (UtilityException e) {
-            throw new ControllerException(e);
+            // If auto annotation fails, continue.
+            Logger.warn("Error in annotating assembly features for "
+                    + partSequence.getEntry().getId());
+            Logger.warn(e.toString());
         }
         if (result != null) {
             return true;

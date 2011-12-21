@@ -129,22 +129,28 @@ public class IceGenbankParser extends AbstractParser {
     // TODO parse source feature tag with xdb_ref
     @Override
     public IDNASequence parse(String textSequence) throws InvalidFormatParserException {
-        textSequence = cleanSequence(textSequence);
-
         FeaturedDNASequence sequence = null;
-        ArrayList<Tag> tags = splitTags(textSequence, NORMAL_TAGS, IGNORE_TAGS);
-        tags = parseTags(tags);
+        try {
+            textSequence = cleanSequence(textSequence);
 
-        sequence = new FeaturedDNASequence();
-        for (Tag tag : tags) {
-            if (tag instanceof LocusTag) {
-                sequence.setName(((LocusTag) tag).getLocusName());
-                sequence.setIsCircular(((LocusTag) tag).isCircular());
-            } else if (tag instanceof OriginTag) {
-                sequence.setSequence(((OriginTag) tag).getSequence());
-            } else if (tag instanceof FeaturesTag) {
-                sequence.setFeatures(((FeaturesTag) tag).getFeatures());
+            ArrayList<Tag> tags = splitTags(textSequence, NORMAL_TAGS, IGNORE_TAGS);
+            tags = parseTags(tags);
+
+            sequence = new FeaturedDNASequence();
+            for (Tag tag : tags) {
+                if (tag instanceof LocusTag) {
+                    sequence.setName(((LocusTag) tag).getLocusName());
+                    sequence.setIsCircular(((LocusTag) tag).isCircular());
+                } else if (tag instanceof OriginTag) {
+                    sequence.setSequence(((OriginTag) tag).getSequence());
+                } else if (tag instanceof FeaturesTag) {
+                    sequence.setFeatures(((FeaturesTag) tag).getFeatures());
+                }
             }
+        } catch (NullPointerException e) {
+            // throw an exception, and include the input textSequence.
+            throw new InvalidFormatParserException("Null Exception for: \n" + textSequence + "\n",
+                    e);
         }
         return sequence;
     }
@@ -509,21 +515,7 @@ public class IceGenbankParser extends AbstractParser {
 
             if ('/' == line.charAt(apparentQualifierColumn)) { // new tag starts
                 if (dnaFeatureNote != null) { // flush previous note
-                    qualifierValue = qualifierItem.toString();
-                    if (qualifierValue.startsWith("\"") && qualifierValue.endsWith("\"")) {
-                        dnaFeatureNote.setQuoted(true);
-                        qualifierValue = qualifierValue.substring(1, qualifierValue.length() - 1);
-                    } else {
-                        dnaFeatureNote.setQuoted(false);
-                    }
-                    qualifierValue = qualifierValue.replaceAll("\\\\", " ");
-                    qualifierValue = qualifierValue.replaceAll("\"\"", "\"");
-
-                    if ("translation".equals(dnaFeatureNote.getName())) {
-                        qualifierValue = Utils.join("", Arrays.asList(qualifierValue.split(" ")))
-                                .trim();
-                    }
-                    dnaFeatureNote.setValue(qualifierValue);
+                    addQualifierItemToDnaFeatureNote(dnaFeatureNote, qualifierItem);
                     notes.add(dnaFeatureNote);
                 }
 
@@ -549,7 +541,25 @@ public class IceGenbankParser extends AbstractParser {
             }
         }
 
-        // parse and add the last one
+        if (dnaFeatureNote != null) { // flush last one
+            addQualifierItemToDnaFeatureNote(dnaFeatureNote, qualifierItem);
+            notes.add(dnaFeatureNote);
+        }
+
+        dnaFeature.setNotes(notes);
+        dnaFeature = populateName(dnaFeature);
+        return dnaFeature;
+    }
+
+    /**
+     * Parse the given Qualifer Item and add to the given dnaFeatureNote.
+     * 
+     * @param dnaFeatureNote
+     * @param qualifierItem
+     */
+    private void addQualifierItemToDnaFeatureNote(DNAFeatureNote dnaFeatureNote,
+            StringBuilder qualifierItem) {
+        String qualifierValue;
         qualifierValue = qualifierItem.toString();
         if (qualifierValue.startsWith("\"") && qualifierValue.endsWith("\"")) {
             dnaFeatureNote.setQuoted(true);
@@ -559,15 +569,11 @@ public class IceGenbankParser extends AbstractParser {
         }
         qualifierValue = qualifierValue.replaceAll("\\\\", " ");
         qualifierValue = qualifierValue.replaceAll("\"\"", "\"");
+
         if ("translation".equals(dnaFeatureNote.getName())) {
             qualifierValue = Utils.join("", Arrays.asList(qualifierValue.split(" "))).trim();
         }
         dnaFeatureNote.setValue(qualifierValue);
-        notes.add(dnaFeatureNote);
-
-        dnaFeature.setNotes(notes);
-        dnaFeature = populateName(dnaFeature);
-        return dnaFeature;
     }
 
     /**
