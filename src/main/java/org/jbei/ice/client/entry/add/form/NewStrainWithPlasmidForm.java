@@ -243,8 +243,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         row += 1;
         general.setWidget(row, 0, new HTML("Summary <span class=\"required\">*</span>"));
         general.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
-        plasmidSummary = new TextArea();
-        plasmidSummary.setStyleName("entry_add_input_area");
+        plasmidSummary = createTextArea("640px", "50px");
         general.setWidget(row, 1, plasmidSummary);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
@@ -252,8 +251,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         row += 1;
         general.setWidget(row, 0, new Label("References"));
         general.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
-        plasmidReferences = new TextArea();
-        plasmidReferences.setStyleName("entry_add_input_area");
+        plasmidReferences = createTextArea("640px", "50px");
         general.setWidget(row, 1, plasmidReferences);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
@@ -261,12 +259,19 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         row += 1;
         general.setWidget(row, 0, new Label("Intellectual Property"));
         general.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
-        plasmidIp = new TextArea();
-        plasmidIp.setStyleName("entry_add_input_area");
+        plasmidIp = createTextArea("640px", "50px");
         general.setWidget(row, 1, plasmidIp);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
         return general;
+    }
+
+    protected TextArea createTextArea(String width, String height) {
+        final TextArea area = new TextArea();
+        area.setStyleName("input_box");
+        area.setWidth(width);
+        area.setHeight(height);
+        return area;
     }
 
     private Widget createPlasmidNotesWidget() {
@@ -368,8 +373,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         row += 1;
         general.setWidget(row, 0, new HTML("Summary <span class=\"required\">*</span>"));
         general.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
-        strainSummary = new TextArea();
-        strainSummary.setStyleName("entry_add_input_area");
+        strainSummary = createTextArea("640px", "50px");
         general.setWidget(row, 1, strainSummary);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
@@ -377,8 +381,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         row += 1;
         general.setWidget(row, 0, new Label("References"));
         general.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
-        strainReferences = new TextArea();
-        strainReferences.setStyleName("entry_add_input_area");
+        strainReferences = createTextArea("640px", "50px");
         general.setWidget(row, 1, strainReferences);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
@@ -386,8 +389,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         row += 1;
         general.setWidget(row, 0, new Label("Intellectual Property"));
         general.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
-        strainIp = new TextArea();
-        strainIp.setStyleName("entry_add_input_area");
+        strainIp = createTextArea("640px", "50px");
         general.setWidget(row, 1, strainIp);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 

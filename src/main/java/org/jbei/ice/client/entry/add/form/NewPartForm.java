@@ -161,8 +161,7 @@ public class NewPartForm extends NewSingleEntryForm<PartInfo> {
         row += 1;
         general.setWidget(row, 0, new HTML("Summary <span class=\"required\">*</span>"));
         general.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
-        summary = new TextArea();
-        summary.setStyleName("entry_add_input_area");
+        summary = createTextArea("640px", "50px");
         general.setWidget(row, 1, summary);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
@@ -170,8 +169,7 @@ public class NewPartForm extends NewSingleEntryForm<PartInfo> {
         row += 1;
         general.setWidget(row, 0, new Label("References"));
         general.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
-        references = new TextArea();
-        references.setStyleName("entry_add_input_area");
+        references = createTextArea("640px", "50px");
         general.setWidget(row, 1, references);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
@@ -179,8 +177,7 @@ public class NewPartForm extends NewSingleEntryForm<PartInfo> {
         row += 1;
         general.setWidget(row, 0, new Label("Intellectual Property"));
         general.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
-        ip = new TextArea();
-        ip.setStyleName("entry_add_input_area");
+        ip = createTextArea("640px", "50px");
         general.setWidget(row, 1, ip);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
