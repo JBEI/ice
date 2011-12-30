@@ -8,13 +8,14 @@ import org.jbei.ice.client.common.Footer;
 import org.jbei.ice.client.common.HeaderMenu;
 import org.jbei.ice.client.common.header.HeaderView;
 
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class HomePageView extends Composite implements HomePagePresenter.Display {
+public class HomePageView extends Composite implements IHomePageView {
 
     private HeaderView header;
 
@@ -51,6 +52,14 @@ public class HomePageView extends Composite implements HomePagePresenter.Display
     @Override
     public ILogoutHandler getLogoutHandler() {
         return header;
+    }
+
+    public Button getQuickSearchButton() {
+        return header.getQuickSearchButton();
+    }
+
+    public String getQuickSearchInput() {
+        return header.getSearchInput();
     }
 
     private Widget getFooter() {

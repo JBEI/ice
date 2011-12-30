@@ -11,10 +11,10 @@ public class SearchFilterInfo implements IsSerializable {
     public SearchFilterInfo() {
     }
 
-    public SearchFilterInfo(String t, String o1, String o2) {
-        this.type = t;
-        this.operator = o1;
-        this.operand = o2;
+    public SearchFilterInfo(String type, String operator, String operand) {
+        this.type = type;
+        this.operator = operator;
+        this.operand = operand;
     }
 
     public String getType() {

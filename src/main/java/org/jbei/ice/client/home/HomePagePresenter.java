@@ -1,6 +1,5 @@
 package org.jbei.ice.client.home;
 
-import org.jbei.ice.client.ILogoutHandler;
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.event.LogoutEvent;
@@ -10,22 +9,15 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.Widget;
 
 public class HomePagePresenter extends AbstractPresenter {
 
-    public interface Display {
-
-        Widget asWidget();
-
-        ILogoutHandler getLogoutHandler();
-    }
-
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
-    private final Display display;
+    private final IHomePageView display;
 
-    public HomePagePresenter(RegistryServiceAsync service, HandlerManager eventBus, Display display) {
+    public HomePagePresenter(RegistryServiceAsync service, HandlerManager eventBus,
+            IHomePageView display) {
 
         this.service = service;
         this.eventBus = eventBus;

@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Image;
@@ -23,7 +22,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class HeaderView extends Composite implements ILogoutHandler {
+public class HeaderView extends Composite implements ILogoutHandler { // TODO: should implement IHasLogOut instead of handler
 
     interface Resources extends ClientBundle {
         @Source("org/jbei/ice/client/resource/image/logo.gif")
@@ -34,6 +33,7 @@ public class HeaderView extends Composite implements ILogoutHandler {
     private Anchor logout;
     private final HeaderPresenter presenter;
     private TextBox searchInput;
+    private Button searchBtn;
 
     public HeaderView() {
 
@@ -77,11 +77,12 @@ public class HeaderView extends Composite implements ILogoutHandler {
         layout.setWidget(0, 0, searchInput);
         layout.getFlexCellFormatter().setRowSpan(0, 0, 2);
 
-        Button searchBtn = new Button("Search");
+        searchBtn = new Button("Search");
         searchBtn.setStyleName("quick_search_btn");
         layout.setWidget(0, 1, searchBtn);
         layout.getFlexCellFormatter().setRowSpan(0, 1, 2);
         layout.setStyleName("float_right");
+        searchBtn.addClickHandler(presenter.getSearchHandler());
 
         //        Hyperlink searchLink = new Hyperlink("Advanced Search", Page.QUERY.getLink());
         //        searchLink.addStyleName("small_text");
@@ -144,17 +145,21 @@ public class HeaderView extends Composite implements ILogoutHandler {
         return panel;
     }
 
-    public TextBox getSearchInput() {
-        return this.searchInput;
+    public String getSearchInput() {
+        return this.searchInput.getText();
     }
 
-    private Widget getUnderLine() {
-        HorizontalPanel panel = new HorizontalPanel();
-        panel.setStyleName("blue_underline");
-        panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_TOP);
-        panel.setWidth("100%");
-        return panel;
+    public Button getQuickSearchButton() {
+        return this.searchBtn;
     }
+
+    //    private Widget getUnderLine() {
+    //        HorizontalPanel panel = new HorizontalPanel();
+    //        panel.setStyleName("blue_underline");
+    //        panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_TOP);
+    //        panel.setWidth("100%");
+    //        return panel;
+    //    }
 
     @Override
     public HasClickHandlers getClickHandler() {
