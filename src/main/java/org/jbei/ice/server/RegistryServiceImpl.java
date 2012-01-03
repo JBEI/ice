@@ -84,7 +84,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         } catch (Exception e) {
             Logger.error(e);
         }
-        return "THIS_IS_A_FAKE_SESSION_dfsafsfas2345435mkldnmg";
+        return null;
     }
 
     @Override
