@@ -300,6 +300,8 @@ public class TipViewContentFactory {
     private static String generateDate(Date date) {
 
         DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yyyy");
+        if (date == null)
+            return "";
         String value = format.format(date);
         return value;
     }
