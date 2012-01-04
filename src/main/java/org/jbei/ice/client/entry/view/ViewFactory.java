@@ -7,7 +7,7 @@ import org.jbei.ice.client.entry.view.detail.PlasmidDetailView;
 import org.jbei.ice.client.entry.view.detail.StrainDetailView;
 import org.jbei.ice.client.entry.view.update.UpdateEntryForm;
 import org.jbei.ice.client.entry.view.update.UpdatePlasmidForm;
-import org.jbei.ice.shared.ArabidopsisSeedInfo;
+import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.PartInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;

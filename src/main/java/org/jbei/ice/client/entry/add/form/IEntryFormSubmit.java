@@ -28,4 +28,6 @@ public interface IEntryFormSubmit {
     void populateEntries();
 
     Set<EntryInfo> getEntries();
+
+    void setSampleLocation(SampleLocationWidget sampleLocation);
 }

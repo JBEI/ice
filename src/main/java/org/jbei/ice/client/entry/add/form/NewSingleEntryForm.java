@@ -10,14 +10,21 @@ import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.ParameterInfo;
 
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
@@ -36,6 +43,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
 
     protected final FlexTable layout;
     protected final HashMap<AutoCompleteField, ArrayList<String>> data;
+
     protected Button cancel;
     protected Button submit;
     protected TextBox creator;
@@ -45,6 +53,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
     private ParametersPanel parametersPanel;
     private ListBox markupOptions;
     private TextArea notesText;
+    private FlexTable sample;
 
     public NewSingleEntryForm(HashMap<AutoCompleteField, ArrayList<String>> data,
             String creatorName, String creatorEmail, T entryInfo) {
@@ -129,6 +138,134 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         layout.setWidget(0, 2, cancel);
 
         return layout;
+    }
+
+    public void setSampleLocation(final SampleLocationWidget widget) {
+
+        // location
+        sample.setWidget(4, 0, new Label("Location"));
+        sample.getFlexCellFormatter().setStyleName(4, 0, "entry_add_sub_label");
+
+        final ListBox locationOptions = new ListBox();
+        locationOptions.setStyleName("input_box");
+        locationOptions.setVisibleItemCount(1);
+
+        for (String location : widget.getLocations()) {
+            locationOptions.addItem(location, location);
+        }
+
+        sample.setWidget(4, 1, locationOptions);
+
+        String value = locationOptions.getValue(0);
+        ArrayList<String> list = widget.getListForLocation(value);
+        if (list == null)
+            return;
+
+        int row = 4;
+
+        for (final String item : list) {
+            row += 1;
+            sample.setWidget(row, 0, new HTML("&nbsp;"));
+            sample.getFlexCellFormatter().setWidth(row, 0, "170px");
+            final TextBox shelf = new TextBox();
+            shelf.setText(item);
+            shelf.setStyleName("input_box");
+            shelf.addFocusHandler(new FocusHandler() {
+
+                @Override
+                public void onFocus(FocusEvent event) {
+                    if (item.equals(shelf.getText().trim()))
+                        shelf.setText("");
+                }
+            });
+
+            shelf.addBlurHandler(new BlurHandler() {
+
+                @Override
+                public void onBlur(BlurEvent event) {
+                    if ("".equals(shelf.getText().trim()))
+                        shelf.setText(item);
+                }
+            });
+            sample.setWidget(row, 1, shelf);
+        }
+
+        locationOptions.addChangeHandler(new ChangeHandler() {
+
+            @Override
+            public void onChange(ChangeEvent event) {
+
+                int index = locationOptions.getSelectedIndex();
+                String value = locationOptions.getValue(index);
+                ArrayList<String> list = widget.getListForLocation(value);
+                if (list == null)
+                    return;
+
+                int row = 4;
+
+                for (final String item : list) {
+                    row += 1;
+                    sample.setWidget(row, 0, new HTML("&nbsp;"));
+                    sample.getFlexCellFormatter().setWidth(row, 0, "170px");
+                    final TextBox shelf = new TextBox();
+                    shelf.setText(item);
+                    shelf.setStyleName("input_box");
+                    shelf.addFocusHandler(new FocusHandler() {
+
+                        @Override
+                        public void onFocus(FocusEvent event) {
+                            if (item.equals(shelf.getText().trim()))
+                                shelf.setText("");
+                        }
+                    });
+
+                    shelf.addBlurHandler(new BlurHandler() {
+
+                        @Override
+                        public void onBlur(BlurEvent event) {
+                            if ("".equals(shelf.getText().trim()))
+                                shelf.setText(item);
+                        }
+                    });
+                    sample.setWidget(row, 1, shelf);
+                }
+            }
+        });
+    }
+
+    protected Widget createSampleWidget() {
+        int row = 0;
+        sample = new FlexTable();
+        sample.setCellPadding(0);
+        sample.setCellSpacing(3);
+        sample.setWidth("100%");
+
+        sample.setWidget(row, 0, new Label("Samples"));
+        sample.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_header");
+        sample.getFlexCellFormatter().setColSpan(row, 0, 2);
+
+        row += 1;
+        sample.setWidget(row, 0, new Label(""));
+        sample.getFlexCellFormatter().setHeight(row, 0, "10px");
+        sample.getFlexCellFormatter().setColSpan(row, 0, 2);
+
+        // name
+        row += 1;
+        sample.setWidget(row, 0, new Label("Name"));
+        sample.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_label");
+        TextBox sampleName = createStandardTextBox("204px");
+        sample.setWidget(row, 1, sampleName);
+
+        // notes
+        row += 1;
+        sample.setWidget(row, 0, new Label("Notes"));
+        sample.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_label");
+        sample.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
+        TextArea sampleNotes = new TextArea();
+        sampleNotes.setStyleName("entry_add_sample_notes_input");
+        sample.setWidget(row, 1, sampleNotes);
+
+        return sample;
     }
 
     protected Widget createParametersWidget() {

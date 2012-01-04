@@ -11,9 +11,11 @@ import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.entry.add.form.EntryCreateWidget;
 import org.jbei.ice.client.entry.add.form.IEntryFormSubmit;
+import org.jbei.ice.client.entry.add.form.SampleLocationWidget;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.EntryInfo.EntryType;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -59,15 +61,63 @@ public class EntryAddPresenter extends AbstractPresenter {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 EntryAddType selected = menuSelectionModel.getSelectedObject();
+                getSampleLocation(selected);
                 EntryCreateWidget form = getEntryForm(selected);
                 display.setCurrentForm(form, ("New " + selected.getDisplay()));
             }
         });
     }
 
+    private void getSampleLocation(EntryAddType selected) {
+
+        EntryType type = null;
+
+        switch (selected) {
+
+        case ARABIDOPSIS:
+            type = EntryType.ARABIDOPSIS;
+            break;
+
+        case PLASMID:
+            type = EntryType.PLASMID;
+            break;
+
+        case PART:
+            type = EntryType.PART;
+            break;
+
+        case STRAIN:
+            type = EntryType.STRAIN;
+            break;
+
+        default:
+            return;
+        }
+
+        // TODO : check cache 
+
+        service.retrieveStorageSchemes(AppController.sessionId, type,
+            new AsyncCallback<HashMap<String, ArrayList<String>>>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert("Failed to retrieve the sample location data: "
+                            + caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(HashMap<String, ArrayList<String>> result) {
+                    SampleLocationWidget sampleLocation = new SampleLocationWidget(result);
+                    // TODO : cache.
+                    display.getCurrentForm().getEntrySubmitForm().setSampleLocation(sampleLocation);
+                }
+            });
+
+    }
+
     protected void bind() {
 
-        // TODO : need to get it everytime this page is loaded?
+        // TODO : look in caching to avoid making the following call every time page is loaded
         service.retrieveAutoCompleteData(AppController.sessionId,
             new AsyncCallback<HashMap<AutoCompleteField, ArrayList<String>>>() {
 
@@ -81,6 +131,7 @@ public class EntryAddPresenter extends AbstractPresenter {
                     autoCompleteData = new HashMap<AutoCompleteField, ArrayList<String>>(result);
                 }
             });
+
     }
 
     protected void save(Set<EntryInfo> hasEntry) {

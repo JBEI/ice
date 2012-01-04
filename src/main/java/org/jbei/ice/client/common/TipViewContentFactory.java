@@ -2,7 +2,7 @@ package org.jbei.ice.client.common;
 
 import java.util.Date;
 
-import org.jbei.ice.shared.ArabidopsisSeedInfo;
+import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.PartInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;

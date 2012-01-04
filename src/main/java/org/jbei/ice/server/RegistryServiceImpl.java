@@ -41,6 +41,7 @@ import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.search.blast.BlastResult;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
+import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BlastProgram;
 import org.jbei.ice.shared.ColumnField;
@@ -50,6 +51,7 @@ import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.EntryInfo.EntryType;
 import org.jbei.ice.shared.dto.ProfileInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
@@ -862,5 +864,49 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.error(e);
             return 0;
         }
+    }
+
+    @Override
+    public HashMap<String, ArrayList<String>> retrieveStorageSchemes(String sessionId,
+            EntryType type) {
+
+        HashMap<String, ArrayList<String>> schemeMap = new HashMap<String, ArrayList<String>>();
+
+        List<Storage> schemes = StorageManager.getStorageSchemesForEntryType(type.getName());
+        for (Storage scheme : schemes) {
+
+            long schemeId = scheme.getId();
+            String schemeName = scheme.getName();
+
+            ArrayList<String> schemeOptions = new ArrayList<String>();
+
+            Storage storage;
+            try {
+                storage = StorageManager.get(schemeId, false);
+
+                if (storage != null) {
+                    ArrayList<Storage> storageSchemes = storage.getSchemes();
+                    if (storageSchemes != null) {
+                        for (Storage storageScheme : storageSchemes) {
+                            schemeOptions.add(storageScheme.getName());
+                        }
+                    }
+                }
+            } catch (ManagerException e) {
+                Logger.error(e);
+                continue;
+            }
+
+            if (PopulateInitialDatabase.DEFAULT_PLASMID_STORAGE_SCHEME_NAME.equals(schemeName)
+                    || PopulateInitialDatabase.DEFAULT_STRAIN_STORAGE_SCHEME_NAME
+                            .equals(schemeName)
+                    || PopulateInitialDatabase.DEFAULT_PART_STORAGE_SCHEME_NAME.equals(schemeName)
+                    || PopulateInitialDatabase.DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME
+                            .equals(schemeName)) {
+                schemeMap.put(schemeName, schemeOptions);
+            }
+        }
+
+        return schemeMap;
     }
 }

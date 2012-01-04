@@ -1,6 +1,6 @@
 package org.jbei.ice.client.entry.view.detail;
 
-import org.jbei.ice.shared.ArabidopsisSeedInfo;
+import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 
 public class ArabidopsisDetailView extends EntryDetailView<ArabidopsisSeedInfo> {
 

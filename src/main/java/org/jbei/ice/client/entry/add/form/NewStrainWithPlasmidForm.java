@@ -509,4 +509,10 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public void setSampleLocation(SampleLocationWidget sampleLocation) {
+        // TODO Auto-generated method stub
+
+    }
 }

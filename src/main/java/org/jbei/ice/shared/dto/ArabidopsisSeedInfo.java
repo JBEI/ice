@@ -1,10 +1,9 @@
-package org.jbei.ice.shared;
+package org.jbei.ice.shared.dto;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 

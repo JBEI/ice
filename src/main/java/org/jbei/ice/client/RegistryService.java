@@ -12,6 +12,7 @@ import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.EntryInfo.EntryType;
 import org.jbei.ice.shared.dto.ProfileInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
@@ -97,4 +98,6 @@ public interface RegistryService extends RemoteService {
     long createEntry(String sid, EntryInfo info);
 
     boolean addEntriesToCollection(String sid, ArrayList<Long> destination, ArrayList<Long> entryIds);
+
+    HashMap<String, ArrayList<String>> retrieveStorageSchemes(String sessionId, EntryType type);
 }

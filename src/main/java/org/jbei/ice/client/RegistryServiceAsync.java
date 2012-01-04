@@ -12,6 +12,7 @@ import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.EntryInfo.EntryType;
 import org.jbei.ice.shared.dto.ProfileInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
@@ -106,4 +107,7 @@ public interface RegistryServiceAsync {
 
     void retrieveUserCollections(String sessionId, String userId,
             AsyncCallback<ArrayList<FolderDetails>> callback);
+
+    void retrieveStorageSchemes(String sessionId, EntryType type,
+            AsyncCallback<HashMap<String, ArrayList<String>>> callback);
 }

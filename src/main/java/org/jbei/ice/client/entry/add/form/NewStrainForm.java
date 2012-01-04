@@ -10,10 +10,6 @@ import org.jbei.ice.shared.BioSafetyOptions;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
 
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.FocusEvent;
-import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
@@ -209,100 +205,6 @@ public class NewStrainForm extends NewSingleEntryForm<StrainInfo> {
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
         return general;
-    }
-
-    protected Widget createSampleWidget() {
-        int row = 0;
-        FlexTable sample = new FlexTable();
-        sample.setCellPadding(0);
-        sample.setCellSpacing(3);
-        sample.setWidth("100%");
-
-        sample.setWidget(row, 0, new Label("Samples"));
-        sample.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_header");
-        sample.getFlexCellFormatter().setColSpan(row, 0, 2);
-
-        row += 1;
-        sample.setWidget(row, 0, new Label(""));
-        sample.getFlexCellFormatter().setHeight(row, 0, "10px");
-        sample.getFlexCellFormatter().setColSpan(row, 0, 2);
-
-        // TODO : rest of samples here
-        // name
-        row += 1;
-        sample.setWidget(row, 0, new Label("Name"));
-        sample.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_label");
-        TextBox sampleName = new TextBox();
-        sampleName.setStyleName("input_box");
-        sample.setWidget(row, 1, sampleName);
-
-        // notes
-        row += 1;
-        sample.setWidget(row, 0, new Label("Notes"));
-        sample.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_label");
-        sample.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
-        TextArea sampleNotes = new TextArea();
-        sampleNotes.setStyleName("entry_add_sample_notes_input");
-        sample.setWidget(row, 1, sampleNotes);
-
-        // location
-        row += 1;
-        sample.setWidget(row, 0, new Label("Location"));
-        sample.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_label");
-        ListBox locationOptions = new ListBox();
-        locationOptions.setVisibleItemCount(1);
-        locationOptions.addItem("Plasmid Storage (Default)");
-        locationOptions.setStyleName("input_box");
-        sample.setWidget(row, 1, locationOptions);
-
-        // shelf, box etc
-        row += 1;
-        sample.setWidget(row, 0, new HTML("&nbsp;"));
-        sample.getFlexCellFormatter().setWidth(row, 0, "170px");
-        final String shelfTxt = "Shelf";
-        final TextBox shelf = new TextBox();
-        shelf.setText(shelfTxt);
-        shelf.setStyleName("input_box");
-        shelf.addFocusHandler(new FocusHandler() {
-
-            @Override
-            public void onFocus(FocusEvent event) {
-                if (shelfTxt.equals(shelf.getText().trim()))
-                    shelf.setText("");
-            }
-        });
-
-        shelf.addBlurHandler(new BlurHandler() {
-
-            @Override
-            public void onBlur(BlurEvent event) {
-                if ("".equals(shelf.getText().trim()))
-                    shelf.setText(shelfTxt);
-            }
-        });
-        sample.setWidget(row, 1, shelf);
-
-        // second 
-        row += 1;
-        sample.setWidget(row, 0, new HTML("&nbsp;"));
-        sample.getFlexCellFormatter().setWidth(row, 0, "170px");
-        final String boxTxt = "Box";
-        final TextBox box = new TextBox();
-        box.setText(boxTxt);
-        box.setStyleName("input_box");
-        sample.setWidget(row, 1, box);
-
-        // third
-        row += 1;
-        sample.setWidget(row, 0, new HTML("&nbsp;"));
-        sample.getFlexCellFormatter().setWidth(row, 0, "170px");
-        final String tubeTxt = "Tube";
-        final TextBox tube = new TextBox();
-        tube.setText(tubeTxt);
-        tube.setStyleName("input_box");
-        sample.setWidget(row, 1, tube);
-
-        return sample;
     }
 
     @Override
