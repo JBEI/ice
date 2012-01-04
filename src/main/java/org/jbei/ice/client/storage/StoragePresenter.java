@@ -2,8 +2,8 @@ package org.jbei.ice.client.storage;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.AbstractPresenter;
+import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
@@ -16,23 +16,15 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
-import com.google.gwt.user.client.ui.Widget;
 
 public class StoragePresenter extends AbstractPresenter {
 
-    public interface Display {
-
-        void setContent(Widget widget);
-
-        Widget asWidget();
-    }
-
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
-    private final Display display;
+    private final IStorageView display;
 
     public StoragePresenter(RegistryServiceAsync service, HandlerManager eventBus,
-            final Display display, String param) {
+            final IStorageView display, String param) {
 
         this.service = service;
         this.eventBus = eventBus;

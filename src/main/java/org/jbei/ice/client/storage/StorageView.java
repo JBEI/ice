@@ -3,8 +3,6 @@ package org.jbei.ice.client.storage;
 import org.jbei.ice.client.common.Footer;
 import org.jbei.ice.client.common.HeaderMenu;
 import org.jbei.ice.client.common.header.HeaderView;
-import org.jbei.ice.client.model.StorageTreeModel;
-import org.jbei.ice.client.presenter.StoragePresenter;
 
 import com.google.gwt.user.cellview.client.CellTree;
 import com.google.gwt.user.client.ui.Composite;
@@ -12,7 +10,7 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Widget;
 
-public class StorageView extends Composite implements StoragePresenter.Display {
+public class StorageView extends Composite implements IStorageView {
 
     private CellTree tree;
     private StorageTreeModel treeModel;
