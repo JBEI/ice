@@ -11,7 +11,6 @@ import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
 
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
@@ -215,46 +214,6 @@ public class NewStrainForm extends NewSingleEntryForm<StrainInfo> {
         strain.setBioSafetyLevel(bioSafety.getSelectedIndex());
         strain.setIntellectualProperty(ip.getText());
         strain.setPrincipalInvestigator(pI.getText());
-    }
-
-    @Override
-    public FocusWidget validateForm() {
-        FocusWidget widget = super.validateForm();
-        if (widget != null)
-            return widget;
-
-        if (name.getText().isEmpty()) {
-            name.setStyleName("entry_input_error");
-            widget = name;
-        } else {
-            name.setStyleName("input_box");
-        }
-
-        if (creator.getText().isEmpty()) {
-            creator.setStyleName("entry_input_error");
-            if (widget == null)
-                widget = creator;
-        } else {
-            creator.setStyleName("input_box");
-        }
-
-        if (pI.getText().isEmpty()) {
-            pI.setStyleName("entry_input_error");
-            if (widget == null)
-                widget = pI;
-        } else {
-            pI.setStyleName("input_box");
-        }
-
-        if (summary.getText().isEmpty()) {
-            summary.setStyleName("entry_input_error");
-            if (widget == null)
-                widget = summary;
-        } else {
-            summary.setStyleName("input_box");
-        }
-
-        return widget;
     }
 
     @Override

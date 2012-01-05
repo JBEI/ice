@@ -14,7 +14,6 @@ import org.jbei.ice.shared.dto.EntryInfo;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
@@ -244,14 +243,6 @@ public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> 
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
         return general;
-    }
-
-    @Override
-    public FocusWidget validateForm() {
-        FocusWidget invalid = super.validateForm();
-        if (invalid != null)
-            return invalid;
-        return invalid;
     }
 
     @Override

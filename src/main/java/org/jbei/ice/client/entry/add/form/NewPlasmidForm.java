@@ -14,7 +14,6 @@ import org.jbei.ice.shared.dto.PlasmidInfo;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
@@ -381,16 +380,6 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
 
     private boolean getCircular() {
         return this.circular.getValue();
-    }
-
-    @Override
-    public FocusWidget validateForm() {
-
-        FocusWidget toReturn = super.validateForm();
-        if (toReturn != null)
-            return toReturn;
-
-        return toReturn;
     }
 
     @Override
