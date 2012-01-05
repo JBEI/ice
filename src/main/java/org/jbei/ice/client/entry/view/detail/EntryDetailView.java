@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Base view for the different types of entries
@@ -261,6 +262,22 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         Label valueLabel = new Label(value);
         //        ValueCell cell = new ValueCell(value, valueType);
         table.setWidget(currentRow, currentCol, valueLabel); // TODO add a style to put space after this or something
+        currentCol += 1;
+    }
+
+    // adds a field to the current table
+    protected void addShortField(String labelString, Widget value, ValueType valueType) {
+        if (currentCol >= 4) { // TODO : maybe add a parameter that determines whether to show on next row or not
+            currentCol = 0;
+            currentRow += 1;
+        }
+
+        HTML label = new HTML("<b>" + labelString + "</b>", true);
+        table.setWidget(currentRow, currentCol, label);
+        table.getFlexCellFormatter().setWidth(currentRow, currentCol, "170px");
+        currentCol += 1;
+        //        ValueCell cell = new ValueCell(value, valueType);
+        table.setWidget(currentRow, currentCol, value); // TODO add a style to put space after this or something
         currentCol += 1;
     }
 

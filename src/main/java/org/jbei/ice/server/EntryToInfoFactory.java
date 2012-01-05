@@ -5,7 +5,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.ArabidopsisSeed;
 import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
@@ -19,12 +23,12 @@ import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.AttachmentInfo;
-import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.Generation;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.PlantType;
+import org.jbei.ice.shared.dto.AttachmentInfo;
+import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryInfo.EntryType;
-import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.ParameterInfo;
 import org.jbei.ice.shared.dto.PartInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
@@ -36,6 +40,8 @@ import org.jbei.ice.shared.dto.StrainInfo;
 /**
  * Factory for converting {@link Entry}s to their corresponding {@link EntryInfo} data transfer
  * objects
+ * 
+ * TODO : this duplicates some of the functionality of EntryViewFactory. Consolidate
  * 
  * @author Hector Plahar
  */
@@ -220,6 +226,19 @@ public class EntryToInfoFactory {
         info.setCircular(plasmid.getCircular());
         info.setOriginOfReplication(plasmid.getOriginOfReplication());
         info.setPromoters(plasmid.getPromoters());
+
+        /// get strains for plasmid
+        try {
+            Set<Strain> strains = UtilsManager.getStrainsForPlasmid(plasmid);
+            if (strains != null) {
+                for (Strain strain : strains) {
+                    info.getStrains()
+                            .put(strain.getId(), strain.getOnePartNumber().getPartNumber());
+                }
+            }
+        } catch (ManagerException e) {
+            Logger.error(e);
+        }
 
         return info;
     }
