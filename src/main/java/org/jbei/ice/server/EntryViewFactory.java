@@ -1,17 +1,21 @@
 package org.jbei.ice.server;
 
+import java.util.Set;
+
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
+import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.ArabidopsisSeed;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryInfo.EntryType;
-import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.PartInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
@@ -34,6 +38,16 @@ public class EntryViewFactory {
         view.setShortDescription(entry.getShortDescription());
         view.setCreationTime(entry.getCreationTime());
         view.setModificationTime(entry.getModificationTime());
+
+        try {
+            boolean hasAttachment = (AttachmentManager.getByEntry(entry).size() > 0);
+            view.setHasAttachment(hasAttachment);
+            boolean hasSample = (SampleManager.getSamplesByEntry(entry).size() > 0);
+            view.setHasSample(hasSample);
+            boolean hasSequence = (SequenceManager.getByEntry(entry) != null);
+            view.setHasSequence(hasSequence);
+        } catch (ManagerException e) {
+        }
     }
 
     public static EntryInfo createTipView(Entry entry) {
@@ -54,16 +68,6 @@ public class EntryViewFactory {
             view.setPlasmids(strain.getPlasmids());
             view.setSelectionMarkers(strain.getSelectionMarkersAsString());
 
-            try {
-                boolean hasAttachment = (AttachmentManager.getByEntry(entry).size() > 0);
-                view.setHasAttachment(hasAttachment);
-                boolean hasSample = (SampleManager.getSamplesByEntry(entry).size() > 0);
-                view.setHasSample(hasSample);
-                boolean hasSequence = (SequenceManager.getByEntry(entry) != null);
-                view.setHasSequence(hasSequence);
-            } catch (ManagerException e) {
-                return null;
-            }
             return view;
         }
 
@@ -101,6 +105,19 @@ public class EntryViewFactory {
             view.setBackbone(plasmid.getBackbone());
             view.setOriginOfReplication(plasmid.getOriginOfReplication());
             view.setPromoters(plasmid.getPromoters());
+
+            // get strains for plasmid
+            try {
+                Set<Strain> strains = UtilsManager.getStrainsForPlasmid(plasmid);
+                if (strains != null) {
+                    for (Strain strain : strains) {
+                        view.getStrains().put(strain.getId(),
+                            strain.getOnePartNumber().getPartNumber());
+                    }
+                }
+            } catch (ManagerException e) {
+                Logger.error(e);
+            }
 
             return view;
         }

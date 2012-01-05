@@ -34,6 +34,7 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
 
     @Override
     protected void initComponents() {
+
         tablePanel = new VerticalPanel();
         tablePanel.setWidth("100%");
 
@@ -86,6 +87,7 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
 
     // left :: menu
     private Widget createSystemCollectionMenu() {
+
         FlexTable layout = new FlexTable();
         layout.setCellPadding(3);
         layout.setCellSpacing(0);
@@ -101,6 +103,7 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
 
     // left :: menu
     private Widget createUserCollectionMenu() {
+
         FlexTable layout = new FlexTable();
         layout.setCellPadding(3);
         layout.setCellSpacing(0);

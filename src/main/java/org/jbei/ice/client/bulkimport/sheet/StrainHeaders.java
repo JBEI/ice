@@ -8,7 +8,7 @@ public class StrainHeaders extends SheetHeader {
         super(col, row, headerTable);
     }
 
-    enum Header {
+    enum Header implements IHeader {
         PI("Principal Investigator"), FUNDING_SOURCE("Funding Source"), IP("Intellectual Property"), BIOSAFETY(
                 "BioSafety Level"), NAME("Name"), ALIAS("Alias"), KEYWORDS("Keywords"), SUMMARY(
                 "Summary"), NOTES("Notes"), REFERENCES("References"), LINKS("Links"), STATUS(

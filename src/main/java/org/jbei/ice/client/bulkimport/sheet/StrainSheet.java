@@ -100,12 +100,7 @@ public class StrainSheet extends Sheet {
     @Override
     protected Widget createHeader() {
         addLeadHeader();
-
         headers = new StrainHeaders(headerCol, row, header);
-        //        while (headerCol < FIELDS) {
-        //            table.setWidget(row, headerCol, new HTML("&nbsp;"));
-        //            headerCol += 1;
-        //        }
         row += 1;
         return header;
     }

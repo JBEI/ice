@@ -15,6 +15,10 @@ body {
 	height: 100%;
 }
 
+.font-12 {
+	font-size: 12px;
+}
+
 .btn_submit_entry_form {
     padding: 5px;
     width: 90px;

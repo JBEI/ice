@@ -8,6 +8,12 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.HasData;
 
+/**
+ * Interface for view that displays details of entry collections
+ * 
+ * @author Hector Plahar
+ */
+
 public interface ICollectionEntriesView {
 
     HasData<FolderDetails> getSystemCollectionMenu();

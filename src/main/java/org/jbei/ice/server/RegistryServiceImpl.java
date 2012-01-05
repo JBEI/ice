@@ -135,17 +135,17 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public ArrayList<EntryInfo> retrieveEntryData(String sid, ArrayList<Long> entryIds,
             ColumnField type, boolean asc) {
 
-        // TODO Use Controller and put all of this logic in there
+        // TODO: Use Controller and put all of the logic in there
         if (type == null)
             type = ColumnField.CREATED;
 
         try {
-            ArrayList<EntryInfo> results = new ArrayList<EntryInfo>();
-            List<Entry> entries = null;
-
             Account account = this.retrieveAccountForSid(sid);
             if (account == null)
                 return null;
+
+            ArrayList<EntryInfo> results = new ArrayList<EntryInfo>();
+            List<Entry> entries = null;
 
             //            EntryController controller = new EntryController(account);
             switch (type) {

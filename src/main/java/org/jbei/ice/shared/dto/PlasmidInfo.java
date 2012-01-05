@@ -1,5 +1,6 @@
 package org.jbei.ice.shared.dto;
 
+import java.util.HashMap;
 
 public class PlasmidInfo extends EntryInfo {
 
@@ -7,9 +8,11 @@ public class PlasmidInfo extends EntryInfo {
     private String originOfReplication;
     private String promoters;
     private boolean circular;
+    private HashMap<Long, String> strains; // id -> partNumber
 
     public PlasmidInfo() {
         this.setType(EntryType.PLASMID);
+        setStrains(new HashMap<Long, String>());
     }
 
     public String getBackbone() {
@@ -42,5 +45,13 @@ public class PlasmidInfo extends EntryInfo {
 
     public void setCircular(boolean circular) {
         this.circular = circular;
+    }
+
+    public HashMap<Long, String> getStrains() {
+        return strains;
+    }
+
+    public void setStrains(HashMap<Long, String> strains) {
+        this.strains = strains;
     }
 }

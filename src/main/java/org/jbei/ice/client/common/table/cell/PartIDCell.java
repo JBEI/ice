@@ -26,7 +26,6 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> {
     private PopupPanel popup;
     private static final String MOUSEOVER_EVENT_NAME = "mouseover";
     private static final String MOUSEOUT_EVENT_NAME = "mouseout";
-    private static final String MOUSEOVER_STYLE = "mouseover_color";
     private static final String MOUSE_CLICK = "click";
 
     public PartIDCell() {
@@ -75,7 +74,6 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> {
         if (popup != null) {
             popup.hide();
             popup = null;
-            parent.removeClassName(MOUSEOVER_STYLE);
         }
     }
 
@@ -102,7 +100,6 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> {
 
     protected void onMouseOver(Element parent, NativeEvent event, EntryInfo value) {
 
-        parent.setClassName(MOUSEOVER_STYLE);
         final int x = event.getClientX() + 30 + Window.getScrollLeft();
         final int y = event.getClientY() + Window.getScrollTop();
 

@@ -77,6 +77,7 @@ public class TipViewContentFactory {
         table.setCellSpacing(2);
         table.setBorderWidth(0);
         table.setStyleName("background_white");
+        table.addStyleName("font-12"); //TODO : style for tool tip table and also use em
 
         // left column
         setLeftColumn(table, view);
@@ -100,7 +101,11 @@ public class TipViewContentFactory {
         table.setText(3, 3, view.getPromoters());
 
         table.setHTML(4, 2, "<b>Strains</b>");
-        table.setText(4, 3, ""); // TODO
+        String strains = "";
+        for (Long id : view.getStrains().keySet())
+            strains += (view.getStrains().get(id) + ", ");
+        strains = strains.substring(0, strains.lastIndexOf(", "));
+        table.setText(4, 3, strains);
 
         table.setHTML(5, 2, "<b>Created</b>");
         String created = generateDate(view.getCreationTime());

@@ -28,7 +28,7 @@ public class SheetHeader {
         headerCol += 1;
     }
 
-    enum IHeader {
+    interface IHeader {
 
     }
 
