@@ -48,6 +48,10 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
     protected Button submit;
     protected TextBox creator;
     protected TextBox creatorEmail;
+    protected TextBox name;
+    protected TextBox alias;
+    protected TextBox principalInvestigator;
+    protected TextArea summary;
 
     private final T entryInfo;
     private ParametersPanel parametersPanel;
@@ -74,6 +78,11 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
 
         creator = createStandardTextBox("205px");
         creatorEmail = createStandardTextBox("205px");
+        name = createStandardTextBox("205px");
+        alias = createStandardTextBox("205px");
+        principalInvestigator = createStandardTextBox("205px");
+
+        summary = createTextArea("640px", "50px");
     }
 
     public T getEntryInfo() {
@@ -240,7 +249,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         sample.setCellSpacing(3);
         sample.setWidth("100%");
 
-        sample.setWidget(row, 0, new Label("Samples"));
+        sample.setWidget(row, 0, new Label("Sample"));
         sample.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_header");
         sample.getFlexCellFormatter().setColSpan(row, 0, 2);
 
@@ -466,7 +475,48 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
 
     @Override
     public FocusWidget validateForm() {
+
+        FocusWidget invalid = null;
+
+        // name
+        if (name.getText().isEmpty()) {
+            name.setStyleName("entry_input_error");
+            invalid = name;
+        } else {
+            name.setStyleName("input_box");
+        }
+
+        // creator
+        if (creator.getText().isEmpty()) {
+            creator.setStyleName("entry_input_error");
+            if (invalid == null)
+                invalid = creator;
+        } else {
+            creator.setStyleName("input_box");
+        }
+
+        // principal investigator
+        if (principalInvestigator.getText().isEmpty()) {
+            principalInvestigator.setStyleName("entry_input_error");
+            if (invalid == null)
+                invalid = principalInvestigator;
+        } else {
+            principalInvestigator.setStyleName("input_box");
+        }
+
+        // summary
+        if (summary.getText().isEmpty()) {
+            summary.setStyleName("entry_input_error");
+            if (invalid == null)
+                invalid = summary;
+        } else {
+            summary.setStyleName("input_box");
+        }
+
+        // parameters
+
         LinkedHashMap<Integer, Parameter> map = parametersPanel.getParameterMap();
+
         for (Integer key : map.keySet()) {
             Parameter parameter = map.get(key);
             String name = parameter.getName();
@@ -474,16 +524,26 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
 
             if (name.isEmpty() && !value.isEmpty()) {
                 parameter.getNameBox().setStyleName("entry_input_error");
-                return parameter.getNameBox();
+                if (invalid == null)
+                    invalid = parameter.getNameBox();
+            } else {
+                parameter.getNameBox().setStyleName("input_box");
             }
 
             if (value.isEmpty() && !name.isEmpty()) {
                 parameter.getValueBox().setStyleName("entry_input_error");
-                return parameter.getValueBox();
+                if (invalid == null)
+                    invalid = parameter.getValueBox();
+            } else {
+                parameter.getValueBox().setStyleName("input_box");
             }
         }
 
-        return null;
+        //
+
+        // TODO  sample
+
+        return invalid;
     }
 
     /**

@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class ArabidopsisSeedInfo extends EntryInfo {
@@ -14,7 +13,19 @@ public class ArabidopsisSeedInfo extends EntryInfo {
     }
 
     public enum PlantType implements IsSerializable {
-        EMS, OVER_EXPRESSION, RNAI, REPORTER, T_DNA, OTHER
+        EMS("EMS"), OVER_EXPRESSION("Over Expression"), RNAI("RNAi"), REPORTER("Reporter"), T_DNA(
+                "T-DNA"), OTHER("Other");
+
+        private String display;
+
+        PlantType(String display) {
+            this.display = display;
+        }
+
+        @Override
+        public String toString() {
+            return this.display;
+        }
     }
 
     private String homozygosity;

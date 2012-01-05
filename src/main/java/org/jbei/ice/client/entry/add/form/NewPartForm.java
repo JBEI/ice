@@ -24,15 +24,12 @@ public class NewPartForm extends NewSingleEntryForm<PartInfo> {
 
     private TextBox name;
     private TextBox alias;
-    private TextBox creator;
     private TextBox pI;
-    private TextBox creatorEmail;
     private TextBox fundingSource;
     private ListBox status;
     private ListBox bioSafety;
     private TextBox links;
     private TextBox keywords;
-    private TextArea summary;
     private TextArea references;
     private TextArea ip;
 
@@ -83,33 +80,28 @@ public class NewPartForm extends NewSingleEntryForm<PartInfo> {
 
         // name
         setLabel(true, "Name", general, row, 0);
-        name = createStandardTextBox("205px");
         Widget widget = createTextBoxWithHelp(name, "e.g. JBEI-0001");
         general.setWidget(row, 1, widget);
 
         // alias
         general.setWidget(row, 2, new Label("Alias"));
         general.getFlexCellFormatter().setWidth(row, 2, "170px");
-        alias = createStandardTextBox("205px");
         general.setWidget(row, 3, alias);
 
         // creator
         row += 1;
         general.setWidget(row, 0, new HTML("Creator <span class=\"required\">*</span>"));
-        creator = createStandardTextBox("205px");
         widget = createTextBoxWithHelp(creator, "Who made this part?");
         general.setWidget(row, 1, widget);
 
         // PI
         general.setWidget(row, 2, new HTML(
                 "Principal Investigator <span class=\"required\">*</span>"));
-        pI = createStandardTextBox("205px");
         general.setWidget(row, 3, pI);
 
         // creator's email
         row += 1;
         general.setWidget(row, 0, new Label("Creator's Email"));
-        creatorEmail = createStandardTextBox("205px");
         widget = createTextBoxWithHelp(creatorEmail, "If known");
         general.setWidget(row, 1, widget);
 
@@ -157,7 +149,6 @@ public class NewPartForm extends NewSingleEntryForm<PartInfo> {
         row += 1;
         general.setWidget(row, 0, new HTML("Summary <span class=\"required\">*</span>"));
         general.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
-        summary = createTextArea("640px", "50px");
         general.setWidget(row, 1, summary);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
@@ -180,104 +171,44 @@ public class NewPartForm extends NewSingleEntryForm<PartInfo> {
         return general;
     }
 
-    //    private Widget createSampleWidget() {
-    //        int row = 0;
-    //        FlexTable sample = new FlexTable();
-    //        sample.setCellPadding(0);
-    //        sample.setCellSpacing(3);
-    //        sample.setWidth("100%");
-    //
-    //        sample.setWidget(row, 0, new Label("Samples"));
-    //        sample.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_header");
-    //        sample.getFlexCellFormatter().setColSpan(row, 0, 2);
-    //
-    //        row += 1;
-    //        sample.setWidget(row, 0, new Label(""));
-    //        sample.getFlexCellFormatter().setHeight(row, 0, "10px");
-    //        sample.getFlexCellFormatter().setColSpan(row, 0, 2);
-    //
-    //        // TODO : rest of samples here
-    //        // name
-    //        row += 1;
-    //        sample.setWidget(row, 0, new Label("Name"));
-    //        sample.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_label");
-    //        TextBox sampleName = new TextBox();
-    //        sampleName.setStyleName("input_box");
-    //        sample.setWidget(row, 1, sampleName);
-    //
-    //        // notes
-    //        row += 1;
-    //        sample.setWidget(row, 0, new Label("Notes"));
-    //        sample.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_label");
-    //        sample.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
-    //        TextArea sampleNotes = new TextArea();
-    //        sampleNotes.setStyleName("entry_add_sample_notes_input");
-    //        sample.setWidget(row, 1, sampleNotes);
-    //
-    //        // location
-    //        row += 1;
-    //        sample.setWidget(row, 0, new Label("Location"));
-    //        sample.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_label");
-    //        ListBox locationOptions = new ListBox();
-    //        locationOptions.setVisibleItemCount(1);
-    //        locationOptions.addItem("Plasmid Storage (Default)");
-    //        locationOptions.setStyleName("input_box");
-    //        sample.setWidget(row, 1, locationOptions);
-    //
-    //        // shelf, box etc
-    //        row += 1;
-    //        sample.setWidget(row, 0, new HTML("&nbsp;"));
-    //        sample.getFlexCellFormatter().setWidth(row, 0, "170px");
-    //        final String shelfTxt = "Shelf";
-    //        final TextBox shelf = new TextBox();
-    //        shelf.setText(shelfTxt);
-    //        shelf.setStyleName("input_box");
-    //        shelf.addFocusHandler(new FocusHandler() {
-    //
-    //            @Override
-    //            public void onFocus(FocusEvent event) {
-    //                if (shelfTxt.equals(shelf.getText().trim()))
-    //                    shelf.setText("");
-    //            }
-    //        });
-    //
-    //        shelf.addBlurHandler(new BlurHandler() {
-    //
-    //            @Override
-    //            public void onBlur(BlurEvent event) {
-    //                if ("".equals(shelf.getText().trim()))
-    //                    shelf.setText(shelfTxt);
-    //            }
-    //        });
-    //        sample.setWidget(row, 1, shelf);
-    //
-    //        // second 
-    //        row += 1;
-    //        sample.setWidget(row, 0, new HTML("&nbsp;"));
-    //        sample.getFlexCellFormatter().setWidth(row, 0, "170px");
-    //        final String boxTxt = "Box";
-    //        final TextBox box = new TextBox();
-    //        box.setText(boxTxt);
-    //        box.setStyleName("input_box");
-    //        sample.setWidget(row, 1, box);
-    //
-    //        // third
-    //        row += 1;
-    //        sample.setWidget(row, 0, new HTML("&nbsp;"));
-    //        sample.getFlexCellFormatter().setWidth(row, 0, "170px");
-    //        final String tubeTxt = "Tube";
-    //        final TextBox tube = new TextBox();
-    //        tube.setText(tubeTxt);
-    //        tube.setStyleName("input_box");
-    //        sample.setWidget(row, 1, tube);
-    //
-    //        return sample;
-    //    }
-    //
-
     @Override
     public FocusWidget validateForm() {
-        return null;
+        FocusWidget widget = super.validateForm();
+        if (widget != null)
+            return widget;
+
+        if (name.getText().isEmpty()) {
+            name.setStyleName("entry_input_error");
+            widget = name;
+        } else {
+            name.setStyleName("input_box");
+        }
+
+        if (creator.getText().isEmpty()) {
+            creator.setStyleName("entry_input_error");
+            if (widget == null)
+                widget = creator;
+        } else {
+            creator.setStyleName("input_box");
+        }
+
+        if (pI.getText().isEmpty()) {
+            pI.setStyleName("entry_input_error");
+            if (widget == null)
+                widget = pI;
+        } else {
+            pI.setStyleName("input_box");
+        }
+
+        if (summary.getText().isEmpty()) {
+            summary.setStyleName("entry_input_error");
+            if (widget == null)
+                widget = summary;
+        } else {
+            summary.setStyleName("input_box");
+        }
+
+        return widget;
     }
 
     @Override

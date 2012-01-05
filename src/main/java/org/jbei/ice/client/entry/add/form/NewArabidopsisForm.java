@@ -7,8 +7,12 @@ import java.util.Set;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BioSafetyOptions;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
+import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.Generation;
+import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.PlantType;
 import org.jbei.ice.shared.dto.EntryInfo;
 
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
@@ -19,12 +23,10 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.datepicker.client.DateBox;
 
 public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> {
 
-    private TextBox name;
-    private TextBox alias;
-    private TextBox pI;
     private TextBox fundingSource;
     private ListBox status;
     private ListBox bioSafety;
@@ -35,9 +37,8 @@ public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> 
     private TextBox markers;
     private TextBox ecoType;
     private TextBox parents;
-    private TextBox harvestDate;
+    private DateBox harvestDate;
     private TextBox keywords;
-    private TextArea summary;
     private TextArea references;
     private TextArea ip;
 
@@ -89,13 +90,11 @@ public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> 
 
         // name
         setLabel(true, "Name", general, row, 0);
-        name = createStandardTextBox("205px");
         Widget widget = createTextBoxWithHelp(name, "e.g. Stock ID / Mutant Name");
         general.setWidget(row, 1, widget);
 
         // alias
         setLabel(false, "Alias", general, row, 2);
-        alias = createStandardTextBox("205px");
         general.setWidget(row, 3, alias);
 
         // creator
@@ -106,8 +105,7 @@ public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> 
 
         // PI
         setLabel(true, "Principal Investigator", general, row, 2);
-        pI = createStandardTextBox("205px");
-        general.setWidget(row, 3, pI);
+        general.setWidget(row, 3, principalInvestigator);
 
         // creator's email
         row += 1;
@@ -145,8 +143,9 @@ public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> 
         setLabel(false, "Generation", general, row, 0);
         generation = new ListBox();
         generation.setVisibleItemCount(1);
-        generation.addItem("M0");
-        generation.addItem("M1");
+        for (Generation gen : Generation.values()) {
+            generation.addItem(gen.toString(), gen.name());
+        }
         generation.setStyleName("input_box");
         general.setWidget(row, 1, generation);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
@@ -156,8 +155,9 @@ public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> 
         setLabel(false, "Plant Type", general, row, 0);
         plantType = new ListBox();
         plantType.setVisibleItemCount(1);
-        plantType.addItem("EMS");
-        plantType.addItem("Over Expression");
+        for (PlantType type : PlantType.values()) {
+            plantType.addItem(type.toString(), type.name());
+        }
         plantType.setStyleName("input_box");
         general.setWidget(row, 1, plantType);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
@@ -165,7 +165,11 @@ public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> 
         // harvest date
         row += 1;
         general.setWidget(row, 0, new Label("Harvest Date"));
-        harvestDate = createStandardTextBox("205px");
+        DateTimeFormat dateFormat = DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT);
+        harvestDate = new DateBox();
+        harvestDate.setStyleName("input_box");
+        harvestDate.setWidth("205px");
+        harvestDate.setFormat(new DateBox.DefaultFormat(dateFormat));
         general.setWidget(row, 1, harvestDate);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
@@ -220,7 +224,6 @@ public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> 
         row += 1;
         general.setWidget(row, 0, new HTML("Summary <span class=\"required\">*</span>"));
         general.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
-        summary = createTextArea("640px", "50px");
         general.setWidget(row, 1, summary);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
@@ -245,8 +248,10 @@ public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> 
 
     @Override
     public FocusWidget validateForm() {
-        // TODO Auto-generated method stub
-        return null;
+        FocusWidget invalid = super.validateForm();
+        if (invalid != null)
+            return invalid;
+        return invalid;
     }
 
     @Override

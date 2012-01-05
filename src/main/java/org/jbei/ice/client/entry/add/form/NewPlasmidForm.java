@@ -23,7 +23,6 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -34,10 +33,6 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
 
-    private TextBox name;
-    private TextBox alias;
-
-    private TextBox pI;
     private TextBox fundingSource;
     private ListBox status;
     private ListBox bioSafety;
@@ -48,17 +43,12 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
     private TextBox origin;
     private TextBox promoters;
     private TextBox keywords;
-    private TextArea summary;
     private TextArea references;
     private TextArea ip;
-
-    // errors
-    private final ArrayList<TextBoxBase> errors;
 
     public NewPlasmidForm(HashMap<AutoCompleteField, ArrayList<String>> data, String creatorName,
             String creatorEmail) {
         super(data, creatorName, creatorEmail, new PlasmidInfo());
-        errors = new ArrayList<TextBoxBase>();
         initWidget(layout);
         initComponent();
     }
@@ -119,8 +109,7 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
 
         // PI
         setLabel(true, "Principal Investigator", general, row, 2);
-        pI = createStandardTextBox("205px");
-        general.setWidget(row, 3, pI);
+        general.setWidget(row, 3, principalInvestigator);
 
         // creator's email
         row += 1;
@@ -215,7 +204,6 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
         row += 1;
         general.setWidget(row, 0, new HTML("Summary <span class=\"required\">*</span>"));
         general.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
-        summary = createTextArea("640px", "50px");
         general.setWidget(row, 1, summary);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
@@ -277,7 +265,7 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
     }
 
     protected String getPrincipalInvestigator() {
-        return this.pI.getText();
+        return this.principalInvestigator.getText();
     }
 
     protected String getKeywords() {
@@ -401,38 +389,6 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
         FocusWidget toReturn = super.validateForm();
         if (toReturn != null)
             return toReturn;
-
-        if (name.getText().isEmpty()) {
-            errors.add(name);
-            name.setStyleName("entry_input_error");
-            toReturn = name;
-        } else {
-            name.removeStyleName("entry_input_error");
-        }
-
-        if (creator.getText().isEmpty()) {
-            creator.setStyleName("entry_input_error");
-            if (toReturn == null)
-                toReturn = creator;
-        } else {
-            creator.removeStyleName("entry_input_error");
-        }
-
-        if (pI.getText().isEmpty()) {
-            pI.setStyleName("entry_input_error");
-            if (toReturn == null)
-                toReturn = pI;
-        } else {
-            pI.removeStyleName("entry_input_error");
-        }
-
-        if (summary.getText().isEmpty()) {
-            summary.setStyleName("entry_input_error");
-            if (toReturn == null)
-                toReturn = summary;
-        } else {
-            summary.removeStyleName("entry_input_error");
-        }
 
         return toReturn;
     }

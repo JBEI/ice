@@ -24,8 +24,6 @@ import com.google.gwt.user.client.ui.Widget;
 public class NewStrainForm extends NewSingleEntryForm<StrainInfo> {
 
     private TextBox name;
-    private TextBox creator;
-    private TextBox creatorEmail;
     private ListBox status;
     private TextBox alias;
     private TextBox links;
@@ -34,7 +32,6 @@ public class NewStrainForm extends NewSingleEntryForm<StrainInfo> {
     private TextBox genPhen;
     private TextBox plasmids;
     private TextBox keywords;
-    private TextArea summary;
     private TextArea references;
     private ListBox bioSafety;
     private TextArea ip;
@@ -78,33 +75,28 @@ public class NewStrainForm extends NewSingleEntryForm<StrainInfo> {
 
         // name
         general.setWidget(row, 0, new HTML("Name <span class=\"required\">*</span>"));
-        name = createStandardTextBox("205px");
         Widget widget = createTextBoxWithHelp(name, "e.g. JBEI-0001");
         general.setWidget(row, 1, widget);
 
         // alias
         general.setWidget(row, 2, new Label("Alias"));
         general.getFlexCellFormatter().setWidth(row, 2, "170px");
-        alias = createStandardTextBox("205px");
         general.setWidget(row, 3, alias);
 
         // creator
         row += 1;
         general.setWidget(row, 0, new HTML("Creator <span class=\"required\">*</span>"));
-        creator = createStandardTextBox("205px");
         widget = createTextBoxWithHelp(creator, "Who made this part?");
         general.setWidget(row, 1, widget);
 
         // PI
         general.setWidget(row, 2, new HTML(
                 "Principal Investigator <span class=\"required\">*</span>"));
-        pI = createStandardTextBox("205px");
         general.setWidget(row, 3, pI);
 
         // creator's email
         row += 1;
         general.setWidget(row, 0, new Label("Creator's Email"));
-        creatorEmail = createStandardTextBox("205px");
         widget = createTextBoxWithHelp(creatorEmail, "If known");
         general.setWidget(row, 1, widget);
 
@@ -184,7 +176,6 @@ public class NewStrainForm extends NewSingleEntryForm<StrainInfo> {
         row += 1;
         general.setWidget(row, 0, new HTML("Summary <span class=\"required\">*</span>"));
         general.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
-        summary = createTextArea("640px", "50px");
         general.setWidget(row, 1, summary);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
@@ -231,7 +222,39 @@ public class NewStrainForm extends NewSingleEntryForm<StrainInfo> {
         FocusWidget widget = super.validateForm();
         if (widget != null)
             return widget;
-        return null;
+
+        if (name.getText().isEmpty()) {
+            name.setStyleName("entry_input_error");
+            widget = name;
+        } else {
+            name.setStyleName("input_box");
+        }
+
+        if (creator.getText().isEmpty()) {
+            creator.setStyleName("entry_input_error");
+            if (widget == null)
+                widget = creator;
+        } else {
+            creator.setStyleName("input_box");
+        }
+
+        if (pI.getText().isEmpty()) {
+            pI.setStyleName("entry_input_error");
+            if (widget == null)
+                widget = pI;
+        } else {
+            pI.setStyleName("input_box");
+        }
+
+        if (summary.getText().isEmpty()) {
+            summary.setStyleName("entry_input_error");
+            if (widget == null)
+                widget = summary;
+        } else {
+            summary.setStyleName("input_box");
+        }
+
+        return widget;
     }
 
     @Override

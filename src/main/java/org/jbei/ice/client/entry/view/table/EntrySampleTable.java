@@ -99,7 +99,8 @@ public class EntrySampleTable extends DataTable<SampleStorage> {
                 sb.appendHtmlConstant("<span>");
                 sb.appendEscaped(value.getSample().getLabel());
                 sb.appendHtmlConstant("</span><br><span>");
-                sb.appendEscaped(value.getSample().getNotes());
+                sb.appendEscaped(value.getSample().getNotes() == null ? "" : value.getSample()
+                        .getNotes());
                 sb.appendHtmlConstant("</span>");
             }
         };
