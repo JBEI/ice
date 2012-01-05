@@ -875,14 +875,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         List<Storage> schemes = StorageManager.getStorageSchemesForEntryType(type.getName());
         for (Storage scheme : schemes) {
 
-            long schemeId = scheme.getId();
             String schemeName = scheme.getName();
-
             ArrayList<String> schemeOptions = new ArrayList<String>();
 
             Storage storage;
             try {
-                storage = StorageManager.get(schemeId, false);
+                storage = StorageManager.get(scheme.getId(), false);
 
                 if (storage != null) {
                     ArrayList<Storage> storageSchemes = storage.getSchemes();
@@ -897,14 +895,15 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 continue;
             }
 
-            if (PopulateInitialDatabase.DEFAULT_PLASMID_STORAGE_SCHEME_NAME.equals(schemeName)
-                    || PopulateInitialDatabase.DEFAULT_STRAIN_STORAGE_SCHEME_NAME
-                            .equals(schemeName)
-                    || PopulateInitialDatabase.DEFAULT_PART_STORAGE_SCHEME_NAME.equals(schemeName)
-                    || PopulateInitialDatabase.DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME
-                            .equals(schemeName)) {
+            if (PopulateInitialDatabase.DEFAULT_PLASMID_STORAGE_SCHEME_NAME.equals(schemeName))
                 schemeMap.put(schemeName, schemeOptions);
-            }
+            else if (PopulateInitialDatabase.DEFAULT_STRAIN_STORAGE_SCHEME_NAME.equals(schemeName))
+                schemeMap.put(schemeName, schemeOptions);
+            else if (PopulateInitialDatabase.DEFAULT_PART_STORAGE_SCHEME_NAME.equals(schemeName))
+                schemeMap.put(schemeName, schemeOptions);
+            else if (PopulateInitialDatabase.DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME
+                    .equals(schemeName))
+                schemeMap.put(schemeName, schemeOptions);
         }
 
         return schemeMap;

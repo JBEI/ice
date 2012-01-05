@@ -51,11 +51,13 @@ public abstract class Sheet extends Composite {
         sheetTable.setStyleName("sheet_table");
         sheetTable.setWidth("100%");
 
+        // placing sheet in focus panel to be able to add handlers for mouse and keyboard events on the sheet
         panel = new FocusPanel(sheetTable);
         panel.setWidth("100%");
         panel.setHeight("100%");
         panel.setStyleName("focus_panel");
 
+        // then wrap it in a scroll panel that expands to fill area given by browser
         wrapper = new ScrollPanel(panel);
         wrapper.setWidth((Window.getClientWidth() - 300) + "px");
         wrapper.setHeight((Window.getClientHeight() - 320) + "px");

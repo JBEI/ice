@@ -31,9 +31,10 @@ public class StrainSheet extends Sheet {
         header = new FlexTable();
         header.setCellPadding(0);
         header.setCellSpacing(0);
+        header.setWidth("100%");
         header.addStyleName("tmp-border-left");
+
         headerWrapper = new ScrollPanel(header);
-        headerWrapper.setWidth("500px");
 
         DOM.setStyleAttribute(headerWrapper.getElement(), "overflowY", "hidden");
         DOM.setStyleAttribute(headerWrapper.getElement(), "overflowX", "hidden");
@@ -41,14 +42,14 @@ public class StrainSheet extends Sheet {
         DOM.setStyleAttribute(rowIndexWrapper.getElement(), "overflowY", "hidden");
         DOM.setStyleAttribute(rowIndexWrapper.getElement(), "overflowX", "hidden");
 
-        createHeader();
-
         headerWrapper.setWidth((Window.getClientWidth() - 260 - 15) + "px"); // TODO : the 15px accounts for the scroll bar. Not sure yet how to get the scrollbar width
+
+        createHeader();
 
         // get header
         layout.setWidget(0, 0, headerWrapper);
         layout.getFlexCellFormatter().setColSpan(0, 0, 2);
-        layout.setWidget(1, 0, rowIndexWrapper);
+        layout.setWidget(1, 0, rowIndexWrapper);// TODO : row index wrapper needs to include the space before the header
         layout.getFlexCellFormatter().setVerticalAlignment(1, 0, HasAlignment.ALIGN_TOP);
         layout.setWidget(1, 1, wrapper);
         layout.getFlexCellFormatter().setVerticalAlignment(1, 1, HasAlignment.ALIGN_TOP);
@@ -111,18 +112,11 @@ public class StrainSheet extends Sheet {
 
     // header that covers the span of the row index
     private void addLeadHeader() {
-        HTML cell = new HTML("&nbsp;");
+        HTML cell = new HTML("&nbsp;foo");
         header.setWidget(row, headerCol, cell);
         header.getFlexCellFormatter().setStyleName(row, headerCol, "leader_cell_column_header");
         headerCol += 1;
     }
-
-    //    private void addHeader(String name) {
-    //        HTML cell = new HTML(name);
-    //        header.setWidget(row, headerCol, cell);
-    //        header.getFlexCellFormatter().setStyleName(row, headerCol, "cell_column_header");
-    //        headerCol += 1;
-    //    }
 
     protected Widget createStatusBox() {
         TreeSet<String> data = new TreeSet<String>();

@@ -87,6 +87,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         mainContent = new FlexTable(); // wrapper
         mainContent.setCellPadding(3);
         mainContent.setCellSpacing(0);
+        mainContent.setWidth("100%");
 
         mainContent.addStyleName("bulk_import_main_content_wrapper");
 

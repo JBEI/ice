@@ -14,7 +14,6 @@ import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Label;
@@ -93,19 +92,19 @@ public class BulkImportPresenter extends AbstractPresenter {
 
     protected void retrieveAutoCompleteData() {
         // TODO : need to get it everytime this page is loaded?
-        service.retrieveAutoCompleteData(AppController.sessionId,
-            new AsyncCallback<HashMap<AutoCompleteField, ArrayList<String>>>() {
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert("Failed to retrieve the autocomplete data: " + caught.getMessage());
-                }
-
-                @Override
-                public void onSuccess(HashMap<AutoCompleteField, ArrayList<String>> result) {
-                    autoCompleteData = new HashMap<AutoCompleteField, ArrayList<String>>(result);
-                }
-            });
+        //        service.retrieveAutoCompleteData(AppController.sessionId,
+        //            new AsyncCallback<HashMap<AutoCompleteField, ArrayList<String>>>() {
+        //
+        //                @Override
+        //                public void onFailure(Throwable caught) {
+        //                    Window.alert("Failed to retrieve the autocomplete data: " + caught.getMessage());
+        //                }
+        //
+        //                @Override
+        //                public void onSuccess(HashMap<AutoCompleteField, ArrayList<String>> result) {
+        //                    autoCompleteData = new HashMap<AutoCompleteField, ArrayList<String>>(result);
+        //                }
+        //            });
     }
 
     @Override

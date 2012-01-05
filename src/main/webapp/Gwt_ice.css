@@ -91,8 +91,7 @@ body {
 
 }
 
-.collection_menu_header {
-	
+.collection_menu_header {	
 }
 
 .entry_input_error {
@@ -159,6 +158,61 @@ body {
 a.cell_mouseover:hover {
 	cursor: pointer;
 }
+
+/* BULK IMPORT*/
+.cell {
+        padding: 2;
+        border-right: 1px solid #ccc;
+        border-top: 1px solid #ccc;
+        
+        width: 130px;
+        height: 17px;
+}
+
+.cell_resize:hover {
+        background-color: #333;
+        cursor: e-resize;
+}
+
+.cell_column_header, .cell_col_header {
+        padding: 2;
+        background-color: #eee;
+        border-right: 1px solid #ccc;
+        border-top: 1px solid #ccc;
+        width: 130px;
+        height: 25px;
+}
+
+.cell_selected {
+        border: 2px solid blue;
+}
+
+.cell_input {
+        padding: 2;
+    border: 1px solid #000;
+    width: 100px;
+    height: 15px;
+}
+
+.attachment_small_text {
+        color: #999;
+        font-size: 9px;
+}
+
+.entry_view_content {
+        border-right: 1px solid #ccc; 
+        border-top: 1px solid #ccc;
+}
+.sheet_table {
+	border: 1px solid #ccc;
+}
+
+.focus_panel {
+	
+}
+
+
+
 
 /* ENTRY DETAIL VIEW */
 .entry_view_left_menu {
