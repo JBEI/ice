@@ -21,9 +21,6 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class NewPartForm extends NewSingleEntryForm<PartInfo> {
 
-    private TextBox name;
-    private TextBox alias;
-    private TextBox pI;
     private TextBox fundingSource;
     private ListBox status;
     private ListBox bioSafety;
@@ -96,7 +93,7 @@ public class NewPartForm extends NewSingleEntryForm<PartInfo> {
         // PI
         general.setWidget(row, 2, new HTML(
                 "Principal Investigator <span class=\"required\">*</span>"));
-        general.setWidget(row, 3, pI);
+        general.setWidget(row, 3, principalInvestigator);
 
         // creator's email
         row += 1;

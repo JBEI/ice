@@ -22,9 +22,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class NewStrainForm extends NewSingleEntryForm<StrainInfo> {
 
-    private TextBox name;
     private ListBox status;
-    private TextBox alias;
     private TextBox links;
     private TextBox host;
     private TextBox markers;
@@ -35,7 +33,6 @@ public class NewStrainForm extends NewSingleEntryForm<StrainInfo> {
     private ListBox bioSafety;
     private TextArea ip;
     private TextBox fundingSource;
-    private TextBox pI;
 
     public NewStrainForm(HashMap<AutoCompleteField, ArrayList<String>> data, String creatorName,
             String creatorEmail) {
@@ -91,7 +88,7 @@ public class NewStrainForm extends NewSingleEntryForm<StrainInfo> {
         // PI
         general.setWidget(row, 2, new HTML(
                 "Principal Investigator <span class=\"required\">*</span>"));
-        general.setWidget(row, 3, pI);
+        general.setWidget(row, 3, principalInvestigator);
 
         // creator's email
         row += 1;
@@ -213,7 +210,7 @@ public class NewStrainForm extends NewSingleEntryForm<StrainInfo> {
         strain.setReferences(references.getText());
         strain.setBioSafetyLevel(bioSafety.getSelectedIndex());
         strain.setIntellectualProperty(ip.getText());
-        strain.setPrincipalInvestigator(pI.getText());
+        strain.setPrincipalInvestigator(principalInvestigator.getText());
     }
 
     @Override

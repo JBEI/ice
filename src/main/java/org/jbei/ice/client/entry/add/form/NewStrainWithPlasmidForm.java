@@ -24,7 +24,6 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSubmit {
 
-    private TextBox name;
     private TextBox creator;
     private TextBox pI;
     private TextBox creatorEmail;
@@ -63,15 +62,16 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     private Button cancel;
 
     private final FlexTable layout;
-    private final HashMap<AutoCompleteField, ArrayList<String>> data;
 
     public NewStrainWithPlasmidForm(HashMap<AutoCompleteField, ArrayList<String>> data,
             String creatorName, String creatorEmail) {
         this.layout = new FlexTable();
-        this.data = data;
         initWidget(layout);
         initComponents();
         init();
+
+        this.creator.setText(creatorName);
+        this.creatorEmail.setText(creatorEmail);
     }
 
     protected void initComponents() {
@@ -483,25 +483,64 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     }
 
     @Override
-    public void populateEntries() {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
     public FocusWidget validateForm() {
-        if (strainNumber.getText().isEmpty())
-            return strainNumber;
 
-        if (pI.getText().isEmpty())
-            return pI;
+        FocusWidget invalid = null;
 
-        if (creator.getText().isEmpty())
-            return creator;
+        // strain number
+        if (strainNumber.getText().isEmpty()) {
+            strainNumber.setStyleName("entry_input_error");
+            invalid = strainNumber;
+        } else {
+            strainNumber.setStyleName("input_box");
+        }
 
-        if (plasmidName.getText().isEmpty())
-            return plasmidName;
+        // principal Investigator
+        if (pI.getText().isEmpty()) {
+            pI.setStyleName("entry_input_error");
+            if (invalid == null)
+                invalid = pI;
+        } else {
+            pI.setStyleName("input_box");
+        }
 
-        return null;
+        // creator
+        if (creator.getText().isEmpty()) {
+            creator.setStyleName("entry_input_error");
+            if (invalid == null)
+                invalid = creator;
+        } else {
+            creator.setStyleName("input_box");
+        }
+
+        // plasmid name
+        if (plasmidName.getText().isEmpty()) {
+            plasmidName.setStyleName("entry_input_error");
+            if (invalid == null)
+                invalid = plasmidName;
+        } else {
+            plasmidName.setStyleName("input_box");
+        }
+
+        // plasmid summary
+        if (plasmidSummary.getText().isEmpty()) {
+            plasmidSummary.setStyleName("entry_input_error");
+            if (invalid == null)
+                invalid = plasmidSummary;
+        } else {
+            plasmidSummary.setStyleName("input_box");
+        }
+
+        // strain summary
+        if (strainSummary.getText().isEmpty()) {
+            strainSummary.setStyleName("entry_input_error");
+            if (invalid == null)
+                invalid = strainSummary;
+        } else {
+            strainSummary.setStyleName("input_box");
+        }
+
+        return invalid;
     }
 
     @Override
@@ -512,7 +551,11 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
 
     @Override
     public void setSampleLocation(SampleLocationWidget sampleLocation) {
-        // TODO Auto-generated method stub
+        // no samples for strain with one plasmid
+    }
 
+    @Override
+    public void populateEntries() {
+        // TODO Auto-generated method stub
     }
 }

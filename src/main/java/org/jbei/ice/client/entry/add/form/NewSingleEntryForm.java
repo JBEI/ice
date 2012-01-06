@@ -542,7 +542,6 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         //
 
         // TODO  sample
-
         return invalid;
     }
 
