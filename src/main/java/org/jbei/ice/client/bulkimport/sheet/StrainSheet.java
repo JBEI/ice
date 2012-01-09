@@ -32,7 +32,7 @@ public class StrainSheet extends Sheet {
         header.setCellPadding(0);
         header.setCellSpacing(0);
         header.setWidth("100%");
-        header.addStyleName("tmp-border-left");
+        header.addStyleName("sheet_header_table");
 
         headerWrapper = new ScrollPanel(header);
 
@@ -107,7 +107,7 @@ public class StrainSheet extends Sheet {
 
     // header that covers the span of the row index
     private void addLeadHeader() {
-        HTML cell = new HTML("&nbsp;foo");
+        HTML cell = new HTML("&nbsp;");
         header.setWidget(row, headerCol, cell);
         header.getFlexCellFormatter().setStyleName(row, headerCol, "leader_cell_column_header");
         headerCol += 1;

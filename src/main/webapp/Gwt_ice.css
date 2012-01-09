@@ -179,24 +179,29 @@ a.cell_mouseover:hover {
         cursor: e-resize;
 }
 
-.cell_column_header, .cell_col_header {
-        padding: 2;
-        background-color: #eee;
-        border-right: 1px solid #ccc;
-        border-top: 1px solid #ccc;
+.cell_column_header {
         width: 130px;
-        height: 25px;
+}
+
+.cell_column_header_td {
+	   text-align: center;
+	   height: 40px;
+	   background-color: #f1f1f1;
+	   border-left: 1px solid #CCC;
 }
 
 .cell_selected {
         border: 2px solid blue;
 }
 
+.sheet_header_table {
+	border-bottom: 1px solid #CCC;
+}
+
 .cell_input {
-        padding: 2;
     border: 1px solid #000;
     width: 100px;
-    height: 15px;
+    height: 17px;
 }
 
 .attachment_small_text {
@@ -209,13 +214,38 @@ a.cell_mouseover:hover {
         border-top: 1px solid #ccc;
 }
 .sheet_table {
-	border: 1px solid #ccc;
+	border-left: 1px solid #ccc;
+	border-bottom: 1px solid #ccc;  
 }
 
 .focus_panel {
 	
 }
 
+.index_td_cell {
+	text-align: center;
+	border-bottom: 1px solid #CCC;
+	height: 17px;
+}
+
+.index_cell {
+	color: #666;
+	font-size: 0.75em;
+	width: 20px;
+}
+
+.sheet_col_index {
+	border-left: 1px solid #CCC;
+	border-top: 1px solid #CCC;
+	border-right: 1px solid #CCC;
+	background-color: #F1F1F1;
+}
+
+.leader_cell_column_header {
+	border-left: 1px solid #CCC;
+    border-top: 1px solid #CCC;
+    border-right: 1px solid #CCC;
+}
 
 
 

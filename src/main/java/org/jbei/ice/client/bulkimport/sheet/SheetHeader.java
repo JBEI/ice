@@ -22,9 +22,9 @@ public class SheetHeader {
 
     protected void addHeader(Header h) {
         HTML cell = new HTML(h.toString());
-        cell.addStyleName("cell");
+        cell.setStyleName("cell_column_header");
         headerTable.setWidget(row, headerCol, cell);
-        headerTable.getFlexCellFormatter().setStyleName(row, headerCol, "cell_column_header");
+        headerTable.getFlexCellFormatter().setStyleName(row, headerCol, "cell_column_header_td");
         headerCol += 1;
     }
 

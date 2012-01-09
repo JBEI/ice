@@ -65,6 +65,7 @@ public abstract class Sheet extends Composite {
         colIndex = new FlexTable();
         colIndex.setCellPadding(0);
         colIndex.setCellSpacing(0);
+        colIndex.setStyleName("sheet_col_index");
         rowIndexWrapper = new ScrollPanel(colIndex);
         rowIndexWrapper.setHeight((Window.getClientHeight() - 320 - 14) + "px");
 
