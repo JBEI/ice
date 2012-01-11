@@ -10,6 +10,7 @@ import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 public interface IEntryView {
@@ -27,5 +28,9 @@ public interface IEntryView {
 
     void showUpdateForm(UpdateEntryForm<? extends EntryInfo> form);
 
+    void showPermissionsWidget(Widget permissionWidget);
+
     Button showSampleView(EntrySampleTable table);
+
+    Label getPermissionLink();
 }

@@ -14,6 +14,7 @@ import org.jbei.ice.client.entry.view.update.UpdateEntryForm;
 import org.jbei.ice.client.entry.view.view.IEntryView;
 import org.jbei.ice.client.entry.view.view.MenuItem;
 import org.jbei.ice.client.entry.view.view.MenuItem.Menu;
+import org.jbei.ice.client.entry.view.view.PermissionsWidget;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
@@ -40,7 +41,8 @@ public class EntryPresenter extends AbstractPresenter {
 
     //    private EntryInfo info;
 
-    public EntryPresenter(RegistryServiceAsync service, HandlerManager eventBus, IEntryView display) {
+    public EntryPresenter(RegistryServiceAsync service, HandlerManager eventBus,
+            final IEntryView display) {
 
         this.service = service;
         this.eventBus = eventBus;
@@ -50,14 +52,23 @@ public class EntryPresenter extends AbstractPresenter {
         sequenceTable = new SequenceTable();
         sampleTable = new EntrySampleTable();
 
-        //        addEditHandler();
+        display.getPermissionLink().addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                // TODO : deselect main menu selection
+                //                display.getMenu().getSelectionModel().setSelected(display.getMenu().getSelectionModel()., false);
+                PermissionsWidget widget = new PermissionsWidget();
+                display.showPermissionsWidget(widget);
+            }
+        });
     }
 
     public EntryPresenter(RegistryServiceAsync service, HandlerManager eventBus,
             final IEntryView display, String entryId) {
         this(service, eventBus, display);
 
-        final long id = Long.decode(entryId); // TODO : catch NFE
+        final long id = Long.decode(entryId); //TODO : catch NFE
         service.retrieveEntryDetails(AppController.sessionId, id, new AsyncCallback<EntryInfo>() {
 
             @Override
@@ -67,6 +78,7 @@ public class EntryPresenter extends AbstractPresenter {
 
             @Override
             public void onSuccess(EntryInfo result) {
+
                 if (result == null) {
                     String errorMsg = "<p>Could not retrieve the entry requested. Please try again later.</p>";
                     // TODO : how to deal with error messages
@@ -76,7 +88,7 @@ public class EntryPresenter extends AbstractPresenter {
 
                 //                info = result;
                 view = ViewFactory.createDetailView(result);
-                String name = result.getType().getDisplay() + ": " + result.getName();
+                String name = result.getType().getDisplay().toUpperCase() + ": " + result.getName();
                 display.setEntryName(name);
 
                 // attachments
@@ -92,6 +104,7 @@ public class EntryPresenter extends AbstractPresenter {
                         sampleInfo));
                     data.add(datum);
                 }
+
                 sampleTable.setData(data);
                 sequenceTable.setData(result.getSequenceAnalysis());
 
@@ -126,7 +139,7 @@ public class EntryPresenter extends AbstractPresenter {
                 public void onSelectionChange(SelectionChangeEvent event) {
                     MenuItem selected = MenuSelectionModel.this.getSelectedObject();
                     switch (selected.getMenu()) {
-                    case GENERAL: // TODO : need to add this only once not everytime the selection changes
+                    case GENERAL: // TODO : need to add this only once not every time the selection changes
                         Button editButton = display.showEntryDetailView(view);
                         editButton.addClickHandler(new ClickHandler() {
 

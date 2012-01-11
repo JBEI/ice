@@ -40,10 +40,11 @@ public class EntryView extends AbstractLayout implements IEntryView {
     private CellList<MenuItem> menu;
     private CellList<AttachmentInfo> attachmentList;
     private FlexTable mainContent;
-    private FlexTable menuLayout;
+    private FlexTable leftColumnLayout;
     private Button cancelAttachmentSubmission;
     private Button saveAttachment;
     private Widget attachmentForm;
+    private Label permissionLink;
 
     // general header
     private HTMLPanel generalHeaderPanel;
@@ -81,7 +82,10 @@ public class EntryView extends AbstractLayout implements IEntryView {
 
                 if (value.getDescription() != null && !value.getDescription().isEmpty()) {
                     sb.appendHtmlConstant("<br /><span class=\"attachment_small_text\">");
-                    sb.appendEscaped(value.getDescription());
+                    String description = value.getDescription();
+                    if (description.isEmpty())
+                        description = "No description provided.";
+                    sb.appendEscaped(description);
                     sb.appendHtmlConstant("</span>");
                 }
             }
@@ -118,6 +122,12 @@ public class EntryView extends AbstractLayout implements IEntryView {
     @Override
     public void showUpdateForm(UpdateEntryForm<? extends EntryInfo> form) {
         mainContent.setWidget(1, 0, form);
+    }
+
+    @Override
+    public void showPermissionsWidget(Widget permissionWidget) {
+        mainContent.setWidget(0, 0, new HTML("Permissions"));
+        mainContent.setWidget(1, 0, permissionWidget);
     }
 
     /**
@@ -188,12 +198,12 @@ public class EntryView extends AbstractLayout implements IEntryView {
 
     // aka createLeft()
     protected Widget createMenu() {
-        menuLayout = new FlexTable();
-        menuLayout.setCellPadding(3);
-        menuLayout.setCellSpacing(0);
-        menuLayout.addStyleName("entry_view_left_menu");
-        menuLayout.setHTML(0, 0, "&nbsp;");
-        menuLayout.getCellFormatter().setStyleName(0, 0, "entry_view_sub_menu_header");
+        leftColumnLayout = new FlexTable();
+        leftColumnLayout.setCellPadding(3);
+        leftColumnLayout.setCellSpacing(0);
+        leftColumnLayout.addStyleName("entry_view_left_menu");
+        leftColumnLayout.setHTML(0, 0, "&nbsp;");
+        leftColumnLayout.getCellFormatter().setStyleName(0, 0, "entry_view_sub_menu_header");
 
         // cell to render value
         menu = new CellList<MenuItem>(new AbstractCell<MenuItem>() {
@@ -211,8 +221,28 @@ public class EntryView extends AbstractLayout implements IEntryView {
                 sb.appendHtmlConstant("</span>");
             }
         });
-        menuLayout.setWidget(1, 0, menu);
-        return menuLayout;
+        leftColumnLayout.setWidget(1, 0, menu);
+
+        createPermissions();
+
+        return leftColumnLayout;
+    }
+
+    private void createPermissions() {
+        leftColumnLayout.setWidget(2, 0, new HTML("&nbsp;"));
+
+        FlexTable permission = new FlexTable();
+        permission.setCellPadding(0);
+        permission.setCellSpacing(0);
+        permissionLink = new HTML("</b>Permissions</b>");
+        permission.setWidget(0, 0, permissionLink);
+
+        leftColumnLayout.setWidget(3, 0, permission);
+    }
+
+    @Override
+    public Label getPermissionLink() {
+        return this.permissionLink;
     }
 
     private Widget createSequenceUploadPanel() {
@@ -347,7 +377,7 @@ public class EntryView extends AbstractLayout implements IEntryView {
 
     @Override
     public void setEntryName(String name) {
-        menuLayout.setHTML(0, 0, name);
+        leftColumnLayout.setHTML(0, 0, name);
     }
 
     @Override
