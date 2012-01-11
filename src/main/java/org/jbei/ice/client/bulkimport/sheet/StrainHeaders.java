@@ -8,18 +8,27 @@ public class StrainHeaders extends SheetHeader {
         super(col, row, headerTable);
     }
 
+    // TODO : use proper class for enable sub-classing from SheetHeader parent
     enum Header implements IHeader {
-        PI("Principal Investigator"), FUNDING_SOURCE("Funding Source"), IP("Intellectual Property"), BIOSAFETY(
-                "BioSafety Level"), NAME("Name"), ALIAS("Alias"), KEYWORDS("Keywords"), SUMMARY(
-                "Summary"), NOTES("Notes"), REFERENCES("References"), LINKS("Links"), STATUS(
-                "Status"), SEQ_FILENAME("Sequence Filename"), ATT_FILENAME("Attachments Filename"), SELECTION_MARKERS(
-                "Selection Markers"), PARENTAL_STRAIN("Parental Strain"), GEN_PHEN(
-                "Genotype/Phenotype"), PLASMIDS("Plasmids");
+        PI("Principal Investigator", true), FUNDING_SOURCE("Funding Source", false), IP(
+                "Intellectual Property", false), BIOSAFETY("BioSafety Level", true), NAME("Name",
+                true), ALIAS("Alias", false), KEYWORDS("Keywords", false), SUMMARY("Summary", true), NOTES(
+                "Notes", false), REFERENCES("References", false), LINKS("Links", false), STATUS(
+                "Status", true), SEQ_FILENAME("Sequence Filename", false), ATT_FILENAME(
+                "Attachments Filename", false), SELECTION_MARKERS("Selection Markers", false), PARENTAL_STRAIN(
+                "Parental Strain", false), GEN_PHEN("Genotype or Phenotype", false), PLASMIDS(
+                "Plasmids", false);
 
         private String label;
+        private boolean required;
 
-        Header(String label) {
+        Header(String label, boolean required) {
             this.label = label;
+            this.required = required;
+        }
+
+        public boolean isRequired() {
+            return this.required;
         }
 
         @Override
@@ -27,5 +36,4 @@ public class StrainHeaders extends SheetHeader {
             return this.label;
         }
     }
-
 }

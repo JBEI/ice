@@ -169,9 +169,17 @@ a.cell_mouseover:hover {
         padding: 2;
         border-right: 1px solid #ccc;
         border-top: 1px solid #ccc;
-        
         width: 130px;
         height: 17px;
+}
+
+.cell_error {
+	padding: 2;
+        border-right: 1px solid #ccc;
+        border-top: 1px solid #ccc;
+        width: 130px;
+        height: 17px;
+        background: #FCC;
 }
 
 .cell_resize:hover {
@@ -181,6 +189,8 @@ a.cell_mouseover:hover {
 
 .cell_column_header {
         width: 130px;
+        font-weight: bold;
+        font-size: 0.80em;
 }
 
 .cell_column_header_td {
@@ -196,11 +206,12 @@ a.cell_mouseover:hover {
 
 .sheet_header_table {
 	border-bottom: 1px solid #CCC;
+	border-top: 1px solid #CCC;
 }
 
 .cell_input {
     border: 1px solid #000;
-    width: 100px;
+    width: 130px;
     height: 17px;
 }
 
@@ -231,7 +242,7 @@ a.cell_mouseover:hover {
 .index_cell {
 	color: #666;
 	font-size: 0.75em;
-	width: 20px;
+	width: 23px;
 }
 
 .sheet_col_index {
@@ -241,10 +252,13 @@ a.cell_mouseover:hover {
 	background-color: #F1F1F1;
 }
 
-.leader_cell_column_header {
+.leader_cell_column_header_td {
 	border-left: 1px solid #CCC;
-    border-top: 1px solid #CCC;
     border-right: 1px solid #CCC;
+}
+
+.leader_cell_column_header {
+	width: 23px;
 }
 
 

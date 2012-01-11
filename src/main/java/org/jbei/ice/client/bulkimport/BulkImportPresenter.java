@@ -7,6 +7,7 @@ import java.util.HashMap;
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.bulkimport.model.NewBulkInput;
 import org.jbei.ice.client.bulkimport.sheet.Sheet;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
@@ -28,6 +29,7 @@ public class BulkImportPresenter extends AbstractPresenter {
     private final IBulkImportView view;
     private final SingleSelectionModel<ImportType> selectionModel;
     private HashMap<AutoCompleteField, ArrayList<String>> autoCompleteData;
+    private HashMap<ImportType, NewBulkInput> sheetCache;
 
     public BulkImportPresenter(RegistryServiceAsync service, HandlerManager eventBus,
             final IBulkImportView display) {
@@ -37,6 +39,7 @@ public class BulkImportPresenter extends AbstractPresenter {
         this.view = display;
 
         selectionModel = new SingleSelectionModel<ImportType>();
+        sheetCache = new HashMap<ImportType, NewBulkInput>();
 
         // add menu items
         this.view.getMenu().setRowData(Arrays.asList(ImportType.values()));
@@ -48,11 +51,30 @@ public class BulkImportPresenter extends AbstractPresenter {
             public void onSelectionChange(SelectionChangeEvent event) {
                 ImportType selection = selectionModel.getSelectedObject();
                 display.setHeader(selection.getDisplay());
-                Sheet sheet = SheetFactory.getSheetForType(selection);
-                if (sheet == null)
-                    display.setSheet(new Label("Error"));
-                else
-                    display.setSheet(sheet);
+                final NewBulkInput input;
+
+                if (sheetCache.containsKey(selection))
+                    input = sheetCache.get(selection);
+                else {
+                    Sheet sheet = SheetFactory.getSheetForType(selection);
+
+                    if (sheet == null) {
+                        display.setSheet(new Label("Error"));
+                        return;
+                    }
+
+                    input = new NewBulkInput(sheet);
+                    input.getSubmit().addClickHandler(new ClickHandler() {
+
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            input.getSheet().validate();
+                        }
+                    });
+                }
+
+                display.setSheet(input);
+
             }
         });
 
@@ -64,13 +86,17 @@ public class BulkImportPresenter extends AbstractPresenter {
     }
 
     protected void setSaveDraftHandler() {
-        this.view.getSaveDraftButton().addClickHandler(new ClickHandler() {
+        //        this.view.getSaveDraftButton().addClickHandler(new ClickHandler() {
+        //
+        //            @Override
+        //            public void onClick(ClickEvent event) {
+        //                // TODO Auto-generated method stub
+        //            }
+        //        });
+    }
 
-            @Override
-            public void onClick(ClickEvent event) {
-                // TODO Auto-generated method stub
-            }
-        });
+    private void setSaveImportDataHandler() {
+        //        this.view.getSaveDraftButton()
     }
 
     protected void setDraftMenu() {

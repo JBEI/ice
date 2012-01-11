@@ -2,6 +2,7 @@ package org.jbei.ice.client.bulkimport.sheet;
 
 import java.util.TreeSet;
 
+import org.jbei.ice.client.bulkimport.sheet.StrainHeaders.Header;
 import org.jbei.ice.shared.StatusType;
 
 import com.google.gwt.event.dom.client.ScrollEvent;
@@ -13,6 +14,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -49,7 +51,7 @@ public class StrainSheet extends Sheet {
         // get header
         layout.setWidget(0, 0, headerWrapper);
         layout.getFlexCellFormatter().setColSpan(0, 0, 2);
-        layout.setWidget(1, 0, rowIndexWrapper);// TODO : row index wrapper needs to include the space before the header
+        layout.setWidget(1, 0, rowIndexWrapper);
         layout.getFlexCellFormatter().setVerticalAlignment(1, 0, HasAlignment.ALIGN_TOP);
         layout.setWidget(1, 1, wrapper);
         layout.getFlexCellFormatter().setVerticalAlignment(1, 1, HasAlignment.ALIGN_TOP);
@@ -108,8 +110,9 @@ public class StrainSheet extends Sheet {
     // header that covers the span of the row index
     private void addLeadHeader() {
         HTML cell = new HTML("&nbsp;");
+        cell.setStyleName("leader_cell_column_header");
         header.setWidget(row, headerCol, cell);
-        header.getFlexCellFormatter().setStyleName(row, headerCol, "leader_cell_column_header");
+        header.getFlexCellFormatter().setStyleName(row, headerCol, "leader_cell_column_header_td");
         headerCol += 1;
     }
 
@@ -134,11 +137,48 @@ public class StrainSheet extends Sheet {
     @Override
     public void addRow() {
         for (int i = 0; i < FIELDS; i += 1) {
-            Widget widget = new HTML("&nbsp;");
+            Widget widget = new HTML("");
             sheetTable.setWidget(row, i, widget);
             widget.setStyleName("cell");
             sheetTable.getFlexCellFormatter().setStyleName(row, i, "td_cell");
         }
         row += 1;
+    }
+
+    public void reset() {
+    }
+
+    public boolean validate() {
+        for (int i = 0; i < sheetTable.getRowCount(); i += 1) {
+            if (isEmptyRow(i))
+                continue;
+
+            for (Header header : Header.values()) {
+                Label widget = (Label) sheetTable.getWidget(i, header.ordinal());
+                boolean isEmpty = widget.getText().trim().isEmpty();
+                if (isEmpty && header.isRequired()) {
+                    widget.setStyleName("cell_error");
+                    widget.setTitle("Required field");
+                } else {
+                    widget.setStyleName("cell");
+                    widget.setTitle("");
+                }
+            }
+        }
+
+        return false;
+    }
+
+    // TODO : use a bit map or bit arrays to track user entered values for more efficient lookup
+    private boolean isEmptyRow(int row) {
+        int cellCount = sheetTable.getCellCount(row); // TODO : this should equal FIELDS value or else there is a big problem
+
+        for (int i = 0; i < cellCount; i += 1) {
+            Label widget = (Label) sheetTable.getWidget(row, i);
+            if (!widget.getText().isEmpty())
+                return false;
+        }
+
+        return true;
     }
 }

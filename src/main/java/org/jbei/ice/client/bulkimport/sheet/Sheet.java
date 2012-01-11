@@ -1,5 +1,6 @@
 package org.jbei.ice.client.bulkimport.sheet;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -9,8 +10,12 @@ import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -40,6 +45,7 @@ public abstract class Sheet extends Composite {
     protected final ScrollPanel rowIndexWrapper;
 
     public Sheet() {
+
         layout = new FlexTable();
         layout.setCellPadding(0);
         layout.setCellSpacing(0);
@@ -100,6 +106,29 @@ public abstract class Sheet extends Composite {
         sheetTable.addClickHandler(new CellClick());
     }
 
+    public void onBrowserEvent(Event event) {
+        super.onBrowserEvent(event);
+
+        switch (DOM.eventGetType(event)) {
+        case Event.ONDBLCLICK:
+            Window.alert("double click");
+            break;
+
+        case Event.ONMOUSEUP:
+            if (DOM.eventGetButton(event) == Event.BUTTON_LEFT) {
+
+                GWT.log("Event.BUTTON_LEFT", null);
+                //                listener.onClick(this, event);
+            }
+
+            if (DOM.eventGetButton(event) == Event.BUTTON_RIGHT) {
+                GWT.log("Event.BUTTON_RIGHT", null);
+                event.stopPropagation();
+                event.preventDefault();
+            }
+        }
+    }
+
     private void addPanelHandlers() {
 
         panel.addKeyDownHandler(new KeyDownHandler() {
@@ -148,9 +177,23 @@ public abstract class Sheet extends Composite {
                 }
             }
         });
+
+        panel.addMouseUpHandler(new MouseUpHandler() {
+
+            @Override
+            public void onMouseUp(MouseUpEvent event) {
+                if (event.getNativeButton() == Event.BUTTON_RIGHT) {
+
+                }
+            }
+        });
     }
 
     protected abstract Widget createHeader();
+
+    public abstract void reset();
+
+    public abstract boolean validate();
 
     // put textinput in cell
     private void switchToInput() {
