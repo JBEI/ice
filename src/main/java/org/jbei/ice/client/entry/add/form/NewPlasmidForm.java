@@ -2,13 +2,9 @@ package org.jbei.ice.client.entry.add.form;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
-import org.jbei.ice.client.AppController;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BioSafetyOptions;
-import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 
 import com.google.gwt.user.client.ui.Button;
@@ -297,8 +293,6 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
         info.setLinks(getLinks());
         info.setName(getName());
         info.setSelectionMarkers(getMarkers());
-        info.setOwner(AppController.accountInfo.getFullName());
-        info.setOwnerEmail(AppController.accountInfo.getEmail());
 
         info.setAlias(getAlias());
         info.setCreator(getCreator());
@@ -311,50 +305,6 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
         info.setIntellectualProperty(this.ip.getText());
         info.setFundingSource(getFundingSource());
         info.setPrincipalInvestigator(getPrincipalInvestigator());
-
-        //
-        //        int nullCounter = 0;
-        //        for (SchemeValue item : getSchemeValues()) {
-        //            if (item.getIndex() == null) {
-        //                nullCounter++;
-        //            }
-        //        }
-        //
-        //        if (getSampleName() == null) {
-        //            if (nullCounter == getSchemeValues().size()) {
-        //                // No sample and no location. Skip sample handling
-        //            } else {
-        //                error("Must enter Sample Name to enter Location");
-        //            }
-        //        } else {
-        //            SampleController sampleController = new SampleController(IceSession.get().getAccount());
-        //            if (nullCounter == getSchemeValues().size()) {
-        //                // create sample, but not location
-        //                sample = sampleController.createSample(getSampleName(), IceSession.get()
-        //                        .getAccount().getEmail(), getSampleNotes());
-        //            } else if (nullCounter != 0) {
-        //                error("Location cannot be partially filled.");
-        //            } else if (nullCounter == 0) {
-        //                // create sample and location
-        //                sample = sampleController.createSample(getSampleName(), IceSession.get()
-        //                        .getAccount().getEmail(), getSampleNotes());
-        //                String[] labels = new String[getSchemeValues().size()];
-        //                for (int i = 0; i < labels.length; i++) {
-        //                    labels[i] = getSchemeValues().get(i).getIndex();
-        //                }
-        //
-        //                Storage storage = null;
-        //                try {
-        //                    Storage scheme = StorageManager.get(
-        //                        Long.parseLong(getSchemeChoice().getValue()), false);
-        //                    storage = StorageManager.getLocation(scheme, labels);
-        //                } catch (NumberFormatException e) {
-        //                    throw new ViewException(e);
-        //                } catch (ManagerException e) {
-        //                    throw new ViewException(e);
-        //                }
-        //
-        //                sample.setStorage(storage);
 
         // below are the fields peculiar to this specialization
         info.setBackbone(getBackbone());
@@ -390,13 +340,5 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
     @Override
     public Button getCancel() {
         return cancel;
-    }
-
-    @Override
-    public Set<EntryInfo> getEntries() {
-        EntryInfo info = this.getEntryInfo();
-        Set<EntryInfo> result = new HashSet<EntryInfo>();
-        result.add(info);
-        return result;
     }
 }

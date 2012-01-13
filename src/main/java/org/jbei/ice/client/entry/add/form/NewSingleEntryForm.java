@@ -2,21 +2,25 @@ package org.jbei.ice.client.entry.add.form;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.Set;
 import java.util.TreeSet;
 
+import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
+import org.jbei.ice.client.entry.add.form.ParametersPanel.Parameter;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.ParameterInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.shared.dto.StorageInfo;
 
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -24,7 +28,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLTable.Cell;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -64,6 +67,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
     private TextBox sampleName;
     private TextArea sampleNotes;
     private ListBox sampleLocation;
+    private ArrayList<TextBox> sampleLocationScheme;
 
     public NewSingleEntryForm(HashMap<AutoCompleteField, ArrayList<String>> data,
             String creatorName, String creatorEmail, T entryInfo) {
@@ -89,6 +93,8 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         principalInvestigator = createStandardTextBox("205px");
 
         summary = createTextArea("640px", "50px");
+
+        sampleLocationScheme = new ArrayList<TextBox>();
     }
 
     public T getEntryInfo() {
@@ -155,6 +161,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         return layout;
     }
 
+    @Override
     public void setSampleLocation(final SampleLocationWidget widget) {
 
         // location
@@ -243,6 +250,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
                         }
                     });
                     sample.setWidget(row, 1, shelf);
+                    sampleLocationScheme.add(shelf);
                 }
             }
         });
@@ -315,121 +323,6 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         area.setWidth(width);
         area.setHeight(height);
         return area;
-    }
-
-    protected class Parameter {
-        private final TextBox name;
-        private final TextBox value;
-        private final Button plus;
-        private final Button minus;
-
-        public Parameter(FlexTable table, int row, boolean firstRow) {
-
-            table.setWidget(row, 0, new Label("Name"));
-            table.getFlexCellFormatter().setStyleName(row, 0, "entry_add_parameter");
-            name = createStandardTextBox("205px");
-            table.setWidget(row, 1, name);
-            table.getFlexCellFormatter().setWidth(row, 1, "220px");
-
-            table.setWidget(row, 2, new Label("Value"));
-            table.getFlexCellFormatter().setWidth(row, 2, "50px");
-
-            value = createStandardTextBox("205px");
-            table.setWidget(row, 3, value);
-            table.getFlexCellFormatter().setWidth(row, 3, "140px");
-
-            plus = new Button("+");
-            minus = new Button("-");
-            table.setWidget(row, 4, plus);
-            if (!firstRow) {
-                table.getFlexCellFormatter().setWidth(row, 4, "20px");
-                table.setWidget(row, 5, minus);
-            }
-        }
-
-        public String getName() {
-            return this.name.getText();
-        }
-
-        public TextBox getNameBox() {
-            return this.name;
-        }
-
-        public TextBox getValueBox() {
-            return this.value;
-        }
-
-        public String getValue() {
-            return this.value.getText();
-        }
-
-        public Button getPlus() {
-            return this.plus;
-        }
-
-        public Button getMinus() {
-            return this.minus;
-        }
-    }
-
-    protected class ParametersPanel {
-        private final LinkedHashMap<Integer, Parameter> map = new LinkedHashMap<Integer, Parameter>();
-        private int row;
-        private int i;
-        private final FlexTable table;
-
-        public ParametersPanel(FlexTable table, int row) {
-            this.table = table;
-            this.row = row;
-            Parameter param = new Parameter(table, row, true);
-            param.getMinus().setVisible(false);
-            this.row += 1;
-            addClickHandlers(param);
-            i = 0;
-            addToMap(param);
-        }
-
-        public LinkedHashMap<Integer, Parameter> getParameterMap() {
-            return new LinkedHashMap<Integer, Parameter>(map);
-        }
-
-        private void addToMap(Parameter param) {
-            map.put(i, param);
-            i += 1;
-        }
-
-        private void addClickHandlers(Parameter param) {
-            param.getPlus().addClickHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    addRow();
-                }
-            });
-
-            param.getMinus().addClickHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    Cell cell = table.getCellForEvent(event);
-                    removeRow(cell.getRowIndex());
-                }
-            });
-        }
-
-        private void addRow() {
-            Parameter param = new Parameter(table, row, false);
-            addClickHandlers(param);
-            addToMap(param);
-            row += 1;
-        }
-
-        private void removeRow(int clickRow) {
-            int toRemove = row - clickRow;
-            map.remove(toRemove);
-            table.removeRow(clickRow);
-            row -= 1;
-        }
     }
 
     /**
@@ -545,9 +438,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
             }
         }
 
-        //
-
-        // TODO  sample
+        // TODO  validate sample
         return invalid;
     }
 
@@ -560,6 +451,9 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
      */
     @Override
     public void populateEntries() {
+
+        this.entryInfo.setOwner(AppController.accountInfo.getFullName());
+        this.entryInfo.setOwnerEmail(AppController.accountInfo.getEmail());
 
         // parameters
         ArrayList<ParameterInfo> parameters = new ArrayList<ParameterInfo>();
@@ -577,7 +471,6 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
 
         this.entryInfo.setParameters(parameters);
 
-        // TODO : samples
         populateSamples();
 
         // notes
@@ -588,9 +481,31 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
 
     protected void populateSamples() {
 
+        if (sampleName.getText().isEmpty())
+            return;
+
         SampleInfo info = new SampleInfo();
         info.setLabel(sampleName.getText());
         info.setNotes(sampleNotes.getText());
 
+        String location = sampleLocation.getValue(sampleLocation.getSelectedIndex());
+        info.setLocation(location);
+
+        LinkedList<StorageInfo> storageInfos = new LinkedList<StorageInfo>();
+
+        for (TextBox scheme : sampleLocationScheme) {
+            StorageInfo storageInfo = new StorageInfo();
+            storageInfo.setDisplay(scheme.getText());
+            storageInfos.add(storageInfo);
+        }
+
+        this.entryInfo.getSampleMap().put(info, storageInfos);
+    }
+
+    @Override
+    public Set<EntryInfo> getEntries() {
+        Set<EntryInfo> entries = new HashSet<EntryInfo>();
+        entries.add(getEntryInfo());
+        return entries;
     }
 }

@@ -72,7 +72,7 @@ public class EntryInfo implements IsSerializable {
     private boolean hasSample;
     private boolean hasSequence;
     private ArrayList<AttachmentInfo> attachments; // TODO : create another object that HAS A EntryInfo and contains these as well
-    private HashMap<SampleInfo, LinkedList<StorageInfo>> sampleMap;
+    private HashMap<SampleInfo, LinkedList<StorageInfo>> sampleMap; // TODO : see SampleStorage
     private ArrayList<SequenceAnalysisInfo> sequenceAnalysis;
     private ArrayList<ParameterInfo> parameters;
 

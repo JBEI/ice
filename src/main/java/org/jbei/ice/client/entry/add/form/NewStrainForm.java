@@ -2,12 +2,9 @@ package org.jbei.ice.client.entry.add.form;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BioSafetyOptions;
-import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
 
 import com.google.gwt.user.client.ui.FlexTable;
@@ -211,12 +208,5 @@ public class NewStrainForm extends NewSingleEntryForm<StrainInfo> {
         strain.setBioSafetyLevel(bioSafety.getSelectedIndex());
         strain.setIntellectualProperty(ip.getText());
         strain.setPrincipalInvestigator(principalInvestigator.getText());
-    }
-
-    @Override
-    public Set<EntryInfo> getEntries() {
-        Set<EntryInfo> entries = new HashSet<EntryInfo>();
-        entries.add(getEntryInfo());
-        return entries;
     }
 }

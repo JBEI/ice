@@ -2,14 +2,12 @@ package org.jbei.ice.client.entry.add.form;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
 
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BioSafetyOptions;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.Generation;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.PlantType;
-import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -246,8 +244,28 @@ public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> 
     }
 
     @Override
-    public Set<EntryInfo> getEntries() {
-        // TODO Auto-generated method stub
-        return null;
+    public void populateEntries() {
+        super.populateEntries();
+        ArabidopsisSeedInfo seed = getEntryInfo();
+        seed.setName(name.getText());
+        seed.setCreator(creator.getText());
+        seed.setCreatorEmail(creatorEmail.getText());
+        seed.setStatus(status.getValue(status.getSelectedIndex()));
+        seed.setAlias(alias.getText());
+        seed.setKeywords(keywords.getText());
+        seed.setReferences(references.getText());
+        seed.setBioSafetyLevel(bioSafety.getSelectedIndex());
+        seed.setIntellectualProperty(ip.getText());
+        seed.setPrincipalInvestigator(principalInvestigator.getText());
+
+        // seed specific
+        Generation gen = Generation.valueOf(generation.getValue(generation.getSelectedIndex()));
+        seed.setGeneration(gen);
+        PlantType type = PlantType.valueOf(plantType.getValue(plantType.getSelectedIndex()));
+        seed.setPlantType(type);
+        seed.setHomozygosity(homozygosity.getText());
+        seed.setEcotype(this.ecoType.getText());
+        seed.setHarvestDate(this.harvestDate.getDatePicker().getValue());
+        seed.setParents(parents.getText());
     }
 }

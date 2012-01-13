@@ -2,11 +2,9 @@ package org.jbei.ice.client.entry.add.form;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
 
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BioSafetyOptions;
-import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.PartInfo;
 
 import com.google.gwt.user.client.ui.FlexTable;
@@ -168,8 +166,18 @@ public class NewPartForm extends NewSingleEntryForm<PartInfo> {
     }
 
     @Override
-    public Set<EntryInfo> getEntries() {
-        // TODO Auto-generated method stub
-        return null;
+    public void populateEntries() {
+        super.populateEntries();
+        PartInfo part = getEntryInfo();
+        part.setName(name.getText());
+        part.setCreator(creator.getText());
+        part.setCreatorEmail(creatorEmail.getText());
+        part.setStatus(status.getValue(status.getSelectedIndex()));
+        part.setAlias(alias.getText());
+        part.setKeywords(keywords.getText());
+        part.setReferences(references.getText());
+        part.setBioSafetyLevel(bioSafety.getSelectedIndex());
+        part.setIntellectualProperty(ip.getText());
+        part.setPrincipalInvestigator(principalInvestigator.getText());
     }
 }
