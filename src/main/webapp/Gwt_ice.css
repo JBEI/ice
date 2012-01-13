@@ -216,21 +216,21 @@ a.cell_mouseover:hover {
 }
 
 .attachment_small_text {
-        color: #999;
-        font-size: 9px;
+       color: #999;
+       font-size: 0.65em;
 }
 
 .entry_view_content {
         border-right: 1px solid #ccc; 
         border-top: 1px solid #ccc;
 }
+
 .sheet_table {
 	border-left: 1px solid #ccc;
 	border-bottom: 1px solid #ccc;  
 }
 
 .focus_panel {
-	
 }
 
 .index_td_cell {

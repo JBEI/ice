@@ -9,6 +9,7 @@ import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.ParameterInfo;
+import org.jbei.ice.shared.dto.SampleInfo;
 
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -58,6 +59,11 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
     private ListBox markupOptions;
     private TextArea notesText;
     private FlexTable sample;
+
+    // sample
+    private TextBox sampleName;
+    private TextArea sampleNotes;
+    private ListBox sampleLocation;
 
     public NewSingleEntryForm(HashMap<AutoCompleteField, ArrayList<String>> data,
             String creatorName, String creatorEmail, T entryInfo) {
@@ -155,17 +161,17 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         sample.setWidget(4, 0, new Label("Location"));
         sample.getFlexCellFormatter().setStyleName(4, 0, "entry_add_sub_label");
 
-        final ListBox locationOptions = new ListBox();
-        locationOptions.setStyleName("input_box");
-        locationOptions.setVisibleItemCount(1);
+        sampleLocation = new ListBox();
+        sampleLocation.setStyleName("input_box");
+        sampleLocation.setVisibleItemCount(1);
 
         for (String location : widget.getLocations()) {
-            locationOptions.addItem(location, location);
+            sampleLocation.addItem(location, location);
         }
 
-        sample.setWidget(4, 1, locationOptions);
+        sample.setWidget(4, 1, sampleLocation);
 
-        String value = locationOptions.getValue(0);
+        String value = sampleLocation.getValue(0);
         ArrayList<String> list = widget.getListForLocation(value);
         if (list == null)
             return;
@@ -199,13 +205,13 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
             sample.setWidget(row, 1, shelf);
         }
 
-        locationOptions.addChangeHandler(new ChangeHandler() {
+        sampleLocation.addChangeHandler(new ChangeHandler() {
 
             @Override
             public void onChange(ChangeEvent event) {
 
-                int index = locationOptions.getSelectedIndex();
-                String value = locationOptions.getValue(index);
+                int index = sampleLocation.getSelectedIndex();
+                String value = sampleLocation.getValue(index);
                 ArrayList<String> list = widget.getListForLocation(value);
                 if (list == null)
                     return;
@@ -262,7 +268,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         row += 1;
         sample.setWidget(row, 0, new Label("Name"));
         sample.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_label");
-        TextBox sampleName = createStandardTextBox("204px");
+        sampleName = createStandardTextBox("204px");
         sample.setWidget(row, 1, sampleName);
 
         // notes
@@ -270,7 +276,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         sample.setWidget(row, 0, new Label("Notes"));
         sample.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_label");
         sample.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
-        TextArea sampleNotes = new TextArea();
+        sampleNotes = new TextArea();
         sampleNotes.setStyleName("entry_add_sample_notes_input");
         sample.setWidget(row, 1, sampleNotes);
 
@@ -572,10 +578,19 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         this.entryInfo.setParameters(parameters);
 
         // TODO : samples
+        populateSamples();
 
         // notes
         this.entryInfo.setLongDescription(this.notesText.getText());
         String longDescType = this.markupOptions.getItemText(this.markupOptions.getSelectedIndex());
         this.entryInfo.setLongDescriptionType(longDescType);
+    }
+
+    protected void populateSamples() {
+
+        SampleInfo info = new SampleInfo();
+        info.setLabel(sampleName.getText());
+        info.setNotes(sampleNotes.getText());
+
     }
 }

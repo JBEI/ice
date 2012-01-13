@@ -284,7 +284,7 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
     }
 
     protected String getMarkers() {
-        return this.name.getText();
+        return this.markers.getText();
     }
 
     @Override

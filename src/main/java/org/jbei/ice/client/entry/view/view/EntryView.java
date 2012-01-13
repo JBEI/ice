@@ -80,14 +80,12 @@ public class EntryView extends AbstractLayout implements IEntryView {
                 sb.appendEscaped(value.getFilename());
                 sb.appendHtmlConstant("</b>");
 
-                if (value.getDescription() != null && !value.getDescription().isEmpty()) {
-                    sb.appendHtmlConstant("<br /><span class=\"attachment_small_text\">");
-                    String description = value.getDescription();
-                    if (description.isEmpty())
-                        description = "No description provided.";
-                    sb.appendEscaped(description);
-                    sb.appendHtmlConstant("</span>");
-                }
+                sb.appendHtmlConstant("<br /><span class=\"attachment_small_text\">");
+                String description = value.getDescription();
+                if (description.isEmpty())
+                    description = "No description provided.";
+                sb.appendEscaped(description);
+                sb.appendHtmlConstant("</span>");
             }
         });
 
