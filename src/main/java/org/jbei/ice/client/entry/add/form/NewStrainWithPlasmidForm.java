@@ -2,11 +2,15 @@ package org.jbei.ice.client.entry.add.form;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BioSafetyOptions;
+import org.jbei.ice.shared.StatusType;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.PlasmidInfo;
+import org.jbei.ice.shared.dto.StrainInfo;
 
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -61,6 +65,9 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     private Button submit;
     private Button cancel;
 
+    private final StrainInfo strain;
+    private final PlasmidInfo plasmid;
+
     private final FlexTable layout;
 
     public NewStrainWithPlasmidForm(HashMap<AutoCompleteField, ArrayList<String>> data,
@@ -69,6 +76,9 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         initWidget(layout);
         initComponents();
         init();
+
+        this.strain = new StrainInfo();
+        this.plasmid = new PlasmidInfo();
 
         this.creator.setText(creatorName);
         this.creatorEmail.setText(creatorEmail);
@@ -139,8 +149,10 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         setLabel(false, "Bio Safety Level", general, row, 2);
         bioSafety = new ListBox();
         bioSafety.setVisibleItemCount(1);
-        bioSafety.addItem(BioSafetyOptions.LEVEL_ONE.getDisplayName());
-        bioSafety.addItem(BioSafetyOptions.LEVEL_TWO.getDisplayName());
+        for (BioSafetyOptions option : BioSafetyOptions.values()) {
+            bioSafety.addItem(option.getDisplayName(), option.getValue());
+        }
+
         bioSafety.setStyleName("input_box");
         general.setWidget(row, 3, bioSafety);
 
@@ -149,9 +161,9 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         setLabel(false, "Status", general, row, 0);
         status = new ListBox();
         status.setVisibleItemCount(1);
-        status.addItem("Complete");
-        status.addItem("In Progress");
-        status.addItem("Planned");
+        for (StatusType type : StatusType.values()) {
+            status.addItem(type.toString(), type.name());
+        }
         status.setStyleName("input_box");
         general.setWidget(row, 1, status);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
@@ -545,8 +557,10 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
 
     @Override
     public Set<EntryInfo> getEntries() {
-        // TODO Auto-generated method stub
-        return null;
+        Set<EntryInfo> entries = new HashSet<EntryInfo>();
+        entries.add(this.strain);
+        entries.add(this.plasmid);
+        return entries;
     }
 
     @Override
@@ -556,6 +570,56 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
 
     @Override
     public void populateEntries() {
-        // TODO Auto-generated method stub
+        strain.setCreator(creator.getText());
+        plasmid.setCreator(creator.getText());
+
+        strain.setPrincipalInvestigator(pI.getText());
+        plasmid.setPrincipalInvestigator(pI.getText());
+
+        strain.setCreatorEmail(creatorEmail.getText());
+        plasmid.setCreatorEmail(creatorEmail.getText());
+
+        strain.setFundingSource(fundingSource.getText());
+        plasmid.setFundingSource(fundingSource.getText());
+
+        String statusText = status.getValue(status.getSelectedIndex());
+        strain.setStatus(statusText);
+        plasmid.setStatus(statusText);
+
+        Integer bioSafetyLevel;
+        try {
+            bioSafetyLevel = Integer.valueOf(bioSafety.getValue(bioSafety.getSelectedIndex()));
+        } catch (NumberFormatException nfe) {
+            bioSafetyLevel = 1;
+        }
+
+        strain.setBioSafetyLevel(bioSafetyLevel);
+        plasmid.setBioSafetyLevel(bioSafetyLevel);
+
+        // strain fields
+        strain.setName(strainNumber.getText());
+        strain.setAlias(strainAlias.getText());
+        strain.setLinks(strainLinks.getText());
+        strain.setHost(host.getText());
+        strain.setSelectionMarkers(strainMarkers.getText());
+        strain.setGenotypePhenotype(genPhen.getText());
+        strain.setKeywords(strainKeywords.getText());
+        strain.setShortDescription(strainSummary.getText());
+        strain.setReferences(strainReferences.getText());
+        strain.setIntellectualProperty(strainIp.getText());
+
+        // plasmid fields
+        plasmid.setName(plasmidName.getText());
+        plasmid.setAlias(plasmidAlias.getText());
+        plasmid.setCircular(circular.isEnabled());
+        plasmid.setBackbone(backbone.getText());
+        plasmid.setLinks(plasmidLinks.getText());
+        plasmid.setSelectionMarkers(plasmidMarkers.getText());
+        plasmid.setOriginOfReplication(origin.getText());
+        plasmid.setPromoters(promoters.getText());
+        plasmid.setKeywords(plasmidKeywords.getText());
+        plasmid.setShortDescription(plasmidSummary.getText());
+        plasmid.setReferences(plasmidReferences.getText());
+        plasmid.setIntellectualProperty(plasmidIp.getText());
     }
 }

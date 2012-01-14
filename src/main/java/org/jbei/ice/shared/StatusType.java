@@ -13,4 +13,9 @@ public enum StatusType {
     public String getDisplayName() {
         return this.displayName;
     }
+
+    @Override
+    public String toString() {
+        return this.displayName;
+    }
 }
