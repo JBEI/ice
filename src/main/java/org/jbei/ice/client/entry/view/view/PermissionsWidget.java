@@ -254,13 +254,12 @@ public class PermissionsWidget extends Composite {
 
         public void removeSelected() {
             int i = listBox.getSelectedIndex();
-            if (i == -1)
-                return;
 
-            for (; i < listBox.getItemCount(); i += 1) {
+            while (i != -1) {
                 String value = listBox.getValue(i);
                 data.remove(value);
                 listBox.removeItem(i);
+                i = listBox.getSelectedIndex();
             }
         }
 
