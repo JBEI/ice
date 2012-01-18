@@ -2,6 +2,7 @@ package org.jbei.ice.client;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
 import org.jbei.ice.shared.AutoCompleteField;
@@ -17,6 +18,7 @@ import org.jbei.ice.shared.dto.ProfileInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -110,4 +112,11 @@ public interface RegistryServiceAsync {
 
     void retrieveStorageSchemes(String sessionId, EntryType type,
             AsyncCallback<HashMap<String, ArrayList<String>>> callback);
+
+    void retrievePermissionData(String sessionId, Long entryId,
+            AsyncCallback<ArrayList<PermissionInfo>> callback);
+
+    void retrieveAllGroups(String sessionId, AsyncCallback<LinkedHashMap<Long, String>> callback);
+
+    void retrieveAllAccounts(String sessionId, AsyncCallback<LinkedHashMap<Long, String>> callback);
 }

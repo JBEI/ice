@@ -58,9 +58,13 @@ public class EntryView extends AbstractLayout implements IEntryView {
     private HTMLPanel samplesPanel;
     private Button addSampleButton;
 
+    // permissions
+    private final PermissionsWidget permissions;
+
     private Widget uploadPanel;
 
     public EntryView() {
+        permissions = new PermissionsWidget();
     }
 
     @Override
@@ -123,9 +127,9 @@ public class EntryView extends AbstractLayout implements IEntryView {
     }
 
     @Override
-    public void showPermissionsWidget(Widget permissionWidget) {
+    public void showPermissionsWidget() {
         mainContent.setWidget(0, 0, new HTML("Permissions"));
-        mainContent.setWidget(1, 0, permissionWidget);
+        mainContent.setWidget(1, 0, this.permissions);
     }
 
     /**
@@ -381,5 +385,10 @@ public class EntryView extends AbstractLayout implements IEntryView {
     @Override
     public CellList<AttachmentInfo> getAttachmentList() {
         return attachmentList;
+    }
+
+    @Override
+    public PermissionsWidget getPermissionsWidget() {
+        return this.permissions;
     }
 }

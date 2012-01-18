@@ -2,9 +2,7 @@ html {
 	height: 98%;
 }
 
-body {
-	/*color: #454545; */
-	/* font: 0.8em/1.5em Arial, sans-serif; */
+body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 	font: normal 100% Arial, sans-serif;
 	background: #ffffff;
 	padding: 0;
@@ -20,82 +18,83 @@ body {
 }
 
 .btn_submit_entry_form {
-    padding: 5px;
-    width: 90px;
-    border: 1px solid #364f82;
-    background-color: #3C5A99;
-    color: #f6f6f6;
-    font-weight: bold;
-    font-size: 0.81em;
-    font-family: sans-serif;
-    cursor: pointer;
-    -moz-border-radius:10px;
-    -webkit-border-radius:10px;
-    border-radius:3px;
-    border-bottom:1px solid #9f9f9f;
-    -moz-box-shadow:inset 0 1px 0 rgba(255,255,255,0.5);-webkit-box-shadow:inset 0 1px 0 rgba(255,255,255,0.5);box-shadow:inset 0 1px 0 rgba(255,255,255,0.5);
+	padding: 5px;
+	width: 90px;
+	border: 1px solid #364f82;
+	background-color: #3C5A99;
+	color: #f6f6f6;
+	font-weight: bold;
+	font-size: 0.81em;
+	font-family: sans-serif;
+	cursor: pointer;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	border-radius: 3px;
+	border-bottom: 1px solid #9f9f9f;
+	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .btn_submit_entry_form:hover {
-    color: #FFF;
-    border: 1px solid #24375c;
+	color: #FFF;
+	border: 1px solid #24375c;
 }
 
 .btn_reset_entry_form {
-    padding: 5px;
-    width: 90px;
-    border: 1px solid #999;
-    background-color: #f4e4e4;
-    color: #555;
-    font-weight: bold;
-    font-size: 0.81em;
-    font-family: sans-serif;
-    cursor: pointer;
-    -moz-border-radius:10px;
-    -webkit-border-radius:10px;
-    border-radius:3px;
-    border-bottom:1px solid #9f9f9f;
-    /* background background:url(overlay.png) repeat-x center #ffcc00; */
--moz-box-shadow:inset 0 1px 0 rgba(255,255,255,0.5);-webkit-box-shadow:inset 0 1px 0 rgba(255,255,255,0.5);box-shadow:inset 0 1px 0 rgba(255,255,255,0.5);
+	padding: 5px;
+	width: 90px;
+	border: 1px solid #999;
+	background-color: #f4e4e4;
+	color: #555;
+	font-weight: bold;
+	font-size: 0.81em;
+	font-family: sans-serif;
+	cursor: pointer;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	border-radius: 3px;
+	border-bottom: 1px solid #9f9f9f;
+	/* background background:url(overlay.png) repeat-x center #ffcc00; */
+	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .btn_reset_entry_form:hover {
-    border: 1px solid #333;
-    color: #000;
-    
-  -moz-box-shadow: 5px 5px 5px #ccc;
-  -webkit-box-shadow: 5px 5px 5px #ccc;
-  box-shadow: 5px 5px 5px #ccc;
-
+	border: 1px solid #333;
+	color: #000;
+	-moz-box-shadow: 5px 5px 5px #ccc;
+	-webkit-box-shadow: 5px 5px 5px #ccc;
+	box-shadow: 5px 5px 5px #ccc;
 }
 
 .top_menu {
-    padding: 3px;
-    width: 60px;
-    border: 1px solid #AAA;
-    background-color: #EEE;
-    color: #444;
-    font-weight: bold;
-    font-size: 0.8em;
-    font-family: arial, sans-serif;
-    cursor: pointer;
-    -moz-border-radius:5px;
-    -webkit-border-radius:5px;
-    border-radius:2px;
-    border-bottom:1px solid #9f9f9f;
+	padding: 3px;
+	width: 60px;
+	border: 1px solid #AAA;
+	background-color: #EEE;
+	color: #444;
+	font-weight: bold;
+	font-size: 0.8em;
+	font-family: arial, sans-serif;
+	cursor: pointer;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 2px;
+	border-bottom: 1px solid #9f9f9f;
 }
 
 .top_menu:hover {
-    border: 1px solid #333;
-    color: #000;
-    
-    -moz-box-shadow: 1px 1px 1px #ccc;
-    -webkit-box-shadow: 1px 1px 1px #ccc;
-    box-shadow: 1px 1px 1px #ccc;
-
+	border: 1px solid #333;
+	color: #000;
+	-moz-box-shadow: 1px 1px 1px #ccc;
+	-webkit-box-shadow: 1px 1px 1px #ccc;
+	box-shadow: 1px 1px 1px #ccc;
 }
 
-.collection_menu_header {	
+.collection_menu_header {
+	
 }
 
 .entry_input_error {
@@ -104,9 +103,9 @@ body {
 }
 
 .entry_add_parameter {
-    text-align: right;
-    padding-right: 10px;
-    width: 160px;
+	text-align: right;
+	padding-right: 10px;
+	width: 160px;
 }
 
 .entry_add_sub_header {
@@ -116,27 +115,27 @@ body {
 
 .entry_add_sub_label {
 	text-align: right;
-    padding-right: 10px;
-    width: 160px;
+	padding-right: 10px;
+	width: 160px;
 }
 
 .input_box {
 	background: none repeat scroll 0 0 #FFFFFF;
-    border: 1px solid #BBBBBB;
+	border: 1px solid #BBBBBB;
 }
 
 .entry_add_notes_input {
-	width: 640px; 
+	width: 640px;
 	height: 200px;
 	background: none repeat scroll 0 0 #FFFFFF;
-    border: 1px solid #BBBBBB;
+	border: 1px solid #BBBBBB;
 }
 
 .entry_add_sample_notes_input {
-	width: 205px; 
+	width: 205px;
 	height: 50px;
 	background: none repeat scroll 0 0 #FFFFFF;
-    border: 1px solid #BBBBBB;
+	border: 1px solid #BBBBBB;
 }
 
 /* style for the number in the menu e.g. Sample   8*/
@@ -146,7 +145,7 @@ body {
 	font-family: arial, ‘Arial Narrow’, sans-serif;
 }
 
-.action_button_small, .action_button {
+.action_button_small,.action_button {
 	border: 1px solid #3565b2;
 	background-color: #4787ED;
 	color: white;
@@ -157,7 +156,7 @@ body {
 }
 
 .action_button:hover {
-    cursor: pointer;
+	cursor: pointer;
 }
 
 a.cell_mouseover:hover {
@@ -166,42 +165,42 @@ a.cell_mouseover:hover {
 
 /* BULK IMPORT*/
 .cell {
-        padding: 2;
-        border-right: 1px solid #ccc;
-        border-top: 1px solid #ccc;
-        width: 130px;
-        height: 17px;
+	padding: 2;
+	border-right: 1px solid #ccc;
+	border-top: 1px solid #ccc;
+	width: 130px;
+	height: 17px;
 }
 
 .cell_error {
 	padding: 2;
-        border-right: 1px solid #ccc;
-        border-top: 1px solid #ccc;
-        width: 130px;
-        height: 17px;
-        background: #FCC;
+	border-right: 1px solid #ccc;
+	border-top: 1px solid #ccc;
+	width: 130px;
+	height: 17px;
+	background: #FCC;
 }
 
 .cell_resize:hover {
-        background-color: #333;
-        cursor: e-resize;
+	background-color: #333;
+	cursor: e-resize;
 }
 
 .cell_column_header {
-        width: 130px;
-        font-weight: bold;
-        font-size: 0.80em;
+	width: 130px;
+	font-weight: bold;
+	font-size: 0.80em;
 }
 
 .cell_column_header_td {
-	   text-align: center;
-	   height: 40px;
-	   background-color: #f1f1f1;
-	   border-left: 1px solid #CCC;
+	text-align: center;
+	height: 40px;
+	background-color: #f1f1f1;
+	border-left: 1px solid #CCC;
 }
 
 .cell_selected {
-        border: 2px solid blue;
+	border: 2px solid blue;
 }
 
 .sheet_header_table {
@@ -210,27 +209,28 @@ a.cell_mouseover:hover {
 }
 
 .cell_input {
-    border: 1px solid #000;
-    width: 130px;
-    height: 17px;
+	border: 1px solid #000;
+	width: 130px;
+	height: 17px;
 }
 
 .attachment_small_text {
-       color: #999;
-       font-size: 0.65em;
+	color: #999;
+	font-size: 0.65em;
 }
 
 .entry_view_content {
-        border-right: 1px solid #ccc; 
-        border-top: 1px solid #ccc;
+	border-right: 1px solid #ccc;
+	border-top: 1px solid #ccc;
 }
 
 .sheet_table {
 	border-left: 1px solid #ccc;
-	border-bottom: 1px solid #ccc;  
+	border-bottom: 1px solid #ccc;
 }
 
 .focus_panel {
+	
 }
 
 .index_td_cell {
@@ -254,57 +254,55 @@ a.cell_mouseover:hover {
 
 .leader_cell_column_header_td {
 	border-left: 1px solid #CCC;
-    border-right: 1px solid #CCC;
+	border-right: 1px solid #CCC;
 }
 
 .leader_cell_column_header {
 	width: 23px;
 }
 
-
-
 /* ENTRY DETAIL VIEW */
 .entry_view_left_menu {
-	border-top: 2px solid #4787ED; 
-    width: 250px; 
-    border-bottom: 1px solid #4787ED;
+	border-top: 2px solid #4787ED;
+	width: 250px;
+	border-bottom: 1px solid #4787ED;
 }
 
 .entry_view_right_menu_2 {
-	border-top: 2px solid #999; 
-    width: 250px; 
-    border-bottom: 1px solid #999;
+	border-top: 2px solid #999;
+	width: 250px;
+	border-bottom: 1px solid #999;
 }
 
 .entry_view_right_menu {
-    float: right; 
-    padding-left: 10px;
+	float: right;
+	padding-left: 10px;
 }
 
 .entry_view_sub_menu_header {
-    background-color: #F1F1F1;
-    font-weight: bold;
-    font-size: 0.95em;
-    font-family: arial;
-    padding: 8px;
+	background-color: #F1F1F1;
+	font-weight: bold;
+	font-size: 0.95em;
+	font-family: arial;
+	padding: 8px;
 }
 
 /* HEADER MENU */
 #dark {
-    background: none repeat scroll 0 0 #444;
-    color: #FFFFFF;
+	background: none repeat scroll 0 0 #444;
+	color: #FFFFFF;
 }
 
 #indented ul {
-    list-style: none;
-    height: 40px;
+	list-style: none;
+	height: 40px;
 }
 
 #indented ul li {
-    border-left: 1px solid #555;
-    border-right: 1px solid #222;
-    float: left;
-    position: relative;
+	border-left: 1px solid #555;
+	border-right: 1px solid #222;
+	float: left;
+	position: relative;
 }
 
 #indented ul li:first-child {
@@ -316,18 +314,20 @@ a.cell_mouseover:hover {
 }
 
 #indented ul li a {
-    padding: 10px;
-    display: block;
-    color: #fff;
-    text-decoration: none;
+	padding: 10px;
+	display: block;
+	color: #fff;
+	text-decoration: none;
 }
 
-#indented ul li a:hover {background: #111;}
+#indented ul li a:hover {
+	background: #111;
+}
 
 /* COLLECTIONS */
 .collection_user_menu:hover {
-    background-color: #FAFAFA;
-    color: #9EC068;
+	background-color: #FAFAFA;
+	color: #9EC068;
 }
 
 .cell_resize:hover {
@@ -346,13 +346,13 @@ a.cell_mouseover:hover {
 }
 
 .entry_view_content {
-	border-right: 1px solid #ccc; 
+	border-right: 1px solid #ccc;
 	border-top: 1px solid #ccc;
 }
 
 /* AUTO COMPLETE AKA SUGGEST BOX */
-
 .gwt-SuggestBox {
+	
 }
 
 .gwt-SuggestBoxPopup {
@@ -360,21 +360,20 @@ a.cell_mouseover:hover {
 	border: 1px solid #CCC;
 }
 
-.gwt-SuggestBoxPopup .item { 
+.gwt-SuggestBoxPopup .item {
+	
 }
 
 .gwt-SuggestBoxPopup .item-selected {
 	background-color: #4787ED;
 }
 /* END */
-
-
-
 /* LOGIN */
-.login_text {	
+.login_text {
+	
 }
 
-.quick_search_btn, .login_button {
+.quick_search_btn,.login_button {
 	color: white;
 	background-color: #4787ED;
 	padding: 4px 15px;
@@ -390,9 +389,9 @@ a.cell_mouseover:hover {
 }
 
 .login_input_error {
-    border: 1px solid red;
-    width: 300px;
-    padding: 5px;
+	border: 1px solid red;
+	width: 300px;
+	padding: 5px;
 }
 
 .login_error_msg {
@@ -622,8 +621,6 @@ a:hover {
 	cursor: default;
 }
 
-
-
 /* TABS */
 /* the panel itself */
 .gwt-TabLayoutPanel {
@@ -798,11 +795,12 @@ td.datePickerMonth {
 }
 
 .dateBoxPopup {
+	
 }
 /* ADD */
 .add_new_entry_main_content_wrapper {
-	border-top: 2px solid #4787ED; 
-    border-bottom: 1px solid #4787ED;
+	border-top: 2px solid #4787ED;
+	border-bottom: 1px solid #4787ED;
 }
 
 .add_new_entry_main_content_header {
@@ -811,8 +809,8 @@ td.datePickerMonth {
 
 /* COLLECTIONS */
 .collection_menu_table {
-	border-top: 2px solid #4787ED; 
-	width: 220px; 
+	border-top: 2px solid #4787ED;
+	width: 220px;
 	border-bottom: 1px solid #4787ED;
 }
 
@@ -821,28 +819,28 @@ td.datePickerMonth {
 }
 
 /* END COLLECTIONS */
-
 /* MENU BAR*/
-
 .gwt-MenuBar {
 	
 }
+
 .gwt-MenuBar-horizontal {
-    color: #999;
+	color: #999;
 }
+
 .gwt-MenuBar-vertical {
 	
 }
-    
+
 .gwt-MenuBar .gwt-MenuItem {
 	background-color: #FFF;
 	width: 150px;
-	
 }
+
 .gwt-MenuBar .gwt-MenuItem-selected {
 	
 }
-    /*
+/*
 .gwt-MenuBar .gwt-MenuItemSeparator
     section breaks between menu items
 .gwt-MenuBar .gwt-MenuItemSeparator .menuSeparatorInner
@@ -883,140 +881,138 @@ td.datePickerMonth {
     the bottom right cell
 .gwt-MenuBarPopup .menuPopupBottomRightInner
     the inner element of the cell  */
-    
-    
-    /* GWT UPLOAD */
-    .GWTUpld {
-        font-family: Verdana, Arial;
-        font-size: 12px;
+/* GWT UPLOAD */
+.GWTUpld {
+	font-family: Verdana, Arial;
+	font-size: 12px;
 }
 
-.GWTUpld form, 
-.GWTUpld .upld-form-elements {
-        padding: 0px;
-        vertical-align: top;
+.GWTUpld form,.GWTUpld .upld-form-elements {
+	padding: 0px;
+	vertical-align: top;
 }
 
 .GWTUpld .upld-status {
-        font-family: arial;
-        font-size: 12px;
-        font-weight: bold;
+	font-family: arial;
+	font-size: 12px;
+	font-weight: bold;
 }
+
 .GWTUpld .upld-status div.cancel {
-        background: url(images/cancel-upld.gif) no-repeat;
-        width: 12px;
-        height: 12px;
-        cursor: pointer;
-        margin-top: 1px;
+	background: url(images/cancel-upld.gif) no-repeat;
+	width: 12px;
+	height: 12px;
+	cursor: pointer;
+	margin-top: 1px;
 }
 
 * html .GWTUpld .upld-status div.cancel {
-        width: 14px;
-        height: 10px;
-        margin-top: 2px;
+	width: 14px;
+	height: 10px;
+	margin-top: 2px;
 }
 
 .GWTUpld .upld-status div.cancel:hover {
-        background: url(images/cancel-upld-hover.gif) no-repeat;
+	background: url(images/cancel-upld-hover.gif) no-repeat;
 }
 
 .GWTUpld .upld-status .filename {
-        overflow: hidden;
-        white-space: nowrap;
-        margin-left: 8px;
-        margin-right: 10px;
-        height: 100%;
+	overflow: hidden;
+	white-space: nowrap;
+	margin-left: 8px;
+	margin-right: 10px;
+	height: 100%;
 }
+
 .GWTUpld .upld-status .status {
-        padding-left: 8px;
-        white-space: nowrap;
-        height: 100%;
+	padding-left: 8px;
+	white-space: nowrap;
+	height: 100%;
 }
+
 .GWTUpld .upld-status .status-success {
-        color: green;
+	color: green;
 }
-.GWTUpld .upld-status .status-error,
-.GWTUpld .upld-status .status-canceled {
-        color: red;
+
+.GWTUpld .upld-status .status-error,.GWTUpld .upld-status .status-canceled
+	{
+	color: red;
 }
 
 .GWTUpld .prgbar-back {
-        background: #ffffff none repeat scroll 0 0;
-        border: 1px solid #999999;
-        height: 10px;
-        overflow: hidden;
-        padding: 1px;
-        width: 100px;
-        float: left;
+	background: #ffffff none repeat scroll 0 0;
+	border: 1px solid #999999;
+	height: 10px;
+	overflow: hidden;
+	padding: 1px;
+	width: 100px;
+	float: left;
 }
+
 * html .GWTUpld .prgbar-back {
-        height: 12px;
-        margin-top: 2px;
+	height: 12px;
+	margin-top: 2px;
 }
+
 .GWTUpld .prgbar-done {
-        background: #d4e4ff none repeat scroll 0 0;
-        font-size: 0;
-        height: 100%;
-        float: left;
+	background: #d4e4ff none repeat scroll 0 0;
+	font-size: 0;
+	height: 100%;
+	float: left;
 }
+
 .GWTUpld .prgbar-msg {
-        position: absolute;
-        z-index: 9;
-        font-size: 9px;
-        font-weight: normal;
-        margin-left: 3px;
+	position: absolute;
+	z-index: 9;
+	font-size: 9px;
+	font-weight: normal;
+	margin-left: 3px;
 }
 
 * html .GWTUpld .prgbar-msg {
-        top: 0px;
-        left: 4px;
+	top: 0px;
+	left: 4px;
 }
 
 .GWTUpld .changed {
-        color: red;
-        font-weight: bold;  
-        text-decoration: blink;
+	color: red;
+	font-weight: bold;
+	text-decoration: blink;
 }
+
 .gwt-PopupPanel .GWTUpld {
-        border: 2px groove #F6A828;
-        padding: 10px;
-        background: #bf984c;
-  -moz-border-radius-bottomleft: 6px;
-  -moz-border-radius-bottomright: 6px;
-  -moz-border-radius-topleft: 6px;
-  -moz-border-radius-topright: 6px;
-        
+	border: 2px groove #F6A828;
+	padding: 10px;
+	background: #bf984c;
+	-moz-border-radius-bottomleft: 6px;
+	-moz-border-radius-bottomright: 6px;
+	-moz-border-radius-topleft: 6px;
+	-moz-border-radius-topright: 6px;
 }
 
 .GWTUpld .DecoratedFileUpload {
-        margin-right: 5px;
+	margin-right: 5px;
 }
 
-.GWTUpld .DecoratedFileUpload .gwt-Button,
-.GWTUpld .DecoratedFileUpload .gwt-Anchor,
-.GWTUpld .DecoratedFileUpload .gwt-Label {
-        white-space: nowrap;
-        font-size: 10px;
+.GWTUpld .DecoratedFileUpload .gwt-Button,.GWTUpld .DecoratedFileUpload .gwt-Anchor,.GWTUpld .DecoratedFileUpload .gwt-Label
+	{
+	white-space: nowrap;
+	font-size: 10px;
 }
 
-.GWTUpld .gwt-Button, .GWTUpld .gwt-FileUpload {
-        font-size: 10px;
-        min-height: 15px;
+.GWTUpld .gwt-Button,.GWTUpld .gwt-FileUpload {
+	font-size: 10px;
+	min-height: 15px;
 }
 
-.GWTUpld .DecoratedFileUpload .gwt-Anchor,
-.GWTUpld .DecoratedFileUpload .gw-Label {
-        color: blue;
-        text-decoration: underline;
-        cursor: pointer;
+.GWTUpld .DecoratedFileUpload .gwt-Anchor,.GWTUpld .DecoratedFileUpload .gw-Label
+	{
+	color: blue;
+	text-decoration: underline;
+	cursor: pointer;
 }
 
-.GWTUpld .gwt-Button:HOVER,
-.GWTUpld .DecoratedFileUpload .gwt-Button-over,
-.GWTUpld .DecoratedFileUpload .gwt-Anchor-over,
-.GWTUpld .DecoratedFileUpload .gwt-Label-over {
-        color: #af6b29;
+.GWTUpld .gwt-Button:HOVER,.GWTUpld .DecoratedFileUpload .gwt-Button-over,.GWTUpld .DecoratedFileUpload .gwt-Anchor-over,.GWTUpld .DecoratedFileUpload .gwt-Label-over
+	{
+	color: #af6b29;
 }
-
-
-

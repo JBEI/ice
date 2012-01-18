@@ -17,6 +17,7 @@ import org.jbei.ice.shared.dto.ProfileInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -100,4 +101,10 @@ public interface RegistryService extends RemoteService {
     boolean addEntriesToCollection(String sid, ArrayList<Long> destination, ArrayList<Long> entryIds);
 
     HashMap<String, ArrayList<String>> retrieveStorageSchemes(String sessionId, EntryType type);
+
+    ArrayList<PermissionInfo> retrievePermissionData(String sessionId, Long entryId);
+
+    HashMap<Long, String> retrieveAllGroups(String sessionId);
+
+    HashMap<Long, String> retrieveAllAccounts(String sessionId);
 }

@@ -28,7 +28,9 @@ public interface IEntryView {
 
     void showUpdateForm(UpdateEntryForm<? extends EntryInfo> form);
 
-    void showPermissionsWidget(Widget permissionWidget);
+    PermissionsWidget getPermissionsWidget();
+
+    void showPermissionsWidget();
 
     Button showSampleView(EntrySampleTable table);
 

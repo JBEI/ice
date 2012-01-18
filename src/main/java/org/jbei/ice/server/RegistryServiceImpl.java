@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.BulkImportManager;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.FolderManager;
+import org.jbei.ice.lib.managers.GroupManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.QueryManager;
 import org.jbei.ice.lib.managers.SampleManager;
@@ -35,10 +37,13 @@ import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.BulkImportDraft;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Folder;
+import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
+import org.jbei.ice.lib.permissions.AuthenticatedPermissionManager;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.search.blast.BlastResult;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
@@ -56,6 +61,8 @@ import org.jbei.ice.shared.dto.ProfileInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -882,12 +889,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             try {
                 storage = StorageManager.get(scheme.getId(), false);
 
-                if (storage != null) {
-                    ArrayList<Storage> storageSchemes = storage.getSchemes();
-                    if (storageSchemes != null) {
-                        for (Storage storageScheme : storageSchemes) {
-                            schemeOptions.add(storageScheme.getName());
-                        }
+                if (storage != null && storage.getSchemes() != null) {
+                    for (Storage storageScheme : storage.getSchemes()) {
+                        schemeOptions.add(storageScheme.getName());
                     }
                 }
             } catch (ManagerException e) {
@@ -907,5 +911,106 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
 
         return schemeMap;
+    }
+
+    @Override
+    public LinkedHashMap<Long, String> retrieveAllAccounts(String sessionId) {
+
+        LinkedHashMap<Long, String> results = null;
+
+        try {
+            Set<Account> accounts = AccountController.getAllByFirstName();
+            results = new LinkedHashMap<Long, String>();
+            for (Account account : accounts) {
+                results.put(account.getId(), account.getFullName());
+            }
+        } catch (ControllerException e) {
+            Logger.error(e);
+        }
+
+        return results;
+    }
+
+    @Override
+    public LinkedHashMap<Long, String> retrieveAllGroups(String sessionId) {
+        LinkedHashMap<Long, String> results = null;
+
+        try {
+            Set<Group> groups = GroupManager.getAll();
+            results = new LinkedHashMap<Long, String>();
+            for (Group group : groups) {
+                results.put(group.getId(), group.getLabel());
+            }
+        } catch (ManagerException e) {
+            Logger.error(e);
+        }
+        return results;
+    }
+
+    @Override
+    public ArrayList<PermissionInfo> retrievePermissionData(String sessionId, Long entryId) {
+
+        ArrayList<PermissionInfo> results = null;
+        Entry entry = null;
+
+        try {
+            entry = EntryManager.get(entryId);
+            if (entry == null)
+                return null;
+        } catch (ManagerException me) {
+            Logger.error(me);
+        }
+
+        results = new ArrayList<PermissionInfo>();
+
+        try {
+            Set<Account> readAccounts = AuthenticatedPermissionManager.getReadUser(entry);
+            for (Account account : readAccounts) {
+                results.add(new PermissionInfo(PermissionType.READ_ACCOUNT, account.getId(),
+                        account.getFullName()));
+            }
+        } catch (ManagerException me) {
+            Logger.error(me);
+        } catch (PermissionException pe) {
+            Logger.error(pe);
+        }
+
+        try {
+            Set<Account> writeAccounts = AuthenticatedPermissionManager.getWriteUser(entry);
+            for (Account account : writeAccounts) {
+                results.add(new PermissionInfo(PermissionType.WRITE_ACCOUNT, account.getId(),
+                        account.getFullName()));
+            }
+        } catch (ManagerException me) {
+            Logger.error(me);
+        } catch (PermissionException pe) {
+            Logger.error(pe);
+        }
+
+        try {
+            Set<Group> readGroups = AuthenticatedPermissionManager.getReadGroup(entry);
+            for (Group group : readGroups) {
+                results.add(new PermissionInfo(PermissionType.READ_GROUP, group.getId(), group
+                        .getLabel()));
+            }
+        } catch (ManagerException me) {
+            Logger.error(me);
+        } catch (PermissionException pe) {
+            Logger.error(pe);
+        }
+
+        try {
+            Set<Group> writeGroups = AuthenticatedPermissionManager.getWriteGroup(entry);
+            for (Group group : writeGroups) {
+                results.add(new PermissionInfo(PermissionType.WRITE_GROUP, group.getId(), group
+                        .getLabel()));
+            }
+        } catch (ManagerException me) {
+            Logger.error(me);
+        } catch (PermissionException pe) {
+            Logger.error(pe);
+        }
+
+        return results;
     }
 }

@@ -1,6 +1,7 @@
 package org.jbei.ice.client.entry.view;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
@@ -14,10 +15,10 @@ import org.jbei.ice.client.entry.view.update.UpdateEntryForm;
 import org.jbei.ice.client.entry.view.view.IEntryView;
 import org.jbei.ice.client.entry.view.view.MenuItem;
 import org.jbei.ice.client.entry.view.view.MenuItem.Menu;
-import org.jbei.ice.client.entry.view.view.PermissionsWidget;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -51,72 +52,125 @@ public class EntryPresenter extends AbstractPresenter {
         generalMenuItem = new MenuItem(Menu.GENERAL, -1);
         sequenceTable = new SequenceTable();
         sampleTable = new EntrySampleTable();
+    }
 
+    public EntryPresenter(final RegistryServiceAsync service, HandlerManager eventBus,
+            final IEntryView display, String entryId) {
+        this(service, eventBus, display);
+
+        final long id = Long.decode(entryId); //TODO : catch potential NFE
+        retrieveEntryDetails(id);
+
+        // add handler for the permission link
         display.getPermissionLink().addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                // TODO : deselect main menu selection
-                //                display.getMenu().getSelectionModel().setSelected(display.getMenu().getSelectionModel()., false);
-                PermissionsWidget widget = new PermissionsWidget();
-                display.showPermissionsWidget(widget);
+                //                retrievePermissionData(id); TODO : RequestCycle.get() causes a failure on the server
+                display.showPermissionsWidget();
             }
         });
+
+        retrieveAccountsAndGroups();
     }
 
-    public EntryPresenter(RegistryServiceAsync service, HandlerManager eventBus,
-            final IEntryView display, String entryId) {
-        this(service, eventBus, display);
+    private void retrieveAccountsAndGroups() {
+        service.retrieveAllAccounts(AppController.sessionId,
+            new AsyncCallback<LinkedHashMap<Long, String>>() {
 
-        final long id = Long.decode(entryId); //TODO : catch NFE
-        service.retrieveEntryDetails(AppController.sessionId, id, new AsyncCallback<EntryInfo>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert("Failed to retrieve entry details: " + caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(EntryInfo result) {
-
-                if (result == null) {
-                    String errorMsg = "<p>Could not retrieve the entry requested. Please try again later.</p>";
-                    // TODO : how to deal with error messages
-                    //                    display.setEntryDetailView(new HTML(errorMsg));
-                    return;
+                @Override
+                public void onSuccess(LinkedHashMap<Long, String> result) {
+                    display.getPermissionsWidget().setAccountData(result);
                 }
 
-                //                info = result;
-                view = ViewFactory.createDetailView(result);
-                String name = result.getType().getDisplay().toUpperCase() + ": " + result.getName();
-                display.setEntryName(name);
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert(caught.getMessage());
+                }
+            });
 
-                // attachments
-                ArrayList<AttachmentInfo> attachments = result.getAttachments();
-                if (attachments != null) {
-                    display.getAttachmentList().setRowData(attachments);
+        service.retrieveAllGroups(AppController.sessionId,
+            new AsyncCallback<LinkedHashMap<Long, String>>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert(caught.getMessage());
                 }
 
-                // menu views
-                ArrayList<SampleStorage> data = new ArrayList<SampleStorage>();
-                for (SampleInfo sampleInfo : result.getSampleMap().keySet()) {
-                    SampleStorage datum = new SampleStorage(sampleInfo, result.getSampleMap().get(
-                        sampleInfo));
-                    data.add(datum);
+                @Override
+                public void onSuccess(LinkedHashMap<Long, String> result) {
+                    display.getPermissionsWidget().setGroupData(result);
+                }
+            });
+    }
+
+    private void retrieveEntryDetails(long entryId) {
+        service.retrieveEntryDetails(AppController.sessionId, entryId,
+            new AsyncCallback<EntryInfo>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert("Failed to retrieve entry details: " + caught.getMessage());
                 }
 
-                sampleTable.setData(data);
-                sequenceTable.setData(result.getSequenceAnalysis());
+                @Override
+                public void onSuccess(EntryInfo result) {
 
-                // menu 
-                ArrayList<MenuItem> menuItems = new ArrayList<MenuItem>();
-                menuItems.add(generalMenuItem);
-                menuItems.add(new MenuItem(Menu.SEQ_ANALYSIS, result.getSequenceAnalysis().size()));
-                menuItems.add(new MenuItem(Menu.SAMPLES, result.getSampleMap().size()));
-                display.getMenu().setRowData(menuItems); // TODO : set menu loading indicator
-                display.getMenu().setSelectionModel(new MenuSelectionModel());
-            }
-        });
+                    if (result == null) {
+                        // TODO : how to deal with error messages
+                        return;
+                    }
+
+                    //                info = result;
+                    view = ViewFactory.createDetailView(result);
+                    String name = result.getType().getDisplay().toUpperCase() + ": "
+                            + result.getName();
+                    display.setEntryName(name);
+
+                    // attachments
+                    ArrayList<AttachmentInfo> attachments = result.getAttachments();
+                    if (attachments != null) {
+                        display.getAttachmentList().setRowData(attachments);
+                    }
+
+                    // menu views
+                    ArrayList<SampleStorage> data = new ArrayList<SampleStorage>();
+                    for (SampleInfo sampleInfo : result.getSampleMap().keySet()) {
+                        SampleStorage datum = new SampleStorage(sampleInfo, result.getSampleMap()
+                                .get(sampleInfo));
+                        data.add(datum);
+                    }
+
+                    sampleTable.setData(data);
+                    sequenceTable.setData(result.getSequenceAnalysis());
+
+                    // menu 
+                    ArrayList<MenuItem> menuItems = new ArrayList<MenuItem>();
+                    menuItems.add(generalMenuItem);
+                    menuItems.add(new MenuItem(Menu.SEQ_ANALYSIS, result.getSequenceAnalysis()
+                            .size()));
+                    menuItems.add(new MenuItem(Menu.SAMPLES, result.getSampleMap().size()));
+                    display.getMenu().setRowData(menuItems); // TODO : set menu loading indicator
+                    display.getMenu().setSelectionModel(new MenuSelectionModel());
+                }
+            });
+    }
+
+    private void retrievePermissionData(final long entryId) {
+        // retrieve data for permission
+        service.retrievePermissionData(AppController.sessionId, entryId,
+            new AsyncCallback<ArrayList<PermissionInfo>>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert("Error occured retrieving permissions: " + caught.getMessage()); // TODO 
+                }
+
+                @Override
+                public void onSuccess(ArrayList<PermissionInfo> result) {
+                    display.getPermissionsWidget().setExistingPermissions(result);
+                }
+            });
     }
 
     @Override
