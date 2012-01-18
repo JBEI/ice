@@ -45,6 +45,9 @@ public class PermissionsWidget extends Composite {
         this.accountInfo = new HashMap<Long, String>();
         this.groupInfo = new HashMap<Long, String>();
 
+        readBox = new PermissionListBox();
+        writeBox = new PermissionListBox();
+
         layout = new FlexTable();
         layout.setCellPadding(0);
         layout.setCellSpacing(0);
@@ -52,8 +55,8 @@ public class PermissionsWidget extends Composite {
         layout.setWidget(0, 0, createMainWidget());
         layout.getFlexCellFormatter().setRowSpan(0, 0, 2);
         layout.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
-        layout.setWidget(0, 1, createReadWidget());
-        layout.setWidget(1, 0, createWriteWidget());
+        layout.setWidget(0, 1, createPermissionBoxWidget(readBox, "Read Allowed", false));
+        layout.setWidget(1, 0, createPermissionBoxWidget(writeBox, "Write Allowed", true));
 
         HorizontalPanel panel = new HorizontalPanel();
         saveButton = new Button("Save");
@@ -96,85 +99,45 @@ public class PermissionsWidget extends Composite {
         return tabPanel;
     }
 
-    private Widget createReadWidget() {
+    private Widget createPermissionBoxWidget(final PermissionListBox box, String caption,
+            boolean isWrite) {
+
         FlexTable table = new FlexTable();
         table.setCellPadding(0);
         table.setCellSpacing(0);
 
-        readBox = new PermissionListBox();
-
         Button addRead = new Button("Add >>");
-        addRead.addClickHandler(new AddToClickHandler(false));
+        addRead.addClickHandler(new AddToClickHandler(isWrite));
 
         Button removeRead = new Button("Remove");
         removeRead.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                readBox.removeSelected();
+                box.removeSelected();
             }
         });
 
         HTMLPanel panel = new HTMLPanel(
-                "<div style=\"padding: 10px;\"><span id=\"addRead\"></span><br /><span id=\"removeRead\"></span></div>");
+                "<div style=\"padding: 10px;\"><span id=\"add\"></span><br /><span id=\"remove\"></span></div>");
 
-        panel.add(removeRead, "removeRead");
-        panel.add(addRead, "addRead");
+        panel.add(removeRead, "remove");
+        panel.add(addRead, "add");
 
         table.setWidget(0, 0, panel);
         table.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_MIDDLE);
         table.getFlexCellFormatter().setHeight(0, 0, "150px");
 
-        table.setWidget(0, 1, readBox);
+        table.setWidget(0, 1, box);
         table.getFlexCellFormatter().setRowSpan(0, 1, 2);
 
-        CaptionPanel captionPanel = new CaptionPanel("Read Allowed");
-        captionPanel.add(table);
-
-        return captionPanel;
-    }
-
-    private Widget createWriteWidget() {
-
-        FlexTable table = new FlexTable();
-        table.setCellPadding(0);
-        table.setCellSpacing(0);
-
-        Button removeWrite = new Button("Remove");
-        removeWrite.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                writeBox.removeSelected();
-            }
-        });
-
-        Button addWrite = new Button(" Add >> ");
-        addWrite.addClickHandler(new AddToClickHandler(true));
-
-        writeBox = new PermissionListBox();
-
-        HTMLPanel panel = new HTMLPanel(
-                "<div style=\"padding: 10px;\"><span id=\"addWrite\"></span><br /><span id=\"removeWrite\"></span></div>");
-
-        panel.add(addWrite, "addWrite");
-        panel.add(removeWrite, "removeWrite");
-
-        table.setWidget(0, 0, panel);
-        table.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_MIDDLE);
-        table.getFlexCellFormatter().setHeight(0, 0, "150px");
-
-        table.setWidget(0, 1, writeBox);
-        table.getFlexCellFormatter().setRowSpan(0, 1, 2);
-
-        CaptionPanel captionPanel = new CaptionPanel("Write Allowed");
+        CaptionPanel captionPanel = new CaptionPanel(caption);
         captionPanel.add(table);
 
         return captionPanel;
     }
 
     // public methods
-
     public void setExistingPermissions(ArrayList<PermissionInfo> permissions) {
         if (permissions == null)
             return;

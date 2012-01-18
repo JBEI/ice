@@ -2,6 +2,7 @@ package org.jbei.ice.client;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
 import org.jbei.ice.shared.AutoCompleteField;
@@ -104,7 +105,7 @@ public interface RegistryService extends RemoteService {
 
     ArrayList<PermissionInfo> retrievePermissionData(String sessionId, Long entryId);
 
-    HashMap<Long, String> retrieveAllGroups(String sessionId);
+    LinkedHashMap<Long, String> retrieveAllGroups(String sessionId);
 
-    HashMap<Long, String> retrieveAllAccounts(String sessionId);
+    LinkedHashMap<Long, String> retrieveAllAccounts(String sessionId);
 }
