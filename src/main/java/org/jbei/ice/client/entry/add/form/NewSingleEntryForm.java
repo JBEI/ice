@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.Set;
 import java.util.TreeSet;
 
 import org.jbei.ice.client.AppController;
@@ -503,8 +502,8 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
     }
 
     @Override
-    public Set<EntryInfo> getEntries() {
-        Set<EntryInfo> entries = new HashSet<EntryInfo>();
+    public HashSet<EntryInfo> getEntries() {
+        HashSet<EntryInfo> entries = new HashSet<EntryInfo>();
         entries.add(getEntryInfo());
         return entries;
     }

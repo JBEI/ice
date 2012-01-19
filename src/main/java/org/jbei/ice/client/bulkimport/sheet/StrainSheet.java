@@ -57,11 +57,12 @@ public class StrainSheet extends Sheet {
         layout.getFlexCellFormatter().setVerticalAlignment(1, 1, HasAlignment.ALIGN_TOP);
 
         // add rows
-        int count = 100;
+        int count = 50;
         int i = 1;
 
         while (count > 0) {
 
+            // TODO Performance issue here
             this.addRow();
 
             // index col
@@ -138,8 +139,9 @@ public class StrainSheet extends Sheet {
     public void addRow() {
         for (int i = 0; i < FIELDS; i += 1) {
             Widget widget = new HTML("");
-            sheetTable.setWidget(row, i, widget);
             widget.setStyleName("cell");
+
+            sheetTable.setWidget(row, i, widget);
             sheetTable.getFlexCellFormatter().setStyleName(row, i, "td_cell");
         }
         row += 1;

@@ -4,15 +4,21 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.jbei.ice.lib.models.ArabidopsisSeed;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.Name;
+import org.jbei.ice.lib.models.Part;
+import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
+import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryInfo.EntryType;
 import org.jbei.ice.shared.dto.PlasmidInfo;
+import org.jbei.ice.shared.dto.StrainInfo;
 
 /**
  * Factory object for converting data transfer objects to model
@@ -29,30 +35,53 @@ public class InfoToModelFactory {
 
         switch (type) {
         case PLASMID:
-            entry = new Plasmid();
-            if (info.getSelectionMarkers() != null && !info.getSelectionMarkers().isEmpty()) {
-                String[] itemsAsString = info.getSelectionMarkers().split("\\s*,+\\s*");
-                HashSet<SelectionMarker> markers = new HashSet<SelectionMarker>();
-
-                for (int i = 0; i < itemsAsString.length; i++) {
-                    String currentItem = itemsAsString[i];
-                    if (!currentItem.trim().isEmpty()) {
-                        SelectionMarker marker = new SelectionMarker();
-                        marker.setName(currentItem);
-                        markers.add(marker);
-                    }
-                }
-
-                entry.setSelectionMarkers(markers); // TODO : looks like selection marker is a common field
-            }
-
-            Plasmid plasmid = (Plasmid) entry;
+            Plasmid plasmid = new Plasmid();
             PlasmidInfo plasmidInfo = (PlasmidInfo) info;
 
             plasmid.setBackbone(plasmidInfo.getBackbone());
             plasmid.setOriginOfReplication(plasmidInfo.getOriginOfReplication());
             plasmid.setPromoters(plasmidInfo.getPromoters());
             plasmid.setCircular(plasmidInfo.getCircular());
+
+            entry = plasmid;
+            break;
+
+        case STRAIN:
+            Strain strain = new Strain();
+            StrainInfo strainInfo = (StrainInfo) info;
+
+            strain.setHost(strainInfo.getHost());
+            strain.setGenotypePhenotype(strain.getGenotypePhenotype());
+            strain.setPlasmids(strainInfo.getPlasmids());
+
+            entry = strain;
+            break;
+
+        case PART:
+            Part part = new Part();
+
+            // default is RAW until sequence is supplied.
+            part.setPackageFormat(AssemblyStandard.RAW);
+
+            entry = part;
+            break;
+
+        case ARABIDOPSIS:
+            ArabidopsisSeed seed = new ArabidopsisSeed();
+            ArabidopsisSeedInfo seedInfo = (ArabidopsisSeedInfo) info;
+
+            seed.setHomozygosity(seedInfo.getHomozygosity());
+            seed.setHarvestDate(seedInfo.getHarvestDate());
+            seed.setEcotype(seedInfo.getEcotype());
+            seed.setParents(seedInfo.getParents());
+            ArabidopsisSeed.Generation generation = ArabidopsisSeed.Generation.valueOf(seedInfo
+                    .getGeneration().name());
+            seed.setGeneration(generation);
+            ArabidopsisSeed.PlantType plantType = ArabidopsisSeed.PlantType.valueOf(seedInfo
+                    .getPlantType().name());
+            seed.setPlantType(plantType);
+
+            entry = seed;
             break;
 
         default:
@@ -64,7 +93,13 @@ public class InfoToModelFactory {
     }
 
     private static Entry setCommon(Entry entry, EntryInfo info) {
-        entry.setNames(getNames(info.getName()));
+        if (entry == null || info == null)
+            return null;
+
+        HashSet<Name> names = getNames(info.getName(), entry);
+        entry.setNames(names);
+        HashSet<SelectionMarker> markers = getSelectionMarkers(info.getSelectionMarkers(), entry);
+        entry.setSelectionMarkers(markers);
         entry.setOwner(info.getOwner());
         entry.setOwnerEmail(info.getOwnerEmail());
         entry.setCreator(info.getCreator());
@@ -90,7 +125,28 @@ public class InfoToModelFactory {
         return entry;
     }
 
-    private static HashSet<Name> getNames(String nameStr) {
+    private static HashSet<SelectionMarker> getSelectionMarkers(String markerStr, Entry entry) {
+
+        HashSet<SelectionMarker> markers = new HashSet<SelectionMarker>();
+
+        if (markerStr != null && !markerStr.isEmpty()) {
+            String[] itemsAsString = markerStr.split("\\s*,+\\s*");
+
+            for (int i = 0; i < itemsAsString.length; i++) {
+                String currentItem = itemsAsString[i];
+                if (!currentItem.trim().isEmpty()) {
+                    SelectionMarker marker = new SelectionMarker();
+                    marker.setName(currentItem);
+                    marker.setEntry(entry);
+                    markers.add(marker);
+                }
+            }
+        }
+
+        return markers;
+    }
+
+    private static HashSet<Name> getNames(String nameStr, Entry entry) {
         HashSet<Name> names = new HashSet<Name>();
         if (nameStr == null || nameStr.isEmpty())
             return names;
@@ -100,6 +156,8 @@ public class InfoToModelFactory {
             if (!item.isEmpty()) {
                 Name name = new Name();
                 name.setName(item);
+                name.setEntry(entry);
+                names.add(name);
             }
         }
 

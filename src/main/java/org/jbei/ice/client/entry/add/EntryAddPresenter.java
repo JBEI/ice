@@ -3,7 +3,7 @@ package org.jbei.ice.client.entry.add;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Set;
+import java.util.HashSet;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
@@ -95,7 +95,6 @@ public class EntryAddPresenter extends AbstractPresenter {
         }
 
         // TODO : check cache 
-
         service.retrieveStorageSchemes(AppController.sessionId, type,
             new AsyncCallback<HashMap<String, ArrayList<String>>>() {
 
@@ -134,12 +133,18 @@ public class EntryAddPresenter extends AbstractPresenter {
 
     }
 
-    protected void save(Set<EntryInfo> hasEntry) {
-        if (hasEntry == null)
+    /**
+     * Makes an rpc to save the set of entrys
+     * 
+     * @param hasEntry
+     *            set of entrys to be saved.
+     */
+    protected void save(final HashSet<EntryInfo> entrySet) {
+        if (entrySet == null || entrySet.isEmpty())
             return;
 
-        for (EntryInfo entry : hasEntry) {
-            this.service.createEntry(AppController.sessionId, entry, new AsyncCallback<Long>() {
+        this.service.createEntry(AppController.sessionId, entrySet,
+            new AsyncCallback<ArrayList<Long>>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
@@ -147,15 +152,19 @@ public class EntryAddPresenter extends AbstractPresenter {
                 }
 
                 @Override
-                public void onSuccess(Long result) {
-
-                    if (result > 0) {
-                        History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + result.longValue());
-                    } else
-                        Window.alert("There was an error creating your entry");
+                public void onSuccess(ArrayList<Long> result) {
+                    if (result.size() != entrySet.size()) {
+                        Window.alert("Your entries could not be created. Please try again later or contact your administrator");
+                    } else {
+                        if (entrySet.size() == 1) {
+                            long id = result.get(0);
+                            History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + id);
+                        } else {
+                            History.newItem(Page.COLLECTIONS.getLink());
+                        }
+                    }
                 }
             });
-        }
     }
 
     /**

@@ -1,6 +1,6 @@
 package org.jbei.ice.client.entry.add.form;
 
-import java.util.Set;
+import java.util.HashSet;
 
 import org.jbei.ice.shared.dto.EntryInfo;
 
@@ -27,7 +27,7 @@ public interface IEntryFormSubmit {
 
     void populateEntries();
 
-    Set<EntryInfo> getEntries();
+    HashSet<EntryInfo> getEntries();
 
     void setSampleLocation(SampleLocationWidget sampleLocation);
 }

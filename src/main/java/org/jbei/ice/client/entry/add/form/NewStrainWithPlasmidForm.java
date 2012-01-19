@@ -3,7 +3,6 @@ package org.jbei.ice.client.entry.add.form;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
 
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BioSafetyOptions;
@@ -556,8 +555,8 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     }
 
     @Override
-    public Set<EntryInfo> getEntries() {
-        Set<EntryInfo> entries = new HashSet<EntryInfo>();
+    public HashSet<EntryInfo> getEntries() {
+        HashSet<EntryInfo> entries = new HashSet<EntryInfo>();
         entries.add(this.strain);
         entries.add(this.plasmid);
         return entries;

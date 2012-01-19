@@ -2,6 +2,7 @@ package org.jbei.ice.client;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
@@ -105,7 +106,7 @@ public interface RegistryServiceAsync {
 
     void retrieveStorageRoot(String sid, AsyncCallback<ArrayList<StorageInfo>> callback);
 
-    void createEntry(String sid, EntryInfo info, AsyncCallback<Long> callback);
+    void createEntry(String sid, HashSet<EntryInfo> info, AsyncCallback<ArrayList<Long>> callback);
 
     void retrieveUserCollections(String sessionId, String userId,
             AsyncCallback<ArrayList<FolderDetails>> callback);

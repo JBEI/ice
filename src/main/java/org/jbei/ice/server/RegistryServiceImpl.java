@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -856,21 +857,39 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public long createEntry(String sid, EntryInfo info) {
-        Account account;
+    public ArrayList<Long> createEntry(String sid, HashSet<EntryInfo> infoSet) {
+        ArrayList<Long> result = new ArrayList<Long>();
+
         try {
-            account = retrieveAccountForSid(sid);
+            Account account = retrieveAccountForSid(sid);
             if (account == null)
-                return 0;
+                return result;
 
             EntryController controller = new EntryController(account);
-            Entry entry = InfoToModelFactory.infoToEntry(info);
-            entry = controller.createEntry(entry);
-            return entry.getId();
+
+            for (EntryInfo info : infoSet) {
+                Entry entry = InfoToModelFactory.infoToEntry(info);
+                entry = controller.createEntry(entry);
+
+                // TODO : save sample (if any)
+                /* 
+                 * if (sample != null) {
+                sample.setEntry(newEntry);
+                if (sample.getStorage() != null) {
+                    Storage storage = StorageManager.update(sample.getStorage());
+                    sample.setStorage(storage);
+                }
+                sampleController.saveSample(sample);
+                }
+
+                 */
+                result.add(entry.getId());
+            }
         } catch (ControllerException e) {
             Logger.error(e);
-            return 0;
         }
+
+        return result;
     }
 
     @Override

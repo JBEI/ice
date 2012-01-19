@@ -2,6 +2,7 @@ package org.jbei.ice.client;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
@@ -97,7 +98,7 @@ public interface RegistryService extends RemoteService {
 
     ArrayList<BulkImportDraftInfo> retrieveImportDraftData(String sid, String email);
 
-    long createEntry(String sid, EntryInfo info);
+    ArrayList<Long> createEntry(String sid, HashSet<EntryInfo> info);
 
     boolean addEntriesToCollection(String sid, ArrayList<Long> destination, ArrayList<Long> entryIds);
 
