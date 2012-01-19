@@ -28,6 +28,11 @@ public interface ICollectionEntriesView {
 
     Button getQuickAddButton();
 
-    // active data view
+    /**
+     * active data view
+     * 
+     * @param table
+     *            data view table. depends on user selection
+     */
     void setDataView(DataTable<?> table);
 }

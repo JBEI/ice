@@ -7,6 +7,7 @@ import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.ICollectionListView;
 import org.jbei.ice.client.collection.model.CreateCollectionPanel;
+import org.jbei.ice.client.event.CollectionCreatedEvent;
 import org.jbei.ice.shared.FolderDetails;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -31,6 +32,7 @@ public class CollectionsListPresenter extends AbstractPresenter {
 
     public CollectionsListPresenter(RegistryServiceAsync service, HandlerManager eventBus,
             ICollectionListView display) {
+
         this.service = service;
         this.eventBus = eventBus;
         this.display = display;
@@ -78,9 +80,14 @@ public class CollectionsListPresenter extends AbstractPresenter {
             @Override
             public void onClick(ClickEvent event) {
                 display.showAddCollectionWidget(panel);
+                display.getAddCollectionButton().setEnabled(false);
             }
         });
     }
+
+    /**
+     * Handlers for the widgets on the "Add User Collection" panel
+     */
 
     private void addPanelHandlers() {
 
@@ -89,9 +96,13 @@ public class CollectionsListPresenter extends AbstractPresenter {
             @Override
             public void onClick(ClickEvent event) {
                 String collectionName = panel.getCollectionName();
+                if (collectionName.isEmpty())
+                    return; // TODO : user notification?
                 String collectionDescription = panel.getCollectionDescription();
+
                 display.hideAddCollectionWidget();
                 panel.reset();
+                display.getAddCollectionButton().setEnabled(true);
 
                 service.createUserCollection(AppController.sessionId, collectionName,
                     collectionDescription, new AsyncCallback<FolderDetails>() {
@@ -103,9 +114,9 @@ public class CollectionsListPresenter extends AbstractPresenter {
 
                         @Override
                         public void onSuccess(FolderDetails result) {
-                            // TODO : 
-                            userFolderDetails.add(0, result);
+                            userFolderDetails.add(userFolderDetails.size(), result);
                             display.getUserDataTable().setData(userFolderDetails);
+                            eventBus.fireEvent(new CollectionCreatedEvent(result));
                         }
                     });
             }
@@ -116,6 +127,7 @@ public class CollectionsListPresenter extends AbstractPresenter {
             @Override
             public void onClick(ClickEvent event) {
                 display.hideAddCollectionWidget();
+                display.getAddCollectionButton().setEnabled(true);
                 panel.reset();
             }
         });
