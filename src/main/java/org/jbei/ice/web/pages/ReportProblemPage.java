@@ -50,6 +50,13 @@ public class ReportProblemPage extends ProtectedPage {
                 // No worries. Just pass.
             }
             idString = partNumber + " (" + idString + ")";
+
+            IceSession session = IceSession.get();
+
+            if (session.isAuthenticated()) {
+                email = session.getAccount().getEmail();
+            }
+
             subject = JbeirSettings.getSetting("ERROR_EMAIL_EXCEPTION_PREFIX")
                     + " Problem reported with entry " + idString + " by " + email;
 
@@ -72,12 +79,6 @@ public class ReportProblemPage extends ProtectedPage {
                 throw new ViewException("Did not receive Id");
             }
             setModel(new CompoundPropertyModel<Object>(this));
-
-            IceSession session = IceSession.get();
-
-            if (session.isAuthenticated()) {
-                email = session.getAccount().getEmail();
-            }
 
             add(new TextField<String>("email").setRequired(true)
                     .setLabel(new Model<String>("Email"))
