@@ -4,6 +4,7 @@ import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Strain;
@@ -36,7 +37,8 @@ public class StrainNewFormPanel extends Panel {
             setEntry(new Strain());
 
             add(new TextField<String>("selectionMarkers", new PropertyModel<String>(this,
-                    "selectionMarkers")));
+                    "selectionMarkers")).setRequired(true).setLabel(
+                new Model<String>("Selection Markers")));
             add(new TextField<String>("host", new PropertyModel<String>(this, "host")));
             add(new TextField<String>("genotypePhenotype", new PropertyModel<String>(this,
                     "genotypePhenotype")));
