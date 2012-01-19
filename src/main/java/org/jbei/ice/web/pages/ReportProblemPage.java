@@ -35,16 +35,17 @@ public class ReportProblemPage extends ProtectedPage {
         public ReportProblemForm(String id, PageParameters parameters) {
             super(id);
 
-            initializeControls(parameters);
-        }
+            try {
+                this.id = Long.parseLong(parameters.getString("0"));
 
-        @Override
-        protected void onSubmit() {
+            } catch (NumberFormatException e) {
+                throw new ViewException("Could not parse id", e);
+            }
 
-            String idString = String.valueOf(id);
+            String idString = String.valueOf(this.id);
             String partNumber = "";
             try {
-                partNumber = EntryManager.get(id).getOnePartNumber().getPartNumber();
+                partNumber = EntryManager.get(this.id).getOnePartNumber().getPartNumber();
             } catch (ManagerException e) {
                 // No worries. Just pass.
             }
@@ -52,6 +53,12 @@ public class ReportProblemPage extends ProtectedPage {
             subject = JbeirSettings.getSetting("ERROR_EMAIL_EXCEPTION_PREFIX")
                     + " Problem reported with entry " + idString + " by " + email;
 
+            message = "* Problem with this Entry?\n* Non viable? \n* Missing from collection? \n* Missing info?\n* Missing plasmid?\n* Other?";
+            initializeControls(parameters);
+        }
+
+        @Override
+        protected void onSubmit() {
             Emailer.send(JbeirSettings.getSetting("ADMIN_EMAIL"), subject, message);
             if (!JbeirSettings.getSetting("ADMIN_EMAIL").equals(
                 JbeirSettings.getSetting("MODERATOR_EMAIL"))) {
@@ -61,13 +68,6 @@ public class ReportProblemPage extends ProtectedPage {
         }
 
         private void initializeControls(PageParameters parameters) {
-            try {
-                id = Long.parseLong(parameters.getString("0"));
-
-            } catch (NumberFormatException e) {
-                throw new ViewException("Could not parse id", e);
-            }
-
             if (id == 0) {
                 throw new ViewException("Did not receive Id");
             }
@@ -83,6 +83,8 @@ public class ReportProblemPage extends ProtectedPage {
                     .setLabel(new Model<String>("Email"))
                     .add(new StringValidator.MaximumLengthValidator(100))
                     .add(EmailAddressValidator.getInstance()).setEnabled(false));
+            add(new TextField<String>("subject").setLabel(new Model<String>("Subject")).setEnabled(
+                false));
             add(new TextArea<String>("message").setLabel(new Model<String>("Message")));
 
             add(new Button("submitButton", new Model<String>("Submit")));
