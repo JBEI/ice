@@ -430,6 +430,9 @@ mvn install:install-file -Dfile=org.eclipse.mylyn.wikitext.confluence.core_1.4.0
        button, click Add, select Project, then check the gd-ice
        project. Use F6 button to step through the source code.
 		    	</para>
+		    	<para>To debug unit tests, create a debug configuration with the following goal: "test -e -DforkMode=never"
+		    	
+		    	</para>
 		    	<para>If you chose to allow Eclipse to "change to the debug
       perspective", you will see a very differently layed out
       screen. A Perspective is a group of windows visible on the screen, associated with a name. 
