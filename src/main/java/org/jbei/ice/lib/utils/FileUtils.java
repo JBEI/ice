@@ -9,6 +9,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 
+import org.jbei.ice.lib.logging.Logger;
+
 /**
  * Utility methods for file handling.
  * 
@@ -114,6 +116,36 @@ public class FileUtils {
         } finally {
             output.close();
         }
+    }
+
+    /**
+     * Save the given text to a file in the temporary directory, and alert the admin.
+     * <p>
+     * Use this to capture interesting files and alert the admin of the fact.
+     * 
+     * @param message
+     * @param fileText
+     * @param e
+     * @throws UtilityException
+     */
+    public static void recordAndReportFile(String message, String fileText, Exception e)
+            throws UtilityException {
+        String tempFileDirectory = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
+        String filePath = tempFileDirectory + File.separator + Utils.generateUUID();
+
+        message = "File has been written to: " + filePath + ". The caller message is :\n" + message;
+        Logger.error(message, e);
+
+        try {
+            FileUtils.writeStringToFile(filePath, fileText);
+        } catch (FileNotFoundException e1) {
+            throw new UtilityException(e1);
+        } catch (IllegalArgumentException e1) {
+            throw new UtilityException(e1);
+        } catch (IOException e1) {
+            throw new UtilityException(e1);
+        }
+
     }
 
 }

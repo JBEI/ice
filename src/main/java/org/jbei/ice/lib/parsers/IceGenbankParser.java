@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jbei.ice.lib.utils.FileUtils;
+import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.DNAFeature;
 import org.jbei.ice.lib.vo.DNAFeatureLocation;
@@ -148,11 +150,28 @@ public class IceGenbankParser extends AbstractParser {
                 }
             }
         } catch (NullPointerException e) {
-            // throw an exception, and include the input textSequence.
-            throw new InvalidFormatParserException("Null Exception for: \n" + textSequence + "\n",
-                    e);
+            recordParsingError(textSequence, e);
+        } catch (StringIndexOutOfBoundsException e) {
+            recordParsingError(textSequence, e);
         }
         return sequence;
+    }
+
+    /**
+     * If there is a parsing error of interest, write the file to disk, and send an email to admin.
+     * 
+     * @param fileText
+     * @param e
+     * @throws UtilityException
+     */
+    private void recordParsingError(String fileText, Exception e)
+            throws InvalidFormatParserException {
+        String message = "Error parsing genbank file. Please examine the recorded file.";
+        try {
+            FileUtils.recordAndReportFile(message, fileText, e);
+        } catch (UtilityException e1) {
+            throw new InvalidFormatParserException("failed to write error");
+        }
     }
 
     private ArrayList<Tag> splitTags(String block, String[] acceptedTags, String[] ignoredTags)
