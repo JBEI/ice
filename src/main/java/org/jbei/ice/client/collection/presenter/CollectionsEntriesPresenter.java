@@ -4,8 +4,11 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.ICollectionEntriesView;
+import org.jbei.ice.client.collection.menu.CollectionEntryMenu;
+import org.jbei.ice.client.collection.menu.CollectionUserMenu;
 import org.jbei.ice.client.collection.menu.EntrySelectionModelMenu;
 import org.jbei.ice.client.collection.menu.UserCollectionMultiSelect;
 import org.jbei.ice.client.collection.table.CollectionEntriesDataTable;
@@ -15,17 +18,24 @@ import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.EntryInfo;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.ProvidesKey;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SingleSelectionModel;
 
 // TODO : show table of collections on click, change view
 public class CollectionsEntriesPresenter extends AbstractPresenter {
@@ -35,10 +45,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
     private final ICollectionEntriesView display;
 
     private final EntryDataViewDataProvider entryDataProvider;
-
     private final CollectionEntriesDataTable collectionsDataTable;
-    private final SingleSelectionModel<FolderDetails> systemFolderSelectionModel;
-    private final SingleSelectionModel<FolderDetails> userFolderSelectionModel;
 
     // data providers
     private final ListDataProvider<FolderDetails> userListProvider;
@@ -61,8 +68,6 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
 
         // initialize all parameters
         this.collectionsDataTable = new CollectionEntriesDataTable();
-        this.systemFolderSelectionModel = new SingleSelectionModel<FolderDetails>();
-        this.userFolderSelectionModel = new SingleSelectionModel<FolderDetails>();
         this.userListProvider = new ListDataProvider<FolderDetails>(new KeyProvider());
         this.systemListProvider = new ListDataProvider<FolderDetails>(new KeyProvider());
         this.entryDataProvider = new EntryDataViewDataProvider(collectionsDataTable, service);
@@ -71,14 +76,12 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         initCollectionsView();
 
         // selection models used for menus
-        initMenuSelectionModels();
+        initMenus();
 
         setMenuOptions();
 
         // init text box
         initCreateCollectionHandlers();
-
-        initDataProviders();
 
         display.setDataView(collectionsDataTable);
 
@@ -116,22 +119,56 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         });
     }
 
-    private void initDataProviders() {
+    private void initCreateCollectionHandlers() {
+        final TextBox quickAddBox = this.display.getUserCollectionMenu().getQuickAddBox();
+        quickAddBox.setVisible(false);
 
-        // user list
-        this.userListProvider.addDataDisplay(this.display.getUserCollectionMenu());
-        this.display.getUserCollectionMenu().setSelectionModel(userFolderSelectionModel);
+        quickAddBox.addKeyPressHandler(new KeyPressHandler() {
 
-        // system list
-        this.systemListProvider.addDataDisplay(this.display.getSystemCollectionMenu());
-        this.display.getSystemCollectionMenu().setSelectionModel(systemFolderSelectionModel);
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                if (event.getCharCode() != KeyCodes.KEY_ENTER)
+                    return;
+
+                if (quickAddBox.getText().isEmpty()) {
+                    quickAddBox.setStyleName("entry_input_error");
+                    return;
+                }
+
+                quickAddBox.setVisible(false);
+                saveCollection(quickAddBox.getText());
+                display.getUserCollectionMenu().hideQuickText();
+            }
+        });
+
+        quickAddBox.addFocusHandler(new FocusHandler() {
+
+            @Override
+            public void onFocus(FocusEvent event) {
+                quickAddBox.setText("");
+            }
+        });
     }
 
-    private void initCreateCollectionHandlers() {
-        QuickCollectionAddHandler handler = new QuickCollectionAddHandler(
-                this.display.getQuickAddButton(), this.display.getQuickAddBox(),
-                this.userListProvider);
-        handler.hideCollectionBox();
+    private void saveCollection(String value) {
+        if (value == null || value.isEmpty())
+            return;
+
+        // TODO : actual save
+        service.createUserCollection(AppController.sessionId, value, "",
+            new AsyncCallback<FolderDetails>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert("Error creating folder");
+                }
+
+                @Override
+                public void onSuccess(FolderDetails result) {
+                    userListProvider.getList().add(result);
+                    display.getUserCollectionMenu().addFolderDetail(result);
+                }
+            });
     }
 
     private void initCollectionsView() {
@@ -154,25 +191,22 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
      * Initializes the selection models used for the menu items
      * by adding the selection change handlers
      */
-    private void initMenuSelectionModels() {
+    private void initMenus() {
 
         // system collection menu
-        this.display.getSystemCollectionMenu().setSelectionModel(systemFolderSelectionModel);
-        systemFolderSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        final CollectionEntryMenu menu = this.display.getSystemCollectionMenu();
+        menu.addClickHandler(new ClickHandler() {
 
             @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-
-                final FolderDetails selected = systemFolderSelectionModel.getSelectedObject();
-                if (selected == null) {
+            public void onClick(ClickEvent event) {
+                if (!menu.isValidClick(event))
                     return;
-                }
 
-                // clear userFolderSelection....if any
-                clearSelection(true);
+                History.newItem(Page.COLLECTIONS.getLink() + ";id=" + menu.getCurrentSelection(),
+                    false);
 
-                service.retrieveEntriesForFolder(AppController.sessionId, selected.getId(),
-                    new AsyncCallback<ArrayList<Long>>() {
+                service.retrieveEntriesForFolder(AppController.sessionId,
+                    menu.getCurrentSelection(), new AsyncCallback<ArrayList<Long>>() {
 
                         @Override
                         public void onSuccess(ArrayList<Long> result) {
@@ -195,20 +229,19 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         });
 
         // user collection menu
-        this.display.getUserCollectionMenu().setSelectionModel(userFolderSelectionModel);
-        userFolderSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        final CollectionUserMenu userMenu = this.display.getUserCollectionMenu();
+        userMenu.addClickHandler(new ClickHandler() {
 
             @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                final FolderDetails selected = userFolderSelectionModel.getSelectedObject();
-                if (selected == null)
+            public void onClick(ClickEvent event) {
+                if (!userMenu.isValidClick(event))
                     return;
 
-                // clear userFolderSelection....if any
-                clearSelection(false);
+                History.newItem(
+                    Page.COLLECTIONS.getLink() + ";id=" + userMenu.getCurrentSelection(), false);
 
-                service.retrieveEntriesForFolder(AppController.sessionId, selected.getId(),
-                    new AsyncCallback<ArrayList<Long>>() {
+                service.retrieveEntriesForFolder(AppController.sessionId,
+                    userMenu.getCurrentSelection(), new AsyncCallback<ArrayList<Long>>() {
 
                         @Override
                         public void onSuccess(ArrayList<Long> result) {
@@ -229,27 +262,6 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                     });
             }
         });
-    }
-
-    /**
-     * Clears a selection model
-     * 
-     * @param clearUserSelection
-     *            determines which selection model to clear. true if
-     *            userFoldersSelectionModel should be cleared. False otherwise.
-     */
-
-    protected void clearSelection(boolean clearUserSelection) {
-        SingleSelectionModel<FolderDetails> toClear;
-        if (clearUserSelection)
-            toClear = userFolderSelectionModel;
-        else
-            toClear = systemFolderSelectionModel;
-
-        FolderDetails prevSelected = toClear.getSelectedObject();
-        if (prevSelected != null) {
-            toClear.setSelected(prevSelected, false);
-        }
     }
 
     protected void setMenuOptions() {
@@ -274,14 +286,10 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                             userFolders.add(folder);
                     }
 
-                    display.getSystemCollectionMenu().setRowData(0, systemFolder);
-                    display.getSystemCollectionMenu().setSelectionModel(systemFolderSelectionModel);
-                    //                    display.getUserCollectionMenu().setRowData(0, userFolders);
-                    //                    display.getUserCollectionMenu().setSelectionModel(userFolderSelectionModel);
+                    display.getSystemCollectionMenu().setFolderDetails(systemFolder);
+                    display.getUserCollectionMenu().setFolderDetails(userFolders);
                     userListProvider.getList().addAll(userFolders);
-
-                    // selection menu
-                    //                    display.setSelectionMenu(menu);
+                    systemListProvider.getList().addAll(systemFolder);
                 }
 
                 @Override
@@ -304,41 +312,13 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
     @Override
     public void go(HasWidgets container) {
         container.clear();
-        retrieveFolderDetails();
         container.add(this.display.asWidget());
     }
 
-    protected void retrieveFolderDetails() {
-
-        try {
-            final long folderId = Long.decode(param);
-            service.retrieveFolderDetails(AppController.sessionId, folderId,
-                new AsyncCallback<FolderDetails>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Window.alert("Failed to retrieve folder details for folderId " + folderId);
-                    }
-
-                    @Override
-                    public void onSuccess(FolderDetails result) {
-                        if (result.isSystemFolder())
-                            systemFolderSelectionModel.setSelected(result, true);
-                        else
-                            userFolderSelectionModel.setSelected(result, true);
-                    }
-                });
-        } catch (NumberFormatException nfe) {
-        }
-    }
-
-    //
-    // inner classes
-    //
-    public class KeyProvider implements ProvidesKey<FolderDetails> {
+    private class KeyProvider implements ProvidesKey<FolderDetails> {
 
         @Override
-        public Object getKey(FolderDetails item) {
+        public Long getKey(FolderDetails item) {
             return item.getId();
         }
     }

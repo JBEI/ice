@@ -93,9 +93,7 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 	box-shadow: 1px 1px 1px #ccc;
 }
 
-.collection_menu_header {
-	
-}
+
 
 .entry_input_error {
 	border: 1px solid #CC3333;
@@ -140,9 +138,11 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 
 /* style for the number in the menu e.g. Sample   8*/
 .menu_count {
-	color: #ccc;
+	color: #aab2bd;
 	float: right;
-	font-family: arial, ‘Arial Narrow’, sans-serif;
+	font-family: sans-serif;
+	font-size: 0.8em; 
+	font-weight: bold;
 }
 
 .action_button_small,.action_button {
@@ -325,9 +325,29 @@ a.cell_mouseover:hover {
 }
 
 /* COLLECTIONS */
+.collection_quick_add_image:hover {
+	cursor:pointer;
+}
+
 .collection_user_menu:hover {
-	background-color: #FAFAFA;
-	color: #9EC068;
+}
+
+.collection_user_menu {
+	font-family: Arial, sans-serif; 
+	font-size: 0.90em;
+}
+
+.collection_user_menu_row {
+    border-right: 1px solid #F2F2F2; 
+    border-top: 1px solid #F2F2F2;
+    padding: 6px;
+}
+
+.collection_user_menu_row:hover {
+	background-color: #CCCC99;
+	border-right: 1px solid #F1F1F1;
+	border-top:  1px solid #F1F1F1;
+	cursor: pointer;
 }
 
 .cell_resize:hover {
@@ -375,7 +395,7 @@ a.cell_mouseover:hover {
 
 .quick_search_btn,.login_button {
 	color: white;
-	background-color: #4787ED;
+	background-color: #0082c0;
 	padding: 4px 15px;
 	border: 1px solid #4787ED;
 	font-weight: bold;
@@ -809,13 +829,19 @@ td.datePickerMonth {
 
 /* COLLECTIONS */
 .collection_menu_table {
-	border-top: 2px solid #4787ED;
+	border-top: 2px solid #0082c0;
 	width: 220px;
-	border-bottom: 1px solid #4787ED;
+	border-bottom: 1px solid #0082c0;
+	
 }
 
 .collections_menu_header {
-	background-color: #cecece;
+	color: #888; 
+	font-size: 0.70em; 
+	font-family: sans-serif; 
+	font-weight: bold;
+	background-color: #F3F3F3;
+	padding: 10px;
 }
 
 /* END COLLECTIONS */
