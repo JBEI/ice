@@ -1,13 +1,17 @@
 package org.jbei.ice.test.parsers;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 
 import org.jbei.ice.lib.parsers.IceGenbankParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.utils.FileUtils;
+import org.jbei.ice.lib.vo.DNAFeature;
+import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.junit.Test;
 
@@ -19,60 +23,54 @@ public class IceGenbankParserTest {
     @Test
     public void testGeneArtCase() throws FileNotFoundException, IOException,
             InvalidFormatParserException {
-        IDNASequence parsed = tryParsing("AcrR_geneart_badlocus_badsequence.gb");
-        if (parsed == null) {
-            fail();
-        }
+        FeaturedDNASequence parsed = tryParsing("AcrR_geneart_badlocus_badsequence.gb");
+        parsed.getSequence();
     }
 
     @Test
     public void testReversedComplementCase() throws FileNotFoundException, IOException,
             InvalidFormatParserException {
-        IDNASequence parsed = tryParsing("JBx_000168.gb");
-        if (parsed == null) {
-            fail();
-        }
+        FeaturedDNASequence parsed = tryParsing("JBx_000168.gb");
+        parsed.getSequence();
     }
 
+    @Test
     public void testMultilineJoinCase() throws FileNotFoundException, IOException,
             InvalidFormatParserException {
-        IDNASequence parsed = tryParsing("multiline_join_test.gb");
-        if (parsed == null) {
-            fail();
-        }
+        FeaturedDNASequence parsed = tryParsing("multiline_join_test.gb");
+        List<DNAFeature> features = parsed.getFeatures();
+        assertEquals(5, features.get(3).getLocations().size());
     }
 
     @Test
     public void testApeNoLocusNameCase() throws FileNotFoundException, IOException,
             InvalidFormatParserException {
-        IDNASequence parsed = tryParsing("pcI-LasI_ape_no_locusname.ape");
-        if (parsed == null) {
-            fail();
-        }
+        FeaturedDNASequence parsed = tryParsing("pcI-LasI_ape_no_locusname.ape");
+        parsed.getSequence();
     }
 
     @Test
     public void testPucCase() throws FileNotFoundException, IOException,
             InvalidFormatParserException {
-        IDNASequence parsed = tryParsing("pUC19.gb");
-        if (parsed == null) {
-            fail();
-        }
+        FeaturedDNASequence parsed = tryParsing("pUC19.gb");
+        parsed.getSequence();
     }
 
     @Test
     public void testSynLocusCase() throws FileNotFoundException, IOException,
             InvalidFormatParserException {
         IDNASequence parsed = tryParsing("SYNPUC19V.gb");
+        parsed.getSequence();
+    }
+
+    private FeaturedDNASequence tryParsing(String testFile) throws FileNotFoundException,
+            IOException, InvalidFormatParserException {
+        testFile = getResourceAsString(resourceLocation + testFile);
+        FeaturedDNASequence parsed = (FeaturedDNASequence) iceGenbankParser.parse(testFile);
         if (parsed == null) {
             fail();
         }
-    }
-
-    private IDNASequence tryParsing(String testFile) throws FileNotFoundException, IOException,
-            InvalidFormatParserException {
-        testFile = getResourceAsString(resourceLocation + testFile);
-        return iceGenbankParser.parse(testFile);
+        return parsed;
     }
 
     private String getResourceAsString(String resourceName) throws FileNotFoundException,

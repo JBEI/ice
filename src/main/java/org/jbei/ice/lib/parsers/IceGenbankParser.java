@@ -362,17 +362,32 @@ public class IceGenbankParser extends AbstractParser {
                     type = chunk[0].trim();
 
                     chunk[1] = chunk[1].trim();
-                    boolean reversedLocations = false;
-                    if (chunk[1].startsWith("complement(join")) {
-                        reversedLocations = true; //standard compliant complement(join(location, location))
-                    }
-                    if (chunk[1].startsWith("complement")) {
-                        complement = true;
-                        chunk[1] = chunk[1].trim();
-                        chunk[1] = chunk[1].substring(11, chunk[1].length() - 1).trim();
+                    String locationString = chunk[1].trim();
+                    /* peak at the next line. If next line doesn't start with a key, append 
+                    next line to locationString */
+                    while (true) {
+                        String nextLine = lines[i + 1].trim();
+                        if (nextLine.startsWith("/")) {
+                            break;
+                        } else {
+                            i++;
+                            line = lines[i];
+                            locationString += line.trim();
+                        }
                     }
 
-                    genbankLocations = parseGenbankLocation(chunk[1]);
+                    boolean reversedLocations = false;
+                    if (locationString.startsWith("complement(join")) {
+                        reversedLocations = true; //standard compliant complement(join(location, location))
+                    }
+                    if (locationString.startsWith("complement")) {
+                        complement = true;
+                        locationString = locationString.trim();
+                        locationString = locationString.substring(11, locationString.length() - 1)
+                                .trim();
+                    }
+
+                    genbankLocations = parseGenbankLocation(locationString);
                     if (reversedLocations) {
                         Collections.reverse(genbankLocations);
                     }
