@@ -12,11 +12,15 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -37,6 +41,12 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
 
         @Source("org/jbei/ice/client/resource/image/minus.png")
         ImageResource minusImage();
+
+        @Source("org/jbei/ice/client/resource/image/edit.png")
+        ImageResource editImage();
+
+        @Source("org/jbei/ice/client/resource/image/delete.png")
+        ImageResource deleteImage();
     }
 
     private final FlexTable table;
@@ -100,6 +110,9 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
             return false;
 
         Cell cell = this.table.getCellForEvent(event);
+        if (cell == null)
+            return false;
+
         return (cell.getCellIndex() != 0 || cell.getRowIndex() != 0);
     }
 
@@ -163,21 +176,75 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
 
         private final HTMLPanel panel;
         private final FolderDetails folder;
+        private final String html;
+        private final Image edit = new Image(resources.editImage());
+        private final Image delete = new Image(resources.deleteImage());
+        private final Label count;
+        private final HorizontalPanel wrapper;
+        private boolean over;
+        private boolean out;
 
         public MenuCell(FolderDetails folder) {
 
-            this.folder = folder;
+            super.sinkEvents(Event.ONMOUSEOVER | Event.ONMOUSEOUT);
+            edit.setStyleName("menu_count");
 
-            String html = "<span style=\"padding: 5px\" class=\"collection_user_menu\">"
-                    + folder.getName() + "</span><span class=\"menu_count\">"
-                    + formatNumber(folder.getCount()) + "</span>";
+            this.folder = folder;
+            wrapper = new HorizontalPanel();
+            wrapper.add(edit);
+            wrapper.setHeight("16px");
+            wrapper.add(delete);
+            wrapper.setStyleName("menu_count");
+
+            html = "<span style=\"padding: 5px\" class=\"collection_user_menu\">"
+                    + folder.getName() + "</span><span id=\"right" + folder.getId() + "\"></span>";
+            count = new Label(formatNumber(folder.getCount()));
+            count.setStyleName("menu_count");
             panel = new HTMLPanel(html);
+            panel.add(count, "right" + folder.getId());
             panel.setStyleName("collection_user_menu_row");
             initWidget(panel);
         }
 
         public long getFolderId() {
             return this.folder.getId();
+        }
+
+        @Override
+        public void onBrowserEvent(Event event) {
+            super.onBrowserEvent(event);
+
+            switch (DOM.eventGetType(event)) {
+            case Event.ONMOUSEOVER:
+                if (!over && !out) { // first time
+                    over = true;
+                    panel.remove(count);
+                    panel.add(wrapper, "right" + folder.getId());
+                } else if (over && !out) {
+
+                } else if (!over && out) {
+
+                } else { // in and out {
+                    // came back from an element in side this area
+                    out = false;
+                    break;
+                }
+
+                break;
+
+            case Event.ONMOUSEOUT:
+                if (over) { // in an element over this object (Menu)
+                    out = true;
+                    break;
+                }
+
+                if (over && !out) {
+                    panel.remove(wrapper);
+                    panel.add(count, ("right" + folder.getId()));
+                }
+                break;
+
+            }
         }
 
         @Override

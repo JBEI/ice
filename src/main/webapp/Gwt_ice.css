@@ -325,6 +325,22 @@ a.cell_mouseover:hover {
 }
 
 /* COLLECTIONS */
+.collection_menu_table {
+    border-top: 2px solid #0082c0;
+    width: 220px;
+    border-bottom: 1px solid #aab2bd;
+    
+}
+
+.collections_menu_header {
+    color: #888; 
+    font-size: 0.70em; 
+    font-family: sans-serif; 
+    font-weight: bold;
+    background-color: #F3F3F3;
+    padding: 10px;
+}
+
 .collection_quick_add_image:hover {
 	cursor:pointer;
 }
@@ -341,12 +357,12 @@ a.cell_mouseover:hover {
     border-right: 1px solid #F2F2F2; 
     border-top: 1px solid #F2F2F2;
     padding: 6px;
+    color: #0082c0;
 }
 
 .collection_user_menu_row:hover {
 	background-color: #CCCC99;
-	border-right: 1px solid #F1F1F1;
-	border-top:  1px solid #F1F1F1;
+	border: 1px solid #aab2bd;
 	cursor: pointer;
 }
 
@@ -827,24 +843,7 @@ td.datePickerMonth {
 	background-color: #cecece;
 }
 
-/* COLLECTIONS */
-.collection_menu_table {
-	border-top: 2px solid #0082c0;
-	width: 220px;
-	border-bottom: 1px solid #0082c0;
-	
-}
 
-.collections_menu_header {
-	color: #888; 
-	font-size: 0.70em; 
-	font-family: sans-serif; 
-	font-weight: bold;
-	background-color: #F3F3F3;
-	padding: 10px;
-}
-
-/* END COLLECTIONS */
 /* MENU BAR*/
 .gwt-MenuBar {
 	
