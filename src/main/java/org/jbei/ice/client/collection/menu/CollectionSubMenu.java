@@ -50,6 +50,9 @@ public class CollectionSubMenu implements IsWidget {
 
     private Button createAddToButton() {
         final Button addTo = new Button("Add To");
+        addTo.setStyleName("buttonGroupItem");
+        addTo.addStyleName("firstItem");
+        addTo.addStyleName("dropDownAdd");
         MenuClickHandler addToHandler = new MenuClickHandler(addToSelection, addTo.getElement());
         addTo.addClickHandler(addToHandler);
         return addTo;
@@ -57,11 +60,14 @@ public class CollectionSubMenu implements IsWidget {
 
     private Button createRemoveMenu() {
         Button remove = new Button("Remove");
+        remove.setStyleName("buttonGroupItem");
         return remove;
     }
 
     private Button createMoveMenu() {
         final Button move = new Button("Move To");
+        move.setStyleName("buttonGroupItem");
+        move.addStyleName("dropDownMove");
         MenuClickHandler clickHandler = new MenuClickHandler(moveToSelection, move.getElement());
         move.addClickHandler(clickHandler);
         return move;
@@ -90,6 +96,7 @@ public class CollectionSubMenu implements IsWidget {
 
         public MenuClickHandler(Widget widget, Element autoHide) {
             this.popup = new PopupPanel();
+            this.popup.setStyleName("add_to_popup");
             this.popup.setAutoHideEnabled(true);
             this.popup.addAutoHidePartner(autoHide);
             this.popup.setWidget(widget);
@@ -100,7 +107,7 @@ public class CollectionSubMenu implements IsWidget {
         public void onClick(ClickEvent event) {
             if (!popup.isShowing()) {
                 Widget source = (Widget) event.getSource();
-                int x = source.getAbsoluteLeft();
+                int x = source.getAbsoluteLeft() - 1;
                 int y = source.getOffsetHeight() + source.getAbsoluteTop();
                 popup.setPopupPosition(x, y);
                 popup.show();

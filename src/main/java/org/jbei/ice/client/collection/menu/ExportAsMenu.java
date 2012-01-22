@@ -25,6 +25,9 @@ public class ExportAsMenu implements IsWidget {
 
     public ExportAsMenu() {
         exportAs = new Button(LABEL);
+        exportAs.setStyleName("buttonGroupItem");
+        exportAs.addStyleName("firstItem");
+        exportAs.addStyleName("dropDownExport");
 
         // renderer for options list
         options = new CellList<ExportAsOption>(new AbstractCell<ExportAsOption>() {
@@ -44,9 +47,7 @@ public class ExportAsMenu implements IsWidget {
                 exportAs.getElement());
 
         exportAs.addClickHandler(exportAsClickHandler);
-
         optionSelection = new SingleSelectionModel<ExportAsOption>();
-
         optionSelection.addSelectionChangeHandler(new Handler() {
 
             @Override
@@ -56,6 +57,7 @@ public class ExportAsMenu implements IsWidget {
         });
 
         options.setSelectionModel(optionSelection);
+
     }
 
     public SingleSelectionModel<ExportAsOption> getSelectionModel() {

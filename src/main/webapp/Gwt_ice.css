@@ -138,11 +138,10 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 
 /* style for the number in the menu e.g. Sample   8*/
 .menu_count {
-	color: #aab2bd;
+	color: #999;
 	float: right;
 	font-family: sans-serif;
 	font-size: 0.8em; 
-	font-weight: bold;
 }
 
 .action_button_small,.action_button {
@@ -325,16 +324,86 @@ a.cell_mouseover:hover {
 }
 
 /* COLLECTIONS */
+
+.add_to_popup {
+	border: 1px solid #A5A5A5;
+	-webkit-box-shadow: 4px 4px 7px  rgba(0, 0, 0, .1);
+	font-size: 0.70em;
+}
+
+.buttonGroup {
+    background-color: #f1f1f1;
+    border: 1px solid #A5A5A5;
+    -webkit-border-radius: 2px;
+    -webkit-box-shadow: 1px 1px 3px  rgba(0, 0, 0, .1);
+    display: inline-block;
+    margin: 0px;
+}
+
+.buttonGroupItem {
+    display: inline-block;
+    cursor: pointer;
+    color: #393939;
+    font-weight: bold;
+    font-family: sans-serif;
+    text-align: center;
+    width: 90px;
+    height: 28px;
+    border: 0px;
+    border-left: 1px solid #D9D9D9;
+    background-color: #f1f1f1;
+    border-top: 2px solid #f1f1f1;
+    border-bottom: 2px solid #f1f1f1;
+}
+
+.buttonGroupItem:hover {
+    border-top: 2px solid #6b81b2;
+    background-color: #f2f2f2;
+}
+
+.dropDownAdd {
+    background-image:url('sort_down.png');
+    background-repeat:no-repeat;
+    background-position: 70px 5px;
+    padding-right: 11px;
+}
+
+.dropDownMove {
+    background-image:url('sort_down.png');
+    background-repeat:no-repeat;
+    background-position: 71px 5px;
+    padding-right: 15px;
+}
+
+
+.dropDownExport {
+    background-image:url('/gwt_ice/sort_down.png');
+    background-repeat:no-repeat;
+    background-position: 74px 5px;
+    padding-right: 15px;
+}
+
+.firstItem {
+    border-left: 0px;
+}
+
 .collection_menu_table {
     border-top: 2px solid #0082c0;
     width: 220px;
     border-bottom: 1px solid #aab2bd;
-    
+}
+
+.user_collection_action {
+	background-color: #CCCC;
+}
+
+.user_collection_action:hover {
+	background-color: #F1F1F1;
 }
 
 .collections_menu_header {
-    color: #888; 
-    font-size: 0.70em; 
+    color: #444; 
+    font-size: 0.75em; 
     font-family: sans-serif; 
     font-weight: bold;
     background-color: #F3F3F3;
@@ -361,7 +430,7 @@ a.cell_mouseover:hover {
 }
 
 .collection_user_menu_row:hover {
-	background-color: #CCCC99;
+	background-color: #F2F2F2;
 	border: 1px solid #aab2bd;
 	cursor: pointer;
 }

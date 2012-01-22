@@ -70,8 +70,10 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
 
         tablePanel.clear();
 
-        if (selectionWidget != null)
+        if (selectionWidget != null) {
             tablePanel.add(selectionWidget);
+            tablePanel.add(new HTML("&nbsp;"));
+        }
 
         tablePanel.add(table);
         EntryTablePager tablePager = new EntryTablePager();

@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import org.jbei.ice.shared.FolderDetails;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
@@ -16,6 +18,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -113,7 +116,11 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         if (cell == null)
             return false;
 
-        return (cell.getCellIndex() != 0 || cell.getRowIndex() != 0);
+        boolean isValid = (cell.getCellIndex() != 0 || cell.getRowIndex() != 0);
+        if (!isValid)
+            return isValid;
+
+        return isValid;
     }
 
     public void addFolderDetail(FolderDetails folder) {
@@ -177,30 +184,38 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         private final HTMLPanel panel;
         private final FolderDetails folder;
         private final String html;
-        private final Image edit = new Image(resources.editImage());
-        private final Image delete = new Image(resources.deleteImage());
-        private final Label count;
-        private final HorizontalPanel wrapper;
-        private boolean over;
-        private boolean out;
 
-        public MenuCell(FolderDetails folder) {
+        private final Label count;
+        private final HoverCell action;
+
+        public MenuCell(final FolderDetails folder) {
 
             super.sinkEvents(Event.ONMOUSEOVER | Event.ONMOUSEOUT);
-            edit.setStyleName("menu_count");
 
             this.folder = folder;
-            wrapper = new HorizontalPanel();
-            wrapper.add(edit);
-            wrapper.setHeight("16px");
-            wrapper.add(delete);
-            wrapper.setStyleName("menu_count");
+            action = new HoverCell();
+            action.getEdit().addClickHandler(new ClickHandler() {
+
+                @Override
+                public void onClick(ClickEvent event) {
+                    // TODO : probably should be moved outside of this class
+                    event.stopPropagation();
+                    Cell cell = table.getCellForEvent(event);
+                    TextBox box = new TextBox();
+                    box.setText(folder.getName());
+                    table.setWidget(cell.getRowIndex(), cell.getCellIndex(), box);
+                    box.setFocus(true);
+                }
+            });
 
             html = "<span style=\"padding: 5px\" class=\"collection_user_menu\">"
                     + folder.getName() + "</span><span id=\"right" + folder.getId() + "\"></span>";
+
+            panel = new HTMLPanel(html);
+
             count = new Label(formatNumber(folder.getCount()));
             count.setStyleName("menu_count");
-            panel = new HTMLPanel(html);
+
             panel.add(count, "right" + folder.getId());
             panel.setStyleName("collection_user_menu_row");
             initWidget(panel);
@@ -216,34 +231,25 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
 
             switch (DOM.eventGetType(event)) {
             case Event.ONMOUSEOVER:
-                if (!over && !out) { // first time
-                    over = true;
-                    panel.remove(count);
-                    panel.add(wrapper, "right" + folder.getId());
-                } else if (over && !out) {
-
-                } else if (!over && out) {
-
-                } else { // in and out {
-                    // came back from an element in side this area
-                    out = false;
-                    break;
-                }
-
+                panel.remove(count);
+                panel.add(action, "right" + folder.getId());
                 break;
 
             case Event.ONMOUSEOUT:
-                if (over) { // in an element over this object (Menu)
-                    out = true;
-                    break;
+                EventTarget target = event.getRelatedEventTarget(); // image
+
+                if (Element.is(target)) {
+                    Element element = Element.as(target);
+                    Element eDelete = action.getDelete().getElement();
+                    Element eEdit = action.getEdit().getElement();
+
+                    if (element.equals(eEdit) || element.equals(eDelete))
+                        break;
                 }
 
-                if (over && !out) {
-                    panel.remove(wrapper);
-                    panel.add(count, ("right" + folder.getId()));
-                }
+                panel.remove(action);
+                panel.add(count, ("right" + folder.getId()));
                 break;
-
             }
         }
 
@@ -255,6 +261,38 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         private String formatNumber(long l) {
             NumberFormat format = NumberFormat.getFormat("##,###");
             return format.format(l);
+        }
+    }
+
+    private class HoverCell extends Composite {
+        private final HorizontalPanel panel;
+        private final Image edit;
+        private final Image delete;
+
+        public HoverCell() {
+
+            panel = new HorizontalPanel();
+            panel.setStyleName("user_collection_action");
+            initWidget(panel);
+
+            edit = new Image(resources.editImage());
+            delete = new Image(resources.deleteImage());
+
+            panel.add(edit);
+            panel.setHeight("16px");
+            HTML pipe = new HTML("&nbsp;|&nbsp;");
+            pipe.addStyleName("color_eee");
+            panel.add(pipe);
+            panel.add(delete);
+            panel.setStyleName("menu_count");
+        }
+
+        public Image getEdit() {
+            return this.edit;
+        }
+
+        public Image getDelete() {
+            return this.delete;
         }
     }
 }

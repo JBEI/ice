@@ -51,8 +51,6 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
     private final ListDataProvider<FolderDetails> userListProvider;
     private final ListDataProvider<FolderDetails> systemListProvider;
 
-    private final String param;
-
     // selection menu
     private final EntrySelectionModelMenu subMenu;
     private final Button addToSubmit;
@@ -64,7 +62,6 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         this.service = service;
         this.eventBus = eventBus;
         this.display = display;
-        this.param = param;
 
         // initialize all parameters
         this.collectionsDataTable = new CollectionEntriesDataTable();
@@ -117,6 +114,10 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 return ids;
             }
         });
+
+        // retrieve the referenced folder
+        if (param != null)
+            retrieveEntriesForFolder(Long.decode(param));
     }
 
     private void initCreateCollectionHandlers() {
@@ -202,29 +203,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 if (!menu.isValidClick(event))
                     return;
 
-                History.newItem(Page.COLLECTIONS.getLink() + ";id=" + menu.getCurrentSelection(),
-                    false);
-
-                service.retrieveEntriesForFolder(AppController.sessionId,
-                    menu.getCurrentSelection(), new AsyncCallback<ArrayList<Long>>() {
-
-                        @Override
-                        public void onSuccess(ArrayList<Long> result) {
-                            if (result == null)
-                                return;
-
-                            entryDataProvider.setValues(result);
-                            collectionsDataTable.setVisibleRangeAndClearData(
-                                collectionsDataTable.getVisibleRange(), false);
-                            checkAndAddEntryTable(collectionsDataTable);
-                            display.setDataView(collectionsDataTable);
-                        }
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            Window.alert("Error: " + caught.getMessage());
-                        }
-                    });
+                retrieveEntriesForFolder(menu.getCurrentSelection());
             }
         });
 
@@ -237,31 +216,34 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 if (!userMenu.isValidClick(event))
                     return;
 
-                History.newItem(
-                    Page.COLLECTIONS.getLink() + ";id=" + userMenu.getCurrentSelection(), false);
-
-                service.retrieveEntriesForFolder(AppController.sessionId,
-                    userMenu.getCurrentSelection(), new AsyncCallback<ArrayList<Long>>() {
-
-                        @Override
-                        public void onSuccess(ArrayList<Long> result) {
-                            if (result == null)
-                                return;
-
-                            entryDataProvider.setValues(result);
-                            collectionsDataTable.setVisibleRangeAndClearData(
-                                collectionsDataTable.getVisibleRange(), false);
-                            checkAndAddEntryTable(collectionsDataTable);
-                            display.setDataView(collectionsDataTable);
-                        }
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            Window.alert("Error: " + caught.getMessage());
-                        }
-                    });
+                retrieveEntriesForFolder(userMenu.getCurrentSelection());
             }
         });
+    }
+
+    private void retrieveEntriesForFolder(long folderId) {
+        History.newItem(Page.COLLECTIONS.getLink() + ";id=" + folderId, false);
+
+        service.retrieveEntriesForFolder(AppController.sessionId, folderId,
+            new AsyncCallback<ArrayList<Long>>() {
+
+                @Override
+                public void onSuccess(ArrayList<Long> result) {
+                    if (result == null)
+                        return;
+
+                    entryDataProvider.setValues(result);
+                    collectionsDataTable.setVisibleRangeAndClearData(
+                        collectionsDataTable.getVisibleRange(), false);
+                    checkAndAddEntryTable(collectionsDataTable);
+                    display.setDataView(collectionsDataTable);
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert("Error: " + caught.getMessage());
+                }
+            });
     }
 
     protected void setMenuOptions() {
