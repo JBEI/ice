@@ -19,11 +19,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public abstract class AddToFolderHandler extends SubmitHandler {
 
-    private final RegistryServiceAsync service;
-
     public AddToFolderHandler(RegistryServiceAsync service) {
         super(service);
-        this.service = service;
     }
 
     @Override
@@ -46,9 +43,9 @@ public abstract class AddToFolderHandler extends SubmitHandler {
                 @Override
                 public void onSuccess(Boolean result) {
                     if (result)
-                        Window.alert("Add to successful");
+                        onAddSuccess();
                     else
-                        Window.alert("Add To did not work");
+                        Window.alert("There was an error adding");
                 }
 
                 @Override
@@ -57,6 +54,8 @@ public abstract class AddToFolderHandler extends SubmitHandler {
                 }
             });
     }
+
+    public abstract void onAddSuccess();
 
     @Override
     protected ArrayList<FolderDetails> getSource() {

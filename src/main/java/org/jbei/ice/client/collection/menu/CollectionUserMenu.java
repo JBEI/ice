@@ -1,6 +1,7 @@
 package org.jbei.ice.client.collection.menu;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import org.jbei.ice.shared.FolderDetails;
 
@@ -16,6 +17,7 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -140,6 +142,18 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         table.setWidget(row, 0, cell);
     }
 
+    public void setBusyIndicator(Set<FolderDetails> folders) {
+        for (int i = 0; i < table.getRowCount(); i += 1) {
+            Widget w = table.getWidget(i, 0);
+            if (!(w instanceof MenuCell))
+                continue;
+
+            MenuCell cell = (MenuCell) w;
+            if (folders.contains(cell.getFolder()))
+                Window.alert("Got it");
+        }
+    }
+
     @Override
     public HandlerRegistration addClickHandler(ClickHandler handler) {
         return addDomHandler(handler, ClickEvent.getType());
@@ -223,6 +237,10 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
 
         public long getFolderId() {
             return this.folder.getId();
+        }
+
+        public FolderDetails getFolder() {
+            return this.folder;
         }
 
         @Override

@@ -1,6 +1,7 @@
 package org.jbei.ice.client.collection.presenter;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
@@ -57,7 +58,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
     private final Button moveToSubmit;
 
     public CollectionsEntriesPresenter(RegistryServiceAsync service, HandlerManager eventBus,
-            ICollectionEntriesView display, String param) {
+            final ICollectionEntriesView display, String param) {
 
         this.service = service;
         this.eventBus = eventBus;
@@ -74,8 +75,6 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
 
         // selection models used for menus
         initMenus();
-
-        setMenuOptions();
 
         // init text box
         initCreateCollectionHandlers();
@@ -98,6 +97,14 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         addToSubmit.addClickHandler(new AddToFolderHandler(this.service) {
 
             @Override
+            public void onClick(ClickEvent event) {
+                super.onClick(event);
+                subMenu.getCollectionMenu().hidePopup();
+                Set<FolderDetails> folders = subMenu.getCollectionMenu().getAddToDestination();
+                display.getUserCollectionMenu().setBusyIndicator(folders);
+            }
+
+            @Override
             protected ArrayList<FolderDetails> getDestination() {
                 ArrayList<FolderDetails> list = new ArrayList<FolderDetails>();
                 list.addAll(subMenu.getCollectionMenu().getAddToDestination());
@@ -112,6 +119,11 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                     ids.add(Long.decode(datum.getRecordId()));
                 }
                 return ids;
+            }
+
+            @Override
+            public void onAddSuccess() {
+                // TODO : 
             }
         });
 
@@ -219,34 +231,6 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 retrieveEntriesForFolder(userMenu.getCurrentSelection());
             }
         });
-    }
-
-    private void retrieveEntriesForFolder(long folderId) {
-        History.newItem(Page.COLLECTIONS.getLink() + ";id=" + folderId, false);
-
-        service.retrieveEntriesForFolder(AppController.sessionId, folderId,
-            new AsyncCallback<ArrayList<Long>>() {
-
-                @Override
-                public void onSuccess(ArrayList<Long> result) {
-                    if (result == null)
-                        return;
-
-                    entryDataProvider.setValues(result);
-                    collectionsDataTable.setVisibleRangeAndClearData(
-                        collectionsDataTable.getVisibleRange(), false);
-                    checkAndAddEntryTable(collectionsDataTable);
-                    display.setDataView(collectionsDataTable);
-                }
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert("Error: " + caught.getMessage());
-                }
-            });
-    }
-
-    protected void setMenuOptions() {
 
         // list of collections for menu
         service.retrieveCollections(AppController.sessionId,
@@ -277,6 +261,31 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 @Override
                 public void onFailure(Throwable caught) {
                     Window.alert("Error retrieving Collections: " + caught.getMessage());
+                }
+            });
+    }
+
+    private void retrieveEntriesForFolder(long folderId) {
+        History.newItem(Page.COLLECTIONS.getLink() + ";id=" + folderId, false);
+
+        service.retrieveEntriesForFolder(AppController.sessionId, folderId,
+            new AsyncCallback<ArrayList<Long>>() {
+
+                @Override
+                public void onSuccess(ArrayList<Long> result) {
+                    if (result == null)
+                        return;
+
+                    entryDataProvider.setValues(result);
+                    collectionsDataTable.setVisibleRangeAndClearData(
+                        collectionsDataTable.getVisibleRange(), false);
+                    checkAndAddEntryTable(collectionsDataTable);
+                    display.setDataView(collectionsDataTable);
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert("Error: " + caught.getMessage());
                 }
             });
     }

@@ -86,10 +86,12 @@ public class CollectionSubMenu implements IsWidget {
         return menuHolder;
     }
 
+    public void hidePopup() {
+    }
+
     //
     // inner classes
     //
-
     private class MenuClickHandler implements ClickHandler {
 
         private final PopupPanel popup;
@@ -108,7 +110,7 @@ public class CollectionSubMenu implements IsWidget {
             if (!popup.isShowing()) {
                 Widget source = (Widget) event.getSource();
                 int x = source.getAbsoluteLeft() - 1;
-                int y = source.getOffsetHeight() + source.getAbsoluteTop();
+                int y = source.getOffsetHeight() + source.getAbsoluteTop() + 1;
                 popup.setPopupPosition(x, y);
                 popup.show();
             } else {

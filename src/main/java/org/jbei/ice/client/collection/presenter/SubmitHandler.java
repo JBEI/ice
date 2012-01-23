@@ -14,7 +14,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 // TODO : currently this just supports "Move To". Sub-class to support both
 public abstract class SubmitHandler implements ClickHandler {
 
-    private final RegistryServiceAsync service;
+    protected final RegistryServiceAsync service;
 
     public SubmitHandler(RegistryServiceAsync service) {
         this.service = service;

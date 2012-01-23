@@ -327,15 +327,14 @@ a.cell_mouseover:hover {
 
 .add_to_popup {
 	border: 1px solid #A5A5A5;
-	-webkit-box-shadow: 4px 4px 7px  rgba(0, 0, 0, .1);
-	font-size: 0.70em;
+	-webkit-box-shadow: 4px 4px 7px #DDD;
 }
 
 .buttonGroup {
     background-color: #f1f1f1;
     border: 1px solid #A5A5A5;
     -webkit-border-radius: 2px;
-    -webkit-box-shadow: 1px 1px 3px  rgba(0, 0, 0, .1);
+    -webkit-box-shadow: 1px 1px 1px #CCC;
     display: inline-block;
     margin: 0px;
 }
