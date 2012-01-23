@@ -1,0 +1,20 @@
+@sprite .dropDownAdd {
+	gwt-image: 'sortDown';
+    background-position: 64px 9px;
+    padding-right: 11px;
+    height: 28px;
+    width: 80px;
+}
+
+.subMenuRemove {
+	height: 28px;
+    width: 80px;
+}
+
+@sprite .dropDownMove {
+	gwt-image: 'sortDown';
+	height: 28px;
+	width: 80px;
+	background-position: 63px 9px;
+	padding-right: 18px; 
+}

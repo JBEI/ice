@@ -102,7 +102,7 @@ public interface RegistryServiceAsync {
             ArrayList<Long> entryIds, AsyncCallback<Boolean> callback);
 
     void addEntriesToCollection(String sid, ArrayList<Long> destination, ArrayList<Long> entryIds,
-            AsyncCallback<Boolean> callback);
+            AsyncCallback<ArrayList<FolderDetails>> callback);
 
     void retrieveStorageRoot(String sid, AsyncCallback<ArrayList<StorageInfo>> callback);
 

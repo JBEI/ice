@@ -1,10 +1,16 @@
 package org.jbei.ice.client.collection.menu;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.CssResource.ImportedWithPrefix;
+import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.resources.client.ImageResource.ImageOptions;
+import com.google.gwt.resources.client.ImageResource.RepeatStyle;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.Element;
@@ -18,30 +24,75 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class ExportAsMenu implements IsWidget {
 
+    @ImportedWithPrefix("")
+    interface Style extends CssResource, CellList.Style {
+        /**
+         * The path to the default CSS styles used by this resource.
+         */
+        String DEFAULT_CSS = "org/jbei/ice/client/resource/css/ExportAs.css";
+
+        String subMenuExport();
+
+        /**
+         * Applied to even items.
+         */
+        String cellListEvenItem();
+
+        /**
+         * Applied to the keyboard selected item.
+         */
+        String cellListKeyboardSelectedItem();
+
+        /**
+         * Applied to odd items.
+         */
+        String cellListOddItem();
+
+        /**
+         * Applied to selected items.
+         */
+        String cellListSelectedItem();
+
+        /**
+         * Applied to the widget.
+         */
+        String cellListWidget();
+    }
+
+    interface ExportAsResource extends CellList.Resources {
+
+        static ExportAsResource INSTANCE = GWT.create(ExportAsResource.class);
+
+        @Source("org/jbei/ice/client/resource/image/arrow_down.png")
+        @ImageOptions(repeatStyle = RepeatStyle.None)
+        ImageResource sortDown();
+
+        @Source(Style.DEFAULT_CSS)
+        Style cellListStyle();
+    }
+
     private static final String LABEL = "Export As";
     private final Button exportAs;
     private final CellList<ExportAsOption> options;
     private final SingleSelectionModel<ExportAsOption> optionSelection;
 
     public ExportAsMenu() {
+        ExportAsResource.INSTANCE.cellListStyle().ensureInjected();
         exportAs = new Button(LABEL);
         exportAs.setStyleName("buttonGroupItem");
         exportAs.addStyleName("firstItem");
-        exportAs.addStyleName("dropDownExport");
+        exportAs.addStyleName(ExportAsResource.INSTANCE.cellListStyle().subMenuExport());
 
         // renderer for options list
         options = new CellList<ExportAsOption>(new AbstractCell<ExportAsOption>() {
 
             @Override
             public void render(Context context, ExportAsOption value, SafeHtmlBuilder sb) {
-                sb.appendHtmlConstant("<span>" + value.toString() + "</span>");
+                sb.appendHtmlConstant("<span style=>" + value.toString() + "</span>");
             }
-        });
+        }, ExportAsResource.INSTANCE);
 
-        ArrayList<ExportAsOption> list = new ArrayList<ExportAsOption>();
-        for (ExportAsOption option : ExportAsOption.values())
-            list.add(option);
-        options.setRowData(list);
+        options.setRowData(Arrays.asList(ExportAsOption.values()));
 
         final MenuClickHandler exportAsClickHandler = new MenuClickHandler(options,
                 exportAs.getElement());
@@ -57,7 +108,6 @@ public class ExportAsMenu implements IsWidget {
         });
 
         options.setSelectionModel(optionSelection);
-
     }
 
     public SingleSelectionModel<ExportAsOption> getSelectionModel() {
@@ -89,8 +139,8 @@ public class ExportAsMenu implements IsWidget {
         public void onClick(ClickEvent event) {
             if (!popup.isShowing()) {
                 Widget source = (Widget) event.getSource();
-                int x = source.getAbsoluteLeft();
-                int y = source.getOffsetHeight() + source.getAbsoluteTop();
+                int x = source.getAbsoluteLeft() - 1;
+                int y = source.getOffsetHeight() + source.getAbsoluteTop() + 1;
                 popup.setPopupPosition(x, y);
                 popup.show();
             } else {

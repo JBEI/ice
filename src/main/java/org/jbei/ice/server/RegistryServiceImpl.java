@@ -763,17 +763,25 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean addEntriesToCollection(String sid, ArrayList<Long> destination,
+    public ArrayList<FolderDetails> addEntriesToCollection(String sid, ArrayList<Long> destination,
             ArrayList<Long> entryIds) {
 
+        ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
+
+        // TODO : see todo in moveToUserCollection
         try {
             for (long folderId : destination) {
-                FolderManager.addFolderContents(folderId, entryIds);
+                Folder folder = FolderManager.addFolderContents(folderId, entryIds);
+                FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), false);
+                int folderSize = FolderManager.getFolderSize(folder.getId()); // TODO : this call may not be needed
+                details.setCount(folderSize);
+                details.setDescription(folder.getDescription());
+                results.add(details);
             }
-            return true;
+            return results;
         } catch (ManagerException e) {
             Logger.error(e);
-            return false;
+            return null;
         }
     }
 

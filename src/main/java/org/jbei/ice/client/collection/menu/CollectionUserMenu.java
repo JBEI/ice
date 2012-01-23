@@ -52,6 +52,9 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
 
         @Source("org/jbei/ice/client/resource/image/delete.png")
         ImageResource deleteImage();
+
+        @Source("org/jbei/ice/client/resource/image/busy.gif")
+        ImageResource busyIndicatorImage();
     }
 
     private final FlexTable table;
@@ -122,6 +125,9 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         if (!isValid)
             return isValid;
 
+        if (quickAddBox.isVisible())
+            isValid = (cell.getRowIndex() != 1);
+
         return isValid;
     }
 
@@ -150,7 +156,26 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
 
             MenuCell cell = (MenuCell) w;
             if (folders.contains(cell.getFolder()))
-                Window.alert("Got it");
+                cell.showBusyIndicator();
+        }
+    }
+
+    public void updateCounts(ArrayList<FolderDetails> folders) {
+        for (int i = 0; i < table.getRowCount(); i += 1) {
+            Widget w = table.getWidget(i, 0);
+            if (!(w instanceof MenuCell))
+                continue;
+
+            MenuCell cell = (MenuCell) w;
+
+            // TODO highly inefficient
+            for (FolderDetails folder : folders) {
+                if (folder.getId() == cell.getFolderId()) {
+                    cell.updateCount(folder.getCount());
+                    cell.removeBusyIndicator();
+                    break;
+                }
+            }
         }
     }
 
@@ -182,6 +207,7 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
             quickAddButton.setStyleName("collection_quick_add_image");
             quickAddBox.setText("");
             quickAddBox.setVisible(true);
+            quickAddBox.setFocus(true);
         }
     }
 
@@ -198,15 +224,18 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         private final HTMLPanel panel;
         private final FolderDetails folder;
         private final String html;
+        private final Image busy;
 
-        private final Label count;
+        private Label count;
         private final HoverCell action;
+        private final String folderId;
 
         public MenuCell(final FolderDetails folder) {
 
             super.sinkEvents(Event.ONMOUSEOVER | Event.ONMOUSEOUT);
 
             this.folder = folder;
+            folderId = "right" + folder.getId();
             action = new HoverCell();
             action.getEdit().addClickHandler(new ClickHandler() {
 
@@ -223,16 +252,32 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
             });
 
             html = "<span style=\"padding: 5px\" class=\"collection_user_menu\">"
-                    + folder.getName() + "</span><span id=\"right" + folder.getId() + "\"></span>";
+                    + folder.getName() + "</span><span class=\"menu_count\" id=\"" + folderId
+                    + "\"></span>";
 
             panel = new HTMLPanel(html);
 
             count = new Label(formatNumber(folder.getCount()));
-            count.setStyleName("menu_count");
 
-            panel.add(count, "right" + folder.getId());
+            panel.add(count, folderId);
             panel.setStyleName("collection_user_menu_row");
             initWidget(panel);
+
+            // init busy indicator
+            busy = new Image(resources.busyIndicatorImage());
+        }
+
+        public void showBusyIndicator() {
+            setRightPanel(busy);
+        }
+
+        public void removeBusyIndicator() {
+            setRightPanel(count);
+        }
+
+        public void updateCount(long newCount) {
+            folder.setCount(newCount);
+            count = new Label(formatNumber(folder.getCount()));
         }
 
         public long getFolderId() {
@@ -249,8 +294,7 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
 
             switch (DOM.eventGetType(event)) {
             case Event.ONMOUSEOVER:
-                panel.remove(count);
-                panel.add(action, "right" + folder.getId());
+                setRightPanel(action);
                 break;
 
             case Event.ONMOUSEOUT:
@@ -264,10 +308,18 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
                     if (element.equals(eEdit) || element.equals(eDelete))
                         break;
                 }
-
-                panel.remove(action);
-                panel.add(count, ("right" + folder.getId()));
+                setRightPanel(count);
                 break;
+            }
+        }
+
+        private void setRightPanel(Widget widget) {
+            Widget toReplace = panel.getWidget(0);
+            if (toReplace == null)
+                Window.alert("Cannot replace widget");
+            else {
+                panel.remove(0);
+                panel.add(widget, folderId);
             }
         }
 

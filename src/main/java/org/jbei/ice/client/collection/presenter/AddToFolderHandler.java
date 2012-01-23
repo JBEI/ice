@@ -38,12 +38,12 @@ public abstract class AddToFolderHandler extends SubmitHandler {
         ArrayList<Long> entryIds = getEntryIds();
 
         service.addEntriesToCollection(AppController.sessionId, destinationFolderIds, entryIds,
-            new AsyncCallback<Boolean>() {
+            new AsyncCallback<ArrayList<FolderDetails>>() {
 
                 @Override
-                public void onSuccess(Boolean result) {
-                    if (result)
-                        onAddSuccess();
+                public void onSuccess(ArrayList<FolderDetails> result) {
+                    if (result != null)
+                        onAddSuccess(result);
                     else
                         Window.alert("There was an error adding");
                 }
@@ -55,7 +55,7 @@ public abstract class AddToFolderHandler extends SubmitHandler {
             });
     }
 
-    public abstract void onAddSuccess();
+    public abstract void onAddSuccess(ArrayList<FolderDetails> result);
 
     @Override
     protected ArrayList<FolderDetails> getSource() {

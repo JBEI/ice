@@ -111,14 +111,13 @@ public class FolderManager {
         }
     }
 
-    public static boolean addFolderContents(long folderId, ArrayList<Long> entryIds)
+    public static Folder addFolderContents(long folderId, ArrayList<Long> entryIds)
             throws ManagerException {
         Session session = DAO.newSession();
         try {
             Folder folder = get(folderId);
             folder.getContents().addAll(EntryManager.getEntriesByIdSet(entryIds));
-            update(folder);
-            return true;
+            return update(folder);
         } finally {
             if (session.isOpen())
                 session.close();

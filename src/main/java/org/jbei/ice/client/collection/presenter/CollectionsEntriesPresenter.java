@@ -102,6 +102,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 subMenu.getCollectionMenu().hidePopup();
                 Set<FolderDetails> folders = subMenu.getCollectionMenu().getAddToDestination();
                 display.getUserCollectionMenu().setBusyIndicator(folders);
+                // TODO : return list of folders that have the busy indicator set to enable easy updateCounts();
             }
 
             @Override
@@ -122,8 +123,12 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
             }
 
             @Override
-            public void onAddSuccess() {
-                // TODO : 
+            public void onAddSuccess(ArrayList<FolderDetails> results) {
+                //                Set<FolderDetails> folders = subMenu.getCollectionMenu().getAddToDestination();
+                //                for (FolderDetails folder : folders) {
+                //                    
+                //                }
+                display.getUserCollectionMenu().updateCounts(results);
             }
         });
 

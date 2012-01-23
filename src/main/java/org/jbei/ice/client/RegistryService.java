@@ -100,7 +100,8 @@ public interface RegistryService extends RemoteService {
 
     ArrayList<Long> createEntry(String sid, HashSet<EntryInfo> info);
 
-    boolean addEntriesToCollection(String sid, ArrayList<Long> destination, ArrayList<Long> entryIds);
+    ArrayList<FolderDetails> addEntriesToCollection(String sid, ArrayList<Long> destination,
+            ArrayList<Long> entryIds);
 
     HashMap<String, ArrayList<String>> retrieveStorageSchemes(String sessionId, EntryType type);
 
