@@ -92,15 +92,10 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
 
         WebMarkupContainer topLinkContainer = new WebMarkupContainer("reportProblem");
 
-        try {
-            topLinkContainer.setOutputMarkupId(true);
-            topLinkContainer.setOutputMarkupPlaceholderTag(true);
-            topLinkContainer.setVisible(entryController.hasWritePermission(getEntry()));
-            topLinkContainer.add(new BookmarkablePageLink<WebPage>("reportProblemLink",
-                    ReportProblemPage.class, new PageParameters("0=" + getEntry().getId())));
-        } catch (ControllerException e) {
-            throw new ViewException(e);
-        }
+        topLinkContainer.setOutputMarkupId(true);
+        topLinkContainer.setOutputMarkupPlaceholderTag(true);
+        topLinkContainer.add(new BookmarkablePageLink<WebPage>("reportProblemLink",
+                ReportProblemPage.class, new PageParameters("0=" + getEntry().getId())));
 
         add(topLinkContainer);
     }
