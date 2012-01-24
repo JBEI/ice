@@ -38,9 +38,6 @@ public class EntryPresenter extends AbstractPresenter {
     private EntryDetailView<? extends EntryInfo> view;
     private final EntrySampleTable sampleTable;
     private final SequenceTable sequenceTable;
-    private final MenuItem generalMenuItem;
-
-    //    private EntryInfo info;
 
     public EntryPresenter(RegistryServiceAsync service, HandlerManager eventBus,
             final IEntryView display) {
@@ -49,7 +46,6 @@ public class EntryPresenter extends AbstractPresenter {
         this.eventBus = eventBus;
         this.display = display;
 
-        generalMenuItem = new MenuItem(Menu.GENERAL, -1);
         sequenceTable = new SequenceTable();
         sampleTable = new EntrySampleTable();
     }
@@ -58,7 +54,7 @@ public class EntryPresenter extends AbstractPresenter {
             final IEntryView display, String entryId) {
         this(service, eventBus, display);
 
-        final long id = Long.decode(entryId); //TODO : catch potential NFE
+        final long id = Long.decode(entryId); // TODO : catch potential NFE
         retrieveEntryDetails(id);
 
         // add handler for the permission link
@@ -118,10 +114,10 @@ public class EntryPresenter extends AbstractPresenter {
 
                     if (result == null) {
                         // TODO : how to deal with error messages
+                        Window.alert("There was an error retrieving the entry. Please try again later");
                         return;
                     }
 
-                    //                info = result;
                     view = ViewFactory.createDetailView(result);
                     String name = result.getType().getDisplay().toUpperCase() + ": "
                             + result.getName();
@@ -146,12 +142,25 @@ public class EntryPresenter extends AbstractPresenter {
 
                     // menu 
                     ArrayList<MenuItem> menuItems = new ArrayList<MenuItem>();
-                    menuItems.add(generalMenuItem);
+                    menuItems.add(new MenuItem(Menu.GENERAL, -1));
                     menuItems.add(new MenuItem(Menu.SEQ_ANALYSIS, result.getSequenceAnalysis()
                             .size()));
                     menuItems.add(new MenuItem(Menu.SAMPLES, result.getSampleMap().size()));
-                    display.getMenu().setRowData(menuItems); // TODO : set menu loading indicator
-                    display.getMenu().setSelectionModel(new MenuSelectionModel());
+                    display.setMenuItems(menuItems); // TODO : set menu loading indicator?
+
+                    Button editButton = display.showEntryDetailView(view);
+                    editButton.addClickHandler(new ClickHandler() {
+
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            UpdateEntryForm<? extends EntryInfo> form = ViewFactory
+                                    .getUpdateForm(view.getInfo());
+                            if (form == null)
+                                return;
+
+                            display.showUpdateForm(form);
+                        }
+                    });
                 }
             });
     }
@@ -186,13 +195,13 @@ public class EntryPresenter extends AbstractPresenter {
         public MenuSelectionModel() {
             super();
 
-            this.setSelected(generalMenuItem, true);
             this.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
                 @Override
                 public void onSelectionChange(SelectionChangeEvent event) {
                     MenuItem selected = MenuSelectionModel.this.getSelectedObject();
                     switch (selected.getMenu()) {
+
                     case GENERAL: // TODO : need to add this only once not every time the selection changes
                         Button editButton = display.showEntryDetailView(view);
                         editButton.addClickHandler(new ClickHandler() {
@@ -210,7 +219,6 @@ public class EntryPresenter extends AbstractPresenter {
                         break;
 
                     case SEQ_ANALYSIS:
-
                         Flash.Parameters params = new Flash.Parameters();
                         params.setSwfPath("static/sc/SequenceChecker.swf");
                         params.setSessiondId(AppController.sessionId);

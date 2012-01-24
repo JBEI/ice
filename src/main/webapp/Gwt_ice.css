@@ -13,9 +13,9 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 	height: 100%;
 }
 
-.font-12 {
-	font-size: 12px;
-}
+.font-85em { font-size: 0.85em; }
+.font-80em { font-size: 0.80em; }
+.pad-6 { padding: 6px; }
 
 .btn_submit_entry_form {
 	padding: 5px;
@@ -93,8 +93,6 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 	box-shadow: 1px 1px 1px #ccc;
 }
 
-
-
 .entry_input_error {
 	border: 1px solid #CC3333;
 	background: #FCC;
@@ -106,9 +104,23 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 	width: 160px;
 }
 
+.entry_general_info_header { 
+	font-size: 0.80em;
+	padding: 6px;
+	color: #555;
+	font-weight: bold;
+}
 .entry_add_sub_header {
 	border-bottom: 0.13em solid #3C5A99;
+	color: #233559;
 	font-weight: bold;
+	padding: 6px;
+	text-transform: uppercase;
+	font-size: 0.80em;
+}
+
+.entry_view_sub_section {
+	padding: 8px;
 }
 
 .entry_add_sub_label {
@@ -219,8 +231,14 @@ a.cell_mouseover:hover {
 }
 
 .entry_view_content {
-	border-right: 1px solid #ccc;
-	border-top: 1px solid #ccc;
+	border-right: 1px solid #f1f1f1;
+	border-top: 1px solid #f1f1f1;
+	padding-left: 5px;
+}
+
+.entry_view_main_content_table {
+	border-left: 1px solid #f1f1f1;
+	border-top: 2px solid #4787ED;
 }
 
 .sheet_table {
@@ -264,7 +282,7 @@ a.cell_mouseover:hover {
 .entry_view_left_menu {
 	border-top: 2px solid #4787ED;
 	width: 250px;
-	border-bottom: 1px solid #4787ED;
+	border-bottom: 1px solid #aab2bd; 
 }
 
 .entry_view_right_menu_2 {
@@ -279,11 +297,12 @@ a.cell_mouseover:hover {
 }
 
 .entry_view_sub_menu_header {
-	background-color: #F1F1F1;
+	background-color: #F3F3F3;
 	font-weight: bold;
-	font-size: 0.95em;
-	font-family: arial;
+	font-size: 0.90em;
+	font-family: sans-serif, arial;
 	padding: 8px;
+	color: #444;
 }
 
 /* HEADER MENU */
@@ -422,11 +441,6 @@ a.cell_mouseover:hover {
 .attachment_small_text {
 	color: #999;
 	font-size: 9px;
-}
-
-.entry_view_content {
-	border-right: 1px solid #ccc;
-	border-top: 1px solid #ccc;
 }
 
 /* AUTO COMPLETE AKA SUGGEST BOX */

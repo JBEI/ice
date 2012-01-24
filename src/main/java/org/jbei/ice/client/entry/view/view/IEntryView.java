@@ -1,5 +1,7 @@
 package org.jbei.ice.client.entry.view.view;
 
+import java.util.ArrayList;
+
 import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.entry.view.detail.EntryDetailView;
 import org.jbei.ice.client.entry.view.table.EntrySampleTable;
@@ -20,7 +22,7 @@ public interface IEntryView {
 
     CellList<AttachmentInfo> getAttachmentList();
 
-    CellList<MenuItem> getMenu();
+    void setMenuItems(ArrayList<MenuItem> items);
 
     Button showSequenceView(SequenceTable table, Flash flash);
 

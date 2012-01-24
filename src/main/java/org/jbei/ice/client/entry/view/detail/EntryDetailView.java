@@ -4,6 +4,7 @@ import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.util.DateUtilities;
+import org.jbei.ice.shared.StatusType;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.ParameterInfo;
 
@@ -36,7 +37,8 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         table = new FlexTable();
         table.setWidth("100%");
         table.setCellPadding(3);
-        table.setCellSpacing(1);
+        table.setCellSpacing(0);
+        table.setStyleName("pad-6");
         initWidget(table);
 
         addCommonShortFields();
@@ -47,6 +49,9 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
 
         // parameters
         showParameters();
+
+        // samples
+        showSamples();
 
         // sequence
         createSequenceView();
@@ -67,21 +72,29 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         return info;
     }
 
+    /**
+     * Adds, to the layout, fields that are short and common to all entry types
+     */
     protected void addCommonShortFields() {
         addShortField("Part ID", info.getPartId(), ValueType.SHORT_TEXT);
-        addShortField("Owner", info.getOwner(), ValueType.SHORT_TEXT);
+        Hyperlink ownerLink = this.createProfileLink(info.getOwnerEmail(), info.getOwner());
+        addShortField("Owner", ownerLink, ValueType.SHORT_TEXT);
 
         addShortField("Name", info.getName(), ValueType.SHORT_TEXT);
         addShortField("Alias", info.getAlias(), ValueType.SHORT_TEXT);
 
-        addShortField("Creator", info.getCreator(), ValueType.SHORT_TEXT);
+        Hyperlink link = this.createProfileLink(info.getCreatorEmail(), info.getCreator());
+        addShortField("Creator", link, ValueType.SHORT_TEXT);
         addShortField("Principal Investigator", info.getPrincipalInvestigator(),
             ValueType.SHORT_TEXT);
 
         addShortField("Created", DateUtilities.formatDate(info.getCreationTime()), ValueType.DATE);
         addShortField("Funding Source", info.getFundingSource(), ValueType.SHORT_TEXT);
 
-        addShortField("Status", info.getStatus(), ValueType.SHORT_TEXT);
+        String statusString = StatusType.displayValueOf(info.getStatus());
+        if (statusString.equals(""))
+            statusString = info.getStatus();
+        addShortField("Status", statusString, ValueType.SHORT_TEXT);
         addShortField("Bio Safety Level", Integer.toString(info.getBioSafetyLevel()),
             ValueType.SHORT_TEXT);
 
@@ -89,6 +102,9 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
             ValueType.SHORT_TEXT);
     }
 
+    /**
+     * Adds fields that are long (span an entire row)
+     */
     protected void addCommonLongFields() {
         addLongField("Links", info.getLinks());
         addLongField("Keywords", info.getKeywords());
@@ -134,6 +150,48 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         table.setWidget(currentRow, 0, parameters);
         table.getFlexCellFormatter().setColSpan(currentRow, 0, 4);
         currentRow += 1;
+    }
+
+    protected void showSamples() {
+        FlexTable sampleLayout = new FlexTable();
+        sampleLayout.setCellPadding(0);
+        sampleLayout.setCellSpacing(0);
+        sampleLayout.setWidth("100%");
+
+        int row = 0;
+        sampleLayout.setWidget(row, 0, new Label("Samples"));
+        sampleLayout.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_header");
+        sampleLayout.getFlexCellFormatter().setColSpan(row, 0, 6);
+
+        row += 1;
+        sampleLayout.setWidget(row, 0, new Label(""));
+        sampleLayout.getFlexCellFormatter().setHeight(row, 0, "10px");
+        sampleLayout.getFlexCellFormatter().setColSpan(row, 0, 6);
+
+        // TODO : sample display
+        if (info.getParameters() != null) {
+            int col = 6;
+            for (ParameterInfo paramInfo : info.getParameters()) {
+
+                if (col > 5) {
+                    col = 0;
+                    row += 1;
+                }
+
+                sampleLayout.setWidget(row, col, new HTML("<b>" + paramInfo.getName() + "</b>"));
+                sampleLayout.getFlexCellFormatter().setWidth(row, col, "50px");
+                col += 1;
+                sampleLayout.setWidget(row, col, new Label(paramInfo.getValue()));
+                sampleLayout.getFlexCellFormatter().setWidth(row, col, "220px");
+                col += 1;
+            }
+        }
+
+        table.setWidget(currentRow, 0, sampleLayout);
+
+        table.getFlexCellFormatter().setColSpan(currentRow, 0, 4);
+        currentRow += 1;
+
     }
 
     protected void createSequenceView() {
@@ -255,13 +313,13 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
             currentRow += 1;
         }
 
-        HTML label = new HTML("<b>" + labelString + "</b>", true);
-        table.setWidget(currentRow, currentCol, label);
+        table.setHTML(currentRow, currentCol, "<b class=\"font-80em\">" + labelString + "</b>");
         table.getFlexCellFormatter().setWidth(currentRow, currentCol, "170px");
         currentCol += 1;
-        Label valueLabel = new Label(value);
         //        ValueCell cell = new ValueCell(value, valueType);
-        table.setWidget(currentRow, currentCol, valueLabel); // TODO add a style to put space after this or something
+        if (value == null)
+            value = "";
+        table.setHTML(currentRow, currentCol, "<span class=\"font-80em\">" + value + "</span>");
         currentCol += 1;
     }
 
@@ -272,11 +330,12 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
             currentRow += 1;
         }
 
-        HTML label = new HTML("<b>" + labelString + "</b>", true);
-        table.setWidget(currentRow, currentCol, label);
+        table.setHTML(currentRow, currentCol, "<b class=\"font-80em\">" + labelString + "</b>");
         table.getFlexCellFormatter().setWidth(currentRow, currentCol, "170px");
         currentCol += 1;
         //        ValueCell cell = new ValueCell(value, valueType);
+
+        value.addStyleName("font-80em");
         table.setWidget(currentRow, currentCol, value); // TODO add a style to put space after this or something
         currentCol += 1;
     }
@@ -284,19 +343,16 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
     protected void addLongField(String labelString, String value) {
         currentRow += 1;
 
-        HTML label = new HTML("<b>" + labelString + "</b>", true);
-        table.setWidget(currentRow, 0, label);
+        table.setHTML(currentRow, 0, "<b class=\"font-80em\">" + labelString + "</b>");
         table.getFlexCellFormatter().setWidth(currentRow, 0, "170px");
 
-        table.setWidget(currentRow, 1, new Label(value));
+        if (value == null)
+            value = "";
+        table.setHTML(currentRow, 1, "<span class=\"font-80em\">" + value + "</span>");
         table.getFlexCellFormatter().setColSpan(currentRow, 1, 3);
 
         currentCol = 0;
         currentRow += 1;
-    }
-
-    // a field that spans 4 cols (both name and value)
-    protected void addLongField() {
     }
 
     private Hyperlink createProfileLink(String email, String name) {

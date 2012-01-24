@@ -18,4 +18,12 @@ public enum StatusType {
     public String toString() {
         return this.displayName;
     }
+
+    public static String displayValueOf(String s) {
+        for (StatusType type : StatusType.values()) {
+            if (type.toString().equalsIgnoreCase(s))
+                return type.toString();
+        }
+        return "";
+    }
 }
