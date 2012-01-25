@@ -12,6 +12,7 @@ import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.table.EntrySampleTable;
 import org.jbei.ice.client.entry.view.table.SequenceTable;
 import org.jbei.ice.client.entry.view.update.UpdateEntryForm;
+import org.jbei.ice.client.entry.view.view.EntryDetailViewMenu;
 import org.jbei.ice.client.entry.view.view.IEntryView;
 import org.jbei.ice.client.entry.view.view.MenuItem;
 import org.jbei.ice.client.entry.view.view.MenuItem.Menu;
@@ -27,8 +28,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SingleSelectionModel;
 
 public class EntryPresenter extends AbstractPresenter {
 
@@ -58,7 +57,7 @@ public class EntryPresenter extends AbstractPresenter {
         retrieveEntryDetails(id);
 
         // add handler for the permission link
-        display.getPermissionLink().addClickHandler(new ClickHandler() {
+        display.getDetailMenu().getPermissionLink().addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -66,6 +65,9 @@ public class EntryPresenter extends AbstractPresenter {
                 display.showPermissionsWidget();
             }
         });
+
+        MenuSelectionHandler handler = new MenuSelectionHandler(display.getDetailMenu());
+        display.getDetailMenu().addClickHandler(handler);
 
         retrieveAccountsAndGroups();
     }
@@ -191,56 +193,61 @@ public class EntryPresenter extends AbstractPresenter {
     //
     // inner classes
     //
-    class MenuSelectionModel extends SingleSelectionModel<MenuItem> {
-        public MenuSelectionModel() {
-            super();
+    public class MenuSelectionHandler implements ClickHandler {
 
-            this.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        private final EntryDetailViewMenu menu;
+        private MenuItem selection;
 
-                @Override
-                public void onSelectionChange(SelectionChangeEvent event) {
-                    MenuItem selected = MenuSelectionModel.this.getSelectedObject();
-                    switch (selected.getMenu()) {
+        public MenuSelectionHandler(EntryDetailViewMenu menu) {
+            this.menu = menu;
+        }
 
-                    case GENERAL: // TODO : need to add this only once not every time the selection changes
-                        Button editButton = display.showEntryDetailView(view);
-                        editButton.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+            if (selection == menu.getCurrentSelection())
+                return;
 
-                            @Override
-                            public void onClick(ClickEvent event) {
-                                UpdateEntryForm<? extends EntryInfo> form = ViewFactory
-                                        .getUpdateForm(view.getInfo());
-                                if (form == null)
-                                    return;
+            selection = menu.getCurrentSelection();
+            switch (menu.getCurrentSelection().getMenu()) {
 
-                                display.showUpdateForm(form);
-                            }
-                        });
-                        break;
+            case GENERAL: // TODO : need to add this only once not every time the selection changes
+                Button editButton = display.showEntryDetailView(view);
+                editButton.addClickHandler(new ClickHandler() {
 
-                    case SEQ_ANALYSIS:
-                        Flash.Parameters params = new Flash.Parameters();
-                        params.setSwfPath("static/sc/SequenceChecker.swf");
-                        params.setSessiondId(AppController.sessionId);
-                        params.setEntryId(view.getInfo().getRecordId());
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        UpdateEntryForm<? extends EntryInfo> form = ViewFactory.getUpdateForm(view
+                                .getInfo());
+                        if (form == null)
+                            return;
 
-                        Button button = display.showSequenceView(sequenceTable, new Flash(params));
-                        if (button != null) {
-                            button.addClickHandler(new ClickHandler() {
-                                @Override
-                                public void onClick(ClickEvent event) {
-                                    //                                view.switchToEditMode();
-                                }
-                            });
-                        }
-                        break;
-
-                    case SAMPLES:
-                        display.showSampleView(sampleTable);
-                        break;
+                        display.showUpdateForm(form);
                     }
+                });
+                break;
+
+            case SEQ_ANALYSIS:
+                Flash.Parameters params = new Flash.Parameters();
+                params.setSwfPath("static/sc/SequenceChecker.swf");
+                params.setSessiondId(AppController.sessionId);
+                params.setEntryId(view.getInfo().getRecordId());
+
+                Button button = display.showSequenceView(sequenceTable, new Flash(params));
+                if (button != null) {
+                    button.addClickHandler(new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            //                                view.switchToEditMode();
+                        }
+                    });
                 }
-            });
+                break;
+
+            case SAMPLES:
+                display.showSampleView(sampleTable);
+                break;
+            }
+
         }
     }
 }

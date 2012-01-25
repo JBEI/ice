@@ -210,8 +210,8 @@ public class EntryView extends AbstractLayout implements IEntryView {
     }
 
     @Override
-    public Label getPermissionLink() {
-        return this.detailMenu.getPermissionLink();
+    public EntryDetailViewMenu getDetailMenu() {
+        return this.detailMenu;
     }
 
     private Widget createSequenceUploadPanel() {
@@ -284,6 +284,7 @@ public class EntryView extends AbstractLayout implements IEntryView {
 
         mainContent.setWidget(0, 0, generalHeaderPanel);
         mainContent.setWidget(1, 0, view);
+        mainContent.getCellFormatter().setHeight(0, 0, "26px");
         return editGeneralButton;
     }
 

@@ -1,17 +1,10 @@
-.cellTableOddRow {
-	background: #FAFAFA;
-}
-
 .cellTableWidget {
-  
 }
 
 .cellTableFirstColumn {
-  
 }
 
 .cellTableLastColumn {
-  
 }
 
 @sprite .cellTableFooter {	
@@ -27,18 +20,30 @@
   overflow: hidden;
 }
 
+/**
+ * Applied to headers cells.
+ */
 .cellTableHeader {
-	background-color: #F0F0F0;
-    font-family: Arial,Helvetica,sans-serif;
-    font-size: 12px;
+	border-bottom: 1px solid #6f7277;
+	padding: 3px 15px;
+    text-align: left;
+    color: #4b4a4a;
+    text-shadow: #ddf 1px 1px 0;
+    overflow: hidden;
+    background-color: #eaeaea;
+    font-size: 0.80em;
     white-space: nowrap;
     border-right: 1px solid #ccc;
-    border-top: 1px solid #ccc; /* ADDED later */
+    border-top: 1px solid #ccc; 
     padding-left: 4px;
 }
 
+/* Applied to every cell */
 .cellTableCell {
-  padding: 4px; /* previously padding-left*/
+  padding: 4px; 
+  font-size: 0.80em;
+  color: #333;
+  font-family: sans-serif;
   overflow: hidden;
   border-right: 1px solid #ccc;
   border-top: 1px solid #ccc;  
@@ -53,76 +58,72 @@
 }
 
 .cellTableLastColumnFooter {
-  
 }
 
 .cellTableLastColumnHeader {
-  
 }
 
 .cellTableSortableHeader {
-  cursor: pointer;
-  cursor: hand;
+	color: #003f7f;
+    cursor: pointer;
+    cursor: hand;
 }
 
 .cellTableSortableHeader:hover {
-  color: #6c6b6b;
+    color: #6c6b6b;
 }
 
 .cellTableSortedHeaderAscending {
-	/* color: red; */
-
 }
 
 .cellTableSortedHeaderDescending {
-	/* color: green; */
-
 }
 
 .cellTableEvenRow {
-  background: #ffffff;
+    background-color: #FFFFFF;
+}
+
+.cellTableOddRow {
+    background-color: #FAFAFA;
+    border: selectionBorderWidth solid #f3f7fb;
 }
 
 .cellTableEvenRowCell {
-  
 }
 
 .cellTableOddRowCell {
-  
 }
 
 .cellTableHoveredRow {
-  background: #eee;
+    background-color: #F6F6F6;
 }
 
 .cellTableHoveredRowCell {
-  
 }
 
 .cellTableKeyboardSelectedRow {
-  background: #ffc;
+    background-color: #ffc;
 }
 
 .cellTableKeyboardSelectedRowCell {
-  
 }
 
 @sprite .cellTableSelectedRow {
-  gwt-image: 'cellTableSelectedBackground';
-  background-color: #628cd5;
-  color: white;
-  height: auto;
-  overflow: auto;
+    gwt-image: 'cellTableSelectedBackground';
+    background-color: #628cd5;
+    color: white;
+    height: auto;
+    overflow: auto;
 }
 
 .cellTableSelectedRowCell {
-  background: #628cd5;
+    background: #628cd5;
 }
 
 .cellTableKeyboardSelectedCell {
-  background: #d7dde8;
+    background: #d7dde8;
 }
 
 .cellTableLoading {
-  margin: 30px;
+    margin: 30px;
 }

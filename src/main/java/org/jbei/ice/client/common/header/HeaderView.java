@@ -10,6 +10,7 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -25,29 +26,34 @@ import com.google.gwt.user.client.ui.Widget;
 public class HeaderView extends Composite implements ILogoutHandler { // TODO: should implement IHasLogOut instead of handler
 
     interface Resources extends ClientBundle {
+
+        static Resources INSTANCE = GWT.create(Resources.class);
+
         @Source("org/jbei/ice/client/resource/image/logo.gif")
         ImageResource logo();
+
+        @Source("org/jbei/ice/client/resource/image/arrow_down.png")
+        ImageResource arrowDown();
     }
 
-    private final Resources resources = GWT.create(Resources.class);
     private Anchor logout;
-    private final HeaderPresenter presenter;
-    private TextBox searchInput;
+    private CompositeText searchInput;
     private Button searchBtn;
 
     public HeaderView() {
-
-        this.presenter = new HeaderPresenter(this);
+        Widget searchPanel = createSearchPanel();
         FlexTable table = new FlexTable();
         table.setCellPadding(0);
         table.setCellSpacing(0);
+        table.setStyleName("pad-right-10");
         table.setWidth("100%");
         initWidget(table);
 
         VerticalPanel vertical = new VerticalPanel();
         vertical.add(createLoggedInContents());
-        vertical.add(createSearchPanel());
+        vertical.add(searchPanel);
         vertical.addStyleName("float_right");
+        vertical.setSpacing(4);
 
         HorizontalPanel horizontal = new HorizontalPanel();
         horizontal.setWidth("100%");
@@ -55,25 +61,31 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
         horizontal.add(vertical);
 
         table.setWidget(0, 0, horizontal);
-        //        table.setWidget(1, 0, getUnderLine());
+        new HeaderPresenter(this);
+    }
+
+    public Image getSearchArrow() { // TODO : more descriptive name
+        return searchInput.getImage();
+    }
+
+    public Button getSearchButton() {
+        return this.searchBtn;
     }
 
     private Widget getImageHeader() {
-        Image img = new Image(resources.logo());
+        Image img = new Image(Resources.INSTANCE.logo());
         return img;
     }
 
     protected Widget createSearchPanel() {
         FlexTable layout = new FlexTable();
-        layout.setCellPadding(0);
-        layout.setCellSpacing(0);
+        layout.setCellPadding(4);
+        layout.setCellSpacing(1);
         if (!isUserLoggedIn()) {
             return layout;
         }
 
-        searchInput = new TextBox();
-        searchInput.setWidth("250px");
-        searchInput.setStyleName("quick_search_input");
+        searchInput = new CompositeText();
         layout.setWidget(0, 0, searchInput);
         layout.getFlexCellFormatter().setRowSpan(0, 0, 2);
 
@@ -82,16 +94,32 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
         layout.setWidget(0, 1, searchBtn);
         layout.getFlexCellFormatter().setRowSpan(0, 1, 2);
         layout.setStyleName("float_right");
-        searchBtn.addClickHandler(presenter.getSearchHandler());
 
-        //        Hyperlink searchLink = new Hyperlink("Advanced Search", Page.QUERY.getLink());
-        //        searchLink.addStyleName("small_text");
-        //        layout.setWidget(0, 2, searchLink);
-        //
-        //        Hyperlink blastLink = new Hyperlink("Blast Search", Page.BLAST.getLink());
-        //        blastLink.addStyleName("small_text");
-        //        layout.setWidget(1, 0, blastLink);
         return layout;
+    }
+
+    public class CompositeText extends Composite {
+        private final TextBox box;
+        private final Image image;
+
+        public CompositeText() {
+            AbsolutePanel panel = new AbsolutePanel();
+            box = new TextBox();
+            box.setStyleName("quick_search_input");
+            panel.add(box);
+            image = new Image(Resources.INSTANCE.arrowDown());
+            image.setStyleName("search_arrow");
+            panel.add(image);
+            initWidget(panel);
+        }
+
+        public TextBox getTextBox() {
+            return this.box;
+        }
+
+        public Image getImage() {
+            return this.image;
+        }
     }
 
     // TODO : move to controller
@@ -107,6 +135,7 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
     private Widget createLoggedInContents() {
         HorizontalPanel panel = new HorizontalPanel();
         panel.setStyleName("float_right");
+        panel.addStyleName("font-95em");
 
         if (AppController.accountInfo == null) {
             panel.add(new HTML(SafeHtmlUtils.EMPTY_SAFE_HTML));
@@ -146,20 +175,16 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
     }
 
     public String getSearchInput() {
-        return this.searchInput.getText();
+        return this.searchInput.getTextBox().getText();
+    }
+
+    public CompositeText getSearchComposite() {
+        return this.searchInput;
     }
 
     public Button getQuickSearchButton() {
         return this.searchBtn;
     }
-
-    //    private Widget getUnderLine() {
-    //        HorizontalPanel panel = new HorizontalPanel();
-    //        panel.setStyleName("blue_underline");
-    //        panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_TOP);
-    //        panel.setWidth("100%");
-    //        return panel;
-    //    }
 
     @Override
     public HasClickHandlers getClickHandler() {

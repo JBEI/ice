@@ -21,7 +21,6 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
@@ -81,7 +80,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         SelectionColumnHeader header = new SelectionColumnHeader();
 
         this.addColumn(selectionColumn, header);
-        this.setColumnWidth(selectionColumn, 30, Unit.PX);
+        this.setColumnWidth(selectionColumn, 10, Unit.PX);
 
         return selectionColumn;
     }
@@ -203,19 +202,19 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
     protected void addHasAttachmentColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.ATTACHMENT);
         this.addColumn(column, column.getHeader());
-        this.setColumnWidth(column, 35, Unit.PX);
+        this.setColumnWidth(column, 20, Unit.PX);
     }
 
     protected void addHasSampleColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SAMPLE);
         this.addColumn(column, column.getHeader());
-        this.setColumnWidth(column, 35, Unit.PX);
+        this.setColumnWidth(column, 20, Unit.PX);
     }
 
     protected void addHasSequenceColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SEQUENCE);
         this.addColumn(column, column.getHeader());
-        this.setColumnWidth(column, 35, Unit.PX);
+        this.setColumnWidth(column, 20, Unit.PX);
     }
 
     protected DataTableColumn<String> addCreatedColumn() {
@@ -224,18 +223,14 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
             @Override
             public String getValue(EntryInfo object) {
-
-                DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yyyy");
-                String value = format.format(object.getCreationTime());
-                if (value.length() >= 13)
-                    value = (value.substring(0, 9) + "...");
-                return value;
+                DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat("MMM d, yyyy");
+                return dateTimeFormat.format(object.getCreationTime());
             }
         };
 
         createdColumn.setSortable(true);
         this.addColumn(createdColumn, "Created");
-        this.setColumnWidth(createdColumn, 120, Unit.PX);
+        this.setColumnWidth(createdColumn, 90, Unit.PX);
         return createdColumn;
     }
 
@@ -263,7 +258,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
         public void setAllSelected(boolean b) {
             allSelected = b;
-            Window.alert("All Selected : " + b);
+            //            Window.alert("All Selected : " + b);
         }
 
         public boolean isAllSelected() {

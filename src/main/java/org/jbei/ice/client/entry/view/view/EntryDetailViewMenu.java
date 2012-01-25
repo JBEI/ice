@@ -51,7 +51,7 @@ public class EntryDetailViewMenu extends Composite implements HasClickHandlers {
         return this.currentSelected;
     }
 
-    Label getPermissionLink() {
+    public Label getPermissionLink() {
         return this.permissionLink;
     }
 

@@ -12,7 +12,6 @@ import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 public interface IEntryView {
@@ -36,5 +35,5 @@ public interface IEntryView {
 
     Button showSampleView(EntrySampleTable table);
 
-    Label getPermissionLink();
+    EntryDetailViewMenu getDetailMenu();
 }

@@ -13,20 +13,25 @@ import com.google.gwt.user.client.ui.Label;
 public abstract class DataTable<T> extends CellTable<T> {
 
     protected interface EntryResources extends Resources {
+
+        static EntryResources INSTANCE = GWT.create(EntryResources.class);
+
         /**
          * The styles used in this widget.
          */
         @Override
         @Source("org/jbei/ice/client/resource/css/EntryTable.css")
-        Style cellTableStyle();
+        DataTableStyle cellTableStyle();
     }
 
-    private static EntryResources resource = GWT.create(EntryResources.class);
+    public interface DataTableStyle extends Style {
+    }
+
     private final ArrayList<DataTableColumn<?>> columns; // TODO : this list is also maintained in the parent class. look for a way to merge them
 
     public DataTable() {
 
-        super(15, resource);
+        super(15, EntryResources.INSTANCE);
         setStyleName("data_table");
         Label empty = new Label();
         empty.setText("Empty");
