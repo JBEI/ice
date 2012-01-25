@@ -2,25 +2,19 @@ package org.jbei.ice.client.collection;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.cellview.client.AbstractPager;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.view.client.HasRows;
 
 public class CollectionListPager extends AbstractPager {
 
-    private Label label;
     private NavLink prevLink;
     private NavLink nextLink;
+    private final FlexTable table;
 
     public CollectionListPager() {
-        this.label = new Label();
 
         nextLink = new NavLink("&gt;", new ClickHandler() {
 
@@ -30,6 +24,7 @@ public class CollectionListPager extends AbstractPager {
                 CollectionListPager.super.setPage(indx);
             }
         });
+        nextLink.addStyleName("nav-left");
 
         prevLink = new NavLink("&lt;", new ClickHandler() {
 
@@ -39,21 +34,29 @@ public class CollectionListPager extends AbstractPager {
                 CollectionListPager.super.setPage(indx);
             }
         });
+        prevLink.addStyleName("nav-right");
 
-        HorizontalPanel layout = new HorizontalPanel();
+        table = new FlexTable();
+        table.setCellPadding(0);
+        table.setCellSpacing(0);
+        table.setWidth("100%");
 
-        layout.add(label);
-        layout.add(prevLink);
-        layout.add(nextLink);
-        initWidget(layout);
+        table.setText(0, 0, "");
+        table.getFlexCellFormatter().setStyleName(0, 0, "font-75em");
+        table.getFlexCellFormatter().addStyleName(0, 0, "font-bold");
+        table.setWidget(0, 1, prevLink);
+        table.setWidget(0, 2, nextLink);
+
+        initWidget(table);
     }
 
     @Override
     protected void onRangeOrRowCountChanged() {
-        this.label.setText(this.createText());
+        String text = this.createText();
 
-        prevLink.setDisabled(!hasPreviousPage());
-        nextLink.setDisabled(!hasNextPage());
+        table.setText(0, 0, text);
+        prevLink.setDisabled(!hasPreviousPage(), false);
+        nextLink.setDisabled(!hasNextPage(), true);
     }
 
     protected String createText() {
@@ -85,39 +88,24 @@ public class CollectionListPager extends AbstractPager {
         public NavLink(String html, ClickHandler handler) {
 
             super(html, handler);
-            addStyles();
+            setStyleName("nav");
         }
 
-        protected void addStyles() {
-
-            this.setStyleName("button_to_link");
-            this.addMouseOverHandler(new MouseOverHandler() {
-
-                @Override
-                public void onMouseOver(MouseOverEvent event) {
-                    setStyleName("button_to_link_hover");
-                }
-            });
-
-            this.addMouseOutHandler(new MouseOutHandler() {
-
-                @Override
-                public void onMouseOut(MouseOutEvent event) {
-                    setStyleName("button_to_link");
-                }
-            });
-        }
-
-        public void setDisabled(boolean isDisabled) {
+        public void setDisabled(boolean isDisabled, boolean isNext) {
 
             if (this.isEnabled() == !isDisabled)
                 return;
 
             this.setEnabled(!isDisabled);
             if (!this.isEnabled())
-                setStyleName("button_to_link_disabled");
+                setStyleName("nav_disabled");
             else
-                setStyleName("button_to_link");
+                setStyleName("nav");
+
+            if (isNext)
+                addStyleName("nav-right");
+            else
+                addStyleName("nav-left");
         }
     }
 }

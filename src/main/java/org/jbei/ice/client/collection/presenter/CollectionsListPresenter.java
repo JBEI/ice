@@ -88,7 +88,6 @@ public class CollectionsListPresenter extends AbstractPresenter {
     /**
      * Handlers for the widgets on the "Add User Collection" panel
      */
-
     private void addPanelHandlers() {
 
         this.panel.addSubmitHandler(new ClickHandler() {
