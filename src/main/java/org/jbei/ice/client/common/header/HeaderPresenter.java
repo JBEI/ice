@@ -25,11 +25,13 @@ public class HeaderPresenter {
     public HeaderPresenter(HeaderView view) {
         this.view = view;
         option = new SearchOption();
-        MenuClickHandler handler = new MenuClickHandler(option, this.view.getSearchComposite()
-                .getTextBox().getElement());
-        this.view.getSearchArrow().addClickHandler(handler);
+        if (this.view.getSearchComposite() != null) {
+            MenuClickHandler handler = new MenuClickHandler(option, this.view.getSearchComposite()
+                    .getTextBox().getElement());
+            this.view.getSearchArrow().addClickHandler(handler);
 
-        view.getSearchButton().addClickHandler(getSearchHandler());
+            view.getSearchButton().addClickHandler(getSearchHandler());
+        }
     }
 
     public ClickHandler getSearchHandler() {
