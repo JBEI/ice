@@ -1,9 +1,9 @@
 @sprite .subMenuExport {
-    height: 28px;
-    width: 90px;
+    height: 26px;
+    width: 92px;
     gwt-image: 'sortDown';
     background-position: 75px 9px;
-    padding-right: 15px;
+    padding-right: 13px;
 }
 
 .cellListKeyboardSelectedItem {

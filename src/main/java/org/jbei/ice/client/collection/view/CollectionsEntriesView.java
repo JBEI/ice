@@ -3,23 +3,21 @@ package org.jbei.ice.client.collection.view;
 import org.jbei.ice.client.collection.ICollectionEntriesView;
 import org.jbei.ice.client.collection.menu.CollectionEntryMenu;
 import org.jbei.ice.client.collection.menu.CollectionUserMenu;
+import org.jbei.ice.client.collection.table.CollectionEntriesDataTable;
 import org.jbei.ice.client.common.AbstractLayout;
-import org.jbei.ice.client.common.table.DataTable;
-import org.jbei.ice.client.common.table.EntryTablePager;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class CollectionsEntriesView extends AbstractLayout implements ICollectionEntriesView {
 
-    private DataTable<?> table;
+    private CollectionEntriesDataTable table;
     private CollectionEntryMenu systemMenu;
     private CollectionUserMenu userMenu;
     private FlexTable contents;
-    private VerticalPanel tablePanel;
+    private FlexTable rightContents;
     private Widget selectionWidget;
 
     public CollectionsEntriesView() {
@@ -27,8 +25,10 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
 
     @Override
     protected void initComponents() {
-        tablePanel = new VerticalPanel();
-        tablePanel.setWidth("100%");
+        rightContents = new FlexTable();
+        rightContents.setCellPadding(0);
+        rightContents.setCellSpacing(0);
+        rightContents.setWidth("100%");
     }
 
     @Override
@@ -41,6 +41,7 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
         // systems collections menu
         systemMenu = new CollectionEntryMenu();
         contents.setWidget(0, 0, systemMenu);
+        contents.getCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
 
         // separator menus
         contents.setHTML(1, 0, "&nbsp;");
@@ -66,21 +67,22 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
     /**
      * @return table of results panel
      */
-    private VerticalPanel getTablePanel() {
-
-        tablePanel.clear();
+    private Widget getTablePanel() {
 
         if (selectionWidget != null) {
-            tablePanel.add(selectionWidget);
-            tablePanel.add(new HTML("&nbsp;"));
+            rightContents.setWidget(0, 0, selectionWidget);
+            rightContents.setHTML(1, 0, "&nbsp;");
         }
 
-        tablePanel.add(table);
-        EntryTablePager tablePager = new EntryTablePager();
-        tablePager.setDisplay(table);
-        tablePanel.add(tablePager);
+        // data table
+        rightContents.setWidget(2, 0, table);
+        rightContents.getFlexCellFormatter().setColSpan(2, 0, 2);
 
-        return tablePanel;
+        // table pager
+        rightContents.setWidget(3, 0, table.getPager());
+        rightContents.getFlexCellFormatter().setColSpan(3, 0, 2);
+
+        return rightContents;
     }
 
     @Override
@@ -89,7 +91,7 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
     }
 
     @Override
-    public void setDataView(DataTable<?> table) {
+    public void setDataView(CollectionEntriesDataTable table) {
         this.table = table;
         contents.setWidget(0, 2, getTablePanel());
     }
@@ -97,6 +99,13 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
     @Override
     public CollectionEntryMenu getSystemCollectionMenu() {
         return this.systemMenu;
+    }
+
+    @Override
+    public void setFeedback(Widget feedback) {
+        rightContents.setWidget(0, 1, feedback);
+        rightContents.getFlexCellFormatter()
+                .setHorizontalAlignment(0, 1, HasAlignment.ALIGN_CENTER);
     }
 
     @Override

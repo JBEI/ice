@@ -34,6 +34,8 @@ public class CollectionSubMenu implements IsWidget {
      */
     public interface Resources extends ClientBundle {
 
+        static Resources INSTANCE = GWT.create(Resources.class);
+
         @Source("org/jbei/ice/client/resource/image/arrow_down.png")
         @ImageOptions(repeatStyle = RepeatStyle.None)
         ImageResource sortDown();
@@ -70,7 +72,8 @@ public class CollectionSubMenu implements IsWidget {
     private final Button addToButton;
     private final Button removeButton;
     private final Button moveToButton;
-    private static Resources resource = GWT.create(Resources.class);
+    private MenuClickHandler addToHandler;
+    private MenuClickHandler clickHandler;
 
     public CollectionSubMenu(UserCollectionMultiSelect addToSelection,
             UserCollectionMultiSelect moveToSelection) {
@@ -89,15 +92,15 @@ public class CollectionSubMenu implements IsWidget {
 
         moveToButton = createMoveMenu();
         this.menuHolder.setWidget(0, 2, moveToButton);
-        resource.subMenuStyle().ensureInjected();
+        Resources.INSTANCE.subMenuStyle().ensureInjected();
     }
 
     private Button createAddToButton() {
         final Button addTo = new Button("Add To");
         addTo.setStyleName("buttonGroupItem");
         addTo.addStyleName("firstItem");
-        addTo.addStyleName(resource.subMenuStyle().dropDownAdd());
-        MenuClickHandler addToHandler = new MenuClickHandler(addToSelection, addTo.getElement());
+        addTo.addStyleName(Resources.INSTANCE.subMenuStyle().dropDownAdd());
+        addToHandler = new MenuClickHandler(addToSelection, addTo.getElement());
         addTo.addClickHandler(addToHandler);
         return addTo;
     }
@@ -105,15 +108,15 @@ public class CollectionSubMenu implements IsWidget {
     private Button createRemoveMenu() {
         Button remove = new Button("Remove");
         remove.setStyleName("buttonGroupItem");
-        remove.addStyleName(resource.subMenuStyle().subMenuRemove());
+        remove.addStyleName(Resources.INSTANCE.subMenuStyle().subMenuRemove());
         return remove;
     }
 
     private Button createMoveMenu() {
         final Button move = new Button("Move To");
         move.setStyleName("buttonGroupItem");
-        move.addStyleName(resource.subMenuStyle().dropDownMove());
-        MenuClickHandler clickHandler = new MenuClickHandler(moveToSelection, move.getElement());
+        move.addStyleName(Resources.INSTANCE.subMenuStyle().dropDownMove());
+        clickHandler = new MenuClickHandler(moveToSelection, move.getElement());
         move.addClickHandler(clickHandler);
         return move;
     }
@@ -132,7 +135,8 @@ public class CollectionSubMenu implements IsWidget {
     }
 
     public void hidePopup() {
-        // TODO
+        addToHandler.hidePopup();
+        clickHandler.hidePopup();
     }
 
     //

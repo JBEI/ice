@@ -7,7 +7,6 @@ import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.shared.FolderDetails;
 
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
@@ -45,17 +44,19 @@ public abstract class AddToFolderHandler extends SubmitHandler {
                     if (result != null)
                         onAddSuccess(result);
                     else
-                        Window.alert("There was an error adding");
+                        onAddFailure("");
                 }
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    Window.alert("Error making call: " + caught.getMessage());
+                    onAddFailure(caught.getMessage());
                 }
             });
     }
 
     public abstract void onAddSuccess(ArrayList<FolderDetails> result);
+
+    public abstract void onAddFailure(String msg);
 
     @Override
     protected ArrayList<FolderDetails> getSource() {

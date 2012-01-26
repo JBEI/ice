@@ -3,6 +3,7 @@ package org.jbei.ice.client.collection.table;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.common.table.EntryDataTable;
+import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.shared.dto.EntryInfo;
 
 /**
@@ -12,6 +13,14 @@ import org.jbei.ice.shared.dto.EntryInfo;
  */
 
 public class CollectionEntriesDataTable extends EntryDataTable<EntryInfo> {
+
+    private final EntryTablePager pager;
+
+    public CollectionEntriesDataTable(EntryTablePager pager) {
+        this.pager = pager;
+        if (pager != null)
+            pager.setDisplay(this);
+    }
 
     @Override
     protected ArrayList<DataTableColumn<?>> createColumns() {
@@ -29,5 +38,9 @@ public class CollectionEntriesDataTable extends EntryDataTable<EntryInfo> {
         columns.add(super.addCreatedColumn());
 
         return columns;
+    }
+
+    public EntryTablePager getPager() {
+        return this.pager;
     }
 }

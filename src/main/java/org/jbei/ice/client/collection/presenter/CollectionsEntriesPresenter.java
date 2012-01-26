@@ -1,6 +1,7 @@
 package org.jbei.ice.client.collection.presenter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.jbei.ice.client.AbstractPresenter;
@@ -14,7 +15,9 @@ import org.jbei.ice.client.collection.menu.EntrySelectionModelMenu;
 import org.jbei.ice.client.collection.menu.UserCollectionMultiSelect;
 import org.jbei.ice.client.collection.table.CollectionEntriesDataTable;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
+import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.client.common.table.DataTable;
+import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -57,15 +60,21 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
     private final Button addToSubmit;
     private final Button moveToSubmit;
 
+    // feedback panel
+    private final FeedbackPanel feedbackPanel;
+
     public CollectionsEntriesPresenter(RegistryServiceAsync service, HandlerManager eventBus,
             final ICollectionEntriesView display, String param) {
 
         this.service = service;
         this.eventBus = eventBus;
         this.display = display;
+        feedbackPanel = new FeedbackPanel("450px");
+        feedbackPanel.setVisible(false);
+        display.setFeedback(feedbackPanel);
 
         // initialize all parameters
-        this.collectionsDataTable = new CollectionEntriesDataTable();
+        this.collectionsDataTable = new CollectionEntriesDataTable(new EntryTablePager());
         this.userListProvider = new ListDataProvider<FolderDetails>(new KeyProvider());
         this.systemListProvider = new ListDataProvider<FolderDetails>(new KeyProvider());
         this.entryDataProvider = new EntryDataViewDataProvider(collectionsDataTable, service);
@@ -86,15 +95,17 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         moveToSubmit = new Button("Submit");
 
         UserCollectionMultiSelect add = new UserCollectionMultiSelect(addToSubmit,
-                this.userListProvider);
+                this.userListProvider, new SingleSelectionHandler());
         UserCollectionMultiSelect move = new UserCollectionMultiSelect(moveToSubmit,
-                this.userListProvider);
+                this.userListProvider, new SingleSelectionHandler());
 
         subMenu = new EntrySelectionModelMenu(add, move);
         this.display.setCollectionSubMenu(subMenu.asWidget());
 
         // handlers for the collection sub menu
         addToSubmit.addClickHandler(new AddToFolderHandler(this.service) {
+
+            private int entrySize;
 
             @Override
             public void onClick(ClickEvent event) {
@@ -119,16 +130,24 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 for (EntryInfo datum : collectionsDataTable.getEntries()) {
                     ids.add(Long.decode(datum.getRecordId()));
                 }
+                entrySize = ids.size();
                 return ids;
             }
 
             @Override
             public void onAddSuccess(ArrayList<FolderDetails> results) {
-                //                Set<FolderDetails> folders = subMenu.getCollectionMenu().getAddToDestination();
-                //                for (FolderDetails folder : folders) {
-                //                    
-                //                }
                 display.getUserCollectionMenu().updateCounts(results);
+                String msg = "<b>" + entrySize + "</b> entries successfully added to ";
+                if (results.size() == 1)
+                    msg += ("\"" + results.get(0).getName() + "\" collection.");
+                else
+                    msg += (results.size() + " collections.");
+                feedbackPanel.setSuccessMessage(msg);
+            }
+
+            @Override
+            public void onAddFailure(String msg) {
+                feedbackPanel.setFailureMessage("An error occurred while adding the entries.");
             }
         });
 
@@ -178,7 +197,8 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    Window.alert("Error creating folder");
+                    feedbackPanel
+                            .setFailureMessage("Error connecting to the server. Please try again.");
                 }
 
                 @Override
@@ -220,6 +240,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 if (!menu.isValidClick(event))
                     return;
 
+                feedbackPanel.setVisible(false);
                 retrieveEntriesForFolder(menu.getCurrentSelection());
             }
         });
@@ -233,6 +254,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 if (!userMenu.isValidClick(event))
                     return;
 
+                feedbackPanel.setVisible(false);
                 retrieveEntriesForFolder(userMenu.getCurrentSelection());
             }
         });
@@ -316,6 +338,56 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         @Override
         public Long getKey(FolderDetails item) {
             return item.getId();
+        }
+    }
+
+    // TODO shares elements with SubmitHandler. 
+    // TODO this entire class does not feel right
+    private class SingleSelectionHandler implements MultiSelectSelectionHandler {
+
+        private int entrySize;
+
+        @Override
+        public void onSingleSelect(FolderDetails details) {
+            subMenu.getCollectionMenu().hidePopup();
+            HashSet<FolderDetails> folders = new HashSet<FolderDetails>();
+            folders.add(details);
+            display.getUserCollectionMenu().setBusyIndicator(folders);
+
+            ArrayList<Long> destinationFolderIds = new ArrayList<Long>();
+            destinationFolderIds.add(details.getId());
+
+            // TODO : inefficient
+            ArrayList<Long> ids = new ArrayList<Long>();
+            for (EntryInfo datum : collectionsDataTable.getEntries()) {
+                if (datum == null)
+                    continue;
+                ids.add(Long.decode(datum.getRecordId()));
+            }
+
+            // service call to actually add
+            service.addEntriesToCollection(AppController.sessionId, destinationFolderIds, ids,
+                new AsyncCallback<ArrayList<FolderDetails>>() {
+
+                    @Override
+                    public void onSuccess(ArrayList<FolderDetails> result) {
+                        if (result != null) {
+                            display.getUserCollectionMenu().updateCounts(result);
+                            String msg = "<b>" + entrySize + "</b> entries successfully added to ";
+                            msg += ("\"" + result.get(0).getName() + "\" collection.");
+                            feedbackPanel.setSuccessMessage(msg);
+                        } else {
+                            feedbackPanel
+                                    .setFailureMessage("An error occured while connecting to the server.");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        feedbackPanel
+                                .setFailureMessage("An error occured while connecting to the server.");
+                    }
+                });
         }
     }
 }

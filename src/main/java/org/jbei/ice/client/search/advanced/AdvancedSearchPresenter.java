@@ -78,7 +78,7 @@ public class AdvancedSearchPresenter extends AbstractPresenter {
                     Button submit = new Button("Submit");
                     userCollectionDataProvider.setList(result);
                     UserCollectionMultiSelect selection = new UserCollectionMultiSelect(submit,
-                            userCollectionDataProvider);
+                            userCollectionDataProvider, null);
                     AddToMenu addToMenu = new AddToMenu(selection);
                     HeaderMenu header = new HeaderMenu(new ExportAsMenu(), addToMenu);
                     display.setSelectionMenu(header);

@@ -6,8 +6,6 @@ import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.CssResource.ImportedWithPrefix;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.resources.client.ImageResource.ImageOptions;
 import com.google.gwt.resources.client.ImageResource.RepeatStyle;
@@ -24,39 +22,9 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class ExportAsMenu implements IsWidget {
 
-    @ImportedWithPrefix("")
-    interface Style extends CssResource, CellList.Style {
-        /**
-         * The path to the default CSS styles used by this resource.
-         */
-        String DEFAULT_CSS = "org/jbei/ice/client/resource/css/ExportAs.css";
+    interface Style extends CellList.Style {
 
         String subMenuExport();
-
-        /**
-         * Applied to even items.
-         */
-        String cellListEvenItem();
-
-        /**
-         * Applied to the keyboard selected item.
-         */
-        String cellListKeyboardSelectedItem();
-
-        /**
-         * Applied to odd items.
-         */
-        String cellListOddItem();
-
-        /**
-         * Applied to selected items.
-         */
-        String cellListSelectedItem();
-
-        /**
-         * Applied to the widget.
-         */
-        String cellListWidget();
     }
 
     interface ExportAsResource extends CellList.Resources {
@@ -67,7 +35,7 @@ public class ExportAsMenu implements IsWidget {
         @ImageOptions(repeatStyle = RepeatStyle.None)
         ImageResource sortDown();
 
-        @Source(Style.DEFAULT_CSS)
+        @Source("org/jbei/ice/client/resource/css/ExportAs.css")
         Style cellListStyle();
     }
 

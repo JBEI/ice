@@ -2,7 +2,7 @@ package org.jbei.ice.client.collection;
 
 import org.jbei.ice.client.collection.menu.CollectionEntryMenu;
 import org.jbei.ice.client.collection.menu.CollectionUserMenu;
-import org.jbei.ice.client.common.table.DataTable;
+import org.jbei.ice.client.collection.table.CollectionEntriesDataTable;
 
 import com.google.gwt.user.client.ui.Widget;
 
@@ -28,5 +28,8 @@ public interface ICollectionEntriesView {
      * @param table
      *            data view table. depends on user selection
      */
-    void setDataView(DataTable<?> table);
+    void setDataView(CollectionEntriesDataTable table);
+
+    // TODO : the following needs to be in abstract layout
+    void setFeedback(Widget feedback);
 }
