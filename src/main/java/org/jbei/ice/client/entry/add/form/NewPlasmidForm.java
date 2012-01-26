@@ -13,7 +13,6 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextArea;
@@ -63,9 +62,10 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
     private void setLabel(boolean required, String label, FlexTable layout, int row, int col) {
         Widget labelWidget;
         if (required)
-            labelWidget = new HTML(label + " <span class=\"required\">*</span>");
+            labelWidget = new HTML("<span class=\"font-80em font-bold\">" + label
+                    + "</span> <span class=\"required\">*</span>");
         else
-            labelWidget = new Label(label);
+            labelWidget = new HTML("<span class=\"font-80em font-bold\">" + label + "</span>");
 
         layout.setWidget(row, col, labelWidget);
         layout.getFlexCellFormatter().setWidth(row, col, "170px");
@@ -149,14 +149,14 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
 
         // backbone
         row += 1;
-        general.setWidget(row, 0, new Label("Backbone"));
+        general.setWidget(row, 0, new HTML("<span class=\"font-80em font-bold\">Backbone</span>"));
         backbone = createStandardTextBox("300px");
         general.setWidget(row, 1, backbone);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
         // links
         row += 1;
-        general.setWidget(row, 0, new Label("Links"));
+        general.setWidget(row, 0, new HTML("<span class=\"font-80em font-bold\">Links</span>"));
         links = createStandardTextBox("300px");
         widget = createTextBoxWithHelp(links, "Comma separated");
         general.setWidget(row, 1, widget);
@@ -164,7 +164,8 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
 
         // selection markers
         row += 1;
-        general.setWidget(row, 0, new Label("Selection Markers"));
+        general.setWidget(row, 0, new HTML(
+                "<span class=\"font-80em font-bold\">Selection Markers</span>"));
         general.getCellFormatter().setWidth(8, 0, "170px");
         markers = createAutoCompleteForSelectionMarkers("300px");
         //        markers = createStandardTextBox("300px");
@@ -174,7 +175,8 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
 
         // origin of replication
         row += 1;
-        general.setWidget(row, 0, new Label("Origin of Replication"));
+        general.setWidget(row, 0, new HTML(
+                "<span class=\"font-80em font-bold\">Origin of Replication</span>"));
         origin = createStandardTextBox("300px");
         widget = createTextBoxWithHelp(origin, "Comma separated");
         general.setWidget(row, 1, widget);
@@ -182,7 +184,7 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
 
         // promoters
         row += 1;
-        general.setWidget(row, 0, new Label("Promoters"));
+        general.setWidget(row, 0, new HTML("<span class=\"font-80em font-bold\">Promoters</span>"));
         promoters = createStandardTextBox("300px");
         widget = createTextBoxWithHelp(promoters, "Comma separated");
         general.setWidget(row, 1, widget);
@@ -190,21 +192,22 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
 
         // keywords
         row += 1;
-        general.setWidget(row, 0, new Label("Keywords"));
+        general.setWidget(row, 0, new HTML("<span class=\"font-80em font-bold\">Keywords</span>"));
         keywords = createStandardTextBox("640px");
         general.setWidget(row, 1, keywords);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
         // summary
         row += 1;
-        general.setWidget(row, 0, new HTML("Summary <span class=\"required\">*</span>"));
+        general.setWidget(row, 0, new HTML("<span class=\"font-80em font-bold\">Summary</span> "
+                + "<span class=\"required\">*</span>"));
         general.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
         general.setWidget(row, 1, summary);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
         // references
         row += 1;
-        general.setWidget(row, 0, new Label("References"));
+        general.setWidget(row, 0, new HTML("<span class=\"font-80em font-bold\">References</span>"));
         general.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
         references = createTextArea("640px", "50px");
         general.setWidget(row, 1, references);
@@ -212,7 +215,8 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
 
         // intellectual property
         row += 1;
-        general.setWidget(row, 0, new Label("Intellectual Property"));
+        general.setWidget(row, 0, new HTML(
+                "<span class=\"font-80em font-bold\">Intellectual Property</span>"));
         general.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
         ip = createTextArea("640px", "50px");
         general.setWidget(row, 1, ip);

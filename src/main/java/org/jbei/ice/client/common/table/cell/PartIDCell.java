@@ -54,13 +54,9 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> {
                 onMouseOver(parent, event, value);
             else
                 onMouseOut(parent);
-        }
-
-        if (MOUSEOUT_EVENT_NAME.equalsIgnoreCase(eventType)) {
+        } else if (MOUSEOUT_EVENT_NAME.equalsIgnoreCase(eventType)) {
             onMouseOut(parent);
-        }
-
-        if (MOUSE_CLICK.equalsIgnoreCase(eventType)) {
+        } else if (MOUSE_CLICK.equalsIgnoreCase(eventType)) {
             if (withinBounds(parent, event))
                 onMouseClick(value.getRecordId());
         }

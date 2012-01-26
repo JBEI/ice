@@ -16,4 +16,9 @@ public enum EntryAddType implements IsSerializable {
     public String getDisplay() {
         return this.display;
     }
+
+    @Override
+    public String toString() {
+        return this.display;
+    }
 }

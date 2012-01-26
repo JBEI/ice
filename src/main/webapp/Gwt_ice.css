@@ -20,6 +20,7 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 .font-bold { font-weight: bold; }
 .pad-6 { padding: 6px; }
 .pad-right-10 { padding-right: 10px; }
+.to_upper { text-transform: uppercase; }
 
 .btn_submit_entry_form {
 	padding: 5px;
@@ -1041,13 +1042,24 @@ td.datePickerMonth {
 /* ADD */
 .add_new_entry_main_content_wrapper {
 	border-top: 2px solid #4787ED;
-	border-bottom: 1px solid #4787ED;
+	border-bottom: 1px solid #CCC;
 }
 
 .add_new_entry_main_content_header {
-	background-color: #cecece;
+	font-size: 0.80em;
+	padding: 10px;
+	color: #444;
+	font-weight: bold;
+	text-transform: uppercase;
+	border-right: 1px solid #F1F1F1;
+	border-left: 1px solid #F1F1F1;
 }
 
+.add_new_entry_sub_content {
+	padding: 6px;
+	border: 1px solid #F1F1F1;
+	
+}
 
 /* MENU BAR*/
 .gwt-MenuBar {

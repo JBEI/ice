@@ -1,8 +1,9 @@
 package org.jbei.ice.client.entry.add;
 
 import org.jbei.ice.client.common.AbstractLayout;
+import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.client.entry.add.form.EntryCreateWidget;
-import org.jbei.ice.client.entry.add.menu.NewEntryMenu;
+import org.jbei.ice.client.entry.add.menu.EntryAddMenu;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -14,9 +15,10 @@ import com.google.gwt.user.client.ui.Widget;
 public class EntryAddView extends AbstractLayout implements IEntryAddView {
 
     private Label contentHeader;
-    private NewEntryMenu menu;
+    private EntryAddMenu menu;
     private EntryCreateWidget currentForm;
     private VerticalPanel subContent;
+    private FlexTable mainContent;
 
     public EntryAddView() {
         super();
@@ -36,17 +38,8 @@ public class EntryAddView extends AbstractLayout implements IEntryAddView {
     }
 
     protected Widget createMenu() {
-        FlexTable layout = new FlexTable();
-        layout.setCellPadding(3);
-        layout.setCellSpacing(0);
-        layout.addStyleName("collection_menu_table");
-        layout.setHTML(0, 0, "Select A Type");
-        layout.getCellFormatter().setStyleName(0, 0, "collections_menu_header");
-
-        // cell to render value
-        menu = new NewEntryMenu();
-        layout.setWidget(1, 0, menu);
-        return layout;
+        menu = new EntryAddMenu();
+        return menu;
     }
 
     protected Widget createMainContent() {
@@ -54,7 +47,7 @@ public class EntryAddView extends AbstractLayout implements IEntryAddView {
         subContent.setWidth("100%");
         contentHeader = new Label("Add New Entry");
 
-        FlexTable mainContent = new FlexTable(); // wrapper
+        mainContent = new FlexTable(); // wrapper
         mainContent.setCellPadding(3);
         mainContent.setWidth("100%");
         mainContent.setCellSpacing(0);
@@ -63,11 +56,13 @@ public class EntryAddView extends AbstractLayout implements IEntryAddView {
         mainContent.getCellFormatter().setStyleName(0, 0, "add_new_entry_main_content_header");
 
         // sub content
-
-        subContent
-                .add(new HTML(
-                        "<p>Please select the type of entry you wish to add. <p>Fields indicated by <span class=\"required\">*</span> are required. Other instructions here. Lorem ipsum."));
+        subContent.add(new HTML("<p>Please select the type of entry you wish to add. "
+                + "<p>Fields indicated by <span class=\"required\">*</span> are required. "
+                + "Other instructions here. Lorem ipsum."));
         mainContent.setWidget(1, 0, subContent);
+        mainContent.getFlexCellFormatter().setStyleName(1, 0, "add_new_entry_sub_content");
+        mainContent.getFlexCellFormatter().setColSpan(1, 0, 2);
+
         return mainContent;
     }
 
@@ -77,6 +72,11 @@ public class EntryAddView extends AbstractLayout implements IEntryAddView {
         subContent.clear();
         subContent.add(this.currentForm);
         contentHeader.setText(title);
+    }
+
+    public void setFeedbackPanel(FeedbackPanel panel) {
+        mainContent.setWidget(0, 1, panel);
+        mainContent.getFlexCellFormatter().setHorizontalAlignment(0, 1, HasAlignment.ALIGN_CENTER);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class EntryAddView extends AbstractLayout implements IEntryAddView {
     }
 
     @Override
-    public NewEntryMenu getMenu() {
+    public EntryAddMenu getMenu() {
         return menu;
     }
 }

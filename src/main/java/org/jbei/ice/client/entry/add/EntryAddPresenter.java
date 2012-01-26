@@ -1,7 +1,6 @@
 package org.jbei.ice.client.entry.add;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -9,6 +8,7 @@ import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.client.entry.add.form.EntryCreateWidget;
 import org.jbei.ice.client.entry.add.form.IEntryFormSubmit;
 import org.jbei.ice.client.entry.add.form.SampleLocationWidget;
@@ -25,18 +25,15 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionChangeEvent.Handler;
-import com.google.gwt.view.client.SingleSelectionModel;
 
 public class EntryAddPresenter extends AbstractPresenter {
 
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
     private final IEntryAddView display;
-    private SingleSelectionModel<EntryAddType> menuSelectionModel;
     private final HashMap<EntryAddType, EntryCreateWidget> formsCache;
     private HashMap<AutoCompleteField, ArrayList<String>> autoCompleteData;
+    private final FeedbackPanel feedbackPanel;
 
     public EntryAddPresenter(RegistryServiceAsync service, HandlerManager eventBus,
             IEntryAddView display) {
@@ -47,25 +44,11 @@ public class EntryAddPresenter extends AbstractPresenter {
 
         formsCache = new HashMap<EntryAddType, EntryCreateWidget>();
 
+        feedbackPanel = new FeedbackPanel("450px");
+        feedbackPanel.setVisible(false);
+        this.display.setFeedbackPanel(feedbackPanel);
+
         bind();
-
-        initSelectionModel();
-    }
-
-    private void initSelectionModel() {
-        menuSelectionModel = new SingleSelectionModel<EntryAddType>();
-        display.getMenu().setRowData(Arrays.asList(EntryAddType.values()));
-        display.getMenu().setSelectionModel(menuSelectionModel);
-        menuSelectionModel.addSelectionChangeHandler(new Handler() {
-
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                EntryAddType selected = menuSelectionModel.getSelectedObject();
-                getSampleLocation(selected);
-                EntryCreateWidget form = getEntryForm(selected);
-                display.setCurrentForm(form, ("New " + selected.getDisplay()));
-            }
-        });
     }
 
     private void getSampleLocation(EntryAddType selected) {
@@ -111,10 +94,23 @@ public class EntryAddPresenter extends AbstractPresenter {
                     display.getCurrentForm().getEntrySubmitForm().setSampleLocation(sampleLocation);
                 }
             });
-
     }
 
     protected void bind() {
+
+        display.getMenu().addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                if (!display.getMenu().isValidClick(event))
+                    return;
+
+                EntryAddType selected = display.getMenu().getCurrentSelection();
+                getSampleLocation(selected);
+                EntryCreateWidget form = getEntryForm(selected);
+                display.setCurrentForm(form, ("New " + selected.getDisplay()));
+            }
+        });
 
         // TODO : look in caching to avoid making the following call every time page is loaded
         service.retrieveAutoCompleteData(AppController.sessionId,
@@ -130,7 +126,6 @@ public class EntryAddPresenter extends AbstractPresenter {
                     autoCompleteData = new HashMap<AutoCompleteField, ArrayList<String>>(result);
                 }
             });
-
     }
 
     /**
@@ -148,13 +143,14 @@ public class EntryAddPresenter extends AbstractPresenter {
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    Window.alert("Failure to create entry");
+                    feedbackPanel.setFailureMessage("Server error. Please try again.");
                 }
 
                 @Override
                 public void onSuccess(ArrayList<Long> result) {
                     if (result.size() != entrySet.size()) {
-                        Window.alert("Your entries could not be created. Please try again later or contact your administrator");
+                        feedbackPanel
+                                .setFailureMessage("Your entry could not be created. Please try again.");
                     } else {
                         if (entrySet.size() == 1) {
                             long id = result.get(0);
@@ -194,9 +190,12 @@ public class EntryAddPresenter extends AbstractPresenter {
 
             @Override
             public void onClick(ClickEvent event) {
+                feedbackPanel.setVisible(false);
+
                 FocusWidget focus = formSubmit.validateForm();
                 if (focus != null) {
                     focus.setFocus(true);
+                    feedbackPanel.setFailureMessage("Please fill out all required fields");
                     return;
                 }
 
@@ -206,13 +205,11 @@ public class EntryAddPresenter extends AbstractPresenter {
         });
 
         formsCache.put(type, form);
-
         return form;
     }
 
     @Override
     public void go(HasWidgets container) {
-
         container.clear();
         container.add(this.display.asWidget());
     }
