@@ -29,6 +29,7 @@ public class AdvancedSearchView extends AbstractLayout implements IAdvancedSearc
 
     @Override
     public void initComponents() {
+        super.initComponents();
         header = new HorizontalPanel();
         resultsPanel = new VerticalPanel();
     }

@@ -22,6 +22,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
 
     @Override
     protected void initComponents() {
+        super.initComponents();
         draftsMenu = new BulkImportMenu();
         menu = new CellList<ImportType>(new ImportListCell());
     }

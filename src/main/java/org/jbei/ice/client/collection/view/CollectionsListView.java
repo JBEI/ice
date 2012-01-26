@@ -32,6 +32,7 @@ public class CollectionsListView extends AbstractLayout implements ICollectionLi
 
     @Override
     protected void initComponents() {
+        super.initComponents();
         systemCollectionTable = new CollectionListTable();
         userCollectionTable = new CollectionListTable();
         addCollectionButton = new Button("Add");

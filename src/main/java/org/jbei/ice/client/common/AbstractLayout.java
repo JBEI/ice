@@ -10,6 +10,9 @@ import com.google.gwt.user.client.ui.Widget;
 
 public abstract class AbstractLayout extends Composite {
 
+    private HeaderView headerView;
+    private HeaderMenu headerMenu;
+
     public AbstractLayout() {
         FlexTable layout = new FlexTable();
         layout.setWidth("100%");
@@ -30,14 +33,20 @@ public abstract class AbstractLayout extends Composite {
     protected abstract Widget createContents();
 
     protected void initComponents() {
+        headerView = new HeaderView();
+        headerMenu = new HeaderMenu();
     }
 
     protected Widget createHeader() {
         VerticalPanel panel = new VerticalPanel();
         panel.setWidth("100%");
-        panel.add(new HeaderView());
-        panel.add(new HeaderMenu());
+        panel.add(headerView);
+        panel.add(headerMenu);
         return panel;
+    }
+
+    protected HeaderView getHeaderView() {
+        return this.headerView;
     }
 
     protected Widget createFooter() {

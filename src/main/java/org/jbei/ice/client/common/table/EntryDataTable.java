@@ -230,7 +230,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
         createdColumn.setSortable(true);
         this.addColumn(createdColumn, "Created");
-        this.setColumnWidth(createdColumn, 90, Unit.PX);
+        this.setColumnWidth(createdColumn, 100, Unit.PX);
         return createdColumn;
     }
 

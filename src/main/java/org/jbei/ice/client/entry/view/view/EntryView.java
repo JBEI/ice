@@ -70,6 +70,7 @@ public class EntryView extends AbstractLayout implements IEntryView {
 
     @Override
     protected void initComponents() {
+        super.initComponents();
 
         uploadPanel = createSequenceUploadPanel();
 

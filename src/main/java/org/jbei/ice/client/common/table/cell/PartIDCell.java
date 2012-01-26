@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Cell for part Id column values. Renders a url
- * that is has a popup on mouse over
+ * that has a popup on mouse over
  * 
  * @author Hector Plahar
  */
@@ -104,7 +104,7 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> {
         final int y = event.getClientY() + Window.getScrollTop();
 
         popup = new PopupPanel(true);
-        popup.setStyleName("popup");
+        popup.setStyleName("add_to_popup");
 
         Widget contents = getTipViewContents(value);
         popup.add(contents);

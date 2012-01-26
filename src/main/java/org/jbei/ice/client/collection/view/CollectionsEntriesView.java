@@ -25,6 +25,7 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
 
     @Override
     protected void initComponents() {
+        super.initComponents();
         rightContents = new FlexTable();
         rightContents.setCellPadding(0);
         rightContents.setCellSpacing(0);

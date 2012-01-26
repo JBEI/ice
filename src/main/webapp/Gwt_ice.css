@@ -130,6 +130,14 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 	font-size: 0.80em;
 }
 
+.entry_tooltip_sub_header {
+	text-transform: uppercase;
+	color: #233559;
+    font-weight: bold;
+	font-size: 0.75em;
+	border-bottom: 0.13em solid #3C5A99;
+}
+
 .entry_view_sub_section {
 	padding: 8px;
 }
