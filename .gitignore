@@ -2,3 +2,5 @@ target/
 *~
 .*
 war/
+src/main/webapp/gwt_ice/
+gwt-unitCache/
