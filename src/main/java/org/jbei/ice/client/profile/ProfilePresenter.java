@@ -7,23 +7,17 @@ import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.SamplesDataProvider;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
-import org.jbei.ice.client.common.table.EntryDataTable;
-import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.ProfileInfo;
-import org.jbei.ice.shared.dto.SampleInfo;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionChangeEvent.Handler;
-import com.google.gwt.view.client.SingleSelectionModel;
 
 public class ProfilePresenter extends AbstractPresenter {
 
@@ -31,41 +25,23 @@ public class ProfilePresenter extends AbstractPresenter {
     private final EntryDataViewDataProvider provider; // entries tab view data provider
     private final SamplesDataProvider samplesDataProvider;
 
-    public interface Display {
-
-        Widget asWidget();
-
-        void setContents(Widget widget);
-
-        CellList<CellEntry> getMenu();
-
-        void setHeaderText(String text);
-
-        HasEntryDataTable<SampleInfo> getSamplesTable();
-
-        EntryDataTable<EntryInfo> getEntryDataTable();
-    }
-
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
-    private final Display display;
-    private final SingleSelectionModel<CellEntry> selectionModel;
+    private final IProfileView display;
     private Widget accountWidget;
 
     public ProfilePresenter(final RegistryServiceAsync service, HandlerManager eventBus,
-            final Display display, final String userId) {
+            final IProfileView display, final String userId) {
 
         this.service = service;
         this.eventBus = eventBus;
         this.display = display;
 
-        // selection model
-        selectionModel = new SingleSelectionModel<CellEntry>();
-        selectionModel.addSelectionChangeHandler(new Handler() {
+        this.display.getMenu().addClickHandler(new ClickHandler() {
 
             @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                CellEntry selected = selectionModel.getSelectedObject();
+            public void onClick(ClickEvent event) {
+                CellEntry selected = display.getMenu().getSelection();
                 switch (selected.getType()) {
                 default:
                 case ABOUT:
@@ -81,7 +57,7 @@ public class ProfilePresenter extends AbstractPresenter {
             }
         });
 
-        this.display.getMenu().setSelectionModel(selectionModel);
+        //        this.display.getMenu().setSelectionModel(selectionModel);
         this.service.retrieveProfileInfo(sid, userId, new AsyncCallback<ProfileInfo>() {
 
             @Override
@@ -107,7 +83,6 @@ public class ProfilePresenter extends AbstractPresenter {
                 menu.add(new CellEntry(MenuType.ENTRIES, info.getUserEntryCount()));
                 menu.add(new CellEntry(MenuType.SAMPLES, info.getUserSampleCount()));
                 display.getMenu().setRowData(menu);
-                selectionModel.setSelected(about, true);
 
                 // set data
                 provider.setValues(profileInfo.getUserEntries());

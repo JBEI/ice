@@ -12,7 +12,6 @@ import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 
-import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -22,13 +21,13 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class ProfileView extends Composite implements ProfilePresenter.Display {
+public class ProfileView extends Composite implements IProfileView {
 
     private EntryDataTable<EntryInfo> entriesTable;
     private SamplesDataTable samplesTable;
 
     private final Label contentHeader;
-    private CellList<CellEntry> menu;
+    private ProfileViewMenu menu;
     private final FlexTable mainContent;
 
     public ProfileView() {
@@ -77,17 +76,8 @@ public class ProfileView extends Composite implements ProfilePresenter.Display {
     }
 
     protected Widget createMenu() {
-        FlexTable layout = new FlexTable();
-        layout.setCellPadding(0);
-        layout.setCellSpacing(0);
-        layout.addStyleName("collection_menu_table");
-        layout.setHTML(0, 0, "User Profile");
-        layout.getCellFormatter().setStyleName(0, 0, "collections_menu_header");
-
-        // cell to render value
-        menu = new CellList<CellEntry>(new ProfileMenuCell());
-        layout.setWidget(1, 0, menu);
-        return layout;
+        menu = new ProfileViewMenu();
+        return menu;
     }
 
     protected Widget createMainContent() {
@@ -114,7 +104,7 @@ public class ProfileView extends Composite implements ProfilePresenter.Display {
     }
 
     @Override
-    public CellList<CellEntry> getMenu() {
+    public ProfileViewMenu getMenu() {
         return this.menu;
     }
 
