@@ -15,6 +15,7 @@ import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryInfo.EntryType;
+import org.jbei.ice.shared.dto.NewsItem;
 import org.jbei.ice.shared.dto.ProfileInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
@@ -120,4 +121,10 @@ public interface RegistryServiceAsync {
     void retrieveAllGroups(String sessionId, AsyncCallback<LinkedHashMap<Long, String>> callback);
 
     void retrieveAllAccounts(String sessionId, AsyncCallback<LinkedHashMap<Long, String>> callback);
+
+    // news
+
+    void retrieveNewsItems(String sessionId, AsyncCallback<ArrayList<NewsItem>> callback);
+
+    void createNewsItem(String sessionId, NewsItem item, AsyncCallback<NewsItem> callback);
 }

@@ -32,6 +32,11 @@ public abstract class AbstractLayout extends Composite {
 
     protected abstract Widget createContents();
 
+    /**
+     * Initialization of components used in this view.
+     * sub-classes that override should make sure to call
+     * super.initComponents();
+     */
     protected void initComponents() {
         headerView = new HeaderView();
         headerMenu = new HeaderMenu();

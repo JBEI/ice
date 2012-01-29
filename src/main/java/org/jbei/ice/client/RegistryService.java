@@ -15,6 +15,7 @@ import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryInfo.EntryType;
+import org.jbei.ice.shared.dto.NewsItem;
 import org.jbei.ice.shared.dto.ProfileInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
@@ -110,4 +111,8 @@ public interface RegistryService extends RemoteService {
     LinkedHashMap<Long, String> retrieveAllGroups(String sessionId);
 
     LinkedHashMap<Long, String> retrieveAllAccounts(String sessionId);
+
+    ArrayList<NewsItem> retrieveNewsItems(String sessionId);
+
+    NewsItem createNewsItem(String sessionId, NewsItem item);
 }

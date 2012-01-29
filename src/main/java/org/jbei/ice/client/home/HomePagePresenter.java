@@ -1,13 +1,14 @@
 package org.jbei.ice.client.home;
 
-import org.jbei.ice.client.AbstractPresenter;
-import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.event.LogoutEvent;
+import java.util.ArrayList;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.HasClickHandlers;
+import org.jbei.ice.client.AbstractPresenter;
+import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.shared.dto.NewsItem;
+
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 
 public class HomePagePresenter extends AbstractPresenter {
@@ -26,17 +27,31 @@ public class HomePagePresenter extends AbstractPresenter {
     }
 
     protected void bind() {
-        HasClickHandlers handler = this.display.getLogoutHandler().getClickHandler();
-        if (handler == null)
-            return; // TODO fire logout event?
 
-        handler.addClickHandler(new ClickHandler() {
+        service.retrieveNewsItems(AppController.sessionId,
+            new AsyncCallback<ArrayList<NewsItem>>() {
 
-            @Override
-            public void onClick(ClickEvent event) {
-                eventBus.fireEvent(new LogoutEvent());
-            }
-        });
+                @Override
+                public void onSuccess(ArrayList<NewsItem> result) {
+                    if (result == null)
+                        return;
+
+                    if (result.isEmpty()) {
+
+                    } else {
+                        for (NewsItem item : result) {
+                            display.addNewsItem(item.getId(), item.getCreationDate().toString(),
+                                item.getHeader(), item.getBody());
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    // TODO
+
+                }
+            });
     }
 
     @Override

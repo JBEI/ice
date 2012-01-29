@@ -26,6 +26,7 @@ import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.FolderManager;
 import org.jbei.ice.lib.managers.GroupManager;
 import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.managers.NewsManager;
 import org.jbei.ice.lib.managers.QueryManager;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
@@ -39,6 +40,7 @@ import org.jbei.ice.lib.models.BulkImportDraft;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Folder;
 import org.jbei.ice.lib.models.Group;
+import org.jbei.ice.lib.models.News;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.models.Storage;
@@ -58,6 +60,7 @@ import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryInfo.EntryType;
+import org.jbei.ice.shared.dto.NewsItem;
 import org.jbei.ice.shared.dto.ProfileInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
@@ -1039,5 +1042,62 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
 
         return results;
+    }
+
+    @Override
+    public ArrayList<NewsItem> retrieveNewsItems(String sessionId) {
+
+        Account account;
+        try {
+            account = retrieveAccountForSid(sessionId);
+            if (account == null)
+                return null;
+        } catch (ControllerException e) {
+            Logger.error(e);
+        }
+
+        ArrayList<NewsItem> items = new ArrayList<NewsItem>();
+
+        ArrayList<News> results;
+        try {
+            results = NewsManager.retrieveAll();
+            for (News news : results) {
+                NewsItem item = new NewsItem(String.valueOf(news.getId()), news.getCreationTime(),
+                        news.getTitle(), news.getBody());
+                items.add(item);
+            }
+        } catch (ManagerException e) {
+            Logger.error(e);
+        }
+
+        return items;
+    }
+
+    @Override
+    public NewsItem createNewsItem(String sessionId, NewsItem item) {
+
+        Account account;
+        try {
+            account = retrieveAccountForSid(sessionId);
+            if (account == null)
+                return null;
+        } catch (ControllerException e) {
+            Logger.error(e);
+        }
+
+        News news = new News();
+        news.setTitle(item.getHeader());
+        news.setBody(item.getBody());
+
+        try {
+            News saved = NewsManager.save(news);
+            item.setCreationDate(saved.getCreationTime());
+            item.setId(String.valueOf(saved.getId()));
+            return item;
+        } catch (ManagerException e) {
+            Logger.error(e);
+            return null;
+        }
+
     }
 }

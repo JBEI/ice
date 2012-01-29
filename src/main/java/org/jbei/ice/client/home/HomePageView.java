@@ -1,73 +1,91 @@
 package org.jbei.ice.client.home;
 
-import gwtupload.client.BaseUploadStatus;
-import gwtupload.client.Uploader;
+import org.jbei.ice.client.common.AbstractLayout;
 
-import org.jbei.ice.client.ILogoutHandler;
-import org.jbei.ice.client.common.Footer;
-import org.jbei.ice.client.common.HeaderMenu;
-import org.jbei.ice.client.common.header.HeaderView;
-
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HeaderPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-public class HomePageView extends Composite implements IHomePageView {
+public class HomePageView extends AbstractLayout implements IHomePageView {
 
-    private HeaderView header;
+    private ArchiveMenu menu;
+    private FlexTable contentTable;
+    //    private final VerticalPanel news;
+    private FlexTable newsAdd;
+    private TextBox title;
+    private TextArea area;
+    private Button submitNews;
+    private Button cancelNews;
 
     public HomePageView() {
-        HeaderPanel layout = new HeaderPanel();
-        layout.setWidth("100%");
-        layout.setHeight("100%");
-        initWidget(layout);
-
-        layout.setHeaderWidget(getHeader());
-        layout.setContentWidget(getContents());
-        layout.setFooterWidget(getFooter());
-    }
-
-    private Widget getHeader() {
-        header = new HeaderView();
-        VerticalPanel panel = new VerticalPanel();
-        panel.setWidth("100%");
-        panel.add(header);
-        panel.add(new HeaderMenu());
-        return panel;
-    }
-
-    protected Widget getContents() {
-        FlexTable table = new FlexTable();
-        table.setHeight("100%");
-        table.setHTML(0, 0, "&nbsp;test");
-        Uploader uploader = new Uploader();
-        uploader.setStatusWidget(new BaseUploadStatus());
-        table.setWidget(1, 0, uploader);
-        return table;
     }
 
     @Override
-    public ILogoutHandler getLogoutHandler() {
-        return header;
+    protected void initComponents() {
+        super.initComponents();
+        menu = new ArchiveMenu();
+        contentTable = new FlexTable();
+        submitNews = new Button("Submit");
+        cancelNews = new Button("Cancel");
+
+        newsAdd = new FlexTable();
+        newsAdd.setHTML(0, 0, "Title");
+        TextBox title = new TextBox();
+        newsAdd.setWidget(0, 1, title);
+        newsAdd.setHTML(1, 0, "Body");
+        TextArea area = new TextArea();
+        newsAdd.setWidget(1, 1, area);
     }
 
-    public Button getQuickSearchButton() {
-        return header.getQuickSearchButton();
+    @Override
+    protected Widget createContents() {
+
+        contentTable.setWidth("100%");
+        contentTable.setWidget(0, 0, menu);
+        contentTable.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
+
+        // TODO : middle sliver goes here
+        contentTable.setWidget(0, 1, createMainContent());
+        contentTable.getFlexCellFormatter().setVerticalAlignment(0, 1, HasAlignment.ALIGN_TOP);
+
+        return contentTable;
     }
 
-    public String getQuickSearchInput() {
-        return header.getSearchInput();
+    private Button createAddButton() {
+        Button button = new Button("Add");
+        button.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                newsAdd.setVisible(!newsAdd.isVisible());
+            }
+        });
+        return button;
     }
 
-    private Widget getFooter() {
-        return Footer.getInstance();
+    private Widget createMainContent() {
+        FlexTable table = new FlexTable();
+        table.setWidth("100%");
+        table.setWidget(0, 0, createAddButton());
+        table.getFlexCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_RIGHT);
+
+        table.setWidget(1, 0, newsAdd);
+
+        return table;
     }
 
     @Override
     public Widget asWidget() {
         return this;
+    }
+
+    @Override
+    public void addNewsItem(String id, String string, String header, String body) {
+
     }
 }
