@@ -15,6 +15,15 @@ import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
 
+/**
+ * Aggregate users into groups.
+ * <p>
+ * Each group has a generated UUIDv4 identifier, except the "everyone" group, which is hard coded
+ * and shared by all gd-ice instances. Groups can have parent groups.
+ * 
+ * @author Timothy Ham, Ziovii Dmytriv, Hector Plahar
+ * 
+ */
 @Entity
 @Table(name = "groups")
 @SequenceGenerator(name = "sequence", sequenceName = "groups_id_seq", allocationSize = 1)

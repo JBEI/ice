@@ -6,6 +6,7 @@ import java.util.Set;
 import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.EntryPermissionVerifier;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
@@ -13,19 +14,25 @@ import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
+import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
-import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.utils.AssemblyUtils;
 import org.jbei.ice.lib.utils.BiobrickAUtils;
 import org.jbei.ice.lib.utils.BiobrickBUtils;
+import org.jbei.ice.lib.utils.IAssemblyUtils;
 import org.jbei.ice.lib.utils.RawAssemblyUtils;
 import org.jbei.ice.lib.utils.SequenceFeatureCollection;
 import org.jbei.ice.lib.utils.UtilityException;
 
+/**
+ * ABI to manipulate DNA Assembly sequences (BioBricks).
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 public class AssemblyController extends Controller {
-    private ArrayList<AssemblyUtils> assemblyUtils = new ArrayList<AssemblyUtils>();
+    private ArrayList<IAssemblyUtils> assemblyUtils = new ArrayList<IAssemblyUtils>();
 
     public AssemblyController(Account account) {
         super(account, new EntryPermissionVerifier());
@@ -34,6 +41,13 @@ public class AssemblyController extends Controller {
         getAssemblyUtils().add(new RawAssemblyUtils());
     }
 
+    /**
+     * Determine the {@link AssemblyStandard} of the given sequence.
+     * 
+     * @param partSequence
+     * @return assemblyStandard
+     * @throws ControllerException
+     */
     public AssemblyStandard determineAssemblyStandard(Sequence partSequence)
             throws ControllerException {
         AssemblyStandard result = null;
@@ -42,6 +56,13 @@ public class AssemblyController extends Controller {
         return result;
     }
 
+    /**
+     * Determine the {@link AssemblyStandard} of the given sequence String.
+     * 
+     * @param partSequenceString
+     * @return assemblyStandard
+     * @throws ControllerException
+     */
     public AssemblyStandard determineAssemblyStandard(String partSequenceString)
             throws ControllerException {
         AssemblyStandard result = null;
@@ -58,6 +79,14 @@ public class AssemblyController extends Controller {
         return result;
     }
 
+    /**
+     * Test for different assembly standards, and return the assembly features appropriate for that
+     * standard, if any.
+     * 
+     * @param partSequence
+     * @return SequenceFeatureCollection object.
+     * @throws ControllerException
+     */
     public SequenceFeatureCollection determineAssemblyFeatures(Sequence partSequence)
             throws ControllerException {
 
@@ -83,7 +112,9 @@ public class AssemblyController extends Controller {
     }
 
     /**
-     * Comparator for assembly basic sequence features
+     * Comparator for assembly basic sequence features.
+     * <p>
+     * Uses Assembly Annotations the system knows about to compare identity.
      * 
      * @param sequenceFeatures1
      * @param sequenceFeatures2
@@ -105,6 +136,16 @@ public class AssemblyController extends Controller {
         return result;
     }
 
+    /**
+     * Automatically annotate BioBrick parts.
+     * <p>
+     * Annotates prefixes, suffixes, and scar sequences by calling populateAssemblyFeatures for
+     * assembly methods known to the system.
+     * 
+     * @param partSequence
+     * @return True if
+     * @throws ControllerException
+     */
     public boolean populateAssemblyAnnotations(Sequence partSequence) throws ControllerException {
         Sequence result = null;
         AssemblyStandard standard = determineAssemblyStandard(partSequence);
@@ -117,7 +158,10 @@ public class AssemblyController extends Controller {
                 result = getAssemblyUtils().get(2).populateAssemblyFeatures(partSequence);
             }
         } catch (UtilityException e) {
-            throw new ControllerException(e);
+            // If auto annotation fails, continue.
+            Logger.warn("Error in annotating assembly features for "
+                    + partSequence.getEntry().getId());
+            Logger.warn(e.toString());
         }
         if (result != null) {
             return true;
@@ -126,6 +170,17 @@ public class AssemblyController extends Controller {
         }
     }
 
+    /**
+     * Join two BioBrick sequences together.
+     * <p>
+     * Join using the proper BioBrick assembly algorithm and saves the result into the database as a
+     * new {@link Entry}.
+     * 
+     * @param sequence1
+     * @param sequence2
+     * @return New joined Sequence. Null if join failed.
+     * @throws ControllerException
+     */
     public Sequence joinBiobricks(Sequence sequence1, Sequence sequence2)
             throws ControllerException {
         AssemblyStandard part1Standard = determineAssemblyStandard(sequence1);
@@ -231,7 +286,7 @@ public class AssemblyController extends Controller {
                     + part2Sequence.getSequence().length());
             for (SequenceFeature item : temp) {
 
-                System.out.println(item.getName() + ": " + item.getGenbankStart() + ":" + item.getEnd());
+                System.out.println(item.getName() + ": ");
             }
 
             //sequenceFeatures.addAll(determineAssemblyFeatures(part2));
@@ -261,11 +316,11 @@ public class AssemblyController extends Controller {
         }
     }
 
-    public void setAssemblyUtils(ArrayList<AssemblyUtils> assemblyUtils) {
+    public void setAssemblyUtils(ArrayList<IAssemblyUtils> assemblyUtils) {
         this.assemblyUtils = assemblyUtils;
     }
 
-    public ArrayList<AssemblyUtils> getAssemblyUtils() {
+    public ArrayList<IAssemblyUtils> getAssemblyUtils() {
         return assemblyUtils;
     }
 }

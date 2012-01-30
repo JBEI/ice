@@ -4,15 +4,19 @@ import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sample;
+import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.permissions.PermissionManager;
 
-/* Permission verifier for Sample and Location models 
+/**
+ * Permission Verifier for {@link Sample}s and {@link Storage}s.
+ * <p>
+ * If the user is the sample depositor, or if the user has write permission to the {@link Entry}
+ * associated with the sample, then user has write permissions. Otherwise the user has only read
+ * permissions.
  * 
- * If user is sample depositor then user has write permissions;
- * If user has write permissions for entry then user has write permissions;
- * Otherwise user has only read permissions
- * */
-
+ * @author Zinovii Dmytriv, Timothy Ham
+ * 
+ */
 public class SamplePermissionVerifier implements IPermissionVerifier {
     @Override
     public boolean hasReadPermissions(IModel model, Account account) {

@@ -10,6 +10,14 @@ import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.utils.LblLdapAuthenticationWrapper;
 import org.jbei.ice.lib.utils.LblLdapAuthenticationWrapper.LblLdapAuthenticationWrapperException;
 
+/**
+ * Authentication Backend for LDAP authentication at JBEI's home institution (Lawrence Berkeley Lab,
+ * aka LBL). This class could be used as a template for creating one's own ldap authentication back
+ * end.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv, Joanna Chen
+ * 
+ */
 public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Serializable {
     private static String LBL_LDAP_EMAIL_SUFFIX = "@lbl.gov";
 

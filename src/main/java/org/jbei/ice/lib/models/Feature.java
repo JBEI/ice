@@ -14,6 +14,17 @@ import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.IFeatureValueObject;
 import org.jbei.ice.lib.utils.SequenceUtils;
 
+/**
+ * Represents a unique sequence annotation known to this instance of gd-ice.
+ * <p>
+ * Annotated sequences associated with entries are parsed, and their fields are saved into the
+ * database as Features. These features have unique identifiers via hash. In the future, select set
+ * of Features will be hand annotated with proper name, identification, genbankType, and then used
+ * for automatic identification and annotation of unknown sequences.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "features")
 @SequenceGenerator(name = "sequence", sequenceName = "features_id_seq", allocationSize = 1)
@@ -47,8 +58,8 @@ public class Feature implements IFeatureValueObject, IModel {
         super();
     }
 
-    public Feature(String name, String identification, String sequence,
-            int autoFind, String genbankType) {
+    public Feature(String name, String identification, String sequence, int autoFind,
+            String genbankType) {
         super();
 
         this.name = name;

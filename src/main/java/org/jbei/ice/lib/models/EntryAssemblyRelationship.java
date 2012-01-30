@@ -12,6 +12,15 @@ import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
 
+/**
+ * Many-to-Many relationship table between two {@link Entry} and {@link AssemblyRelationship}.
+ * <p>
+ * For example, Part1 "is a subcomponent of" Part2 is represented as subject = Part1, object =
+ * Part2, and relationship = "sub component of".
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "entry_entry_assembly_relationship")
 @SequenceGenerator(name = "sequence", sequenceName = "entry_entry_assembly_relationship_id_seq", allocationSize = 1)

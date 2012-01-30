@@ -5,6 +5,12 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
 import org.jbei.ice.lib.logging.Logger;
 
+/**
+ * Helper class to Initialize Hibernate, and obtain new sessions.
+ * 
+ * @author Zinovii Dmytriv, Timothy Ham
+ * 
+ */
 public class HibernateHelper {
     private static final SessionFactory sessionFactory;
 
@@ -18,10 +24,20 @@ public class HibernateHelper {
         }
     }
 
+    /**
+     * Retrieve the {@link SessionFactory}.
+     * 
+     * @return Hibernate sessionFactory
+     */
     public static SessionFactory getSessionFactory() {
         return sessionFactory;
     }
 
+    /**
+     * Open a new {@link Session} from the sessionFactory.
+     * 
+     * @return New Hibernate {@link Session}.
+     */
     public static Session newSession() {
         return getSessionFactory().openSession();
     }

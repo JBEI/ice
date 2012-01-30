@@ -39,6 +39,7 @@ import org.jbei.ice.web.pages.WelcomePage;
  * application without deploying, run the Start class.
  * 
  * @see org.jbei.Start#main(String[])
+ * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 public class WicketApplication extends WebApplication {
 
@@ -85,6 +86,9 @@ public class WicketApplication extends WebApplication {
         return WelcomePage.class;
     }
 
+    /**
+     * Mount pages to fixed urls.
+     */
     private void mountPages() {
         mountBookmarkablePage("/login", WelcomePage.class);
         mountBookmarkablePage("/logout", LogOutPage.class);
@@ -109,6 +113,9 @@ public class WicketApplication extends WebApplication {
         mount(new IndexedParamUrlCodingStrategy("/storage", StoragePage.class));
     }
 
+    /**
+     * Start the job cue thread.
+     */
     private void initializeQueueingSystem() {
         JobCue jobCue = JobCue.getInstance();
         Thread jobThread = new Thread(jobCue);

@@ -27,7 +27,9 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.Part;
+import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.models.Strain;
@@ -38,13 +40,13 @@ import org.jbei.ice.lib.utils.ParameterGeneratorParser;
 import org.jbei.ice.lib.utils.Utils;
 
 /**
- * Full text search of the registry.
- * It uses a single instance of the IndexSearcher for efficiency, and
- * most importantly to be able to rebuild the underlying index transparently.
- * When rebuildIndex() is called, the index is rebuilt, after which a new
- * IndexSearcher is instantiated with the updated index.
+ * Full text search of the registry using Lucene search engine.
+ * <p>
+ * It uses a single instance of the IndexSearcher for efficiency, and most importantly to be able to
+ * rebuild the underlying index transparently. When rebuildIndex() is called, the index is rebuilt,
+ * after which a new IndexSearcher is instantiated with the updated index.
  * 
- * @author tham
+ * @author Timothy Ham, Zinovii Dmytriv
  * 
  */
 public class LuceneSearch {
@@ -61,10 +63,22 @@ public class LuceneSearch {
         private static final LuceneSearch INSTANCE = new LuceneSearch();
     }
 
+    /**
+     * Retrieve the singleton instance of this classe.
+     * 
+     * @return LuceneSearch instance.
+     */
     public static LuceneSearch getInstance() {
         return SingletonHolder.INSTANCE;
     }
 
+    /**
+     * Rebuild the lucene index.
+     * <p>
+     * Serialize {@link Entry} and some associated classes such as {@link PartNumber},
+     * 
+     * @throws SearchException
+     */
     public void rebuildIndex() throws SearchException {
         File indexFile = new File(JbeirSettings.getSetting("SEARCH_INDEX_FILE"));
         FSDirectory directory = null;
@@ -102,6 +116,16 @@ public class LuceneSearch {
         }
     }
 
+    /**
+     * Search the lucene index for the queryString.
+     * <p>
+     * If the database does not exist, create one.
+     * 
+     * @param queryString
+     *            query to be performed.
+     * @return ArrayList of {@link SearchResult}s.
+     * @throws SearchException
+     */
     public ArrayList<SearchResult> query(String queryString) throws SearchException {
         ArrayList<SearchResult> result = new ArrayList<SearchResult>();
         Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
@@ -145,6 +169,12 @@ public class LuceneSearch {
         return result;
     }
 
+    /**
+     * Creates an empty index on disk.
+     * 
+     * @return {@link IndexSearcher}.
+     * @throws SearchException
+     */
     private IndexSearcher getIndexSearcher() throws SearchException {
         if (indexSearcher == null) {
             try {
@@ -158,6 +188,9 @@ public class LuceneSearch {
         return indexSearcher;
     }
 
+    /**
+     * Initialize a new index on disk.
+     */
     private void initializeIndexSearcher() {
         indexFile = new File(JbeirSettings.getSetting("SEARCH_INDEX_FILE"));
         if (!indexFile.canWrite()) {
@@ -192,6 +225,11 @@ public class LuceneSearch {
         }
     }
 
+    /**
+     * Create a new empty index on disk.
+     * 
+     * @throws IOException
+     */
     private void createEmptyIndex() throws IOException {
         FSDirectory directory = null;
         try {
@@ -210,6 +248,16 @@ public class LuceneSearch {
         Logger.info("Created empty Index");
     }
 
+    /**
+     * Create a new lucene {@link Document} from the given {@link Entry}.
+     * <p>
+     * Related objects, such as {@link PartNumber} or {@link org.jbei.ice.lib.models.Name Name}s or
+     * {@link FundingSource}s are also put into the document.
+     * 
+     * @param entry
+     * @return Document.
+     * @throws SearchException
+     */
     protected static Document createDocument(Entry entry) throws SearchException {
         Document document = new Document();
         String content = "";

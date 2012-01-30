@@ -2,6 +2,12 @@ package org.jbei.ice.web.common;
 
 import java.io.Serializable;
 
+/**
+ * Object to handle name/value pairs for custom choices.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class CustomChoice implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -9,7 +15,7 @@ public class CustomChoice implements Serializable {
     private String value;
 
     public CustomChoice(String displayName, String value) {
-        this.name = displayName;
+        name = displayName;
         this.value = value;
     }
 

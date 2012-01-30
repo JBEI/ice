@@ -16,11 +16,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.jbei.ice.lib.utils.UtilityException;
 
 /**
- * IP address based filter.
- * It takes init-param "allow", as comma separated regex expressions of
- * ip addresses.
+ * IP address based Servlet filter. Limits access to the gd-ice instance to specified ip addresses.
+ * <p>
+ * It takes init-param "allow", as comma separated regex expressions of ip addresses.
  * 
- * @author tham
+ * @author Timothy Ham
  * 
  */
 public class IceIpFilter implements Filter {
@@ -56,13 +56,11 @@ public class IceIpFilter implements Filter {
      * adapted from org.apache.catalina.valves.RequestFilterValve.process
      * 
      * @param property
-     * @param request
-     * @param response
      */
     protected boolean isAllowed(String property) {
         boolean result = false;
-        for (int i = 0; i < allow.length; i++) {
-            if (allow[i].matcher(property).matches()) {
+        for (Pattern element : allow) {
+            if (element.matcher(property).matches()) {
                 result = true;
             }
         }
@@ -73,7 +71,7 @@ public class IceIpFilter implements Filter {
      * adapted from org.apache.catalina.valves.RequestFilterValve
      * 
      * @param allowedList
-     * @return
+     * @return {@link Pattern} array.
      * @throws UtilityException
      */
     protected Pattern[] calculateAllow(String allowedList) throws UtilityException {
@@ -89,8 +87,9 @@ public class IceIpFilter implements Filter {
         ArrayList<Pattern> reAllowedList = new ArrayList<Pattern>();
         while (allowedList.length() > 0) {
             int comma = allowedList.indexOf(',');
-            if (comma < 0)
+            if (comma < 0) {
                 break;
+            }
             String pattern = allowedList.substring(0, comma).trim();
             try {
                 reAllowedList.add(Pattern.compile(pattern));

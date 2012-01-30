@@ -19,14 +19,36 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.web.IceSession;
 
+/**
+ * Manager to manipulate Permissions.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 public class PermissionManager {
 
-    // convenience method that wraps actual method
+    /**
+     * Check if the logged in user has read permission to the given {@link Entry} by entryId.
+     * 
+     * @param entryId
+     *            id of the Entry.
+     * @return True if user has read permission to the specified entry.
+     */
     public static boolean hasReadPermission(long entryId) {
         return hasReadPermission(entryId, IceSession.get().getAccount());
     }
 
-    public static boolean hasReadPermission(String entryId, String sessionKey) {
+    /**
+     * Check if the {@link Account} associated with the given sessionKey has read permission to the
+     * given {@link Entry} by recordId.
+     * 
+     * @param recordId
+     *            recordId of the Entry.
+     * @param sessionKey
+     *            session key.
+     * @return True if the given session account has read permission to the specified entry.
+     */
+    public static boolean hasReadPermission(String recordId, String sessionKey) {
         boolean result = false;
 
         Account account = null;
@@ -34,8 +56,8 @@ public class PermissionManager {
             account = AccountManager.getAccountByAuthToken(sessionKey);
 
             if (account != null) {
-                result = hasReadPermission(entryId, account)
-                        | groupHasReadPermission(entryId, account);
+                result = hasReadPermission(recordId, account)
+                        || groupHasReadPermission(recordId, account);
             }
         } catch (ManagerException e) {
             // if lookup fails, doesn't have permission
@@ -46,16 +68,25 @@ public class PermissionManager {
         return result;
     }
 
-    public static boolean hasReadPermission(String entryId, Account account) {
+    /**
+     * Check if the {@link Account} has read permission to the specified {@link Entry} by entryId.
+     * 
+     * @param recordId
+     *            recordId of the Entry.
+     * @param account
+     *            Account
+     * @return True if the given Account has read permission to the specified Entry.
+     */
+    public static boolean hasReadPermission(String recordId, Account account) {
         boolean result = false;
 
-        if (entryId != null && !entryId.isEmpty() && account != null) {
+        if (recordId != null && !recordId.isEmpty() && account != null) {
             try {
                 if (AccountManager.isModerator(account)) {
                     result = true;
                 } else {
-                    result = groupHasReadPermission(entryId, account)
-                            || userHasReadPermission(entryId, account);
+                    result = groupHasReadPermission(recordId, account)
+                            || userHasReadPermission(recordId, account);
                 }
             } catch (ManagerException e) {
                 e.printStackTrace();
@@ -65,6 +96,15 @@ public class PermissionManager {
         return result;
     }
 
+    /**
+     * Check if the {@link Account} has read permission to the specified {@link Entry}.
+     * 
+     * @param entryId
+     *            id of the specified Entry.
+     * @param account
+     *            Account
+     * @return True if given Account has read permission to the specified Entry.
+     */
     public static boolean hasReadPermission(long entryId, Account account) {
         boolean result = false;
 
@@ -84,7 +124,13 @@ public class PermissionManager {
         return result;
     }
 
-    // convenience method that wraps actual method
+    /**
+     * Check if the current {@link Account} has write permission to the specified {@link Entry}.
+     * 
+     * @param entryId
+     *            id of the specified Entry.
+     * @return True if current user has write permission to the specified Entry.
+     */
     public static boolean hasWritePermission(long entryId) {
         boolean result = false;
         Entry entry;
@@ -102,6 +148,16 @@ public class PermissionManager {
         return result;
     }
 
+    /**
+     * Check if the {@link Account} associated with the given session key has write permission to
+     * the specified {@link Entry}.
+     * 
+     * @param entryId
+     *            id of the Entry
+     * @param sessionKey
+     *            session key
+     * @return True if the user has write permission.
+     */
     public static boolean hasWritePermission(long entryId, String sessionKey) {
         boolean result = false;
         Entry entry;
@@ -120,12 +176,22 @@ public class PermissionManager {
         return result;
     }
 
-    public static boolean hasWritePermission(String entryId, Account account) {
+    /**
+     * Check if the {@link Account} associated with the given session key has write permission to
+     * the specified {@link Entry}.
+     * 
+     * @param recordId
+     *            recordId of the Entry.
+     * @param account
+     *            Account to be queried.
+     * @return True if the account has write permission to the specified Entry.
+     */
+    public static boolean hasWritePermission(String recordId, Account account) {
         boolean result = false;
         Entry entry;
 
         try {
-            entry = EntryManager.getByRecordId(entryId);
+            entry = EntryManager.getByRecordId(recordId);
 
             if (entry != null) {
                 result = hasWritePermission(entry, account);
@@ -139,6 +205,16 @@ public class PermissionManager {
         return result;
     }
 
+    /**
+     * Check if the {@link Account} associated with the given session key has write permission to
+     * the specified {@link Entry}.
+     * 
+     * @param entryId
+     *            id of the Entry.
+     * @param account
+     *            Account to be queried.
+     * @return True if the account has write permission to the specified Entry.
+     */
     public static boolean hasWritePermission(long entryId, Account account) {
         boolean result = false;
         Entry entry;
@@ -158,6 +234,14 @@ public class PermissionManager {
         return result;
     }
 
+    /**
+     * Checks if the current {@link Account} logged in has read permission to the given
+     * {@link Entry}.
+     * 
+     * @param entry
+     *            Entry to be queried.
+     * @return True if the current user has read permission.
+     */
     public static boolean hasReadPermission(Entry entry) {
         return hasReadPermission(entry, IceSession.get().getAccount());
     }
@@ -179,6 +263,14 @@ public class PermissionManager {
         return result;
     }
 
+    /**
+     * Checks if the current {@link Account} logged in has write permission to the given
+     * {@link Entry}.
+     * 
+     * @param entry
+     *            Entry to be queried.
+     * @return True if the current user has wrte permission.
+     */
     public static boolean hasWritePermission(Entry entry) {
         boolean result = false;
 
@@ -200,6 +292,15 @@ public class PermissionManager {
         return result;
     }
 
+    /**
+     * Checks if the given {@link Account} has write permission to the given {@link Entry}.
+     * 
+     * @param entry
+     *            Entry to be queried.
+     * @param account
+     *            Account to be queried.
+     * @return True if the given account has write permission to the given Entry.
+     */
     public static boolean hasWritePermission(Entry entry, Account account) {
         boolean result = false;
         if (entry != null && account != null) {
@@ -217,6 +318,17 @@ public class PermissionManager {
         return result;
     }
 
+    /**
+     * Set read permissions for specified user {@link Account}s to the given {@link Entry}.
+     * <p>
+     * This method creates new {@link ReadUser} objects using the given {@link Account}s.
+     * 
+     * @param entry
+     *            Entry to give read permission to.
+     * @param accounts
+     *            Accounts to give read permission to.
+     * @throws ManagerException
+     */
     public static void setReadUser(Entry entry, Set<Account> accounts) throws ManagerException {
         String queryString = "delete  ReadUser readUser where readUser.entry = :entry";
         Session session = DAO.newSession();
@@ -240,6 +352,15 @@ public class PermissionManager {
         }
     }
 
+    /**
+     * Add read permission for the specified {@link Account} to the specified {@link Entry}.
+     * <p>
+     * This method adds a new {@link ReadUser} object to the database..
+     * 
+     * @param entry
+     * @param account
+     * @throws ManagerException
+     */
     public static void addReadUser(Entry entry, Account account) throws ManagerException {
         Set<Account> accounts = getReadUser(entry);
         boolean alreadyAdded = false;
@@ -255,6 +376,14 @@ public class PermissionManager {
         }
     }
 
+    /**
+     * Retrieve {@link Account}s with read permissions set for the specified {@link Entry}.
+     * 
+     * @param entry
+     *            Entry to get ReadUsers about.
+     * @return Set of Accounts with read permission for the given Entry.
+     * @throws ManagerException
+     */
     public static Set<Account> getReadUser(Entry entry) throws ManagerException {
         Session session = DAO.newSession();
         try {
@@ -278,6 +407,17 @@ public class PermissionManager {
         }
     }
 
+    /**
+     * Set read permissions for specified user {@link Group}s to the given {@link Entry}.
+     * <p>
+     * This method creates new {@link ReadGroup} objects using the given {@link Group}s.
+     * 
+     * @param entry
+     *            Entry to give permission to.
+     * @param groups
+     *            Groups to give read permission to.
+     * @throws ManagerException
+     */
     public static void setReadGroup(Entry entry, Set<Group> groups) throws ManagerException {
         String queryString = "delete  ReadGroup readGroup where readGroup.entry = :entry";
         Session session = DAO.newSession();
@@ -302,6 +442,17 @@ public class PermissionManager {
         }
     }
 
+    /**
+     * Add read permission for the specified {@link Group} to the specified {@link Entry}.
+     * <p>
+     * This method adds a new {@link ReadGroup} object to the database..
+     * 
+     * @param entry
+     *            Entry to give read permission to.
+     * @param group
+     *            Group to give read permission to.
+     * @throws ManagerException
+     */
     public static void addReadGroup(Entry entry, Group group) throws ManagerException {
         Set<Group> groups = getReadGroup(entry);
         boolean alreadyAdded = false;
@@ -317,6 +468,14 @@ public class PermissionManager {
         }
     }
 
+    /**
+     * Retrieve {@link Group}s with read permissions set for the specified {@link Entry}.
+     * 
+     * @param entry
+     *            Entry to query on.
+     * @return Set of Groups.
+     * @throws ManagerException
+     */
     public static Set<Group> getReadGroup(Entry entry) throws ManagerException {
         Session session = DAO.newSession();
         try {
@@ -341,6 +500,17 @@ public class PermissionManager {
         }
     }
 
+    /**
+     * Set write permissions for specified user {@link Account}s to the given {@link Entry}.
+     * <p>
+     * This method creates new {@link WriteUser} objects using the given {@link Account}s.
+     * 
+     * @param entry
+     *            Entry to give permission to.
+     * @param accounts
+     *            Accounts to give write permission to.
+     * @throws ManagerException
+     */
     public static void setWriteUser(Entry entry, Set<Account> accounts) throws ManagerException {
         String queryString = "delete  WriteUser writeUser where writeUser.entry = :entry";
 
@@ -368,6 +538,17 @@ public class PermissionManager {
         }
     }
 
+    /**
+     * Add write permission for the specified {@link Account} to the specified {@link Entry}.
+     * <p>
+     * This method adds a new {@link WriteUser} object to the database..
+     * 
+     * @param entry
+     *            Entry to give write permission to.
+     * @param account
+     *            Account to give write permission to.
+     * @throws ManagerException
+     */
     public static void addWriteUser(Entry entry, Account account) throws ManagerException {
         Set<Account> accounts = getWriteUser(entry);
         boolean alreadyAdded = false;
@@ -383,6 +564,14 @@ public class PermissionManager {
         }
     }
 
+    /**
+     * Retrieve {@link Account}s with write permissions set for the specified {@link Entry}.
+     * 
+     * @param entry
+     *            entry to query on.
+     * @return Set of Accounts.
+     * @throws ManagerException
+     */
     public static Set<Account> getWriteUser(Entry entry) throws ManagerException {
         Session session = DAO.newSession();
         try {
@@ -407,6 +596,17 @@ public class PermissionManager {
 
     }
 
+    /**
+     * Set write permissions for specified user {@link Group}s to the given {@link Entry}.
+     * <p>
+     * This method creates new {@link WriteGroup} objects using the given {@link Group}s.
+     * 
+     * @param entry
+     *            Entry to give permission to.
+     * @param groups
+     *            Groups to give write permission to.
+     * @throws ManagerException
+     */
     public static void setWriteGroup(Entry entry, Set<Group> groups) throws ManagerException {
         String queryString = "delete  WriteGroup writeGroup where writeGroup.entry = :entry";
         Session session = DAO.newSession();
@@ -429,6 +629,17 @@ public class PermissionManager {
         }
     }
 
+    /**
+     * Add write permission for the specified {@link Group} to the specified {@link Entry}.
+     * <p>
+     * This method adds a new {@link WriteGroup} object to the database..
+     * 
+     * @param entry
+     *            Entry to give write permission to.
+     * @param group
+     *            Group to give write permission to.
+     * @throws ManagerException
+     */
     public static void addWriteGroup(Entry entry, Group group) throws ManagerException {
         Set<Group> groups = getWriteGroup(entry);
         boolean alreadyAdded = false;
@@ -444,6 +655,14 @@ public class PermissionManager {
         }
     }
 
+    /**
+     * Retrieve {@link Group}s with write permissions set for the specified {@link Entry}.
+     * 
+     * @param entry
+     *            Entry to query on.
+     * @return Set of Groups.
+     * @throws ManagerException
+     */
     public static Set<Group> getWriteGroup(Entry entry) throws ManagerException {
         Session session = DAO.newSession();
         try {
@@ -466,6 +685,15 @@ public class PermissionManager {
         }
     }
 
+    /**
+     * Check if the given {@link Account} has read permission to the given {@link Entry}.
+     * 
+     * @param entry
+     *            Entry to query on.
+     * @param account
+     *            Account to query on.
+     * @return True if given Account has read permission to the given Entry.
+     */
     @SuppressWarnings("unchecked")
     protected static boolean userHasReadPermission(Entry entry, Account account) {
         boolean result = false;
@@ -491,6 +719,15 @@ public class PermissionManager {
         return result;
     }
 
+    /**
+     * Check if the given {@link Account} has read permission to the specified {@link Entry}.
+     * 
+     * @param entryId
+     *            id of Entry to query on.
+     * @param account
+     *            Account to query on.
+     * @return True if given Account has read permission to the specified Entry.
+     */
     @SuppressWarnings("unchecked")
     protected static boolean userHasReadPermission(long entryId, Account account) {
         boolean result = false;
@@ -539,12 +776,21 @@ public class PermissionManager {
         return result;
     }
 
+    /**
+     * Check if the given {@link Account} has read permission to the specified {@link Entry}.
+     * 
+     * @param recordId
+     *            id of Entry to query on.
+     * @param account
+     *            Account to query on.
+     * @return True if given Account has read permission to the specified Entry.
+     */
     @SuppressWarnings("unchecked")
-    protected static boolean userHasReadPermission(String entryId, Account account) {
+    protected static boolean userHasReadPermission(String recordId, Account account) {
         boolean result = false;
 
         String queryString1 = "select count(id) from Entry as entry where entry.ownerEmail = '"
-                + account.getEmail() + "' AND " + " entry.recordId = '" + entryId + "'";
+                + account.getEmail() + "' AND " + " entry.recordId = '" + recordId + "'";
         Session session = DAO.newSession();
         Long numberOfEntries = null;
         try {
@@ -564,7 +810,7 @@ public class PermissionManager {
 
         if (!result) {
             String queryString2 = "select readUser.account.id from ReadUser as readUser where readUser.entry.recordId = '"
-                    + entryId + "'";
+                    + recordId + "'";
             session = DAO.newSession();
             Query query2 = session.createQuery(queryString2);
             List<Long> accounts = null;
@@ -587,6 +833,15 @@ public class PermissionManager {
         return result;
     }
 
+    /**
+     * Check if the given {@link Account} has write permission to the given {@link Entry}.
+     * 
+     * @param entry
+     *            Entry to query on.
+     * @param account
+     *            Account to query on.
+     * @return True if given Account has write permission to the given Entry.
+     */
     protected static boolean userHasWritePermission(Entry entry, Account account) {
         boolean result = false;
         String queryString = "select writeUser.account.id from WriteUser as writeUser where writeUser.entry = :entry";
@@ -616,6 +871,16 @@ public class PermissionManager {
         return result;
     }
 
+    /**
+     * Check if the given {@link Account} has read permission to the given {@link Entry} by
+     * comparing the permissible {@link Group} hierarchy with groups the user belongs to.
+     * 
+     * @param entry
+     *            Entry to query on.
+     * @param account
+     *            Account to query on.
+     * @return True if the Account has read permission to the Entry.
+     */
     @SuppressWarnings("unchecked")
     protected static boolean groupHasReadPermission(Entry entry, Account account) {
         boolean result = false;
@@ -643,6 +908,16 @@ public class PermissionManager {
         return result;
     }
 
+    /**
+     * Check if the given {@link Account} has read permission to the specified {@link Entry} by
+     * comparing the permissible {@link Group} hierarchy with groups the user belongs to.
+     * 
+     * @param entryId
+     *            id of the Entry.
+     * @param account
+     *            Account to be queried.
+     * @return True if the Account has read permission to the Entry.
+     */
     @SuppressWarnings("unchecked")
     protected static boolean groupHasReadPermission(long entryId, Account account) {
         boolean result = false;
@@ -671,12 +946,22 @@ public class PermissionManager {
         return result;
     }
 
+    /**
+     * Check if the given {@link Account} has read permission to the specified {@link Entry} by
+     * comparing the permissible {@link Group} hierarchy with groups the user belongs to.
+     * 
+     * @param recordId
+     *            recordId of Entry.
+     * @param account
+     *            Account to query on.
+     * @return True if the Account has read permission to the Entry.
+     */
     @SuppressWarnings("unchecked")
-    protected static boolean groupHasReadPermission(String entryId, Account account) {
+    protected static boolean groupHasReadPermission(String recordId, Account account) {
         boolean result = false;
 
         String queryString = "select readGroup.group.id from ReadGroup as readGroup where readGroup.entry.recordId = '"
-                + entryId + "'";
+                + recordId + "'";
         Session session = DAO.newSession();
         List<Long> readGroups = null;
         try {
@@ -699,6 +984,17 @@ public class PermissionManager {
         return result;
     }
 
+    /**
+     * Check if the given {@link Account} has write permission to the specified {@link Entry} by
+     * comparing the permissible {@link Group} hierarchy with groups the user belongs to.
+     * *
+     * 
+     * @param entry
+     *            Entry to query on.
+     * @param account
+     *            Account to query on.
+     * @return True if the Account has write permission to the Entry.
+     */
     @SuppressWarnings("unchecked")
     protected static boolean groupHasWritePermission(Entry entry, Account account) {
         boolean result = false;
@@ -727,6 +1023,15 @@ public class PermissionManager {
         return result;
     }
 
+    /**
+     * Retrieve all parent {@link Group}s of a given group.
+     * 
+     * @param group
+     *            Group to query on.
+     * @param groupIds
+     *            optional set of group ids. Can be empty.
+     * @return Set of Parent group ids.
+     */
     protected static HashSet<Long> getParentGroups(Group group, HashSet<Long> groupIds) {
         if (groupIds.contains(group.getId())) {
             return groupIds;
@@ -741,6 +1046,13 @@ public class PermissionManager {
         return groupIds;
     }
 
+    /**
+     * Retrieve all parent {@link Group}s of a given {@link Account}.
+     * 
+     * @param account
+     *            Account to query on.
+     * @return Set of Group ids.
+     */
     protected static Set<Long> getAllAccountGroups(Account account) {
         HashSet<Long> accountGroups = new HashSet<Long>();
 
@@ -756,9 +1068,5 @@ public class PermissionManager {
             Logger.warn("could not get everybody group: " + e.toString());
         }
         return accountGroups;
-    }
-
-    public static void main(String[] args) {
-
     }
 }

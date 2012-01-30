@@ -3,6 +3,12 @@ package org.jbei.ice.lib.vo;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Value object to hold SequenceChecker data.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class SequenceCheckerData implements Serializable {
     private static final long serialVersionUID = 1L;
 

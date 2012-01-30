@@ -1,5 +1,11 @@
 package org.jbei.ice.lib.utils;
 
+/**
+ * Exception class for Utilities.
+ * 
+ * @author Timothy Ham
+ * 
+ */
 public class UtilityException extends Exception {
 
     private static final long serialVersionUID = 1L;

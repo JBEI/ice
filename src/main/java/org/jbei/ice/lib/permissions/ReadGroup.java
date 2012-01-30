@@ -13,6 +13,15 @@ import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Group;
 
+/**
+ * Give a {@link Group} read permission to an {@link Entry}.
+ * <p>
+ * If ReadGroup object exists for a given Entry:Group pair, then the Group has read permission to
+ * the Entry.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "permission_read_groups")
 @SequenceGenerator(name = "sequence", sequenceName = "permission_read_groups_id_seq", allocationSize = 1)

@@ -13,11 +13,30 @@ import org.jbei.ice.lib.models.Project;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.Utils;
 
+/**
+ * ABI to manipulate {@link Project}s.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class ProjectController extends Controller {
     public ProjectController(Account account) {
         super(account, new ProjectPermissionVerifier());
     }
 
+    /**
+     * Create a new {@link Project}.
+     * <p>
+     * 
+     * @param account
+     * @param name
+     * @param description
+     * @param data
+     * @param type
+     * @param creationTime
+     * @param modificationTime
+     * @return Project.
+     */
     public Project createProject(Account account, String name, String description, String data,
             String type, Date creationTime, Date modificationTime) {
         Project project = new Project();
@@ -34,6 +53,13 @@ public class ProjectController extends Controller {
         return project;
     }
 
+    /**
+     * Checks if the user has read permission to the {@link Project}.
+     * 
+     * @param project
+     * @return True if user has read permission.
+     * @throws ControllerException
+     */
     public boolean hasReadPermission(Project project) throws ControllerException {
         if (project == null) {
             throw new ControllerException("Failed to check read permissions for null project!");
@@ -42,6 +68,13 @@ public class ProjectController extends Controller {
         return getPermissionVerifier().hasReadPermissions(project, getAccount());
     }
 
+    /**
+     * Checks if the user has write permission to the {@link Project}
+     * 
+     * @param project
+     * @return True if user has write permission.
+     * @throws ControllerException
+     */
     public boolean hasWritePermission(Project project) throws ControllerException {
         if (project == null) {
             throw new ControllerException("Failed to check write permissions for null project!");
@@ -50,6 +83,14 @@ public class ProjectController extends Controller {
         return getProjectPermissionVerifier().hasWritePermissions(project, getAccount());
     }
 
+    /**
+     * Save the {@link Project} to the database.
+     * 
+     * @param project
+     * @return Project that was saved.
+     * @throws ControllerException
+     * @throws PermissionException
+     */
     public Project save(Project project) throws ControllerException, PermissionException {
         if (!hasWritePermission(project)) {
             throw new PermissionException("No permissions to save project!");
@@ -66,6 +107,13 @@ public class ProjectController extends Controller {
         return savedProject;
     }
 
+    /**
+     * Delete the {@link Project} in the database.
+     * 
+     * @param project
+     * @throws ControllerException
+     * @throws PermissionException
+     */
     public void delete(Project project) throws ControllerException, PermissionException {
         if (!hasWritePermission(project)) {
             throw new PermissionException("No permissions to delete project!");
@@ -78,6 +126,12 @@ public class ProjectController extends Controller {
         }
     }
 
+    /**
+     * Retrieve the {@link Project}s owned by the user.
+     * 
+     * @return ArrayList of Projects
+     * @throws ControllerException
+     */
     public ArrayList<Project> getProjects() throws ControllerException {
         ArrayList<Project> projects = null;
 
@@ -90,6 +144,13 @@ public class ProjectController extends Controller {
         return projects;
     }
 
+    /**
+     * Retrieve the {@link Project} by uuid.
+     * 
+     * @param uuid
+     * @return Project
+     * @throws ControllerException
+     */
     public Project getProjectByUUID(String uuid) throws ControllerException {
         Project project = null;
 
@@ -102,6 +163,11 @@ public class ProjectController extends Controller {
         return project;
     }
 
+    /**
+     * Return the {@link ProjectPermissionVerifier}
+     * 
+     * @return projectPermissionVerifier
+     */
     protected ProjectPermissionVerifier getProjectPermissionVerifier() {
         return (ProjectPermissionVerifier) getPermissionVerifier();
     }

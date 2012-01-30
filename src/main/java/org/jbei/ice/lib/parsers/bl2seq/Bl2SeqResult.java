@@ -1,5 +1,11 @@
 package org.jbei.ice.lib.parsers.bl2seq;
 
+/**
+ * Stores information about the bl2seq output.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class Bl2SeqResult {
     private int score;
     private int queryStart;

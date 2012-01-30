@@ -14,6 +14,13 @@ import javax.persistence.Table;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.utils.Utils;
 
+/**
+ * Store session information for a logged in user.
+ * 
+ * @see org.jbei.ice.web.IceSession
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "session_data")
 public class SessionData implements IModel {
@@ -76,6 +83,12 @@ public class SessionData implements IModel {
         throw new CloneNotSupportedException();
     }
 
+    /**
+     * Generate a new session key, and set the expiration time.
+     * 
+     * @param secret
+     *            salt used to generate the random sessionKey.
+     */
     public SessionData(String secret) {
         String sha = generateSessionKey(secret);
         setSessionKey(sha);

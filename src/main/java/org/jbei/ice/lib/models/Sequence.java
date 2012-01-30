@@ -23,7 +23,23 @@ import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.ISequenceValueObject;
 import org.jbei.ice.lib.utils.SequenceFeatureCollection;
 import org.jbei.ice.lib.utils.SequenceUtils;
+import org.jbei.ice.lib.utils.UtilityException;
 
+/**
+ * Stores the unique sequence for an {@link Entry} object.
+ * <p>
+ * <ul>
+ * <li><b>sequence: </b>Normalized (lower cased, trimmed) sequence for {@link Entry}.</li>
+ * <li><b>sequenceUser: </b>Original sequence uploaded by the user. For example, the unparsed
+ * genbank file, if that was the original upload. If the original upload does not exist, then this
+ * field is the same as sequence.</li>
+ * <li><b>fwdHash, revHash: </b>sha1 hash of the normalized sequence for fast searches.</li>
+ * <li><b>sequenceFeatures: </b>{@link SequenceFeature} objects.</li>
+ * </ul>
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "sequences")
 @SequenceGenerator(name = "sequence", sequenceName = "sequences_id_seq", allocationSize = 1)
@@ -78,6 +94,7 @@ public class Sequence implements ISequenceValueObject, IModel {
         return id;
     }
 
+    @Override
     public void setId(long id) {
         this.id = id;
     }
@@ -91,7 +108,11 @@ public class Sequence implements ISequenceValueObject, IModel {
     public void setSequence(String sequence) {
         this.sequence = sequence;
         setFwdHash(SequenceUtils.calculateSequenceHash(sequence));
-        setRevHash(SequenceUtils.calculateReverseComplementSequenceHash(sequence));
+        try {
+            setRevHash(SequenceUtils.calculateReverseComplementSequenceHash(sequence));
+        } catch (UtilityException e) {
+            setRevHash("");
+        }
 
     }
 

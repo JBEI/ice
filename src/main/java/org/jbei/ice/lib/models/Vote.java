@@ -19,6 +19,13 @@ import javax.persistence.TemporalType;
 
 import org.jbei.ice.lib.dao.IModel;
 
+/**
+ * Store popularity voting information about an {@link Entry}.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
+@Deprecated
 @Entity
 @Table(name = "votes")
 @SequenceGenerator(name = "sequence", sequenceName = "votes_id_seq", allocationSize = 1)

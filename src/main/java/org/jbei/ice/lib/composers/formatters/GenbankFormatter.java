@@ -2,6 +2,7 @@ package org.jbei.ice.lib.composers.formatters;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.TreeSet;
@@ -9,12 +10,14 @@ import java.util.TreeSet;
 import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.seq.Feature;
 import org.biojava.bio.symbol.IllegalSymbolException;
+import org.biojava.bio.symbol.Location;
 import org.biojava.ontology.InvalidTermException;
 import org.biojava.utils.ChangeVetoException;
 import org.biojavax.RichAnnotation;
 import org.biojavax.RichObjectFactory;
 import org.biojavax.SimpleNote;
 import org.biojavax.SimpleRichAnnotation;
+import org.biojavax.bio.seq.CompoundRichLocation;
 import org.biojavax.bio.seq.RichFeature;
 import org.biojavax.bio.seq.RichLocation.Strand;
 import org.biojavax.bio.seq.RichSequence;
@@ -23,13 +26,20 @@ import org.biojavax.bio.seq.SimpleRichFeature;
 import org.biojavax.bio.seq.SimpleRichLocation;
 import org.biojavax.bio.seq.SimpleRichSequence;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.models.SequenceFeatureAttribute;
 
+/**
+ * Formatter for the Genbank file format.
+ * 
+ * @author Zinovii Dmytriv, Timothy Ham
+ * 
+ */
 public class GenbankFormatter extends AbstractFormatter {
-    private String name;
-    private String accessionNumber;
+    private final String name;
+    private final String accessionNumber;
     private int version = 1;
     private double seqVersion = 1.0;
     private boolean circular = false;
@@ -37,10 +47,23 @@ public class GenbankFormatter extends AbstractFormatter {
     private String division = "";
     private String identifier = "";
 
+    /**
+     * Constructor using only the name.
+     * 
+     * @param name
+     */
     public GenbankFormatter(String name) {
         this(name, name, 1, 1.0);
     }
 
+    /**
+     * Constructor using the complete header fields.
+     * 
+     * @param name
+     * @param accessionNumber
+     * @param version
+     * @param seqVersion
+     */
     public GenbankFormatter(String name, String accessionNumber, int version, double seqVersion) {
         super();
 
@@ -121,15 +144,32 @@ public class GenbankFormatter extends AbstractFormatter {
 
                     RichFeature.Template featureTemplate = new RichFeature.Template();
                     featureTemplate.annotation = getAnnotations(sequenceFeature);
-                    featureTemplate.location = new SimpleRichLocation(new SimplePosition(
-                            sequenceFeature.getGenbankStart()), new SimplePosition(
-                            sequenceFeature.getEnd()), 1, getStrand(sequenceFeature));
+
+                    Set<AnnotationLocation> locations = sequenceFeature.getAnnotationLocations();
+
+                    if (locations.size() == 1) {
+                        featureTemplate.location = new SimpleRichLocation(new SimplePosition(
+                                sequenceFeature.getUniqueGenbankStart()), new SimplePosition(
+                                sequenceFeature.getUniqueEnd()), 1, getStrand(sequenceFeature));
+                    } else {
+
+                        ArrayList<Location> members = new ArrayList<Location>();
+
+                        for (AnnotationLocation location : locations) {
+                            members.add(new SimpleRichLocation(new SimplePosition(location
+                                    .getGenbankStart()), new SimplePosition(location.getEnd()), 1,
+                                    getStrand(sequenceFeature)));
+                        }
+                        featureTemplate.location = new CompoundRichLocation(members);
+                    }
 
                     featureTemplate.source = getDefaultFeatureSource();
                     featureTemplate.type = getFeatureType(sequenceFeature);
                     featureTemplate.rankedCrossRefs = new TreeSet<Object>();
 
-                    featureSet.add(new SimpleRichFeature(simpleRichSequence, featureTemplate));
+                    SimpleRichFeature simpleRichFeature = new SimpleRichFeature(simpleRichSequence,
+                            featureTemplate);
+                    featureSet.add(simpleRichFeature);
                 }
 
                 simpleRichSequence.setFeatureSet(featureSet);
@@ -145,6 +185,12 @@ public class GenbankFormatter extends AbstractFormatter {
         RichSequence.IOTools.writeGenbank(outputStream, simpleRichSequence, getNamespace());
     }
 
+    /**
+     * Get the strand of the {@link SequenceFeature} feature.
+     * 
+     * @param sequenceFeature
+     * @return Strand of the feature.
+     */
     protected Strand getStrand(SequenceFeature sequenceFeature) {
         Strand strand;
 
@@ -159,6 +205,12 @@ public class GenbankFormatter extends AbstractFormatter {
         return strand;
     }
 
+    /**
+     * Convert {@link SequenceFeature} into a {@link RichAnnotation}.
+     * 
+     * @param sequenceFeature
+     * @return RichAnnotation object.
+     */
     protected RichAnnotation getAnnotations(SequenceFeature sequenceFeature) {
         RichAnnotation richAnnotation = new SimpleRichAnnotation();
 
@@ -172,7 +224,6 @@ public class GenbankFormatter extends AbstractFormatter {
         for (SequenceFeatureAttribute attribute : sequenceFeature.getSequenceFeatureAttributes()) {
             String key = attribute.getKey();
             String value = attribute.getValue();
-
             if (key == null || key.isEmpty() || key.toLowerCase().equals("label")) { // skip invalid or feature with "label" note
                 continue;
             }
@@ -185,6 +236,13 @@ public class GenbankFormatter extends AbstractFormatter {
         return richAnnotation;
     }
 
+    /**
+     * Retrieve feature type from given {@link SequenceFeature}. Populate it with "misc_feature" if
+     * undefined.
+     * 
+     * @param sequenceFeature
+     * @return Genbank Feature type.
+     */
     protected String getFeatureType(SequenceFeature sequenceFeature) {
         String featureType;
 
@@ -200,10 +258,21 @@ public class GenbankFormatter extends AbstractFormatter {
         return featureType;
     }
 
+    /**
+     * Return the default feature source for a Genbank file.
+     * 
+     * @return Returns "org.jbei".
+     */
     protected String getDefaultFeatureSource() {
         return "org.jbei";
     }
 
+    /**
+     * Truncate Locus Name to 10 characters, as per Genbank specification.
+     * 
+     * @param locusName
+     * @return
+     */
     private String normalizeLocusName(String locusName) {
         if (locusName == null || locusName.isEmpty()) {
             return "";
@@ -219,6 +288,12 @@ public class GenbankFormatter extends AbstractFormatter {
         return result;
     }
 
+    /**
+     * Clean up feature values by removing double quotes and whitespace.
+     * 
+     * @param value
+     * @return
+     */
     private String normalizeFeatureValue(String value) {
         if (value == null || value.isEmpty()) {
             return "";

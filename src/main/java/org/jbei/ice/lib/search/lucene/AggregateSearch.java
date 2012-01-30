@@ -7,6 +7,7 @@ import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.query.Query;
 import org.jbei.ice.lib.query.QueryException;
 
@@ -16,10 +17,23 @@ import edu.emory.mathcs.backport.java.util.Collections;
  * Combine different searches into one interface, with heuristics built in to
  * give most relevant answers.
  * 
- * @author tham
+ * @author Timothy Ham, Zinovii Dmytriv
  * 
  */
 public class AggregateSearch {
+    /**
+     * Perform ful text aggregated query on entries.
+     * <p>
+     * This weighs positively on {@link Entry}.name or .alias fields, or matches in
+     * {@link PartNumber}.partNumber.
+     * 
+     * @param queryString
+     *            string to query
+     * @param account
+     *            Account of the query
+     * @return - ArrayList of {@link SearchResult}s.
+     * @throws SearchException
+     */
     public static ArrayList<SearchResult> query(String queryString, Account account)
             throws SearchException {
         EntryController entryController = new EntryController(account);

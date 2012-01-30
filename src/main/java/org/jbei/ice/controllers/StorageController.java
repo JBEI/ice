@@ -11,12 +11,28 @@ import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
 
+/**
+ * ABI to manipulate {@link Storage}.
+ * 
+ * @author Hector Plahar
+ * 
+ */
 public class StorageController extends Controller {
 
     public StorageController(Account account) {
         super(account, new SamplePermissionVerifier());
     }
 
+    /**
+     * Retrieve {@link Storage} object by its name, index, type and the parent id from the database.
+     * 
+     * @param name
+     * @param index
+     * @param type
+     * @param parentId
+     * @return Storage object.
+     * @throws ControllerException
+     */
     public Storage retrieveStorageBy(String name, String index, StorageType type, long parentId)
             throws ControllerException {
         try {
@@ -26,6 +42,12 @@ public class StorageController extends Controller {
         }
     }
 
+    /**
+     * Retrieve {@link Storage} that are schemas from the database.
+     * 
+     * @return List of {@link Storage} objects that are schemas.
+     * @throws ControllerException
+     */
     public List<Storage> retrieveAllStorageSchemes() throws ControllerException {
         try {
             return StorageManager.getAllStorageSchemes();
@@ -34,6 +56,13 @@ public class StorageController extends Controller {
         }
     }
 
+    /**
+     * Retrieve a {@link Storage} object from the database by the bar code from the database.
+     * 
+     * @param barcode
+     * @return Storage.
+     * @throws ControllerException
+     */
     public Storage retrieveStorageTube(String barcode) throws ControllerException {
         try {
             return StorageManager.retrieveStorageTube(barcode);
@@ -42,6 +71,13 @@ public class StorageController extends Controller {
         }
     }
 
+    /**
+     * Update the {@link Storage} object in the database.
+     * 
+     * @param storage
+     * @return Saved storage.
+     * @throws ControllerException
+     */
     public Storage update(Storage storage) throws ControllerException {
         try {
             return StorageManager.update(storage);
@@ -50,6 +86,13 @@ public class StorageController extends Controller {
         }
     }
 
+    /**
+     * Save the {@link Storage} object in the database.
+     * 
+     * @param storage
+     * @return Saved storage.
+     * @throws ControllerException
+     */
     public Storage save(Storage storage) throws ControllerException {
         try {
             return StorageManager.save(storage);

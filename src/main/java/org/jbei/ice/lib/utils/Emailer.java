@@ -12,7 +12,27 @@ import javax.mail.internet.MimeMessage;
 
 import org.jbei.ice.lib.logging.Logger;
 
+/**
+ * Utility methods for email.
+ * <p>
+ * The SMTP server is specified in the configuration file.
+ * 
+ * @author Zinovii Dmytriv, Timothy Ham
+ * 
+ */
 public class Emailer {
+    /**
+     * Send an email.
+     * 
+     * @param receiverEmail
+     *            Address to send email to.
+     * @param ccEmail
+     *            Address to send carbon copy to.
+     * @param subject
+     *            Text of subject.
+     * @param body
+     *            Text of body.
+     */
     public static void send(String receiverEmail, String ccEmail, String subject, String body) {
         Properties props = new Properties();
         props.put("mail.smtp.host", JbeirSettings.getSetting("SMTP_HOST"));
@@ -40,10 +60,28 @@ public class Emailer {
         }
     }
 
+    /**
+     * Send an email, and cc to the administrator.
+     * 
+     * @param receiverEmail
+     *            Address to send email to.
+     * @param subject
+     *            Subject text.
+     * @param body
+     *            Body text.
+     */
     public static void send(String receiverEmail, String subject, String body) {
         send(receiverEmail, JbeirSettings.getSetting("ADMIN_EMAIL"), subject, body);
     }
 
+    /**
+     * Send an email to the administrator.
+     * 
+     * @param subject
+     *            Subject text.
+     * @param body
+     *            Body text.
+     */
     public static void error(String subject, String body) {
         send(JbeirSettings.getSetting("ADMIN_EMAIL"), subject, body);
     }

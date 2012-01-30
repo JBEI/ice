@@ -13,6 +13,15 @@ import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 
+/**
+ * Give an {@link Account} read permission to an {@link Entry}.
+ * <p>
+ * If ReadUser object eists for a given Entry:ACcount pair, then the Account has read permission to
+ * the Entry.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "permission_read_users")
 @SequenceGenerator(name = "sequence", sequenceName = "permission_read_users_id_seq", allocationSize = 1)
@@ -61,6 +70,6 @@ public class ReadUser implements IModel {
     }
 
     public void setAccount(Account readUser) {
-        this.account = readUser;
+        account = readUser;
     }
 }

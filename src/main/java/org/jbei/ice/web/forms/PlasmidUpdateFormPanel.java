@@ -5,6 +5,7 @@ import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
@@ -43,7 +44,8 @@ public class PlasmidUpdateFormPanel extends Panel {
             super.initializeElements();
 
             add(new TextField<String>("selectionMarkers", new PropertyModel<String>(this,
-                    "selectionMarkers")));
+                    "selectionMarkers")).setRequired(true).setLabel(
+                new Model<String>("Selection Markers")));
             add(new TextField<String>("backbone", new PropertyModel<String>(this, "backbone")));
             add(new TextField<String>("originOfReplication", new PropertyModel<String>(this,
                     "originOfReplication")));

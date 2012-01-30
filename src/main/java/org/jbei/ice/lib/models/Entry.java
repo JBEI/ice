@@ -34,6 +34,74 @@ import org.jbei.ice.lib.models.interfaces.IEntryValueObject;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.lib.utils.JbeirSettings;
 
+/**
+ * Entry class is the most important class in gd-ice. Other record types extend this class.
+ * <p>
+ * Entry class represent the unique handle for each record in the system. It provides the common
+ * fields, such as the recordId (uuid), timestamps, owner and creator information, etc.
+ * <p>
+ * Many of the fields accept mediawiki style linking tags. For example,
+ * "[[jbei:JBx_000001|Descriptive Name]]" will automatically generate a clickable link to the part
+ * JBx_000001 with text "Descriptive Name". The wiki link prefix (jbei:) in this case can be
+ * confgured in the configuration file. In the future, links to other registries can be specified
+ * via the configuration, similar to other mediawiki links.
+ * <p>
+ * Description of Entry fields:
+ * <p>
+ * <ul>
+ * <li><b>id:</b> database id of an entry.</li>
+ * <li><b>recordId:</b> 36 character globally unique identifier. Implemented as UUIDv4.</li>
+ * <li><b>versionId:</b> 36 character globally unique identifier.</li>
+ * <li><b>recordType:</b> The type of record. Currently there are plasmids, strains, arabidopsis
+ * seeds, and parts. Parts represent linear DNA in a packaging format, such as Biobricks, or raw DNA
+ * for ligationless assembly.</li>
+ * <li><b>owner:</b> Owner is the person that has complete read and write access to a part. This
+ * field is the user friendly string, such as their full name, and is not used by the system for
+ * identification and association. See ownerEmail for that functionality. This field is also
+ * distinct from the creator field.</li>
+ * <li><b>ownerEmail:</b> Email address of the owner. Because an entry can be exchanged between
+ * different registries, without having the corresponding account records be exchanged along with
+ * it, association of entry with a user is done through this field, instead of the database id of
+ * {@link Account}. This means that other classes (such as {@link Sample}) also associate via the
+ * email address. Consequently, email address must be unique to a gd-ice instance.</li>
+ * <li><b>creator:</b> Creator is the person that has created this entry. If the entry came from
+ * somewhere else, or was entered into this instance of gd-ice by someone other than the creator,
+ * then the owner and the creator fields would be different. This field is the user friendly string,
+ * such as their full name, and is not used by the system for identification and association.</li>
+ * <li><b>creatorEmail:</b> Email address of the creator. For some very old entries, or entries that
+ * came from a third party, email address maybe empty.</li>
+ * <li><b>alias:</b> Comma separated list of alias names.</li>
+ * <li><b>keywords:</b> Comma separated list of keywords.</li>
+ * <li><b>status:</b> Status of this entry. Currently the options are complete, in progress, or
+ * planned. This field in the future should be used to filter search results.</li>
+ * <li><b>shortDescription:</b> A summary of the entry in a few words. This is what is displayed in
+ * the search result summaries, and brevity is best.</li>
+ * <li><b>longDescription:</b> Longer description for the entry. Details that are not part of the
+ * summary description should be placed in this field. This field accepts markup text of different
+ * styles. see longDescriptionType</li>
+ * <li><b>longDescriptionType: Markup syntax used for long description. Currently plain text,
+ * mediawiki, and confluence markup syntax is supported.</b>/
+ * <li>
+ * <li><b>references:</b> References for this entry.</li>
+ * <li><b>creationTime:</b> Timestamp of creation of this entry.</li>
+ * <li><b>modificationTime:</b> Timestamp of last modification of this entry.</li>
+ * <li><b>bioSafetyLevel:</b> The biosafety level of this entry. In the future, this field will
+ * propagate to other entries, so that a strain entry holding a higher level bioSafetyLevel plasmid
+ * entry will inherit the higher bioSafetyLevel.</li>
+ * <li><b>intellectualProperty:</b> Information about intellectual property (patent filing numbers,
+ * etc) for this entry.</li>
+ * <li><b>selectionMarkers:</b> {@link SelectionMarker}s for this entry. In the future, this field
+ * will propagate to other entries based on inheritence.</li>
+ * <li><b>links:</b> URL or other links that point outside of this instance of gd-ice.</li>
+ * <lli><b>names: </b> {@link Name}s for this entry.</li>
+ * <li><b>partNumbers: </b> {@link PartNumber}s for this entry.</li>
+ * <li><b>entryFundingSources</b> {@link EntryFundingSource}s for this entry.</li>
+ * <li><b>parameters: {@link Parameter}s for this entry.</b></li>
+ * </ul>
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "entries")
 @SequenceGenerator(name = "sequence", sequenceName = "entries_id_seq", allocationSize = 1)
@@ -48,11 +116,23 @@ public class Entry implements IEntryValueObject, IModel {
     public static final String ARABIDOPSIS_SEED_ENTRY_TYPE = "arabidopsis";
 
     //TODO actually use these types
+    /**
+     * Mark up types for longDescription.
+     * 
+     * @author Timothy Ham
+     * 
+     */
     public enum MarkupType {
         text, wiki, confluence
     }
 
     // TODO actually use these types
+    /**
+     * Available recordTypes.
+     * 
+     * @author Timothy Ham
+     * 
+     */
     public enum EntryType {
         strain(STRAIN_ENTRY_TYPE), plasmid(PLASMID_ENTRY_TYPE), part(PART_ENTRY_TYPE), arabidopsis(
                 ARABIDOPSIS_SEED_ENTRY_TYPE);
@@ -78,6 +158,12 @@ public class Entry implements IEntryValueObject, IModel {
     }
 
     // TODO use these enums. Currently "in progress" with a space is used. 
+    /**
+     * Available status options.
+     * 
+     * @author Timothy Ham
+     * 
+     */
     public enum StatusOptions {
         complete, in_progress, planned
     }
@@ -86,7 +172,7 @@ public class Entry implements IEntryValueObject, IModel {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
     private long id;
 
-    @Column(name = "record_id", length = 36, nullable = false)
+    @Column(name = "record_id", length = 36, nullable = false, unique = true)
     private String recordId;
 
     @Column(name = "version_id", length = 36, nullable = false)
@@ -298,6 +384,12 @@ public class Entry implements IEntryValueObject, IModel {
         return partNumbers;
     }
 
+    /**
+     * Generate the comma separated string representation of {@link PartNumber}s associated with
+     * this entry.
+     * 
+     * @return Comma separated part numbers.
+     */
     public String getPartNumbersAsString() {
         String result = "";
         ArrayList<String> numbers = new ArrayList<String>();
@@ -309,6 +401,12 @@ public class Entry implements IEntryValueObject, IModel {
         return result;
     }
 
+    /**
+     * Return the first {@link PartNumber} associated with this entry, preferring the PartNumber
+     * local to this instance of gd-ice.
+     * 
+     * @return PartNumber.
+     */
     public PartNumber getOnePartNumber() {
         PartNumber result = null;
         // prefer local part number prefix over other prefixes
@@ -406,6 +504,11 @@ public class Entry implements IEntryValueObject, IModel {
         return selectionMarkers;
     }
 
+    /**
+     * Generate a String representation of the {@link SelectionMarker}s associated with this entry.
+     * 
+     * @return Comma separated selection markers.
+     */
     public String getSelectionMarkersAsString() {
         String result = "";
         ArrayList<String> markers = new ArrayList<String>();
@@ -438,6 +541,11 @@ public class Entry implements IEntryValueObject, IModel {
         return links;
     }
 
+    /**
+     * String representation of {@link Link}s.
+     * 
+     * @return Comma separated list of links.
+     */
     public String getLinksAsString() {
         String result = "";
         ArrayList<String> links = new ArrayList<String>();
@@ -584,6 +692,11 @@ public class Entry implements IEntryValueObject, IModel {
         return parameters;
     }
 
+    /**
+     * Get the principalInvestigator field of the entry's EntryFundingSource.
+     * 
+     * @return principalInvestigator field as String.
+     */
     public String principalInvestigatorToString() {
         String principalInvestigator = "";
 
@@ -599,6 +712,11 @@ public class Entry implements IEntryValueObject, IModel {
         return principalInvestigator;
     }
 
+    /**
+     * Get the funding source field of the entry's EntryFundingSource.
+     * 
+     * @return funding source field as String.
+     */
     public String fundingSourceToString() {
         String fundingSource = "";
 
@@ -613,6 +731,12 @@ public class Entry implements IEntryValueObject, IModel {
         return fundingSource;
     }
 
+    /**
+     * Generate the options map of the bioSafetyLevel field containing friendly names for the
+     * fields.
+     * 
+     * @return Map of biosafety levels and names.
+     */
     public static Map<String, String> getBioSafetyLevelOptionsMap() {
         Map<String, String> resultMap = new LinkedHashMap<String, String>();
 
@@ -622,6 +746,12 @@ public class Entry implements IEntryValueObject, IModel {
         return resultMap;
     }
 
+    /**
+     * Generate the options map of markupTypes containing friendly names for
+     * {@link Entry.MarkupType}.
+     * 
+     * @return Map of markup types and names.
+     */
     public static Map<String, String> getMarkupTypeMap() {
         Map<String, String> resultMap = new LinkedHashMap<String, String>();
 
@@ -632,6 +762,11 @@ public class Entry implements IEntryValueObject, IModel {
         return resultMap;
     }
 
+    /**
+     * Generate the options map of status options containing friendly names for status field.
+     * 
+     * @return Map of options and names.
+     */
     public static Map<String, String> getStatusOptionsMap() {
         Map<String, String> resultMap = new LinkedHashMap<String, String>();
 
@@ -642,6 +777,11 @@ public class Entry implements IEntryValueObject, IModel {
         return resultMap;
     }
 
+    /**
+     * Generate the options map of entry types containing friendly names for entryType field.
+     * 
+     * @return Map of entry types and names.
+     */
     public static Map<String, String> getEntryTypeOptionsMap() {
         Map<String, String> resultMap = new LinkedHashMap<String, String>();
 

@@ -60,7 +60,7 @@ public class EntriesDataProvider extends AbstractEntriesDataProvider {
         EntryController entryController = new EntryController(IceSession.get().getAccount());
 
         try {
-            numberOfEntries = entryController.getNumberOfVisibleEntries();
+            numberOfEntries = entryController.getEntriesSize();
         } catch (ControllerException e) {
             throw new ViewException(e);
         }

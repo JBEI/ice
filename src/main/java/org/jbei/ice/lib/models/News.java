@@ -15,6 +15,12 @@ import javax.persistence.TemporalType;
 
 import org.jbei.ice.lib.dao.IModel;
 
+/**
+ * Store information about a news item.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "news")
 @SequenceGenerator(name = "sequence", sequenceName = "news_id_seq", allocationSize = 1)

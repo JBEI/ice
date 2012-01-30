@@ -3,8 +3,10 @@
 	elementFormDefault="qualified"
 	targetNamespace="http://jbei.org/ice"
 	xmlns:ice="http://jbei.org/ice"
-	xmlns:seq="http://jbei.org/sequence">
+	xmlns:seq="http://jbei.org/sequence"
+	xmlns:exp="http://jbei.org/exp" >
 <xs:import namespace="http://jbei.org/sequence" schemaLocation="seq.xsd"/>
+<xs:import namespace="http://jbei.org/exp" schemaLocation="exp.xsd"/>
 <xs:element name="ice">
 	<xs:complexType>
 		<xs:sequence>
@@ -39,8 +41,9 @@
 			<xs:element ref="ice:bioSafetyLevel" />
 			<xs:element ref="ice:intellectualProperty" minOccurs="0" />
 			<xs:element ref="ice:fundingSources" minOccurs="0" />
+			<xs:element ref="seq:seq" minOccurs="0" />
 			<xs:element ref="ice:attachments" minOccurs="0" />
-			<xs:element ref="seq:seq" minOccurs="0" />	
+			<xs:element ref="exp:exp" minOccurs="0" />
 		</xs:sequence>
 		<xs:attribute name="index" type="xs:integer" />
 	</xs:complexType>

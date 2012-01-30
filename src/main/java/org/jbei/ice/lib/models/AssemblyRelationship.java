@@ -10,6 +10,13 @@ import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
 
+/**
+ * Represent the relationship as to how an {@link Entry} relates to another. For example,
+ * "derived from" would be an AssemblyRelationship.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "assembly_relationship")
 @SequenceGenerator(name = "sequence", sequenceName = "assembly_relationship_id_seq", allocationSize = 1)

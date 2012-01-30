@@ -19,6 +19,10 @@ import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.Part;
+import org.jbei.ice.lib.models.PartNumber;
+import org.jbei.ice.lib.models.Plasmid;
+import org.jbei.ice.lib.models.SelectionMarker;
+import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.search.blast.Blast;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastResult;
@@ -28,6 +32,15 @@ import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
  * TODO This class was written as a translation from a dynamic language. A cleaner 
  * refactoring would be beneficial.
  */
+
+/**
+ * Advanced search queries.
+ * <p>
+ * This class allows searches based on database fields, combination of database fields, blast, etc.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @SuppressWarnings("unchecked")
 public class Query {
 
@@ -35,6 +48,11 @@ public class Query {
 
     private static Query instance = null;
 
+    /**
+     * Obtain singleton instance of {@link Query} object.
+     * 
+     * @return Instance of a Query object.
+     */
     public static Query getInstance() {
         if (instance == null) {
             instance = new Query();
@@ -47,6 +65,9 @@ public class Query {
         initializeFilters();
     }
 
+    /**
+     * Set up all known filters.
+     */
     private void initializeFilters() {
         Map<String, String> selectionMarkersMap = new LinkedHashMap<String, String>();
         TreeSet<String> uniqueSelectionMarkers = null;
@@ -124,6 +145,12 @@ public class Query {
         filters.add(new BlastFilter("tblastx", "BLAST-Translate", "filterBlast"));
     }
 
+    /**
+     * Retrieve a filter by its key.
+     * 
+     * @param key
+     * @return
+     */
     private Filter filterByKey(String key) {
         Filter result = null;
 
@@ -137,6 +164,16 @@ public class Query {
         return result;
     }
 
+    /**
+     * Query using the filter specified by the key.
+     * 
+     * @param key
+     *            name of the filter to query.
+     * @param value
+     *            query value.
+     * @return
+     * @throws QueryException
+     */
     private HashSet<Integer> runFilter(String key, String value) throws QueryException {
         HashSet<Integer> result = null;
 
@@ -160,6 +197,14 @@ public class Query {
         return result;
     }
 
+    /**
+     * Search using filter syntax given by data.
+     * 
+     * @param data
+     *            filter syntax.
+     * @return List of {@link Entry} ids
+     * @throws QueryException
+     */
     public ArrayList<Long> query(ArrayList<String[]> data) throws QueryException {
         ArrayList<Long> resultIds = new ArrayList<Long>();
 
@@ -191,6 +236,18 @@ public class Query {
         return filters;
     }
 
+    /**
+     * Convert filter selection options into hql query terms.
+     * 
+     * @param field
+     *            field to operate on.
+     * @param operator
+     *            ~ is contains, !~ is not contain, = is exact equal, ! is exact not, ^ is matches
+     *            start, $ is matches end.
+     * @param term
+     *            query term.
+     * @return HQL query term for field.
+     */
     protected String makeCriterion(String field, String operator, String term) {
         String result = null;
         term = term.toLowerCase();
@@ -218,6 +275,13 @@ public class Query {
         return result;
     }
 
+    /**
+     * Parse the syntax in value into operator and the query string.
+     * 
+     * @param value
+     *            query syntax.
+     * @return HashMap containing operator and value.
+     */
     protected HashMap<String, String> parseQuery(String value) {
         HashMap<String, String> result = new HashMap<String, String>();
         String operator = "";
@@ -252,6 +316,12 @@ public class Query {
 
     }
 
+    /**
+     * Filter by {@link org.jbei.ice.lib.models.Name Name}.name field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterName(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
 
@@ -262,6 +332,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link Strain}.plasmids field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterStrainPlasmids(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
 
@@ -272,6 +348,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link Entry}.recordType field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterType(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.recordType)", parsedQuery.get("operator"),
@@ -281,6 +363,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link Entry}.alias field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterAlias(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.alias)", parsedQuery.get("operator"),
@@ -290,6 +378,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link PartNumber}.partNumber field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterPartNumber(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(partNumber.partNumber)",
@@ -300,6 +394,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter for existence of any {@link org.jbei.ice.lib.models.Attachment Attachment}s.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterHasAttachment(String queryString) {
         HashSet<Long> result = null;
         HashSet<Long> allEntriesWithAttachment = null;
@@ -321,6 +421,12 @@ public class Query {
         return result;
     }
 
+    /**
+     * Filter for existence of any {@link org.jbei.ice.lib.models.Sample Sample}s.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterHasSample(String queryString) {
         HashSet<Long> result = null;
         HashSet<Long> allEntriesWithSample = null;
@@ -342,6 +448,12 @@ public class Query {
         return result;
     }
 
+    /**
+     * Filter existence of any {@link org.jbei.ice.lib.models.Sequence Sequence}s.
+     * 
+     * @param queryString
+     * @return HashSet of {@link Entry} ids.
+     */
     protected HashSet<Long> filterHasSequence(String queryString) {
         HashSet<Long> result = null;
         HashSet<Long> allEntriesWithSequence = null;
@@ -363,6 +475,12 @@ public class Query {
         return result;
     }
 
+    /**
+     * Filter by {@link Entry}.recordId field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterRecordId(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.recordId) ", parsedQuery.get("operator"),
@@ -372,6 +490,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link Entry}.owner and .ownerEmail fields.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterOwnerCombined(String queryString) {
         HashSet<Long> ownerResults = filterOwner(queryString);
         HashSet<Long> ownerEmailResults = filterOwnerEmail(queryString);
@@ -381,6 +505,12 @@ public class Query {
         return ownerResults;
     }
 
+    /**
+     * Filter by {@link Entry}.owner field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterOwner(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.owner) ", parsedQuery.get("operator"),
@@ -390,6 +520,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link Entry}.ownerEmail field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterOwnerEmail(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.ownerEmail) ", parsedQuery.get("operator"),
@@ -399,6 +535,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link Entry}.creator and .creatorEmail fields.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterCreatorCombined(String queryString) {
         HashSet<Long> creatorResults = filterCreator(queryString);
         HashSet<Long> creatorEmailResults = filterCreatorEmail(queryString);
@@ -408,6 +550,13 @@ public class Query {
         return creatorResults;
     }
 
+    /**
+     * Filter by {@link Entry}.creator field.
+     * 
+     * @param queryString
+     * @return
+     *         HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterCreator(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.creator) ", parsedQuery.get("operator"),
@@ -417,6 +566,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link Entry}.creatorEmail field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterCreatorEmail(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
 
@@ -427,6 +582,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link Entry}.keywords field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterKeywords(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.keywords)", parsedQuery.get("operator"),
@@ -436,6 +597,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link Entry}.shortDescription, .longDescription, and .references fields.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterSummaryNotesReferences(String queryString) {
         HashSet<Long> summaryResults = filterShortDescription(queryString);
         HashSet<Long> notesResults = filterLongDescription(queryString);
@@ -447,6 +614,12 @@ public class Query {
         return summaryResults;
     }
 
+    /**
+     * Filter by {@link Entry}.shortDescription field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterShortDescription(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.shortDescription)",
@@ -456,6 +629,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link Entry}.longDescription field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterLongDescription(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.longDescription)",
@@ -465,6 +644,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link Entry}.references field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterReferences(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.references)", parsedQuery.get("operator"),
@@ -474,6 +659,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link Plasmid}.backbone field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterBackbone(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(plasmid.backbone)", parsedQuery.get("operator"),
@@ -483,6 +674,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link Plasmid}.promoters field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterPromoters(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(plasmid.promoters)", parsedQuery.get("operator"),
@@ -492,6 +689,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link Plasmid}.originOfReplication field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterOriginOfReplication(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(plasmid.originOfReplication)",
@@ -501,6 +704,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link Strain}.host field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterHost(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(strain.host)", parsedQuery.get("operator"),
@@ -510,6 +719,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link Strain}.genotypePhenotype field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterGenotypePhenotype(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(strain.genotypePhenotype)",
@@ -519,6 +734,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link Part}.packageFormat field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterPackageFormat(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(part.packageFormat)", parsedQuery.get("operator"),
@@ -528,6 +749,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link SelectionMarker}.name field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterSelectionMarker(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(marker.name)", parsedQuery.get("operator"),
@@ -538,6 +765,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link Entry}.status field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterStatus(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(entry.status)", parsedQuery.get("operator"),
@@ -547,6 +780,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link Strain}.plasmids field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterStrainPlasmid(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
         String criteria = makeCriterion("lower(strain.plasmids)", parsedQuery.get("operator"),
@@ -556,6 +795,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link org.jbei.ice.lib.models.Name Name}.name or {@link Entry}.alias fields.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterNameOrAlias(String queryString) {
         HashSet<Long> nameResults = filterName(queryString);
         HashSet<Long> aliasResults = filterAlias(queryString);
@@ -565,6 +810,12 @@ public class Query {
         return nameResults;
     }
 
+    /**
+     * Filter by {@link EntryFundingSource}.principalInvestigator field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterPrincipalInvestigator(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
 
@@ -577,6 +828,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link EntryFundingSource}.fundingSource field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterFundingSource(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
 
@@ -588,6 +845,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link Entry}.intellectualProperty field.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterIntelectualProperty(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
 
@@ -600,6 +863,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by {@link Entry}.bioSafety field, less than equal to inclusive.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterBioSafetyLevel(String queryString) {
         HashMap<String, String> parsedQuery = parseQuery(queryString);
 
@@ -618,6 +887,12 @@ public class Query {
         return hibernateQuery(query);
     }
 
+    /**
+     * Filter by blast query.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     protected HashSet<Long> filterBlast(String queryString) {
         String[] parameters = queryString.split(","); //query, type, %ident, minLength
         String query = parameters[0];
@@ -635,6 +910,12 @@ public class Query {
         return blastQuery(query, type, minPercentIdentity, minLength);
     }
 
+    /**
+     * Perform HQL query in hiberate.
+     * 
+     * @param queryString
+     * @return HashSet of {link Entry} ids.
+     */
     private HashSet<Long> hibernateQuery(String queryString) {
         HashSet<Long> rawResults = new HashSet<Long>();
         Session session = DAO.newSession();
@@ -654,6 +935,19 @@ public class Query {
         return rawResults;
     }
 
+    /**
+     * Perform blast query.
+     * 
+     * @param queryString
+     *            sequence to be queried.
+     * @param type
+     *            blast program name.
+     * @param minPercentIdentity
+     *            lower bound percent identity filter.
+     * @param minLength
+     *            lower bound length filter.
+     * @return HashSet of {link Entry} ids.
+     */
     private HashSet<Long> blastQuery(String queryString, String type, double minPercentIdentity,
             int minLength) {
         HashSet<Long> rawResults = new HashSet<Long>();

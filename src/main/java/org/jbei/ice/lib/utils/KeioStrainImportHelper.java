@@ -35,6 +35,12 @@ import org.jbei.ice.lib.permissions.PermissionException;
 
 import au.com.bytecode.opencsv.CSVReader;
 
+/**
+ * Import helper for Keio Strains with samples.
+ * 
+ * @author Hector Plahar
+ * 
+ */
 public class KeioStrainImportHelper {
 
     private static enum Header {

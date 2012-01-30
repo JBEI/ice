@@ -12,8 +12,21 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 
+/**
+ * Manager to manipulate {@link Group} objects.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 public class GroupManager {
 
+    /**
+     * Retrieve {@link Group} object from the database by its uuid.
+     * 
+     * @param uuid
+     * @return Group object.
+     * @throws ManagerException
+     */
     public static Group get(String uuid) throws ManagerException {
         Group result = null;
         Session session = DAO.newSession();
@@ -34,6 +47,13 @@ public class GroupManager {
         return result;
     }
 
+    /**
+     * Retrieve {@link Group} object from the database by its id.
+     * 
+     * @param id
+     * @return Group object.
+     * @throws ManagerException
+     */
     public static Group get(long id) throws ManagerException {
         Group result = null;
         Session session = DAO.newSession();
@@ -55,6 +75,12 @@ public class GroupManager {
         return result;
     }
 
+    /**
+     * Retrieve the Everybody {@link Group} object.
+     * 
+     * @return Everybody Group object.
+     * @throws ManagerException
+     */
     public static Group getEverybodyGroup() throws ManagerException {
         Group result = null;
         try {
@@ -68,6 +94,12 @@ public class GroupManager {
         return result;
     }
 
+    /**
+     * Retrieve all the {@link Group} objects in the database.
+     * 
+     * @return SEt of Groups.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static Set<Group> getAll() throws ManagerException {
         LinkedHashSet<Group> groups = new LinkedHashSet<Group>();
@@ -88,6 +120,16 @@ public class GroupManager {
         return groups;
     }
 
+    /**
+     * Create new {@link Group} object in the database, using parameters.
+     * 
+     * @param uuid
+     * @param label
+     * @param description
+     * @param parent
+     * @return Saved Group object.
+     * @throws ManagerException
+     */
     public static Group create(String uuid, String label, String description, Group parent)
             throws ManagerException {
         Group g = new Group();
@@ -109,6 +151,15 @@ public class GroupManager {
 
     }
 
+    /**
+     * Create a new {@link Group} object in the database, using parameters.
+     * 
+     * @param label
+     * @param description
+     * @param parent
+     * @return Saved Group object.
+     * @throws ManagerException
+     */
     public static Group create(String label, String description, Group parent)
             throws ManagerException {
         String uuid = java.util.UUID.randomUUID().toString();
@@ -116,6 +167,13 @@ public class GroupManager {
 
     }
 
+    /**
+     * Update the given {@link Group} object in the database.
+     * 
+     * @param group
+     * @return Saved Group object.
+     * @throws ManagerException
+     */
     public static Group update(Group group) throws ManagerException {
         try {
             DAO.save(group);
@@ -130,6 +188,12 @@ public class GroupManager {
         return group;
     }
 
+    /**
+     * Delete the given {@link Group} object in the database.
+     * 
+     * @param group
+     * @throws ManagerException
+     */
     public static void delete(Group group) throws ManagerException {
         try {
             DAO.delete(group);
@@ -141,6 +205,13 @@ public class GroupManager {
         }
     }
 
+    /**
+     * Save the given {@link Group} object in the database.
+     * 
+     * @param group
+     * @return Saved Group object.
+     * @throws ManagerException
+     */
     public static Group save(Group group) throws ManagerException {
         Group result = null;
         try {

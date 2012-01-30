@@ -13,6 +13,21 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+/**
+ * Store Arabidopsis Seed specific fields.
+ * <p>
+ * <ul>
+ * <li><b>hobozygosity: </b></li>
+ * <li><b>ecotype: </b></li>
+ * <li><b>harvestDate: </b></li>
+ * <li><b>parents:</b></li>
+ * <li><b>generation:</b></li>
+ * <li><b>plantType</b></li>
+ * </ul>
+ * 
+ * @author Timothy Ham
+ * 
+ */
 @Entity
 @PrimaryKeyJoinColumn(name = "entries_id")
 @Table(name = "arabidopsis_seed")
@@ -20,10 +35,22 @@ public class ArabidopsisSeed extends Entry {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Generation options.
+     * 
+     * @author Timothy Ham
+     * 
+     */
     public enum Generation {
         M0, M1, M2, T0, T1, T2, T3, T4, T5
     }
 
+    /**
+     * Plant types.
+     * 
+     * @author Timothy Ham
+     * 
+     */
     public enum PlantType {
         EMS, OVER_EXPRESSION, RNAI, REPORTER, T_DNA, OTHER
     }
@@ -49,6 +76,11 @@ public class ArabidopsisSeed extends Entry {
     @Enumerated(EnumType.STRING)
     private PlantType plantType;
 
+    /**
+     * Return a Map to look up {@link Generation} to its string representation.
+     * 
+     * @return Map of generation to names.
+     */
     public static Map<String, String> getGenerationOptionsMap() {
         Map<String, String> resultMap = new LinkedHashMap<String, String>();
         for (Generation generation : Generation.values()) {
@@ -59,6 +91,11 @@ public class ArabidopsisSeed extends Entry {
 
     }
 
+    /**
+     * Return a Map to look up {@link PlantType} to its friendly string representation.
+     * 
+     * @return Map to look up Plant type to its string representation.
+     */
     public static Map<String, String> getPlantTypeOptionsMap() {
         Map<String, String> resultMap = new LinkedHashMap<String, String>();
 

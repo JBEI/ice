@@ -15,7 +15,7 @@ import org.jbei.ice.lib.utils.Utils;
  * TODO: Tim; Wicket has a nice dynamic getter/setter generation from field name.
  * Implement something similar. Right now, it must be passed the method names
  * 
- * @author tham
+ * @author Zinovii Dmytriv, Timothy Ham
  * @param <T>
  * 
  */
@@ -34,7 +34,7 @@ public class CommaSeparatedField<T> implements Serializable {
         this.setterName = setterName;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public CommaSeparatedField(Class<T> k, Collection<Object> c, String getterName,
             String setterName) {
         items = new ArrayList(c);
@@ -77,7 +77,7 @@ public class CommaSeparatedField<T> implements Serializable {
     /**
      * Generates an ArrayList of objects of type created from input string
      * 
-     * @param Input
+     * @param string
      *            comma separated string
      * @return ArrayList of objects with its property set
      * @throws FormException
@@ -90,13 +90,12 @@ public class CommaSeparatedField<T> implements Serializable {
 
         String[] itemsAsString = string.split("\\s*,+\\s*");
 
-        for (int i = 0; i < itemsAsString.length; i++) {
-            String currentItem = itemsAsString[i];
+        for (String currentItem : itemsAsString) {
             if (currentItem.length() > 0) {
                 try {
                     T instance = klass.newInstance();
                     Method setMethod = klass.getDeclaredMethod(setterName,
-                            new Class[] { String.class });
+                        new Class[] { String.class });
                     setMethod.invoke(instance, currentItem);
                     result.add(instance);
 

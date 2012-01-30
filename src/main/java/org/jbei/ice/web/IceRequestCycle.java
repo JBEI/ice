@@ -20,11 +20,29 @@ import org.jbei.ice.web.pages.ErrorPage;
 import org.jbei.ice.web.pages.PageExpiredPage;
 import org.jbei.ice.web.pages.PermissionDeniedPage;
 
+/**
+ * Custom wicket {@link WebRequestCycle} for gd-ice.
+ * 
+ * @author Zinovii Dmytriv, Timothy Ham
+ * 
+ */
 public class IceRequestCycle extends WebRequestCycle {
+    /**
+     * Constructor.
+     * 
+     * @param application
+     * @param request
+     * @param response
+     */
     public IceRequestCycle(WebApplication application, WebRequest request, Response response) {
         super(application, request, response);
     }
 
+    /**
+     * Called when the request cycle object is beginning its response.
+     * <p>
+     * Also logs the request to the usage log.
+     */
     @Override
     protected void onBeginRequest() {
         Account account = IceSession.get().getAccount();
@@ -46,6 +64,12 @@ public class IceRequestCycle extends WebRequestCycle {
         }
     }
 
+    /**
+     * Handle runtime exception. Generate exception pages (Permission denied, Page expired, or an
+     * Error page).
+     * <p>
+     * Also logs to the logfile.
+     */
     @Override
     public Page onRuntimeException(Page page, RuntimeException e) {
         Page result = null;

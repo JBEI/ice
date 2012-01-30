@@ -17,7 +17,20 @@ import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.utils.Utils;
 
+/**
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
+ * 
+ */
 public class SampleManager {
+
+    /**
+     * Save the given {@link Sample} object in the database.
+     * 
+     * @param sample
+     * @return Saved Sample object.
+     * @throws ManagerException
+     */
     public static Sample saveSample(Sample sample) throws ManagerException {
         if (sample == null) {
             throw new ManagerException("Failed to save null sample!");
@@ -36,6 +49,12 @@ public class SampleManager {
         return sample;
     }
 
+    /**
+     * Delete the give {@link Sample} object in the database.
+     * 
+     * @param sample
+     * @throws ManagerException
+     */
     public static void deleteSample(Sample sample) throws ManagerException {
         if (sample == null) {
             throw new ManagerException("Failed to delete null sample!");
@@ -48,6 +67,13 @@ public class SampleManager {
         }
     }
 
+    /**
+     * Retrieve {@link Sample} object associated with the given {@link Entry} object.
+     * 
+     * @param entry
+     * @return ArrayList of Sample objects.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static ArrayList<Long> getSampleIdsByOwner(String ownerId) throws ManagerException {
 
@@ -109,6 +135,13 @@ public class SampleManager {
         return samples;
     }
 
+    /**
+     * Retrieve {@link Sample} objects associated with the given {@link Storage} object.
+     * 
+     * @param storage
+     * @return ArrayList of Sample objects.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static ArrayList<Sample> getSamplesByStorage(Storage storage) throws ManagerException {
         ArrayList<Sample> samples = null;
@@ -138,6 +171,13 @@ public class SampleManager {
         return samples;
     }
 
+    /**
+     * Retrieve {@link Sample} objects by its index field.
+     * 
+     * @param code
+     * @return ArrayList of Sample objects.
+     * @throws ManagerException
+     */
     public static ArrayList<Sample> retrieveSamplesByIndex(String code) throws ManagerException {
         Session session = DAO.newSession();
         String queryString = "from " + Storage.class.getName()
@@ -154,6 +194,15 @@ public class SampleManager {
         }
     }
 
+    /**
+     * Retrieve {@link Sample} objects by its depositor field.
+     * 
+     * @param depositor
+     * @param offset
+     * @param limit
+     * @return ArrayList of Sample objects.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static ArrayList<Sample> getSamplesByDepositor(String depositor, int offset, int limit)
             throws ManagerException {
@@ -189,6 +238,13 @@ public class SampleManager {
         return samples;
     }
 
+    /**
+     * Retrieve the number of samples associated the given depositor (email) string.
+     * 
+     * @param depositor
+     * @return Number of samples.
+     * @throws ManagerException
+     */
     public static int getSampleCountBy(String depositor) throws ManagerException {
         Session session = DAO.newSession();
         try {

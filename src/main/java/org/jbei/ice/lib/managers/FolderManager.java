@@ -15,8 +15,21 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Folder;
 
+/**
+ * Manipulate {@link Folder} objects in the database.
+ * 
+ * @author Hector Plahar
+ * 
+ */
 public class FolderManager {
 
+    /**
+     * Retrieve {@link Folder} objects from the database by id.
+     * 
+     * @param id
+     * @return Folder object.
+     * @throws ManagerException
+     */
     public static Folder get(long id) throws ManagerException {
         Folder result = null;
         Session session = DAO.newSession();
@@ -39,8 +52,8 @@ public class FolderManager {
     }
 
     /**
-     * Retrieves the count of the number of contents in the folder
-     * if the folder contains other folders, the it returns the number of sub-folders
+     * Retrieves the count of the number of contents in the folder.
+     * If the folder contains other folders, the it returns the number of sub-folders
      * 
      * @param id
      *            unique folder identifier
@@ -64,15 +77,14 @@ public class FolderManager {
     }
 
     /**
-     * Retrieves the entry contents of a folder
+     * Retrieves the entry contents of a folder contents.
      * 
      * @param id
-     *            unique folder identifier
+     *            folder id.
      * @param asc
-     *            return order
-     * @return list of entry ids retrieved
+     *            true if ascending.
+     * @return List of Entry ids.
      * @throws ManagerException
-     *             on any exception accessing the folder or its contents
      */
     public static ArrayList<Long> getFolderContents(long id, boolean asc) throws ManagerException {
         ArrayList<Long> results = new ArrayList<Long>();
@@ -85,14 +97,16 @@ public class FolderManager {
 
             @SuppressWarnings("unchecked")
             List<BigInteger> l = query.list();
-            for (BigInteger bi : l)
+            for (BigInteger bi : l) {
                 results.add(bi.longValue());
+            }
 
             return results;
 
         } finally {
-            if (session.isOpen())
+            if (session.isOpen()) {
                 session.close();
+            }
         }
     }
 
@@ -124,11 +138,19 @@ public class FolderManager {
         }
     }
 
+    /**
+     * Retrieve all {@link Folder}s owned by given the {@link Account}.
+     * 
+     * @param account
+     * @return List of Folder objects.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static List<Folder> getFoldersByOwner(Account account) throws ManagerException {
 
-        if (account == null)
+        if (account == null) {
             throw new ManagerException("Requesting information for null account");
+        }
 
         ArrayList<Folder> folders = null;
 
@@ -152,6 +174,13 @@ public class FolderManager {
         return folders;
     }
 
+    /**
+     * Save the {@link Folder} object in the database.
+     * 
+     * @param folder
+     * @return Saved Folder object.
+     * @throws ManagerException
+     */
     public static Folder update(Folder folder) throws ManagerException {
         try {
             folder.setModificationTime(new Date(System.currentTimeMillis()));

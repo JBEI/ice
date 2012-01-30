@@ -13,6 +13,12 @@ import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
 
+/**
+ * Store genbank style attributes.
+ * 
+ * @author Timothy Ham
+ * 
+ */
 @Entity
 @Table(name = "sequence_feature_attribute")
 @SequenceGenerator(name = "sequence", sequenceName = "sequence_feature_attribute_id_seq", allocationSize = 1)

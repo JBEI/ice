@@ -129,7 +129,8 @@ public class PlasmidStrainNewFormPanel extends Panel {
             add(new TextField<String>("plasmidLinks", new PropertyModel<String>(this,
                     "plasmidLinks")));
             add(new TextField<String>("plasmidSelectionMarkers", new PropertyModel<String>(this,
-                    "plasmidSelectionMarkers")));
+                    "plasmidSelectionMarkers")).setRequired(true).setLabel(
+                new Model<String>("Plasmid Selection Markers")));
             add(new TextField<String>("plasmidAlias", new PropertyModel<String>(this,
                     "plasmidAlias")));
             add(new TextField<String>("plasmidCreator", new PropertyModel<String>(this,
@@ -167,7 +168,8 @@ public class PlasmidStrainNewFormPanel extends Panel {
                     .setRequired(true).setLabel(new Model<String>("Strain Number")));
             add(new TextField<String>("strainLinks", new PropertyModel<String>(this, "strainLinks")));
             add(new TextField<String>("strainSelectionMarkers", new PropertyModel<String>(this,
-                    "strainSelectionMarkers")));
+                    "strainSelectionMarkers")).setRequired(true).setLabel(
+                new Model<String>("Strain Selection Markers")));
             add(new TextField<String>("strainAlias", new PropertyModel<String>(this, "strainAlias")));
             add(new TextField<String>("strainKeywords", new PropertyModel<String>(this,
                     "strainKeywords")));

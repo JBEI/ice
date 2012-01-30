@@ -1,5 +1,11 @@
 package org.jbei.ice.web.common;
 
+/**
+ * Exception class for view permissions.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class ViewPermissionException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 

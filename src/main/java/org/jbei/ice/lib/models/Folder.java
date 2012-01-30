@@ -24,7 +24,7 @@ import org.jbei.ice.lib.dao.IModel;
 
 /**
  * Encapsulates the notion of a collection of {@link org.jbei.ice.lib.models.Entry}s
- * Each folder has an owner
+ * Each folder has an owner.
  * 
  * @author Hector Plahar
  */
@@ -121,7 +121,7 @@ public class Folder implements IModel {
     }
 
     public Set<Entry> getContents() {
-        return this.contents;
+        return contents;
     }
 
     public Date getCreationTime() {

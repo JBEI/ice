@@ -1,5 +1,12 @@
 package org.jbei.ice.lib.utils;
 
+/**
+ * Simple feature for biobrick assembly.
+ * 
+ * @author Timothy Ham
+ * 
+ */
+@Deprecated
 public class SimpleFeature {
     private String sequence;
     private int start;

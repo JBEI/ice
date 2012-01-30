@@ -55,6 +55,9 @@ import org.jbei.ice.lib.vo.SequenceTraceFile;
 import com.ibm.icu.util.Calendar;
 
 /**
+ * IceXML serializer/deserializer.
+ * <p>
+ * See ice.xsd and seq.xsd in the /docs directory for the xml schema.
  * 
  * @author Timothy Ham
  * 
@@ -132,8 +135,16 @@ public class IceXmlSerializer {
     private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
             "yyyy-MM-dd'T'HH:mm:ss'Z'");
 
-    private ArrayList<CompleteEntry> completeEntries = new ArrayList<CompleteEntry>();
+    private final ArrayList<CompleteEntry> completeEntries = new ArrayList<CompleteEntry>();
 
+    /**
+     * Generate ice-xml from given List of {@link Entry}s.
+     * 
+     * @param entries
+     *            Entries to serialize.
+     * @return xml document as string.
+     * @throws UtilityException
+     */
     public static String serializeToJbeiXml(List<Entry> entries) throws UtilityException {
         ArrayList<Sequence> sequences = new ArrayList<Sequence>();
         for (Entry entry : entries) {
@@ -162,6 +173,16 @@ public class IceXmlSerializer {
 
     }
 
+    /**
+     * Generate ice-xml from the given List of {@link Entry}s and {@link Sequence}s.
+     * 
+     * @param entries
+     *            Entries to serialize.
+     * @param sequences
+     *            Corresponding sequences to serialize.
+     * @return xml {@link Document}.
+     * @throws UtilityException
+     */
     public static Document serializeToJbeiXml(List<Entry> entries, List<Sequence> sequences)
             throws UtilityException {
 
@@ -187,9 +208,20 @@ public class IceXmlSerializer {
         return document;
     }
 
+    /**
+     * Generate single "entry" xml {@link Element} from the given {@link Entry} and {@link Sequence}
+     * 
+     * @param entry
+     *            Entry to serialize.
+     * @param sequence
+     *            Sequence to serialize.
+     * @return xml Element.
+     * @throws UtilityException
+     */
     private static Element toEntryElement(Entry entry, Sequence sequence) throws UtilityException {
-        if (entry == null)
+        if (entry == null) {
             return null;
+        }
 
         DefaultElement entryRoot = new DefaultElement("entry", iceNamespace);
 
@@ -289,7 +321,7 @@ public class IceXmlSerializer {
                 try {
                     file = AttachmentManager.getFile(attachment);
                     fileString = SerializationUtils
-                            .serializeBytesToString(org.apache.commons.io.FileUtils
+                            .serializeBytesToBase64String(org.apache.commons.io.FileUtils
                                     .readFileToByteArray(file));
 
                 } catch (FileNotFoundException e) {
@@ -315,6 +347,13 @@ public class IceXmlSerializer {
         return entryRoot;
     }
 
+    /**
+     * Generate type specific fields as xml {@link Element} from the given {@link Entry}.
+     * 
+     * @param entry
+     *            Entry to serialize.
+     * @return xml Element containing type specific fields.
+     */
     private static Element getEntryTypeSpecificFields(Entry entry) {
         String fieldName = null;
         if (entry.getRecordType().equals(PLASMID)) {
@@ -378,6 +417,13 @@ public class IceXmlSerializer {
         return fields;
     }
 
+    /**
+     * Generate selection marker xml {@link Element} from the given {@link Entry}.
+     * 
+     * @param entry
+     *            Entry to serialize.
+     * @return xml Element containing selection markers.
+     */
     private static Element getSelectionMarkers(Entry entry) {
         if (entry.getSelectionMarkers().size() == 0) {
             return null;
@@ -392,11 +438,14 @@ public class IceXmlSerializer {
     }
 
     /**
+     * Generate experiment xml {@link Element} from the given {@link Entry}.
+     * <p>
      * Currently generates sequence traces. They use a different schema called exp.xsd. Move this
-     * out as experimental data schema develops
+     * out as experimental data schema develops.
      * 
      * @param entry
-     * @return
+     *            Entry to serialize.
+     * @return xml Element.
      * @throws UtilityException
      */
     private static Element getExperimentElement(Entry entry) throws UtilityException {
@@ -418,7 +467,7 @@ public class IceXmlSerializer {
                 try {
                     traceFile = TraceSequenceManager.getFile(trace);
                     traceString = SerializationUtils
-                            .serializeBytesToString(org.apache.commons.io.FileUtils
+                            .serializeBytesToBase64String(org.apache.commons.io.FileUtils
                                     .readFileToByteArray(traceFile));
                 } catch (ManagerException e) {
                     // skip this one
@@ -450,6 +499,14 @@ public class IceXmlSerializer {
         return result;
     }
 
+    /**
+     * Deserialize given xml to list of {@link CompleteEntry}s.
+     * 
+     * @param xml
+     *            xml to parse.
+     * @return List of CompleteEntries.
+     * @throws UtilityException
+     */
     public List<CompleteEntry> deserializeJbeiXml(String xml) throws UtilityException {
         completeEntries.clear();
         SAXReader reader = new SAXReader();
@@ -484,6 +541,13 @@ public class IceXmlSerializer {
         return completeEntries;
     }
 
+    /**
+     * Deserialize given trace element xml Element into List of {@link SequenceTraceFile}s.
+     * 
+     * @param tracesElement
+     *            xml element.
+     * @return List of SequenceTracefiles.
+     */
     private static List<SequenceTraceFile> parseSequenceTraces(Element tracesElement) {
         ArrayList<SequenceTraceFile> traceFileList = new ArrayList<SequenceTraceFile>();
 
@@ -510,6 +574,14 @@ public class IceXmlSerializer {
         return traceFileList;
     }
 
+    /**
+     * Deserialize given entry xml element into {@link CompleteEntry}.
+     * 
+     * @param entryDocument
+     *            xml element to parse.
+     * @return CompleteEntry.
+     * @throws UtilityException
+     */
     private static CompleteEntry parseEntry(Element entryDocument) throws UtilityException {
         CompleteEntry completeEntry = new CompleteEntry();
 
@@ -673,10 +745,11 @@ public class IceXmlSerializer {
     }
 
     /**
-     * Returns SelectionMarkers without entries. Make sure to set them after receiving them.
+     * Deserialize selection marker xml Element into a set of {@link SelectionMarker}s.
      * 
      * @param selectionMarkers
-     * @return
+     *            xml element.
+     * @return Set of SelectionMarkers
      */
     private static Set<SelectionMarker> parseSelectionMarkers(Element selectionMarkers) {
         HashSet<SelectionMarker> result = new HashSet<SelectionMarker>();
@@ -689,6 +762,13 @@ public class IceXmlSerializer {
         return result;
     }
 
+    /**
+     * Deserialize attachment xml Element into a List of {@link AttachmentData}.
+     * 
+     * @param attachments
+     *            xml element.
+     * @return List of AttachmentData.
+     */
     private static List<AttachmentData> parseAttachments(Element attachments) {
         ArrayList<AttachmentData> attachmentsList = new ArrayList<AttachmentData>();
 
@@ -707,6 +787,13 @@ public class IceXmlSerializer {
         return attachmentsList;
     }
 
+    /**
+     * Replace null value of a string object into an empty string. Non-null value is returned
+     * unaltered.
+     * 
+     * @param string
+     * @return
+     */
     private static String emptyStringify(String string) {
         if (string == null) {
             return "";

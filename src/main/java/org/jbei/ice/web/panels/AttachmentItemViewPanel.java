@@ -25,12 +25,11 @@ public class AttachmentItemViewPanel extends Panel {
     private Integer index = null;
     private Attachment attachment = null;
 
-    @SuppressWarnings("unchecked")
     public AttachmentItemViewPanel(String id, Integer counter, Attachment attachment) {
         super(id);
 
-        this.setAttachment(attachment);
-        this.setIndex(counter);
+        setAttachment(attachment);
+        setIndex(counter);
 
         add(new Label("counter", counter.toString()));
         String descriptionString = attachment.getDescription();
@@ -40,6 +39,7 @@ public class AttachmentItemViewPanel extends Panel {
         Label description = new Label("description", descriptionString);
         add(description);
 
+        @SuppressWarnings("rawtypes")
         class DeleteAttachmentLink extends AjaxFallbackLink {
             private static final long serialVersionUID = 1L;
 
@@ -73,6 +73,7 @@ public class AttachmentItemViewPanel extends Panel {
 
         EntryController entryController = new EntryController(IceSession.get().getAccount());
 
+        @SuppressWarnings("rawtypes")
         AjaxFallbackLink deleteAttachmentLink = new DeleteAttachmentLink("deleteAttachmentLink");
         deleteAttachmentLink.setOutputMarkupId(true);
         deleteAttachmentLink.setOutputMarkupPlaceholderTag(true);
@@ -123,6 +124,7 @@ public class AttachmentItemViewPanel extends Panel {
                         "0=" + attachment.getEntry().getId() + ",1=" + attachment.getFileName()));
 
         try {
+            @SuppressWarnings("unused")
             File file = attachmentController.getFile(attachment);
         } catch (ControllerException e) {
             downloadLink.setEnabled(false);

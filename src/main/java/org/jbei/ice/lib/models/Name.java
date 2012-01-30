@@ -15,6 +15,12 @@ import javax.xml.bind.annotation.XmlTransient;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.INameValueObject;
 
+/**
+ * Store the friendly name for an {@link Entry}.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "names")
 @SequenceGenerator(name = "sequence", sequenceName = "names_id_seq", allocationSize = 1)
@@ -40,6 +46,7 @@ public class Name implements INameValueObject, IModel {
         this.entry = entry;
     }
 
+    @Override
     public void setId(long id) {
         this.id = id;
     }

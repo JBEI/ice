@@ -16,18 +16,11 @@ import org.jbei.ice.lib.logging.Logger;
 
 /**
  * Little wrapper for lbl ldap.
+ * <p>
+ * Simple usage: LdapAuthl = new LdapAuth(); if (l.isWikiUser(String Username)) { try {
+ * l.authenticate(Username, password); } except { //auth failed } }
  * 
- * Simple usage:
- * LdapAuthl = new LdapAuth();
- * if (l.isWikiUser(String Username)) {
- * try {
- * l.authenticate(Username, password);
- * } except {
- * //auth failed
- * }
- * }
- * 
- * @author tham
+ * @author Zinovii Dmytriv, Timothy Ham
  * 
  */
 public class LblLdapAuthenticationWrapper {
@@ -41,16 +34,27 @@ public class LblLdapAuthenticationWrapper {
     protected boolean initialized = false;
 
     public boolean authenticated = false;
-    public String givenName = null;
-    public String sirName = null;
-    public String eMail = null;
-    public String org = null;
-    public String description = null;
+    public String givenName = "";
+    public String sirName = "";
+    public String eMail = "";
+    public String org = "";
+    public String description = "";
 
+    /**
+     * Constructor.
+     */
     public LblLdapAuthenticationWrapper() {
         initialize();
     }
 
+    /**
+     * Authenticate user to the ldap server.
+     * 
+     * @param userName
+     * @param passWord
+     * @return True if successfully authenticated.
+     * @throws LblLdapAuthenticationWrapperException
+     */
     public boolean authenticate(String userName, String passWord)
             throws LblLdapAuthenticationWrapperException {
         DirContext authContext = null;
@@ -75,13 +79,20 @@ public class LblLdapAuthenticationWrapper {
             Attributes attributes = searchResult.getAttributes();
             employeeNumber = (String) attributes.get("lblempnum").get();
 
-            this.givenName = (String) attributes.get("givenName").get();
-            this.sirName = (String) attributes.get("sn").get();
-            this.eMail = (String) attributes.get("mail").get();
-            this.eMail = this.eMail.toLowerCase();
-            this.org = "Lawrence Berkeley Laboratory";
-            this.description = (String) attributes.get("description").get();
-
+            if (attributes.get("givenName") != null) {
+                givenName = (String) attributes.get("givenName").get();
+            }
+            if (attributes.get("sn") != null) {
+                sirName = (String) attributes.get("sn").get();
+            }
+            if (attributes.get("mail") != null) {
+                eMail = (String) attributes.get("mail").get();
+            }
+            eMail = eMail.toLowerCase();
+            org = "Lawrence Berkeley Laboratory";
+            if (attributes.get("description") != null) {
+                description = (String) attributes.get("description").get();
+            }
             authContext = getAuthenticatedContext(employeeNumber, passWord);
 
             authContext.close();
@@ -107,6 +118,13 @@ public class LblLdapAuthenticationWrapper {
         return authenticated;
     }
 
+    /**
+     * Check if the user is in the settings file specified ldap group before authenticating.
+     * 
+     * @param loginName
+     * @return True if user is in the specified ldap group.
+     * @throws LblLdapAuthenticationWrapperException
+     */
     public boolean isWikiUser(String loginName) throws LblLdapAuthenticationWrapperException {
         boolean result = false;
 
@@ -114,8 +132,8 @@ public class LblLdapAuthenticationWrapper {
 
         String whitelistString = JbeirSettings.getSetting("LBL_LDAP_WHITELIST_GROUPS");
         String[] whiteListArray = whitelistString.split(",");
-        for (int i = 0; i < whiteListArray.length; i++) {
-            whitelistGroups.add(whiteListArray[i]);
+        for (String element : whiteListArray) {
+            whitelistGroups.add(element);
         }
 
         String queryPrefix = "cn=";
@@ -135,8 +153,8 @@ public class LblLdapAuthenticationWrapper {
                 String queryString = queryPrefix + group + querySuffix;
                 SearchResult searchResult = dirContext.search(queryString, filter, searchControls)
                         .nextElement();
-                NamingEnumeration<?> uniqueMembers = searchResult.getAttributes().get(
-                    "uniquemember").getAll();
+                NamingEnumeration<?> uniqueMembers = searchResult.getAttributes()
+                        .get("uniquemember").getAll();
                 while (uniqueMembers.hasMore()) {
                     String temp = (String) uniqueMembers.next();
                     whiteList.add(temp.toLowerCase());
@@ -187,6 +205,12 @@ public class LblLdapAuthenticationWrapper {
         return description;
     }
 
+    /**
+     * Get unauthenticated ldap context.
+     * 
+     * @return {@link DirContext} object.
+     * @throws NamingException
+     */
     protected DirContext getContext() throws NamingException {
         Hashtable<String, String> env = new Hashtable<String, String>();
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
@@ -196,7 +220,7 @@ public class LblLdapAuthenticationWrapper {
         env.put("com.sun.jndi.ldap.read.timeout", "500");
         env.put("com.sun.jndi.ldap.connect.timeout", "10000");
 
-        env.put(Context.PROVIDER_URL, this.searchURL);
+        env.put(Context.PROVIDER_URL, searchURL);
         env.put(Context.SECURITY_AUTHENTICATION, "none");
 
         InitialDirContext result = null;
@@ -210,6 +234,14 @@ public class LblLdapAuthenticationWrapper {
         return result;
     }
 
+    /**
+     * Get authenticated context from the ldap server. Failure means bad user or password.
+     * 
+     * @param lblEmployeeNumber
+     * @param passWord
+     * @return {@link DirContext} object.
+     * @throws NamingException
+     */
     protected DirContext getAuthenticatedContext(String lblEmployeeNumber, String passWord)
             throws NamingException {
 
@@ -223,7 +255,7 @@ public class LblLdapAuthenticationWrapper {
         env.put("com.sun.jndi.ldap.read.timeout", "3000");
         env.put("com.sun.jndi.ldap.connect.timeout", "1000");
 
-        env.put(Context.PROVIDER_URL, this.authenticationURL);
+        env.put(Context.PROVIDER_URL, authenticationURL);
         env.put(Context.SECURITY_AUTHENTICATION, "simple");
         env.put(Context.SECURITY_PRINCIPAL, "lblempnum=" + lblEmployeeNumber + ",ou=People,"
                 + baseDN);
@@ -235,13 +267,19 @@ public class LblLdapAuthenticationWrapper {
     }
 
     private void initialize() {
-        if (this.initialized == false) {
-            this.searchURL = LDAP_SEARCH_URL;
-            this.authenticationURL = LDAP_AUTHENTICATION_URL;
-            this.initialized = true;
+        if (initialized == false) {
+            searchURL = LDAP_SEARCH_URL;
+            authenticationURL = LDAP_AUTHENTICATION_URL;
+            initialized = true;
         }
     }
 
+    /**
+     * Exception
+     * 
+     * @author Zinovii Dmytriv
+     * 
+     */
     public class LblLdapAuthenticationWrapperException extends Exception {
         private static final long serialVersionUID = 1L;
 

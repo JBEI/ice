@@ -8,6 +8,14 @@ import java.util.Comparator;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Entry;
 
+/**
+ * Hold search results.
+ * <p>
+ * Holds the score and the {@link Entry}.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class SearchResult implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -42,6 +50,7 @@ public class SearchResult implements Serializable {
 
     protected static ArrayList<SearchResult> sort(ArrayList<SearchResult> incoming) {
         class SearchResultComparator implements Comparator<SearchResult> {
+            @Override
             public int compare(SearchResult arg0, SearchResult arg1) {
                 float temp = arg1.getScore() - arg0.getScore();
                 int result = 0;
@@ -92,8 +101,8 @@ public class SearchResult implements Serializable {
                 SearchResult targetResult = target.get(targetIndex);
                 SearchResult objectResult = object.get(objectIndex);
 
-                if (targetResult.getEntry().getRecordId().equals(
-                    objectResult.getEntry().getRecordId())) {
+                if (targetResult.getEntry().getRecordId()
+                        .equals(objectResult.getEntry().getRecordId())) {
                     targetResult.setScore(targetResult.getScore() + objectResult.getScore());
                 } else {
                     String msg = "Algorithm Error in SearchResult.sumSearchResults!";

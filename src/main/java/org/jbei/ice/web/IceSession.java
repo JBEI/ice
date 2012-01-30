@@ -22,11 +22,22 @@ import org.jbei.ice.lib.models.AccountPreferences;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.utils.JbeirSettings;
 
+/**
+ * Custom wicket {@link WebSession} for gd-ice.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 public class IceSession extends WebSession {
     private static final long serialVersionUID = 1L;
 
     private final String COOKIE_NAME = JbeirSettings.getSetting("COOKIE_NAME");
 
+    /**
+     * Constructor.
+     * 
+     * @param request
+     */
     public IceSession(Request request) {
         super(request);
     }
@@ -57,6 +68,17 @@ public class IceSession extends WebSession {
 
     }
 
+    /**
+     * Authenticate the user using authentication method specified in the settings file.
+     * 
+     * @param login
+     *            Login name.
+     * @param password
+     *            Password
+     * @return - {@link SessionData} object.
+     * @throws IceSessionException
+     * @throws InvalidCredentialsException
+     */
     public SessionData authenticateUser(String login, String password) throws IceSessionException,
             InvalidCredentialsException {
 
@@ -85,19 +107,37 @@ public class IceSession extends WebSession {
         return sessionData;
     }
 
+    /**
+     * Log out this session.
+     */
     public void deAuthenticateUser() {
         clearSavedSession();
     }
 
+    /**
+     * Check if this session is authenticated.
+     * 
+     * @return True if an {@link Account} is associated with this session.
+     */
     public boolean isAuthenticated() {
         return (getAccount() == null) ? false : true;
     }
 
     //getters and setters
+    /**
+     * Retrieve the session instance.
+     * 
+     * @return IceSession instance.
+     */
     public static IceSession get() {
         return (IceSession) Session.get();
     }
 
+    /**
+     * Retrieve the session key.
+     * 
+     * @return Session key string.
+     */
     public String getSessionKey() {
         String result = null;
         result = (getSessionData() != null) ? getSessionData().getSessionKey() : "";
@@ -105,6 +145,11 @@ public class IceSession extends WebSession {
         return result;
     }
 
+    /**
+     * Retrieve the {@link SessionData} for this session.
+     * 
+     * @return SessionData object.
+     */
     public SessionData getSessionData() {
         SessionData sessionData = null;
         Cookie userCookie = getRequest().getCookie(COOKIE_NAME);
@@ -120,6 +165,12 @@ public class IceSession extends WebSession {
         return sessionData;
     }
 
+    /**
+     * Set a cookie in the user's browser.
+     * 
+     * @param sessionKey
+     *            session key to set into the cookie.
+     */
     private void setSessionKeyCookie(String sessionKey) {
         Cookie cookie = new Cookie(COOKIE_NAME, sessionKey);
         cookie.setPath("/");
@@ -136,6 +187,11 @@ public class IceSession extends WebSession {
         }
     }
 
+    /**
+     * Retrieve the {@link Account} for this session.
+     * 
+     * @return Account object.
+     */
     public Account getAccount() {
         Account account = null;
         SessionData sessionData = getSessionData();
@@ -146,6 +202,12 @@ public class IceSession extends WebSession {
         return account;
     }
 
+    /**
+     * Save the {@link AccountPreferences} into the database.
+     * 
+     * @param accountPreferences
+     *            AccountPreferences.
+     */
     public void setAccountPreferences(AccountPreferences accountPreferences) {
         try {
             AccountController.saveAccountPreferences(accountPreferences);
@@ -155,15 +217,11 @@ public class IceSession extends WebSession {
         }
     }
 
-    public void saveAccountPreferences() {
-        try {
-            AccountController.saveAccountPreferences(getAccountPreferences());
-        } catch (ControllerException e) {
-            String msg = "Could not save accountPreferences in IceSession";
-            Logger.error(msg, e);
-        }
-    }
-
+    /**
+     * Retrieve the {@link AccountPreferences} from the database.
+     * 
+     * @return AccountPreferences.
+     */
     public AccountPreferences getAccountPreferences() {
         AccountPreferences result = null;
         try {
@@ -176,6 +234,9 @@ public class IceSession extends WebSession {
     }
 
     //private methods
+    /**
+     * Clear the current sessionData from the database.
+     */
     private void clearSavedSession() {
         try {
             SessionData sessionData = getSessionData();
@@ -188,12 +249,23 @@ public class IceSession extends WebSession {
         }
     }
 
+    /**
+     * Retrieve the {@link WebRequest} object for this session's {@link WebRequestCycle}.
+     * 
+     * @return WebRequest.
+     */
     private WebRequest getRequest() {
 
         WebRequestCycle webRequestCycle = (WebRequestCycle) WebRequestCycle.get();
         return webRequestCycle.getWebRequest();
     }
 
+    /**
+     * Exception class for IceSession.
+     * 
+     * @author Timothy Ham
+     * 
+     */
     public class IceSessionException extends Exception {
         private static final long serialVersionUID = 1L;
 

@@ -18,6 +18,7 @@ import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
+import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Name;
@@ -28,7 +29,13 @@ import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.models.SequenceFeature.AnnotationType;
 import org.jbei.ice.lib.permissions.PermissionException;
 
-public class BiobrickAUtils implements AssemblyUtils {
+/**
+ * Biobrick (BBF RFC10, RFC20) assembly standard.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
+public class BiobrickAUtils implements IAssemblyUtils {
 
     /*
      * Biobrick A Assembly Standard (BBF RFC10, RFC20)
@@ -184,6 +191,16 @@ public class BiobrickAUtils implements AssemblyUtils {
         return result;
     }
 
+    /**
+     * Determine whether the given sequence string conforms to the proper Biobrick assembly format.
+     * <p>
+     * It checks for prefix, suffix, and scans for incomaptible restriction sites.
+     * 
+     * @param partSequenceString
+     *            sequence string to test.
+     * @return {@link AssemblyStandard}.
+     * @throws UtilityException
+     */
     private static AssemblyStandard determineBiobrickAAssemblyStandard(String partSequenceString)
             throws UtilityException {
         AssemblyStandard result = null;
@@ -206,6 +223,15 @@ public class BiobrickAUtils implements AssemblyUtils {
         return result;
     }
 
+    /**
+     * Check if the given sequence string can be assembled as a biobrick by having the correct
+     * restriction sites.
+     * 
+     * @param sequenceString
+     *            query string.
+     * @return True if the given sequence is biobrick compatible.
+     * @throws UtilityException
+     */
     private static boolean isBiobrickACompatible(String sequenceString) throws UtilityException {
         boolean result = false;
         org.biojava.bio.seq.Sequence sequence = null;
@@ -244,6 +270,15 @@ public class BiobrickAUtils implements AssemblyUtils {
         return result;
     }
 
+    /**
+     * Annotate the given sequence string with biobrick format features, such as the prefix, suffix,
+     * and the inner feature.
+     * 
+     * @param partSequence
+     *            sequence to query.
+     * @return {@link SequenceFeatureCollection}.
+     * @throws UtilityException
+     */
     private static SequenceFeatureCollection determineBiobrickAFeatures(Sequence partSequence)
             throws UtilityException {
         //all positions are 0 based positions, not offsets
@@ -251,57 +286,65 @@ public class BiobrickAUtils implements AssemblyUtils {
         int partSequenceLength = partSequenceString.length();
         SequenceFeatureCollection sequenceFeatures = new SequenceFeatureCollection();
         if (partSequenceString.startsWith(biobrickAPrefix)) {
-            Feature feature = new Feature(biobrickAPrefixFeatureName,
-                    "", biobrickAPrefix, 1, "misc_feature");
+            Feature feature = new Feature(biobrickAPrefixFeatureName, "", biobrickAPrefix, 1,
+                    "misc_feature");
             try {
                 feature = SequenceManager.getReferenceFeature(feature);
             } catch (ControllerException e) {
                 throw new UtilityException(e);
             }
-
-            SequenceFeature sequenceFeature = new SequenceFeature(partSequence, feature, 1, 22, +1,
+            SequenceFeature sequenceFeature = new SequenceFeature(partSequence, feature, +1,
                     feature.getName(), feature.getGenbankType(),
                     SequenceFeature.AnnotationType.PREFIX);
+            sequenceFeature.getAnnotationLocations().add(
+                new AnnotationLocation(1, 22, sequenceFeature));
             sequenceFeatures.add(sequenceFeature);
         } else if (partSequenceString.startsWith(biobrickAPrefix2)) {
-            Feature feature = new Feature(biobrickAPrefix2FeatureName,
-                    "", biobrickAPrefix2, 1, "misc_feature");
+            Feature feature = new Feature(biobrickAPrefix2FeatureName, "", biobrickAPrefix2, 1,
+                    "misc_feature");
             try {
                 feature = SequenceManager.getReferenceFeature(feature);
             } catch (ControllerException e) {
                 throw new UtilityException(e);
             }
-            SequenceFeature sequenceFeature = new SequenceFeature(partSequence, feature, 1, 20, +1,
+            SequenceFeature sequenceFeature = new SequenceFeature(partSequence, feature, +1,
                     feature.getName(), feature.getGenbankType(),
                     SequenceFeature.AnnotationType.PREFIX);
+            sequenceFeature.getAnnotationLocations().add(
+                new AnnotationLocation(1, 20, sequenceFeature));
             sequenceFeatures.add(sequenceFeature);
         }
         if (partSequenceString.endsWith(biobrickASuffix)) {
-            Feature feature = new Feature(biobrickASuffixFeatureName,
-                    "", biobrickASuffix, 1, "misc_feature");
+            Feature feature = new Feature(biobrickASuffixFeatureName, "", biobrickASuffix, 1,
+                    "misc_feature");
             try {
                 feature = SequenceManager.getReferenceFeature(feature);
             } catch (ControllerException e) {
                 throw new UtilityException(e);
             }
-            SequenceFeature sequenceFeature = new SequenceFeature(partSequence, feature,
-                    partSequenceLength - 20, partSequenceLength, +1, feature.getName(),
-                    feature.getGenbankType(),
+            SequenceFeature sequenceFeature = new SequenceFeature(partSequence, feature, +1,
+                    feature.getName(), feature.getGenbankType(),
                     SequenceFeature.AnnotationType.SUFFIX);
-
+            sequenceFeature.getAnnotationLocations()
+                    .add(
+                        new AnnotationLocation(partSequenceLength - 20, partSequenceLength,
+                                sequenceFeature));
             sequenceFeatures.add(sequenceFeature);
         } else if (partSequenceString.endsWith(biobrickASuffix2)) {
-            Feature feature = new Feature(biobrickASuffix2FeatureName,
-                    "", biobrickASuffix2, 1, "misc_feature");
+            Feature feature = new Feature(biobrickASuffix2FeatureName, "", biobrickASuffix2, 1,
+                    "misc_feature");
             try {
                 feature = SequenceManager.getReferenceFeature(feature);
             } catch (ControllerException e) {
                 throw new UtilityException(e);
             }
-            SequenceFeature sequenceFeature = new SequenceFeature(partSequence, feature,
-                    partSequenceLength - 22, partSequenceLength, +1, feature.getName(), feature.getGenbankType(),
+            SequenceFeature sequenceFeature = new SequenceFeature(partSequence, feature, +1,
+                    feature.getName(), feature.getGenbankType(),
                     SequenceFeature.AnnotationType.SUFFIX);
-
+            sequenceFeature.getAnnotationLocations()
+                    .add(
+                        new AnnotationLocation(partSequenceLength - 22, partSequenceLength,
+                                sequenceFeature));
             sequenceFeatures.add(sequenceFeature);
         }
         // determine inner feature
@@ -340,8 +383,8 @@ public class BiobrickAUtils implements AssemblyUtils {
         if (partSequence != null) {
             Set<SequenceFeature> existingSequenceFeatures = partSequence.getSequenceFeatures();
             for (SequenceFeature sequenceFeature : existingSequenceFeatures) {
-                int start = sequenceFeature.getGenbankStart() - 1;
-                int end = sequenceFeature.getEnd() - 1;
+                int start = sequenceFeature.getUniqueGenbankStart() - 1;
+                int end = sequenceFeature.getUniqueEnd() - 1;
                 if ((start < minimumFeatureStart) && (start > absoluteMinimumFeatureStart)) {
                     minimumFeatureStart = start;
                 }
@@ -353,15 +396,16 @@ public class BiobrickAUtils implements AssemblyUtils {
         Entry part = partSequence.getEntry();
         String featureName = part.getRecordId(); // uuid of the given part
         String featureIdentification = part.getRecordId();
-        Feature innerPartFeature = new Feature(featureName,
-                featureIdentification, partSequenceString.substring(minimumFeatureStart,
-                    maximumFeatureEnd + 1), 0, "misc_feature");
-
-        SequenceFeature sequenceFeature = new SequenceFeature(partSequence, innerPartFeature,
-                minimumFeatureStart + 1, maximumFeatureEnd + 1, +1, innerPartFeature.getName(),
-                innerPartFeature.getGenbankType(),
+        Feature innerPartFeature = new Feature(featureName, featureIdentification,
+                partSequenceString.substring(minimumFeatureStart, maximumFeatureEnd + 1), 0,
+                "misc_feature");
+        SequenceFeature sequenceFeature = new SequenceFeature(partSequence, innerPartFeature, +1,
+                innerPartFeature.getName(), innerPartFeature.getGenbankType(),
                 SequenceFeature.AnnotationType.INNER);
-
+        sequenceFeature.getAnnotationLocations()
+                .add(
+                    new AnnotationLocation(minimumFeatureStart + 1, maximumFeatureEnd + 1,
+                            sequenceFeature));
         sequenceFeatures.add(sequenceFeature);
         // check if part has at least prefix, suffix, and one inner feature
         //
@@ -373,12 +417,12 @@ public class BiobrickAUtils implements AssemblyUtils {
         List<SequenceFeature> innerFeature = sequenceFeatures
                 .get(SequenceFeature.AnnotationType.INNER);
         if (prefixFeature.size() == 1) {
-            if (prefixFeature.get(0).getGenbankStart() == 1) {
+            if (prefixFeature.get(0).getUniqueGenbankStart() == 1) {
                 temp = temp + 1;
             }
         }
         if (suffixFeature.size() == 1) {
-            if (suffixFeature.get(0).getEnd() == partSequenceLength) {
+            if (suffixFeature.get(0).getUniqueEnd() == partSequenceLength) {
                 temp = temp + 1;
             }
         }
@@ -391,6 +435,16 @@ public class BiobrickAUtils implements AssemblyUtils {
         return sequenceFeatures;
     }
 
+    /**
+     * Assemble two biobrick sequences together.
+     * 
+     * @param part1Sequence
+     *            first sequence
+     * @param part2Sequence
+     *            second sequence
+     * @return Assembled {@link Sequence}.
+     * @throws UtilityException
+     */
     public Sequence joinBiobrickA(Sequence part1Sequence, Sequence part2Sequence)
             throws UtilityException {
         Sequence result = null;
@@ -433,7 +487,7 @@ public class BiobrickAUtils implements AssemblyUtils {
             String firstPart = part1SequenceString.substring(0, suffixChopPosition);
             String secondPart = part2SequenceString.substring(prefixChopPosition);
             //            concatSequence = part1SequenceString.substring(0, part1SequenceString.length()
-            //                    - suffixOffset);
+            //                    suffixOffset);
             //            concatSequence = concatSequence + part2SequenceString.substring(prefixOffset - 1);
             joinedSequence = firstPart + secondPart;
             // end concat sequence
@@ -448,8 +502,7 @@ public class BiobrickAUtils implements AssemblyUtils {
             newPart.setPackageFormat(part1.getPackageFormat());
             newPart.setShortDescription("Assembly of " + newPartNameString);
             newPart.setStatus("in progress");
-            newPart.setBioSafetyLevel(Math
-                    .max(part1.getBioSafetyLevel(), part2.getBioSafetyLevel()));
+            newPart.setBioSafetyLevel(Math.max(part1.getBioSafetyLevel(), part2.getBioSafetyLevel()));
             newPart.setOwner("System");
             newPart.setOwnerEmail("System");
             newPart.setCreator("System");
@@ -488,8 +541,9 @@ public class BiobrickAUtils implements AssemblyUtils {
             temp.setName(part1InnerFeature.getName());
             temp.setAnnotationType(SequenceFeature.AnnotationType.SUBINNER);
             temp.setGenbankType("misc_feature");
-            temp.setGenbankStart(part1InnerFeature.getGenbankStart());
-            temp.setEnd(part1InnerFeature.getEnd());
+            temp.getAnnotationLocations().add(
+                new AnnotationLocation(part1InnerFeature.getUniqueGenbankStart(), part1InnerFeature
+                        .getUniqueEnd(), temp));
             temp.setStrand(part1InnerFeature.getStrand());
             newFeatures.add(temp);
             // part 2 inner feature as subinner feature
@@ -500,8 +554,10 @@ public class BiobrickAUtils implements AssemblyUtils {
             temp.setAnnotationType(SequenceFeature.AnnotationType.SUBINNER);
             temp.setGenbankType("misc_feature");
             int secondPartFeatureOffset = scarStartPosition - prefixChopPosition + 2;
-            temp.setGenbankStart(part2InnerFeature.getGenbankStart() + secondPartFeatureOffset);
-            temp.setEnd(part2InnerFeature.getEnd() + secondPartFeatureOffset);
+            temp.getAnnotationLocations().add(
+                new AnnotationLocation(part2InnerFeature.getUniqueGenbankStart()
+                        + secondPartFeatureOffset, part2InnerFeature.getUniqueEnd()
+                        + secondPartFeatureOffset, temp));
             temp.setStrand(part2InnerFeature.getStrand());
             newFeatures.add(temp);
             // scar
@@ -509,8 +565,10 @@ public class BiobrickAUtils implements AssemblyUtils {
             temp.setSequence(newPartSequence);
             temp.setAnnotationType(SequenceFeature.AnnotationType.SCAR);
             temp.setGenbankType("misc_feature");
-            temp.setGenbankStart(scarStartPosition + 1);
-            temp.setEnd(scarStartPosition + scarLength);
+            temp.getAnnotationLocations()
+                    .add(
+                        new AnnotationLocation(scarStartPosition + 1, scarStartPosition
+                                + scarLength, temp));
             temp.setStrand(1);
             if (scarLength == 8) {
                 try {
@@ -542,6 +600,12 @@ public class BiobrickAUtils implements AssemblyUtils {
         return result;
     }
 
+    /**
+     * Retrieve biobrick short scar {@link Feature}.
+     * 
+     * @return {@link Feature}.
+     * @throws ControllerException
+     */
     private static Feature getBiobrickAShortScarFeature() throws ControllerException {
         Feature feature = new Feature();
         feature.setAutoFind(1);
@@ -553,6 +617,12 @@ public class BiobrickAUtils implements AssemblyUtils {
         return feature;
     }
 
+    /**
+     * Retrieve biobrick long scar {@link Feature}.
+     * 
+     * @return {@link Feature}.
+     * @throws ControllerException
+     */
     private static Feature getBiobrickALongScarFeature() throws ControllerException {
         Feature feature = new Feature();
         feature.setAutoFind(1);

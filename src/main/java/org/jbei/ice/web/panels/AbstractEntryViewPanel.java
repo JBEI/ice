@@ -25,6 +25,7 @@ import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.EntryUpdatePage;
 import org.jbei.ice.web.pages.ProfilePage;
+import org.jbei.ice.web.pages.ReportProblemPage;
 import org.jbei.ice.web.panels.sample.BriefSampleViewPanel;
 import org.jbei.ice.web.utils.WebUtils;
 
@@ -57,6 +58,8 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
         renderPrincipalInvestigator();
         renderParameters();
         renderBriefSampleView();
+        renderTopLink();
+        renderReportProblemLink();
     }
 
     protected T getEntry() {
@@ -77,6 +80,22 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
         } catch (ControllerException e) {
             throw new ViewException(e);
         }
+
+        add(topLinkContainer);
+    }
+
+    /**
+     * Render the report problem link.
+     */
+    protected void renderReportProblemLink() {
+        EntryController entryController = new EntryController(IceSession.get().getAccount());
+
+        WebMarkupContainer topLinkContainer = new WebMarkupContainer("reportProblem");
+
+        topLinkContainer.setOutputMarkupId(true);
+        topLinkContainer.setOutputMarkupPlaceholderTag(true);
+        topLinkContainer.add(new BookmarkablePageLink<WebPage>("reportProblemLink",
+                ReportProblemPage.class, new PageParameters("0=" + getEntry().getId())));
 
         add(topLinkContainer);
     }

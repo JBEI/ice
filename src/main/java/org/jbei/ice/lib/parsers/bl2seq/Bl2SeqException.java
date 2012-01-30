@@ -1,5 +1,11 @@
 package org.jbei.ice.lib.parsers.bl2seq;
 
+/**
+ * Exception class for Bl2SeqParser.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class Bl2SeqException extends Exception {
     private static final long serialVersionUID = -2399411731925185230L;
 

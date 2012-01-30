@@ -14,6 +14,12 @@ import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.BulkImport;
 import org.jbei.ice.lib.models.BulkImportDraft;
 
+/**
+ * Manage {@link BulkImport} objects in the database.
+ * 
+ * @author Hector Plahar
+ * 
+ */
 public class BulkImportManager {
 
     public static BulkImportDraft saveDraft(BulkImportDraft draft) throws ManagerException {
@@ -55,10 +61,18 @@ public class BulkImportManager {
         }
     }
 
+    /**
+     * Create a new {@link BulkImport} object in the database.
+     * 
+     * @param data
+     * @return Saved BulkImport
+     * @throws ManagerException
+     */
     public static BulkImport createBulkImportRecord(BulkImport data) throws ManagerException {
 
-        if (data == null)
+        if (data == null) {
             throw new ManagerException("Cannot create record from null data");
+        }
 
         try {
             Date creationDate = new Date(System.currentTimeMillis());
@@ -69,6 +83,12 @@ public class BulkImportManager {
         }
     }
 
+    /**
+     * Delete the given {@link BulkImport} object in the database.
+     * 
+     * @param bulkImport
+     * @throws ManagerException
+     */
     public static void delete(BulkImport bulkImport) throws ManagerException {
         try {
             DAO.delete(bulkImport);
@@ -78,6 +98,12 @@ public class BulkImportManager {
         }
     }
 
+    /**
+     * Retrieve all {@link BulkImport} objects in the database.
+     * 
+     * @return List of BulkImport objects.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static List<BulkImport> retrieveAll() throws ManagerException {
         Session session = DAO.newSession();
@@ -89,13 +115,22 @@ public class BulkImportManager {
         } catch (HibernateException he) {
             throw new ManagerException("Error retrieving list of bulk imports", he);
         } finally {
-            if (session.isOpen())
+            if (session.isOpen()) {
                 session.close();
+            }
         }
 
         return list;
     }
 
+    /**
+     * Retrieve a {@link BulkImport} object by its id.
+     * 
+     * @param importId
+     *            BulkImport's id.
+     * @return BulkImport object.
+     * @throws ManagerException
+     */
     public static BulkImport retrieveById(long importId) throws ManagerException {
         Session session = DAO.newSession();
         Query query = session.createQuery("from " + BulkImport.class.getName() + " where id = :id");
@@ -106,11 +141,20 @@ public class BulkImportManager {
             throw new ManagerException("Error retrieving bulk import record", e);
         } finally {
 
-            if (session != null && session.isOpen())
+            if (session != null && session.isOpen()) {
                 session.close();
+            }
         }
     }
 
+    /**
+     * Retrieve a {@link BulkImport} type by its id.
+     * 
+     * @param id
+     *            BulkImport's id.
+     * @return Type
+     * @throws ManagerException
+     */
     public static String retrieveType(long id) throws ManagerException {
         Session session = DAO.newSession();
         try {
@@ -120,8 +164,9 @@ public class BulkImportManager {
         } catch (Exception e) {
             throw new ManagerException("Error retrieving bulk import record type", e);
         } finally {
-            if (session != null && session.isOpen())
+            if (session != null && session.isOpen()) {
                 session.close();
+            }
         }
     }
 }

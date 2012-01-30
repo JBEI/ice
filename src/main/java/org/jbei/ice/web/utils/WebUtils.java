@@ -18,8 +18,23 @@ import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.pages.EntryViewPage;
 
+/**
+ * Utility methods for web pages.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv, Joanna Chen
+ * 
+ */
 public class WebUtils {
-    private static String makeEntryLink(JbeiLink jbeiLink) {
+    /**
+     * Generate a clickable &lt;a&gt; link from the given {@link IceLink}.
+     * <p>
+     * If the partnumber referred in the link does not exist, it creates a non-clickable text.
+     * 
+     * @param iceLink
+     *            link to create.
+     * @return Html of the link.
+     */
+    private static String makeEntryLink(IceLink iceLink) {
         String result = null;
 
         EntryController entryController = new EntryController(IceSession.get().getAccount());
@@ -31,7 +46,7 @@ public class WebUtils {
         Entry entry = null;
 
         try {
-            entry = entryController.getByPartNumber(jbeiLink.getPartNumber());
+            entry = entryController.getByPartNumber(iceLink.getPartNumber());
         } catch (ControllerException e) {
             throw new ViewException(e);
         } catch (PermissionException e) {
@@ -43,12 +58,12 @@ public class WebUtils {
         }
 
         String descriptiveLabel = "";
-        if (jbeiLink.getDescriptiveLabel() == null) {
-            descriptiveLabel = jbeiLink.getPartNumber();
-        } else if (jbeiLink.getDescriptiveLabel().equals("")) {
-            descriptiveLabel = jbeiLink.getPartNumber();
+        if (iceLink.getDescriptiveLabel() == null) {
+            descriptiveLabel = iceLink.getPartNumber();
+        } else if (iceLink.getDescriptiveLabel().equals("")) {
+            descriptiveLabel = iceLink.getPartNumber();
         } else {
-            descriptiveLabel = jbeiLink.getDescriptiveLabel();
+            descriptiveLabel = iceLink.getDescriptiveLabel();
         }
 
         result = "<a href=" + relativePath + "/" + id + ">" + descriptiveLabel + "</a>";
@@ -56,6 +71,13 @@ public class WebUtils {
         return result;
     }
 
+    /**
+     * Generate a clickable &lt;a&gt; link from the specified {@link Entry} id.
+     * 
+     * @param id
+     *            id of the Entry.
+     * @return Html of the clickable link.
+     */
     private static String makeEntryLink(long id) {
         String result = "";
 
@@ -78,6 +100,12 @@ public class WebUtils {
         return result;
     }
 
+    /**
+     * Create a space separated html links from the given Collection of {@link Entry}s.
+     * 
+     * @param entries
+     * @return Space separate html links.
+     */
     public static String makeEntryLinks(Collection<? extends Entry> entries) {
         StringBuilder result = new StringBuilder();
 
@@ -88,6 +116,13 @@ public class WebUtils {
         return result.toString();
     }
 
+    /**
+     * Generate an html &lt;a&gt; link from the given url.
+     * 
+     * @param text
+     *            Url to linkify.
+     * @return Html &lt;a&gt; link.
+     */
     public static String urlLinkifyText(String text) {
 
         Pattern urlPattern = Pattern.compile("\\bhttp://(\\S*)\\b");
@@ -177,6 +212,13 @@ public class WebUtils {
         return newText;
     }
 
+    /**
+     * Generate an html &lt;a&gt; link from the given {@link IceLink} text.
+     * 
+     * @param text
+     *            IceLink text.
+     * @return Html &lt;a&gt; link.
+     */
     private static String wikiLinkifyText(String text) {
         String newText = "";
 
@@ -195,7 +237,7 @@ public class WebUtils {
             }
             Matcher basicWikiLinkMatcher = basicWikiLinkPattern.matcher(text);
 
-            ArrayList<JbeiLink> jbeiLinks = new ArrayList<JbeiLink>();
+            ArrayList<IceLink> jbeiLinks = new ArrayList<IceLink>();
             ArrayList<Integer> starts = new ArrayList<Integer>();
             ArrayList<Integer> ends = new ArrayList<Integer>();
 
@@ -219,7 +261,7 @@ public class WebUtils {
                     Entry entry = entryController.getByPartNumber(partNumber);
 
                     if (entry != null) {
-                        jbeiLinks.add(new JbeiLink(partNumber, descriptive));
+                        jbeiLinks.add(new IceLink(partNumber, descriptive));
                         starts.add(basicWikiLinkMatcher.start());
                         ends.add(basicWikiLinkMatcher.end());
                     }
@@ -239,27 +281,69 @@ public class WebUtils {
         return newText;
     }
 
-    public static class JbeiLink {
+    /**
+     * Hold information about the ICE link.
+     * <p>
+     * These links are modeled after wikipedia/mediawiki links. They are of the form
+     * <p>
+     * [[jbei:JBx_000001]] or [[jbei:JBx_000001 | Descriptive label]] format, just like mediawiki
+     * links.
+     * <p>
+     * The prefix (for example "jbei") can be changed in the preferences file.
+     * 
+     * @author Timothy Ham
+     * 
+     */
+    public static class IceLink {
         private String descriptiveLabel = "";
         private String partNumber = "";
 
-        public JbeiLink(String partNumber, String descriptiveLabel) {
+        /**
+         * Contructor.
+         * 
+         * @param partNumber
+         *            Part number.
+         * @param descriptiveLabel
+         *            Descriptive label.
+         */
+        public IceLink(String partNumber, String descriptiveLabel) {
             this.partNumber = partNumber;
             this.descriptiveLabel = descriptiveLabel;
         }
 
+        /**
+         * Set the descriptive label string.
+         * 
+         * @param descriptiveLabel
+         *            descriptive label.
+         */
         public void setDescriptiveLabel(String descriptiveLabel) {
             this.descriptiveLabel = descriptiveLabel;
         }
 
+        /**
+         * Get the descriptive label.
+         * 
+         * @return descriptive label.
+         */
         public String getDescriptiveLabel() {
             return descriptiveLabel;
         }
 
+        /**
+         * Set the part number string.
+         * 
+         * @param partNumber
+         */
         public void setPartNumber(String partNumber) {
             this.partNumber = partNumber;
         }
 
+        /**
+         * Get the part number string.
+         * 
+         * @return Part number.
+         */
         public String getPartNumber() {
             return partNumber;
         }

@@ -15,8 +15,24 @@ import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.utils.Utils;
 
+/**
+ * Manager to manipulate {@link Storage} objects in the database.
+ * 
+ * @author Timothy Ham, Hector Plahar
+ * 
+ */
 public class StorageManager {
 
+    /**
+     * Retrieve {@link Storage} object from the database by its id. Optionally, retrieve children at
+     * this time.
+     * 
+     * @param id
+     * @param fetchChildren
+     *            True if children are to be fetched.
+     * @return Storage object.
+     * @throws ManagerException
+     */
     public static Storage get(long id, boolean fetchChildren) throws ManagerException {
         Storage result = null;
         Session session = DAO.newSession();
@@ -25,8 +41,9 @@ public class StorageManager {
                     .createQuery("from " + Storage.class.getName() + " where id = :id");
             query.setLong("id", id);
             result = (Storage) query.uniqueResult();
-            if (fetchChildren && result != null)
+            if (fetchChildren && result != null) {
                 result.getChildren().size();
+            }
         } catch (Exception e) {
             String msg = "Could not get Location by id: " + id + " " + e.toString();
             Logger.error(msg, e);
@@ -40,6 +57,13 @@ public class StorageManager {
         return result;
     }
 
+    /**
+     * Retrieve {@link Storage} object by its uuid.
+     * 
+     * @param uuid
+     * @return Storage object.
+     * @throws ManagerException
+     */
     public static Storage get(String uuid) throws ManagerException {
         Storage result = null;
         Session session = DAO.newSession();
@@ -62,10 +86,9 @@ public class StorageManager {
     }
 
     /**
-     * Retrieves Storage representing a tube. The 2Dbarcode for a tube is unique across plates so
-     * this method is expected to return
-     * a single results. Compare to wells in 96 well plate that have same type and index across
-     * multiple plates
+     * Retrieves {@link Storage} object representing a tube. The 2Dbarcode for a tube is unique
+     * across plates so this method is expected to return a single results. Compare to wells in 96
+     * well plate that have same type and index across multiple plates
      * 
      * @param barcode
      *            unique identifier for storage tube
@@ -76,8 +99,9 @@ public class StorageManager {
     public static Storage retrieveStorageTube(String barcode) throws ManagerException {
         List<Storage> results = StorageManager.retrieveStorageByIndex(barcode, StorageType.TUBE);
 
-        if (results == null || results.isEmpty())
+        if (results == null || results.isEmpty()) {
             return null;
+        }
 
         if (results.size() > 1)
             throw new ManagerException("Expecting single result, received \"" + results.size()
@@ -86,6 +110,14 @@ public class StorageManager {
         return results.get(0);
     }
 
+    /**
+     * Retrieve a {@link Storage} object by its index and {@link StorageType} fields.
+     * 
+     * @param index
+     * @param type
+     * @return List of Storage objects.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static List<Storage> retrieveStorageByIndex(String index, StorageType type)
             throws ManagerException {
@@ -114,6 +146,13 @@ public class StorageManager {
 
     }
 
+    /**
+     * Save the given {@link Storage} object in the database.
+     * 
+     * @param location
+     * @return Saved Storage object.
+     * @throws ManagerException
+     */
     public static Storage update(Storage location) throws ManagerException {
         if (location == null) {
             return null;
@@ -133,10 +172,23 @@ public class StorageManager {
         return location;
     }
 
+    /**
+     * Save the given {@link Storage} object in the database.
+     * 
+     * @param location
+     * @return Saved Storage object.
+     * @throws ManagerException
+     */
     public static Storage save(Storage location) throws ManagerException {
         return update(location);
     }
 
+    /**
+     * Delete the given {@link Storage} object in the database.
+     * 
+     * @param location
+     * @throws ManagerException
+     */
     public static void delete(Storage location) throws ManagerException {
         try {
             DAO.delete(location);
@@ -147,6 +199,12 @@ public class StorageManager {
         }
     }
 
+    /**
+     * Retrieve all {@link Storage} objects with non-empty schemes.
+     * 
+     * @return List of Storage objects with schemes.
+     * @throws ManagerException
+     */
     @SuppressWarnings("unchecked")
     public static List<Storage> getAllStorageSchemes() throws ManagerException {
         ArrayList<Storage> result = null;
@@ -173,6 +231,12 @@ public class StorageManager {
         return result;
     }
 
+    /**
+     * Retrieve all {@link Storage} objects with schemes for a given entryType.n
+     * 
+     * @param entryType
+     * @return List of Storage objects with schemes.
+     */
     @SuppressWarnings("unchecked")
     public static List<Storage> getAllStorageRoot() throws ManagerException {
         ArrayList<Storage> result = null;
@@ -232,11 +296,23 @@ public class StorageManager {
             }
         } catch (ManagerException e) {
             // log error and pass
-            Logger.error(e.toString());
+            Logger.error(e);
         }
         return result;
     }
 
+    /**
+     * Retrieve or create {@link Storage} object with parent hierarchy as specified in the template
+     * scheme as specified inside the given {@link Storage} object, with given labels, ordered from
+     * parent to child.
+     * 
+     * @param scheme
+     *            {@link Storage} object with the template scheme.
+     * @param labels
+     *            Text labels, ordered from parent to child.
+     * @return Storage object in the database.
+     * @throws ManagerException
+     */
     public static Storage getLocation(Storage scheme, String[] labels) throws ManagerException {
         Storage result = null;
         Storage parent = scheme;
@@ -251,14 +327,24 @@ public class StorageManager {
                 parent = result;
             }
         } catch (ManagerException e) {
-            String msg = "Could not retrieve child " + e.toString();
-            Logger.error(msg);
+            String msg = "Could not retrieve child ";
+            Logger.error(msg, e);
             // ok to return null on fail
         }
 
         return result;
     }
 
+    /**
+     * Retrieve or create a {@link Storage} object as a child of the given {@link Storage} parent
+     * object, with the name from the template object, and index itemLabel.
+     * 
+     * @param template
+     * @param itemLabel
+     * @param parent
+     * @return Storage object.
+     * @throws ManagerException
+     */
     private static Storage getOrCreateChildLocation(Storage template, String itemLabel,
             Storage parent) throws ManagerException {
 
@@ -277,6 +363,16 @@ public class StorageManager {
         return result;
     }
 
+    /**
+     * Retrieve {@link Storage} object by its name, index, {@link StorageType} and parent id.
+     * 
+     * @param name
+     * @param index
+     * @param type
+     * @param parentId
+     * @return Storage object.
+     * @throws ManagerException
+     */
     public static Storage retrieveStorageBy(String name, String index, StorageType type,
             long parentId) throws ManagerException {
         Session session = DAO.newSession();
@@ -304,6 +400,13 @@ public class StorageManager {
         }
     }
 
+    /**
+     * Retrieve the root level {@link Storage} object with the scheme that is used by the given
+     * {@link Storage} object.
+     * 
+     * @param storage
+     * @return Root level Storage object.
+     */
     public static Storage getSchemeContainingParentStorage(Storage storage) {
         if (storage == null) {
             return null;
@@ -316,25 +419,44 @@ public class StorageManager {
                 break;
             } else {
                 current = current.getParent();
+                if (current == null) {
+                    break;
+                }
             }
         }
 
         return result;
     }
 
+    /**
+     * Retrieve the parent {@link Storage} objects of a given {@link Storage} object, up to, but
+     * excluding the Storage object containing the scheme.
+     * <p>
+     * Useful for getting all the parents of a Storage object, except the scheme containing root
+     * object.
+     * 
+     * @param storage
+     * @return parent storage object.
+     */
     public static List<Storage> getStoragesUptoScheme(Storage storage) {
         if (storage == null) {
             return null;
         }
         ArrayList<Storage> result = new ArrayList<Storage>();
         Storage current = storage;
-        while (current.getStorageType() != StorageType.SCHEME) {
+        while (current != null && current.getStorageType() != StorageType.SCHEME) {
             result.add(current);
             current = current.getParent();
         }
         return result;
     }
 
+    /**
+     * Check if the {@link Storage} object given agrees with the scheme as specified by its parents.
+     * 
+     * @param storage
+     * @return True if the scheme is in agreement with the hierarchy.
+     */
     public static boolean isStorageSchemeInAgreement(Storage storage) {
         boolean result = true;
         if (storage.getStorageType() == StorageType.SCHEME) {

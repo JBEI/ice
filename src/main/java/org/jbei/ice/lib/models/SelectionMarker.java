@@ -15,6 +15,12 @@ import javax.xml.bind.annotation.XmlTransient;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.ISelectionMarkerValueObject;
 
+/**
+ * Represents a selection marker for entry.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "selection_markers")
 @SequenceGenerator(name = "sequence", sequenceName = "selection_markers_id_seq", allocationSize = 1)
@@ -46,6 +52,7 @@ public class SelectionMarker implements ISelectionMarkerValueObject, IModel {
         return id;
     }
 
+    @Override
     public void setId(long id) {
         this.id = id;
     }

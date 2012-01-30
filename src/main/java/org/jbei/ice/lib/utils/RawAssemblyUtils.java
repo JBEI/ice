@@ -6,13 +6,20 @@ import java.util.Set;
 import org.apache.commons.lang.NotImplementedException;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
+import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 
-public class RawAssemblyUtils implements AssemblyUtils {
+/**
+ * Assembly Utils for sequences without any assembly format.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
+public class RawAssemblyUtils implements IAssemblyUtils {
 
     @Override
     public SequenceFeatureCollection determineAssemblyFeatures(Sequence partSequence)
@@ -92,18 +99,26 @@ public class RawAssemblyUtils implements AssemblyUtils {
         return result;
     }
 
+    /**
+     * Assign the sequence itself as the inner feature.
+     * 
+     * @param partSequence
+     * @return
+     */
     private SequenceFeatureCollection determineRawAssemblyFeatures(Sequence partSequence) {
         SequenceFeatureCollection sequenceFeatures = new SequenceFeatureCollection();
         String partSequenceString = partSequence.getSequence();
         Entry part = partSequence.getEntry();
         String featureName = part.getRecordId(); // uuid of the given part
         String featureIdentification = part.getRecordId();
+
         Feature innerPartFeature = new Feature(featureName, featureIdentification,
                 partSequenceString, 0, "misc_feature");
-        SequenceFeature sequenceFeature = new SequenceFeature(partSequence, innerPartFeature, 1,
-                partSequenceString.length(), +1, innerPartFeature.getName(),
-                innerPartFeature.getGenbankType(),
+        SequenceFeature sequenceFeature = new SequenceFeature(partSequence, innerPartFeature, +1,
+                innerPartFeature.getName(), innerPartFeature.getGenbankType(),
                 SequenceFeature.AnnotationType.INNER);
+        sequenceFeature.getAnnotationLocations().add(
+            new AnnotationLocation(1, partSequenceString.length(), sequenceFeature));
 
         sequenceFeatures.add(sequenceFeature);
 

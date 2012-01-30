@@ -12,6 +12,15 @@ import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
 
+/**
+ * Many-to-many relationship table between two {@link Feature}s and {@link FeatureRelationship}.
+ * <p>
+ * For example, Feature1 "is derived from" Feature2 is represented as subject = Feature1, object =
+ * Feature2, and relationship = "derived from".
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "feature_feature_relationship")
 @SequenceGenerator(name = "sequence", sequenceName = "feature_feature_relationship_id_seq", allocationSize = 1)

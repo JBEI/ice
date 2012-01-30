@@ -8,7 +8,20 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountPreferences;
 
+/**
+ * Manager to manipulate {@link AccountPreferences} objects in the database.
+ * 
+ * @author Zinovii Dmytriv, Timothy Ham
+ * 
+ */
 public class AccountPreferencesManager {
+    /**
+     * Retrieve the {@link AccountPreferences} of the given {@link Account}.
+     * 
+     * @param account
+     * @return AccountPreferences.
+     * @throws ManagerException
+     */
     public static AccountPreferences getAccountPreferences(Account account) throws ManagerException {
         if (account == null) {
             throw new ManagerException("Failed to get AccountPreferences for null Account!");
@@ -36,6 +49,13 @@ public class AccountPreferencesManager {
         return accountPreferences;
     }
 
+    /**
+     * Save the given {@link AccountPreferences} into the database.
+     * 
+     * @param accountPreferences
+     * @return Saved AccountPreferences.
+     * @throws ManagerException
+     */
     public static AccountPreferences save(AccountPreferences accountPreferences)
             throws ManagerException {
         if (accountPreferences == null) {

@@ -11,8 +11,6 @@ public class PartViewPanel extends AbstractEntryViewPanel<Part> {
     public PartViewPanel(String id, Part entry) {
         super(id, new Model<Part>(entry));
 
-        renderTopLink();
-
         renderPackageFormat();
     }
 

@@ -14,6 +14,12 @@ import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
 
+/**
+ * Users can tag entries with their own labels. To be implemented.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "labels")
 @SequenceGenerator(name = "sequence", sequenceName = "labels_id_seq", allocationSize = 1)

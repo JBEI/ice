@@ -9,11 +9,18 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.jbei.ice.lib.utils.FileUtils;
+import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.DNAFeature;
+import org.jbei.ice.lib.vo.DNAFeatureLocation;
 import org.jbei.ice.lib.vo.DNAFeatureNote;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
@@ -60,7 +67,6 @@ public class IceGenbankParser extends AbstractParser {
     public static final String REMARK_TAG = "REMARK";
     // obsolete tags
     public static final String BASE_TAG = "BASE";
-
     private static final String[] NORMAL_TAGS = { LOCUS_TAG, DEFINITION_TAG, ACCESSION_TAG,
             VERSION_TAG, NID_TAG, PROJECT_TAG, DBLINK_TAG, KEYWORDS_TAG, SEGMENT_TAG, SOURCE_TAG,
             ORGANISM_TAG, REFERENCE_TAG, COMMENT_TAG, FEATURES_TAG, BASE_COUNT_TAG, CONTIG_TAG,
@@ -68,10 +74,30 @@ public class IceGenbankParser extends AbstractParser {
     private static final String[] REFERENCE_TAGS = { AUTHORS_TAG, CONSRTM_TAG, TITLE_TAG,
             JOURNAL_TAG, MEDLINE_TAG, PUBMED_TAG, REMARK_TAG };
     private static final String[] IGNORE_TAGS = { BASE_TAG, };
+    private static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yyyy");
+
+    private static final Pattern startStopPattern = Pattern.compile("[<>]*(\\d+)\\.\\.[<>]*(\\d+)");
+    private static final Pattern startOnlyPattern = Pattern.compile("\\d+");
+
+    private Boolean hasErrors = false;
+    private List<String> errors = new ArrayList<String>();
 
     @Override
     public String getName() {
         return ICE_GENBANK_PARSER;
+    }
+
+    @Override
+    public Boolean hasErrors() {
+        return hasErrors;
+    }
+
+    public List<String> getErrors() {
+        return errors;
+    }
+
+    public void setErrors(List<String> errors) {
+        this.errors = errors;
     }
 
     @Override
@@ -91,6 +117,7 @@ public class IceGenbankParser extends AbstractParser {
             while (br.ready()) {
                 sb.append((char) br.read());
             }
+            br.close();
 
             IceGenbankParser iceGenbankParser = new IceGenbankParser();
 
@@ -104,24 +131,47 @@ public class IceGenbankParser extends AbstractParser {
     // TODO parse source feature tag with xdb_ref
     @Override
     public IDNASequence parse(String textSequence) throws InvalidFormatParserException {
-        textSequence = cleanSequence(textSequence);
-
         FeaturedDNASequence sequence = null;
-        ArrayList<Tag> tags = splitTags(textSequence, NORMAL_TAGS, IGNORE_TAGS);
-        tags = parseTags(tags);
+        try {
+            textSequence = cleanSequence(textSequence);
 
-        sequence = new FeaturedDNASequence();
-        for (Tag tag : tags) {
-            if (tag instanceof LocusTag) {
-                sequence.setName(((LocusTag) tag).getLocusName());
-                sequence.setIsCircular(((LocusTag) tag).isCircular());
-            } else if (tag instanceof OriginTag) {
-                sequence.setSequence(((OriginTag) tag).getSequence());
-            } else if (tag instanceof FeaturesTag) {
-                sequence.setFeatures(((FeaturesTag) tag).getFeatures());
+            ArrayList<Tag> tags = splitTags(textSequence, NORMAL_TAGS, IGNORE_TAGS);
+            tags = parseTags(tags);
+
+            sequence = new FeaturedDNASequence();
+            for (Tag tag : tags) {
+                if (tag instanceof LocusTag) {
+                    sequence.setName(((LocusTag) tag).getLocusName());
+                    sequence.setIsCircular(((LocusTag) tag).isCircular());
+                } else if (tag instanceof OriginTag) {
+                    sequence.setSequence(((OriginTag) tag).getSequence());
+                } else if (tag instanceof FeaturesTag) {
+                    sequence.setFeatures(((FeaturesTag) tag).getFeatures());
+                }
             }
+        } catch (NullPointerException e) {
+            recordParsingError(textSequence, e);
+        } catch (StringIndexOutOfBoundsException e) {
+            recordParsingError(textSequence, e);
         }
         return sequence;
+    }
+
+    /**
+     * If there is a parsing error of interest, write the file to disk, and send an email to admin.
+     * 
+     * @param fileText
+     * @param e
+     * @throws UtilityException
+     */
+    private void recordParsingError(String fileText, Exception e)
+            throws InvalidFormatParserException {
+        String message = "Error parsing genbank file. Please examine the recorded file.";
+        try {
+            FileUtils.recordAndReportFile(message, fileText, e);
+        } catch (UtilityException e1) {
+            throw new InvalidFormatParserException("failed to write error");
+        }
     }
 
     private ArrayList<Tag> splitTags(String block, String[] acceptedTags, String[] ignoredTags)
@@ -271,11 +321,8 @@ public class IceGenbankParser extends AbstractParser {
         String[] chunk;
         DNAFeature dnaFeature = null;
         StringBuilder qualifierBlock = new StringBuilder();
-        int genbankStart = 0;
-        int end = 0;
         String type = null;
-
-        int strand;
+        boolean complement = false;
 
         for (int i = 1; i < lines.length; i++) {
             line = lines[i];
@@ -289,30 +336,85 @@ public class IceGenbankParser extends AbstractParser {
                 dnaFeature = new DNAFeature();
                 qualifierBlock = new StringBuilder();
 
+                /*
+                 * Locations are generated differently by different implementations. Given
+                 * the following two features:
+                 * feature1: (1..3, 5..10) on the + strand |-|.|---->
+                 * feature2: (1..3, 5..10) on the - strand <-|.|----|
+                 * 
+                 *  biojava follows the letter of the standard (gbrel.txt)
+                 *  feature1: join(1..3,5..10)
+                 *  feature2: complement(join(5..10,1..3))
+                 *  
+                 *  However, VectorNTI generates the following
+                 *  feature1: join(1..3,5..10)
+                 *  feature2: complement(1..3,5..10)
+                 *  
+                 *  This of course is incorrect, but we must parse them. 
+                 * 
+                 */
+
                 // grab type, genbankStart, end, and strand
+                List<GenbankLocation> genbankLocations = null;
+                complement = false;
                 try {
                     chunk = line.trim().split(" +");
                     type = chunk[0].trim();
 
                     chunk[1] = chunk[1].trim();
-                    if (chunk[1].startsWith("complement")) {
-                        strand = -1;
-                        chunk[1] = chunk[1].substring(11, chunk[1].length() - 1);
-                    } else {
-                        strand = 1;
+                    String locationString = chunk[1].trim();
+                    /* peak at the next line. If next line doesn't start with a key, append 
+                    next line to locationString */
+                    while (true) {
+                        String nextLine = lines[i + 1].trim();
+                        if (nextLine.startsWith("/")) {
+                            break;
+                        } else {
+                            i++;
+                            line = lines[i];
+                            locationString += line.trim();
+                        }
                     }
-                    String[] startStop = chunk[1].split("\\.\\.");
-                    genbankStart = Integer.parseInt(startStop[0]);
-                    end = Integer.parseInt((startStop[1]));
 
+                    boolean reversedLocations = false;
+                    if (locationString.startsWith("complement(join")) {
+                        reversedLocations = true; //standard compliant complement(join(location, location))
+                    }
+                    if (locationString.startsWith("complement")) {
+                        complement = true;
+                        locationString = locationString.trim();
+                        locationString = locationString.substring(11, locationString.length() - 1)
+                                .trim();
+                    }
+
+                    genbankLocations = parseGenbankLocation(locationString);
+                    if (reversedLocations) {
+                        Collections.reverse(genbankLocations);
+                    }
                 } catch (NumberFormatException e) {
-                    System.err.println("Could not parse feature " + line);
+                    getErrors().add("Could not parse feature " + line);
+                    System.out.println(line);
+                    hasErrors = true;
                     continue;
                 }
-                dnaFeature.setGenbankStart(genbankStart);
-                dnaFeature.setEnd(end);
-                dnaFeature.setStrand(strand);
+
+                LinkedList<DNAFeatureLocation> dnaFeatureLocations = new LinkedList<DNAFeatureLocation>();
+                for (GenbankLocation genbankLocation : genbankLocations) {
+                    DNAFeatureLocation dnaFeatureLocation = new DNAFeatureLocation(
+                            genbankLocation.getGenbankStart(), genbankLocation.getEnd());
+                    dnaFeatureLocation.setInBetween(genbankLocation.isInbetween());
+                    dnaFeatureLocation.setSingleResidue(genbankLocation.isSingleResidue());
+                    dnaFeatureLocations.add(dnaFeatureLocation);
+                }
+
+                dnaFeature.getLocations().addAll(dnaFeatureLocations);
                 dnaFeature.setType(type);
+
+                if (complement) {
+                    dnaFeature.setStrand(-1);
+                } else {
+                    dnaFeature.setStrand(1);
+                }
             } else {
                 qualifierBlock.append(line);
                 qualifierBlock.append("\n");
@@ -325,7 +427,93 @@ public class IceGenbankParser extends AbstractParser {
         return result;
     }
 
-    private static DNAFeature parseQualifiers(String block, DNAFeature dnaFeature) {
+    private List<GenbankLocation> parseGenbankLocation(String input)
+            throws InvalidFormatParserException {
+        LinkedList<GenbankLocation> result = new LinkedList<GenbankLocation>();
+
+        int genbankStart = 1;
+        int end = 1;
+
+        if (input.startsWith("join")) {
+            input = input.substring(5, input.length() - 1).trim();
+        }
+
+        String[] chunks = input.split(",");
+        for (String chunk : chunks) {
+            chunk = chunk.trim();
+            Matcher startStopMatcher = startStopPattern.matcher(chunk);
+            if (startStopMatcher.find()) {
+                if (startStopMatcher.groupCount() == 2) {
+                    genbankStart = Integer.parseInt(startStopMatcher.group(1));
+                    end = Integer.parseInt(startStopMatcher.group(2));
+                    result.add(new GenbankLocation(genbankStart, end));
+                }
+            } else {
+                Matcher startOnlyMatcher = startOnlyPattern.matcher(chunk);
+                if (startOnlyMatcher.find()) {
+                    genbankStart = Integer.parseInt(startOnlyMatcher.group(0));
+                    end = Integer.parseInt(startOnlyMatcher.group(0));
+                    result.add(new GenbankLocation(genbankStart, end));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Represent a contiguous Genbank location, including a single base pair.
+     * 
+     * @author Timothy Ham
+     * 
+     */
+    public class GenbankLocation {
+        private int genbankStart = -1;
+        private int end = -1;
+        private boolean inbetween = false;
+        private boolean singleResidue = false;
+
+        public GenbankLocation(int genbankStart, int end) {
+            super();
+            setGenbankStart(genbankStart);
+            setEnd(end);
+        }
+
+        public int getGenbankStart() {
+            return genbankStart;
+        }
+
+        public void setGenbankStart(int genbankStart) {
+            this.genbankStart = genbankStart;
+        }
+
+        public int getEnd() {
+            return end;
+        }
+
+        public void setEnd(int end) {
+            this.end = end;
+        }
+
+        public void setInbetween(boolean inbetween) {
+            this.inbetween = inbetween;
+        }
+
+        public boolean isInbetween() {
+            return inbetween;
+        }
+
+        public void setSingleResidue(boolean singleResidue) {
+            this.singleResidue = singleResidue;
+        }
+
+        public boolean isSingleResidue() {
+            return singleResidue;
+        }
+
+    }
+
+    private DNAFeature parseQualifiers(String block, DNAFeature dnaFeature) {
         /* 
          * Qualifiers are interesting beasts. The values can be quoted 
          * or not quoted. They can span multiple lines. Older versions used
@@ -354,28 +542,14 @@ public class IceGenbankParser extends AbstractParser {
         StringBuilder qualifierItem = new StringBuilder();
         String qualifierValue = null;
 
-        int apparentQualifierColumn = lines[0].indexOf(lines[0].split("\\/")[1]) - 1;
+        int apparentQualifierColumn = lines[0].indexOf("/");
 
         for (String line2 : lines) {
             line = line2;
 
             if ('/' == line.charAt(apparentQualifierColumn)) { // new tag starts
                 if (dnaFeatureNote != null) { // flush previous note
-                    qualifierValue = qualifierItem.toString();
-                    if (qualifierValue.startsWith("\"") && qualifierValue.endsWith("\"")) {
-                        dnaFeatureNote.setQuoted(true);
-                        qualifierValue = qualifierValue.substring(1, qualifierValue.length() - 1);
-                    } else {
-                        dnaFeatureNote.setQuoted(false);
-                    }
-                    qualifierValue = qualifierValue.replaceAll("\\\\", " ");
-                    qualifierValue = qualifierValue.replaceAll("\"\"", "\"");
-
-                    if ("translation".equals(dnaFeatureNote.getName())) {
-                        qualifierValue = Utils.join("", Arrays.asList(qualifierValue.split(" ")))
-                                .trim();
-                    }
-                    dnaFeatureNote.setValue(qualifierValue);
+                    addQualifierItemToDnaFeatureNote(dnaFeatureNote, qualifierItem);
                     notes.add(dnaFeatureNote);
                 }
 
@@ -384,7 +558,8 @@ public class IceGenbankParser extends AbstractParser {
                 qualifierItem = new StringBuilder();
                 chunk = line.split("=");
                 if (chunk.length < 2) {
-                    System.err.println("Skipping bad genbank qualifier " + line);
+                    getErrors().add("Skipping bad genbank qualifier " + line);
+                    hasErrors = true;
                     dnaFeatureNote = null;
                     continue;
                 } else {
@@ -400,7 +575,25 @@ public class IceGenbankParser extends AbstractParser {
             }
         }
 
-        // parse and add the last one
+        if (dnaFeatureNote != null) { // flush last one
+            addQualifierItemToDnaFeatureNote(dnaFeatureNote, qualifierItem);
+            notes.add(dnaFeatureNote);
+        }
+
+        dnaFeature.setNotes(notes);
+        dnaFeature = populateName(dnaFeature);
+        return dnaFeature;
+    }
+
+    /**
+     * Parse the given Qualifer Item and add to the given dnaFeatureNote.
+     * 
+     * @param dnaFeatureNote
+     * @param qualifierItem
+     */
+    private void addQualifierItemToDnaFeatureNote(DNAFeatureNote dnaFeatureNote,
+            StringBuilder qualifierItem) {
+        String qualifierValue;
         qualifierValue = qualifierItem.toString();
         if (qualifierValue.startsWith("\"") && qualifierValue.endsWith("\"")) {
             dnaFeatureNote.setQuoted(true);
@@ -410,15 +603,11 @@ public class IceGenbankParser extends AbstractParser {
         }
         qualifierValue = qualifierValue.replaceAll("\\\\", " ");
         qualifierValue = qualifierValue.replaceAll("\"\"", "\"");
+
         if ("translation".equals(dnaFeatureNote.getName())) {
             qualifierValue = Utils.join("", Arrays.asList(qualifierValue.split(" "))).trim();
         }
         dnaFeatureNote.setValue(qualifierValue);
-        notes.add(dnaFeatureNote);
-
-        dnaFeature.setNotes(notes);
-        dnaFeature = populateName(dnaFeature);
-        return dnaFeature;
     }
 
     /**
@@ -428,7 +617,7 @@ public class IceGenbankParser extends AbstractParser {
      * @param dnaFeature
      * @return
      */
-    private static DNAFeature populateName(DNAFeature dnaFeature) {
+    private DNAFeature populateName(DNAFeature dnaFeature) {
         String LABEL_QUALIFIER = "label";
         String APE_LABEL_QUALIFIER = "apeinfo_label";
         String NOTE_QUALIFIER = "note";
@@ -459,7 +648,7 @@ public class IceGenbankParser extends AbstractParser {
         return dnaFeature;
     }
 
-    private static int dnaFeatureContains(ArrayList<DNAFeatureNote> notes, String key) {
+    private int dnaFeatureContains(ArrayList<DNAFeatureNote> notes, String key) {
         int result = -1;
         for (int i = 0; i < notes.size(); i++) {
             if (notes.get(i).getName().equals(key)) {
@@ -477,9 +666,6 @@ public class IceGenbankParser extends AbstractParser {
         String putativeValue = lines[0].split(" +")[1];
         tag.setValue(putativeValue);
 
-        ArrayList<Tag> temp = splitTags(tag.getRawBody(), REFERENCE_TAGS,
-            new String[] { REFERENCE_TAG });
-
         return null;
     }
 
@@ -490,18 +676,19 @@ public class IceGenbankParser extends AbstractParser {
         String locusLine = tag.getRawBody();
         String[] locusChunks = locusLine.split(" +");
 
-        if (Arrays.asList(locusChunks).contains("circular")) {
+        if (Arrays.asList(locusChunks).contains("circular")
+                || Arrays.asList(locusChunks).contains("CIRCULAR")) {
             result.setCircular(true);
         } else {
             result.setCircular(false);
         }
 
-        String dateString = locusChunks[locusChunks.length - 1];
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yyyy");
+        String dateString = locusChunks[locusChunks.length - 1].trim();
         try {
             result.setDate(simpleDateFormat.parse(dateString));
         } catch (ParseException e1) {
-            System.err.println("Invalid date format. Trying to continue.");
+            getErrors().add("Invalid date format: " + dateString + ". Setting today's date.");
+            hasErrors = true;
             result.setDate(new Date());
         }
 
@@ -515,6 +702,7 @@ public class IceGenbankParser extends AbstractParser {
     }
 
     public static void main(String[] args) throws IOException {
+        /*
         File file = new File(
                 "src/main/java/org/jbei/ice/lib/parsers/examples/AcrR_geneart_badlocus_badsequence.gb");
         //         "src/main/java/org/jbei/ice/lib/parsers/examples/pcI-LasI_ape_no_locusname.ape");
@@ -540,9 +728,9 @@ public class IceGenbankParser extends AbstractParser {
             } catch (InvalidFormatParserException e) {
                 e.printStackTrace();
             }
-
+            
         }
-
+         */
     }
 
     private class Tag {

@@ -5,6 +5,12 @@ import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.permissions.PermissionManager;
 
+/**
+ * General Permission Verifier for Entry.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class EntryPermissionVerifier implements IPermissionVerifier {
     @Override
     public boolean hasReadPermissions(IModel model, Account account) {

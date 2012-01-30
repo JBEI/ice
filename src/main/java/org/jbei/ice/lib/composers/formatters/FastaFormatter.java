@@ -15,16 +15,36 @@ import org.jbei.ice.lib.models.Sequence;
  * ><namespace>|<accession>.<version>|<name> <description> 
  * */
 
+/**
+ * Formatter for creating a FASTA formatted output.
+ * <p>
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class FastaFormatter extends AbstractFormatter {
-    private String name;
-    private String accessionNumber;
+    private final String name;
+    private final String accessionNumber;
     private int version = 1;
     private double seqVersion = 1.0;
 
+    /**
+     * Constructor using only the name. Uses the name as the accession number.
+     * 
+     * @param name
+     */
     public FastaFormatter(String name) {
         this(name, name, 1, 1.0);
     }
 
+    /**
+     * Constructor using all required fields for FASTA format.
+     * 
+     * @param name
+     * @param accessionNumber
+     * @param version
+     * @param seqVersion
+     */
     public FastaFormatter(String name, String accessionNumber, int version, double seqVersion) {
         super();
 

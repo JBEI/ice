@@ -3,6 +3,7 @@ package org.jbei.ice.lib.utils;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -23,6 +24,7 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.StorageManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountFundingSource;
+import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Configuration;
 import org.jbei.ice.lib.models.Configuration.ConfigurationKey;
 import org.jbei.ice.lib.models.Entry;
@@ -36,6 +38,12 @@ import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.permissions.PermissionManager;
 
+/**
+ * Populate an empty database with necessary objects and values.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 public class PopulateInitialDatabase {
     public static final String DEFAULT_PLASMID_STORAGE_SCHEME_NAME = "Plasmid Storage (Default)";
     public static final String DEFAULT_STRAIN_STORAGE_SCHEME_NAME = "Strain Storage (Default)";
@@ -47,8 +55,8 @@ public class PopulateInitialDatabase {
     // naming scheme "custom-[your institute]-[your version]", as
     // the system will try to upgrade schemas of known older versions.
     // Setting the correct parent schema version may help you in the future.
-    public static final String DATABASE_SCHEMA_VERSION = "0.8.1";
-    public static final String PARENT_DATABASE_SCHEMA_VERSION = "0.8.0";
+    public static final String DATABASE_SCHEMA_VERSION = "0.9.0";
+    public static final String PARENT_DATABASE_SCHEMA_VERSION = "0.8.1";
 
     // This is a global "everyone" uuid
     public static String everyoneGroup = "8746a64b-abd5-4838-a332-02c356bbeac0";
@@ -70,6 +78,19 @@ public class PopulateInitialDatabase {
         }
     }
 
+    /**
+     * Populate an empty database with necessary objects and values.
+     * <p>
+     * <ul>
+     * <li>Create the everyone group.</li>
+     * <li>Create the System account.</li>
+     * <li>Create the Admin account.</li>
+     * <li>Create default storage schemes.</li>
+     * <li>Update the database schema, if necessary.</li>
+     * </ul>
+     * 
+     * @throws UtilityException
+     */
     public static void initializeDatabase() throws UtilityException {
         Group group1 = null;
         try {
@@ -207,6 +228,11 @@ public class PopulateInitialDatabase {
 
     }
 
+    /**
+     * Update the database schema.
+     * 
+     * @throws UtilityException
+     */
     private static void updateDatabaseSchema() throws UtilityException {
         Configuration databaseSchema = null;
 
@@ -220,21 +246,21 @@ public class PopulateInitialDatabase {
 
             if (databaseSchema.getValue().equals(PARENT_DATABASE_SCHEMA_VERSION)) {
                 // do schema upgrade
-                boolean error = migrateFrom080To081();
+                boolean error = migrateFrom081To090();
                 if (!error) {
                     databaseSchema.setValue(DATABASE_SCHEMA_VERSION);
                     ConfigurationManager.save(databaseSchema);
                 }
             }
+
         } catch (ManagerException e) {
             throw new UtilityException(e);
         }
-
     }
 
     /**
      * Check for, and create first admin account
-     *
+     * 
      * @throws UtilityException
      */
     private static void createAdminAccount() throws UtilityException {
@@ -275,6 +301,11 @@ public class PopulateInitialDatabase {
         }
     }
 
+    /**
+     * Check for and create the System account.
+     * 
+     * @throws UtilityException
+     */
     private static void createSystemAccount() throws UtilityException {
         // Check for, and create system account
         Account systemAccount = null;
@@ -309,6 +340,11 @@ public class PopulateInitialDatabase {
         }
     }
 
+    /**
+     * Check for and create the everyone group.
+     * 
+     * @return Everyone group.
+     */
     public static Group createFirstGroup() {
         Group group1 = null;
         try {
@@ -339,6 +375,9 @@ public class PopulateInitialDatabase {
         return group1;
     }
 
+    /**
+     * Populate the permission read group. For schema upgrade only.
+     */
     public static void populatePermissionReadGroup() {
         Group group1 = null;
         try {
@@ -373,6 +412,11 @@ public class PopulateInitialDatabase {
         }
     }
 
+    /**
+     * Process funding sources. For schema update only.
+     * 
+     * @throws DAOException
+     */
     public static void normalizeAllFundingSources() throws DAOException {
         ArrayList<Entry> allEntries = null;
 
@@ -391,6 +435,12 @@ public class PopulateInitialDatabase {
         }
     }
 
+    /**
+     * Process funding sources. For schema update.
+     * 
+     * @param dupeFundingSource
+     * @throws DAOException
+     */
     @SuppressWarnings("unchecked")
     public static void normalizeFundingSources(FundingSource dupeFundingSource) throws DAOException {
 
@@ -481,7 +531,7 @@ public class PopulateInitialDatabase {
 
     /**
      * parse SequenceFeature.description and populate SequenceFeatureAttribute.
-     *
+     * 
      */
     @SuppressWarnings("deprecation")
     public static boolean migrateFrom080To081() {
@@ -537,6 +587,54 @@ public class PopulateInitialDatabase {
         return error;
     }
 
+    /**
+     * Convert SequenceFeature.start and ends to locations.
+     * 
+     * @return True if error exists..
+     */
+    @SuppressWarnings({ "unchecked", "deprecation" })
+    public static boolean migrateFrom081To090() {
+        Logger.warn("Updating database schema from 0.8.1 to 0.9.0. Please wait...");
+        Logger.info("reading database");
+        boolean error = false;
+
+        /* Changes: Creation of new AnnotationLocation table. Move all 
+        SequenceFeature genbankStart/end to AnnotationLocations */
+        String queryString = "from " + SequenceFeature.class.getName();
+        Session session = DAO.newSession();
+        Query query = session.createQuery(queryString);
+        LinkedList<SequenceFeature> sequenceFeatures = null;
+        sequenceFeatures = new LinkedList<SequenceFeature>(query.list());
+        session.close();
+
+        Logger.info("parsing fields");
+        for (SequenceFeature sequenceFeature : sequenceFeatures) {
+            AnnotationLocation location = new AnnotationLocation(sequenceFeature.getGenbankStart(),
+                    sequenceFeature.getEnd(), sequenceFeature);
+            sequenceFeature.setGenbankStart(1);
+            sequenceFeature.setEnd(1);
+            try {
+                DAO.save(location);
+                DAO.save(sequenceFeature);
+            } catch (DAOException e) {
+                Logger.error("Error saving new locations", e);
+                error = true;
+            }
+        }
+
+        if (error) {
+            Logger.error("Error converting database schema from 0.8.1 to 0.9.0. Restore from backup!");
+        }
+
+        return error;
+    }
+
+    /**
+     * Clean up and parse the description field into SequenceFeature attributes.
+     * 
+     * @param row
+     * @return
+     */
     private static List<SequenceFeatureAttribute> parseDescription(String row) {
         Pattern uuidPattern = Pattern.compile("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}");
         Pattern keyValuePattern = Pattern.compile("\"*(\\w+)=\"*\\s{0,1}([^\"]+)\\s{0,1}\"*");

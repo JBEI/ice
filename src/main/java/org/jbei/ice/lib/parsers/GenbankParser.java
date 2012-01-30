@@ -13,18 +13,33 @@ import org.biojavax.RankedCrossRef;
 import org.biojavax.bio.seq.RichFeature;
 import org.biojavax.bio.seq.RichLocation;
 import org.biojavax.bio.seq.RichSequence;
-import org.biojavax.bio.seq.RichSequenceIterator;
 import org.biojavax.bio.seq.RichSequence.IOTools;
+import org.biojavax.bio.seq.RichSequenceIterator;
 import org.jbei.ice.lib.vo.DNAFeature;
+import org.jbei.ice.lib.vo.DNAFeatureLocation;
 import org.jbei.ice.lib.vo.DNAFeatureNote;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
 
+/**
+ * Parse genbank files using the BioJava parser.
+ * 
+ * @author Zinovii Dmytriv, Timothy Ham
+ * 
+ */
+@Deprecated
 public class GenbankParser extends AbstractParser {
     private static final String GENBANK_PARSER = "GenBank";
 
+    @Override
     public String getName() {
         return GENBANK_PARSER;
+    }
+
+    @Override
+    public Boolean hasErrors() {
+        // This parser cannot succeed with errors, so always return false, or fail.
+        return false;
     }
 
     @Override
@@ -129,8 +144,7 @@ public class GenbankParser extends AbstractParser {
 
                     int strand = featureLocation.getStrand().intValue();
 
-                    dnaFeature.setGenbankStart(start + 1);
-                    dnaFeature.setEnd(end + 1);
+                    dnaFeature.getLocations().add(new DNAFeatureLocation(start + 1, end + 1));
                     dnaFeature.setStrand(strand);
                     dnaFeature.setType(genbankType);
                     dnaFeature.setName(featureName);

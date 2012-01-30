@@ -6,6 +6,12 @@ import java.util.Set;
 
 import org.jbei.ice.bio.enzymes.RestrictionEnzyme;
 
+/**
+ * Value object to store Restrection Enzyme Group information for flex apps.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class RestrictionEnzymeGroup implements Serializable {
     private static final long serialVersionUID = 2321365485733702387L;
 
@@ -13,10 +19,21 @@ public class RestrictionEnzymeGroup implements Serializable {
     private Set<RestrictionEnzyme> enzymes;
 
     // Constructors
+    /**
+     * Constructor.
+     */
     public RestrictionEnzymeGroup() {
         enzymes = new HashSet<RestrictionEnzyme>();
     }
 
+    /**
+     * Constuctor setting the name and the {@link RestrictionEnzyme}s.
+     * 
+     * @param name
+     *            name of the group to create.
+     * @param enzymes
+     *            Set of RestrictionEnzymes.
+     */
     public RestrictionEnzymeGroup(String name, Set<RestrictionEnzyme> enzymes) {
         super();
         this.name = name;

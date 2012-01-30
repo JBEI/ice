@@ -12,6 +12,16 @@ import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
 
+/**
+ * Many-to-Many representation betwee {@link Entry} and {@link Label}.
+ * <p>
+ * This class explicitly spells out the many-to-many representation instead of relying on
+ * Hibernate's automatic intermediate table generation due to historical database compatibility with
+ * the python version.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "entry_labels")
 @SequenceGenerator(name = "sequence", sequenceName = "entry_labels_id_seq", allocationSize = 1)

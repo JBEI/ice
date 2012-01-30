@@ -1,5 +1,11 @@
 package org.jbei.ice.lib.vo;
 
+/**
+ * Value object to hold Attachment data, including file content.
+ * 
+ * @author Timothy Ham
+ * 
+ */
 public class AttachmentData {
     private String base64Data;
     private String fileName;

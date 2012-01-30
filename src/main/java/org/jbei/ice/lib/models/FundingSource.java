@@ -11,6 +11,12 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.dao.IModel;
 
+/**
+ * Store Funding Source information.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "funding_source")
 @SequenceGenerator(name = "sequence", sequenceName = "funding_source_id_seq", allocationSize = 1)

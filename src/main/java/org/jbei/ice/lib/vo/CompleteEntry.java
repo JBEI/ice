@@ -5,6 +5,13 @@ import java.util.ArrayList;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sequence;
 
+/**
+ * Value object to hold complete {@link Entry} data, including {@link Sequence} and
+ * {@link AttachmentData}, and {@link SequenceTraceFile}.
+ * 
+ * @author Timothy Ham
+ * 
+ */
 public class CompleteEntry {
     private Entry entry;
     private ArrayList<AttachmentData> attachments = new ArrayList<AttachmentData>();

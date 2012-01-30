@@ -15,6 +15,21 @@ import javax.persistence.Table;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.IPartValueObject;
 
+/**
+ * Store Part specific fields.
+ * <p>
+ * <ul>
+ * <li><b>packageFormat: </b>Best guess assembly/packaging format for the part. Currentyl accepts
+ * Raw, Biobrick, and BglBrick.</li>
+ * <li><b>pkgd_dna_fwd_hash: </b> Forward sequence hash of the entire sequence, including complete
+ * prefix and suffix, if applicable.</li>
+ * <li><b>pkgd_dna_rev_hash: </b> Reverse sequence hash of the entre sequence, including complete
+ * prefix and suffix, if applicable.</li>
+ * </ul>
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @PrimaryKeyJoinColumn(name = "entries_id")
 @Table(name = "parts")
@@ -82,6 +97,11 @@ public class Part extends Entry implements IPartValueObject, IModel {
         this.pkgdDnaRevHash = pkgdDnaRevHash;
     }
 
+    /**
+     * Generate a map between {@link AssemblyStandard} types and user friendly string.
+     * 
+     * @return Map of types and names.
+     */
     public static Map<String, String> getPackageFormatOptionsMap() {
         Map<String, String> resultMap = new LinkedHashMap<String, String>();
 

@@ -91,6 +91,9 @@ a.title {
 	background: #FFF;
 }
 
+a.problem{
+	color: #FE6700;
+}
 .odd_row,.odd {
 	background-color: #FFFFFF;
 }

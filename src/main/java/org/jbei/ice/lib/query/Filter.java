@@ -2,6 +2,12 @@ package org.jbei.ice.lib.query;
 
 import java.io.Serializable;
 
+/**
+ * Abstract class for filters.
+ * 
+ * @author Zinovii Dmytriv, Timothy Ham
+ * 
+ */
 public abstract class Filter implements Serializable {
     private static final long serialVersionUID = 1L;
 

@@ -26,6 +26,16 @@ import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.ISequenceFeatureValueObject;
 
+/**
+ * Stores the sequence annotation information, and associates {@link Feature} objects to a
+ * {@link Sequence} object.
+ * <p>
+ * SequenceFeature represents is a many-to-many mapping. In addition, this class has fields to store
+ * sequence specific annotation information.
+ * 
+ * @author Timothy Ham, Zinovii Dmytriv
+ * 
+ */
 @Entity
 @Table(name = "sequence_feature")
 @SequenceGenerator(name = "sequence", sequenceName = "sequence_feature_id_seq", allocationSize = 1)
@@ -47,9 +57,17 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
     @JoinColumn(name = "feature_id")
     private Feature feature;
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "sequenceFeature")
+    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
+    @JoinColumn(name = "sequence_feature_id")
+    @OrderBy("id")
+    private final Set<AnnotationLocation> annotationLocations = new LinkedHashSet<AnnotationLocation>();
+
+    @Deprecated
     @Column(name = "feature_start")
     private int genbankStart;
 
+    @Deprecated
     @Column(name = "feature_end")
     private int end;
 
@@ -87,20 +105,26 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         super();
     }
 
-    public SequenceFeature(Sequence sequence, Feature feature, int genbankStart, int end,
-            int strand, String name, String genbankType,
-            AnnotationType annotationType) {
+    public SequenceFeature(Sequence sequence, Feature feature, int strand, String name,
+            String genbankType, AnnotationType annotationType) {
         super();
         this.sequence = sequence;
         this.feature = feature;
-        this.genbankStart = genbankStart;
-        this.end = end;
         this.strand = strand;
         this.name = name;
         this.genbankType = genbankType;
         this.annotationType = annotationType;
     }
 
+    /**
+     * Annotation type for "parts".
+     * <p>
+     * Parts can have a PREFIX, a SUFFIX, a SCAR features. The INNER and SUBINNER features indicate
+     * part sequence excluding the prefix and suffix.
+     * 
+     * @author Timothy Ham
+     * 
+     */
     public enum AnnotationType {
         PREFIX, SUFFIX, SCAR, INNER, SUBINNER;
     }
@@ -137,25 +161,54 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         this.feature = feature;
     }
 
+    public void setAnnotationLocations(Set<AnnotationLocation> annotationLocations) {
+        // for JAXB web services
+        if (annotationLocations == null) {
+            this.annotationLocations.clear();
+            return;
+        }
+        if (annotationLocations != this.annotationLocations) {
+            annotationLocations.clear();
+            this.annotationLocations.addAll(annotationLocations);
+        }
+    }
+
+    public Set<AnnotationLocation> getAnnotationLocations() {
+        return annotationLocations;
+    }
+
     /**
-     * This is 1 based ala Genbank
+     * Use locations instead. This field exists to allow scripted migration of data using
+     * the new database schema.
      */
-    @Override
+    @Deprecated
     public int getGenbankStart() {
         return genbankStart;
     }
 
-    @Override
+    /**
+     * Use locations instead. This field exists to allow scripted migration of data using
+     * the new database schema.
+     */
+    @Deprecated
     public void setGenbankStart(int genbankStart) {
         this.genbankStart = genbankStart;
     }
 
-    @Override
+    /**
+     * Use locations instead. This field exists to allow scripted migration of data using
+     * the new database schema.
+     */
+    @Deprecated
     public int getEnd() {
         return end;
     }
 
-    @Override
+    /**
+     * Use locations instead. This field exists to allow scripted migration of data using
+     * the new database schema.
+     */
+    @Deprecated
     public void setEnd(int end) {
         this.end = end;
     }
@@ -165,6 +218,9 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         return strand;
     }
 
+    /**
+     * +1 for forward, -1 for reverse.
+     */
     @Override
     public void setStrand(int strand) {
         this.strand = strand;
@@ -182,8 +238,8 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
 
     /**
      * Deprecated since schema > 0.8.0. Use SequenceFeatureAttribute with "description" as key
-     *
-     * @return
+     * 
+     * @return Description.
      */
     @Deprecated
     public String getDescription() {
@@ -192,7 +248,7 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
 
     /**
      * Deprecated since schema > 0.8.0. Use SequenceFeatureAttribute with "description" as key
-     *
+     * 
      * @param description
      */
     @Deprecated
@@ -232,4 +288,22 @@ public class SequenceFeature implements ISequenceFeatureValueObject, IModel {
         }
 
     }
+
+    public Integer getUniqueGenbankStart() {
+        Integer result = null;
+        if (getAnnotationLocations() != null && getAnnotationLocations().size() == 1) {
+            result = ((AnnotationLocation) getAnnotationLocations().toArray()[0]).getGenbankStart();
+        }
+        return result;
+    }
+
+    public Integer getUniqueEnd() {
+        Integer result = null;
+        if (getAnnotationLocations() != null && getAnnotationLocations().size() == 1) {
+            result = ((AnnotationLocation) getAnnotationLocations().toArray()[getAnnotationLocations()
+                    .size() - 1]).getEnd();
+        }
+        return result;
+    }
+
 }

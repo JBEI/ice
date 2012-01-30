@@ -16,14 +16,6 @@ public interface ISequenceFeatureValueObject {
 
     void setFeature(Feature feature);
 
-    int getGenbankStart();
-
-    void setGenbankStart(int genbankStart);
-
-    int getEnd();
-
-    void setEnd(int end);
-
     int getStrand();
 
     void setStrand(int strand);

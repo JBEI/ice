@@ -8,7 +8,22 @@ import org.jbei.ice.lib.composers.formatters.FormatterException;
 import org.jbei.ice.lib.composers.formatters.IFormatter;
 import org.jbei.ice.lib.models.Sequence;
 
+/**
+ * Wrapper for formatters. To be used to generate sequence files of various formats, as specified by
+ * the {@link IFormatter} formatter.
+ * 
+ * @author Zinovii Dmytriv
+ * 
+ */
 public class SequenceComposer {
+    /**
+     * Create a string representation of {@link Sequence} using the {@link IFormatter} formatter.
+     * 
+     * @param sequence
+     * @param formatter
+     * @return Text of formatted output.
+     * @throws SequenceComposerException
+     */
     public static String compose(Sequence sequence, IFormatter formatter)
             throws SequenceComposerException {
         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
@@ -22,6 +37,16 @@ public class SequenceComposer {
         return byteStream.toString();
     }
 
+    /**
+     * Output a representation of {@link Sequence} using the {@link IFormatter} formatter, to the
+     * {@link OutputStream} stream.
+     * 
+     * @param sequence
+     * @param formatter
+     * @param stream
+     * @throws SequenceComposerException
+     * @throws IOException
+     */
     public static void compose(Sequence sequence, IFormatter formatter, OutputStream stream)
             throws SequenceComposerException, IOException {
 

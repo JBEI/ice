@@ -5,6 +5,12 @@ import java.util.Iterator;
 
 import org.jbei.ice.lib.vo.IDNASequence;
 
+/**
+ * Helper class to set up a list of parsers to iterate over, to try to parse the input file.
+ * 
+ * @author Zinovii Dmytriv, Timothy Ham
+ * 
+ */
 public class GeneralParser {
     private static GeneralParser instance = null;
     private final ArrayList<AbstractParser> parsers = new ArrayList<AbstractParser>();
@@ -79,11 +85,11 @@ public class GeneralParser {
         // TODO: Depricate some of these old parsers. The new 
         // IceGenbankParser should replace all of these parsers. 
         // However, maintain these for backward compatibility for now.
-        parsers.add(new GenbankParser()); // TODO depricate
         parsers.add(new IceGenbankParser());
         parsers.add(new FastaParser());
-        parsers.add(new ApeParser()); // TODO depricate
-        parsers.add(new GenbankLocusFriendlyParser()); // TODO depricate
+        //parsers.add(new ApeParser()); // TODO depricate
+        //parsers.add(new GenbankLocusFriendlyParser()); // TODO depricate
+        //parsers.add(new GenbankParser()); // TODO depricate
         parsers.add(new PlainParser());
     }
 }

@@ -8,8 +8,21 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.Configuration;
 import org.jbei.ice.lib.models.Configuration.ConfigurationKey;
 
+/**
+ * Manage {@link Configuration} objects in the database.
+ * 
+ * @author Timothy Ham
+ * 
+ */
 public class ConfigurationManager {
 
+    /**
+     * Save the given {@link Configuration} object in the database.
+     * 
+     * @param configuration
+     * @return Saved Configuration.
+     * @throws ManagerException
+     */
     public static Configuration save(Configuration configuration) throws ManagerException {
         if (configuration == null) {
             return null;
@@ -23,6 +36,12 @@ public class ConfigurationManager {
         }
     }
 
+    /**
+     * Delete the given {@link Configuration} object in the database.
+     * 
+     * @param configuration
+     * @throws ManagerException
+     */
     public static void delete(Configuration configuration) throws ManagerException {
         if (configuration != null) {
             try {
@@ -33,6 +52,13 @@ public class ConfigurationManager {
         }
     }
 
+    /**
+     * Retrieve the {@link Configuration} object with the given {@link ConfigurationKey}.
+     * 
+     * @param key
+     * @return Configuration
+     * @throws ManagerException
+     */
     public static Configuration get(ConfigurationKey key) throws ManagerException {
         Configuration configuration = null;
 

@@ -38,22 +38,19 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Project;
+import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.utils.AssemblyHelper;
 import org.jbei.ice.lib.utils.BulkImportEntryData;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.utils.SerializationUtils.SerializationUtilsException;
 import org.jbei.ice.lib.utils.TraceAlignmentHelper;
-import org.jbei.ice.lib.vo.AssemblyProject;
-import org.jbei.ice.lib.vo.AssemblyTable;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
-import org.jbei.ice.lib.vo.PermutationSet;
 import org.jbei.ice.lib.vo.SequenceCheckerData;
 import org.jbei.ice.lib.vo.SequenceCheckerProject;
 import org.jbei.ice.lib.vo.TraceData;
@@ -65,7 +62,22 @@ import flex.messaging.io.ArrayCollection;
 import flex.messaging.io.amf.ASObject;
 import flex.messaging.io.amf.translator.ASTranslator;
 
+/**
+ * BlazeDS service calls for Flex applications.
+ * 
+ * @author Zinovii Dmytriv, Hector Plahar, Joanna Chen, Timothy Ham
+ * 
+ */
 public class RegistryAMFAPI extends BaseService {
+    /**
+     * Retrieve {@link Entry} by its recordId.
+     * 
+     * @param sessionId
+     *            session key.
+     * @param entryId
+     *            recordId.
+     * @return Entry object.
+     */
     public Entry getEntry(String sessionId, String entryId) {
         Account account = getAccountBySessionId(sessionId);
 
@@ -92,6 +104,15 @@ public class RegistryAMFAPI extends BaseService {
         return entry;
     }
 
+    /**
+     * Determine if the session has write permission to the specified {@link Entry}.
+     * 
+     * @param sessionId
+     *            session key.
+     * @param entryId
+     *            recordId.
+     * @return True if session has write permission to the Entry.
+     */
     public boolean hasWritablePermissions(String sessionId, String entryId) {
         boolean result = false;
 
@@ -123,6 +144,15 @@ public class RegistryAMFAPI extends BaseService {
         return result;
     }
 
+    /**
+     * Retrieve the {@link FeaturedDNASequence} of the specified {@link Entry}.
+     * 
+     * @param sessionId
+     *            session key.
+     * @param entryId
+     *            recordIf of the desired Entry.
+     * @return FeaturedDNASequence object.
+     */
     public FeaturedDNASequence getSequence(String sessionId, String entryId) {
         Account account = getAccountBySessionId(sessionId);
 
@@ -161,6 +191,17 @@ public class RegistryAMFAPI extends BaseService {
         return featuredDNASequence;
     }
 
+    /**
+     * Save the given {@link FeaturedDNASequence} with the specified {@link Entry}.
+     * 
+     * @param sessionId
+     *            session key.
+     * @param entryId
+     *            recordId of the desired Entry.
+     * @param featuredDNASequence
+     *            featuredDNASequence object to save.
+     * @return True if successful.
+     */
     public boolean saveSequence(String sessionId, String entryId,
             FeaturedDNASequence featuredDNASequence) {
         boolean result = false;
@@ -202,6 +243,15 @@ public class RegistryAMFAPI extends BaseService {
         return result;
     }
 
+    /**
+     * Retrieve {@link TraceSequence}s of the specified {@link Entry}.
+     * 
+     * @param sessionId
+     *            session key.
+     * @param entryId
+     *            recordId of the desired Entry.
+     * @return - List of TraceSequence objects.
+     */
     public ArrayList<TraceSequence> getTraces(String sessionId, String entryId) {
         Account account = getAccountBySessionId(sessionId);
 
@@ -240,6 +290,19 @@ public class RegistryAMFAPI extends BaseService {
         return (ArrayList<TraceSequence>) traces;
     }
 
+    /**
+     * Generate a Genbank file from the given {@link FeaturedDNASequence}.
+     * 
+     * @param sessionId
+     *            session key.
+     * @param featuredDNASequence
+     *            FeaturedDNASequence object.
+     * @param name
+     *            Locus name to be used.
+     * @param isCircular
+     *            True if circular.
+     * @return Generated Genbank file as a String.
+     */
     public String generateGenBank(String sessionId, FeaturedDNASequence featuredDNASequence,
             String name, boolean isCircular) {
         String result = "";
@@ -276,6 +339,13 @@ public class RegistryAMFAPI extends BaseService {
         return result;
     }
 
+    /**
+     * Retrieve {@link UserPreferences} for the given session.
+     * 
+     * @param sessionId
+     *            session key.
+     * @return UserPreferences object for the specified user.
+     */
     public UserPreferences getUserPreferences(String sessionId) {
         UserPreferences userPreferences = null;
         try {
@@ -314,6 +384,15 @@ public class RegistryAMFAPI extends BaseService {
         return userPreferences;
     }
 
+    /**
+     * Save {@link UserPreferences} object to the server.
+     * 
+     * @param sessionId
+     *            session key.
+     * @param preferences
+     *            UserPreferences obect.
+     * @return True if successful.
+     */
     public boolean saveUserPreferences(String sessionId, UserPreferences preferences) {
         try {
             Account account = getAccountBySessionId(sessionId);
@@ -355,6 +434,13 @@ public class RegistryAMFAPI extends BaseService {
         return false;
     }
 
+    /**
+     * Retrieve {@link UserRestrictionEnzymes} for the given session.
+     * 
+     * @param sessionId
+     *            session key.
+     * @return UserRestrictionEnzymes object for the current user.
+     */
     public UserRestrictionEnzymes getUserRestrictionEnzymes(String sessionId) {
         UserRestrictionEnzymes userRestrictionEnzymes = null;
 
@@ -392,6 +478,14 @@ public class RegistryAMFAPI extends BaseService {
         return userRestrictionEnzymes;
     }
 
+    /**
+     * Save the given {@link UserRestrictionEnzymes} to the database.
+     * 
+     * @param sessionId
+     *            session key.
+     * @param userRestrictionEnzymes
+     *            UserRestrictionEnzymes object to save.
+     */
     public void saveUserRestrictionEnzymes(String sessionId,
             UserRestrictionEnzymes userRestrictionEnzymes) {
         try {
@@ -426,6 +520,13 @@ public class RegistryAMFAPI extends BaseService {
         }
     }
 
+    /**
+     * Retrieve {@link RestrictionEnzyme}s for the given user.
+     * 
+     * @param sessionId
+     *            session key.
+     * @return Collection of RestrictionEnzymes for the specified user.
+     */
     public Collection<RestrictionEnzyme> getRestrictionEnzymes(String sessionId) {
         Account account = getAccountBySessionId(sessionId);
 
@@ -448,6 +549,13 @@ public class RegistryAMFAPI extends BaseService {
         return enzymes;
     }
 
+    /**
+     * Parse the given string data into a {@link FeaturedDNASequence} object.
+     * 
+     * @param data
+     *            data to parse.
+     * @return FeaturedDNASequence object.
+     */
     public FeaturedDNASequence parseSequenceFile(String data) {
         FeaturedDNASequence featuredDNASequence = null;
 
@@ -466,6 +574,13 @@ public class RegistryAMFAPI extends BaseService {
         return featuredDNASequence;
     }
 
+    /**
+     * Generate a new Genbank file from the given {@link FeaturedDNASequence}.
+     * 
+     * @param featuredDNASequence
+     *            FeaturedDNASequence object to convert to genbank.
+     * @return Genbank file as string.
+     */
     public String generateSequenceFile(FeaturedDNASequence featuredDNASequence) {
         String result = "";
 
@@ -491,158 +606,15 @@ public class RegistryAMFAPI extends BaseService {
         return result;
     }
 
-    public AssemblyProject createAssemblyProject(String sessionId, AssemblyProject assemblyProject) {
-        if (assemblyProject == null || sessionId == null) {
-            return null;
-        }
-
-        Account account = getAccountBySessionId(sessionId);
-
-        if (account == null) {
-            return null;
-        }
-
-        String serializedAssemblyTable = "";
-
-        try {
-            serializedAssemblyTable = SerializationUtils.serializeObjectToString(assemblyProject
-                    .getAssemblyTable());
-        } catch (SerializationUtilsException e) {
-            Logger.error(getLoggerPrefix(), e);
-
-            return null;
-        }
-
-        ProjectController projectController = new ProjectController(account);
-
-        Project project = projectController.createProject(account, assemblyProject.getName(),
-            assemblyProject.getDescription(), serializedAssemblyTable, assemblyProject.typeName(),
-            new Date(), new Date());
-
-        try {
-            Project savedProject = projectController.save(project);
-
-            assemblyProject.setName(savedProject.getName());
-            assemblyProject.setDescription(savedProject.getDescription());
-            assemblyProject.setUuid(savedProject.getUuid());
-            assemblyProject.setOwnerEmail(savedProject.getAccount().getEmail());
-            assemblyProject.setOwnerName(savedProject.getAccount().getFullName());
-            assemblyProject.setCreationTime(savedProject.getCreationTime());
-            assemblyProject.setModificationTime(savedProject.getModificationTime());
-        } catch (ControllerException e) {
-            Logger.error(getLoggerPrefix(), e);
-
-            return null;
-        } catch (PermissionException e) {
-            Logger.error(getLoggerPrefix(), e);
-
-            return null;
-        }
-
-        return assemblyProject;
-    }
-
-    public AssemblyProject getAssemblyProject(String sessionId, String projectId) {
-        if (projectId == null || sessionId == null || sessionId.isEmpty() || projectId.isEmpty()) {
-            return null;
-        }
-
-        Account account = getAccountBySessionId(sessionId);
-
-        if (account == null) {
-            return null;
-        }
-
-        AssemblyProject assemblyProject = null;
-
-        ProjectController projectController = new ProjectController(account);
-        try {
-            Project project = projectController.getProjectByUUID(projectId);
-
-            AssemblyTable assemblyTable = (AssemblyTable) SerializationUtils
-                    .deserializeStringToObject(project.getData());
-
-            assemblyProject = new AssemblyProject(project.getName(), project.getDescription(),
-                    project.getUuid(), account.getEmail(), account.getFullName(),
-                    project.getCreationTime(), project.getModificationTime(), assemblyTable);
-        } catch (ControllerException e) {
-            Logger.error(getLoggerPrefix(), e);
-
-            return null;
-        } catch (SerializationUtilsException e) {
-            Logger.error(getLoggerPrefix(), e);
-
-            return null;
-        }
-
-        return assemblyProject;
-    }
-
-    public AssemblyProject saveAssemblyProject(String sessionId, AssemblyProject assemblyProject) {
-        if (sessionId == null || sessionId.isEmpty() || assemblyProject == null
-                || assemblyProject.getUuid() == null) {
-            return null;
-        }
-
-        Account account = getAccountBySessionId(sessionId);
-
-        if (account == null) {
-            return null;
-        }
-
-        AssemblyProject resultAssemblyProject = null;
-
-        ProjectController projectController = new ProjectController(account);
-        try {
-            Project project = projectController.getProjectByUUID(assemblyProject.getUuid());
-
-            project.setName(assemblyProject.getName());
-            project.setDescription(assemblyProject.getDescription());
-            project.setModificationTime(new Date());
-            project.setData(SerializationUtils.serializeObjectToString(assemblyProject
-                    .getAssemblyTable()));
-
-            Project savedProject = projectController.save(project);
-
-            resultAssemblyProject = new AssemblyProject(savedProject.getName(),
-                    savedProject.getDescription(), savedProject.getUuid(), savedProject
-                            .getAccount().getEmail(), savedProject.getAccount().getFullName(),
-                    savedProject.getCreationTime(), savedProject.getModificationTime(),
-                    assemblyProject.getAssemblyTable());
-        } catch (ControllerException e) {
-            Logger.error(getLoggerPrefix(), e);
-
-            return null;
-        } catch (SerializationUtilsException e) {
-            Logger.error(getLoggerPrefix(), e);
-
-            return null;
-        } catch (PermissionException e) {
-            Logger.error(getLoggerPrefix(), e);
-
-            return null;
-        }
-
-        return resultAssemblyProject;
-    }
-
-    public PermutationSet assembleAssemblyProject(String sessionId, AssemblyProject assemblyProject) {
-        if (sessionId == null || sessionId.isEmpty() || assemblyProject == null) {
-            return null;
-        }
-
-        Account account = getAccountBySessionId(sessionId);
-
-        if (account == null) {
-            return null;
-        }
-
-        PermutationSet permutationSet = AssemblyHelper.buildPermutationSet(assemblyProject
-                .getAssemblyTable());
-
-        return permutationSet;
-    }
-
+    /**
+     * Create a new {@link SequenceCheckerProject} in the database.
+     * 
+     * @param sessionId
+     *            session key.
+     * @param sequenceCheckerProject
+     *            SequenceCheckerProject to save.
+     * @return SequenceCheckerProject that was saved in the database.
+     */
     public SequenceCheckerProject createSequenceCheckerProject(String sessionId,
             SequenceCheckerProject sequenceCheckerProject) {
         if (sequenceCheckerProject == null || sessionId == null) {
@@ -696,6 +668,16 @@ public class RegistryAMFAPI extends BaseService {
         return sequenceCheckerProject;
     }
 
+    /**
+     * Save the given {@link SequenceCheckerProject} in the database.
+     * 
+     * 
+     * @param sessionId
+     *            session key.
+     * @param sequenceCheckerProject
+     *            SequenceCheckerProject to save.
+     * @return SequenceCheckerProject that was saved in the database.
+     */
     public SequenceCheckerProject saveSequenceCheckerProject(String sessionId,
             SequenceCheckerProject sequenceCheckerProject) {
         if (sessionId == null || sessionId.isEmpty() || sequenceCheckerProject == null
@@ -745,6 +727,15 @@ public class RegistryAMFAPI extends BaseService {
         return resultSequenceCheckerProject;
     }
 
+    /**
+     * Retrieve the specified {@link SequenceCheckerProject} in the database.
+     * 
+     * @param sessionId
+     *            session key.
+     * @param projectId
+     *            uuid of the SequenceCheckerProject to retrieve.
+     * @return SequenceCheckerProject object.
+     */
     public SequenceCheckerProject getSequenceCheckerProject(String sessionId, String projectId) {
         if (projectId == null || sessionId == null || sessionId.isEmpty() || projectId.isEmpty()) {
             return null;
@@ -782,6 +773,15 @@ public class RegistryAMFAPI extends BaseService {
         return sequenceCheckerProject;
     }
 
+    /**
+     * Perform sequence trace alignment on the given {@link SequenceCheckerProject}.
+     * 
+     * @param sessionId
+     *            session key.
+     * @param sequenceCheckerProject
+     *            SequenceCheckerProject
+     * @return SequenceCheckerPorject with updated alignment information.
+     */
     public SequenceCheckerProject alignSequenceCheckerProject(String sessionId,
             SequenceCheckerProject sequenceCheckerProject) {
         if (sessionId == null || sessionId.isEmpty() || sequenceCheckerProject == null) {
@@ -860,6 +860,15 @@ public class RegistryAMFAPI extends BaseService {
         return sequenceCheckerProject;
     }
 
+    /**
+     * Parse the given byte array data into {@link TraceData}.
+     * 
+     * @param traceFileName
+     *            name of the trace file.
+     * @param data
+     *            byte array data.
+     * @return TraceData object.
+     */
     public TraceData parseTraceFile(String traceFileName, byte[] data) {
         TraceData traceData = null;
 
@@ -883,6 +892,15 @@ public class RegistryAMFAPI extends BaseService {
         return traceData;
     }
 
+    /**
+     * Create a new {@link VectorEditorProject} in the database.
+     * 
+     * @param sessionId
+     *            session key.
+     * @param vectorEditorProject
+     *            VectorEditorProject to create.
+     * @return Saved VectorEditorProject.
+     */
     public VectorEditorProject createVectorEditorProject(String sessionId,
             VectorEditorProject vectorEditorProject) {
         if (vectorEditorProject == null || sessionId == null) {
@@ -935,6 +953,15 @@ public class RegistryAMFAPI extends BaseService {
         return vectorEditorProject;
     }
 
+    /**
+     * Save the given {@link VectorEditorProject} into the database.
+     * 
+     * @param sessionId
+     *            session key.
+     * @param vectorEditorProject
+     *            VectorEditorProject to save.
+     * @return Saved VectorEditorProject.
+     */
     public VectorEditorProject saveVectorEditorProject(String sessionId,
             VectorEditorProject vectorEditorProject) {
         if (sessionId == null || sessionId.isEmpty() || vectorEditorProject == null
@@ -984,6 +1011,15 @@ public class RegistryAMFAPI extends BaseService {
         return resultVectorEditorProject;
     }
 
+    /**
+     * Retrieve the specified {@link VectorEditorProject}.
+     * 
+     * @param sessionId
+     *            session key.
+     * @param projectId
+     *            UUID of the desired VectorEditorProject.
+     * @return VectorEditorProject.
+     */
     public VectorEditorProject getVectorEditorProject(String sessionId, String projectId) {
         if (projectId == null || sessionId == null || sessionId.isEmpty() || projectId.isEmpty()) {
             return null;
@@ -1021,17 +1057,34 @@ public class RegistryAMFAPI extends BaseService {
         return vectorEditorProject;
     }
 
+    /**
+     * Retrieve the {@link Account} associated with the given session key.
+     * 
+     * @param sessionId
+     *            session key.
+     * @return Account object for the session key.
+     */
     private Account sessionToAccount(String sessionId) {
-        if (sessionId == null || sessionId.isEmpty())
+        if (sessionId == null || sessionId.isEmpty()) {
             return null;
+        }
 
         return getAccountBySessionId(sessionId);
     }
 
+    /**
+     * Retrieve the BulkImportEntry type.
+     * 
+     * @param sessionId
+     *            session key.
+     * @param importId
+     *            id of the BulkImport object.
+     * @return String representation of BulkImport.
+     */
     // TODO : the following need to be folded into a single call
     public String retrieveBulkImportEntryType(String sessionId, String importId) {
 
-        Account account = this.sessionToAccount(sessionId);
+        Account account = sessionToAccount(sessionId);
         if (account == null) {
             System.out.println("Session is invalid");
             return null;
@@ -1047,9 +1100,18 @@ public class RegistryAMFAPI extends BaseService {
         }
     }
 
+    /**
+     * Retrieve the BulkImport object by its id.
+     * 
+     * @param sessionId
+     *            session key.
+     * @param importId
+     *            id of the BulkImport object.
+     * @return BulkImport object.
+     */
     @SuppressWarnings("unchecked")
     public ASObject retrieveImportData(String sessionId, String importId) {
-        Account account = this.sessionToAccount(sessionId);
+        Account account = sessionToAccount(sessionId);
         if (account == null) {
             Logger.info("Session is invalid");
             return null;
@@ -1107,11 +1169,30 @@ public class RegistryAMFAPI extends BaseService {
 
     // end TODO 
 
+    /**
+     * Save entries using the bulk import mechanism.
+     * 
+     * @param sessionId
+     *            session key.
+     * @param primaryData
+     *            BulkImport data
+     * @param secondaryData
+     *            More BulkImport data
+     * @param sequenceZipFile
+     *            Zip file containing sequences.
+     * @param attachmentZipFile
+     *            Zip file containing attachments.
+     * @param sequenceFilename
+     *            Sequence file name.
+     * @param attachmentFilename
+     *            Attachment file name.
+     * @return Number of entries saved.
+     */
     public int saveEntries(String sessionId, ArrayCollection primaryData,
             ArrayCollection secondaryData, Byte[] sequenceZipFile, Byte[] attachmentZipFile,
             String sequenceFilename, String attachmentFilename) {
 
-        Account account = this.sessionToAccount(sessionId);
+        Account account = sessionToAccount(sessionId);
         if (account == null) {
             Logger.error("Invalid session");
             return 0;
@@ -1177,10 +1258,29 @@ public class RegistryAMFAPI extends BaseService {
         }
     }
 
+    /**
+     * Save the specified {@link Entry} into the database.
+     * 
+     * @param sessionId
+     *            session key.
+     * @param importId
+     *            ImportId if using bulk import
+     * @param entry
+     *            Entry to be saved.
+     * @param attachmentFile
+     *            Attachment file contents as bytes.
+     * @param attachmentFilename
+     *            Attachment file name.
+     * @param sequenceFile
+     *            Sequence file as bytes.
+     * @param sequenceFilename
+     *            Sequence file name.
+     * @return saved Entry.
+     */
     public Entry saveEntry(String sessionId, String importId, Entry entry, Byte[] attachmentFile,
             String attachmentFilename, Byte[] sequenceFile, String sequenceFilename) {
 
-        Account account = this.sessionToAccount(sessionId);
+        Account account = sessionToAccount(sessionId);
         if (account == null) {
             return null;
         }
@@ -1195,11 +1295,13 @@ public class RegistryAMFAPI extends BaseService {
         } catch (Exception e1) {
         }
 
-        if (Entry.PART_ENTRY_TYPE.equals(entry.getRecordType()))
+        if (Entry.PART_ENTRY_TYPE.equals(entry.getRecordType())) {
             ((Part) entry).setPackageFormat(Part.AssemblyStandard.RAW);
+        }
 
-        if (entry.getLongDescriptionType() == null)
+        if (entry.getLongDescriptionType() == null) {
             entry.setLongDescriptionType(Entry.MarkupType.text.name());
+        }
 
         EntryController entryController = new EntryController(account);
         Entry saved = null;
@@ -1219,13 +1321,42 @@ public class RegistryAMFAPI extends BaseService {
         return saved;
     }
 
+    /**
+     * Save a {@link Strain} with a single {@link Plasmid}.
+     * 
+     * @param sessionId
+     *            session key.
+     * @param importId
+     *            BulkImport id, if any.
+     * @param strain
+     *            Strain object.
+     * @param plasmid
+     *            Plasmid object.
+     * @param strainSequenceFile
+     *            Sequence file content for Strain.
+     * @param strainSequenceFilename
+     *            Sequence file name for Strain.
+     * @param strainAttachmentFile
+     *            Attachment file content for Strain.
+     * @param strainAttachmentFilename
+     *            Attachment file name for Strain.
+     * @param plasmidSequenceFile
+     *            Sequence file content for Plasmid.
+     * @param plasmidSequenceFilename
+     *            Sequence file name for Plasmid.
+     * @param plasmidAttachmentFile
+     *            Attachment file content for Plasmid.
+     * @param plasmidAttachmentFilename
+     *            Attachment file name for Plasmid.
+     * @return List of saved Entries.
+     */
     public List<Entry> saveStrainWithPlasmid(String sessionId, String importId, Strain strain,
             Plasmid plasmid, Byte[] strainSequenceFile, String strainSequenceFilename,
             Byte[] strainAttachmentFile, String strainAttachmentFilename,
             Byte[] plasmidSequenceFile, String plasmidSequenceFilename,
             Byte[] plasmidAttachmentFile, String plasmidAttachmentFilename) {
 
-        Account account = this.sessionToAccount(sessionId);
+        Account account = sessionToAccount(sessionId);
         if (account == null) {
             return null;
         }
@@ -1249,12 +1380,14 @@ public class RegistryAMFAPI extends BaseService {
         }
 
         // strain
-        if (strain.getLongDescriptionType() == null)
+        if (strain.getLongDescriptionType() == null) {
             strain.setLongDescriptionType(Entry.MarkupType.text.name());
+        }
 
         // plasmid
-        if (plasmid.getLongDescriptionType() == null)
+        if (plasmid.getLongDescriptionType() == null) {
             plasmid.setLongDescriptionType(Entry.MarkupType.text.name());
+        }
 
         EntryController entryController = new EntryController(account);
 
@@ -1275,10 +1408,12 @@ public class RegistryAMFAPI extends BaseService {
         }
 
         List<Entry> saved = new LinkedList<Entry>();
-        if (newPlasmid != null)
+        if (newPlasmid != null) {
             saved.add(newPlasmid);
-        if (newStrain != null)
+        }
+        if (newStrain != null) {
             saved.add(newStrain);
+        }
 
         // save sequences
         saveEntrySequence(account, newPlasmid, plasmidSequenceFile, plasmidSequenceFilename);
@@ -1291,6 +1426,18 @@ public class RegistryAMFAPI extends BaseService {
         return saved;
     }
 
+    /**
+     * Save the given sequence file with the given {@link Entry}.
+     * 
+     * @param account
+     * @{link Account} to save as.
+     * @param entry
+     *            Entry to associate with.
+     * @param fileBytes
+     *            Sequence file content.
+     * @param filename
+     *            Sequence file name.
+     */
     private void saveEntrySequence(Account account, Entry entry, Byte[] fileBytes, String filename) {
         if (fileBytes == null || entry == null) {
             return;
@@ -1316,6 +1463,18 @@ public class RegistryAMFAPI extends BaseService {
         }
     }
 
+    /**
+     * Save the given attachment to the server.
+     * 
+     * @param account
+     *            {@link Account} to save as.
+     * @param entry
+     *            {@link Entry} to associate attachment with.
+     * @param fileBytes
+     *            Attachment file content.
+     * @param filename
+     *            Attachment file name.
+     */
     private void saveEntryAttachment(Account account, Entry entry, Byte[] fileBytes, String filename) {
         if (fileBytes == null) {
             return;
@@ -1342,11 +1501,22 @@ public class RegistryAMFAPI extends BaseService {
         }
     }
 
+    /**
+     * Save the given sequence file with the given {@link Entry}.
+     * 
+     * @param account
+     *            {@link Account} to save as.
+     * @param entry
+     *            Entry to associate with.
+     * @param seqFile
+     *            -Sequence file.
+     * @throws IOException
+     */
     private void createSequence(Account account, Entry entry, File seqFile) throws IOException {
         // set sequence
         SequenceController sequenceController = new SequenceController(account);
 
-        String sequenceUser = this.readSequenceFile(seqFile).toString();
+        String sequenceUser = readSequenceFile(seqFile).toString();
         IDNASequence dnaSequence = null;
         if (sequenceUser != null) {
             dnaSequence = SequenceController.parse(sequenceUser);
@@ -1368,6 +1538,13 @@ public class RegistryAMFAPI extends BaseService {
         }
     }
 
+    /**
+     * Convert the given file to StringBuilder.
+     * 
+     * @param seqFile
+     *            file to convert.
+     * @return StringBuilder object with the content of the file.
+     */
     private StringBuilder readSequenceFile(File seqFile) {
         StringBuilder sequenceStringBuilder = new StringBuilder();
         if (seqFile.canRead()) {
@@ -1391,21 +1568,32 @@ public class RegistryAMFAPI extends BaseService {
             } catch (FileNotFoundException e1) {
                 Logger.error(getLoggerPrefix(), e1);
             } finally {
-                if (br != null)
+                if (br != null) {
                     try {
                         br.close();
                     } catch (IOException e) {
                     }
+                }
             }
         }
 
         return sequenceStringBuilder;
     }
 
+    /**
+     * Retrieve unique origin of replications from the database.
+     * 
+     * @return Set of unique origins.
+     */
     public TreeSet<String> getUniqueOriginOfReplications() {
         return UtilsManager.getUniqueOriginOfReplications();
     }
 
+    /**
+     * Retrieve all the unique {@link SelectionMarker}s as collection of Strings.
+     * 
+     * @return Set of unique SelectionMarkers.
+     */
     public TreeSet<String> getUniqueSelectionMarkers() {
         try {
             return UtilsManager.getUniqueSelectionMarkers();
@@ -1415,6 +1603,11 @@ public class RegistryAMFAPI extends BaseService {
         }
     }
 
+    /**
+     * Retrieve unique promoters from the database.
+     * 
+     * @return Set of unique promoters.
+     */
     public TreeSet<String> getUniquePromoters() {
         return UtilsManager.getUniquePromoters();
     }
