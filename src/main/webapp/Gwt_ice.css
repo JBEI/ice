@@ -20,6 +20,9 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 .font-bold { font-weight: bold; }
 .pad-6 { padding: 6px; }
 .pad-right-10 { padding-right: 10px; }
+.pad-15 { padding: 15px; }
+.pad-40 { padding: 40px; }
+.pad-left-40 { padding-left: 40px; }
 .to_upper { text-transform: uppercase; }
 
 .btn_submit_entry_form {
@@ -574,16 +577,36 @@ a.cell_mouseover:hover {
 /* END */
 
 /* LOGIN */
-.login_text {
+.login_panel {
+	padding: 20px; width: 500px; border: 1px solid #f1f1f1; -moz-box-shadow: 0 0 7px #bbb; -webkit-box-shadow: 0 0 7px #bbb; box-shadow: 0 0 7px #bbb;
+}
+.login_table {
+	background-color: #f1f1f1; 
+	width: 500px; 
+	padding-bottom: 20px; 
+	color: #444;
 }
 
-.login_button {
-	color: white;
-	background-color: #0082c0;
-	padding: 4px 15px;
-	border: 1px solid #0082C0;
-	font-weight: bold;
-	font: arial, sans-serif;
+.login_btn {
+    color: white;
+    background-color: #0082C0;
+    padding: 4px 15px;
+    border: 1px solid #1568d6;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 2px;
+    -webkit-border-radius: 2px;
+    width: 90px;
+    height: 30px;
+    font-size: 0.8em;
+    font-family: Arial, sans-serif;
+}
+
+.login_btn:hover {
+    -webkit-box-shadow: 2px 2px 2px #f3f3f3;
+    border: 1px solid #bbb;
+    background: -webkit-linear-gradient(top, #f5f5f5, #c5c5c5);
+    color: #777;
 }
 
 .quick_search_btn {
@@ -611,15 +634,14 @@ a.cell_mouseover:hover {
 }
 
 .login_input {
-	border: 1px solid #EEE;
-	width: 300px;
-	padding: 5px;
+	border: 1px solid #DDD;
+	width: 350px;
+	padding: 7px;
 }
 
 .login_input_error {
-	border: 1px solid red;
-	width: 300px;
-	padding: 5px;
+	border: 1px solid #CC3333;
+    background: #FCC;
 }
 
 .login_error_msg {

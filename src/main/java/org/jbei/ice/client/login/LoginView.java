@@ -7,13 +7,14 @@ import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HeaderPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -23,23 +24,47 @@ public class LoginView extends Composite implements ILoginView {
 
     private Button submitButton;
     private TextBox loginInput;
-    private VerticalPanel loginPanel;
     private Label loginErrorLabel;
 
     private TextBox passwordInput;
-    private VerticalPanel passwordPanel;
     private Label passwordErrorLabel;
     private CheckBox remember;
 
     public LoginView() {
-        HeaderPanel layout = new HeaderPanel();
+        FlexTable layout = new FlexTable();
         layout.setWidth("100%");
         layout.setHeight("100%");
+        layout.setCellSpacing(0);
+        layout.setCellPadding(0);
         initWidget(layout);
 
-        layout.setHeaderWidget(createHeader());
-        layout.setContentWidget(createContents());
-        layout.setFooterWidget(createFooter());
+        initComponents();
+
+        layout.setWidget(0, 0, createHeader());
+        layout.setHTML(1, 0, "&nbsp;");
+        layout.setWidget(2, 0, createContents());
+        layout.getCellFormatter().setVerticalAlignment(2, 0, HasVerticalAlignment.ALIGN_TOP);
+        layout.getCellFormatter().setHorizontalAlignment(2, 0, HasAlignment.ALIGN_CENTER);
+        layout.getCellFormatter().setHeight(2, 0, "100%");
+        layout.setWidget(3, 0, createFooter());
+    }
+
+    private void initComponents() {
+        loginInput = new TextBox();
+        loginInput.setStyleName("login_input");
+
+        passwordInput = new PasswordTextBox();
+        passwordInput.setStyleName("login_input");
+
+        submitButton = new Button("Login");
+        submitButton.setStyleName("login_btn");
+        remember = new CheckBox();
+        loginErrorLabel = new Label();
+        loginErrorLabel.setStyleName("login_error_msg");
+        loginErrorLabel.setVisible(false);
+        passwordErrorLabel = new Label();
+        passwordErrorLabel.setStyleName("login_error_msg");
+        passwordErrorLabel.setVisible(false);
     }
 
     protected Widget createHeader() {
@@ -49,58 +74,42 @@ public class LoginView extends Composite implements ILoginView {
     }
 
     protected Widget createContents() {
-
-        //        VerticalPanel panel = new VerticalPanel();
         FlowPanel panel = new FlowPanel();
+        panel.add(createLoginWidget());
+        return panel;
+    }
 
-        // login text
-        Label loginLabel = new Label("LOG IN");
-        loginLabel.setStyleName("login_header_label");
-        panel.add(loginLabel);
+    private Widget createLoginWidget() {
+        FlowPanel panel = new FlowPanel();
+        panel.setStyleName("login_panel");
+        FlexTable table = new FlexTable();
+        table.setStyleName("login_table");
+        table.setCellPadding(0);
+        table.setCellSpacing(0);
+        table.setHTML(1, 0, "<b>LOG IN</b>");
+        table.getCellFormatter().setStyleName(1, 0, "pad-15");
+        table.setHTML(2, 0, "<div style=\"height: 2px; background-color: #0082C0;"
+                + "-webkit-box-shadow: 0px 1px 1px #999\"></div>"); // TODO : move it to styles
 
-        // line 
-        HorizontalPanel underline = new HorizontalPanel();
-        underline.setStyleName("blue_underline");
-        underline.setWidth("100%");
-        panel.add(underline);
+        String html = "<span>Username</span><br><span id=\"user_login_input\"></span><div id=\"user_login_error_message\"></div>"
+                + "<br><span>Password</span><br><span id=\"user_password_input\"></span><div id=\"user_password_error_message\"></div>";
 
-        // username text
-        Label usernameLabel = new Label("Username");
-        usernameLabel.addStyleName("login_text");
-        panel.add(usernameLabel);
+        HTMLPanel htmlPanel = new HTMLPanel(html);
+        htmlPanel.add(loginInput, "user_login_input");
+        htmlPanel.add(passwordInput, "user_password_input");
+        htmlPanel.add(loginErrorLabel, "user_login_error_message");
+        htmlPanel.add(passwordErrorLabel, "user_password_error_message");
 
-        // username input
-        loginInput = new TextBox();
-        loginInput.setStyleName("login_input");
-        loginPanel = new VerticalPanel();
-        loginPanel.add(loginInput);
-        panel.add(loginPanel);
+        table.setWidget(3, 0, htmlPanel);
+        table.getFlexCellFormatter().setStyleName(3, 0, "pad-40");
+        HTMLPanel submitPanel = new HTMLPanel(
+                "<span id=\"login_button\"></span> <span id=\"remember_user_login_checkbox\"></span> <span class=\"font-80em\">Remember me on this computer</span>");
+        submitPanel.add(submitButton, "login_button");
+        submitPanel.add(remember, "remember_user_login_checkbox");
+        table.setWidget(4, 0, submitPanel);
+        table.getFlexCellFormatter().setStyleName(4, 0, "pad-left-40");
 
-        // password text
-        Label passwordLabel = new Label("Password");
-        passwordLabel.addStyleName("login_text");
-        panel.add(passwordLabel);
-
-        // password input
-        passwordInput = new PasswordTextBox();
-        passwordInput.setStyleName("login_input");
-        passwordPanel = new VerticalPanel();
-        passwordPanel.add(passwordInput);
-        panel.add(passwordPanel);
-
-        // login button and "remember me link"
-        HorizontalPanel submitPanel = new HorizontalPanel();
-        submitButton = new Button("Login");
-        submitButton.setStyleName("login_button");
-        submitPanel.add(submitButton);
-
-        remember = new CheckBox();
-        submitPanel.add(remember);
-
-        Label rememberLabel = new Label("Remember me on this computer");
-        submitPanel.add(rememberLabel);
-
-        panel.add(submitPanel);
+        panel.add(table);
         return panel;
     }
 
@@ -132,42 +141,24 @@ public class LoginView extends Composite implements ILoginView {
 
     @Override
     public void setLoginNameError(String errorMsg) {
-        if (loginErrorLabel == null)
-            loginErrorLabel = new Label();
-
         loginErrorLabel.setText(errorMsg);
-        loginErrorLabel.setStyleName("login_error_msg");
-        loginPanel.add(loginErrorLabel);
-        loginInput.setStyleName("login_input_error");
+        loginInput.addStyleName("login_input_error");
+        loginErrorLabel.setVisible(true);
     }
 
     @Override
     public void setLoginPassError(String errorMsg) {
-        if (passwordErrorLabel == null)
-            passwordErrorLabel = new Label();
-
         passwordErrorLabel.setText(errorMsg);
-        passwordErrorLabel.setStyleName("login_error_msg");
-        passwordPanel.add(passwordErrorLabel);
-        passwordInput.setStyleName("login_input_error");
+        passwordInput.addStyleName("login_input_error");
+        passwordErrorLabel.setVisible(true);
     }
 
     @Override
-    public void clearLoginNameError() {
-        if (loginErrorLabel == null)
-            return;
-
-        loginPanel.remove(loginErrorLabel);
-        loginInput.setStyleName("login_input");
-    }
-
-    @Override
-    public void clearLoginPassError() {
-        if (passwordErrorLabel == null)
-            return;
-
-        passwordPanel.remove(passwordErrorLabel);
-        passwordInput.setStyleName("login_input");
+    public void clearErrorMessages() {
+        loginErrorLabel.setVisible(false);
+        passwordInput.removeStyleName("login_input_error");
+        loginInput.removeStyleName("login_input_error");
+        passwordErrorLabel.setVisible(false);
     }
 
     @Override

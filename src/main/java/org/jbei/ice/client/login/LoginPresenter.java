@@ -35,24 +35,30 @@ public class LoginPresenter extends AbstractPresenter {
     }
 
     protected void login() {
-        this.display.clearLoginNameError();
-        this.display.clearLoginPassError();
+        this.display.clearErrorMessages();
 
         String loginName = this.display.getLoginName();
         String loginPass = this.display.getLoginPass();
+        boolean error = false;
 
         if (loginName == null || loginName.isEmpty()) {
-            this.display.setLoginNameError("Username is required and cannot be left empty!");
-            return;
+            this.display
+                    .setLoginNameError("The username field is required and cannot be left empty!");
+            error = true;
         }
 
         if (loginPass == null || loginPass.isEmpty()) {
-            this.display.setLoginPassError("Password is required and cannot be left empty!");
-            return;
+            this.display
+                    .setLoginPassError("The password field is required and cannot be left empty!");
+            error = true;
         }
+
+        if (error)
+            return;
 
         // client validation passed. attempt to login
         Utils.showWaitCursor(null);
+        display.getSubmitButton().setEnabled(false);
         service.login(loginName, loginPass, new AsyncCallback<AccountInfo>() {
 
             @Override
@@ -63,6 +69,7 @@ public class LoginPresenter extends AbstractPresenter {
                     return;
                 }
 
+                resetCursor();
                 eventBus.fireEvent(new LoginEvent(result, display.rememberUserOnComputer()));
             }
 
@@ -75,6 +82,7 @@ public class LoginPresenter extends AbstractPresenter {
     }
 
     private void resetCursor() {
+        display.getSubmitButton().setEnabled(true);
         Utils.showDefaultCursor(null);
     }
 
@@ -98,13 +106,18 @@ public class LoginPresenter extends AbstractPresenter {
         container.add(this.display.asWidget());
     }
 
-    public class SubmitHandler implements KeyPressHandler {
+    public class SubmitHandler implements KeyPressHandler, ClickHandler {
 
         @Override
         public void onKeyPress(KeyPressEvent event) {
             if (event.getCharCode() != KeyCodes.KEY_ENTER)
                 return;
 
+            login();
+        }
+
+        @Override
+        public void onClick(ClickEvent event) {
             login();
         }
     }

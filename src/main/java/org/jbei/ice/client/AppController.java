@@ -91,6 +91,10 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             History.newItem(Page.MAIN.getLink());
     }
 
+    private void logout() {
+        this.eventBus.fireEvent(new LogoutEvent());
+    }
+
     /**
      * Required override from ValueChange Handler interface.
      * newItem and fireCurrentHistoryState method calls of History, causes
@@ -108,7 +112,18 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             page = Page.MAIN;
         else
             page = getPage(token);
+
+        if (page == Page.LOGOUT) {
+            logout();
+            return;
+        }
+
         String param = getParam("id", token);
+
+        // TODO redirect after login
+        if (AppController.sessionId == null)
+            page = Page.LOGIN;
+
         AbstractPresenter presenter;
 
         switch (page) {
@@ -116,21 +131,6 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         // TODO : cache the views and call reset() in the presenter when displaying them. they are apparently expensive to create or sum such
         // TODO : presenters are cheap however
         case MAIN:
-            // illustrates code splitting
-            //            GWT.runAsync(new RunAsyncCallback() {
-            //                
-            //                @Override
-            //                public void onSuccess() {
-            //                    new HomePagePresenter(service, eventBus, new HomePageView());
-            //                    
-            //                }
-            //                
-            //                @Override
-            //                public void onFailure(Throwable reason) {
-            //                    // TODO Auto-generated method stub
-            //                    
-            //                }
-            //            });
             presenter = new HomePagePresenter(this.service, this.eventBus, new HomePageView());
             break;
 

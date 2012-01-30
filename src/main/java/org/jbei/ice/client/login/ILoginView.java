@@ -27,13 +27,11 @@ public interface ILoginView {
      */
     boolean rememberUserOnComputer();
 
+    void clearErrorMessages();
+
     void setLoginNameError(String errMsg);
 
     void setLoginPassError(String errMsg);
-
-    void clearLoginNameError();
-
-    void clearLoginPassError();
 
     void setSubmitHandler(KeyPressHandler handler);
 
