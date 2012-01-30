@@ -6,40 +6,48 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class HomePageView extends AbstractLayout implements IHomePageView {
 
     private ArchiveMenu menu;
     private FlexTable contentTable;
-    //    private final VerticalPanel news;
+    private VerticalPanel news;
     private FlexTable newsAdd;
     private TextBox title;
     private TextArea area;
     private Button submitNews;
     private Button cancelNews;
-
-    public HomePageView() {
-    }
+    private int row;
 
     @Override
     protected void initComponents() {
         super.initComponents();
+
+        news = new VerticalPanel();
         menu = new ArchiveMenu();
         contentTable = new FlexTable();
+
         submitNews = new Button("Submit");
         cancelNews = new Button("Cancel");
 
         newsAdd = new FlexTable();
         newsAdd.setHTML(0, 0, "Title");
-        TextBox title = new TextBox();
+        title = new TextBox();
         newsAdd.setWidget(0, 1, title);
+
         newsAdd.setHTML(1, 0, "Body");
-        TextArea area = new TextArea();
+        area = new TextArea();
         newsAdd.setWidget(1, 1, area);
+
+        newsAdd.setWidget(2, 0, submitNews);
+        newsAdd.setWidget(2, 1, cancelNews);
+        newsAdd.setVisible(false);
     }
 
     @Override
@@ -75,6 +83,7 @@ public class HomePageView extends AbstractLayout implements IHomePageView {
         table.getFlexCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_RIGHT);
 
         table.setWidget(1, 0, newsAdd);
+        table.setWidget(2, 0, news);
 
         return table;
     }
@@ -85,7 +94,30 @@ public class HomePageView extends AbstractLayout implements IHomePageView {
     }
 
     @Override
-    public void addNewsItem(String id, String string, String header, String body) {
+    public void addNewsItem(String id, String date, String header, String body) {
+        String html = "<div style=\"border-top: 1px solid #f1f1f1; margin-bottom: 10px; padding: 6px;\"><b>"
+                + header + "</b><br><span>" + date + "</span><br><br><div>" + body + "</div></div>";
+        HTMLPanel panel = new HTMLPanel(html);
+        news.insert(panel, 0);
+    }
 
+    @Override
+    public String getNewsTitle() {
+        return this.title.getText();
+    }
+
+    @Override
+    public String getNewsBody() {
+        return this.area.getText();
+    }
+
+    @Override
+    public Button getSubmitButton() {
+        return this.submitNews;
+    }
+
+    @Override
+    public void setAddNewsVisibility(boolean visible) {
+        this.newsAdd.setVisible(visible);
     }
 }
