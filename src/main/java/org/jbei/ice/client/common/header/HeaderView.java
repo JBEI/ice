@@ -182,10 +182,6 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
         return this.searchInput;
     }
 
-    public Button getQuickSearchButton() {
-        return this.searchBtn;
-    }
-
     @Override
     public HasClickHandlers getClickHandler() {
         return this.logout;

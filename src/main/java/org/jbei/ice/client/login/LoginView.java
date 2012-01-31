@@ -9,9 +9,12 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -41,12 +44,28 @@ public class LoginView extends Composite implements ILoginView {
         initComponents();
 
         layout.setWidget(0, 0, createHeader());
-        layout.setHTML(1, 0, "&nbsp;");
-        layout.setWidget(2, 0, createContents());
-        layout.getCellFormatter().setVerticalAlignment(2, 0, HasVerticalAlignment.ALIGN_TOP);
-        layout.getCellFormatter().setHorizontalAlignment(2, 0, HasAlignment.ALIGN_CENTER);
-        layout.getCellFormatter().setHeight(2, 0, "100%");
-        layout.setWidget(3, 0, createFooter());
+        layout.setWidget(0, 1, getRegisterPasswordPanel());
+        layout.getFlexCellFormatter().setHorizontalAlignment(0, 1, HasAlignment.ALIGN_RIGHT);
+
+        layout.setWidget(1, 0, createContents());
+        layout.getCellFormatter().setVerticalAlignment(1, 0, HasVerticalAlignment.ALIGN_TOP);
+        layout.getCellFormatter().setHorizontalAlignment(1, 0, HasAlignment.ALIGN_CENTER);
+        layout.getCellFormatter().setHeight(1, 0, "100%");
+        layout.getFlexCellFormatter().setColSpan(1, 0, 2);
+
+        layout.setWidget(2, 0, createFooter());
+        layout.getFlexCellFormatter().setColSpan(2, 0, 2);
+    }
+
+    private Widget getRegisterPasswordPanel() {
+        // TODO : use jbei settings to check if user can change password (PASSWORD_CHANGE_ALLOWED)
+        HorizontalPanel panel = new HorizontalPanel();
+        panel.setStyleName("font-85em");
+        panel.setSpacing(10);
+        panel.add(new Hyperlink("Forgot your password?", "foo"));
+        panel.add(new HTML("<span style=\"color: #ccc\">|</span>"));
+        panel.add(new Hyperlink("Register", "foo1"));
+        return panel;
     }
 
     private void initComponents() {

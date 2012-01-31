@@ -1,7 +1,6 @@
 package org.jbei.ice.client.bulkimport;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 import org.jbei.ice.client.AbstractPresenter;
@@ -18,16 +17,12 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionChangeEvent.Handler;
-import com.google.gwt.view.client.SingleSelectionModel;
 
 public class BulkImportPresenter extends AbstractPresenter {
 
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
     private final IBulkImportView view;
-    private final SingleSelectionModel<ImportType> selectionModel;
     private HashMap<AutoCompleteField, ArrayList<String>> autoCompleteData;
     private HashMap<ImportType, NewBulkInput> sheetCache;
 
@@ -38,19 +33,16 @@ public class BulkImportPresenter extends AbstractPresenter {
         this.eventBus = eventBus;
         this.view = display;
 
-        selectionModel = new SingleSelectionModel<ImportType>();
         sheetCache = new HashMap<ImportType, NewBulkInput>();
 
         // add menu items
-        this.view.getMenu().setRowData(Arrays.asList(ImportType.values()));
-        this.view.getMenu().setSelectionModel(selectionModel);
-
-        this.selectionModel.addSelectionChangeHandler(new Handler() {
+        this.view.getMenu().addClickHandler(new ClickHandler() {
 
             @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                ImportType selection = selectionModel.getSelectedObject();
-                display.setHeader(selection.getDisplay());
+            public void onClick(ClickEvent event) {
+                // TODO Auto-generated method stub
+                ImportType selection = view.getMenu().getCurrentSelection();
+                display.setHeader(selection.getDisplay() + " BULK IMPORT");
                 final NewBulkInput input;
 
                 if (sheetCache.containsKey(selection))
@@ -72,9 +64,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                         }
                     });
                 }
-
                 display.setSheet(input);
-
             }
         });
 
@@ -111,7 +101,7 @@ public class BulkImportPresenter extends AbstractPresenter {
 
                 @Override
                 public void onSuccess(ArrayList<BulkImportDraftInfo> result) {
-                    view.getDraftMenu().setRowData(result);
+                    view.getDraftMenu().setData(result);
                 }
             });
     }

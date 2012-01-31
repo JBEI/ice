@@ -1,7 +1,6 @@
 package org.jbei.ice.client.common.search;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.jbei.ice.client.common.FilterOperand;
 import org.jbei.ice.shared.QueryOperator;
@@ -13,12 +12,11 @@ import com.google.gwt.user.client.ui.TextBox;
 
 public class SearchFilterOperand extends FilterOperand {
 
-    private final List<QueryOperator> operators;
+    private final ArrayList<QueryOperator> operators;
     private final ListBox list;
     private final TextBox box;
 
     public SearchFilterOperand(SearchFilterType type, QueryOperator... operators) {
-
         super(type);
 
         list = new ListBox();
@@ -34,7 +32,6 @@ public class SearchFilterOperand extends FilterOperand {
 
     @Override
     public void addWidgets(HorizontalPanel panel) {
-
         panel.add(list);
         panel.add(box);
     }
@@ -48,7 +45,7 @@ public class SearchFilterOperand extends FilterOperand {
     }
 
     @Override
-    public QueryOperator getOperator() {
+    public QueryOperator getSelectedOperator() {
         int indx = this.list.getSelectedIndex();
         return this.operators.get(indx);
     }
@@ -56,5 +53,10 @@ public class SearchFilterOperand extends FilterOperand {
     @Override
     public String getOperand() {
         return this.box.getText();
+    }
+
+    @Override
+    public ArrayList<QueryOperator> getOperatorList() {
+        return operators;
     }
 }

@@ -6,10 +6,6 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 	font: normal 100% Arial, sans-serif;
 	background: #ffffff;
 	padding: 0;
-	margin-top: 5;
-	margin-bottom: 5;
-	margin-left: 5;
-	margin-right: 5;
 	height: 100%;
 }
 
@@ -24,6 +20,7 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 .pad-40 { padding: 40px; }
 .pad-left-40 { padding-left: 40px; }
 .to_upper { text-transform: uppercase; }
+.border-bottom { border-bottom: 1px solid #ccc;}
 
 .btn_submit_entry_form {
 	padding: 5px;
@@ -270,7 +267,6 @@ a.cell_mouseover:hover {
 }
 
 .focus_panel {
-	
 }
 
 .index_td_cell {
@@ -329,9 +325,15 @@ a.cell_mouseover:hover {
 }
 
 /* HEADER MENU */
+
 #dark {
 	background: none repeat scroll 0 0 #444;
 	color: #FFFFFF;
+	text-align: center;
+	border-radius: 2px;
+    -webkit-border-radius: 2px;
+    -webkit-box-shadow: 1px 1px 2px #ccc; 
+    -moz-box-shadow: 1px 1px 2px #ccc;
 }
 
 #indented ul {
@@ -386,7 +388,7 @@ a.cell_mouseover:hover {
 	padding: 2px 6px 2px 6px;
     border: 1px solid #ccc;
     background-color: #F2F2F2;
-    color: #555;
+    color: #999;
     cursor: default;
     font-weight: bold;
 }
@@ -445,10 +447,6 @@ a.cell_mouseover:hover {
 }
 
 .collection_list_header_description {
-    -webkit-border-top-left-radius: 6px; 
-    -moz-border-top-left-radius: 6px;
-    border-top-left-radius: 6px;
-    -webkit-border-top-right-radius: 6px;
     border-top: 1px solid #d5d5d5;  
     border-bottom: 1px solid #d5d5d5; 
     padding-left: 10px;
@@ -458,7 +456,7 @@ a.cell_mouseover:hover {
 .collection_list_pager_cell {
     width: 120px;
     border: 1px solid #d5d5d5; 
-    background-color: #efedde;
+    background-color: #f9edbe;
     text-align:center;
     padding: 5px;
 }

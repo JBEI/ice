@@ -1,5 +1,7 @@
 package org.jbei.ice.client.common;
 
+import java.util.ArrayList;
+
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
 
@@ -18,13 +20,11 @@ public class BooleanFilterOperand extends FilterOperand {
         operator = QueryOperator.BOOLEAN;
         yesRadio = new RadioButton(operator.operator(), "Yes");
         noRadio = new RadioButton(operator.operator(), "No");
-
         this.addWidgets(hPanel);
-
     }
 
     @Override
-    public QueryOperator getOperator() {
+    public QueryOperator getSelectedOperator() {
         return operator;
     }
 
@@ -37,5 +37,12 @@ public class BooleanFilterOperand extends FilterOperand {
     public void addWidgets(HorizontalPanel panel) {
         panel.add(yesRadio);
         panel.add(noRadio);
+    }
+
+    @Override
+    public ArrayList<QueryOperator> getOperatorList() {
+        ArrayList<QueryOperator> operators = new ArrayList<QueryOperator>();
+        operators.add(operator);
+        return operators;
     }
 }

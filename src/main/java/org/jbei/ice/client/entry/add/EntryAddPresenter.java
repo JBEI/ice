@@ -105,6 +105,7 @@ public class EntryAddPresenter extends AbstractPresenter {
                 if (!display.getMenu().isValidClick(event))
                     return;
 
+                feedbackPanel.setVisible(false);
                 EntryAddType selected = display.getMenu().getCurrentSelection();
                 getSampleLocation(selected);
                 EntryCreateWidget form = getEntryForm(selected);

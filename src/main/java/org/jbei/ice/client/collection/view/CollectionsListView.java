@@ -34,7 +34,10 @@ public class CollectionsListView extends AbstractLayout implements ICollectionLi
     protected void initComponents() {
         super.initComponents();
         systemCollectionTable = new CollectionListTable();
+        systemCollectionTable.addStyleName("border-bottom");
         userCollectionTable = new CollectionListTable();
+        userCollectionTable.addStyleName("border-bottom");
+
         addCollectionButton = new Button("Add");
         addCollectionButton.setStyleName("collection_user_add_button");
 
@@ -98,7 +101,7 @@ public class CollectionsListView extends AbstractLayout implements ICollectionLi
                     0,
                     1,
                     new HTML(
-                            "<span style=\"color: #aaa;\" class=\"font-85em\">Collection of entries created by your administrator and available to all users.</span>"));
+                            "<span style=\"color: #aaa; padding-left: 20px\" class=\"font-85em\">Collection of entries created by your administrator and available to all users.</span>"));
         systemTable.getFlexCellFormatter().setStyleName(0, 1, "collection_list_header_description");
 
         // pager
@@ -128,7 +131,7 @@ public class CollectionsListView extends AbstractLayout implements ICollectionLi
         userTable.getFlexCellFormatter().setWidth(0, 0, "160px");
 
         // description
-        String html = "<span style=\"color: #aaa;\" class=\"font-85em\">Collection of entries created by you."
+        String html = "<span style=\"color: #aaa; padding-left: 20px\" class=\"font-85em\">Collection of entries created by you."
                 + " These are available only to you.</span> &nbsp; &nbsp; <span id=\"collection_user_add_button\"></span>";
         HTMLPanel panel = new HTMLPanel(html);
         panel.add(addCollectionButton, "collection_user_add_button");

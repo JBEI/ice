@@ -8,6 +8,7 @@ import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.menu.ExportAsMenu;
 import org.jbei.ice.client.collection.menu.UserCollectionMultiSelect;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
+import org.jbei.ice.client.common.header.QuickSearchParser;
 import org.jbei.ice.client.event.SearchEvent;
 import org.jbei.ice.client.event.SearchSelectionHandler;
 import org.jbei.ice.client.util.Utils;
@@ -62,6 +63,37 @@ public class AdvancedSearchPresenter extends AbstractPresenter {
                 // TODO Auto-generated method stub
             }
         };
+    }
+
+    public AdvancedSearchPresenter(RegistryServiceAsync rpcService, HandlerManager eventBus,
+            IAdvancedSearchView view, String query) {
+        this(rpcService, eventBus, view);
+        ArrayList<SearchFilterInfo> filters = QuickSearchParser.parse(query);
+        rpcService.retrieveSearchResults(filters, new AsyncCallback<ArrayList<Long>>() {
+
+            @Override
+            public void onSuccess(ArrayList<Long> result) {
+                display.setResultsVisibility(true);
+                dataProvider.setValues(result);
+                reset();
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert("Call failed: " + caught.getMessage());
+
+                // TODO: Hide the table and show a red error msg in the position where it states
+                // "no records found"
+                display.setResultsVisibility(false);
+                reset();
+            }
+
+            public void reset() {
+                display.getEvaluateButton().setEnabled(true);
+                Utils.showDefaultCursor(null);
+            }
+        });
+
     }
 
     public void retrieveUserCollections() {

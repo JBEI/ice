@@ -29,6 +29,8 @@ public class CollectionListTable extends DataTable<FolderDetails> {
     private DataProvider provider;
 
     public CollectionListTable() {
+        super();
+        this.setPageSize(5);
         provider = new DataProvider();
         provider.addDataDisplay(this);
     }
@@ -149,7 +151,9 @@ public class CollectionListTable extends DataTable<FolderDetails> {
             if (end > data.size())
                 end = data.size();
 
-            sortByColumn(this.getSortField(), sortList.get(0).isAscending());
+            if (sortList != null && sortList.size() > 0) {
+                sortByColumn(this.getSortField(), sortList.get(0).isAscending());
+            }
             CollectionListTable.this.setRowData(start, data.subList(start, end));
         }
 

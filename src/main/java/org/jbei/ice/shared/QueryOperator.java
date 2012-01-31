@@ -39,4 +39,16 @@ public enum QueryOperator {
     public String value() {
         return value;
     }
+
+    public static QueryOperator operatorValueOf(String value) {
+        try {
+            return QueryOperator.valueOf(value);
+        } catch (IllegalArgumentException iae) {
+            for (QueryOperator operator : QueryOperator.values()) {
+                if (value.equals(operator.value))
+                    return operator;
+            }
+            return null;
+        }
+    }
 }

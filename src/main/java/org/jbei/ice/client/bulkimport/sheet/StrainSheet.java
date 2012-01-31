@@ -14,6 +14,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -176,7 +177,7 @@ public class StrainSheet extends Sheet {
         int cellCount = sheetTable.getCellCount(row); // TODO : this should equal FIELDS value or else there is a big problem
 
         for (int i = 0; i < cellCount; i += 1) {
-            Label widget = (Label) sheetTable.getWidget(row, i);
+            HasText widget = (HasText) sheetTable.getWidget(row, i);
             if (!widget.getText().isEmpty())
                 return false;
         }

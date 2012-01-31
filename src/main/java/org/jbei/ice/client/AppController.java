@@ -163,8 +163,13 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             break;
 
         case QUERY:
-            presenter = new AdvancedSearchPresenter(this.service, this.eventBus,
-                    new AdvancedSearchView());
+            param = parseSingleToken(token);
+            if (param == null)
+                presenter = new AdvancedSearchPresenter(this.service, this.eventBus,
+                        new AdvancedSearchView());
+            else
+                presenter = new AdvancedSearchPresenter(this.service, this.eventBus,
+                        new AdvancedSearchView(), param);
             break;
 
         case BULK_IMPORT:
@@ -214,6 +219,14 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         }
 
         return tokens;
+    }
+
+    private String parseSingleToken(String token) {
+        String[] split = token.split("id=");
+        if (split.length <= 1)
+            return null;
+
+        return split[1];
     }
 
     // newItem and fireCurrentHistoryState causes onValueChange call

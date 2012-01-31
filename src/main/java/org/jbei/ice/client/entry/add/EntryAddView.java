@@ -28,12 +28,17 @@ public class EntryAddView extends AbstractLayout implements IEntryAddView {
     protected Widget createContents() {
         FlexTable contentTable = new FlexTable();
         contentTable.setWidth("100%");
+        contentTable.setCellPadding(0);
+        contentTable.setCellSpacing(0);
         contentTable.setWidget(0, 0, createMenu());
         contentTable.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
+
         // TODO : middle sliver goes here
-        contentTable.setWidget(0, 1, createMainContent());
-        contentTable.getCellFormatter().setWidth(0, 1, "100%");
-        contentTable.getFlexCellFormatter().setVerticalAlignment(0, 1, HasAlignment.ALIGN_TOP);
+        contentTable.setHTML(0, 1, "&nbsp;");
+
+        contentTable.setWidget(0, 2, createMainContent());
+        contentTable.getCellFormatter().setWidth(0, 2, "100%");
+        contentTable.getFlexCellFormatter().setVerticalAlignment(0, 2, HasAlignment.ALIGN_TOP);
         return contentTable;
     }
 
@@ -74,6 +79,7 @@ public class EntryAddView extends AbstractLayout implements IEntryAddView {
         contentHeader.setText(title);
     }
 
+    @Override
     public void setFeedbackPanel(FeedbackPanel panel) {
         mainContent.setWidget(0, 1, panel);
         mainContent.getFlexCellFormatter().setHorizontalAlignment(0, 1, HasAlignment.ALIGN_CENTER);

@@ -20,10 +20,10 @@ public enum SearchFilterType {
             "Part ID", "id", false), TYPE("Type", "type", false), STATUS("Status", "status", false), OWNER(
             "Owner", "owner", true), CREATOR("Creator", "creator", false), KEYWORDS("Keywords",
             "keywords", false), DESCRIPTION("Description (Summary/Notes/References)",
-            "description", false), HAS_ATTACHMENT("Has Attachment", "", false), HAS_SEQUENCE(
+            "description", false), HAS_ATTACHMENT("Has Attachment", "has_attach", false), HAS_SEQUENCE(
             "Has Sequence", "", false), HAS_SAMPLE("Has Sample", "", false), BIO_SAFETY_LEVEL(
-            "Bio Safety Level", "", false), INTELLECTUAL_PROPERTY("Intellectual Property", "",
-            false), PRINCIPAL_INVESTIGATOR("Principal Investigator", "", false), FUNDING_SOURCE(
+            "Bio Safety Level", "", false), INTELLECTUAL_PROPERTY("Intellectual Property", "ip",
+            false), PRINCIPAL_INVESTIGATOR("Principal Investigator", "pi", false), FUNDING_SOURCE(
             "Funding Source", "", false), SELECTION_MARKER(
             "Selection Marker (Strains and Plasmids only)", "", false), BACKBONE(
             "Backbone (Plasmids only)", "", false), PROMOTERS("Promoters (Plasmids Only)", "",
@@ -58,6 +58,19 @@ public enum SearchFilterType {
 
     public String getShortName() {
         return this.shortName;
+    }
+
+    public static SearchFilterType filterValueOf(String value) {
+        try {
+            return SearchFilterType.valueOf(value);
+        } catch (IllegalArgumentException iae) {
+            for (SearchFilterType type : SearchFilterType.values()) {
+                if (value.equals(type.shortName) && !type.getShortName().isEmpty())
+                    return type;
+            }
+
+            return null;
+        }
     }
 
     /**

@@ -1,23 +1,20 @@
-package org.jbei.ice.client.entry.add.menu;
-
-import org.jbei.ice.shared.EntryAddType;
+package org.jbei.ice.client.bulkimport;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
 
-public class EntryAddMenu extends Composite implements HasClickHandlers {
+public class BulkImportMenu extends Composite implements HasClickHandlers {
 
     private final FlexTable table;
-    private EntryAddType currentSelected;
+    private ImportType currentSelected;
 
-    public EntryAddMenu() {
+    public BulkImportMenu() {
         table = new FlexTable();
         initWidget(table);
 
@@ -29,7 +26,7 @@ public class EntryAddMenu extends Composite implements HasClickHandlers {
 
         int row = 1;
         // set menu options
-        for (EntryAddType type : EntryAddType.values()) {
+        for (ImportType type : ImportType.values()) {
             final MenuCell cell = new MenuCell(type);
             cell.addClickHandler(new ClickHandler() {
 
@@ -43,13 +40,8 @@ public class EntryAddMenu extends Composite implements HasClickHandlers {
         }
     }
 
-    public EntryAddType getCurrentSelection() {
+    public ImportType getCurrentSelection() {
         return this.currentSelected;
-    }
-
-    private String formatNumber(long l) {
-        NumberFormat format = NumberFormat.getFormat("##,###");
-        return format.format(l);
     }
 
     // TODO : when this is combined with other menus 
@@ -71,20 +63,20 @@ public class EntryAddMenu extends Composite implements HasClickHandlers {
     private class MenuCell extends Composite implements HasClickHandlers {
 
         private final HTMLPanel panel;
-        private final EntryAddType addType;
+        private final ImportType addType;
 
-        public MenuCell(EntryAddType addType) {
+        public MenuCell(ImportType addType) {
 
             this.addType = addType;
 
             String html = "<span style=\"padding: 5px\" class=\"collection_user_menu\">"
-                    + addType.toString() + "</span>";
+                    + addType.getDisplay() + "</span>";
             panel = new HTMLPanel(html);
             panel.setStyleName("collection_user_menu_row");
             initWidget(panel);
         }
 
-        public EntryAddType getAddType() {
+        public ImportType getAddType() {
             return this.addType;
         }
 
@@ -93,5 +85,4 @@ public class EntryAddMenu extends Composite implements HasClickHandlers {
             return addDomHandler(handler, ClickEvent.getType());
         }
     }
-
 }

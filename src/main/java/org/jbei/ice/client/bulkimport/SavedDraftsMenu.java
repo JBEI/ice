@@ -1,6 +1,8 @@
-package org.jbei.ice.client.entry.add.menu;
+package org.jbei.ice.client.bulkimport;
 
-import org.jbei.ice.shared.EntryAddType;
+import java.util.ArrayList;
+
+import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -12,30 +14,33 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
 
-public class EntryAddMenu extends Composite implements HasClickHandlers {
+public class SavedDraftsMenu extends Composite implements HasClickHandlers {
 
     private final FlexTable table;
-    private EntryAddType currentSelected;
+    private BulkImportDraftInfo currentSelected;
 
-    public EntryAddMenu() {
+    public SavedDraftsMenu() {
         table = new FlexTable();
         initWidget(table);
 
         table.setCellPadding(0);
         table.setCellSpacing(0);
         table.setStyleName("collection_menu_table");
-        table.setHTML(0, 0, "SELECT NEW ENTRY TYPE");
+        table.setHTML(0, 0, "SAVED DRAFTS");
         table.getFlexCellFormatter().setStyleName(0, 0, "collections_menu_header");
+    }
+
+    public void setData(ArrayList<BulkImportDraftInfo> data) {
 
         int row = 1;
         // set menu options
-        for (EntryAddType type : EntryAddType.values()) {
-            final MenuCell cell = new MenuCell(type);
+        for (BulkImportDraftInfo info : data) {
+            final MenuCell cell = new MenuCell(info);
             cell.addClickHandler(new ClickHandler() {
 
                 @Override
                 public void onClick(ClickEvent event) {
-                    currentSelected = cell.getAddType();
+                    currentSelected = cell.getDraftInfo();
                 }
             });
             table.setWidget(row, 0, cell);
@@ -43,13 +48,8 @@ public class EntryAddMenu extends Composite implements HasClickHandlers {
         }
     }
 
-    public EntryAddType getCurrentSelection() {
+    public BulkImportDraftInfo getCurrentSelection() {
         return this.currentSelected;
-    }
-
-    private String formatNumber(long l) {
-        NumberFormat format = NumberFormat.getFormat("##,###");
-        return format.format(l);
     }
 
     // TODO : when this is combined with other menus 
@@ -71,21 +71,28 @@ public class EntryAddMenu extends Composite implements HasClickHandlers {
     private class MenuCell extends Composite implements HasClickHandlers {
 
         private final HTMLPanel panel;
-        private final EntryAddType addType;
+        private final BulkImportDraftInfo draftInfo;
 
-        public MenuCell(EntryAddType addType) {
+        public MenuCell(BulkImportDraftInfo draftInfo) {
 
-            this.addType = addType;
+            this.draftInfo = draftInfo;
 
             String html = "<span style=\"padding: 5px\" class=\"collection_user_menu\">"
-                    + addType.toString() + "</span>";
+                    + draftInfo.getName() + "</span><span class=\"menu_count\" id=\""
+                    + formatNumber(draftInfo.getCount()) + "\"></span>";
+
             panel = new HTMLPanel(html);
             panel.setStyleName("collection_user_menu_row");
             initWidget(panel);
         }
 
-        public EntryAddType getAddType() {
-            return this.addType;
+        private String formatNumber(long l) {
+            NumberFormat format = NumberFormat.getFormat("##,###");
+            return format.format(l);
+        }
+
+        public BulkImportDraftInfo getDraftInfo() {
+            return this.draftInfo;
         }
 
         @Override
@@ -93,5 +100,4 @@ public class EntryAddMenu extends Composite implements HasClickHandlers {
             return addDomHandler(handler, ClickEvent.getType());
         }
     }
-
 }

@@ -1,5 +1,7 @@
 package org.jbei.ice.client.common;
 
+import java.util.ArrayList;
+
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
 
@@ -29,7 +31,9 @@ public abstract class FilterOperand extends Composite {
         return this.type;
     }
 
-    public abstract QueryOperator getOperator();
+    public abstract QueryOperator getSelectedOperator();
+
+    public abstract ArrayList<QueryOperator> getOperatorList();
 
     public abstract String getOperand();
 

@@ -1,5 +1,6 @@
 package org.jbei.ice.client.common;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jbei.ice.client.model.OperandValue;
@@ -13,16 +14,20 @@ public class TypeOperand extends FilterOperand {
 
     private final ListBox operators;
     private final ListBox operands;
+    private final ArrayList<QueryOperator> operatorsList;
 
     public TypeOperand(SearchFilterType filterType, List<OperandValue> operands,
             QueryOperator... operators) {
 
         super(filterType);
 
+        operatorsList = new ArrayList<QueryOperator>();
+
         // entry types
         this.operators = new ListBox();
         for (QueryOperator operator : operators) {
             this.operators.addItem(operator.operator(), operator.name());
+            operatorsList.add(operator);
         }
 
         this.operands = new ListBox();
@@ -33,7 +38,7 @@ public class TypeOperand extends FilterOperand {
     }
 
     @Override
-    public QueryOperator getOperator() {
+    public QueryOperator getSelectedOperator() {
         int index = this.operators.getSelectedIndex();
         String value = this.operators.getValue(index);
         return QueryOperator.valueOf(value);
@@ -51,5 +56,10 @@ public class TypeOperand extends FilterOperand {
 
         panel.add(operators);
         panel.add(operands);
+    }
+
+    @Override
+    public ArrayList<QueryOperator> getOperatorList() {
+        return operatorsList;
     }
 }

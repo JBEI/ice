@@ -56,7 +56,7 @@ public class ExportAsMenu implements IsWidget {
 
             @Override
             public void render(Context context, ExportAsOption value, SafeHtmlBuilder sb) {
-                sb.appendHtmlConstant("<span style=>" + value.toString() + "</span>");
+                sb.appendHtmlConstant("<span>" + value.toString() + "</span>");
             }
         }, ExportAsResource.INSTANCE);
 

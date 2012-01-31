@@ -25,8 +25,8 @@ public class QueryFilter {
         if (trans == null)
             throw new IllegalArgumentException("Null parameter for QueryFilter");
 
-        type = SearchFilterType.valueOf(trans.getType());
-        operator = QueryOperator.valueOf(trans.getOperator());
+        type = SearchFilterType.filterValueOf(trans.getType());
+        operator = QueryOperator.operatorValueOf(trans.getOperator());
         operand = trans.getOperand();
 
         params = SearchFilterCallbackFactory.getFilterParameters(trans);

@@ -24,7 +24,7 @@ public class CollectionListPager extends AbstractPager {
                 CollectionListPager.super.setPage(indx);
             }
         });
-        nextLink.addStyleName("nav-left");
+        nextLink.addStyleName("nav-right");
 
         prevLink = new NavLink("&lt;", new ClickHandler() {
 
@@ -34,7 +34,7 @@ public class CollectionListPager extends AbstractPager {
                 CollectionListPager.super.setPage(indx);
             }
         });
-        prevLink.addStyleName("nav-right");
+        prevLink.addStyleName("nav-left");
 
         table = new FlexTable();
         table.setCellPadding(0);

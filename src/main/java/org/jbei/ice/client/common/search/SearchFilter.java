@@ -71,7 +71,7 @@ public class SearchFilter extends Composite {
     }
 
     public QueryOperator getOperator() {
-        return operand.getOperator();
+        return operand.getSelectedOperator();
     }
 
     public String getOperand() {

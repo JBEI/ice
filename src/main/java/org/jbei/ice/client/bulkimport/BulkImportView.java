@@ -1,106 +1,78 @@
 package org.jbei.ice.client.bulkimport;
 
-import org.jbei.ice.client.bulkimport.model.BulkImportMenu;
 import org.jbei.ice.client.common.AbstractLayout;
 
-import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class BulkImportView extends AbstractLayout implements IBulkImportView {
 
-    private CellList<ImportType> menu;
-    private BulkImportMenu draftsMenu;
+    private BulkImportMenu menu;
+    private SavedDraftsMenu draftsMenu;
     private Label contentHeader;
-
     private FlexTable mainContent;
-
-    public BulkImportView() {
-    }
+    private VerticalPanel subContent;
 
     @Override
     protected void initComponents() {
         super.initComponents();
-        draftsMenu = new BulkImportMenu();
-        menu = new CellList<ImportType>(new ImportListCell());
+        draftsMenu = new SavedDraftsMenu();
+        menu = new BulkImportMenu();
     }
 
     @Override
     protected Widget createContents() {
         FlexTable contentTable = new FlexTable();
         contentTable.setWidth("100%");
-        contentTable.setWidget(0, 0, createMenu());
+        contentTable.setCellPadding(0);
+        contentTable.setCellSpacing(0);
+        contentTable.setWidget(0, 0, menu);
         contentTable.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
-        contentTable.setWidget(1, 0, createDraftsMenu());
-        contentTable.getFlexCellFormatter().setVerticalAlignment(1, 0, HasAlignment.ALIGN_TOP);
+        contentTable.getFlexCellFormatter().setWidth(0, 0, "220px");
+
+        contentTable.setHTML(1, 0, "&nbsp;");
+
+        contentTable.setWidget(2, 0, draftsMenu);
+        contentTable.getFlexCellFormatter().setVerticalAlignment(2, 0, HasAlignment.ALIGN_TOP);
 
         // TODO : middle sliver goes here
-        contentTable.getFlexCellFormatter().setRowSpan(0, 1, 2);
-        contentTable.setWidget(0, 1, createMainContent());
-        contentTable.getFlexCellFormatter().setVerticalAlignment(0, 1, HasAlignment.ALIGN_TOP);
+        contentTable.setHTML(0, 1, "&nbsp;");
+        contentTable.getFlexCellFormatter().setRowSpan(0, 1, 3);
+
+        contentTable.getFlexCellFormatter().setRowSpan(0, 2, 3);
+        contentTable.setWidget(0, 2, createMainContent());
+        contentTable.getFlexCellFormatter().setVerticalAlignment(0, 2, HasAlignment.ALIGN_TOP);
 
         return contentTable;
     }
 
-    protected Widget createMenu() {
-        FlexTable layout = new FlexTable();
-        layout.setCellPadding(3);
-        layout.setCellSpacing(0);
-        layout.addStyleName("collection_menu_table");
-        layout.setHTML(0, 0, "Select A Type");
-        layout.getCellFormatter().setStyleName(0, 0, "collections_menu_header");
-
-        // cell to render value
-        layout.setWidget(1, 0, menu);
-        return layout;
-    }
-
-    protected Widget createDraftsMenu() {
-        FlexTable layout = new FlexTable();
-        layout.setCellPadding(3);
-        layout.setCellSpacing(0);
-        layout.addStyleName("collection_menu_table");
-        layout.setHTML(0, 0, "Saved Drafts");
-        layout.getCellFormatter().setStyleName(0, 0, "collections_menu_header");
-        layout.setWidget(1, 0, draftsMenu);
-
-        return layout;
-    }
-
     protected Widget createMainContent() {
+        subContent = new VerticalPanel();
+        subContent.setWidth("100%");
+        contentHeader = new Label("Bulk Import");
+
         mainContent = new FlexTable(); // wrapper
         mainContent.setCellPadding(3);
-        mainContent.setCellSpacing(0);
         mainContent.setWidth("100%");
-
-        mainContent.addStyleName("bulk_import_main_content_wrapper");
-
-        // content header (label)
-        contentHeader = new Label("Bulk Import");
-        contentHeader.setStyleName("bulk_import_main_content_header");
+        mainContent.setCellSpacing(0);
+        mainContent.addStyleName("add_new_entry_main_content_wrapper");
         mainContent.setWidget(0, 0, contentHeader);
+        mainContent.getCellFormatter().setStyleName(0, 0, "add_new_entry_main_content_header");
 
-        //        mainContent.setWidget(1, 0, createContentMenu());
-        //        mainContent.setWidget(2, 0, new StrainSheet());
+        // sub content
+        subContent.add(new HTML("<p>Please select the type of entry you wish to add. "
+                + "<p>Fields indicated by <span class=\"required\">*</span> are required. "
+                + "Other instructions here. Lorem ipsum."));
+        mainContent.setWidget(1, 0, subContent);
+        mainContent.getFlexCellFormatter().setStyleName(1, 0, "add_new_entry_sub_content");
+        mainContent.getFlexCellFormatter().setColSpan(1, 0, 2);
 
         return mainContent;
     }
-
-    //    private Widget createContentMenu() {
-    //
-    //        String html = "<span style=\"width: 50%; text-align: left; display: inline-block;\"><span id=\"input_draft_name\"></span><span id=\"btn_save_draft\"></span></span>"
-    //                + "<span style=\"width: 47%; text-align: right; display: inline-block;\"><span id=\"btn_reset\"></span><span id=\"btn_submit\"></span></span>";
-    //        HTMLPanel panel = new HTMLPanel(html);
-    //
-    //        panel.add(draftInput, "input_draft_name");
-    //        panel.add(draftSave, "btn_save_draft");
-    //        panel.add(reset, "btn_reset");
-    //        panel.add(submit, "btn_submit");
-    //
-    //        return panel;
-    //    }
 
     @Override
     public Widget asWidget() {
@@ -108,12 +80,12 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     }
 
     @Override
-    public CellList<ImportType> getMenu() {
+    public BulkImportMenu getMenu() {
         return this.menu;
     }
 
     @Override
-    public BulkImportMenu getDraftMenu() {
+    public SavedDraftsMenu getDraftMenu() {
         return this.draftsMenu;
     }
 

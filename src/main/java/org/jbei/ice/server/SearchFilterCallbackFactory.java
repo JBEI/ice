@@ -22,12 +22,11 @@ public class SearchFilterCallbackFactory {
     public static List<QueryFilterParams> getFilterParameters(SearchFilterInfo trans) {
 
         ArrayList<QueryFilterParams> params = new ArrayList<QueryFilterParams>();
-        SearchFilterType type = SearchFilterType.valueOf(trans.getType());
-        QueryOperator operator = QueryOperator.valueOf(trans.getOperator());
+        SearchFilterType type = SearchFilterType.filterValueOf(trans.getType());
+        QueryOperator operator = QueryOperator.operatorValueOf(trans.getOperator());
         String operand = trans.getOperand();
 
         for (FilterCallback callback : getQueryFilters(type)) {
-
             String criterion = callback.createCriterion(operator, operand);
             String from = callback.getFrom();
             String selection = callback.getSelection();

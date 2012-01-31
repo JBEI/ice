@@ -95,8 +95,12 @@ public class HomePageView extends AbstractLayout implements IHomePageView {
 
     @Override
     public void addNewsItem(String id, String date, String header, String body) {
-        String html = "<div style=\"border-top: 1px solid #f1f1f1; margin-bottom: 10px; padding: 6px;\"><b>"
-                + header + "</b><br><span>" + date + "</span><br><br><div>" + body + "</div></div>";
+        // TODO move styles to css
+        String html = "<div style=\"border-bottom: 1px solid #f1f1f1; margin-bottom: 10px; padding: 6px;\"><b style=\"color: #211f19; font-size: 1.20em\">"
+                + header
+                + "</b><br><span style=\"font-size: 0.75em; color: #a1a1a1\">"
+                + date
+                + "</span><br><br><div class=\"font-80em\">" + body + "</div></div>";
         HTMLPanel panel = new HTMLPanel(html);
         news.insert(panel, 0);
     }
