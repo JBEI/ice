@@ -104,7 +104,7 @@ public class Footer extends Composite {
         panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 
         HorizontalPanel line1 = new HorizontalPanel();
-        Hyperlink registry = new Hyperlink("JBEI Registry", Page.LOGIN.getToken());
+        Anchor registry = new Anchor("JBEI Registry", "http://code.google.com/p/gd-ice/");
         line1.add(new HTML("&copy;&nbsp;"));
         line1.add(registry);
 
