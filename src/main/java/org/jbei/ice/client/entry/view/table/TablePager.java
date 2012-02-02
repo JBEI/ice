@@ -9,6 +9,7 @@ import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.cellview.client.AbstractPager;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.HasRows;
@@ -21,6 +22,7 @@ public class TablePager extends AbstractPager {
 
     public TablePager() {
         this.label = new Label();
+        this.label.setStyleName("font-bold");
 
         nextLink = new NavLink("&gt;", new ClickHandler() {
 
@@ -30,6 +32,7 @@ public class TablePager extends AbstractPager {
                 TablePager.super.setPage(indx);
             }
         });
+        nextLink.addStyleName("nav-right");
 
         prevLink = new NavLink("&lt;", new ClickHandler() {
 
@@ -39,10 +42,13 @@ public class TablePager extends AbstractPager {
                 TablePager.super.setPage(indx);
             }
         });
+        prevLink.addStyleName("nav-left");
 
         HorizontalPanel layout = new HorizontalPanel();
-
+        layout.setSpacing(5);
+        layout.setStyleName("font-75em");
         layout.add(label);
+        layout.setVerticalAlignment(HasAlignment.ALIGN_MIDDLE);
         layout.add(prevLink);
         layout.add(nextLink);
         initWidget(layout);

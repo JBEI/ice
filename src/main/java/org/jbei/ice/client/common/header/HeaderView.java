@@ -2,6 +2,7 @@ package org.jbei.ice.client.common.header;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.ILogoutHandler;
+import org.jbei.ice.client.Page;
 import org.jbei.ice.shared.dto.AccountInfo;
 
 import com.google.gwt.core.client.GWT;
@@ -11,7 +12,6 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.AbsolutePanel;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -36,7 +36,7 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
         ImageResource arrowDown();
     }
 
-    private Anchor logout;
+    private Hyperlink logout;
     private CompositeText searchInput;
     private Button searchBtn;
 
@@ -168,7 +168,7 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
         panel.add(pipe);
 
         // logout link
-        logout = new Anchor("Log Out");
+        logout = new Hyperlink("Log Out", Page.LOGOUT.getLink());
         panel.add(logout);
 
         return panel;

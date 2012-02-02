@@ -23,7 +23,6 @@ public class HomePageView extends AbstractLayout implements IHomePageView {
     private TextArea area;
     private Button submitNews;
     private Button cancelNews;
-    private int row;
 
     @Override
     protected void initComponents() {
@@ -37,12 +36,17 @@ public class HomePageView extends AbstractLayout implements IHomePageView {
         cancelNews = new Button("Cancel");
 
         newsAdd = new FlexTable();
-        newsAdd.setHTML(0, 0, "Title");
+        newsAdd.setHTML(0, 0, "<span class=\"font-85em font-bold\">Title</span>");
         title = new TextBox();
+        title.setStyleName("input_box");
+        title.setWidth("350px");
         newsAdd.setWidget(0, 1, title);
 
-        newsAdd.setHTML(1, 0, "Body");
+        newsAdd.setHTML(1, 0, "<span class=\"font-85em font-bold\">Contents</span>");
+        newsAdd.getFlexCellFormatter().setVerticalAlignment(1, 0, HasAlignment.ALIGN_TOP);
         area = new TextArea();
+        area.setStyleName("input_box");
+        area.setSize("350px", "120px");
         newsAdd.setWidget(1, 1, area);
 
         newsAdd.setWidget(2, 0, submitNews);

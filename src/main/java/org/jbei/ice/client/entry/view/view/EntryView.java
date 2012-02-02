@@ -55,6 +55,7 @@ public class EntryView extends AbstractLayout implements IEntryView {
     // samples
     private HTMLPanel samplesPanel;
     private Button addSampleButton;
+    private CreateSampleForm sampleForm;
 
     // permissions
     private final PermissionsWidget permissions;
@@ -71,6 +72,9 @@ public class EntryView extends AbstractLayout implements IEntryView {
     @Override
     protected void initComponents() {
         super.initComponents();
+
+        sampleForm = new CreateSampleForm();
+        sampleForm.setVisible(false);
 
         uploadPanel = createSequenceUploadPanel();
 
@@ -299,12 +303,9 @@ public class EntryView extends AbstractLayout implements IEntryView {
         panel.setCellHorizontalAlignment(pager, HasAlignment.ALIGN_RIGHT);
 
         // add new sample 
-
-        CreateSampleForm sampleForm = new CreateSampleForm();
         panel.add(sampleForm);
 
         // end add new sample
-
         panel.add(table);
 
         if (samplesPanel == null) {
@@ -349,6 +350,11 @@ public class EntryView extends AbstractLayout implements IEntryView {
     @Override
     public void setEntryName(String name) {
         detailMenu.setHeader(name);
+    }
+
+    @Override
+    public CreateSampleForm getSampleForm() {
+        return this.sampleForm;
     }
 
     @Override

@@ -14,7 +14,7 @@ public class SheetHeaderPanel extends Composite {
 
     public SheetHeaderPanel() {
         String html = "<span style=\"width: 50%; text-align: left; display: inline-block;\"><span id=\"input_draft_name\"></span><span id=\"btn_save_draft\"></span></span>"
-                + "<span style=\"width: 47%; text-align: right; display: inline-block;\"><span id=\"btn_reset\"></span><span id=\"btn_submit\"></span></span>";
+                + "<span style=\"width: 47%; text-align: right; float:right; display: inline-block;\"><span id=\"btn_reset\"></span><span id=\"btn_submit\"></span></span>";
         HTMLPanel panel = new HTMLPanel(html);
 
         init();
@@ -28,16 +28,31 @@ public class SheetHeaderPanel extends Composite {
 
     private void init() {
         draftInput = new TextBox();
-        draftInput.setStylePrimaryName("input_box");
-        draftInput.setText("Enter Name");
+        draftInput.setStylePrimaryName("bulk_import_draft_input");
 
         draftSave = new Button("Save Draft");
+        draftSave.setStyleName("bulk_import_draft_save_button");
+
         reset = new Button("Reset");
+        reset.setStyleName("bulk_import_reset_button");
+
         submit = new Button("Submit");
+        submit.setStyleName("bulk_import_submit_button");
     }
 
     public Button getSubmit() {
         return this.submit;
     }
 
+    public Button getDraftSave() {
+        return draftSave;
+    }
+
+    public Button getReset() {
+        return this.reset;
+    }
+
+    public TextBox getDraftInput() {
+        return this.draftInput;
+    }
 }

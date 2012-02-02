@@ -39,6 +39,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 
+// TODO : this class is due for a makeover
 public class AppController extends AbstractPresenter implements ValueChangeHandler<String> {
 
     // cookie times out in three days (current value set in Ice)
@@ -123,6 +124,10 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         // TODO redirect after login
         if (AppController.sessionId == null)
             page = Page.LOGIN;
+        else {
+            if (page == Page.LOGIN)
+                page = Page.MAIN;
+        }
 
         AbstractPresenter presenter;
 

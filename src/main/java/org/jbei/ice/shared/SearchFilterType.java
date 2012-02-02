@@ -21,16 +21,17 @@ public enum SearchFilterType {
             "Owner", "owner", true), CREATOR("Creator", "creator", false), KEYWORDS("Keywords",
             "keywords", false), DESCRIPTION("Description (Summary/Notes/References)",
             "description", false), HAS_ATTACHMENT("Has Attachment", "has_attach", false), HAS_SEQUENCE(
-            "Has Sequence", "", false), HAS_SAMPLE("Has Sample", "", false), BIO_SAFETY_LEVEL(
-            "Bio Safety Level", "", false), INTELLECTUAL_PROPERTY("Intellectual Property", "ip",
-            false), PRINCIPAL_INVESTIGATOR("Principal Investigator", "pi", false), FUNDING_SOURCE(
-            "Funding Source", "", false), SELECTION_MARKER(
-            "Selection Marker (Strains and Plasmids only)", "", false), BACKBONE(
-            "Backbone (Plasmids only)", "", false), PROMOTERS("Promoters (Plasmids Only)", "",
-            false), ORIGIN("Origin of Replication (Plasmids Only)", "", false), HOST(
-            "Host (Strains Only)", "", false), STRAIN_PLASMIDS("Strain Plasmids (Strains only)",
-            "", false), GEN_PHEN("Genotype/Phenotype (Strains only)", "", false), PACKAGE_FORMAT(
-            "Package Format (Parts Only)", "", false), RECORD_ID("Record ID", "", false);
+            "Has Sequence", "has_seq", false), HAS_SAMPLE("Has Sample", "has_sample", false), BIO_SAFETY_LEVEL(
+            "Bio Safety Level", "safety_level", false), INTELLECTUAL_PROPERTY(
+            "Intellectual Property", "ip", false), PRINCIPAL_INVESTIGATOR("Principal Investigator",
+            "pi", false), FUNDING_SOURCE("Funding Source", "funding", false), SELECTION_MARKER(
+            "Selection Marker (Strains and Plasmids only)", "marker", false), BACKBONE(
+            "Backbone (Plasmids only)", "backbone", false), PROMOTERS("Promoters (Plasmids Only)",
+            "promoters", false), ORIGIN("Origin of Replication (Plasmids Only)", "origin", false), HOST(
+            "Host (Strains Only)", "host", false), STRAIN_PLASMIDS(
+            "Strain Plasmids (Strains only)", "plasmids", false), GEN_PHEN(
+            "Genotype/Phenotype (Strains only)", "gen_phen", false), PACKAGE_FORMAT(
+            "Package Format (Parts Only)", "format", false), RECORD_ID("Record ID", "rid", false);
 
     private String displayName;
     private boolean composite;

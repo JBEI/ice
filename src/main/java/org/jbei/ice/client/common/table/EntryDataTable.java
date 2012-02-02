@@ -47,7 +47,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
             DefaultSelectionEventManager.<T> createCheckboxManager());
     }
 
-    protected DataTableColumn<Boolean> addSelectionColumn() {
+    protected DataTableColumn<Boolean> addSelectionColumn(double width, Unit unit) {
         final CheckboxCell columnCell = new CheckboxCell(true, false) {
             @Override
             public void onBrowserEvent(Context context, Element parent, Boolean value,
@@ -80,12 +80,11 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         SelectionColumnHeader header = new SelectionColumnHeader();
 
         this.addColumn(selectionColumn, header);
-        this.setColumnWidth(selectionColumn, 10, Unit.PX);
-
+        this.setColumnWidth(selectionColumn, width, unit);
         return selectionColumn;
     }
 
-    protected DataTableColumn<String> addTypeColumn(boolean sortable) {
+    protected DataTableColumn<String> addTypeColumn(boolean sortable, double width, Unit unit) {
         DataTableColumn<String> typeCol = new DataTableColumn<String>(new TextCell(),
                 ColumnField.TYPE) {
 
@@ -96,11 +95,11 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         };
         typeCol.setSortable(sortable);
         this.addColumn(typeCol, "Type");
-        this.setColumnWidth(typeCol, 100, Unit.PX);
+        this.setColumnWidth(typeCol, width, unit);
         return typeCol;
     }
 
-    protected DataTableColumn<EntryInfo> addPartIdColumn(boolean sortable) {
+    protected DataTableColumn<EntryInfo> addPartIdColumn(boolean sortable, double width, Unit unit) {
 
         DataTableColumn<EntryInfo> partIdColumn = new DataTableColumn<EntryInfo>(
                 new PartIDCell<EntryInfo>(), ColumnField.PART_ID) {
@@ -111,13 +110,13 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
             }
         };
 
-        this.setColumnWidth(partIdColumn, 100, Unit.PX);
+        this.setColumnWidth(partIdColumn, width, unit);
         partIdColumn.setSortable(sortable);
         this.addColumn(partIdColumn, "Part ID");
         return partIdColumn;
     }
 
-    protected DataTableColumn<String> addNameColumn() {
+    protected DataTableColumn<String> addNameColumn(double width, Unit unit) {
         DataTableColumn<String> nameColumn = new DataTableColumn<String>(new TextCell(),
                 ColumnField.NAME) {
 
@@ -129,7 +128,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
         this.addColumn(nameColumn, "Name");
         nameColumn.setSortable(true);
-        this.setColumnWidth(nameColumn, 150, Unit.PX);
+        this.setColumnWidth(nameColumn, width, unit);
         return nameColumn;
     }
 

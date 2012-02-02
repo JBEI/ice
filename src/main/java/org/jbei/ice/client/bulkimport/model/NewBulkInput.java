@@ -3,10 +3,15 @@ package org.jbei.ice.client.bulkimport.model;
 import org.jbei.ice.client.bulkimport.panel.SheetHeaderPanel;
 import org.jbei.ice.client.bulkimport.sheet.Sheet;
 
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * Wrapper around the header container submit buttons etc
+ * and the actual sheet
+ * 
+ * @author Hector Plahar
+ */
 public class NewBulkInput extends Composite {
 
     private final SheetHeaderPanel panel;
@@ -24,12 +29,11 @@ public class NewBulkInput extends Composite {
 
     }
 
-    public Button getSubmit() {
-        return this.panel.getSubmit();
+    public SheetHeaderPanel getSheetHeaderPanel() {
+        return this.panel;
     }
 
     public Sheet getSheet() {
         return this.sheet;
     }
-
 }

@@ -1100,4 +1100,66 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
 
     }
+
+    @Override
+    public FolderDetails updateFolder(String sid, long folderId, FolderDetails update) {
+        Account account;
+        try {
+            account = retrieveAccountForSid(sid);
+            if (account == null)
+                return null;
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return null;
+        }
+
+        try {
+            Folder folder = FolderManager.get(folderId);
+            if (folder == null)
+                return null;
+
+            folder.setName(update.getName());
+            folder.setDescription(update.getDescription());
+            Folder updated = FolderManager.update(folder);
+            update.setId(updated.getId());
+            return update;
+
+        } catch (ManagerException e) {
+            Logger.error(e);
+            return null;
+        }
+    }
+
+    @Override
+    public BulkImportDraftInfo saveBulkImportDraft(String sid, String email, String name,
+            ArrayList<EntryInfo> info) {
+
+        Account account;
+        try {
+            account = retrieveAccountForSid(sid);
+            if (account == null)
+                return null;
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return null;
+        }
+
+        BulkImportDraft draft = new BulkImportDraft();
+        draft.setName(name);
+        // TODO : entry infos
+
+        try {
+            BulkImportDraft result = BulkImportManager.saveDraft(draft);
+            BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
+
+            draftInfo.setCreated(result.getCreationTime());
+            draftInfo.setName(result.getName());
+            return draftInfo;
+
+        } catch (ManagerException e) {
+            Logger.error(e);
+            return null;
+        }
+
+    }
 }

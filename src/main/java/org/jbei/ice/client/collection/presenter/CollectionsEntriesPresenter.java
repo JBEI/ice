@@ -22,11 +22,15 @@ import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.EntryInfo;
 
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -103,53 +107,9 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         this.display.setCollectionSubMenu(subMenu.asWidget());
 
         // handlers for the collection sub menu
-        addToSubmit.addClickHandler(new AddToFolderHandler(this.service) {
-
-            private int entrySize;
-
-            @Override
-            public void onClick(ClickEvent event) {
-                super.onClick(event);
-                subMenu.getCollectionMenu().hidePopup();
-                Set<FolderDetails> folders = subMenu.getCollectionMenu().getAddToDestination();
-                display.getUserCollectionMenu().setBusyIndicator(folders);
-                // TODO : return list of folders that have the busy indicator set to enable easy updateCounts();
-            }
-
-            @Override
-            protected ArrayList<FolderDetails> getDestination() {
-                ArrayList<FolderDetails> list = new ArrayList<FolderDetails>();
-                list.addAll(subMenu.getCollectionMenu().getAddToDestination());
-                return list;
-            }
-
-            @Override
-            protected ArrayList<Long> getEntryIds() {
-                // TODO : inefficient
-                ArrayList<Long> ids = new ArrayList<Long>();
-                for (EntryInfo datum : collectionsDataTable.getEntries()) {
-                    ids.add(Long.decode(datum.getRecordId()));
-                }
-                entrySize = ids.size();
-                return ids;
-            }
-
-            @Override
-            public void onAddSuccess(ArrayList<FolderDetails> results) {
-                display.getUserCollectionMenu().updateCounts(results);
-                String msg = "<b>" + entrySize + "</b> entries successfully added to ";
-                if (results.size() == 1)
-                    msg += ("\"" + results.get(0).getName() + "\" collection.");
-                else
-                    msg += (results.size() + " collections.");
-                feedbackPanel.setSuccessMessage(msg);
-            }
-
-            @Override
-            public void onAddFailure(String msg) {
-                feedbackPanel.setFailureMessage("An error occurred while adding the entries.");
-            }
-        });
+        CollectionEntryAddToFolderHandler addToFolderHandler = new CollectionEntryAddToFolderHandler(
+                this.service);
+        addToSubmit.addClickHandler(addToFolderHandler);
 
         // retrieve the referenced folder
         if (param != null)
@@ -185,6 +145,60 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 quickAddBox.setText("");
             }
         });
+
+        // quick edit
+        CollectionUserMenu userMenu = display.getUserCollectionMenu();
+        userMenu.getQuickEditBox().addBlurHandler(new BlurHandler() {
+
+            @Override
+            public void onBlur(BlurEvent event) {
+                handle();
+            }
+        });
+
+        userMenu.getQuickEditBox().addKeyDownHandler(new KeyDownHandler() {
+
+            @Override
+            public void onKeyDown(KeyDownEvent event) {
+                if (event.getNativeKeyCode() != KeyCodes.KEY_ENTER)
+                    return;
+                handle();
+            }
+        });
+    }
+
+    private void handle() {
+        if (!display.getUserCollectionMenu().getQuickEditBox().isVisible())
+            return;
+
+        String oldCollectionName = display.getUserCollectionMenu().getCurrentEditSelection()
+                .getName();
+        String newName = display.getUserCollectionMenu().getQuickEditBox().getText();
+
+        final FolderDetails currentEdit = display.getUserCollectionMenu().getCurrentEditSelection();
+
+        if (oldCollectionName.equals(newName)) {
+            // No change
+            display.getUserCollectionMenu().setEditDetail(currentEdit);
+        } else {
+            // RPC with newName
+            // TODO : show busy signal
+            currentEdit.setName(newName);
+            service.updateFolder(AppController.sessionId, currentEdit.getId(), currentEdit,
+                new AsyncCallback<FolderDetails>() {
+
+                    @Override
+                    public void onSuccess(FolderDetails result) {
+                        display.getUserCollectionMenu().setEditDetail(result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Window.alert("there was an error updating");
+                        display.getUserCollectionMenu().setEditDetail(currentEdit);
+                    }
+                });
+        }
     }
 
     private void saveCollection(String value) {
@@ -255,7 +269,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                     return;
 
                 feedbackPanel.setVisible(false);
-                retrieveEntriesForFolder(userMenu.getCurrentSelection());
+                retrieveEntriesForFolder(userMenu.getCurrentSelection().getId());
             }
         });
 
@@ -365,6 +379,8 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 ids.add(Long.decode(datum.getRecordId()));
             }
 
+            entrySize = collectionsDataTable.getEntries().size();
+
             // service call to actually add
             service.addEntriesToCollection(AppController.sessionId, destinationFolderIds, ids,
                 new AsyncCallback<ArrayList<FolderDetails>>() {
@@ -390,4 +406,56 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 });
         }
     }
+
+    // helper class for adding to folder
+    class CollectionEntryAddToFolderHandler extends AddToFolderHandler {
+        private int entrySize;
+
+        public CollectionEntryAddToFolderHandler(RegistryServiceAsync service) {
+            super(service);
+        }
+
+        @Override
+        public void onClick(ClickEvent event) {
+            super.onClick(event);
+            subMenu.getCollectionMenu().hidePopup();
+            Set<FolderDetails> folders = subMenu.getCollectionMenu().getAddToDestination();
+            display.getUserCollectionMenu().setBusyIndicator(folders);
+            // TODO : return list of folders that have the busy indicator set to enable easy updateCounts();
+        }
+
+        @Override
+        protected ArrayList<FolderDetails> getDestination() {
+            ArrayList<FolderDetails> list = new ArrayList<FolderDetails>();
+            list.addAll(subMenu.getCollectionMenu().getAddToDestination());
+            return list;
+        }
+
+        @Override
+        protected ArrayList<Long> getEntryIds() {
+            // TODO : inefficient
+            ArrayList<Long> ids = new ArrayList<Long>();
+            for (EntryInfo datum : collectionsDataTable.getEntries()) {
+                ids.add(Long.decode(datum.getRecordId()));
+            }
+            entrySize = ids.size();
+            return ids;
+        }
+
+        @Override
+        public void onAddSuccess(ArrayList<FolderDetails> results) {
+            display.getUserCollectionMenu().updateCounts(results);
+            String msg = "<b>" + entrySize + "</b> entries successfully added to ";
+            if (results.size() == 1)
+                msg += ("\"" + results.get(0).getName() + "\" collection.");
+            else
+                msg += (results.size() + " collections.");
+            feedbackPanel.setSuccessMessage(msg);
+        }
+
+        @Override
+        public void onAddFailure(String msg) {
+            feedbackPanel.setFailureMessage("An error occurred while adding the entries.");
+        }
+    };
 }

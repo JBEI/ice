@@ -244,10 +244,16 @@ public class EntryPresenter extends AbstractPresenter {
                 break;
 
             case SAMPLES:
-                display.showSampleView(sampleTable);
+                Button addSample = display.showSampleView(sampleTable);
+                addSample.addClickHandler(new ClickHandler() {
+
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        display.getSampleForm().setVisible(!display.getSampleForm().isVisible());
+                    }
+                });
                 break;
             }
-
         }
     }
 }

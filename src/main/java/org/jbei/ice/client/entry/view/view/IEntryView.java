@@ -36,4 +36,6 @@ public interface IEntryView {
     Button showSampleView(EntrySampleTable table);
 
     EntryDetailViewMenu getDetailMenu();
+
+    CreateSampleForm getSampleForm();
 }

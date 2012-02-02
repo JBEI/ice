@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jbei.ice.client.Page;
 import org.jbei.ice.client.common.table.DataTable;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.util.DateUtilities;
@@ -15,6 +16,7 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.ColumnSortList;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.view.client.AbstractDataProvider;
@@ -28,6 +30,8 @@ public class EntrySampleTable extends DataTable<SampleStorage> {
     public EntrySampleTable() {
         provider = new DataProvider();
         provider.addDataDisplay(this);
+        this.setStyleName("entry_sample_table");
+        this.setPageSize(5);
     }
 
     @Override
@@ -50,14 +54,18 @@ public class EntrySampleTable extends DataTable<SampleStorage> {
                     return;
 
                 Tree tree = new Tree();
-                TreeItem root = new TreeItem(list.get(0).getDisplay());
+                Hyperlink rootLink = new Hyperlink(list.get(0).getDisplay(), Page.STORAGE.getLink()
+                        + ";id=" + list.get(0).getId());
+                TreeItem root = new TreeItem(rootLink);
                 tree.addItem(root);
                 TreeItem tmp;
 
                 if (list.size() > 1) {
                     for (int i = 1; i < list.size(); i += 1) {
                         StorageInfo info = list.get(i);
-                        tmp = new TreeItem(info.getDisplay());
+                        Hyperlink infoLink = new Hyperlink(info.getDisplay(),
+                                Page.STORAGE.getLink() + ";id=" + info.getId());
+                        tmp = new TreeItem(infoLink);
                         root.addItem(tmp);
                         root = tmp;
                     }
@@ -96,9 +104,9 @@ public class EntrySampleTable extends DataTable<SampleStorage> {
 
             @Override
             public void render(Context context, SampleStorage value, SafeHtmlBuilder sb) {
-                sb.appendHtmlConstant("<span>");
+                sb.appendHtmlConstant("<span class=\"font-bold\">");
                 sb.appendEscaped(value.getSample().getLabel());
-                sb.appendHtmlConstant("</span><br><span>");
+                sb.appendHtmlConstant("</span><br><span style=\"color: #999\" class=\"font-85em\">");
                 sb.appendEscaped(value.getSample().getNotes() == null ? "" : value.getSample()
                         .getNotes());
                 sb.appendHtmlConstant("</span>");
@@ -119,8 +127,12 @@ public class EntrySampleTable extends DataTable<SampleStorage> {
             public void render(Context context, SampleStorage value, SafeHtmlBuilder sb) {
                 sb.appendHtmlConstant("<span>");
                 sb.appendEscaped(DateUtilities.formatDate(value.getSample().getCreationTime()));
+
+                Hyperlink link = new Hyperlink(value.getSample().getDepositor(),
+                        Page.PROFILE.getLink() + ";id=" + value.getSample().getDepositor());
+
                 sb.appendHtmlConstant("</span><br /><span>");
-                sb.appendEscaped("by " + value.getSample().getDepositor());
+                sb.appendHtmlConstant("by " + link.getElement().getInnerHTML());
                 sb.appendHtmlConstant("</span>");
             }
         };

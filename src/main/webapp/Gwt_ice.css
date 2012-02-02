@@ -10,6 +10,7 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 }
 
 .font-95em { font-size: 0.95em; }
+.font-90em { font-size: 0.90em; }
 .font-85em { font-size: 0.85em; }
 .font-80em { font-size: 0.80em; }
 .font-75em { font-size: 0.75em; }
@@ -21,6 +22,7 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 .pad-left-40 { padding-left: 40px; }
 .to_upper { text-transform: uppercase; }
 .border-bottom { border-bottom: 1px solid #ccc;}
+.pull_down { border: 1px solid #CCC; background-color: #f1f1f1; }
 
 .btn_submit_entry_form {
 	padding: 5px;
@@ -109,6 +111,11 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 	background: #FCC;
 }
 
+.input_box_error {
+	border: 1px solid #CC3333;
+    background: #FCC;
+}
+
 .entry_add_parameter {
 	text-align: right;
 	padding-right: 10px;
@@ -195,6 +202,24 @@ a.cell_mouseover:hover {
 }
 
 /* BULK IMPORT*/
+.bulk_import_draft_save_button {
+}
+
+.bulk_import_submit_button {
+	
+}
+
+.bulk_import_reset_button {
+	
+}
+
+.bulk_import_draft_input {
+    padding: 3px;
+    width: 300px;
+    border: 1px solid #CCC;
+    border-radius: 2px;
+}
+
 .cell {
 	padding: 2;
 	border-right: 1px solid #ccc;
@@ -327,18 +352,22 @@ a.cell_mouseover:hover {
 /* HEADER MENU */
 
 #dark {
+	
 	background: none repeat scroll 0 0 #444;
 	color: #FFFFFF;
 	text-align: center;
+	
 	border-radius: 2px;
     -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    
     -webkit-box-shadow: 1px 1px 2px #ccc; 
     -moz-box-shadow: 1px 1px 2px #ccc;
 }
 
 #indented ul {
 	list-style: none;
-	height: 40px;
+	height: 30px;
 }
 
 #indented ul li {
@@ -782,6 +811,11 @@ a:hover {
 	background-color: #BBBBBB;
 	border-left: 1px solid #ccc;
 	width: 100%;
+}
+
+.entry_sample_table {
+	width: 100%;
+	border-bottom: 1px solid #ccc;
 }
 
 .background_white {

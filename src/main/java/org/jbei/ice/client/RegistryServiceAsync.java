@@ -96,6 +96,9 @@ public interface RegistryServiceAsync {
      * Collections
      */
 
+    void updateFolder(String sid, long folderId, FolderDetails update,
+            AsyncCallback<FolderDetails> callback);
+
     void createUserCollection(String sid, String name, String description,
             AsyncCallback<FolderDetails> callback);
 
@@ -127,4 +130,7 @@ public interface RegistryServiceAsync {
     void retrieveNewsItems(String sessionId, AsyncCallback<ArrayList<NewsItem>> callback);
 
     void createNewsItem(String sessionId, NewsItem item, AsyncCallback<NewsItem> callback);
+
+    void saveBulkImportDraft(String sid, String email, String name, ArrayList<EntryInfo> info,
+            AsyncCallback<BulkImportDraftInfo> callback);
 }

@@ -41,6 +41,9 @@ import com.google.gwt.user.client.ui.Widget;
 public class CollectionUserMenu extends Composite implements HasClickHandlers {
 
     interface Resources extends ClientBundle {
+
+        static Resources INSTANCE = GWT.create(Resources.class);
+
         @Source("org/jbei/ice/client/resource/image/plus.png")
         ImageResource plusImage();
 
@@ -58,23 +61,32 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
     }
 
     private final FlexTable table;
-    private long currentSelected;
+    private FolderDetails currentSelected;
+    private FolderDetails currentEditSelection;
     private final TextBox quickAddBox;
     private final Image quickAddButton;
     private int row;
-    private final Resources resources = GWT.create(Resources.class);
+    private final TextBox editCollectionNameBox;
+    private int editRow = -1;
+    private int editIndex = -1;
 
     public CollectionUserMenu() {
 
         table = new FlexTable();
         initWidget(table);
 
+        // quick edit
+        editCollectionNameBox = new TextBox();
+        editCollectionNameBox.setStyleName("input_box");
+        editCollectionNameBox.setWidth("99%");
+        editCollectionNameBox.setVisible(false);
+
         // quick add widgets
         quickAddBox = new TextBox();
         quickAddBox.setStyleName("input_box");
         quickAddBox.setText("Enter new collection name...");
         quickAddBox.setWidth("99%");
-        quickAddButton = new Image(resources.plusImage());
+        quickAddButton = new Image(Resources.INSTANCE.plusImage());
         quickAddButton.setStyleName("collection_quick_add_image");
 
         table.setCellPadding(0);
@@ -90,7 +102,6 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         // add quick add box
         row += 1;
         table.setWidget(row, 0, quickAddBox);
-
         initComponents();
     }
 
@@ -104,6 +115,25 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         });
     }
 
+    public TextBox getQuickEditBox() {
+        return this.editCollectionNameBox;
+    }
+
+    public void showFolderCount(FolderDetails details) {
+        for (int i = 0; i < table.getRowCount(); i += 1) {
+            Widget w = table.getWidget(i, 0);
+            if (!(w instanceof MenuCell))
+                continue;
+
+            MenuCell cell = (MenuCell) w;
+
+            if (details.getId() == cell.getFolderId()) {
+                table.setWidget(i, 0, cell);
+                cell.showFolderCount();
+            }
+        }
+    }
+
     public void setFolderDetails(ArrayList<FolderDetails> folders) {
         if (folders == null || folders.isEmpty())
             return;
@@ -113,6 +143,14 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         }
     }
 
+    /**
+     * checks if the user clicked within the menu contents
+     * and not, for eg. the header
+     * 
+     * @param event
+     *            user click event
+     * @return true if a response is required for user selection
+     */
     public boolean isValidClick(ClickEvent event) {
         if (event == null)
             return false;
@@ -131,6 +169,32 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         return isValid;
     }
 
+    /**
+     * replaces current edit cell (in menu)
+     * with new cell with folder
+     * 
+     * @param folder
+     *            new folder for cell
+     */
+    public void setEditDetail(FolderDetails folder) {
+        if (this.editIndex == -1 && this.editRow == -1)
+            return;
+
+        if (folder == null)
+            return;
+
+        final MenuCell cell = new MenuCell(folder);
+        cell.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                currentSelected = cell.getFolder();
+            }
+        });
+        table.setWidget(editRow, editIndex, cell);
+        this.editCollectionNameBox.setVisible(false);
+    }
+
     public void addFolderDetail(FolderDetails folder) {
         if (folder == null)
             return;
@@ -140,7 +204,7 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
 
             @Override
             public void onClick(ClickEvent event) {
-                currentSelected = cell.getFolderId();
+                currentSelected = cell.getFolder();
             }
         });
 
@@ -148,6 +212,12 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         table.setWidget(row, 0, cell);
     }
 
+    /**
+     * sets the busy indicator where the folder counts are displayed
+     * to indicate that some form of update is taking place
+     * 
+     * @param folders
+     */
     public void setBusyIndicator(Set<FolderDetails> folders) {
         for (int i = 0; i < table.getRowCount(); i += 1) {
             Widget w = table.getWidget(i, 0);
@@ -172,7 +242,7 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
             for (FolderDetails folder : folders) {
                 if (folder.getId() == cell.getFolderId()) {
                     cell.updateCount(folder.getCount());
-                    cell.removeBusyIndicator();
+                    cell.showFolderCount();
                     break;
                 }
             }
@@ -192,18 +262,22 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         return this.quickAddBox;
     }
 
-    public long getCurrentSelection() {
+    public FolderDetails getCurrentSelection() {
         return currentSelected;
+    }
+
+    public FolderDetails getCurrentEditSelection() {
+        return currentEditSelection;
     }
 
     public void switchButton() {
         if (quickAddBox.isVisible()) {
-            quickAddButton.setUrl(resources.plusImage().getSafeUri());
+            quickAddButton.setUrl(Resources.INSTANCE.plusImage().getSafeUri());
             quickAddButton.setStyleName("collection_quick_add_image");
             quickAddBox.setVisible(false);
             quickAddBox.setStyleName("input_box");
         } else {
-            quickAddButton.setUrl(resources.minusImage().getSafeUri());
+            quickAddButton.setUrl(Resources.INSTANCE.minusImage().getSafeUri());
             quickAddButton.setStyleName("collection_quick_add_image");
             quickAddBox.setText("");
             quickAddBox.setVisible(true);
@@ -212,7 +286,7 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
     }
 
     public void hideQuickText() {
-        quickAddButton.setUrl(resources.plusImage().getSafeUri());
+        quickAddButton.setUrl(Resources.INSTANCE.plusImage().getSafeUri());
         quickAddButton.setStyleName("collection_quick_add_image");
         quickAddBox.setVisible(false);
         quickAddBox.setStyleName("input_box");
@@ -233,6 +307,7 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         public MenuCell(final FolderDetails folder) {
 
             super.sinkEvents(Event.ONMOUSEOVER | Event.ONMOUSEOUT);
+            // text box used when user wishes to edit a collection name
 
             this.folder = folder;
             folderId = "right" + folder.getId();
@@ -244,10 +319,13 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
                     // TODO : probably should be moved outside of this class
                     event.stopPropagation();
                     Cell cell = table.getCellForEvent(event);
-                    TextBox box = new TextBox();
-                    box.setText(folder.getName());
-                    table.setWidget(cell.getRowIndex(), cell.getCellIndex(), box);
-                    box.setFocus(true);
+                    editCollectionNameBox.setText(folder.getName());
+                    editRow = cell.getRowIndex();
+                    editIndex = cell.getCellIndex();
+                    currentEditSelection = folder;
+                    table.setWidget(cell.getRowIndex(), cell.getCellIndex(), editCollectionNameBox);
+                    editCollectionNameBox.setVisible(true);
+                    editCollectionNameBox.setFocus(true);
                 }
             });
 
@@ -264,14 +342,14 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
             initWidget(panel);
 
             // init busy indicator
-            busy = new Image(resources.busyIndicatorImage());
+            busy = new Image(Resources.INSTANCE.busyIndicatorImage());
         }
 
         public void showBusyIndicator() {
             setRightPanel(busy);
         }
 
-        public void removeBusyIndicator() {
+        public void showFolderCount() {
             setRightPanel(count);
         }
 
@@ -345,8 +423,8 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
             panel.setStyleName("user_collection_action");
             initWidget(panel);
 
-            edit = new Image(resources.editImage());
-            delete = new Image(resources.deleteImage());
+            edit = new Image(Resources.INSTANCE.editImage());
+            delete = new Image(Resources.INSTANCE.deleteImage());
 
             panel.add(edit);
             panel.setHeight("16px");

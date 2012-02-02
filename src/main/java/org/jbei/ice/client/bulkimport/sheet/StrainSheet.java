@@ -1,9 +1,11 @@
 package org.jbei.ice.client.bulkimport.sheet;
 
+import java.util.ArrayList;
 import java.util.TreeSet;
 
 import org.jbei.ice.client.bulkimport.sheet.StrainHeaders.Header;
 import org.jbei.ice.shared.StatusType;
+import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.event.dom.client.ScrollEvent;
 import com.google.gwt.event.dom.client.ScrollHandler;
@@ -148,9 +150,21 @@ public class StrainSheet extends Sheet {
         row += 1;
     }
 
+    @Override
     public void reset() {
+        for (int i = 0; i < sheetTable.getRowCount(); i += 1) {
+            if (isEmptyRow(i))
+                continue;
+
+            for (int j = 0; j < FIELDS; j += 1) {
+                HasText widget = (HasText) sheetTable.getWidget(row, i);
+                widget.setText("");
+                ((Widget) widget).setStyleName("cell");
+            }
+        }
     }
 
+    @Override
     public boolean validate() {
         for (int i = 0; i < sheetTable.getRowCount(); i += 1) {
             if (isEmptyRow(i))
@@ -170,6 +184,12 @@ public class StrainSheet extends Sheet {
         }
 
         return false;
+    }
+
+    @Override
+    public ArrayList<EntryInfo> getInfos() {
+        ArrayList<EntryInfo> infos = new ArrayList<EntryInfo>();
+        return infos;
     }
 
     // TODO : use a bit map or bit arrays to track user entered values for more efficient lookup

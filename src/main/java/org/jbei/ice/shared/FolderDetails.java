@@ -29,6 +29,10 @@ public class FolderDetails implements IsSerializable {
         return this.id;
     }
 
+    public void setId(long id) {
+        this.id = id;
+    }
+
     public String getName() {
         return this.folderName;
     }

@@ -180,7 +180,10 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> {
                 public void onSuccess(ArrayList<EntryInfo> result) {
 
                     results.addAll(result);
-                    updateRowData(rangeStart, results.subList(rangeStart, rangeEnd));
+                    int end = rangeEnd;
+                    if (rangeEnd > results.size())
+                        end = results.size();
+                    updateRowData(rangeStart, results.subList(rangeStart, end));
                 }
             });
     }

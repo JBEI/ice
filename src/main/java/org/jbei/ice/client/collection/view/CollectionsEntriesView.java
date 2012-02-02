@@ -20,9 +20,6 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
     private FlexTable rightContents;
     private Widget selectionWidget;
 
-    public CollectionsEntriesView() {
-    }
-
     @Override
     protected void initComponents() {
         super.initComponents();

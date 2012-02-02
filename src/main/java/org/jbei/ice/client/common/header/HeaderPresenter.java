@@ -15,11 +15,11 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class HeaderPresenter {
@@ -31,16 +31,13 @@ public class HeaderPresenter {
         option = new SearchOption();
         option.addStyleName("background_white");
         option.setWidth("350px");
-        option.setHeight("180px");
+        option.setHeight("150px");
         if (this.view.getSearchComposite() != null) {
             MenuClickHandler handler = new MenuClickHandler(option, this.view.getSearchComposite()
                     .getTextBox().getElement());
             this.view.getSearchArrow().addClickHandler(handler);
-
             view.getSearchButton().addClickHandler(getSearchHandler());
         }
-
-        // search
     }
 
     public ClickHandler getSearchHandler() {
@@ -62,24 +59,32 @@ public class HeaderPresenter {
     //
     private class SearchOption extends Composite {
 
-        private final VerticalPanel panel;
         private final ListBox options; // search options
         private FilterOperand operand;
         private final Button addFilter;
+        private final FlexTable panel;
 
         public SearchOption() {
-            panel = new VerticalPanel();
+            panel = new FlexTable();
+            panel.setCellPadding(5);
+            panel.setCellSpacing(0);
             initWidget(panel);
 
             addFilter = new Button("Add Filter");
             options = new ListBox();
-            options.setWidth("120px");
-            options.setStyleName("input_box");
+            options.setWidth("150px");
+            options.setStyleName("pull_down");
 
             for (SearchFilterType type : SearchFilterType.values())
                 this.options.addItem(type.displayName(), type.name());
 
-            panel.add(options);
+            panel.setHTML(0, 0,
+                "<span class=\"font-85em font-bold\" style=\"color: #999\">FILTERS</span>");
+            panel.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
+            panel.getFlexCellFormatter().setHeight(0, 0, "20px");
+
+            panel.setWidget(1, 0, options);
+            panel.getFlexCellFormatter().setVerticalAlignment(1, 0, HasAlignment.ALIGN_TOP);
             bind();
         }
 
@@ -94,20 +99,25 @@ public class HeaderPresenter {
                     int index = options.getSelectedIndex();
                     String value = options.getValue(index);
                     SearchFilterType type = SearchFilterType.valueOf(value);
-                    if (type == null)
+                    if (type == null) {
+                        panel.setHTML(2, 0, "&nbsp;");
+                        panel.setHTML(3, 0, "&nbsp;");
                         return;
-
-                    if (panel.getWidgetCount() > 1) {
-                        panel.remove(1);
                     }
 
                     // operand
                     operand = type.getOperatorAndOperands();
                     if (operand != null)
-                        panel.add(operand);
+                        panel.setWidget(2, 0, operand);
+                    else {
+                        panel.setHTML(2, 0, "&nbsp;");
+                        panel.setHTML(3, 0, "&nbsp;");
+                        return;
+                    }
 
-                    panel.add(addFilter);
-                    panel.setCellHorizontalAlignment(addFilter, HasAlignment.ALIGN_RIGHT);
+                    panel.setWidget(3, 0, addFilter);
+                    panel.getFlexCellFormatter().setHorizontalAlignment(3, 0,
+                        HasAlignment.ALIGN_RIGHT);
                 }
             });
 

@@ -1,5 +1,9 @@
 package org.jbei.ice.client.bulkimport.sheet;
 
+import java.util.ArrayList;
+
+import org.jbei.ice.shared.dto.EntryInfo;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -194,6 +198,8 @@ public abstract class Sheet extends Composite {
     public abstract void reset();
 
     public abstract boolean validate();
+
+    public abstract ArrayList<EntryInfo> getInfos();
 
     // put textinput in cell
     private void switchToInput() {

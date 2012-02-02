@@ -7,6 +7,7 @@ import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.bulkimport.model.NewBulkInput;
+import org.jbei.ice.client.bulkimport.panel.SheetHeaderPanel;
 import org.jbei.ice.client.bulkimport.sheet.Sheet;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
@@ -14,6 +15,7 @@ import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Label;
@@ -55,14 +57,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                         return;
                     }
 
-                    input = new NewBulkInput(sheet);
-                    input.getSubmit().addClickHandler(new ClickHandler() {
-
-                        @Override
-                        public void onClick(ClickEvent event) {
-                            input.getSheet().validate();
-                        }
-                    });
+                    input = createNewInput(sheet);
                 }
                 display.setSheet(input);
             }
@@ -73,6 +68,71 @@ public class BulkImportPresenter extends AbstractPresenter {
         setSaveDraftHandler();
 
         setDraftMenu();
+    }
+
+    private NewBulkInput createNewInput(Sheet sheet) {
+        final NewBulkInput input = new NewBulkInput(sheet);
+        final SheetHeaderPanel panel = input.getSheetHeaderPanel();
+        panel.getSubmit().addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                input.getSheet().validate();
+            }
+        });
+
+        // draft save
+        panel.getDraftSave().addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                String name = panel.getDraftInput().getText();
+                if (name == null || name.isEmpty()) {
+                    panel.getDraftInput().addStyleName("input_box_error");
+                    return;
+                }
+
+                // save draft
+                panel.getDraftInput().removeStyleName("input_box_error");
+
+                service.saveBulkImportDraft(AppController.sessionId,
+                    AppController.accountInfo.getEmail(), name, input.getSheet().getInfos(),
+                    new AsyncCallback<BulkImportDraftInfo>() {
+
+                        @Override
+                        public void onSuccess(BulkImportDraftInfo result) {
+                            if (result == null)
+                                return;
+                            view.getDraftMenu().addMenuData(result);
+                        }
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            Window.alert("Problem saving draft");
+                        }
+                    });
+            }
+        });
+
+        // reset
+        panel.getReset().addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                input.getSheet().reset();
+            }
+        });
+
+        // submit
+        panel.getSubmit().addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                // TODO Auto-generated method stub
+            }
+        });
+
+        return input;
     }
 
     protected void setSaveDraftHandler() {
@@ -86,7 +146,7 @@ public class BulkImportPresenter extends AbstractPresenter {
     }
 
     private void setSaveImportDataHandler() {
-        //        this.view.getSaveDraftButton()
+        //                this.view.getSaveDraftButton()
     }
 
     protected void setDraftMenu() {

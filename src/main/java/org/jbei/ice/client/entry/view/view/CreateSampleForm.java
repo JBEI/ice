@@ -8,8 +8,8 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
@@ -17,6 +17,9 @@ import com.google.gwt.user.client.ui.TextBox;
 public class CreateSampleForm extends Composite {
 
     private final FlexTable table;
+    private TextBox sampleLabel;
+    private TextArea sampleNotes;
+    private TextBox depositor;
 
     public CreateSampleForm() {
         table = new FlexTable();
@@ -30,42 +33,58 @@ public class CreateSampleForm extends Composite {
         addThirdColumn();
     }
 
+    /**
+     * Label and Notes
+     */
     private void addFirstColumn() {
-        String html = "<div style=\"outline:none;\"><b>Label</b><span id=\"sample_label\"></span><br /><b style=\"vertical-align: top\">Notes</b> <span id=\"sample_notes\"></span></div>";
+        // TODO use .css
+        String html = "<b class=\"font-85em\">Label</b><span class=\"required\">*</span>&nbsp;<span id=\"sample_label\"></span>"
+                + "<br><b style=\"vertical-align: top; font-size: 0.85em;\">Notes</b>&nbsp; <span id=\"sample_notes\"></span></div>";
         HTMLPanel panel = new HTMLPanel(html);
-        TextBox sampleLabel = new TextBox();
+        sampleLabel = new TextBox();
         sampleLabel.setStyleName("input_box");
         panel.add(sampleLabel, "sample_label");
 
-        TextArea sampleNotes = new TextArea();
+        sampleNotes = new TextArea();
+        sampleNotes.setStyleName("input_box");
+
         panel.add(sampleNotes, "sample_notes");
         table.setWidget(0, 0, panel);
     }
 
     private void addSecondColumn() {
         ListBox options = new ListBox();
+        options.setStyleName("pull_down");
         options.setVisibleItemCount(1);
+
+        // TODO : actual values
         options.addItem("Strain Storage (Default)");
         options.addItem("Strain Storage Matrix Tubes");
 
-        String html = "<div style=\"outline:none;\"><span id=\"storage_options\"></span></div>";
+        String html = "<b class=\"font-85em\">Location</b><span class=\"required\">*</span><span id=\"storage_options\"></span>";
         HTMLPanel panel = new HTMLPanel(html);
         panel.add(options, "storage_options");
         table.setWidget(0, 1, panel);
+        table.getFlexCellFormatter().setVerticalAlignment(0, 1, HasAlignment.ALIGN_TOP);
     }
 
     private void addThirdColumn() {
         SafeHtmlBuilder builder = new SafeHtmlBuilder();
         builder.appendHtmlConstant("<span>");
         builder.appendEscaped(formatDate(new Date()));
-        builder.appendHtmlConstant("</span><br /><span>");
+        builder.appendHtmlConstant("</span><br /><span>by");
 
-        builder.appendHtmlConstant("by <a href='" + AppController.accountInfo.getEmail() + "'>"
-                + AppController.accountInfo.getFirstName() + " "
-                + AppController.accountInfo.getLastName() + "</a></span>");
+        depositor = new TextBox();
+        depositor.setStyleName("input_box");
+        depositor.setText(AppController.accountInfo.getEmail());
+        String html = builder.toSafeHtml().asString() + "<span id=\"sample_depositor\"></span>";
+        HTMLPanel panel = new HTMLPanel(html);
 
-        table.setWidget(0, 2, new HTML(builder.toSafeHtml().asString()));
-        //        table.getFlexCellFormatter().setWidth(0, 1, "20%");
+        panel.add(depositor, "sample_depositor");
+
+        table.setWidget(0, 2, panel);
+        table.getFlexCellFormatter().setStyleName(0, 2, "font-85em");
+        table.getFlexCellFormatter().setVerticalAlignment(0, 2, HasAlignment.ALIGN_TOP);
     }
 
     protected String formatDate(Date date) {

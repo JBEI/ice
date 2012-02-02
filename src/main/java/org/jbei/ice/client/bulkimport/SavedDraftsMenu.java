@@ -18,6 +18,7 @@ public class SavedDraftsMenu extends Composite implements HasClickHandlers {
 
     private final FlexTable table;
     private BulkImportDraftInfo currentSelected;
+    private int row = 1;
 
     public SavedDraftsMenu() {
         table = new FlexTable();
@@ -32,7 +33,6 @@ public class SavedDraftsMenu extends Composite implements HasClickHandlers {
 
     public void setData(ArrayList<BulkImportDraftInfo> data) {
 
-        int row = 1;
         // set menu options
         for (BulkImportDraftInfo info : data) {
             final MenuCell cell = new MenuCell(info);
@@ -46,6 +46,19 @@ public class SavedDraftsMenu extends Composite implements HasClickHandlers {
             table.setWidget(row, 0, cell);
             row += 1;
         }
+    }
+
+    public void addMenuData(BulkImportDraftInfo info) {
+        final MenuCell cell = new MenuCell(info);
+        cell.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                currentSelected = cell.getDraftInfo();
+            }
+        });
+        table.setWidget(row, 0, cell);
+        row += 1;
     }
 
     public BulkImportDraftInfo getCurrentSelection() {

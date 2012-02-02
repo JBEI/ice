@@ -22,6 +22,9 @@ public class ImageUtil {
 
         @Source("org/jbei/ice/client/resource/image/blank.png")
         ImageResource blank();
+
+        @Source("org/jbei/ice/client/resource/image/plus.png")
+        ImageResource plus();
     }
 
     public static Image getSampleIcon() {
@@ -38,5 +41,9 @@ public class ImageUtil {
 
     public static Image getBlankIcon() {
         return new Image(Resources.INSTANCE.blank());
+    }
+
+    public static Image getPlusIcon() {
+        return new Image(Resources.INSTANCE.plus());
     }
 }

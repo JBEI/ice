@@ -99,6 +99,9 @@ public interface RegistryService extends RemoteService {
 
     ArrayList<BulkImportDraftInfo> retrieveImportDraftData(String sid, String email);
 
+    BulkImportDraftInfo saveBulkImportDraft(String sid, String email, String name,
+            ArrayList<EntryInfo> info);
+
     ArrayList<Long> createEntry(String sid, HashSet<EntryInfo> info);
 
     ArrayList<FolderDetails> addEntriesToCollection(String sid, ArrayList<Long> destination,
@@ -115,4 +118,6 @@ public interface RegistryService extends RemoteService {
     ArrayList<NewsItem> retrieveNewsItems(String sessionId);
 
     NewsItem createNewsItem(String sessionId, NewsItem item);
+
+    FolderDetails updateFolder(String sid, long folderId, FolderDetails update);
 }
