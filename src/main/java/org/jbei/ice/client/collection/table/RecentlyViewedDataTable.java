@@ -16,9 +16,9 @@ public class RecentlyViewedDataTable extends EntryDataTable<EntryInfo> {
     protected ArrayList<DataTableColumn<?>> createColumns() {
         ArrayList<DataTableColumn<?>> columns = new ArrayList<DataTableColumn<?>>();
 
-        columns.add(super.addTypeColumn(true));
-        columns.add(super.addPartIdColumn(true));
-        columns.add(super.addNameColumn());
+        columns.add(super.addTypeColumn(true, 60, Unit.PX));
+        columns.add(super.addPartIdColumn(true, 120, Unit.PX));
+        columns.add(super.addNameColumn(120, Unit.PX));
         columns.add(super.addSummaryColumn());
         columns.add(this.addLastAddedColumn());
         columns.add(this.addLastVisitedColumn());

@@ -12,6 +12,7 @@ import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -121,9 +122,9 @@ public class ProfileView extends Composite implements IProfileView {
             protected ArrayList<DataTableColumn<?>> createColumns() {
 
                 ArrayList<DataTableColumn<?>> columns = new ArrayList<DataTableColumn<?>>();
-                columns.add(super.addTypeColumn(true));
-                columns.add(super.addPartIdColumn(true));
-                super.addNameColumn();
+                columns.add(super.addTypeColumn(true, 50, Unit.PX));
+                columns.add(super.addPartIdColumn(true, 120, Unit.PX));
+                super.addNameColumn(120, Unit.PX);
                 super.addSummaryColumn();
                 super.addStatusColumn();
                 super.addHasAttachmentColumn();
