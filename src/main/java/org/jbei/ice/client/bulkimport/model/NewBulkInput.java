@@ -1,5 +1,6 @@
 package org.jbei.ice.client.bulkimport.model;
 
+import org.jbei.ice.client.bulkimport.ImportType;
 import org.jbei.ice.client.bulkimport.panel.SheetHeaderPanel;
 import org.jbei.ice.client.bulkimport.sheet.Sheet;
 
@@ -17,16 +18,17 @@ public class NewBulkInput extends Composite {
     private final SheetHeaderPanel panel;
     private final VerticalPanel layout;
     private final Sheet sheet;
+    private final ImportType type;
 
-    public NewBulkInput(Sheet sheet) {
+    public NewBulkInput(ImportType type, Sheet sheet) {
         layout = new VerticalPanel();
         initWidget(layout);
         this.sheet = sheet;
+        this.type = type;
 
         panel = new SheetHeaderPanel();
         layout.add(panel);
         layout.add(sheet);
-
     }
 
     public SheetHeaderPanel getSheetHeaderPanel() {
@@ -35,5 +37,9 @@ public class NewBulkInput extends Composite {
 
     public Sheet getSheet() {
         return this.sheet;
+    }
+
+    public ImportType getImportType() {
+        return this.type;
     }
 }

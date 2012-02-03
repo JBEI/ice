@@ -8,10 +8,19 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class BulkImportDraftInfo implements IsSerializable {
 
+    private long id;
     private String name;
     private EntryAddType type;
     private int count;
     private Date created;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;

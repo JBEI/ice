@@ -7,7 +7,6 @@ import org.jbei.ice.shared.dto.AccountInfo;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.HasClickHandlers;
-import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -153,17 +152,6 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
 
         // pipe
         HTML pipe = new HTML("&nbsp;|&nbsp;");
-        pipe.addStyleName("color_eee");
-        panel.add(pipe);
-
-        // Entries Available
-        String formattedEntries = NumberFormat.getDecimalFormat().format(
-            info.getVisibleEntryCount());
-        HTML entriesAvailable = new HTML(formattedEntries + " entries available");
-        panel.add(entriesAvailable);
-
-        // pipe
-        pipe = new HTML("&nbsp;|&nbsp;");
         pipe.addStyleName("color_eee");
         panel.add(pipe);
 

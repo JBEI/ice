@@ -8,8 +8,8 @@ public class StrainHeaders extends SheetHeader {
         super(col, row, headerTable);
     }
 
-    // TODO : use proper class for enable sub-classing from SheetHeader parent
-    enum Header implements IHeader {
+    // TODO : use proper class to enable sub-classing from SheetHeader parent
+    public enum Header implements IHeader {
         PI("Principal Investigator", true), FUNDING_SOURCE("Funding Source", false), IP(
                 "Intellectual Property", false), BIOSAFETY("BioSafety Level", true), NAME("Name",
                 true), ALIAS("Alias", false), KEYWORDS("Keywords", false), SUMMARY("Summary", true), NOTES(

@@ -36,7 +36,7 @@ import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.managers.WorkspaceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Attachment;
-import org.jbei.ice.lib.models.BulkImportDraft;
+import org.jbei.ice.lib.models.BulkImport;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Folder;
 import org.jbei.ice.lib.models.Group;
@@ -53,7 +53,6 @@ import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BlastProgram;
 import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BlastResultInfo;
@@ -843,16 +842,17 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            ArrayList<BulkImportDraft> results = BulkImportManager.retrieveUserDrafts(account);
+            ArrayList<BulkImport> results = BulkImportManager.retrieveByUser(account);
             ArrayList<BulkImportDraftInfo> info = new ArrayList<BulkImportDraftInfo>();
 
             if (results != null) {
-                for (BulkImportDraft draft : results) {
+                for (BulkImport draft : results) {
                     BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
-                    draftInfo.setCount(draft.getContents().size());
+                    //                    draftInfo.setCount(draft.getPrimaryData().size()); // TODO
                     draftInfo.setCreated(draft.getCreationTime());
                     draftInfo.setName(draft.getName());
-                    draftInfo.setType(EntryAddType.valueOf(draft.getType()));
+                    //                    draftInfo.setType(EntryAddType.valueOf(draft.getType()));
+                    info.add(draftInfo);
                 }
             }
 
@@ -1144,12 +1144,15 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             return null;
         }
 
-        BulkImportDraft draft = new BulkImportDraft();
-        draft.setName(name);
-        // TODO : entry infos
+        BulkImport draft = new BulkImport();
 
         try {
-            BulkImportDraft result = BulkImportManager.saveDraft(draft);
+            Account emailAccount = AccountManager.getByEmail(email);
+            draft.setAccount(emailAccount);
+            draft.setName(name);
+            // TODO : entry infos
+
+            BulkImport result = BulkImportManager.createBulkImportRecord(draft);
             BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
 
             draftInfo.setCreated(result.getCreationTime());

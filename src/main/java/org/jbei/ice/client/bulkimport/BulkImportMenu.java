@@ -13,6 +13,7 @@ public class BulkImportMenu extends Composite implements HasClickHandlers {
 
     private final FlexTable table;
     private ImportType currentSelected;
+    private MenuCell previousSelected;
 
     public BulkImportMenu() {
         table = new FlexTable();
@@ -32,7 +33,12 @@ public class BulkImportMenu extends Composite implements HasClickHandlers {
 
                 @Override
                 public void onClick(ClickEvent event) {
+                    if (previousSelected != null)
+                        previousSelected.removeStyleName("collection_user_menu_row_selected");
+
                     currentSelected = cell.getAddType();
+                    cell.addStyleName("collection_user_menu_row_selected");
+                    previousSelected = cell;
                 }
             });
             table.setWidget(row, 0, cell);

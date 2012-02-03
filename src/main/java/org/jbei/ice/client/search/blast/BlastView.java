@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class BlastView extends Composite implements BlastPresenter.Display {
+public class BlastView extends Composite implements IBlastView {
 
     private final TextArea sequence;
     private final ListBox program;

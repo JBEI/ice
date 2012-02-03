@@ -206,17 +206,23 @@ a.cell_mouseover:hover {
 }
 
 .bulk_import_submit_button {
-	
 }
 
 .bulk_import_reset_button {
-	
 }
 
 .bulk_import_draft_input {
     padding: 3px;
-    width: 300px;
     border: 1px solid #CCC;
+    width: 275px;    
+    border-radius: 2px;
+}
+
+.bulk_import_draft_input_error {
+	padding: 3px;
+    border: 1px solid #cc3333;
+    background-color: #fcc;
+    width: 275px;    
     border-radius: 2px;
 }
 
@@ -352,7 +358,6 @@ a.cell_mouseover:hover {
 /* HEADER MENU */
 
 #dark {
-	
 	background: none repeat scroll 0 0 #444;
 	color: #FFFFFF;
 	text-align: center;
@@ -386,7 +391,7 @@ a.cell_mouseover:hover {
 }
 
 #indented ul li a {
-	padding: 10px;
+	padding: 6px;
 	display: block;
 	color: #fff;
 	text-decoration: none;
@@ -569,6 +574,13 @@ a.cell_mouseover:hover {
 	background-color: #F2F2F2;
 	border: 1px solid #aab2bd;
 	cursor: pointer;
+}
+
+.collection_user_menu_row_selected {
+	background-color: #ede8d7;
+    cursor: default;
+    font-weight: bold;
+    color: #555;
 }
 
 .cell_resize:hover {
@@ -1105,7 +1117,6 @@ td.datePickerMonth {
 	color: #444;
 	font-weight: bold;
 	text-transform: uppercase;
-	border-right: 1px solid #F1F1F1;
 	border-left: 1px solid #F1F1F1;
 }
 

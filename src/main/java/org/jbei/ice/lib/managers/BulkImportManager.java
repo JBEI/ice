@@ -12,7 +12,6 @@ import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.BulkImport;
-import org.jbei.ice.lib.models.BulkImportDraft;
 
 /**
  * Manage {@link BulkImport} objects in the database.
@@ -22,40 +21,22 @@ import org.jbei.ice.lib.models.BulkImportDraft;
  */
 public class BulkImportManager {
 
-    public static BulkImportDraft saveDraft(BulkImportDraft draft) throws ManagerException {
-        if (draft == null)
-            throw new ManagerException("Cannot save null data");
-
-        Date creationDate = new Date(System.currentTimeMillis());
-        draft.setCreationTime(creationDate);
-        draft.setLastModifiedTime(creationDate);
-        try {
-            return (BulkImportDraft) DAO.save(draft);
-        } catch (DAOException de) {
-            throw new ManagerException("Exception saving bulk import draft record", de);
-        }
-    }
-
     @SuppressWarnings("unchecked")
-    public static ArrayList<BulkImportDraft> retrieveUserDrafts(Account account)
-            throws ManagerException {
-
-        ArrayList<BulkImportDraft> drafts = null;
+    public static ArrayList<BulkImport> retrieveByUser(Account account) throws ManagerException {
 
         Session session = DAO.newSession();
+        Query query = session.createQuery("from " + BulkImport.class.getName()
+                + " where account = :account");
+        query.setEntity("account", account);
+
         try {
-            String queryString = "from " + BulkImportDraft.class.getName()
-                    + " WHERE ownerEmail = :ownerEmail";
-            Query query = session.createQuery(queryString);
-
-            query.setParameter("ownerEmail", account.getEmail());
-            drafts = new ArrayList<BulkImportDraft>(query.list());
-            return drafts;
-
-        } catch (HibernateException e) {
-            throw new ManagerException("Failed to retrieve folders!", e);
+            ArrayList<BulkImport> result = new ArrayList<BulkImport>(query.list());
+            return result;
+        } catch (Exception e) {
+            throw new ManagerException("Error retrieving bulk import record", e);
         } finally {
-            if (session.isOpen()) {
+
+            if (session != null && session.isOpen()) {
                 session.close();
             }
         }

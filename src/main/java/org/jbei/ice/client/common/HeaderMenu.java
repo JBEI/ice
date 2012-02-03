@@ -24,15 +24,12 @@ public class HeaderMenu extends Composite {
 
         String html = "<div id=\"dark\"><div id=\"indented\">"
                 + "<ul>"
-                + "<li style=\"width: 5%; height: 30px\">&nbsp;</li>"
-                + "<li style=\"width: 10%\" class=\"font-90em\"><a href=\"#page=main\">Home</a></li>"
-                + "<li style=\"width: 12%\" class=\"font-90em\"><a href=\"#page=collections\">Collections</a></li>"
-                + "<li style=\"width: 16%\" class=\"font-90em\"><a href=\"#page=add\">Add New Entry</a></li>"
-                + "<li style=\"width: 12%\" class=\"font-90em\"><a href=\"#page=bulk\">Bulk Import</a></li>"
-                + "<li style=\"width: 16%\" class=\"font-90em\"><a href=\"#page=query\">Advanced Search</a></li>"
-                + "<li style=\"width: 10%\" class=\"font-90em\"><a href=\"#page=blast\">Blast</a></li>"
+                + "<li style=\"width: 7%\" class=\"font-90em\"><a href=\"#page=main\">Home</a></li>"
                 + "<li style=\"width: 10%\" class=\"font-90em\"><a href=\"#page=news\">News</a></li>"
-                + "<li style=\"width: 5%; height: 30px\">&nbsp;</li>" + "</ul></div></div>";
+                + "<li style=\"width: 12%\" class=\"font-90em\"><a href=\"#page=collections\">Collections</a></li>"
+                + "<li style=\"width: 12%\" class=\"font-90em\"><a href=\"#page=bulk\">Bulk Import</a></li>"
+                + "<li style=\"height: 30px; text-align: right \">&nbsp;</li>"
+                + "</ul></div></div>";
         HTMLPanel panel = new HTMLPanel(html);
         initWidget(panel);
     }

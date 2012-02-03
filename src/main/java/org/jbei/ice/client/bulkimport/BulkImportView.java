@@ -42,6 +42,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         // TODO : middle sliver goes here
         contentTable.setHTML(0, 1, "&nbsp;");
         contentTable.getFlexCellFormatter().setRowSpan(0, 1, 3);
+        contentTable.getFlexCellFormatter().setWidth(0, 1, "15px");
 
         contentTable.getFlexCellFormatter().setRowSpan(0, 2, 3);
         contentTable.setWidget(0, 2, createMainContent());
@@ -60,8 +61,13 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         mainContent.setWidth("100%");
         mainContent.setCellSpacing(0);
         mainContent.addStyleName("add_new_entry_main_content_wrapper");
+
         mainContent.setWidget(0, 0, contentHeader);
         mainContent.getCellFormatter().setStyleName(0, 0, "add_new_entry_main_content_header");
+        // space for feedback panel
+        mainContent.setHTML(0, 1, "&nbsp");
+        mainContent.getFlexCellFormatter().setWidth(0, 1, "350px");
+        mainContent.getFlexCellFormatter().setHorizontalAlignment(0, 1, HasAlignment.ALIGN_RIGHT);
 
         // sub content
         subContent.add(new HTML("<p>Please select the type of entry you wish to add. "
@@ -97,5 +103,10 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     @Override
     public void setSheet(Widget sheet) {
         this.mainContent.setWidget(1, 0, sheet);
+    }
+
+    @Override
+    public void setFeedbackPanel(Widget widget) {
+        mainContent.setWidget(0, 1, widget);
     }
 }

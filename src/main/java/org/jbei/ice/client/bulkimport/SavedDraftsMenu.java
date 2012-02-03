@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
+import com.google.gwt.user.client.ui.Label;
 
 public class SavedDraftsMenu extends Composite implements HasClickHandlers {
 
@@ -31,7 +32,7 @@ public class SavedDraftsMenu extends Composite implements HasClickHandlers {
         table.getFlexCellFormatter().setStyleName(0, 0, "collections_menu_header");
     }
 
-    public void setData(ArrayList<BulkImportDraftInfo> data) {
+    public void setData(ArrayList<BulkImportDraftInfo> data) { // TODO : use some sort of delegate instead of passing the model since this is part of the view
 
         // set menu options
         for (BulkImportDraftInfo info : data) {
@@ -85,17 +86,23 @@ public class SavedDraftsMenu extends Composite implements HasClickHandlers {
 
         private final HTMLPanel panel;
         private final BulkImportDraftInfo draftInfo;
+        private Label count;
+        private String countElementId;
 
         public MenuCell(BulkImportDraftInfo draftInfo) {
 
             this.draftInfo = draftInfo;
+            countElementId = "draft_count_" + draftInfo.getId();
 
             String html = "<span style=\"padding: 5px\" class=\"collection_user_menu\">"
                     + draftInfo.getName() + "</span><span class=\"menu_count\" id=\""
-                    + formatNumber(draftInfo.getCount()) + "\"></span>";
+                    + countElementId + "\"></span>";
 
             panel = new HTMLPanel(html);
             panel.setStyleName("collection_user_menu_row");
+            count = new Label(formatNumber(draftInfo.getCount()));
+            panel.add(count, countElementId);
+
             initWidget(panel);
         }
 

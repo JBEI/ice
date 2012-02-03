@@ -64,6 +64,7 @@ public class FeedbackPanel extends Composite {
         img.setStyleName(FeedbackResource.INSTANCE.css().img());
         label = new HTML();
         panel.add(label, MSG_ID);
+        panel.setVisible(false);
     }
 
     public void setSuccessMessage(String msg) {

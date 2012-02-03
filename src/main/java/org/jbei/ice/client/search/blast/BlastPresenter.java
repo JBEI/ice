@@ -3,8 +3,8 @@ package org.jbei.ice.client.search.blast;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.AbstractPresenter;
+import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.util.Utils;
 import org.jbei.ice.shared.BlastProgram;
@@ -15,35 +15,16 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.Widget;
 
 public class BlastPresenter extends AbstractPresenter {
 
-    public interface Display {
-
-        BlastResultsTable getResultsTable();
-
-        String getSequence();
-
-        BlastProgram getProgram();
-
-        Button getSubmit();
-
-        void setResultsDisplayVisible(boolean visible);
-
-        void setProgramOptions(HashMap<String, String> options);
-
-        Widget asWidget();
-    }
-
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
-    private final Display display;
+    private final IBlastView display;
 
     public BlastPresenter(RegistryServiceAsync service, HandlerManager eventBus,
-            final Display display) {
+            final IBlastView display) {
 
         this.service = service;
         this.eventBus = eventBus;
@@ -55,7 +36,6 @@ public class BlastPresenter extends AbstractPresenter {
             options.put(option.getName() + " (" + option.getDetails() + ")", option.name());
         }
         display.setProgramOptions(options);
-
         display.setResultsDisplayVisible(false);
 
         // submit handler

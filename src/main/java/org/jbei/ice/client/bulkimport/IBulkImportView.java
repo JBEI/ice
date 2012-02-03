@@ -4,8 +4,6 @@ import com.google.gwt.user.client.ui.Widget;
 
 public interface IBulkImportView {
 
-    Widget asWidget();
-
     BulkImportMenu getMenu();
 
     void setHeader(String header);
@@ -14,4 +12,7 @@ public interface IBulkImportView {
 
     SavedDraftsMenu getDraftMenu();
 
+    void setFeedbackPanel(Widget widget);
+
+    Widget asWidget();
 }

@@ -5,6 +5,8 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.bulkimport.BulkImportPresenter;
 import org.jbei.ice.client.bulkimport.BulkImportView;
+import org.jbei.ice.client.bulkimport.IBulkImportView;
+import org.jbei.ice.client.bulkimport.model.BulkImportModel;
 import org.jbei.ice.client.collection.presenter.CollectionsEntriesPresenter;
 import org.jbei.ice.client.collection.presenter.CollectionsListPresenter;
 import org.jbei.ice.client.collection.view.CollectionsEntriesView;
@@ -21,6 +23,8 @@ import org.jbei.ice.client.home.HomePagePresenter;
 import org.jbei.ice.client.home.HomePageView;
 import org.jbei.ice.client.login.LoginPresenter;
 import org.jbei.ice.client.login.LoginView;
+import org.jbei.ice.client.news.NewsPresenter;
+import org.jbei.ice.client.news.NewsView;
 import org.jbei.ice.client.profile.ProfilePresenter;
 import org.jbei.ice.client.profile.ProfileView;
 import org.jbei.ice.client.search.advanced.AdvancedSearchPresenter;
@@ -47,14 +51,13 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
     private static final String COOKIE_NAME = "gd-ice";
     private static final String COOKIE_PATH = "/";
 
-    private HasWidgets container; // rootpanel
+    private HasWidgets container; // root panel
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
     public static String sessionId;
     public static AccountInfo accountInfo;
 
     public AppController(RegistryServiceAsync service, HandlerManager eB) {
-
         this.service = service;
         eventBus = eB;
         bind();
@@ -73,7 +76,7 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
 
                 if (event.isRememberUser()) {
                     Date expires = new Date(System.currentTimeMillis() + COOKIE_TIMEOUT);
-                    // TODO : set the domain ? and change secure to true?
+                    // TODO : set the domain ? 
                     Cookies.setCookie(COOKIE_NAME, sessionId, expires, null, COOKIE_PATH, true);
                 }
                 goToMainPage();
@@ -178,11 +181,17 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             break;
 
         case BULK_IMPORT:
-            presenter = new BulkImportPresenter(this.service, this.eventBus, new BulkImportView());
+            BulkImportModel model = new BulkImportModel(this.service, this.eventBus);
+            IBulkImportView view = new BulkImportView();
+            presenter = new BulkImportPresenter(model, view);
             break;
 
         case STORAGE:
             presenter = new StoragePresenter(this.service, this.eventBus, new StorageView(), param);
+            break;
+
+        case NEWS:
+            presenter = new NewsPresenter(this.service, this.eventBus, new NewsView());
             break;
 
         case LOGIN:

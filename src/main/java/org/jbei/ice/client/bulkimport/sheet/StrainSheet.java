@@ -1,11 +1,11 @@
 package org.jbei.ice.client.bulkimport.sheet;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.TreeSet;
 
 import org.jbei.ice.client.bulkimport.sheet.StrainHeaders.Header;
 import org.jbei.ice.shared.StatusType;
-import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.event.dom.client.ScrollEvent;
 import com.google.gwt.event.dom.client.ScrollHandler;
@@ -166,30 +166,57 @@ public class StrainSheet extends Sheet {
 
     @Override
     public boolean validate() {
+
+        boolean validates = true;
+
         for (int i = 0; i < sheetTable.getRowCount(); i += 1) {
             if (isEmptyRow(i))
                 continue;
-
+            // TODO : sometimes input box is active and user clicks submit
             for (Header header : Header.values()) {
-                Label widget = (Label) sheetTable.getWidget(i, header.ordinal());
-                boolean isEmpty = widget.getText().trim().isEmpty();
-                if (isEmpty && header.isRequired()) {
-                    widget.setStyleName("cell_error");
-                    widget.setTitle("Required field");
-                } else {
-                    widget.setStyleName("cell");
-                    widget.setTitle("");
+                Widget widget = sheetTable.getWidget(i, header.ordinal());
+                if (widget instanceof Label) {
+                    Label label = (Label) widget;
+                    boolean isEmpty = label.getText().trim().isEmpty();
+                    if (isEmpty && header.isRequired()) {
+                        label.setStyleName("cell_error");
+                        label.setTitle("Required field");
+                        validates = false;
+                    } else {
+                        label.setStyleName("cell");
+                        label.setTitle("");
+                    }
                 }
             }
         }
 
-        return false;
+        return validates;
     }
 
     @Override
-    public ArrayList<EntryInfo> getInfos() {
-        ArrayList<EntryInfo> infos = new ArrayList<EntryInfo>();
-        return infos;
+    public HashMap<Integer, ArrayList<String>> getCellData() {
+        HashMap<Integer, ArrayList<String>> cellData = new HashMap<Integer, ArrayList<String>>();
+
+        for (int i = 0; i < sheetTable.getRowCount(); i += 1) {
+            if (isEmptyRow(i))
+                continue;
+
+            ArrayList<String> row = cellData.get(i);
+            if (row == null) {
+                row = new ArrayList<String>(Header.values().length);
+                // TODO : bad form, use String[]
+                for (int j = 0; j < Header.values().length; j += 1)
+                    row.add("");
+                cellData.put(i, row);
+            }
+
+            for (Header header : Header.values()) {
+                HasText widget = (HasText) sheetTable.getWidget(i, header.ordinal());
+                row.set(header.ordinal(), widget.getText());
+            }
+        }
+
+        return cellData;
     }
 
     // TODO : use a bit map or bit arrays to track user entered values for more efficient lookup
