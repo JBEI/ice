@@ -10,7 +10,6 @@ import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -18,7 +17,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -36,8 +34,9 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
     }
 
     private Hyperlink logout;
-    private CompositeText searchInput;
+    private SearchCompositeBox searchInput;
     private Button searchBtn;
+    private final SearchOption option;
 
     public HeaderView() {
         Widget searchPanel = createSearchPanel();
@@ -60,7 +59,18 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
         horizontal.add(vertical);
 
         table.setWidget(0, 0, horizontal);
+
+        // search Option
+        option = new SearchOption();
+        option.addStyleName("background_white");
+        option.setWidth("350px");
+        option.setHeight("150px");
+
         new HeaderPresenter(this);
+    }
+
+    public SearchOption getSearchOption() {
+        return this.option;
     }
 
     public Image getSearchArrow() { // TODO : more descriptive name
@@ -84,7 +94,7 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
             return layout;
         }
 
-        searchInput = new CompositeText();
+        searchInput = new SearchCompositeBox();
         layout.setWidget(0, 0, searchInput);
         layout.getFlexCellFormatter().setRowSpan(0, 0, 2);
 
@@ -95,30 +105,6 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
         layout.setStyleName("float_right");
 
         return layout;
-    }
-
-    public class CompositeText extends Composite {
-        private final TextBox box;
-        private final Image image;
-
-        public CompositeText() {
-            AbsolutePanel panel = new AbsolutePanel();
-            box = new TextBox();
-            box.setStyleName("quick_search_input");
-            panel.add(box);
-            image = new Image(Resources.INSTANCE.arrowDown());
-            image.setStyleName("search_arrow");
-            panel.add(image);
-            initWidget(panel);
-        }
-
-        public TextBox getTextBox() {
-            return this.box;
-        }
-
-        public Image getImage() {
-            return this.image;
-        }
     }
 
     // TODO : move to controller
@@ -166,7 +152,7 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
         return this.searchInput.getTextBox().getText();
     }
 
-    public CompositeText getSearchComposite() {
+    public SearchCompositeBox getSearchComposite() {
         return this.searchInput;
     }
 

@@ -1,10 +1,11 @@
 package org.jbei.ice.client.common.header;
 
-import org.jbei.ice.client.Page;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+
 import org.jbei.ice.client.common.FilterOperand;
 import org.jbei.ice.client.event.SearchEvent;
 import org.jbei.ice.client.event.SearchEventHandler;
-import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -12,44 +13,130 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
+// TODO : need associated model to go with this
 public class HeaderPresenter {
     private final HeaderView view;
-    private final SearchOption option;
+    private FilterOperand currentSelected;
+    private ArrayList<FilterOperand> filters;
 
     public HeaderPresenter(HeaderView view) {
+        filters = new ArrayList<FilterOperand>();
+
         this.view = view;
-        option = new SearchOption();
-        option.addStyleName("background_white");
-        option.setWidth("350px");
-        option.setHeight("150px");
+        SearchOption option = view.getSearchOption();
+
+        // search options
+        LinkedHashMap<String, String> options = new LinkedHashMap<String, String>();
+        options.put("Select Filter", "");
+
+        // regular search
+        for (SearchFilterType type : SearchFilterType.values())
+            options.put(type.displayName(), type.name());
+
+        option.setOptions(options);
+
+        // handlers
+        setHandlers(option);
+
         if (this.view.getSearchComposite() != null) {
-            MenuClickHandler handler = new MenuClickHandler(option, this.view.getSearchComposite()
+            PopupHandler handler = new PopupHandler(option, this.view.getSearchComposite()
                     .getTextBox().getElement());
             this.view.getSearchArrow().addClickHandler(handler);
             view.getSearchButton().addClickHandler(getSearchHandler());
         }
     }
 
+    protected void setHandlers(final SearchOption option) {
+
+        final ListBox filterOptions = option.getFilterOptions();
+
+        filterOptions.addChangeHandler(new ChangeHandler() {
+
+            @Override
+            public void onChange(ChangeEvent event) {
+
+                // get type from value of new selection
+                int index = filterOptions.getSelectedIndex();
+                String value = filterOptions.getValue(index);
+
+                // TODO : now that there is not a separate blast page, combine BlastProgram with SearchFilterType
+                SearchFilterType type = SearchFilterType.filterValueOf(value);
+                if (type == null) {
+                    return;
+                }
+
+                currentSelected = type.getOperatorAndOperands();
+                option.setFilterOperands(currentSelected);
+
+                // set the textArea for the view
+                // TODO : pass to model
+
+                //                if (type == null) {
+                //                    panel.setHTML(2, 0, "&nbsp;");
+                //                    panel.setHTML(3, 0, "&nbsp;");
+                //                    return;
+                //                }
+                //
+                //                // operand
+                //                operand = type.getOperatorAndOperands();
+                //                if (operand != null)
+                //                    panel.setWidget(2, 0, operand);
+                //                else {
+                //                    panel.setHTML(2, 0, "&nbsp;");
+                //                    panel.setHTML(3, 0, "&nbsp;");
+                //                    return;
+                //                }
+                //
+                //                panel.setWidget(3, 0, addFilter);
+                //                panel.getFlexCellFormatter().setHorizontalAlignment(3, 0, HasAlignment.ALIGN_RIGHT);
+
+            }
+        });
+
+        // button handler
+        option.getAddFilter().addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                if (currentSelected == null)
+                    return;
+
+                filters.add(currentSelected);
+
+                // display to user
+                String operand = currentSelected.getOperand();
+                if (operand.length() > 10) {
+                    BlastXSearchFilter filter = new BlastXSearchFilter(operand);
+                    view.getSearchComposite().addSearchWidget(filter);
+                } else {
+                    String search = currentSelected.getType().getShortName().toLowerCase();
+                    search += currentSelected.getSelectedOperator().value();
+                    search += operand;
+                    view.getSearchComposite().appendFilter(search);
+                }
+            }
+        });
+    }
+
+    /**
+     * @return new handler for searches that occur
+     */
     public ClickHandler getSearchHandler() {
         return new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                String query = view.getSearchInput();
-                if (query == null || query.isEmpty())
-                    view.getSearchComposite().getTextBox().setFocus(true);
-                else
-                    History.newItem(Page.QUERY.getLink() + ";id=" + query);
+
+                // TODO : send message on event bus with list of filters as parameter
+                //                String query = view.getSearchInput();
+                //                if (query == null || query.isEmpty())
+                //                    view.getSearchComposite().getTextBox().setFocus(true);
+                //                else
+                //                    History.newItem(Page.QUERY.getLink() + ";id=" + query, false); // causes app controller to handle the logic
             }
         };
     }
@@ -57,105 +144,12 @@ public class HeaderPresenter {
     //
     // inner classes
     //
-    private class SearchOption extends Composite {
-
-        private final ListBox options; // search options
-        private FilterOperand operand;
-        private final Button addFilter;
-        private final FlexTable panel;
-
-        public SearchOption() {
-            panel = new FlexTable();
-            panel.setCellPadding(5);
-            panel.setCellSpacing(0);
-            initWidget(panel);
-
-            addFilter = new Button("Add Filter");
-            options = new ListBox();
-            options.setWidth("150px");
-            options.setStyleName("pull_down");
-
-            for (SearchFilterType type : SearchFilterType.values())
-                this.options.addItem(type.displayName(), type.name());
-
-            panel.setHTML(0, 0,
-                "<span class=\"font-85em font-bold\" style=\"color: #999\">FILTERS</span>");
-            panel.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
-            panel.getFlexCellFormatter().setHeight(0, 0, "20px");
-
-            panel.setWidget(1, 0, options);
-            panel.getFlexCellFormatter().setVerticalAlignment(1, 0, HasAlignment.ALIGN_TOP);
-            bind();
-        }
-
-        private void bind() {
-
-            options.addChangeHandler(new ChangeHandler() {
-
-                @Override
-                public void onChange(ChangeEvent event) {
-
-                    // get type from value of new selection
-                    int index = options.getSelectedIndex();
-                    String value = options.getValue(index);
-                    SearchFilterType type = SearchFilterType.valueOf(value);
-                    if (type == null) {
-                        panel.setHTML(2, 0, "&nbsp;");
-                        panel.setHTML(3, 0, "&nbsp;");
-                        return;
-                    }
-
-                    // operand
-                    operand = type.getOperatorAndOperands();
-                    if (operand != null)
-                        panel.setWidget(2, 0, operand);
-                    else {
-                        panel.setHTML(2, 0, "&nbsp;");
-                        panel.setHTML(3, 0, "&nbsp;");
-                        return;
-                    }
-
-                    panel.setWidget(3, 0, addFilter);
-                    panel.getFlexCellFormatter().setHorizontalAlignment(3, 0,
-                        HasAlignment.ALIGN_RIGHT);
-                }
-            });
-
-            // button handler
-            addFilter.addClickHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    TextBox box = view.getSearchComposite().getTextBox();
-                    String text = getSearchType().name().toLowerCase();
-                    text += getOperator().value();
-                    text += getOperand();
-                    if (box.getText().isEmpty())
-                        box.setText(text);
-                    else
-                        box.setText(box.getText() + " " + text);
-                }
-            });
-        }
-
-        public SearchFilterType getSearchType() {
-            return operand.getType();
-        }
-
-        public QueryOperator getOperator() {
-            return operand.getSelectedOperator();
-        }
-
-        public String getOperand() {
-            return operand.getOperand();
-        }
-    }
-
-    private class MenuClickHandler implements ClickHandler {
+    private class PopupHandler implements ClickHandler {
 
         private final PopupPanel popup;
+        private final int xOffset = -318;
 
-        public MenuClickHandler(Widget widget, Element autoHide) {
+        public PopupHandler(Widget widget, Element autoHide) {
             this.popup = new PopupPanel();
             this.popup.setStyleName("add_to_popup");
             this.popup.setAutoHideEnabled(true);
@@ -168,8 +162,8 @@ public class HeaderPresenter {
         public void onClick(ClickEvent event) {
             if (!popup.isShowing()) {
                 Widget source = (Widget) event.getSource();
-                int x = source.getAbsoluteLeft() - 295;
-                int y = source.getOffsetHeight() + source.getAbsoluteTop() + 12;
+                int x = source.getAbsoluteLeft() + xOffset;
+                int y = source.getOffsetHeight() + source.getAbsoluteTop() + 17;
                 popup.setPopupPosition(x, y);
                 popup.show();
             } else {

@@ -6,7 +6,6 @@ import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
 
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 
 /**
  * Composite of components for each search filter.
@@ -17,14 +16,11 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 public abstract class FilterOperand extends Composite {
 
     protected final SearchFilterType type;
-    protected final HorizontalPanel hPanel;
 
     public FilterOperand(SearchFilterType type) {
         super();
 
         this.type = type;
-        this.hPanel = new HorizontalPanel();
-        initWidget(hPanel);
     }
 
     public SearchFilterType getType() {
@@ -36,6 +32,4 @@ public abstract class FilterOperand extends Composite {
     public abstract ArrayList<QueryOperator> getOperatorList();
 
     public abstract String getOperand();
-
-    public abstract void addWidgets(HorizontalPanel panel);
 }

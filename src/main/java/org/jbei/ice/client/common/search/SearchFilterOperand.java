@@ -6,7 +6,6 @@ import org.jbei.ice.client.common.FilterOperand;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
 
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -27,13 +26,6 @@ public class SearchFilterOperand extends FilterOperand {
         }
 
         box = new TextBox();
-        this.addWidgets(hPanel);
-    }
-
-    @Override
-    public void addWidgets(HorizontalPanel panel) {
-        panel.add(list);
-        panel.add(box);
     }
 
     public String getOperandValues() {

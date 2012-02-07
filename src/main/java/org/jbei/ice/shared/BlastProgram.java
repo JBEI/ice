@@ -21,4 +21,12 @@ public enum BlastProgram implements IsSerializable {
     public String getDetails() {
         return this.details;
     }
+
+    public static BlastProgram filterValueOf(String value) {
+        try {
+            return BlastProgram.valueOf(value);
+        } catch (IllegalArgumentException iae) {
+            return null;
+        }
+    }
 }

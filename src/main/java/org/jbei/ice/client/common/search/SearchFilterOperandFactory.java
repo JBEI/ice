@@ -105,8 +105,8 @@ public class SearchFilterOperandFactory {
         case RECORD_ID:
             return textInputOperand;
 
-        case CHOOSE:
-            return null;
+        case BLAST:
+            return new BlastFilterOperand();
 
         default:
             throw new IllegalArgumentException("Could not handle case for type " + type);
