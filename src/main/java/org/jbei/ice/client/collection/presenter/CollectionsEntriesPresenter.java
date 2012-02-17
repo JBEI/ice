@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
-import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.ICollectionEntriesView;
 import org.jbei.ice.client.collection.add.EntryAddPresenter;
@@ -45,7 +44,6 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ListDataProvider;
@@ -290,7 +288,6 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
 
                 feedbackPanel.setVisible(false);
                 retrieveEntriesForFolder(selection.getId());
-                display.setCurrentMenuSelection(selection.getId());
             }
         });
 
@@ -304,7 +301,6 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
 
                 feedbackPanel.setVisible(false);
                 retrieveEntriesForFolder(selection.getId());
-                display.setCurrentMenuSelection(selection.getId());
             }
         });
 
@@ -351,7 +347,6 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
     }
 
     private void retrieveEntriesForFolder(final long id) {
-        History.newItem(Page.COLLECTIONS.getLink() + ";id=" + id, false);
 
         model.retrieveEntriesForFolder(id, new EntryIdsEventHandler() {
 
@@ -363,7 +358,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 }
 
                 currentFolderId = id;
-
+                display.setCurrentMenuSelection(id);
                 ArrayList<Long> ids = event.getIds();
                 entryDataProvider.setValues(ids);
                 collectionsDataTable.setVisibleRangeAndClearData(

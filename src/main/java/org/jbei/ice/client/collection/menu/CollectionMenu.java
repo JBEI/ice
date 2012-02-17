@@ -40,12 +40,9 @@ import com.google.gwt.view.client.SingleSelectionModel;
  * Left bar menu for showing user collections. Also adds widgets such as
  * an icon for adding a new user collection and edit/delete
  * 
- * TODO : this could probably extend CollectionEntryMenu or a common
- * TODO : abstract parent class extracted from both
- * 
  * @author Hector Plahar
  */
-public class CollectionMenu extends Composite implements HasClickHandlers {
+public class CollectionMenu extends Composite {
 
     interface Resources extends ClientBundle {
 
@@ -332,20 +329,6 @@ public class CollectionMenu extends Composite implements HasClickHandlers {
                 }
             }
         }
-    }
-
-    @Override
-    public HandlerRegistration addClickHandler(final ClickHandler handler) {
-        return addDomHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                if (!isValidClick(event))
-                    return;
-
-                handler.onClick(event);
-            }
-        }, ClickEvent.getType());
     }
 
     public Widget getQuickAddButton() {
