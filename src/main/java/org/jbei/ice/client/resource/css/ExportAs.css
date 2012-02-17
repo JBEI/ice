@@ -4,6 +4,22 @@
     gwt-image: 'sortDown';
     background-position: 75px 9px;
     padding-right: 13px;
+    
+     display: inline-block;
+    cursor: pointer;
+    color: #393939;
+    font-weight: bold;
+    font-size: 0.75em;
+    text-align: center;
+    border: 0px;
+    background-color: #f1f1f1;
+    border-top: 2px solid #f1f1f1;
+    border-bottom: 2px solid #f1f1f1;
+}
+
+.subMenuExport:hover {
+    border-top: 2px solid #0082C0;
+    background-color: #f2f2f2;
 }
 
 .cellListKeyboardSelectedItem {
@@ -13,8 +29,6 @@
 	padding: 4px;
     padding-left: 10px;
     cursor: pointer;
-    border: 1px solid #DDD;
-    -moz-border-radius: 2px;
     border-radius: 2px;
 }
 
@@ -22,6 +36,10 @@
 	background-color: #F1F1F1;
     border: 1px solid #BBB;
     color: #333;
+}
+
+.cellListOddItem:hover, .cellListEvenItem:hover {
+    background-color: #ededed;
 }
 
 .cellListWidget {

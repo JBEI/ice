@@ -46,8 +46,6 @@ public interface RegistryServiceAsync {
 
     void retrieveEntryDetails(String sessionId, long id, AsyncCallback<EntryInfo> callback);
 
-    void retrieveCollections(String sessionId, AsyncCallback<ArrayList<FolderDetails>> callback);
-
     /**
      * retrieves the list of entries for the folder
      */
@@ -96,11 +94,16 @@ public interface RegistryServiceAsync {
      * Collections
      */
 
+    void retrieveCollections(String sessionId, AsyncCallback<ArrayList<FolderDetails>> callback);
+
     void updateFolder(String sid, long folderId, FolderDetails update,
             AsyncCallback<FolderDetails> callback);
 
     void createUserCollection(String sid, String name, String description,
             AsyncCallback<FolderDetails> callback);
+
+    void retrieveUserCollections(String sessionId, String userId,
+            AsyncCallback<ArrayList<FolderDetails>> callback);
 
     void moveToUserCollection(String sid, ArrayList<Long> source, ArrayList<Long> destination,
             ArrayList<Long> entryIds, AsyncCallback<Boolean> callback);
@@ -108,12 +111,13 @@ public interface RegistryServiceAsync {
     void addEntriesToCollection(String sid, ArrayList<Long> destination, ArrayList<Long> entryIds,
             AsyncCallback<ArrayList<FolderDetails>> callback);
 
+    //
+    // end collections
+    //
+
     void retrieveStorageRoot(String sid, AsyncCallback<ArrayList<StorageInfo>> callback);
 
     void createEntry(String sid, HashSet<EntryInfo> info, AsyncCallback<ArrayList<Long>> callback);
-
-    void retrieveUserCollections(String sessionId, String userId,
-            AsyncCallback<ArrayList<FolderDetails>> callback);
 
     void retrieveStorageSchemes(String sessionId, EntryType type,
             AsyncCallback<HashMap<String, ArrayList<String>>> callback);
@@ -130,6 +134,8 @@ public interface RegistryServiceAsync {
     void retrieveNewsItems(String sessionId, AsyncCallback<ArrayList<NewsItem>> callback);
 
     void createNewsItem(String sessionId, NewsItem item, AsyncCallback<NewsItem> callback);
+
+    // bulk import draft
 
     void saveBulkImportDraft(String sid, String email, String name, ArrayList<EntryInfo> info,
             AsyncCallback<BulkImportDraftInfo> callback);

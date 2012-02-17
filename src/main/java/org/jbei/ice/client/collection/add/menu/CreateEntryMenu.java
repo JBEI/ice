@@ -1,8 +1,9 @@
-package org.jbei.ice.client.collection.menu;
+package org.jbei.ice.client.collection.add.menu;
 
 import java.util.Arrays;
 
 import org.jbei.ice.client.common.widget.PopupHandler;
+import org.jbei.ice.shared.EntryAddType;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
@@ -18,11 +19,11 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-public class ExportAsMenu implements IsWidget {
+public class CreateEntryMenu implements IsWidget {
 
     interface Style extends CellList.Style {
 
-        String subMenuExport();
+        String subMenuCreateNew();
     }
 
     interface ExportAsResource extends CellList.Resources {
@@ -33,53 +34,53 @@ public class ExportAsMenu implements IsWidget {
         @ImageOptions(repeatStyle = RepeatStyle.None)
         ImageResource sortDown();
 
-        @Source("org/jbei/ice/client/resource/css/ExportAs.css")
+        // TODO : fold with all pull downs (e.g. ExportAs) and make a generic one
+        @Source("org/jbei/ice/client/resource/css/CreateEntry.css")
         Style cellListStyle();
     }
 
-    private static final String LABEL = "Export As";
-    private final Button exportAs;
-    private final CellList<ExportAsOption> options;
-    private final SingleSelectionModel<ExportAsOption> optionSelection;
+    private static final String LABEL = "Create Entry";
+    private final Button createEntry;
+    private final CellList<EntryAddType> options;
+    private final SingleSelectionModel<EntryAddType> optionSelection;
 
-    public ExportAsMenu() {
+    public CreateEntryMenu() {
         ExportAsResource.INSTANCE.cellListStyle().ensureInjected();
-        exportAs = new Button(LABEL);
-        exportAs.setStyleName(ExportAsResource.INSTANCE.cellListStyle().subMenuExport());
+        createEntry = new Button(LABEL);
+        createEntry.setStyleName(ExportAsResource.INSTANCE.cellListStyle().subMenuCreateNew());
 
         // renderer for options list
-        options = new CellList<ExportAsOption>(new AbstractCell<ExportAsOption>() {
+        options = new CellList<EntryAddType>(new AbstractCell<EntryAddType>() {
 
             @Override
-            public void render(Context context, ExportAsOption value, SafeHtmlBuilder sb) {
-                sb.appendHtmlConstant("<span>" + value.toString() + "</span>");
+            public void render(Context context, EntryAddType type, SafeHtmlBuilder sb) {
+                sb.appendHtmlConstant("<span>" + type.toString() + "</span>");
             }
         }, ExportAsResource.INSTANCE);
 
-        options.setRowData(Arrays.asList(ExportAsOption.values()));
+        options.setRowData(Arrays.asList(EntryAddType.values()));
 
-        final PopupHandler exportAsClickHandler = new PopupHandler(options, exportAs.getElement(),
-                -1, 1);
+        final PopupHandler clickHandler = new PopupHandler(options, createEntry.getElement(), -1, 1);
 
-        exportAs.addClickHandler(exportAsClickHandler);
-        optionSelection = new SingleSelectionModel<ExportAsOption>();
+        createEntry.addClickHandler(clickHandler);
+        optionSelection = new SingleSelectionModel<EntryAddType>();
         optionSelection.addSelectionChangeHandler(new Handler() {
 
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                exportAsClickHandler.hidePopup();
+                clickHandler.hidePopup();
             }
         });
 
         options.setSelectionModel(optionSelection);
     }
 
-    public SingleSelectionModel<ExportAsOption> getSelectionModel() {
+    public SingleSelectionModel<EntryAddType> getSelectionModel() {
         return this.optionSelection;
     }
 
     @Override
     public Widget asWidget() {
-        return exportAs;
+        return createEntry;
     }
 }

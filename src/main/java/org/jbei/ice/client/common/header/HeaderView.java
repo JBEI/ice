@@ -65,12 +65,14 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
         option.addStyleName("background_white");
         option.setWidth("350px");
         option.setHeight("150px");
-
-        new HeaderPresenter(this);
     }
 
     public SearchOption getSearchOption() {
         return this.option;
+    }
+
+    public HasClickHandlers getPullDownArea() {
+        return searchInput.getPullDownArea();
     }
 
     public Image getSearchArrow() { // TODO : more descriptive name

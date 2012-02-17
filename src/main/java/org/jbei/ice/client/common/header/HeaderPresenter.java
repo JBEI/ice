@@ -4,27 +4,25 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import org.jbei.ice.client.common.FilterOperand;
-import org.jbei.ice.client.event.SearchEvent;
-import org.jbei.ice.client.event.SearchEventHandler;
+import org.jbei.ice.client.common.widget.PopupHandler;
 import org.jbei.ice.shared.SearchFilterType;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 // TODO : need associated model to go with this
 public class HeaderPresenter {
     private final HeaderView view;
     private FilterOperand currentSelected;
     private ArrayList<FilterOperand> filters;
+    private final HeaderModel model;
 
-    public HeaderPresenter(HeaderView view) {
+    public HeaderPresenter(HeaderModel model, HeaderView view) {
         filters = new ArrayList<FilterOperand>();
+        this.model = model;
 
         this.view = view;
         SearchOption option = view.getSearchOption();
@@ -44,8 +42,8 @@ public class HeaderPresenter {
 
         if (this.view.getSearchComposite() != null) {
             PopupHandler handler = new PopupHandler(option, this.view.getSearchComposite()
-                    .getTextBox().getElement());
-            this.view.getSearchArrow().addClickHandler(handler);
+                    .getTextBox().getElement(), -318, 17);
+            this.view.getPullDownArea().addClickHandler(handler);
             view.getSearchButton().addClickHandler(getSearchHandler());
         }
     }
@@ -54,6 +52,7 @@ public class HeaderPresenter {
 
         final ListBox filterOptions = option.getFilterOptions();
 
+        // change handler for filter options
         filterOptions.addChangeHandler(new ChangeHandler() {
 
             @Override
@@ -63,7 +62,7 @@ public class HeaderPresenter {
                 int index = filterOptions.getSelectedIndex();
                 String value = filterOptions.getValue(index);
 
-                // TODO : now that there is not a separate blast page, combine BlastProgram with SearchFilterType
+                // now that there is not a separate blast page, BlastProgram is rolled into SearchFilterType
                 SearchFilterType type = SearchFilterType.filterValueOf(value);
                 if (type == null) {
                     return;
@@ -71,33 +70,10 @@ public class HeaderPresenter {
 
                 currentSelected = type.getOperatorAndOperands();
                 option.setFilterOperands(currentSelected);
-
-                // set the textArea for the view
-                // TODO : pass to model
-
-                //                if (type == null) {
-                //                    panel.setHTML(2, 0, "&nbsp;");
-                //                    panel.setHTML(3, 0, "&nbsp;");
-                //                    return;
-                //                }
-                //
-                //                // operand
-                //                operand = type.getOperatorAndOperands();
-                //                if (operand != null)
-                //                    panel.setWidget(2, 0, operand);
-                //                else {
-                //                    panel.setHTML(2, 0, "&nbsp;");
-                //                    panel.setHTML(3, 0, "&nbsp;");
-                //                    return;
-                //                }
-                //
-                //                panel.setWidget(3, 0, addFilter);
-                //                panel.getFlexCellFormatter().setHorizontalAlignment(3, 0, HasAlignment.ALIGN_RIGHT);
-
             }
         });
 
-        // button handler
+        // button handler for the "Add Filter" button
         option.getAddFilter().addClickHandler(new ClickHandler() {
 
             @Override
@@ -130,60 +106,9 @@ public class HeaderPresenter {
 
             @Override
             public void onClick(ClickEvent event) {
-
-                // TODO : send message on event bus with list of filters as parameter
-                //                String query = view.getSearchInput();
-                //                if (query == null || query.isEmpty())
-                //                    view.getSearchComposite().getTextBox().setFocus(true);
-                //                else
-                //                    History.newItem(Page.QUERY.getLink() + ";id=" + query, false); // causes app controller to handle the logic
+                // TODO : validation for the search box
+                model.submitSearch(filters);
             }
         };
-    }
-
-    //
-    // inner classes
-    //
-    private class PopupHandler implements ClickHandler {
-
-        private final PopupPanel popup;
-        private final int xOffset = -318;
-
-        public PopupHandler(Widget widget, Element autoHide) {
-            this.popup = new PopupPanel();
-            this.popup.setStyleName("add_to_popup");
-            this.popup.setAutoHideEnabled(true);
-            this.popup.addAutoHidePartner(autoHide);
-            this.popup.setWidget(widget);
-            this.popup.setGlassEnabled(true);
-        }
-
-        @Override
-        public void onClick(ClickEvent event) {
-            if (!popup.isShowing()) {
-                Widget source = (Widget) event.getSource();
-                int x = source.getAbsoluteLeft() + xOffset;
-                int y = source.getOffsetHeight() + source.getAbsoluteTop() + 17;
-                popup.setPopupPosition(x, y);
-                popup.show();
-            } else {
-                popup.hide();
-            }
-        }
-
-        public void hidePopup() {
-            if (this.popup == null || !this.popup.isShowing())
-                return;
-
-            this.popup.hide();
-        }
-    }
-
-    private static class SearchHandler implements SearchEventHandler {
-
-        @Override
-        public void onSearch(SearchEvent event) {
-            // TODO Auto-generated method stub
-        }
     }
 }

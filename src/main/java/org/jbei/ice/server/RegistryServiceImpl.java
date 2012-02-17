@@ -88,6 +88,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             info.setSessionId(sessionData.getSessionKey());
             long visibleEntryCount = EntryManager.getNumberOfVisibleEntries();
             info.setVisibleEntryCount(visibleEntryCount);
+            int entryCount = EntryManager.getEntryCountBy(info.getEmail());
+            info.setUserEntryCount(entryCount);
+
             return info;
         } catch (InvalidCredentialsException e) {
             Logger.warn("Invalid credentials provided by user: " + name);
@@ -107,6 +110,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 AccountInfo info = this.accountToInfo(account);
                 long visibleEntryCount = EntryManager.getNumberOfVisibleEntries();
                 info.setVisibleEntryCount(visibleEntryCount);
+                int entryCount = EntryManager.getEntryCountBy(info.getEmail());
+                info.setUserEntryCount(entryCount);
                 return info;
             }
         } catch (ControllerException e) {
@@ -121,24 +126,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public boolean logout(String sessionId) {
         // TODO Auto-generated method stub
         return false;
-    }
-
-    @Override
-    public ArrayList<Long> retrieveSearchResults(ArrayList<SearchFilterInfo> filters) {
-        ArrayList<QueryFilter> queryFilters = new ArrayList<QueryFilter>();
-        for (SearchFilterInfo filter : filters) {
-            QueryFilter queryFilter = new QueryFilter(filter);
-            queryFilters.add(queryFilter);
-        }
-
-        try {
-            Set<Long> filterResults = QueryManager.runFilters(queryFilters);
-            ArrayList<Long> results = new ArrayList<Long>(filterResults);
-            return results;
-        } catch (ManagerException e) {
-            Logger.error(e);
-            return null;
-        }
     }
 
     @Override
@@ -504,6 +491,33 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         info.setSince(dateFormat.format(memberSinceDate));
 
         return info;
+    }
+
+    //
+    // SEARCH
+    // 
+
+    @Override
+    public ArrayList<Long> retrieveSearchResults(ArrayList<SearchFilterInfo> filters) {
+        ArrayList<Long> results = new ArrayList<Long>();
+
+        if (filters == null || filters.isEmpty())
+            return results;
+
+        ArrayList<QueryFilter> queryFilters = new ArrayList<QueryFilter>();
+        for (SearchFilterInfo filter : filters) {
+            QueryFilter queryFilter = new QueryFilter(filter);
+            queryFilters.add(queryFilter);
+        }
+
+        try {
+            Set<Long> filterResults = QueryManager.runFilters(queryFilters);
+            results.addAll(filterResults);
+            return results;
+        } catch (ManagerException e) {
+            Logger.error(e);
+            return null;
+        }
     }
 
     @Override

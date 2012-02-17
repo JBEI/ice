@@ -33,7 +33,6 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 	color: #f6f6f6;
 	font-weight: bold;
 	font-size: 0.81em;
-	font-family: sans-serif;
 	cursor: pointer;
 	-moz-border-radius: 10px;
 	-webkit-border-radius: 10px;
@@ -57,7 +56,6 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 	color: #555;
 	font-weight: bold;
 	font-size: 0.81em;
-	font-family: sans-serif;
 	cursor: pointer;
 	-moz-border-radius: 10px;
 	-webkit-border-radius: 10px;
@@ -180,7 +178,6 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 .menu_count {
 	color: #999;
 	float: right;
-	font-family: sans-serif;
 	font-size: 0.8em; 
 }
 
@@ -227,14 +224,6 @@ a.cell_mouseover:hover {
     border-radius: 2px;
 }
 
-.cell {
-	padding: 2;
-	border-right: 1px solid #ccc;
-	border-top: 1px solid #ccc;
-	width: 130px;
-	height: 17px;
-}
-
 .cell_error {
 	padding: 2;
 	border-right: 1px solid #ccc;
@@ -262,19 +251,30 @@ a.cell_mouseover:hover {
 	border-left: 1px solid #CCC;
 }
 
-.cell_selected {
-	border: 2px solid blue;
-}
-
 .sheet_header_table {
 	border-bottom: 1px solid #CCC;
 	border-top: 1px solid #CCC;
 }
 
+.cell {
+    border-right: 1px solid #ccc;
+    border-top: 1px solid #ccc;
+    width: 130px;
+    height: 17px;
+    font-size: 0.80em;
+}
+
 .cell_input {
 	border: 1px solid #000;
-	width: 130px;
-	height: 17px;
+	width: 129px;
+	height: 14px;
+	font-size: 0.70em;
+}
+
+.cell_selected {
+    border: 2px solid #0082C0;
+    width: 127px;
+    height: 14px;
 }
 
 .attachment_small_text {
@@ -311,6 +311,7 @@ a.cell_mouseover:hover {
 	color: #666;
 	font-size: 0.75em;
 	width: 23px;
+	height: 17px;
 }
 
 .sheet_col_index {
@@ -351,7 +352,7 @@ a.cell_mouseover:hover {
 	background-color: #F3F3F3;
 	font-weight: bold;
 	font-size: 0.90em;
-	font-family: sans-serif, arial;
+	font-family: arial;
 	padding: 8px;
 	color: #444;
 }
@@ -510,8 +511,7 @@ a.cell_mouseover:hover {
     cursor: pointer;
     color: #393939;
     font-weight: bold;
-    font-size: 0.78em;
-    font-family: sans-serif;
+    font-size: 0.75em;
     text-align: center;
     border: 0px;
     border-left: 1px solid #C9C9C9;
@@ -546,7 +546,6 @@ a.cell_mouseover:hover {
 .collections_menu_header {
     color: #444; 
     font-size: 0.75em; 
-    font-family: sans-serif; 
     font-weight: bold;
     background-color: #F3F3F3;
     padding: 10px;
@@ -560,8 +559,8 @@ a.cell_mouseover:hover {
 }
 
 .collection_user_menu {
-	font-family: Arial, sans-serif; 
-	font-size: 0.90em;
+	font-family: Arial; 
+	font-size: 0.80em;
 }
 
 .collection_user_menu_row {
@@ -578,10 +577,10 @@ a.cell_mouseover:hover {
 }
 
 .collection_user_menu_row_selected {
-	background-color: #ede8d7;
+	background-color: #f9f6f6; 
     cursor: default;
     font-weight: bold;
-    color: #555;
+    color: #4d5b76;
 }
 
 .cell_resize:hover {
@@ -639,7 +638,7 @@ a.cell_mouseover:hover {
     width: 90px;
     height: 30px;
     font-size: 0.8em;
-    font-family: Arial, sans-serif;
+    font-family: Arial;
 }
 
 .login_btn:hover {
@@ -650,24 +649,24 @@ a.cell_mouseover:hover {
 }
 
 .quick_search_btn {
-    background-color: #0082c0;
-    font-weight: bold;
-    font: arial, sans-serif;
-    color: white;
-    padding: 4px 15px;
+	background-color: #0082c0;
     border: 1px solid #1568d6;
+    color: white;
+    font-weight: bold;
+    font: arial;
+    padding: 4px 15px;
     cursor: pointer;
     border-radius: 2px;
     -webkit-border-radius: 2px;
     width: 90px;
     font-size: 0.75em;
-    font-family: Arial, sans-serif;
+    font-family: Arial;
     height: 28px;
     text-transform: uppercase;
 }
 
 .quick_search_btn:hover {
-    -webkit-box-shadow: 2px 2px 2px #f3f3f3;
+	-webkit-box-shadow: 2px 2px 2px #f3f3f3;
     border: 1px solid #bbb;
     background: -webkit-gradient(linear, left top, left bottom, from(#f5f5f5), to(#c5c5c5));
     color: #777;
@@ -1153,11 +1152,10 @@ td.datePickerMonth {
 }
 
 .add_new_entry_main_content_header {
-	font-size: 0.80em;
+	font-size: 0.85em;
 	padding: 10px;
 	color: #444;
 	font-weight: bold;
-	text-transform: uppercase;
 	border-left: 1px solid #F1F1F1;
 }
 

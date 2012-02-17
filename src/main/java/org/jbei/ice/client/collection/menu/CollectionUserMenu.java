@@ -8,9 +8,17 @@ import org.jbei.ice.shared.FolderDetails;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.ClientBundle;
@@ -61,14 +69,15 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
     }
 
     private final FlexTable table;
-    private FolderDetails currentSelected;
-    private FolderDetails currentEditSelection;
+    private MenuItem currentSelected;
+    private MenuItem currentEditSelection;
     private final TextBox quickAddBox;
     private final Image quickAddButton;
     private int row;
     private final TextBox editCollectionNameBox;
     private int editRow = -1;
     private int editIndex = -1;
+    private MenuCell previousSelected;
 
     public CollectionUserMenu() {
 
@@ -88,6 +97,13 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         quickAddBox.setWidth("99%");
         quickAddButton = new Image(Resources.INSTANCE.plusImage());
         quickAddButton.setStyleName("collection_quick_add_image");
+        quickAddBox.addFocusHandler(new FocusHandler() {
+
+            @Override
+            public void onFocus(FocusEvent event) {
+                quickAddBox.setText("");
+            }
+        });
 
         table.setCellPadding(0);
         table.setCellSpacing(0);
@@ -105,6 +121,15 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         initComponents();
     }
 
+    // todo : move to model/presenter/handler
+    protected boolean validate() {
+        if (quickAddBox.getText().isEmpty()) {
+            quickAddBox.setStyleName("entry_input_error");
+            return false;
+        }
+        return true;
+    }
+
     private void initComponents() {
         quickAddButton.addClickHandler(new ClickHandler() {
 
@@ -119,6 +144,22 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         return this.editCollectionNameBox;
     }
 
+    public void addQuickEditBlurHandler(BlurHandler handler) {
+        this.editCollectionNameBox.addBlurHandler(handler);
+    }
+
+    public void addQuickEditKeyDownHandler(final KeyDownHandler handler) {
+        this.editCollectionNameBox.addKeyDownHandler(new KeyDownHandler() {
+
+            @Override
+            public void onKeyDown(KeyDownEvent event) {
+                if (event.getNativeKeyCode() != KeyCodes.KEY_ENTER)
+                    return;
+                handler.onKeyDown(event);
+            }
+        });
+    }
+
     public void showFolderCount(FolderDetails details) {
         for (int i = 0; i < table.getRowCount(); i += 1) {
             Widget w = table.getWidget(i, 0);
@@ -127,19 +168,20 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
 
             MenuCell cell = (MenuCell) w;
 
-            if (details.getId() == cell.getFolderId()) {
+            long id = Long.decode(cell.getMenuItem().getId());
+            if (details.getId() == id) {
                 table.setWidget(i, 0, cell);
                 cell.showFolderCount();
             }
         }
     }
 
-    public void setFolderDetails(ArrayList<FolderDetails> folders) {
-        if (folders == null || folders.isEmpty())
+    public void setMenuItems(ArrayList<MenuItem> items) {
+        if (items == null || items.isEmpty())
             return;
 
-        for (FolderDetails folder : folders) {
-            addFolderDetail(folder);
+        for (MenuItem item : items) {
+            addMenuItem(item);
         }
     }
 
@@ -176,40 +218,61 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
      * @param folder
      *            new folder for cell
      */
-    public void setEditDetail(FolderDetails folder) {
+    public void setMenuItem(MenuItem item) {
         if (this.editIndex == -1 && this.editRow == -1)
             return;
 
-        if (folder == null)
+        if (item == null)
             return;
 
-        final MenuCell cell = new MenuCell(folder);
+        final MenuCell cell = new MenuCell(item);
         cell.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                currentSelected = cell.getFolder();
+                currentSelected = cell.getMenuItem();
             }
         });
         table.setWidget(editRow, editIndex, cell);
         this.editCollectionNameBox.setVisible(false);
     }
 
-    public void addFolderDetail(FolderDetails folder) {
-        if (folder == null)
+    public void addMenuItem(MenuItem item) {
+        if (item == null)
             return;
 
-        final MenuCell cell = new MenuCell(folder);
+        final MenuCell cell = new MenuCell(item);
         cell.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                currentSelected = cell.getFolder();
+                currentSelected = cell.getMenuItem();
             }
         });
 
         row += 1;
         table.setWidget(row, 0, cell);
+    }
+
+    public boolean removeMenuItem(MenuItem item) {
+        if (item == null)
+            return false;
+
+        for (int i = 0; i < table.getRowCount(); i += 1) {
+            Widget w = table.getWidget(i, 0);
+            if (!(w instanceof MenuCell))
+                continue;
+
+            MenuCell cell = (MenuCell) w;
+            if (!cell.getMenuItem().getId().equals(item.getId()))
+                continue;
+
+            table.remove(cell);
+            row -= 1;
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -218,19 +281,19 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
      * 
      * @param folders
      */
-    public void setBusyIndicator(Set<FolderDetails> folders) {
+    public void setBusyIndicator(Set<String> ids) {
         for (int i = 0; i < table.getRowCount(); i += 1) {
             Widget w = table.getWidget(i, 0);
             if (!(w instanceof MenuCell))
                 continue;
 
             MenuCell cell = (MenuCell) w;
-            if (folders.contains(cell.getFolder()))
+            if (ids.contains(cell.getMenuItem().getId()))
                 cell.showBusyIndicator();
         }
     }
 
-    public void updateCounts(ArrayList<FolderDetails> folders) {
+    public void updateCounts(ArrayList<MenuItem> items) {
         for (int i = 0; i < table.getRowCount(); i += 1) {
             Widget w = table.getWidget(i, 0);
             if (!(w instanceof MenuCell))
@@ -238,10 +301,9 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
 
             MenuCell cell = (MenuCell) w;
 
-            // TODO highly inefficient
-            for (FolderDetails folder : folders) {
-                if (folder.getId() == cell.getFolderId()) {
-                    cell.updateCount(folder.getCount());
+            for (MenuItem item : items) {
+                if (item.getId().equals(cell.getMenuItem().getId())) {
+                    cell.updateCount(item.getCount());
                     cell.showFolderCount();
                     break;
                 }
@@ -250,8 +312,17 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
     }
 
     @Override
-    public HandlerRegistration addClickHandler(ClickHandler handler) {
-        return addDomHandler(handler, ClickEvent.getType());
+    public HandlerRegistration addClickHandler(final ClickHandler handler) {
+        return addDomHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                if (!isValidClick(event))
+                    return;
+
+                handler.onClick(event);
+            }
+        }, ClickEvent.getType());
     }
 
     public Widget getQuickAddButton() {
@@ -262,11 +333,11 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         return this.quickAddBox;
     }
 
-    public FolderDetails getCurrentSelection() {
+    public MenuItem getCurrentSelection() {
         return currentSelected;
     }
 
-    public FolderDetails getCurrentEditSelection() {
+    public MenuItem getCurrentEditSelection() {
         return currentEditSelection;
     }
 
@@ -296,7 +367,7 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
     private class MenuCell extends Composite implements HasClickHandlers {
 
         private final HTMLPanel panel;
-        private final FolderDetails folder;
+        private final MenuItem item;
         private final String html;
         private final Image busy;
 
@@ -304,45 +375,61 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         private final HoverCell action;
         private final String folderId;
 
-        public MenuCell(final FolderDetails folder) {
+        public MenuCell(final MenuItem item) {
 
             super.sinkEvents(Event.ONMOUSEOVER | Event.ONMOUSEOUT);
             // text box used when user wishes to edit a collection name
 
-            this.folder = folder;
-            folderId = "right" + folder.getId();
+            this.item = item;
+            folderId = "right" + item.getId();
             action = new HoverCell();
             action.getEdit().addClickHandler(new ClickHandler() {
 
                 @Override
                 public void onClick(ClickEvent event) {
-                    // TODO : probably should be moved outside of this class
                     event.stopPropagation();
                     Cell cell = table.getCellForEvent(event);
-                    editCollectionNameBox.setText(folder.getName());
+                    editCollectionNameBox.setText(item.getName());
                     editRow = cell.getRowIndex();
                     editIndex = cell.getCellIndex();
-                    currentEditSelection = folder;
+                    currentEditSelection = item;
                     table.setWidget(cell.getRowIndex(), cell.getCellIndex(), editCollectionNameBox);
                     editCollectionNameBox.setVisible(true);
                     editCollectionNameBox.setFocus(true);
                 }
             });
 
-            html = "<span style=\"padding: 5px\" class=\"collection_user_menu\">"
-                    + folder.getName() + "</span><span class=\"menu_count\" id=\"" + folderId
-                    + "\"></span>";
+            html = "<span style=\"padding: 5px\" class=\"collection_user_menu\">" + item.getName()
+                    + "</span><span class=\"menu_count\" id=\"" + folderId + "\"></span>";
 
             panel = new HTMLPanel(html);
 
-            count = new Label(formatNumber(folder.getCount()));
+            count = new Label(formatNumber(item.getCount()));
 
             panel.add(count, folderId);
             panel.setStyleName("collection_user_menu_row");
             initWidget(panel);
 
+            // menu cell clickHandler
+            addClickHandler();
+
             // init busy indicator
             busy = new Image(Resources.INSTANCE.busyIndicatorImage());
+        }
+
+        protected void addClickHandler() {
+            this.addClickHandler(new ClickHandler() {
+
+                @Override
+                public void onClick(ClickEvent event) {
+                    if (previousSelected != null)
+                        previousSelected.removeStyleName("collection_user_menu_row_selected");
+
+                    currentSelected = item;
+                    MenuCell.this.addStyleName("collection_user_menu_row_selected");
+                    previousSelected = MenuCell.this;
+                }
+            });
         }
 
         public void showBusyIndicator() {
@@ -354,21 +441,20 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         }
 
         public void updateCount(long newCount) {
-            folder.setCount(newCount);
-            count = new Label(formatNumber(folder.getCount()));
+            item.setCount(newCount);
+            count = new Label(formatNumber(item.getCount()));
         }
 
-        public long getFolderId() {
-            return this.folder.getId();
-        }
-
-        public FolderDetails getFolder() {
-            return this.folder;
+        public MenuItem getMenuItem() {
+            return this.item;
         }
 
         @Override
         public void onBrowserEvent(Event event) {
             super.onBrowserEvent(event);
+
+            if (item.isSystem())
+                return;
 
             switch (DOM.eventGetType(event)) {
             case Event.ONMOUSEOVER:
@@ -442,5 +528,22 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         public Image getDelete() {
             return this.delete;
         }
+    }
+
+    public void addQuickAddKeyPressHandler(final KeyPressHandler handler) {
+        quickAddBox.addKeyPressHandler(new KeyPressHandler() {
+
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                if (event.getCharCode() != KeyCodes.KEY_ENTER)
+                    return;
+
+                if (!validate())
+                    return;
+
+                quickAddBox.setVisible(false);
+                handler.onKeyPress(event);
+            }
+        });
     }
 }

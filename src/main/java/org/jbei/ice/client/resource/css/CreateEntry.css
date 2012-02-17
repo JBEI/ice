@@ -1,0 +1,55 @@
+@sprite .subMenuCreateNew {
+    height: 26px;
+    width: 106px;
+    gwt-image: 'sortDown';
+    color: #ededed;
+    background-position: 90px 9px;
+    padding-right: 12px;
+    background-color: #6a7893;
+    font-weight: bold;
+    font: arial;
+    border: 1px solid #555;
+    cursor: pointer;
+    font-size: 0.75em;
+    text-align: center;
+    border-top: 2px solid #6a7893;
+    border-bottom: 2px solid #6a7893;
+    -webkit-border-radius: 1px;
+    -moz-border-radius: 1px;
+    -webkit-box-shadow: 1px 1px 1px #CCC;
+}
+
+.subMenuCreateNew:hover {
+	border-top: 2px solid #0082C0;
+}
+
+.cellListKeyboardSelectedItem {
+}
+
+.cellListOddItem, .cellListEvenItem {
+    padding: 4px;
+    padding-left: 10px;
+    cursor: pointer;
+    border-radius: 2px;
+}
+
+.cellListOddItem:hover, .cellListEvenItem:hover {
+    background-color: #ededed;
+}
+
+.cellListSelectedItem {
+    background-color: #F1F1F1;
+    border: 1px solid #BBB;
+    color: #333;
+}
+
+.cellListWidget {
+    background-color: #FFF;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    width: 180px;
+    font-family: arial;
+    font-size: 13px;
+}
+

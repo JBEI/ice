@@ -1,5 +1,6 @@
 package org.jbei.ice.client;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -8,17 +9,19 @@ import org.jbei.ice.client.bulkimport.BulkImportView;
 import org.jbei.ice.client.bulkimport.IBulkImportView;
 import org.jbei.ice.client.bulkimport.model.BulkImportModel;
 import org.jbei.ice.client.collection.presenter.CollectionsEntriesPresenter;
-import org.jbei.ice.client.collection.presenter.CollectionsListPresenter;
 import org.jbei.ice.client.collection.view.CollectionsEntriesView;
-import org.jbei.ice.client.collection.view.CollectionsListView;
-import org.jbei.ice.client.entry.add.EntryAddPresenter;
-import org.jbei.ice.client.entry.add.EntryAddView;
+import org.jbei.ice.client.common.AbstractLayout;
+import org.jbei.ice.client.common.FilterOperand;
+import org.jbei.ice.client.common.header.HeaderModel;
+import org.jbei.ice.client.common.header.HeaderPresenter;
 import org.jbei.ice.client.entry.view.EntryPresenter;
 import org.jbei.ice.client.entry.view.view.EntryView;
 import org.jbei.ice.client.event.ILoginEventHandler;
 import org.jbei.ice.client.event.ILogoutEventHandler;
 import org.jbei.ice.client.event.LoginEvent;
 import org.jbei.ice.client.event.LogoutEvent;
+import org.jbei.ice.client.event.SearchEvent;
+import org.jbei.ice.client.event.SearchEventHandler;
 import org.jbei.ice.client.home.HomePagePresenter;
 import org.jbei.ice.client.home.HomePageView;
 import org.jbei.ice.client.login.LoginPresenter;
@@ -29,8 +32,6 @@ import org.jbei.ice.client.profile.ProfilePresenter;
 import org.jbei.ice.client.profile.ProfileView;
 import org.jbei.ice.client.search.advanced.AdvancedSearchPresenter;
 import org.jbei.ice.client.search.advanced.AdvancedSearchView;
-import org.jbei.ice.client.search.blast.BlastPresenter;
-import org.jbei.ice.client.search.blast.BlastView;
 import org.jbei.ice.client.storage.StoragePresenter;
 import org.jbei.ice.client.storage.StorageView;
 import org.jbei.ice.shared.dto.AccountInfo;
@@ -85,6 +86,23 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
 
         // add log out handler
         this.eventBus.addHandler(LogoutEvent.TYPE, new AppLogoutHandler());
+
+        // search handler
+        this.eventBus.addHandler(SearchEvent.TYPE, new SearchEventHandler() {
+
+            @Override
+            public void onSearch(SearchEvent event) {
+                showSearchResults(event.getOperands(), event.getResults());
+            }
+        });
+    }
+
+    private void showSearchResults(ArrayList<FilterOperand> query, ArrayList<Long> results) {
+        History.newItem("query", false);
+        AdvancedSearchView searchView = new AdvancedSearchView();
+        new HeaderPresenter(new HeaderModel(this.service, this.eventBus), searchView.getHeader());
+        AbstractPresenter presenter = new AdvancedSearchPresenter(service, eventBus, searchView);
+        presenter.go(container);
     }
 
     private void goToMainPage() {
@@ -133,17 +151,17 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         }
 
         AbstractPresenter presenter;
+        AbstractLayout view = null;
 
         switch (page) {
 
         // TODO : cache the views and call reset() in the presenter when displaying them. they are apparently expensive to create or sum such
         // TODO : presenters are cheap however
         case MAIN:
-            presenter = new HomePagePresenter(this.service, this.eventBus, new HomePageView());
-            break;
-
-        case ADD_ENTRY:
-            presenter = new EntryAddPresenter(this.service, this.eventBus, new EntryAddView());
+            //        case BLAST:
+            HomePageView homePageView = new HomePageView();
+            view = homePageView;
+            presenter = new HomePagePresenter(this.service, this.eventBus, homePageView);
             break;
 
         case ENTRY_VIEW:
@@ -158,32 +176,27 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             break;
 
         case COLLECTIONS:
-            if (param != null && !param.isEmpty())
-                presenter = new CollectionsEntriesPresenter(this.service, this.eventBus,
-                        new CollectionsEntriesView(), param);
-            else
-                presenter = new CollectionsListPresenter(this.service, this.eventBus,
-                        new CollectionsListView());
+            CollectionsEntriesView collectionsView = new CollectionsEntriesView();
+            view = collectionsView;
+            presenter = new CollectionsEntriesPresenter(this.service, this.eventBus,
+                    collectionsView, param);
             break;
 
-        case BLAST:
-            presenter = new BlastPresenter(this.service, this.eventBus, new BlastView());
-            break;
-
-        case QUERY:
-            param = parseSingleToken(token);
-            if (param == null)
-                presenter = new AdvancedSearchPresenter(this.service, this.eventBus,
-                        new AdvancedSearchView());
-            else
-                presenter = new AdvancedSearchPresenter(this.service, this.eventBus,
-                        new AdvancedSearchView(), param);
-            break;
+        //        case QUERY:
+        //            param = parseSingleToken(token);
+        //            new AdvancedSearchView();
+        //            if (param == null)
+        //                presenter = new AdvancedSearchPresenter(this.service, this.eventBus,
+        //                        );
+        //            else
+        //                presenter = new AdvancedSearchPresenter(this.service, this.eventBus,
+        //                        new AdvancedSearchView(), param);
+        //            break;
 
         case BULK_IMPORT:
             BulkImportModel model = new BulkImportModel(this.service, this.eventBus);
-            IBulkImportView view = new BulkImportView();
-            presenter = new BulkImportPresenter(model, view);
+            IBulkImportView importView = new BulkImportView();
+            presenter = new BulkImportPresenter(model, importView);
             break;
 
         case STORAGE:
@@ -200,7 +213,10 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             break;
         }
 
+        if (view != null)
+            new HeaderPresenter(new HeaderModel(this.service, this.eventBus), view.getHeader());
         presenter.go(this.container);
+
     }
 
     protected Page getPage(String token) {
@@ -233,14 +249,6 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         }
 
         return tokens;
-    }
-
-    private String parseSingleToken(String token) {
-        String[] split = token.split("id=");
-        if (split.length <= 1)
-            return null;
-
-        return split[1];
     }
 
     // newItem and fireCurrentHistoryState causes onValueChange call

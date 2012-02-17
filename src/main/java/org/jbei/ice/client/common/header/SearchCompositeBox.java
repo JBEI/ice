@@ -2,8 +2,10 @@ package org.jbei.ice.client.common.header;
 
 import org.jbei.ice.client.common.header.HeaderView.Resources;
 
+import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -14,6 +16,7 @@ public class SearchCompositeBox extends Composite {
 
     private final TextBox box;
     private final HTMLPanel imagePanel;
+    private final FocusPanel imagePanelWrapper;
     private Image image;
     private final FlexTable widgetHolder;
 
@@ -33,17 +36,19 @@ public class SearchCompositeBox extends Composite {
 
         // text box
         box = new TextBox();
-        box.setWidth("300px");
+        box.setWidth("330px");
         box.setStyleName("quick_search_input");
         grid.setWidget(0, 1, box);
 
         // search arrow
         imagePanel = new HTMLPanel(
                 "<span style=\"position: relative; left: 7px\" id=\"search_arrow\"></span>");
+        imagePanelWrapper = new FocusPanel();
         image = new Image(Resources.INSTANCE.arrowDown());
         imagePanel.setStyleName("quick_search_arrow_panel");
         imagePanel.add(image, "search_arrow");
-        grid.setWidget(0, 2, imagePanel);
+        imagePanelWrapper.add(imagePanel);
+        grid.setWidget(0, 2, imagePanelWrapper);
         grid.getCellFormatter().setStyleName(0, 2, "search_arrow_td");
     }
 
@@ -53,6 +58,14 @@ public class SearchCompositeBox extends Composite {
 
     public TextBox getTextBox() {
         return this.box;
+    }
+
+    /**
+     * @return the area where the user clicks to show the
+     *         search options pull down
+     */
+    public HasClickHandlers getPullDownArea() {
+        return this.imagePanelWrapper;
     }
 
     public Image getImage() {

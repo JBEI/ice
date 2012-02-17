@@ -15,6 +15,11 @@ import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * Options widget for search
+ * 
+ * @author Hector Plahar
+ */
 public class SearchOption extends Composite {
 
     private final ListBox options; // search options

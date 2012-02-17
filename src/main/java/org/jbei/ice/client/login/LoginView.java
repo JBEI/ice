@@ -1,7 +1,6 @@
 package org.jbei.ice.client.login;
 
 import org.jbei.ice.client.common.Footer;
-import org.jbei.ice.client.common.header.HeaderView;
 
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -43,18 +42,15 @@ public class LoginView extends Composite implements ILoginView {
 
         initComponents();
 
-        layout.setWidget(0, 0, createHeader());
-        layout.setWidget(0, 1, getRegisterPasswordPanel());
+        layout.setWidget(0, 0, getRegisterPasswordPanel());
         layout.getFlexCellFormatter().setHorizontalAlignment(0, 1, HasAlignment.ALIGN_RIGHT);
 
         layout.setWidget(1, 0, createContents());
         layout.getCellFormatter().setVerticalAlignment(1, 0, HasVerticalAlignment.ALIGN_TOP);
         layout.getCellFormatter().setHorizontalAlignment(1, 0, HasAlignment.ALIGN_CENTER);
         layout.getCellFormatter().setHeight(1, 0, "100%");
-        layout.getFlexCellFormatter().setColSpan(1, 0, 2);
 
         layout.setWidget(2, 0, createFooter());
-        layout.getFlexCellFormatter().setColSpan(2, 0, 2);
     }
 
     private Widget getRegisterPasswordPanel() {
@@ -84,12 +80,6 @@ public class LoginView extends Composite implements ILoginView {
         passwordErrorLabel = new Label();
         passwordErrorLabel.setStyleName("login_error_msg");
         passwordErrorLabel.setVisible(false);
-    }
-
-    protected Widget createHeader() {
-        HeaderView header = new HeaderView();
-        header.setWidth("100%");
-        return header;
     }
 
     protected Widget createContents() {

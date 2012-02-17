@@ -2,8 +2,6 @@ package org.jbei.ice.client.collection.menu;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.shared.FolderDetails;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
@@ -17,7 +15,8 @@ import com.google.gwt.user.client.ui.HTMLTable.Cell;
 public class CollectionEntryMenu extends Composite implements HasClickHandlers {
 
     private final FlexTable table;
-    private long currentSelected;
+    private MenuItem currentSelected;
+    private MenuCell previousSelected;
 
     public CollectionEntryMenu() {
         table = new FlexTable();
@@ -30,25 +29,18 @@ public class CollectionEntryMenu extends Composite implements HasClickHandlers {
         table.getFlexCellFormatter().setStyleName(0, 0, "collections_menu_header");
     }
 
-    public long getCurrentSelection() {
+    public MenuItem getCurrentSelection() {
         return this.currentSelected;
     }
 
-    public void setFolderDetails(ArrayList<FolderDetails> folders) {
-        if (folders == null || folders.isEmpty())
+    public void setMenuItems(ArrayList<MenuItem> items) {
+        if (items == null || items.isEmpty())
             return;
 
         int row = 1;
 
-        for (FolderDetails folder : folders) {
-            final MenuCell cell = new MenuCell(folder);
-            cell.addClickHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    currentSelected = cell.getFolderId();
-                }
-            });
+        for (MenuItem item : items) {
+            final MenuCell cell = new MenuCell(item);
             table.setWidget(row, 0, cell);
             row += 1;
         }
@@ -68,30 +60,52 @@ public class CollectionEntryMenu extends Composite implements HasClickHandlers {
     }
 
     @Override
-    public HandlerRegistration addClickHandler(ClickHandler handler) {
-        return addDomHandler(handler, ClickEvent.getType());
+    public HandlerRegistration addClickHandler(final ClickHandler handler) {
+        return addDomHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                if (!isValidClick(event))
+                    return;
+
+                handler.onClick(event);
+            }
+        }, ClickEvent.getType());
     }
 
     // inner class
-    private class MenuCell extends Composite implements HasClickHandlers {
+    class MenuCell extends Composite implements HasClickHandlers {
 
         private final HTMLPanel panel;
-        private final FolderDetails folder;
+        private final MenuItem item;
 
-        public MenuCell(FolderDetails folder) {
+        public MenuCell(MenuItem item) {
 
-            this.folder = folder;
+            this.item = item;
 
             String html = "<span style=\"padding: 5px\" class=\"collection_user_menu\">"
-                    + folder.getName() + "</span><span class=\"menu_count\">"
-                    + formatNumber(folder.getCount()) + "</span>";
+                    + item.getName() + "</span><span class=\"menu_count\">"
+                    + formatNumber(item.getCount()) + "</span>";
             panel = new HTMLPanel(html);
             panel.setStyleName("collection_user_menu_row");
             initWidget(panel);
+
+            this.addClickHandler(new ClickHandler() {
+
+                @Override
+                public void onClick(ClickEvent event) {
+                    if (previousSelected != null)
+                        previousSelected.removeStyleName("collection_user_menu_row_selected");
+
+                    currentSelected = getItem();
+                    MenuCell.this.addStyleName("collection_user_menu_row_selected");
+                    previousSelected = MenuCell.this;
+                }
+            });
         }
 
-        public long getFolderId() {
-            return this.folder.getId();
+        public MenuItem getItem() {
+            return this.item;
         }
 
         @Override

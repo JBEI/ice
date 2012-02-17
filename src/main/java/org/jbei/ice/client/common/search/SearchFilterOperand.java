@@ -6,6 +6,7 @@ import org.jbei.ice.client.common.FilterOperand;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
 
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -14,6 +15,7 @@ public class SearchFilterOperand extends FilterOperand {
     private final ArrayList<QueryOperator> operators;
     private final ListBox list;
     private final TextBox box;
+    private final HTMLPanel layout;
 
     public SearchFilterOperand(SearchFilterType type, QueryOperator... operators) {
         super(type);
@@ -26,6 +28,13 @@ public class SearchFilterOperand extends FilterOperand {
         }
 
         box = new TextBox();
+        String listId = "_" + type.getShortName();
+        String boxId = "_" + type.getShortName();
+        layout = new HTMLPanel("<span id=\"" + listId + "\"></span> <span id=\"" + boxId
+                + "\"></span>");
+        layout.add(list, listId);
+        layout.add(box, boxId);
+        initWidget(layout);
     }
 
     public String getOperandValues() {

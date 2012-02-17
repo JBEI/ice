@@ -4,8 +4,8 @@
 	background-color: #f7e08f; 
 	font-size: 0.80em; 
 	border-radius: 3px; 
-	-webkit-box-shadow: 2px 2px 3px #bbb; 
-    moz-box-shadow: 2px 2px 4px #bbb;
+	-webkit-box-shadow: 1px 1px 2px #bbb; 
+    -moz-box-shadow: 1px 1px 2px #bbb;
     text-align: left;
 }
 
