@@ -21,8 +21,19 @@
 		specific <context-param> The value might be either "development" (reloading when templates change)
 		or "deployment". If no configuration is found, "development" is the default.
 	-->
+	
+	<filter>
+           <filter-name>UrlRewriteFilter</filter-name>
+           <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+    </filter>
+    <filter-mapping>
+       <filter-name>UrlRewriteFilter</filter-name>
+       <url-pattern>/*</url-pattern>
+       <dispatcher>REQUEST</dispatcher>
+       <dispatcher>FORWARD</dispatcher>
+    </filter-mapping>
 
-	<!-- Wicket Application -->
+	<!-- Wicket Application 
 	<filter>
 		<filter-name>wicket.ice</filter-name>
 		<filter-class>org.apache.wicket.protocol.http.WicketFilter</filter-class>
@@ -39,7 +50,7 @@
 	<filter-mapping>
 		<filter-name>wicket.ice</filter-name>
 		<url-pattern>/*</url-pattern>
-	</filter-mapping>
+	</filter-mapping> -->
 
 
 	<!-- BlazeDS -->
@@ -57,6 +68,18 @@
 		<servlet-name>MessageBrokerServlet</servlet-name>
 		<url-pattern>/messagebroker/*</url-pattern>
 	</servlet-mapping>
+	
+	<!-- re-writer servlet for specific url mapping 
+	<servlet>
+                <servlet-name>rewriter</servlet-name>
+                <servlet-class>org.jbei.ice.server.URLRewriter</servlet-class>
+        </servlet> 
+        
+	<servlet-mapping>
+	   <servlet-name>rewriter</servlet-name>
+	   <url-pattern>/entry/view</url-pattern>
+	</servlet-mapping>
+	-->
 
 
 	<!-- Apache CXF WebServices -->
@@ -101,4 +124,8 @@
         <servlet-name>fileUploaderServlet</servlet-name>
         <url-pattern>*.gupld</url-pattern>
     </servlet-mapping>
+    
+    <welcome-file-list>
+        <welcome-file>Gwt_ice.html</welcome-file>
+    </welcome-file-list>
 </web-app>
