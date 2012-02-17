@@ -1,6 +1,6 @@
 package org.jbei.ice.client.collection.menu;
 
-import org.jbei.ice.client.collection.menu.CollectionUserMenu.MenuCell;
+import org.jbei.ice.client.collection.menu.CollectionMenu.MenuCell;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

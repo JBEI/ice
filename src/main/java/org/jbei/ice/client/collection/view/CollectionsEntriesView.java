@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.jbei.ice.client.collection.ICollectionEntriesView;
 import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
-import org.jbei.ice.client.collection.menu.CollectionUserMenu;
+import org.jbei.ice.client.collection.menu.CollectionMenu;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.collection.table.CollectionEntriesDataTable;
 import org.jbei.ice.client.common.AbstractLayout;
@@ -20,8 +20,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 public class CollectionsEntriesView extends AbstractLayout implements ICollectionEntriesView {
-    private CollectionUserMenu systemMenu;
-    private CollectionUserMenu userMenu;
+    private CollectionMenu systemMenu;
+    private CollectionMenu userMenu;
     private FlexTable contents;
     private FlexTable rightContents;
     private CreateEntryMenu createNew;
@@ -52,7 +52,7 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
         contents.setCellPadding(0);
 
         // systems collections menu
-        systemMenu = new CollectionUserMenu(false, "Collections");
+        systemMenu = new CollectionMenu(false, "Collections");
         contents.setWidget(0, 0, systemMenu);
         contents.getCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
 
@@ -60,7 +60,7 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
         contents.setHTML(1, 0, "&nbsp;");
 
         // user collection menu
-        userMenu = new CollectionUserMenu(true, "My Collections");
+        userMenu = new CollectionMenu(true, "My Collections");
         contents.setWidget(2, 0, userMenu);
         contents.getCellFormatter().setVerticalAlignment(2, 0, HasAlignment.ALIGN_TOP);
 

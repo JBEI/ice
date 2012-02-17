@@ -1,6 +1,6 @@
 package org.jbei.ice.client.collection.menu;
 
-import org.jbei.ice.client.collection.menu.CollectionUserMenu.Resources;
+import org.jbei.ice.client.collection.menu.CollectionMenu.Resources;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;

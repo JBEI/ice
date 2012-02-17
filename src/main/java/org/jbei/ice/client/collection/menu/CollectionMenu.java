@@ -45,7 +45,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
  * 
  * @author Hector Plahar
  */
-public class CollectionUserMenu extends Composite implements HasClickHandlers {
+public class CollectionMenu extends Composite implements HasClickHandlers {
 
     interface Resources extends ClientBundle {
 
@@ -80,7 +80,7 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
     private TextBox quickAddBox;
     private Image quickAddButton;
 
-    public CollectionUserMenu(boolean addQuickEdit, String header) {
+    public CollectionMenu(boolean addQuickEdit, String header) {
         table = new FlexTable();
         table.setCellPadding(0);
         table.setCellSpacing(0);
