@@ -2,12 +2,12 @@ package org.jbei.ice.client.collection.menu;
 
 public class MenuItem {
 
-    private final String id;
+    private final long id;
     private String name;
     private long count;
     private final boolean isSystem;
 
-    public MenuItem(String id, String name, long count, boolean isSystem) {
+    public MenuItem(long id, String name, long count, boolean isSystem) {
         this.id = id;
         this.name = name;
         this.count = count;
@@ -18,7 +18,7 @@ public class MenuItem {
         return this.isSystem;
     }
 
-    public String getId() {
+    public long getId() {
         return id;
     }
 

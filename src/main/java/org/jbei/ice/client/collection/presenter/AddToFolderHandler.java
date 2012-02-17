@@ -42,24 +42,20 @@ public abstract class AddToFolderHandler extends SubmitHandler {
                 @Override
                 public void onSuccess(ArrayList<FolderDetails> result) {
                     if (result != null)
-                        onAddSuccess(result);
+                        onSuccess(result);
                     else
-                        onAddFailure("");
+                        onSubmitFailure("");
                 }
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    onAddFailure(caught.getMessage());
+                    onSubmitFailure(caught.getMessage());
                 }
             });
     }
 
-    public abstract void onAddSuccess(ArrayList<FolderDetails> result);
-
-    public abstract void onAddFailure(String msg);
-
     @Override
-    protected ArrayList<FolderDetails> getSource() {
+    protected ArrayList<Long> getSource() {
         return null;
     }
 }

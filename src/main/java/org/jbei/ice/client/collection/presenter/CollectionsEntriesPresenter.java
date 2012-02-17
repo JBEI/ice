@@ -23,17 +23,21 @@ import org.jbei.ice.client.collection.model.CollectionsModel;
 import org.jbei.ice.client.collection.table.CollectionEntriesDataTable;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.common.FeedbackPanel;
+import org.jbei.ice.client.common.FilterOperand;
 import org.jbei.ice.client.common.table.DataTable;
 import org.jbei.ice.client.common.table.EntryTablePager;
+import org.jbei.ice.client.event.SearchEvent;
+import org.jbei.ice.client.event.SearchEventHandler;
+import org.jbei.ice.client.search.advanced.AdvancedSearchPresenter;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.EntryInfo;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -42,7 +46,6 @@ import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ListDataProvider;
@@ -53,8 +56,6 @@ import com.google.gwt.view.client.SingleSelectionModel;
 // TODO : show table of collections on click, change view
 public class CollectionsEntriesPresenter extends AbstractPresenter {
 
-    //    private final RegistryServiceAsync service;
-    private final HandlerManager eventBus;
     private final ICollectionEntriesView display;
 
     private final EntryDataViewDataProvider entryDataProvider;
@@ -65,27 +66,44 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
     private final ListDataProvider<FolderDetails> systemListProvider;
 
     // selection menu
-    // TODO : three widgets below should be moved to view
     private final EntrySelectionModelMenu subMenu;
-    private final Button addToSubmit;
-    private final Button moveToSubmit;
-
     private final CollectionsModel model;
 
     // feedback panel
     private final FeedbackPanel feedbackPanel;
-
     private EntryAddPresenter entryPresenter;
+    private AdvancedSearchPresenter searchPresenter;
+
+    // id of the folder currently selected
+    private long currentFolderId;
 
     public CollectionsEntriesPresenter(final RegistryServiceAsync service,
             final HandlerManager eventBus, final ICollectionEntriesView display, String param) {
 
-        //        this.service = service;
-        this.eventBus = eventBus;
+        this(new CollectionsModel(service, eventBus), service, eventBus, display, param);
+        eventBus.addHandler(SearchEvent.TYPE, new SearchEventHandler() {
+
+            @Override
+            public void onSearch(SearchEvent event) {
+                search(event.getOperands());
+            }
+        });
+    }
+
+    public CollectionsEntriesPresenter(final RegistryServiceAsync service,
+            final HandlerManager eventBus, final ICollectionEntriesView display,
+            ArrayList<FilterOperand> operands) {
+        this(new CollectionsModel(service, eventBus), service, eventBus, display, null);
+        search(operands);
+    }
+
+    public CollectionsEntriesPresenter(CollectionsModel model, final RegistryServiceAsync service,
+            final HandlerManager eventBus, final ICollectionEntriesView display, String param) {
+
         this.display = display;
         feedbackPanel = new FeedbackPanel("450px");
         display.setFeedback(feedbackPanel);
-        model = new CollectionsModel(service, this.eventBus);
+        this.model = model;
 
         // initialize all parameters
         this.collectionsDataTable = new CollectionEntriesDataTable(new EntryTablePager());
@@ -102,29 +120,28 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         // init text box
         initCreateCollectionHandlers();
 
-        display.setDataView(collectionsDataTable);
-
         // collection sub menu
-        addToSubmit = new Button("Submit");
-        moveToSubmit = new Button("Submit");
+        UserCollectionMultiSelect add = new UserCollectionMultiSelect(this.userListProvider,
+                new SingleSelectionHandler());
+        add.addSubmitHandler(new CollectionEntryAddToFolderHandler(service));
 
-        UserCollectionMultiSelect add = new UserCollectionMultiSelect(addToSubmit,
-                this.userListProvider, new SingleSelectionHandler());
-        UserCollectionMultiSelect move = new UserCollectionMultiSelect(moveToSubmit,
-                this.userListProvider, new SingleSelectionHandler());
+        UserCollectionMultiSelect move = new UserCollectionMultiSelect(this.userListProvider,
+                new SingleSelectionHandler());
+        move.addSubmitHandler(new MoveEntryHandler(service));
 
         subMenu = new EntrySelectionModelMenu(add, move);
         this.display.setCollectionSubMenu(subMenu.asWidget());
 
-        // handlers for the collection sub menu
-        CollectionEntryAddToFolderHandler addToFolderHandler = new CollectionEntryAddToFolderHandler(
-                service);
-        addToSubmit.addClickHandler(addToFolderHandler);
-
         // retrieve the referenced folder
         // TODO : highlight menu
-        if (param != null)
-            retrieveEntriesForFolder(param);
+        long id = 0;
+        try {
+            if (param != null)
+                id = Long.decode(param);
+        } catch (NumberFormatException nfe) {
+            id = 0;
+        }
+        retrieveEntriesForFolder(id);
 
         // entry add
         entryPresenter = new EntryAddPresenter(service, eventBus, feedbackPanel);
@@ -140,6 +157,17 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 display.setMainContent(entryPresenter.getView());
             }
         });
+    }
+
+    private void search(ArrayList<FilterOperand> operands) {
+        if (operands == null)
+            return;
+
+        if (searchPresenter == null)
+            searchPresenter = new AdvancedSearchPresenter(model.getService(), model.getEventBus(),
+                    operands);
+
+        display.setMainContent(searchPresenter.getView());
     }
 
     private void initCreateCollectionHandlers() {
@@ -181,38 +209,30 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         if (!display.getQuickEditVisibility())
             return;
 
-        final String oldCollectionName = display.getCurrentMenuItemSelection().getName();
         String newName = display.getQuickEditInput();
-
         final MenuItem item = display.getCurrentMenuEditSelection();
 
-        if (!oldCollectionName.equals(newName)) {
-            // RPC with newName
-            // TODO : show busy signal
-            item.setName(newName);
-            FolderDetails editFolder = new FolderDetails();
-            editFolder.setCount(item.getCount());
-            editFolder.setName(item.getName());
-            editFolder.setId(Long.decode(item.getId()));
+        // RPC with newName
+        item.setName(newName);
+        FolderDetails editFolder = new FolderDetails();
+        editFolder.setCount(item.getCount());
+        editFolder.setName(item.getName());
+        editFolder.setId(item.getId());
 
-            model.updateFolder(Long.decode(item.getId()), editFolder, new FolderEventHandler() {
+        model.updateFolder(item.getId(), editFolder, new FolderEventHandler() {
 
-                @Override
-                public void onFolderEvent(FolderEvent event) {
-                    FolderDetails folder = event.getFolder();
-                    if (folder == null) {
-                        feedbackPanel
-                                .setFailureMessage("Error updating collection. Please try again");
-                        item.setName(oldCollectionName);
-                        display.setMenuItem(item);
-                        return;
-                    }
-                    MenuItem resultItem = new MenuItem(folder.getId() + "", folder.getName(),
-                            folder.getCount(), folder.isSystemFolder());
-                    display.setMenuItem(resultItem);
+            @Override
+            public void onFolderEvent(FolderEvent event) {
+                FolderDetails folder = event.getFolder();
+                if (folder == null) {
+                    feedbackPanel.setFailureMessage("Error updating collection. Please try again");
+                    return;
                 }
-            });
-        }
+                MenuItem resultItem = new MenuItem(folder.getId(), folder.getName(), folder
+                        .getCount(), folder.isSystemFolder());
+                display.setMenuItem(resultItem);
+            }
+        });
     }
 
     private void saveCollection(String value) {
@@ -230,15 +250,14 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 }
 
                 userListProvider.getList().add(folder);
-                MenuItem newItem = new MenuItem(folder.getId() + "", folder.getName(), folder
-                        .getCount(), folder.isSystemFolder());
+                MenuItem newItem = new MenuItem(folder.getId(), folder.getName(),
+                        folder.getCount(), folder.isSystemFolder());
                 display.addMenuItem(newItem);
             }
         });
     }
 
     private void initCollectionsView() {
-
         // collections table view. single view used for all collections
         collectionsDataTable.addColumnSortHandler(new AsyncHandler(collectionsDataTable));
         DataTable<EntryInfo>.DataTableColumn<?> createdField = collectionsDataTable
@@ -258,12 +277,34 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
      * by adding the selection change handlers
      */
     private void initMenus() {
-        display.addMenuSelectionHandler(new ClickHandler() {
+        final SingleSelectionModel<MenuItem> userModel = display.getUserMenuModel();
+        final SingleSelectionModel<MenuItem> systemModel = display.getSystemMenuModel();
+
+        userModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
             @Override
-            public void onClick(ClickEvent event) {
+            public void onSelectionChange(SelectionChangeEvent event) {
+                MenuItem selection = userModel.getSelectedObject();
+                if (selection == null)
+                    return;
+
                 feedbackPanel.setVisible(false);
-                retrieveEntriesForFolder(display.getCurrentMenuItemSelection().getId());
+                retrieveEntriesForFolder(selection.getId());
+                display.setCurrentMenuSelection(selection.getId());
+            }
+        });
+
+        systemModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                MenuItem selection = systemModel.getSelectedObject();
+                if (selection == null)
+                    return;
+
+                feedbackPanel.setVisible(false);
+                retrieveEntriesForFolder(selection.getId());
+                display.setCurrentMenuSelection(selection.getId());
             }
         });
 
@@ -281,22 +322,24 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 ArrayList<FolderDetails> systemFolder = new ArrayList<FolderDetails>();
 
                 for (FolderDetails folder : folders) {
-                    MenuItem item = new MenuItem(folder.getId() + "", folder.getName(), folder
+                    MenuItem item = new MenuItem(folder.getId(), folder.getName(), folder
                             .getCount(), folder.isSystemFolder());
 
                     if (folder.isSystemFolder()) {
                         systemMenuItems.add(item);
+                        systemFolder.add(folder);
                     } else {
                         userMenuItems.add(item);
+                        userFolders.add(folder);
                     }
                 }
 
                 // my entries
-                MenuItem item = new MenuItem(AppController.accountInfo.getEmail(), "My Entries",
-                        AppController.accountInfo.getUserEntryCount(), true);
+                MenuItem item = new MenuItem(0, "My Entries", AppController.accountInfo
+                        .getUserEntryCount(), true);
                 userMenuItems.add(0, item);
-                MenuItem allEntriesItem = new MenuItem(AppController.accountInfo.getEmail(),
-                        "Available Entries", AppController.accountInfo.getVisibleEntryCount(), true);
+                MenuItem allEntriesItem = new MenuItem(-1, "Available Entries",
+                        AppController.accountInfo.getVisibleEntryCount(), true);
                 systemMenuItems.add(0, allEntriesItem);
                 display.setSystemCollectionMenuItems(systemMenuItems);
                 display.setUserCollectionMenuItems(userMenuItems);
@@ -307,7 +350,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         });
     }
 
-    private void retrieveEntriesForFolder(String id) {
+    private void retrieveEntriesForFolder(final long id) {
         History.newItem(Page.COLLECTIONS.getLink() + ";id=" + id, false);
 
         model.retrieveEntriesForFolder(id, new EntryIdsEventHandler() {
@@ -318,6 +361,8 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                     feedbackPanel.setFailureMessage("Error connecting to server. Please try again");
                     return;
                 }
+
+                currentFolderId = id;
 
                 ArrayList<Long> ids = event.getIds();
                 entryDataProvider.setValues(ids);
@@ -398,8 +443,8 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                     ArrayList<FolderDetails> results = event.getItems();
                     ArrayList<MenuItem> items = new ArrayList<MenuItem>();
                     for (FolderDetails result : results) {
-                        items.add(new MenuItem(result.getId() + "", result.getName(), result
-                                .getCount(), result.isSystemFolder()));
+                        items.add(new MenuItem(result.getId(), result.getName(), result.getCount(),
+                                result.isSystemFolder()));
                     }
                     display.updateMenuItemCounts(items);
                     String msg = "<b>" + entrySize + "</b> entries successfully added to ";
@@ -450,12 +495,12 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         }
 
         @Override
-        public void onAddSuccess(ArrayList<FolderDetails> results) {
+        public void onSubmitSuccess(ArrayList<FolderDetails> results) {
 
             ArrayList<MenuItem> items = new ArrayList<MenuItem>();
             for (FolderDetails result : results) {
-                items.add(new MenuItem(result.getId() + "", result.getName(), result.getCount(),
-                        result.isSystemFolder()));
+                items.add(new MenuItem(result.getId(), result.getName(), result.getCount(), result
+                        .isSystemFolder()));
             }
 
             String msg = "<b>" + entrySize + "</b> entries successfully added to ";
@@ -467,8 +512,71 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         }
 
         @Override
-        public void onAddFailure(String msg) {
+        public void onSubmitFailure(String msg) {
             feedbackPanel.setFailureMessage("An error occurred while adding the entries.");
         }
     };
+
+    // handler for moving entries
+    class MoveEntryHandler extends SubmitHandler {
+
+        private int entrySize;
+
+        public MoveEntryHandler(RegistryServiceAsync service) {
+            super(service);
+        }
+
+        @Override
+        protected ArrayList<Long> getSource() { // TODO : can you even move from multiple folders
+            ArrayList<Long> source = new ArrayList<Long>();
+            if (currentFolderId <= 0)
+                return source;
+
+            try {
+                source.add(currentFolderId);
+            } catch (NumberFormatException nfe) {
+                GWT.log(nfe.getMessage());
+            }
+            return source;
+        }
+
+        @Override
+        protected ArrayList<FolderDetails> getDestination() {
+            ArrayList<FolderDetails> list = new ArrayList<FolderDetails>();
+            list.addAll(subMenu.getCollectionMenu().getMoveToDestination());
+            return list;
+        }
+
+        @Override
+        protected ArrayList<Long> getEntryIds() {
+            // TODO : inefficient
+            ArrayList<Long> ids = new ArrayList<Long>();
+            for (EntryInfo datum : collectionsDataTable.getEntries()) {
+                ids.add(Long.decode(datum.getRecordId()));
+            }
+            entrySize = ids.size();
+            return ids;
+        }
+
+        @Override
+        protected void onSubmitSuccess(ArrayList<FolderDetails> results) {
+            ArrayList<MenuItem> items = new ArrayList<MenuItem>();
+            for (FolderDetails result : results) {
+                items.add(new MenuItem(result.getId(), result.getName(), result.getCount(), result
+                        .isSystemFolder()));
+            }
+
+            String msg = "<b>" + entrySize + "</b> entries successfully moved to ";
+            if (results.size() == 1)
+                msg += ("\"" + results.get(0).getName() + "\" collection.");
+            else
+                msg += (results.size() + " collections.");
+            feedbackPanel.setSuccessMessage(msg);
+        }
+
+        @Override
+        protected void onSubmitFailure(String msg) {
+            feedbackPanel.setFailureMessage("An error occurred while moving entries.");
+        }
+    }
 }

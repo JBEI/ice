@@ -7,6 +7,10 @@ import org.jbei.ice.shared.FolderDetails;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -39,6 +43,7 @@ public class UserCollectionMultiSelect extends Composite { // TODO : split model
     private final CellTable<FolderDetails> table;
     private final ListDataProvider<FolderDetails> dataProvider;
     private final MultiSelectionModel<FolderDetails> model;
+    private final Button submitButton;
 
     /**
      * 
@@ -46,8 +51,8 @@ public class UserCollectionMultiSelect extends Composite { // TODO : split model
      * @param dataProvider
      * @param handler
      */
-    public UserCollectionMultiSelect(Button submitButton,
-            ListDataProvider<FolderDetails> dataProvider, final MultiSelectSelectionHandler handler) {
+    public UserCollectionMultiSelect(ListDataProvider<FolderDetails> dataProvider,
+            final MultiSelectSelectionHandler handler) {
 
         VerticalPanel wrapper = new VerticalPanel();
         wrapper.addStyleName("background_white"); // TODO : generic style
@@ -69,6 +74,17 @@ public class UserCollectionMultiSelect extends Composite { // TODO : split model
         });
         wrapper.add(table);
 
+        submitButton = new Button("Submit");
+        submitButton.addKeyPressHandler(new KeyPressHandler() {
+
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                if (event.getCharCode() != KeyCodes.KEY_ENTER)
+                    return;
+                submitButton.click();
+            }
+        });
+
         wrapper.add(submitButton);
         wrapper.setCellHorizontalAlignment(submitButton, HasAlignment.ALIGN_RIGHT);
 
@@ -80,6 +96,10 @@ public class UserCollectionMultiSelect extends Composite { // TODO : split model
 
         addSelectionColumn();
         addNameColumn();
+    }
+
+    public void addSubmitHandler(ClickHandler handler) {
+        submitButton.addClickHandler(handler);
     }
 
     public Set<FolderDetails> getSelected() {

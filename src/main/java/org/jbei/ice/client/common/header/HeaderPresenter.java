@@ -46,6 +46,7 @@ public class HeaderPresenter {
             this.view.getPullDownArea().addClickHandler(handler);
             view.getSearchButton().addClickHandler(getSearchHandler());
         }
+
     }
 
     protected void setHandlers(final SearchOption option) {

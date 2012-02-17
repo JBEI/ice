@@ -8,7 +8,6 @@ import org.jbei.ice.client.collection.table.CollectionEntriesDataTable;
 import org.jbei.ice.shared.EntryAddType;
 
 import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.Widget;
@@ -56,17 +55,13 @@ public interface ICollectionEntriesView {
     // sets the menu item in a menu list
     void setMenuItem(MenuItem item);
 
+    void setCurrentMenuSelection(long id);
+
     // new name for existing menu item
     String getQuickEditInput();
 
-    // current selection across either system or user collection
-    MenuItem getCurrentMenuItemSelection();
-
     // user menu selection for edit
     MenuItem getCurrentMenuEditSelection();
-
-    // what happens when the user clicks a valid menu item
-    void addMenuSelectionHandler(ClickHandler handler);
 
     void hideQuickAddInput();
 
@@ -89,4 +84,7 @@ public interface ICollectionEntriesView {
     // TODO : the following needs to be in abstract layout
     void setFeedback(Widget feedback);
 
+    SingleSelectionModel<MenuItem> getUserMenuModel();
+
+    SingleSelectionModel<MenuItem> getSystemMenuModel();
 }

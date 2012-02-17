@@ -2,22 +2,19 @@ package org.jbei.ice.client.collection.menu;
 
 import java.util.Set;
 
+import org.jbei.ice.client.common.widget.PopupHandler;
 import org.jbei.ice.shared.FolderDetails;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.CssResource.ImportedWithPrefix;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.resources.client.ImageResource.ImageOptions;
 import com.google.gwt.resources.client.ImageResource.RepeatStyle;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -72,8 +69,8 @@ public class CollectionSubMenu implements IsWidget {
     private final Button addToButton;
     private final Button removeButton;
     private final Button moveToButton;
-    private MenuClickHandler addToHandler;
-    private MenuClickHandler clickHandler;
+    private PopupHandler addToHandler;
+    private PopupHandler clickHandler;
 
     public CollectionSubMenu(UserCollectionMultiSelect addToSelection,
             UserCollectionMultiSelect moveToSelection) {
@@ -100,7 +97,7 @@ public class CollectionSubMenu implements IsWidget {
         addTo.setStyleName("buttonGroupItem");
         addTo.addStyleName("firstItem");
         addTo.addStyleName(Resources.INSTANCE.subMenuStyle().dropDownAdd());
-        addToHandler = new MenuClickHandler(addToSelection, addTo.getElement());
+        addToHandler = new PopupHandler(addToSelection, addTo.getElement(), -1, 1);
         addTo.addClickHandler(addToHandler);
         return addTo;
     }
@@ -116,7 +113,7 @@ public class CollectionSubMenu implements IsWidget {
         final Button move = new Button("Move To");
         move.setStyleName("buttonGroupItem");
         move.addStyleName(Resources.INSTANCE.subMenuStyle().dropDownMove());
-        clickHandler = new MenuClickHandler(moveToSelection, move.getElement());
+        clickHandler = new PopupHandler(moveToSelection, move.getElement(), -1, 1);
         move.addClickHandler(clickHandler);
         return move;
     }
@@ -137,42 +134,5 @@ public class CollectionSubMenu implements IsWidget {
     public void hidePopup() {
         addToHandler.hidePopup();
         clickHandler.hidePopup();
-    }
-
-    //
-    // inner classes
-    //
-    private class MenuClickHandler implements ClickHandler {
-
-        private final PopupPanel popup;
-
-        public MenuClickHandler(Widget widget, Element autoHide) {
-            this.popup = new PopupPanel();
-            this.popup.setStyleName("add_to_popup");
-            this.popup.setAutoHideEnabled(true);
-            this.popup.addAutoHidePartner(autoHide);
-            this.popup.setWidget(widget);
-            this.popup.setGlassEnabled(true);
-        }
-
-        @Override
-        public void onClick(ClickEvent event) {
-            if (!popup.isShowing()) {
-                Widget source = (Widget) event.getSource();
-                int x = source.getAbsoluteLeft() - 1;
-                int y = source.getOffsetHeight() + source.getAbsoluteTop() + 1;
-                popup.setPopupPosition(x, y);
-                popup.show();
-            } else {
-                popup.hide();
-            }
-        }
-
-        public void hidePopup() { // see ExportAsMenu for usage
-            if (this.popup == null || !this.popup.isShowing())
-                return;
-
-            this.popup.hide();
-        }
     }
 }

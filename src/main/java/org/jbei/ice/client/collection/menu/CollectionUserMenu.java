@@ -28,14 +28,13 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 /**
  * Left bar menu for showing user collections. Also adds widgets such as
@@ -69,19 +68,23 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
     }
 
     private final FlexTable table;
-    private MenuItem currentSelected;
     private MenuItem currentEditSelection;
-    private final TextBox quickAddBox;
-    private final Image quickAddButton;
+
     private int row;
     private final TextBox editCollectionNameBox;
     private int editRow = -1;
     private int editIndex = -1;
-    private MenuCell previousSelected;
+    private SingleSelectionModel<MenuItem> selectionModel;
 
-    public CollectionUserMenu() {
+    // quick add
+    private TextBox quickAddBox;
+    private Image quickAddButton;
 
+    public CollectionUserMenu(boolean addQuickEdit, String header) {
         table = new FlexTable();
+        table.setCellPadding(0);
+        table.setCellSpacing(0);
+        table.setStyleName("collection_menu_table");
         initWidget(table);
 
         // quick edit
@@ -90,54 +93,58 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         editCollectionNameBox.setWidth("99%");
         editCollectionNameBox.setVisible(false);
 
-        // quick add widgets
-        quickAddBox = new TextBox();
-        quickAddBox.setStyleName("input_box");
-        quickAddBox.setText("Enter new collection name...");
-        quickAddBox.setWidth("99%");
-        quickAddButton = new Image(Resources.INSTANCE.plusImage());
-        quickAddButton.setStyleName("collection_quick_add_image");
-        quickAddBox.addFocusHandler(new FocusHandler() {
+        if (addQuickEdit) {
+            // quick add widgets
+            quickAddBox = new TextBox();
+            quickAddBox.setStyleName("input_box");
+            quickAddBox.setText("Enter new collection name...");
+            quickAddBox.setWidth("99%");
+            quickAddButton = new Image(Resources.INSTANCE.plusImage());
+            quickAddButton.setStyleName("collection_quick_add_image");
+            quickAddBox.addFocusHandler(new FocusHandler() {
 
-            @Override
-            public void onFocus(FocusEvent event) {
-                quickAddBox.setText("");
-            }
-        });
+                @Override
+                public void onFocus(FocusEvent event) {
+                    quickAddBox.setText("");
+                }
+            });
 
-        table.setCellPadding(0);
-        table.setCellSpacing(0);
-        table.setStyleName("collection_menu_table");
+            quickAddButton.addClickHandler(new ClickHandler() {
 
-        String html = "<span>MY COLLECTIONS</span><span style=\"float: right\" id=\"quick_add\"></span>";
-        HTMLPanel panel = new HTMLPanel(html);
-        panel.add(quickAddButton, "quick_add");
-        table.setWidget(row, 0, panel);
-        table.getFlexCellFormatter().setStyleName(row, 0, "collections_menu_header");
+                @Override
+                public void onClick(ClickEvent event) {
+                    switchButton();
+                }
+            });
 
-        // add quick add box
-        row += 1;
-        table.setWidget(row, 0, quickAddBox);
-        initComponents();
+            HTMLPanel menuHeaderPanel = new HTMLPanel("<span>" + header
+                    + "</span><span style=\"float: right\" id=\"quick_add\"></span>");
+            menuHeaderPanel.add(quickAddButton, "quick_add");
+            table.setWidget(row, 0, menuHeaderPanel);
+            table.getFlexCellFormatter().setStyleName(row, 0, "collections_menu_header");
+
+            row += 1;
+            table.setWidget(row, 0, quickAddBox);
+
+        } else {
+            table.setHTML(row, 0, header);
+            table.getFlexCellFormatter().setStyleName(row, 0, "collections_menu_header");
+        }
+
+        selectionModel = new SingleSelectionModel<MenuItem>();
     }
 
     // todo : move to model/presenter/handler
     protected boolean validate() {
-        if (quickAddBox.getText().isEmpty()) {
+        if (quickAddBox != null && quickAddBox.getText().isEmpty()) {
             quickAddBox.setStyleName("entry_input_error");
             return false;
         }
         return true;
     }
 
-    private void initComponents() {
-        quickAddButton.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                switchButton();
-            }
-        });
+    public SingleSelectionModel<MenuItem> getSelectionModel() {
+        return this.selectionModel;
     }
 
     public TextBox getQuickEditBox() {
@@ -167,12 +174,44 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
                 continue;
 
             MenuCell cell = (MenuCell) w;
-
-            long id = Long.decode(cell.getMenuItem().getId());
-            if (details.getId() == id) {
+            if (details.getId() == cell.getMenuItem().getId()) {
                 table.setWidget(i, 0, cell);
                 cell.showFolderCount();
             }
+        }
+    }
+
+    public void addQuickAddKeyPressHandler(final KeyPressHandler handler) {
+        if (quickAddBox == null)
+            return;
+
+        quickAddBox.addKeyPressHandler(new KeyPressHandler() {
+
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                if (event.getCharCode() != KeyCodes.KEY_ENTER)
+                    return;
+
+                if (!validate())
+                    return;
+
+                quickAddBox.setVisible(false);
+                handler.onKeyPress(event);
+            }
+        });
+    }
+
+    public void setSelection(long id) {
+        for (int i = 0; i < table.getRowCount(); i += 1) {
+            Widget w = table.getWidget(i, 0);
+            if (!(w instanceof MenuCell))
+                continue;
+
+            MenuCell cell = (MenuCell) w;
+            if (id == cell.getMenuItem().getId())
+                cell.setSelected(true);
+            else
+                cell.setSelected(false);
         }
     }
 
@@ -205,7 +244,7 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         if (!isValid)
             return isValid;
 
-        if (quickAddBox.isVisible())
+        if (quickAddBox != null && quickAddBox.isVisible())
             isValid = (cell.getRowIndex() != 1);
 
         return isValid;
@@ -219,20 +258,11 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
      *            new folder for cell
      */
     public void setMenuItem(MenuItem item) {
-        if (this.editIndex == -1 && this.editRow == -1)
-            return;
-
-        if (item == null)
+        if ((this.editIndex == -1 && this.editRow == -1) || (item == null))
             return;
 
         final MenuCell cell = new MenuCell(item);
-        cell.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                currentSelected = cell.getMenuItem();
-            }
-        });
+        cell.addClickHandler(new CellSelectionHandler(selectionModel, cell));
         table.setWidget(editRow, editIndex, cell);
         this.editCollectionNameBox.setVisible(false);
     }
@@ -242,14 +272,7 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
             return;
 
         final MenuCell cell = new MenuCell(item);
-        cell.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                currentSelected = cell.getMenuItem();
-            }
-        });
-
+        cell.addClickHandler(new CellSelectionHandler(selectionModel, cell));
         row += 1;
         table.setWidget(row, 0, cell);
     }
@@ -264,7 +287,7 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
                 continue;
 
             MenuCell cell = (MenuCell) w;
-            if (!cell.getMenuItem().getId().equals(item.getId()))
+            if (cell.getMenuItem().getId() != item.getId())
                 continue;
 
             table.remove(cell);
@@ -302,7 +325,7 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
             MenuCell cell = (MenuCell) w;
 
             for (MenuItem item : items) {
-                if (item.getId().equals(cell.getMenuItem().getId())) {
+                if (item.getId() == cell.getMenuItem().getId()) {
                     cell.updateCount(item.getCount());
                     cell.showFolderCount();
                     break;
@@ -333,15 +356,14 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
         return this.quickAddBox;
     }
 
-    public MenuItem getCurrentSelection() {
-        return currentSelected;
-    }
-
     public MenuItem getCurrentEditSelection() {
         return currentEditSelection;
     }
 
     public void switchButton() {
+        if (quickAddBox == null)
+            return;
+
         if (quickAddBox.isVisible()) {
             quickAddButton.setUrl(Resources.INSTANCE.plusImage().getSafeUri());
             quickAddButton.setStyleName("collection_quick_add_image");
@@ -357,6 +379,9 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
     }
 
     public void hideQuickText() {
+        if (quickAddBox == null)
+            return;
+
         quickAddButton.setUrl(Resources.INSTANCE.plusImage().getSafeUri());
         quickAddButton.setStyleName("collection_quick_add_image");
         quickAddBox.setVisible(false);
@@ -364,7 +389,7 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
     }
 
     // inner class
-    private class MenuCell extends Composite implements HasClickHandlers {
+    class MenuCell extends Composite implements HasClickHandlers {
 
         private final HTMLPanel panel;
         private final MenuItem item;
@@ -410,26 +435,15 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
             panel.setStyleName("collection_user_menu_row");
             initWidget(panel);
 
-            // menu cell clickHandler
-            addClickHandler();
-
             // init busy indicator
             busy = new Image(Resources.INSTANCE.busyIndicatorImage());
         }
 
-        protected void addClickHandler() {
-            this.addClickHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    if (previousSelected != null)
-                        previousSelected.removeStyleName("collection_user_menu_row_selected");
-
-                    currentSelected = item;
-                    MenuCell.this.addStyleName("collection_user_menu_row_selected");
-                    previousSelected = MenuCell.this;
-                }
-            });
+        public void setSelected(boolean selected) {
+            if (selected)
+                this.addStyleName("collection_user_menu_row_selected");
+            else
+                this.removeStyleName("collection_user_menu_row_selected");
         }
 
         public void showBusyIndicator() {
@@ -496,54 +510,5 @@ public class CollectionUserMenu extends Composite implements HasClickHandlers {
             NumberFormat format = NumberFormat.getFormat("##,###");
             return format.format(l);
         }
-    }
-
-    private class HoverCell extends Composite {
-        private final HorizontalPanel panel;
-        private final Image edit;
-        private final Image delete;
-
-        public HoverCell() {
-
-            panel = new HorizontalPanel();
-            panel.setStyleName("user_collection_action");
-            initWidget(panel);
-
-            edit = new Image(Resources.INSTANCE.editImage());
-            delete = new Image(Resources.INSTANCE.deleteImage());
-
-            panel.add(edit);
-            panel.setHeight("16px");
-            HTML pipe = new HTML("&nbsp;|&nbsp;");
-            pipe.addStyleName("color_eee");
-            panel.add(pipe);
-            panel.add(delete);
-            panel.setStyleName("menu_count");
-        }
-
-        public Image getEdit() {
-            return this.edit;
-        }
-
-        public Image getDelete() {
-            return this.delete;
-        }
-    }
-
-    public void addQuickAddKeyPressHandler(final KeyPressHandler handler) {
-        quickAddBox.addKeyPressHandler(new KeyPressHandler() {
-
-            @Override
-            public void onKeyPress(KeyPressEvent event) {
-                if (event.getCharCode() != KeyCodes.KEY_ENTER)
-                    return;
-
-                if (!validate())
-                    return;
-
-                quickAddBox.setVisible(false);
-                handler.onKeyPress(event);
-            }
-        });
     }
 }

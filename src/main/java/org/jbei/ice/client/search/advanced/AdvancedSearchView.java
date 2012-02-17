@@ -2,21 +2,19 @@ package org.jbei.ice.client.search.advanced;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.search.SearchFilterPanel;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.event.SearchSelectionHandler;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class AdvancedSearchView extends AbstractLayout implements IAdvancedSearchView {
+public class AdvancedSearchView extends Composite implements IAdvancedSearchView {
 
     private SearchFilterPanel filterPanel;
     private AdvancedSearchResultsTable table;
@@ -25,16 +23,18 @@ public class AdvancedSearchView extends AbstractLayout implements IAdvancedSearc
     private VerticalPanel resultsPanel;
 
     public AdvancedSearchView() {
-    }
+        FlexTable layout = new FlexTable();
+        layout.setWidth("100%");
+        layout.setHeight("100%");
+        layout.setCellSpacing(0);
+        layout.setCellPadding(0);
+        initWidget(layout);
 
-    @Override
-    public void initComponents() {
-        super.initComponents();
         header = new HorizontalPanel();
         resultsPanel = new VerticalPanel();
+        layout.setWidget(0, 0, createContents());
     }
 
-    @Override
     protected Widget createContents() {
 
         FlexTable contents = new FlexTable();
@@ -43,16 +43,13 @@ public class AdvancedSearchView extends AbstractLayout implements IAdvancedSearc
         contents.setWidth("100%");
 
         // add filters
-        CaptionPanel captionPanel = new CaptionPanel("Filters");
+        CaptionPanel captionPanel = new CaptionPanel("Search Filters");
         captionPanel.setWidth("100%");
 
         filterPanel = new SearchFilterPanel();
-        captionPanel.setWidth("500px");
+        captionPanel.setWidth("97%");
         captionPanel.add(filterPanel);
-        //        captionPanel.setStyleName("center");
         contents.setWidget(0, 0, captionPanel);
-        contents.getFlexCellFormatter().setHorizontalAlignment(0, 0,
-            HasHorizontalAlignment.ALIGN_CENTER);
 
         // add results table
         resultsPanel.setWidth("100%");
@@ -77,11 +74,6 @@ public class AdvancedSearchView extends AbstractLayout implements IAdvancedSearc
     @Override
     public Widget asWidget() {
         return this;
-    }
-
-    @Override
-    public Button getEvaluateButton() {
-        return this.filterPanel.getEvaluateButton();
     }
 
     @Override

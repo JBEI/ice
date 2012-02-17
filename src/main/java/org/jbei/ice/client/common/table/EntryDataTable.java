@@ -47,7 +47,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
             DefaultSelectionEventManager.<T> createCheckboxManager());
     }
 
-    protected DataTableColumn<Boolean> addSelectionColumn(double width, Unit unit) {
+    protected DataTableColumn<Boolean> addSelectionColumn() {
         final CheckboxCell columnCell = new CheckboxCell(true, false) {
             @Override
             public void onBrowserEvent(Context context, Element parent, Boolean value,
@@ -80,7 +80,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         SelectionColumnHeader header = new SelectionColumnHeader();
 
         this.addColumn(selectionColumn, header);
-        this.setColumnWidth(selectionColumn, width, unit);
+        this.setColumnWidth(selectionColumn, 30, Unit.PX);
         return selectionColumn;
     }
 
@@ -201,19 +201,19 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
     protected void addHasAttachmentColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.ATTACHMENT);
         this.addColumn(column, column.getHeader());
-        this.setColumnWidth(column, 20, Unit.PX);
+        this.setColumnWidth(column, 34, Unit.PX);
     }
 
     protected void addHasSampleColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SAMPLE);
         this.addColumn(column, column.getHeader());
-        this.setColumnWidth(column, 20, Unit.PX);
+        this.setColumnWidth(column, 34, Unit.PX);
     }
 
     protected void addHasSequenceColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SEQUENCE);
         this.addColumn(column, column.getHeader());
-        this.setColumnWidth(column, 20, Unit.PX);
+        this.setColumnWidth(column, 34, Unit.PX);
     }
 
     protected DataTableColumn<String> addCreatedColumn() {

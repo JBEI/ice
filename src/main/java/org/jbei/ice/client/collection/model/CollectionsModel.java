@@ -24,6 +24,14 @@ public class CollectionsModel {
         this.eventBus = eventBus;
     }
 
+    public RegistryServiceAsync getService() {
+        return this.service;
+    }
+
+    public HandlerManager getEventBus() {
+        return this.eventBus;
+    }
+
     public void retrieveFolders(final FolderRetrieveEventHandler handler) {
         service.retrieveCollections(AppController.sessionId,
             new AsyncCallback<ArrayList<FolderDetails>>() {
@@ -72,26 +80,14 @@ public class CollectionsModel {
             });
     }
 
-    public void retrieveEntriesForFolder(String id, final EntryIdsEventHandler handler) {
+    public void retrieveEntriesForFolder(long id, final EntryIdsEventHandler handler) {
 
-        // TODO : find a different way to distinguish between folder id and user id (isNumeric?)
-        try {
-            service.retrieveEntriesForFolder(AppController.sessionId, Long.decode(id),
-                new AsyncCallback<ArrayList<Long>>() {
-
-                    @Override
-                    public void onSuccess(ArrayList<Long> result) {
-                        handler.onEntryIdsEvent(new EntryIdsEvent(result));
-                    }
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        handler.onEntryIdsEvent(null);
-                    }
-                });
-
-        } catch (NumberFormatException nfe) {
-            service.retrieveUserEntries(AppController.sessionId, id,
+        if (id == 0)
+            retrieveEntriesForCurrentUser(handler);
+        else if (id == -1)
+            retrieveAllEntries(handler);
+        else {
+            service.retrieveEntriesForFolder(AppController.sessionId, id,
                 new AsyncCallback<ArrayList<Long>>() {
 
                     @Override
@@ -105,6 +101,37 @@ public class CollectionsModel {
                     }
                 });
         }
+    }
+
+    public void retrieveAllEntries(final EntryIdsEventHandler handler) {
+        service.retrieveAllEntryIDs(AppController.sessionId, new AsyncCallback<ArrayList<Long>>() {
+
+            @Override
+            public void onSuccess(ArrayList<Long> result) {
+                handler.onEntryIdsEvent(new EntryIdsEvent(result));
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                handler.onEntryIdsEvent(null);
+            }
+        });
+    }
+
+    public void retrieveEntriesForCurrentUser(final EntryIdsEventHandler handler) {
+        service.retrieveUserEntries(AppController.sessionId, AppController.accountInfo.getEmail(),
+            new AsyncCallback<ArrayList<Long>>() {
+
+                @Override
+                public void onSuccess(ArrayList<Long> result) {
+                    handler.onEntryIdsEvent(new EntryIdsEvent(result));
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    handler.onEntryIdsEvent(null);
+                }
+            });
     }
 
     public void addEntriesToFolder(ArrayList<Long> destinationFolderIds, ArrayList<Long> ids,

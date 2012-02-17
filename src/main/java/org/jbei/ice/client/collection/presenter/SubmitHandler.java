@@ -22,13 +22,7 @@ public abstract class SubmitHandler implements ClickHandler {
 
     @Override
     public void onClick(ClickEvent event) {
-        ArrayList<Long> sourceFolderIds = new ArrayList<Long>();
-        if (getSource() != null) {
-            for (FolderDetails folderDetail : getSource()) {
-                sourceFolderIds.add(folderDetail.getId());
-            }
-        }
-
+        ArrayList<Long> sourceFolderIds = new ArrayList<Long>(getSource());
         ArrayList<Long> destinationFolderIds = new ArrayList<Long>();
         if (getDestination() != null) {
             for (FolderDetails detail : getDestination()) {
@@ -60,7 +54,7 @@ public abstract class SubmitHandler implements ClickHandler {
      * @return List of folders that the entries are originating from. When performing
      *         a move, the entries are removed from this folder
      */
-    protected abstract ArrayList<FolderDetails> getSource();
+    protected abstract ArrayList<Long> getSource();
 
     /**
      * @return List of folders that the entries are to be added to
@@ -71,4 +65,8 @@ public abstract class SubmitHandler implements ClickHandler {
      * @return List of entry identifiers that are to be moved or added
      */
     protected abstract ArrayList<Long> getEntryIds();
+
+    protected abstract void onSubmitSuccess(ArrayList<FolderDetails> result);
+
+    protected abstract void onSubmitFailure(String msg);
 }

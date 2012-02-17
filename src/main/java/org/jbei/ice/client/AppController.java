@@ -30,8 +30,6 @@ import org.jbei.ice.client.news.NewsPresenter;
 import org.jbei.ice.client.news.NewsView;
 import org.jbei.ice.client.profile.ProfilePresenter;
 import org.jbei.ice.client.profile.ProfileView;
-import org.jbei.ice.client.search.advanced.AdvancedSearchPresenter;
-import org.jbei.ice.client.search.advanced.AdvancedSearchView;
 import org.jbei.ice.client.storage.StoragePresenter;
 import org.jbei.ice.client.storage.StorageView;
 import org.jbei.ice.shared.dto.AccountInfo;
@@ -92,16 +90,24 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
 
             @Override
             public void onSearch(SearchEvent event) {
-                showSearchResults(event.getOperands(), event.getResults());
+                showSearchResults(event.getOperands(), event.getOperands());
             }
         });
     }
 
-    private void showSearchResults(ArrayList<FilterOperand> query, ArrayList<Long> results) {
-        History.newItem("query", false);
-        AdvancedSearchView searchView = new AdvancedSearchView();
-        new HeaderPresenter(new HeaderModel(this.service, this.eventBus), searchView.getHeader());
-        AbstractPresenter presenter = new AdvancedSearchPresenter(service, eventBus, searchView);
+    private void showSearchResults(ArrayList<FilterOperand> query, ArrayList<FilterOperand> operands) {
+        if (operands == null)
+            return;
+
+        Page currentPage = getPage(History.getToken());
+        if (currentPage == Page.COLLECTIONS)
+            return;
+
+        History.newItem(Page.COLLECTIONS.getLink(), false);
+        CollectionsEntriesView cView = new CollectionsEntriesView();
+        new HeaderPresenter(new HeaderModel(this.service, this.eventBus), cView.getHeader());
+        CollectionsEntriesPresenter presenter = new CollectionsEntriesPresenter(this.service,
+                this.eventBus, cView, operands);
         presenter.go(container);
     }
 
@@ -181,17 +187,6 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             presenter = new CollectionsEntriesPresenter(this.service, this.eventBus,
                     collectionsView, param);
             break;
-
-        //        case QUERY:
-        //            param = parseSingleToken(token);
-        //            new AdvancedSearchView();
-        //            if (param == null)
-        //                presenter = new AdvancedSearchPresenter(this.service, this.eventBus,
-        //                        );
-        //            else
-        //                presenter = new AdvancedSearchPresenter(this.service, this.eventBus,
-        //                        new AdvancedSearchView(), param);
-        //            break;
 
         case BULK_IMPORT:
             BulkImportModel model = new BulkImportModel(this.service, this.eventBus);

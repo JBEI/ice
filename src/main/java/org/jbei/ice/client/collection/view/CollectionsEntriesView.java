@@ -5,7 +5,6 @@ import java.util.Set;
 
 import org.jbei.ice.client.collection.ICollectionEntriesView;
 import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
-import org.jbei.ice.client.collection.menu.CollectionEntryMenu;
 import org.jbei.ice.client.collection.menu.CollectionUserMenu;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.collection.table.CollectionEntriesDataTable;
@@ -13,7 +12,6 @@ import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.shared.EntryAddType;
 
 import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -22,7 +20,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 public class CollectionsEntriesView extends AbstractLayout implements ICollectionEntriesView {
-    private CollectionEntryMenu systemMenu;
+    private CollectionUserMenu systemMenu;
     private CollectionUserMenu userMenu;
     private FlexTable contents;
     private FlexTable rightContents;
@@ -54,7 +52,7 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
         contents.setCellPadding(0);
 
         // systems collections menu
-        systemMenu = new CollectionEntryMenu();
+        systemMenu = new CollectionUserMenu(false, "Collections");
         contents.setWidget(0, 0, systemMenu);
         contents.getCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
 
@@ -62,7 +60,7 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
         contents.setHTML(1, 0, "&nbsp;");
 
         // user collection menu
-        userMenu = new CollectionUserMenu();
+        userMenu = new CollectionUserMenu(true, "My Collections");
         contents.setWidget(2, 0, userMenu);
         contents.getCellFormatter().setVerticalAlignment(2, 0, HasAlignment.ALIGN_TOP);
 
@@ -189,27 +187,28 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
     }
 
     @Override
+    public void setCurrentMenuSelection(long id) {
+        this.userMenu.setSelection(id);
+        this.systemMenu.setSelection(id);
+    }
+
+    @Override
     public String getQuickEditInput() {
         return this.userMenu.getQuickEditBox().getText();
     }
 
     @Override
-    public MenuItem getCurrentMenuItemSelection() {
-        MenuItem item = this.userMenu.getCurrentSelection();
-        if (item == null)
-            item = this.systemMenu.getCurrentSelection();
-
-        return item;
-    }
-
-    @Override
-    public void addMenuSelectionHandler(ClickHandler handler) {
-        this.userMenu.addClickHandler(handler);
-        this.systemMenu.addClickHandler(handler);
-    }
-
-    @Override
     public MenuItem getCurrentMenuEditSelection() {
         return this.userMenu.getCurrentEditSelection();
+    }
+
+    @Override
+    public SingleSelectionModel<MenuItem> getUserMenuModel() {
+        return userMenu.getSelectionModel();
+    }
+
+    @Override
+    public SingleSelectionModel<MenuItem> getSystemMenuModel() {
+        return systemMenu.getSelectionModel();
     }
 }

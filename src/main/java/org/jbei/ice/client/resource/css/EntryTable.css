@@ -25,7 +25,6 @@
  */
 .cellTableHeader {
 	border-bottom: 1px solid #6f7277;
-	padding: 3px 15px;
     text-align: left;
     color: #4b4a4a;
     text-shadow: #ddf 1px 1px 0;
@@ -35,15 +34,15 @@
     white-space: nowrap;
     border-right: 1px solid #ccc;
     border-top: 1px solid #ccc; 
-    padding-left: 4px;
+    padding: 3px;
 }
 
 /* Applied to every cell */
 .cellTableCell {
-  padding: 4px; 
+  padding: 3px; 
   font-size: 0.80em;
   color: #333;
-  font-family: sans-serif;
+  font-family: arial;
   overflow: hidden;
   border-right: 1px solid #ccc;
   border-top: 1px solid #ccc;  
