@@ -666,6 +666,10 @@ a.cell_mouseover:hover {
     text-transform: uppercase;
 }
 
+.quick_search_widget_close:hover {
+	cursor: pointer;
+}
+
 .quick_search_btn:hover {
 	-webkit-box-shadow: 2px 2px 2px #f3f3f3;
     border: 1px solid #bbb;
@@ -1163,6 +1167,9 @@ td.datePickerMonth {
 .add_new_entry_sub_content {
 	padding: 6px;
 	border: 1px solid #F1F1F1;
+}
+
+.bulk_import_sub_content {
 	
 }
 

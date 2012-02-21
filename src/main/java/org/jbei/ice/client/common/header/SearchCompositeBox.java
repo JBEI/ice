@@ -12,8 +12,13 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * Composite box for quick search.
+ * Combines a text box and a holder for search widgets
+ * 
+ * @author Hector Plahar
+ */
 public class SearchCompositeBox extends Composite {
-
     private final TextBox box;
     private final HTMLPanel imagePanel;
     private final FocusPanel imagePanelWrapper;
@@ -77,5 +82,13 @@ public class SearchCompositeBox extends Composite {
             box.setText(filter);
         else
             box.setText(box.getText() + " " + filter);
+    }
+
+    public void setTextFilter(String filter) {
+        box.setText(filter);
+    }
+
+    public void removeSearchWidget(Widget filter) {
+        widgetHolder.remove(filter);
     }
 }

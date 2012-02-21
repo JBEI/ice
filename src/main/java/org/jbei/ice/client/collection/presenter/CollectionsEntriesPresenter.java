@@ -91,7 +91,54 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
     public CollectionsEntriesPresenter(final RegistryServiceAsync service,
             final HandlerManager eventBus, final ICollectionEntriesView display,
             ArrayList<FilterOperand> operands) {
-        this(new CollectionsModel(service, eventBus), service, eventBus, display, null);
+
+        this.display = display;
+        feedbackPanel = new FeedbackPanel("450px");
+        display.setFeedback(feedbackPanel);
+        this.model = new CollectionsModel(service, eventBus);
+
+        // initialize all parameters
+        this.collectionsDataTable = new CollectionEntriesDataTable(new EntryTablePager());
+        this.userListProvider = new ListDataProvider<FolderDetails>(new KeyProvider());
+        this.systemListProvider = new ListDataProvider<FolderDetails>(new KeyProvider());
+        this.entryDataProvider = new EntryDataViewDataProvider(collectionsDataTable, service);
+
+        // Collections
+        initCollectionsView();
+
+        // selection models used for menus
+        initMenus();
+
+        // init text box
+        initCreateCollectionHandlers();
+
+        // collection sub menu
+        UserCollectionMultiSelect add = new UserCollectionMultiSelect(this.userListProvider,
+                new SingleSelectionHandler());
+        add.addSubmitHandler(new CollectionEntryAddToFolderHandler(service));
+
+        UserCollectionMultiSelect move = new UserCollectionMultiSelect(this.userListProvider,
+                new SingleSelectionHandler());
+        move.addSubmitHandler(new MoveEntryHandler(service));
+
+        subMenu = new EntrySelectionModelMenu(add, move);
+        this.display.setCollectionSubMenu(subMenu.asWidget());
+
+        // entry add
+        entryPresenter = new EntryAddPresenter(service, eventBus, feedbackPanel);
+
+        // create entry handler
+        final SingleSelectionModel<EntryAddType> selectionModel = display
+                .getAddEntrySelectionHandler();
+        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                entryPresenter.setType(selectionModel.getSelectedObject());
+                display.setMainContent(entryPresenter.getView());
+            }
+        });
+
         search(operands);
     }
 
@@ -482,7 +529,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         protected ArrayList<Long> getEntryIds() {
             // TODO : inefficient
             ArrayList<Long> ids = new ArrayList<Long>();
-            for (EntryInfo datum : collectionsDataTable.getEntries()) {
+            for (EntryInfo datum : collectionsDataTable.getEntries()) { // TODO : when adding from search results this will not work
                 ids.add(Long.decode(datum.getRecordId()));
             }
             entrySize = ids.size();

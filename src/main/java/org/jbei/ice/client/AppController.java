@@ -164,7 +164,6 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         // TODO : cache the views and call reset() in the presenter when displaying them. they are apparently expensive to create or sum such
         // TODO : presenters are cheap however
         case MAIN:
-            //        case BLAST:
             HomePageView homePageView = new HomePageView();
             view = homePageView;
             presenter = new HomePagePresenter(this.service, this.eventBus, homePageView);

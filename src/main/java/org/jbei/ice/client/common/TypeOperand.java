@@ -7,10 +7,12 @@ import org.jbei.ice.client.model.OperandValue;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
 
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.ListBox;
 
 public class TypeOperand extends FilterOperand {
 
+    private final FlexTable layout;
     private final ListBox operators;
     private final ListBox operands;
     private final ArrayList<QueryOperator> operatorsList;
@@ -19,6 +21,11 @@ public class TypeOperand extends FilterOperand {
             QueryOperator... operators) {
 
         super(filterType);
+
+        layout = new FlexTable();
+        layout.setCellPadding(0);
+
+        initWidget(layout);
 
         operatorsList = new ArrayList<QueryOperator>();
 
@@ -30,8 +37,14 @@ public class TypeOperand extends FilterOperand {
         }
 
         this.operands = new ListBox();
-        for (OperandValue value : operands)
+        for (OperandValue value : operands) {
             this.operands.addItem(value.getDisplay(), value.getValue());
+        }
+
+        // layout options
+        layout.setWidget(0, 0, this.operators);
+        layout.setWidget(0, 1, this.operands);
+
     }
 
     @Override

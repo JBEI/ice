@@ -2,6 +2,13 @@ package org.jbei.ice.shared.dto;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
+/**
+ * DTO for passing search filter data from the client. This exists to create
+ * a separation between the gwt dependent code (which will use this class)
+ * and the server code (whose equivalent class is QueryFilter and more tightly bound)
+ * 
+ * @author Hector Plahar
+ */
 public class SearchFilterInfo implements IsSerializable {
 
     private String type;

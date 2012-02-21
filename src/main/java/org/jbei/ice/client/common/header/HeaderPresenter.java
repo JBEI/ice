@@ -1,6 +1,5 @@
 package org.jbei.ice.client.common.header;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import org.jbei.ice.client.common.FilterOperand;
@@ -13,17 +12,13 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.ListBox;
 
-// TODO : need associated model to go with this
 public class HeaderPresenter {
     private final HeaderView view;
     private FilterOperand currentSelected;
-    private ArrayList<FilterOperand> filters;
     private final HeaderModel model;
 
     public HeaderPresenter(HeaderModel model, HeaderView view) {
-        filters = new ArrayList<FilterOperand>();
         this.model = model;
-
         this.view = view;
         SearchOption option = view.getSearchOption();
 
@@ -41,12 +36,11 @@ public class HeaderPresenter {
         setHandlers(option);
 
         if (this.view.getSearchComposite() != null) {
-            PopupHandler handler = new PopupHandler(option, this.view.getSearchComposite()
-                    .getTextBox().getElement(), -318, 17);
-            this.view.getPullDownArea().addClickHandler(handler);
+            PopupHandler handler = new PopupHandler(option, view.getSearchComposite().getTextBox()
+                    .getElement(), -342, 8); // TODO : needs to be moved to view
+            view.getSearchComposite().getPullDownArea().addClickHandler(handler);
             view.getSearchButton().addClickHandler(getSearchHandler());
         }
-
     }
 
     protected void setHandlers(final SearchOption option) {
@@ -75,28 +69,7 @@ public class HeaderPresenter {
         });
 
         // button handler for the "Add Filter" button
-        option.getAddFilter().addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                if (currentSelected == null)
-                    return;
-
-                filters.add(currentSelected);
-
-                // display to user
-                String operand = currentSelected.getOperand();
-                if (operand.length() > 10) {
-                    BlastXSearchFilter filter = new BlastXSearchFilter(operand);
-                    view.getSearchComposite().addSearchWidget(filter);
-                } else {
-                    String search = currentSelected.getType().getShortName().toLowerCase();
-                    search += currentSelected.getSelectedOperator().value();
-                    search += operand;
-                    view.getSearchComposite().appendFilter(search);
-                }
-            }
-        });
+        option.getAddFilter().addClickHandler(new AddFilterHandler());
     }
 
     /**
@@ -108,8 +81,55 @@ public class HeaderPresenter {
             @Override
             public void onClick(ClickEvent event) {
                 // TODO : validation for the search box
-                model.submitSearch(filters);
+                String value = view.getSearchInput();
+                QuickSearchParser.parse(value);
+                //                model.submitSearch(filters); // TODO 
             }
         };
+    }
+
+    /**
+     * Handler for when user clicks "Add filter"
+     */
+    private class AddFilterHandler implements ClickHandler {
+
+        @Override
+        public void onClick(ClickEvent event) {
+            if (currentSelected == null)
+                return;
+
+            // display to user
+            String operand = currentSelected.getOperand();
+            switch (currentSelected.getType()) {
+
+            case BLAST:
+                final BlastSearchFilter filter = new BlastSearchFilter(operand, currentSelected
+                        .getSelectedOperator().value());
+                filter.setCloseHandler(new ClickHandler() {
+
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        view.getSearchComposite().removeSearchWidget(filter);
+                    }
+                });
+
+                view.getSearchComposite().addSearchWidget(filter);
+                break;
+
+            default:
+                String type = currentSelected.getType().getShortName().toLowerCase();
+                String operator = currentSelected.getSelectedOperator().value();
+
+                int indexOfType = view.getSearchInput().indexOf(type);
+                if (indexOfType == -1) {
+                    String currentFilter = type + operator + operand;
+                    view.getSearchComposite().appendFilter(currentFilter);
+                } else {
+                    String parsed = QuickSearchParser.containsType(view.getSearchInput(),
+                        currentSelected.getType(), operand, operator);
+                    view.getSearchComposite().setTextFilter(parsed);
+                }
+            }
+        }
     }
 }

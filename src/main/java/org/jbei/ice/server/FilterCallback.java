@@ -46,5 +46,4 @@ public abstract class FilterCallback {
         }
         return result;
     }
-
 }

@@ -37,9 +37,9 @@ public enum SearchFilterType {
             "Blast", "blast", false);
 
     private String displayName;
-    private boolean composite;
+    private boolean composite; // TODO : composite refers to more than one db fields
     private String shortName;
-    private ArrayList<SearchFilterType> constraints;
+    private ArrayList<SearchFilterType> constraints; // TODO :SearchFilterInfo (type=plasmid)
 
     SearchFilterType(String displayName, String shortName, boolean isComposite,
             SearchFilterType... constraints) {

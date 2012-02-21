@@ -75,10 +75,6 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
         return searchInput.getPullDownArea();
     }
 
-    public Image getSearchArrow() { // TODO : more descriptive name
-        return searchInput.getImage();
-    }
-
     public Button getSearchButton() {
         return this.searchBtn;
     }
@@ -92,11 +88,13 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
         FlexTable layout = new FlexTable();
         layout.setCellPadding(4);
         layout.setCellSpacing(1);
+
         if (!isUserLoggedIn()) {
             return layout;
         }
 
         searchInput = new SearchCompositeBox();
+
         layout.setWidget(0, 0, searchInput);
         layout.getFlexCellFormatter().setRowSpan(0, 0, 2);
 
@@ -105,7 +103,6 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
         layout.setWidget(0, 1, searchBtn);
         layout.getFlexCellFormatter().setRowSpan(0, 1, 2);
         layout.setStyleName("float_right");
-
         return layout;
     }
 

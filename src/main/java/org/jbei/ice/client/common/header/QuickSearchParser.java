@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import org.jbei.ice.shared.QueryOperator;
+import org.jbei.ice.shared.SearchFilterType;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 /**
@@ -56,5 +57,23 @@ public class QuickSearchParser {
         }
 
         return filters;
+    }
+
+    // TODO : use a better algorithm
+    public static String containsType(String text, SearchFilterType type, String operand,
+            String operator) {
+
+        String ret = "";
+
+        for (String str : text.split("\\s+")) { // TODO : this does not handle spaces within operand. e.g. status=In Progress
+
+            if (str.startsWith(type.getShortName())) {
+                ret += (type.getShortName() + operator + operand + " ");
+            } else {
+                ret += (str + " ");
+            }
+        }
+
+        return ret;
     }
 }

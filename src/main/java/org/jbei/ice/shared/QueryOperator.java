@@ -1,7 +1,8 @@
 package org.jbei.ice.shared;
 
+
 /**
- * Operators for advanced search.
+ * Operators for filtered search
  * 
  * @author Hector Plahar
  */
@@ -9,10 +10,10 @@ public enum QueryOperator {
 
     IS("is", "="), CONTAINS("contains", "~"), DOES_NOT_CONTAIN("doesn't contain", "!~"), BEGINS_WITH(
             "begins with", "^"), ENDS_WITH("ends with", "$"), IS_NOT("isn't", "!"), BOOLEAN(
-            "yes_no", ":");
+            "yes_no", ":"), BLAST_N("blastn(nucleotide search)", "blastn"), TBLAST_X(
+            "tblastx(translated search)", "tblastx");
 
     // Not properly represented here is "yes" "no"
-
     private String operator;
     private String value;
 
