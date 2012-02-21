@@ -2,14 +2,14 @@ package org.jbei.ice.client.event;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.client.common.FilterOperand;
+import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.event.shared.GwtEvent;
 
 public class SearchEvent extends GwtEvent<SearchEventHandler> {
 
     public static Type<SearchEventHandler> TYPE = new Type<SearchEventHandler>();
-    private ArrayList<FilterOperand> operands;
+    private ArrayList<SearchFilterInfo> filters;
     private boolean isAdd;
     private ArrayList<Long> results;
 
@@ -31,12 +31,12 @@ public class SearchEvent extends GwtEvent<SearchEventHandler> {
         this.isAdd = isAdd;
     }
 
-    public ArrayList<FilterOperand> getOperands() {
-        return operands;
+    public ArrayList<SearchFilterInfo> getFilters() {
+        return filters;
     }
 
-    public void setOperands(ArrayList<FilterOperand> operands) {
-        this.operands = operands;
+    public void setFilters(ArrayList<SearchFilterInfo> operands) {
+        this.filters = operands;
     }
 
     public ArrayList<Long> getResults() {

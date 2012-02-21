@@ -22,7 +22,6 @@ import org.jbei.ice.client.collection.model.CollectionsModel;
 import org.jbei.ice.client.collection.table.CollectionEntriesDataTable;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.common.FeedbackPanel;
-import org.jbei.ice.client.common.FilterOperand;
 import org.jbei.ice.client.common.table.DataTable;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.event.SearchEvent;
@@ -32,6 +31,7 @@ import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -83,14 +83,14 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
 
             @Override
             public void onSearch(SearchEvent event) {
-                search(event.getOperands());
+                search(event.getFilters());
             }
         });
     }
 
     public CollectionsEntriesPresenter(final RegistryServiceAsync service,
             final HandlerManager eventBus, final ICollectionEntriesView display,
-            ArrayList<FilterOperand> operands) {
+            ArrayList<SearchFilterInfo> operands) {
 
         this.display = display;
         feedbackPanel = new FeedbackPanel("450px");
@@ -204,7 +204,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         });
     }
 
-    private void search(ArrayList<FilterOperand> operands) {
+    private void search(ArrayList<SearchFilterInfo> operands) {
         if (operands == null)
             return;
 

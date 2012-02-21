@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
-import org.jbei.ice.client.common.FilterOperand;
 import org.jbei.ice.client.event.SearchEvent;
 import org.jbei.ice.client.event.SearchEventHandler;
 import org.jbei.ice.client.util.Utils;
@@ -44,29 +43,22 @@ public class AdvancedSearchPresenter {
 
             @Override
             public void onSearch(SearchEvent event) {
-                search(event.getOperands());
+                search(event.getFilters());
             }
         });
     }
 
     public AdvancedSearchPresenter(final RegistryServiceAsync rpcService,
-            final HandlerManager eventBus, ArrayList<FilterOperand> operands) {
+            final HandlerManager eventBus, ArrayList<SearchFilterInfo> operands) {
         this(rpcService, eventBus);
         search(operands);
     }
 
-    protected void search(ArrayList<FilterOperand> operands) {
-        if (operands == null)
+    protected void search(ArrayList<SearchFilterInfo> searchFilters) {
+        if (searchFilters == null)
             return;
 
         // TODO : model
-        ArrayList<SearchFilterInfo> searchFilters = new ArrayList<SearchFilterInfo>();
-        for (FilterOperand operand : operands) {
-            SearchFilterInfo info = new SearchFilterInfo(operand.getType().name(), operand
-                    .getSelectedOperator().name(), operand.getOperand());
-            searchFilters.add(info);
-        }
-
         rpcService.retrieveSearchResults(searchFilters, new AsyncCallback<ArrayList<Long>>() {
 
             @Override

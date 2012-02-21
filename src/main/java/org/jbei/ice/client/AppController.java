@@ -11,7 +11,6 @@ import org.jbei.ice.client.bulkimport.model.BulkImportModel;
 import org.jbei.ice.client.collection.presenter.CollectionsEntriesPresenter;
 import org.jbei.ice.client.collection.view.CollectionsEntriesView;
 import org.jbei.ice.client.common.AbstractLayout;
-import org.jbei.ice.client.common.FilterOperand;
 import org.jbei.ice.client.common.header.HeaderModel;
 import org.jbei.ice.client.common.header.HeaderPresenter;
 import org.jbei.ice.client.entry.view.EntryPresenter;
@@ -33,6 +32,7 @@ import org.jbei.ice.client.profile.ProfileView;
 import org.jbei.ice.client.storage.StoragePresenter;
 import org.jbei.ice.client.storage.StorageView;
 import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -90,12 +90,12 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
 
             @Override
             public void onSearch(SearchEvent event) {
-                showSearchResults(event.getOperands(), event.getOperands());
+                showSearchResults(event.getFilters());
             }
         });
     }
 
-    private void showSearchResults(ArrayList<FilterOperand> query, ArrayList<FilterOperand> operands) {
+    private void showSearchResults(ArrayList<SearchFilterInfo> operands) {
         if (operands == null)
             return;
 

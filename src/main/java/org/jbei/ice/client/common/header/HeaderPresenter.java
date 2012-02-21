@@ -82,8 +82,7 @@ public class HeaderPresenter {
             public void onClick(ClickEvent event) {
                 // TODO : validation for the search box
                 String value = view.getSearchInput();
-                QuickSearchParser.parse(value);
-                //                model.submitSearch(filters); // TODO 
+                model.submitSearch(QuickSearchParser.parse(value));
             }
         };
     }
