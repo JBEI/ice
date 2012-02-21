@@ -144,8 +144,12 @@ public class CollectionMenu extends Composite {
         return this.selectionModel;
     }
 
-    public TextBox getQuickEditBox() {
-        return this.editCollectionNameBox;
+    public String getQuickEditText() {
+        return this.editCollectionNameBox.getText();
+    }
+
+    public boolean isQuickEditVisible() {
+        return this.editCollectionNameBox.isVisible();
     }
 
     public void addQuickEditBlurHandler(BlurHandler handler) {
@@ -397,13 +401,14 @@ public class CollectionMenu extends Composite {
                 public void onClick(ClickEvent event) {
                     event.stopPropagation();
                     Cell cell = table.getCellForEvent(event);
-                    editCollectionNameBox.setText(item.getName());
+                    editCollectionNameBox.setText(getMenuItem().getName());
                     editRow = cell.getRowIndex();
                     editIndex = cell.getCellIndex();
-                    currentEditSelection = item;
-                    table.setWidget(cell.getRowIndex(), cell.getCellIndex(), editCollectionNameBox);
+                    currentEditSelection = getMenuItem();
+                    table.setWidget(editRow, editIndex, editCollectionNameBox);
                     editCollectionNameBox.setVisible(true);
                     editCollectionNameBox.setFocus(true);
+                    editCollectionNameBox.selectAll();
                 }
             });
 

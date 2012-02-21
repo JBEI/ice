@@ -60,7 +60,6 @@ public interface ICollectionEntriesView {
     // new name for existing menu item
     String getQuickEditInput();
 
-    // user menu selection for edit
     MenuItem getCurrentMenuEditSelection();
 
     void hideQuickAddInput();

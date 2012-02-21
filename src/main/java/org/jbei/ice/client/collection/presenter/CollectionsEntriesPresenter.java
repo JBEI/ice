@@ -358,7 +358,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 }
 
                 currentFolderId = id;
-                display.setCurrentMenuSelection(id);
+
                 ArrayList<Long> ids = event.getIds();
                 entryDataProvider.setValues(ids);
                 collectionsDataTable.setVisibleRangeAndClearData(

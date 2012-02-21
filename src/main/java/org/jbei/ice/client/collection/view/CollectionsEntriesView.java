@@ -148,7 +148,7 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
 
     @Override
     public boolean getQuickEditVisibility() {
-        return this.userMenu.getQuickEditBox().isVisible();
+        return this.userMenu.isQuickEditVisible();
     }
 
     @Override
@@ -194,7 +194,7 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
 
     @Override
     public String getQuickEditInput() {
-        return this.userMenu.getQuickEditBox().getText();
+        return this.userMenu.getQuickEditText();
     }
 
     @Override
