@@ -29,7 +29,7 @@ public class CollectionEntriesDataTable extends EntryDataTable<EntryInfo> {
         ArrayList<DataTableColumn<?>> columns = new ArrayList<DataTableColumn<?>>();
 
         columns.add(super.addSelectionColumn());
-        columns.add(super.addTypeColumn(true, 50, Unit.PX));
+        columns.add(super.addTypeColumn(true, 60, Unit.PX));
         columns.add(super.addPartIdColumn(true, 120, Unit.PX));
         columns.add(super.addNameColumn(120, Unit.PX));
         columns.add(super.addSummaryColumn());

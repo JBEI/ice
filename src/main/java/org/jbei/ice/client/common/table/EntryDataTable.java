@@ -34,7 +34,6 @@ import com.google.gwt.view.client.ProvidesKey;
  * @param <T>
  */
 
-// TODO : allow specializations to specify column widths
 public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> implements
         IHasEntry<T> {
 
@@ -201,19 +200,19 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
     protected void addHasAttachmentColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.ATTACHMENT);
         this.addColumn(column, column.getHeader());
-        this.setColumnWidth(column, 34, Unit.PX);
+        this.setColumnWidth(column, 30, Unit.PX);
     }
 
     protected void addHasSampleColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SAMPLE);
         this.addColumn(column, column.getHeader());
-        this.setColumnWidth(column, 34, Unit.PX);
+        this.setColumnWidth(column, 30, Unit.PX);
     }
 
     protected void addHasSequenceColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SEQUENCE);
         this.addColumn(column, column.getHeader());
-        this.setColumnWidth(column, 34, Unit.PX);
+        this.setColumnWidth(column, 30, Unit.PX);
     }
 
     protected DataTableColumn<String> addCreatedColumn() {
@@ -257,7 +256,6 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
         public void setAllSelected(boolean b) {
             allSelected = b;
-            //            Window.alert("All Selected : " + b);
         }
 
         public boolean isAllSelected() {
