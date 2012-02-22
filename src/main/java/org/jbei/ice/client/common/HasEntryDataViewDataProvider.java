@@ -141,27 +141,6 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
         if (sortAsc == lastSortAsc && sortField == lastSortField)
             return false;
 
-        // TODO : why is this here? this belongs in a SamplesDataProvider
-        //        service.retrieveSamplesByDepositor(AppController.sessionId, null, sortField, sortAsc,
-        //            new AsyncCallback<LinkedList<Long>>() {
-        //
-        //                // re-sorting
-        //                @Override
-        //                public void onFailure(Throwable caught) {
-        //                    Window.alert(caught.getMessage());
-        //                }
-        //
-        //                @Override
-        //                public void onSuccess(LinkedList<Long> result) {
-        //                    if (result == null)
-        //                        return;
-        //
-        //                    setValues(result);
-        //                    lastSortAsc = sortAsc;
-        //                    lastSortField = sortField;
-        //                }
-        //            });
-
         return true;
     }
 

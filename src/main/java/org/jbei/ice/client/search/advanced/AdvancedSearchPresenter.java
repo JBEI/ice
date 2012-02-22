@@ -7,14 +7,15 @@ import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.event.SearchEvent;
 import org.jbei.ice.client.event.SearchEventHandler;
+import org.jbei.ice.client.search.blast.BlastSearchDataProvider;
 import org.jbei.ice.client.util.Utils;
-import org.jbei.ice.shared.FolderDetails;
+import org.jbei.ice.shared.QueryOperator;
+import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.view.client.ListDataProvider;
 
 public class AdvancedSearchPresenter {
 
@@ -22,20 +23,13 @@ public class AdvancedSearchPresenter {
     private final HandlerManager eventBus;
     private final AdvancedSearchView display;
     private final EntryDataViewDataProvider dataProvider;
-    private final ListDataProvider<FolderDetails> userCollectionDataProvider;
 
-    public AdvancedSearchPresenter(final RegistryServiceAsync rpcService,
-            final HandlerManager eventBus) {
-
+    public AdvancedSearchPresenter(RegistryServiceAsync rpcService, HandlerManager eventBus) {
         this.rpcService = rpcService;
         this.eventBus = eventBus;
         this.display = new AdvancedSearchView();
-        userCollectionDataProvider = new ListDataProvider<FolderDetails>();
-
-        retrieveUserCollections();
 
         // hide the results table
-        this.display.setResultsVisibility(false);
         dataProvider = new AdvancedSearchDataProvider(display.getResultsTable(), rpcService);
 
         // register for search events
@@ -54,54 +48,123 @@ public class AdvancedSearchPresenter {
         search(operands);
     }
 
-    protected void search(ArrayList<SearchFilterInfo> searchFilters) {
+    protected void search(final ArrayList<SearchFilterInfo> searchFilters) {
         if (searchFilters == null)
             return;
 
-        // TODO : model
-        rpcService.retrieveSearchResults(searchFilters, new AsyncCallback<ArrayList<Long>>() {
+        // currently support only a single blast search with filters
+        SearchFilterInfo blastInfo = null;
 
-            @Override
-            public void onSuccess(ArrayList<Long> result) {
-                display.setResultsVisibility(true);
-                dataProvider.setValues(result);
-                reset();
+        for (SearchFilterInfo filter : searchFilters) {
+            QueryOperator operator = QueryOperator.operatorValueOf(filter.getOperator());
+            if (operator == null)
+                continue;
+
+            if (operator == QueryOperator.TBLAST_X || operator == QueryOperator.BLAST_N) {
+                if (searchFilters.remove(filter)) {
+                    blastInfo = filter;
+                }
+                break;
             }
+        }
 
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert("Call failed: " + caught.getMessage());
+        // TODO : move to model
 
-                // TODO: Hide the table and show a red error msg in the position where it states
-                // "no records found"
-                display.setResultsVisibility(false);
-                reset();
-            }
+        if (blastInfo != null) {
 
-            public void reset() {
-                Utils.showDefaultCursor(null);
-            }
-        });
+            // show blast table loading
+            display.setBlastVisibility(true);
+
+            // get blast results and filter 
+            QueryOperator program = QueryOperator.operatorValueOf(blastInfo.getOperator());
+            rpcService.blastSearch(AppController.sessionId, blastInfo.getOperand(), program,
+                new AsyncCallback<ArrayList<BlastResultInfo>>() {
+
+                    @Override
+                    public void onSuccess(final ArrayList<BlastResultInfo> blastResult) {
+                        if (searchFilters.isEmpty()) {
+                            new BlastSearchDataProvider(display.getBlastResultTable(), blastResult,
+                                    rpcService);
+                        } else {
+
+                            // retrieve other filters
+                            rpcService.retrieveSearchResults(AppController.sessionId,
+                                searchFilters, new AsyncCallback<ArrayList<Long>>() {
+
+                                    @Override
+                                    public void onSuccess(ArrayList<Long> result) {
+
+                                        // TODO
+                                        // TODO : SLO....OOOO....WWW!!! DEFCON 2!!!
+                                        // TODO : push to server for filtering. this search can return a very long list
+                                        // TODO
+                                        ArrayList<BlastResultInfo> toRemove = new ArrayList<BlastResultInfo>();
+
+                                        for (BlastResultInfo info : blastResult) {
+                                            long entryId = Long.decode(info.getDataView()
+                                                    .getRecordId());
+                                            if (!result.contains(entryId)) {
+                                                toRemove.add(info);
+                                            }
+                                        }
+
+                                        blastResult.removeAll(toRemove);
+                                        display.setSearchFilters(searchFilters);
+                                        new BlastSearchDataProvider(display.getBlastResultTable(),
+                                                blastResult, rpcService);
+                                        reset();
+                                    }
+
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        Window.alert("Call failed: " + caught.getMessage());
+                                        display.setBlastVisibility(false);
+                                        reset();
+                                    }
+
+                                    public void reset() {
+                                        Utils.showDefaultCursor(null);
+                                    }
+                                });
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        display.setBlastVisibility(false);
+                        // TODO proper error handler
+                        Window.alert("Could not retrieve blast results");
+                    }
+                });
+
+        } else {
+            display.setSearchVisibility(true);
+
+            rpcService.retrieveSearchResults(AppController.sessionId, searchFilters,
+                new AsyncCallback<ArrayList<Long>>() {
+
+                    @Override
+                    public void onSuccess(ArrayList<Long> result) {
+                        display.setSearchFilters(searchFilters);
+                        dataProvider.setValues(result);
+                        reset();
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Window.alert("Call failed: " + caught.getMessage());
+                        display.setSearchVisibility(false);
+                        reset();
+                    }
+
+                    public void reset() {
+                        Utils.showDefaultCursor(null);
+                    }
+                });
+        }
     }
 
     public AdvancedSearchView getView() {
         return this.display;
     }
-
-    public void retrieveUserCollections() {
-        this.rpcService.retrieveUserCollections(AppController.sessionId,
-            AppController.accountInfo.getEmail(), new AsyncCallback<ArrayList<FolderDetails>>() {
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert("Call for user collection failed: " + caught.getMessage());
-                }
-
-                @Override
-                public void onSuccess(ArrayList<FolderDetails> result) {
-                    userCollectionDataProvider.setList(result);
-                }
-            });
-    }
-
 }

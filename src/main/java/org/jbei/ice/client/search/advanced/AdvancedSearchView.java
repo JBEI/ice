@@ -2,73 +2,59 @@ package org.jbei.ice.client.search.advanced;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.client.common.search.SearchFilterPanel;
 import org.jbei.ice.client.common.table.EntryTablePager;
-import org.jbei.ice.client.event.SearchSelectionHandler;
+import org.jbei.ice.client.search.blast.BlastResultsTable;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 public class AdvancedSearchView extends Composite implements IAdvancedSearchView {
 
-    private SearchFilterPanel filterPanel;
+    private FlowPanel filterPanel;
     private AdvancedSearchResultsTable table;
+    private BlastResultsTable blastTable;
     private EntryTablePager pager;
-    private HorizontalPanel header; // TODO : another table
-    private VerticalPanel resultsPanel;
+    private EntryTablePager blastPager;
+    private final FlexTable layout;
 
     public AdvancedSearchView() {
-        FlexTable layout = new FlexTable();
+        layout = new FlexTable();
         layout.setWidth("100%");
         layout.setHeight("100%");
         layout.setCellSpacing(0);
         layout.setCellPadding(0);
         initWidget(layout);
 
-        header = new HorizontalPanel();
-        resultsPanel = new VerticalPanel();
-        layout.setWidget(0, 0, createContents());
-    }
-
-    protected Widget createContents() {
-
-        FlexTable contents = new FlexTable();
-        contents.setCellPadding(0);
-        contents.setCellSpacing(0);
-        contents.setWidth("100%");
+        initComponents();
 
         // add filters
         CaptionPanel captionPanel = new CaptionPanel("Search Filters");
-        captionPanel.setWidth("100%");
-
-        filterPanel = new SearchFilterPanel();
         captionPanel.setWidth("97%");
         captionPanel.add(filterPanel);
-        contents.setWidget(0, 0, captionPanel);
-
-        // add results table
-        resultsPanel.setWidth("100%");
-        resultsPanel.add(header);
-        table = new AdvancedSearchResultsTable();
-        table.setWidth("100%", true);
-        resultsPanel.add(table);
+        layout.setWidget(0, 0, captionPanel);
 
         // add a break between filters and results
-        contents.setHTML(1, 0, "<br />");
+        layout.setHTML(1, 0, "&nbsp;");
 
-        // table pager
+        // TODO : loading indicator?
+    }
+
+    protected void initComponents() {
+        filterPanel = new FlowPanel();
+        table = new AdvancedSearchResultsTable();
+        blastTable = new BlastResultsTable();
+
+        // search pager
         pager = new EntryTablePager();
         pager.setDisplay(table);
-        resultsPanel.add(pager);
 
-        contents.setWidget(2, 0, resultsPanel);
-
-        return contents;
+        blastPager = new EntryTablePager();
+        blastPager.setDisplay(blastTable);
     }
 
     @Override
@@ -82,25 +68,39 @@ public class AdvancedSearchView extends Composite implements IAdvancedSearchView
     }
 
     @Override
-    public ArrayList<SearchFilterInfo> getSearchFilters() {
-        return filterPanel.getFilters();
+    public void setSearchFilters(ArrayList<SearchFilterInfo> filters) {
+        filterPanel.clear();
+        for (SearchFilterInfo filter : filters) {
+            String filterString = filter.getType() + filter.getOperator() + filter.getOperand();
+            Label label = new Label(filterString + " ");
+            filterPanel.add(label);
+        }
     }
 
     @Override
-    public void setResultsVisibility(boolean visible) {
-        //        this.table.setVisible(visible);
-        //        this.pager.setVisible(visible);
-        resultsPanel.setVisible(visible);
+    public void setSearchVisibility(boolean visible) {
+        pager.setVisible(visible);
+        table.setVisible(visible);
+
+        if (visible) {
+            layout.setWidget(2, 0, pager);
+            layout.setWidget(3, 0, table);
+        }
     }
 
     @Override
-    public void setSelectionMenu(Widget menu) {
-        header.add(menu);
+    public void setBlastVisibility(boolean visible) {
+        blastPager.setVisible(visible);
+        blastTable.setVisible(visible);
+
+        if (visible) {
+            layout.setWidget(2, 0, blastTable);
+            layout.setWidget(3, 0, blastPager);
+        }
     }
 
     @Override
-    public void setFilterPanelChangeHandler(SearchSelectionHandler handler) {
-
+    public BlastResultsTable getBlastResultTable() {
+        return blastTable;
     }
-
 }

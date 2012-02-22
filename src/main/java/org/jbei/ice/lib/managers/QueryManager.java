@@ -44,8 +44,7 @@ public class QueryManager {
 
         for (QueryFilter filter : filters) {
 
-            Set<Long> intermediate = fetchIntermediateResults(filter.getParams(),
-                filter.getOperator(), filter.getOperand());
+            Set<Long> intermediate = fetchIntermediateResults(filter);
 
             if (results == null) {
                 results = new HashSet<Long>();
@@ -61,12 +60,21 @@ public class QueryManager {
         return results;
     }
 
-    protected static Set<Long> fetchIntermediateResults(List<QueryFilterParams> filterParams,
-            QueryOperator operator, String operand) throws ManagerException {
+    protected static Set<Long> fetchIntermediateResults(QueryFilter filter) throws ManagerException {
+
+        List<QueryFilterParams> filterParams = filter.getParams();
+        QueryOperator operator = filter.getOperator();
+        String operand = filter.getOperand();
 
         switch (operator) {
         case BOOLEAN:
             return getIntermediateResultsHasX(filterParams.get(0), Boolean.valueOf(operand));
+
+        case BLAST_N:
+            return null;
+
+        case TBLAST_X:
+            return null;
 
         default:
             return getIntermediateResultsUnion(filterParams);

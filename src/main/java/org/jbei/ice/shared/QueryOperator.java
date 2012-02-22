@@ -1,12 +1,13 @@
 package org.jbei.ice.shared;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * Operators for filtered search
  * 
  * @author Hector Plahar
  */
-public enum QueryOperator {
+public enum QueryOperator implements IsSerializable {
 
     IS("is", "="), CONTAINS("contains", "~"), DOES_NOT_CONTAIN("doesn't contain", "!~"), BEGINS_WITH(
             "begins with", "^"), ENDS_WITH("ends with", "$"), IS_NOT("isn't", "!"), BOOLEAN(

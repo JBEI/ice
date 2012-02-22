@@ -7,9 +7,9 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
 import org.jbei.ice.shared.AutoCompleteField;
-import org.jbei.ice.shared.BlastProgram;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.FolderDetails;
+import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
@@ -36,7 +36,7 @@ public interface RegistryServiceAsync {
      */
     void logout(String sessionId, AsyncCallback<Boolean> callback);
 
-    void retrieveSearchResults(ArrayList<SearchFilterInfo> filters,
+    void retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters,
             AsyncCallback<ArrayList<Long>> asyncCallback);
 
     void retrieveEntryData(String sid, ArrayList<Long> entries, ColumnField field, boolean asc,
@@ -70,7 +70,7 @@ public interface RegistryServiceAsync {
 
     void retrieveAccountInfo(String sid, String userId, AsyncCallback<AccountInfo> callback);
 
-    void blastSearch(String sid, String searchString, BlastProgram program,
+    void blastSearch(String sid, String searchString, QueryOperator program,
             AsyncCallback<ArrayList<BlastResultInfo>> callback);
 
     void retrieveChildren(String sid, long id, AsyncCallback<ArrayList<StorageInfo>> callback);

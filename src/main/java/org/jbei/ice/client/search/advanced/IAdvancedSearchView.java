@@ -2,7 +2,7 @@ package org.jbei.ice.client.search.advanced;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.client.event.SearchSelectionHandler;
+import org.jbei.ice.client.search.blast.BlastResultsTable;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.user.client.ui.Widget;
@@ -14,15 +14,15 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public interface IAdvancedSearchView {
 
-    ArrayList<SearchFilterInfo> getSearchFilters();
+    void setSearchFilters(ArrayList<SearchFilterInfo> filters);
 
     AdvancedSearchResultsTable getResultsTable();
 
-    void setResultsVisibility(boolean visible);
-
-    void setSelectionMenu(Widget menu);
-
-    void setFilterPanelChangeHandler(SearchSelectionHandler handler);
+    BlastResultsTable getBlastResultTable();
 
     Widget asWidget();
+
+    void setSearchVisibility(boolean visible);
+
+    void setBlastVisibility(boolean visible);
 }

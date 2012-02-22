@@ -7,9 +7,9 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
 import org.jbei.ice.shared.AutoCompleteField;
-import org.jbei.ice.shared.BlastProgram;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.FolderDetails;
+import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
@@ -40,7 +40,9 @@ public interface RegistryService extends RemoteService {
     //
     // Search
     //
-    ArrayList<Long> retrieveSearchResults(ArrayList<SearchFilterInfo> filters);
+    ArrayList<Long> retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters);
+
+    ArrayList<BlastResultInfo> blastSearch(String sid, String searchString, QueryOperator program);
 
     ArrayList<EntryInfo> retrieveEntryData(String sid, ArrayList<Long> entries, ColumnField field,
             boolean asc);
@@ -74,8 +76,6 @@ public interface RegistryService extends RemoteService {
     AccountInfo retrieveAccountInfo(String sid, String userId);
 
     AccountInfo retrieveAccountInfoForSession(String sid);
-
-    ArrayList<BlastResultInfo> blastSearch(String sid, String searchString, BlastProgram program);
 
     ArrayList<StorageInfo> retrieveChildren(String sid, long id);
 

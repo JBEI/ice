@@ -1,10 +1,12 @@
 package org.jbei.ice.client.common.header;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import org.jbei.ice.client.common.FilterOperand;
 import org.jbei.ice.client.common.widget.PopupHandler;
 import org.jbei.ice.shared.SearchFilterType;
+import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -16,6 +18,7 @@ public class HeaderPresenter {
     private final HeaderView view;
     private FilterOperand currentSelected;
     private final HeaderModel model;
+    private SearchFilterInfo blastInfo;
 
     public HeaderPresenter(HeaderModel model, HeaderView view) {
         this.model = model;
@@ -81,8 +84,10 @@ public class HeaderPresenter {
             @Override
             public void onClick(ClickEvent event) {
                 // TODO : validation for the search box
-                String value = view.getSearchInput();
-                model.submitSearch(QuickSearchParser.parse(value));
+                ArrayList<SearchFilterInfo> parse = QuickSearchParser.parse(view.getSearchInput());
+                if (blastInfo != null)
+                    parse.add(blastInfo);
+                model.submitSearch(parse);
             }
         };
     }
@@ -109,10 +114,13 @@ public class HeaderPresenter {
                     @Override
                     public void onClick(ClickEvent event) {
                         view.getSearchComposite().removeSearchWidget(filter);
+                        blastInfo = null;
                     }
                 });
 
                 view.getSearchComposite().addSearchWidget(filter);
+                blastInfo = new SearchFilterInfo(currentSelected.getSelectedOperator().value(),
+                        currentSelected.getSelectedOperator().value(), operand);
                 break;
 
             default:

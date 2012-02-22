@@ -16,18 +16,15 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
 
-class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastResultInfo> {
+public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastResultInfo> {
 
     public BlastSearchDataProvider(HasEntryDataTable<BlastResultInfo> view,
             ArrayList<BlastResultInfo> data, RegistryServiceAsync service) {
 
         super(view, service, ColumnField.BIT_SCORE);
 
-        long i = 1;
         for (BlastResultInfo info : data) {
-            info.setId(i);
-            i += 1;
-            valueIds.add(i);
+            valueIds.add(info.getId());
         }
 
         results.clear();

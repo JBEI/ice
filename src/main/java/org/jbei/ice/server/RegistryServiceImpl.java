@@ -51,9 +51,9 @@ import org.jbei.ice.lib.search.blast.BlastResult;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.shared.AutoCompleteField;
-import org.jbei.ice.shared.BlastProgram;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.FolderDetails;
+import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
@@ -498,7 +498,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     // 
 
     @Override
-    public ArrayList<Long> retrieveSearchResults(ArrayList<SearchFilterInfo> filters) {
+    public ArrayList<Long> retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters) {
         ArrayList<Long> results = new ArrayList<Long>();
 
         if (filters == null || filters.isEmpty())
@@ -521,7 +521,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<BlastResultInfo> blastSearch(String sid, String query, BlastProgram program) {
+    public ArrayList<BlastResultInfo> blastSearch(String sid, String query, QueryOperator program) {
         try {
             Account account = this.retrieveAccountForSid(sid);
             if (account == null)
@@ -531,30 +531,15 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             ArrayList<BlastResult> blastResults = new ArrayList<BlastResult>();
 
             SearchController searchController = new SearchController(account);
-            if (program == BlastProgram.BLAST_N) {
+            switch (program) {
+            case BLAST_N:
                 blastResults.addAll(searchController.blastn(query));
-            } else if (program == BlastProgram.TBLAST_X) {
+                break;
+            case TBLAST_X:
                 blastResults.addAll(searchController.tblastx(query));
+                //                String proteinQuery = SequenceUtils.translateToProtein(query);  as far as I can tell this is only for display to user
+                break;
             }
-
-            //            if (blastResults != null && blastResults.size() > 0) {
-            //                Panel resultPanel;
-            //                if (program.equals("tblastx")) {
-            //                    String proteinQuery;
-            //                    try {
-            //                        proteinQuery = SequenceUtils.translateToProtein(query);
-            //                    } catch (Exception e) {
-            //                        proteinQuery = "";
-            //
-            //                        Logger.error("Failed to translate dna to protein!", e);
-            //                    }
-            //
-            //                    resultPanel = new BlastResultPanel(BLAST_RESULT_PANEL_NAME,
-            //                            proteinQuery, blastResults, NUMBER_OF_ENTRIES_PER_PAGE, false);
-            //                } else {
-            //                    resultPanel = new BlastResultPanel(BLAST_RESULT_PANEL_NAME, query,
-            //                            blastResults, NUMBER_OF_ENTRIES_PER_PAGE, true);
-            //                }
 
             for (BlastResult blastResult : blastResults) {
                 BlastResultInfo info = new BlastResultInfo();
