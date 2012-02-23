@@ -5,6 +5,7 @@ public class PartInfo extends EntryInfo {
     private String packageFormat;
 
     public PartInfo() {
+        super(EntryType.PART);
     }
 
     public String getPackageFormat() {

@@ -60,6 +60,12 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> {
         this(view, new LinkedList<Long>(), service);
     }
 
+    public void reset() {
+        this.results.clear();
+        this.valuesIds.clear();
+        this.table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
+    }
+
     // clears all table data 
     private void resetTableAndData(List<Long> data) {
 

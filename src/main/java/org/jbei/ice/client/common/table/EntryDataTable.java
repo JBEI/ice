@@ -22,8 +22,6 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.History;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
-import com.google.gwt.view.client.MultiSelectionModel;
-import com.google.gwt.view.client.ProvidesKey;
 
 /**
  * DataTable for view entities that are EntryDatas. Provides selection support via space bar,
@@ -37,11 +35,11 @@ import com.google.gwt.view.client.ProvidesKey;
 public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> implements
         IHasEntry<T> {
 
-    private final EntrySelection selectionModel;
+    private final EntrySelectionModel<T> selectionModel;
 
     public EntryDataTable() {
         super();
-        selectionModel = new EntrySelection();
+        selectionModel = new EntrySelectionModel<T>();
         this.setSelectionModel(selectionModel,
             DefaultSelectionEventManager.<T> createCheckboxManager());
     }
@@ -240,37 +238,6 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
     //
     // inner classes
     //
-    public class EntrySelection extends MultiSelectionModel<T> {
-
-        private boolean allSelected;
-
-        public EntrySelection() {
-            super(new ProvidesKey<T>() {
-
-                @Override
-                public Long getKey(T item) {
-                    return Long.decode(item.getRecordId());
-                }
-            });
-        }
-
-        public void setAllSelected(boolean b) {
-            allSelected = b;
-        }
-
-        public boolean isAllSelected() {
-            return this.allSelected;
-        }
-
-        @Override
-        public boolean isSelected(T object) {
-            if (allSelected) {
-                setSelected(object, true);
-            }
-
-            return super.isSelected(object);
-        }
-    }
 
     protected CheckboxCell createHeaderCell() {
         return new CheckboxCell(true, false) {
@@ -305,7 +272,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
         @Override
         public Boolean getValue() {
-            if (selectionModel.allSelected)
+            if (selectionModel.isAllSelected())
                 return true;
 
             return !(selectionModel.getSelectedSet().isEmpty());

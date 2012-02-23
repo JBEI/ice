@@ -83,8 +83,8 @@ public class AdvancedSearchView extends Composite implements IAdvancedSearchView
         table.setVisible(visible);
 
         if (visible) {
-            layout.setWidget(2, 0, pager);
-            layout.setWidget(3, 0, table);
+            layout.setWidget(2, 0, table);
+            layout.setWidget(3, 0, pager);
         }
     }
 

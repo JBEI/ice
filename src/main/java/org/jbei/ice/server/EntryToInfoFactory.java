@@ -248,9 +248,6 @@ public class EntryToInfoFactory {
         info.setRecordId(entry.getRecordId());
         info.setVersionId(entry.getVersionId());
         info.setName(entry.getNamesAsString());
-        EntryType type = getEntryType(entry);
-        if (type != null)
-            info.setType(type);
         info.setSelectionMarkers(entry.getSelectionMarkersAsString());
 
         info.setOwner(entry.getOwner());
@@ -306,5 +303,36 @@ public class EntryToInfoFactory {
             return EntryType.PLASMID;
 
         return null;
+    }
+
+    // todo ; this is a temp "fix" till all the factorys that perform DTO conversions
+    // are consolidated. this is meant to retrieve the minimum needed
+
+    public static EntryInfo getSummaryInfo(Entry entry) {
+
+        EntryInfo info = null;
+
+        switch (getEntryType(entry)) {
+        case ARABIDOPSIS:
+            info = new ArabidopsisSeedInfo();
+            break;
+
+        case PART:
+            info = new PartInfo();
+            break;
+
+        case PLASMID:
+            info = new PlasmidInfo();
+            break;
+
+        case STRAIN:
+            info = new StrainInfo();
+            break;
+        }
+
+        info.setId(entry.getId());
+        info.setPartId(entry.getPartNumbersAsString());
+        info.setName(info.getName());
+        return info;
     }
 }

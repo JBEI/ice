@@ -44,6 +44,7 @@ public class EntryInfo implements IsSerializable {
         }
     }
 
+    private long id;
     private String recordId;
     private String versionId;
     private String name;
@@ -76,7 +77,8 @@ public class EntryInfo implements IsSerializable {
     private ArrayList<SequenceAnalysisInfo> sequenceAnalysis;
     private ArrayList<ParameterInfo> parameters;
 
-    public EntryInfo() {
+    public EntryInfo(EntryType type) {
+        this.type = type;
     }
 
     public String getRecordId() {
@@ -97,10 +99,6 @@ public class EntryInfo implements IsSerializable {
 
     public EntryType getType() {
         return type;
-    }
-
-    public void setType(EntryType type) {
-        this.type = type;
     }
 
     public String getOwner() {
@@ -325,5 +323,13 @@ public class EntryInfo implements IsSerializable {
 
     public void setHasSequence(boolean hasSequence) {
         this.hasSequence = hasSequence;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }

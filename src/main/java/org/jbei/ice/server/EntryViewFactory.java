@@ -15,7 +15,6 @@ import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.EntryInfo.EntryType;
 import org.jbei.ice.shared.dto.PartInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
@@ -24,9 +23,8 @@ public class EntryViewFactory {
 
     private static void getCommon(EntryInfo view, Entry entry) {
 
-        view.setRecordId(String.valueOf(entry.getId()));
-        EntryType type = EntryType.nameToType(entry.getRecordType());
-        view.setType(type);
+        view.setId(entry.getId());
+        view.setRecordId(entry.getRecordId());
         view.setPartId(entry.getPartNumbersAsString());
         view.setName(entry.getNamesAsString());
         view.setAlias(entry.getAlias());

@@ -9,11 +9,11 @@ public abstract class HasEntryInfo implements IsSerializable {
     public HasEntryInfo() {
     }
 
-    public void setDataView(EntryInfo view) {
+    public void setEntryInfo(EntryInfo view) {
         this.dataView = view;
     }
 
-    public EntryInfo getDataView() {
+    public EntryInfo getEntryInfo() {
         return this.dataView;
     }
 }

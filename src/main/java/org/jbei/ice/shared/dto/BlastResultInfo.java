@@ -6,7 +6,6 @@ public class BlastResultInfo extends HasEntryInfo {
     private float eValue;
     private int alignmentLength;
     private float percentId;
-    private long id;
     private int queryLength;
 
     public int getAlignmentLength() {
@@ -39,14 +38,6 @@ public class BlastResultInfo extends HasEntryInfo {
 
     public void seteValue(float eValue) {
         this.eValue = eValue;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public int getQueryLength() {

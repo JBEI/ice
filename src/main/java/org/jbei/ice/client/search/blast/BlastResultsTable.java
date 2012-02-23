@@ -20,6 +20,7 @@ public class BlastResultsTable extends HasEntryDataTable<BlastResultInfo> {
 
         ArrayList<DataTableColumn<?>> columns = new ArrayList<DataTableColumn<?>>();
 
+        columns.add(super.addSelectionColumn());
         columns.add(super.addTypeColumn(true));
         columns.add(super.addPartIdColumn(true));
         columns.add(super.addNameColumn());

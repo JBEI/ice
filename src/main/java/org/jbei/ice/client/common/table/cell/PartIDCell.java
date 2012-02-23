@@ -58,11 +58,11 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> {
             onMouseOut(parent);
         } else if (MOUSE_CLICK.equalsIgnoreCase(eventType)) {
             if (withinBounds(parent, event))
-                onMouseClick(value.getRecordId());
+                onMouseClick(value.getId());
         }
     }
 
-    protected void onMouseClick(String recordId) {
+    protected void onMouseClick(long recordId) {
         History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + recordId);
     }
 

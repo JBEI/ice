@@ -24,7 +24,7 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastR
         super(view, service, ColumnField.BIT_SCORE);
 
         for (BlastResultInfo info : data) {
-            valueIds.add(info.getId());
+            valueIds.add(info.getEntryInfo().getId());
         }
 
         results.clear();
@@ -57,8 +57,9 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastR
             updateRowData(rangeStart, show);
         } else {
 
-            // TODO : blast, All results are returned. Need to redo
-            Window.alert("Could not page");
+            // TODO : with blast, all results are returned need to redo
+            Window.alert("Results has size " + results.size() + " but requesting range ["
+                    + rangeStart + ", " + rangeEnd + "]");
         }
     }
 
@@ -91,16 +92,16 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastR
 
                 switch (field) {
                 case TYPE:
-                    diff = o1.getDataView().getType().toString()
-                            .compareToIgnoreCase(o2.getDataView().getType().toString());
+                    diff = o1.getEntryInfo().getType().toString()
+                            .compareToIgnoreCase(o2.getEntryInfo().getType().toString());
                     break;
 
                 case PART_ID:
-                    diff = o1.getDataView().getPartId().compareTo(o2.getDataView().getPartId());
+                    diff = o1.getEntryInfo().getPartId().compareTo(o2.getEntryInfo().getPartId());
                     break;
 
                 case NAME:
-                    diff = o1.getDataView().getName().compareTo(o2.getDataView().getName());
+                    diff = o1.getEntryInfo().getName().compareTo(o2.getEntryInfo().getName());
                     break;
 
                 case ALIGNED_BP:
@@ -123,5 +124,34 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastR
                 return asc ? diff : -diff;
             }
         });
+    }
+
+    public void setData(ArrayList<BlastResultInfo> data) {
+
+        for (BlastResultInfo info : data) {
+            valueIds.add(info.getEntryInfo().getId());
+        }
+
+        this.results.clear();
+        this.results.addAll(data);
+
+        updateRowCount(this.valueIds.size(), true);
+
+        lastSortAsc = false;
+        lastSortField = this.defaultSort;
+
+        // retrieve the first page of results and updateRowData
+        final Range range = this.dataTable.getVisibleRange();
+        final int rangeStart = range.getStart();
+        final int rangeEnd;
+        if ((rangeStart + range.getLength()) > valueIds.size())
+            rangeEnd = valueIds.size();
+        else
+            rangeEnd = (rangeStart + range.getLength());
+
+        // TODO : you have access to the sort info from the table
+        // TODO : this goes with the above todo. if we clear all the sort info then we use default else use the top sort
+        // TODO : look at the sort method for an example of how to do this
+        fetchHasEntryData(rangeStart, rangeEnd);
     }
 }

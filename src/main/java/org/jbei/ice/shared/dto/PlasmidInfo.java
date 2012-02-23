@@ -11,7 +11,7 @@ public class PlasmidInfo extends EntryInfo {
     private HashMap<Long, String> strains; // id -> partNumber
 
     public PlasmidInfo() {
-        this.setType(EntryType.PLASMID);
+        super(EntryType.PLASMID);
         setStrains(new HashMap<Long, String>());
     }
 

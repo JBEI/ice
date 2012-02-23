@@ -1,6 +1,5 @@
 package org.jbei.ice.shared.dto;
 
-
 public class StrainInfo extends EntryInfo {
 
     private String host;
@@ -8,6 +7,7 @@ public class StrainInfo extends EntryInfo {
     private String plasmids;
 
     public StrainInfo() {
+        super(EntryType.STRAIN);
     }
 
     public String getHost() {

@@ -23,12 +23,12 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
     protected final LinkedList<Long> valueIds;
     protected final LinkedList<T> results;
     protected final RegistryServiceAsync service;
-    private final HasEntryDataTable<T> dataTable;
+    protected final HasEntryDataTable<T> dataTable;
 
     // default values
-    private boolean lastSortAsc = false;
-    private ColumnField lastSortField;
-    private final ColumnField defaultSort;
+    protected boolean lastSortAsc = false;
+    protected ColumnField lastSortField;
+    protected final ColumnField defaultSort;
 
     public HasEntryDataViewDataProvider(HasEntryDataTable<T> view, List<Long> data,
             RegistryServiceAsync service, ColumnField defaultSort) {
@@ -61,7 +61,7 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
     }
 
     // clears all table data but does not reset the 
-    private void resetTableAndData(List<Long> data) {
+    protected void resetTableAndData(List<Long> data) {
 
         this.results.clear();
         this.valueIds.clear();
@@ -78,7 +78,7 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
      * 
      * @param data
      */
-    public void setValues(List<Long> data) {
+    protected void setValues(List<Long> data) {
 
         resetTableAndData(data);
         // retrieve the first page of results and updateRowData
@@ -189,6 +189,12 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
 
     public HasEntryDataTable<T> getDataTable() {
         return this.dataTable;
+    }
+
+    public void reset() {
+        this.results.clear();
+        valueIds.clear();
+        dataTable.setVisibleRangeAndClearData(dataTable.getVisibleRange(), false);
     }
 
     protected LinkedList<T> getResults() {

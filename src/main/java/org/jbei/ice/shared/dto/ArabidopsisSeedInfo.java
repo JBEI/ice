@@ -35,6 +35,10 @@ public class ArabidopsisSeedInfo extends EntryInfo {
     private Generation generation;
     private PlantType plantType;
 
+    public ArabidopsisSeedInfo() {
+        super(EntryType.ARABIDOPSIS);
+    }
+
     public static Map<String, String> getGenerationOptionsMap() {
         Map<String, String> resultMap = new LinkedHashMap<String, String>();
         for (Generation generation : Generation.values()) {

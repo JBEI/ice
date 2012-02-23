@@ -1,5 +1,6 @@
 package org.jbei.ice.client.collection;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import org.jbei.ice.client.AppController;
@@ -44,5 +45,9 @@ public class SamplesDataProvider extends HasEntryDataViewDataProvider<SampleInfo
                     }
                 });
         }
+    }
+
+    public void setValues(ArrayList<Long> data) {
+        this.setValues(data);
     }
 }

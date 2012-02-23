@@ -23,6 +23,7 @@ public class AdvancedSearchPresenter {
     private final HandlerManager eventBus;
     private final AdvancedSearchView display;
     private final EntryDataViewDataProvider dataProvider;
+    private final BlastSearchDataProvider blastProvider;
 
     public AdvancedSearchPresenter(RegistryServiceAsync rpcService, HandlerManager eventBus) {
         this.rpcService = rpcService;
@@ -31,6 +32,8 @@ public class AdvancedSearchPresenter {
 
         // hide the results table
         dataProvider = new AdvancedSearchDataProvider(display.getResultsTable(), rpcService);
+        blastProvider = new BlastSearchDataProvider(display.getBlastResultTable(),
+                new ArrayList<BlastResultInfo>(), rpcService);
 
         // register for search events
         eventBus.addHandler(SearchEvent.TYPE, new SearchEventHandler() {
@@ -73,7 +76,10 @@ public class AdvancedSearchPresenter {
         if (blastInfo != null) {
 
             // show blast table loading
+            blastProvider.updateRowCount(0, false);
             display.setBlastVisibility(true);
+            display.getBlastResultTable().setVisibleRangeAndClearData(
+                display.getBlastResultTable().getVisibleRange(), false);
 
             // get blast results and filter 
             QueryOperator program = QueryOperator.operatorValueOf(blastInfo.getOperator());
@@ -83,8 +89,8 @@ public class AdvancedSearchPresenter {
                     @Override
                     public void onSuccess(final ArrayList<BlastResultInfo> blastResult) {
                         if (searchFilters.isEmpty()) {
-                            new BlastSearchDataProvider(display.getBlastResultTable(), blastResult,
-                                    rpcService);
+                            blastProvider.setData(blastResult);
+
                         } else {
 
                             // retrieve other filters
@@ -93,16 +99,18 @@ public class AdvancedSearchPresenter {
 
                                     @Override
                                     public void onSuccess(ArrayList<Long> result) {
+                                        if (result == null) {
+                                            display.setBlastVisibility(false);
+                                            reset();
+                                            return;
+                                        }
 
-                                        // TODO
-                                        // TODO : SLO....OOOO....WWW!!! DEFCON 2!!!
+                                        // TODO : performance
                                         // TODO : push to server for filtering. this search can return a very long list
-                                        // TODO
                                         ArrayList<BlastResultInfo> toRemove = new ArrayList<BlastResultInfo>();
 
                                         for (BlastResultInfo info : blastResult) {
-                                            long entryId = Long.decode(info.getDataView()
-                                                    .getRecordId());
+                                            long entryId = info.getEntryInfo().getId();
                                             if (!result.contains(entryId)) {
                                                 toRemove.add(info);
                                             }
@@ -110,8 +118,7 @@ public class AdvancedSearchPresenter {
 
                                         blastResult.removeAll(toRemove);
                                         display.setSearchFilters(searchFilters);
-                                        new BlastSearchDataProvider(display.getBlastResultTable(),
-                                                blastResult, rpcService);
+                                        blastProvider.setData(blastResult);
                                         reset();
                                     }
 
@@ -119,6 +126,7 @@ public class AdvancedSearchPresenter {
                                     public void onFailure(Throwable caught) {
                                         Window.alert("Call failed: " + caught.getMessage());
                                         display.setBlastVisibility(false);
+                                        blastProvider.reset();
                                         reset();
                                     }
 
@@ -136,9 +144,10 @@ public class AdvancedSearchPresenter {
                         Window.alert("Could not retrieve blast results");
                     }
                 });
-
         } else {
             display.setSearchVisibility(true);
+            display.getResultsTable().setVisibleRangeAndClearData(
+                display.getResultsTable().getVisibleRange(), false);
 
             rpcService.retrieveSearchResults(AppController.sessionId, searchFilters,
                 new AsyncCallback<ArrayList<Long>>() {
@@ -154,7 +163,7 @@ public class AdvancedSearchPresenter {
                     public void onFailure(Throwable caught) {
                         Window.alert("Call failed: " + caught.getMessage());
                         display.setSearchVisibility(false);
-                        reset();
+                        dataProvider.reset();
                     }
 
                     public void reset() {

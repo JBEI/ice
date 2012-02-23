@@ -230,7 +230,7 @@ public class EntryPresenter extends AbstractPresenter {
                 Flash.Parameters params = new Flash.Parameters();
                 params.setSwfPath("static/sc/SequenceChecker.swf");
                 params.setSessiondId(AppController.sessionId);
-                params.setEntryId(view.getInfo().getRecordId());
+                params.setEntryId(view.getInfo().getId() + "");
 
                 Button button = display.showSequenceView(sequenceTable, new Flash(params));
                 if (button != null) {

@@ -466,7 +466,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
             for (EntryInfo datum : collectionsDataTable.getEntries()) {
                 if (datum == null)
                     continue;
-                ids.add(Long.decode(datum.getRecordId()));
+                ids.add(datum.getId());
             }
 
             entrySize = collectionsDataTable.getEntries().size();
@@ -530,7 +530,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
             // TODO : inefficient
             ArrayList<Long> ids = new ArrayList<Long>();
             for (EntryInfo datum : collectionsDataTable.getEntries()) { // TODO : when adding from search results this will not work
-                ids.add(Long.decode(datum.getRecordId()));
+                ids.add(datum.getId());
             }
             entrySize = ids.size();
             return ids;
@@ -594,7 +594,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
             // TODO : inefficient
             ArrayList<Long> ids = new ArrayList<Long>();
             for (EntryInfo datum : collectionsDataTable.getEntries()) {
-                ids.add(Long.decode(datum.getRecordId()));
+                ids.add(datum.getId());
             }
             entrySize = ids.size();
             return ids;

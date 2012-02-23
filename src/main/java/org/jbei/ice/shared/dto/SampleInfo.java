@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class SampleInfo extends HasEntryInfo {
 
-    private String id;
+    private String sampleId;
     private String label;
     private String notes;
     private String location;
@@ -16,12 +16,12 @@ public class SampleInfo extends HasEntryInfo {
         return label;
     }
 
-    public String getId() {
-        return id;
+    public String getSampleId() {
+        return sampleId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setSampleId(String id) {
+        this.sampleId = id;
     }
 
     public void setLabel(String label) {

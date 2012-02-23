@@ -47,7 +47,6 @@ import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.AuthenticatedPermissionManager;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.search.blast.BlastResult;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.shared.AutoCompleteField;
@@ -527,41 +526,25 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            ArrayList<BlastResultInfo> results = new ArrayList<BlastResultInfo>();
-            ArrayList<BlastResult> blastResults = new ArrayList<BlastResult>();
-
             SearchController searchController = new SearchController(account);
             switch (program) {
             case BLAST_N:
-                blastResults.addAll(searchController.blastn(query));
-                break;
+                return searchController.runBlastN(query);
             case TBLAST_X:
-                blastResults.addAll(searchController.tblastx(query));
+                return searchController.runTblastx(query);
                 //                String proteinQuery = SequenceUtils.translateToProtein(query);  as far as I can tell this is only for display to user
-                break;
-            }
 
-            for (BlastResult blastResult : blastResults) {
-                BlastResultInfo info = new BlastResultInfo();
-                info.setBitScore(blastResult.getBitScore());
-                EntryInfo view = EntryViewFactory.createTipView(blastResult.getEntry());
-                info.setDataView(view);
-                info.seteValue(blastResult.geteValue());
-                info.setAlignmentLength(blastResult.getAlignmentLength());
-                info.setPercentId(blastResult.getPercentId());
-                info.setQueryLength(query.length());
-                results.add(info);
+            default:
+                return null;
             }
-
-            return results;
 
         } catch (ControllerException ce) {
             Logger.error(ce);
+            return null;
         } catch (ProgramTookTooLongException e) {
             Logger.error(e);
+            return null;
         }
-
-        return null;
     }
 
     //
@@ -596,7 +579,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 for (Sample sample : samples) {
                     SampleInfo sampleInfo = new SampleInfo();
                     sampleInfo.setLabel(sample.getLabel());
-                    sampleInfo.setId("" + sample.getId());
+                    sampleInfo.setSampleId("" + sample.getId());
                     sampleInfos.add(sampleInfo);
                 }
                 info.setSamples(sampleInfos);
@@ -685,10 +668,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
                 for (Sample sample : results) { // TODO
                     SampleInfo info = new SampleInfo();
-                    info.setId(String.valueOf(sample.getId()));
+                    info.setSampleId(String.valueOf(sample.getId()));
                     info.setCreationTime(sample.getCreationTime());
                     EntryInfo view = EntryViewFactory.createTipView(sample.getEntry());
-                    info.setDataView(view);
+                    info.setEntryInfo(view);
                     info.setLabel(sample.getLabel());
                     info.setNotes(sample.getNotes());
                     Storage storage = sample.getStorage();
