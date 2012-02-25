@@ -10,7 +10,7 @@ import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.add.form.EntryCreateWidget;
 import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
 import org.jbei.ice.client.collection.add.form.SampleLocationWidget;
-import org.jbei.ice.client.common.FeedbackPanel;
+import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -31,15 +31,11 @@ public class EntryAddPresenter {
     private final EntryAddView display;
     private final HashMap<EntryAddType, EntryCreateWidget> formsCache;
     private HashMap<AutoCompleteField, ArrayList<String>> autoCompleteData;
-    private final FeedbackPanel feedbackPanel;
 
-    public EntryAddPresenter(RegistryServiceAsync service, HandlerManager eventBus,
-            FeedbackPanel feedbackPanel) {
-
+    public EntryAddPresenter(RegistryServiceAsync service, HandlerManager eventBus) {
         this.service = service;
         this.eventBus = eventBus;
         this.display = new EntryAddView();
-        this.feedbackPanel = feedbackPanel;
 
         formsCache = new HashMap<EntryAddType, EntryCreateWidget>();
         bind();
@@ -138,14 +134,15 @@ public class EntryAddPresenter {
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    feedbackPanel.setFailureMessage("Server error. Please try again.");
+                    eventBus.fireEvent(new FeedbackEvent(true, "Server error. Please try again."));
                 }
 
                 @Override
                 public void onSuccess(ArrayList<Long> result) {
                     if (result.size() != entrySet.size()) {
-                        feedbackPanel
-                                .setFailureMessage("Your entry could not be created. Please try again.");
+                        FeedbackEvent event = new FeedbackEvent(true,
+                                "Your entry could not be created. Please try again.");
+                        eventBus.fireEvent(event);
                     } else {
                         if (entrySet.size() == 1) {
                             long id = result.get(0);
@@ -189,7 +186,9 @@ public class EntryAddPresenter {
                 FocusWidget focus = formSubmit.validateForm();
                 if (focus != null) {
                     focus.setFocus(true);
-                    feedbackPanel.setFailureMessage("Please fill out all required fields");
+                    FeedbackEvent feedback = new FeedbackEvent(true,
+                            "Please fill out all required fields");
+                    eventBus.fireEvent(feedback);
                     return;
                 }
 

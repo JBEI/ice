@@ -1,9 +1,10 @@
 package org.jbei.ice.client.collection.menu;
 
-import java.util.Set;
+import java.util.List;
 
-import org.jbei.ice.client.common.widget.PopupHandler;
-import org.jbei.ice.shared.FolderDetails;
+import org.jbei.ice.client.collection.event.SubmitHandler;
+import org.jbei.ice.client.collection.presenter.MoveToSubmitHandler;
+import org.jbei.ice.client.collection.view.OptionSelect;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
@@ -24,7 +25,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Hector Plahar
  * 
  */
-public class CollectionSubMenu implements IsWidget {
+public class CollectionEntryActionMenu implements IsWidget {
 
     /**
      * Resources to access images and styles
@@ -64,42 +65,25 @@ public class CollectionSubMenu implements IsWidget {
 
     private final FlexTable menuHolder;
 
-    private final UserCollectionMultiSelect addToSelection;
-    private final UserCollectionMultiSelect moveToSelection;
-    private final Button addToButton;
+    private final AddToMenuItem<OptionSelect> add;
     private final Button removeButton;
-    private final Button moveToButton;
-    private PopupHandler addToHandler;
-    private PopupHandler clickHandler;
+    //    private final Button moveToButton;
+    private final AddToMenuItem<OptionSelect> move;
 
-    public CollectionSubMenu(UserCollectionMultiSelect addToSelection,
-            UserCollectionMultiSelect moveToSelection) {
+    public CollectionEntryActionMenu() {
         this.menuHolder = new FlexTable();
         this.menuHolder.setCellPadding(0);
         this.menuHolder.setCellSpacing(0);
 
-        this.addToSelection = addToSelection;
-        this.moveToSelection = moveToSelection;
-
-        addToButton = createAddToButton();
-        this.menuHolder.setWidget(0, 0, addToButton);
+        add = new AddToMenuItem<OptionSelect>("Add To");
+        this.menuHolder.setWidget(0, 0, add);
 
         removeButton = createRemoveMenu();
         this.menuHolder.setWidget(0, 1, removeButton);
 
-        moveToButton = createMoveMenu();
-        this.menuHolder.setWidget(0, 2, moveToButton);
+        move = new AddToMenuItem<OptionSelect>("Move To");
+        this.menuHolder.setWidget(0, 2, move);
         Resources.INSTANCE.subMenuStyle().ensureInjected();
-    }
-
-    private Button createAddToButton() {
-        final Button addTo = new Button("Add To");
-        addTo.setStyleName("buttonGroupItem");
-        addTo.addStyleName("firstItem");
-        addTo.addStyleName(Resources.INSTANCE.subMenuStyle().dropDownAdd());
-        addToHandler = new PopupHandler(addToSelection, addTo.getElement(), -1, 1);
-        addTo.addClickHandler(addToHandler);
-        return addTo;
     }
 
     private Button createRemoveMenu() {
@@ -109,30 +93,42 @@ public class CollectionSubMenu implements IsWidget {
         return remove;
     }
 
-    private Button createMoveMenu() {
-        final Button move = new Button("Move To");
-        move.setStyleName("buttonGroupItem");
-        move.addStyleName(Resources.INSTANCE.subMenuStyle().dropDownMove());
-        clickHandler = new PopupHandler(moveToSelection, move.getElement(), -1, 1);
-        move.addClickHandler(clickHandler);
-        return move;
-    }
-
-    public Set<FolderDetails> getAddToDestination() {
-        return addToSelection.getSelected();
-    }
-
-    public Set<FolderDetails> getMoveToDestination() {
-        return this.moveToSelection.getSelected();
-    }
-
     @Override
     public Widget asWidget() {
         return menuHolder;
     }
 
-    public void hidePopup() {
-        addToHandler.hidePopup();
-        clickHandler.hidePopup();
+    public void addAddToSubmitHandler(SubmitHandler handler) {
+        this.add.addSubmitHandler(handler);
+    }
+
+    public void addOption(OptionSelect option) {
+        this.add.addOption(option);
+        this.move.addOption(option);
+    }
+
+    public void setOptions(List<OptionSelect> options) {
+        this.add.setOptions(options);
+        this.move.setOptions(options);
+    }
+
+    public List<OptionSelect> getSelectedOptions(boolean add) {
+        if (add)
+            return this.add.getSelectedItems();
+        return this.move.getSelectedItems();
+    }
+
+    public void updateOption(OptionSelect optionSelect) {
+        this.add.updateOption(optionSelect);
+        this.move.updateOption(optionSelect);
+    }
+
+    public void removeOption(OptionSelect option) {
+        this.add.removeOption(option);
+        this.move.removeOption(option);
+    }
+
+    public void setMoveToSubmitHandler(MoveToSubmitHandler moveHandler) {
+        this.move.addSubmitHandler(moveHandler);
     }
 }

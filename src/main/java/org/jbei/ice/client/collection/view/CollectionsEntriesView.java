@@ -1,14 +1,19 @@
 package org.jbei.ice.client.collection.view;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.client.collection.ICollectionEntriesView;
 import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
+import org.jbei.ice.client.collection.event.SubmitHandler;
+import org.jbei.ice.client.collection.menu.CollectionEntryActionMenu;
 import org.jbei.ice.client.collection.menu.CollectionMenu;
 import org.jbei.ice.client.collection.menu.MenuItem;
+import org.jbei.ice.client.collection.presenter.MoveToSubmitHandler;
 import org.jbei.ice.client.collection.table.CollectionEntriesDataTable;
 import org.jbei.ice.client.common.AbstractLayout;
+import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.shared.EntryAddType;
 
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -20,11 +25,16 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 public class CollectionsEntriesView extends AbstractLayout implements ICollectionEntriesView {
+
     private CollectionMenu systemMenu;
     private CollectionMenu userMenu;
+
     private FlexTable contents;
     private FlexTable rightContents;
+
     private CreateEntryMenu createNew;
+    private CollectionEntryActionMenu subMenu;
+    private FeedbackPanel feedback;
 
     @Override
     protected void initComponents() {
@@ -35,6 +45,7 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
         rightContents.setWidth("100%");
 
         createNew = new CreateEntryMenu();
+        feedback = new FeedbackPanel("450px");
 
         rightContents.setWidget(0, 0, createNew);
         rightContents.getFlexCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_LEFT);
@@ -42,6 +53,14 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
 
         rightContents.setHTML(1, 0, "&nbsp;");
         rightContents.getFlexCellFormatter().setColSpan(1, 0, 3);
+
+        rightContents.setWidget(0, 2, feedback);
+        rightContents.getFlexCellFormatter().setHorizontalAlignment(0, 2, HasAlignment.ALIGN_RIGHT);
+
+        // sub menu
+        //        AddToMenuItem<OptionSelect> widget = new AddToMenuItem<OptionSelect>();
+        subMenu = new CollectionEntryActionMenu();
+        rightContents.setWidget(0, 1, subMenu);
     }
 
     @Override
@@ -94,6 +113,7 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
 
     @Override
     public void setDataView(CollectionEntriesDataTable table) {
+        rightContents.setWidget(0, 1, subMenu);
         rightContents.setWidget(2, 0, table);
         rightContents.getFlexCellFormatter().setColSpan(2, 0, 3);
 
@@ -103,7 +123,11 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
     }
 
     @Override
-    public void setMainContent(Widget mainContent) {
+    public void setMainContent(Widget mainContent, boolean showSubMenu) {
+        if (showSubMenu)
+            rightContents.setWidget(0, 1, subMenu);
+        else
+            rightContents.setHTML(0, 1, "&nbsp;");
         rightContents.setWidget(2, 0, mainContent);
         rightContents.getFlexCellFormatter().setColSpan(2, 0, 3);
         if (rightContents.getRowCount() > 3)
@@ -121,14 +145,11 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
     }
 
     @Override
-    public void setFeedback(Widget feedback) {
-        rightContents.setWidget(0, 2, feedback);
-        rightContents.getFlexCellFormatter().setHorizontalAlignment(0, 2, HasAlignment.ALIGN_RIGHT);
-    }
-
-    @Override
-    public void setCollectionSubMenu(Widget widget) {
-        rightContents.setWidget(0, 1, widget);
+    public void showFeedbackMessage(String msg, boolean errMsg) {
+        if (errMsg)
+            feedback.setFailureMessage(msg);
+        else
+            feedback.setSuccessMessage(msg);
     }
 
     @Override
@@ -162,7 +183,7 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
     }
 
     @Override
-    public void setBusyIndicator(Set<String> ids) {
+    public void setBusyIndicator(Set<Long> ids) {
         this.userMenu.setBusyIndicator(ids);
     }
 
@@ -210,5 +231,35 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
     @Override
     public SingleSelectionModel<MenuItem> getSystemMenuModel() {
         return systemMenu.getSelectionModel();
+    }
+
+    @Override
+    public void addSubMenuFolder(OptionSelect option) {
+        subMenu.addOption(option);
+    }
+
+    @Override
+    public void addAddToSubmitHandler(SubmitHandler handler) {
+        subMenu.addAddToSubmitHandler(handler);
+    }
+
+    @Override
+    public void addMoveSubmitHandler(MoveToSubmitHandler moveHandler) {
+        subMenu.setMoveToSubmitHandler(moveHandler);
+    }
+
+    @Override
+    public void updateSubMenuFolder(OptionSelect optionSelect) {
+        subMenu.updateOption(optionSelect);
+    }
+
+    @Override
+    public void removeSubMenuFolder(OptionSelect optionSelect) {
+        subMenu.removeOption(optionSelect);
+    }
+
+    @Override
+    public List<OptionSelect> getSelectedOptions(boolean addOption) {
+        return subMenu.getSelectedOptions(addOption);
     }
 }

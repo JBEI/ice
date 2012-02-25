@@ -234,6 +234,7 @@ public class EntryView extends AbstractLayout implements IEntryView {
 
             @Override
             public void onSubmit(SubmitEvent event) {
+                // TODO : 
             }
         });
 

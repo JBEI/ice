@@ -105,8 +105,8 @@ public interface RegistryServiceAsync {
     void retrieveUserCollections(String sessionId, String userId,
             AsyncCallback<ArrayList<FolderDetails>> callback);
 
-    void moveToUserCollection(String sid, ArrayList<Long> source, ArrayList<Long> destination,
-            ArrayList<Long> entryIds, AsyncCallback<Boolean> callback);
+    void moveToUserCollection(String sid, long source, ArrayList<Long> destination,
+            ArrayList<Long> entryIds, AsyncCallback<ArrayList<FolderDetails>> callback);
 
     void addEntriesToCollection(String sid, ArrayList<Long> destination, ArrayList<Long> entryIds,
             AsyncCallback<ArrayList<FolderDetails>> callback);

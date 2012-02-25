@@ -1,33 +1,20 @@
 package org.jbei.ice.client.collection.menu;
 
-public class MenuItem {
+import org.jbei.ice.client.collection.view.OptionSelect;
 
-    private final long id;
-    private String name;
+public class MenuItem extends OptionSelect {
+
     private long count;
     private final boolean isSystem;
 
     public MenuItem(long id, String name, long count, boolean isSystem) {
-        this.id = id;
-        this.name = name;
+        super(id, name);
         this.count = count;
         this.isSystem = isSystem;
     }
 
     public boolean isSystem() {
         return this.isSystem;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public long getCount() {

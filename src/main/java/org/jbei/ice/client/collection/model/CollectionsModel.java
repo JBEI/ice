@@ -10,6 +10,7 @@ import org.jbei.ice.client.collection.event.FolderEvent;
 import org.jbei.ice.client.collection.event.FolderEventHandler;
 import org.jbei.ice.client.collection.event.FolderRetrieveEvent;
 import org.jbei.ice.client.collection.event.FolderRetrieveEventHandler;
+import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.shared.FolderDetails;
 
 import com.google.gwt.event.shared.HandlerManager;
@@ -147,6 +148,24 @@ public class CollectionsModel {
                 @Override
                 public void onFailure(Throwable caught) {
                     handler.onMenuRetrieval(null);
+                }
+            });
+    }
+
+    public void moveEntriesToFolder(long source, ArrayList<Long> destinationFolderIds,
+            ArrayList<Long> ids, final FolderRetrieveEventHandler handler) {
+        service.moveToUserCollection(AppController.sessionId, source, destinationFolderIds, ids,
+            new AsyncCallback<ArrayList<FolderDetails>>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    FeedbackEvent event = new FeedbackEvent(true, "Error moving folders");
+                    eventBus.fireEvent(event);
+                }
+
+                @Override
+                public void onSuccess(ArrayList<FolderDetails> results) {
+                    handler.onMenuRetrieval(new FolderRetrieveEvent(results));
                 }
             });
     }

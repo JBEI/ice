@@ -92,8 +92,8 @@ public interface RegistryService extends RemoteService {
 
     FolderDetails createUserCollection(String sid, String name, String description);
 
-    boolean moveToUserCollection(String sid, ArrayList<Long> source, ArrayList<Long> destination,
-            ArrayList<Long> entryIds);
+    ArrayList<FolderDetails> moveToUserCollection(String sid, long source,
+            ArrayList<Long> destination, ArrayList<Long> entryIds);
 
     ProfileInfo retrieveProfileInfo(String sid, String userId);
 

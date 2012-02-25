@@ -1,10 +1,14 @@
 package org.jbei.ice.client.collection;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
+import org.jbei.ice.client.collection.event.SubmitHandler;
 import org.jbei.ice.client.collection.menu.MenuItem;
+import org.jbei.ice.client.collection.presenter.MoveToSubmitHandler;
 import org.jbei.ice.client.collection.table.CollectionEntriesDataTable;
+import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.shared.EntryAddType;
 
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -45,7 +49,7 @@ public interface ICollectionEntriesView {
 
     // set menu items indicated by the ids with the busy indicator
     // currently supported by the user menu only
-    void setBusyIndicator(Set<String> ids);
+    void setBusyIndicator(Set<Long> ids);
 
     void updateMenuItemCounts(ArrayList<MenuItem> item);
 
@@ -66,8 +70,6 @@ public interface ICollectionEntriesView {
 
     Widget asWidget();
 
-    void setCollectionSubMenu(Widget widget);
-
     SingleSelectionModel<EntryAddType> getAddEntrySelectionHandler();
 
     /**
@@ -78,12 +80,25 @@ public interface ICollectionEntriesView {
      */
     void setDataView(CollectionEntriesDataTable table);
 
-    void setMainContent(Widget mainContent);
+    void setMainContent(Widget mainContent, boolean showSubMenu);
 
-    // TODO : the following needs to be in abstract layout
-    void setFeedback(Widget feedback);
+    void showFeedbackMessage(String msg, boolean errMsg);
 
     SingleSelectionModel<MenuItem> getUserMenuModel();
 
     SingleSelectionModel<MenuItem> getSystemMenuModel();
+
+    void addSubMenuFolder(OptionSelect option);
+
+    // called when a folder is updated
+    void updateSubMenuFolder(OptionSelect optionSelect);
+
+    // called when a folder is deleted
+    void removeSubMenuFolder(OptionSelect optionSelect);
+
+    List<OptionSelect> getSelectedOptions(boolean addToOption);
+
+    void addAddToSubmitHandler(SubmitHandler handler);
+
+    void addMoveSubmitHandler(MoveToSubmitHandler moveHandler);
 }

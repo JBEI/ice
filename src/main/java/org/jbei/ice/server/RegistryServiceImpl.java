@@ -729,21 +729,32 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
     }
 
-    // TODO : this is currently working just as "Add to"
     @Override
-    public boolean moveToUserCollection(String sid, ArrayList<Long> source,
+    public ArrayList<FolderDetails> moveToUserCollection(String sid, long source,
             ArrayList<Long> destination, ArrayList<Long> entryIds) {
 
-        // TODO:  this needs to be done in a single transaction, set list of folders in manager instead of iterating here
         try {
-            for (long folderId : destination) {
-                FolderManager.addFolderContents(folderId, entryIds);
+            if (FolderManager.removeFolderContents(source, entryIds)) {
+                ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
+
+                for (long folderId : destination) {
+                    Folder folder = FolderManager.addFolderContents(folderId, entryIds);
+                    FolderDetails details = new FolderDetails(folder.getId(), folder.getName(),
+                            false);
+                    int folderSize = FolderManager.getFolderSize(folder.getId()); // TODO : this call may not be needed
+                    details.setCount(folderSize);
+                    details.setDescription(folder.getDescription());
+                    results.add(details);
+                }
+
+                Folder sourceFolder = FolderManager.get(source);
+                results.add(new FolderDetails(sourceFolder.getId(), sourceFolder.getName(), false));
+                return results;
             }
-            return true;
         } catch (ManagerException e) {
             Logger.error(e);
-            return false;
         }
+        return null;
     }
 
     @Override

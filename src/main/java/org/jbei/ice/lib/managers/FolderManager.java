@@ -3,6 +3,7 @@ package org.jbei.ice.lib.managers;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.HibernateException;
@@ -13,6 +14,7 @@ import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
+import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Folder;
 
 /**
@@ -115,7 +117,13 @@ public class FolderManager {
         Session session = DAO.newSession();
         try {
             Folder folder = get(folderId);
-            folder.getContents().removeAll(EntryManager.getEntriesByIdSet(entryIds));
+            Iterator<Entry> it = folder.getContents().iterator();
+
+            while (it.hasNext()) {
+                Entry entry = it.next();
+                if (entryIds.contains(entry.getId()))
+                    it.remove();
+            }
             update(folder);
             return true;
 
@@ -130,7 +138,11 @@ public class FolderManager {
         Session session = DAO.newSession();
         try {
             Folder folder = get(folderId);
-            folder.getContents().addAll(EntryManager.getEntriesByIdSet(entryIds));
+            ArrayList<Entry> entries = EntryManager.getEntriesByIdSet(entryIds);
+            if (entries == null)
+                return folder;
+
+            folder.getContents().addAll(entries);
             return update(folder);
         } finally {
             if (session.isOpen())

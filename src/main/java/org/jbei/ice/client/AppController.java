@@ -8,6 +8,7 @@ import org.jbei.ice.client.bulkimport.BulkImportPresenter;
 import org.jbei.ice.client.bulkimport.BulkImportView;
 import org.jbei.ice.client.bulkimport.IBulkImportView;
 import org.jbei.ice.client.bulkimport.model.BulkImportModel;
+import org.jbei.ice.client.collection.model.CollectionsModel;
 import org.jbei.ice.client.collection.presenter.CollectionsEntriesPresenter;
 import org.jbei.ice.client.collection.view.CollectionsEntriesView;
 import org.jbei.ice.client.common.AbstractLayout;
@@ -106,8 +107,8 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         History.newItem(Page.COLLECTIONS.getLink(), false);
         CollectionsEntriesView cView = new CollectionsEntriesView();
         new HeaderPresenter(new HeaderModel(this.service, this.eventBus), cView.getHeader());
-        CollectionsEntriesPresenter presenter = new CollectionsEntriesPresenter(this.service,
-                this.eventBus, cView, operands);
+        CollectionsEntriesPresenter presenter = new CollectionsEntriesPresenter(
+                new CollectionsModel(this.service, this.eventBus), cView, operands);
         presenter.go(container);
     }
 
@@ -183,8 +184,8 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         case COLLECTIONS:
             CollectionsEntriesView collectionsView = new CollectionsEntriesView();
             view = collectionsView;
-            presenter = new CollectionsEntriesPresenter(this.service, this.eventBus,
-                    collectionsView, param);
+            presenter = new CollectionsEntriesPresenter(new CollectionsModel(this.service,
+                    this.eventBus), collectionsView, param);
             break;
 
         case BULK_IMPORT:

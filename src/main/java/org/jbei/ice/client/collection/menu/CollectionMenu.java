@@ -305,7 +305,7 @@ public class CollectionMenu extends Composite {
      * 
      * @param folders
      */
-    public void setBusyIndicator(Set<String> ids) {
+    public void setBusyIndicator(Set<Long> ids) {
         for (int i = 0; i < table.getRowCount(); i += 1) {
             Widget w = table.getWidget(i, 0);
             if (!(w instanceof MenuCell))
