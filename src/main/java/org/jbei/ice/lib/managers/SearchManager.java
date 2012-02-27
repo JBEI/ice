@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.managers;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,11 +9,12 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.server.QueryFilter;
 import org.jbei.ice.server.QueryFilterParams;
+import org.jbei.ice.server.SearchFilterCallbackFactory;
 import org.jbei.ice.shared.QueryOperator;
+import org.jbei.ice.shared.SearchFilterType;
 
-public class QueryManager {
+public class SearchManager {
 
     @SuppressWarnings("unchecked")
     private static Set<Long> runHibernateQuery(String queryString) throws ManagerException {
@@ -38,46 +38,18 @@ public class QueryManager {
         }
     }
 
-    public static Set<Long> runFilters(ArrayList<QueryFilter> filters) throws ManagerException {
+    public static Set<Long> runSearchFilter(SearchFilterType type, QueryOperator operator,
+            String operand) throws ManagerException {
 
-        Set<Long> results = null;
-
-        for (QueryFilter filter : filters) {
-
-            Set<Long> intermediate = fetchIntermediateResults(filter);
-
-            if (results == null) {
-                results = new HashSet<Long>();
-                results.addAll(intermediate);
-            } else
-                results.retainAll(intermediate);
-
-            // if current results set is empty no need to run other filters
-            if (results.isEmpty())
-                return results;
-        }
-
-        return results;
-    }
-
-    protected static Set<Long> fetchIntermediateResults(QueryFilter filter) throws ManagerException {
-
-        List<QueryFilterParams> filterParams = filter.getParams();
-        QueryOperator operator = filter.getOperator();
-        String operand = filter.getOperand();
+        List<QueryFilterParams> params = SearchFilterCallbackFactory.getFilterParameters(type,
+            operator, operand);
 
         switch (operator) {
         case BOOLEAN:
-            return getIntermediateResultsHasX(filterParams.get(0), Boolean.valueOf(operand));
-
-        case BLAST_N:
-            return null;
-
-        case TBLAST_X:
-            return null;
+            return getIntermediateResultsHasX(params.get(0), Boolean.valueOf(operand));
 
         default:
-            return getIntermediateResultsUnion(filterParams);
+            return getIntermediateResultsUnion(params);
         }
     }
 
@@ -129,4 +101,5 @@ public class QueryManager {
         }
         return intermediate;
     }
+
 }

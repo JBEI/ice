@@ -27,7 +27,6 @@ import org.jbei.ice.lib.managers.FolderManager;
 import org.jbei.ice.lib.managers.GroupManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.NewsManager;
-import org.jbei.ice.lib.managers.QueryManager;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.managers.StorageManager;
@@ -510,10 +509,16 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
 
         try {
-            Set<Long> filterResults = QueryManager.runFilters(queryFilters);
+
+            Account account = this.retrieveAccountForSid(sid);
+            if (account == null)
+                return null;
+
+            SearchController search = new SearchController(account);
+            Set<Long> filterResults = search.runSearch(queryFilters);
             results.addAll(filterResults);
             return results;
-        } catch (ManagerException e) {
+        } catch (ControllerException e) {
             Logger.error(e);
             return null;
         }

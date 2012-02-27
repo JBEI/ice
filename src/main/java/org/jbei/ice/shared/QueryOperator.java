@@ -43,6 +43,9 @@ public enum QueryOperator implements IsSerializable {
     }
 
     public static QueryOperator operatorValueOf(String value) {
+        if (value == null)
+            return null;
+
         try {
             return QueryOperator.valueOf(value);
         } catch (IllegalArgumentException iae) {

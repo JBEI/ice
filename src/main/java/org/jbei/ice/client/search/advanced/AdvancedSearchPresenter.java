@@ -56,8 +56,8 @@ public class AdvancedSearchPresenter {
             return;
 
         // currently support only a single blast search with filters
+        // search for blast operator
         SearchFilterInfo blastInfo = null;
-
         for (SearchFilterInfo filter : searchFilters) {
             QueryOperator operator = QueryOperator.operatorValueOf(filter.getOperator());
             if (operator == null)

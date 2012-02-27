@@ -6,7 +6,6 @@ import java.util.List;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
-import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 /**
  * A search filter is represented by the filter type (e.g. NAME_OR_ALIAS),
@@ -19,14 +18,14 @@ import org.jbei.ice.shared.dto.SearchFilterInfo;
  */
 public class SearchFilterCallbackFactory {
 
-    public static List<QueryFilterParams> getFilterParameters(SearchFilterInfo trans) {
+    public static List<QueryFilterParams> getFilterParameters(SearchFilterType type,
+            QueryOperator operator, String operand) {
 
         ArrayList<QueryFilterParams> params = new ArrayList<QueryFilterParams>();
-        SearchFilterType type = SearchFilterType.filterValueOf(trans.getType());
-        QueryOperator operator = QueryOperator.operatorValueOf(trans.getOperator());
-        String operand = trans.getOperand();
 
-        for (FilterCallback callback : getQueryFilters(type)) {
+        FilterCallback[] callbackList = getQueryFilters(type);
+
+        for (FilterCallback callback : callbackList) {
             String criterion = callback.createCriterion(operator, operand);
             String from = callback.getFrom();
             String selection = callback.getSelection();

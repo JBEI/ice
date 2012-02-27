@@ -69,6 +69,9 @@ public enum SearchFilterType {
     }
 
     public static SearchFilterType filterValueOf(String value) {
+        if (value == null)
+            return null;
+
         try {
             return SearchFilterType.valueOf(value);
         } catch (IllegalArgumentException iae) {
