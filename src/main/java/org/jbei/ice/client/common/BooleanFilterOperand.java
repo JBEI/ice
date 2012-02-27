@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
 
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.RadioButton;
 
 public class BooleanFilterOperand extends FilterOperand {
@@ -12,6 +13,7 @@ public class BooleanFilterOperand extends FilterOperand {
     private final QueryOperator operator;
     private final RadioButton yesRadio;
     private final RadioButton noRadio;
+    private final HorizontalPanel panel;
 
     public BooleanFilterOperand(SearchFilterType type) {
         super(type);
@@ -19,7 +21,10 @@ public class BooleanFilterOperand extends FilterOperand {
         operator = QueryOperator.BOOLEAN;
         yesRadio = new RadioButton(operator.operator(), "Yes");
         noRadio = new RadioButton(operator.operator(), "No");
-        //        this.addWidgets(hPanel);
+        panel = new HorizontalPanel();
+        panel.add(yesRadio);
+        panel.add(noRadio);
+        initWidget(panel);
     }
 
     @Override
