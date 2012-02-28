@@ -5,12 +5,12 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.bulkimport.ImportType;
 import org.jbei.ice.client.bulkimport.events.SavedDraftsEvent;
 import org.jbei.ice.client.bulkimport.events.SavedDraftsEventHandler;
 import org.jbei.ice.client.event.AutoCompleteDataEvent;
 import org.jbei.ice.client.event.AutoCompleteDataEventHandler;
 import org.jbei.ice.shared.AutoCompleteField;
+import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 
@@ -65,7 +65,7 @@ public class BulkImportModel {
             });
     }
 
-    public void saveData(ImportType type, HashMap<Integer, ArrayList<String>> data) {
+    public void saveData(EntryAddType type, HashMap<Integer, ArrayList<String>> data) {
         SheetModel model = ModelFactory.getModelForType(type);
         ArrayList<EntryInfo> entries = model.createInfo(data);
 

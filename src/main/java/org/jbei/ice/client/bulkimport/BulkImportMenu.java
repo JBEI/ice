@@ -1,5 +1,7 @@
 package org.jbei.ice.client.bulkimport;
 
+import org.jbei.ice.shared.EntryAddType;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
@@ -12,7 +14,7 @@ import com.google.gwt.user.client.ui.HTMLTable.Cell;
 public class BulkImportMenu extends Composite implements HasClickHandlers {
 
     private final FlexTable table;
-    private ImportType currentSelected;
+    private EntryAddType currentSelected;
     private MenuCell previousSelected;
 
     public BulkImportMenu() {
@@ -27,7 +29,7 @@ public class BulkImportMenu extends Composite implements HasClickHandlers {
 
         int row = 1;
         // set menu options
-        for (ImportType type : ImportType.values()) {
+        for (EntryAddType type : EntryAddType.values()) {
             final MenuCell cell = new MenuCell(type);
             cell.addClickHandler(new ClickHandler() {
 
@@ -46,7 +48,7 @@ public class BulkImportMenu extends Composite implements HasClickHandlers {
         }
     }
 
-    public ImportType getCurrentSelection() {
+    public EntryAddType getCurrentSelection() {
         return this.currentSelected;
     }
 
@@ -69,9 +71,9 @@ public class BulkImportMenu extends Composite implements HasClickHandlers {
     private class MenuCell extends Composite implements HasClickHandlers {
 
         private final HTMLPanel panel;
-        private final ImportType addType;
+        private final EntryAddType addType;
 
-        public MenuCell(ImportType addType) {
+        public MenuCell(EntryAddType addType) {
 
             this.addType = addType;
 
@@ -82,7 +84,7 @@ public class BulkImportMenu extends Composite implements HasClickHandlers {
             initWidget(panel);
         }
 
-        public ImportType getAddType() {
+        public EntryAddType getAddType() {
             return this.addType;
         }
 

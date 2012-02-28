@@ -47,7 +47,8 @@ public class StrainSheet extends Sheet {
         DOM.setStyleAttribute(rowIndexWrapper.getElement(), "overflowY", "hidden");
         DOM.setStyleAttribute(rowIndexWrapper.getElement(), "overflowX", "hidden");
 
-        headerWrapper.setWidth((Window.getClientWidth() - 260 - 15) + "px"); // TODO : the 15px accounts for the scroll bar. Not sure yet how to get the scrollbar width
+        //  - 260 accounts for left menu bar. get actual width
+        headerWrapper.setWidth((Window.getClientWidth() - 40 - 15) + "px"); // TODO : the 15px accounts for the scroll bar. Not sure yet how to get the scrollbar width
 
         createHeader();
 
@@ -65,7 +66,6 @@ public class StrainSheet extends Sheet {
 
         while (count > 0) {
 
-            // TODO Performance issue here
             this.addRow();
 
             // index col
@@ -151,7 +151,7 @@ public class StrainSheet extends Sheet {
     }
 
     @Override
-    public void reset() {
+    public void clear() {
         for (int i = 0; i < sheetTable.getRowCount(); i += 1) {
             if (isEmptyRow(i))
                 continue;
@@ -220,7 +220,8 @@ public class StrainSheet extends Sheet {
     }
 
     // TODO : use a bit map or bit arrays to track user entered values for more efficient lookup
-    private boolean isEmptyRow(int row) {
+    @Override
+    public boolean isEmptyRow(int row) {
         int cellCount = sheetTable.getCellCount(row); // TODO : this should equal FIELDS value or else there is a big problem
 
         for (int i = 0; i < cellCount; i += 1) {
@@ -230,5 +231,11 @@ public class StrainSheet extends Sheet {
         }
 
         return true;
+    }
+
+    @Override
+    public void highlightHeaders(int row, int col) {
+        // TODO Auto-generated method stub
+
     }
 }

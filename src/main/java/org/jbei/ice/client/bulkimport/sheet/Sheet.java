@@ -1,7 +1,6 @@
 package org.jbei.ice.client.bulkimport.sheet;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import org.jbei.ice.client.bulkimport.SheetPresenter;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -29,7 +28,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-public abstract class Sheet extends Composite {
+public abstract class Sheet extends Composite implements SheetPresenter.View {
 
     private final FocusPanel panel;
     protected final FlexTable layout;
@@ -46,6 +45,9 @@ public abstract class Sheet extends Composite {
     protected final FlexTable colIndex;
     protected final ScrollPanel wrapper;
     protected final ScrollPanel rowIndexWrapper;
+
+    private final int WIDTH = 40; //300;
+    private final int HEIGHT = 320;
 
     public Sheet() {
 
@@ -68,15 +70,15 @@ public abstract class Sheet extends Composite {
 
         // then wrap it in a scroll panel that expands to fill area given by browser
         wrapper = new ScrollPanel(panel);
-        wrapper.setWidth((Window.getClientWidth() - 300) + "px");
-        wrapper.setHeight((Window.getClientHeight() - 320) + "px");
+        wrapper.setWidth((Window.getClientWidth() - WIDTH - 25) + "px");
+        wrapper.setHeight((Window.getClientHeight() - HEIGHT) + "px");
 
         colIndex = new FlexTable();
         colIndex.setCellPadding(0);
         colIndex.setCellSpacing(0);
         colIndex.setStyleName("sheet_col_index");
         rowIndexWrapper = new ScrollPanel(colIndex);
-        rowIndexWrapper.setHeight((Window.getClientHeight() - 320 - 14) + "px");
+        rowIndexWrapper.setHeight((Window.getClientHeight() - HEIGHT - 14) + "px");
 
         addPanelHandlers();
 
@@ -85,15 +87,15 @@ public abstract class Sheet extends Composite {
             @Override
             public void onResize(ResizeEvent event) {
 
-                int wrapperWidth = (event.getWidth() - 300);
+                int wrapperWidth = (event.getWidth() - WIDTH);
                 if (wrapperWidth >= 0)
                     wrapper.setWidth(wrapperWidth + "px");
 
-                int wrapperHeight = (event.getHeight() - 350);
+                int wrapperHeight = (event.getHeight() - HEIGHT - 30);
                 if (wrapperHeight >= 0)
                     wrapper.setHeight(wrapperHeight + "px");
 
-                int rowIndexHeight = (event.getHeight() - 350 - 15);
+                int rowIndexHeight = (event.getHeight() - HEIGHT - 30 - 15);
                 if (rowIndexHeight >= 0)
                     rowIndexWrapper.setHeight(rowIndexHeight + "px");
             }
@@ -194,11 +196,7 @@ public abstract class Sheet extends Composite {
 
     protected abstract Widget createHeader();
 
-    public abstract void reset();
-
     public abstract boolean validate();
-
-    public abstract HashMap<Integer, ArrayList<String>> getCellData();
 
     // put textinput in cell
     private void switchToInput() {

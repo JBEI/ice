@@ -58,7 +58,6 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
         rightContents.getFlexCellFormatter().setHorizontalAlignment(0, 2, HasAlignment.ALIGN_RIGHT);
 
         // sub menu
-        //        AddToMenuItem<OptionSelect> widget = new AddToMenuItem<OptionSelect>();
         subMenu = new CollectionEntryActionMenu();
         rightContents.setWidget(0, 1, subMenu);
     }
