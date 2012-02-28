@@ -1,5 +1,9 @@
 package org.jbei.ice.client.common.table;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.jbei.ice.client.common.entry.IHasEntryId;
 import org.jbei.ice.client.common.table.cell.PartIDCell;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -26,7 +30,8 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
  * @author Hector Plahar
  * 
  */
-public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTable<T> {
+public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTable<T> implements
+        IHasEntryId {
 
     private final HasEntrySelectionModel<T> selectionModel;
 
@@ -35,6 +40,17 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
         selectionModel = new HasEntrySelectionModel<T>();
         this.setSelectionModel(selectionModel,
             DefaultSelectionEventManager.<T> createCheckboxManager());
+    }
+
+    @Override
+    public Set<Long> getEntrySet() {
+        Set<Long> infoSet = new HashSet<Long>();
+
+        for (HasEntryInfo info : selectionModel.getSelectedSet()) {
+            infoSet.add(info.getEntryInfo().getId());
+        }
+
+        return infoSet;
     }
 
     protected DataTableColumn<Boolean> addSelectionColumn() {

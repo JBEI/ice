@@ -67,11 +67,12 @@ public class CollectionEntryActionMenu implements IsWidget {
 
     private final AddToMenuItem<OptionSelect> add;
     private final Button removeButton;
-    //    private final Button moveToButton;
     private final AddToMenuItem<OptionSelect> move;
+    private final static int WIDTH = 240;
 
     public CollectionEntryActionMenu() {
         this.menuHolder = new FlexTable();
+        this.menuHolder.setWidth(WIDTH + "px");
         this.menuHolder.setCellPadding(0);
         this.menuHolder.setCellSpacing(0);
 
@@ -91,6 +92,10 @@ public class CollectionEntryActionMenu implements IsWidget {
         remove.setStyleName("buttonGroupItem");
         remove.addStyleName(Resources.INSTANCE.subMenuStyle().subMenuRemove());
         return remove;
+    }
+
+    public int getWidth() {
+        return WIDTH;
     }
 
     @Override

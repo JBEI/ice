@@ -18,7 +18,7 @@ import org.jbei.ice.client.collection.model.CollectionsModel;
 import org.jbei.ice.client.collection.table.CollectionEntriesDataTable;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
-import org.jbei.ice.client.common.entry.IHasEntry;
+import org.jbei.ice.client.common.entry.IHasEntryId;
 import org.jbei.ice.client.common.table.DataTable;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.event.FeedbackEvent;
@@ -48,6 +48,12 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class CollectionsEntriesPresenter extends AbstractPresenter {
 
+    // this is a temporary measure to determine how to return entries both 
+    // search and collection browsing. this should be replaced by EntryContext
+    private enum Mode {
+        SEARCH, COLLECTION;
+    }
+
     private final ICollectionEntriesView display;
 
     private final EntryDataViewDataProvider entryDataProvider;
@@ -62,6 +68,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
     private AdvancedSearchPresenter searchPresenter;
     private EntryAddPresenter entryPresenter;
     private long currentFolder;
+    private Mode mode = Mode.COLLECTION;
 
     public CollectionsEntriesPresenter(CollectionsModel model,
             final ICollectionEntriesView display, ArrayList<SearchFilterInfo> operands) {
@@ -164,7 +171,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
             @Override
             protected void moveEntriesToFolder(Set<Long> destinationFolders,
                     final ArrayList<Long> entryIds) {
-                // TODO : both this and add to use the wrong handler. this becomes more of an issue when the presenter listens on the event bus
+                // TODO : both this and "add to" use the wrong handler. this becomes more of an issue when the presenter listens on the event bus
                 model.moveEntriesToFolder(currentFolder, new ArrayList<Long>(destinationFolders),
                     entryIds, new FolderRetrieveEventHandler() {
 
@@ -223,6 +230,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                     operands);
 
         display.setMainContent(searchPresenter.getView(), true);
+        mode = Mode.SEARCH;
     }
 
     private void initCreateCollectionHandlers() {
@@ -428,6 +436,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 checkAndAddEntryTable(collectionsDataTable);
                 display.setDataView(collectionsDataTable);
                 currentFolder = id;
+                mode = Mode.COLLECTION;
             }
         });
     }
@@ -456,11 +465,18 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         }
     }
 
-    private class HasEntry implements IHasEntry<EntryInfo> {
+    private class HasEntry implements IHasEntryId {
 
         @Override
-        public Set<EntryInfo> getEntries() {
-            return collectionsDataTable.getEntries();
+        public Set<Long> getEntrySet() {
+            switch (mode) {
+            case COLLECTION:
+            default:
+                return collectionsDataTable.getEntrySet();
+
+            case SEARCH:
+                return searchPresenter.getEntrySet();
+            }
         }
     }
 }

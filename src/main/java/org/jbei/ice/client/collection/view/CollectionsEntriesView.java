@@ -9,6 +9,7 @@ import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
 import org.jbei.ice.client.collection.event.SubmitHandler;
 import org.jbei.ice.client.collection.menu.CollectionEntryActionMenu;
 import org.jbei.ice.client.collection.menu.CollectionMenu;
+import org.jbei.ice.client.collection.menu.ExportAsMenu;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.collection.presenter.MoveToSubmitHandler;
 import org.jbei.ice.client.collection.table.CollectionEntriesDataTable;
@@ -34,6 +35,7 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
 
     private CreateEntryMenu createNew;
     private CollectionEntryActionMenu subMenu;
+    private ExportAsMenu exportAs;
     private FeedbackPanel feedback;
 
     @Override
@@ -47,19 +49,26 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
         createNew = new CreateEntryMenu();
         feedback = new FeedbackPanel("450px");
 
+        // create new pulldown
         rightContents.setWidget(0, 0, createNew);
-        rightContents.getFlexCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_LEFT);
-        rightContents.getFlexCellFormatter().setWidth(0, 0, "118px");
+        rightContents.getFlexCellFormatter().setWidth(0, 0, "120px");
+
+        // sub menu (add to, remove, move to)
+        subMenu = new CollectionEntryActionMenu();
+        rightContents.setWidget(0, 1, subMenu);
+        String width = (subMenu.getWidth() + 12) + "px";
+        rightContents.getFlexCellFormatter().setWidth(0, 1, width);
+
+        // export as
+        exportAs = new ExportAsMenu();
+        rightContents.setWidget(0, 2, exportAs);
+
+        // feedback
+        rightContents.setWidget(0, 3, feedback);
+        rightContents.getFlexCellFormatter().setHorizontalAlignment(0, 3, HasAlignment.ALIGN_RIGHT);
 
         rightContents.setHTML(1, 0, "&nbsp;");
         rightContents.getFlexCellFormatter().setColSpan(1, 0, 3);
-
-        rightContents.setWidget(0, 2, feedback);
-        rightContents.getFlexCellFormatter().setHorizontalAlignment(0, 2, HasAlignment.ALIGN_RIGHT);
-
-        // sub menu
-        subMenu = new CollectionEntryActionMenu();
-        rightContents.setWidget(0, 1, subMenu);
     }
 
     @Override
@@ -113,12 +122,15 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
     @Override
     public void setDataView(CollectionEntriesDataTable table) {
         rightContents.setWidget(0, 1, subMenu);
+        String width = (subMenu.getWidth() + 12) + "px";
+        rightContents.getFlexCellFormatter().setWidth(0, 1, width);
+
         rightContents.setWidget(2, 0, table);
-        rightContents.getFlexCellFormatter().setColSpan(2, 0, 3);
+        rightContents.getFlexCellFormatter().setColSpan(2, 0, 4);
 
         // table pager TODO : this should be merged with the table
         rightContents.setWidget(3, 0, table.getPager());
-        rightContents.getFlexCellFormatter().setColSpan(3, 0, 3);
+        rightContents.getFlexCellFormatter().setColSpan(3, 0, 4);
     }
 
     @Override
@@ -127,8 +139,9 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
             rightContents.setWidget(0, 1, subMenu);
         else
             rightContents.setHTML(0, 1, "&nbsp;");
+
         rightContents.setWidget(2, 0, mainContent);
-        rightContents.getFlexCellFormatter().setColSpan(2, 0, 3);
+        rightContents.getFlexCellFormatter().setColSpan(2, 0, 4);
         if (rightContents.getRowCount() > 3)
             rightContents.removeRow(3);
     }

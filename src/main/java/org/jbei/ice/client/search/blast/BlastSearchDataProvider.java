@@ -128,6 +128,8 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastR
 
     public void setData(ArrayList<BlastResultInfo> data) {
 
+        valueIds.clear();
+
         for (BlastResultInfo info : data) {
             valueIds.add(info.getEntryInfo().getId());
         }

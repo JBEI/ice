@@ -9,15 +9,14 @@ import org.jbei.ice.client.collection.ICollectionEntriesView;
 import org.jbei.ice.client.collection.event.SubmitEvent;
 import org.jbei.ice.client.collection.event.SubmitHandler;
 import org.jbei.ice.client.collection.view.OptionSelect;
-import org.jbei.ice.client.common.entry.IHasEntry;
-import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.client.common.entry.IHasEntryId;
 
 public abstract class MoveToSubmitHandler implements SubmitHandler {
 
     private final ICollectionEntriesView view;
-    private final IHasEntry<EntryInfo> hasEntry;
+    private final IHasEntryId hasEntry;
 
-    public MoveToSubmitHandler(ICollectionEntriesView view, IHasEntry<EntryInfo> hasEntry) {
+    public MoveToSubmitHandler(ICollectionEntriesView view, IHasEntryId hasEntry) {
         this.view = view;
         this.hasEntry = hasEntry;
     }
@@ -32,10 +31,7 @@ public abstract class MoveToSubmitHandler implements SubmitHandler {
             destinationFolders.add(option.getId());
         }
 
-        final ArrayList<Long> entryIds = new ArrayList<Long>();
-        for (EntryInfo info : hasEntry.getEntries()) {
-            entryIds.add(info.getId());
-        }
+        final ArrayList<Long> entryIds = new ArrayList<Long>(hasEntry.getEntrySet());
 
         // validate
         if (destinationFolders.isEmpty() || entryIds.isEmpty())

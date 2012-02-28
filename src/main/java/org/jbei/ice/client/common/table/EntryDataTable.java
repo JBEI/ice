@@ -1,9 +1,10 @@
 package org.jbei.ice.client.common.table;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.jbei.ice.client.Page;
-import org.jbei.ice.client.common.entry.IHasEntry;
+import org.jbei.ice.client.common.entry.IHasEntryId;
 import org.jbei.ice.client.common.table.cell.PartIDCell;
 import org.jbei.ice.client.common.table.cell.UrlCell;
 import org.jbei.ice.client.common.table.column.ImageColumn;
@@ -33,7 +34,7 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
  */
 
 public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> implements
-        IHasEntry<T> {
+        IHasEntryId {
 
     private final EntrySelectionModel<T> selectionModel;
 
@@ -231,8 +232,14 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
     }
 
     @Override
-    public Set<T> getEntries() {
-        return selectionModel.getSelectedSet();
+    // returns the selected entry set
+    public Set<Long> getEntrySet() {
+        Set<Long> entrySet = new HashSet<Long>();
+        for (EntryInfo info : selectionModel.getSelectedSet()) {
+            entrySet.add(info.getId());
+        }
+
+        return entrySet;
     }
 
     //
