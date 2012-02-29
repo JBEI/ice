@@ -229,7 +229,7 @@ a.cell_mouseover:hover {
 	border-right: 1px solid #ccc;
 	border-top: 1px solid #ccc;
 	width: 130px;
-	height: 17px;
+	height: 19px;
 	background: #FCC;
 }
 
@@ -260,21 +260,21 @@ a.cell_mouseover:hover {
     border-right: 1px solid #ccc;
     border-top: 1px solid #ccc;
     width: 130px;
-    height: 17px;
+    height: 19px;
     font-size: 0.80em;
 }
 
 .cell_input {
-	border: 1px solid #000;
+	border: 1px solid #333;
 	width: 129px;
-	height: 14px;
+	height: 15px;
 	font-size: 0.70em;
 }
 
 .cell_selected {
     border: 2px solid #0082C0;
     width: 127px;
-    height: 14px;
+    height: 16px;
 }
 
 .attachment_small_text {
@@ -304,14 +304,14 @@ a.cell_mouseover:hover {
 .index_td_cell {
 	text-align: center;
 	border-bottom: 1px solid #CCC;
-	height: 17px;
+	height: 19px;
 }
 
 .index_cell {
 	color: #666;
 	font-size: 0.75em;
 	width: 23px;
-	height: 17px;
+	height: 19px;
 }
 
 .sheet_col_index {

@@ -46,6 +46,7 @@ public class AdvancedSearchView extends Composite implements IAdvancedSearchView
 
     protected void initComponents() {
         filterPanel = new FlowPanel();
+        filterPanel.setWidth("100%");
         table = new AdvancedSearchResultsTable();
         blastTable = new BlastResultsTable();
 

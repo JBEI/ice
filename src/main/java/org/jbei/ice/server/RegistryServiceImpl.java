@@ -373,7 +373,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         try {
             ArrayList<String> markers = new ArrayList<String>();
             markers.addAll(UtilsManager.getUniqueSelectionMarkers());
-            data.put(AutoCompleteField.SELECTION_MARKER, markers);
+            data.put(AutoCompleteField.SELECTION_MARKERS, markers);
         } catch (ManagerException e) {
             Logger.error(e);
         }
@@ -381,7 +381,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         // promoters
         ArrayList<String> promoters = new ArrayList<String>();
         promoters.addAll(UtilsManager.getUniquePromoters());
-        data.put(AutoCompleteField.PROMOTER, promoters);
+        data.put(AutoCompleteField.PROMOTERS, promoters);
 
         // plasmid names
         ArrayList<String> plasmidNames = new ArrayList<String>();

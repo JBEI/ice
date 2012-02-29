@@ -1,6 +1,7 @@
 package org.jbei.ice.client.collection.presenter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Set;
 
 import org.jbei.ice.client.AbstractPresenter;
@@ -380,6 +381,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
             @Override
             public void onMenuRetrieval(FolderRetrieveEvent event) {
                 ArrayList<FolderDetails> folders = event.getItems();
+                Collections.reverse(folders);
 
                 ArrayList<MenuItem> userMenuItems = new ArrayList<MenuItem>();
                 ArrayList<FolderDetails> userFolders = new ArrayList<FolderDetails>();

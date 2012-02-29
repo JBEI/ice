@@ -2,6 +2,8 @@ package org.jbei.ice.client.bulkimport;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.client.bulkimport.model.NewBulkInput;
+import org.jbei.ice.client.bulkimport.panel.SheetHeaderPanel;
 import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
 import org.jbei.ice.client.collection.menu.CollectionMenu;
 import org.jbei.ice.client.collection.menu.MenuItem;
@@ -42,6 +44,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         // placeholder for saved drafts menu
         layout.setHTML(0, 0, "");
 
+        // right content. fills entire space when there are no drafts
         layout.setWidget(0, 1, createMainContent());
         layout.getFlexCellFormatter().setVerticalAlignment(0, 1, HasAlignment.ALIGN_TOP);
 
@@ -56,16 +59,13 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         mainContent.setWidth("100%");
 
         mainContent.setWidget(0, 0, create);
+        mainContent.getFlexCellFormatter().setWidth(0, 0, "115px");
 
-        // other headers can go here
-
-        // feedback panel
-        mainContent.setWidget(0, 1, feedback);
-        mainContent.getFlexCellFormatter().setHorizontalAlignment(0, 1, HasAlignment.ALIGN_RIGHT);
+        int count = mainContent.getCellCount(0);
 
         // space
-        mainContent.setHTML(1, 0, "&nbsp;&nbsp;");
-        mainContent.getFlexCellFormatter().setColSpan(1, 0, 2);
+        mainContent.setHTML(1, 0, "&nbsp;");
+        mainContent.getFlexCellFormatter().setColSpan(1, 0, (count + 1));
 
         return mainContent;
     }
@@ -81,12 +81,38 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     }
 
     @Override
-    public void setSheet(Widget sheet) {
-        this.mainContent.setWidget(2, 0, sheet);
+    public void setSheet(NewBulkInput input) { // mainContent.setWidget(0, 0, create);
+
+        SheetHeaderPanel header = input.getSheetHeaderPanel();
+        mainContent.setWidget(0, 1, header.getDraftInput());
+        mainContent.getFlexCellFormatter().setWidth(0, 1, "310px");
+        mainContent.setWidget(0, 2, header.getDraftSave());
+        mainContent.getFlexCellFormatter().setWidth(0, 2, "85px");
+
+        // feedback
+        mainContent.setWidget(0, 3, feedback);
+
+        // reset / save
+        mainContent.setWidget(0, 4, header.getReset());
+        mainContent.getFlexCellFormatter().setWidth(0, 4, "60px");
+        mainContent.setWidget(0, 5, header.getSubmit());
+        mainContent.getFlexCellFormatter().setWidth(0, 5, "60px");
+
+        int index = mainContent.getCellCount(0);
+
+        mainContent.setHTML(1, 0, "&nbsp;");
+        mainContent.getFlexCellFormatter().setColSpan(1, 0, index);
+
+        this.mainContent.setWidget(2, 0, input.getSheet());
+        mainContent.getFlexCellFormatter().setColSpan(2, 0, index);
     }
 
     @Override
     public void showFeedback(String msg, boolean isError) {
+        if (isError)
+            feedback.setFailureMessage(msg);
+        else
+            feedback.setSuccessMessage(msg);
     }
 
     @Override

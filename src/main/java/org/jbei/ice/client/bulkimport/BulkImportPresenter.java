@@ -2,6 +2,7 @@ package org.jbei.ice.client.bulkimport;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.bulkimport.events.SavedDraftsEvent;
@@ -13,6 +14,7 @@ import org.jbei.ice.client.bulkimport.sheet.Sheet;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.event.AutoCompleteDataEvent;
 import org.jbei.ice.client.event.AutoCompleteDataEventHandler;
+import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 
@@ -27,6 +29,7 @@ public class BulkImportPresenter extends AbstractPresenter {
     private final IBulkImportView view;
     private HashMap<EntryAddType, NewBulkInput> sheetCache;
     private final BulkImportModel model;
+    private HashMap<AutoCompleteField, ArrayList<String>> data;
 
     public BulkImportPresenter(BulkImportModel model, final IBulkImportView display) {
         this.view = display;
@@ -68,12 +71,8 @@ public class BulkImportPresenter extends AbstractPresenter {
                 if (sheetCache.containsKey(selection))
                     input = sheetCache.get(selection);
                 else {
-                    Sheet sheet = SheetFactory.getSheetForType(selection);
-                    if (sheet == null) {
-                        view.showFeedback("Could not load spreadsheet", true);
-                        return;
-                    }
-
+                    Sheet sheet = new Sheet(selection);
+                    sheet.setAutoCompleteData(data);
                     input = new NewBulkInput(selection, sheet);
 
                     // submit handler
@@ -119,7 +118,16 @@ public class BulkImportPresenter extends AbstractPresenter {
 
             @Override
             public void onDataRetrieval(AutoCompleteDataEvent event) {
-                // TODO : do something with the data
+                HashMap<AutoCompleteField, ArrayList<String>> eventData = event.getData();
+                if (eventData == null)
+                    return;
+
+                data = eventData;
+
+                for (Entry<EntryAddType, NewBulkInput> entry : sheetCache.entrySet()) {
+                    NewBulkInput input = entry.getValue();
+                    input.getSheet().setAutoCompleteData(eventData);
+                }
             }
         });
     }
@@ -143,8 +151,8 @@ public class BulkImportPresenter extends AbstractPresenter {
         public void onClick(ClickEvent event) {
             boolean isValid = input.getSheet().validate();
             if (!isValid) {
+                view.showFeedback("Please correct validation errors.", true);
                 return;
-                // TODO : feedback panel message
             }
 
             model.saveData(input.getImportType(), input.getSheet().getCellData());

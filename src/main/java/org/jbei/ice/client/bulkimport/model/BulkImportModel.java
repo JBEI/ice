@@ -65,7 +65,7 @@ public class BulkImportModel {
             });
     }
 
-    public void saveData(EntryAddType type, HashMap<Integer, ArrayList<String>> data) {
+    public void saveData(EntryAddType type, HashMap<Integer, String[]> data) {
         SheetModel model = ModelFactory.getModelForType(type);
         ArrayList<EntryInfo> entries = model.createInfo(data);
 
@@ -73,5 +73,8 @@ public class BulkImportModel {
         //        this.service.
         GWT.log("saving " + entries.size());
 
+    }
+
+    public void retrieve() {
     }
 }

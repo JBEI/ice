@@ -338,7 +338,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
 
     public Widget createAutoCompleteForPromoters(String width) {
 
-        SuggestBox box = createSuggestBox(new TreeSet<String>(data.get(AutoCompleteField.PROMOTER)));
+        SuggestBox box = createSuggestBox(new TreeSet<String>(data.get(AutoCompleteField.PROMOTERS)));
         box.setWidth(width);
         return box;
     }
@@ -346,7 +346,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
     public SuggestBox createAutoCompleteForSelectionMarkers(String width) {
 
         SuggestBox box = this.createSuggestBox(new TreeSet<String>(data
-                .get(AutoCompleteField.SELECTION_MARKER)));
+                .get(AutoCompleteField.SELECTION_MARKERS)));
         box.setWidth(width);
         return box;
     }

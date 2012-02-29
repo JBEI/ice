@@ -1,6 +1,13 @@
 package org.jbei.ice.client.bulkimport.sheet;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.TreeSet;
+
 import org.jbei.ice.client.bulkimport.SheetPresenter;
+import org.jbei.ice.client.common.widget.MultipleTextBox;
+import org.jbei.ice.shared.AutoCompleteField;
+import org.jbei.ice.shared.EntryAddType;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -14,6 +21,8 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.event.dom.client.ScrollEvent;
+import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.DOM;
@@ -22,13 +31,18 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FocusPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
+import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-public abstract class Sheet extends Composite implements SheetPresenter.View {
+public class Sheet extends Composite implements SheetPresenter.View {
 
     private final FocusPanel panel;
     protected final FlexTable layout;
@@ -45,16 +59,32 @@ public abstract class Sheet extends Composite implements SheetPresenter.View {
     protected final FlexTable colIndex;
     protected final ScrollPanel wrapper;
     protected final ScrollPanel rowIndexWrapper;
+    protected final FlexTable header;
+    protected final ScrollPanel headerWrapper;
 
     private final int WIDTH = 40; //300;
     private final int HEIGHT = 320;
 
-    public Sheet() {
+    private final EntryAddType type;
+    private int headerCol;
+
+    protected final SheetPresenter presenter;
+
+    public Sheet(EntryAddType type) {
+
+        this.type = type;
+        headerCol = 0;
 
         layout = new FlexTable();
         layout.setCellPadding(0);
         layout.setCellSpacing(0);
         initWidget(layout);
+
+        header = new FlexTable();
+        header.setCellPadding(0);
+        header.setCellSpacing(0);
+        header.setWidth("100%");
+        header.addStyleName("sheet_header_table");
 
         sheetTable = new FlexTable();
         sheetTable.setCellPadding(0);
@@ -81,25 +111,7 @@ public abstract class Sheet extends Composite implements SheetPresenter.View {
         rowIndexWrapper.setHeight((Window.getClientHeight() - HEIGHT - 14) + "px");
 
         addPanelHandlers();
-
-        Window.addResizeHandler(new ResizeHandler() {
-
-            @Override
-            public void onResize(ResizeEvent event) {
-
-                int wrapperWidth = (event.getWidth() - WIDTH);
-                if (wrapperWidth >= 0)
-                    wrapper.setWidth(wrapperWidth + "px");
-
-                int wrapperHeight = (event.getHeight() - HEIGHT - 30);
-                if (wrapperHeight >= 0)
-                    wrapper.setHeight(wrapperHeight + "px");
-
-                int rowIndexHeight = (event.getHeight() - HEIGHT - 30 - 15);
-                if (rowIndexHeight >= 0)
-                    rowIndexWrapper.setHeight(rowIndexHeight + "px");
-            }
-        });
+        addWindowResizeHandler();
 
         currentRow = inputRow = -1;
         currentIndex = inputIndex = -1;
@@ -109,6 +121,79 @@ public abstract class Sheet extends Composite implements SheetPresenter.View {
 
         sheetTable.addDoubleClickHandler(new CellDoubleClick());
         sheetTable.addClickHandler(new CellClick());
+
+        // init
+        headerWrapper = new ScrollPanel(header);
+        init();
+        addScrollHandlers();
+        addResizeHandler();
+
+        // presenter
+        presenter = new SheetPresenter(this);
+    }
+
+    private void addResizeHandler() {
+        Window.addResizeHandler(new ResizeHandler() {
+
+            @Override
+            public void onResize(ResizeEvent event) {
+                headerWrapper.setWidth((wrapper.getOffsetWidth() - 15 + 40) + "px"); // TODO : ditto on 15px here also and the 40 is for the leader_header
+            }
+        });
+    }
+
+    private void addScrollHandlers() {
+        wrapper.addScrollHandler(new ScrollHandler() {
+
+            @Override
+            public void onScroll(ScrollEvent event) {
+                headerWrapper.setHorizontalScrollPosition(wrapper.getHorizontalScrollPosition());
+                rowIndexWrapper.setVerticalScrollPosition(wrapper.getVerticalScrollPosition());
+            }
+        });
+    }
+
+    protected void init() {
+        DOM.setStyleAttribute(headerWrapper.getElement(), "overflowY", "hidden");
+        DOM.setStyleAttribute(headerWrapper.getElement(), "overflowX", "hidden");
+
+        DOM.setStyleAttribute(rowIndexWrapper.getElement(), "overflowY", "hidden");
+        DOM.setStyleAttribute(rowIndexWrapper.getElement(), "overflowX", "hidden");
+
+        //  - 260 accounts for left menu bar. get actual width
+        headerWrapper.setWidth((Window.getClientWidth() - 20 - 15) + "px"); // TODO : the 15px accounts for the scroll bar. Not sure yet how to get the scrollbar width
+
+        createHeader();
+
+        // get header
+        layout.setWidget(0, 0, headerWrapper);
+        layout.getFlexCellFormatter().setColSpan(0, 0, 2);
+        layout.setWidget(1, 0, rowIndexWrapper);
+        layout.getFlexCellFormatter().setVerticalAlignment(1, 0, HasAlignment.ALIGN_TOP);
+        layout.setWidget(1, 1, wrapper);
+        layout.getFlexCellFormatter().setVerticalAlignment(1, 1, HasAlignment.ALIGN_TOP);
+
+        // add rows
+        int count = 50;
+        int i = 1;
+
+        while (count > 0) {
+
+            this.addRow();
+
+            // index col
+            HTML indexCell = new HTML(i + "");
+            colIndex.setWidget(row, 0, indexCell);
+            indexCell.setStyleName("index_cell");
+            colIndex.getFlexCellFormatter().setStyleName(row, 0, "index_td_cell");
+
+            count -= 1;
+            i += 1;
+        }
+    }
+
+    public void setAutoCompleteData(HashMap<AutoCompleteField, ArrayList<String>> data) {
+        presenter.setAutoCompleteData(data);
     }
 
     public void onBrowserEvent(Event event) {
@@ -132,6 +217,27 @@ public abstract class Sheet extends Composite implements SheetPresenter.View {
                 event.preventDefault();
             }
         }
+    }
+
+    private void addWindowResizeHandler() {
+        Window.addResizeHandler(new ResizeHandler() {
+
+            @Override
+            public void onResize(ResizeEvent event) {
+
+                int wrapperWidth = (event.getWidth() - WIDTH);
+                if (wrapperWidth >= 0)
+                    wrapper.setWidth(wrapperWidth + "px");
+
+                int wrapperHeight = (event.getHeight() - HEIGHT - 30);
+                if (wrapperHeight >= 0)
+                    wrapper.setHeight(wrapperHeight + "px");
+
+                int rowIndexHeight = (event.getHeight() - HEIGHT - 30 - 15);
+                if (rowIndexHeight >= 0)
+                    rowIndexWrapper.setHeight(rowIndexHeight + "px");
+            }
+        });
     }
 
     private void addPanelHandlers() {
@@ -194,9 +300,113 @@ public abstract class Sheet extends Composite implements SheetPresenter.View {
         });
     }
 
-    protected abstract Widget createHeader();
+    protected Widget createHeader() {
+        addLeadHeader();
 
-    public abstract boolean validate();
+        Header[] headers = ImportTypeHeaders.getHeadersForType(type);
+        new SheetHeader(headers, headerCol, row, header);
+        row += 1;
+        return header;
+    }
+
+    // header that covers the span of the row index
+    private void addLeadHeader() {
+        HTML cell = new HTML("&nbsp;");
+        cell.setStyleName("leader_cell_column_header");
+        header.setWidget(row, headerCol, cell);
+        header.getFlexCellFormatter().setStyleName(row, headerCol, "leader_cell_column_header_td");
+        headerCol += 1;
+    }
+
+    @Override
+    public void clear() {
+        for (int i = 0; i < sheetTable.getRowCount(); i += 1) {
+            if (isEmptyRow(i))
+                continue;
+
+            final int FIELDS = ImportTypeHeaders.getHeadersForType(type).length;
+
+            for (int j = 0; j < FIELDS; j += 1) {
+                HasText widget = (HasText) sheetTable.getWidget(row, i);
+                widget.setText("");
+                ((Widget) widget).setStyleName("cell");
+            }
+        }
+    }
+
+    @Override
+    public HashMap<Integer, String[]> getCellData() {
+        HashMap<Integer, String[]> cellData = new HashMap<Integer, String[]>();
+
+        int headerLength = ImportTypeHeaders.getHeadersForType(type).length;
+
+        for (int i = 0; i < sheetTable.getRowCount(); i += 1) {
+            if (isEmptyRow(i))
+                continue;
+
+            String[] row = cellData.get(i);
+            if (row == null) {
+                row = new String[headerLength];
+
+                cellData.put(i, row);
+            }
+
+            for (Header header : ImportTypeHeaders.getHeadersForType(type)) {
+                HasText widget = (HasText) sheetTable.getWidget(i, header.ordinal());
+                row[header.ordinal()] = widget.getText();
+            }
+        }
+
+        return cellData;
+    }
+
+    @Override
+    public void highlightHeaders(int row, int col) {
+        // TODO Auto-generated method stub
+    }
+
+    // TODO : use a bit map or bit arrays to track user entered values for more efficient lookup
+    @Override
+    public boolean isEmptyRow(int row) {
+        int cellCount = sheetTable.getCellCount(row);
+
+        for (int i = 0; i < cellCount; i += 1) {
+            HasText widget = (HasText) sheetTable.getWidget(row, i);
+            if (!widget.getText().isEmpty())
+                return false;
+        }
+
+        return true;
+    }
+
+    public boolean validate() {
+
+        boolean validates = true;
+
+        for (int i = 0; i < sheetTable.getRowCount(); i += 1) {
+            if (isEmptyRow(i))
+                continue;
+
+            // TODO : sometimes input box is active and user clicks submit
+            for (Header header : ImportTypeHeaders.getHeadersForType(type)) {
+                Widget widget = sheetTable.getWidget(i, header.ordinal());
+                if (widget instanceof Label) {
+                    Label label = (Label) widget;
+                    boolean isEmpty = label.getText().trim().isEmpty();
+                    if (isEmpty && header.isRequired()) {
+                        label.setStyleName("cell_error");
+                        label.setTitle("Required field");
+                        validates = false;
+                    } else {
+                        label.setStyleName("cell");
+                        label.setTitle("");
+                    }
+                }
+            }
+        }
+
+        return validates;
+    }
 
     // put textinput in cell
     private void switchToInput() {
@@ -221,10 +431,34 @@ public abstract class Sheet extends Composite implements SheetPresenter.View {
         inputRow = currentRow;
 
         // replace
+        Header currentHeader = ImportTypeHeaders.getHeadersForType(this.type)[currentIndex];
+        FieldType fieldType = currentHeader.geFieldType();
         String text = sheetTable.getText(currentRow, currentIndex);
-        input.setText(text);
-        sheetTable.setWidget(currentRow, currentIndex, input);
-        input.setFocus(true);
+
+        if (fieldType == null) {
+            input.setText(text);
+            sheetTable.setWidget(currentRow, currentIndex, input);
+            input.setFocus(true);
+        } else {
+            // TODO : cache 
+            switch (fieldType) {
+            case AUTO_COMPLETE:
+                AutoCompleteField field = AutoCompleteField.fieldValue(currentHeader.name());
+                ArrayList<String> list = presenter.getAutoCompleteData(field);
+
+                MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
+                oracle.addAll(new TreeSet<String>(list));
+                MultipleTextBox textBox = new MultipleTextBox();
+                SuggestBox box = new SuggestBox(oracle, textBox);
+                box.setStyleName("cell_input");
+                box.setWidth("129px");
+                box.setText(text);
+                sheetTable.setWidget(currentRow, currentIndex, box);
+                textBox.setFocus(true);
+            }
+
+            // TODO : handle other field types
+        }
     }
 
     private boolean isRowInBounds(int row) {
@@ -293,10 +527,14 @@ public abstract class Sheet extends Composite implements SheetPresenter.View {
     }
 
     public void addRow() {
-        for (int i = 0; i < 18; i += 1) {
-            FocusPanel cell = new FocusPanel();
-            cell.setStyleName("cell");
-            sheetTable.setWidget(row, i, cell);
+        int headerFields = ImportTypeHeaders.getHeadersForType(this.type).length;
+
+        for (int i = 0; i < headerFields; i += 1) {
+            Widget widget = new HTML("");
+            widget.setStyleName("cell");
+
+            sheetTable.setWidget(row, i, widget);
+            sheetTable.getFlexCellFormatter().setStyleName(row, i, "td_cell");
         }
         row += 1;
     }

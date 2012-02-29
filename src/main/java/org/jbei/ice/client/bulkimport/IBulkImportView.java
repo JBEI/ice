@@ -2,6 +2,7 @@ package org.jbei.ice.client.bulkimport;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.client.bulkimport.model.NewBulkInput;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.shared.EntryAddType;
 
@@ -12,7 +13,7 @@ public interface IBulkImportView {
 
     void setHeader(String header);
 
-    void setSheet(Widget sheet);
+    void setSheet(NewBulkInput bulkImput);
 
     Widget asWidget();
 

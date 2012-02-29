@@ -3,13 +3,13 @@ package org.jbei.ice.client.bulkimport.model;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.jbei.ice.client.bulkimport.sheet.StrainHeaders.Header;
+import org.jbei.ice.client.bulkimport.sheet.Header;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
 
-public class StrainSheetModel extends SheetModel {
+public class StrainSheetModel extends SingleInfoSheetModel {
 
     private HashMap<Integer, StrainInfo> list;
 
@@ -18,13 +18,13 @@ public class StrainSheetModel extends SheetModel {
     }
 
     @Override
-    public ArrayList<EntryInfo> createInfo(HashMap<Integer, ArrayList<String>> data) {
+    public ArrayList<EntryInfo> createInfo(HashMap<Integer, String[]> data) {
         ArrayList<EntryInfo> entries = new ArrayList<EntryInfo>();
 
-        for (ArrayList<String> datum : data.values()) {
+        for (String[] datum : data.values()) {
             StrainInfo info = new StrainInfo();
             for (Header header : Header.values()) {
-                setField(header, info, datum.get(header.ordinal()));
+                setField(header, info, datum[header.ordinal()]);
             }
             entries.add(info);
         }

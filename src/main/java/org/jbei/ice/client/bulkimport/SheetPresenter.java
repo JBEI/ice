@@ -3,6 +3,8 @@ package org.jbei.ice.client.bulkimport;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.jbei.ice.shared.AutoCompleteField;
+
 import com.google.gwt.user.client.Window;
 
 public class SheetPresenter {
@@ -19,10 +21,11 @@ public class SheetPresenter {
 
         boolean isEmptyRow(int row);
 
-        HashMap<Integer, ArrayList<String>> getCellData();
+        HashMap<Integer, String[]> getCellData();
     }
 
     private final View view;
+    private HashMap<AutoCompleteField, ArrayList<String>> data;
 
     public SheetPresenter(View view) {
         this.view = view;
@@ -31,5 +34,16 @@ public class SheetPresenter {
     public void reset() {
         if (Window.confirm("Clear all data?"))
             view.clear();
+    }
+
+    public void setAutoCompleteData(HashMap<AutoCompleteField, ArrayList<String>> data) {
+        this.data = data;
+    }
+
+    public ArrayList<String> getAutoCompleteData(AutoCompleteField field) {
+        if (data == null)
+            return null;
+
+        return data.get(field);
     }
 }

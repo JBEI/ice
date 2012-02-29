@@ -1,7 +1,5 @@
 package org.jbei.ice.client.bulkimport.sheet;
 
-import org.jbei.ice.client.bulkimport.sheet.StrainHeaders.Header;
-
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 
@@ -11,12 +9,12 @@ public class SheetHeader {
     final int row;
     final FlexTable headerTable;
 
-    public SheetHeader(int col, int row, FlexTable headerTable) {
+    public SheetHeader(Header[] headers, int col, int row, FlexTable headerTable) {
         this.headerCol = col;
         this.headerTable = headerTable;
         this.row = row;
 
-        for (Header header : Header.values())
+        for (Header header : headers)
             this.addHeader(header);
     }
 
@@ -27,9 +25,4 @@ public class SheetHeader {
         headerTable.getFlexCellFormatter().setStyleName(row, headerCol, "cell_column_header_td");
         headerCol += 1;
     }
-
-    interface IHeader {
-
-    }
-
 }
