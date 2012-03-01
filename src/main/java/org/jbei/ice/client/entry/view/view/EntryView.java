@@ -61,12 +61,22 @@ public class EntryView extends AbstractLayout implements IEntryView {
     private final PermissionsWidget permissions;
 
     private Widget uploadPanel;
+    private FlexTable left; // left side of the page with menu
+
+    // navigation buttons for context navigation.
+    // TODO : create a widget for it
+    private Button goBack;
+    private Button leftBtn;
+    private Button rightBtn;
 
     // menu
     private EntryDetailViewMenu detailMenu;
 
     public EntryView() {
         permissions = new PermissionsWidget();
+        goBack = new Button("Back");
+        leftBtn = new Button("Prev");
+        rightBtn = new Button("Next");
     }
 
     @Override
@@ -122,6 +132,7 @@ public class EntryView extends AbstractLayout implements IEntryView {
         contentTable.setCellSpacing(0);
         contentTable.setWidget(0, 0, createMenu());
         contentTable.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
+
         // TODO : middle sliver goes here
         contentTable.setWidget(0, 1, createMainContent());
         contentTable.getCellFormatter().setWidth(0, 1, "100%");
@@ -150,6 +161,7 @@ public class EntryView extends AbstractLayout implements IEntryView {
         mainContent.setWidth("100%");
         mainContent.setCellPadding(3);
         mainContent.setCellSpacing(0);
+
         mainContent.setHTML(0, 0, "&nbsp;");
         mainContent.getFlexCellFormatter().setColSpan(0, 0, 2);
 
@@ -210,8 +222,53 @@ public class EntryView extends AbstractLayout implements IEntryView {
     }
 
     protected Widget createMenu() {
+        left = new FlexTable();
+        left.setCellPadding(0);
+        left.setCellSpacing(0);
         this.detailMenu = new EntryDetailViewMenu();
-        return this.detailMenu;
+        left.setHTML(0, 0, "");
+        left.setWidget(1, 0, detailMenu);
+        return left;
+    }
+
+    @Override
+    public void addNextHandler(ClickHandler handler) {
+        rightBtn.addClickHandler(handler);
+    }
+
+    @Override
+    public void addGoBackHandler(ClickHandler handler) {
+        goBack.addClickHandler(handler);
+    }
+
+    @Override
+    public void addPrevHandler(ClickHandler handler) {
+        leftBtn.addClickHandler(handler);
+    }
+
+    @Override
+    public void enablePrev(boolean enabled) {
+        leftBtn.setEnabled(enabled);
+    }
+
+    @Override
+    public void enableNext(boolean enabled) {
+        rightBtn.setEnabled(enabled);
+    }
+
+    @Override
+    public void showContextNav(boolean show) {
+        if (show) {
+            HTMLPanel panel = new HTMLPanel(
+                    "<span id=\"goBack\"></span> <span id=\"leftBtn\"></span> <span id=\"rightBtn\"></span>");
+            panel.add(goBack, "goBack");
+            panel.add(leftBtn, "leftBtn");
+            panel.add(rightBtn, "rightBtn");
+
+            left.setWidget(0, 0, panel);
+        } else {
+            left.setHTML(0, 0, "");
+        }
     }
 
     @Override

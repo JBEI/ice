@@ -40,7 +40,6 @@ public class AdvancedSearchView extends Composite implements IAdvancedSearchView
 
         // add a break between filters and results
         layout.setHTML(1, 0, "&nbsp;");
-
         // TODO : loading indicator?
     }
 

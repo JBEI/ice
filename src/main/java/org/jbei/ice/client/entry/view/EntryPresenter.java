@@ -1,7 +1,9 @@
 package org.jbei.ice.client.entry.view;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
@@ -37,21 +39,21 @@ public class EntryPresenter extends AbstractPresenter {
     private EntryDetailView<? extends EntryInfo> view;
     private final EntrySampleTable sampleTable;
     private final SequenceTable sequenceTable;
+    private final List<Long> contextList;
+    private long currentId;
 
-    public EntryPresenter(RegistryServiceAsync service, HandlerManager eventBus,
-            final IEntryView display) {
-
+    public EntryPresenter(final RegistryServiceAsync service, HandlerManager eventBus,
+            final IEntryView display, String entryId, List<Long> contextList) {
         this.service = service;
         this.eventBus = eventBus;
         this.display = display;
 
+        this.contextList = contextList;
+        if (contextList != null)
+            Collections.reverse(this.contextList); // TODO : order matters. make sure this is the case in all
+
         sequenceTable = new SequenceTable();
         sampleTable = new EntrySampleTable();
-    }
-
-    public EntryPresenter(final RegistryServiceAsync service, HandlerManager eventBus,
-            final IEntryView display, String entryId) {
-        this(service, eventBus, display);
 
         final long id = Long.decode(entryId); // TODO : catch potential NFE
         retrieveEntryDetails(id);
@@ -70,6 +72,41 @@ public class EntryPresenter extends AbstractPresenter {
         display.getDetailMenu().addClickHandler(handler);
 
         retrieveAccountsAndGroups();
+
+        // handlers for context navigation
+        setHandlerForContextNavigation();
+    }
+
+    protected void setHandlerForContextNavigation() {
+        boolean show = (contextList != null);
+        display.showContextNav(show);
+        if (!show) {
+            display.enableNext(false);
+            display.enablePrev(false);
+            return;
+        }
+
+        display.addNextHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                int idx = contextList.indexOf(currentId);
+                if (idx == -1) {
+                    display.enableNext(false);
+                    display.enablePrev(false);
+                    return; // we have a problem. most likely means we did not disable next at the right time
+                }
+
+                if (contextList.size() == idx + 1) {
+                    display.enableNext(false);
+                }
+
+                // TODO :this needs to be folded into a single "Retrieve"
+                retrieveEntryDetails(contextList.get(idx + 1));
+                retrieveAccountsAndGroups();
+                //                retrievePermissionData(contextList.get(idx + 1));
+            }
+        });
     }
 
     private void retrieveAccountsAndGroups() {
@@ -103,6 +140,7 @@ public class EntryPresenter extends AbstractPresenter {
     }
 
     private void retrieveEntryDetails(long entryId) {
+        currentId = entryId;
         service.retrieveEntryDetails(AppController.sessionId, entryId,
             new AsyncCallback<EntryInfo>() {
 

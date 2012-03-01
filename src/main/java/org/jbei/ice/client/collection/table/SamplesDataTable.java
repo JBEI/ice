@@ -26,7 +26,7 @@ public class SamplesDataTable extends HasEntryDataTable<SampleInfo> {
         ArrayList<DataTableColumn<?>> columns = new ArrayList<DataTableColumn<?>>();
 
         columns.add(super.addTypeColumn(true));
-        columns.add(super.addPartIdColumn(true));
+        columns.add(super.addPartIdColumn(true, null));
         columns.add(super.addNameColumn());
         columns.add(this.addLabelColumn());
         columns.add(this.addNotesColumn());

@@ -22,6 +22,8 @@ import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.common.entry.IHasEntryId;
 import org.jbei.ice.client.common.table.DataTable;
 import org.jbei.ice.client.common.table.EntryTablePager;
+import org.jbei.ice.client.event.EntryViewEvent;
+import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.event.SearchEvent;
 import org.jbei.ice.client.event.SearchEventHandler;
@@ -84,7 +86,20 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         this.model = model;
 
         // initialize all parameters
-        this.collectionsDataTable = new CollectionEntriesDataTable(new EntryTablePager());
+        this.collectionsDataTable = new CollectionEntriesDataTable(new EntryTablePager()) {
+
+            @Override
+            protected EntryViewEventHandler getHandler() {
+                return new EntryViewEventHandler() {
+                    public void onEntryView(EntryViewEvent event) {
+                        //                        int i = entryDataProvider.getData().size();
+                        event.setList(entryDataProvider.getData());
+                        //                        event.setHasEntry(new HasEntry());
+                        model.getEventBus().fireEvent(event);
+                    }
+                };
+            }
+        };
         this.userListProvider = new ListDataProvider<FolderDetails>(new KeyProvider());
         this.systemListProvider = new ListDataProvider<FolderDetails>(new KeyProvider());
         this.entryDataProvider = new EntryDataViewDataProvider(collectionsDataTable,

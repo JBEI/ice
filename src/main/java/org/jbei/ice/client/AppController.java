@@ -3,6 +3,8 @@ package org.jbei.ice.client;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.jbei.ice.client.bulkimport.BulkImportPresenter;
 import org.jbei.ice.client.bulkimport.BulkImportView;
@@ -10,12 +12,15 @@ import org.jbei.ice.client.bulkimport.IBulkImportView;
 import org.jbei.ice.client.bulkimport.model.BulkImportModel;
 import org.jbei.ice.client.collection.model.CollectionsModel;
 import org.jbei.ice.client.collection.presenter.CollectionsEntriesPresenter;
+import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.collection.view.CollectionsEntriesView;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.header.HeaderModel;
 import org.jbei.ice.client.common.header.HeaderPresenter;
 import org.jbei.ice.client.entry.view.EntryPresenter;
 import org.jbei.ice.client.entry.view.view.EntryView;
+import org.jbei.ice.client.event.EntryViewEvent;
+import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.event.ILoginEventHandler;
 import org.jbei.ice.client.event.ILogoutEventHandler;
 import org.jbei.ice.client.event.LoginEvent;
@@ -94,6 +99,28 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
                 showSearchResults(event.getFilters());
             }
         });
+
+        // view handler
+        this.eventBus.addHandler(EntryViewEvent.TYPE, new EntryViewEventHandler() {
+
+            @Override
+            public void onEntryView(EntryViewEvent event) {
+                showEntryView(event.getContext());
+            }
+        });
+    }
+
+    private void showEntryView(EntryContext context) {
+        long recordId = context.getCurrent();
+        List<Long> list = new LinkedList<Long>(context.getList());
+
+        History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + recordId, false);
+        EntryView eView = new EntryView();
+        String param = String.valueOf(recordId);
+        EntryPresenter presenter = new EntryPresenter(this.service, this.eventBus, eView, param,
+                list);
+        new HeaderPresenter(new HeaderModel(this.service, this.eventBus), eView.getHeader());
+        presenter.go(container);
     }
 
     private void showSearchResults(ArrayList<SearchFilterInfo> operands) {
@@ -102,7 +129,7 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
 
         Page currentPage = getPage(History.getToken());
         if (currentPage == Page.COLLECTIONS)
-            return;
+            return; // collections is also listening on the eventBus for search events so do not respond
 
         History.newItem(Page.COLLECTIONS.getLink(), false);
         CollectionsEntriesView cView = new CollectionsEntriesView();
@@ -171,10 +198,8 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             break;
 
         case ENTRY_VIEW:
-            if (param == null)
-                presenter = new EntryPresenter(this.service, this.eventBus, new EntryView());
-            else
-                presenter = new EntryPresenter(this.service, this.eventBus, new EntryView(), param);
+            presenter = new EntryPresenter(this.service, this.eventBus, new EntryView(), param,
+                    null);
             break;
 
         case PROFILE:

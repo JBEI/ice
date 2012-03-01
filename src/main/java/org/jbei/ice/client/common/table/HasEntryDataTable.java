@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.jbei.ice.client.common.entry.IHasEntryId;
 import org.jbei.ice.client.common.table.cell.PartIDCell;
+import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.HasEntryInfo;
@@ -105,10 +106,11 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
         return typeCol;
     }
 
-    protected DataTableColumn<EntryInfo> addPartIdColumn(boolean sortable) {
+    protected DataTableColumn<EntryInfo> addPartIdColumn(boolean sortable,
+            EntryViewEventHandler handler) {
 
         DataTableColumn<EntryInfo> partIdColumn = new DataTableColumn<EntryInfo>(
-                new PartIDCell<EntryInfo>(), ColumnField.PART_ID) {
+                new PartIDCell<EntryInfo>(), ColumnField.PART_ID) { // TODO : see EntryDataTable:108
 
             @Override
             public EntryInfo getValue(T object) {

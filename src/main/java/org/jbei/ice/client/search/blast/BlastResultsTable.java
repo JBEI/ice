@@ -22,7 +22,7 @@ public class BlastResultsTable extends HasEntryDataTable<BlastResultInfo> {
 
         columns.add(super.addSelectionColumn());
         columns.add(super.addTypeColumn(true));
-        columns.add(super.addPartIdColumn(true));
+        columns.add(super.addPartIdColumn(true, null));
         columns.add(super.addNameColumn());
         columns.add(addAlignedColumn());
         columns.add(addAlignedIdentityColumn());

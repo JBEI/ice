@@ -14,6 +14,9 @@ import com.google.gwt.dom.client.Style.Unit;
  */
 public class AdvancedSearchResultsTable extends EntryDataTable<EntryInfo> {
 
+    public AdvancedSearchResultsTable() {
+    }
+
     @Override
     protected ArrayList<DataTableColumn<?>> createColumns() {
 
@@ -21,7 +24,7 @@ public class AdvancedSearchResultsTable extends EntryDataTable<EntryInfo> {
 
         columns.add(super.addSelectionColumn());
         columns.add(super.addTypeColumn(true, 50, Unit.PX));
-        columns.add(super.addPartIdColumn(true, 120, Unit.PX));
+        columns.add(super.addPartIdColumn(true, 120, Unit.PX, null));
         columns.add(super.addNameColumn(120, Unit.PX));
         columns.add(super.addSummaryColumn());
         columns.add(super.addOwnerColumn());

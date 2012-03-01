@@ -60,6 +60,10 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> {
         this(view, new LinkedList<Long>(), service);
     }
 
+    public LinkedList<Long> getData() {
+        return new LinkedList<Long>(this.valuesIds);
+    }
+
     public void reset() {
         this.results.clear();
         this.valuesIds.clear();

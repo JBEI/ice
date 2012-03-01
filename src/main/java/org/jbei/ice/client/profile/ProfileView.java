@@ -123,7 +123,7 @@ public class ProfileView extends Composite implements IProfileView {
 
                 ArrayList<DataTableColumn<?>> columns = new ArrayList<DataTableColumn<?>>();
                 columns.add(super.addTypeColumn(true, 50, Unit.PX));
-                columns.add(super.addPartIdColumn(true, 120, Unit.PX));
+                //                columns.add(super.addPartIdColumn(true, 120, Unit.PX)); // TODO 
                 super.addNameColumn(120, Unit.PX);
                 super.addSummaryColumn();
                 super.addStatusColumn();

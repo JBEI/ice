@@ -1,16 +1,36 @@
 package org.jbei.ice.client.collection.presenter;
 
-import org.jbei.ice.client.common.entry.IHasEntry;
-import org.jbei.ice.shared.dto.EntryInfo;
+import java.util.List;
 
 public class EntryContext {
-    private IHasEntry<EntryInfo> hasEntry;
+    //    private IHasEntryId hasEntry;
+    private List<Long> list;
+    private long current;
 
-    public EntryContext(IHasEntry<EntryInfo> hasEntry) {
-        this.hasEntry = hasEntry;
+    public EntryContext() {
     }
 
-    public IHasEntry<EntryInfo> getHasEntry() {
-        return this.hasEntry;
+    public long getCurrent() {
+        return current;
+    }
+
+    public void setCurrent(long current) {
+        this.current = current;
+    }
+
+    //    public IHasEntryId getHasEntry() {
+    //        return hasEntry;
+    //    }
+    //
+    //    public void setHasEntry(IHasEntryId hasEntry) {
+    //        this.hasEntry = hasEntry;
+    //    }
+
+    public List<Long> getList() {
+        return list;
+    }
+
+    public void setList(List<Long> list) {
+        this.list = list;
     }
 }
