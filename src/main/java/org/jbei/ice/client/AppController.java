@@ -37,6 +37,7 @@ import org.jbei.ice.client.profile.ProfilePresenter;
 import org.jbei.ice.client.profile.ProfileView;
 import org.jbei.ice.client.storage.StoragePresenter;
 import org.jbei.ice.client.storage.StorageView;
+import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
@@ -45,6 +46,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 
@@ -60,6 +62,7 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
     public static String sessionId;
+    public static HashMap<AutoCompleteField, ArrayList<String>> autoCompleteData;
     public static AccountInfo accountInfo;
 
     public AppController(RegistryServiceAsync service, HandlerManager eB) {
@@ -108,6 +111,21 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
                 showEntryView(event.getContext());
             }
         });
+
+        // retrieve autocomplete data
+        service.retrieveAutoCompleteData(AppController.sessionId,
+            new AsyncCallback<HashMap<AutoCompleteField, ArrayList<String>>>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert("Failed to retrieve the autocomplete data: " + caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(HashMap<AutoCompleteField, ArrayList<String>> result) {
+                    autoCompleteData = new HashMap<AutoCompleteField, ArrayList<String>>(result);
+                }
+            });
     }
 
     private void showEntryView(EntryContext context) {

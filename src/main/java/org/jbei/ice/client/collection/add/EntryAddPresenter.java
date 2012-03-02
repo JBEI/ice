@@ -11,7 +11,6 @@ import org.jbei.ice.client.collection.add.form.EntryCreateWidget;
 import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
 import org.jbei.ice.client.collection.add.form.SampleLocationWidget;
 import org.jbei.ice.client.event.FeedbackEvent;
-import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryInfo.EntryType;
@@ -30,7 +29,6 @@ public class EntryAddPresenter {
     private final HandlerManager eventBus;
     private final EntryAddView display;
     private final HashMap<EntryAddType, EntryCreateWidget> formsCache;
-    private HashMap<AutoCompleteField, ArrayList<String>> autoCompleteData;
 
     public EntryAddPresenter(RegistryServiceAsync service, HandlerManager eventBus) {
         this.service = service;
@@ -38,7 +36,6 @@ public class EntryAddPresenter {
         this.display = new EntryAddView();
 
         formsCache = new HashMap<EntryAddType, EntryCreateWidget>();
-        bind();
     }
 
     public EntryAddView getView() {
@@ -101,24 +98,6 @@ public class EntryAddPresenter {
             });
     }
 
-    protected void bind() {
-
-        // TODO : look in caching to avoid making the following call every time page is loaded
-        service.retrieveAutoCompleteData(AppController.sessionId,
-            new AsyncCallback<HashMap<AutoCompleteField, ArrayList<String>>>() {
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert("Failed to retrieve the autocomplete data: " + caught.getMessage());
-                }
-
-                @Override
-                public void onSuccess(HashMap<AutoCompleteField, ArrayList<String>> result) {
-                    autoCompleteData = new HashMap<AutoCompleteField, ArrayList<String>>(result);
-                }
-            });
-    }
-
     /**
      * Makes an rpc to save the set of entrys
      * 
@@ -171,8 +150,8 @@ public class EntryAddPresenter {
         String creatorName = AppController.accountInfo.getFullName();
         String creatorEmail = AppController.accountInfo.getEmail();
 
-        final EntryCreateWidget form = EntryFormFactory.entryForm(type, autoCompleteData,
-            creatorName, creatorEmail);
+        final EntryCreateWidget form = EntryFormFactory.entryForm(type,
+            AppController.autoCompleteData, creatorName, creatorEmail);
 
         if (form == null)
             return null;
