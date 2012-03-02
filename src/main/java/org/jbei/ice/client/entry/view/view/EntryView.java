@@ -65,9 +65,10 @@ public class EntryView extends AbstractLayout implements IEntryView {
 
     // navigation buttons for context navigation.
     // TODO : create a widget for it
-    private Button goBack;
-    private Button leftBtn;
-    private Button rightBtn;
+    private final Button goBack;
+    private final Button leftBtn;
+    private final Label navText;
+    private final Button rightBtn;
 
     // menu
     private EntryDetailViewMenu detailMenu;
@@ -77,6 +78,8 @@ public class EntryView extends AbstractLayout implements IEntryView {
         goBack = new Button("Back");
         leftBtn = new Button("Prev");
         rightBtn = new Button("Next");
+        navText = new Label();
+        navText.setStyleName("display-inline");
     }
 
     @Override
@@ -257,12 +260,18 @@ public class EntryView extends AbstractLayout implements IEntryView {
     }
 
     @Override
+    public void setNavText(String text) {
+        this.navText.setText(text);
+    }
+
+    @Override
     public void showContextNav(boolean show) {
         if (show) {
             HTMLPanel panel = new HTMLPanel(
-                    "<span id=\"goBack\"></span> <span id=\"leftBtn\"></span> <span id=\"rightBtn\"></span>");
+                    "<span id=\"goBack\"></span> <span id=\"leftBtn\"></span> <span id=\"navText\"></span><span id=\"rightBtn\"></span>");
             panel.add(goBack, "goBack");
             panel.add(leftBtn, "leftBtn");
+            panel.add(navText, "navText");
             panel.add(rightBtn, "rightBtn");
 
             left.setWidget(0, 0, panel);

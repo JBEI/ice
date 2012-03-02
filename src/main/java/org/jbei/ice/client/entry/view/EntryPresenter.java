@@ -26,6 +26,7 @@ import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -86,6 +87,18 @@ public class EntryPresenter extends AbstractPresenter {
             return;
         }
 
+        if (contextList.isEmpty() || contextList.size() == 1) {
+            display.enableNext(false);
+            display.enablePrev(false);
+        }
+
+        int idx = contextList.indexOf(currentId);
+        if (idx == 0)
+            display.enablePrev(false);
+
+        String text = (idx + 1) + " of " + contextList.size();
+        display.setNavText(text);
+
         display.addNextHandler(new ClickHandler() {
 
             @Override
@@ -101,10 +114,51 @@ public class EntryPresenter extends AbstractPresenter {
                     display.enableNext(false);
                 }
 
+                String text = (idx - 1) + " of " + contextList.size();
+                display.setNavText(text);
                 // TODO :this needs to be folded into a single "Retrieve"
-                retrieveEntryDetails(contextList.get(idx + 1));
+                currentId = contextList.get(idx + 1);
+                retrieveEntryDetails(currentId);
                 retrieveAccountsAndGroups();
                 //                retrievePermissionData(contextList.get(idx + 1));
+                display.enablePrev(true);
+            }
+        });
+
+        // add previous handler
+        display.addPrevHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                int idx = contextList.indexOf(currentId);
+                if (idx == -1) {
+                    display.enableNext(false);
+                    display.enablePrev(false);
+                    return; // we have a problem. most likely means we did not disable prev at the right time
+                }
+
+                if (idx - 1 == 0) { // at the first position {
+                    display.enablePrev(false);
+                }
+
+                String text = (idx + 1) + " of " + contextList.size();
+                display.setNavText(text);
+                currentId = contextList.get(idx - 1);
+                retrieveEntryDetails(currentId);
+                retrieveAccountsAndGroups();
+                //                retrievePermissionData(contextList.get(idx - 1));
+                display.enableNext(true);
+
+            }
+        });
+
+        // add go back handler
+        // TODO : this can be improved to show the current position of the viewed entry in the list
+        display.addGoBackHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                History.back();
             }
         });
     }

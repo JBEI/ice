@@ -24,6 +24,7 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 .border-bottom { border-bottom: 1px solid #ccc;}
 .pull_down { border: 1px solid #CCC; background-color: #f1f1f1; }
 .fill { height: 100%; width: 100% }
+.display-inline { display: inline}
 
 .btn_submit_entry_form {
 	padding: 5px;

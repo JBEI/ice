@@ -51,4 +51,6 @@ public interface IEntryView {
     void enablePrev(boolean enable);
 
     void enableNext(boolean enable);
+
+    void setNavText(String text);
 }

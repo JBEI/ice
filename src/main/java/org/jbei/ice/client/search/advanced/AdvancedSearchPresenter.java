@@ -5,6 +5,8 @@ import java.util.Set;
 
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
+import org.jbei.ice.client.event.EntryViewEvent;
+import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.event.SearchEvent;
 import org.jbei.ice.client.event.SearchEventHandler;
 import org.jbei.ice.client.search.blast.BlastSearchDataProvider;
@@ -26,13 +28,28 @@ public class AdvancedSearchPresenter {
     private final EntryDataViewDataProvider dataProvider;
     private final BlastSearchDataProvider blastProvider;
     private final AdvancedSearchModel model;
+    private AdvancedSearchResultsTable table;
     private Mode mode;
 
     public AdvancedSearchPresenter(RegistryServiceAsync rpcService, HandlerManager eventBus) {
         this.display = new AdvancedSearchView();
 
+        table = new AdvancedSearchResultsTable() {
+
+            @Override
+            protected EntryViewEventHandler getHandler() {
+                return new EntryViewEventHandler() {
+                    @Override
+                    public void onEntryView(EntryViewEvent event) {
+                        event.setList(dataProvider.getData());
+                        model.getEventBus().fireEvent(event);
+                    }
+                };
+            }
+        };
+
         // hide the results table
-        dataProvider = new AdvancedSearchDataProvider(display.getResultsTable(), rpcService);
+        dataProvider = new AdvancedSearchDataProvider(table, rpcService);
         blastProvider = new BlastSearchDataProvider(display.getBlastResultTable(),
                 new ArrayList<BlastResultInfo>(), rpcService);
 
@@ -46,6 +63,7 @@ public class AdvancedSearchPresenter {
                 search(event.getFilters());
             }
         });
+
     }
 
     public AdvancedSearchPresenter(final RegistryServiceAsync rpcService,
@@ -87,9 +105,8 @@ public class AdvancedSearchPresenter {
             this.model.performBlast(searchFilters, blastInfo.getOperand(), program, new Handler(
                     searchFilters));
         } else {
-            display.setSearchVisibility(true);
-            display.getResultsTable().setVisibleRangeAndClearData(
-                display.getResultsTable().getVisibleRange(), false);
+            display.setSearchVisibility(table, true);
+            table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
 
             this.model.retrieveSearchResults(searchFilters, new Handler(searchFilters));
         }
@@ -99,7 +116,7 @@ public class AdvancedSearchPresenter {
         switch (mode) {
         case SEARCH:
         default:
-            return display.getResultsTable().getEntrySet();
+            return table.getEntrySet();
 
         case BLAST:
             return display.getBlastResultTable().getEntrySet();

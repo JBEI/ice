@@ -121,4 +121,8 @@ public class AdvancedSearchModel {
                 }
             });
     }
+
+    public HandlerManager getEventBus() {
+        return eventBus;
+    }
 }

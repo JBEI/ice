@@ -16,13 +16,11 @@ public interface IAdvancedSearchView {
 
     void setSearchFilters(ArrayList<SearchFilterInfo> filters);
 
-    AdvancedSearchResultsTable getResultsTable();
-
     BlastResultsTable getBlastResultTable();
 
     Widget asWidget();
 
-    void setSearchVisibility(boolean visible);
+    void setSearchVisibility(AdvancedSearchResultsTable table, boolean visible);
 
     void setBlastVisibility(boolean visible);
 }

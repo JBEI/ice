@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.Widget;
 public class AdvancedSearchView extends Composite implements IAdvancedSearchView {
 
     private FlowPanel filterPanel;
-    private AdvancedSearchResultsTable table;
     private BlastResultsTable blastTable;
     private EntryTablePager pager;
     private EntryTablePager blastPager;
@@ -46,12 +45,11 @@ public class AdvancedSearchView extends Composite implements IAdvancedSearchView
     protected void initComponents() {
         filterPanel = new FlowPanel();
         filterPanel.setWidth("100%");
-        table = new AdvancedSearchResultsTable();
+
         blastTable = new BlastResultsTable();
 
         // search pager
         pager = new EntryTablePager();
-        pager.setDisplay(table);
 
         blastPager = new EntryTablePager();
         blastPager.setDisplay(blastTable);
@@ -60,11 +58,6 @@ public class AdvancedSearchView extends Composite implements IAdvancedSearchView
     @Override
     public Widget asWidget() {
         return this;
-    }
-
-    @Override
-    public AdvancedSearchResultsTable getResultsTable() {
-        return this.table;
     }
 
     @Override
@@ -78,7 +71,8 @@ public class AdvancedSearchView extends Composite implements IAdvancedSearchView
     }
 
     @Override
-    public void setSearchVisibility(boolean visible) {
+    public void setSearchVisibility(AdvancedSearchResultsTable table, boolean visible) {
+        pager.setDisplay(table);
         pager.setVisible(visible);
         table.setVisible(visible);
 
