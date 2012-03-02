@@ -110,18 +110,20 @@ public class EntryPresenter extends AbstractPresenter {
                     return; // we have a problem. most likely means we did not disable next at the right time
                 }
 
-                if (contextList.size() == idx + 1) {
+                int next = idx + 1;
+
+                if (contextList.size() == next + 1) {
                     display.enableNext(false);
                 }
 
-                String text = (idx - 1) + " of " + contextList.size();
-                display.setNavText(text);
                 // TODO :this needs to be folded into a single "Retrieve"
-                currentId = contextList.get(idx + 1);
+                currentId = contextList.get(next);
                 retrieveEntryDetails(currentId);
                 retrieveAccountsAndGroups();
                 //                retrievePermissionData(contextList.get(idx + 1));
                 display.enablePrev(true);
+                String text = (next + 1) + " of " + contextList.size();
+                display.setNavText(text);
             }
         });
 
@@ -137,17 +139,18 @@ public class EntryPresenter extends AbstractPresenter {
                     return; // we have a problem. most likely means we did not disable prev at the right time
                 }
 
-                if (idx - 1 == 0) { // at the first position {
+                int prev = idx - 1;
+                if (prev <= 0) { // at the first position {
                     display.enablePrev(false);
                 }
 
-                String text = (idx + 1) + " of " + contextList.size();
-                display.setNavText(text);
-                currentId = contextList.get(idx - 1);
+                currentId = contextList.get(prev);
                 retrieveEntryDetails(currentId);
                 retrieveAccountsAndGroups();
                 //                retrievePermissionData(contextList.get(idx - 1));
                 display.enableNext(true);
+                String text = (prev + 1) + " of " + contextList.size();
+                display.setNavText(text);
 
             }
         });
