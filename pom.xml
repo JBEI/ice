@@ -284,6 +284,11 @@
 			<artifactId>gwtupload</artifactId>
 			<version>0.6.3-compat</version>
 		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-servlet</artifactId>
+			<version>2.4.0</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<outputDirectory>target</outputDirectory>
