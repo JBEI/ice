@@ -333,20 +333,20 @@ a.cell_mouseover:hover {
 
 /* ENTRY DETAIL VIEW */
 .entry_view_left_menu {
-	border-top: 2px solid #0082C0;
-	width: 250px;
+	/*border-top: 2px solid #0082C0; */
+	border-top: 1px solid #aab2bd; 
+	width: 180px;
 	border-bottom: 1px solid #aab2bd; 
 }
 
 .entry_view_right_menu_2 {
 	border-top: 2px solid #999;
-	width: 250px;
+	width: 180px;
 	border-bottom: 1px solid #999;
 }
 
 .entry_view_right_menu {
 	float: right;
-	padding-left: 10px;
 }
 
 .entry_view_sub_menu_header {
@@ -580,6 +580,26 @@ a.cell_mouseover:hover {
 
 .collection_user_menu_row_selected {
 	background-color: #f9f6f6; 
+    cursor: default;
+    font-weight: bold;
+    color: #4d5b76;
+}
+
+.entry_detail_view_row {
+    border-right: 1px solid #F2F2F2; 
+    border-top: 1px solid #F2F2F2;
+    padding: 3px;
+    color: #0082c0;
+}
+
+.entry_detail_view_row:hover {
+    background-color: #F2F2F2;
+    border: 1px solid #aab2bd;
+    cursor: pointer;
+}
+
+.entry_detail_view_row_selected {
+    background-color: #f9f6f6; 
     cursor: default;
     font-weight: bold;
     color: #4d5b76;

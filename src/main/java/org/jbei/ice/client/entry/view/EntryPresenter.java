@@ -8,6 +8,7 @@ import java.util.List;
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.entry.view.detail.EntryDetailView;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
@@ -15,9 +16,12 @@ import org.jbei.ice.client.entry.view.table.EntrySampleTable;
 import org.jbei.ice.client.entry.view.table.SequenceTable;
 import org.jbei.ice.client.entry.view.update.UpdateEntryForm;
 import org.jbei.ice.client.entry.view.view.EntryDetailViewMenu;
+import org.jbei.ice.client.entry.view.view.EntryView;
 import org.jbei.ice.client.entry.view.view.IEntryView;
 import org.jbei.ice.client.entry.view.view.MenuItem;
 import org.jbei.ice.client.entry.view.view.MenuItem.Menu;
+import org.jbei.ice.client.event.EntryViewEvent;
+import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
@@ -31,6 +35,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.user.client.ui.Widget;
 
 public class EntryPresenter extends AbstractPresenter {
 
@@ -40,14 +45,14 @@ public class EntryPresenter extends AbstractPresenter {
     private EntryDetailView<? extends EntryInfo> view;
     private final EntrySampleTable sampleTable;
     private final SequenceTable sequenceTable;
-    private final List<Long> contextList;
+    private List<Long> contextList;
     private long currentId;
 
     public EntryPresenter(final RegistryServiceAsync service, HandlerManager eventBus,
-            final IEntryView display, String entryId, List<Long> contextList) {
+            long entryId, List<Long> contextList) {
         this.service = service;
         this.eventBus = eventBus;
-        this.display = display;
+        this.display = new EntryView();
 
         this.contextList = contextList;
         if (contextList != null)
@@ -56,8 +61,7 @@ public class EntryPresenter extends AbstractPresenter {
         sequenceTable = new SequenceTable();
         sampleTable = new EntrySampleTable();
 
-        final long id = Long.decode(entryId); // TODO : catch potential NFE
-        retrieveEntryDetails(id);
+        retrieveEntryDetails(entryId);
 
         // add handler for the permission link
         display.getDetailMenu().getPermissionLink().addClickHandler(new ClickHandler() {
@@ -76,6 +80,24 @@ public class EntryPresenter extends AbstractPresenter {
 
         // handlers for context navigation
         setHandlerForContextNavigation();
+
+        eventBus.addHandler(EntryViewEvent.TYPE, new EntryViewEventHandler() {
+
+            @Override
+            public void onEntryView(EntryViewEvent event) {
+                showEntryView(event.getContext());
+            }
+        });
+    }
+
+    private void showEntryView(EntryContext context) {
+
+        this.contextList = context.getList();
+        if (contextList != null)
+            Collections.reverse(this.contextList); // TODO : order matters. make sure this is the case in all
+
+        long entryId = context.getCurrent();
+        retrieveEntryDetails(entryId);
     }
 
     protected void setHandlerForContextNavigation() {
@@ -303,6 +325,8 @@ public class EntryPresenter extends AbstractPresenter {
                 return;
 
             selection = menu.getCurrentSelection();
+            menu.setSelection(selection.getMenu());
+
             switch (menu.getCurrentSelection().getMenu()) {
 
             case GENERAL: // TODO : need to add this only once not every time the selection changes
@@ -350,5 +374,9 @@ public class EntryPresenter extends AbstractPresenter {
                 break;
             }
         }
+    }
+
+    public Widget getView() {
+        return this.display.asWidget();
     }
 }

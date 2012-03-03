@@ -2,6 +2,8 @@ package org.jbei.ice.client.entry.view.view;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.client.entry.view.view.MenuItem.Menu;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
@@ -11,6 +13,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Widget;
 
 public class EntryDetailViewMenu extends Composite implements HasClickHandlers {
 
@@ -26,8 +29,8 @@ public class EntryDetailViewMenu extends Composite implements HasClickHandlers {
         table.setCellPadding(0);
         table.setCellSpacing(0);
         table.setStyleName("entry_view_left_menu");
-        table.setHTML(0, 0, "&nbsp;"); // place holder for header
-        table.getFlexCellFormatter().setStyleName(0, 0, "entry_view_sub_menu_header");
+        //        table.setHTML(0, 0, "&nbsp;"); // place holder for header
+        //        table.getFlexCellFormatter().setStyleName(0, 0, "entry_view_sub_menu_header");
 
         //        leftColumnLayout.setWidget(2, 0, new HTML("&nbsp;"));
         //
@@ -43,12 +46,22 @@ public class EntryDetailViewMenu extends Composite implements HasClickHandlers {
 
     }
 
-    public void setHeader(String name) {
-        table.setHTML(0, 0, name);
-    }
-
     public MenuItem getCurrentSelection() {
         return this.currentSelected;
+    }
+
+    public void setSelection(Menu menu) {
+        for (int i = 0; i < table.getRowCount(); i += 1) {
+            Widget w = table.getWidget(i, 0);
+            if (!(w instanceof MenuCell))
+                continue;
+
+            MenuCell cell = (MenuCell) w;
+            if (menu == cell.getMenuItem().getMenu())
+                cell.setSelected(true);
+            else
+                cell.setSelected(false);
+        }
     }
 
     public Label getPermissionLink() {
@@ -57,7 +70,7 @@ public class EntryDetailViewMenu extends Composite implements HasClickHandlers {
 
     void setMenuItems(ArrayList<MenuItem> items) {
 
-        int row = 1;
+        int row = 0;
 
         for (MenuItem item : items) {
             final MenuCell cell = new MenuCell(item);
@@ -100,8 +113,15 @@ public class EntryDetailViewMenu extends Composite implements HasClickHandlers {
                     + item.getMenu().toString() + "</span><span class=\"menu_count\">"
                     + formatNumber(item.getCount()) + "</span>";
             panel = new HTMLPanel(html);
-            panel.setStyleName("collection_user_menu_row");
+            panel.setStyleName("entry_detail_view_row");
             initWidget(panel);
+        }
+
+        public void setSelected(boolean selected) {
+            if (selected)
+                this.addStyleName("entry_detail_view_row_selected");
+            else
+                this.removeStyleName("entry_detail_view_row_selected");
         }
 
         @Override

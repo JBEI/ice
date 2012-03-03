@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import org.jbei.ice.client.AppController;
-import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.entry.view.detail.EntryDetailView;
 import org.jbei.ice.client.entry.view.table.EntrySampleTable;
@@ -22,6 +21,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -36,7 +36,7 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class EntryView extends AbstractLayout implements IEntryView {
+public class EntryView extends Composite implements IEntryView {
 
     private CellList<AttachmentInfo> attachmentList;
     private FlexTable mainContent;
@@ -70,21 +70,20 @@ public class EntryView extends AbstractLayout implements IEntryView {
     private final Label navText;
     private final Button rightBtn;
 
+    private Label headerLabel;
+
     // menu
     private EntryDetailViewMenu detailMenu;
 
     public EntryView() {
         permissions = new PermissionsWidget();
+        headerLabel = new Label();
+        headerLabel.setStyleName("display-inline");
         goBack = new Button("Back");
         leftBtn = new Button("Prev");
         rightBtn = new Button("Next");
         navText = new Label();
         navText.setStyleName("display-inline");
-    }
-
-    @Override
-    protected void initComponents() {
-        super.initComponents();
 
         sampleForm = new CreateSampleForm();
         sampleForm.setVisible(false);
@@ -125,22 +124,31 @@ public class EntryView extends AbstractLayout implements IEntryView {
         saveAttachment = new Button("Save");
         attachmentForm = createAddToAttachment();
         attachmentForm.setVisible(false);
-    }
 
-    @Override
-    protected Widget createContents() {
+        createMenu();
+
         FlexTable contentTable = new FlexTable();
+        initWidget(contentTable);
         contentTable.setWidth("100%");
-        contentTable.setCellPadding(3);
+        contentTable.setCellPadding(0);
         contentTable.setCellSpacing(0);
-        contentTable.setWidget(0, 0, createMenu());
-        contentTable.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
+        //        contentTable.setWidget(0, 0, createMenu());
+        //        contentTable.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
 
         // TODO : middle sliver goes here
         contentTable.setWidget(0, 1, createMainContent());
         contentTable.getCellFormatter().setWidth(0, 1, "100%");
         contentTable.getFlexCellFormatter().setVerticalAlignment(0, 1, HasAlignment.ALIGN_TOP);
-        return contentTable;
+    }
+
+    protected Widget createMenu() {
+        left = new FlexTable();
+        left.setCellPadding(0);
+        left.setCellSpacing(0);
+        this.detailMenu = new EntryDetailViewMenu();
+        left.setHTML(0, 0, "");
+        left.setWidget(1, 0, detailMenu);
+        return left;
     }
 
     @Override
@@ -162,7 +170,7 @@ public class EntryView extends AbstractLayout implements IEntryView {
         mainContent = new FlexTable();
         mainContent.setStyleName("entry_view_main_content_table");
         mainContent.setWidth("100%");
-        mainContent.setCellPadding(3);
+        mainContent.setCellPadding(0);
         mainContent.setCellSpacing(0);
 
         mainContent.setHTML(0, 0, "&nbsp;");
@@ -172,8 +180,14 @@ public class EntryView extends AbstractLayout implements IEntryView {
         mainContent.setWidget(1, 0, new Label("Loading..."));
         mainContent.getFlexCellFormatter().setStyleName(1, 0, "entry_view_content");
         mainContent.getCellFormatter().setWidth(1, 0, "100%");
-        mainContent.setWidget(1, 1, createRightMenu());
-        mainContent.getFlexCellFormatter().setStyleName(1, 1, "entry_view_right_menu");
+        mainContent.getFlexCellFormatter().setRowSpan(1, 0, 5);
+
+        mainContent.setWidget(1, 1, left);
+
+        mainContent.setHTML(2, 0, "&nbsp");
+
+        mainContent.setWidget(3, 0, createRightMenu());
+        mainContent.getFlexCellFormatter().setStyleName(3, 0, "entry_view_right_menu");
 
         return mainContent;
     }
@@ -181,7 +195,7 @@ public class EntryView extends AbstractLayout implements IEntryView {
     // currently shows only the attachments menu
     protected Widget createRightMenu() {
         FlexTable layout = new FlexTable();
-        layout.setCellPadding(3);
+        layout.setCellPadding(0);
         layout.setCellSpacing(0);
         layout.addStyleName("entry_view_right_menu_2"); // TODO cannot find what I am using 1 for
         HorizontalPanel panel = new HorizontalPanel();
@@ -224,16 +238,6 @@ public class EntryView extends AbstractLayout implements IEntryView {
         return panel;
     }
 
-    protected Widget createMenu() {
-        left = new FlexTable();
-        left.setCellPadding(0);
-        left.setCellSpacing(0);
-        this.detailMenu = new EntryDetailViewMenu();
-        left.setHTML(0, 0, "");
-        left.setWidget(1, 0, detailMenu);
-        return left;
-    }
-
     @Override
     public void addNextHandler(ClickHandler handler) {
         rightBtn.addClickHandler(handler);
@@ -266,18 +270,19 @@ public class EntryView extends AbstractLayout implements IEntryView {
 
     @Override
     public void showContextNav(boolean show) {
-        if (show) {
-            HTMLPanel panel = new HTMLPanel(
-                    "<span id=\"goBack\"></span> <span id=\"leftBtn\"></span> <span id=\"navText\"></span><span id=\"rightBtn\"></span>");
-            panel.add(goBack, "goBack");
-            panel.add(leftBtn, "leftBtn");
-            panel.add(navText, "navText");
-            panel.add(rightBtn, "rightBtn");
+        //        if (show) {
+        HTMLPanel panel = new HTMLPanel(
+                "<span id=\"goBack\"></span> <span id=\"leftBtn\"></span> <span id=\"navText\"></span><span id=\"rightBtn\"></span>");
+        panel.add(goBack, "goBack");
+        panel.add(leftBtn, "leftBtn");
+        panel.add(navText, "navText");
+        panel.add(rightBtn, "rightBtn");
 
-            left.setWidget(0, 0, panel);
-        } else {
-            left.setHTML(0, 0, "");
-        }
+        left.setWidget(0, 0, panel);
+        //        }
+        //        } else {
+        //            left.setHTML(0, 0, "");
+        //        }
     }
 
     @Override
@@ -340,18 +345,15 @@ public class EntryView extends AbstractLayout implements IEntryView {
     }
 
     @Override
-    public Widget asWidget() {
-        return this;
-    }
-
-    @Override
     public Button showEntryDetailView(EntryDetailView<? extends EntryInfo> view) {
         if (generalHeaderPanel == null) {
             generalHeaderPanel = new HTMLPanel(
-                    "<span class=\"entry_general_info_header\">GENERAL INFORMATION</span> &nbsp; <span id=\"edit_button\"></span>");
+                    "<span class=\"entry_general_info_header\" id=\"entry_header\"></span> &nbsp; <span id=\"edit_button\"></span>");
             editGeneralButton = new Button("Edit");
             editGeneralButton.setStyleName("top_menu");
             generalHeaderPanel.add(editGeneralButton, "edit_button");
+
+            generalHeaderPanel.add(headerLabel, "entry_header");
         }
 
         mainContent.setWidget(0, 0, generalHeaderPanel);
@@ -416,7 +418,8 @@ public class EntryView extends AbstractLayout implements IEntryView {
 
     @Override
     public void setEntryName(String name) {
-        detailMenu.setHeader(name);
+        headerLabel.setText(name);
+        //        detailMenu.setHeader(name);
     }
 
     @Override

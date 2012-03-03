@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.Page;
 import org.jbei.ice.client.collection.ICollectionEntriesView;
 import org.jbei.ice.client.collection.add.EntryAddPresenter;
 import org.jbei.ice.client.collection.event.EntryIdsEvent;
@@ -22,6 +23,7 @@ import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.common.entry.IHasEntryId;
 import org.jbei.ice.client.common.table.DataTable;
 import org.jbei.ice.client.common.table.EntryTablePager;
+import org.jbei.ice.client.entry.view.EntryPresenter;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.event.FeedbackEvent;
@@ -42,6 +44,7 @@ import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ListDataProvider;
@@ -70,6 +73,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
     private final CollectionsModel model;
     private AdvancedSearchPresenter searchPresenter;
     private EntryAddPresenter entryPresenter;
+    private EntryPresenter entryViewPresenter;
     private long currentFolder;
     private Mode mode = Mode.COLLECTION;
 
@@ -79,9 +83,15 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         search(operands);
     }
 
+    // collections for entry view
+    public CollectionsEntriesPresenter(CollectionsModel model, final ICollectionEntriesView view,
+            EntryContext event) {
+        this(model, view);
+        this.showEntryView(event);
+    }
+
     public CollectionsEntriesPresenter(final CollectionsModel model,
             final ICollectionEntriesView display) {
-
         this.display = display;
         this.model = model;
 
@@ -132,6 +142,18 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
             @Override
             public void onSearch(SearchEvent event) {
                 search(event.getFilters());
+            }
+        });
+
+        // register for entry view events
+        model.getEventBus().addHandler(EntryViewEvent.TYPE, new EntryViewEventHandler() {
+
+            @Override
+            public void onEntryView(EntryViewEvent event) {
+                if (entryViewPresenter != null)
+                    return;
+
+                showEntryView(event.getContext());
             }
         });
 
@@ -234,6 +256,15 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
             id = 0;
         }
         retrieveEntriesForFolder(id);
+    }
+
+    private void showEntryView(EntryContext event) {
+        if (entryViewPresenter == null)
+            entryViewPresenter = new EntryPresenter(model.getService(), model.getEventBus(),
+                    event.getCurrent(), event.getList());
+
+        History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + event.getCurrent(), false);
+        display.setMainContent(entryViewPresenter.getView(), false);
     }
 
     private void search(ArrayList<SearchFilterInfo> operands) {
@@ -373,6 +404,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 if (selection == null)
                     return;
 
+                display.setCurrentMenuSelection(selection.getId());
                 retrieveEntriesForFolder(selection.getId());
             }
         });
@@ -385,6 +417,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 if (selection == null)
                     return;
 
+                display.setCurrentMenuSelection(selection.getId());
                 retrieveEntriesForFolder(selection.getId());
             }
         });
