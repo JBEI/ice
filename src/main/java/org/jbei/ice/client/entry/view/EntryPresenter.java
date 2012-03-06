@@ -79,7 +79,8 @@ public class EntryPresenter extends AbstractPresenter {
         retrieveAccountsAndGroups();
 
         // handlers for context navigation
-        setHandlerForContextNavigation();
+        setContextNavData();
+        setContextNavHandlers();
 
         eventBus.addHandler(EntryViewEvent.TYPE, new EntryViewEventHandler() {
 
@@ -93,14 +94,16 @@ public class EntryPresenter extends AbstractPresenter {
     private void showEntryView(EntryContext context) {
 
         this.contextList = context.getList();
-        if (contextList != null)
-            Collections.reverse(this.contextList); // TODO : order matters. make sure this is the case in all
+        //        if (contextList != null)
+        //            Collections.reverse(this.contextList); // TODO : order matters. make sure this is the case in all
 
         long entryId = context.getCurrent();
+        retrieveAccountsAndGroups();
+        setContextNavData();
         retrieveEntryDetails(entryId);
     }
 
-    protected void setHandlerForContextNavigation() {
+    protected void setContextNavData() {
         boolean show = (contextList != null);
         display.showContextNav(show);
         if (!show) {
@@ -115,13 +118,17 @@ public class EntryPresenter extends AbstractPresenter {
         }
 
         int idx = contextList.indexOf(currentId);
-        if (idx == 0)
-            display.enablePrev(false);
+        display.enablePrev(!(idx == 0));
+        boolean atEnd = ((idx + 1) == contextList.size());
+        display.enableNext(!atEnd);
 
         String text = (idx + 1) + " of " + contextList.size();
         display.setNavText(text);
 
-        display.addNextHandler(new ClickHandler() {
+    }
+
+    private void setContextNavHandlers() {
+        display.setNextHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -150,7 +157,7 @@ public class EntryPresenter extends AbstractPresenter {
         });
 
         // add previous handler
-        display.addPrevHandler(new ClickHandler() {
+        display.setPrevHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -179,7 +186,7 @@ public class EntryPresenter extends AbstractPresenter {
 
         // add go back handler
         // TODO : this can be improved to show the current position of the viewed entry in the list
-        display.addGoBackHandler(new ClickHandler() {
+        display.setGoBackHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {

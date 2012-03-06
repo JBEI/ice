@@ -150,8 +150,12 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
 
             @Override
             public void onEntryView(EntryViewEvent event) {
-                if (entryViewPresenter != null)
+                if (entryViewPresenter != null) {
+                    History.newItem(Page.ENTRY_VIEW.getLink() + ";id="
+                            + event.getContext().getCurrent(), false);
+                    display.setMainContent(entryViewPresenter.getView(), false);
                     return;
+                }
 
                 showEntryView(event.getContext());
             }

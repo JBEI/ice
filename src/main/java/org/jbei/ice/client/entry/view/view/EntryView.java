@@ -239,17 +239,17 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public void addNextHandler(ClickHandler handler) {
+    public void setNextHandler(ClickHandler handler) {
         rightBtn.addClickHandler(handler);
     }
 
     @Override
-    public void addGoBackHandler(ClickHandler handler) {
+    public void setGoBackHandler(ClickHandler handler) {
         goBack.addClickHandler(handler);
     }
 
     @Override
-    public void addPrevHandler(ClickHandler handler) {
+    public void setPrevHandler(ClickHandler handler) {
         leftBtn.addClickHandler(handler);
     }
 

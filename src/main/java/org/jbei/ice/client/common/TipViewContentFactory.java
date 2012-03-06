@@ -105,7 +105,8 @@ public class TipViewContentFactory {
         for (Long id : view.getStrains().keySet())
             strains += (view.getStrains().get(id) + ", ");
 
-        strains = strains.substring(0, strains.lastIndexOf(", ")); // TODO 
+        if (view.getStrains().keySet().size() > 0)
+            strains = strains.substring(0, strains.lastIndexOf(", "));
         addField(table, 4, 2, "Strains", strains);
         addField(table, 5, 2, "Modified", generateDate(view.getModificationTime()));
         addField(table, 6, 2, "Funding Source", view.getFundingSource());

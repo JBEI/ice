@@ -42,11 +42,11 @@ public interface IEntryView {
 
     void showContextNav(boolean show);
 
-    void addNextHandler(ClickHandler handler);
+    void setNextHandler(ClickHandler handler);
 
-    void addGoBackHandler(ClickHandler handler);
+    void setGoBackHandler(ClickHandler handler);
 
-    void addPrevHandler(ClickHandler handler);
+    void setPrevHandler(ClickHandler handler);
 
     void enablePrev(boolean enable);
 
