@@ -52,6 +52,7 @@ public class TipViewContentFactory {
         case PART:
             PartInfo partInfo = (PartInfo) entry;
             getPartContent(parent, partInfo);
+            break;
 
         default:
             return null;
@@ -134,7 +135,8 @@ public class TipViewContentFactory {
         // second column
         addField(table, 1, 2, "Package Format", view.getPackageFormat());
         addField(table, 2, 2, "Modified", generateDate(view.getModificationTime()));
-        addField(table, 3, 2, "Funding Source", view.getFundingSource());
+        String fundingSource = view.getFundingSource() == null ? "" : view.getFundingSource();
+        addField(table, 3, 2, "Funding Source", fundingSource);
     }
 
     private static void getSeedContent(FlexTable table, ArabidopsisSeedInfo view) {

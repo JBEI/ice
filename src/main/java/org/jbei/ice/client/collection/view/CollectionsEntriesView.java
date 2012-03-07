@@ -121,6 +121,8 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
 
     @Override
     public void setDataView(CollectionEntriesDataTable table) {
+        feedback.setVisible(false);
+
         rightContents.setWidget(0, 1, subMenu);
         String width = (subMenu.getWidth() + 12) + "px";
         rightContents.getFlexCellFormatter().setWidth(0, 1, width);
@@ -135,6 +137,8 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
 
     @Override
     public void setMainContent(Widget mainContent, boolean showSubMenu) {
+        feedback.setVisible(false);
+
         if (showSubMenu)
             rightContents.setWidget(0, 1, subMenu);
         else

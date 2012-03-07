@@ -46,7 +46,6 @@ import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -250,7 +249,6 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
             final ICollectionEntriesView display, String param) {
 
         // collection sub menu
-        // TODO : highlight menu
         this(model, display);
         long id = 0;
         try {
@@ -259,6 +257,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         } catch (NumberFormatException nfe) {
             id = 0;
         }
+
         retrieveEntriesForFolder(id);
     }
 
@@ -385,13 +384,6 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         collectionsDataTable.getColumnSortList().push(createdField);
     }
 
-    private void checkAndAddEntryTable(DataTable<EntryInfo> display) {
-        if (this.entryDataProvider.getDataDisplays().contains(display))
-            return;
-
-        this.entryDataProvider.addDataDisplay(display);
-    }
-
     /**
      * Initializes the selection models used for the menu items
      * by adding the selection change handlers
@@ -408,7 +400,6 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 if (selection == null)
                     return;
 
-                display.setCurrentMenuSelection(selection.getId());
                 retrieveEntriesForFolder(selection.getId());
             }
         });
@@ -421,7 +412,6 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 if (selection == null)
                     return;
 
-                display.setCurrentMenuSelection(selection.getId());
                 retrieveEntriesForFolder(selection.getId());
             }
         });
@@ -482,26 +472,15 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                     return;
                 }
 
+                History.newItem(Page.COLLECTIONS.getLink() + ";id=" + id, false);
                 ArrayList<Long> ids = event.getIds();
                 entryDataProvider.setValues(ids);
-                collectionsDataTable.setVisibleRangeAndClearData(
-                    collectionsDataTable.getVisibleRange(), false); // TODO :
-                checkAndAddEntryTable(collectionsDataTable);
                 display.setDataView(collectionsDataTable);
+                display.setCurrentMenuSelection(id);
                 currentFolder = id;
                 mode = Mode.COLLECTION;
             }
         });
-    }
-
-    protected void clearDataDisplayFromProviders() {
-        if (entryDataProvider.getDataDisplays() == null
-                || entryDataProvider.getDataDisplays().isEmpty())
-            return;
-
-        for (HasData<EntryInfo> view : entryDataProvider.getDataDisplays()) {
-            entryDataProvider.removeDataDisplay(view);
-        }
     }
 
     @Override
