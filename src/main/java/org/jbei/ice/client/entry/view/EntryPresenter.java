@@ -15,6 +15,7 @@ import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.table.EntrySampleTable;
 import org.jbei.ice.client.entry.view.table.SequenceTable;
 import org.jbei.ice.client.entry.view.update.UpdateEntryForm;
+import org.jbei.ice.client.entry.view.view.AttachmentItem;
 import org.jbei.ice.client.entry.view.view.EntryDetailViewMenu;
 import org.jbei.ice.client.entry.view.view.EntryView;
 import org.jbei.ice.client.entry.view.view.IEntryView;
@@ -94,8 +95,8 @@ public class EntryPresenter extends AbstractPresenter {
     private void showEntryView(EntryContext context) {
 
         this.contextList = context.getList();
-        //        if (contextList != null)
-        //            Collections.reverse(this.contextList); // TODO : order matters. make sure this is the case in all
+        if (contextList != null)
+            Collections.reverse(this.contextList); // TODO : order matters. make sure this is the case in all
 
         long entryId = context.getCurrent();
         retrieveAccountsAndGroups();
@@ -124,7 +125,6 @@ public class EntryPresenter extends AbstractPresenter {
 
         String text = (idx + 1) + " of " + contextList.size();
         display.setNavText(text);
-
     }
 
     private void setContextNavHandlers() {
@@ -180,7 +180,6 @@ public class EntryPresenter extends AbstractPresenter {
                 display.enableNext(true);
                 String text = (prev + 1) + " of " + contextList.size();
                 display.setNavText(text);
-
             }
         });
 
@@ -252,7 +251,12 @@ public class EntryPresenter extends AbstractPresenter {
                     // attachments
                     ArrayList<AttachmentInfo> attachments = result.getAttachments();
                     if (attachments != null) {
-                        display.getAttachmentList().setRowData(attachments);
+                        ArrayList<AttachmentItem> items = new ArrayList<AttachmentItem>();
+                        for (AttachmentInfo info : attachments) {
+                            items.add(new AttachmentItem(info.getId(), info.getFilename(), info
+                                    .getDescription()));
+                        }
+                        display.setAttachments(items);
                     }
 
                     // menu views

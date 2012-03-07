@@ -10,16 +10,12 @@ import org.jbei.ice.client.entry.view.table.EntrySampleTable;
 import org.jbei.ice.client.entry.view.table.SequenceTable;
 import org.jbei.ice.client.entry.view.table.TablePager;
 import org.jbei.ice.client.entry.view.update.UpdateEntryForm;
-import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 
-import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -30,19 +26,14 @@ import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class EntryView extends Composite implements IEntryView {
 
-    private CellList<AttachmentInfo> attachmentList;
     private FlexTable mainContent;
-    private Button cancelAttachmentSubmission;
-    private Button saveAttachment;
-    private Widget attachmentForm;
+    private AttachmentListMenu attachmentMenu;
 
     // general header
     private HTMLPanel generalHeaderPanel;
@@ -89,41 +80,7 @@ public class EntryView extends Composite implements IEntryView {
         sampleForm.setVisible(false);
 
         uploadPanel = createSequenceUploadPanel();
-
-        // attachments
-        attachmentList = new CellList<AttachmentInfo>(new AbstractCell<AttachmentInfo>() {
-
-            @Override
-            public void render(Context context, AttachmentInfo value, SafeHtmlBuilder sb) {
-                if (value == null)
-                    return;
-
-                sb.appendHtmlConstant("<b>");
-                sb.appendEscaped(value.getFilename());
-                sb.appendHtmlConstant("</b>");
-
-                sb.appendHtmlConstant("<br /><span class=\"attachment_small_text\">");
-                String description = value.getDescription();
-                if (description.isEmpty())
-                    description = "No description provided.";
-                sb.appendEscaped(description);
-                sb.appendHtmlConstant("</span>");
-            }
-        });
-
-        // buttons 
-        cancelAttachmentSubmission = new Button("Cancel", new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                // TODO : clear the form field values
-                attachmentForm.setVisible(false);
-            }
-        });
-
-        saveAttachment = new Button("Save");
-        attachmentForm = createAddToAttachment();
-        attachmentForm.setVisible(false);
+        attachmentMenu = new AttachmentListMenu();
 
         createMenu();
 
@@ -187,56 +144,11 @@ public class EntryView extends Composite implements IEntryView {
 
         mainContent.setHTML(2, 0, "&nbsp");
 
-        mainContent.setWidget(3, 0, createRightMenu());
+        mainContent.setWidget(3, 0, attachmentMenu);
+        //        mainContent.setWidget(3, 0, createRightMenu());
         mainContent.getFlexCellFormatter().setStyleName(3, 0, "entry_view_right_menu");
 
         return mainContent;
-    }
-
-    // currently shows only the attachments menu
-    protected Widget createRightMenu() {
-        FlexTable layout = new FlexTable();
-        layout.setCellPadding(0);
-        layout.setCellSpacing(0);
-        layout.addStyleName("entry_view_right_menu_2"); // TODO cannot find what I am using 1 for
-        HorizontalPanel panel = new HorizontalPanel();
-        panel.add(new HTML("Attachments"));
-        final Button button = new Button("+", new ClickHandler() { // TODO : use a push button
-
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        boolean visible = attachmentForm.isVisible();
-                        attachmentForm.setVisible(!visible);
-                    }
-                });
-
-        panel.add(button);
-        panel.setWidth("100%");
-        panel.setCellHorizontalAlignment(button, HasAlignment.ALIGN_RIGHT);
-
-        layout.setWidget(0, 0, panel);
-        layout.getCellFormatter().setStyleName(0, 0, "entry_view_sub_menu_header");
-        layout.setWidget(1, 0, attachmentForm);
-
-        // cell to render value
-        layout.setWidget(2, 0, attachmentList);
-        return layout;
-    }
-
-    protected Widget createAddToAttachment() {
-        VerticalPanel panel = new VerticalPanel();
-        panel.add(new HTML("<b>File</b>"));
-        panel.add(new FileUpload());
-        panel.add(new HTML("<b>Description</b>"));
-        panel.add(new TextArea());
-        HorizontalPanel savePanel = new HorizontalPanel();
-
-        savePanel.add(saveAttachment);
-        savePanel.add(cancelAttachmentSubmission);
-        panel.add(savePanel);
-        panel.setCellHorizontalAlignment(savePanel, HasAlignment.ALIGN_RIGHT);
-
-        return panel;
     }
 
     @Override
@@ -282,6 +194,8 @@ public class EntryView extends Composite implements IEntryView {
         } else {
             left.setHTML(0, 0, "");
         }
+
+        goBack.setVisible(show);
     }
 
     @Override
@@ -427,11 +341,6 @@ public class EntryView extends Composite implements IEntryView {
         return this.sampleForm;
     }
 
-    @Override
-    public CellList<AttachmentInfo> getAttachmentList() {
-        return attachmentList;
-    }
-
     public EntryDetailViewMenu getEntryViewMenu() {
         return this.detailMenu;
     }
@@ -439,5 +348,10 @@ public class EntryView extends Composite implements IEntryView {
     @Override
     public PermissionsWidget getPermissionsWidget() {
         return this.permissions;
+    }
+
+    @Override
+    public void setAttachments(ArrayList<AttachmentItem> items) {
+        attachmentMenu.setMenuItems(items);
     }
 }

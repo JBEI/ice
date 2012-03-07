@@ -125,7 +125,7 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 .entry_general_info_header { 
 	font-size: 0.80em;
 	padding: 6px;
-	color: #555;
+	color: #233559;
 	font-weight: bold;
 }
 
@@ -353,9 +353,9 @@ a.cell_mouseover:hover {
 .entry_view_sub_menu_header {
 	background-color: #F3F3F3;
 	font-weight: bold;
-	font-size: 0.90em;
+	font-size: 0.80em;
 	font-family: arial;
-	padding: 5px;
+	padding: 4px;
 	color: #444;
 }
 
@@ -617,10 +617,6 @@ a.cell_mouseover:hover {
 	background-color: #eee;
 }
 
-.attachment_small_text {
-	color: #999;
-	font-size: 9px;
-}
 
 /* AUTO COMPLETE AKA SUGGEST BOX */
 .gwt-SuggestBox {
