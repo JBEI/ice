@@ -14,6 +14,8 @@ import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
+import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.Generation;
+import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.PlantType;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.PartInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
@@ -36,6 +38,7 @@ public class EntryViewFactory {
         view.setShortDescription(entry.getShortDescription());
         view.setCreationTime(entry.getCreationTime());
         view.setModificationTime(entry.getModificationTime());
+        view.setBioSafetyLevel(entry.getBioSafetyLevel());
 
         try {
             boolean hasAttachment = (AttachmentManager.getByEntry(entry).size() > 0);
@@ -45,6 +48,7 @@ public class EntryViewFactory {
             boolean hasSequence = (SequenceManager.getByEntry(entry) != null);
             view.setHasSequence(hasSequence);
         } catch (ManagerException e) {
+            Logger.error(e);
         }
     }
 
@@ -75,12 +79,15 @@ public class EntryViewFactory {
             getCommon(view, entry);
 
             ArabidopsisSeed seed = (ArabidopsisSeed) entry;
-            seed.getPlantType();
-            seed.getGeneration().toString();
-            seed.getHomozygosity();
-            seed.getEcotype();
-            seed.getParents();
-            //            seed.getHarvestDate();
+            PlantType plantType = PlantType.valueOf(seed.getPlantType().toString());
+            view.setPlantType(plantType);
+
+            Generation generation = Generation.valueOf(seed.getGeneration().toString());
+            view.setGeneration(generation);
+            view.setHomozygosity(seed.getHomozygosity());
+            view.setEcotype(seed.getEcotype());
+            view.setParents(seed.getParents());
+            view.setHarvestDate(seed.getHarvestDate());
 
             return view;
         }

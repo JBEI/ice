@@ -412,10 +412,15 @@ public class CollectionMenu extends Composite {
                 }
             });
 
-            html = "<span style=\"padding: 5px\" class=\"collection_user_menu\">" + item.getName()
+            String name = item.getName();
+            if (name.length() > 22)
+                name = (name.substring(0, 22) + "...");
+
+            html = "<span style=\"padding: 5px\" class=\"collection_user_menu\">" + name
                     + "</span><span class=\"menu_count\" id=\"" + folderId + "\"></span>";
 
             panel = new HTMLPanel(html);
+            panel.setTitle(item.getName());
 
             count = new Label(formatNumber(item.getCount()));
 

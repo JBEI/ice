@@ -143,8 +143,10 @@ public class TipViewContentFactory {
         setLeftColumn(table, view);
 
         // second column
-        addField(table, 1, 2, "Plant Type", view.getPlantType().toString());
-        addField(table, 2, 2, "Generation", view.getGeneration().toString());
+        String plantType = (view.getPlantType() == null) ? "" : view.getPlantType().toString();
+        addField(table, 1, 2, "Plant Type", plantType);
+        String generation = (view.getGeneration() == null) ? "" : view.getGeneration().toString();
+        addField(table, 2, 2, "Generation", generation);
         addField(table, 3, 2, "Homozygosity", view.getHomozygosity());
         addField(table, 4, 2, "Ecotype", view.getEcotype());
         addField(table, 5, 2, "Parents", view.getParents());
@@ -165,7 +167,6 @@ public class TipViewContentFactory {
     }
 
     private static void setLeftColumn(FlexTable table, EntryInfo entry) {
-
         addField(table, 1, 0, "Part ID", entry.getPartId());
         addField(table, 2, 0, "Alias", entry.getAlias());
         addField(table, 3, 0, "Creator", entry.getCreator());
@@ -189,10 +190,10 @@ public class TipViewContentFactory {
     }
 
     private static String generateDate(Date date) {
-
-        DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yyyy");
         if (date == null)
             return "";
+
+        DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yyyy");
         String value = format.format(date);
         return value;
     }

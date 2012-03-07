@@ -11,7 +11,7 @@ public class EntryInfo implements IsSerializable {
 
     public enum EntryType implements IsSerializable {
         STRAIN("Strain", "strain"), PLASMID("Plasmid", "plasmid"), PART("Part", "part"), ARABIDOPSIS(
-                "Arabidopsis Seed", "arabidopsis");
+                "Arabidopsis", "arabidopsis");
 
         private String name;
         private String display;

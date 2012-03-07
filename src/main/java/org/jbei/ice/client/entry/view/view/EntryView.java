@@ -183,6 +183,7 @@ public class EntryView extends Composite implements IEntryView {
         mainContent.getFlexCellFormatter().setRowSpan(1, 0, 5);
 
         mainContent.setWidget(1, 1, left);
+        mainContent.getFlexCellFormatter().setVerticalAlignment(1, 1, HasAlignment.ALIGN_TOP);
 
         mainContent.setHTML(2, 0, "&nbsp");
 
@@ -270,19 +271,17 @@ public class EntryView extends Composite implements IEntryView {
 
     @Override
     public void showContextNav(boolean show) {
-        //        if (show) {
-        HTMLPanel panel = new HTMLPanel(
-                "<span id=\"goBack\"></span> <span id=\"leftBtn\"></span> <span id=\"navText\"></span><span id=\"rightBtn\"></span>");
-        panel.add(goBack, "goBack");
-        panel.add(leftBtn, "leftBtn");
-        panel.add(navText, "navText");
-        panel.add(rightBtn, "rightBtn");
+        if (show) {
+            HTMLPanel panel = new HTMLPanel(
+                    "<span id=\"leftBtn\"></span> <span id=\"navText\"></span><span id=\"rightBtn\"></span>");
+            panel.add(leftBtn, "leftBtn");
+            panel.add(navText, "navText");
+            panel.add(rightBtn, "rightBtn");
 
-        left.setWidget(0, 0, panel);
-        //        }
-        //        } else {
-        //            left.setHTML(0, 0, "");
-        //        }
+            left.setWidget(0, 0, panel);
+        } else {
+            left.setHTML(0, 0, "");
+        }
     }
 
     @Override
@@ -348,10 +347,11 @@ public class EntryView extends Composite implements IEntryView {
     public Button showEntryDetailView(EntryDetailView<? extends EntryInfo> view) {
         if (generalHeaderPanel == null) {
             generalHeaderPanel = new HTMLPanel(
-                    "<span class=\"entry_general_info_header\" id=\"entry_header\"></span> &nbsp; <span id=\"edit_button\"></span>");
+                    "<span id=\"go_back_button\"></span> <span class=\"entry_general_info_header\" id=\"entry_header\"></span> &nbsp; <span id=\"edit_button\"></span>");
             editGeneralButton = new Button("Edit");
             editGeneralButton.setStyleName("top_menu");
             generalHeaderPanel.add(editGeneralButton, "edit_button");
+            generalHeaderPanel.add(goBack, "go_back_button");
 
             generalHeaderPanel.add(headerLabel, "entry_header");
         }

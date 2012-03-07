@@ -24,7 +24,7 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 .border-bottom { border-bottom: 1px solid #ccc;}
 .pull_down { border: 1px solid #CCC; background-color: #f1f1f1; }
 .fill { height: 100%; width: 100% }
-.display-inline { display: inline}
+.display-inline { display: inline }
 
 .btn_submit_entry_form {
 	padding: 5px;
@@ -133,7 +133,7 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 	border-bottom: 0.13em solid #3C5A99;
 	color: #233559;
 	font-weight: bold;
-	padding: 6px;
+	padding: 6px 6px 6px 0px;
 	text-transform: uppercase;
 	font-size: 0.80em;
 }
@@ -270,6 +270,7 @@ a.cell_mouseover:hover {
 	width: 129px;
 	height: 15px;
 	font-size: 0.70em;
+	padding: 3px 0px 0px 0px;
 }
 
 .cell_selected {
@@ -334,9 +335,9 @@ a.cell_mouseover:hover {
 /* ENTRY DETAIL VIEW */
 .entry_view_left_menu {
 	/*border-top: 2px solid #0082C0; */
-	border-top: 1px solid #aab2bd; 
+	/*border-top: 1px solid #aab2bd; */ 
 	width: 180px;
-	border-bottom: 1px solid #aab2bd; 
+	border-bottom: 1px solid #f1f1f1; 
 }
 
 .entry_view_right_menu_2 {
@@ -354,7 +355,7 @@ a.cell_mouseover:hover {
 	font-weight: bold;
 	font-size: 0.90em;
 	font-family: arial;
-	padding: 8px;
+	padding: 5px;
 	color: #444;
 }
 
@@ -576,6 +577,7 @@ a.cell_mouseover:hover {
 	background-color: #F2F2F2;
 	border: 1px solid #aab2bd;
 	cursor: pointer;
+	padding: 5px;
 }
 
 .collection_user_menu_row_selected {
@@ -594,7 +596,7 @@ a.cell_mouseover:hover {
 
 .entry_detail_view_row:hover {
     background-color: #F2F2F2;
-    border: 1px solid #aab2bd;
+    /* border: 1px solid #aab2bd; */
     cursor: pointer;
 }
 

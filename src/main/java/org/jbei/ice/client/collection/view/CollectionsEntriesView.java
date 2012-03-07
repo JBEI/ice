@@ -49,7 +49,7 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
         createNew = new CreateEntryMenu();
         feedback = new FeedbackPanel("450px");
 
-        // create new pulldown
+        // create new pull down
         rightContents.setWidget(0, 0, createNew);
         rightContents.getFlexCellFormatter().setWidth(0, 0, "120px");
 

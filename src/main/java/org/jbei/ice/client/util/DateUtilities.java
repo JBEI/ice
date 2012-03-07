@@ -10,7 +10,7 @@ public class DateUtilities {
         if (date == null)
             return "";
 
-        DateTimeFormat format = DateTimeFormat.getFormat("EEE MMM d, y h:mm a");
+        DateTimeFormat format = DateTimeFormat.getFormat("MMM d, y hh:mm a");
         return format.format(date);
     }
 }

@@ -11,6 +11,7 @@ import org.jbei.ice.shared.dto.ParameterInfo;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -191,7 +192,6 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
 
         table.getFlexCellFormatter().setColSpan(currentRow, 0, 4);
         currentRow += 1;
-
     }
 
     protected void createSequenceView() {
@@ -313,13 +313,13 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
             currentRow += 1;
         }
 
-        table.setHTML(currentRow, currentCol, "<b class=\"font-85em\">" + labelString + "</b>");
+        table.setHTML(currentRow, currentCol, "<b class=\"font-80em\">" + labelString + "</b>");
         table.getFlexCellFormatter().setWidth(currentRow, currentCol, "170px");
         currentCol += 1;
         //        ValueCell cell = new ValueCell(value, valueType);
         if (value == null)
             value = "";
-        table.setHTML(currentRow, currentCol, "<span class=\"font-85em\">" + value + "</span>");
+        table.setHTML(currentRow, currentCol, "<span class=\"font-80em\">" + value + "</span>");
         currentCol += 1;
     }
 
@@ -330,12 +330,12 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
             currentRow += 1;
         }
 
-        table.setHTML(currentRow, currentCol, "<b class=\"font-85em\">" + labelString + "</b>");
+        table.setHTML(currentRow, currentCol, "<b class=\"font-80em\">" + labelString + "</b>");
         table.getFlexCellFormatter().setWidth(currentRow, currentCol, "170px");
         currentCol += 1;
         //        ValueCell cell = new ValueCell(value, valueType);
 
-        value.addStyleName("font-85em");
+        value.addStyleName("font-80em");
         table.setWidget(currentRow, currentCol, value); // TODO add a style to put space after this or something
         currentCol += 1;
     }
@@ -343,12 +343,13 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
     protected void addLongField(String labelString, String value) {
         currentRow += 1;
 
-        table.setHTML(currentRow, 0, "<b class=\"font-85em\">" + labelString + "</b>");
+        table.setHTML(currentRow, 0, "<b class=\"font-80em\">" + labelString + "</b>");
         table.getFlexCellFormatter().setWidth(currentRow, 0, "170px");
+        table.getFlexCellFormatter().setVerticalAlignment(currentRow, 0, HasAlignment.ALIGN_TOP);
 
         if (value == null)
             value = "";
-        table.setHTML(currentRow, 1, "<span class=\"font-85em\">" + value + "</span>");
+        table.setHTML(currentRow, 1, "<span class=\"font-80em\">" + value + "</span>");
         table.getFlexCellFormatter().setColSpan(currentRow, 1, 3);
 
         currentCol = 0;
