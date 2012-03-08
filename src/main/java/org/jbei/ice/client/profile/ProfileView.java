@@ -3,9 +3,7 @@ package org.jbei.ice.client.profile;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.collection.table.SamplesDataTable;
-import org.jbei.ice.client.common.Footer;
-import org.jbei.ice.client.common.HeaderMenu;
-import org.jbei.ice.client.common.header.HeaderView;
+import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.table.EntryDataTable;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
@@ -13,58 +11,29 @@ import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class ProfileView extends Composite implements IProfileView {
+public class ProfileView extends AbstractLayout implements IProfileView {
 
     private EntryDataTable<EntryInfo> entriesTable;
     private SamplesDataTable samplesTable;
 
-    private final Label contentHeader;
+    private Label contentHeader;
     private ProfileViewMenu menu;
-    private final FlexTable mainContent;
+    private FlexTable mainContent;
 
-    public ProfileView() {
-        FlexTable layout = new FlexTable();
-        layout.setWidth("100%");
-        layout.setHeight("100%");
-        layout.setCellSpacing(0);
-        layout.setCellPadding(0);
-        initWidget(layout);
-
+    @Override
+    protected Widget createContents() {
         contentHeader = new Label("");
         mainContent = new FlexTable();
         createEntriesTablePanel();
         this.createSamplesTablePanel();
 
-        // layout
-        layout.setWidget(0, 0, createHeader());
-        layout.setWidget(1, 0, createContents());
-        layout.getCellFormatter().setVerticalAlignment(1, 0, HasVerticalAlignment.ALIGN_TOP);
-        layout.getCellFormatter().setHeight(1, 0, "100%");
-        layout.setWidget(2, 0, createFooter());
-    }
-
-    protected Widget createHeader() {
-        VerticalPanel panel = new VerticalPanel();
-        panel.setWidth("100%");
-        panel.add(new HeaderView());
-        panel.add(new HeaderMenu());
-        return panel;
-    }
-
-    protected Widget createFooter() {
-        return Footer.getInstance();
-    }
-
-    protected Widget createContents() {
         FlexTable contentTable = new FlexTable();
         contentTable.setWidth("100%");
         contentTable.setWidget(0, 0, createMenu());

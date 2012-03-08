@@ -1,11 +1,18 @@
 package org.jbei.ice.client.common.header;
 
+import java.util.LinkedHashMap;
+
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.ILogoutHandler;
 import org.jbei.ice.client.Page;
+import org.jbei.ice.client.common.FilterOperand;
+import org.jbei.ice.client.common.widget.PopupHandler;
 import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
@@ -17,6 +24,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -37,6 +45,7 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
     private SearchCompositeBox searchInput;
     private Button searchBtn;
     private final SearchOption option;
+    private final HeaderPresenter presenter;
 
     public HeaderView() {
         Widget searchPanel = createSearchPanel();
@@ -65,10 +74,27 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
         option.addStyleName("background_white");
         option.setWidth("350px");
         option.setHeight("150px");
+
+        presenter = new HeaderPresenter(this);
     }
 
-    public SearchOption getSearchOption() {
-        return this.option;
+    public String getSelectedFilterValue() {
+        final ListBox filterOptions = option.getFilterOptions();
+        int index = filterOptions.getSelectedIndex();
+        return filterOptions.getValue(index);
+    }
+
+    // handler for clicking search
+    public void addSearchClickHandler(ClickHandler handler) {
+        searchBtn.addClickHandler(handler);
+    }
+
+    public void setAddFilterHandler(ClickHandler handler) {
+        option.getAddFilter().addClickHandler(handler);
+    }
+
+    public void setSearchOptions(LinkedHashMap<String, String> options) {
+        option.setOptions(options);
     }
 
     public HasClickHandlers getPullDownArea() {
@@ -158,5 +184,26 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
     @Override
     public HasClickHandlers getClickHandler() {
         return this.logout;
+    }
+
+    public SearchFilterInfo getBlastInfo() {
+        return presenter.getBlastInfo();
+    }
+
+    public void setFilterChangeHandler(ChangeHandler handler) {
+        final ListBox filterOptions = option.getFilterOptions();
+        filterOptions.addChangeHandler(handler);
+    }
+
+    public void createPullDownHandler() {
+        if (this.searchInput != null) {
+            PopupHandler handler = new PopupHandler(option, this.searchInput.getTextBox()
+                    .getElement(), -342, 8);
+            this.searchInput.getPullDownArea().addClickHandler(handler);
+        }
+    }
+
+    public void setFilterOperands(FilterOperand currentSelected) {
+        option.setFilterOperands(currentSelected);
     }
 }

@@ -6,15 +6,13 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.bulkimport.BulkImportPresenter;
 import org.jbei.ice.client.bulkimport.BulkImportView;
-import org.jbei.ice.client.bulkimport.IBulkImportView;
 import org.jbei.ice.client.bulkimport.model.BulkImportModel;
 import org.jbei.ice.client.collection.model.CollectionsModel;
 import org.jbei.ice.client.collection.presenter.CollectionsEntriesPresenter;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.collection.view.CollectionsEntriesView;
 import org.jbei.ice.client.common.AbstractLayout;
-import org.jbei.ice.client.common.header.HeaderModel;
-import org.jbei.ice.client.common.header.HeaderPresenter;
+import org.jbei.ice.client.common.header.QuickSearchParser;
 import org.jbei.ice.client.event.ILoginEventHandler;
 import org.jbei.ice.client.event.ILogoutEventHandler;
 import org.jbei.ice.client.event.LoginEvent;
@@ -35,6 +33,8 @@ import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -97,15 +97,6 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             }
         });
 
-        // view handler
-        //        this.eventBus.addHandler(EntryViewEvent.TYPE, new EntryViewEventHandler() {
-        //
-        //            @Override
-        //            public void onEntryView(EntryViewEvent event) {
-        //                showEntryView(event.getContext());
-        //            }
-        //        });
-
         // retrieve autocomplete data
         service.retrieveAutoCompleteData(AppController.sessionId,
             new AsyncCallback<HashMap<AutoCompleteField, ArrayList<String>>>() {
@@ -122,19 +113,6 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             });
     }
 
-    //    private void showEntryView(EntryContext context) {
-    //        long recordId = context.getCurrent();
-    //        List<Long> list = new LinkedList<Long>(context.getList());
-    //
-    //        History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + recordId, false);
-    //        EntryView eView = new EntryView();
-    //        String param = String.valueOf(recordId);
-    //        EntryPresenter presenter = new EntryPresenter(this.service, this.eventBus, eView, param,
-    //                list);
-    //        new HeaderPresenter(new HeaderModel(this.service, this.eventBus), eView.getHeader());
-    //        presenter.go(container);
-    //    }
-
     private void showSearchResults(ArrayList<SearchFilterInfo> operands) {
         if (operands == null)
             return;
@@ -144,8 +122,22 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             return; // collections is also listening on the eventBus for search events so do not respond
 
         History.newItem(Page.COLLECTIONS.getLink(), false);
-        CollectionsEntriesView cView = new CollectionsEntriesView();
-        new HeaderPresenter(new HeaderModel(this.service, this.eventBus), cView.getHeader());
+        final CollectionsEntriesView cView = new CollectionsEntriesView();
+        addHeaderSearchHandler(cView);
+        //        cView.getHeader().addSearchClickHandler(new ClickHandler() {
+        //
+        //            @Override
+        //            public void onClick(ClickEvent event) {
+        //                ArrayList<SearchFilterInfo> parse = QuickSearchParser.parse(cView.getHeader()
+        //                        .getSearchInput());
+        //                SearchFilterInfo blastInfo = cView.getHeader().getBlastInfo();
+        //                if (blastInfo != null)
+        //                    parse.add(blastInfo);
+        //                SearchEvent searchInProgressEvent = new SearchEvent();
+        //                searchInProgressEvent.setFilters(parse);
+        //                eventBus.fireEvent(searchInProgressEvent);
+        //            }
+        //        });
         CollectionsEntriesPresenter presenter = new CollectionsEntriesPresenter(
                 new CollectionsModel(this.service, this.eventBus), cView, operands);
         presenter.go(container);
@@ -197,7 +189,6 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         }
 
         AbstractPresenter presenter;
-        AbstractLayout view = null;
 
         switch (page) {
 
@@ -205,13 +196,13 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         // TODO : presenters are cheap however
         case MAIN:
             HomePageView homePageView = new HomePageView();
-            view = homePageView;
+            addHeaderSearchHandler(homePageView);
             presenter = new HomePagePresenter(this.service, this.eventBus, homePageView);
             break;
 
         case ENTRY_VIEW:
             CollectionsEntriesView cView = new CollectionsEntriesView();
-            view = cView;
+            addHeaderSearchHandler(cView); // TODO : not sure if this is needed
             long id = Long.decode(param);
             EntryContext context = new EntryContext();
             context.setCurrent(id);
@@ -221,19 +212,22 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             break;
 
         case PROFILE:
-            presenter = new ProfilePresenter(this.service, this.eventBus, new ProfileView(), param);
+            ProfileView pView = new ProfileView();
+            presenter = new ProfilePresenter(this.service, this.eventBus, pView, param);
+            addHeaderSearchHandler(pView);
             break;
 
         case COLLECTIONS:
             CollectionsEntriesView collectionsView = new CollectionsEntriesView();
-            view = collectionsView;
+            addHeaderSearchHandler(collectionsView);
             presenter = new CollectionsEntriesPresenter(new CollectionsModel(this.service,
                     this.eventBus), collectionsView, param);
             break;
 
         case BULK_IMPORT:
             BulkImportModel model = new BulkImportModel(this.service, this.eventBus);
-            IBulkImportView importView = new BulkImportView();
+            BulkImportView importView = new BulkImportView();
+            addHeaderSearchHandler(importView);
             presenter = new BulkImportPresenter(model, importView);
             break;
 
@@ -242,7 +236,9 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             break;
 
         case NEWS:
-            presenter = new NewsPresenter(this.service, this.eventBus, new NewsView());
+            NewsView nView = new NewsView();
+            addHeaderSearchHandler(nView);
+            presenter = new NewsPresenter(this.service, this.eventBus, nView);
             break;
 
         case LOGIN:
@@ -251,10 +247,27 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             break;
         }
 
-        if (view != null)
-            new HeaderPresenter(new HeaderModel(this.service, this.eventBus), view.getHeader());
         presenter.go(this.container);
+    }
 
+    private void addHeaderSearchHandler(final AbstractLayout view) {
+        if (view == null)
+            return;
+
+        view.getHeader().addSearchClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                ArrayList<SearchFilterInfo> parse = QuickSearchParser.parse(view.getHeader()
+                        .getSearchInput());
+                SearchFilterInfo blastInfo = view.getHeader().getBlastInfo();
+                if (blastInfo != null)
+                    parse.add(blastInfo);
+                SearchEvent searchInProgressEvent = new SearchEvent();
+                searchInProgressEvent.setFilters(parse);
+                eventBus.fireEvent(searchInProgressEvent);
+            }
+        });
     }
 
     protected Page getPage(String token) {
