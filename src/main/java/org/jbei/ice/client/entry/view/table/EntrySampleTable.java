@@ -2,228 +2,129 @@ package org.jbei.ice.client.entry.view.table;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
 import org.jbei.ice.client.Page;
-import org.jbei.ice.client.common.table.DataTable;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
 
-import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.Cell;
-import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.cellview.client.ColumnSortList;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
-import com.google.gwt.view.client.AbstractDataProvider;
-import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.Range;
 
-public class EntrySampleTable extends DataTable<SampleStorage> {
+public class EntrySampleTable extends Composite {
 
-    private DataProvider provider;
+    private final FlexTable table;
+    private int row;
 
     public EntrySampleTable() {
-        provider = new DataProvider();
-        provider.addDataDisplay(this);
-        this.setStyleName("entry_sample_table");
-        this.setPageSize(5);
-    }
+        table = new FlexTable();
+        initWidget(table);
 
-    @Override
-    protected ArrayList<DataTableColumn<?>> createColumns() {
-        ArrayList<DataTableColumn<?>> columns = new ArrayList<DataTableColumn<?>>();
-        columns.add(this.createLabelColumn());
-        columns.add(this.createStorageColumn());
-        columns.add(this.createAddedColumn());
-        //        columns.add(this.createEditColumn()); // TODO : add if only admins
-        return columns;
-    }
-
-    protected DataTableColumn<SampleStorage> createStorageColumn() {
-        AbstractCell<SampleStorage> cell = new AbstractCell<SampleStorage>() {
-
-            @Override
-            public void render(Context context, SampleStorage value, SafeHtmlBuilder sb) {
-                LinkedList<StorageInfo> list = value.getStorageList();
-                if (list == null || list.isEmpty())
-                    return;
-
-                Tree tree = new Tree();
-                Hyperlink rootLink = new Hyperlink(list.get(0).getDisplay(), Page.STORAGE.getLink()
-                        + ";id=" + list.get(0).getId());
-                TreeItem root = new TreeItem(rootLink);
-                tree.addItem(root);
-                TreeItem tmp;
-
-                if (list.size() > 1) {
-                    for (int i = 1; i < list.size(); i += 1) {
-                        StorageInfo info = list.get(i);
-                        Hyperlink infoLink = new Hyperlink(info.getDisplay(),
-                                Page.STORAGE.getLink() + ";id=" + info.getId());
-                        tmp = new TreeItem(infoLink);
-                        root.addItem(tmp);
-                        root = tmp;
-                    }
-                }
-
-                sb.appendHtmlConstant(tree.getElement().getInnerHTML());
-            }
-        };
-
-        SampleInfoDataColumn labelColumn = new SampleInfoDataColumn(cell, ColumnField.LABEL);
-        this.addColumn(labelColumn);
-        labelColumn.setSortable(true);
-        this.setColumnWidth(labelColumn, 250, Unit.PX);
-        return labelColumn;
-    }
-
-    protected DataTableColumn<SampleStorage> createEditColumn() {
-        AbstractCell<SampleStorage> cell = new AbstractCell<SampleStorage>() {
-
-            @Override
-            public void render(Context context, SampleStorage value, SafeHtmlBuilder sb) {
-                sb.appendHtmlConstant("<span>edit | delete");
-                sb.appendHtmlConstant("</span>");
-            }
-        };
-
-        SampleInfoDataColumn labelColumn = new SampleInfoDataColumn(cell, ColumnField.LABEL);
-        this.addColumn(labelColumn);
-        labelColumn.setSortable(true);
-        this.setColumnWidth(labelColumn, 250, Unit.PX);
-        return labelColumn;
-    }
-
-    protected DataTableColumn<SampleStorage> createLabelColumn() {
-        AbstractCell<SampleStorage> cell = new AbstractCell<SampleStorage>() {
-
-            @Override
-            public void render(Context context, SampleStorage value, SafeHtmlBuilder sb) {
-                sb.appendHtmlConstant("<span class=\"font-bold\">");
-                sb.appendEscaped(value.getSample().getLabel());
-                sb.appendHtmlConstant("</span><br><span style=\"color: #999\" class=\"font-85em\">");
-                sb.appendEscaped(value.getSample().getNotes() == null ? "" : value.getSample()
-                        .getNotes());
-                sb.appendHtmlConstant("</span>");
-            }
-        };
-
-        SampleInfoDataColumn labelColumn = new SampleInfoDataColumn(cell, ColumnField.LABEL);
-        this.addColumn(labelColumn);
-        labelColumn.setSortable(true);
-        this.setColumnWidth(labelColumn, 250, Unit.PX);
-        return labelColumn;
-    }
-
-    protected DataTableColumn<?> createAddedColumn() {
-        AbstractCell<SampleStorage> cell = new AbstractCell<SampleStorage>() {
-
-            @Override
-            public void render(Context context, SampleStorage value, SafeHtmlBuilder sb) {
-                sb.appendHtmlConstant("<span>");
-                sb.appendEscaped(DateUtilities.formatDate(value.getSample().getCreationTime()));
-
-                Hyperlink link = new Hyperlink(value.getSample().getDepositor(),
-                        Page.PROFILE.getLink() + ";id=" + value.getSample().getDepositor());
-
-                sb.appendHtmlConstant("</span><br /><span>");
-                sb.appendHtmlConstant("by " + link.getElement().getInnerHTML());
-                sb.appendHtmlConstant("</span>");
-            }
-        };
-
-        SampleInfoDataColumn labelColumn = new SampleInfoDataColumn(cell, ColumnField.LABEL);
-        this.addColumn(labelColumn);
-        labelColumn.setSortable(true);
-        this.setColumnWidth(labelColumn, 20, Unit.PCT);
-        return labelColumn;
+        table.setWidth("100%");
     }
 
     public void setData(ArrayList<SampleStorage> data) {
-        this.provider.setData(data);
-    }
+        table.clear();
+        row = 0;
 
-    //
-    // inner classes
-    //
-    protected class DataProvider extends AbstractDataProvider<SampleStorage> {
+        for (SampleStorage datum : data) {
+            addLabelCol(row, datum.getSample());
+            addLocationCol(row, datum.getStorageList());
+            addDepositor(row, datum.getSample());
 
-        private ArrayList<SampleStorage> data;
-
-        public DataProvider() {
-            data = new ArrayList<SampleStorage>();
-        }
-
-        public void setData(ArrayList<SampleStorage> data) {
-            this.data.clear();
-            this.data.addAll(data);
-
-            final Range range = EntrySampleTable.this.getVisibleRange();
-            final int rangeStart = range.getStart();
-            final int rangeEnd;
-            if ((rangeStart + range.getLength()) > this.data.size())
-                rangeEnd = this.data.size();
-            else
-                rangeEnd = (rangeStart + range.getLength());
-
-            List<SampleStorage> show = new ArrayList<SampleStorage>();
-            show.addAll(data.subList(rangeStart, rangeEnd));
-            updateRowCount(this.data.size(), true);
-            updateRowData(rangeStart, show);
-        }
-
-        @Override
-        protected void onRangeChanged(HasData<SampleStorage> display) {
-            if (data.isEmpty())
-                return;
-
-            final Range range = display.getVisibleRange();
-            final ColumnSortList sortList = EntrySampleTable.this.getColumnSortList();
-            int start = range.getStart();
-            int end = range.getLength() + start;
-            if (end > data.size())
-                end = data.size();
-
-            sortByColumn(this.getSortField(), sortList.get(0).isAscending());
-            EntrySampleTable.this.setRowData(start, data.subList(start, end));
-        }
-
-        /**
-         * Sorts the data based on params
-         * 
-         * @param field
-         * @param asc
-         */
-        private void sortByColumn(ColumnField field, boolean asc) {
-            // TODO : collections.sort(data...)
-        }
-
-        protected ColumnField getSortField() {
-            ColumnSortList sortList = EntrySampleTable.this.getColumnSortList();
-            int colIndex = EntrySampleTable.this.getColumns().indexOf(sortList.get(0).getColumn());
-            if (colIndex == -1)
-                return null; // TODO : this will be pretty unusual
-
-            ColumnField field = EntrySampleTable.this.getColumns().get(colIndex).getField();
-            return field;
+            // add/edit
+            row += 1;
         }
     }
 
-    private class SampleInfoDataColumn extends DataTableColumn<SampleStorage> {
+    private void addDepositor(int row, SampleInfo sampleInfo) {
+        SafeHtmlBuilder sb = new SafeHtmlBuilder();
+        sb.appendHtmlConstant("<span>");
+        sb.appendEscaped(DateUtilities.formatDate(sampleInfo.getCreationTime()));
 
-        public SampleInfoDataColumn(Cell<SampleStorage> cell, ColumnField field) {
-            super(cell, field);
-        }
+        Hyperlink link = new Hyperlink(sampleInfo.getDepositor(), Page.PROFILE.getLink() + ";id="
+                + sampleInfo.getDepositor());
 
-        @Override
-        public SampleStorage getValue(SampleStorage object) {
-            return object;
-        }
+        sb.appendHtmlConstant("</span><br /><span>");
+        sb.appendHtmlConstant("by " + link.getElement().getInnerHTML());
+        sb.appendHtmlConstant("</span>");
+        table.setHTML(row, 2, sb.toSafeHtml().asString());
+        table.getFlexCellFormatter().setVerticalAlignment(row, 2, HasAlignment.ALIGN_TOP);
     }
 
+    private void addLabelCol(int row, SampleInfo sampleInfo) {
+        SafeHtmlBuilder sb = new SafeHtmlBuilder();
+        sb.appendHtmlConstant("<span class=\"font-bold\">");
+        sb.appendEscaped(sampleInfo.getLabel());
+        sb.appendHtmlConstant("</span><br><span style=\"color: #999\" class=\"font-85em\">");
+        sb.appendEscaped(sampleInfo.getNotes() == null ? "" : sampleInfo.getNotes());
+        sb.appendHtmlConstant("</span>");
+        table.setHTML(row, 0, sb.toSafeHtml().asString());
+        table.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
+    }
+
+    private void addLocationCol(int row, LinkedList<StorageInfo> list) {
+        Tree tree = new Tree();
+        addTreeHandler(tree);
+        Hyperlink rootLink = new Hyperlink(list.get(0).getDisplay(), Page.STORAGE.getLink()
+                + ";id=" + list.get(0).getId());
+        TreeItem root = new TreeItem(rootLink);
+        tree.addItem(root);
+        TreeItem tmp;
+
+        if (list.size() > 1) {
+            for (int i = 1; i < list.size(); i += 1) {
+                StorageInfo info = list.get(i);
+                Hyperlink infoLink = new Hyperlink(info.getDisplay(), Page.STORAGE.getLink()
+                        + ";id=" + info.getId());
+                tmp = new TreeItem(infoLink);
+                root.addItem(tmp);
+                root = tmp;
+            }
+        }
+        table.setWidget(row, 1, tree);
+        table.getFlexCellFormatter().setWidth(row, 1, "300px");
+    }
+
+    private void addTreeHandler(Tree tree) {
+        tree.addOpenHandler(new OpenHandler<TreeItem>() {
+
+            @Override
+            public void onOpen(OpenEvent<TreeItem> event) {
+                TreeItem item = event.getTarget();
+
+                // open everything underneath
+                item = item.getChild(0);
+                while (item != null) {
+                    item.setState(true, false);
+                    item = item.getChild(0);
+                }
+            }
+        });
+
+        tree.addCloseHandler(new CloseHandler<TreeItem>() {
+
+            @Override
+            public void onClose(CloseEvent<TreeItem> event) {
+                // close everything below it
+                TreeItem item = event.getTarget();
+
+                item = item.getChild(0);
+                while (item != null) {
+                    item.setState(false, false);
+                    item = item.getChild(0);
+                }
+            }
+        });
+    }
 }

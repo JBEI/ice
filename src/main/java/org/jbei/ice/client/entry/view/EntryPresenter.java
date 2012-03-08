@@ -12,7 +12,6 @@ import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.entry.view.detail.EntryDetailView;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
-import org.jbei.ice.client.entry.view.table.EntrySampleTable;
 import org.jbei.ice.client.entry.view.table.SequenceTable;
 import org.jbei.ice.client.entry.view.update.UpdateEntryForm;
 import org.jbei.ice.client.entry.view.view.AttachmentItem;
@@ -44,7 +43,6 @@ public class EntryPresenter extends AbstractPresenter {
     private final HandlerManager eventBus;
     private final IEntryView display;
     private EntryDetailView<? extends EntryInfo> view;
-    private final EntrySampleTable sampleTable;
     private final SequenceTable sequenceTable;
     private List<Long> contextList;
     private long currentId;
@@ -56,7 +54,6 @@ public class EntryPresenter extends AbstractPresenter {
         this.display = new EntryView();
 
         sequenceTable = new SequenceTable();
-        sampleTable = new EntrySampleTable();
 
         // add handler for the permission link
         display.getDetailMenu().getPermissionLink().addClickHandler(new ClickHandler() {
@@ -74,14 +71,18 @@ public class EntryPresenter extends AbstractPresenter {
         setContextNavHandlers();
 
         showEntryView(context);
-        //        this.contextList = contextList;
-        //        if (contextList != null)
-        //            Collections.reverse(this.contextList); // TODO : order matters. make sure this is the case in all
-        //
-        //        retrieveAccountsAndGroups();
-        //        setContextNavData();
-        //        retrieveEntryDetails(entryId);
 
+        // SAMPLE
+        // add sample handler
+
+        display.addSampleButtonHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                boolean visible = display.getSampleFormVisibility();
+                display.setSampleFormVisibility(!visible);
+            }
+        });
     }
 
     private void addEntryViewHandler() {
@@ -268,7 +269,7 @@ public class EntryPresenter extends AbstractPresenter {
                         data.add(datum);
                     }
 
-                    sampleTable.setData(data);
+                    display.setSampleData(data);
                     sequenceTable.setData(result.getSequenceAnalysis());
 
                     // menu 
@@ -368,21 +369,13 @@ public class EntryPresenter extends AbstractPresenter {
                     button.addClickHandler(new ClickHandler() {
                         @Override
                         public void onClick(ClickEvent event) {
-                            //                                view.switchToEditMode();
                         }
                     });
                 }
                 break;
 
             case SAMPLES:
-                Button addSample = display.showSampleView(sampleTable);
-                addSample.addClickHandler(new ClickHandler() {
-
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        display.getSampleForm().setVisible(!display.getSampleForm().isVisible());
-                    }
-                });
+                display.showSampleView();
                 break;
             }
         }

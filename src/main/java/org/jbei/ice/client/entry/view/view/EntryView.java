@@ -6,6 +6,7 @@ import java.util.Date;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.entry.view.detail.EntryDetailView;
+import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.table.EntrySampleTable;
 import org.jbei.ice.client.entry.view.table.SequenceTable;
 import org.jbei.ice.client.entry.view.table.TablePager;
@@ -62,6 +63,7 @@ public class EntryView extends Composite implements IEntryView {
     private final Button rightBtn;
 
     private Label headerLabel;
+    private EntrySampleTable table;
 
     // menu
     private EntryDetailViewMenu detailMenu;
@@ -89,13 +91,21 @@ public class EntryView extends Composite implements IEntryView {
         contentTable.setWidth("100%");
         contentTable.setCellPadding(0);
         contentTable.setCellSpacing(0);
-        //        contentTable.setWidget(0, 0, createMenu());
-        //        contentTable.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
-
-        // TODO : middle sliver goes here
         contentTable.setWidget(0, 1, createMainContent());
         contentTable.getCellFormatter().setWidth(0, 1, "100%");
         contentTable.getFlexCellFormatter().setVerticalAlignment(0, 1, HasAlignment.ALIGN_TOP);
+
+        // sample panel
+        initSamplePanel();
+        table = new EntrySampleTable();
+    }
+
+    private void initSamplePanel() {
+        samplesPanel = new HTMLPanel(
+                "<span class=\"entry_general_info_header\">Samples</span> &nbsp; <span id=\"add_sample_button\"></span>");
+        addSampleButton = new Button("Add");
+        addSampleButton.setStyleName("top_menu");
+        samplesPanel.add(addSampleButton, "add_sample_button");
     }
 
     protected Widget createMenu() {
@@ -136,6 +146,7 @@ public class EntryView extends Composite implements IEntryView {
         // second row
         mainContent.setWidget(1, 0, new Label("Loading..."));
         mainContent.getFlexCellFormatter().setStyleName(1, 0, "entry_view_content");
+        mainContent.getFlexCellFormatter().setVerticalAlignment(1, 0, HasAlignment.ALIGN_TOP);
         mainContent.getCellFormatter().setWidth(1, 0, "100%");
         mainContent.getFlexCellFormatter().setRowSpan(1, 0, 5);
 
@@ -145,7 +156,6 @@ public class EntryView extends Composite implements IEntryView {
         mainContent.setHTML(2, 0, "&nbsp");
 
         mainContent.setWidget(3, 0, attachmentMenu);
-        //        mainContent.setWidget(3, 0, createRightMenu());
         mainContent.getFlexCellFormatter().setStyleName(3, 0, "entry_view_right_menu");
 
         return mainContent;
@@ -266,7 +276,6 @@ public class EntryView extends Composite implements IEntryView {
             editGeneralButton.setStyleName("top_menu");
             generalHeaderPanel.add(editGeneralButton, "edit_button");
             generalHeaderPanel.add(goBack, "go_back_button");
-
             generalHeaderPanel.add(headerLabel, "entry_header");
         }
 
@@ -277,13 +286,15 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public Button showSampleView(EntrySampleTable table) {
+    public void addSampleButtonHandler(ClickHandler handler) {
+        addSampleButton.addClickHandler(handler);
+    }
+
+    @Override
+    public void showSampleView() {
+
         VerticalPanel panel = new VerticalPanel();
         panel.setWidth("100%");
-        TablePager pager = new TablePager();
-        pager.setDisplay(table);
-        panel.add(pager);
-        panel.setCellHorizontalAlignment(pager, HasAlignment.ALIGN_RIGHT);
 
         // add new sample 
         panel.add(sampleForm);
@@ -291,17 +302,8 @@ public class EntryView extends Composite implements IEntryView {
         // end add new sample
         panel.add(table);
 
-        if (samplesPanel == null) {
-            samplesPanel = new HTMLPanel(
-                    "<span>Samples</span> &nbsp; <span id=\"add_sample_button\"></span>");
-            addSampleButton = new Button("Add");
-            addSampleButton.setStyleName("top_menu");
-            samplesPanel.add(addSampleButton, "add_sample_button");
-        }
-
         mainContent.setWidget(0, 0, samplesPanel);
         mainContent.setWidget(1, 0, panel);
-        return addSampleButton;
     }
 
     @Override
@@ -319,7 +321,7 @@ public class EntryView extends Composite implements IEntryView {
 
         if (seqPanel == null) {
             seqPanel = new HTMLPanel(
-                    "<span>Sequence Analysis</span> <span id=\"add_trace_button\"></span>");
+                    "<span class=\"entry_general_info_header\">Sequence Analysis</span> <span id=\"add_trace_button\"></span>");
             addSeqButton = new Button("Add");
             addSeqButton.setStyleName("top_menu");
             seqPanel.add(addSeqButton, "add_trace_button");
@@ -333,16 +335,21 @@ public class EntryView extends Composite implements IEntryView {
     @Override
     public void setEntryName(String name) {
         headerLabel.setText(name);
-        //        detailMenu.setHeader(name);
     }
 
     @Override
-    public CreateSampleForm getSampleForm() {
-        return this.sampleForm;
+    public void setSampleData(ArrayList<SampleStorage> data) {
+        table.setData(data);
     }
 
-    public EntryDetailViewMenu getEntryViewMenu() {
-        return this.detailMenu;
+    @Override
+    public boolean getSampleFormVisibility() {
+        return this.sampleForm.isVisible();
+    }
+
+    @Override
+    public void setSampleFormVisibility(boolean visible) {
+        this.sampleForm.setVisible(visible);
     }
 
     @Override

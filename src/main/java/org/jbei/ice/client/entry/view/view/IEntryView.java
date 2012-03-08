@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.entry.view.detail.EntryDetailView;
-import org.jbei.ice.client.entry.view.table.EntrySampleTable;
+import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.table.SequenceTable;
 import org.jbei.ice.client.entry.view.update.UpdateEntryForm;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -32,11 +32,11 @@ public interface IEntryView {
 
     void showPermissionsWidget();
 
-    Button showSampleView(EntrySampleTable table);
+    void addSampleButtonHandler(ClickHandler handler);
+
+    void showSampleView();
 
     EntryDetailViewMenu getDetailMenu();
-
-    CreateSampleForm getSampleForm();
 
     void showContextNav(boolean show);
 
@@ -53,4 +53,10 @@ public interface IEntryView {
     void setNavText(String text);
 
     void setAttachments(ArrayList<AttachmentItem> items);
+
+    boolean getSampleFormVisibility();
+
+    void setSampleFormVisibility(boolean visible);
+
+    void setSampleData(ArrayList<SampleStorage> data);
 }
