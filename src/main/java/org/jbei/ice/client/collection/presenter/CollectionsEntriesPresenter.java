@@ -263,8 +263,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
 
     private void showEntryView(EntryContext event) {
         if (entryViewPresenter == null)
-            entryViewPresenter = new EntryPresenter(model.getService(), model.getEventBus(),
-                    event.getCurrent(), event.getList());
+            entryViewPresenter = new EntryPresenter(model.getService(), model.getEventBus(), event);
 
         History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + event.getCurrent(), false);
         display.setMainContent(entryViewPresenter.getView(), false);

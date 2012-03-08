@@ -50,19 +50,13 @@ public class EntryPresenter extends AbstractPresenter {
     private long currentId;
 
     public EntryPresenter(final RegistryServiceAsync service, HandlerManager eventBus,
-            long entryId, List<Long> contextList) {
+            EntryContext context) {
         this.service = service;
         this.eventBus = eventBus;
         this.display = new EntryView();
 
-        this.contextList = contextList;
-        if (contextList != null)
-            Collections.reverse(this.contextList); // TODO : order matters. make sure this is the case in all
-
         sequenceTable = new SequenceTable();
         sampleTable = new EntrySampleTable();
-
-        retrieveEntryDetails(entryId);
 
         // add handler for the permission link
         display.getDetailMenu().getPermissionLink().addClickHandler(new ClickHandler() {
@@ -74,15 +68,23 @@ public class EntryPresenter extends AbstractPresenter {
             }
         });
 
+        addEntryViewHandler();
         MenuSelectionHandler handler = new MenuSelectionHandler(display.getDetailMenu());
         display.getDetailMenu().addClickHandler(handler);
-
-        retrieveAccountsAndGroups();
-
-        // handlers for context navigation
-        setContextNavData();
         setContextNavHandlers();
 
+        showEntryView(context);
+        //        this.contextList = contextList;
+        //        if (contextList != null)
+        //            Collections.reverse(this.contextList); // TODO : order matters. make sure this is the case in all
+        //
+        //        retrieveAccountsAndGroups();
+        //        setContextNavData();
+        //        retrieveEntryDetails(entryId);
+
+    }
+
+    private void addEntryViewHandler() {
         eventBus.addHandler(EntryViewEvent.TYPE, new EntryViewEventHandler() {
 
             @Override
@@ -93,15 +95,14 @@ public class EntryPresenter extends AbstractPresenter {
     }
 
     private void showEntryView(EntryContext context) {
-
         this.contextList = context.getList();
         if (contextList != null)
             Collections.reverse(this.contextList); // TODO : order matters. make sure this is the case in all
 
-        long entryId = context.getCurrent();
+        currentId = context.getCurrent();
         retrieveAccountsAndGroups();
         setContextNavData();
-        retrieveEntryDetails(entryId);
+        retrieveEntryDetails(currentId);
     }
 
     protected void setContextNavData() {
