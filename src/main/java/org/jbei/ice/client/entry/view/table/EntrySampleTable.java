@@ -24,18 +24,17 @@ import com.google.gwt.user.client.ui.TreeItem;
 public class EntrySampleTable extends Composite {
 
     private final FlexTable table;
-    private int row;
 
     public EntrySampleTable() {
         table = new FlexTable();
         initWidget(table);
-
         table.setWidth("100%");
+        table.setHTML(0, 0, "No Samples Available");
     }
 
     public void setData(ArrayList<SampleStorage> data) {
         table.clear();
-        row = 0;
+        int row = 0;
 
         for (SampleStorage datum : data) {
             addLabelCol(row, datum.getSample());
@@ -74,6 +73,12 @@ public class EntrySampleTable extends Composite {
     }
 
     private void addLocationCol(int row, LinkedList<StorageInfo> list) {
+        if (list.isEmpty()) {
+            table.setHTML(row, 1, "");
+            table.getFlexCellFormatter().setWidth(row, 1, "300px");
+            return;
+        }
+
         Tree tree = new Tree();
         addTreeHandler(tree);
         Hyperlink rootLink = new Hyperlink(list.get(0).getDisplay(), Page.STORAGE.getLink()

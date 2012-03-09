@@ -216,36 +216,13 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
             Flash.Parameters param = new Flash.Parameters();
             param.setEntryId(info.getRecordId());
             param.setSessiondId(AppController.sessionId);
-            param.setSwfPath("static/vv/VectorViewer.swf");
+            param.setSwfPath("vv/VectorViewer.swf");
             sequence.setWidget(row, 0, new Flash(param));
             sequence.getFlexCellFormatter().setHeight(row, 0, "600px");
         } else {
             sequence.setWidget(row, 0, new HTML("links"));
             // TODO : add links to upload or create a new one in vector editor
             // TODO : the latter action opens vector editor in a new window
-            /* 
-             * WebComponent flashComponent = new WebComponent("flashComponent");
-
-            String entryRecordId = parameters.getString("entryId");
-            String accountSessionId = IceSession.get().getSessionKey();
-
-            ResourceReference veResourceReference = new ResourceReference(UnprotectedPage.class,
-                UnprotectedPage.VE_RESOURCE_LOCATION + "VectorEditor.swf?entryId=" + entryRecordId
-                        + "&sessionId=" + accountSessionId);
-
-            flashComponent.add(new SimpleAttributeModifier("src", urlFor(veResourceReference)));
-            flashComponent.add(new SimpleAttributeModifier("quality", "high"));
-            flashComponent.add(new SimpleAttributeModifier("bgcolor", "#869ca7"));
-            flashComponent.add(new SimpleAttributeModifier("width", "100%"));
-            flashComponent.add(new SimpleAttributeModifier("height", "100%"));
-            flashComponent.add(new SimpleAttributeModifier("name", "VectorEditor"));
-            flashComponent.add(new SimpleAttributeModifier("align", "middle"));
-            flashComponent.add(new SimpleAttributeModifier("play", "true"));
-            flashComponent.add(new SimpleAttributeModifier("loop", "false"));
-            flashComponent.add(new SimpleAttributeModifier("type", "application/x-shockwave-flash"));
-            flashComponent.add(new SimpleAttributeModifier("pluginspage",
-                "http://www.adobe.com/go/getflashplayer"));
-             */
         }
 
         table.setWidget(currentRow, 0, sequence);
@@ -314,6 +291,8 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         }
 
         table.setHTML(currentRow, currentCol, "<b class=\"font-80em\">" + labelString + "</b>");
+        table.getFlexCellFormatter().setVerticalAlignment(currentRow, currentCol,
+            HasAlignment.ALIGN_TOP);
         table.getFlexCellFormatter().setWidth(currentRow, currentCol, "170px");
         currentCol += 1;
         //        ValueCell cell = new ValueCell(value, valueType);

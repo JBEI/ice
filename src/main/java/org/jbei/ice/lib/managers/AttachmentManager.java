@@ -128,6 +128,42 @@ public class AttachmentManager {
     }
 
     /**
+     * Retrieves attachment referenced by a unique file identifier
+     * 
+     * @param fileId
+     *            unique file identifier
+     * @return retrieved attachment; null if none is found or there is a problem retrieving
+     *         attachment
+     * @throws ManagerException
+     *             on Hibernate exception
+     */
+    public static Attachment getByFileId(String fileId) throws ManagerException {
+        Attachment attachment = null;
+
+        Session session = DAO.newSession();
+        try {
+            Query query = session.createQuery("from " + Attachment.class.getName()
+                    + " where fileId = :fileId");
+
+            query.setParameter("fileId", fileId);
+
+            Object queryResult = query.uniqueResult();
+
+            if (queryResult != null) {
+                attachment = (Attachment) queryResult;
+            }
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve attachment by fileId: " + fileId, e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+
+        return attachment;
+    }
+
+    /**
      * Retrieve the {@link File} from the disk of the given {@link Attachment}.
      * 
      * @param attachment
@@ -200,4 +236,5 @@ public class AttachmentManager {
             throw new ManagerException(e);
         }
     }
+
 }

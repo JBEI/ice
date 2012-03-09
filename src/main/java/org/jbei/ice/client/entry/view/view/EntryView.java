@@ -5,13 +5,14 @@ import java.util.Date;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.common.widget.Flash;
+import org.jbei.ice.client.entry.view.ViewFactory;
 import org.jbei.ice.client.entry.view.detail.EntryDetailView;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.table.EntrySampleTable;
-import org.jbei.ice.client.entry.view.table.SequenceTable;
-import org.jbei.ice.client.entry.view.table.TablePager;
+import org.jbei.ice.client.entry.view.table.EntrySequenceTable;
 import org.jbei.ice.client.entry.view.update.UpdateEntryForm;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -63,7 +64,9 @@ public class EntryView extends Composite implements IEntryView {
     private final Button rightBtn;
 
     private Label headerLabel;
-    private EntrySampleTable table;
+    private EntrySampleTable sampleTable;
+    //    private SequenceTable sequenceTable;
+    private EntrySequenceTable sequenceTable;
 
     // menu
     private EntryDetailViewMenu detailMenu;
@@ -82,6 +85,7 @@ public class EntryView extends Composite implements IEntryView {
         sampleForm.setVisible(false);
 
         uploadPanel = createSequenceUploadPanel();
+        uploadPanel.setVisible(false);
         attachmentMenu = new AttachmentListMenu();
 
         createMenu();
@@ -97,7 +101,32 @@ public class EntryView extends Composite implements IEntryView {
 
         // sample panel
         initSamplePanel();
-        table = new EntrySampleTable();
+        sampleTable = new EntrySampleTable();
+        sequenceTable = new EntrySequenceTable();
+
+        // general panel
+        initGeneralPanel();
+
+        // sequence
+        initSequencePanel();
+    }
+
+    private void initSequencePanel() {
+        seqPanel = new HTMLPanel(
+                "<span class=\"entry_general_info_header\">Sequence Analysis</span> <span id=\"add_trace_button\"></span>");
+        addSeqButton = new Button("Add");
+        addSeqButton.setStyleName("top_menu");
+        seqPanel.add(addSeqButton, "add_trace_button");
+    }
+
+    private void initGeneralPanel() {
+        generalHeaderPanel = new HTMLPanel(
+                "<span id=\"go_back_button\"></span> <span class=\"entry_general_info_header\" id=\"entry_header\"></span> &nbsp; <span id=\"edit_button\"></span>");
+        editGeneralButton = new Button("Edit");
+        editGeneralButton.setStyleName("top_menu");
+        generalHeaderPanel.add(editGeneralButton, "edit_button");
+        generalHeaderPanel.add(goBack, "go_back_button");
+        generalHeaderPanel.add(headerLabel, "entry_header");
     }
 
     private void initSamplePanel() {
@@ -119,7 +148,10 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public void showUpdateForm(UpdateEntryForm<? extends EntryInfo> form) {
+    public void showUpdateForm(EntryInfo info) {
+        UpdateEntryForm<? extends EntryInfo> form = ViewFactory.getUpdateForm(info);
+        if (form == null)
+            return;
         mainContent.setWidget(1, 0, form);
     }
 
@@ -157,6 +189,7 @@ public class EntryView extends Composite implements IEntryView {
 
         mainContent.setWidget(3, 0, attachmentMenu);
         mainContent.getFlexCellFormatter().setStyleName(3, 0, "entry_view_right_menu");
+        mainContent.getFlexCellFormatter().setVerticalAlignment(3, 0, HasAlignment.ALIGN_TOP);
 
         return mainContent;
     }
@@ -268,21 +301,11 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public Button showEntryDetailView(EntryDetailView<? extends EntryInfo> view) {
-        if (generalHeaderPanel == null) {
-            generalHeaderPanel = new HTMLPanel(
-                    "<span id=\"go_back_button\"></span> <span class=\"entry_general_info_header\" id=\"entry_header\"></span> &nbsp; <span id=\"edit_button\"></span>");
-            editGeneralButton = new Button("Edit");
-            editGeneralButton.setStyleName("top_menu");
-            generalHeaderPanel.add(editGeneralButton, "edit_button");
-            generalHeaderPanel.add(goBack, "go_back_button");
-            generalHeaderPanel.add(headerLabel, "entry_header");
-        }
-
+    public void showEntryDetailView(EntryInfo info) {
+        EntryDetailView<? extends EntryInfo> detailView = ViewFactory.createDetailView(info);
         mainContent.setWidget(0, 0, generalHeaderPanel);
-        mainContent.setWidget(1, 0, view);
-        mainContent.getCellFormatter().setHeight(0, 0, "26px");
-        return editGeneralButton;
+        mainContent.setWidget(1, 0, detailView);
+        mainContent.getCellFormatter().setHeight(0, 0, "30px");
     }
 
     @Override
@@ -290,9 +313,12 @@ public class EntryView extends Composite implements IEntryView {
         addSampleButton.addClickHandler(handler);
     }
 
+    public void addGeneralEditButtonHandler(ClickHandler handler) {
+        editGeneralButton.addClickHandler(handler);
+    }
+
     @Override
     public void showSampleView() {
-
         VerticalPanel panel = new VerticalPanel();
         panel.setWidth("100%");
 
@@ -300,36 +326,42 @@ public class EntryView extends Composite implements IEntryView {
         panel.add(sampleForm);
 
         // end add new sample
-        panel.add(table);
+        panel.add(sampleTable);
 
         mainContent.setWidget(0, 0, samplesPanel);
         mainContent.setWidget(1, 0, panel);
     }
 
     @Override
-    public Button showSequenceView(SequenceTable table, Flash flash) {
-        VerticalPanel panel = new VerticalPanel();
-        panel.setWidth("100%");
-        TablePager pager = new TablePager();
-        pager.setDisplay(table);
-        panel.add(pager);
-        panel.setCellHorizontalAlignment(pager, HasAlignment.ALIGN_RIGHT);
-        panel.add(uploadPanel);
-        panel.add(table);
-        panel.add(flash);
-        panel.setCellHeight(flash, "600px");
-
-        if (seqPanel == null) {
-            seqPanel = new HTMLPanel(
-                    "<span class=\"entry_general_info_header\">Sequence Analysis</span> <span id=\"add_trace_button\"></span>");
-            addSeqButton = new Button("Add");
-            addSeqButton.setStyleName("top_menu");
-            seqPanel.add(addSeqButton, "add_trace_button");
-        }
+    public void showSequenceView(EntryInfo info, boolean showFlash) {
 
         mainContent.setWidget(0, 0, seqPanel);
+
+        VerticalPanel panel = new VerticalPanel();
+        panel.setWidth("100%");
+        //        TablePager pager = new TablePager();
+        //        pager.setDisplay(sequenceTable);
+        //        panel.add(pager);
+        //        panel.setCellHorizontalAlignment(pager, HasAlignment.ALIGN_RIGHT);
+        panel.add(uploadPanel);
+        panel.add(sequenceTable);
+
+        if (showFlash) {
+            Flash.Parameters params = new Flash.Parameters();
+            params.setSwfPath("sc/SequenceChecker.swf");
+            params.setSessiondId(AppController.sessionId);
+            params.setEntryId(info.getRecordId());
+
+            Flash flash = new Flash(params);
+            panel.add(flash);
+            panel.setCellHeight(flash, "600px");
+        }
+
         mainContent.setWidget(1, 0, panel);
-        return addSeqButton;
+    }
+
+    public void addSequenceButtonHandler(ClickHandler handler) {
+        addSeqButton.addClickHandler(handler);
     }
 
     @Override
@@ -339,7 +371,7 @@ public class EntryView extends Composite implements IEntryView {
 
     @Override
     public void setSampleData(ArrayList<SampleStorage> data) {
-        table.setData(data);
+        sampleTable.setData(data);
     }
 
     @Override
@@ -360,5 +392,25 @@ public class EntryView extends Composite implements IEntryView {
     @Override
     public void setAttachments(ArrayList<AttachmentItem> items) {
         attachmentMenu.setMenuItems(items);
+    }
+
+    @Override
+    public void setSequenceData(ArrayList<SequenceAnalysisInfo> data) {
+        sequenceTable.setData(data);
+    }
+
+    @Override
+    public void addSequenceAddButtonHandler(ClickHandler clickHandler) {
+        addSeqButton.addClickHandler(clickHandler);
+    }
+
+    @Override
+    public boolean getSequenceFormVisibility() {
+        return uploadPanel.isVisible();
+    }
+
+    @Override
+    public void setSequenceFormVisibility(boolean visible) {
+        uploadPanel.setVisible(visible);
     }
 }

@@ -20,6 +20,7 @@ import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.PartInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
+import org.jbei.ice.web.utils.WebUtils;
 
 public class EntryViewFactory {
 
@@ -67,7 +68,8 @@ public class EntryViewFactory {
             Strain strain = (Strain) entry;
             view.setHost(strain.getHost());
             view.setGenotypePhenotype(strain.getGenotypePhenotype());
-            view.setPlasmids(strain.getPlasmids());
+            String link = WebUtils.linkifyText(strain.getPlasmids());
+            view.setPlasmids(link);
             view.setSelectionMarkers(strain.getSelectionMarkersAsString());
 
             return view;

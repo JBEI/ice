@@ -9,6 +9,7 @@ public class SequenceAnalysisInfo implements IsSerializable {
     private String name;
     private AccountInfo depositor;
     private Date created;
+    private String fileId;
 
     public SequenceAnalysisInfo() {
     }
@@ -35,5 +36,13 @@ public class SequenceAnalysisInfo implements IsSerializable {
 
     public void setCreated(Date created) {
         this.created = created;
+    }
+
+    public String getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(String fileId) {
+        this.fileId = fileId;
     }
 }

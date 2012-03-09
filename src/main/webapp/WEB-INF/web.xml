@@ -116,13 +116,24 @@
     
     <!-- file upload from gwt -->
     <servlet>
-        <servlet-name>fileUploaderServlet</servlet-name>
-        <servlet-class>org.jbei.ice.server.FileUploadServlet</servlet-class>
+        <servlet-name>FileUploadServlet</servlet-name>
+        <servlet-class>org.jbei.ice.server.servlet.FileUploadServlet</servlet-class>
     </servlet>
     
     <servlet-mapping>
-        <servlet-name>fileUploaderServlet</servlet-name>
+        <servlet-name>FileUploadServlet</servlet-name>
         <url-pattern>*.gupld</url-pattern>
+    </servlet-mapping>
+    
+    <!--  file download -->
+    <servlet>
+        <servlet-name>FileDownloadServlet</servlet-name>
+        <servlet-class>org.jbei.ice.server.servlet.FileDownloadServlet</servlet-class>
+    </servlet>
+ 
+    <servlet-mapping>
+        <servlet-name>FileDownloadServlet</servlet-name>
+        <url-pattern>/download</url-pattern>
     </servlet-mapping>
     
     <welcome-file-list>

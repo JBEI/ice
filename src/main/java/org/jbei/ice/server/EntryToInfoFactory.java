@@ -115,6 +115,7 @@ public class EntryToInfoFactory {
             info.setDescription(attachment.getDescription());
             info.setFilename(attachment.getFileName());
             info.setId(attachment.getId());
+            info.setFileId(attachment.getFileId());
             infos.add(info);
         }
 
@@ -166,6 +167,7 @@ public class EntryToInfoFactory {
             account.setEmail(sequence.getDepositor());
             info.setDepositor(account);
             infos.add(info);
+            info.setFileId(sequence.getFileId());
         }
 
         return infos;

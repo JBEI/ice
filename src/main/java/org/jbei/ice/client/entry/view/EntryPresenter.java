@@ -9,11 +9,7 @@ import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.presenter.EntryContext;
-import org.jbei.ice.client.common.widget.Flash;
-import org.jbei.ice.client.entry.view.detail.EntryDetailView;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
-import org.jbei.ice.client.entry.view.table.SequenceTable;
-import org.jbei.ice.client.entry.view.update.UpdateEntryForm;
 import org.jbei.ice.client.entry.view.view.AttachmentItem;
 import org.jbei.ice.client.entry.view.view.EntryDetailViewMenu;
 import org.jbei.ice.client.entry.view.view.EntryView;
@@ -33,7 +29,6 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -42,8 +37,7 @@ public class EntryPresenter extends AbstractPresenter {
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
     private final IEntryView display;
-    private EntryDetailView<? extends EntryInfo> view;
-    private final SequenceTable sequenceTable;
+    private EntryInfo currentInfo;
     private List<Long> contextList;
     private long currentId;
 
@@ -52,8 +46,6 @@ public class EntryPresenter extends AbstractPresenter {
         this.service = service;
         this.eventBus = eventBus;
         this.display = new EntryView();
-
-        sequenceTable = new SequenceTable();
 
         // add handler for the permission link
         display.getDetailMenu().getPermissionLink().addClickHandler(new ClickHandler() {
@@ -73,14 +65,32 @@ public class EntryPresenter extends AbstractPresenter {
         showEntryView(context);
 
         // SAMPLE
-        // add sample handler
-
+        // add sample button handler
         display.addSampleButtonHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
                 boolean visible = display.getSampleFormVisibility();
                 display.setSampleFormVisibility(!visible);
+            }
+        });
+
+        // GENERAL
+        display.addGeneralEditButtonHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                display.showUpdateForm(currentInfo);
+            }
+        });
+
+        // SEQUENCE
+        display.addSequenceAddButtonHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                boolean visible = display.getSequenceFormVisibility();
+                display.setSequenceFormVisibility(!visible);
             }
         });
     }
@@ -245,7 +255,7 @@ public class EntryPresenter extends AbstractPresenter {
                         return;
                     }
 
-                    view = ViewFactory.createDetailView(result);
+                    currentInfo = result;
                     String name = result.getType().getDisplay().toUpperCase() + ": "
                             + result.getName();
                     display.setEntryName(name);
@@ -255,8 +265,10 @@ public class EntryPresenter extends AbstractPresenter {
                     if (attachments != null) {
                         ArrayList<AttachmentItem> items = new ArrayList<AttachmentItem>();
                         for (AttachmentInfo info : attachments) {
-                            items.add(new AttachmentItem(info.getId(), info.getFilename(), info
-                                    .getDescription()));
+                            AttachmentItem item = new AttachmentItem(info.getId(), info
+                                    .getFilename(), info.getDescription());
+                            item.setFileId(info.getFileId());
+                            items.add(item);
                         }
                         display.setAttachments(items);
                     }
@@ -270,7 +282,7 @@ public class EntryPresenter extends AbstractPresenter {
                     }
 
                     display.setSampleData(data);
-                    sequenceTable.setData(result.getSequenceAnalysis());
+                    display.setSequenceData(result.getSequenceAnalysis());
 
                     // menu 
                     ArrayList<MenuItem> menuItems = new ArrayList<MenuItem>();
@@ -279,20 +291,7 @@ public class EntryPresenter extends AbstractPresenter {
                             .size()));
                     menuItems.add(new MenuItem(Menu.SAMPLES, result.getSampleMap().size()));
                     display.setMenuItems(menuItems); // TODO : set menu loading indicator?
-
-                    Button editButton = display.showEntryDetailView(view);
-                    editButton.addClickHandler(new ClickHandler() {
-
-                        @Override
-                        public void onClick(ClickEvent event) {
-                            UpdateEntryForm<? extends EntryInfo> form = ViewFactory
-                                    .getUpdateForm(view.getInfo());
-                            if (form == null)
-                                return;
-
-                            display.showUpdateForm(form);
-                        }
-                    });
+                    display.showEntryDetailView(currentInfo);
                 }
             });
     }
@@ -342,36 +341,13 @@ public class EntryPresenter extends AbstractPresenter {
 
             switch (menu.getCurrentSelection().getMenu()) {
 
-            case GENERAL: // TODO : need to add this only once not every time the selection changes
-                Button editButton = display.showEntryDetailView(view);
-                editButton.addClickHandler(new ClickHandler() {
-
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        UpdateEntryForm<? extends EntryInfo> form = ViewFactory.getUpdateForm(view
-                                .getInfo());
-                        if (form == null)
-                            return;
-
-                        display.showUpdateForm(form);
-                    }
-                });
+            case GENERAL:
+                display.showEntryDetailView(currentInfo);
                 break;
 
             case SEQ_ANALYSIS:
-                Flash.Parameters params = new Flash.Parameters();
-                params.setSwfPath("static/sc/SequenceChecker.swf");
-                params.setSessiondId(AppController.sessionId);
-                params.setEntryId(view.getInfo().getId() + "");
-
-                Button button = display.showSequenceView(sequenceTable, new Flash(params));
-                if (button != null) {
-                    button.addClickHandler(new ClickHandler() {
-                        @Override
-                        public void onClick(ClickEvent event) {
-                        }
-                    });
-                }
+                boolean showFlash = (menu.getCurrentSelection().getCount() > 0);
+                display.showSequenceView(currentInfo, showFlash);
                 break;
 
             case SAMPLES:

@@ -19,7 +19,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
 
@@ -85,8 +84,8 @@ public class EntryAddPresenter {
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    Window.alert("Failed to retrieve the sample location data: "
-                            + caught.getMessage());
+                    eventBus.fireEvent(new FeedbackEvent(true,
+                            "Failed to retrieve the sample location data."));
                 }
 
                 @Override

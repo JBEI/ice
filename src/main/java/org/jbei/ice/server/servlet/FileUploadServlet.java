@@ -1,4 +1,4 @@
-package org.jbei.ice.server;
+package org.jbei.ice.server.servlet;
 
 import gwtupload.server.UploadAction;
 import gwtupload.server.exceptions.UploadActionException;

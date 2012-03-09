@@ -7,6 +7,7 @@ public class AttachmentInfo implements IsSerializable {
     private long id;
     private String filename;
     private String description;
+    private String fileId;
 
     public AttachmentInfo() {
     }
@@ -33,5 +34,13 @@ public class AttachmentInfo implements IsSerializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public void setFileId(String fileId) {
+        this.fileId = fileId;
+    }
+
+    public String getFileId() {
+        return this.fileId;
     }
 }

@@ -13,6 +13,8 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class Flash extends Widget {
 
+    public static String SWF_LOCATION = "static/swf/";
+
     public Flash(Parameters params) {
         setElement(DOM.createDiv());
         Element element = getFlashElement(params);
@@ -22,8 +24,7 @@ public class Flash extends Widget {
     public Element getFlashElement(Parameters params) {
         String url = GWT.getHostPageBaseURL();
         Element el = DOM.createElement("EMBED");
-        DOM.setElementAttribute(el, "src", url
-                + "resources/org.jbei.ice.web.pages.UnprotectedPage/" + params.getSwfPath()
+        DOM.setElementAttribute(el, "src", url + SWF_LOCATION + "/" + params.getSwfPath()
                 + "?entryId=" + params.getEntryId() + "&sessionId=" + params.getSessiondId());
         DOM.setElementAttribute(el, "width", "100%");
         DOM.setElementAttribute(el, "height", "100%");
@@ -40,7 +41,7 @@ public class Flash extends Widget {
     public static class Parameters {
         private String sessiondId;
         private String entryId;
-        private String swf; // e.g. static/vv/VectorViewer.swf
+        private String swf;
 
         public String getSessiondId() {
             return sessiondId;

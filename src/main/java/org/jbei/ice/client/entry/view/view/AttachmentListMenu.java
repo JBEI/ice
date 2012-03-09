@@ -2,10 +2,12 @@ package org.jbei.ice.client.entry.view.view;
 
 import java.util.ArrayList;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -20,10 +22,10 @@ import com.google.gwt.user.client.ui.Widget;
 public class AttachmentListMenu extends Composite {
 
     private final FlexTable layout;
-    private AttachmentItem currentSelected;
     private Button cancelAttachmentSubmission;
     private Button saveAttachment;
     private Widget attachmentForm;
+    private final AttachmentMenuPresenter presenter;
 
     public AttachmentListMenu() {
         layout = new FlexTable();
@@ -66,6 +68,7 @@ public class AttachmentListMenu extends Composite {
         });
 
         attachmentForm.setVisible(false);
+        presenter = new AttachmentMenuPresenter(this);
     }
 
     void setMenuItems(ArrayList<AttachmentItem> items) {
@@ -74,14 +77,7 @@ public class AttachmentListMenu extends Composite {
 
         for (AttachmentItem item : items) {
             final MenuCell cell = new MenuCell(item);
-            cell.addClickHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    currentSelected = cell.getItem();
-                }
-            });
-
+            cell.addClickHandler(presenter.getCellClickHandler(item));
             layout.setWidget(row, 0, cell);
             row += 1;
         }
@@ -118,8 +114,8 @@ public class AttachmentListMenu extends Composite {
             this.item = item;
 
             String name = item.getName();
-            if (name.length() > 25) {
-                name = (name.substring(0, 22) + "...");
+            if (name.length() > 20) {
+                name = (name.substring(0, 18) + "...");
             }
 
             String description = (item.getDescription() == null || item.getDescription().isEmpty()) ? "No description provided"
@@ -131,14 +127,8 @@ public class AttachmentListMenu extends Composite {
 
             panel = new HTMLPanel(html);
             panel.setStyleName("entry_detail_view_row");
+            panel.setTitle(item.getName());
             initWidget(panel);
-        }
-
-        public void setSelected(boolean selected) {
-            if (selected)
-                this.addStyleName("entry_detail_view_row_selected");
-            else
-                this.removeStyleName("entry_detail_view_row_selected");
         }
 
         @Override
@@ -157,6 +147,18 @@ public class AttachmentListMenu extends Composite {
 
         public AttachmentMenuPresenter(AttachmentListMenu view) {
             this.view = view;
+        }
+
+        public ClickHandler getCellClickHandler(final AttachmentItem item) {
+            return new ClickHandler() {
+
+                @Override
+                public void onClick(ClickEvent event) {
+                    String url = GWT.getHostPageBaseURL() + "download?type=attachment&id="
+                            + item.getFileId();
+                    Window.open(url, "Attachment Download", "");
+                }
+            };
         }
     }
 }

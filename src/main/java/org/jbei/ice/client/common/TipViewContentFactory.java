@@ -178,7 +178,7 @@ public class TipViewContentFactory {
         addField(table, 7, 0, "Keywords", entry.getKeywords());
         addField(table, 8, 0, "References", entry.getReferences());
         addField(table, 9, 0, "Bio Safety", entry.getBioSafetyLevel() + "");
-        addField(table, 10, 0, "IP Information", entry.getPartId());
+        addField(table, 10, 0, "IP Information", entry.getIntellectualProperty());
 
         table.setHTML(11, 0, "&nbsp;");
         table.getFlexCellFormatter().setColSpan(12, 1, 4);
