@@ -75,6 +75,14 @@ public class AttachmentListMenu extends Composite {
 
         int row = 2;
 
+        // clear rows 2+
+        while (row < layout.getRowCount()) {
+            layout.removeRow(row);
+            row += 1;
+        }
+
+        row = 2;
+
         for (AttachmentItem item : items) {
             final MenuCell cell = new MenuCell(item);
             cell.addClickHandler(presenter.getCellClickHandler(item));

@@ -262,17 +262,17 @@ public class EntryPresenter extends AbstractPresenter {
 
                     // attachments
                     ArrayList<AttachmentInfo> attachments = result.getAttachments();
+                    ArrayList<AttachmentItem> items = new ArrayList<AttachmentItem>();
                     if (attachments != null) {
-                        ArrayList<AttachmentItem> items = new ArrayList<AttachmentItem>();
                         for (AttachmentInfo info : attachments) {
                             AttachmentItem item = new AttachmentItem(info.getId(), info
                                     .getFilename(), info.getDescription());
                             item.setFileId(info.getFileId());
                             items.add(item);
                         }
-                        display.setAttachments(items);
                     }
 
+                    display.setAttachments(items);
                     // menu views
                     ArrayList<SampleStorage> data = new ArrayList<SampleStorage>();
                     for (SampleInfo sampleInfo : result.getSampleMap().keySet()) {
