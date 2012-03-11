@@ -82,6 +82,6 @@ public class SearchOption extends Composite {
     }
 
     public String getOperand() {
-        return operand.getOperand();
+        return operand.getSelectedOperand();
     }
 }

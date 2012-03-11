@@ -1,6 +1,7 @@
 package org.jbei.ice.client.common;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
@@ -31,5 +32,13 @@ public abstract class FilterOperand extends Composite {
 
     public abstract ArrayList<QueryOperator> getOperatorList();
 
-    public abstract String getOperand();
+    public abstract String getSelectedOperand();
+
+    /**
+     * 
+     * @return list of possible operands that are displayed to the user.
+     *         e.g. for status, the list will contain (currently) In Progress, Completed
+     *         and Planned
+     */
+    public abstract HashSet<String> getPossibleOperands();
 }

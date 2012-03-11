@@ -1,6 +1,7 @@
 package org.jbei.ice.client.common.search;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import org.jbei.ice.client.common.FilterOperand;
 import org.jbei.ice.shared.QueryOperator;
@@ -15,6 +16,7 @@ public class BlastFilterOperand extends FilterOperand {
     private final TextArea area;
     private final ListBox list;
     private final ArrayList<QueryOperator> operators;
+    private final HashSet<String> operands;
 
     public BlastFilterOperand() {
         super(SearchFilterType.BLAST);
@@ -37,6 +39,10 @@ public class BlastFilterOperand extends FilterOperand {
         this.operators.add(QueryOperator.TBLAST_X);
         list.addItem(QueryOperator.TBLAST_X.operator(), QueryOperator.TBLAST_X.value());
 
+        this.operands = new HashSet<String>();
+        this.operands.add(QueryOperator.BLAST_N.value());
+        this.operands.add(QueryOperator.TBLAST_X.value());
+
         layout.setWidget(1, 0, list);
     }
 
@@ -52,7 +58,12 @@ public class BlastFilterOperand extends FilterOperand {
     }
 
     @Override
-    public String getOperand() {
+    public String getSelectedOperand() {
         return area.getText();
+    }
+
+    @Override
+    public HashSet<String> getPossibleOperands() {
+        return this.operands;
     }
 }

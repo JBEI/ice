@@ -70,7 +70,7 @@ public class HeaderPresenter {
                 return;
 
             // display to user
-            String operand = currentSelected.getOperand();
+            String operand = currentSelected.getSelectedOperand();
             switch (currentSelected.getType()) {
 
             case BLAST:
@@ -96,11 +96,15 @@ public class HeaderPresenter {
 
                 int indexOfType = view.getSearchInput().indexOf(type);
                 if (indexOfType == -1) {
-                    String currentFilter = type + operator + operand;
+                    String currentFilter = type + operator;
+                    if (operand.contains(" "))
+                        currentFilter += ("\"" + operand + "\"");
+                    else
+                        currentFilter += operand;
                     view.getSearchComposite().appendFilter(currentFilter);
                 } else {
                     String parsed = QuickSearchParser.containsType(view.getSearchInput(),
-                        currentSelected.getType(), operand, operator);
+                        currentSelected, operand, operator);
                     view.getSearchComposite().setTextFilter(parsed);
                 }
             }

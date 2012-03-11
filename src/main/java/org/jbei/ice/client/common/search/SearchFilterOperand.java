@@ -1,6 +1,7 @@
 package org.jbei.ice.client.common.search;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import org.jbei.ice.client.common.FilterOperand;
 import org.jbei.ice.shared.QueryOperator;
@@ -38,10 +39,8 @@ public class SearchFilterOperand extends FilterOperand {
     }
 
     public String getOperandValues() {
-
         int selectedIdx = list.getSelectedIndex();
         String selectedValue = list.getValue(selectedIdx);
-
         return (selectedValue + box.getText());
     }
 
@@ -52,12 +51,17 @@ public class SearchFilterOperand extends FilterOperand {
     }
 
     @Override
-    public String getOperand() {
+    public String getSelectedOperand() {
         return this.box.getText();
     }
 
     @Override
     public ArrayList<QueryOperator> getOperatorList() {
         return operators;
+    }
+
+    @Override
+    public HashSet<String> getPossibleOperands() {
+        return null;
     }
 }
