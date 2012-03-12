@@ -203,7 +203,6 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                         }
                     });
             }
-
         };
         display.addAddToSubmitHandler(addHandler);
 
@@ -256,7 +255,8 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
             @Override
             public void onClick(ClickEvent event) {
 
-                final ArrayList<Long> ids = new ArrayList<Long>(new HasEntry().getEntrySet());
+                final ArrayList<Long> ids = new ArrayList<Long>(
+                        new HasEntry().getSelectedEntrySet());
 
                 model.removeEntriesFromFolder(currentFolder, ids, new FolderRetrieveEventHandler() {
 
@@ -296,8 +296,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         this(model, display);
         long id = 0;
         try {
-            if (param != null)
-                id = Long.decode(param);
+            id = Long.decode(param);
         } catch (NumberFormatException nfe) {
             id = 0;
         }
@@ -543,11 +542,11 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
     private class HasEntry implements IHasEntryId {
 
         @Override
-        public Set<Long> getEntrySet() {
+        public Set<Long> getSelectedEntrySet() {
             switch (mode) {
             case COLLECTION:
             default:
-                return collectionsDataTable.getEntrySet();
+                return collectionsDataTable.getSelectedEntrySet();
 
             case SEARCH:
                 return searchPresenter.getEntrySet();

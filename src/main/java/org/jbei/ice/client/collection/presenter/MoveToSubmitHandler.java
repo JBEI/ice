@@ -31,7 +31,7 @@ public abstract class MoveToSubmitHandler implements SubmitHandler {
             destinationFolders.add(option.getId());
         }
 
-        final ArrayList<Long> entryIds = new ArrayList<Long>(hasEntry.getEntrySet());
+        final ArrayList<Long> entryIds = new ArrayList<Long>(hasEntry.getSelectedEntrySet());
 
         // validate
         if (destinationFolders.isEmpty() || entryIds.isEmpty())

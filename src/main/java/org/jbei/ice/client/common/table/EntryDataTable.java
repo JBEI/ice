@@ -262,7 +262,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
     @Override
     // returns the selected entry set
-    public Set<Long> getEntrySet() {
+    public Set<Long> getSelectedEntrySet() {
         Set<Long> entrySet = new HashSet<Long>();
         for (EntryInfo info : selectionModel.getSelectedSet()) {
             entrySet.add(info.getId());

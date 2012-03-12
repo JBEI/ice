@@ -116,10 +116,10 @@ public class AdvancedSearchPresenter {
         switch (mode) {
         case SEARCH:
         default:
-            return table.getEntrySet();
+            return table.getSelectedEntrySet();
 
         case BLAST:
-            return display.getBlastResultTable().getEntrySet();
+            return display.getBlastResultTable().getSelectedEntrySet();
         }
 
     }

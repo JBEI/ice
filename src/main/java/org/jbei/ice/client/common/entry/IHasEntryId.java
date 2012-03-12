@@ -4,6 +4,6 @@ import java.util.Set;
 
 public interface IHasEntryId {
 
-    Set<Long> getEntrySet();
+    Set<Long> getSelectedEntrySet();
 
 }

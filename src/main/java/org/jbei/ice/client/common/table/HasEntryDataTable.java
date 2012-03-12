@@ -44,7 +44,7 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
     }
 
     @Override
-    public Set<Long> getEntrySet() {
+    public Set<Long> getSelectedEntrySet() {
         Set<Long> infoSet = new HashSet<Long>();
 
         for (HasEntryInfo info : selectionModel.getSelectedSet()) {
