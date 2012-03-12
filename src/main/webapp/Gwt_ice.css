@@ -581,7 +581,7 @@ a.cell_mouseover:hover {
 }
 
 .collection_user_menu_row_selected {
-	background-color: #f2f39e; 
+	background-color: #f9edbe; 
     cursor: default;
     font-weight: bold;
     color: #4d5b76;

@@ -4,9 +4,8 @@
   <inherits name='com.google.gwt.user.User'/>
   <inherits name="gwtupload.GWTUpload"/>
   
-  <!--<set-configuration-property name="UiBinder.useSafeHtmlTemplates" value="true" />
-
-   Inherit the default GWT style sheet.  You can change       -->
+  <stylesheet src="Upload.css"/>
+  <!--  Inherit the default GWT style sheet.  You can change       -->
   <!-- the theme of your GWT application by uncommenting          -->
   <!-- any one of the following lines.                            -->
   <!-- <inherits name='com.google.gwt.user.theme.clean.Clean'/>  -->

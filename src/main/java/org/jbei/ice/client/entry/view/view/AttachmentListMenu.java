@@ -1,5 +1,12 @@
 package org.jbei.ice.client.entry.view.view;
 
+import gwtupload.client.DecoratedFileUpload;
+import gwtupload.client.IFileInput.FileInputType;
+import gwtupload.client.IUploadStatus.Status;
+import gwtupload.client.IUploader;
+import gwtupload.client.IUploader.OnFinishUploaderHandler;
+import gwtupload.client.SingleUploader;
+
 import java.util.ArrayList;
 
 import com.google.gwt.core.client.GWT;
@@ -10,7 +17,6 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -98,7 +104,7 @@ public class AttachmentListMenu extends Composite {
         table.setWidth("100%");
 
         table.setHTML(0, 0, "<b class=\"font-80em\">File</b>");
-        table.setWidget(1, 0, new FileUpload());
+        table.setWidget(1, 0, createUploader());
         table.setHTML(2, 0, "<b class=\"font-80em\">Description</b>");
         TextArea area = new TextArea();
         table.setWidget(3, 0, area);
@@ -110,6 +116,25 @@ public class AttachmentListMenu extends Composite {
         table.setWidget(4, 0, panel);
         table.getFlexCellFormatter().setHorizontalAlignment(4, 0, HasAlignment.ALIGN_RIGHT);
         return table;
+    }
+
+    protected Widget createUploader() {
+        DecoratedFileUpload d = new DecoratedFileUpload("foo");
+        SingleUploader uploader = new SingleUploader(FileInputType.CUSTOM, null, saveAttachment);
+        uploader.setServletPath("upload.gupld");
+        uploader.setAutoSubmit(true);
+        uploader.setWidth("240px");
+
+        uploader.addOnFinishUploadHandler(new OnFinishUploaderHandler() {
+            public void onFinish(IUploader uploader) {
+                if (uploader.getStatus() == Status.SUCCESS) {
+                    Window.alert("Server response: \n" + uploader.getServerResponse());
+                    uploader.reset();
+                }
+            }
+        });
+
+        return uploader;
     }
 
     private class MenuCell extends Composite implements HasClickHandlers {

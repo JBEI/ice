@@ -280,14 +280,19 @@
 			<type>pom</type>
 		</dependency>
 		<dependency>
-			<groupId>com.googlecode.gwtupload</groupId>
-			<artifactId>gwtupload</artifactId>
-			<version>0.6.3-compat</version>
-		</dependency>
-		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-servlet</artifactId>
 			<version>2.4.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.gwtupload</groupId>
+			<artifactId>gwtupload</artifactId>
+			<version>0.6.4</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>1.2.2</version>
 		</dependency>
 	</dependencies>
 	<build>

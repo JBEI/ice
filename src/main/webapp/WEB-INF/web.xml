@@ -33,26 +33,6 @@
        <dispatcher>FORWARD</dispatcher>
     </filter-mapping>
 
-	<!-- Wicket Application 
-	<filter>
-		<filter-name>wicket.ice</filter-name>
-		<filter-class>org.apache.wicket.protocol.http.WicketFilter</filter-class>
-		<init-param>
-			<param-name>applicationClassName</param-name>
-			<param-value>org.jbei.ice.web.WicketApplication</param-value>
-		</init-param>
-		<init-param>
-			<param-name>configuration</param-name>
-			<param-value>deployment</param-value>
-		</init-param>
-	</filter>
-
-	<filter-mapping>
-		<filter-name>wicket.ice</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping> -->
-
-
 	<!-- BlazeDS -->
 	<servlet>
 		<servlet-name>MessageBrokerServlet</servlet-name>
@@ -114,7 +94,23 @@
         <url-pattern>/gwt_ice/ice</url-pattern>
     </servlet-mapping>
     
-    <!-- file upload from gwt -->
+    <!-- file upload -->
+    
+    <context-param>
+    <!-- max size of the upload request -->
+    <param-name>maxSize</param-name>
+    <param-value>3145728</param-value>
+  </context-param>
+  <context-param>
+    <!-- Useful in development mode to slow down the uploads in fast networks.
+         Put the number of milliseconds to sleep in each block received in the server.
+         false or 0, means don't use slow uploads  -->
+    <param-name>slowUploads</param-name>
+    <param-value>2</param-value>
+  </context-param>
+
+
+  
     <servlet>
         <servlet-name>FileUploadServlet</servlet-name>
         <servlet-class>org.jbei.ice.server.servlet.FileUploadServlet</servlet-class>

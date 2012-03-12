@@ -2,6 +2,7 @@ package org.jbei.ice.server.servlet;
 
 import gwtupload.server.UploadAction;
 import gwtupload.server.exceptions.UploadActionException;
+import gwtupload.shared.UConsts;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,10 +20,7 @@ public class FileUploadServlet extends UploadAction {
     private static final long serialVersionUID = 1L;
 
     Hashtable<String, String> receivedContentTypes = new Hashtable<String, String>();
-    /**
-     * Maintain a list with received files and their content types.
-     */
-    Hashtable<String, File> receivedFiles = new Hashtable<String, File>();
+    Hashtable<String, File> receivedFiles = new Hashtable<String, File>(); // received files list and content types
 
     /**
      * Override executeAction to save the received files in a custom place
@@ -74,14 +72,14 @@ public class FileUploadServlet extends UploadAction {
     @Override
     public void getUploadedFile(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        String fieldName = request.getParameter(PARAM_SHOW);
+        String fieldName = request.getParameter(UConsts.PARAM_SHOW);
         File f = receivedFiles.get(fieldName);
         if (f != null) {
             response.setContentType(receivedContentTypes.get(fieldName));
             FileInputStream is = new FileInputStream(f);
             copyFromInputStreamToOutputStream(is, response.getOutputStream());
         } else {
-            renderXmlResponse(request, response, ERROR_ITEM_NOT_FOUND);
+            renderXmlResponse(request, response, XML_ERROR_ITEM_NOT_FOUND);
         }
     }
 
