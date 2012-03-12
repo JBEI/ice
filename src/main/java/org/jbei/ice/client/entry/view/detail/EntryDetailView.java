@@ -52,7 +52,7 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         showParameters();
 
         // samples
-        showSamples();
+        //        showSamples();
 
         // sequence
         createSequenceView();
@@ -237,7 +237,7 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         notes.setWidth("100%");
 
         int row = 0;
-        notes.setWidget(row, 0, new Label("Notes"));
+        notes.setWidget(row, 0, new Label("Notes")); // TODO : parse this
         notes.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_header");
 
         row += 1;
@@ -245,7 +245,7 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         notes.getFlexCellFormatter().setHeight(row, 0, "10px");
 
         row += 1;
-        notes.setWidget(row, 0, new Label(info.getLongDescription()));
+        notes.setHTML(row, 0, "<span class=\"font-80em\">" + info.getLongDescription() + "</span>");
 
         table.setWidget(currentRow, 0, notes);
         table.getFlexCellFormatter().setColSpan(currentRow, 0, 4);

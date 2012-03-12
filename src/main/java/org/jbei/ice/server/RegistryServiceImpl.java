@@ -48,6 +48,7 @@ import org.jbei.ice.lib.permissions.AuthenticatedPermissionManager;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
+import org.jbei.ice.lib.utils.RichTextRenderer;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.FolderDetails;
@@ -420,12 +421,62 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             boolean hasSequence = (SequenceManager.getByEntry(entry) != null);
 
-            return EntryToInfoFactory
-                    .getInfo(entry, attachments, sampleMap, sequences, hasSequence);
+            EntryInfo info = EntryToInfoFactory.getInfo(entry, attachments, sampleMap, sequences,
+                hasSequence);
+
+            // convert notes. this will eventually be pushed to client
+            String html = RichTextRenderer.richTextToHtml(info.getLongDescriptionType(),
+                info.getLongDescription());
+            String parsed = getParsedNotes(html);
+            info.setLongDescription(parsed);
+            return info;
+
         } catch (ManagerException e) {
             Logger.error(e);
             return null;
         }
+    }
+
+    private String getParsedNotes(String s) {
+        if (s == null) {
+            return null;
+        }
+
+        final StringBuilder buffer = new StringBuilder();
+        int newlineCount = 0;
+
+        buffer.append("<p>");
+        for (int i = 0; i < s.length(); i++) {
+            final char c = s.charAt(i);
+
+            switch (c) {
+            case '\n':
+                newlineCount++;
+                break;
+
+            case '\r':
+                break;
+
+            default:
+                if (newlineCount == 1) {
+                    buffer.append("<br/>");
+                } else if (newlineCount > 1) {
+                    buffer.append("</p><p>");
+                }
+
+                buffer.append(c);
+                newlineCount = 0;
+                break;
+            }
+        }
+        if (newlineCount == 1) {
+            buffer.append("<br/>");
+        } else if (newlineCount > 1) {
+            buffer.append("</p><p>");
+        }
+        buffer.append("</p>");
+        return buffer.toString();
+
     }
 
     @Override
