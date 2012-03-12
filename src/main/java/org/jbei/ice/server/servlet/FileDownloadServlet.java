@@ -56,6 +56,7 @@ public class FileDownloadServlet extends HttpServlet {
 
         String fileId = request.getParameter("id");
         String type = request.getParameter("type");
+        String name = request.getParameter("name");
         Logger.info(FileDownloadServlet.class.getSimpleName() + ": user = " + account.getEmail()
                 + ", file type = " + type + ", file id = " + fileId);
 
@@ -74,7 +75,9 @@ public class FileDownloadServlet extends HttpServlet {
 
         response.setContentType("application/octet-stream");
         response.setContentLength((int) file.length());
-        response.setHeader("Content-Disposition", "attachment;filename=" + file.getName());
+        if (name == null || name.isEmpty())
+            name = file.getName();
+        response.setHeader("Content-Disposition", "attachment;filename=" + name);
 
         OutputStream os = response.getOutputStream();
         DataInputStream is = new DataInputStream(new FileInputStream(file));

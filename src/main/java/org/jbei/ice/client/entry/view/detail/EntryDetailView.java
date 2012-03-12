@@ -245,7 +245,8 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         notes.getFlexCellFormatter().setHeight(row, 0, "10px");
 
         row += 1;
-        notes.setHTML(row, 0, "<span class=\"font-80em\">" + info.getLongDescription() + "</span>");
+        String description = (info.getLongDescription() == null) ? "" : info.getLongDescription();
+        notes.setHTML(row, 0, "<span class=\"font-80em\">" + description + "</span>");
 
         table.setWidget(currentRow, 0, notes);
         table.getFlexCellFormatter().setColSpan(currentRow, 0, 4);
