@@ -58,7 +58,7 @@ public class FileDownloadServlet extends HttpServlet {
         String type = request.getParameter("type");
         String name = request.getParameter("name");
         Logger.info(FileDownloadServlet.class.getSimpleName() + ": user = " + account.getEmail()
-                + ", file type = " + type + ", file id = " + fileId);
+                + ", file type = " + type + ", name = " + name + ", file id = " + fileId);
 
         File file = null;
 

@@ -7,6 +7,7 @@ import org.jbei.ice.client.collection.presenter.MoveToSubmitHandler;
 import org.jbei.ice.client.collection.view.OptionSelect;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.CssResource.ImportedWithPrefix;
@@ -135,5 +136,9 @@ public class CollectionEntryActionMenu implements IsWidget {
 
     public void setMoveToSubmitHandler(MoveToSubmitHandler moveHandler) {
         this.move.addSubmitHandler(moveHandler);
+    }
+
+    public void addRemoveHandler(ClickHandler handler) {
+        this.removeButton.addClickHandler(handler);
     }
 }

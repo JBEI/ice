@@ -169,4 +169,23 @@ public class CollectionsModel {
                 }
             });
     }
+
+    public void removeEntriesFromFolder(long source, ArrayList<Long> ids,
+            final FolderRetrieveEventHandler handler) {
+        service.removeFromUserCollection(AppController.sessionId, source, ids,
+            new AsyncCallback<FolderDetails>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    FeedbackEvent event = new FeedbackEvent(true,
+                            "Error removing items from folder");
+                    eventBus.fireEvent(event);
+                }
+
+                @Override
+                public void onSuccess(FolderDetails results) {
+                    handler.onMenuRetrieval(new FolderRetrieveEvent(results));
+                }
+            });
+    }
 }

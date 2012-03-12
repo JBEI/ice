@@ -139,4 +139,7 @@ public interface RegistryServiceAsync {
 
     void saveBulkImportDraft(String sid, String email, String name, ArrayList<EntryInfo> info,
             AsyncCallback<BulkImportDraftInfo> callback);
+
+    void removeFromUserCollection(String sessionId, long source, ArrayList<Long> ids,
+            AsyncCallback<FolderDetails> asyncCallback);
 }

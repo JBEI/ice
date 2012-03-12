@@ -181,14 +181,14 @@ public class TipViewContentFactory {
         addField(table, 10, 0, "IP Information", entry.getIntellectualProperty());
 
         table.setHTML(11, 0, "&nbsp;");
-        table.getFlexCellFormatter().setColSpan(12, 1, 4);
+        table.getFlexCellFormatter().setColSpan(11, 0, 4);
 
         table.setHTML(12, 0, "<b>Samples</b>");
         table.getCellFormatter().addStyleName(12, 0, "entry_tooltip_sub_header");
-        table.getFlexCellFormatter().setColSpan(12, 1, 4);
+        table.getFlexCellFormatter().setColSpan(12, 0, 4);
 
-        table.setHTML(13, 0, "&nbsp;");
-        table.getFlexCellFormatter().setColSpan(13, 1, 4);
+        table.setHTML(13, 0, "&nbsp;"); // TODO : samples widget goes here
+        table.getFlexCellFormatter().setColSpan(13, 0, 4);
     }
 
     private static String generateDate(Date date) {

@@ -790,7 +790,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             ArrayList<Long> destination, ArrayList<Long> entryIds) {
 
         try {
-            if (FolderManager.removeFolderContents(source, entryIds)) {
+            if (FolderManager.removeFolderContents(source, entryIds) != null) {
                 ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
 
                 for (long folderId : destination) {
@@ -811,6 +811,24 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.error(e);
         }
         return null;
+    }
+
+    @Override
+    public FolderDetails removeFromUserCollection(String sid, long source, ArrayList<Long> entryIds) {
+        try {
+            Folder folder = FolderManager.removeFolderContents(source, entryIds);
+            if (folder == null)
+                return null;
+
+            FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), false);
+            int folderSize = FolderManager.getFolderSize(folder.getId());
+            details.setCount(folderSize);
+            details.setDescription(folder.getDescription());
+            return details;
+        } catch (ManagerException e) {
+            Logger.error(e);
+            return null;
+        }
     }
 
     @Override

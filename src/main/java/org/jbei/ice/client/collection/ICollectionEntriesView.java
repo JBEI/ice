@@ -12,6 +12,7 @@ import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.shared.EntryAddType;
 
 import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.Widget;
@@ -101,4 +102,6 @@ public interface ICollectionEntriesView {
     void addAddToSubmitHandler(SubmitHandler handler);
 
     void addMoveSubmitHandler(MoveToSubmitHandler moveHandler);
+
+    void addRemoveHandler(ClickHandler handler);
 }

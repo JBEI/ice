@@ -15,6 +15,11 @@ public class FolderRetrieveEvent extends GwtEvent<FolderRetrieveEventHandler> {
         this.items = new ArrayList<FolderDetails>(items);
     }
 
+    public FolderRetrieveEvent(FolderDetails item) {
+        this.items = new ArrayList<FolderDetails>();
+        this.items.add(item);
+    }
+
     @Override
     public GwtEvent.Type<FolderRetrieveEventHandler> getAssociatedType() {
         return TYPE;

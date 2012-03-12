@@ -220,7 +220,7 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
             sequence.setWidget(row, 0, new Flash(param));
             sequence.getFlexCellFormatter().setHeight(row, 0, "600px");
         } else {
-            sequence.setWidget(row, 0, new HTML("links"));
+            sequence.setWidget(row, 0, new HTML(" TODO : links to open in vector editor"));
             // TODO : add links to upload or create a new one in vector editor
             // TODO : the latter action opens vector editor in a new window
         }

@@ -18,6 +18,7 @@ import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.shared.EntryAddType;
 
 import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -262,6 +263,11 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
     @Override
     public void addMoveSubmitHandler(MoveToSubmitHandler moveHandler) {
         subMenu.setMoveToSubmitHandler(moveHandler);
+    }
+
+    @Override
+    public void addRemoveHandler(ClickHandler handler) {
+        subMenu.addRemoveHandler(handler);
     }
 
     @Override

@@ -25,8 +25,6 @@ public interface IEntryView {
 
     PermissionsWidget getPermissionsWidget();
 
-    void showPermissionsWidget();
-
     void addSampleButtonHandler(ClickHandler handler);
 
     void addGeneralEditButtonHandler(ClickHandler clickHandler);

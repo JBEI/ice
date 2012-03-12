@@ -65,7 +65,6 @@ public class EntryView extends Composite implements IEntryView {
 
     private Label headerLabel;
     private EntrySampleTable sampleTable;
-    //    private SequenceTable sequenceTable;
     private EntrySequenceTable sequenceTable;
 
     // menu
@@ -155,12 +154,6 @@ public class EntryView extends Composite implements IEntryView {
         mainContent.setWidget(1, 0, form);
     }
 
-    @Override
-    public void showPermissionsWidget() {
-        mainContent.setWidget(0, 0, new HTML("Permissions"));
-        mainContent.setWidget(1, 0, this.permissions);
-    }
-
     /**
      * Center content
      */
@@ -190,6 +183,13 @@ public class EntryView extends Composite implements IEntryView {
         mainContent.setWidget(3, 0, attachmentMenu);
         mainContent.getFlexCellFormatter().setStyleName(3, 0, "entry_view_right_menu");
         mainContent.getFlexCellFormatter().setVerticalAlignment(3, 0, HasAlignment.ALIGN_TOP);
+
+        /*
+        mainContent.setHTML(4, 0, "&nbsp");
+        mainContent.setWidget(5, 0, new Label("FOO"));
+        mainContent.getFlexCellFormatter().setStyleName(5, 0, "entry_view_right_menu");
+        mainContent.getFlexCellFormatter().setVerticalAlignment(5, 0, HasAlignment.ALIGN_TOP);
+        */
 
         return mainContent;
     }

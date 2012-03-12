@@ -120,4 +120,6 @@ public interface RegistryService extends RemoteService {
     NewsItem createNewsItem(String sessionId, NewsItem item);
 
     FolderDetails updateFolder(String sid, long folderId, FolderDetails update);
+
+    FolderDetails removeFromUserCollection(String sessionId, long source, ArrayList<Long> ids);
 }

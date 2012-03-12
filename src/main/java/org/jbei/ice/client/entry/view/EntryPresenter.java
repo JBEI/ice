@@ -48,14 +48,14 @@ public class EntryPresenter extends AbstractPresenter {
         this.display = new EntryView();
 
         // add handler for the permission link
-        display.getDetailMenu().getPermissionLink().addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                //                retrievePermissionData(id); TODO : RequestCycle.get() causes a failure on the server
-                display.showPermissionsWidget();
-            }
-        });
+        //        display.getDetailMenu().getPermissionLink().addClickHandler(new ClickHandler() {
+        //
+        //            @Override
+        //            public void onClick(ClickEvent event) {
+        //                retrievePermissionData(currentId);
+        //                display.showPermissionsWidget();
+        //            }
+        //        });
 
         addEntryViewHandler();
         MenuSelectionHandler handler = new MenuSelectionHandler(display.getDetailMenu());
@@ -297,6 +297,7 @@ public class EntryPresenter extends AbstractPresenter {
     }
 
     private void retrievePermissionData(final long entryId) {
+
         // retrieve data for permission
         service.retrievePermissionData(AppController.sessionId, entryId,
             new AsyncCallback<ArrayList<PermissionInfo>>() {

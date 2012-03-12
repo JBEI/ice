@@ -112,11 +112,16 @@ public class FolderManager {
         }
     }
 
-    public static boolean removeFolderContents(long folderId, ArrayList<Long> entryIds)
+    public static Folder removeFolderContents(long folderId, ArrayList<Long> entryIds)
             throws ManagerException {
         Session session = DAO.newSession();
         try {
             Folder folder = get(folderId);
+            boolean isSystemFolder = folder.getOwnerEmail().equals(
+                AccountManager.getSystemAccount().getEmail());
+            if (isSystemFolder)
+                throw new ManagerException("Cannot modify non user folder " + folder.getName());
+
             Iterator<Entry> it = folder.getContents().iterator();
 
             while (it.hasNext()) {
@@ -124,8 +129,7 @@ public class FolderManager {
                 if (entryIds.contains(entry.getId()))
                     it.remove();
             }
-            update(folder);
-            return true;
+            return update(folder);
 
         } finally {
             if (session.isOpen())

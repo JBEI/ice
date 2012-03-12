@@ -38,6 +38,8 @@ import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -233,8 +235,12 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                             display.updateMenuItemCounts(items);
                             String entryDisp = (entryIds.size() == 1) ? "entry" : "entries";
                             String msg = "<b>" + entryIds.size() + "</b> " + entryDisp
-                                    + " successfully moved to ";
-                            msg += ("\"<b>" + results.get(0).getName() + "</b>\" collection.");
+                                    + " successfully moved";
+
+                            if (results.size() == 1)
+                                msg += ("\" to <b>" + results.get(0).getName() + "</b>\" collection.");
+                            else
+                                msg += ".";
 
                             retrieveEntriesForFolder(currentFolder);
                             display.showFeedbackMessage(msg, false);
@@ -243,6 +249,44 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
             }
         };
         display.addMoveSubmitHandler(moveHandler);
+
+        // remove handler
+        ClickHandler removeHandler = new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+
+                final ArrayList<Long> ids = new ArrayList<Long>(new HasEntry().getEntrySet());
+
+                model.removeEntriesFromFolder(currentFolder, ids, new FolderRetrieveEventHandler() {
+
+                    @Override
+                    public void onMenuRetrieval(FolderRetrieveEvent event) {
+                        if (event == null || event.getItems() == null) {
+                            display.showFeedbackMessage(
+                                "An error occured while removing entries. Please try again.", true);
+                            return;
+                        }
+
+                        FolderDetails result = event.getItems().get(0);
+                        ArrayList<MenuItem> items = new ArrayList<MenuItem>();
+                        MenuItem updateItem = new MenuItem(result.getId(), result.getName(), result
+                                .getCount(), result.isSystemFolder());
+                        items.add(updateItem);
+                        display.updateMenuItemCounts(items);
+
+                        String entryDisp = (ids.size() == 1) ? "entry" : "entries";
+                        String msg = "<b>" + ids.size() + "</b> " + entryDisp
+                                + " successfully moved to ";
+                        msg += ("\"<b>" + result.getName() + "</b>\" collection.");
+
+                        retrieveEntriesForFolder(currentFolder);
+                        display.showFeedbackMessage(msg, false);
+                    }
+                });
+            }
+        };
+        display.addRemoveHandler(removeHandler);
     }
 
     public CollectionsEntriesPresenter(CollectionsModel model,
