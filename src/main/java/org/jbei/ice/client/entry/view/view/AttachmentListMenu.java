@@ -72,13 +72,16 @@ public class AttachmentListMenu extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                // TODO : clear the form field values
-                attachmentForm.setVisible(false);
+                switchButton();
             }
         });
 
         attachmentForm.setVisible(false);
         presenter = new AttachmentMenuPresenter(this);
+
+        // this is replaced when menu data is set
+        layout.setHTML(2, 0,
+            "<span style=\"padding: 2px\" class=\"font-75em\">No attachments available</span>");
     }
 
     public void switchButton() {
@@ -98,6 +101,8 @@ public class AttachmentListMenu extends Composite {
     }
 
     void setMenuItems(ArrayList<AttachmentItem> items) {
+        if (items.isEmpty())
+            return;
 
         int row = 2;
 
