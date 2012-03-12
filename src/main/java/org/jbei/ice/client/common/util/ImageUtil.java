@@ -25,6 +25,18 @@ public class ImageUtil {
 
         @Source("org/jbei/ice/client/resource/image/plus.png")
         ImageResource plus();
+
+        @Source("org/jbei/ice/client/resource/image/delete.png")
+        ImageResource deleteImage();
+
+        @Source("org/jbei/ice/client/resource/image/busy.gif")
+        ImageResource busyIndicatorImage();
+
+        @Source("org/jbei/ice/client/resource/image/minus.png")
+        ImageResource minusImage();
+
+        @Source("org/jbei/ice/client/resource/image/edit.png")
+        ImageResource editImage();
     }
 
     public static Image getSampleIcon() {
@@ -45,5 +57,21 @@ public class ImageUtil {
 
     public static Image getPlusIcon() {
         return new Image(Resources.INSTANCE.plus());
+    }
+
+    public static Image getDeleteIcon() {
+        return new Image(Resources.INSTANCE.deleteImage());
+    }
+
+    public static Image getEditIcon() {
+        return new Image(Resources.INSTANCE.editImage());
+    }
+
+    public static Image getBusyIcon() {
+        return new Image(Resources.INSTANCE.busyIndicatorImage());
+    }
+
+    public static Image getMinusIcon() {
+        return new Image(Resources.INSTANCE.minusImage());
     }
 }

@@ -1,6 +1,6 @@
 package org.jbei.ice.client.collection.menu;
 
-import org.jbei.ice.client.collection.menu.CollectionMenu.Resources;
+import org.jbei.ice.client.common.util.ImageUtil;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
@@ -25,8 +25,8 @@ public class HoverCell extends Composite {
         panel.setStyleName("user_collection_action");
         initWidget(panel);
 
-        edit = new Image(Resources.INSTANCE.editImage());
-        delete = new Image(Resources.INSTANCE.deleteImage());
+        edit = ImageUtil.getEditIcon();
+        delete = ImageUtil.getDeleteIcon();
 
         panel.add(edit);
         panel.setHeight("16px");

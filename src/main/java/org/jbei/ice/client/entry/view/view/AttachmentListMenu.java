@@ -1,6 +1,5 @@
 package org.jbei.ice.client.entry.view.view;
 
-import gwtupload.client.DecoratedFileUpload;
 import gwtupload.client.IFileInput.FileInputType;
 import gwtupload.client.IUploadStatus.Status;
 import gwtupload.client.IUploader;
@@ -8,6 +7,8 @@ import gwtupload.client.IUploader.OnFinishUploaderHandler;
 import gwtupload.client.SingleUploader;
 
 import java.util.ArrayList;
+
+import org.jbei.ice.client.common.util.ImageUtil;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -22,6 +23,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -32,6 +34,7 @@ public class AttachmentListMenu extends Composite {
     private Button saveAttachment;
     private Widget attachmentForm;
     private final AttachmentMenuPresenter presenter;
+    private Image quickAdd;
 
     public AttachmentListMenu() {
         layout = new FlexTable();
@@ -43,18 +46,19 @@ public class AttachmentListMenu extends Composite {
         HorizontalPanel panel = new HorizontalPanel();
         panel.add(new HTML("Attachments"));
 
-        final Button button = new Button("+9", new ClickHandler() { // TODO : use a push button
+        quickAdd = ImageUtil.getPlusIcon();
+        quickAdd.setStyleName("collection_quick_add_image");
+        quickAdd.addClickHandler(new ClickHandler() {
 
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        boolean visible = attachmentForm.isVisible();
-                        attachmentForm.setVisible(!visible);
-                    }
-                });
+            @Override
+            public void onClick(ClickEvent event) {
+                switchButton();
+            }
+        });
 
-        panel.add(button);
+        panel.add(quickAdd);
         panel.setWidth("100%");
-        panel.setCellHorizontalAlignment(button, HasAlignment.ALIGN_RIGHT);
+        panel.setCellHorizontalAlignment(quickAdd, HasAlignment.ALIGN_RIGHT);
 
         saveAttachment = new Button("Save");
         cancelAttachmentSubmission = new Button("Cancel");
@@ -75,6 +79,22 @@ public class AttachmentListMenu extends Composite {
 
         attachmentForm.setVisible(false);
         presenter = new AttachmentMenuPresenter(this);
+    }
+
+    public void switchButton() {
+        if (attachmentForm == null)
+            return;
+
+        if (attachmentForm.isVisible()) {
+            quickAdd.setUrl(ImageUtil.getPlusIcon().getUrl());
+            quickAdd.setStyleName("collection_quick_add_image");
+            attachmentForm.setVisible(false);
+        } else {
+            quickAdd.setUrl(ImageUtil.getMinusIcon().getUrl());
+            quickAdd.setStyleName("collection_quick_add_image");
+            attachmentForm.setVisible(true);
+            //            quickAddBox.setFocus(true);// TODO 
+        }
     }
 
     void setMenuItems(ArrayList<AttachmentItem> items) {
@@ -119,8 +139,7 @@ public class AttachmentListMenu extends Composite {
     }
 
     protected Widget createUploader() {
-        DecoratedFileUpload d = new DecoratedFileUpload("foo");
-        SingleUploader uploader = new SingleUploader(FileInputType.CUSTOM, null, saveAttachment);
+        SingleUploader uploader = new SingleUploader(FileInputType.BUTTON, null, saveAttachment);
         uploader.setServletPath("upload.gupld");
         uploader.setAutoSubmit(true);
         uploader.setWidth("240px");

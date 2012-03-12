@@ -3,9 +3,9 @@ package org.jbei.ice.client.collection.menu;
 import java.util.ArrayList;
 import java.util.Set;
 
+import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.shared.FolderDetails;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -21,8 +21,6 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
@@ -43,26 +41,6 @@ import com.google.gwt.view.client.SingleSelectionModel;
  * @author Hector Plahar
  */
 public class CollectionMenu extends Composite {
-
-    interface Resources extends ClientBundle {
-
-        static Resources INSTANCE = GWT.create(Resources.class);
-
-        @Source("org/jbei/ice/client/resource/image/plus.png")
-        ImageResource plusImage();
-
-        @Source("org/jbei/ice/client/resource/image/minus.png")
-        ImageResource minusImage();
-
-        @Source("org/jbei/ice/client/resource/image/edit.png")
-        ImageResource editImage();
-
-        @Source("org/jbei/ice/client/resource/image/delete.png")
-        ImageResource deleteImage();
-
-        @Source("org/jbei/ice/client/resource/image/busy.gif")
-        ImageResource busyIndicatorImage();
-    }
 
     private final FlexTable table;
     private MenuItem currentEditSelection;
@@ -96,7 +74,7 @@ public class CollectionMenu extends Composite {
             quickAddBox.setStyleName("input_box");
             quickAddBox.setText("Enter new collection name...");
             quickAddBox.setWidth("99%");
-            quickAddButton = new Image(Resources.INSTANCE.plusImage());
+            quickAddButton = ImageUtil.getPlusIcon();
             quickAddButton.setStyleName("collection_quick_add_image");
             quickAddBox.addFocusHandler(new FocusHandler() {
 
@@ -352,12 +330,12 @@ public class CollectionMenu extends Composite {
             return;
 
         if (quickAddBox.isVisible()) {
-            quickAddButton.setUrl(Resources.INSTANCE.plusImage().getSafeUri());
+            quickAddButton.setUrl(ImageUtil.getPlusIcon().getUrl()); //Resources.INSTANCE.plusImage().getSafeUri());
             quickAddButton.setStyleName("collection_quick_add_image");
             quickAddBox.setVisible(false);
             quickAddBox.setStyleName("input_box");
         } else {
-            quickAddButton.setUrl(Resources.INSTANCE.minusImage().getSafeUri());
+            quickAddButton.setUrl(ImageUtil.getMinusIcon().getUrl()); //Resources.INSTANCE.minusImage().getSafeUri());
             quickAddButton.setStyleName("collection_quick_add_image");
             quickAddBox.setText("");
             quickAddBox.setVisible(true);
@@ -369,7 +347,7 @@ public class CollectionMenu extends Composite {
         if (quickAddBox == null)
             return;
 
-        quickAddButton.setUrl(Resources.INSTANCE.plusImage().getSafeUri());
+        quickAddButton.setUrl(ImageUtil.getPlusIcon().getUrl()); //Resources.INSTANCE.plusImage().getSafeUri());
         quickAddButton.setStyleName("collection_quick_add_image");
         quickAddBox.setVisible(false);
         quickAddBox.setStyleName("input_box");
@@ -429,7 +407,7 @@ public class CollectionMenu extends Composite {
             initWidget(panel);
 
             // init busy indicator
-            busy = new Image(Resources.INSTANCE.busyIndicatorImage());
+            busy = ImageUtil.getBusyIcon(); // new Image(Resources.INSTANCE.busyIndicatorImage());
         }
 
         public void setSelected(boolean selected) {
