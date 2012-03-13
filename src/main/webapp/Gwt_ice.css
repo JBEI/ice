@@ -169,6 +169,14 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 	border: 1px solid #BBBBBB;
 }
 
+.entry_sequence_table {
+    font-size: 0.80em;	
+}
+
+.entry_sequence_table td {
+    border-bottom: 1px solid #f1f1f1;	
+}
+
 .entry_add_sample_notes_input {
 	width: 205px;
 	height: 50px;

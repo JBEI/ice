@@ -4,23 +4,38 @@ import gwtupload.server.UploadAction;
 import gwtupload.server.exceptions.UploadActionException;
 import gwtupload.shared.UConsts;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.io.IOUtils;
+import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.SequenceAnalysisController;
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.lib.vo.IDNASequence;
 
+// TODO : Robust exception handling
 public class FileUploadServlet extends UploadAction {
 
     private static final long serialVersionUID = 1L;
@@ -39,7 +54,24 @@ public class FileUploadServlet extends UploadAction {
             throws UploadActionException {
 
         // TODO : check cookie
-        // TODO : if non available, check session id
+        Account account;
+
+        try {
+            account = isLoggedIn(request.getCookies());
+            if (account == null) {
+                // TODO : check session id
+                return "";
+            }
+
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+            String url = request.getRequestURL().toString();
+            String path = request.getServletPath();
+            url = url.substring(0, url.indexOf(path));
+            Logger.info(FileUploadServlet.class.getSimpleName()
+                    + ": authenication failed. Redirecting user to " + url);
+            return "";
+        }
 
         String desc = request.getParameter("desc");
         String type = request.getParameter("type");
@@ -52,7 +84,8 @@ public class FileUploadServlet extends UploadAction {
                 continue;
 
             String saveName = item.getName().replaceAll("[\\\\/><\\|\\s\"'{}()\\[\\]]+", "_");
-            File file = new File("/tmp/" + saveName);
+            String tmpDir = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
+            File file = new File(tmpDir + File.separator + saveName);
             try {
                 item.write(file);
             } catch (Exception e) {
@@ -63,14 +96,123 @@ public class FileUploadServlet extends UploadAction {
 
             if (ATTACHMENT_TYPE.equalsIgnoreCase(type)) {
                 return uploadAttachment(file, entryId, desc, saveName);
-            } else {
-                //                throw new ServletException("Do not know what to do with type " + type);
+            } else if (SEQUENCE_TYPE.equalsIgnoreCase(type)) {
+                try {
+                    return uploadSequenceTraceFile(file, entryId, account, saveName);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         }
 
         removeSessionFileItems(request);
         return "";
 
+    }
+
+    private Account isLoggedIn(Cookie[] cookies) throws ControllerException {
+        for (Cookie cookie : cookies) {
+            if ("gd-ice".equals(cookie.getName())) {
+                String sid = cookie.getValue();
+                if (sid == null || sid.isEmpty())
+                    return null;
+
+                if (!AccountController.isAuthenticated(sid))
+                    return null;
+                return AccountController.getAccountBySessionKey(sid);
+            }
+        }
+        return null;
+    }
+
+    // TODO : this needs to go to manager/controller
+    private String uploadSequenceTraceFile(File file, String entryId, Account account,
+            String uploadFileName) throws IOException {
+
+        Entry entry = null;
+        try {
+            entry = EntryManager.get(Long.decode(entryId));
+        } catch (NumberFormatException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        } catch (ManagerException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        if (entry == null)
+            return "Could not retrieve entry with id : " + entryId;
+
+        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController(
+                account);
+
+        IDNASequence dnaSequence = null;
+
+        ArrayList<ByteHolder> byteHolders = new ArrayList<ByteHolder>();
+        FileInputStream inputStream = new FileInputStream(file);
+
+        if ((uploadFileName.endsWith(".zip")) || uploadFileName.endsWith(".ZIP")) {
+            try {
+
+                ZipInputStream zis = new ZipInputStream(inputStream);
+                ZipEntry zipEntry = null;
+
+                while (true) {
+                    zipEntry = zis.getNextEntry();
+
+                    if (zipEntry != null) {
+
+                        if (!zipEntry.isDirectory() && !zipEntry.getName().startsWith("__MACOSX")) {
+
+                            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                            int c;
+                            while ((c = zis.read()) != -1) {
+                                byteArrayOutputStream.write(c);
+                            }
+                            ByteHolder byteHolder = new ByteHolder();
+                            byteHolder.setBytes(byteArrayOutputStream.toByteArray());
+                            byteHolder.setName(zipEntry.getName());
+                            byteHolders.add(byteHolder);
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            } catch (IOException e) {
+                String errMsg = ("Could not parse zip file.");
+                Logger.error(errMsg);
+                return errMsg;
+            }
+        } else {
+            ByteHolder byteHolder = new ByteHolder();
+            byteHolder.setBytes(IOUtils.toByteArray(inputStream));
+            byteHolder.setName(uploadFileName);
+            byteHolders.add(byteHolder);
+        }
+
+        String currentFileName = "";
+        try {
+            for (ByteHolder byteHolder : byteHolders) {
+                currentFileName = byteHolder.getName();
+                dnaSequence = sequenceAnalysisController.parse(byteHolder.getBytes());
+                if (dnaSequence == null || dnaSequence.getSequence() == null) {
+                    String errMsg = ("Could not parse file: " + currentFileName + ". Only Fasta, GenBank, or ABI files are supported.");
+                    Logger.error(errMsg);
+                    return errMsg;
+                }
+
+                sequenceAnalysisController.uploadTraceSequence(entry, byteHolder.getName(),
+                    account.getEmail(), dnaSequence.getSequence().toLowerCase(),
+                    new ByteArrayInputStream(byteHolder.getBytes()));
+            }
+            sequenceAnalysisController.rebuildAllAlignments(entry);
+            return "ok";
+
+        } catch (ControllerException e) { // 
+            String errMsg = ("Could not parse file: " + currentFileName + ". Only Fasta, GenBank, or ABI files are supported.");
+            Logger.error(errMsg);
+            return errMsg;
+        }
     }
 
     // TODO : check for path information in filename. safari includes it
@@ -98,7 +240,6 @@ public class FileUploadServlet extends UploadAction {
         }
 
         return null;
-
     }
 
     /**

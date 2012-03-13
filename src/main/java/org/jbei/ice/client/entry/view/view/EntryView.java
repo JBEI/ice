@@ -1,5 +1,9 @@
 package org.jbei.ice.client.entry.view.view;
 
+import gwtupload.client.IUploader;
+import gwtupload.client.IUploader.OnStartUploaderHandler;
+import gwtupload.client.SingleUploader;
+
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -14,18 +18,12 @@ import org.jbei.ice.client.entry.view.update.UpdateEntryForm;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 
-import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
-import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Label;
@@ -67,6 +65,9 @@ public class EntryView extends Composite implements IEntryView {
     private EntrySampleTable sampleTable;
     private EntrySequenceTable sequenceTable;
 
+    private Button sequenceAddCancelbutton;
+    private long entryId;
+
     // menu
     private EntryDetailViewMenu detailMenu;
 
@@ -86,6 +87,14 @@ public class EntryView extends Composite implements IEntryView {
         uploadPanel = createSequenceUploadPanel();
         uploadPanel.setVisible(false);
         attachmentMenu = new AttachmentListMenu();
+
+        sequenceAddCancelbutton.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                uploadPanel.setVisible(false);
+            }
+        });
 
         createMenu();
 
@@ -250,38 +259,41 @@ public class EntryView extends Composite implements IEntryView {
         FlexTable table = new FlexTable();
         table.setWidth("100%");
 
-        String html = "<div style=\"outline:none;\"><span id=\"upload\"></span><span style=\"color: #777777;font-size: 9px;\">Fasta, GenBank, or ABI formats, optionally in zip file.</span></div>";
-        HTMLPanel panel = new HTMLPanel(html);
+        final SingleUploader uploader = new SingleUploader();
+        uploader.setAutoSubmit(true);
 
-        // form panel for file uploads (required use)
-        FormPanel formPanel = new FormPanel();
-        final FileUpload fileUpload = new FileUpload();
-
-        formPanel.addSubmitHandler(new SubmitHandler() {
+        uploader.addOnStartUploadHandler(new OnStartUploaderHandler() {
 
             @Override
-            public void onSubmit(SubmitEvent event) {
-                // TODO : 
+            public void onStart(IUploader uploader) {
+                uploader.setServletPath(uploader.getServletPath() + "?eid=" + entryId
+                        + "&type=sequence&sid=" + AppController.sessionId);
             }
         });
 
-        formPanel.setAction(GWT.getModuleBaseURL() + "file");
+        //        uploader.addOnFinishUploadHandler(new OnFinishUploaderHandler() {
+        //            public void onFinish(IUploader uploader) {
+        //                if (uploader.getStatus() == Status.SUCCESS) {
+        //                    UploadedInfo info = uploader.getServerInfo();
+        //                    String fileId = info.message;
+        //                    String attDesc = desc.equals(area.getText()) ? "" : area.getText();
+        //                    AttachmentItem item = new AttachmentItem(layout.getRowCount() + 1, info.name,
+        //                            attDesc);
+        //                    item.setFileId(fileId);
+        //                    uploader.reset();
+        //                } else {
+        //                    // TODO : notify user of error
+        //                }
+        //            }
+        //        });
 
-        fileUpload.setStyleName("input_box");
-        formPanel.add(fileUpload);
-        panel.add(formPanel, "upload");
+        String html = "<div style=\"outline:none; padding: 4px\"><span id=\"upload\"></span><span style=\"color: #777777;font-size: 9px;\">Fasta, GenBank, or ABI formats, optionally in zip file.</span></div>";
+        HTMLPanel panel = new HTMLPanel(html);
+        panel.add(uploader, "upload");
+
         table.setWidget(0, 0, panel);
-
-        SafeHtmlBuilder builder = new SafeHtmlBuilder();
-        builder.appendHtmlConstant("<span>");
-        builder.appendEscaped(formatDate(new Date()));
-        builder.appendHtmlConstant("</span><br /><span>");
-
-        builder.appendHtmlConstant("by <a href='" + AppController.accountInfo.getEmail() + "'>"
-                + AppController.accountInfo.getFirstName() + " "
-                + AppController.accountInfo.getLastName() + "</a></span>");
-
-        table.setWidget(0, 1, new HTML(builder.toSafeHtml().asString()));
+        sequenceAddCancelbutton = new Button("Cancel");
+        table.setWidget(0, 1, sequenceAddCancelbutton);
         table.getFlexCellFormatter().setWidth(0, 1, "20%");
 
         return table;
@@ -339,10 +351,6 @@ public class EntryView extends Composite implements IEntryView {
 
         VerticalPanel panel = new VerticalPanel();
         panel.setWidth("100%");
-        //        TablePager pager = new TablePager();
-        //        pager.setDisplay(sequenceTable);
-        //        panel.add(pager);
-        //        panel.setCellHorizontalAlignment(pager, HasAlignment.ALIGN_RIGHT);
         panel.add(uploadPanel);
         panel.add(sequenceTable);
 
@@ -395,8 +403,9 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public void setSequenceData(ArrayList<SequenceAnalysisInfo> data) {
+    public void setSequenceData(ArrayList<SequenceAnalysisInfo> data, long entryId) {
         sequenceTable.setData(data);
+        this.entryId = entryId;
     }
 
     @Override

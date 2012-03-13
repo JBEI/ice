@@ -285,7 +285,7 @@ public class EntryPresenter extends AbstractPresenter {
                     }
 
                     display.setSampleData(data);
-                    display.setSequenceData(result.getSequenceAnalysis());
+                    display.setSequenceData(result.getSequenceAnalysis(), entryId);
 
                     // menu 
                     ArrayList<MenuItem> menuItems = new ArrayList<MenuItem>();

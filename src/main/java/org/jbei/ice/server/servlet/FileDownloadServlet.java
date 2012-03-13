@@ -76,7 +76,7 @@ public class FileDownloadServlet extends HttpServlet {
         response.setContentType("application/octet-stream");
         response.setContentLength((int) file.length());
         if (name == null || name.isEmpty())
-            name = file.getName();
+            name = file.getName(); // TODO : the filename is also stored in the db
         response.setHeader("Content-Disposition", "attachment;filename=" + name);
 
         OutputStream os = response.getOutputStream();
@@ -100,7 +100,8 @@ public class FileDownloadServlet extends HttpServlet {
             if (sequence == null)
                 return null;
 
-            return controller.getFile(sequence);
+            File file = controller.getFile(sequence);
+            return file;
         } catch (ControllerException ce) {
             Logger.error("Error retrieving sequence trace file with id " + fileId + ". Details...");
             Logger.error(ce);

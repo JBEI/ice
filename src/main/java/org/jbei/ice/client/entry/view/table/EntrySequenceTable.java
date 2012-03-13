@@ -20,6 +20,7 @@ public class EntrySequenceTable extends Composite {
     public EntrySequenceTable() {
         table = new FlexTable();
         initWidget(table);
+        table.setStyleName("entry_sequence_table");
         table.setWidth("100%");
         table.setHTML(0, 0, "No Sequence Trace Files Available");
     }
@@ -41,7 +42,8 @@ public class EntrySequenceTable extends Composite {
     }
 
     private void addFileName(int row, String fileName, String fileId) {
-        String url = GWT.getHostPageBaseURL() + "download?type=sequence&id=" + fileId;
+        String url = GWT.getHostPageBaseURL() + "download?type=sequence&id=" + fileId + "&name="
+                + fileName;
 
         Anchor anchor = new Anchor(fileName, url);
         table.setWidget(row, 0, anchor);

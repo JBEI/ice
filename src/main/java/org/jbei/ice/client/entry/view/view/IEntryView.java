@@ -61,5 +61,5 @@ public interface IEntryView {
 
     void setSampleData(ArrayList<SampleStorage> data);
 
-    void setSequenceData(ArrayList<SequenceAnalysisInfo> sequenceAnalysis);
+    void setSequenceData(ArrayList<SequenceAnalysisInfo> sequenceAnalysis, long entryId);
 }
