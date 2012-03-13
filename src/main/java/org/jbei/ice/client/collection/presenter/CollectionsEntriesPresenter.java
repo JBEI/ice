@@ -29,6 +29,8 @@ import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.event.SearchEvent;
 import org.jbei.ice.client.event.SearchEventHandler;
+import org.jbei.ice.client.event.ShowEntryListEvent;
+import org.jbei.ice.client.event.ShowEntryListEventHandler;
 import org.jbei.ice.client.search.advanced.AdvancedSearchPresenter;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.EntryAddType;
@@ -91,6 +93,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         this.showEntryView(event);
     }
 
+    // TODO : really need to do something about the size of this constructor
     public CollectionsEntriesPresenter(final CollectionsModel model,
             final ICollectionEntriesView display) {
         this.display = display;
@@ -143,6 +146,19 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
             @Override
             public void onSearch(SearchEvent event) {
                 search(event.getFilters());
+            }
+        });
+
+        // show entry context
+        model.getEventBus().addHandler(ShowEntryListEvent.TYPE, new ShowEntryListEventHandler() {
+
+            @Override
+            public void onEntryListContextAvailable(ShowEntryListEvent event) {
+                EntryContext context = event.getContext();
+                if (context == null)
+                    return;
+
+                handleContext(context);
             }
         });
 
@@ -323,6 +339,16 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
 
         display.setMainContent(searchPresenter.getView(), true);
         mode = Mode.SEARCH;
+    }
+
+    private void handleContext(EntryContext context) {
+        ArrayList<Long> ids = new ArrayList<Long>(context.getList());
+        entryDataProvider.setValues(ids);
+        display.setDataView(collectionsDataTable);
+        //        display.setCurrentMenuSelection(id);
+        //        currentFolder = id;
+        mode = Mode.SEARCH;
+
     }
 
     private void initCreateCollectionHandlers() {

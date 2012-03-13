@@ -3,6 +3,7 @@ package org.jbei.ice.client.search.advanced;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.collection.menu.IHasEntryHandlers;
+import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.table.DataTable;
 import org.jbei.ice.client.common.table.EntryDataTable;
 import org.jbei.ice.client.common.table.cell.PartIDCell;
@@ -51,7 +52,7 @@ public abstract class AdvancedSearchResultsTable extends EntryDataTable<EntryInf
 
     protected DataTableColumn<EntryInfo> addPartIdColumn(boolean sortable, double width, Unit unit) {
 
-        PartIDCell<EntryInfo> cell = new PartIDCell<EntryInfo>();
+        PartIDCell<EntryInfo> cell = new PartIDCell<EntryInfo>(EntryContext.Type.SEARCH);
         cell.addEntryHandler(getHandler());
         DataTableColumn<EntryInfo> partIdColumn = new PartIdColumn(cell);
         this.setColumnWidth(partIdColumn, width, unit);

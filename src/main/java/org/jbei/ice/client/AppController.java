@@ -33,6 +33,7 @@ import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -40,7 +41,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 
@@ -103,7 +103,8 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    Window.alert("Failed to retrieve the autocomplete data: " + caught.getMessage());
+                    // TODO : not still quite sure what the complete ramifications are
+                    GWT.log("Failed to retrieve the autocomplete data: " + caught.getMessage());
                 }
 
                 @Override
@@ -204,7 +205,7 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             CollectionsEntriesView cView = new CollectionsEntriesView();
             addHeaderSearchHandler(cView); // TODO : not sure if this is needed
             long id = Long.decode(param);
-            EntryContext context = new EntryContext();
+            EntryContext context = new EntryContext(EntryContext.Type.COLLECTION);
             context.setCurrent(id);
 
             presenter = new CollectionsEntriesPresenter(new CollectionsModel(this.service,

@@ -55,7 +55,7 @@ public class QuickSearchParser {
                     if (type == null)
                         continue;
 
-                    if (params.length < 3) {
+                    if (params.length < 2) {
                         // valid type but incorrectly formed query.
                         // TODO need to hightlight and let user know
                         continue;

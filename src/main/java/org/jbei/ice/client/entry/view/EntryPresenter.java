@@ -3,7 +3,6 @@ package org.jbei.ice.client.entry.view;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
@@ -18,6 +17,7 @@ import org.jbei.ice.client.entry.view.view.MenuItem;
 import org.jbei.ice.client.entry.view.view.MenuItem.Menu;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
+import org.jbei.ice.client.event.ShowEntryListEvent;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
@@ -26,7 +26,6 @@ import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -38,8 +37,9 @@ public class EntryPresenter extends AbstractPresenter {
     private final HandlerManager eventBus;
     private final IEntryView display;
     private EntryInfo currentInfo;
-    private List<Long> contextList;
-    private long currentId;
+    //    private List<Long> contextList;
+    //    private long currentId;
+    private EntryContext currentContext;
 
     public EntryPresenter(final RegistryServiceAsync service, HandlerManager eventBus,
             EntryContext context) {
@@ -106,18 +106,17 @@ public class EntryPresenter extends AbstractPresenter {
     }
 
     private void showEntryView(EntryContext context) {
-        this.contextList = context.getList();
-        if (contextList != null)
-            Collections.reverse(this.contextList); // TODO : order matters. make sure this is the case in all
+        this.currentContext = context;
+        if (context.getList() != null)
+            Collections.reverse(context.getList()); // TODO : order matters. make sure this is the case in all
 
-        currentId = context.getCurrent();
         retrieveAccountsAndGroups();
         setContextNavData();
-        retrieveEntryDetails(currentId);
+        retrieveEntryDetails(this.currentContext.getCurrent());
     }
 
     protected void setContextNavData() {
-        boolean show = (contextList != null);
+        boolean show = (this.currentContext.getList() != null);
         display.showContextNav(show);
         if (!show) {
             display.enableNext(false);
@@ -125,17 +124,17 @@ public class EntryPresenter extends AbstractPresenter {
             return;
         }
 
-        if (contextList.isEmpty() || contextList.size() == 1) {
+        if (this.currentContext.getList().isEmpty() || this.currentContext.getList().size() == 1) {
             display.enableNext(false);
             display.enablePrev(false);
         }
 
-        int idx = contextList.indexOf(currentId);
+        int idx = this.currentContext.getList().indexOf(this.currentContext.getCurrent());
         display.enablePrev(!(idx == 0));
-        boolean atEnd = ((idx + 1) == contextList.size());
+        boolean atEnd = ((idx + 1) == this.currentContext.getList().size());
         display.enableNext(!atEnd);
 
-        String text = (idx + 1) + " of " + contextList.size();
+        String text = (idx + 1) + " of " + this.currentContext.getList().size();
         display.setNavText(text);
     }
 
@@ -144,7 +143,7 @@ public class EntryPresenter extends AbstractPresenter {
 
             @Override
             public void onClick(ClickEvent event) {
-                int idx = contextList.indexOf(currentId);
+                int idx = currentContext.getList().indexOf(currentContext.getCurrent());
                 if (idx == -1) {
                     display.enableNext(false);
                     display.enablePrev(false);
@@ -152,18 +151,20 @@ public class EntryPresenter extends AbstractPresenter {
                 }
 
                 int next = idx + 1;
+                int size = currentContext.getList().size();
 
-                if (contextList.size() == next + 1) {
+                if (size == next + 1) {
                     display.enableNext(false);
                 }
 
                 // TODO :this needs to be folded into a single "Retrieve"
-                currentId = contextList.get(next);
+                long currentId = currentContext.getList().get(next);
+                currentContext.setCurrent(currentId);
                 retrieveEntryDetails(currentId);
                 retrieveAccountsAndGroups();
                 //                retrievePermissionData(contextList.get(idx + 1));
                 display.enablePrev(true);
-                String text = (next + 1) + " of " + contextList.size();
+                String text = (next + 1) + " of " + size;
                 display.setNavText(text);
             }
         });
@@ -173,7 +174,7 @@ public class EntryPresenter extends AbstractPresenter {
 
             @Override
             public void onClick(ClickEvent event) {
-                int idx = contextList.indexOf(currentId);
+                int idx = currentContext.getList().indexOf(currentContext.getCurrent());
                 if (idx == -1) {
                     display.enableNext(false);
                     display.enablePrev(false);
@@ -185,12 +186,13 @@ public class EntryPresenter extends AbstractPresenter {
                     display.enablePrev(false);
                 }
 
-                currentId = contextList.get(prev);
+                long currentId = currentContext.getList().get(prev);
+                currentContext.setCurrent(currentId);
                 retrieveEntryDetails(currentId);
                 retrieveAccountsAndGroups();
                 //                retrievePermissionData(contextList.get(idx - 1));
                 display.enableNext(true);
-                String text = (prev + 1) + " of " + contextList.size();
+                String text = (prev + 1) + " of " + currentContext.getList().size();
                 display.setNavText(text);
             }
         });
@@ -201,7 +203,7 @@ public class EntryPresenter extends AbstractPresenter {
 
             @Override
             public void onClick(ClickEvent event) {
-                History.back();
+                eventBus.fireEvent(new ShowEntryListEvent(currentContext));
             }
         });
     }
@@ -236,8 +238,9 @@ public class EntryPresenter extends AbstractPresenter {
             });
     }
 
-    private void retrieveEntryDetails(long entryId) {
-        currentId = entryId;
+    private void retrieveEntryDetails(final long entryId) {
+        //        currentId = entryId;
+        currentContext.setCurrent(entryId);
         service.retrieveEntryDetails(AppController.sessionId, entryId,
             new AsyncCallback<EntryInfo>() {
 
@@ -272,7 +275,7 @@ public class EntryPresenter extends AbstractPresenter {
                         }
                     }
 
-                    display.setAttachments(items, currentId);
+                    display.setAttachments(items, entryId);
                     // menu views
                     ArrayList<SampleStorage> data = new ArrayList<SampleStorage>();
                     for (SampleInfo sampleInfo : result.getSampleMap().keySet()) {

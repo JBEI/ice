@@ -1,6 +1,7 @@
 package org.jbei.ice.client.common.table.cell;
 
 import org.jbei.ice.client.collection.menu.IHasEntryHandlers;
+import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.TipViewContentFactory;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
@@ -32,9 +33,11 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
     private static final String MOUSEOUT_EVENT_NAME = "mouseout";
     private static final String MOUSE_CLICK = "click";
     private HandlerManager handlerManager;
+    private final EntryContext.Type mode;
 
-    public PartIDCell() {
+    public PartIDCell(EntryContext.Type mode) {
         super(MOUSEOVER_EVENT_NAME, MOUSEOUT_EVENT_NAME, MOUSE_CLICK);
+        this.mode = mode;
     }
 
     @Override
@@ -81,7 +84,7 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
 
             @Override
             protected void dispatch(EntryViewEventHandler handler) {
-                handler.onEntryView(new EntryViewEvent(recordId));
+                handler.onEntryView(new EntryViewEvent(recordId, mode));
             }
         });
     }

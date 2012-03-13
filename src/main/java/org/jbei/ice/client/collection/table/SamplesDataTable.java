@@ -3,6 +3,7 @@ package org.jbei.ice.client.collection.table;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.Page;
+import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.client.common.table.cell.UrlCell;
 import org.jbei.ice.shared.ColumnField;
@@ -26,7 +27,7 @@ public class SamplesDataTable extends HasEntryDataTable<SampleInfo> {
         ArrayList<DataTableColumn<?>> columns = new ArrayList<DataTableColumn<?>>();
 
         columns.add(super.addTypeColumn(true));
-        columns.add(super.addPartIdColumn(true, null));
+        columns.add(super.addPartIdColumn(true, null, EntryContext.Type.SAMPLES));
         columns.add(super.addNameColumn());
         columns.add(this.addLabelColumn());
         columns.add(this.addNotesColumn());

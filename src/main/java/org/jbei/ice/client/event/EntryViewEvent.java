@@ -17,14 +17,10 @@ public class EntryViewEvent extends GwtEvent<EntryViewEventHandler> {
     public static Type<EntryViewEventHandler> TYPE = new Type<EntryViewEventHandler>();
     private EntryContext context;
 
-    public EntryViewEvent(long id) {
-        this.context = new EntryContext();
+    public EntryViewEvent(long id, EntryContext.Type mode) {
+        this.context = new EntryContext(mode);
         this.context.setCurrent(id);
     }
-
-    //    public void setHasEntry(IHasEntryId hasEntry) {
-    //        this.context.setHasEntry(hasEntry);
-    //    }
 
     public void setList(List<Long> ids) {
         this.context.setList(ids);

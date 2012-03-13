@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.collection.menu.IHasEntryHandlers;
+import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.entry.IHasEntryId;
 import org.jbei.ice.client.common.table.cell.PartIDCell;
 import org.jbei.ice.client.common.table.cell.UrlCell;
@@ -104,9 +105,9 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
     }
 
     protected DataTableColumn<EntryInfo> addPartIdColumn(boolean sortable, double width, Unit unit,
-            EntryViewEventHandler handler) {
+            EntryViewEventHandler handler, EntryContext.Type mode) {
 
-        PartIDCell<EntryInfo> cell = new PartIDCell<EntryInfo>();
+        PartIDCell<EntryInfo> cell = new PartIDCell<EntryInfo>(mode);
         cell.addEntryHandler(handler);
         DataTableColumn<EntryInfo> partIdColumn = new PartIdColumn(cell);
         this.setColumnWidth(partIdColumn, width, unit);

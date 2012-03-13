@@ -2,6 +2,7 @@ package org.jbei.ice.client.search.blast;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.BlastResultInfo;
@@ -22,7 +23,7 @@ public class BlastResultsTable extends HasEntryDataTable<BlastResultInfo> {
 
         columns.add(super.addSelectionColumn());
         columns.add(super.addTypeColumn(true));
-        columns.add(super.addPartIdColumn(true, null));
+        columns.add(super.addPartIdColumn(true, null, EntryContext.Type.SEARCH));
         columns.add(super.addNameColumn());
         columns.add(addAlignedColumn());
         columns.add(addAlignedIdentityColumn());

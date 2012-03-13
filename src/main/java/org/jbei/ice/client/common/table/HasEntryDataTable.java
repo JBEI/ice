@@ -3,6 +3,7 @@ package org.jbei.ice.client.common.table;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.entry.IHasEntryId;
 import org.jbei.ice.client.common.table.cell.PartIDCell;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
@@ -107,10 +108,10 @@ public abstract class HasEntryDataTable<T extends HasEntryInfo> extends DataTabl
     }
 
     protected DataTableColumn<EntryInfo> addPartIdColumn(boolean sortable,
-            EntryViewEventHandler handler) {
+            EntryViewEventHandler handler, EntryContext.Type mode) {
 
         DataTableColumn<EntryInfo> partIdColumn = new DataTableColumn<EntryInfo>(
-                new PartIDCell<EntryInfo>(), ColumnField.PART_ID) { // TODO : see EntryDataTable:108
+                new PartIDCell<EntryInfo>(mode), ColumnField.PART_ID) { // TODO : see EntryDataTable:108
 
             @Override
             public EntryInfo getValue(T object) {
