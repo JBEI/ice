@@ -139,11 +139,12 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
                     row += 1;
                 }
 
-                parameters.setWidget(row, col, new HTML("<b>" + paramInfo.getName() + "</b>"));
-                parameters.getFlexCellFormatter().setWidth(row, col, "50px");
+                parameters.setWidget(row, col, new HTML("<b class=\"font-80em color_444\">"
+                        + paramInfo.getName() + "</b>"));
+                parameters.getFlexCellFormatter().setWidth(row, col, "170px");
                 col += 1;
                 parameters.setWidget(row, col, new Label(paramInfo.getValue()));
-                parameters.getFlexCellFormatter().setWidth(row, col, "220px");
+                //                parameters.getFlexCellFormatter().setWidth(row, col, "220px");
                 col += 1;
             }
         }
@@ -291,7 +292,8 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
             currentRow += 1;
         }
 
-        table.setHTML(currentRow, currentCol, "<b class=\"font-80em\">" + labelString + "</b>");
+        table.setHTML(currentRow, currentCol, "<b class=\"font-80em color_444\">" + labelString
+                + "</b>");
         table.getFlexCellFormatter().setVerticalAlignment(currentRow, currentCol,
             HasAlignment.ALIGN_TOP);
         table.getFlexCellFormatter().setWidth(currentRow, currentCol, "170px");
@@ -310,7 +312,8 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
             currentRow += 1;
         }
 
-        table.setHTML(currentRow, currentCol, "<b class=\"font-80em\">" + labelString + "</b>");
+        table.setHTML(currentRow, currentCol, "<b class=\"font-80em color_444\">" + labelString
+                + "</b>");
         table.getFlexCellFormatter().setWidth(currentRow, currentCol, "170px");
         currentCol += 1;
         //        ValueCell cell = new ValueCell(value, valueType);
@@ -323,7 +326,7 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
     protected void addLongField(String labelString, String value) {
         currentRow += 1;
 
-        table.setHTML(currentRow, 0, "<b class=\"font-80em\">" + labelString + "</b>");
+        table.setHTML(currentRow, 0, "<b class=\"font-80em color_444\">" + labelString + "</b>");
         table.getFlexCellFormatter().setWidth(currentRow, 0, "170px");
         table.getFlexCellFormatter().setVerticalAlignment(currentRow, 0, HasAlignment.ALIGN_TOP);
 
