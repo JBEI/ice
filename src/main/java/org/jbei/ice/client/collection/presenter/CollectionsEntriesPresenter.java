@@ -296,7 +296,8 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         this(model, display);
         long id = 0;
         try {
-            id = Long.decode(param);
+            if (param != null)
+                id = Long.decode(param);
         } catch (NumberFormatException nfe) {
             id = 0;
         }
