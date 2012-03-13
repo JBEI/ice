@@ -285,6 +285,9 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                         }
 
                         FolderDetails result = event.getItems().get(0);
+                        if (result == null)
+                            return;
+
                         ArrayList<MenuItem> items = new ArrayList<MenuItem>();
                         MenuItem updateItem = new MenuItem(result.getId(), result.getName(), result
                                 .getCount(), result.isSystemFolder());

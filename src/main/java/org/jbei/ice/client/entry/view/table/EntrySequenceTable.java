@@ -22,11 +22,12 @@ public class EntrySequenceTable extends Composite {
         initWidget(table);
         table.setStyleName("entry_sequence_table");
         table.setWidth("100%");
-        table.setHTML(0, 0, "No Sequence Trace Files Available");
+        table.setHTML(0, 0, "No Sequence Trace Files Provided");
     }
 
     public void setData(ArrayList<SequenceAnalysisInfo> data) {
-        table.clear();
+        table.clear(true);
+        table.setHTML(0, 0, "No Sequence Trace Files Provided");
         int row = 0;
 
         for (SequenceAnalysisInfo datum : data) {

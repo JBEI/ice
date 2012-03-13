@@ -1,6 +1,8 @@
 package org.jbei.ice.client.entry.view.view;
 
+import gwtupload.client.IUploadStatus.Status;
 import gwtupload.client.IUploader;
+import gwtupload.client.IUploader.OnFinishUploaderHandler;
 import gwtupload.client.IUploader.OnStartUploaderHandler;
 import gwtupload.client.SingleUploader;
 
@@ -271,21 +273,17 @@ public class EntryView extends Composite implements IEntryView {
             }
         });
 
-        //        uploader.addOnFinishUploadHandler(new OnFinishUploaderHandler() {
-        //            public void onFinish(IUploader uploader) {
-        //                if (uploader.getStatus() == Status.SUCCESS) {
-        //                    UploadedInfo info = uploader.getServerInfo();
-        //                    String fileId = info.message;
-        //                    String attDesc = desc.equals(area.getText()) ? "" : area.getText();
-        //                    AttachmentItem item = new AttachmentItem(layout.getRowCount() + 1, info.name,
-        //                            attDesc);
-        //                    item.setFileId(fileId);
-        //                    uploader.reset();
-        //                } else {
-        //                    // TODO : notify user of error
-        //                }
-        //            }
-        //        });
+        uploader.addOnFinishUploadHandler(new OnFinishUploaderHandler() {
+            public void onFinish(IUploader uploader) {
+                if (uploader.getStatus() == Status.SUCCESS) {
+                    //                    UploadedInfo info = uploader.getServerInfo();
+                    uploader.reset();
+                    uploadPanel.setVisible(false);
+                } else {
+                    // TODO : notify user of error
+                }
+            }
+        });
 
         String html = "<div style=\"outline:none; padding: 4px\"><span id=\"upload\"></span><span style=\"color: #777777;font-size: 9px;\">Fasta, GenBank, or ABI formats, optionally in zip file.</span></div>";
         HTMLPanel panel = new HTMLPanel(html);

@@ -140,10 +140,10 @@ public class CollectionsEntriesView extends AbstractLayout implements ICollectio
     public void setMainContent(Widget mainContent, boolean showSubMenu) {
         feedback.setVisible(false);
 
-        if (showSubMenu)
-            rightContents.setWidget(0, 1, subMenu);
-        else
-            rightContents.setHTML(0, 1, "&nbsp;");
+        //        if (showSubMenu)
+        rightContents.setWidget(0, 1, subMenu);
+        //        else
+        //            rightContents.setHTML(0, 1, "&nbsp;");
 
         rightContents.setWidget(2, 0, mainContent);
         rightContents.getFlexCellFormatter().setColSpan(2, 0, 4);

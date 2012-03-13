@@ -177,6 +177,22 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
     border-bottom: 1px solid #f1f1f1;	
 }
 
+.entry_sample_table {
+	font-size: 0.80em; 
+}
+
+.entry_sample_table td {
+    border-bottom: 1px solid #f1f1f1;   
+}
+
+.entry_sample_table td img {
+    border: 0px;
+}
+
+.entry_sample_table td table td {
+    border-bottom: 0px;
+}
+
 .entry_add_sample_notes_input {
 	width: 205px;
 	height: 50px;
@@ -508,17 +524,15 @@ a.cell_mouseover:hover {
     padding: 5px;
 }
 
-.buttonGroup {
+.button_group {
     background-color: #f1f1f1;
     border: 1px solid #A5A5A5;
     -webkit-border-radius: 2px;
-    -webkit-box-shadow: 1px 1px 1px #CCC;
-    display: inline-block;
     margin: 0px;
 }
 
-.buttonGroupItem {
-    display: inline-block;
+.button_group_item {
+	display: inline-block;
     cursor: pointer;
     color: #393939;
     font-weight: bold;
@@ -531,9 +545,14 @@ a.cell_mouseover:hover {
     border-bottom: 2px solid #f1f1f1;
 }
 
-.buttonGroupItem:hover {
+.button_group_item[disabled] {
+	color: #eaeaea;
+}
+
+.button_group_item:hover {
     border-top: 2px solid #0082C0;
     background-color: #f2f2f2;
+    color: #0f3f33;
 }
 
 .firstItem {
@@ -895,11 +914,6 @@ a:hover {
 	background-color: #BBBBBB;
 	border-left: 1px solid #ccc;
 	width: 100%;
-}
-
-.entry_sample_table {
-	width: 100%;
-	border-bottom: 1px solid #ccc;
 }
 
 .background_white {

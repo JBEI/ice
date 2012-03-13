@@ -81,8 +81,10 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
     private final SubMenuOptionsPresenter<T> presenter;
     private final Button addWidget;
     private final PopupHandler addToHandler;
+    private final boolean addFirstStyle;
 
-    public AddToMenuItem(String label) {
+    public AddToMenuItem(String label, boolean addFirstStyle) {
+        this.addFirstStyle = addFirstStyle;
         addWidget = createAddWidget(label);
         initWidget(addWidget);
 
@@ -148,8 +150,9 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
 
     protected Button createAddWidget(String label) {
         final Button addTo = new Button(label);
-        addTo.setStyleName("buttonGroupItem");
-        addTo.addStyleName("firstItem");
+        addTo.setStyleName("button_group_item");
+        if (addFirstStyle)
+            addTo.addStyleName("firstItem");
         addTo.addStyleName(Resources.INSTANCE.subMenuStyle().dropDownAdd());
         return addTo;
     }

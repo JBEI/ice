@@ -2,19 +2,21 @@
 	gwt-image: 'sortDown';
     background-position: 64px 9px;
     padding-right: 11px;
-    height: 26px;
+    height: 24px;
     width: 80px;
+    background-color: #F1F1F1;
 }
 
 .subMenuRemove {
-	height: 26px;
+	height: 24px;
     width: 80px;
 }
 
 @sprite .dropDownMove {
 	gwt-image: 'sortDown';
-	height: 26px;
+	height: 24px;
 	width: 85px;
 	background-position: 63px 9px;
 	padding-right: 15px; 
+	background-color: #F1F1F1;
 }

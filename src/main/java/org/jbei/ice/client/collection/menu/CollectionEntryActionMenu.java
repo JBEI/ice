@@ -73,24 +73,25 @@ public class CollectionEntryActionMenu implements IsWidget {
 
     public CollectionEntryActionMenu() {
         this.menuHolder = new FlexTable();
+        this.menuHolder.setStyleName("button_group");
         this.menuHolder.setWidth(WIDTH + "px");
         this.menuHolder.setCellPadding(0);
         this.menuHolder.setCellSpacing(0);
 
-        add = new AddToMenuItem<OptionSelect>("Add To");
+        add = new AddToMenuItem<OptionSelect>("Add To", true);
         this.menuHolder.setWidget(0, 0, add);
 
         removeButton = createRemoveMenu();
         this.menuHolder.setWidget(0, 1, removeButton);
 
-        move = new AddToMenuItem<OptionSelect>("Move To");
+        move = new AddToMenuItem<OptionSelect>("Move To", false);
         this.menuHolder.setWidget(0, 2, move);
         Resources.INSTANCE.subMenuStyle().ensureInjected();
     }
 
     private Button createRemoveMenu() {
         Button remove = new Button("Remove");
-        remove.setStyleName("buttonGroupItem");
+        remove.setStyleName("button_group_item");
         remove.addStyleName(Resources.INSTANCE.subMenuStyle().subMenuRemove());
         return remove;
     }

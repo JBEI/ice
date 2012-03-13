@@ -28,12 +28,14 @@ public class EntrySampleTable extends Composite {
     public EntrySampleTable() {
         table = new FlexTable();
         initWidget(table);
+        table.setStyleName("entry_sample_table");
         table.setWidth("100%");
         table.setHTML(0, 0, "No Samples Available");
     }
 
     public void setData(ArrayList<SampleStorage> data) {
-        table.clear();
+        table.clear(true);
+        table.setHTML(0, 0, "No Samples Available");
         int row = 0;
 
         for (SampleStorage datum : data) {
@@ -69,7 +71,6 @@ public class EntrySampleTable extends Composite {
         sb.appendEscaped(sampleInfo.getNotes() == null ? "" : sampleInfo.getNotes());
         sb.appendHtmlConstant("</span>");
         table.setHTML(row, 0, sb.toSafeHtml().asString());
-        table.getFlexCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
     }
 
     private void addLocationCol(int row, LinkedList<StorageInfo> list) {
