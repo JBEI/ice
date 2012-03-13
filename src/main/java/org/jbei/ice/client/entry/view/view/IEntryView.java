@@ -49,7 +49,7 @@ public interface IEntryView {
 
     void setNavText(String text);
 
-    void setAttachments(ArrayList<AttachmentItem> items);
+    void setAttachments(ArrayList<AttachmentItem> items, long entryId);
 
     boolean getSequenceFormVisibility();
 

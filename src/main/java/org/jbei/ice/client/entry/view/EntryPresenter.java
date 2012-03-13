@@ -272,7 +272,7 @@ public class EntryPresenter extends AbstractPresenter {
                         }
                     }
 
-                    display.setAttachments(items);
+                    display.setAttachments(items, currentId);
                     // menu views
                     ArrayList<SampleStorage> data = new ArrayList<SampleStorage>();
                     for (SampleInfo sampleInfo : result.getSampleMap().keySet()) {

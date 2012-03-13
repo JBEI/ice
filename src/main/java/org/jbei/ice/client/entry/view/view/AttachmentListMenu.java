@@ -4,6 +4,8 @@ import gwtupload.client.IFileInput.FileInputType;
 import gwtupload.client.IUploadStatus.Status;
 import gwtupload.client.IUploader;
 import gwtupload.client.IUploader.OnFinishUploaderHandler;
+import gwtupload.client.IUploader.OnStartUploaderHandler;
+import gwtupload.client.IUploader.UploadedInfo;
 import gwtupload.client.SingleUploader;
 
 import java.util.ArrayList;
@@ -11,8 +13,12 @@ import java.util.ArrayList;
 import org.jbei.ice.client.common.util.ImageUtil;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
@@ -24,7 +30,9 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class AttachmentListMenu extends Composite {
@@ -35,6 +43,7 @@ public class AttachmentListMenu extends Composite {
     private Widget attachmentForm;
     private final AttachmentMenuPresenter presenter;
     private Image quickAdd;
+    private long entryId;
 
     public AttachmentListMenu() {
         layout = new FlexTable();
@@ -100,7 +109,8 @@ public class AttachmentListMenu extends Composite {
         }
     }
 
-    void setMenuItems(ArrayList<AttachmentItem> items) {
+    void setMenuItems(ArrayList<AttachmentItem> items, long entryId) {
+        this.entryId = entryId;
         if (items.isEmpty())
             return;
 
@@ -122,38 +132,79 @@ public class AttachmentListMenu extends Composite {
         }
     }
 
-    protected Widget createAddToAttachment() {
-        FlexTable table = new FlexTable();
-        table.setCellPadding(0);
-        table.setCellSpacing(0);
-        table.setWidth("100%");
-
-        table.setHTML(0, 0, "<b class=\"font-80em\">File</b>");
-        table.setWidget(1, 0, createUploader());
-        table.setHTML(2, 0, "<b class=\"font-80em\">Description</b>");
-        TextArea area = new TextArea();
-        table.setWidget(3, 0, area);
-        HTMLPanel panel = new HTMLPanel(
-                "<span id=\"save_attachment\"></span><span id=\"cancel_attachment_submission\"></span>");
-
-        panel.add(saveAttachment, "save_attachment");
-        panel.add(cancelAttachmentSubmission, "cancel_attachment_submission");
-        table.setWidget(4, 0, panel);
-        table.getFlexCellFormatter().setHorizontalAlignment(4, 0, HasAlignment.ALIGN_RIGHT);
-        return table;
+    void addMenuItem(AttachmentItem item) {
+        int row = layout.getRowCount();
+        final MenuCell cell = new MenuCell(item);
+        cell.addClickHandler(presenter.getCellClickHandler(item));
+        layout.setWidget(row, 0, cell);
     }
 
-    protected Widget createUploader() {
-        SingleUploader uploader = new SingleUploader(FileInputType.BUTTON, null, saveAttachment);
-        uploader.setServletPath("upload.gupld");
-        uploader.setAutoSubmit(true);
-        uploader.setWidth("240px");
+    protected Widget createAddToAttachment() {
+
+        SingleUploader uploader = new SingleUploader(FileInputType.BROWSER_INPUT, null,
+                saveAttachment) {
+            @Override
+            public Panel getUploaderPanel() {
+                VerticalPanel vPanel = new VerticalPanel();
+                vPanel.setWidth("180px");
+                return vPanel;
+            }
+        };
+        uploader.setAutoSubmit(false);
+        final String desc = "Enter File Description";
+        final TextArea area = new TextArea();
+        area.setText(desc);
+        HTMLPanel panel = new HTMLPanel(
+                "<br><div style=\"word-wrap: break-word\" id=\"attachment_input_description\"></div>");
+        panel.add(area, "attachment_input_description");
+
+        area.addFocusHandler(new FocusHandler() {
+
+            @Override
+            public void onFocus(FocusEvent event) {
+                if (desc.equalsIgnoreCase(area.getText().trim()))
+                    area.setText("");
+            }
+        });
+
+        area.addBlurHandler(new BlurHandler() {
+
+            @Override
+            public void onBlur(BlurEvent event) {
+                if (area.getText().trim().isEmpty())
+                    area.setText(desc);
+            }
+        });
+
+        uploader.add(panel, 1);
+        uploader.add(saveAttachment);
+        uploader.setWidth("180px");
+
+        // TODO : use presenter @see AttachmentListPresenter
+        uploader.addOnStartUploadHandler(new OnStartUploaderHandler() {
+
+            @Override
+            public void onStart(IUploader uploader) {
+                String attDesc = desc.equals(area.getText()) ? "" : area.getText();
+                uploader.setServletPath(uploader.getServletPath() + "?desc=" + attDesc + "&eid="
+                        + entryId + "&type=attachment");
+            }
+        });
 
         uploader.addOnFinishUploadHandler(new OnFinishUploaderHandler() {
             public void onFinish(IUploader uploader) {
                 if (uploader.getStatus() == Status.SUCCESS) {
-                    Window.alert("Server response: \n" + uploader.getServerResponse());
+                    switchButton();
+                    UploadedInfo info = uploader.getServerInfo();
+                    String fileId = info.message;
+                    String attDesc = desc.equals(area.getText()) ? "" : area.getText();
+                    AttachmentItem item = new AttachmentItem(layout.getRowCount() + 1, info.name,
+                            attDesc);
+                    item.setFileId(fileId);
+                    addMenuItem(item);
                     uploader.reset();
+                } else {
+                    // TODO : notify user of error
                 }
             }
         });

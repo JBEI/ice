@@ -390,8 +390,8 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public void setAttachments(ArrayList<AttachmentItem> items) {
-        attachmentMenu.setMenuItems(items);
+    public void setAttachments(ArrayList<AttachmentItem> items, long entryId) {
+        attachmentMenu.setMenuItems(items, entryId);
     }
 
     @Override

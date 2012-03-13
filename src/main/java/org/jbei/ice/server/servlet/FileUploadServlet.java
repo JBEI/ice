@@ -6,6 +6,7 @@ import gwtupload.shared.UConsts;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.List;
@@ -14,10 +15,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
+import org.jbei.ice.lib.managers.AttachmentManager;
+import org.jbei.ice.lib.managers.EntryManager;
+import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.models.Attachment;
+import org.jbei.ice.lib.models.Entry;
 
 public class FileUploadServlet extends UploadAction {
 
     private static final long serialVersionUID = 1L;
+    private static final String SEQUENCE_TYPE = "sequence";
+    private static final String ATTACHMENT_TYPE = "attachment";
 
     Hashtable<String, String> receivedContentTypes = new Hashtable<String, String>();
     Hashtable<String, File> receivedFiles = new Hashtable<String, File>(); // received files list and content types
@@ -29,41 +37,68 @@ public class FileUploadServlet extends UploadAction {
     @Override
     public String executeAction(HttpServletRequest request, List<FileItem> sessionFiles)
             throws UploadActionException {
-        String response = "";
-        int cont = 0;
+
+        // TODO : check cookie
+        // TODO : if non available, check session id
+
+        String desc = request.getParameter("desc");
+        String type = request.getParameter("type");
+        String entryId = request.getParameter("eid");
+        if (entryId == null || entryId.isEmpty())
+            return "No entry id specified for file upload";
+
         for (FileItem item : sessionFiles) {
-            if (false == item.isFormField()) {
-                cont++;
-                try {
-                    /// Create a new file based on the remote file name in the client
-                    // String saveName = item.getName().replaceAll("[\\\\/><\\|\\s\"'{}()\\[\\]]+", "_");
-                    // File file =new File("/tmp/" + saveName);
+            if (item.isFormField())
+                continue;
 
-                    /// Create a temporary file placed in /tmp (only works in unix)
-                    // File file = File.createTempFile("upload-", ".bin", new File("/tmp"));
+            String saveName = item.getName().replaceAll("[\\\\/><\\|\\s\"'{}()\\[\\]]+", "_");
+            File file = new File("/tmp/" + saveName);
+            try {
+                item.write(file);
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                continue;
+            }
 
-                    /// Create a temporary file placed in the default system temp folder
-                    File file = File.createTempFile("upload-", ".bin");
-                    item.write(file);
-
-                    /// Save a list with the received files
-                    receivedFiles.put(item.getFieldName(), file);
-                    receivedContentTypes.put(item.getFieldName(), item.getContentType());
-
-                    /// Send a customized message to the client.
-                    response += "File saved as " + file.getAbsolutePath();
-
-                } catch (Exception e) {
-                    throw new UploadActionException(e);
-                }
+            if (ATTACHMENT_TYPE.equalsIgnoreCase(type)) {
+                return uploadAttachment(file, entryId, desc, saveName);
+            } else {
+                //                throw new ServletException("Do not know what to do with type " + type);
             }
         }
 
-        /// Remove files from session because we have a copy of them
         removeSessionFileItems(request);
+        return "";
 
-        /// Send your customized message to the client.
-        return response;
+    }
+
+    // TODO : check for path information in filename. safari includes it
+    private String uploadAttachment(File file, String entryId, String desc, String filename) {
+
+        try {
+            Entry entry = EntryManager.get(Long.decode(entryId));
+            if (entry == null)
+                return "Could not retrieve entry with id : " + entryId;
+            Attachment attachment = new Attachment();
+            attachment.setEntry(entry);
+            attachment.setDescription(desc);
+            attachment.setFileName(filename);
+
+            FileInputStream inputStream = new FileInputStream(file);
+            Attachment saved = AttachmentManager.save(attachment, inputStream);
+            if (saved != null)
+                return saved.getFileId();
+        } catch (ManagerException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return null;
+
     }
 
     /**
@@ -97,41 +132,3 @@ public class FileUploadServlet extends UploadAction {
         }
     }
 }
-
-// another way to do it
-//    private static final long serialVersionUID = 1L;
-//
-//    @Override
-//    public void doPost(HttpServletRequest request, HttpServletResponse response)
-//            throws ServletException, IOException {
-//        ServletFileUpload upload = new ServletFileUpload();
-//
-//        try{
-//            FileItemIterator iter = upload.getItemIterator(request);
-//
-//            while (iter.hasNext()) {
-//                FileItemStream item = iter.next();
-//
-//                String name = item.getFieldName();
-//                InputStream stream = item.openStream();
-//
-//
-//                // Process the input stream
-//                ByteArrayOutputStream out = new ByteArrayOutputStream();
-//                int len;
-//                byte[] buffer = new byte[8192];
-//                while ((len = stream.read(buffer, 0, buffer.length)) != -1) {
-//                    out.write(buffer, 0, len);
-//                }
-//
-//                int maxFileSize = 10*(1024*2); //10 megs max 
-//                if (out.size() > maxFileSize) { 
-//                    throw new RuntimeException("File is > than " + maxFileSize);
-//                }
-//            }
-//        }
-//        catch(Exception e){
-//            throw new RuntimeException(e);
-//        }
-
-//    }
