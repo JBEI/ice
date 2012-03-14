@@ -27,7 +27,7 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> {
     protected LinkedList<EntryInfo> results;
     private final RegistryServiceAsync service;
     private final DataTable<EntryInfo> table;
-    private ColumnField lastSortField = ColumnField.CREATED;
+    private ColumnField lastSortField;
     private boolean lastSortAsc = false;
 
     public EntryDataViewDataProvider(DataTable<EntryInfo> view, List<Long> data,
@@ -40,7 +40,7 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> {
 
         this.table.addColumnSortHandler(new AsyncHandler(this.table));
         DataTable<EntryInfo>.DataTableColumn<?> defaultSortField = this.table
-                .getColumn(lastSortField);
+                .getColumn(ColumnField.CREATED);
 
         if (defaultSortField != null) {
             ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);
@@ -68,14 +68,13 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> {
 
         // reset sort 
         lastSortAsc = false;
-        lastSortField = ColumnField.CREATED;
+        lastSortField = null;
 
         this.table.getColumnSortList().clear();
         DataTable<EntryInfo>.DataTableColumn<?> defaultSortField = this.table
-                .getColumn(lastSortField);
+                .getColumn(ColumnField.CREATED);
 
         if (defaultSortField != null) {
-            //            this.table.getColumnSortList().push(defaultSortField);
             ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);
             this.table.getColumnSortList().push(info);
         }
@@ -97,20 +96,8 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> {
         else
             rangeEnd = (rangeStart + range.getLength());
 
-        // get the sort info for data fetch
-        ColumnSortList sortList = this.table.getColumnSortList();
-        final boolean sortAsc;
-        final ColumnField sortField;
-
-        sortAsc = sortList.get(0).isAscending();
-
-        int colIndex = this.table.getColumns().indexOf(sortList.get(0).getColumn());
-        if (colIndex < 0)
-            sortField = lastSortField;
-        else
-            sortField = this.table.getColumns().get(colIndex).getField();
-
-        fetchEntryData(sortField, sortAsc, rangeStart, rangeEnd);
+        // this will always cause a sort since reset() is call.
+        sort(rangeStart, rangeEnd);
     }
 
     @Override
@@ -122,17 +109,26 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> {
         final int rangeEnd = (rangeStart + range.getLength()) > valuesIds.size() ? valuesIds.size()
                 : (rangeStart + range.getLength());
 
-        sort(rangeStart, rangeEnd);
+        if (sort(rangeStart, rangeEnd))
+            return;
+
+        // did not need to sort so use the cache
+        ArrayList<EntryInfo> show = new ArrayList<EntryInfo>();
+        show.addAll(results.subList(rangeStart, rangeEnd));
+        updateRowData(rangeStart, show);
     }
 
     /**
+     * Determines if the sort params have changed and therefore warrants a
+     * call to retrieve new data based on those params. Note that the rpc is
+     * still made if the cache does not contain enough data;
      * 
-     * @param sortList
      * @param rangeStart
+     *            data range start (based on page user is on)
      * @param rangeEnd
-     * @return
+     * @return true if the data is sorted/rpc is made
      */
-    protected void sort(int rangeStart, int rangeEnd) {
+    protected boolean sort(int rangeStart, int rangeEnd) {
 
         ColumnSortList sortList = this.table.getColumnSortList();
         final boolean sortAsc;
@@ -146,12 +142,30 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> {
         else
             sortField = this.table.getColumns().get(colIndex).getField();
 
+        // check whether we need to sort in order to determine whether we can use the cache or not
+        // this is done because sort() is also called when we are paging (from onRangeChanged)
+        if (lastSortAsc == sortAsc && lastSortField == sortField) {
+            // make sure there is enough data in the cache for the callee to obtain what they need
+            // based on range
+            if (results.size() >= rangeEnd)
+                return false;
+        }
+
         results.clear();
         lastSortAsc = sortAsc;
         lastSortField = sortField;
         fetchEntryData(sortField, sortAsc, rangeStart, rangeEnd);
+        return true;
     }
 
+    /**
+     * Fetches the data user is interested in viewing (usually a page)
+     * 
+     * @param field
+     * @param ascending
+     * @param rangeStart
+     * @param rangeEnd
+     */
     protected void fetchEntryData(ColumnField field, boolean ascending, final int rangeStart,
             final int rangeEnd) {
 
