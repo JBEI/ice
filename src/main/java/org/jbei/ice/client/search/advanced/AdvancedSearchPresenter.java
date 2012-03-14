@@ -41,7 +41,7 @@ public class AdvancedSearchPresenter {
                 return new EntryViewEventHandler() {
                     @Override
                     public void onEntryView(EntryViewEvent event) {
-                        event.setList(dataProvider.getData());
+                        event.setNavigable(dataProvider);
                         model.getEventBus().fireEvent(event);
                     }
                 };

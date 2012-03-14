@@ -3,6 +3,7 @@ package org.jbei.ice.client.event;
 import java.util.List;
 
 import org.jbei.ice.client.collection.presenter.EntryContext;
+import org.jbei.ice.client.common.IHasNavigableData;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 
 import com.google.gwt.event.shared.EventHandler;
@@ -47,6 +48,10 @@ public class EntryViewEvent extends GwtEvent<EntryViewEventHandler> {
     @Override
     protected void dispatch(EntryViewEventHandler handler) {
         handler.onEntryView(this);
+    }
+
+    public void setNavigable(IHasNavigableData nav) {
+        context.setNav(nav);
     }
 
 }

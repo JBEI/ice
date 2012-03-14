@@ -107,7 +107,8 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
                 return new EntryViewEventHandler() {
                     @Override
                     public void onEntryView(EntryViewEvent event) {
-                        event.setList(entryDataProvider.getData());
+                        //                        event.setList(entryDataProvider.getData());
+                        event.setNavigable(entryDataProvider);
                         model.getEventBus().fireEvent(event);
                     }
                 };

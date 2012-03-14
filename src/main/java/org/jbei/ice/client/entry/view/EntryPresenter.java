@@ -7,6 +7,7 @@ import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.presenter.EntryContext;
+import org.jbei.ice.client.common.IHasNavigableData;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.view.AttachmentItem;
 import org.jbei.ice.client.entry.view.view.EntryDetailViewMenu;
@@ -106,8 +107,6 @@ public class EntryPresenter extends AbstractPresenter {
 
     private void showEntryView(EntryContext context) {
         this.currentContext = context;
-        //        if (context.getList() != null)
-        //            Collections.reverse(context.getList()); // TODO : order matters. make sure this is the case in all
 
         retrieveAccountsAndGroups();
         setContextNavData();
@@ -115,7 +114,9 @@ public class EntryPresenter extends AbstractPresenter {
     }
 
     protected void setContextNavData() {
-        boolean show = (this.currentContext.getList() != null);
+        IHasNavigableData nav = this.currentContext.getNav();
+        boolean show = (nav != null);
+
         display.showContextNav(show);
         if (!show) {
             display.enableNext(false);
@@ -123,17 +124,21 @@ public class EntryPresenter extends AbstractPresenter {
             return;
         }
 
-        if (this.currentContext.getList().isEmpty() || this.currentContext.getList().size() == 1) {
+        int size = nav.getSize();
+        if (size == 0 || size == 1) {
             display.enableNext(false);
             display.enablePrev(false);
         }
 
-        int idx = this.currentContext.getList().indexOf(this.currentContext.getCurrent());
+        EntryInfo info = nav.getCachedData(this.currentContext.getCurrent());
+        // TODO : info == null ?
+        int idx = nav.indexOfCached(info);
+
         display.enablePrev(!(idx == 0));
-        boolean atEnd = ((idx + 1) == this.currentContext.getList().size());
+        boolean atEnd = ((idx + 1) == size);
         display.enableNext(!atEnd);
 
-        String text = (idx + 1) + " of " + this.currentContext.getList().size();
+        String text = (idx + 1) + " of " + size;
         display.setNavText(text);
     }
 
@@ -142,22 +147,26 @@ public class EntryPresenter extends AbstractPresenter {
 
             @Override
             public void onClick(ClickEvent event) {
-                int idx = currentContext.getList().indexOf(currentContext.getCurrent());
+
+                IHasNavigableData nav = currentContext.getNav();
+                EntryInfo currentInfo = nav.getCachedData(currentContext.getCurrent());
+                int idx = nav.indexOfCached(currentInfo);
+
                 if (idx == -1) {
                     display.enableNext(false);
                     display.enablePrev(false);
                     return; // we have a problem. most likely means we did not disable next at the right time
                 }
 
+                int size = nav.getSize();
                 int next = idx + 1;
-                int size = currentContext.getList().size();
-
-                if (size == next + 1) {
+                if (next + 1 == size)
                     display.enableNext(false);
-                }
+
+                EntryInfo nextInfo = nav.getNext(currentInfo);
 
                 // TODO :this needs to be folded into a single "Retrieve"
-                long currentId = currentContext.getList().get(next);
+                long currentId = nextInfo.getId();
                 currentContext.setCurrent(currentId);
                 retrieveEntryDetails(currentId);
                 retrieveAccountsAndGroups();
@@ -173,7 +182,11 @@ public class EntryPresenter extends AbstractPresenter {
 
             @Override
             public void onClick(ClickEvent event) {
-                int idx = currentContext.getList().indexOf(currentContext.getCurrent());
+
+                IHasNavigableData nav = currentContext.getNav();
+                EntryInfo currentInfo = nav.getCachedData(currentContext.getCurrent());
+                int idx = nav.indexOfCached(currentInfo);
+
                 if (idx == -1) {
                     display.enableNext(false);
                     display.enablePrev(false);
@@ -185,13 +198,15 @@ public class EntryPresenter extends AbstractPresenter {
                     display.enablePrev(false);
                 }
 
-                long currentId = currentContext.getList().get(prev);
+                EntryInfo prevInfo = nav.getPrev(currentInfo);
+
+                long currentId = prevInfo.getId();
                 currentContext.setCurrent(currentId);
                 retrieveEntryDetails(currentId);
                 retrieveAccountsAndGroups();
                 //                retrievePermissionData(contextList.get(idx - 1));
                 display.enableNext(true);
-                String text = (prev + 1) + " of " + currentContext.getList().size();
+                String text = (prev + 1) + " of " + nav.getSize();
                 display.setNavText(text);
             }
         });

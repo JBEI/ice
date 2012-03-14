@@ -2,6 +2,7 @@ package org.jbei.ice.client.collection.presenter;
 
 import java.util.List;
 
+import org.jbei.ice.client.common.IHasNavigableData;
 import org.jbei.ice.shared.ColumnField;
 
 public class EntryContext {
@@ -10,6 +11,7 @@ public class EntryContext {
     private Type type;
     private ColumnField sortColumn;
     private boolean asc;
+    private IHasNavigableData nav;
 
     public EntryContext(Type type) {
         this.setType(type);
@@ -53,6 +55,14 @@ public class EntryContext {
 
     public void setAsc(boolean asc) {
         this.asc = asc;
+    }
+
+    public IHasNavigableData getNav() {
+        return nav;
+    }
+
+    public void setNav(IHasNavigableData nav) {
+        this.nav = nav;
     }
 
     public enum Type {

@@ -20,8 +20,8 @@ import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
 
 // Takes care of retrieving all data page, by page
-
-public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> {
+public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> implements
+        IHasNavigableData {
 
     protected final List<Long> valuesIds;
     protected LinkedList<EntryInfo> results;
@@ -57,8 +57,49 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> {
         this(view, new LinkedList<Long>(), service);
     }
 
-    public LinkedList<Long> getData() {
-        return new LinkedList<Long>(this.valuesIds);
+    // experimental. assumes that we have the entryId cached if 
+    // user can click on it. performance is terrible. need a better data structure
+    // expect this to be called only once and getNext()/getPrev() used instead
+
+    @Override
+    public EntryInfo getCachedData(long entryId) {
+        for (EntryInfo result : results) {
+
+            if (result.getId() == entryId)
+                return result;
+        }
+        return null;
+    }
+
+    @Override
+    public int indexOfCached(EntryInfo info) {
+        return results.indexOf(info);
+    }
+
+    @Override
+    public EntryInfo getNext(EntryInfo info) {
+        int idx = results.indexOf(info);
+        // TODO : need to check valuesIds also
+        // we just may have reached the end of the cache and need to retrieve more
+        if (idx == -1 || results.size() <= idx + 1)
+            return null;
+
+        // TODO : if we are at the end of results and there is still more, fetch Data
+        return results.get(idx + 1);
+    }
+
+    @Override
+    public EntryInfo getPrev(EntryInfo info) {
+        int idx = results.indexOf(info);
+        if (idx == -1)
+            return null;
+
+        return results.get(idx - 1);
+    }
+
+    @Override
+    public int getSize() {
+        return valuesIds.size();
     }
 
     public void reset() {
