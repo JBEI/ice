@@ -16,6 +16,7 @@ import org.jbei.ice.client.entry.view.detail.EntryDetailView;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.table.EntrySampleTable;
 import org.jbei.ice.client.entry.view.table.EntrySequenceTable;
+import org.jbei.ice.client.entry.view.update.IEntryFormUpdateSubmit;
 import org.jbei.ice.client.entry.view.update.UpdateEntryForm;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
@@ -164,11 +165,14 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public void showUpdateForm(EntryInfo info) {
-        UpdateEntryForm<? extends EntryInfo> form = ViewFactory.getUpdateForm(info);
+    public IEntryFormUpdateSubmit showUpdateForm(EntryInfo info) {
+        UpdateEntryForm<? extends EntryInfo> form = ViewFactory.getUpdateForm(info,
+            AppController.autoCompleteData);
         if (form == null)
-            return;
+            return form;
+
         mainContent.setWidget(1, 0, form);
+        return form;
     }
 
     /**
@@ -345,6 +349,7 @@ public class EntryView extends Composite implements IEntryView {
         addSampleButton.addClickHandler(handler);
     }
 
+    @Override
     public void addGeneralEditButtonHandler(ClickHandler handler) {
         editGeneralButton.addClickHandler(handler);
     }

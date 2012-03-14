@@ -12,11 +12,13 @@ import org.jbei.ice.shared.dto.ParameterInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -32,16 +34,28 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Hector Plahar
  */
 public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite implements
-        IEntryFormSubmit {
+        IEntryFormUpdateSubmit {
 
     protected final FlexTable layout;
     protected final HashMap<AutoCompleteField, ArrayList<String>> data;
+
     protected Button cancel;
     protected Button submit;
+
+    protected TextBox name;
+    protected TextBox alias;
+    protected TextBox principalInvestigator;
+    protected TextArea summary;
+
     protected TextBox creator;
     protected TextBox creatorEmail;
     private final T entryInfo;
+    private ListBox markupOptions;
+    private TextArea notesText;
     private ParametersPanel parametersPanel;
+
+    private HandlerRegistration submitRegistration;
+    private HandlerRegistration cancelRegistration;
 
     public UpdateEntryForm(HashMap<AutoCompleteField, ArrayList<String>> data, T entryInfo) {
         layout = new FlexTable();
@@ -49,18 +63,29 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
         initComponents();
 
         this.entryInfo = entryInfo;
+
         this.creator.setText(entryInfo.getCreator());
         this.creatorEmail.setText(entryInfo.getCreatorEmail());
+        this.name.setText(entryInfo.getName());
+        this.alias.setText(entryInfo.getAlias());
+        this.principalInvestigator.setText(entryInfo.getPrincipalInvestigator());
+        this.summary.setText(entryInfo.getShortDescription());
     }
 
     protected void initComponents() {
         submit = new Button("Submit");
         submit.setStyleName("btn_submit_entry_form");
-        cancel = new Button("Reset");
+        cancel = new Button("Cancel");
         cancel.setStyleName("btn_reset_entry_form");
 
         creator = createStandardTextBox("205px");
         creatorEmail = createStandardTextBox("205px");
+
+        name = createStandardTextBox("205px");
+        alias = createStandardTextBox("205px");
+        principalInvestigator = createStandardTextBox("205px");
+
+        summary = createTextArea("640px", "50px");
     }
 
     public T getEntryInfo() {
@@ -68,13 +93,47 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
     }
 
     @Override
-    public Button getSubmit() {
-        return this.submit;
+    public void addSubmitHandler(ClickHandler handler) {
+        if (submitRegistration != null)
+            submitRegistration.removeHandler();
+        submitRegistration = this.submit.addClickHandler(handler);
     }
 
     @Override
-    public Button getCancel() {
-        return this.cancel;
+    public void addCancelHandler(ClickHandler handler) {
+        if (cancelRegistration != null)
+            cancelRegistration.removeHandler();
+        cancelRegistration = this.cancel.addClickHandler(handler);
+    }
+
+    @Override
+    public boolean hasSubmitHandler() {
+        return (submitRegistration != null);
+    }
+
+    @Override
+    public boolean hasCancelHandler() {
+        return (cancelRegistration != null);
+    }
+
+    protected void setLabel(boolean required, String label, FlexTable layout, int row, int col) {
+        Widget labelWidget;
+        if (required)
+            labelWidget = new HTML("<span class=\"font-80em\">" + label
+                    + "</span> <span class=\"required\">*</span>");
+        else
+            labelWidget = new HTML("<span class=\"font-80em\">" + label + "</span>");
+
+        layout.setWidget(row, col, labelWidget);
+        layout.getFlexCellFormatter().setWidth(row, col, "170px");
+    }
+
+    protected Widget createTextBoxWithHelp(Widget box, String helpText) {
+        String html = "<span id=\"box_id\"></span><span class=\"help_text\">" + helpText
+                + "</span>";
+        HTMLPanel panel = new HTMLPanel(html);
+        panel.addAndReplaceElement(box, "box_id");
+        return panel;
     }
 
     protected Widget createNotesWidget() {
@@ -90,9 +149,9 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
         notes.getFlexCellFormatter().setHeight(1, 0, "10px");
         notes.getFlexCellFormatter().setColSpan(1, 0, 2);
 
-        notes.setWidget(2, 0, new Label("Markup Type"));
+        notes.setWidget(2, 0, new HTML("<span class=\"font-80em\">Markup Type</span>"));
         notes.getFlexCellFormatter().setStyleName(2, 0, "entry_add_sub_label");
-        ListBox markupOptions = new ListBox();
+        markupOptions = new ListBox();
         markupOptions.setVisibleItemCount(1);
         markupOptions.addItem("Text");
         markupOptions.addItem("Wiki");
@@ -104,9 +163,9 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
         notes.setWidget(3, 0, new Label(""));
         notes.getFlexCellFormatter().setWidth(3, 0, "170px");
 
-        TextArea area = new TextArea();
-        area.setStyleName("entry_add_notes_input");
-        notes.setWidget(3, 1, area);
+        notesText = new TextArea();
+        notesText.setStyleName("entry_add_notes_input");
+        notes.setWidget(3, 1, notesText);
 
         return notes;
     }
@@ -282,8 +341,7 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
     private SuggestBox createSuggestBox(TreeSet<String> data) {
 
         MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
-        if (data != null)
-            oracle.addAll(data);
+        oracle.addAll(data);
         SuggestBox box = new SuggestBox(oracle, new MultipleTextBox());
         box.setStyleName("input_box");
         return box;
@@ -291,23 +349,23 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
 
     public Widget createAutoCompleteForPromoters(String width) {
 
-        SuggestBox box = createSuggestBox(new TreeSet<String>());//data.get(AutoCompleteField.PROMOTER)));
+        SuggestBox box = createSuggestBox(new TreeSet<String>(data.get(AutoCompleteField.PROMOTERS)));
         box.setWidth(width);
         return box;
     }
 
     public SuggestBox createAutoCompleteForSelectionMarkers(String width) {
 
-        SuggestBox box = this.createSuggestBox(new TreeSet<String>()); //data
-        //                .get(AutoCompleteField.SELECTION_MARKER)));
+        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data
+                .get(AutoCompleteField.SELECTION_MARKERS)));
         box.setWidth(width);
         return box;
     }
 
     public Widget createAutoCompleteForPlasmidNames(String width) {
 
-        SuggestBox box = this.createSuggestBox(new TreeSet<String>());//data
-        //                .get(AutoCompleteField.PLASMID_NAME)));
+        SuggestBox box = this.createSuggestBox(new TreeSet<String>(data
+                .get(AutoCompleteField.PLASMID_NAME)));
         box.setWidth(width);
         return box;
     }
@@ -324,8 +382,50 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
     // Abstract Methods
     // 
 
+    @Override
     public FocusWidget validateForm() {
+
+        FocusWidget invalid = null;
+
+        // name
+        if (name.getText().isEmpty()) {
+            name.setStyleName("entry_input_error");
+            invalid = name;
+        } else {
+            name.setStyleName("input_box");
+        }
+
+        // creator
+        if (creator.getText().isEmpty()) {
+            creator.setStyleName("entry_input_error");
+            if (invalid == null)
+                invalid = creator;
+        } else {
+            creator.setStyleName("input_box");
+        }
+
+        // principal investigator
+        if (principalInvestigator.getText().isEmpty()) {
+            principalInvestigator.setStyleName("entry_input_error");
+            if (invalid == null)
+                invalid = principalInvestigator;
+        } else {
+            principalInvestigator.setStyleName("input_box");
+        }
+
+        // summary
+        if (summary.getText().isEmpty()) {
+            summary.setStyleName("entry_input_error");
+            if (invalid == null)
+                invalid = summary;
+        } else {
+            summary.setStyleName("input_box");
+        }
+
+        // parameters
+
         LinkedHashMap<Integer, Parameter> map = parametersPanel.getParameterMap();
+
         for (Integer key : map.keySet()) {
             Parameter parameter = map.get(key);
             String name = parameter.getName();
@@ -333,16 +433,22 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
 
             if (name.isEmpty() && !value.isEmpty()) {
                 parameter.getNameBox().setStyleName("entry_input_error");
-                return parameter.getNameBox();
+                if (invalid == null)
+                    invalid = parameter.getNameBox();
+            } else {
+                parameter.getNameBox().setStyleName("input_box");
             }
 
             if (value.isEmpty() && !name.isEmpty()) {
                 parameter.getValueBox().setStyleName("entry_input_error");
-                return parameter.getValueBox();
+                if (invalid == null)
+                    invalid = parameter.getValueBox();
+            } else {
+                parameter.getValueBox().setStyleName("input_box");
             }
         }
 
-        return null;
+        return invalid;
     }
 
     /**
@@ -350,7 +456,9 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
      * that the specializations can
      * input their class specific fields.
      */
+    @Override
     public void populateEntry() {
+
         // parameters
         ArrayList<ParameterInfo> parameters = new ArrayList<ParameterInfo>();
         LinkedHashMap<Integer, Parameter> map = parametersPanel.getParameterMap();
@@ -367,8 +475,14 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
 
         this.entryInfo.setParameters(parameters);
 
-        // TODO : samples
+        // notes
+        this.entryInfo.setLongDescription(this.notesText.getText());
+        String longDescType = this.markupOptions.getItemText(this.markupOptions.getSelectedIndex());
+        this.entryInfo.setLongDescriptionType(longDescType);
+    }
 
-        // TODO : notes
+    @Override
+    public EntryInfo getEntry() {
+        return this.getEntryInfo();
     }
 }

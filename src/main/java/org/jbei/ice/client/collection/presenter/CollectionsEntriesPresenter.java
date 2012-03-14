@@ -353,7 +353,6 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         //        display.setCurrentMenuSelection(id);
         //        currentFolder = id;
         mode = Mode.SEARCH; // TODO : use context mode
-
     }
 
     private void initCreateCollectionHandlers() {

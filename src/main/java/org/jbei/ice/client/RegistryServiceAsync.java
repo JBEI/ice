@@ -119,6 +119,8 @@ public interface RegistryServiceAsync {
 
     void createEntry(String sid, HashSet<EntryInfo> info, AsyncCallback<ArrayList<Long>> callback);
 
+    void updateEntry(String sid, EntryInfo info, AsyncCallback<Boolean> callback);
+
     void retrieveStorageSchemes(String sessionId, EntryType type,
             AsyncCallback<HashMap<String, ArrayList<String>>> callback);
 

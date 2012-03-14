@@ -946,7 +946,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             EntryController controller = new EntryController(account);
 
             for (EntryInfo info : infoSet) {
-                Entry entry = InfoToModelFactory.infoToEntry(info);
+                Entry entry = InfoToModelFactory.infoToEntry(info, null);
                 entry = controller.createEntry(entry);
 
                 // TODO : save sample (if any)
@@ -968,6 +968,32 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
 
         return result;
+    }
+
+    @Override
+    public boolean updateEntry(String sid, EntryInfo info) {
+
+        try {
+            Account account = retrieveAccountForSid(sid);
+            if (account == null)
+                return false;
+
+            EntryController controller = new EntryController(account);
+            Entry existing = controller.getByRecordId(info.getRecordId());
+
+            Entry entry = InfoToModelFactory.infoToEntry(info, existing);
+
+            if (controller.hasWritePermission(entry)) {
+                controller.save(existing);
+                return true;
+            }
+
+        } catch (ControllerException e) {
+            Logger.error(e);
+        } catch (PermissionException e) {
+            Logger.error(e);
+        }
+        return false;
     }
 
     @Override

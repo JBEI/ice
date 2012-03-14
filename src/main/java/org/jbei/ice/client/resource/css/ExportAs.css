@@ -16,6 +16,7 @@
     border: 1px solid #A5A5A5;
     -webkit-border-radius: 2px;
     margin: 0px;
+    font-family: Arial;
 }
 
 .subMenuExport:hover {
@@ -49,6 +50,6 @@
     margin: 0;
     list-style: none;
     width: 120px;
-    font-family: arial;
+    font-family: Arial;
     font-size: 13px;
 }

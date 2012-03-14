@@ -13,6 +13,7 @@
     text-align: center;
     -webkit-border-radius: 1px;
     -moz-border-radius: 1px;
+    font-family: Arial;
 }
 
 .subMenuCreateNew:hover {

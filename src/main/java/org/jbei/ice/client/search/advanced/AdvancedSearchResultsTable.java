@@ -37,7 +37,6 @@ public abstract class AdvancedSearchResultsTable extends EntryDataTable<EntryInf
         DataTableColumn<EntryInfo> partIdCol = addPartIdColumn(true, 120, Unit.PX);
         columns.add(partIdCol);
 
-        //        columns.add(super.addPartIdColumn(true, 120, Unit.PX, null));
         columns.add(super.addNameColumn(120, Unit.PX));
         columns.add(super.addSummaryColumn());
         columns.add(super.addOwnerColumn());

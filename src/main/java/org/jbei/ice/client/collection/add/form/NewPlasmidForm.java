@@ -89,11 +89,9 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
         general.setCellSpacing(0);
 
         // name
-        name = createStandardTextBox("205px");
         addField(general, "Name", row, 0, name, "e.g. pTSH117", true);
 
         // alias
-        alias = createStandardTextBox("205px");
         addField(general, "Alias", row, 2, alias, null, false);
 
         // creator

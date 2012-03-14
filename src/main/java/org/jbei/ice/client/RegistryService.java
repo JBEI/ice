@@ -122,4 +122,6 @@ public interface RegistryService extends RemoteService {
     FolderDetails updateFolder(String sid, long folderId, FolderDetails update);
 
     FolderDetails removeFromUserCollection(String sessionId, long source, ArrayList<Long> ids);
+
+    boolean updateEntry(String sid, EntryInfo info);
 }

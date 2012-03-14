@@ -9,6 +9,7 @@ import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.IHasNavigableData;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
+import org.jbei.ice.client.entry.view.update.IEntryFormUpdateSubmit;
 import org.jbei.ice.client.entry.view.view.AttachmentItem;
 import org.jbei.ice.client.entry.view.view.EntryDetailViewMenu;
 import org.jbei.ice.client.entry.view.view.EntryView;
@@ -17,6 +18,7 @@ import org.jbei.ice.client.entry.view.view.MenuItem;
 import org.jbei.ice.client.entry.view.view.MenuItem.Menu;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
+import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.event.ShowEntryListEvent;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -28,6 +30,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -37,8 +40,6 @@ public class EntryPresenter extends AbstractPresenter {
     private final HandlerManager eventBus;
     private final IEntryView display;
     private EntryInfo currentInfo;
-    //    private List<Long> contextList;
-    //    private long currentId;
     private EntryContext currentContext;
 
     public EntryPresenter(final RegistryServiceAsync service, HandlerManager eventBus,
@@ -46,6 +47,7 @@ public class EntryPresenter extends AbstractPresenter {
         this.service = service;
         this.eventBus = eventBus;
         this.display = new EntryView();
+        this.currentContext = context;
 
         // add handler for the permission link
         //        display.getDetailMenu().getPermissionLink().addClickHandler(new ClickHandler() {
@@ -62,7 +64,7 @@ public class EntryPresenter extends AbstractPresenter {
         display.getDetailMenu().addClickHandler(handler);
         setContextNavHandlers();
 
-        showEntryView(context);
+        showCurrentEntryView();
 
         // SAMPLE
         // add sample button handler
@@ -80,7 +82,15 @@ public class EntryPresenter extends AbstractPresenter {
 
             @Override
             public void onClick(ClickEvent event) {
-                display.showUpdateForm(currentInfo);
+                IEntryFormUpdateSubmit formUpdate = display.showUpdateForm(currentInfo);
+                if (formUpdate == null)
+                    return;
+
+                if (!formUpdate.hasCancelHandler())
+                    formUpdate.addCancelHandler(new UpdateFormCancelHandler());
+
+                if (!formUpdate.hasSubmitHandler())
+                    formUpdate.addSubmitHandler(new UpdateFormSubmitHandler(formUpdate));
             }
         });
 
@@ -95,22 +105,22 @@ public class EntryPresenter extends AbstractPresenter {
         });
     }
 
+    private void showCurrentEntryView() {
+        retrieveAccountsAndGroups();
+        setContextNavData();
+        retrieveEntryDetails();
+    }
+
     private void addEntryViewHandler() {
         eventBus.addHandler(EntryViewEvent.TYPE, new EntryViewEventHandler() {
 
             @Override
             public void onEntryView(EntryViewEvent event) {
-                showEntryView(event.getContext());
+                if (event != null && event.getContext() != null)
+                    currentContext = event.getContext();
+                showCurrentEntryView();
             }
         });
-    }
-
-    private void showEntryView(EntryContext context) {
-        this.currentContext = context;
-
-        retrieveAccountsAndGroups();
-        setContextNavData();
-        retrieveEntryDetails(this.currentContext.getCurrent());
     }
 
     protected void setContextNavData() {
@@ -168,7 +178,7 @@ public class EntryPresenter extends AbstractPresenter {
                 // TODO :this needs to be folded into a single "Retrieve"
                 long currentId = nextInfo.getId();
                 currentContext.setCurrent(currentId);
-                retrieveEntryDetails(currentId);
+                retrieveEntryDetails();
                 retrieveAccountsAndGroups();
                 //                retrievePermissionData(contextList.get(idx + 1));
                 display.enablePrev(true);
@@ -202,7 +212,7 @@ public class EntryPresenter extends AbstractPresenter {
 
                 long currentId = prevInfo.getId();
                 currentContext.setCurrent(currentId);
-                retrieveEntryDetails(currentId);
+                retrieveEntryDetails();
                 retrieveAccountsAndGroups();
                 //                retrievePermissionData(contextList.get(idx - 1));
                 display.enableNext(true);
@@ -252,23 +262,26 @@ public class EntryPresenter extends AbstractPresenter {
             });
     }
 
-    private void retrieveEntryDetails(final long entryId) {
-        //        currentId = entryId;
-        currentContext.setCurrent(entryId);
+    private void retrieveEntryDetails() {
+
+        final long entryId = currentContext.getCurrent();
         service.retrieveEntryDetails(AppController.sessionId, entryId,
             new AsyncCallback<EntryInfo>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    Window.alert("Failed to retrieve entry details: " + caught.getMessage());
+                    FeedbackEvent event = new FeedbackEvent(true,
+                            "There was an error retrieving the entry. Please try again later.");
+                    eventBus.fireEvent(event);
                 }
 
                 @Override
                 public void onSuccess(EntryInfo result) {
 
                     if (result == null) {
-                        // TODO : how to deal with error messages
-                        Window.alert("There was an error retrieving the entry. Please try again later");
+                        FeedbackEvent event = new FeedbackEvent(true,
+                                "System returned null entry. Please try again later.");
+                        eventBus.fireEvent(event);
                         return;
                     }
 
@@ -337,6 +350,10 @@ public class EntryPresenter extends AbstractPresenter {
         container.add(this.display.asWidget());
     }
 
+    public Widget getView() {
+        return this.display.asWidget();
+    }
+
     //
     // inner classes
     //
@@ -375,7 +392,68 @@ public class EntryPresenter extends AbstractPresenter {
         }
     }
 
-    public Widget getView() {
-        return this.display.asWidget();
+    private class UpdateFormCancelHandler implements ClickHandler {
+
+        @Override
+        public void onClick(ClickEvent event) {
+            showCurrentEntryView();
+        }
+    }
+
+    private class UpdateFormSubmitHandler implements ClickHandler {
+
+        private final IEntryFormUpdateSubmit formSubmit;
+
+        public UpdateFormSubmitHandler(IEntryFormUpdateSubmit formSubmit) {
+            this.formSubmit = formSubmit;
+        }
+
+        @Override
+        public void onClick(ClickEvent event) {
+            FocusWidget focus = formSubmit.validateForm();
+            if (focus != null) {
+                focus.setFocus(true);
+                FeedbackEvent feedback = new FeedbackEvent(true,
+                        "Please fill out all required fields");
+                eventBus.fireEvent(feedback);
+                return;
+            }
+
+            formSubmit.populateEntry();
+            update(formSubmit.getEntry());
+        }
+
+        /**
+         * Makes an rpc to save the set of entrys
+         * 
+         * @param hasEntry
+         *            set of entrys to be saved.
+         */
+        protected void update(final EntryInfo info) {
+            if (info == null)
+                return;
+
+            service.updateEntry(AppController.sessionId, info, new AsyncCallback<Boolean>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    eventBus.fireEvent(new FeedbackEvent(true, "Server error. Please try again."));
+                }
+
+                @Override
+                public void onSuccess(Boolean success) {
+                    if (!success) {
+                        FeedbackEvent event = new FeedbackEvent(true,
+                                "Your entry could not be updated. Please try again.");
+                        eventBus.fireEvent(event);
+                    } else {
+                        showCurrentEntryView();
+                        FeedbackEvent event = new FeedbackEvent(false,
+                                "Entry successfully updated.");
+                        eventBus.fireEvent(event);
+                    }
+                }
+            });
+        }
     }
 }

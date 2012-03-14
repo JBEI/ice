@@ -28,14 +28,20 @@ import org.jbei.ice.shared.dto.StrainInfo;
  */
 public class InfoToModelFactory {
 
-    public static Entry infoToEntry(EntryInfo info) {
+    public static Entry infoToEntry(EntryInfo info, Entry entry) {
 
         EntryType type = info.getType();
-        Entry entry;
 
         switch (type) {
         case PLASMID:
-            Plasmid plasmid = new Plasmid();
+            Plasmid plasmid;
+            if (entry == null) {
+                plasmid = new Plasmid();
+                entry = plasmid;
+            } else
+                plasmid = (Plasmid) entry;
+
+            plasmid.setRecordType(Entry.PLASMID_ENTRY_TYPE);
             PlasmidInfo plasmidInfo = (PlasmidInfo) info;
 
             plasmid.setBackbone(plasmidInfo.getBackbone());
@@ -43,11 +49,17 @@ public class InfoToModelFactory {
             plasmid.setPromoters(plasmidInfo.getPromoters());
             plasmid.setCircular(plasmidInfo.getCircular());
 
-            entry = plasmid;
             break;
 
         case STRAIN:
-            Strain strain = new Strain();
+            Strain strain;
+            if (entry == null) {
+                strain = new Strain();
+                entry = strain;
+            } else
+                strain = (Strain) entry;
+
+            strain.setRecordType(Entry.STRAIN_ENTRY_TYPE);
             StrainInfo strainInfo = (StrainInfo) info;
 
             strain.setHost(strainInfo.getHost());
@@ -58,7 +70,13 @@ public class InfoToModelFactory {
             break;
 
         case PART:
-            Part part = new Part();
+            Part part;
+            if (entry == null) {
+                part = new Part();
+                entry = part;
+            } else
+                part = (Part) entry;
+            part.setRecordType(Entry.PART_ENTRY_TYPE);
 
             // default is RAW until sequence is supplied.
             part.setPackageFormat(AssemblyStandard.RAW);
@@ -67,7 +85,14 @@ public class InfoToModelFactory {
             break;
 
         case ARABIDOPSIS:
-            ArabidopsisSeed seed = new ArabidopsisSeed();
+            ArabidopsisSeed seed;
+            if (entry == null) {
+                seed = new ArabidopsisSeed();
+                entry = seed;
+            } else
+                seed = (ArabidopsisSeed) entry;
+
+            seed.setRecordType(Entry.ARABIDOPSIS_SEED_ENTRY_TYPE);
             ArabidopsisSeedInfo seedInfo = (ArabidopsisSeedInfo) info;
 
             seed.setHomozygosity(seedInfo.getHomozygosity());
@@ -101,6 +126,7 @@ public class InfoToModelFactory {
         HashSet<SelectionMarker> markers = getSelectionMarkers(info.getSelectionMarkers(), entry);
         entry.setSelectionMarkers(markers);
         entry.setOwner(info.getOwner());
+        entry.setRecordId(info.getRecordId());
         entry.setOwnerEmail(info.getOwnerEmail());
         entry.setCreator(info.getCreator());
         entry.setCreatorEmail(info.getCreatorEmail());
@@ -109,7 +135,8 @@ public class InfoToModelFactory {
         entry.setBioSafetyLevel(info.getBioSafetyLevel());
         entry.setShortDescription(info.getShortDescription());
         entry.setLongDescription(info.getLongDescription());
-        entry.setLongDescriptionType("text"); // TODO
+        entry.setLongDescriptionType(info.getLongDescriptionType());
+        entry.setVersionId(info.getVersionId());
 
         FundingSource fundingSource = new FundingSource();
         fundingSource.setFundingSource((info.getFundingSource() != null) ? info.getFundingSource()
