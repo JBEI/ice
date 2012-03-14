@@ -27,8 +27,6 @@ public class UpdatePartForm extends UpdateEntryForm<PartInfo> {
 
     public UpdatePartForm(HashMap<AutoCompleteField, ArrayList<String>> data, PartInfo info) {
         super(data, info);
-        initWidget(layout);
-        initComponent();
 
         // fill out plasmid fields
         this.fundingSource.setText(info.getFundingSource());
@@ -50,18 +48,8 @@ public class UpdatePartForm extends UpdateEntryForm<PartInfo> {
         ip.setText(info.getIntellectualProperty());
     }
 
-    protected void initComponent() {
-        layout.setWidth("100%");
-        layout.setCellPadding(2);
-        layout.setCellSpacing(0);
-
-        layout.setWidget(0, 0, createGeneralWidget());
-        layout.setWidget(1, 0, createParametersWidget());
-        layout.setWidget(2, 0, createNotesWidget());
-        layout.setWidget(3, 0, createSubmitCancelButtons());
-    }
-
-    private Widget createGeneralWidget() {
+    @Override
+    protected Widget createGeneralWidget() {
         int row = 0;
         FlexTable general = new FlexTable();
         general.setWidth("100%");

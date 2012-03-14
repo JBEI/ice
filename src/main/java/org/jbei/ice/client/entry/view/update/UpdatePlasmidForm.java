@@ -41,8 +41,6 @@ public class UpdatePlasmidForm extends UpdateEntryForm<PlasmidInfo> {
 
     public UpdatePlasmidForm(HashMap<AutoCompleteField, ArrayList<String>> data, PlasmidInfo info) {
         super(data, info);
-        initWidget(layout);
-        initComponent();
 
         // fill out plasmid fields
         this.fundingSource.setText(info.getFundingSource());
@@ -69,17 +67,6 @@ public class UpdatePlasmidForm extends UpdateEntryForm<PlasmidInfo> {
         ip.setText(info.getIntellectualProperty());
     }
 
-    protected void initComponent() {
-        layout.setWidth("100%");
-        layout.setCellPadding(2);
-        layout.setCellSpacing(0);
-
-        layout.setWidget(0, 0, createGeneralWidget());
-        layout.setWidget(1, 0, createParametersWidget());
-        layout.setWidget(2, 0, createNotesWidget());
-        layout.setWidget(3, 0, createSubmitCancelButtons());
-    }
-
     private void addField(FlexTable table, String label, int row, int col, TextBox box,
             String help, boolean required) {
         setLabel(required, label, table, row, col);
@@ -90,6 +77,7 @@ public class UpdatePlasmidForm extends UpdateEntryForm<PlasmidInfo> {
             table.setWidget(row, col + 1, box);
     }
 
+    @Override
     protected Widget createGeneralWidget() {
         int row = 0;
         FlexTable general = new FlexTable();

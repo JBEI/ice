@@ -40,8 +40,6 @@ public class ArabidopsisUpdateForm extends UpdateEntryForm<ArabidopsisSeedInfo> 
     public ArabidopsisUpdateForm(HashMap<AutoCompleteField, ArrayList<String>> data,
             ArabidopsisSeedInfo info) {
         super(data, info);
-        initWidget(layout);
-        initComponent();
 
         // fill out fields
         this.fundingSource.setText(info.getFundingSource());
@@ -87,17 +85,7 @@ public class ArabidopsisUpdateForm extends UpdateEntryForm<ArabidopsisSeedInfo> 
         ip.setText(info.getIntellectualProperty());
     }
 
-    protected void initComponent() {
-        layout.setWidth("100%");
-        layout.setCellPadding(2);
-        layout.setCellSpacing(0);
-
-        layout.setWidget(0, 0, createGeneralWidget());
-        layout.setWidget(1, 0, createParametersWidget());
-        layout.setWidget(2, 0, createNotesWidget());
-        layout.setWidget(3, 0, createSubmitCancelButtons());
-    }
-
+    @Override
     protected Widget createGeneralWidget() {
         int row = 0;
         FlexTable general = new FlexTable();

@@ -397,6 +397,7 @@ public class EntryPresenter extends AbstractPresenter {
         @Override
         public void onClick(ClickEvent event) {
             showCurrentEntryView();
+            Window.scrollTo(0, 0);
         }
     }
 
@@ -451,6 +452,7 @@ public class EntryPresenter extends AbstractPresenter {
                         FeedbackEvent event = new FeedbackEvent(false,
                                 "Entry successfully updated.");
                         eventBus.fireEvent(event);
+                        Window.scrollTo(0, 0);
                     }
                 }
             });

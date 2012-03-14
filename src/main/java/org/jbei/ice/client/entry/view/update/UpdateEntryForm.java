@@ -59,20 +59,11 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
 
     public UpdateEntryForm(HashMap<AutoCompleteField, ArrayList<String>> data, T entryInfo) {
         layout = new FlexTable();
+        initWidget(layout);
+
         this.data = data;
-        initComponents();
 
         this.entryInfo = entryInfo;
-
-        this.creator.setText(entryInfo.getCreator());
-        this.creatorEmail.setText(entryInfo.getCreatorEmail());
-        this.name.setText(entryInfo.getName());
-        this.alias.setText(entryInfo.getAlias());
-        this.principalInvestigator.setText(entryInfo.getPrincipalInvestigator());
-        this.summary.setText(entryInfo.getShortDescription());
-    }
-
-    protected void initComponents() {
         submit = new Button("Submit");
         submit.setStyleName("btn_submit_entry_form");
         cancel = new Button("Cancel");
@@ -86,7 +77,32 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
         principalInvestigator = createStandardTextBox("205px");
 
         summary = createTextArea("640px", "50px");
+
+        this.creator.setText(entryInfo.getCreator());
+        this.creatorEmail.setText(entryInfo.getCreatorEmail());
+        this.name.setText(entryInfo.getName());
+        this.alias.setText(entryInfo.getAlias());
+        this.principalInvestigator.setText(entryInfo.getPrincipalInvestigator());
+        this.summary.setText(entryInfo.getShortDescription());
+
+        initComponents();
+
+        this.notesText.setText(entryInfo.getLongDescription());
     }
+
+    protected void initComponents() {
+
+        layout.setWidth("100%");
+        layout.setCellPadding(2);
+        layout.setCellSpacing(0);
+
+        layout.setWidget(0, 0, createGeneralWidget());
+        layout.setWidget(1, 0, createParametersWidget());
+        layout.setWidget(2, 0, createNotesWidget());
+        layout.setWidget(3, 0, createSubmitCancelButtons());
+    }
+
+    protected abstract Widget createGeneralWidget();
 
     public T getEntryInfo() {
         return this.entryInfo;
