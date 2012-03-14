@@ -1,7 +1,6 @@
 package org.jbei.ice.client.entry.view;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 
 import org.jbei.ice.client.AbstractPresenter;
@@ -107,8 +106,8 @@ public class EntryPresenter extends AbstractPresenter {
 
     private void showEntryView(EntryContext context) {
         this.currentContext = context;
-        if (context.getList() != null)
-            Collections.reverse(context.getList()); // TODO : order matters. make sure this is the case in all
+        //        if (context.getList() != null)
+        //            Collections.reverse(context.getList()); // TODO : order matters. make sure this is the case in all
 
         retrieveAccountsAndGroups();
         setContextNavData();
