@@ -79,9 +79,15 @@ public class EntryView extends Composite implements IEntryView {
         headerLabel.setStyleName("display-inline");
         goBack = new Button("Back");
         leftBtn = new Button("Prev");
+        leftBtn.setStyleName("nav");
+        leftBtn.addStyleName("nav-left");
         rightBtn = new Button("Next");
+        rightBtn.setStyleName("nav");
+        rightBtn.addStyleName("nav-right");
         navText = new Label();
         navText.setStyleName("display-inline");
+        navText.addStyleName("font-80em");
+        navText.addStyleName("pad-6");
 
         sampleForm = new CreateSampleForm();
         sampleForm.setVisible(false);
@@ -223,11 +229,25 @@ public class EntryView extends Composite implements IEntryView {
     @Override
     public void enablePrev(boolean enabled) {
         leftBtn.setEnabled(enabled);
+        if (enabled) {
+            leftBtn.removeStyleName("nav_disabled");
+            leftBtn.addStyleName("nav");
+        } else {
+            leftBtn.removeStyleName("nav");
+            leftBtn.addStyleName("nav_disabled");
+        }
     }
 
     @Override
     public void enableNext(boolean enabled) {
         rightBtn.setEnabled(enabled);
+        if (enabled) {
+            rightBtn.removeStyleName("nav_disabled");
+            rightBtn.addStyleName("nav");
+        } else {
+            rightBtn.removeStyleName("nav");
+            rightBtn.addStyleName("nav_disabled");
+        }
     }
 
     @Override
@@ -239,12 +259,14 @@ public class EntryView extends Composite implements IEntryView {
     public void showContextNav(boolean show) {
         if (show) {
             HTMLPanel panel = new HTMLPanel(
-                    "<span id=\"leftBtn\"></span> <span id=\"navText\"></span><span id=\"rightBtn\"></span>");
+                    "<span id=\"leftBtn\"></span> <span id=\"navText\" class=\"font-bold\"></span><span id=\"rightBtn\"></span>");
             panel.add(leftBtn, "leftBtn");
             panel.add(navText, "navText");
             panel.add(rightBtn, "rightBtn");
 
             left.setWidget(0, 0, panel);
+            left.getFlexCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_CENTER);
+            left.getFlexCellFormatter().setStyleName(0, 0, "pad-6");
         } else {
             left.setHTML(0, 0, "");
         }
