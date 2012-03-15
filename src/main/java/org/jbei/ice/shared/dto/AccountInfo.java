@@ -15,6 +15,7 @@ public class AccountInfo implements IsSerializable {
     private int userEntryCount;
     private int userSampleCount;
     private long visibleEntryCount;
+    private boolean isModerator;
 
     public AccountInfo() {
     }
@@ -109,5 +110,13 @@ public class AccountInfo implements IsSerializable {
 
     public void setVisibleEntryCount(long visibleEntryCount) {
         this.visibleEntryCount = visibleEntryCount;
+    }
+
+    public boolean isModerator() {
+        return isModerator;
+    }
+
+    public void setModerator(boolean isModerator) {
+        this.isModerator = isModerator;
     }
 }

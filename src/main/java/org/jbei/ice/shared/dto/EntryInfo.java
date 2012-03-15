@@ -76,6 +76,7 @@ public class EntryInfo implements IsSerializable {
     private HashMap<SampleInfo, LinkedList<StorageInfo>> sampleMap; // TODO : see SampleStorage
     private ArrayList<SequenceAnalysisInfo> sequenceAnalysis;
     private ArrayList<ParameterInfo> parameters;
+    private boolean canEdit; // whether current user that requested this entry info has write privs
 
     public EntryInfo(EntryType type) {
         this.type = type;
@@ -331,5 +332,13 @@ public class EntryInfo implements IsSerializable {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public boolean isCanEdit() {
+        return canEdit;
+    }
+
+    public void setCanEdit(boolean canEdit) {
+        this.canEdit = canEdit;
     }
 }

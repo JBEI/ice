@@ -290,6 +290,10 @@ public class EntryPresenter extends AbstractPresenter {
                             + result.getName();
                     display.setEntryName(name);
 
+                    // can user edit ?
+                    boolean canEdit = (AppController.accountInfo.isModerator() || result
+                            .isCanEdit());
+
                     // attachments
                     ArrayList<AttachmentInfo> attachments = result.getAttachments();
                     ArrayList<AttachmentItem> items = new ArrayList<AttachmentItem>();
@@ -321,7 +325,7 @@ public class EntryPresenter extends AbstractPresenter {
                             .size()));
                     menuItems.add(new MenuItem(Menu.SAMPLES, result.getSampleMap().size()));
                     display.setMenuItems(menuItems); // TODO : set menu loading indicator?
-                    display.showEntryDetailView(currentInfo);
+                    display.showEntryDetailView(currentInfo, canEdit);
                 }
             });
     }
@@ -377,7 +381,9 @@ public class EntryPresenter extends AbstractPresenter {
             switch (menu.getCurrentSelection().getMenu()) {
 
             case GENERAL:
-                display.showEntryDetailView(currentInfo);
+                boolean canEdit = (AppController.accountInfo.isModerator() || currentInfo
+                        .isCanEdit());
+                display.showEntryDetailView(currentInfo, canEdit);
                 break;
 
             case SEQ_ANALYSIS:

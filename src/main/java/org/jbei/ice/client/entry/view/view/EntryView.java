@@ -345,8 +345,9 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public void showEntryDetailView(EntryInfo info) {
+    public void showEntryDetailView(EntryInfo info, boolean showEdit) {
         EntryDetailView<? extends EntryInfo> detailView = ViewFactory.createDetailView(info);
+        editGeneralButton.setVisible(showEdit);
         mainContent.setWidget(0, 0, generalHeaderPanel);
         mainContent.setWidget(1, 0, detailView);
         mainContent.getCellFormatter().setHeight(0, 0, "30px");

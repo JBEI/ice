@@ -46,6 +46,7 @@ import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.AuthenticatedPermissionManager;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.lib.utils.RichTextRenderer;
@@ -80,7 +81,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             SessionData sessionData = AccountController.authenticate(name, pass);
             log("User by login '" + name + "' successfully logged in");
 
-            AccountInfo info = this.accountToInfo(sessionData.getAccount());
+            Account account = sessionData.getAccount();
+            AccountInfo info = this.accountToInfo(account);
             if (info == null)
                 return null;
 
@@ -89,6 +91,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             info.setVisibleEntryCount(visibleEntryCount);
             int entryCount = EntryManager.getEntryCountBy(info.getEmail());
             info.setUserEntryCount(entryCount);
+
+            boolean isModerator = AccountController.isModerator(account);
+            info.setModerator(isModerator);
 
             return info;
         } catch (InvalidCredentialsException e) {
@@ -395,8 +400,15 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public EntryInfo retrieveEntryDetails(String sid, long id) {
         try {
+            Account account = retrieveAccountForSid(sid);
+            if (account == null)
+                return null;
+
             Entry entry = EntryManager.get(id);
             if (entry == null)
+                return null;
+
+            if (!PermissionManager.hasReadPermission(entry, account))
                 return null;
 
             ArrayList<Attachment> attachments = AttachmentManager.getByEntry(entry);
@@ -424,14 +436,22 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             EntryInfo info = EntryToInfoFactory.getInfo(entry, attachments, sampleMap, sequences,
                 hasSequence);
 
-            // convert notes. this will eventually be pushed to client
+            // TODO : move this to client
+            // TODO : convert notes. this will eventually be pushed to client
             String html = RichTextRenderer.richTextToHtml(info.getLongDescriptionType(),
                 info.getLongDescription());
             String parsed = getParsedNotes(html);
             info.setLongDescription(parsed);
+
+            // group with write permissions
+            info.setCanEdit(PermissionManager.hasWritePermission(entry, account));
+
             return info;
 
         } catch (ManagerException e) {
+            Logger.error(e);
+            return null;
+        } catch (ControllerException e) {
             Logger.error(e);
             return null;
         }

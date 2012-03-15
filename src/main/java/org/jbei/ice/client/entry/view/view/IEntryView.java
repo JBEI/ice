@@ -20,7 +20,7 @@ public interface IEntryView {
 
     void showSequenceView(EntryInfo info, boolean showFlash);
 
-    void showEntryDetailView(EntryInfo info);
+    void showEntryDetailView(EntryInfo info, boolean showEdit);
 
     IEntryFormUpdateSubmit showUpdateForm(EntryInfo info);
 
