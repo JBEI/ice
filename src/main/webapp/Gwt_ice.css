@@ -121,7 +121,7 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 .entry_add_parameter {
 	text-align: right;
 	padding-right: 10px;
-	width: 160px;
+	width: 150px;
 }
 
 .entry_general_info_header { 
@@ -311,8 +311,8 @@ a.cell_mouseover:hover {
 }
 
 .entry_view_content {
-	border-right: 1px solid #f1f1f1;
-	border-top: 1px solid #f1f1f1;
+	border-right: 1px solid #e4e4e4;
+	border-top: 1px solid #e4e4e4;
 	padding-left: 5px;
 }
 

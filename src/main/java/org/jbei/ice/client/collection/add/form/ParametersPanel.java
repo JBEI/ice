@@ -70,7 +70,7 @@ public class ParametersPanel {
         row -= 1;
     }
 
-    protected class Parameter {
+    public class Parameter {
         private final TextBox name;
         private final TextBox value;
         private final Button plus;
