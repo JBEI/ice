@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.entry.view.ViewFactory;
 import org.jbei.ice.client.entry.view.detail.EntryDetailView;
@@ -29,6 +30,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -39,7 +42,7 @@ public class EntryView extends Composite implements IEntryView {
     private AttachmentListMenu attachmentMenu;
 
     // general header
-    private HTMLPanel generalHeaderPanel;
+    private HorizontalPanel generalHeaderPanel;
     private Button editGeneralButton;
 
     // sequence Analysis
@@ -59,7 +62,7 @@ public class EntryView extends Composite implements IEntryView {
 
     // navigation buttons for context navigation.
     // TODO : create a widget for it
-    private final Button goBack;
+    private final Image goBack;
     private final Button leftBtn;
     private final Label navText;
     private final Button rightBtn;
@@ -77,8 +80,10 @@ public class EntryView extends Composite implements IEntryView {
     public EntryView() {
         permissions = new PermissionsWidget();
         headerLabel = new Label();
-        headerLabel.setStyleName("display-inline");
-        goBack = new Button("Back");
+        goBack = ImageUtil.getPrevIcon();
+        goBack.setTitle("Back");
+        goBack.setStyleName("cursor_pointer");
+
         leftBtn = new Button("Prev");
         leftBtn.setStyleName("nav");
         leftBtn.addStyleName("nav-left");
@@ -137,13 +142,16 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     private void initGeneralPanel() {
-        generalHeaderPanel = new HTMLPanel(
-                "<span id=\"go_back_button\"></span> <span class=\"entry_general_info_header\" id=\"entry_header\"></span> &nbsp; <span id=\"edit_button\"></span>");
+        //        generalHeaderPanel = new HTMLPanel(
+        //                "<span id=\"go_back_button\"></span> <span class=\"entry_general_info_header\" id=\"entry_header\"></span> &nbsp; <span id=\"edit_button\"></span>");
+        generalHeaderPanel = new HorizontalPanel();
+        generalHeaderPanel.setVerticalAlignment(HasAlignment.ALIGN_MIDDLE);
         editGeneralButton = new Button("Edit");
         editGeneralButton.setStyleName("top_menu");
-        generalHeaderPanel.add(editGeneralButton, "edit_button");
-        generalHeaderPanel.add(goBack, "go_back_button");
-        generalHeaderPanel.add(headerLabel, "entry_header");
+        generalHeaderPanel.add(goBack);
+        generalHeaderPanel.add(headerLabel);
+        headerLabel.setStyleName("entry_general_info_header");
+        generalHeaderPanel.add(editGeneralButton);
     }
 
     private void initSamplePanel() {

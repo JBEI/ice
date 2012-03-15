@@ -65,7 +65,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
 
     private final ICollectionEntriesView display;
 
-    private final EntryDataViewDataProvider entryDataProvider;
+    private EntryDataViewDataProvider entryDataProvider;
     private final CollectionEntriesDataTable collectionsDataTable;
 
     //  data providers for the sub menu
@@ -346,13 +346,21 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
     }
 
     private void handleContext(EntryContext context) {
-        // TODO : punt to advanced search view
-        ArrayList<Long> ids = new ArrayList<Long>(context.getList());
-        entryDataProvider.setValues(ids);
-        display.setDataView(collectionsDataTable);
-        //        display.setCurrentMenuSelection(id);
-        //        currentFolder = id;
-        mode = Mode.SEARCH; // TODO : use context mode
+        switch (context.getType()) {
+        case COLLECTION:
+        case SAMPLES:
+        default:
+            mode = Mode.COLLECTION;
+            display.setDataView(collectionsDataTable);
+            //          display.setCurrentMenuSelection(id);
+            //        currentFolder = id;
+            break;
+
+        case SEARCH:
+            mode = Mode.SEARCH;
+            display.setMainContent(searchPresenter.getView(), true);
+            break;
+        }
     }
 
     private void initCreateCollectionHandlers() {

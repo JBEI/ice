@@ -141,6 +141,11 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
         sort(rangeStart, rangeEnd);
     }
 
+    public void refresh() {
+        table.setVisibleRangeAndClearData(table.getVisibleRange(), true);
+        updateRowCount(this.valuesIds.size(), true); // tODO : this may need to go after the call to updateRowData() in onRangeChanged
+    }
+
     @Override
     protected void onRangeChanged(final HasData<EntryInfo> display) {
 

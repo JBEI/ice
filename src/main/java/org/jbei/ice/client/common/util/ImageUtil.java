@@ -37,6 +37,10 @@ public class ImageUtil {
 
         @Source("org/jbei/ice/client/resource/image/edit.png")
         ImageResource editImage();
+
+        @Source("org/jbei/ice/client/resource/image/prev.png")
+        ImageResource prevImage();
+
     }
 
     public static Image getSampleIcon() {
@@ -73,5 +77,9 @@ public class ImageUtil {
 
     public static Image getMinusIcon() {
         return new Image(Resources.INSTANCE.minusImage());
+    }
+
+    public static Image getPrevIcon() {
+        return new Image(Resources.INSTANCE.prevImage());
     }
 }
