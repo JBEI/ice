@@ -5,16 +5,17 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import org.jbei.ice.client.AbstractPresenter;
+import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.bulkimport.events.BulkImportSubmitEvent;
+import org.jbei.ice.client.bulkimport.events.BulkImportSubmitEventHandler;
 import org.jbei.ice.client.bulkimport.events.SavedDraftsEvent;
 import org.jbei.ice.client.bulkimport.events.SavedDraftsEventHandler;
 import org.jbei.ice.client.bulkimport.model.BulkImportModel;
 import org.jbei.ice.client.bulkimport.model.NewBulkInput;
+import org.jbei.ice.client.bulkimport.model.SheetFieldData;
 import org.jbei.ice.client.bulkimport.panel.SheetHeaderPanel;
 import org.jbei.ice.client.bulkimport.sheet.Sheet;
 import org.jbei.ice.client.collection.menu.MenuItem;
-import org.jbei.ice.client.event.AutoCompleteDataEvent;
-import org.jbei.ice.client.event.AutoCompleteDataEventHandler;
-import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 
@@ -29,7 +30,6 @@ public class BulkImportPresenter extends AbstractPresenter {
     private final IBulkImportView view;
     private HashMap<EntryAddType, NewBulkInput> sheetCache;
     private final BulkImportModel model;
-    private HashMap<AutoCompleteField, ArrayList<String>> data;
 
     public BulkImportPresenter(BulkImportModel model, final IBulkImportView display) {
         this.view = display;
@@ -72,7 +72,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                     input = sheetCache.get(selection);
                 else {
                     Sheet sheet = new Sheet(selection);
-                    sheet.setAutoCompleteData(data);
+                    sheet.setAutoCompleteData(AppController.autoCompleteData);
                     input = new NewBulkInput(selection, sheet);
 
                     // submit handler
@@ -114,22 +114,10 @@ public class BulkImportPresenter extends AbstractPresenter {
     }
 
     private void retrieveAutoCompleteData() {
-        this.model.retrieveAutoCompleteData(new AutoCompleteDataEventHandler() {
-
-            @Override
-            public void onDataRetrieval(AutoCompleteDataEvent event) {
-                HashMap<AutoCompleteField, ArrayList<String>> eventData = event.getData();
-                if (eventData == null)
-                    return;
-
-                data = eventData;
-
-                for (Entry<EntryAddType, NewBulkInput> entry : sheetCache.entrySet()) {
-                    NewBulkInput input = entry.getValue();
-                    input.getSheet().setAutoCompleteData(eventData);
-                }
-            }
-        });
+        for (Entry<EntryAddType, NewBulkInput> entry : sheetCache.entrySet()) {
+            NewBulkInput input = entry.getValue();
+            input.getSheet().setAutoCompleteData(AppController.autoCompleteData);
+        }
     }
 
     @Override
@@ -155,7 +143,27 @@ public class BulkImportPresenter extends AbstractPresenter {
                 return;
             }
 
-            model.saveData(input.getImportType(), input.getSheet().getCellData());
+            ArrayList<SheetFieldData[]> cellData = input.getSheet().getCellData();
+            if (cellData == null || cellData.isEmpty()) {
+                view.showFeedback("Please enter data into the sheet before saving", true);
+                return;
+            }
+
+            view.clearFeedback();
+
+            model.saveData(input.getImportType(), cellData, new BulkImportSubmitEventHandler() {
+
+                @Override
+                public void onSubmit(BulkImportSubmitEvent event) {
+                    if (event.isSuccess()) {
+                        //
+                        // TODO : reset
+                        view.showFeedback("Entries submitted successfully for verification.", false);
+                    } else {
+                        view.showFeedback("Error saving entries", true);
+                    }
+                }
+            });
         }
     }
 
@@ -191,30 +199,6 @@ public class BulkImportPresenter extends AbstractPresenter {
             // save draft
             panel.getDraftInput().setStyleName("bulk_import_draft_input");
 
-            //            service.saveBulkImportDraft(AppController.sessionId,
-            //                AppController.accountInfo.getEmail(), name, input.getSheet().getInfos(), // TODO : get this from model
-            //                new AsyncCallback<BulkImportDraftInfo>() {
-            //
-            //                    @Override
-            //                    public void onSuccess(BulkImportDraftInfo result) {
-            //                        if (result == null)
-            //                            return;
-            //
-            //                        view.getDraftMenu().addMenuData(result);
-            //                        panel.setDraftName(result.getName());
-            //
-            //                        // change view draft to read only
-            //
-            //                        // highlight just added menu; associate just created one with top menu
-            //
-            //                        // 
-            //                    }
-            //
-            //                    @Override
-            //                    public void onFailure(Throwable caught) {
-            //                        feedback.setFailureMessage("Problem saving draft");
-            //                    }
-            //                });
         }
     }
 }

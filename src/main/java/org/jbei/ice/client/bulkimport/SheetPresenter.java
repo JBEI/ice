@@ -3,6 +3,7 @@ package org.jbei.ice.client.bulkimport;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.jbei.ice.client.bulkimport.model.SheetFieldData;
 import org.jbei.ice.shared.AutoCompleteField;
 
 import com.google.gwt.user.client.Window;
@@ -21,7 +22,7 @@ public class SheetPresenter {
 
         boolean isEmptyRow(int row);
 
-        HashMap<Integer, String[]> getCellData();
+        ArrayList<SheetFieldData[]> getCellData();
     }
 
     private final View view;

@@ -59,7 +59,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         mainContent.setWidth("100%");
 
         mainContent.setWidget(0, 0, create);
-        mainContent.getFlexCellFormatter().setWidth(0, 0, "115px");
+        mainContent.getFlexCellFormatter().setWidth(0, 0, "110px");
 
         int count = mainContent.getCellCount(0);
 
@@ -85,12 +85,13 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
 
         SheetHeaderPanel header = input.getSheetHeaderPanel();
         mainContent.setWidget(0, 1, header.getDraftInput());
-        mainContent.getFlexCellFormatter().setWidth(0, 1, "310px");
+        mainContent.getFlexCellFormatter().setWidth(0, 1, "302px");
         mainContent.setWidget(0, 2, header.getDraftSave());
-        mainContent.getFlexCellFormatter().setWidth(0, 2, "85px");
+        mainContent.getFlexCellFormatter().setWidth(0, 2, "100px");
 
         // feedback
         mainContent.setWidget(0, 3, feedback);
+        mainContent.setWidth("47%");
 
         // reset / save
         mainContent.setWidget(0, 4, header.getReset());
@@ -113,6 +114,11 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
             feedback.setFailureMessage(msg);
         else
             feedback.setSuccessMessage(msg);
+    }
+
+    @Override
+    public void clearFeedback() {
+        feedback.setVisible(false);
     }
 
     @Override

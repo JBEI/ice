@@ -19,6 +19,8 @@ public interface IBulkImportView {
 
     void showFeedback(String msg, boolean isError);
 
+    void clearFeedback();
+
     void setSavedDraftsData(ArrayList<MenuItem> data);
 
     SingleSelectionModel<MenuItem> getDraftMenuModel();

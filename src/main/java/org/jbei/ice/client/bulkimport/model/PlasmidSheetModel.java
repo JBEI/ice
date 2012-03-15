@@ -5,13 +5,10 @@ import java.util.ArrayList;
 import org.jbei.ice.client.bulkimport.sheet.Header;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
-import org.jbei.ice.shared.dto.StrainInfo;
 
-public class StrainSheetModel extends SingleInfoSheetModel {
-
-    public StrainSheetModel() {
-    }
+public class PlasmidSheetModel extends SingleInfoSheetModel {
 
     @Override
     public void createInfo(ArrayList<SheetFieldData[]> data, ArrayList<EntryInfo> primaryData,
@@ -25,16 +22,14 @@ public class StrainSheetModel extends SingleInfoSheetModel {
         for (SheetFieldData[] datumArray : data) {
 
             // each each field
-            StrainInfo info = new StrainInfo();
+            PlasmidInfo info = new PlasmidInfo();
             for (SheetFieldData datum : datumArray)
                 setField(info, datum);
             primaryData.add(info);
         }
-
-        //        return entries;
     }
 
-    public void setField(StrainInfo info, SheetFieldData datum) {
+    public void setField(PlasmidInfo info, SheetFieldData datum) {
         if (datum == null)
             return;
 
@@ -130,18 +125,22 @@ public class StrainSheetModel extends SingleInfoSheetModel {
             info.setSelectionMarkers(value);
             break;
 
-        case PARENTAL_STRAIN:
-            info.setHost(value);
+        case CIRCULAR:
+            boolean circular = Boolean.parseBoolean(value);
+            info.setCircular(circular);
             break;
 
-        case GEN_PHEN:
-            info.setGenotypePhenotype(value);
+        case BACKBONE:
+            info.setBackbone(value);
             break;
 
-        case PLASMIDS:
-            info.setPlasmids(value);
+        case PROMOTERS:
+            info.setPromoters(value);
+            break;
+
+        case ORIGIN_OF_REPLICATION:
+            info.setOriginOfReplication(value);
             break;
         }
     }
-
 }

@@ -1,16 +1,25 @@
 package org.jbei.ice.server;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.jbei.ice.client.RegistryService;
 import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.EntryController;
@@ -48,13 +57,17 @@ import org.jbei.ice.lib.permissions.AuthenticatedPermissionManager;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
+import org.jbei.ice.lib.utils.BulkImportEntryData;
+import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.lib.utils.RichTextRenderer;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -63,6 +76,7 @@ import org.jbei.ice.shared.dto.NewsItem;
 import org.jbei.ice.shared.dto.ProfileInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
+import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
@@ -338,8 +352,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     protected Account retrieveAccountForSid(String sid) throws ControllerException {
-        if (!AccountController.isAuthenticated(sid))
+        boolean isAuthenticated = AccountController.isAuthenticated(sid);
+        if (!isAuthenticated) {
+            Logger.info("Session failed authentication: " + sid);
             return null;
+        }
 
         return AccountController.getAccountBySessionKey(sid);
     }
@@ -955,6 +972,167 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public BulkImportDraftInfo saveBulkImportDraft(String sid, String email, String name,
+            ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary) {
+
+        Account account;
+        try {
+            account = retrieveAccountForSid(sid);
+            if (account == null)
+                return null;
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return null;
+        }
+
+        BulkImport draft = new BulkImport();
+
+        try {
+            Account emailAccount = AccountManager.getByEmail(email);
+            draft.setAccount(emailAccount);
+            draft.setName(name);
+            // TODO : entry infos
+
+            BulkImport result = BulkImportManager.createBulkImportRecord(draft);
+            BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
+
+            draftInfo.setCreated(result.getCreationTime());
+            draftInfo.setName(result.getName());
+            return draftInfo;
+
+        } catch (ManagerException e) {
+            Logger.error(e);
+            return null;
+        }
+
+    }
+
+    @Override
+    public boolean submitBulkImport(String sid, String email, ArrayList<EntryInfo> primary,
+            ArrayList<EntryInfo> secondary) {
+        try {
+            Account account = retrieveAccountForSid(sid);
+            if (account == null)
+                return false;
+
+            if (primary.isEmpty())
+                return false;
+
+            String tmpDir = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
+
+            // submit bulk import for verification
+
+            ArrayList<BulkImportEntryData> primaryDataList = new ArrayList<BulkImportEntryData>(
+                    primary.size());
+
+            EntryAddType type = null;
+            HashMap<String, File> attachmentFiles = new HashMap<String, File>();
+            HashMap<String, File> sequenceFiles = new HashMap<String, File>();
+
+            for (EntryInfo info : primary) {
+                BulkImportEntryData data = new BulkImportEntryData();
+
+                Entry entry = InfoToModelFactory.infoToEntry(info, null);
+                entry.setOwnerEmail(account.getEmail());
+                entry.setOwner(account.getFullName());
+                data.setEntry(entry);
+
+                // deal with files
+                if (!info.getAttachments().isEmpty()) {
+                    // deal with attachment files
+                    AttachmentInfo attachmentInfo = info.getAttachments().get(0);
+                    File file = new File(tmpDir + File.separator + attachmentInfo.getFilename());
+                    if (file.exists())
+                        attachmentFiles.put(file.getName(), file);
+                }
+
+                if (!info.getSequenceAnalysis().isEmpty()) {
+                    // deal with sequence files
+                    SequenceAnalysisInfo sequenceInfo = info.getSequenceAnalysis().get(0);
+                    File file = new File(tmpDir + File.separator + sequenceInfo.getName());
+                    if (file.exists())
+                        sequenceFiles.put(file.getName(), file);
+                }
+
+                // type 
+                type = EntryAddType.valueOf(info.getType().name());
+                primaryDataList.add(data);
+            }
+
+            // set primary data and attachments and sequence files if any
+            BulkImport bulkImport = new BulkImport();
+            bulkImport.setPrimaryData(primaryDataList);
+            if (!attachmentFiles.isEmpty()) {
+                try {
+                    byte[] bytes = createZip(attachmentFiles);
+                    bulkImport.setAttachmentFile(ArrayUtils.toObject(bytes));
+                } catch (IOException ioe) {
+                    Logger.error(ioe);
+                }
+            }
+
+            if (!sequenceFiles.isEmpty()) {
+                try {
+                    byte[] bytes = createZip(sequenceFiles);
+                    bulkImport.setSequenceFile(ArrayUtils.toObject(bytes));
+                } catch (IOException ioe) {
+                    Logger.error(ioe);
+                }
+            }
+
+            // TODO : secondary data
+            //            ArrayList<BulkImportEntryData> secondaryDataList = new ArrayList<BulkImportEntryData>(
+            //                    secondary.size());
+            // secondary data
+            //            if (secondaryData != null && !secondaryData.isEmpty()) {
+            //                for (int i = 0; i < secondaryData.size(); i += 1) {
+            //                    aso = (ASObject) secondaryData.get(i);
+            //                    aso.setType("org.jbei.ice.lib.utils.BulkImportEntryData");
+            //                    importData = (BulkImportEntryData) ast.convert(aso, BulkImportEntryData.class);
+            //                    data2.add(importData);
+            //                    Entry entry = importData.getEntry();
+            //                    entry.setOwnerEmail(account.getEmail());
+            //                    entry.setOwner(account.getFullName());
+            //                }
+            //
+            //                bulkImport.setSecondaryData(data2);
+            //                bulkImport.setType("strain w/ plasmid");
+            //            } else {
+            //                bulkImport.setType(type);
+            //            }
+            bulkImport.setType(type.toString());
+            BulkImport savedImport = BulkImportManager.createBulkImportRecord(bulkImport);
+            return (savedImport != null);
+
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+            return false;
+        } catch (ManagerException me) {
+            Logger.error(me);
+            return false;
+        }
+    }
+
+    private static byte[] createZip(HashMap<String, File> files) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ZipOutputStream zipfile = new ZipOutputStream(bos);
+        String fileName = null;
+        ZipEntry zipentry = null;
+        Iterator<String> iter = files.keySet().iterator();
+        while (iter.hasNext()) {
+            fileName = iter.next();
+            zipentry = new ZipEntry(fileName);
+            zipfile.putNextEntry(zipentry);
+            File file = files.get(fileName);
+            FileInputStream input = new FileInputStream(file);
+            byte[] bytes = IOUtils.toByteArray(input);
+            zipfile.write(bytes);
+        }
+        zipfile.close();
+        return bos.toByteArray();
+    }
+
+    @Override
     public ArrayList<Long> createEntry(String sid, HashSet<EntryInfo> infoSet) {
         ArrayList<Long> result = new ArrayList<Long>();
 
@@ -1243,39 +1421,4 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
     }
 
-    @Override
-    public BulkImportDraftInfo saveBulkImportDraft(String sid, String email, String name,
-            ArrayList<EntryInfo> info) {
-
-        Account account;
-        try {
-            account = retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return null;
-        }
-
-        BulkImport draft = new BulkImport();
-
-        try {
-            Account emailAccount = AccountManager.getByEmail(email);
-            draft.setAccount(emailAccount);
-            draft.setName(name);
-            // TODO : entry infos
-
-            BulkImport result = BulkImportManager.createBulkImportRecord(draft);
-            BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
-
-            draftInfo.setCreated(result.getCreationTime());
-            draftInfo.setName(result.getName());
-            return draftInfo;
-
-        } catch (ManagerException e) {
-            Logger.error(e);
-            return null;
-        }
-
-    }
 }

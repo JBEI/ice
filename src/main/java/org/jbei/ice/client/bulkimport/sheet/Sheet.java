@@ -1,10 +1,20 @@
 package org.jbei.ice.client.bulkimport.sheet;
 
+import gwtupload.client.IFileInput.FileInputType;
+import gwtupload.client.IUploadStatus.Status;
+import gwtupload.client.IUploader;
+import gwtupload.client.IUploader.OnFinishUploaderHandler;
+import gwtupload.client.IUploader.OnStartUploaderHandler;
+import gwtupload.client.IUploader.UploadedInfo;
+import gwtupload.client.SingleUploader;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeSet;
 
+import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.bulkimport.SheetPresenter;
+import org.jbei.ice.client.bulkimport.model.SheetFieldData;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.EntryAddType;
@@ -52,7 +62,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
     private Label lastReplaced; // cache of the last widget that was replaced
     private int currentRow;
     private int currentIndex;
-    private final TextBox input;
+
     private int inputRow;
     private int inputIndex;
 
@@ -70,10 +80,21 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     protected final SheetPresenter presenter;
 
+    private final TextBox input;
+    private SuggestBox box;
+    private String filename;
+    private SingleUploader uploader;
+    private HashMap<Integer, String> attachmentRowFileIds;
+    private HashMap<Integer, String> sequenceRowFileIds;
+
+    private final static int ROW_COUNT = 100;
+
     public Sheet(EntryAddType type) {
 
         this.type = type;
         headerCol = 0;
+        attachmentRowFileIds = new HashMap<Integer, String>();
+        sequenceRowFileIds = new HashMap<Integer, String>();
 
         layout = new FlexTable();
         layout.setCellPadding(0);
@@ -163,7 +184,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         //  - 260 accounts for left menu bar. get actual width
         headerWrapper.setWidth((Window.getClientWidth() - 20 - 15) + "px"); // TODO : the 15px accounts for the scroll bar. Not sure yet how to get the scrollbar width
 
-        createHeader();
+        createHeaderCells();
 
         // get header
         layout.setWidget(0, 0, headerWrapper);
@@ -174,7 +195,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         layout.getFlexCellFormatter().setVerticalAlignment(1, 1, HasAlignment.ALIGN_TOP);
 
         // add rows
-        int count = 50;
+        int count = ROW_COUNT;
         int i = 1;
 
         while (count > 0) {
@@ -300,11 +321,15 @@ public class Sheet extends Composite implements SheetPresenter.View {
         });
     }
 
-    protected Widget createHeader() {
+    protected Widget createHeaderCells() {
         addLeadHeader();
 
         Header[] headers = ImportTypeHeaders.getHeadersForType(type);
         new SheetHeader(headers, headerCol, row, header);
+
+        headerCol += headers.length;
+        addTailHeader();
+
         row += 1;
         return header;
     }
@@ -315,6 +340,15 @@ public class Sheet extends Composite implements SheetPresenter.View {
         cell.setStyleName("leader_cell_column_header");
         header.setWidget(row, headerCol, cell);
         header.getFlexCellFormatter().setStyleName(row, headerCol, "leader_cell_column_header_td");
+        headerCol += 1;
+    }
+
+    // tail header 
+    private void addTailHeader() {
+        HTML cell = new HTML("&nbsp;");
+        cell.setStyleName("tail_cell_column_header");
+        header.setWidget(row, headerCol, cell);
+        header.getFlexCellFormatter().setStyleName(row, headerCol, "tail_cell_column_header_td");
         headerCol += 1;
     }
 
@@ -335,26 +369,35 @@ public class Sheet extends Composite implements SheetPresenter.View {
     }
 
     @Override
-    public HashMap<Integer, String[]> getCellData() {
-        HashMap<Integer, String[]> cellData = new HashMap<Integer, String[]>();
+    public ArrayList<SheetFieldData[]> getCellData() {
+        ArrayList<SheetFieldData[]> cellData = new ArrayList<SheetFieldData[]>();
 
-        int headerLength = ImportTypeHeaders.getHeadersForType(type).length;
+        Header[] headers = ImportTypeHeaders.getHeadersForType(type);
+        SheetFieldData[] row = null;
 
         for (int i = 0; i < sheetTable.getRowCount(); i += 1) {
             if (isEmptyRow(i))
                 continue;
 
-            String[] row = cellData.get(i);
-            if (row == null) {
-                row = new String[headerLength];
+            row = new SheetFieldData[headers.length];
 
-                cellData.put(i, row);
+            int y = 0;
+            for (Header header : headers) {
+
+                String id;
+                if (header == Header.ATT_FILENAME) {
+                    id = attachmentRowFileIds.get(i);
+                } else if (header == Header.SEQ_FILENAME) {
+                    id = sequenceRowFileIds.get(i);
+                } else
+                    id = "";
+
+                HasText widget = (HasText) sheetTable.getWidget(i, y);
+                row[y] = new SheetFieldData(header, id, widget.getText());
+                y += 1;
             }
 
-            for (Header header : ImportTypeHeaders.getHeadersForType(type)) {
-                HasText widget = (HasText) sheetTable.getWidget(i, header.ordinal());
-                row[header.ordinal()] = widget.getText();
-            }
+            cellData.add(row);
         }
 
         return cellData;
@@ -388,8 +431,9 @@ public class Sheet extends Composite implements SheetPresenter.View {
                 continue;
 
             // TODO : sometimes input box is active and user clicks submit
+            int y = 0;
             for (Header header : ImportTypeHeaders.getHeadersForType(type)) {
-                Widget widget = sheetTable.getWidget(i, header.ordinal());
+                Widget widget = sheetTable.getWidget(i, y);
                 if (widget instanceof Label) {
                     Label label = (Label) widget;
                     boolean isEmpty = label.getText().trim().isEmpty();
@@ -402,6 +446,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
                         label.setTitle("");
                     }
                 }
+                y += 1;
             }
         }
 
@@ -411,12 +456,14 @@ public class Sheet extends Composite implements SheetPresenter.View {
     // put textinput in cell
     private void switchToInput() {
 
+        // get widget at current position. expect it to be a label
         Widget widget = sheetTable.getWidget(currentRow, currentIndex);
         if (!(widget instanceof Label))
             return;
 
+        // if a switch has occurred, then set the text for it
         if (lastReplaced != null) {
-            String lastText = input.getText();
+            String lastText = input.getText(); // TODO : problem here. this is not always input
             sheetTable.setWidget(inputRow, inputIndex, lastReplaced);
             if (lastText != null && !lastText.isEmpty()) {
                 Label replaced = lastReplaced;
@@ -424,14 +471,14 @@ public class Sheet extends Composite implements SheetPresenter.View {
             }
         }
 
-        // cache 
+        // cache the current label we are replacing 
         lastReplaced = (Label) sheetTable.getWidget(currentRow, currentIndex);
         lastReplaced.removeStyleName("cell_selected");
         inputIndex = currentIndex;
         inputRow = currentRow;
 
         // replace
-        Header currentHeader = ImportTypeHeaders.getHeadersForType(this.type)[currentIndex];
+        final Header currentHeader = ImportTypeHeaders.getHeadersForType(this.type)[currentIndex];
         FieldType fieldType = currentHeader.geFieldType();
         String text = sheetTable.getText(currentRow, currentIndex);
 
@@ -449,12 +496,56 @@ public class Sheet extends Composite implements SheetPresenter.View {
                 MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
                 oracle.addAll(new TreeSet<String>(list));
                 MultipleTextBox textBox = new MultipleTextBox();
-                SuggestBox box = new SuggestBox(oracle, textBox);
+                box = new SuggestBox(oracle, textBox);
                 box.setStyleName("cell_input");
                 box.setWidth("129px");
                 box.setText(text);
                 sheetTable.setWidget(currentRow, currentIndex, box);
                 textBox.setFocus(true);
+                break;
+
+            case FILE_INPUT:
+                uploader = new SingleUploader(FileInputType.LABEL);
+                uploader.setAutoSubmit(true);
+                uploader.getWidget().setSize("129px", "26px");
+
+                //                uploader.getWidget().setStyleName();
+
+                uploader.addOnStartUploadHandler(new OnStartUploaderHandler() {
+
+                    @Override
+                    public void onStart(IUploader uploader) {
+                        uploader.setServletPath(uploader.getServletPath()
+                                + "?type=bulk_attachment&sid=" + AppController.sessionId);
+                    }
+                });
+
+                uploader.addOnFinishUploadHandler(new OnFinishUploaderHandler() {
+                    public void onFinish(IUploader uploader) {
+                        if (uploader.getStatus() == Status.SUCCESS) {
+                            UploadedInfo info = uploader.getServerInfo();
+                            if (info.message.isEmpty())
+                                return; // TODO : hook into error message
+
+                            // attachment or 
+                            if (currentHeader == Header.ATT_FILENAME) {
+                                attachmentRowFileIds.put(currentRow, info.message);
+                            } else if (currentHeader == Header.SEQ_FILENAME) {
+                                sequenceRowFileIds.put(currentRow, info.message);
+                            }
+
+                            filename = info.name;
+                            selectCell(currentRow, currentIndex, currentRow, currentIndex);
+                        } else {
+                            // TODO : notify user of error
+                        }
+                    }
+                });
+                sheetTable.setWidget(currentRow, currentIndex, uploader.getWidget());
+                break;
+
+            case DATE:
+                break;
             }
 
             // TODO : handle other field types
@@ -472,6 +563,12 @@ public class Sheet extends Composite implements SheetPresenter.View {
         if ((currentRow == -1 && currentIndex == -1) || !isRowInBounds(currentRow - 1))
             return;
 
+        // exit for up arrow press in auto complete box
+        Header currentHeader = ImportTypeHeaders.getHeadersForType(this.type)[inputIndex];
+        FieldType fieldType = currentHeader.geFieldType();
+        if (fieldType == FieldType.AUTO_COMPLETE)
+            return;
+
         selectCell(currentRow, currentIndex, currentRow - 1, currentIndex);
     }
 
@@ -480,6 +577,12 @@ public class Sheet extends Composite implements SheetPresenter.View {
             return;
 
         if (!isRowInBounds(currentRow + 1))
+            return;
+
+        // exit for down arrow press in auto complete box
+        Header currentHeader = ImportTypeHeaders.getHeadersForType(this.type)[inputIndex];
+        FieldType fieldType = currentHeader.geFieldType();
+        if (fieldType == FieldType.AUTO_COMPLETE)
             return;
 
         selectCell(currentRow, currentIndex, currentRow + 1, currentIndex);
@@ -507,11 +610,15 @@ public class Sheet extends Composite implements SheetPresenter.View {
         selectCell(currentRow, currentIndex, currentRow, currentIndex - 1);
     }
 
-    private void selectCell(int row, int col, int newRow, int newCol) {
+    private void selectCell(int row, int col, int newRow, int newCol) { // TODO : similar in functionality to cell click
         if (lastReplaced != null) {
-            String inputText = input.getText();
-            input.setText("");
+
+            String inputText = getLastWidgetText();
+            lastReplaced.setTitle(inputText);
+            if (inputText.length() > 15)
+                inputText = (inputText.substring(0, 13) + "...");
             lastReplaced.setText(inputText);
+
             sheetTable.setWidget(inputRow, inputIndex, lastReplaced);
             inputRow = inputIndex = -1; // lastReplaced not visible
             lastReplaced = null;
@@ -539,6 +646,46 @@ public class Sheet extends Composite implements SheetPresenter.View {
         row += 1;
     }
 
+    /**
+     * poor method name. what this attempts to do is
+     * determine what the last widget was that the user interacted with
+     * and return the text for that. E.g. if the user entered a value in the suggest
+     * box (for auto complete boxes), this method determines that and returns the value
+     * for the box instead of the value for the input (Textbox), which is for regular fields.
+     * 
+     * @return
+     */
+    private String getLastWidgetText() {
+        Header currentHeader = ImportTypeHeaders.getHeadersForType(this.type)[inputIndex];
+        FieldType fieldType = currentHeader.geFieldType();
+        String ret = "";
+        if (fieldType == null) {
+            ret = input.getText();
+            input.setText("");
+            return ret;
+        }
+
+        switch (fieldType) {
+
+        case AUTO_COMPLETE:
+            ret = box.getText();
+            box.setText("");
+            break;
+
+        case FILE_INPUT:
+            ret = filename;
+            filename = "";
+            break;
+
+        default:
+            ret = input.getText();
+            input.setText("");
+            break;
+        }
+
+        return ret;
+    }
+
     //
     // inner classes
     //
@@ -550,6 +697,11 @@ public class Sheet extends Composite implements SheetPresenter.View {
             if (cell == null)
                 return;
 
+            // if we are clicking on the same cell, do nothing
+            if (cell.getRowIndex() == currentRow && cell.getCellIndex() == currentIndex) {
+                return;
+            }
+
             // clear previously selected cell, if any
             if (currentRow >= 0 && currentIndex >= 0) {
                 sheetTable.getWidget(currentRow, currentIndex).removeStyleName("cell_selected");
@@ -557,9 +709,12 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
             // reset and remove input
             if (lastReplaced != null) {
-                String inputText = input.getText();
-                input.setText("");
+                String inputText = getLastWidgetText();
+                lastReplaced.setTitle(inputText);
+                if (inputText.length() > 15)
+                    inputText = (inputText.substring(0, 13) + "...");
                 lastReplaced.setText(inputText);
+
                 sheetTable.setWidget(inputRow, inputIndex, lastReplaced);
                 inputRow = inputIndex = -1; // lastReplaced not visible
                 lastReplaced = null;

@@ -33,6 +33,7 @@ import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
 
 // TODO : Robust exception handling
@@ -41,9 +42,26 @@ public class FileUploadServlet extends UploadAction {
     private static final long serialVersionUID = 1L;
     private static final String SEQUENCE_TYPE = "sequence";
     private static final String ATTACHMENT_TYPE = "attachment";
+    private static final String BULK_ATTACHMENT_TYPE = "bulk_attachment";
+    private static final String BULK_SEQUENCE_TYPE = "bulk_sequence";
 
     Hashtable<String, String> receivedContentTypes = new Hashtable<String, String>();
     Hashtable<String, File> receivedFiles = new Hashtable<String, File>(); // received files list and content types
+
+    private Account isLoggedIn(Cookie[] cookies) throws ControllerException {
+        for (Cookie cookie : cookies) {
+            if ("gd-ice".equals(cookie.getName())) {
+                String sid = cookie.getValue();
+                if (sid == null || sid.isEmpty())
+                    return null;
+
+                if (!AccountController.isAuthenticated(sid))
+                    return null;
+                return AccountController.getAccountBySessionKey(sid);
+            }
+        }
+        return null;
+    }
 
     /**
      * Override executeAction to save the received files in a custom place
@@ -76,8 +94,6 @@ public class FileUploadServlet extends UploadAction {
         String desc = request.getParameter("desc");
         String type = request.getParameter("type");
         String entryId = request.getParameter("eid");
-        if (entryId == null || entryId.isEmpty())
-            return "No entry id specified for file upload";
 
         for (FileItem item : sessionFiles) {
             if (item.isFormField())
@@ -86,6 +102,7 @@ public class FileUploadServlet extends UploadAction {
             String saveName = item.getName().replaceAll("[\\\\/><\\|\\s\"'{}()\\[\\]]+", "_");
             String tmpDir = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
             File file = new File(tmpDir + File.separator + saveName);
+
             try {
                 item.write(file);
             } catch (Exception e) {
@@ -95,14 +112,23 @@ public class FileUploadServlet extends UploadAction {
             }
 
             if (ATTACHMENT_TYPE.equalsIgnoreCase(type)) {
+                if (entryId == null || entryId.isEmpty())
+                    return "No entry id specified for file upload";
                 return uploadAttachment(file, entryId, desc, saveName);
             } else if (SEQUENCE_TYPE.equalsIgnoreCase(type)) {
+                if (entryId == null || entryId.isEmpty())
+                    return "No entry id specified for file upload";
                 try {
                     return uploadSequenceTraceFile(file, entryId, account, saveName);
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
+            } else if (BULK_ATTACHMENT_TYPE.equalsIgnoreCase(type)) {
+
+                return uploadBulkAttachment(file, saveName);
+            } else if (BULK_SEQUENCE_TYPE.equalsIgnoreCase(type)) {
+
             }
         }
 
@@ -111,19 +137,11 @@ public class FileUploadServlet extends UploadAction {
 
     }
 
-    private Account isLoggedIn(Cookie[] cookies) throws ControllerException {
-        for (Cookie cookie : cookies) {
-            if ("gd-ice".equals(cookie.getName())) {
-                String sid = cookie.getValue();
-                if (sid == null || sid.isEmpty())
-                    return null;
-
-                if (!AccountController.isAuthenticated(sid))
-                    return null;
-                return AccountController.getAccountBySessionKey(sid);
-            }
-        }
-        return null;
+    public String uploadBulkAttachment(File file, String saveName) {
+        String fileId = Utils.generateUUID();
+        if (file.renameTo(new File(file.getParentFile() + File.separator + fileId)))
+            return fileId;
+        return saveName;
     }
 
     // TODO : this needs to go to manager/controller

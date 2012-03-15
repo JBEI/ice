@@ -97,11 +97,6 @@ public interface RegistryService extends RemoteService {
 
     ProfileInfo retrieveProfileInfo(String sid, String userId);
 
-    ArrayList<BulkImportDraftInfo> retrieveImportDraftData(String sid, String email);
-
-    BulkImportDraftInfo saveBulkImportDraft(String sid, String email, String name,
-            ArrayList<EntryInfo> info);
-
     ArrayList<Long> createEntry(String sid, HashSet<EntryInfo> info);
 
     ArrayList<FolderDetails> addEntriesToCollection(String sid, ArrayList<Long> destination,
@@ -124,4 +119,12 @@ public interface RegistryService extends RemoteService {
     FolderDetails removeFromUserCollection(String sessionId, long source, ArrayList<Long> ids);
 
     boolean updateEntry(String sid, EntryInfo info);
+
+    boolean submitBulkImport(String sid, String email, ArrayList<EntryInfo> primary,
+            ArrayList<EntryInfo> seconday);
+
+    ArrayList<BulkImportDraftInfo> retrieveImportDraftData(String sid, String email);
+
+    BulkImportDraftInfo saveBulkImportDraft(String sid, String email, String name,
+            ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary);
 }

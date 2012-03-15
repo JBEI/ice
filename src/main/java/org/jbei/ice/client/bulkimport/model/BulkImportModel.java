@@ -1,20 +1,17 @@
 package org.jbei.ice.client.bulkimport.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.bulkimport.events.BulkImportSubmitEvent;
+import org.jbei.ice.client.bulkimport.events.BulkImportSubmitEventHandler;
 import org.jbei.ice.client.bulkimport.events.SavedDraftsEvent;
 import org.jbei.ice.client.bulkimport.events.SavedDraftsEventHandler;
-import org.jbei.ice.client.event.AutoCompleteDataEvent;
-import org.jbei.ice.client.event.AutoCompleteDataEventHandler;
-import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -22,29 +19,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public class BulkImportModel {
 
     private final RegistryServiceAsync service;
-
-    //    private final HandlerManager eventBus;
+    private final HandlerManager eventBus;
 
     public BulkImportModel(RegistryServiceAsync service, HandlerManager eventBus) {
         this.service = service;
-        //        this.eventBus = eventBus;
-    }
-
-    public void retrieveAutoCompleteData(final AutoCompleteDataEventHandler handler) {
-        service.retrieveAutoCompleteData(AppController.sessionId,
-            new AsyncCallback<HashMap<AutoCompleteField, ArrayList<String>>>() {
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert("Failed to retrieve the autocomplete data: " + caught.getMessage());
-                }
-
-                @Override
-                public void onSuccess(HashMap<AutoCompleteField, ArrayList<String>> result) {
-                    AutoCompleteDataEvent event = new AutoCompleteDataEvent(result);
-                    handler.onDataRetrieval(event);
-                }
-            });
+        this.eventBus = eventBus;
     }
 
     public void retrieveDraftMenuData(final SavedDraftsEventHandler handler) {
@@ -65,16 +44,55 @@ public class BulkImportModel {
             });
     }
 
-    public void saveData(EntryAddType type, HashMap<Integer, String[]> data) {
+    public void saveData(EntryAddType type, ArrayList<SheetFieldData[]> data,
+            final BulkImportSubmitEventHandler handler) {
         SheetModel model = ModelFactory.getModelForType(type);
-        ArrayList<EntryInfo> entries = model.createInfo(data);
+        if (model != null) {
+            ArrayList<EntryInfo> primary = new ArrayList<EntryInfo>();
+            ArrayList<EntryInfo> secondary = new ArrayList<EntryInfo>();
 
-        // actual save
-        //        this.service.
-        GWT.log("saving " + entries.size());
+            // arrays get filled out here
+            model.createInfo(data, primary, secondary);
 
+            service.submitBulkImport(AppController.sessionId, AppController.accountInfo.getEmail(),
+                primary, secondary, new AsyncCallback<Boolean>() {
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        handler.onSubmit(new BulkImportSubmitEvent(result));
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        handler.onSubmit(new BulkImportSubmitEvent(false));
+                    }
+                });
+        }
     }
+    /*
+     * service.saveBulkImportDraft(AppController.sessionId,
+                AppController.accountInfo.getEmail(), name, entries,
+                new AsyncCallback<BulkImportDraftInfo>() {
 
-    public void retrieve() {
-    }
+                    @Override
+                    public void onSuccess(BulkImportDraftInfo result) {
+                        if (result == null)
+                            return;
+
+                        view.getDraftMenu().addMenuData(result);
+                        panel.setDraftName(result.getName());
+
+                        // change view draft to read only
+
+                        // highlight just added menu; associate just created one with top menu
+
+                        // 
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        feedback.setFailureMessage("Problem saving draft");
+                    }
+                });
+     */
 }

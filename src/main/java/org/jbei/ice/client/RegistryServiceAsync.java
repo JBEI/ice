@@ -137,10 +137,13 @@ public interface RegistryServiceAsync {
 
     void createNewsItem(String sessionId, NewsItem item, AsyncCallback<NewsItem> callback);
 
-    // bulk import draft
+    // bulk import and draft
 
-    void saveBulkImportDraft(String sid, String email, String name, ArrayList<EntryInfo> info,
-            AsyncCallback<BulkImportDraftInfo> callback);
+    void saveBulkImportDraft(String sid, String email, String name, ArrayList<EntryInfo> primary,
+            ArrayList<EntryInfo> secondary, AsyncCallback<BulkImportDraftInfo> callback);
+
+    void submitBulkImport(String sid, String email, ArrayList<EntryInfo> primary,
+            ArrayList<EntryInfo> seconday, AsyncCallback<Boolean> callback);
 
     void removeFromUserCollection(String sessionId, long source, ArrayList<Long> ids,
             AsyncCallback<FolderDetails> asyncCallback);

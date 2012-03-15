@@ -3,15 +3,12 @@ package org.jbei.ice.client.bulkimport.model;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.bulkimport.sheet.Header;
+import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
-import org.jbei.ice.shared.dto.StrainInfo;
 
-public class StrainSheetModel extends SingleInfoSheetModel {
-
-    public StrainSheetModel() {
-    }
+public class ArabidopsisSheetModel extends SingleInfoSheetModel {
 
     @Override
     public void createInfo(ArrayList<SheetFieldData[]> data, ArrayList<EntryInfo> primaryData,
@@ -25,16 +22,14 @@ public class StrainSheetModel extends SingleInfoSheetModel {
         for (SheetFieldData[] datumArray : data) {
 
             // each each field
-            StrainInfo info = new StrainInfo();
+            ArabidopsisSeedInfo info = new ArabidopsisSeedInfo();
             for (SheetFieldData datum : datumArray)
                 setField(info, datum);
             primaryData.add(info);
         }
-
-        //        return entries;
     }
 
-    public void setField(StrainInfo info, SheetFieldData datum) {
+    public void setField(ArabidopsisSeedInfo info, SheetFieldData datum) {
         if (datum == null)
             return;
 
@@ -125,23 +120,6 @@ public class StrainSheetModel extends SingleInfoSheetModel {
             attInfo.add(att);
             info.setHasAttachment(true);
             break;
-
-        case SELECTION_MARKERS:
-            info.setSelectionMarkers(value);
-            break;
-
-        case PARENTAL_STRAIN:
-            info.setHost(value);
-            break;
-
-        case GEN_PHEN:
-            info.setGenotypePhenotype(value);
-            break;
-
-        case PLASMIDS:
-            info.setPlasmids(value);
-            break;
         }
     }
-
 }
