@@ -64,7 +64,19 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         int count = mainContent.getCellCount(0);
 
         // space
-        mainContent.setHTML(1, 0, "&nbsp;");
+        mainContent
+                .setHTML(
+                    1,
+                    0,
+                    "<br><div style=\"font-family: Arial; border: 1px solid #e4e4e4; padding: 10px\"><p>Select type "
+                            + "of entry you wish to bulk import.</p> <p>Please note that columns"
+                            + " with headers indicated by <span class=\"required\">*</span> "
+                            + "are required. You will not be able to submit the form until you enter a "
+                            + "value for those fields.</p>"
+                            + "<p>After submitting, an administrator must approve your "
+                            + "submission before it will show up in the search listings. Contact them if you are in a "
+                            + "hurry.You may optionally save a named draft of a bulk import you are working on. This will not "
+                            + "be submitted and you can continue working on it at a later time</p></div>");
         mainContent.getFlexCellFormatter().setColSpan(1, 0, (count + 1));
 
         return mainContent;

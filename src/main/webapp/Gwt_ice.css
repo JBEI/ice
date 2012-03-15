@@ -954,6 +954,7 @@ a:hover {
 	width: 100%;
 	font-family: Arial, Helvetica, sans-serif;
 	background-color: #F0F0F0;
+	font-size: 11px;
 	padding: 2px;
 }
 
@@ -969,7 +970,7 @@ a:hover {
 	border: 1px solid #ccc;
 	background-color: white;
 	color: #185DA0;
-	font-size: 0.85em;
+	font-size: 12px;
 	cursor: default;
 }
 
@@ -978,7 +979,7 @@ a:hover {
 	border: 1px solid #ccc;
 	background-color: white;
 	color: #9EC068;
-	font-size: 0.85em;
+	font-size: 12px;
 	cursor: pointer;
 }
 
@@ -986,7 +987,7 @@ a:hover {
 	padding: 2px 6px 2px 6px;
 	border: 1px solid #ccc;
 	background-color: white;
-	font-size: 0.85em;
+	font-size: 12px;
 	color: #555;
 	cursor: default;
 	font-weight: bold;

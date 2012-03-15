@@ -1041,17 +1041,17 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 if (!info.getAttachments().isEmpty()) {
                     // deal with attachment files
                     AttachmentInfo attachmentInfo = info.getAttachments().get(0);
-                    File file = new File(tmpDir + File.separator + attachmentInfo.getFilename());
+                    File file = new File(tmpDir + File.separator + attachmentInfo.getFileId());
                     if (file.exists())
-                        attachmentFiles.put(file.getName(), file);
+                        attachmentFiles.put(attachmentInfo.getFilename(), file);
                 }
 
                 if (!info.getSequenceAnalysis().isEmpty()) {
                     // deal with sequence files
                     SequenceAnalysisInfo sequenceInfo = info.getSequenceAnalysis().get(0);
-                    File file = new File(tmpDir + File.separator + sequenceInfo.getName());
+                    File file = new File(tmpDir + File.separator + sequenceInfo.getFileId());
                     if (file.exists())
-                        sequenceFiles.put(file.getName(), file);
+                        sequenceFiles.put(sequenceInfo.getName(), file);
                 }
 
                 // type 
