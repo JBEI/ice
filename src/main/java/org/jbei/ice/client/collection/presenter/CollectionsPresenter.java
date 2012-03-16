@@ -17,7 +17,7 @@ import org.jbei.ice.client.collection.event.FolderRetrieveEvent;
 import org.jbei.ice.client.collection.event.FolderRetrieveEventHandler;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.collection.model.CollectionsModel;
-import org.jbei.ice.client.collection.table.CollectionEntriesDataTable;
+import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.common.entry.IHasEntryId;
@@ -66,7 +66,7 @@ public class CollectionsPresenter extends AbstractPresenter {
     private final ICollectionView display;
 
     private EntryDataViewDataProvider entryDataProvider;
-    private final CollectionEntriesDataTable collectionsDataTable;
+    private final CollectionDataTable collectionsDataTable;
 
     //  data providers for the sub menu
     private final ListDataProvider<FolderDetails> userListProvider;
@@ -80,8 +80,8 @@ public class CollectionsPresenter extends AbstractPresenter {
     private long currentFolder;
     private Mode mode = Mode.COLLECTION;
 
-    public CollectionsPresenter(CollectionsModel model,
-            final ICollectionView display, ArrayList<SearchFilterInfo> operands) {
+    public CollectionsPresenter(CollectionsModel model, final ICollectionView display,
+            ArrayList<SearchFilterInfo> operands) {
         this(model, display);
         search(operands);
     }
@@ -94,13 +94,12 @@ public class CollectionsPresenter extends AbstractPresenter {
     }
 
     // TODO : really need to do something about the size of this constructor
-    public CollectionsPresenter(final CollectionsModel model,
-            final ICollectionView display) {
+    public CollectionsPresenter(final CollectionsModel model, final ICollectionView display) {
         this.display = display;
         this.model = model;
 
         // initialize all parameters
-        this.collectionsDataTable = new CollectionEntriesDataTable(new EntryTablePager()) {
+        this.collectionsDataTable = new CollectionDataTable(new EntryTablePager()) {
 
             @Override
             protected EntryViewEventHandler getHandler() {
@@ -188,39 +187,9 @@ public class CollectionsPresenter extends AbstractPresenter {
                 }
             });
 
-        AddToSubmitHandler addHandler = new AddToSubmitHandler(display, new HasEntry()) {
-
-            @Override
-            public void addEntriesToFolder(final Set<Long> destinationFolders,
-                    final ArrayList<Long> entryIds) {
-                model.addEntriesToFolder(new ArrayList<Long>(destinationFolders), entryIds,
-                    new FolderRetrieveEventHandler() {
-
-                        @Override
-                        public void onMenuRetrieval(FolderRetrieveEvent event) {
-                            if (event == null || event.getItems() == null) {
-                                display.showFeedbackMessage(
-                                    "An error occured while adding entries. Please try again.",
-                                    true);
-                                return;
-                            }
-
-                            ArrayList<FolderDetails> results = event.getItems();
-                            ArrayList<MenuItem> items = new ArrayList<MenuItem>();
-                            for (FolderDetails result : results) {
-                                items.add(new MenuItem(result.getId(), result.getName(), result
-                                        .getCount(), result.isSystemFolder()));
-                            }
-                            display.updateMenuItemCounts(items);
-                            String entryDisp = (entryIds.size() == 1) ? "entry" : "entries";
-                            String msg = "<b>" + entryIds.size() + "</b> " + entryDisp
-                                    + " successfully added to ";
-                            msg += ("\"<b>" + results.get(0).getName() + "</b>\" collection.");
-                            display.showFeedbackMessage(msg, false);
-                        }
-                    });
-            }
-        };
+        // handler for "add to" submenu
+        AddToHandler addHandler = new AddToHandler(display, new HasEntry(), model,
+                this.collectionsDataTable);
         display.addAddToSubmitHandler(addHandler);
 
         // move to handler
@@ -309,8 +278,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         display.addRemoveHandler(removeHandler);
     }
 
-    public CollectionsPresenter(CollectionsModel model,
-            final ICollectionView display, String param) {
+    public CollectionsPresenter(CollectionsModel model, final ICollectionView display, String param) {
 
         // collection sub menu
         this(model, display);

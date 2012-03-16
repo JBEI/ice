@@ -70,7 +70,7 @@
 }
 
 .cellTableSortableHeader:hover {
-    color: #6c6b6b;
+    color: #222;
 }
 
 .cellTableSortedHeaderAscending {
@@ -102,7 +102,6 @@
 }
 
 .cellTableKeyboardSelectedRow {
-    background-color: #ffc;
 }
 
 .cellTableKeyboardSelectedRowCell {
@@ -110,18 +109,17 @@
 
 @sprite .cellTableSelectedRow {
     gwt-image: 'cellTableSelectedBackground';
-    background-color: #628cd5;
+    background-color: #ffc;
     color: white;
     height: auto;
     overflow: auto;
 }
 
 .cellTableSelectedRowCell {
-    background: #628cd5;
+    background: #ffc;
 }
 
 .cellTableKeyboardSelectedCell {
-    background: #d7dde8;
 }
 
 .cellTableLoading {

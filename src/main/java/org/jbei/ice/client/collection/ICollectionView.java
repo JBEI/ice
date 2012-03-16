@@ -7,7 +7,7 @@ import java.util.Set;
 import org.jbei.ice.client.collection.event.SubmitHandler;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.collection.presenter.MoveToSubmitHandler;
-import org.jbei.ice.client.collection.table.CollectionEntriesDataTable;
+import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.shared.EntryAddType;
 
@@ -79,7 +79,7 @@ public interface ICollectionView {
      * @param table
      *            data view table. depends on user selection
      */
-    void setDataView(CollectionEntriesDataTable table);
+    void setDataView(CollectionDataTable table);
 
     void setMainContent(Widget mainContent, boolean showSubMenu);
 

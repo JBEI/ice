@@ -12,7 +12,7 @@ import org.jbei.ice.client.collection.menu.CollectionMenu;
 import org.jbei.ice.client.collection.menu.ExportAsMenu;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.collection.presenter.MoveToSubmitHandler;
-import org.jbei.ice.client.collection.table.CollectionEntriesDataTable;
+import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.shared.EntryAddType;
@@ -22,6 +22,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -79,26 +80,21 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
         contents.setCellSpacing(0);
         contents.setCellPadding(0);
 
-        // systems collections menu
         systemMenu = new CollectionMenu(false, "Collections");
-        contents.setWidget(0, 0, systemMenu);
-        contents.getCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
-
-        // separator between menus (top and bottom)
-        contents.setHTML(1, 0, "&nbsp;");
-
-        // user collection menu
         userMenu = new CollectionMenu(true, "My Collections");
-        contents.setWidget(2, 0, userMenu);
-        contents.getCellFormatter().setVerticalAlignment(2, 0, HasAlignment.ALIGN_TOP);
+        HTMLPanel menuPanel = new HTMLPanel(
+                "<span id=\"system_menu\"></span><br><span id=\"user_menu\"></span><br>");
+        menuPanel.add(systemMenu, "system_menu");
+        menuPanel.add(userMenu, "user_menu");
+
+        contents.setWidget(0, 0, menuPanel);
+        contents.getCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
 
         // separator between menu and content (left and right)
         contents.setHTML(0, 1, "&nbsp;&nbsp;&nbsp;&nbsp;");
-        contents.getFlexCellFormatter().setRowSpan(0, 1, 3);
 
         // main content area
         contents.setWidget(0, 2, rightContents);
-        contents.getFlexCellFormatter().setRowSpan(0, 2, 3);
         contents.getCellFormatter().setVerticalAlignment(0, 2, HasAlignment.ALIGN_TOP);
         contents.getCellFormatter().setHorizontalAlignment(0, 2, HasAlignment.ALIGN_RIGHT);
         contents.getCellFormatter().setWidth(0, 2, "100%");
@@ -121,7 +117,7 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
-    public void setDataView(CollectionEntriesDataTable table) {
+    public void setDataView(CollectionDataTable table) {
         feedback.setVisible(false);
 
         rightContents.setWidget(0, 1, subMenu);

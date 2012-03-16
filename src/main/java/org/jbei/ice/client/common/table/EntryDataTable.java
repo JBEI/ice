@@ -89,6 +89,10 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         return selectionColumn;
     }
 
+    public void clearSelection() {
+        selectionModel.clear();
+    }
+
     protected DataTableColumn<String> addTypeColumn(boolean sortable, double width, Unit unit) {
         DataTableColumn<String> typeCol = new DataTableColumn<String>(new TextCell(),
                 ColumnField.TYPE) {
@@ -226,22 +230,25 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         return (value.substring(0, 1).toUpperCase() + value.substring(1));
     }
 
-    protected void addHasAttachmentColumn() {
+    protected void addHasAttachmentColumn(boolean sortable) {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.ATTACHMENT);
         this.addColumn(column, column.getHeader());
         this.setColumnWidth(column, 30, Unit.PX);
+        column.setSortable(sortable);
     }
 
-    protected void addHasSampleColumn() {
+    protected void addHasSampleColumn(boolean sortable) {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SAMPLE);
         this.addColumn(column, column.getHeader());
         this.setColumnWidth(column, 30, Unit.PX);
+        column.setSortable(sortable);
     }
 
-    protected void addHasSequenceColumn() {
+    protected void addHasSequenceColumn(boolean sortable) {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SEQUENCE);
         this.addColumn(column, column.getHeader());
         this.setColumnWidth(column, 30, Unit.PX);
+        column.setSortable(sortable);
     }
 
     protected DataTableColumn<String> addCreatedColumn() {

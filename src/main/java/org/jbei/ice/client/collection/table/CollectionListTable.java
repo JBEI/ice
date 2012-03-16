@@ -20,7 +20,7 @@ import com.google.gwt.view.client.Range;
 /**
  * Table for displaying meta data about the list of collections.
  * 
- * @see CollectionEntriesDataTable which is responsible for displaying the contents of each
+ * @see CollectionDataTable which is responsible for displaying the contents of each
  *      collection
  * @author Hector Plahar
  */
