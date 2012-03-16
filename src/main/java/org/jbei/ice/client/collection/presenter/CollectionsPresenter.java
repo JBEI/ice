@@ -220,15 +220,22 @@ public class CollectionsPresenter extends AbstractPresenter {
                             display.updateMenuItemCounts(items);
                             String entryDisp = (entryIds.size() == 1) ? "entry" : "entries";
                             String msg = "<b>" + entryIds.size() + "</b> " + entryDisp
-                                    + " successfully moved";
+                                    + " successfully moved to ";
 
-                            if (results.size() == 1)
-                                msg += ("\" to <b>" + results.get(0).getName() + "</b>\" collection.");
-                            else
-                                msg += ".";
+                            int size = results.size();
+                            if (size == 1) {
+                                String name = results.get(0).getName();
+                                if (name.length() > 24) {
+                                    name = "<abbr title=\"" + results.get(0).getName() + "\">"
+                                            + name.substring(0, 21) + "...</abbr>";
+                                }
+                                msg += ("\"<b>" + name + "</b>\" collection.");
+                            } else {
+                                msg += ("\"<b>" + size + "</b> collections.");
+                            }
 
-                            retrieveEntriesForFolder(currentFolder);
-                            display.showFeedbackMessage(msg, false);
+                            retrieveEntriesForFolder(currentFolder, msg);
+                            collectionsDataTable.clearSelection();
                         }
                     });
             }
@@ -266,11 +273,22 @@ public class CollectionsPresenter extends AbstractPresenter {
 
                         String entryDisp = (ids.size() == 1) ? "entry" : "entries";
                         String msg = "<b>" + ids.size() + "</b> " + entryDisp
-                                + " successfully moved to ";
-                        msg += ("\"<b>" + result.getName() + "</b>\" collection.");
+                                + " successfully removed from";
 
-                        retrieveEntriesForFolder(currentFolder);
-                        display.showFeedbackMessage(msg, false);
+                        int size = ids.size();
+                        if (size == 1) {
+                            String name = result.getName();
+                            if (name.length() > 24) {
+                                name = "<abbr title=\"" + result.getName() + "\">"
+                                        + name.substring(0, 21) + "...</abbr>";
+                            }
+                            msg += ("\"<b>" + name + "</b>\" collection.");
+                        } else {
+                            msg += ("\"<b>" + size + "</b> collections.");
+                        }
+
+                        retrieveEntriesForFolder(currentFolder, msg);
+                        collectionsDataTable.clearSelection();
                     }
                 });
             }
@@ -290,7 +308,7 @@ public class CollectionsPresenter extends AbstractPresenter {
             id = 0;
         }
 
-        retrieveEntriesForFolder(id);
+        retrieveEntriesForFolder(id, null);
     }
 
     private void showEntryView(EntryContext event) {
@@ -449,7 +467,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                 if (selection == null)
                     return;
 
-                retrieveEntriesForFolder(selection.getId());
+                retrieveEntriesForFolder(selection.getId(), null);
             }
         });
 
@@ -461,7 +479,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                 if (selection == null)
                     return;
 
-                retrieveEntriesForFolder(selection.getId());
+                retrieveEntriesForFolder(selection.getId(), null);
             }
         });
 
@@ -509,7 +527,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         });
     }
 
-    private void retrieveEntriesForFolder(final long id) {
+    private void retrieveEntriesForFolder(final long id, final String msg) {
 
         model.retrieveEntriesForFolder(id, new EntryIdsEventHandler() {
 
@@ -528,6 +546,8 @@ public class CollectionsPresenter extends AbstractPresenter {
                 display.setCurrentMenuSelection(id);
                 currentFolder = id;
                 mode = Mode.COLLECTION;
+                if (msg != null && !msg.isEmpty())
+                    display.showFeedbackMessage(msg, false);
             }
         });
     }

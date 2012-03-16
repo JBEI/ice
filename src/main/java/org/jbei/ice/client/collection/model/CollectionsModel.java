@@ -10,7 +10,6 @@ import org.jbei.ice.client.collection.event.FolderEvent;
 import org.jbei.ice.client.collection.event.FolderEventHandler;
 import org.jbei.ice.client.collection.event.FolderRetrieveEvent;
 import org.jbei.ice.client.collection.event.FolderRetrieveEventHandler;
-import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.shared.FolderDetails;
 
 import com.google.gwt.event.shared.HandlerManager;
@@ -159,8 +158,7 @@ public class CollectionsModel {
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    FeedbackEvent event = new FeedbackEvent(true, "Error moving folders");
-                    eventBus.fireEvent(event);
+                    handler.onMenuRetrieval(null);
                 }
 
                 @Override
@@ -177,9 +175,7 @@ public class CollectionsModel {
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    FeedbackEvent event = new FeedbackEvent(true,
-                            "Error removing items from folder");
-                    eventBus.fireEvent(event);
+                    handler.onMenuRetrieval(null);
                 }
 
                 @Override
