@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.jbei.ice.client.collection.ICollectionEntriesView;
+import org.jbei.ice.client.collection.ICollectionView;
 import org.jbei.ice.client.collection.event.SubmitEvent;
 import org.jbei.ice.client.collection.event.SubmitHandler;
 import org.jbei.ice.client.collection.view.OptionSelect;
@@ -13,10 +13,10 @@ import org.jbei.ice.client.common.entry.IHasEntryId;
 
 public abstract class AddToSubmitHandler implements SubmitHandler {
 
-    private final ICollectionEntriesView view;
+    private final ICollectionView view;
     private final IHasEntryId hasEntry;
 
-    public AddToSubmitHandler(ICollectionEntriesView view, IHasEntryId hasEntry) {
+    public AddToSubmitHandler(ICollectionView view, IHasEntryId hasEntry) {
         this.view = view;
         this.hasEntry = hasEntry;
     }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.jbei.ice.client.collection.ICollectionEntriesView;
+import org.jbei.ice.client.collection.ICollectionView;
 import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
 import org.jbei.ice.client.collection.event.SubmitHandler;
 import org.jbei.ice.client.collection.menu.CollectionEntryActionMenu;
@@ -26,7 +26,7 @@ import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-public class CollectionsEntriesView extends AbstractLayout implements ICollectionEntriesView {
+public class CollectionsView extends AbstractLayout implements ICollectionView {
 
     private CollectionMenu systemMenu;
     private CollectionMenu userMenu;

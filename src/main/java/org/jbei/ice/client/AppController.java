@@ -8,9 +8,9 @@ import org.jbei.ice.client.bulkimport.BulkImportPresenter;
 import org.jbei.ice.client.bulkimport.BulkImportView;
 import org.jbei.ice.client.bulkimport.model.BulkImportModel;
 import org.jbei.ice.client.collection.model.CollectionsModel;
-import org.jbei.ice.client.collection.presenter.CollectionsEntriesPresenter;
+import org.jbei.ice.client.collection.presenter.CollectionsPresenter;
 import org.jbei.ice.client.collection.presenter.EntryContext;
-import org.jbei.ice.client.collection.view.CollectionsEntriesView;
+import org.jbei.ice.client.collection.view.CollectionsView;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.header.QuickSearchParser;
 import org.jbei.ice.client.event.ILoginEventHandler;
@@ -123,7 +123,7 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             return; // collections is also listening on the eventBus for search events so do not respond
 
         History.newItem(Page.COLLECTIONS.getLink(), false);
-        final CollectionsEntriesView cView = new CollectionsEntriesView();
+        final CollectionsView cView = new CollectionsView();
         addHeaderSearchHandler(cView);
         //        cView.getHeader().addSearchClickHandler(new ClickHandler() {
         //
@@ -139,7 +139,7 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         //                eventBus.fireEvent(searchInProgressEvent);
         //            }
         //        });
-        CollectionsEntriesPresenter presenter = new CollectionsEntriesPresenter(
+        CollectionsPresenter presenter = new CollectionsPresenter(
                 new CollectionsModel(this.service, this.eventBus), cView, operands);
         presenter.go(container);
     }
@@ -202,13 +202,13 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             break;
 
         case ENTRY_VIEW:
-            CollectionsEntriesView cView = new CollectionsEntriesView();
+            CollectionsView cView = new CollectionsView();
             addHeaderSearchHandler(cView); // TODO : not sure if this is needed
             long id = Long.decode(param);
             EntryContext context = new EntryContext(EntryContext.Type.COLLECTION);
             context.setCurrent(id);
 
-            presenter = new CollectionsEntriesPresenter(new CollectionsModel(this.service,
+            presenter = new CollectionsPresenter(new CollectionsModel(this.service,
                     this.eventBus), cView, context);
             break;
 
@@ -219,9 +219,9 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             break;
 
         case COLLECTIONS:
-            CollectionsEntriesView collectionsView = new CollectionsEntriesView();
+            CollectionsView collectionsView = new CollectionsView();
             addHeaderSearchHandler(collectionsView);
-            presenter = new CollectionsEntriesPresenter(new CollectionsModel(this.service,
+            presenter = new CollectionsPresenter(new CollectionsModel(this.service,
                     this.eventBus), collectionsView, param);
             break;
 

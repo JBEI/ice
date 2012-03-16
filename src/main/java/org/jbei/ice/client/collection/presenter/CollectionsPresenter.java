@@ -7,7 +7,7 @@ import java.util.Set;
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Page;
-import org.jbei.ice.client.collection.ICollectionEntriesView;
+import org.jbei.ice.client.collection.ICollectionView;
 import org.jbei.ice.client.collection.add.EntryAddPresenter;
 import org.jbei.ice.client.collection.event.EntryIdsEvent;
 import org.jbei.ice.client.collection.event.EntryIdsEventHandler;
@@ -55,7 +55,7 @@ import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-public class CollectionsEntriesPresenter extends AbstractPresenter {
+public class CollectionsPresenter extends AbstractPresenter {
 
     // this is a temporary measure to determine how to return entries both 
     // search and collection browsing. this should be replaced by EntryContext
@@ -63,7 +63,7 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         SEARCH, COLLECTION;
     }
 
-    private final ICollectionEntriesView display;
+    private final ICollectionView display;
 
     private EntryDataViewDataProvider entryDataProvider;
     private final CollectionEntriesDataTable collectionsDataTable;
@@ -80,22 +80,22 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
     private long currentFolder;
     private Mode mode = Mode.COLLECTION;
 
-    public CollectionsEntriesPresenter(CollectionsModel model,
-            final ICollectionEntriesView display, ArrayList<SearchFilterInfo> operands) {
+    public CollectionsPresenter(CollectionsModel model,
+            final ICollectionView display, ArrayList<SearchFilterInfo> operands) {
         this(model, display);
         search(operands);
     }
 
     // collections for entry view
-    public CollectionsEntriesPresenter(CollectionsModel model, final ICollectionEntriesView view,
+    public CollectionsPresenter(CollectionsModel model, final ICollectionView view,
             EntryContext event) {
         this(model, view);
         this.showEntryView(event);
     }
 
     // TODO : really need to do something about the size of this constructor
-    public CollectionsEntriesPresenter(final CollectionsModel model,
-            final ICollectionEntriesView display) {
+    public CollectionsPresenter(final CollectionsModel model,
+            final ICollectionView display) {
         this.display = display;
         this.model = model;
 
@@ -309,8 +309,8 @@ public class CollectionsEntriesPresenter extends AbstractPresenter {
         display.addRemoveHandler(removeHandler);
     }
 
-    public CollectionsEntriesPresenter(CollectionsModel model,
-            final ICollectionEntriesView display, String param) {
+    public CollectionsPresenter(CollectionsModel model,
+            final ICollectionView display, String param) {
 
         // collection sub menu
         this(model, display);

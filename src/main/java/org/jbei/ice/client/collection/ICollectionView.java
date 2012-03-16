@@ -24,7 +24,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
  * @author Hector Plahar
  */
 
-public interface ICollectionEntriesView {
+public interface ICollectionView {
 
     void setSystemCollectionMenuItems(ArrayList<MenuItem> items);
 
