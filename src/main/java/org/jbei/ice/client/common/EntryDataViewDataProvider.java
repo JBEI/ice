@@ -10,6 +10,7 @@ import org.jbei.ice.client.common.table.DataTable;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
 
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
@@ -30,15 +31,24 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
     private ColumnField lastSortField;
     private boolean lastSortAsc = false;
 
-    public EntryDataViewDataProvider(DataTable<EntryInfo> view, List<Long> data,
-            RegistryServiceAsync service) {
+    public EntryDataViewDataProvider(DataTable<EntryInfo> view, RegistryServiceAsync service) {
 
         this.table = view;
         this.service = service;
         this.valuesIds = new LinkedList<Long>();
         results = new LinkedList<EntryInfo>();
 
-        this.table.addColumnSortHandler(new AsyncHandler(this.table));
+        this.table.addColumnSortHandler(new AsyncHandler(this.table) {
+            @Override
+            public void onColumnSort(ColumnSortEvent event) {
+                super.onColumnSort(event);
+
+                results.clear();
+                int pageSize = table.getVisibleRange().getLength();
+                table.setVisibleRange(0, pageSize);
+            }
+        });
+
         DataTable<EntryInfo>.DataTableColumn<?> defaultSortField = this.table
                 .getColumn(ColumnField.CREATED);
 
@@ -47,14 +57,7 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
             this.table.getColumnSortList().push(info);
         }
 
-        if (!data.isEmpty())
-            this.setValues(data);
-
         this.addDataDisplay(this.table);
-    }
-
-    public EntryDataViewDataProvider(DataTable<EntryInfo> view, RegistryServiceAsync service) {
-        this(view, new LinkedList<Long>(), service);
     }
 
     // experimental. assumes that we have the entryId cached if 

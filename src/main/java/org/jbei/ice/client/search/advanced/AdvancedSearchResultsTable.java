@@ -41,9 +41,9 @@ public abstract class AdvancedSearchResultsTable extends EntryDataTable<EntryInf
         columns.add(super.addSummaryColumn());
         columns.add(super.addOwnerColumn());
         columns.add(super.addStatusColumn());
-        super.addHasAttachmentColumn(true);
-        super.addHasSampleColumn(true);
-        super.addHasSequenceColumn(true);
+        super.addHasAttachmentColumn();
+        super.addHasSampleColumn();
+        super.addHasSequenceColumn();
         columns.add(super.addCreatedColumn());
 
         return columns;

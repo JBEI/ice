@@ -46,9 +46,9 @@ public abstract class CollectionDataTable extends EntryDataTable<EntryInfo> {
         columns.add(super.addNameColumn(120, Unit.PX));
         columns.add(super.addSummaryColumn());
         columns.add(super.addStatusColumn());
-        super.addHasAttachmentColumn(true);
-        super.addHasSampleColumn(true);
-        super.addHasSequenceColumn(true);
+        super.addHasAttachmentColumn();
+        super.addHasSampleColumn();
+        super.addHasSequenceColumn();
         columns.add(super.addCreatedColumn());
 
         return columns;

@@ -96,9 +96,9 @@ public class ProfileView extends AbstractLayout implements IProfileView {
                 super.addNameColumn(120, Unit.PX);
                 super.addSummaryColumn();
                 super.addStatusColumn();
-                super.addHasAttachmentColumn(true);
-                super.addHasSampleColumn(true);
-                super.addHasSequenceColumn(true);
+                super.addHasAttachmentColumn();
+                super.addHasSampleColumn();
+                super.addHasSequenceColumn();
                 super.addCreatedColumn();
 
                 return columns;

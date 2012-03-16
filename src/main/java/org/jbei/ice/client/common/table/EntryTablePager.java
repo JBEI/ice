@@ -161,6 +161,10 @@ public class EntryTablePager extends AbstractPager {
         layout.setCellSpacing(0);
     }
 
+    public void goToFirstPage() {
+        this.firstPage();
+    }
+
     /**
      * creates first (<<) prev (<) navigation
      */

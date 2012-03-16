@@ -170,6 +170,18 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 //                entries = controller.
                 break;
 
+            case PART_ID:
+                entries = EntryManager.getEntriesByIdSetSortByPartNumber(entryIds, asc);
+                break;
+
+            case STATUS:
+                entries = EntryManager.getEntriesByIdSetSortByStatus(entryIds, asc);
+                break;
+
+            case NAME:
+                entries = EntryManager.getEntriesByIdSetSortByName(entryIds, asc);
+                break;
+
             case CREATED:
                 entries = EntryManager.getEntriesByIdSetSortByCreated(entryIds, asc);
                 break;

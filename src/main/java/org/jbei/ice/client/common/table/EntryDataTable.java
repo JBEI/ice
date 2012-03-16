@@ -230,25 +230,22 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         return (value.substring(0, 1).toUpperCase() + value.substring(1));
     }
 
-    protected void addHasAttachmentColumn(boolean sortable) {
+    protected void addHasAttachmentColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.ATTACHMENT);
         this.addColumn(column, column.getHeader());
         this.setColumnWidth(column, 30, Unit.PX);
-        column.setSortable(sortable);
     }
 
-    protected void addHasSampleColumn(boolean sortable) {
+    protected void addHasSampleColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SAMPLE);
         this.addColumn(column, column.getHeader());
         this.setColumnWidth(column, 30, Unit.PX);
-        column.setSortable(sortable);
     }
 
-    protected void addHasSequenceColumn(boolean sortable) {
+    protected void addHasSequenceColumn() {
         ImageColumn<T> column = new ImageColumn<T>(ImageColumn.Type.SEQUENCE);
         this.addColumn(column, column.getHeader());
         this.setColumnWidth(column, 30, Unit.PX);
-        column.setSortable(sortable);
     }
 
     protected DataTableColumn<String> addCreatedColumn() {
