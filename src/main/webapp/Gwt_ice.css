@@ -372,6 +372,20 @@ a.cell_mouseover:hover {
 	border-bottom: 1px solid #999;
 }
 
+.permissions_display {
+    width: 180px;
+    border-bottom: 1px solid #c3c2c2;
+}
+
+.permissions_sub_header {
+	font-size: 0.85em;
+	padding: 6px;
+	line-height: 13px;
+	font-weight: bold;
+	color: #233559;
+	border-bottom: 1px solid #c3c2c2;
+}
+
 .entry_view_right_menu {
 	float: right;
 }

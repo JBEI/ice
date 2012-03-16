@@ -40,6 +40,7 @@ public class EntryView extends Composite implements IEntryView {
 
     private FlexTable mainContent;
     private AttachmentListMenu attachmentMenu;
+    private PermissionsDisplayWidget permissionsDisplay;
 
     // general header
     private HorizontalPanel generalHeaderPanel;
@@ -101,6 +102,7 @@ public class EntryView extends Composite implements IEntryView {
         uploadPanel = createSequenceUploadPanel();
         uploadPanel.setVisible(false);
         attachmentMenu = new AttachmentListMenu();
+        permissionsDisplay = new PermissionsDisplayWidget();
 
         sequenceAddCancelbutton.addClickHandler(new ClickHandler() {
 
@@ -213,12 +215,11 @@ public class EntryView extends Composite implements IEntryView {
         mainContent.getFlexCellFormatter().setStyleName(3, 0, "entry_view_right_menu");
         mainContent.getFlexCellFormatter().setVerticalAlignment(3, 0, HasAlignment.ALIGN_TOP);
 
-        /*
         mainContent.setHTML(4, 0, "&nbsp");
-        mainContent.setWidget(5, 0, new Label("FOO"));
+
+        mainContent.setWidget(5, 0, permissionsDisplay);
         mainContent.getFlexCellFormatter().setStyleName(5, 0, "entry_view_right_menu");
         mainContent.getFlexCellFormatter().setVerticalAlignment(5, 0, HasAlignment.ALIGN_TOP);
-        */
 
         return mainContent;
     }

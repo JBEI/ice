@@ -50,14 +50,14 @@ public class EntryPresenter extends AbstractPresenter {
         this.currentContext = context;
 
         // add handler for the permission link
-        //        display.getDetailMenu().getPermissionLink().addClickHandler(new ClickHandler() {
-        //
-        //            @Override
-        //            public void onClick(ClickEvent event) {
-        //                retrievePermissionData(currentId);
-        //                display.showPermissionsWidget();
-        //            }
-        //        });
+        //                display.getDetailMenu().getPermissionLink().addClickHandler(new ClickHandler() {
+        //        
+        //                    @Override
+        //                    public void onClick(ClickEvent event) {
+        //                        retrievePermissionData(currentId);
+        //                        display.showPermissionsWidget();
+        //                    }
+        //                });
 
         addEntryViewHandler();
         MenuSelectionHandler handler = new MenuSelectionHandler(display.getDetailMenu());

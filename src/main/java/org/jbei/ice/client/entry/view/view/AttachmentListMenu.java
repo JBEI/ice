@@ -90,7 +90,7 @@ public class AttachmentListMenu extends Composite {
 
         // this is replaced when menu data is set
         layout.setHTML(2, 0,
-            "<span style=\"padding: 2px\" class=\"font-75em\">No attachments available</span>");
+            "<span style=\"padding: 4px\" class=\"font-75em\">No attachments available</span>");
     }
 
     public void switchButton() {
