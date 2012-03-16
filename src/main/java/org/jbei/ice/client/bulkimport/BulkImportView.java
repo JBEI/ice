@@ -32,6 +32,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         draftsMenu = new CollectionMenu(false, "SAVED DRAFTS");
         create = new CreateEntryMenu();
         feedback = new FeedbackPanel("450px");
+        contentHeader = new Label("");
     }
 
     @Override
@@ -68,7 +69,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
                 .setHTML(
                     1,
                     0,
-                    "<br><div style=\"font-family: Arial; border: 1px solid #e4e4e4; padding: 10px\"><p>Select type "
+                    "<br><div style=\"font-family: Arial; border: 1px solid #e4e4e4; padding: 10px; background-color: #f1f1f1\"><p>Select type "
                             + "of entry you wish to bulk import.</p> <p>Please note that columns"
                             + " with headers indicated by <span class=\"required\">*</span> "
                             + "are required. You will not be able to submit the form until you enter a "
@@ -116,8 +117,12 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         mainContent.setHTML(1, 0, "&nbsp;");
         mainContent.getFlexCellFormatter().setColSpan(1, 0, index);
 
-        this.mainContent.setWidget(2, 0, input.getSheet());
+        mainContent.setWidget(2, 0, contentHeader);
+        mainContent.getCellFormatter().setStyleName(2, 0, "bulk_import_header");
         mainContent.getFlexCellFormatter().setColSpan(2, 0, index);
+
+        this.mainContent.setWidget(3, 0, input.getSheet());
+        mainContent.getFlexCellFormatter().setColSpan(3, 0, index);
     }
 
     @Override

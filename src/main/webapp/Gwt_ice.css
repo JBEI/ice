@@ -1196,6 +1196,16 @@ td.datePickerMonth {
 	border-bottom: 1px solid #CCC;
 }
 
+.bulk_import_header {
+	border-top: 2px solid #4787ED;
+	font-size: 0.80em;
+    padding: 8px;
+    color: #333;
+    font-weight: bold;
+    border-left: 1px solid #F1F1F1;
+    text-transform: uppercase;
+}
+
 .add_new_entry_main_content_header {
 	font-size: 0.85em;
 	padding: 10px;
