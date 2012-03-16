@@ -127,4 +127,6 @@ public interface RegistryService extends RemoteService {
 
     BulkImportDraftInfo saveBulkImportDraft(String sid, String email, String name,
             ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary);
+
+    BulkImportDraftInfo retrieveBulkImport(String sid, long id);
 }

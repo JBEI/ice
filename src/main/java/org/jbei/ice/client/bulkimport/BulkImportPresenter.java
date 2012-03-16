@@ -16,6 +16,7 @@ import org.jbei.ice.client.bulkimport.model.SheetFieldData;
 import org.jbei.ice.client.bulkimport.panel.SheetHeaderPanel;
 import org.jbei.ice.client.bulkimport.sheet.Sheet;
 import org.jbei.ice.client.collection.menu.MenuItem;
+import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 
@@ -40,9 +41,22 @@ public class BulkImportPresenter extends AbstractPresenter {
         setMenuSelectionModel();
         setCreateSelectionModel();
 
+        // toggle menu
+        addToggleMenuHandler();
+
         // retrieveData
         retrieveSavedDrafts();
         retrieveAutoCompleteData();
+    }
+
+    private void addToggleMenuHandler() {
+        view.addToggleMenuHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                view.setMenuVisibility(!view.getMenuVisibility());
+            }
+        });
     }
 
     private void setMenuSelectionModel() {
@@ -51,9 +65,37 @@ public class BulkImportPresenter extends AbstractPresenter {
 
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                MenuItem item = draftSelection.getSelectedObject();
+                final MenuItem item = draftSelection.getSelectedObject();
+                model.retrieveUserSavedDrafts(item.getId(), new SavedDraftsEventHandler() {
 
-                // TODO : load sheet with data loaded from database
+                    @Override
+                    public void onDataRetrieval(SavedDraftsEvent event) {
+                        if (event == null)
+                            return; // TODO : error msg
+
+                        BulkImportDraftInfo info = event.getData().get(0);
+                        Sheet sheet = new Sheet(info.getType(), info);
+                        sheet.setAutoCompleteData(AppController.autoCompleteData);
+                        NewBulkInput input = new NewBulkInput(info.getType(), sheet);
+
+                        // submit handler
+                        SheetSubmitHandler handler = new SheetSubmitHandler(input);
+                        input.getSheetHeaderPanel().getSubmit().addClickHandler(handler);
+
+                        // reset
+                        SheetResetHandler resetHandler = new SheetResetHandler(input);
+                        input.getSheetHeaderPanel().getReset().addClickHandler(resetHandler);
+
+                        // save draft
+                        SheetDraftSaveHandler draftSaveHandler = new SheetDraftSaveHandler(input
+                                .getSheetHeaderPanel());
+                        input.getSheetHeaderPanel().getDraftSave()
+                                .addClickHandler(draftSaveHandler);
+                        view.setSheet(input);
+                        view.setHeader(item.getName());
+                        view.setMenuVisibility(false);
+                    }
+                });
             }
         });
     }
@@ -71,7 +113,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                 if (sheetCache.containsKey(selection))
                     input = sheetCache.get(selection);
                 else {
-                    Sheet sheet = new Sheet(selection);
+                    Sheet sheet = new Sheet(selection, null);
                     sheet.setAutoCompleteData(AppController.autoCompleteData);
                     input = new NewBulkInput(selection, sheet);
 
@@ -104,12 +146,15 @@ public class BulkImportPresenter extends AbstractPresenter {
             public void onDataRetrieval(SavedDraftsEvent event) {
                 ArrayList<MenuItem> data = new ArrayList<MenuItem>();
                 for (BulkImportDraftInfo info : event.getData()) {
-                    MenuItem item = new MenuItem(info.getId(), info.getName(), info.getCount(),
-                            false);
+                    String name = info.getName();
+                    if (name == null)
+                        name = DateUtilities.formatDate(info.getCreated());
+                    MenuItem item = new MenuItem(info.getId(), name, info.getCount(), false);
                     data.add(item);
                 }
 
-                //                view.setSavedDraftsData(data);
+                if (!data.isEmpty())
+                    view.setSavedDraftsData(data);
             }
         });
     }

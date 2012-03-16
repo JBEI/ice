@@ -11,7 +11,10 @@ import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.shared.EntryAddType;
 
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
@@ -22,9 +25,12 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     private CollectionMenu draftsMenu; // TODO
     private Label contentHeader;
     private FlexTable mainContent;
-    private CreateEntryMenu create; // TODO: 
+    private CreateEntryMenu create; // TODO: needs its own menu
     private FeedbackPanel feedback;
     private FlexTable layout;
+    //    private ToggleButton toggle;
+
+    private Button toggle;
 
     @Override
     protected void initComponents() {
@@ -33,6 +39,10 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         create = new CreateEntryMenu();
         feedback = new FeedbackPanel("450px");
         contentHeader = new Label("");
+        //        toggle = new ToggleButton("+", "-");
+
+        toggle = new Button("+");
+        //                toggle.setWidth("10px");
     }
 
     @Override
@@ -44,12 +54,19 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
 
         // placeholder for saved drafts menu
         layout.setHTML(0, 0, "");
+        layout.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
+        layout.setHTML(0, 1, "<span style=\"width: 10px\">&nbsp;</span>");
 
         // right content. fills entire space when there are no drafts
-        layout.setWidget(0, 1, createMainContent());
-        layout.getFlexCellFormatter().setVerticalAlignment(0, 1, HasAlignment.ALIGN_TOP);
+        layout.setWidget(0, 2, createMainContent());
+        //        layout.getFlexCellFormatter().setVerticalAlignment(0, 2, HasAlignment.ALIGN_TOP);
 
         return layout;
+    }
+
+    @Override
+    public void addToggleMenuHandler(ClickHandler handler) {
+        this.toggle.addClickHandler(handler);
     }
 
     protected Widget createMainContent() {
@@ -59,8 +76,13 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         mainContent.setCellSpacing(0);
         mainContent.setWidth("100%");
 
-        mainContent.setWidget(0, 0, create);
-        mainContent.getFlexCellFormatter().setWidth(0, 0, "110px");
+        HTMLPanel panel = new HTMLPanel(
+                "<span id=\"toggle_side\"></span>&nbsp<span id=\"create_btn\"></span>");
+        panel.add(toggle, "toggle_side");
+        panel.add(create.asWidget(), "create_btn");
+
+        mainContent.setWidget(0, 0, panel);
+        mainContent.getFlexCellFormatter().setWidth(0, 0, "150px");
 
         int count = mainContent.getCellCount(0);
 
@@ -104,7 +126,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
 
         // feedback
         mainContent.setWidget(0, 3, feedback);
-        mainContent.setWidth("47%");
+        mainContent.setWidth("44%");
 
         // reset / save
         mainContent.setWidget(0, 4, header.getReset());
@@ -141,11 +163,21 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     @Override
     public void setSavedDraftsData(ArrayList<MenuItem> data) {
         draftsMenu.setMenuItems(data);
-        layout.getFlexCellFormatter().setWidth(0, 0, "220px");
         layout.setWidget(0, 0, draftsMenu);
-        layout.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
-        layout.setHTML(0, 1, "&nbsp;");
-        layout.getFlexCellFormatter().setRowSpan(0, 1, 3);
+    }
+
+    @Override
+    public void setMenuVisibility(boolean visible) {
+        draftsMenu.setVisible(visible);
+
+        if (!visible) {
+
+            //            layout.setHTML(0, 0, "");
+            layout.setHTML(0, 1, "");
+        } else {
+            //            layout.setWidget(0, 0, draftsMenu);
+            layout.setHTML(0, 1, "<span style=\"width: 10px\">&nbsp;</span>");
+        }
     }
 
     @Override
@@ -156,5 +188,10 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     @Override
     public SingleSelectionModel<EntryAddType> getImportCreateModel() {
         return create.getSelectionModel();
+    }
+
+    @Override
+    public boolean getMenuVisibility() {
+        return draftsMenu.isVisible();
     }
 }

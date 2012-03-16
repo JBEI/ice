@@ -30,8 +30,6 @@ public class StrainSheetModel extends SingleInfoSheetModel {
                 setField(info, datum);
             primaryData.add(info);
         }
-
-        //        return entries;
     }
 
     public void setField(StrainInfo info, SheetFieldData datum) {

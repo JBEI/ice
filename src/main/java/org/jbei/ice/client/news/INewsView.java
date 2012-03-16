@@ -16,4 +16,6 @@ public interface INewsView {
     void addNewsItem(String id, String date, String header, String body);
 
     void setAddNewsVisibility(boolean visible);
+
+    void setAddNewsButtonVisibilty(boolean visible);
 }

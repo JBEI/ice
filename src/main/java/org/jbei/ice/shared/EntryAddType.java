@@ -13,6 +13,20 @@ public enum EntryAddType implements IsSerializable {
         this.display = display;
     }
 
+    // TODO : 
+    public static EntryAddType stringToType(String str) {
+
+        if (str.contains(PLASMID.toString().toLowerCase())
+                && str.contains(STRAIN.toString().toLowerCase()))
+            return STRAIN_WITH_PLASMID;
+
+        for (EntryAddType type : EntryAddType.values()) {
+            if (str.equalsIgnoreCase(type.toString()))
+                return type;
+        }
+        return null;
+    }
+
     public String getDisplay() {
         return this.display;
     }

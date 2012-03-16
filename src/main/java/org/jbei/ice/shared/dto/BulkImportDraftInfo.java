@@ -1,5 +1,6 @@
 package org.jbei.ice.shared.dto;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import org.jbei.ice.shared.EntryAddType;
@@ -13,6 +14,11 @@ public class BulkImportDraftInfo implements IsSerializable {
     private EntryAddType type;
     private int count;
     private Date created;
+
+    // when retrieving the data for menu
+    // these are empty
+    private ArrayList<EntryInfo> primary;
+    private ArrayList<EntryInfo> secondary;
 
     public long getId() {
         return id;
@@ -52,5 +58,21 @@ public class BulkImportDraftInfo implements IsSerializable {
 
     public void setCreated(Date created) {
         this.created = created;
+    }
+
+    public ArrayList<EntryInfo> getPrimary() {
+        return primary;
+    }
+
+    public void setPrimary(ArrayList<EntryInfo> primary) {
+        this.primary = primary;
+    }
+
+    public ArrayList<EntryInfo> getSecondary() {
+        return secondary;
+    }
+
+    public void setSecondary(ArrayList<EntryInfo> secondary) {
+        this.secondary = secondary;
     }
 }

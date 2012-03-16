@@ -147,4 +147,6 @@ public interface RegistryServiceAsync {
 
     void removeFromUserCollection(String sessionId, long source, ArrayList<Long> ids,
             AsyncCallback<FolderDetails> asyncCallback);
+
+    void retrieveBulkImport(String sid, long id, AsyncCallback<BulkImportDraftInfo> callback);
 }

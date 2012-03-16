@@ -69,6 +69,25 @@ public class BulkImportModel {
                 });
         }
     }
+
+    public void retrieveUserSavedDrafts(long id, final SavedDraftsEventHandler handler) {
+        service.retrieveBulkImport(AppController.sessionId, id,
+            new AsyncCallback<BulkImportDraftInfo>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    handler.onDataRetrieval(null);
+                }
+
+                @Override
+                public void onSuccess(BulkImportDraftInfo result) {
+                    ArrayList<BulkImportDraftInfo> data = new ArrayList<BulkImportDraftInfo>();
+                    data.add(result);
+                    handler.onDataRetrieval(new SavedDraftsEvent(data));
+                }
+            });
+    }
+
     /*
      * service.saveBulkImportDraft(AppController.sessionId,
                 AppController.accountInfo.getEmail(), name, entries,

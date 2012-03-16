@@ -24,6 +24,7 @@ public class NewsView extends AbstractLayout implements INewsView {
     private TextArea area;
     private Button submitNews;
     private Button cancelNews;
+    private Button addNewButton;
 
     @Override
     protected void initComponents() {
@@ -70,15 +71,15 @@ public class NewsView extends AbstractLayout implements INewsView {
     }
 
     private Button createAddButton() {
-        Button button = new Button("Add");
-        button.addClickHandler(new ClickHandler() {
+        addNewButton = new Button("Add");
+        addNewButton.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
                 newsAdd.setVisible(!newsAdd.isVisible());
             }
         });
-        return button;
+        return addNewButton;
     }
 
     private Widget createMainContent() {
@@ -128,5 +129,10 @@ public class NewsView extends AbstractLayout implements INewsView {
     @Override
     public void setAddNewsVisibility(boolean visible) {
         this.newsAdd.setVisible(visible);
+    }
+
+    @Override
+    public void setAddNewsButtonVisibilty(boolean visible) {
+        this.addNewButton.setVisible(visible);
     }
 }

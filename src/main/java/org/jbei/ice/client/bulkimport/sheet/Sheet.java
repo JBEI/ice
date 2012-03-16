@@ -18,6 +18,8 @@ import org.jbei.ice.client.bulkimport.model.SheetFieldData;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.EntryAddType;
+import org.jbei.ice.shared.dto.BulkImportDraftInfo;
+import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -86,12 +88,15 @@ public class Sheet extends Composite implements SheetPresenter.View {
     private SingleUploader uploader;
     private HashMap<Integer, String> attachmentRowFileIds;
     private HashMap<Integer, String> sequenceRowFileIds;
+    private BulkImportDraftInfo info;
 
     private final static int ROW_COUNT = 100;
 
-    public Sheet(EntryAddType type) {
+    public Sheet(EntryAddType type, BulkImportDraftInfo info) {
 
         this.type = type;
+        this.info = info;
+
         headerCol = 0;
         attachmentRowFileIds = new HashMap<Integer, String>();
         sequenceRowFileIds = new HashMap<Integer, String>();
@@ -634,10 +639,32 @@ public class Sheet extends Composite implements SheetPresenter.View {
     }
 
     public void addRow() {
-        int headerFields = ImportTypeHeaders.getHeadersForType(this.type).length;
+        int index = row - 1; // row includes the headers but this is 0-indexed
 
-        for (int i = 0; i < headerFields; i += 1) {
-            Widget widget = new HTML("");
+        // type is already set in the constructor 
+        Header[] headers = ImportTypeHeaders.getHeadersForType(this.type);
+        int headersSize = headers.length;
+
+        for (int i = 0; i < headersSize; i += 1) {
+            Widget widget;
+            if (info != null && info.getCount() >= row) {
+                EntryInfo primaryInfo = info.getPrimary().get(index);
+                EntryInfo secondaryInfo = null;
+                if (info.getSecondary() != null)
+                    secondaryInfo = info.getSecondary().get(index);
+
+                String value = InfoValueExtractorFactory.extractValue(this.type, headers[i],
+                    primaryInfo, secondaryInfo, index, attachmentRowFileIds, sequenceRowFileIds);
+                if (value == null)
+                    value = "";
+
+                String display = value;
+                if (value.length() > 15)
+                    display = (value.substring(0, 13) + "...");
+                widget = new HTML(display);
+                widget.setTitle(value);
+            } else
+                widget = new HTML("");
             widget.setStyleName("cell");
 
             sheetTable.setWidget(row, i, widget);

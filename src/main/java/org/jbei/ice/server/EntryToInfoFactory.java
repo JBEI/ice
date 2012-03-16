@@ -74,10 +74,12 @@ public class EntryToInfoFactory {
 
         // get samples
         HashMap<SampleInfo, LinkedList<StorageInfo>> sampleMap = new HashMap<SampleInfo, LinkedList<StorageInfo>>();
-        for (Sample sample : samples.keySet()) {
-            SampleInfo key = getSampleInfo(sample);
-            LinkedList<Storage> storage = samples.get(sample);
-            sampleMap.put(key, getStorageListInfo(storage));
+        if (samples != null) {
+            for (Sample sample : samples.keySet()) {
+                SampleInfo key = getSampleInfo(sample);
+                LinkedList<Storage> storage = samples.get(sample);
+                sampleMap.put(key, getStorageListInfo(storage));
+            }
         }
         info.setSampleMap(sampleMap);
         info.setHasSample(!sampleMap.keySet().isEmpty());

@@ -968,10 +968,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (results != null) {
                 for (BulkImport draft : results) {
                     BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
-                    //                    draftInfo.setCount(draft.getPrimaryData().size()); // TODO
+                    draftInfo.setCount(draft.getPrimaryData().size());
                     draftInfo.setCreated(draft.getCreationTime());
+                    draftInfo.setId(draft.getId());
                     draftInfo.setName(draft.getName());
-                    //                    draftInfo.setType(EntryAddType.valueOf(draft.getType()));
+                    draftInfo.setType(EntryAddType.stringToType(draft.getType()));
                     info.add(draftInfo);
                 }
             }
@@ -985,6 +986,66 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.error(me);
             return null;
         }
+    }
+
+    @Override
+    public BulkImportDraftInfo retrieveBulkImport(String sid, long id) {
+
+        BulkImport bi;
+
+        try {
+            Account account = retrieveAccountForSid(sid);
+            if (account == null)
+                return null;
+
+            bi = BulkImportManager.retrieveById(id);
+        } catch (ManagerException me) {
+            Logger.error(me);
+            return null;
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return null;
+        }
+
+        BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
+        draftInfo.setCount(bi.getPrimaryData().size());
+        draftInfo.setCreated(bi.getCreationTime());
+        draftInfo.setId(bi.getId());
+        draftInfo.setName(bi.getName());
+        EntryAddType type = EntryAddType.stringToType(bi.getType());
+        if (type != null)
+            draftInfo.setType(type);
+
+        // primary data
+        ArrayList<EntryInfo> primary = new ArrayList<EntryInfo>();
+        String ownerEmail = bi.getAccount().getEmail();
+
+        List<BulkImportEntryData> data = bi.getPrimaryData();
+        for (BulkImportEntryData datum : data) {
+            Entry entry = datum.getEntry();
+            entry.setOwnerEmail(ownerEmail);
+            // TODO : attachments etc as paramaters to the following method call
+            EntryInfo info = EntryToInfoFactory.getInfo(entry, null, null, null, false);
+            primary.add(info);
+        }
+        draftInfo.setPrimary(primary);
+
+        // secondary data (if any)
+        List<BulkImportEntryData> data2 = bi.getSecondaryData();
+        if (data2 != null && !data2.isEmpty()) {
+            ArrayList<EntryInfo> secondary = new ArrayList<EntryInfo>();
+            for (BulkImportEntryData datum : data2) {
+                Entry entry2 = datum.getEntry();
+                entry2.setOwnerEmail(ownerEmail);
+
+                // TODO : attachments etc as paramaters to the following method call
+                EntryInfo info = EntryToInfoFactory.getInfo(entry2, null, null, null, false);
+                secondary.add(info);
+            }
+            draftInfo.setSecondary(secondary);
+        }
+
+        return draftInfo;
     }
 
     @Override

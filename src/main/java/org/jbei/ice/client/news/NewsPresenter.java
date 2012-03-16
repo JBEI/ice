@@ -32,6 +32,11 @@ public class NewsPresenter extends AbstractPresenter {
     private void bind() {
         display.setAddNewsVisibility(false);
 
+        if (!AppController.accountInfo.isModerator()) {
+            display.setAddNewsButtonVisibilty(false);
+            return;
+        }
+
         service.retrieveNewsItems(AppController.sessionId,
             new AsyncCallback<ArrayList<NewsItem>>() {
 
@@ -82,6 +87,9 @@ public class NewsPresenter extends AbstractPresenter {
     }
 
     private void save(NewsItem item) {
+
+        if (!AppController.accountInfo.isModerator())
+            return;
 
         service.createNewsItem(AppController.sessionId, item, new AsyncCallback<NewsItem>() {
 

@@ -6,6 +6,7 @@ import org.jbei.ice.client.bulkimport.model.NewBulkInput;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.shared.EntryAddType;
 
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 
@@ -26,4 +27,10 @@ public interface IBulkImportView {
     SingleSelectionModel<MenuItem> getDraftMenuModel();
 
     SingleSelectionModel<EntryAddType> getImportCreateModel();
+
+    void setMenuVisibility(boolean visible);
+
+    void addToggleMenuHandler(ClickHandler handler);
+
+    boolean getMenuVisibility();
 }
