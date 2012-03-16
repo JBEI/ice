@@ -123,6 +123,10 @@ public class Footer extends Composite {
         Hyperlink feedback = new Hyperlink("Feedback", Page.FEEDBACK.getToken());
         line3.add(feedback);
 
+        line3.add(new HTML("&nbsp; | &nbsp; "));
+        Anchor api = new Anchor("API", GWT.getHostPageBaseURL() + "api");
+        line3.add(api);
+
         panel.add(line3);
         return panel;
     }
