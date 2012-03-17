@@ -1,5 +1,7 @@
 package org.jbei.ice.client.entry.view.view;
 
+import java.util.ArrayList;
+
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Tree;
@@ -14,6 +16,8 @@ import com.google.gwt.user.client.ui.TreeItem;
 public class PermissionsDisplayWidget extends Composite {
 
     private final FlexTable layout;
+    private final Tree readTree;
+    private final Tree rwTree;
 
     public PermissionsDisplayWidget() {
 
@@ -23,34 +27,33 @@ public class PermissionsDisplayWidget extends Composite {
         layout.setCellSpacing(0);
         layout.addStyleName("permissions_display");
 
-        addHeaderLabel();
-        addPermissions();
-    }
+        readTree = new Tree();
+        readTree.setStyleName("font-75em");
+        readTree.addItem(new TreeItem("Read Allowed"));
+        readTree.getItem(0).setState(true, false);
 
-    private void addHeaderLabel() {
+        rwTree = new Tree();
+        rwTree.setStyleName("font-75em");
+        rwTree.addItem(new TreeItem("Read/Write Allowed"));
+        rwTree.getItem(0).setState(true, false);
+
         layout.setHTML(0, 0, "Permissions");
         layout.getCellFormatter().setStyleName(0, 0, "permissions_sub_header");
+
+        layout.setWidget(1, 0, readTree);
+        layout.setWidget(2, 0, rwTree);
     }
 
-    public void addPermissions() {
-        Tree tree = new Tree();
-        tree.setStyleName("font-75em");
-        TreeItem root = new TreeItem("Read Allowed");
+    public void setPermissionData(ArrayList<PermissionItem> data) {
+        if (data == null)
+            return;
 
-        root.addItem(new TreeItem("JBEI"));
-        tree.addItem(root);
-
-        layout.setWidget(1, 0, tree);
-        root.setState(true, false);
-
-        Tree rwTree = new Tree();
-        rwTree.setStyleName("font-75em");
-        TreeItem rwTreeRoot = new TreeItem("Read/Write Allowed");
-        rwTree.addItem(rwTreeRoot);
-        rwTreeRoot.addItem(new TreeItem("Only you"));
-
-        layout.setWidget(2, 0, rwTree);
-        rwTreeRoot.setState(true, false);
+        for (PermissionItem datum : data) {
+            if (datum.isWrite())
+                readTree.getItem(0).addItem(new TreeItem(datum.getName()));
+            else
+                readTree.getItem(0).addItem(new TreeItem(datum.getName()));
+        }
     }
 
 }

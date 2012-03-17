@@ -53,7 +53,6 @@ import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
-import org.jbei.ice.lib.permissions.AuthenticatedPermissionManager;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
@@ -1351,10 +1350,20 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         ArrayList<PermissionInfo> results = null;
         Entry entry = null;
 
+        final Account account;
         try {
+            account = retrieveAccountForSid(sessionId);
+            if (account == null)
+                return null;
+
             entry = EntryManager.get(entryId);
             if (entry == null)
                 return null;
+
+            if (!PermissionManager.hasReadPermission(entry, account))
+                return null;
+        } catch (ControllerException e) {
+            Logger.error(e);
         } catch (ManagerException me) {
             Logger.error(me);
         }
@@ -1362,53 +1371,44 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         results = new ArrayList<PermissionInfo>();
 
         try {
-            Set<Account> readAccounts = AuthenticatedPermissionManager.getReadUser(entry);
-            for (Account account : readAccounts) {
-                results.add(new PermissionInfo(PermissionType.READ_ACCOUNT, account.getId(),
-                        account.getFullName()));
+            Set<Account> readAccounts = PermissionManager.getReadUser(entry);
+            for (Account readAccount : readAccounts) {
+                results.add(new PermissionInfo(PermissionType.READ_ACCOUNT, readAccount.getId(),
+                        readAccount.getFullName()));
             }
         } catch (ManagerException me) {
             Logger.error(me);
-        } catch (PermissionException pe) {
-            Logger.error(pe);
         }
 
         try {
-            Set<Account> writeAccounts = AuthenticatedPermissionManager.getWriteUser(entry);
-            for (Account account : writeAccounts) {
-                results.add(new PermissionInfo(PermissionType.WRITE_ACCOUNT, account.getId(),
-                        account.getFullName()));
+            Set<Account> writeAccounts = PermissionManager.getWriteUser(entry);
+            for (Account writeAccount : writeAccounts) {
+                results.add(new PermissionInfo(PermissionType.WRITE_ACCOUNT, writeAccount.getId(),
+                        writeAccount.getFullName()));
             }
         } catch (ManagerException me) {
             Logger.error(me);
-        } catch (PermissionException pe) {
-            Logger.error(pe);
         }
 
         try {
-            Set<Group> readGroups = AuthenticatedPermissionManager.getReadGroup(entry);
+            Set<Group> readGroups = PermissionManager.getReadGroup(entry);
             for (Group group : readGroups) {
                 results.add(new PermissionInfo(PermissionType.READ_GROUP, group.getId(), group
                         .getLabel()));
             }
         } catch (ManagerException me) {
             Logger.error(me);
-        } catch (PermissionException pe) {
-            Logger.error(pe);
         }
 
         try {
-            Set<Group> writeGroups = AuthenticatedPermissionManager.getWriteGroup(entry);
+            Set<Group> writeGroups = PermissionManager.getWriteGroup(entry);
             for (Group group : writeGroups) {
                 results.add(new PermissionInfo(PermissionType.WRITE_GROUP, group.getId(), group
                         .getLabel()));
             }
         } catch (ManagerException me) {
             Logger.error(me);
-        } catch (PermissionException pe) {
-            Logger.error(pe);
         }
-
         return results;
     }
 

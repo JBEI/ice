@@ -27,6 +27,7 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 .fill { height: 100%; width: 100% }
 .display-inline { display: inline }
 .cursor_pointer:hover { cursor: pointer }
+.float_right{ float: right}
 
 .btn_submit_entry_form {
 	padding: 5px;
@@ -317,8 +318,8 @@ a.cell_mouseover:hover {
 }
 
 .entry_view_main_content_table {
-	border-left: 1px solid #f1f1f1;
-	border-top: 2px solid #0082C0;
+	/* border-left: 1px solid #f1f1f1; */
+	border-top: 1px solid #0082C0;
 }
 
 .sheet_table {
@@ -367,23 +368,23 @@ a.cell_mouseover:hover {
 }
 
 .entry_view_right_menu_2 {
-	border-top: 2px solid #999;
+	border-top: 1px solid #c1c1c1;
 	width: 180px;
-	border-bottom: 1px solid #999;
+	border-bottom: 1px solid #c1c1c1;
 }
 
 .permissions_display {
     width: 180px;
-    border-bottom: 1px solid #c3c2c2;
+    border-bottom: 1px solid #c1c1c1;
 }
 
 .permissions_sub_header {
-	font-size: 0.85em;
+	font-size: 0.80em;
 	padding: 6px;
 	line-height: 13px;
 	font-weight: bold;
 	color: #233559;
-	border-bottom: 1px solid #c3c2c2;
+	border-bottom: 1px solid #c1c1c1;
 }
 
 .entry_view_right_menu {
@@ -395,8 +396,8 @@ a.cell_mouseover:hover {
 	font-weight: bold;
 	font-size: 0.80em;
 	font-family: arial;
-	padding: 4px;
-	color: #444;
+	padding: 5px;
+	color: #233559;
 }
 
 /* HEADER MENU */
@@ -574,7 +575,7 @@ a.cell_mouseover:hover {
 .collection_menu_table {
     border-top: 2px solid #0082c0;
     width: 220px;
-    border-bottom: 1px solid #aab2bd;
+    border-bottom: 1px solid #f2f2f2;
 }
 
 .user_collection_action {
@@ -586,11 +587,11 @@ a.cell_mouseover:hover {
 }
 
 .collections_menu_header {
-    color: #444; 
+    color: #333; 
     font-size: 0.75em; 
     font-weight: bold;
     background-color: #F3F3F3;
-    padding: 10px;
+    padding: 8px;
     text-transform: uppercase;
 }
 

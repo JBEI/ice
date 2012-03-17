@@ -16,6 +16,7 @@ import org.jbei.ice.client.entry.view.view.EntryView;
 import org.jbei.ice.client.entry.view.view.IEntryView;
 import org.jbei.ice.client.entry.view.view.MenuItem;
 import org.jbei.ice.client.entry.view.view.MenuItem.Menu;
+import org.jbei.ice.client.entry.view.view.PermissionItem;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.event.FeedbackEvent;
@@ -25,6 +26,7 @@ import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -103,6 +105,48 @@ public class EntryPresenter extends AbstractPresenter {
                 display.setSequenceFormVisibility(!visible);
             }
         });
+
+        retrievePermissionData();
+    }
+
+    private void retrievePermissionData() {
+        service.retrievePermissionData(AppController.sessionId, this.currentContext.getCurrent(),
+            new AsyncCallback<ArrayList<PermissionInfo>>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    GWT.log(caught.getMessage());
+                    // TODO Auto-generated method stub
+                }
+
+                @Override
+                public void onSuccess(ArrayList<PermissionInfo> result) {
+                    ArrayList<PermissionItem> data = new ArrayList<PermissionItem>();
+                    for (PermissionInfo info : result) {
+                        PermissionItem item = null;
+                        switch (info.getType()) {
+                        case READ_ACCOUNT:
+                            item = new PermissionItem(info.getId(), info.getDisplay(), false, false);
+                            break;
+
+                        case READ_GROUP:
+                            item = new PermissionItem(info.getId(), info.getDisplay(), true, false);
+                            break;
+
+                        case WRITE_ACCOUNT:
+                            item = new PermissionItem(info.getId(), info.getDisplay(), false, true);
+                            break;
+
+                        case WRITE_GROUP:
+                            item = new PermissionItem(info.getId(), info.getDisplay(), true, true);
+                            break;
+                        }
+                        if (item != null)
+                            data.add(item);
+                    }
+                    display.setPermissionData(data);
+                }
+            });
     }
 
     private void showCurrentEntryView() {

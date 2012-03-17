@@ -1,10 +1,15 @@
 package org.jbei.ice.shared.dto.permission;
 
-public class PermissionInfo {
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-    private final PermissionType type;
-    private final long id;
-    private final String display;
+public class PermissionInfo implements IsSerializable {
+
+    private PermissionType type;
+    private long id;
+    private String display;
+
+    public PermissionInfo() {
+    }
 
     public PermissionInfo(PermissionType type, long id, String display) {
         this.type = type;
@@ -24,7 +29,7 @@ public class PermissionInfo {
         return display;
     }
 
-    public enum PermissionType {
+    public enum PermissionType implements IsSerializable {
         READ_ACCOUNT, WRITE_ACCOUNT, READ_GROUP, WRITE_GROUP;
     }
 }

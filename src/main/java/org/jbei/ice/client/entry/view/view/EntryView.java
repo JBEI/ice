@@ -59,7 +59,7 @@ public class EntryView extends Composite implements IEntryView {
     private final PermissionsWidget permissions;
 
     private Widget uploadPanel;
-    private FlexTable left; // left side of the page with menu
+    private FlexTable entryDetailMenuWrapper; // left side of the page with menu
 
     // navigation buttons for context navigation.
     // TODO : create a widget for it
@@ -165,13 +165,13 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     protected Widget createMenu() {
-        left = new FlexTable();
-        left.setCellPadding(0);
-        left.setCellSpacing(0);
+        entryDetailMenuWrapper = new FlexTable();
+        entryDetailMenuWrapper.setCellPadding(0);
+        entryDetailMenuWrapper.setCellSpacing(0);
         this.detailMenu = new EntryDetailViewMenu();
-        left.setHTML(0, 0, "");
-        left.setWidget(1, 0, detailMenu);
-        return left;
+        entryDetailMenuWrapper.setHTML(0, 0, "");
+        entryDetailMenuWrapper.setWidget(1, 0, detailMenu);
+        return entryDetailMenuWrapper;
     }
 
     @Override
@@ -204,24 +204,25 @@ public class EntryView extends Composite implements IEntryView {
         mainContent.getFlexCellFormatter().setStyleName(1, 0, "entry_view_content");
         mainContent.getFlexCellFormatter().setVerticalAlignment(1, 0, HasAlignment.ALIGN_TOP);
         mainContent.getCellFormatter().setWidth(1, 0, "100%");
-        mainContent.getFlexCellFormatter().setRowSpan(1, 0, 5);
 
-        mainContent.setWidget(1, 1, left);
+        HTMLPanel panel = new HTMLPanel(
+                "<div class=\"entry_view_right_menu\" id=\"entry_sub_header_div\"></div>&nbsp;"
+                        + "<div class=\"entry_view_right_menu\" id=\"attachments_div\"></div>"
+                        + "<div style=\"padding-top: 20px\" class=\"entry_view_right_menu\" id=\"permissions_div\"></div>&nbsp;");
+
+        panel.add(entryDetailMenuWrapper, "entry_sub_header_div");
+        panel.add(attachmentMenu, "attachments_div");
+        panel.add(permissionsDisplay, "permissions_div");
+
+        mainContent.setWidget(1, 1, panel);
         mainContent.getFlexCellFormatter().setVerticalAlignment(1, 1, HasAlignment.ALIGN_TOP);
 
-        mainContent.setHTML(2, 0, "&nbsp");
-
-        mainContent.setWidget(3, 0, attachmentMenu);
-        mainContent.getFlexCellFormatter().setStyleName(3, 0, "entry_view_right_menu");
-        mainContent.getFlexCellFormatter().setVerticalAlignment(3, 0, HasAlignment.ALIGN_TOP);
-
-        mainContent.setHTML(4, 0, "&nbsp");
-
-        mainContent.setWidget(5, 0, permissionsDisplay);
-        mainContent.getFlexCellFormatter().setStyleName(5, 0, "entry_view_right_menu");
-        mainContent.getFlexCellFormatter().setVerticalAlignment(5, 0, HasAlignment.ALIGN_TOP);
-
         return mainContent;
+    }
+
+    @Override
+    public void setPermissionData(ArrayList<PermissionItem> data) {
+        this.permissionsDisplay.setPermissionData(data);
     }
 
     @Override
@@ -277,11 +278,12 @@ public class EntryView extends Composite implements IEntryView {
             panel.add(navText, "navText");
             panel.add(rightBtn, "rightBtn");
 
-            left.setWidget(0, 0, panel);
-            left.getFlexCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_CENTER);
-            left.getFlexCellFormatter().setStyleName(0, 0, "pad-6");
+            entryDetailMenuWrapper.setWidget(0, 0, panel);
+            entryDetailMenuWrapper.getFlexCellFormatter().setHorizontalAlignment(0, 0,
+                HasAlignment.ALIGN_CENTER);
+            entryDetailMenuWrapper.getFlexCellFormatter().setStyleName(0, 0, "pad-6");
         } else {
-            left.setHTML(0, 0, "");
+            entryDetailMenuWrapper.setHTML(0, 0, "");
         }
 
         goBack.setVisible(show);

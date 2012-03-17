@@ -17,6 +17,7 @@ public class Flash extends Widget {
 
     public Flash(Parameters params) {
         setElement(DOM.createDiv());
+        DOM.setElementAttribute(getElement(), "style", "height: 100%");
         Element element = getFlashElement(params);
         DOM.appendChild(getElement(), element);
     }
@@ -24,8 +25,8 @@ public class Flash extends Widget {
     public Element getFlashElement(Parameters params) {
         String url = GWT.getHostPageBaseURL();
         Element el = DOM.createElement("EMBED");
-        DOM.setElementAttribute(el, "src", url + SWF_LOCATION + "/" + params.getSwfPath()
-                + "?entryId=" + params.getEntryId() + "&sessionId=" + params.getSessiondId());
+        DOM.setElementAttribute(el, "src", url + SWF_LOCATION + params.getSwfPath() + "?entryId="
+                + params.getEntryId() + "&sessionId=" + params.getSessiondId());
         DOM.setElementAttribute(el, "width", "100%");
         DOM.setElementAttribute(el, "height", "100%");
         DOM.setElementPropertyBoolean(el, "play", true);
