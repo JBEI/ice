@@ -39,6 +39,10 @@ public abstract class MoveToSubmitHandler implements SubmitHandler {
 
         // TODO : should be able to pass List<OptionSelect> without
         view.setBusyIndicator(destinationFolders);
+        // show busy indicator for source folders also
+        HashSet<Long> source = new HashSet<Long>();
+        source.add(this.getSource());
+        view.setBusyIndicator(source);
 
         // service call to actually move
         moveEntriesToFolder(destinationFolders, entryIds);
@@ -46,4 +50,6 @@ public abstract class MoveToSubmitHandler implements SubmitHandler {
 
     protected abstract void moveEntriesToFolder(Set<Long> destinationFolders,
             ArrayList<Long> entryIds);
+
+    protected abstract long getSource();
 }

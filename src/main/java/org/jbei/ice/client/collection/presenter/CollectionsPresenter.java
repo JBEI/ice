@@ -173,6 +173,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                     History.newItem(Page.ENTRY_VIEW.getLink() + ";id="
                             + event.getContext().getCurrent(), false);
                     display.setMainContent(entryViewPresenter.getView(), false);
+                    mode = Mode.ENTRY;
                     return;
                 }
 
@@ -198,7 +199,12 @@ public class CollectionsPresenter extends AbstractPresenter {
         MoveToSubmitHandler moveHandler = new MoveToSubmitHandler(display, new HasEntry()) {
 
             @Override
-            protected void moveEntriesToFolder(Set<Long> destinationFolders,
+            protected long getSource() {
+                return currentFolder;
+            }
+
+            @Override
+            protected void moveEntriesToFolder(final Set<Long> destinationFolders,
                     final ArrayList<Long> entryIds) {
                 // TODO : both this and "add to" use the wrong handler. this becomes more of an issue when the presenter listens on the event bus
                 model.moveEntriesToFolder(currentFolder, new ArrayList<Long>(destinationFolders),
@@ -215,25 +221,30 @@ public class CollectionsPresenter extends AbstractPresenter {
 
                             ArrayList<FolderDetails> results = event.getItems();
                             ArrayList<MenuItem> items = new ArrayList<MenuItem>();
+                            int size = 0;
+                            String name = "";
+
                             for (FolderDetails result : results) {
                                 items.add(new MenuItem(result.getId(), result.getName(), result
                                         .getCount(), result.isSystemFolder()));
+                                if (result.getId() != currentFolder) {
+                                    size += 1;
+                                    name = result.getName();
+                                }
                             }
                             display.updateMenuItemCounts(items);
                             String entryDisp = (entryIds.size() == 1) ? "entry" : "entries";
                             String msg = "<b>" + entryIds.size() + "</b> " + entryDisp
                                     + " successfully moved to ";
 
-                            int size = results.size();
-                            if (size == 1) {
-                                String name = results.get(0).getName();
+                            if (size == 1 && !name.isEmpty()) {
                                 if (name.length() > 24) {
                                     name = "<abbr title=\"" + results.get(0).getName() + "\">"
                                             + name.substring(0, 21) + "...</abbr>";
                                 }
                                 msg += ("\"<b>" + name + "</b>\" collection.");
                             } else {
-                                msg += ("\"<b>" + size + "</b> collections.");
+                                msg += ("<b>" + size + "</b> collections.");
                             }
 
                             retrieveEntriesForFolder(currentFolder, msg);
@@ -286,7 +297,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                             }
                             msg += ("\"<b>" + name + "</b>\" collection.");
                         } else {
-                            msg += ("\"<b>" + size + "</b> collections.");
+                            msg += ("<b>" + size + "</b> collections.");
                         }
 
                         retrieveEntriesForFolder(currentFolder, msg);
