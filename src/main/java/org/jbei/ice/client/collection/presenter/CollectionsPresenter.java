@@ -2,6 +2,7 @@ package org.jbei.ice.client.collection.presenter;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.jbei.ice.client.AbstractPresenter;
@@ -60,7 +61,7 @@ public class CollectionsPresenter extends AbstractPresenter {
     // this is a temporary measure to determine how to return entries both 
     // search and collection browsing. this should be replaced by EntryContext
     private enum Mode {
-        SEARCH, COLLECTION;
+        SEARCH, COLLECTION, ENTRY;
     }
 
     private final ICollectionView display;
@@ -79,6 +80,7 @@ public class CollectionsPresenter extends AbstractPresenter {
     private EntryPresenter entryViewPresenter;
     private long currentFolder;
     private Mode mode = Mode.COLLECTION;
+    private EntryContext currentContext; // this can sometimes be null
 
     public CollectionsPresenter(CollectionsModel model, final ICollectionView display,
             ArrayList<SearchFilterInfo> operands) {
@@ -314,7 +316,8 @@ public class CollectionsPresenter extends AbstractPresenter {
     private void showEntryView(EntryContext event) {
         if (entryViewPresenter == null)
             entryViewPresenter = new EntryPresenter(model.getService(), model.getEventBus(), event);
-
+        mode = Mode.ENTRY;
+        currentContext = event;
         History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + event.getCurrent(), false);
         display.setMainContent(entryViewPresenter.getView(), false);
     }
@@ -332,6 +335,8 @@ public class CollectionsPresenter extends AbstractPresenter {
     }
 
     private void handleContext(EntryContext context) {
+        this.currentContext = context;
+
         switch (context.getType()) {
         case COLLECTION:
         case SAMPLES:
@@ -577,6 +582,12 @@ public class CollectionsPresenter extends AbstractPresenter {
 
             case SEARCH:
                 return searchPresenter.getEntrySet();
+
+            case ENTRY:
+                HashSet<Long> set = new HashSet<Long>();
+                if (currentContext != null)
+                    set.add(currentContext.getCurrent());
+                return set;
             }
         }
     }
