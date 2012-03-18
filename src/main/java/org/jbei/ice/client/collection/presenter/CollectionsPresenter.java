@@ -10,8 +10,6 @@ import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.collection.ICollectionView;
 import org.jbei.ice.client.collection.add.EntryAddPresenter;
-import org.jbei.ice.client.collection.event.EntryIdsEvent;
-import org.jbei.ice.client.collection.event.EntryIdsEventHandler;
 import org.jbei.ice.client.collection.event.FolderEvent;
 import org.jbei.ice.client.collection.event.FolderEventHandler;
 import org.jbei.ice.client.collection.event.FolderRetrieveEvent;
@@ -22,7 +20,6 @@ import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.common.entry.IHasEntryId;
-import org.jbei.ice.client.common.table.DataTable;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.entry.view.EntryPresenter;
 import org.jbei.ice.client.event.EntryViewEvent;
@@ -33,10 +30,8 @@ import org.jbei.ice.client.event.SearchEventHandler;
 import org.jbei.ice.client.event.ShowEntryListEvent;
 import org.jbei.ice.client.event.ShowEntryListEventHandler;
 import org.jbei.ice.client.search.advanced.AdvancedSearchPresenter;
-import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.FolderDetails;
-import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -48,7 +43,6 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.ListDataProvider;
@@ -108,7 +102,6 @@ public class CollectionsPresenter extends AbstractPresenter {
                 return new EntryViewEventHandler() {
                     @Override
                     public void onEntryView(EntryViewEvent event) {
-                        //                        event.setList(entryDataProvider.getData());
                         event.setNavigable(entryDataProvider);
                         model.getEventBus().fireEvent(event);
                     }
@@ -119,9 +112,6 @@ public class CollectionsPresenter extends AbstractPresenter {
         this.systemListProvider = new ListDataProvider<FolderDetails>(new KeyProvider());
         this.entryDataProvider = new EntryDataViewDataProvider(collectionsDataTable,
                 model.getService());
-
-        // setting sorting for collections. TODO : this should go into the data provider
-        setCollectionsSort();
 
         // selection models used for menus
         initMenus();
@@ -181,6 +171,7 @@ public class CollectionsPresenter extends AbstractPresenter {
             }
         });
 
+        // handler for showing feedback messages
         model.getEventBus().addHandler(FeedbackEvent.TYPE,
             new FeedbackEvent.IFeedbackEventHandler() {
 
@@ -211,7 +202,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                     entryIds, new FolderRetrieveEventHandler() {
 
                         @Override
-                        public void onMenuRetrieval(FolderRetrieveEvent event) {
+                        public void onFolderRetrieve(FolderRetrieveEvent event) {
                             if (event == null || event.getItems() == null) {
                                 display.showFeedbackMessage(
                                     "An error occured while moving entries. Please try again.",
@@ -263,11 +254,13 @@ public class CollectionsPresenter extends AbstractPresenter {
 
                 final ArrayList<Long> ids = new ArrayList<Long>(
                         new HasEntry().getSelectedEntrySet());
+                if (ids.isEmpty())
+                    return;
 
                 model.removeEntriesFromFolder(currentFolder, ids, new FolderRetrieveEventHandler() {
 
                     @Override
-                    public void onMenuRetrieval(FolderRetrieveEvent event) {
+                    public void onFolderRetrieve(FolderRetrieveEvent event) {
                         if (event == null || event.getItems() == null) {
                             display.showFeedbackMessage(
                                 "An error occured while removing entries. Please try again.", true);
@@ -354,8 +347,6 @@ public class CollectionsPresenter extends AbstractPresenter {
         default:
             mode = Mode.COLLECTION;
             display.setDataView(collectionsDataTable);
-            //          display.setCurrentMenuSelection(id);
-            //        currentFolder = id;
             break;
 
         case SEARCH:
@@ -459,14 +450,6 @@ public class CollectionsPresenter extends AbstractPresenter {
         });
     }
 
-    private void setCollectionsSort() {
-        // collections table view. single view used for all collections
-        collectionsDataTable.addColumnSortHandler(new AsyncHandler(collectionsDataTable));
-        DataTable<EntryInfo>.DataTableColumn<?> createdField = collectionsDataTable
-                .getColumn(ColumnField.CREATED);
-        collectionsDataTable.getColumnSortList().push(createdField);
-    }
-
     /**
      * Initializes the selection models used for the menu items
      * by adding the selection change handlers
@@ -503,7 +486,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         model.retrieveFolders(new FolderRetrieveEventHandler() {
 
             @Override
-            public void onMenuRetrieval(FolderRetrieveEvent event) {
+            public void onFolderRetrieve(FolderRetrieveEvent event) {
                 ArrayList<FolderDetails> folders = event.getItems();
                 Collections.reverse(folders);
 
@@ -545,21 +528,24 @@ public class CollectionsPresenter extends AbstractPresenter {
 
     private void retrieveEntriesForFolder(final long id, final String msg) {
 
-        model.retrieveEntriesForFolder(id, new EntryIdsEventHandler() {
+        model.retrieveEntriesForFolder(id, new FolderRetrieveEventHandler() {
 
             @Override
-            public void onEntryIdsEvent(EntryIdsEvent event) {
-                if (event == null || event.getIds() == null) {
+            public void onFolderRetrieve(FolderRetrieveEvent event) {
+                if (event == null || event.getItems() == null) {
                     display.showFeedbackMessage("Error connecting to server. Please try again",
                         true);
                     return;
                 }
 
+                FolderDetails folder = event.getItems().get(0);
+
                 History.newItem(Page.COLLECTIONS.getLink() + ";id=" + id, false);
-                ArrayList<Long> ids = event.getIds();
-                entryDataProvider.setValues(ids);
+                ArrayList<Long> entries = folder.getContents();
+                entryDataProvider.setValues(entries);
                 display.setDataView(collectionsDataTable);
                 display.setCurrentMenuSelection(id);
+                display.setSubMenuEnable(true, !folder.isSystemFolder(), !folder.isSystemFolder());
                 currentFolder = id;
                 mode = Mode.COLLECTION;
                 if (msg != null && !msg.isEmpty())

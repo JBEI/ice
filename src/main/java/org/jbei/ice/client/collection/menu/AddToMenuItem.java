@@ -251,4 +251,8 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
             hasClick.click();
         }
     }
+
+    public void setEnabled(boolean enable) {
+        this.addWidget.setEnabled(enable);
+    }
 }

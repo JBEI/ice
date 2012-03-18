@@ -57,13 +57,13 @@ public interface RegistryService extends RemoteService {
 
     ArrayList<FolderDetails> retrieveUserCollections(String sessionId, String userId);
 
-    ArrayList<Long> retrieveEntriesForFolder(String sessionId, long folderId);
+    FolderDetails retrieveEntriesForFolder(String sessionId, long folderId);
 
     long retrieveAvailableEntryCount(String sessionId);
 
-    ArrayList<Long> retrieveUserEntries(String sid, String userId);
+    FolderDetails retrieveUserEntries(String sid, String userId);
 
-    ArrayList<Long> retrieveAllEntryIDs(String sid);
+    FolderDetails retrieveAllEntryIDs(String sid);
 
     ArrayList<Long> retrieveRecentlyViewed(String sid);
 

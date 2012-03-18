@@ -50,13 +50,13 @@ public interface RegistryServiceAsync {
      * retrieves the list of entries for the folder
      */
     void retrieveEntriesForFolder(String sessionId, long folderId,
-            AsyncCallback<ArrayList<Long>> callback);
+            AsyncCallback<FolderDetails> callback);
 
     void retrieveAvailableEntryCount(String sessionId, AsyncCallback<Long> callback);
 
-    void retrieveUserEntries(String sid, String userId, AsyncCallback<ArrayList<Long>> callback);
+    void retrieveUserEntries(String sid, String userId, AsyncCallback<FolderDetails> asyncCallback);
 
-    void retrieveAllEntryIDs(String sid, AsyncCallback<ArrayList<Long>> callback);
+    void retrieveAllEntryIDs(String sid, AsyncCallback<FolderDetails> asyncCallback);
 
     void retrieveRecentlyViewed(String sid, AsyncCallback<ArrayList<Long>> callback);
 

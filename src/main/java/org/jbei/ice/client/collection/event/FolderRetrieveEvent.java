@@ -27,7 +27,7 @@ public class FolderRetrieveEvent extends GwtEvent<FolderRetrieveEventHandler> {
 
     @Override
     protected void dispatch(FolderRetrieveEventHandler handler) {
-        handler.onMenuRetrieval(this);
+        handler.onFolderRetrieve(this);
     }
 
     public ArrayList<FolderDetails> getItems() {

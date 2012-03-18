@@ -1,5 +1,7 @@
 package org.jbei.ice.shared;
 
+import java.util.ArrayList;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
@@ -15,6 +17,7 @@ public class FolderDetails implements IsSerializable {
     private long count;
     private boolean systemFolder;
     private String description;
+    private ArrayList<Long> contents;
 
     public FolderDetails() {
     }
@@ -63,6 +66,14 @@ public class FolderDetails implements IsSerializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public ArrayList<Long> getContents() {
+        return contents;
+    }
+
+    public void setContents(ArrayList<Long> contents) {
+        this.contents = contents;
     }
 
 }

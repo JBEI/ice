@@ -67,7 +67,7 @@ public class AddToHandler implements SubmitHandler {
             new FolderRetrieveEventHandler() {
 
                 @Override
-                public void onMenuRetrieval(FolderRetrieveEvent event) {
+                public void onFolderRetrieve(FolderRetrieveEvent event) {
                     if (event == null || event.getItems() == null) {
                         view.showFeedbackMessage(
                             "An error occured while adding entries. Please try again.", true);

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.collection.event.EntryIdsEvent;
-import org.jbei.ice.client.collection.event.EntryIdsEventHandler;
 import org.jbei.ice.client.collection.event.FolderEvent;
 import org.jbei.ice.client.collection.event.FolderEventHandler;
 import org.jbei.ice.client.collection.event.FolderRetrieveEvent;
@@ -38,12 +36,12 @@ public class CollectionsModel {
 
                 @Override
                 public void onSuccess(ArrayList<FolderDetails> result) {
-                    handler.onMenuRetrieval(new FolderRetrieveEvent(result));
+                    handler.onFolderRetrieve(new FolderRetrieveEvent(result));
                 }
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    handler.onMenuRetrieval(null);
+                    handler.onFolderRetrieve(null);
                 }
             });
     }
@@ -80,7 +78,7 @@ public class CollectionsModel {
             });
     }
 
-    public void retrieveEntriesForFolder(long id, final EntryIdsEventHandler handler) {
+    public void retrieveEntriesForFolder(long id, final FolderRetrieveEventHandler handler) {
 
         if (id == 0)
             retrieveEntriesForCurrentUser(handler);
@@ -88,48 +86,48 @@ public class CollectionsModel {
             retrieveAllEntries(handler);
         else {
             service.retrieveEntriesForFolder(AppController.sessionId, id,
-                new AsyncCallback<ArrayList<Long>>() {
+                new AsyncCallback<FolderDetails>() {
 
                     @Override
-                    public void onSuccess(ArrayList<Long> result) {
-                        handler.onEntryIdsEvent(new EntryIdsEvent(result));
+                    public void onSuccess(FolderDetails result) {
+                        handler.onFolderRetrieve(new FolderRetrieveEvent(result));
                     }
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        handler.onEntryIdsEvent(null);
+                        handler.onFolderRetrieve(null);
                     }
                 });
         }
     }
 
-    public void retrieveAllEntries(final EntryIdsEventHandler handler) {
-        service.retrieveAllEntryIDs(AppController.sessionId, new AsyncCallback<ArrayList<Long>>() {
+    public void retrieveAllEntries(final FolderRetrieveEventHandler handler) {
+        service.retrieveAllEntryIDs(AppController.sessionId, new AsyncCallback<FolderDetails>() {
 
             @Override
-            public void onSuccess(ArrayList<Long> result) {
-                handler.onEntryIdsEvent(new EntryIdsEvent(result));
+            public void onSuccess(FolderDetails result) {
+                handler.onFolderRetrieve(new FolderRetrieveEvent(result));
             }
 
             @Override
             public void onFailure(Throwable caught) {
-                handler.onEntryIdsEvent(null);
+                handler.onFolderRetrieve(null);
             }
         });
     }
 
-    public void retrieveEntriesForCurrentUser(final EntryIdsEventHandler handler) {
+    public void retrieveEntriesForCurrentUser(final FolderRetrieveEventHandler handler) {
         service.retrieveUserEntries(AppController.sessionId, AppController.accountInfo.getEmail(),
-            new AsyncCallback<ArrayList<Long>>() {
+            new AsyncCallback<FolderDetails>() {
 
                 @Override
-                public void onSuccess(ArrayList<Long> result) {
-                    handler.onEntryIdsEvent(new EntryIdsEvent(result));
+                public void onSuccess(FolderDetails result) {
+                    handler.onFolderRetrieve(new FolderRetrieveEvent(result));
                 }
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    handler.onEntryIdsEvent(null);
+                    handler.onFolderRetrieve(null);
                 }
             });
     }
@@ -141,12 +139,12 @@ public class CollectionsModel {
 
                 @Override
                 public void onSuccess(ArrayList<FolderDetails> results) {
-                    handler.onMenuRetrieval(new FolderRetrieveEvent(results));
+                    handler.onFolderRetrieve(new FolderRetrieveEvent(results));
                 }
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    handler.onMenuRetrieval(null);
+                    handler.onFolderRetrieve(null);
                 }
             });
     }
@@ -158,12 +156,12 @@ public class CollectionsModel {
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    handler.onMenuRetrieval(null);
+                    handler.onFolderRetrieve(null);
                 }
 
                 @Override
                 public void onSuccess(ArrayList<FolderDetails> results) {
-                    handler.onMenuRetrieval(new FolderRetrieveEvent(results));
+                    handler.onFolderRetrieve(new FolderRetrieveEvent(results));
                 }
             });
     }
@@ -175,12 +173,12 @@ public class CollectionsModel {
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    handler.onMenuRetrieval(null);
+                    handler.onFolderRetrieve(null);
                 }
 
                 @Override
                 public void onSuccess(FolderDetails results) {
-                    handler.onMenuRetrieval(new FolderRetrieveEvent(results));
+                    handler.onFolderRetrieve(new FolderRetrieveEvent(results));
                 }
             });
     }

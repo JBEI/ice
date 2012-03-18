@@ -104,4 +104,6 @@ public interface ICollectionView {
     void addMoveSubmitHandler(MoveToSubmitHandler moveHandler);
 
     void addRemoveHandler(ClickHandler handler);
+
+    void setSubMenuEnable(boolean enableAddTo, boolean enableRemove, boolean enableMoveTo);
 }

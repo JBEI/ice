@@ -297,49 +297,57 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<Long> retrieveEntriesForFolder(String sessionId, long folderId) {
-        // TODO :
-
-        //        Account account = this.retrieveAccountForSid(sessionId);
-        //        if( account == null )
-        //            return null;
+    public FolderDetails retrieveEntriesForFolder(String sessionId, long folderId) {
 
         try {
-            return FolderManager.getFolderContents(folderId, false);
+            Account account = this.retrieveAccountForSid(sessionId);
+            if (account == null)
+                return null;
+
+            Logger.info(account.getEmail() + " retrieving entries for folder " + folderId);
+            Folder folder = FolderManager.get(folderId);
+            if (folder == null)
+                return null;
+
+            Account system = AccountController.getSystemAccount();
+            boolean isSystem = system.getEmail().equals(folder.getOwnerEmail());
+            FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), isSystem);
+            int folderSize = FolderManager.getFolderSize(folderId);
+            details.setCount(folderSize);
+            details.setDescription(folder.getDescription());
+            ArrayList<Long> contents = FolderManager.getFolderContents(folderId, false);
+            details.setContents(contents);
+            return details;
         } catch (ManagerException e) {
             Logger.error(e);
-            return null;
+        } catch (ControllerException e) {
+            Logger.error(e);
         }
+        return null;
     }
 
     @Override
-    public ArrayList<Long> retrieveUserEntries(String sid, String userId) {
-
-        Account account = null;
+    public FolderDetails retrieveUserEntries(String sid, String userId) {
 
         try {
-            if (userId == null)
-                account = retrieveAccountForSid(sid);
-            else
-                account = AccountManager.getByEmail(userId);
-
+            Account account = this.retrieveAccountForSid(sid);
             if (account == null)
                 return null;
 
             EntryController entryController = new EntryController(account);
-            return entryController.getEntryIdsByOwner(account.getEmail());
-
+            FolderDetails details = new FolderDetails(0, "My Entries", true);
+            ArrayList<Long> entries = entryController.getEntryIdsByOwner(userId);
+            details.setContents(entries);
+            return details;
         } catch (ControllerException e) {
             Logger.error(e);
-            return null;
-        } catch (ManagerException e) {
-            Logger.error(e);
-            return null;
         }
+
+        return null;
     }
 
     @Override
-    public ArrayList<Long> retrieveAllEntryIDs(String sid) {
+    public FolderDetails retrieveAllEntryIDs(String sid) {
         Account account = null;
 
         try {
@@ -347,9 +355,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
+            Logger.info(account.getEmail() + " retrieving all entry ids");
             EntryController entryController = new EntryController(account);
-            return entryController.getAllEntryIDs();
-
+            ArrayList<Long> entries = entryController.getAllEntryIDs();
+            FolderDetails details = new FolderDetails(-1, "Available Entries", true);
+            details.setContents(entries);
+            return details;
         } catch (ControllerException e) {
             Logger.error(e);
             return null;

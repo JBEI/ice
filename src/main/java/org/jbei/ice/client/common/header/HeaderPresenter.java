@@ -2,6 +2,7 @@ package org.jbei.ice.client.common.header;
 
 import java.util.LinkedHashMap;
 
+import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.common.FilterOperand;
 import org.jbei.ice.shared.SearchFilterType;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
@@ -113,5 +114,13 @@ public class HeaderPresenter {
 
     public SearchFilterInfo getBlastInfo() {
         return blastInfo;
+    }
+
+    public boolean isUserLoggedIn() {
+        return AppController.sessionId != null;
+    }
+
+    public boolean isModerator() {
+        return AppController.accountInfo.isModerator();
     }
 }

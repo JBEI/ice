@@ -132,7 +132,6 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
         return layout;
     }
 
-    // TODO : move to controller
     protected boolean isUserLoggedIn() {
         return AppController.sessionId != null;
     }

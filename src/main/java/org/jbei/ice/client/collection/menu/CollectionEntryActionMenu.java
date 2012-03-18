@@ -142,4 +142,10 @@ public class CollectionEntryActionMenu implements IsWidget {
     public void addRemoveHandler(ClickHandler handler) {
         this.removeButton.addClickHandler(handler);
     }
+
+    public void setEnable(boolean enableAddTo, boolean enableRemove, boolean enableMoveTo) {
+        this.add.setEnabled(enableAddTo);
+        removeButton.setEnabled(enableRemove);
+        this.move.setEnabled(enableMoveTo);
+    }
 }
