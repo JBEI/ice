@@ -100,7 +100,7 @@ public interface RegistryServiceAsync {
             AsyncCallback<FolderDetails> callback);
 
     void createUserCollection(String sid, String name, String description,
-            AsyncCallback<FolderDetails> callback);
+            ArrayList<Long> contents, AsyncCallback<FolderDetails> callback);
 
     void retrieveUserCollections(String sessionId, String userId,
             AsyncCallback<ArrayList<FolderDetails>> callback);
@@ -149,4 +149,6 @@ public interface RegistryServiceAsync {
             AsyncCallback<FolderDetails> asyncCallback);
 
     void retrieveBulkImport(String sid, long id, AsyncCallback<BulkImportDraftInfo> callback);
+
+    void deleteFolder(String sessionId, long folderId, AsyncCallback<FolderDetails> callback);
 }

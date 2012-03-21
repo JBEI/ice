@@ -162,7 +162,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
 
     @Override
     public void setSavedDraftsData(ArrayList<MenuItem> data) {
-        draftsMenu.setMenuItems(data);
+        draftsMenu.setMenuItems(data, null);
         layout.setWidget(0, 0, draftsMenu);
     }
 

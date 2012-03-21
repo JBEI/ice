@@ -10,6 +10,7 @@ import org.jbei.ice.client.collection.event.SubmitHandler;
 import org.jbei.ice.client.collection.menu.CollectionEntryActionMenu;
 import org.jbei.ice.client.collection.menu.CollectionMenu;
 import org.jbei.ice.client.collection.menu.ExportAsMenu;
+import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.collection.presenter.MoveToSubmitHandler;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
@@ -149,12 +150,12 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
 
     @Override
     public void setSystemCollectionMenuItems(ArrayList<MenuItem> items) {
-        this.systemMenu.setMenuItems(items);
+        this.systemMenu.setMenuItems(items, null);
     }
 
     @Override
-    public void setUserCollectionMenuItems(ArrayList<MenuItem> items) {
-        this.userMenu.setMenuItems(items);
+    public void setUserCollectionMenuItems(ArrayList<MenuItem> items, IDeleteMenuHandler handler) {
+        this.userMenu.setMenuItems(items, handler);
     }
 
     @Override
@@ -201,8 +202,8 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
-    public void addMenuItem(MenuItem item) {
-        this.userMenu.addMenuItem(item);
+    public void addMenuItem(MenuItem item, IDeleteMenuHandler handler) {
+        this.userMenu.addMenuItem(item, handler);
     }
 
     @Override
@@ -216,8 +217,8 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
-    public void setMenuItem(MenuItem item) {
-        this.userMenu.setMenuItem(item);
+    public void setMenuItem(MenuItem item, IDeleteMenuHandler handler) {
+        this.userMenu.setMenuItem(item, handler);
     }
 
     @Override

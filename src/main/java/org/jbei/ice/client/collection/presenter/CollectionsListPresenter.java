@@ -104,7 +104,7 @@ public class CollectionsListPresenter extends AbstractPresenter {
                 display.getAddCollectionButton().setEnabled(true);
 
                 service.createUserCollection(AppController.sessionId, collectionName,
-                    collectionDescription, new AsyncCallback<FolderDetails>() {
+                    collectionDescription, null, new AsyncCallback<FolderDetails>() {
 
                         @Override
                         public void onFailure(Throwable caught) {

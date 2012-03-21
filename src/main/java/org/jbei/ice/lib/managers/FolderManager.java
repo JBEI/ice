@@ -53,6 +53,21 @@ public class FolderManager {
         return result;
     }
 
+    public static boolean delete(Folder folder) throws ManagerException {
+        if (folder == null)
+            throw new ManagerException("Failed to delete null folder!");
+
+        try {
+            DAO.delete(folder);
+            return true;
+        } catch (DAOException e) {
+            String msg = "Could not delete folder " + folder.getName() + " with id "
+                    + folder.getId();
+            Logger.error(msg, e);
+            throw new ManagerException(msg, e);
+        }
+    }
+
     /**
      * Retrieves the count of the number of contents in the folder.
      * If the folder contains other folders, the it returns the number of sub-folders

@@ -327,6 +327,41 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public FolderDetails deleteFolder(String sessionId, long folderId) {
+        try {
+            Account account = this.retrieveAccountForSid(sessionId);
+            if (account == null)
+                return null;
+
+            Logger.info(account.getEmail() + " deleting folder " + folderId);
+            Folder folder = FolderManager.get(folderId);
+            if (folder == null)
+                return null;
+
+            Account system = AccountController.getSystemAccount();
+            boolean isSystem = system.getEmail().equals(folder.getOwnerEmail());
+            if (isSystem) {
+                Logger.info("Cannot delete system folder");
+                return null;
+            }
+
+            FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), isSystem);
+            int folderSize = FolderManager.getFolderSize(folderId);
+            details.setCount(folderSize);
+            details.setDescription(folder.getDescription());
+            ArrayList<Long> contents = FolderManager.getFolderContents(folderId, false);
+            details.setContents(contents);
+            if (FolderManager.delete(folder))
+                return details;
+        } catch (ManagerException e) {
+            Logger.error(e);
+        } catch (ControllerException e) {
+            Logger.error(e);
+        }
+        return null;
+    }
+
+    @Override
     public FolderDetails retrieveUserEntries(String sid, String userId) {
 
         try {
@@ -825,7 +860,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public FolderDetails createUserCollection(String sid, String name, String description) {
+    public FolderDetails createUserCollection(String sid, String name, String description,
+            ArrayList<Long> contents) {
         try {
             Account account = this.retrieveAccountForSid(sid);
             Folder folder = new Folder(name);
@@ -834,6 +870,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             folder = FolderManager.save(folder);
             FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), false);
             details.setDescription(folder.getDescription());
+
+            if (contents != null && !contents.isEmpty()) {
+                FolderManager.addFolderContents(folder.getId(), contents);
+                details.setContents(contents);
+                details.setCount(contents.size());
+            }
+
             return details;
         } catch (ControllerException e) {
             Logger.error(e.getMessage());

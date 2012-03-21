@@ -1439,3 +1439,32 @@ td.datePickerMonth {
 	{
 	color: #af6b29;
 }
+
+.undo_delete_name_row {
+    border-right: 1px solid #F2F2F2;    
+    border-top: 1px solid #F2F2F2;
+    padding: 6px;
+    background-color: #f1f1f1;
+    color: #333;
+    opacity: 0.9;
+}
+
+.undo_delete_name {
+	font-size: 0.70em; 
+    font-family: Arial;
+}
+
+.undo_delete_name_link {
+	font-size: 0.70em; 
+	text-decoration: underline;
+	float: right;
+	color: blue;
+}
+
+.undo_delete_name_link:hover {
+	text-decoration: none;
+	cursor: pointer;
+	color: #185DA0;
+}
+
+

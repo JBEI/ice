@@ -90,7 +90,8 @@ public interface RegistryService extends RemoteService {
 
     // collections
 
-    FolderDetails createUserCollection(String sid, String name, String description);
+    FolderDetails createUserCollection(String sid, String name, String description,
+            ArrayList<Long> contents);
 
     ArrayList<FolderDetails> moveToUserCollection(String sid, long source,
             ArrayList<Long> destination, ArrayList<Long> entryIds);
@@ -129,4 +130,6 @@ public interface RegistryService extends RemoteService {
             ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary);
 
     BulkImportDraftInfo retrieveBulkImport(String sid, long id);
+
+    FolderDetails deleteFolder(String sessionId, long folderId);
 }

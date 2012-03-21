@@ -63,7 +63,7 @@ public class CollectionsModel {
     }
 
     public void createFolder(String collectionName, final FolderEventHandler handler) {
-        service.createUserCollection(AppController.sessionId, collectionName, "",
+        service.createUserCollection(AppController.sessionId, collectionName, "", null,
             new AsyncCallback<FolderDetails>() {
 
                 @Override

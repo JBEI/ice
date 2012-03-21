@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -60,7 +59,7 @@ public class Folder implements IModel {
     @Temporal(TemporalType.TIMESTAMP)
     private Date modificationTime;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "folder_entry", joinColumns = { @JoinColumn(name = "folder_id", nullable = false) }, inverseJoinColumns = { @JoinColumn(name = "entry_id", nullable = false) })
     private Set<Entry> contents = new LinkedHashSet<Entry>();
 

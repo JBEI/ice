@@ -49,7 +49,7 @@ public class CollectionMenu extends Composite {
     private final TextBox editCollectionNameBox;
     private int editRow = -1;
     private int editIndex = -1;
-    private SingleSelectionModel<MenuItem> selectionModel;
+    private final SingleSelectionModel<MenuItem> selectionModel;
 
     // quick add
     private TextBox quickAddBox;
@@ -111,7 +111,7 @@ public class CollectionMenu extends Composite {
 
     // todo : move to model/presenter/handler
     protected boolean validate() {
-        if (quickAddBox != null && quickAddBox.getText().isEmpty()) {
+        if (quickAddBox != null && quickAddBox.getText().trim().isEmpty()) {
             quickAddBox.setStyleName("entry_input_error");
             return false;
         }
@@ -194,12 +194,12 @@ public class CollectionMenu extends Composite {
         }
     }
 
-    public void setMenuItems(ArrayList<MenuItem> items) {
+    public void setMenuItems(ArrayList<MenuItem> items, IDeleteMenuHandler handler) {
         if (items == null || items.isEmpty())
             return;
 
         for (MenuItem item : items) {
-            addMenuItem(item);
+            addMenuItem(item, handler);
         }
     }
 
@@ -236,21 +236,21 @@ public class CollectionMenu extends Composite {
      * @param folder
      *            new folder for cell
      */
-    public void setMenuItem(MenuItem item) {
+    public void setMenuItem(MenuItem item, IDeleteMenuHandler deleteHandler) {
         if ((this.editIndex == -1 && this.editRow == -1) || (item == null))
             return;
 
-        final MenuCell cell = new MenuCell(item);
+        final MenuCell cell = new MenuCell(item, deleteHandler);
         cell.addClickHandler(new CellSelectionHandler(selectionModel, cell));
         table.setWidget(editRow, editIndex, cell);
         this.editCollectionNameBox.setVisible(false);
     }
 
-    public void addMenuItem(MenuItem item) {
+    public void addMenuItem(MenuItem item, IDeleteMenuHandler deleteHandler) {
         if (item == null)
             return;
 
-        final MenuCell cell = new MenuCell(item);
+        final MenuCell cell = new MenuCell(item, deleteHandler);
         cell.addClickHandler(new CellSelectionHandler(selectionModel, cell));
         row += 1;
         table.setWidget(row, 0, cell);
@@ -275,6 +275,27 @@ public class CollectionMenu extends Composite {
         }
 
         return false;
+    }
+
+    // currently this is being used for deleted cells only
+    public void updateMenuItem(long id, MenuItem item, IDeleteMenuHandler deleteHandler) {
+        if (item == null)
+            return;
+
+        for (int i = 0; i < table.getRowCount(); i += 1) {
+            Widget w = table.getWidget(i, 0);
+            if (!(w instanceof DeletedCell))
+                continue;
+
+            DeletedCell cell = (DeletedCell) w;
+            if (cell.getMenuItem().getId() != id)
+                continue;
+
+            final MenuCell newCell = new MenuCell(item, deleteHandler);
+            newCell.addClickHandler(new CellSelectionHandler(selectionModel, newCell));
+            table.setWidget(i, 0, newCell);
+            break;
+        }
     }
 
     /**
@@ -347,7 +368,7 @@ public class CollectionMenu extends Composite {
         if (quickAddBox == null)
             return;
 
-        quickAddButton.setUrl(ImageUtil.getPlusIcon().getUrl()); //Resources.INSTANCE.plusImage().getSafeUri());
+        quickAddButton.setUrl(ImageUtil.getPlusIcon().getUrl());
         quickAddButton.setStyleName("collection_quick_add_image");
         quickAddBox.setVisible(false);
         quickAddBox.setStyleName("input_box");
@@ -359,13 +380,12 @@ public class CollectionMenu extends Composite {
         private final HTMLPanel panel;
         private final MenuItem item;
         private final String html;
-        private final Image busy;
 
         private Label count;
         private final HoverCell action;
         private final String folderId;
 
-        public MenuCell(final MenuItem item) {
+        public MenuCell(final MenuItem item, final IDeleteMenuHandler deleteHandler) {
 
             super.sinkEvents(Event.ONMOUSEOVER | Event.ONMOUSEOUT);
             // text box used when user wishes to edit a collection name
@@ -390,6 +410,32 @@ public class CollectionMenu extends Composite {
                 }
             });
 
+            if (deleteHandler != null) {
+                action.getDelete().addClickHandler(new ClickHandler() {
+
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        event.stopPropagation();
+                        Cell cell = table.getCellForEvent(event);
+                        if (cell == null)
+                            return;
+
+                        editRow = cell.getRowIndex();
+                        editIndex = cell.getCellIndex();
+                        currentEditSelection = getMenuItem();
+
+                        // folderId
+                        if (deleteHandler.delete(item.getId())) {
+                            MenuHiderTimer timer = new MenuHiderTimer(table, editRow);
+                            DeletedCell deletedCell = new DeletedCell(currentEditSelection,
+                                    deleteHandler.getUndoHandler(item, CollectionMenu.this, timer));
+                            table.setWidget(editRow, editIndex, deletedCell);
+                            timer.schedule(13000);
+                        }
+                    }
+                });
+            }
+
             String name = item.getName();
             if (name.length() > 22)
                 name = (name.substring(0, 22) + "...");
@@ -405,9 +451,6 @@ public class CollectionMenu extends Composite {
             panel.add(count, folderId);
             panel.setStyleName("collection_user_menu_row");
             initWidget(panel);
-
-            // init busy indicator
-            busy = ImageUtil.getBusyIcon(); // new Image(Resources.INSTANCE.busyIndicatorImage());
         }
 
         public void setSelected(boolean selected) {
@@ -418,7 +461,7 @@ public class CollectionMenu extends Composite {
         }
 
         public void showBusyIndicator() {
-            setRightPanel(busy);
+            setRightPanel(ImageUtil.getBusyIcon());
         }
 
         public void showFolderCount() {

@@ -52,8 +52,6 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class CollectionsPresenter extends AbstractPresenter {
 
-    // this is a temporary measure to determine how to return entries both 
-    // search and collection browsing. this should be replaced by EntryContext
     private enum Mode {
         SEARCH, COLLECTION, ENTRY;
     }
@@ -75,6 +73,7 @@ public class CollectionsPresenter extends AbstractPresenter {
     private long currentFolder;
     private Mode mode = Mode.COLLECTION;
     private EntryContext currentContext; // this can sometimes be null
+    private final DeleteItemHandler deleteHandler;
 
     public CollectionsPresenter(CollectionsModel model, final ICollectionView display,
             ArrayList<SearchFilterInfo> operands) {
@@ -93,6 +92,7 @@ public class CollectionsPresenter extends AbstractPresenter {
     public CollectionsPresenter(final CollectionsModel model, final ICollectionView display) {
         this.display = display;
         this.model = model;
+        this.deleteHandler = new DeleteItemHandler(model.getService());
 
         // initialize all parameters
         this.collectionsDataTable = new CollectionDataTable(new EntryTablePager()) {
@@ -398,7 +398,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         String newName = display.getQuickEditInput();
         final MenuItem item = display.getCurrentMenuEditSelection();
         if (newName.trim().equals(item.getName().trim())) {
-            display.setMenuItem(item);
+            display.setMenuItem(item, deleteHandler);
             return;
         }
 
@@ -422,7 +422,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                 display.updateSubMenuFolder(new OptionSelect(folder.getId(), folder.getName()));
                 MenuItem resultItem = new MenuItem(folder.getId(), folder.getName(), folder
                         .getCount(), folder.isSystemFolder());
-                display.setMenuItem(resultItem);
+                display.setMenuItem(resultItem, deleteHandler);
             }
         });
     }
@@ -435,17 +435,22 @@ public class CollectionsPresenter extends AbstractPresenter {
 
             @Override
             public void onFolderEvent(FolderEvent event) {
-                FolderDetails folder = event.getFolder();
-                if (folder == null) {
+                if (event == null || event.getFolder() == null) {
                     display.showFeedbackMessage("Error creating new folder. Please try again", true);
                     return;
                 }
+
+                FolderDetails folder = event.getFolder();
 
                 userListProvider.getList().add(folder);
                 display.addSubMenuFolder(new OptionSelect(folder.getId(), folder.getName()));
                 MenuItem newItem = new MenuItem(folder.getId(), folder.getName(),
                         folder.getCount(), folder.isSystemFolder());
-                display.addMenuItem(newItem);
+
+                if (!folder.isSystemFolder())
+                    display.addMenuItem(newItem, deleteHandler);
+                else
+                    display.addMenuItem(newItem, null);
             }
         });
     }
@@ -518,7 +523,8 @@ public class CollectionsPresenter extends AbstractPresenter {
                         AppController.accountInfo.getVisibleEntryCount(), true);
                 systemMenuItems.add(0, allEntriesItem);
                 display.setSystemCollectionMenuItems(systemMenuItems);
-                display.setUserCollectionMenuItems(userMenuItems);
+                DeleteItemHandler deleteHandler = new DeleteItemHandler(model.getService());
+                display.setUserCollectionMenuItems(userMenuItems, deleteHandler);
 
                 userListProvider.getList().addAll(userFolders);
                 systemListProvider.getList().addAll(systemFolder);
@@ -539,6 +545,8 @@ public class CollectionsPresenter extends AbstractPresenter {
                 }
 
                 FolderDetails folder = event.getItems().get(0);
+                if (folder == null)
+                    display.showFeedbackMessage("Could not retrieve collection with id " + id, true);
 
                 History.newItem(Page.COLLECTIONS.getLink() + ";id=" + id, false);
                 ArrayList<Long> entries = folder.getContents();

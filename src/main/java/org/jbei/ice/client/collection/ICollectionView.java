@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.client.collection.event.SubmitHandler;
+import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.collection.presenter.MoveToSubmitHandler;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
@@ -28,7 +29,7 @@ public interface ICollectionView {
 
     void setSystemCollectionMenuItems(ArrayList<MenuItem> items);
 
-    void setUserCollectionMenuItems(ArrayList<MenuItem> items);
+    void setUserCollectionMenuItems(ArrayList<MenuItem> items, IDeleteMenuHandler handler);
 
     void setQuickAddVisibility(boolean visible);
 
@@ -55,10 +56,10 @@ public interface ICollectionView {
     void updateMenuItemCounts(ArrayList<MenuItem> item);
 
     // add menu item to user menu
-    void addMenuItem(MenuItem item);
+    void addMenuItem(MenuItem item, IDeleteMenuHandler handler);
 
     // sets the menu item in a menu list
-    void setMenuItem(MenuItem item);
+    void setMenuItem(MenuItem item, IDeleteMenuHandler handler);
 
     void setCurrentMenuSelection(long id);
 
