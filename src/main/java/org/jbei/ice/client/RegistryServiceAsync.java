@@ -42,8 +42,6 @@ public interface RegistryServiceAsync {
     void retrieveEntryData(String sid, ArrayList<Long> entries, ColumnField field, boolean asc,
             AsyncCallback<ArrayList<EntryInfo>> callback);
 
-    void retrieveEntryView(long id, AsyncCallback<EntryInfo> callback);
-
     void retrieveEntryDetails(String sessionId, long id, AsyncCallback<EntryInfo> callback);
 
     /**

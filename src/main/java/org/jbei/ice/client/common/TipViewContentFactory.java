@@ -1,16 +1,25 @@
 package org.jbei.ice.client.common;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map.Entry;
 
 import org.jbei.ice.client.common.util.ImageUtil;
+import org.jbei.ice.client.entry.view.model.SampleStorage;
+import org.jbei.ice.client.entry.view.table.EntrySampleTable;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.PartInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
+import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.shared.dto.StorageInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Widget;
@@ -183,12 +192,27 @@ public class TipViewContentFactory {
         table.setHTML(11, 0, "&nbsp;");
         table.getFlexCellFormatter().setColSpan(11, 0, 4);
 
-        table.setHTML(12, 0, "<b>Samples</b>");
-        table.getCellFormatter().addStyleName(12, 0, "entry_tooltip_sub_header");
+        table.setHTML(12, 0, "<b class=\"entry_tooltip_sub_header\">Samples</b>");
         table.getFlexCellFormatter().setColSpan(12, 0, 4);
 
-        table.setHTML(13, 0, "&nbsp;"); // TODO : samples widget goes here
+        Widget samplesWidget = createSamplesWidget(entry.getSampleMap());
+        table.setWidget(13, 0, samplesWidget);
         table.getFlexCellFormatter().setColSpan(13, 0, 4);
+    }
+
+    private static Widget createSamplesWidget(HashMap<SampleInfo, LinkedList<StorageInfo>> samples) {
+        if (samples == null || samples.isEmpty())
+            return new HTML("<span class=\"font-75em\">No samples</span>");
+
+        // TODO : use SampleStorage to set the sample map in the call to the remote procedure
+        ArrayList<SampleStorage> data = new ArrayList<SampleStorage>();
+        for (Entry<SampleInfo, LinkedList<StorageInfo>> set : samples.entrySet()) {
+            data.add(new SampleStorage(set.getKey(), set.getValue()));
+        }
+        EntrySampleTable sampleTable = new EntrySampleTable();
+        sampleTable.setData(data);
+
+        return sampleTable;
     }
 
     private static String generateDate(Date date) {

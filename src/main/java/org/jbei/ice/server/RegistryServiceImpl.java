@@ -212,12 +212,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public EntryInfo retrieveEntryView(long id) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public ArrayList<FolderDetails> retrieveUserCollections(String sessionId, String userId) {
         ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
 
@@ -316,6 +310,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             details.setCount(folderSize);
             details.setDescription(folder.getDescription());
             ArrayList<Long> contents = FolderManager.getFolderContents(folderId, false);
+
             details.setContents(contents);
             return details;
         } catch (ManagerException e) {
