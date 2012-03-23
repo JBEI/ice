@@ -50,10 +50,13 @@ public class PermissionsDisplayWidget extends Composite {
 
         for (PermissionItem datum : data) {
             if (datum.isWrite())
-                readTree.getItem(0).addItem(new TreeItem(datum.getName()));
+                rwTree.getItem(0).addItem(new TreeItem(datum.getName()));
             else
                 readTree.getItem(0).addItem(new TreeItem(datum.getName()));
         }
+
+        rwTree.getItem(0).setState(true, false);
+        readTree.getItem(0).setState(true, false);
     }
 
 }
