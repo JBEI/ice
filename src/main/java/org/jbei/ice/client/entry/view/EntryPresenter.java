@@ -97,6 +97,15 @@ public class EntryPresenter extends AbstractPresenter {
         });
 
         retrievePermissionData();
+
+        // permissions
+        display.addPermissionEditClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                display.showPermissionsWidget();
+            }
+        });
     }
 
     private void retrievePermissionData() {

@@ -379,6 +379,20 @@ a.cell_mouseover:hover {
     border-bottom: 1px solid #c1c1c1;
 }
 
+.edit_permissions_label {
+	font-size: 0.75em;
+	text-decoration: underline;
+	color: #185DA0;
+	font-weight: normal;
+}
+
+.edit_permissions_label:hover {
+    color: #9EC068;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+
 .permissions_sub_header {
 	font-size: 0.80em;
 	padding: 6px;

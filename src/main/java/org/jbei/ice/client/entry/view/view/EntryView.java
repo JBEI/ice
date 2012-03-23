@@ -39,8 +39,8 @@ import com.google.gwt.user.client.ui.Widget;
 public class EntryView extends Composite implements IEntryView {
 
     private FlexTable mainContent;
-    private AttachmentListMenu attachmentMenu;
-    private PermissionsDisplayWidget permissionsDisplay;
+    private final AttachmentListMenu attachmentMenu;
+    private final PermissionsDisplayWidget permissionsDisplay;
 
     // general header
     private HorizontalPanel generalHeaderPanel;
@@ -53,12 +53,12 @@ public class EntryView extends Composite implements IEntryView {
     // samples
     private HTMLPanel samplesPanel;
     private Button addSampleButton;
-    private CreateSampleForm sampleForm;
+    private final CreateSampleForm sampleForm;
 
     // permissions
     private final PermissionsWidget permissions;
 
-    private Widget uploadPanel;
+    private final Widget uploadPanel;
     private FlexTable entryDetailMenuWrapper; // left side of the page with menu
 
     // navigation buttons for context navigation.
@@ -68,9 +68,9 @@ public class EntryView extends Composite implements IEntryView {
     private final Label navText;
     private final Button rightBtn;
 
-    private Label headerLabel;
-    private EntrySampleTable sampleTable;
-    private EntrySequenceTable sequenceTable;
+    private final Label headerLabel;
+    private final EntrySampleTable sampleTable;
+    private final EntrySequenceTable sequenceTable;
 
     private Button sequenceAddCancelbutton;
     private long entryId;
@@ -311,6 +311,7 @@ public class EntryView extends Composite implements IEntryView {
         });
 
         uploader.addOnFinishUploadHandler(new OnFinishUploaderHandler() {
+            @Override
             public void onFinish(IUploader uploader) {
                 if (uploader.getStatus() == Status.SUCCESS) {
                     //                    UploadedInfo info = uploader.getServerInfo();
@@ -403,6 +404,16 @@ public class EntryView extends Composite implements IEntryView {
         }
 
         mainContent.setWidget(1, 0, panel);
+    }
+
+    @Override
+    public void addPermissionEditClickHandler(ClickHandler handler) {
+        permissionsDisplay.addPermissionEditClickHandler(handler);
+    }
+
+    @Override
+    public void showPermissionsWidget() {
+        mainContent.setWidget(1, 0, permissions);
     }
 
     public void addSequenceButtonHandler(ClickHandler handler) {

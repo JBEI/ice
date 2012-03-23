@@ -65,4 +65,8 @@ public interface IEntryView {
     void setSequenceData(ArrayList<SequenceAnalysisInfo> sequenceAnalysis, long entryId);
 
     void setPermissionData(ArrayList<PermissionItem> data);
+
+    void showPermissionsWidget();
+
+    void addPermissionEditClickHandler(ClickHandler handler);
 }
