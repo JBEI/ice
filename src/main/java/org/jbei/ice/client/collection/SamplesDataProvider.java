@@ -48,6 +48,7 @@ public class SamplesDataProvider extends HasEntryDataViewDataProvider<SampleInfo
     }
 
     public void setValues(ArrayList<Long> data) {
-        this.setValues(data);
+        this.valueIds.clear();
+        this.valueIds.addAll(data);
     }
 }

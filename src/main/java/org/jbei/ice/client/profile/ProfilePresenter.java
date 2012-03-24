@@ -6,7 +6,11 @@ import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.SamplesDataProvider;
+import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
+import org.jbei.ice.client.common.table.EntryTablePager;
+import org.jbei.ice.client.event.EntryViewEvent;
+import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.ProfileInfo;
 
@@ -17,6 +21,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ProfilePresenter extends AbstractPresenter {
@@ -29,8 +34,10 @@ public class ProfilePresenter extends AbstractPresenter {
     private final HandlerManager eventBus;
     private final IProfileView display;
     private Widget accountWidget;
+    private CollectionDataTable table;
+    private final VerticalPanel panel;
 
-    public ProfilePresenter(final RegistryServiceAsync service, HandlerManager eventBus,
+    public ProfilePresenter(final RegistryServiceAsync service, final HandlerManager eventBus,
             final IProfileView display, final String userId) {
 
         this.service = service;
@@ -48,7 +55,8 @@ public class ProfilePresenter extends AbstractPresenter {
                     display.setContents(accountWidget);
                     break;
                 case ENTRIES:
-                    display.setContents(display.getEntryDataTable());
+
+                    display.setContents(panel);
                     break;
                 case SAMPLES:
                     display.setContents(display.getSamplesTable());
@@ -95,7 +103,28 @@ public class ProfilePresenter extends AbstractPresenter {
             }
         });
 
-        provider = new EntryDataViewDataProvider(display.getEntryDataTable(), service);
+        this.table = new CollectionDataTable(new EntryTablePager()) {
+
+            @Override
+            protected EntryViewEventHandler getHandler() {
+                return new EntryViewEventHandler() {
+                    @Override
+                    public void onEntryView(EntryViewEvent event) {
+                        event.setNavigable(provider);
+                        eventBus.fireEvent(event);
+                    }
+                };
+            }
+        };
+        panel = new VerticalPanel();
+        panel.setWidth("100%");
+        //                    entriesTable.addStyleName("gray_border");
+        panel.add(table);
+        EntryTablePager tablePager = new EntryTablePager();
+        tablePager.setDisplay(table);
+        panel.add(tablePager);
+
+        provider = new EntryDataViewDataProvider(this.table, service);
         samplesDataProvider = new SamplesDataProvider(display.getSamplesTable(), service);
     }
 

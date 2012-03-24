@@ -1,16 +1,11 @@
 package org.jbei.ice.client.profile;
 
-import java.util.ArrayList;
-
 import org.jbei.ice.client.collection.table.SamplesDataTable;
 import org.jbei.ice.client.common.AbstractLayout;
-import org.jbei.ice.client.common.table.EntryDataTable;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
-import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasAlignment;
@@ -20,7 +15,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class ProfileView extends AbstractLayout implements IProfileView {
 
-    private EntryDataTable<EntryInfo> entriesTable;
+    //    private EntryDataTable<EntryInfo> entriesTable;
     private SamplesDataTable samplesTable;
 
     private Label contentHeader;
@@ -31,7 +26,7 @@ public class ProfileView extends AbstractLayout implements IProfileView {
     protected Widget createContents() {
         contentHeader = new Label("");
         mainContent = new FlexTable();
-        createEntriesTablePanel();
+        //        createEntriesTablePanel();
         this.createSamplesTablePanel();
 
         FlexTable contentTable = new FlexTable();
@@ -83,39 +78,6 @@ public class ProfileView extends AbstractLayout implements IProfileView {
         contentHeader.setText(text);
     }
 
-    private VerticalPanel createEntriesTablePanel() {
-
-        entriesTable = new EntryDataTable<EntryInfo>() {
-
-            @Override
-            protected ArrayList<DataTableColumn<?>> createColumns() {
-
-                ArrayList<DataTableColumn<?>> columns = new ArrayList<DataTableColumn<?>>();
-                columns.add(super.addTypeColumn(true, 50, Unit.PX));
-                //                columns.add(super.addPartIdColumn(true, 120, Unit.PX)); // TODO 
-                super.addNameColumn(120, Unit.PX);
-                super.addSummaryColumn();
-                super.addStatusColumn();
-                super.addHasAttachmentColumn();
-                super.addHasSampleColumn();
-                super.addHasSequenceColumn();
-                super.addCreatedColumn();
-
-                return columns;
-            }
-        };
-
-        VerticalPanel panel = new VerticalPanel();
-        panel.setWidth("100%");
-        entriesTable.addStyleName("gray_border");
-        panel.add(entriesTable);
-        EntryTablePager tablePager = new EntryTablePager();
-        tablePager.setDisplay(entriesTable);
-        panel.add(tablePager);
-
-        return panel;
-    }
-
     private VerticalPanel createSamplesTablePanel() {
 
         samplesTable = new SamplesDataTable();
@@ -133,10 +95,5 @@ public class ProfileView extends AbstractLayout implements IProfileView {
     @Override
     public HasEntryDataTable<SampleInfo> getSamplesTable() {
         return this.samplesTable;
-    }
-
-    @Override
-    public EntryDataTable<EntryInfo> getEntryDataTable() {
-        return this.entriesTable;
     }
 }
