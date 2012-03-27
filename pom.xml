@@ -233,6 +233,11 @@
 			<version>SNAPSHOT</version>
 		</dependency>
 		<dependency>
+			<groupId>org.jbei.ice</groupId>
+			<artifactId>libSBOLj</artifactId>
+			<version>SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<groupId>net.sf.opencsv</groupId>
 			<artifactId>opencsv</artifactId>
 			<version>2.1</version>
