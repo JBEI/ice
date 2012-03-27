@@ -92,7 +92,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         try {
             SessionData sessionData = AccountController.authenticate(name, pass);
-            log("User by login '" + name + "' successfully logged in");
+            Logger.info("User by login '" + name + "' successfully logged in");
 
             Account account = sessionData.getAccount();
             AccountInfo info = this.accountToInfo(account);
@@ -100,8 +100,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             info.setSessionId(sessionData.getSessionKey());
-            long visibleEntryCount = EntryManager.getNumberOfVisibleEntries();
-            info.setVisibleEntryCount(visibleEntryCount);
             int entryCount = EntryManager.getEntryCountBy(info.getEmail());
             info.setUserEntryCount(entryCount);
 
@@ -121,6 +119,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public AccountInfo sessionValid(String sid) {
+        Logger.info("Checking session validity for \"" + sid + "\"");
+
         try {
             if (AccountController.isAuthenticated(sid)) {
                 Account account = AccountController.getAccountBySessionKey(sid);
@@ -145,8 +145,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public boolean logout(String sessionId) {
-        // TODO Auto-generated method stub
-        return false;
+        Logger.info("Deauthenticating session \"" + sessionId + "\"");
+        try {
+            AccountController.deauthenticate(sessionId);
+            return true;
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return false;
+        }
     }
 
     @Override

@@ -13,6 +13,8 @@ import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.collection.view.CollectionsView;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.header.QuickSearchParser;
+import org.jbei.ice.client.event.EntryViewEvent;
+import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.event.ILoginEventHandler;
 import org.jbei.ice.client.event.ILogoutEventHandler;
 import org.jbei.ice.client.event.LoginEvent;
@@ -97,6 +99,15 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             }
         });
 
+        // entry view event
+        this.eventBus.addHandler(EntryViewEvent.TYPE, new EntryViewEventHandler() {
+
+            @Override
+            public void onEntryView(EntryViewEvent event) {
+                showEntryView(event);
+            }
+        });
+
         // retrieve autocomplete data
         service.retrieveAutoCompleteData(AppController.sessionId,
             new AsyncCallback<HashMap<AutoCompleteField, ArrayList<String>>>() {
@@ -125,22 +136,21 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         History.newItem(Page.COLLECTIONS.getLink(), false);
         final CollectionsView cView = new CollectionsView();
         addHeaderSearchHandler(cView);
-        //        cView.getHeader().addSearchClickHandler(new ClickHandler() {
-        //
-        //            @Override
-        //            public void onClick(ClickEvent event) {
-        //                ArrayList<SearchFilterInfo> parse = QuickSearchParser.parse(cView.getHeader()
-        //                        .getSearchInput());
-        //                SearchFilterInfo blastInfo = cView.getHeader().getBlastInfo();
-        //                if (blastInfo != null)
-        //                    parse.add(blastInfo);
-        //                SearchEvent searchInProgressEvent = new SearchEvent();
-        //                searchInProgressEvent.setFilters(parse);
-        //                eventBus.fireEvent(searchInProgressEvent);
-        //            }
-        //        });
         CollectionsPresenter presenter = new CollectionsPresenter(new CollectionsModel(
                 this.service, this.eventBus), cView, operands);
+        presenter.go(container);
+    }
+
+    private void showEntryView(EntryViewEvent event) {
+        Page currentPage = getPage(History.getToken());
+        if (currentPage == Page.COLLECTIONS)
+            return;
+
+        CollectionsView cView = new CollectionsView();
+        addHeaderSearchHandler(cView); // TODO : not sure if this is needed
+
+        CollectionsPresenter presenter = new CollectionsPresenter(new CollectionsModel(
+                this.service, this.eventBus), cView, event.getContext());
         presenter.go(container);
     }
 

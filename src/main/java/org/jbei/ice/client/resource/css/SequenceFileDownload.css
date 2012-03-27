@@ -1,0 +1,58 @@
+@sprite .downloadStyle {
+    height: 18px;
+    width: 75px;
+    gwt-image: 'sortDown';
+    background-position: 55px 5px;
+    padding-right: 13px;    
+    cursor: pointer;
+    color: #393939;
+    font-size: 0.70em;
+    text-align: center;
+    border: 0px;
+    background-color: #f1f1f1;
+    border-top: 2px solid #f1f1f1;
+    border-bottom: 2px solid #f1f1f1;    
+    border: 1px solid #A5A5A5;
+    -webkit-border-radius: 2px;
+    margin: 0px;
+    font-family: Arial;
+    display: inline;
+    opacity: 0.8;
+    padding-left: 3px;
+}
+
+.downloadStyle:hover {
+    border-top: 2px solid #0082C0;
+    background-color: #f2f2f2;
+    opacity: 1;
+}
+
+.cellListKeyboardSelectedItem {
+}
+
+.cellListOddItem, .cellListEvenItem {
+    padding: 4px;
+    padding-left: 10px;
+    cursor: pointer;
+    border-radius: 2px;
+}
+
+.cellListSelectedItem {
+    background-color: #F1F1F1;
+    border: 1px solid #BBB;
+    color: #333;
+}
+
+.cellListOddItem:hover, .cellListEvenItem:hover {
+    background-color: #ededed;
+}
+
+.cellListWidget {
+    background-color: #FFF;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    width: 120px;
+    font-family: Arial;
+    font-size: 13px;
+}

@@ -1,12 +1,10 @@
 package org.jbei.ice.client.collection.presenter;
 
-import java.util.List;
-
 import org.jbei.ice.client.common.IHasNavigableData;
 import org.jbei.ice.shared.ColumnField;
 
 public class EntryContext {
-    private List<Long> list;
+
     private long current;
     private Type type;
     private ColumnField sortColumn;
@@ -23,14 +21,6 @@ public class EntryContext {
 
     public void setCurrent(long current) {
         this.current = current;
-    }
-
-    public List<Long> getList() {
-        return list;
-    }
-
-    public void setList(List<Long> list) {
-        this.list = list;
     }
 
     public Type getType() {

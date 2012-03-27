@@ -7,11 +7,17 @@ import com.google.gwt.user.client.ui.FlexTable;
 
 public class AboutWidget extends Composite {
 
-    public AboutWidget(AccountInfo info) {
+    private final FlexTable contents;
 
-        FlexTable contents = new FlexTable();
+    public AboutWidget() {
+
+        contents = new FlexTable();
+        contents.setCellSpacing(7);
+        contents.setStyleName("font-85em");
         initWidget(contents);
+    }
 
+    public void setAccountInfo(AccountInfo info) {
         contents.setHTML(0, 0, "<b>Name:</b>");
         contents.getCellFormatter().setWidth(0, 0, "150px");
         String fullName = info.getFirstName() + " " + info.getLastName();

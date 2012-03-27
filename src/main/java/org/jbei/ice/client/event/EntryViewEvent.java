@@ -1,7 +1,5 @@
 package org.jbei.ice.client.event;
 
-import java.util.List;
-
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.IHasNavigableData;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
@@ -21,10 +19,6 @@ public class EntryViewEvent extends GwtEvent<EntryViewEventHandler> {
     public EntryViewEvent(long id, EntryContext.Type mode) {
         this.context = new EntryContext(mode);
         this.context.setCurrent(id);
-    }
-
-    public void setList(List<Long> ids) {
-        this.context.setList(ids);
     }
 
     public EntryContext getContext() {
@@ -53,5 +47,4 @@ public class EntryViewEvent extends GwtEvent<EntryViewEventHandler> {
     public void setNavigable(IHasNavigableData nav) {
         context.setNav(nav);
     }
-
 }

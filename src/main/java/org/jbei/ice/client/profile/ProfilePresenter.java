@@ -22,7 +22,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 public class ProfilePresenter extends AbstractPresenter {
 
@@ -33,7 +32,7 @@ public class ProfilePresenter extends AbstractPresenter {
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
     private final IProfileView display;
-    private Widget accountWidget;
+    private AboutWidget accountWidget;
     private CollectionDataTable table;
     private final VerticalPanel panel;
 
@@ -43,6 +42,7 @@ public class ProfilePresenter extends AbstractPresenter {
         this.service = service;
         this.eventBus = eventBus;
         this.display = display;
+        accountWidget = new AboutWidget();
 
         this.display.getMenu().addClickHandler(new ClickHandler() {
 
@@ -82,7 +82,8 @@ public class ProfilePresenter extends AbstractPresenter {
 
                 AccountInfo info = profileInfo.getAccountInfo();
                 display.setHeaderText(info.getFirstName() + " " + info.getLastName());
-                accountWidget = new AboutWidget(info);
+                accountWidget.setAccountInfo(info);
+                display.setContents(accountWidget);
 
                 // set menu
                 ArrayList<CellEntry> menu = new ArrayList<CellEntry>();
