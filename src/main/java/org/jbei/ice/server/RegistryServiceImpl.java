@@ -636,7 +636,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d yyyy");
         Date memberSinceDate = account.getCreationTime();
-        info.setSince(dateFormat.format(memberSinceDate));
+        if (memberSinceDate != null)
+            info.setSince(dateFormat.format(memberSinceDate));
 
         return info;
     }
