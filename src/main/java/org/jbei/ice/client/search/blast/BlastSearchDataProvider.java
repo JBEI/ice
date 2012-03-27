@@ -27,11 +27,11 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastR
             valueIds.add(info.getEntryInfo().getId());
         }
 
-        results.clear();
         results.addAll(data);
         updateRowCount(data.size(), true);
-        //        this.setValues(valueIds);
-        final Range range = getDataTable().getVisibleRange();
+
+        // retrieve the first page of results and updateRowData
+        final Range range = this.getRanges()[0];
         final int rangeStart = range.getStart();
         final int rangeEnd;
         if ((rangeStart + range.getLength()) > valueIds.size())
@@ -44,12 +44,12 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastR
         // TODO : you have access to the sort info from the table
         // TODO : this goes with the above todo. if we clear all the sort info then we use default else use the top sort
         // TODO : look at the sort method for an example of how to do this
-        fetchHasEntryData(rangeStart, rangeEnd);
+        fetchHasEntryData(this.getSortField(), true, rangeStart, rangeEnd);
     }
 
     @Override
     protected void retrieveValues(LinkedList<Long> values, final int rangeStart,
-            final int rangeEnd, boolean asc) {
+            final int rangeEnd, ColumnField searchField, boolean asc) {
         // check the cache first 
         if (results.size() >= rangeEnd) {
             LinkedList<BlastResultInfo> show = new LinkedList<BlastResultInfo>();
@@ -154,6 +154,6 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastR
         // TODO : you have access to the sort info from the table
         // TODO : this goes with the above todo. if we clear all the sort info then we use default else use the top sort
         // TODO : look at the sort method for an example of how to do this
-        fetchHasEntryData(rangeStart, rangeEnd);
+        fetchHasEntryData(this.getSortField(), true, rangeStart, rangeEnd);
     }
 }

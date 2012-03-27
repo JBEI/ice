@@ -82,7 +82,8 @@ public interface RegistryService extends RemoteService {
     LinkedList<Long> retrieveSamplesByDepositor(String sid, String email, ColumnField field,
             boolean asc);
 
-    LinkedList<SampleInfo> retrieveSampleInfo(String sid, LinkedList<Long> sampleIds, boolean asc);
+    LinkedList<SampleInfo> retrieveSampleInfo(String sid, LinkedList<Long> sampleIds,
+            ColumnField sortField, boolean asc);
 
     FolderDetails retrieveFolderDetails(String sid, long folderId);
 

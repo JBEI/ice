@@ -1,6 +1,5 @@
 package org.jbei.ice.client.collection;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 import org.jbei.ice.client.AppController;
@@ -21,34 +20,24 @@ public class SamplesDataProvider extends HasEntryDataViewDataProvider<SampleInfo
 
     @Override
     protected void retrieveValues(LinkedList<Long> values, final int rangeStart,
-            final int rangeEnd, boolean asc) {
+            final int rangeEnd, ColumnField sortField, boolean asc) {
 
-        // check the cache first 
-        if (results.size() >= rangeEnd) {
-            LinkedList<SampleInfo> show = new LinkedList<SampleInfo>();
-            show.addAll(results.subList(rangeStart, rangeEnd));
-            updateRowData(rangeStart, show);
-        } else {
+        service.retrieveSampleInfo(AppController.sessionId, values, sortField, asc,
+            new AsyncCallback<LinkedList<SampleInfo>>() {
 
-            service.retrieveSampleInfo(AppController.sessionId, values, asc,
-                new AsyncCallback<LinkedList<SampleInfo>>() {
+                @Override
+                public void onSuccess(LinkedList<SampleInfo> result) {
+                    results.addAll(result);
+                    int end = rangeEnd;
+                    if (rangeEnd > results.size())
+                        end = results.size();
+                    updateRowData(rangeStart, results.subList(rangeStart, end));
+                }
 
-                    @Override
-                    public void onSuccess(LinkedList<SampleInfo> result) {
-                        results.addAll(result);
-                        updateRowData(rangeStart, results.subList(rangeStart, rangeEnd));
-                    }
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Window.alert("Error retrieving sample values: " + caught.getMessage());
-                    }
-                });
-        }
-    }
-
-    public void setValues(ArrayList<Long> data) {
-        this.valueIds.clear();
-        this.valueIds.addAll(data);
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert("Error retrieving sample values: " + caught.getMessage());
+                }
+            });
     }
 }

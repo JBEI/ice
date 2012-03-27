@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class ProfileView extends AbstractLayout implements IProfileView {
 
-    //    private EntryDataTable<EntryInfo> entriesTable;
     private SamplesDataTable samplesTable;
 
     private Label contentHeader;

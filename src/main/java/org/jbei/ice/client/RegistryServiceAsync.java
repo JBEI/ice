@@ -73,8 +73,8 @@ public interface RegistryServiceAsync {
 
     void retrieveChildren(String sid, long id, AsyncCallback<ArrayList<StorageInfo>> callback);
 
-    void retrieveSampleInfo(String sid, LinkedList<Long> sampleIds, boolean asc,
-            AsyncCallback<LinkedList<SampleInfo>> callback);
+    void retrieveSampleInfo(String sid, LinkedList<Long> sampleIds, ColumnField sortField,
+            boolean asc, AsyncCallback<LinkedList<SampleInfo>> callback);
 
     void retrieveAccountInfoForSession(String sid, AsyncCallback<AccountInfo> callback);
 

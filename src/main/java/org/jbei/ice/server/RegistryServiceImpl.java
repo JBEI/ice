@@ -803,20 +803,17 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public LinkedList<SampleInfo> retrieveSampleInfo(String sid, LinkedList<Long> sampleIds,
-            boolean asc) {
+            ColumnField sortField, boolean asc) {
         LinkedList<SampleInfo> data = null;
         Account account = null;
+
         try {
             account = this.retrieveAccountForSid(sid);
-        } catch (ControllerException e) {
-            Logger.error(e);
-        }
+            if (account == null)
+                return null;
 
-        if (account == null)
-            return null;
+            SampleController sampleController = new SampleController(account);
 
-        SampleController sampleController = new SampleController(account);
-        try {
             LinkedList<Sample> results = sampleController.retrieveSamplesByIdSet(sampleIds, asc);
             if (results != null) {
                 data = new LinkedList<SampleInfo>();

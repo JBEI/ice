@@ -1,7 +1,7 @@
 package org.jbei.ice.client.common;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.table.DataTable;
@@ -9,7 +9,7 @@ import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.HasEntryInfo;
 
-import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
@@ -30,8 +30,8 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
     protected ColumnField lastSortField;
     protected final ColumnField defaultSort;
 
-    public HasEntryDataViewDataProvider(HasEntryDataTable<T> view, List<Long> data,
-            RegistryServiceAsync service, ColumnField defaultSort) {
+    public HasEntryDataViewDataProvider(HasEntryDataTable<T> view, RegistryServiceAsync service,
+            ColumnField defaultSort) {
 
         this.dataTable = view;
         this.service = service;
@@ -39,7 +39,17 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
         results = new LinkedList<T>();
 
         // sorting. set created sort as the default
-        this.dataTable.addColumnSortHandler(new AsyncHandler(this.dataTable));
+        this.dataTable.addColumnSortHandler(new AsyncHandler(this.dataTable) {
+            @Override
+            public void onColumnSort(ColumnSortEvent event) {
+                super.onColumnSort(event);
+
+                results.clear();
+                int pageSize = dataTable.getVisibleRange().getLength();
+                dataTable.setVisibleRange(0, pageSize);
+            }
+        });
+
         DataTable<T>.DataTableColumn<?> defaultSortField = this.dataTable.getColumn(defaultSort);
         lastSortField = defaultSort;
         this.defaultSort = defaultSort;
@@ -49,51 +59,26 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
             this.dataTable.getColumnSortList().push(info);
         }
 
-        if (!data.isEmpty())
-            this.setValues(data);
-
         this.addDataDisplay(this.dataTable);
     }
 
-    public HasEntryDataViewDataProvider(HasEntryDataTable<T> view, RegistryServiceAsync service,
-            ColumnField defaultSort) {
-        this(view, new LinkedList<Long>(), service, defaultSort);
-    }
-
-    // clears all table data but does not reset the 
-    protected void resetTableAndData(List<Long> data) {
-
-        this.results.clear();
-        this.valueIds.clear();
+    public void setValues(ArrayList<Long> data) {
+        reset();
         this.valueIds.addAll(data);
+        updateRowCount(data.size(), true);
 
-        updateRowCount(this.valueIds.size(), true);
-
-        lastSortAsc = false;
-        lastSortField = this.defaultSort;
-    }
-
-    /**
-     * Set the valueIds
-     * 
-     * @param data
-     */
-    protected void setValues(List<Long> data) {
-
-        resetTableAndData(data);
         // retrieve the first page of results and updateRowData
-        final Range range = this.dataTable.getVisibleRange();
+        final Range range = this.getRanges()[0];
         final int rangeStart = range.getStart();
         final int rangeEnd;
+
         if ((rangeStart + range.getLength()) > valueIds.size())
             rangeEnd = valueIds.size();
         else
             rangeEnd = (rangeStart + range.getLength());
 
-        // TODO : you have access to the sort info from the table
-        // TODO : this goes with the above todo. if we clear all the sort info then we use default else use the top sort
-        // TODO : look at the sort method for an example of how to do this
-        fetchHasEntryData(rangeStart, rangeEnd);
+        // this will always cause a sort since reset() is call.
+        sort(rangeStart, rangeEnd);
     }
 
     // when a user sorts a column, setVisibleRangeAndclearData is called which
@@ -107,13 +92,13 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
         final int rangeEnd = (rangeStart + range.getLength()) > valueIds.size() ? valueIds.size()
                 : (rangeStart + range.getLength());
 
-        // if sort data is available, then sort
-        // but if we push a column sort, then a sort should always be available.
-        // just a question of what is at the top
-        boolean sorted = sort(rangeStart, rangeEnd);
-        if (!sorted) {
-            fetchHasEntryData(rangeStart, rangeEnd);
-        }
+        if (sort(rangeStart, rangeEnd))
+            return;
+
+        // did not need to sort so use the cache
+        ArrayList<T> show = new ArrayList<T>();
+        show.addAll(results.subList(rangeStart, rangeEnd));
+        updateRowData(rangeStart, show);
     }
 
     protected boolean sort(int rangeStart, int rangeEnd) {
@@ -122,29 +107,32 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
         final boolean sortAsc;
         final ColumnField sortField;
 
-        if (sortList == null || sortList.size() == 0) {
-            // set sort defaults. typically on first page load
-            sortAsc = lastSortAsc;
+        sortAsc = sortList.get(0).isAscending();
+
+        int colIndex = this.dataTable.getColumns().indexOf(sortList.get(0).getColumn());
+        if (colIndex < 0)
             sortField = lastSortField;
-        } else {
-            // get sort data
-            sortAsc = sortList.get(0).isAscending();
-            Column<?, ?> column = sortList.get(0).getColumn();
-            int colIndex = getDataTable().getColumns().indexOf(column); //TODO : find a way to perform a single lookup to retrieve the field
-            if (colIndex < 0)
-                sortField = lastSortField;
-            else
-                sortField = getDataTable().getColumns().get(colIndex).getField();
+        else
+            sortField = this.dataTable.getColumns().get(colIndex).getField();
+
+        // check whether we need to sort in order to determine whether we can use the cache or not
+        // this is done because sort() is also called when we are paging (from onRangeChanged)
+        if (lastSortAsc == sortAsc && lastSortField == sortField) {
+            // make sure there is enough data in the cache for the callee to obtain what they need
+            // based on range
+            if (results.size() >= rangeEnd)
+                return false;
         }
 
-        // do not resort if sort params have not changed
-        if (sortAsc == lastSortAsc && sortField == lastSortField)
-            return false;
-
+        results.clear();
+        lastSortAsc = sortAsc;
+        lastSortField = sortField;
+        fetchHasEntryData(sortField, sortAsc, rangeStart, rangeEnd);
         return true;
     }
 
-    protected void fetchHasEntryData(final int rangeStart, final int rangeEnd) {
+    protected void fetchHasEntryData(ColumnField sortField, boolean asc, final int rangeStart,
+            final int rangeEnd) {
 
         if (this.valueIds == null || this.valueIds.isEmpty())
             return;
@@ -154,14 +142,7 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
         LinkedList<Long> subList = new LinkedList<Long>(valueIds.subList(rangeStart, factor));
 
         final LinkedList<Long> realValues = new LinkedList<Long>(subList);
-        boolean asc;
-        ColumnSortList sortList = this.dataTable.getColumnSortList();
-        if (sortList == null || sortList.size() == 0)
-            asc = false;
-        else
-            asc = sortList.get(0).isAscending();
-
-        retrieveValues(realValues, rangeStart, rangeEnd, asc);
+        retrieveValues(realValues, rangeStart, rangeEnd, sortField, asc);
     }
 
     protected ColumnField getSortField() {
@@ -185,7 +166,7 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
      *            sort Type
      */
     protected abstract void retrieveValues(LinkedList<Long> values, int rangeStart, int rangeEnd,
-            boolean asc);
+            ColumnField sortField, boolean asc);
 
     public HasEntryDataTable<T> getDataTable() {
         return this.dataTable;
@@ -193,8 +174,21 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
 
     public void reset() {
         this.results.clear();
-        valueIds.clear();
-        dataTable.setVisibleRangeAndClearData(dataTable.getVisibleRange(), false);
+        this.valueIds.clear();
+        this.dataTable.setVisibleRangeAndClearData(dataTable.getVisibleRange(), false);
+
+        // reset sort 
+        lastSortAsc = false;
+        lastSortField = null;
+
+        this.dataTable.getColumnSortList().clear();
+        DataTable<T>.DataTableColumn<?> defaultSortField = this.dataTable
+                .getColumn(ColumnField.CREATED);
+
+        if (defaultSortField != null) {
+            ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);
+            this.dataTable.getColumnSortList().push(info);
+        }
     }
 
     protected LinkedList<T> getResults() {
