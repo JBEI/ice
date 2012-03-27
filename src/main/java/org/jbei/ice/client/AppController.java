@@ -139,8 +139,8 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         //                eventBus.fireEvent(searchInProgressEvent);
         //            }
         //        });
-        CollectionsPresenter presenter = new CollectionsPresenter(
-                new CollectionsModel(this.service, this.eventBus), cView, operands);
+        CollectionsPresenter presenter = new CollectionsPresenter(new CollectionsModel(
+                this.service, this.eventBus), cView, operands);
         presenter.go(container);
     }
 
@@ -208,8 +208,8 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             EntryContext context = new EntryContext(EntryContext.Type.COLLECTION);
             context.setCurrent(id);
 
-            presenter = new CollectionsPresenter(new CollectionsModel(this.service,
-                    this.eventBus), cView, context);
+            presenter = new CollectionsPresenter(new CollectionsModel(this.service, this.eventBus),
+                    cView, context);
             break;
 
         case PROFILE:
@@ -221,8 +221,8 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         case COLLECTIONS:
             CollectionsView collectionsView = new CollectionsView();
             addHeaderSearchHandler(collectionsView);
-            presenter = new CollectionsPresenter(new CollectionsModel(this.service,
-                    this.eventBus), collectionsView, param);
+            presenter = new CollectionsPresenter(new CollectionsModel(this.service, this.eventBus),
+                    collectionsView, param);
             break;
 
         case BULK_IMPORT:

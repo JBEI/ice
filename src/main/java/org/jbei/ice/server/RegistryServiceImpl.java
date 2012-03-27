@@ -129,6 +129,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 info.setVisibleEntryCount(visibleEntryCount);
                 int entryCount = EntryManager.getEntryCountBy(info.getEmail());
                 info.setUserEntryCount(entryCount);
+
+                boolean isModerator = AccountController.isModerator(account);
+                info.setModerator(isModerator);
+
                 return info;
             }
         } catch (ControllerException e) {

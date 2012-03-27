@@ -34,7 +34,6 @@ public class NewsPresenter extends AbstractPresenter {
 
         if (!AppController.accountInfo.isModerator()) {
             display.setAddNewsButtonVisibilty(false);
-            return;
         }
 
         service.retrieveNewsItems(AppController.sessionId,

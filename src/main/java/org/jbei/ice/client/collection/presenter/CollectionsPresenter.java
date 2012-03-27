@@ -533,6 +533,9 @@ public class CollectionsPresenter extends AbstractPresenter {
     }
 
     private void retrieveEntriesForFolder(final long id, final String msg) {
+        display.setCurrentMenuSelection(id);
+        entryDataProvider.updateRowCount(0, false);
+        display.setDataView(collectionsDataTable);
 
         model.retrieveEntriesForFolder(id, new FolderRetrieveEventHandler() {
 
@@ -545,14 +548,15 @@ public class CollectionsPresenter extends AbstractPresenter {
                 }
 
                 FolderDetails folder = event.getItems().get(0);
-                if (folder == null)
+                if (folder == null) {
                     display.showFeedbackMessage("Could not retrieve collection with id " + id, true);
+                    return;
+                }
 
                 History.newItem(Page.COLLECTIONS.getLink() + ";id=" + id, false);
                 ArrayList<Long> entries = folder.getContents();
                 entryDataProvider.setValues(entries);
-                display.setDataView(collectionsDataTable);
-                display.setCurrentMenuSelection(id);
+
                 display.setSubMenuEnable(true, !folder.isSystemFolder(), !folder.isSystemFolder());
                 currentFolder = id;
                 mode = Mode.COLLECTION;
