@@ -177,6 +177,8 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
 
         for (SampleInfo location : widget.getLocations()) {
             sampleLocation.addItem(location.getLocation(), location.getLocationId());
+            if (location.getLocation().equals(location.getLabel()))
+                sampleLocation.setSelectedIndex(sampleLocation.getItemCount() - 1);
         }
 
         sample.setWidget(4, 1, sampleLocation);
@@ -448,7 +450,25 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
             }
         }
 
-        // TODO  validate sample
+        // samples
+        String location = sampleLocation.getValue(sampleLocation.getSelectedIndex());
+
+        ArrayList<String> passedLocationList = passedLocation.getListForLocation(location);
+        boolean hasValidScheme = false;
+        for (TextBox scheme : sampleLocationScheme) {
+
+            String schemeText = scheme.getText();
+
+            if (passedLocationList != null && passedLocationList.contains(schemeText.trim()))
+                continue;
+
+            hasValidScheme = true;
+            break;
+        }
+
+        if (hasValidScheme && sampleName.getText().trim().isEmpty())
+            invalid = sampleName;
+
         return invalid;
     }
 
