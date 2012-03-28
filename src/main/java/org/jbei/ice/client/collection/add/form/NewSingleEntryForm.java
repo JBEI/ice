@@ -161,7 +161,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
     }
 
     @Override
-    public void setSampleLocation(final SampleLocationWidget widget) {
+    public void setSampleLocation(final SampleLocation widget) {
 
         // location
         sample.setWidget(4, 0, new HTML("<span class=\"font-80em\">Location</span>"));
@@ -224,6 +224,13 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
 
                 int row = 4;
 
+                // clear any remaining left over rows
+                int rowCount = sample.getRowCount() - 1;
+                while (rowCount > row) {
+                    sample.removeRow(rowCount);
+                    rowCount -= 1;
+                }
+
                 for (final String item : list) {
                     row += 1;
                     sample.setWidget(row, 0, new HTML("&nbsp;"));
@@ -251,6 +258,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
                     sample.setWidget(row, 1, shelf);
                     sampleLocationScheme.add(shelf);
                 }
+
             }
         });
     }

@@ -58,7 +58,6 @@ import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.BulkImportEntryData;
 import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.lib.utils.RichTextRenderer;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.ColumnField;
@@ -1353,15 +1352,18 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 continue;
             }
 
-            if (PopulateInitialDatabase.DEFAULT_PLASMID_STORAGE_SCHEME_NAME.equals(schemeName))
-                schemeMap.put(schemeName, schemeOptions);
-            else if (PopulateInitialDatabase.DEFAULT_STRAIN_STORAGE_SCHEME_NAME.equals(schemeName))
-                schemeMap.put(schemeName, schemeOptions);
-            else if (PopulateInitialDatabase.DEFAULT_PART_STORAGE_SCHEME_NAME.equals(schemeName))
-                schemeMap.put(schemeName, schemeOptions);
-            else if (PopulateInitialDatabase.DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME
-                    .equals(schemeName))
-                schemeMap.put(schemeName, schemeOptions);
+            schemeMap.put(schemeName, schemeOptions);
+
+            // TODO : this is the default
+            //            if (PopulateInitialDatabase.DEFAULT_PLASMID_STORAGE_SCHEME_NAME.equals(schemeName))
+            //                schemeMap.put(schemeName, schemeOptions);
+            //            else if (PopulateInitialDatabase.DEFAULT_STRAIN_STORAGE_SCHEME_NAME.equals(schemeName))
+            //                schemeMap.put(schemeName, schemeOptions);
+            //            else if (PopulateInitialDatabase.DEFAULT_PART_STORAGE_SCHEME_NAME.equals(schemeName))
+            //                schemeMap.put(schemeName, schemeOptions);
+            //            else if (PopulateInitialDatabase.DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME
+            //                    .equals(schemeName))
+            //                schemeMap.put(schemeName, schemeOptions);
         }
 
         return schemeMap;

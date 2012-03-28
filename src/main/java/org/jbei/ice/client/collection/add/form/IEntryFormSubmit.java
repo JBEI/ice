@@ -29,5 +29,5 @@ public interface IEntryFormSubmit {
 
     HashSet<EntryInfo> getEntries();
 
-    void setSampleLocation(SampleLocationWidget sampleLocation);
+    void setSampleLocation(SampleLocation sampleLocation);
 }

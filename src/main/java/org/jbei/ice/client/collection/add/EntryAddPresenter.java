@@ -9,7 +9,7 @@ import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.add.form.EntryCreateWidget;
 import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
-import org.jbei.ice.client.collection.add.form.SampleLocationWidget;
+import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -28,6 +28,7 @@ public class EntryAddPresenter {
     private final HandlerManager eventBus;
     private final EntryAddView display;
     private final HashMap<EntryAddType, EntryCreateWidget> formsCache;
+    private final HashMap<EntryType, SampleLocation> locationCache;
 
     public EntryAddPresenter(RegistryServiceAsync service, HandlerManager eventBus) {
         this.service = service;
@@ -35,6 +36,7 @@ public class EntryAddPresenter {
         this.display = new EntryAddView();
 
         formsCache = new HashMap<EntryAddType, EntryCreateWidget>();
+        locationCache = new HashMap<EntryType, SampleLocation>();
     }
 
     public EntryAddView getView() {
@@ -54,7 +56,7 @@ public class EntryAddPresenter {
     }
 
     private void getSampleLocation(EntryAddType selected) {
-        EntryType type = null;
+        final EntryType type;
 
         switch (selected) {
 
@@ -78,7 +80,12 @@ public class EntryAddPresenter {
             return;
         }
 
-        // TODO : check cache 
+        SampleLocation cacheLocation = locationCache.get(type);
+        if (cacheLocation != null) {
+            display.getCurrentForm().getEntrySubmitForm().setSampleLocation(cacheLocation);
+            return;
+        }
+
         service.retrieveStorageSchemes(AppController.sessionId, type,
             new AsyncCallback<HashMap<String, ArrayList<String>>>() {
 
@@ -90,8 +97,12 @@ public class EntryAddPresenter {
 
                 @Override
                 public void onSuccess(HashMap<String, ArrayList<String>> result) {
-                    SampleLocationWidget sampleLocation = new SampleLocationWidget(result);
-                    // TODO : cache.
+                    if (result == null)
+                        return;
+
+                    SampleLocation sampleLocation = new SampleLocation(result);
+                    locationCache.put(type, sampleLocation);
+
                     display.getCurrentForm().getEntrySubmitForm().setSampleLocation(sampleLocation);
                 }
             });

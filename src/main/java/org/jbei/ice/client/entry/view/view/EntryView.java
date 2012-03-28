@@ -85,10 +85,10 @@ public class EntryView extends Composite implements IEntryView {
         goBack.setTitle("Back");
         goBack.setStyleName("cursor_pointer");
 
-        leftBtn = new Button("Prev");
+        leftBtn = new Button("&lt;");
         leftBtn.setStyleName("nav");
         leftBtn.addStyleName("nav-left");
-        rightBtn = new Button("Next");
+        rightBtn = new Button("&gt;");
         rightBtn.setStyleName("nav");
         rightBtn.addStyleName("nav-right");
         navText = new Label();

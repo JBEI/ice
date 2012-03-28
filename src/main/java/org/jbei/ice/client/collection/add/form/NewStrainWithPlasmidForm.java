@@ -569,7 +569,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
     }
 
     @Override
-    public void setSampleLocation(SampleLocationWidget sampleLocation) {
+    public void setSampleLocation(SampleLocation sampleLocation) {
         // no samples for strain with one plasmid
     }
 

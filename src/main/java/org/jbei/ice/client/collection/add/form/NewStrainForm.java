@@ -61,6 +61,7 @@ public class NewStrainForm extends NewSingleEntryForm<StrainInfo> {
     protected Widget createGeneralWidget() {
         int row = 0;
         FlexTable general = new FlexTable();
+        general.setStyleName("no_wrap");
         general.setWidth("100%");
         general.setCellPadding(3);
         general.setCellSpacing(0);
@@ -69,6 +70,7 @@ public class NewStrainForm extends NewSingleEntryForm<StrainInfo> {
         general.setWidget(row, 0, new HTML(
                 "<span class=\"font-80em\">Name</span> <span class=\"required\">*</span>"));
         Widget widget = createTextBoxWithHelp(name, "e.g. JBEI-0001");
+        general.getFlexCellFormatter().setWidth(row, 0, "170px");
         general.setWidget(row, 1, widget);
 
         // alias
