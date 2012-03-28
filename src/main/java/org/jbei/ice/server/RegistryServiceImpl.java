@@ -21,10 +21,12 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.jbei.ice.client.RegistryService;
+import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SampleController;
 import org.jbei.ice.controllers.SearchController;
+import org.jbei.ice.controllers.StorageController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.logging.Logger;
@@ -78,6 +80,7 @@ import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
+import org.jbei.ice.web.common.ViewException;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -1266,35 +1269,101 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public ArrayList<Long> createEntry(String sid, HashSet<EntryInfo> infoSet) {
+
+        Logger.info("Creating \"" + infoSet.size() + "\" entries");
         ArrayList<Long> result = new ArrayList<Long>();
+        Account account = null;
 
         try {
-            Account account = retrieveAccountForSid(sid);
+            account = retrieveAccountForSid(sid);
             if (account == null)
                 return result;
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+            return result;
+        }
 
-            EntryController controller = new EntryController(account);
+        EntryController controller = new EntryController(account);
+        SampleController sampleController = new SampleController(account);
+        StorageController storageController = new StorageController(account);
 
-            for (EntryInfo info : infoSet) {
-                Entry entry = InfoToModelFactory.infoToEntry(info, null);
+        for (EntryInfo info : infoSet) {
+            Entry entry = InfoToModelFactory.infoToEntry(info, null);
+            try {
                 entry = controller.createEntry(entry);
-
-                // TODO : save sample (if any)
-                /* 
-                 * if (sample != null) {
-                sample.setEntry(newEntry);
-                if (sample.getStorage() != null) {
-                    Storage storage = StorageManager.update(sample.getStorage());
-                    sample.setStorage(storage);
-                }
-                sampleController.saveSample(sample);
-                }
-
-                 */
-                result.add(entry.getId());
+            } catch (ControllerException ce) {
+                Logger.error(ce);
+                continue;
             }
-        } catch (ControllerException e) {
-            Logger.error(e);
+
+            ArrayList<SampleStorage> sampleMap = info.getSampleStorage();
+
+            if (sampleMap != null) {
+                for (SampleStorage sampleStorage : sampleMap) {
+                    SampleInfo sampleInfo = sampleStorage.getSample();
+                    LinkedList<StorageInfo> locations = sampleStorage.getStorageList();
+
+                    Sample sample = sampleController.createSample(sampleInfo.getLabel(),
+                        account.getEmail(), sampleInfo.getNotes());
+                    sample.setEntry(entry);
+
+                    if (locations == null || locations.isEmpty()) {
+
+                        // create sample, but not location
+                        try {
+                            Logger.info("Creating sample without location");
+                            sampleController.saveSample(sample);
+                        } catch (PermissionException e) {
+                            Logger.error(e);
+                            sample = null;
+                        } catch (ControllerException e) {
+                            Logger.error(e);
+                            sample = null;
+                        }
+                    } else {
+                        // create sample and location
+                        String[] labels = new String[locations.size()];
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < labels.length; i++) {
+                            labels[i] = locations.get(i).getDisplay();
+                            sb.append(labels[i]);
+                            if (i - 1 < labels.length)
+                                sb.append("/");
+                        }
+
+                        Logger.info("Creating sample with locations " + sb.toString());
+                        Storage storage = null;
+                        try {
+                            Storage scheme = StorageManager.get(
+                                Long.parseLong(sampleInfo.getLocationId()), false);
+                            storage = StorageManager.getLocation(scheme, labels);
+                        } catch (NumberFormatException e) {
+                            throw new ViewException(e);
+                        } catch (ManagerException e) {
+                            throw new ViewException(e);
+                        }
+
+                        try {
+                            storage = storageController.update(storage);
+                            sample.setStorage(storage);
+                        } catch (ControllerException e) {
+                            Logger.error(e);
+                        }
+                    }
+
+                    if (sample != null) {
+                        try {
+                            sampleController.saveSample(sample);
+                        } catch (ControllerException e) {
+                            Logger.error(e);
+                        } catch (PermissionException e) { // having to deal with permission exceptions do not make sense in this context since entry was created by user
+                            Logger.error(e);
+                        }
+                    }
+                }
+            }
+
+            result.add(entry.getId());
         }
 
         return result;
@@ -1327,18 +1396,21 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public HashMap<String, ArrayList<String>> retrieveStorageSchemes(String sessionId,
+    public HashMap<SampleInfo, ArrayList<String>> retrieveStorageSchemes(String sessionId,
             EntryType type) {
 
-        HashMap<String, ArrayList<String>> schemeMap = new HashMap<String, ArrayList<String>>();
+        HashMap<SampleInfo, ArrayList<String>> schemeMap = new HashMap<SampleInfo, ArrayList<String>>();
 
         List<Storage> schemes = StorageManager.getStorageSchemesForEntryType(type.getName());
         for (Storage scheme : schemes) {
 
-            String schemeName = scheme.getName();
-            ArrayList<String> schemeOptions = new ArrayList<String>();
+            SampleInfo sampleInfo = new SampleInfo();
+            sampleInfo.setLocation(scheme.getName());
+            sampleInfo.setLocationId(String.valueOf(scheme.getId()));
 
+            ArrayList<String> schemeOptions = new ArrayList<String>();
             Storage storage;
+
             try {
                 storage = StorageManager.get(scheme.getId(), false);
 
@@ -1352,7 +1424,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 continue;
             }
 
-            schemeMap.put(schemeName, schemeOptions);
+            schemeMap.put(sampleInfo, schemeOptions);
 
             // TODO : this is the default
             //            if (PopulateInitialDatabase.DEFAULT_PLASMID_STORAGE_SCHEME_NAME.equals(schemeName))

@@ -2,8 +2,8 @@ package org.jbei.ice.shared.dto;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
+
+import org.jbei.ice.client.entry.view.model.SampleStorage;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -73,13 +73,14 @@ public class EntryInfo implements IsSerializable {
     private boolean hasSample;
     private boolean hasSequence;
     private ArrayList<AttachmentInfo> attachments; // TODO : create another object that HAS A EntryInfo and contains these as well
-    private HashMap<SampleInfo, LinkedList<StorageInfo>> sampleMap; // TODO : see SampleStorage
+    private ArrayList<SampleStorage> sampleStorage;
     private ArrayList<SequenceAnalysisInfo> sequenceAnalysis;
     private ArrayList<ParameterInfo> parameters;
     private boolean canEdit; // whether current user that requested this entry info has write privs
 
     public EntryInfo(EntryType type) {
         this.type = type;
+        sampleStorage = new ArrayList<SampleStorage>();
     }
 
     public String getRecordId() {
@@ -294,12 +295,13 @@ public class EntryInfo implements IsSerializable {
         this.links = links;
     }
 
-    public HashMap<SampleInfo, LinkedList<StorageInfo>> getSampleMap() {
-        return sampleMap;
+    public ArrayList<SampleStorage> getSampleStorage() {
+        return sampleStorage;
     }
 
-    public void setSampleMap(HashMap<SampleInfo, LinkedList<StorageInfo>> sampleMap) {
-        this.sampleMap = sampleMap;
+    public void setSampleMap(ArrayList<SampleStorage> sampleStorage) {
+        this.sampleStorage.clear();
+        this.sampleStorage.addAll(sampleStorage);
     }
 
     public boolean isHasAttachment() {

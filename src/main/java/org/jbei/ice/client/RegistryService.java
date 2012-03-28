@@ -102,7 +102,7 @@ public interface RegistryService extends RemoteService {
     ArrayList<FolderDetails> addEntriesToCollection(String sid, ArrayList<Long> destination,
             ArrayList<Long> entryIds);
 
-    HashMap<String, ArrayList<String>> retrieveStorageSchemes(String sessionId, EntryType type);
+    HashMap<SampleInfo, ArrayList<String>> retrieveStorageSchemes(String sessionId, EntryType type);
 
     ArrayList<PermissionInfo> retrievePermissionData(String sessionId, Long entryId);
 

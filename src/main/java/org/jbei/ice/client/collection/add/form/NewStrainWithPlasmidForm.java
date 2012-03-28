@@ -586,16 +586,6 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         plasmid.setOwner(AppController.accountInfo.getFullName());
         plasmid.setOwnerEmail(AppController.accountInfo.getEmail());
 
-        //  notes
-        plasmid.setLongDescription(this.plasmidNotesArea.getText());
-        String longDescType = plasmidNotesMarkupOptions.getItemText(plasmidNotesMarkupOptions
-                .getSelectedIndex());
-        plasmid.setLongDescriptionType(longDescType);
-        strain.setLongDescription(this.strainNotesArea.getText());
-        longDescType = strainNotesMarkupOptions.getItemText(strainNotesMarkupOptions
-                .getSelectedIndex());
-        strain.setLongDescriptionType(longDescType);
-
         strain.setCreator(creator.getText());
         plasmid.setCreator(creator.getText());
 
@@ -633,6 +623,10 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         strain.setShortDescription(strainSummary.getText());
         strain.setReferences(strainReferences.getText());
         strain.setIntellectualProperty(strainIp.getText());
+        strain.setLongDescription(this.strainNotesArea.getText());
+        String longDescType = strainNotesMarkupOptions.getItemText(strainNotesMarkupOptions
+                .getSelectedIndex());
+        strain.setLongDescriptionType(longDescType);
 
         // plasmid fields
         plasmid.setName(plasmidName.getText());
@@ -647,5 +641,9 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         plasmid.setShortDescription(plasmidSummary.getText());
         plasmid.setReferences(plasmidReferences.getText());
         plasmid.setIntellectualProperty(plasmidIp.getText());
+        plasmid.setLongDescription(this.plasmidNotesArea.getText());
+        longDescType = plasmidNotesMarkupOptions.getItemText(plasmidNotesMarkupOptions
+                .getSelectedIndex());
+        plasmid.setLongDescriptionType(longDescType);
     }
 }

@@ -6,6 +6,8 @@ import java.util.List;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
 /**
  * A wrapper for sample info with a bunch of storage data
  * 
@@ -13,9 +15,13 @@ import org.jbei.ice.shared.dto.StorageInfo;
  * 
  * @author Hector Plahar
  */
-public class SampleStorage {
+public class SampleStorage implements IsSerializable {
+
     private SampleInfo sample;
     private LinkedList<StorageInfo> storageList;
+
+    public SampleStorage() {
+    }
 
     public SampleStorage(SampleInfo sample, List<StorageInfo> storage) {
         this.sample = sample;
@@ -28,7 +34,15 @@ public class SampleStorage {
         return sample;
     }
 
+    public void setSample(SampleInfo info) {
+        this.sample = info;
+    }
+
     public LinkedList<StorageInfo> getStorageList() {
         return storageList;
+    }
+
+    public void setStorageList(LinkedList<StorageInfo> list) {
+        this.storageList = list;
     }
 }

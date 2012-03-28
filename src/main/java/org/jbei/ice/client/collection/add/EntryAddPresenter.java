@@ -14,6 +14,7 @@ import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryInfo.EntryType;
+import org.jbei.ice.shared.dto.SampleInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -87,7 +88,7 @@ public class EntryAddPresenter {
         }
 
         service.retrieveStorageSchemes(AppController.sessionId, type,
-            new AsyncCallback<HashMap<String, ArrayList<String>>>() {
+            new AsyncCallback<HashMap<SampleInfo, ArrayList<String>>>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
@@ -96,7 +97,7 @@ public class EntryAddPresenter {
                 }
 
                 @Override
-                public void onSuccess(HashMap<String, ArrayList<String>> result) {
+                public void onSuccess(HashMap<SampleInfo, ArrayList<String>> result) {
                     if (result == null)
                         return;
 

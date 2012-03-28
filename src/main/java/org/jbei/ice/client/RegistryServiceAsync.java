@@ -120,7 +120,7 @@ public interface RegistryServiceAsync {
     void updateEntry(String sid, EntryInfo info, AsyncCallback<Boolean> callback);
 
     void retrieveStorageSchemes(String sessionId, EntryType type,
-            AsyncCallback<HashMap<String, ArrayList<String>>> callback);
+            AsyncCallback<HashMap<SampleInfo, ArrayList<String>>> callback);
 
     void retrievePermissionData(String sessionId, Long entryId,
             AsyncCallback<ArrayList<PermissionInfo>> callback);

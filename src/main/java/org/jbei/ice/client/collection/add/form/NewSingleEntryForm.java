@@ -10,6 +10,7 @@ import java.util.TreeSet;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.collection.add.form.ParametersPanel.Parameter;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
+import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.ParameterInfo;
@@ -67,6 +68,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
     private TextArea sampleNotes;
     private ListBox sampleLocation;
     private ArrayList<TextBox> sampleLocationScheme;
+    private SampleLocation passedLocation;
 
     public NewSingleEntryForm(HashMap<AutoCompleteField, ArrayList<String>> data,
             String creatorName, String creatorEmail, T entryInfo) {
@@ -163,6 +165,8 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
     @Override
     public void setSampleLocation(final SampleLocation widget) {
 
+        passedLocation = widget;
+
         // location
         sample.setWidget(4, 0, new HTML("<span class=\"font-80em\">Location</span>"));
         sample.getFlexCellFormatter().setStyleName(4, 0, "entry_add_sub_label");
@@ -171,8 +175,8 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         sampleLocation.setStyleName("input_box");
         sampleLocation.setVisibleItemCount(1);
 
-        for (String location : widget.getLocations()) {
-            sampleLocation.addItem(location, location);
+        for (SampleInfo location : widget.getLocations()) {
+            sampleLocation.addItem(location.getLocation(), location.getLocationId());
         }
 
         sample.setWidget(4, 1, sampleLocation);
@@ -420,7 +424,6 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         }
 
         // parameters
-
         LinkedHashMap<Integer, Parameter> map = parametersPanel.getParameterMap();
 
         for (Integer key : map.keySet()) {
@@ -499,14 +502,21 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         info.setLocation(location);
 
         LinkedList<StorageInfo> storageInfos = new LinkedList<StorageInfo>();
+        ArrayList<String> passedLocationList = passedLocation.getListForLocation(location);
 
         for (TextBox scheme : sampleLocationScheme) {
             StorageInfo storageInfo = new StorageInfo();
-            storageInfo.setDisplay(scheme.getText());
+            String schemeText = scheme.getText();
+
+            if (passedLocationList != null && passedLocationList.contains(schemeText.trim()))
+                continue;
+
+            storageInfo.setDisplay(schemeText);
             storageInfos.add(storageInfo);
         }
 
-        this.entryInfo.getSampleMap().put(info, storageInfos);
+        SampleStorage storage = new SampleStorage(info, storageInfos);
+        this.entryInfo.getSampleStorage().add(storage);
     }
 
     @Override

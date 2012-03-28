@@ -1,11 +1,11 @@
 package org.jbei.ice.server;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.ManagerException;
@@ -55,7 +55,8 @@ public class EntryViewFactory {
             view.setHasAttachment(hasAttachment);
 
             ArrayList<Sample> samples = SampleManager.getSamplesByEntry(entry);
-            HashMap<SampleInfo, LinkedList<StorageInfo>> sampleMap = new HashMap<SampleInfo, LinkedList<StorageInfo>>();
+            ArrayList<SampleStorage> sampleMap = new ArrayList<SampleStorage>();
+
             if (samples != null) {
                 for (Sample sample : samples) {
                     Storage storage = sample.getStorage();
@@ -70,7 +71,9 @@ public class EntryViewFactory {
                         storageList.add(scheme);
 
                     SampleInfo sampleInfo = getSampleInfo(sample);
-                    sampleMap.put(sampleInfo, getStorageListInfo(storageList));
+                    SampleStorage sampleStorage = new SampleStorage(sampleInfo,
+                            getStorageListInfo(storageList));
+                    sampleMap.add(sampleStorage);
                 }
             }
 

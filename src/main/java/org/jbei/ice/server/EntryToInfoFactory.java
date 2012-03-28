@@ -1,12 +1,12 @@
 package org.jbei.ice.server;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.UtilsManager;
@@ -73,16 +73,17 @@ public class EntryToInfoFactory {
         info.setHasAttachment(!attachmentInfos.isEmpty());
 
         // get samples
-        HashMap<SampleInfo, LinkedList<StorageInfo>> sampleMap = new HashMap<SampleInfo, LinkedList<StorageInfo>>();
+        ArrayList<SampleStorage> samplesList = new ArrayList<SampleStorage>();
         if (samples != null) {
             for (Sample sample : samples.keySet()) {
                 SampleInfo key = getSampleInfo(sample);
                 LinkedList<Storage> storage = samples.get(sample);
-                sampleMap.put(key, getStorageListInfo(storage));
+                SampleStorage sampleStorage = new SampleStorage(key, getStorageListInfo(storage));
+                samplesList.add(sampleStorage);
             }
         }
-        info.setSampleMap(sampleMap);
-        info.setHasSample(!sampleMap.keySet().isEmpty());
+        info.setSampleMap(samplesList);
+        info.setHasSample(!samplesList.isEmpty());
 
         // get trace sequences 
         ArrayList<SequenceAnalysisInfo> analysisInfo = getSequenceAnaylsis(sequences);

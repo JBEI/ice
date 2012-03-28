@@ -8,7 +8,6 @@ import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.IHasNavigableData;
-import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.update.IEntryFormUpdateSubmit;
 import org.jbei.ice.client.entry.view.view.AttachmentItem;
 import org.jbei.ice.client.entry.view.view.EntryDetailViewMenu;
@@ -23,7 +22,6 @@ import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.event.ShowEntryListEvent;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.core.client.GWT;
@@ -351,14 +349,7 @@ public class EntryPresenter extends AbstractPresenter {
 
                     display.setAttachments(items, entryId);
                     // menu views
-                    ArrayList<SampleStorage> data = new ArrayList<SampleStorage>();
-                    for (SampleInfo sampleInfo : result.getSampleMap().keySet()) {
-                        SampleStorage datum = new SampleStorage(sampleInfo, result.getSampleMap()
-                                .get(sampleInfo));
-                        data.add(datum);
-                    }
-
-                    display.setSampleData(data);
+                    display.setSampleData(result.getSampleStorage());
                     display.setSequenceData(result.getSequenceAnalysis(), entryId);
 
                     // menu 
@@ -366,7 +357,7 @@ public class EntryPresenter extends AbstractPresenter {
                     menuItems.add(new MenuItem(Menu.GENERAL, -1));
                     menuItems.add(new MenuItem(Menu.SEQ_ANALYSIS, result.getSequenceAnalysis()
                             .size()));
-                    menuItems.add(new MenuItem(Menu.SAMPLES, result.getSampleMap().size()));
+                    menuItems.add(new MenuItem(Menu.SAMPLES, result.getSampleStorage().size()));
                     display.setMenuItems(menuItems); // TODO : set menu loading indicator?
                     display.showEntryDetailView(currentInfo, canEdit);
                 }

@@ -2,9 +2,6 @@ package org.jbei.ice.client.common;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map.Entry;
 
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
@@ -13,8 +10,6 @@ import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.PartInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
-import org.jbei.ice.shared.dto.SampleInfo;
-import org.jbei.ice.shared.dto.StorageInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -195,20 +190,15 @@ public class TipViewContentFactory {
         table.setHTML(12, 0, "<b class=\"entry_tooltip_sub_header\">Samples</b>");
         table.getFlexCellFormatter().setColSpan(12, 0, 4);
 
-        Widget samplesWidget = createSamplesWidget(entry.getSampleMap());
+        Widget samplesWidget = createSamplesWidget(entry.getSampleStorage());
         table.setWidget(13, 0, samplesWidget);
         table.getFlexCellFormatter().setColSpan(13, 0, 4);
     }
 
-    private static Widget createSamplesWidget(HashMap<SampleInfo, LinkedList<StorageInfo>> samples) {
-        if (samples == null || samples.isEmpty())
+    private static Widget createSamplesWidget(ArrayList<SampleStorage> data) {
+        if (data == null || data.isEmpty())
             return new HTML("<span class=\"font-75em\">No samples</span>");
 
-        // TODO : use SampleStorage to set the sample map in the call to the remote procedure
-        ArrayList<SampleStorage> data = new ArrayList<SampleStorage>();
-        for (Entry<SampleInfo, LinkedList<StorageInfo>> set : samples.entrySet()) {
-            data.add(new SampleStorage(set.getKey(), set.getValue()));
-        }
         EntrySampleTable sampleTable = new EntrySampleTable();
         sampleTable.setData(data);
 
