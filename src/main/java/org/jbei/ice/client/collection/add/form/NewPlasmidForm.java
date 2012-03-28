@@ -86,6 +86,7 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
         FlexTable general = new FlexTable();
         general.setWidth("100%");
         general.setCellPadding(2);
+        general.setStyleName("no_wrap");
         general.setCellSpacing(0);
 
         // name

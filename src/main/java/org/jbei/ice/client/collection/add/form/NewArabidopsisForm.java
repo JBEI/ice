@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
@@ -73,7 +72,7 @@ public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> 
             labelWidget = new HTML("<span class=\"font-80em\">" + label
                     + "</span> <span class=\"required\">*</span>");
         else
-            labelWidget = new Label(label);
+            labelWidget = new HTML("<span class=\"font-80em\">" + label + "</span>");
 
         layout.setWidget(row, col, labelWidget);
         layout.getFlexCellFormatter().setWidth(row, col, "170px");
@@ -83,6 +82,7 @@ public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> 
         int row = 0;
         FlexTable general = new FlexTable();
         general.setWidth("100%");
+        general.setStyleName("no_wrap");
         general.setCellPadding(3);
         general.setCellSpacing(0);
 

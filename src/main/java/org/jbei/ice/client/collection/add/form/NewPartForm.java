@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
@@ -54,27 +53,19 @@ public class NewPartForm extends NewSingleEntryForm<PartInfo> {
         return panel;
     }
 
-    private void setLabel(boolean required, String label, FlexTable layout, int row, int col) {
-        Widget labelWidget;
-        if (required)
-            labelWidget = new HTML(label + " <span class=\"required\">*</span>");
-        else
-            labelWidget = new Label(label);
-
-        layout.setWidget(row, col, labelWidget);
-        layout.getFlexCellFormatter().setWidth(row, col, "170px");
-    }
-
     private Widget createGeneralWidget() {
         int row = 0;
         FlexTable general = new FlexTable();
         general.setWidth("100%");
+        general.setStyleName("no_wrap");
         general.setCellPadding(3);
         general.setCellSpacing(0);
 
         // name
-        setLabel(true, "Name", general, row, 0);
+        general.setWidget(row, 0, new HTML(
+                "<span class=\"font-80em\">Name</span> <span class=\"required\">*</span>"));
         Widget widget = createTextBoxWithHelp(name, "e.g. JBEI-0001");
+        general.getFlexCellFormatter().setWidth(row, 0, "170px");
         general.setWidget(row, 1, widget);
 
         // alias

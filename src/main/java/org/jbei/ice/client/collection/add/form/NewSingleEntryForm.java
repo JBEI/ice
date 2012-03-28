@@ -130,7 +130,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         markupOptions.addItem("Text");
         markupOptions.addItem("Wiki");
         markupOptions.addItem("Confluence");
-        markupOptions.setStyleName("entry_add_standard_input_box");
+        markupOptions.setStyleName("input_box");
         notes.setWidget(2, 1, markupOptions);
 
         // input
