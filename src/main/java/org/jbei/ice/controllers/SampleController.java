@@ -11,6 +11,7 @@ import org.jbei.ice.controllers.permissionVerifiers.SamplePermissionVerifier;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
+import org.jbei.ice.lib.managers.StorageManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sample;
@@ -143,7 +144,8 @@ public class SampleController extends Controller {
     }
 
     /**
-     * Delete the {@link Sample} in the database, then rebuild the search index.
+     * Delete the {@link Sample} in the database, then rebuild the search index. Also deletes the
+     * associated {@link Storage}, if it is a tube.
      * 
      * @param sample
      * @throws ControllerException
@@ -154,7 +156,8 @@ public class SampleController extends Controller {
     }
 
     /**
-     * Delete the {@link Sample} in the database, with the option to rebuild the search index.
+     * Delete the {@link Sample} in the database, with the option to rebuild the search index. Also
+     * deletes the associated {@link Storage}, if it is a tube.
      * 
      * @param sample
      * @param scheduleIndexRebuild
@@ -168,7 +171,13 @@ public class SampleController extends Controller {
         }
 
         try {
+            Storage storage = sample.getStorage();
+
             SampleManager.deleteSample(sample);
+
+            if (storage.getStorageType() == Storage.StorageType.TUBE) {
+                StorageManager.delete(storage);
+            }
 
             if (scheduleIndexRebuild) {
                 ApplicationContoller.scheduleSearchIndexRebuildJob();
