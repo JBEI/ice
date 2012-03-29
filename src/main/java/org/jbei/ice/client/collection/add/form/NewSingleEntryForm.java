@@ -132,7 +132,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         markupOptions.addItem("Text");
         markupOptions.addItem("Wiki");
         markupOptions.addItem("Confluence");
-        markupOptions.setStyleName("input_box");
+        markupOptions.setStyleName("pull_down");
         notes.setWidget(2, 1, markupOptions);
 
         // input
@@ -172,7 +172,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         sample.getFlexCellFormatter().setStyleName(4, 0, "entry_add_sub_label");
 
         sampleLocation = new ListBox();
-        sampleLocation.setStyleName("input_box");
+        sampleLocation.setStyleName("pull_down");
         sampleLocation.setVisibleItemCount(1);
 
         for (SampleInfo location : widget.getLocations()) {
@@ -185,8 +185,10 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
 
         String value = sampleLocation.getValue(0);
         ArrayList<String> list = widget.getListForLocation(value);
-        if (list == null)
+        if (list == null) {
+            sampleLocationScheme.clear();
             return;
+        }
 
         int row = 4;
 
@@ -215,6 +217,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
                 }
             });
             sample.setWidget(row, 1, shelf);
+            sampleLocationScheme.add(shelf);
         }
 
         sampleLocation.addChangeHandler(new ChangeHandler() {
@@ -225,12 +228,15 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
                 int index = sampleLocation.getSelectedIndex();
                 String value = sampleLocation.getValue(index);
                 ArrayList<String> list = widget.getListForLocation(value);
-                if (list == null)
+                if (list == null) {
+                    sampleLocationScheme.clear();
                     return;
+                }
 
                 int row = 4;
 
                 // clear any remaining left over rows
+                sampleLocationScheme.clear();
                 int rowCount = sample.getRowCount() - 1;
                 while (rowCount > row) {
                     sample.removeRow(rowCount);
@@ -264,7 +270,6 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
                     sample.setWidget(row, 1, shelf);
                     sampleLocationScheme.add(shelf);
                 }
-
             }
         });
     }
@@ -467,7 +472,8 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         }
 
         if (hasValidScheme && sampleName.getText().trim().isEmpty())
-            invalid = sampleName;
+            if (invalid == null)
+                invalid = sampleName;
 
         return invalid;
     }
@@ -519,7 +525,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         info.setNotes(sampleNotes.getText());
 
         String location = sampleLocation.getValue(sampleLocation.getSelectedIndex());
-        info.setLocation(location);
+        info.setLocationId(location);
 
         LinkedList<StorageInfo> storageInfos = new LinkedList<StorageInfo>();
         ArrayList<String> passedLocationList = passedLocation.getListForLocation(location);

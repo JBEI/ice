@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.entry.view.ViewFactory;
@@ -53,7 +54,7 @@ public class EntryView extends Composite implements IEntryView {
     // samples
     private HTMLPanel samplesPanel;
     private Button addSampleButton;
-    private final CreateSampleForm sampleForm;
+    private CreateSampleForm sampleForm;
 
     // permissions
     private final PermissionsWidget permissions;
@@ -95,9 +96,6 @@ public class EntryView extends Composite implements IEntryView {
         navText.setStyleName("display-inline");
         navText.addStyleName("font-80em");
         navText.addStyleName("pad-6");
-
-        sampleForm = new CreateSampleForm();
-        sampleForm.setVisible(false);
 
         uploadPanel = createSequenceUploadPanel();
         uploadPanel.setVisible(false);
@@ -369,17 +367,8 @@ public class EntryView extends Composite implements IEntryView {
 
     @Override
     public void showSampleView() {
-        VerticalPanel panel = new VerticalPanel();
-        panel.setWidth("100%");
-
-        // add new sample 
-        panel.add(sampleForm);
-
-        // end add new sample
-        panel.add(sampleTable);
-
         mainContent.setWidget(0, 0, samplesPanel);
-        mainContent.setWidget(1, 0, panel);
+        mainContent.setWidget(1, 0, sampleTable);
     }
 
     @Override
@@ -428,6 +417,33 @@ public class EntryView extends Composite implements IEntryView {
     @Override
     public void setSampleData(ArrayList<SampleStorage> data) {
         sampleTable.setData(data);
+    }
+
+    @Override
+    public void setSampleOptions(SampleLocation options) {
+        sampleForm = new CreateSampleForm(options);
+        sampleForm.setVisible(false);
+        mainContent.setWidget(0, 0, samplesPanel);
+        HTMLPanel panel = new HTMLPanel(
+                "<div id=\"create_sample_form\"></div><div id=\"sample_table\"></div>");
+        panel.add(sampleForm, "create_sample_form");
+        panel.add(sampleTable, "sample_table");
+
+        mainContent.setWidget(1, 0, panel);
+    }
+
+    @Override
+    public void addSampleSaveHandler(ClickHandler handler) {
+        if (sampleForm == null)
+            return;
+        sampleForm.addSaveHandler(handler);
+    }
+
+    @Override
+    public SampleStorage getSampleAddFormValues() {
+        if (sampleForm == null)
+            return null;
+        return sampleForm.populateSample();
     }
 
     @Override

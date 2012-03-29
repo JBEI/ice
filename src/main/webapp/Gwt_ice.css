@@ -30,6 +30,7 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 .cursor_pointer:hover { cursor: pointer }
 .float_right{ float: right}
 .no_wrap { white-space: nowrap; }
+.bg_f1 {background-color: #f1f1f1; }
 
 .btn_submit_entry_form {
 	padding: 5px;

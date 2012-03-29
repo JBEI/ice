@@ -77,8 +77,15 @@ public class EntryToInfoFactory {
         if (samples != null) {
             for (Sample sample : samples.keySet()) {
                 SampleInfo key = getSampleInfo(sample);
-                LinkedList<Storage> storage = samples.get(sample);
-                SampleStorage sampleStorage = new SampleStorage(key, getStorageListInfo(storage));
+                Storage storage = sample.getStorage();
+                if (storage != null) {
+                    key.setLocationId(String.valueOf(storage.getId()));
+                    key.setLocation(storage.getIndex());
+                }
+
+                LinkedList<Storage> storageList = samples.get(sample);
+                SampleStorage sampleStorage = new SampleStorage(key,
+                        getStorageListInfo(storageList));
                 samplesList.add(sampleStorage);
             }
         }
@@ -250,6 +257,7 @@ public class EntryToInfoFactory {
 
     private static EntryInfo getCommon(EntryInfo info, Entry entry) {
 
+        info.setId(entry.getId());
         info.setRecordId(entry.getRecordId());
         info.setVersionId(entry.getVersionId());
         info.setName(entry.getNamesAsString());

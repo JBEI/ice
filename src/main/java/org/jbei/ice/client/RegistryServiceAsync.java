@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
+import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.FolderDetails;
@@ -82,6 +83,9 @@ public interface RegistryServiceAsync {
 
     void retrieveImportDraftData(String sid, String email,
             AsyncCallback<ArrayList<BulkImportDraftInfo>> callback);
+
+    void createSample(String sessionId, SampleStorage sampleStorage, long entryId,
+            AsyncCallback<SampleStorage> callback);
 
     /**
      * Profile

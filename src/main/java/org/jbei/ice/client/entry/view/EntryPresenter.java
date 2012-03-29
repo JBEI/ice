@@ -1,13 +1,16 @@
 package org.jbei.ice.client.entry.view;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.IHasNavigableData;
+import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.update.IEntryFormUpdateSubmit;
 import org.jbei.ice.client.entry.view.view.AttachmentItem;
 import org.jbei.ice.client.entry.view.view.EntryDetailViewMenu;
@@ -22,6 +25,8 @@ import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.event.ShowEntryListEvent;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.EntryInfo.EntryType;
+import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.core.client.GWT;
@@ -41,13 +46,15 @@ public class EntryPresenter extends AbstractPresenter {
     private final IEntryView display;
     private EntryInfo currentInfo;
     private EntryContext currentContext;
+    private final HashMap<EntryType, SampleLocation> cache;
 
-    public EntryPresenter(final RegistryServiceAsync service, HandlerManager eventBus,
+    public EntryPresenter(final RegistryServiceAsync service, final HandlerManager eventBus,
             EntryContext context) {
         this.service = service;
         this.eventBus = eventBus;
         this.display = new EntryView();
         this.currentContext = context;
+        this.cache = new HashMap<EntryType, SampleLocation>();
 
         addEntryViewHandler();
         MenuSelectionHandler handler = new MenuSelectionHandler(display.getDetailMenu());
@@ -62,8 +69,37 @@ public class EntryPresenter extends AbstractPresenter {
 
             @Override
             public void onClick(ClickEvent event) {
-                boolean visible = display.getSampleFormVisibility();
-                display.setSampleFormVisibility(!visible);
+                if (currentInfo == null)
+                    return; // TODO : show some error msg or wait till it is not null
+
+                SampleLocation cacheLocation = cache.get(currentInfo.getType());
+                if (cacheLocation != null) {
+                    display.setSampleOptions(cacheLocation);
+                    display.setSampleFormVisibility(!display.getSampleFormVisibility());
+                    return;
+                }
+
+                service.retrieveStorageSchemes(AppController.sessionId, currentInfo.getType(),
+                    new AsyncCallback<HashMap<SampleInfo, ArrayList<String>>>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            eventBus.fireEvent(new FeedbackEvent(true,
+                                    "Failed to retrieve the sample location data."));
+                        }
+
+                        @Override
+                        public void onSuccess(HashMap<SampleInfo, ArrayList<String>> result) {
+                            if (result == null)
+                                return;
+
+                            SampleLocation sampleLocation = new SampleLocation(result);
+                            cache.put(currentInfo.getType(), sampleLocation);
+                            display.setSampleOptions(sampleLocation);
+                            display.setSampleFormVisibility(!display.getSampleFormVisibility());
+                            display.addSampleSaveHandler(new SampleAddHandler());
+                        }
+                    });
             }
         });
 
@@ -113,7 +149,6 @@ public class EntryPresenter extends AbstractPresenter {
                 @Override
                 public void onFailure(Throwable caught) {
                     GWT.log(caught.getMessage());
-                    // TODO Auto-generated method stub
                 }
 
                 @Override
@@ -438,6 +473,41 @@ public class EntryPresenter extends AbstractPresenter {
         public void onClick(ClickEvent event) {
             showCurrentEntryView();
             Window.scrollTo(0, 0);
+        }
+    }
+
+    private class SampleAddHandler implements ClickHandler {
+
+        @Override
+        public void onClick(ClickEvent event) {
+            SampleStorage sample = display.getSampleAddFormValues();
+            if (sample == null)
+                return;
+
+            service.createSample(AppController.sessionId, sample, currentInfo.getId(),
+                new AsyncCallback<SampleStorage>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        FeedbackEvent feedback = new FeedbackEvent(true, "Could not save sample");
+                        eventBus.fireEvent(feedback);
+                    }
+
+                    @Override
+                    public void onSuccess(SampleStorage result) {
+                        if (result == null) {
+                            FeedbackEvent feedback = new FeedbackEvent(true,
+                                    "Could not save sample");
+                            eventBus.fireEvent(feedback);
+                            return;
+                        }
+                        display.setSampleFormVisibility(false);
+                        currentInfo.getSampleStorage().add(result);
+                        display.setSampleData(currentInfo.getSampleStorage());
+                        // TODO : update counts and show the loading indicator when the sample is being created
+                        // TODO : on click.
+                    }
+                });
         }
     }
 

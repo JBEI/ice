@@ -13,7 +13,7 @@ public class SampleLocation {
         this.sampleLocation = sampleLocation;
     }
 
-    public HashMap<SampleInfo, ArrayList<String>> getSampleLocation() {
+    public HashMap<SampleInfo, ArrayList<String>> getSampleMap() {
         return sampleLocation;
     }
 

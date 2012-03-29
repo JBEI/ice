@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
+import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.FolderDetails;
@@ -131,4 +132,6 @@ public interface RegistryService extends RemoteService {
     BulkImportDraftInfo retrieveBulkImport(String sid, long id);
 
     FolderDetails deleteFolder(String sessionId, long folderId);
+
+    SampleStorage createSample(String sessionId, SampleStorage sampleStorage, long entryId);
 }

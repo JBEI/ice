@@ -81,7 +81,6 @@ import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
-import org.jbei.ice.web.common.ViewException;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -1338,17 +1337,17 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                             Storage scheme = StorageManager.get(
                                 Long.parseLong(sampleInfo.getLocationId()), false);
                             storage = StorageManager.getLocation(scheme, labels);
-                        } catch (NumberFormatException e) {
-                            throw new ViewException(e);
-                        } catch (ManagerException e) {
-                            throw new ViewException(e);
-                        }
-
-                        try {
                             storage = storageController.update(storage);
                             sample.setStorage(storage);
+                        } catch (NumberFormatException e) {
+                            Logger.error(e);
+                            continue;
+                        } catch (ManagerException e) {
+                            Logger.error(e);
+                            continue;
                         } catch (ControllerException e) {
                             Logger.error(e);
+                            continue;
                         }
                     }
 
@@ -1368,6 +1367,101 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
 
         return result;
+    }
+
+    @Override
+    public SampleStorage createSample(String sessionId, SampleStorage sampleStorage, long entryId) {
+
+        Logger.info("Creating sample for entry with id " + entryId);
+        Account account = null;
+
+        try {
+            account = retrieveAccountForSid(sessionId);
+            if (account == null)
+                return null;
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+            return null;
+        }
+
+        EntryController controller = new EntryController(account);
+        SampleController sampleController = new SampleController(account);
+        StorageController storageController = new StorageController(account);
+
+        Entry entry = null;
+        try {
+            entry = controller.get(entryId);
+            if (entry == null) {
+                Logger.error("Could not retrieve entry with id " + entryId
+                        + ". Skipping sample creation");
+                return null;
+            }
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return null;
+        } catch (PermissionException e) {
+            Logger.error(e);
+            return null;
+        }
+
+        SampleInfo sampleInfo = sampleStorage.getSample();
+        LinkedList<StorageInfo> locations = sampleStorage.getStorageList();
+
+        Sample sample = sampleController.createSample(sampleInfo.getLabel(), account.getEmail(),
+            sampleInfo.getNotes());
+        sample.setEntry(entry);
+
+        if (locations == null || locations.isEmpty()) {
+            Logger.info("Creating sample without location");
+
+            // create sample, but not location
+            try {
+                sample = sampleController.saveSample(sample);
+                sampleStorage.getSample().setSampleId(sample.getId() + "");
+                sampleStorage.getSample().setDepositor(account.getEmail());
+                return sampleStorage;
+            } catch (PermissionException e) {
+                Logger.error(e);
+                return null;
+            } catch (ControllerException e) {
+                Logger.error(e);
+                return null;
+            }
+        }
+
+        // create sample and location
+        String[] labels = new String[locations.size()];
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < labels.length; i++) {
+            labels[i] = locations.get(i).getDisplay();
+            sb.append(labels[i]);
+            if (i - 1 < labels.length)
+                sb.append("/");
+        }
+
+        Logger.info("Creating sample with locations " + sb.toString());
+
+        Storage storage = null;
+        try {
+            Storage scheme = StorageManager.get(Long.parseLong(sampleInfo.getLocationId()), false);
+            storage = StorageManager.getLocation(scheme, labels);
+            storage = storageController.update(storage);
+            sample.setStorage(storage);
+            sample = sampleController.saveSample(sample);
+            sampleStorage.getSample().setSampleId(sample.getId() + "");
+            sampleStorage.getSample().setDepositor(account.getEmail());
+            return sampleStorage;
+        } catch (NumberFormatException e) {
+            Logger.error(e);
+        } catch (ManagerException e) {
+            Logger.error(e);
+        } catch (ControllerException e) {
+            Logger.error(e);
+        } catch (PermissionException e) {
+            Logger.error(e);
+        }
+
+        return null;
     }
 
     @Override
