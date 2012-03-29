@@ -104,7 +104,8 @@ public class StorageManager {
         }
 
         if (results.size() > 1) {
-            throw new ManagerException("Expecting single result, received " + results.size());
+            throw new ManagerException("Expecting single result, received " + results.size()
+                    + " for " + barcode);
         }
 
         return results.get(0);
