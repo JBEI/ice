@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.bulkimport.events.BulkImportDraftSubmitEvent;
+import org.jbei.ice.client.bulkimport.events.BulkImportDraftSubmitEvent.BulkImportDraftSubmitEventHandler;
 import org.jbei.ice.client.bulkimport.events.BulkImportSubmitEvent;
 import org.jbei.ice.client.bulkimport.events.BulkImportSubmitEventHandler;
 import org.jbei.ice.client.bulkimport.events.SavedDraftsEvent;
@@ -40,6 +42,35 @@ public class BulkImportModel {
                 @Override
                 public void onSuccess(ArrayList<BulkImportDraftInfo> result) {
                     handler.onDataRetrieval(new SavedDraftsEvent(result));
+                }
+            });
+    }
+
+    public void saveDraftData(EntryAddType type, String name, ArrayList<SheetFieldData[]> data,
+            final BulkImportDraftSubmitEventHandler handler) {
+        SheetModel model = ModelFactory.getModelForType(type);
+        if (model == null) {
+            handler.onSubmit(null);
+            return;
+        }
+
+        ArrayList<EntryInfo> primary = new ArrayList<EntryInfo>();
+        ArrayList<EntryInfo> secondary = new ArrayList<EntryInfo>();
+
+        // arrays get filled out here
+        model.createInfo(data, primary, secondary);
+
+        service.saveBulkImportDraft(AppController.sessionId, AppController.accountInfo.getEmail(),
+            name, primary, secondary, new AsyncCallback<BulkImportDraftInfo>() {
+
+                @Override
+                public void onSuccess(BulkImportDraftInfo result) {
+                    handler.onSubmit(new BulkImportDraftSubmitEvent(result));
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    handler.onSubmit(null);
                 }
             });
     }
@@ -88,30 +119,4 @@ public class BulkImportModel {
             });
     }
 
-    /*
-     * service.saveBulkImportDraft(AppController.sessionId,
-                AppController.accountInfo.getEmail(), name, entries,
-                new AsyncCallback<BulkImportDraftInfo>() {
-
-                    @Override
-                    public void onSuccess(BulkImportDraftInfo result) {
-                        if (result == null)
-                            return;
-
-                        view.getDraftMenu().addMenuData(result);
-                        panel.setDraftName(result.getName());
-
-                        // change view draft to read only
-
-                        // highlight just added menu; associate just created one with top menu
-
-                        // 
-                    }
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        feedback.setFailureMessage("Problem saving draft");
-                    }
-                });
-     */
 }

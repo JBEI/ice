@@ -6,6 +6,8 @@ import java.util.Map.Entry;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.bulkimport.events.BulkImportDraftSubmitEvent;
+import org.jbei.ice.client.bulkimport.events.BulkImportDraftSubmitEvent.BulkImportDraftSubmitEventHandler;
 import org.jbei.ice.client.bulkimport.events.BulkImportSubmitEvent;
 import org.jbei.ice.client.bulkimport.events.BulkImportSubmitEventHandler;
 import org.jbei.ice.client.bulkimport.events.SavedDraftsEvent;
@@ -29,7 +31,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 public class BulkImportPresenter extends AbstractPresenter {
 
     private final IBulkImportView view;
-    private HashMap<EntryAddType, NewBulkInput> sheetCache;
+    private final HashMap<EntryAddType, NewBulkInput> sheetCache;
     private final BulkImportModel model;
 
     public BulkImportPresenter(BulkImportModel model, final IBulkImportView display) {
@@ -87,8 +89,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                         input.getSheetHeaderPanel().getReset().addClickHandler(resetHandler);
 
                         // save draft
-                        SheetDraftSaveHandler draftSaveHandler = new SheetDraftSaveHandler(input
-                                .getSheetHeaderPanel());
+                        SheetDraftSaveHandler draftSaveHandler = new SheetDraftSaveHandler(input);
                         input.getSheetHeaderPanel().getDraftSave()
                                 .addClickHandler(draftSaveHandler);
                         view.setSheet(input);
@@ -126,8 +127,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                     input.getSheetHeaderPanel().getReset().addClickHandler(resetHandler);
 
                     // save draft
-                    SheetDraftSaveHandler draftSaveHandler = new SheetDraftSaveHandler(input
-                            .getSheetHeaderPanel());
+                    SheetDraftSaveHandler draftSaveHandler = new SheetDraftSaveHandler(input);
                     input.getSheetHeaderPanel().getDraftSave().addClickHandler(draftSaveHandler);
 
                     // header Panel 
@@ -153,8 +153,9 @@ public class BulkImportPresenter extends AbstractPresenter {
                     data.add(item);
                 }
 
-                if (!data.isEmpty())
-                    view.setSavedDraftsData(data);
+                if (!data.isEmpty()) {
+                    view.setSavedDraftsData(data, null); // tOdO : delete handler
+                }
             }
         });
     }
@@ -195,8 +196,6 @@ public class BulkImportPresenter extends AbstractPresenter {
                 return;
             }
 
-            view.clearFeedback();
-
             model.saveData(input.getImportType(), cellData, new BulkImportSubmitEventHandler() {
 
                 @Override
@@ -229,9 +228,11 @@ public class BulkImportPresenter extends AbstractPresenter {
     private class SheetDraftSaveHandler implements ClickHandler {
 
         private final SheetHeaderPanel panel;
+        private final NewBulkInput input;
 
-        public SheetDraftSaveHandler(SheetHeaderPanel panel) {
-            this.panel = panel;
+        public SheetDraftSaveHandler(NewBulkInput input) {
+            this.panel = input.getSheetHeaderPanel();
+            this.input = input;
         }
 
         @Override
@@ -244,7 +245,31 @@ public class BulkImportPresenter extends AbstractPresenter {
 
             // save draft
             panel.getDraftInput().setStyleName("bulk_import_draft_input");
+            ArrayList<SheetFieldData[]> cellData = input.getSheet().getCellData();
+            if (cellData == null || cellData.isEmpty()) {
+                view.showFeedback("Please enter data into the sheet before saving draft", true);
+                return;
+            }
 
+            model.saveDraftData(input.getImportType(), name, cellData,
+                new BulkImportDraftSubmitEventHandler() {
+
+                    @Override
+                    public void onSubmit(BulkImportDraftSubmitEvent event) {
+                        if (event == null || event.getDraftInfo() == null)
+                            view.showFeedback("Error saving draft", true);
+                        else {
+                            BulkImportDraftInfo info = event.getDraftInfo();
+                            view.showFeedback(
+                                "Draft \"" + info.getName() + "\" with <b>" + info.getCount()
+                                        + "</b> entry/ies successfully saved", false);
+                            MenuItem item = new MenuItem(info.getId(), info.getName(), info
+                                    .getCount(), false);
+                            view.addSavedDraftData(item, null); // TODO : deleteHandler
+                            panel.setDraftName(event.getDraftInfo().getName());
+                        }
+                    }
+                });
         }
     }
 }

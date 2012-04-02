@@ -86,11 +86,11 @@ public class Sheet extends Composite implements SheetPresenter.View {
     private SuggestBox box;
     private String filename;
     private SingleUploader uploader;
-    private HashMap<Integer, String> attachmentRowFileIds;
-    private HashMap<Integer, String> sequenceRowFileIds;
-    private BulkImportDraftInfo info;
+    private final HashMap<Integer, String> attachmentRowFileIds;
+    private final HashMap<Integer, String> sequenceRowFileIds;
+    private final BulkImportDraftInfo info;
 
-    private final static int ROW_COUNT = 100;
+    private final static int ROW_COUNT = 5;
 
     public Sheet(EntryAddType type, BulkImportDraftInfo info) {
 
@@ -222,6 +222,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         presenter.setAutoCompleteData(data);
     }
 
+    @Override
     public void onBrowserEvent(Event event) {
         super.onBrowserEvent(event);
 
@@ -420,6 +421,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         for (int i = 0; i < cellCount; i += 1) {
             HasText widget = (HasText) sheetTable.getWidget(row, i);
+
             if (!widget.getText().isEmpty())
                 return false;
         }
@@ -526,6 +528,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
                 });
 
                 uploader.addOnFinishUploadHandler(new OnFinishUploaderHandler() {
+                    @Override
                     public void onFinish(IUploader uploader) {
                         if (uploader.getStatus() == Status.SUCCESS) {
                             UploadedInfo info = uploader.getServerInfo();
@@ -569,7 +572,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
             return;
 
         // exit for up arrow press in auto complete box
-        Header currentHeader = ImportTypeHeaders.getHeadersForType(this.type)[inputIndex];
+        Header currentHeader = ImportTypeHeaders.getHeadersForType(this.type)[currentIndex];
         FieldType fieldType = currentHeader.geFieldType();
         if (fieldType == FieldType.AUTO_COMPLETE)
             return;
@@ -585,7 +588,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
             return;
 
         // exit for down arrow press in auto complete box
-        Header currentHeader = ImportTypeHeaders.getHeadersForType(this.type)[inputIndex];
+        Header currentHeader = ImportTypeHeaders.getHeadersForType(this.type)[currentIndex];
         FieldType fieldType = currentHeader.geFieldType();
         if (fieldType == FieldType.AUTO_COMPLETE)
             return;
@@ -601,6 +604,19 @@ public class Sheet extends Composite implements SheetPresenter.View {
         if (currentIndex + 1 >= cellCount)
             return;
 
+        // auto scroll wrapper
+        int max = wrapper.getMaximumHorizontalScrollPosition();
+        int width = wrapper.getOffsetWidth();
+        int nextIndex = currentIndex + 1;
+
+        // 130 is the width of the cell
+        if (130 * (nextIndex + 1) > width) {
+            int nextScrollPosition = wrapper.getHorizontalScrollPosition() + 130;
+            if (nextScrollPosition > max)
+                nextScrollPosition = max;
+            wrapper.setHorizontalScrollPosition(nextScrollPosition);
+        }
+
         selectCell(currentRow, currentIndex, currentRow, currentIndex + 1);
     }
 
@@ -609,13 +625,26 @@ public class Sheet extends Composite implements SheetPresenter.View {
         if ((currentRow == -1 && currentIndex == -1))
             return;
 
-        if (currentIndex - 1 < 0)
+        int nextIndex = currentIndex - 1;
+        if (nextIndex < 0)
             return;
 
-        selectCell(currentRow, currentIndex, currentRow, currentIndex - 1);
+        int min = wrapper.getMinimumHorizontalScrollPosition();
+        int current = wrapper.getHorizontalScrollPosition();
+
+        if (130 * (nextIndex - 1) < current) {
+            int nextScrollPosition = wrapper.getHorizontalScrollPosition() - 130;
+            if (nextScrollPosition < min)
+                nextScrollPosition = min;
+            wrapper.setHorizontalScrollPosition(nextScrollPosition);
+        }
+        selectCell(currentRow, currentIndex, currentRow, nextIndex);
     }
 
     private void selectCell(int row, int col, int newRow, int newCol) { // TODO : similar in functionality to cell click
+        //        HTML corner = new HTML(
+        //                "<div style=\"position: relative; width: 5px; height: 5px; background-color: blue; top: 12px; right: -122px; border: 3px solid white\"></div>");
+
         if (lastReplaced != null) {
 
             String inputText = getLastWidgetText();

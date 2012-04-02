@@ -15,6 +15,8 @@ public enum EntryAddType implements IsSerializable {
 
     // TODO : 
     public static EntryAddType stringToType(String str) {
+        if (str == null)
+            return null;
 
         if (str.contains(PLASMID.toString().toLowerCase())
                 && str.contains(STRAIN.toString().toLowerCase()))

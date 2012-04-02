@@ -28,6 +28,13 @@ import org.jbei.ice.shared.dto.StrainInfo;
  */
 public class InfoToModelFactory {
 
+    /**
+     * 
+     * @param info
+     * @param entry
+     *            if null, a new entry is created otherwise entry is used
+     * @return
+     */
     public static Entry infoToEntry(EntryInfo info, Entry entry) {
 
         EntryType type = info.getType();

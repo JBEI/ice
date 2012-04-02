@@ -1026,7 +1026,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (results != null) {
                 for (BulkImport draft : results) {
                     BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
-                    draftInfo.setCount(draft.getPrimaryData().size());
+                    List<BulkImportEntryData> primary = draft.getPrimaryData();
+                    if (primary != null)
+                        draftInfo.setCount(draft.getPrimaryData().size());
+                    else
+                        draftInfo.setCount(-1);
                     draftInfo.setCreated(draft.getCreationTime());
                     draftInfo.setId(draft.getId());
                     draftInfo.setName(draft.getName());
@@ -1115,27 +1119,26 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             account = retrieveAccountForSid(sid);
             if (account == null)
                 return null;
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return null;
-        }
 
-        BulkImport draft = new BulkImport();
+            if (primary.isEmpty())
+                return null;
 
-        try {
-            Account emailAccount = AccountManager.getByEmail(email);
-            draft.setAccount(emailAccount);
+            BulkImport draft = createBulkImport(account, primary, secondary, email);
             draft.setName(name);
-            // TODO : entry infos
-
             BulkImport result = BulkImportManager.createBulkImportRecord(draft);
-            BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
 
+            // result to DTO
+            BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
+            draftInfo.setId(result.getId());
+            draftInfo.setCount(result.getPrimaryData().size());
             draftInfo.setCreated(result.getCreationTime());
             draftInfo.setName(result.getName());
             return draftInfo;
 
         } catch (ManagerException e) {
+            Logger.error(e);
+            return null;
+        } catch (ControllerException e) {
             Logger.error(e);
             return null;
         }
@@ -1153,18 +1156,73 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (primary.isEmpty())
                 return false;
 
-            String tmpDir = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
+            BulkImport bulkImport = createBulkImport(account, primary, secondary, email);
+            BulkImport savedImport = BulkImportManager.createBulkImportRecord(bulkImport);
+            return (savedImport != null);
 
-            // submit bulk import for verification
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+            return false;
+        } catch (ManagerException me) {
+            Logger.error(me);
+            return false;
+        }
+    }
 
-            ArrayList<BulkImportEntryData> primaryDataList = new ArrayList<BulkImportEntryData>(
-                    primary.size());
+    private BulkImport createBulkImport(Account account, ArrayList<EntryInfo> primary,
+            ArrayList<EntryInfo> secondary, String email) throws ManagerException,
+            ControllerException {
 
-            EntryAddType type = null;
-            HashMap<String, File> attachmentFiles = new HashMap<String, File>();
-            HashMap<String, File> sequenceFiles = new HashMap<String, File>();
+        String tmpDir = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
 
-            for (EntryInfo info : primary) {
+        // submit bulk import for verification
+        ArrayList<BulkImportEntryData> primaryDataList = new ArrayList<BulkImportEntryData>(
+                primary.size());
+
+        EntryAddType type = null;
+        HashMap<String, File> attachmentFiles = new HashMap<String, File>();
+        HashMap<String, File> sequenceFiles = new HashMap<String, File>();
+        BulkImport bulkImport = new BulkImport();
+
+        for (EntryInfo info : primary) {
+            BulkImportEntryData data = new BulkImportEntryData();
+
+            Entry entry = InfoToModelFactory.infoToEntry(info, null);
+            entry.setOwnerEmail(account.getEmail());
+            entry.setOwner(account.getFullName());
+            data.setEntry(entry);
+
+            // deal with files
+            if (info.getAttachments() != null && !info.getAttachments().isEmpty()) {
+                // deal with attachment files
+                AttachmentInfo attachmentInfo = info.getAttachments().get(0);
+                File file = new File(tmpDir + File.separator + attachmentInfo.getFileId());
+                if (file.exists())
+                    attachmentFiles.put(attachmentInfo.getFilename(), file);
+            }
+
+            if (info.getSequenceAnalysis() != null && !info.getSequenceAnalysis().isEmpty()) {
+                // deal with sequence files
+                SequenceAnalysisInfo sequenceInfo = info.getSequenceAnalysis().get(0);
+                File file = new File(tmpDir + File.separator + sequenceInfo.getFileId());
+                if (file.exists())
+                    sequenceFiles.put(sequenceInfo.getName(), file);
+            }
+
+            // type 
+            type = EntryAddType.valueOf(info.getType().name());
+            primaryDataList.add(data);
+        }
+
+        // save primary data
+        bulkImport.setPrimaryData(primaryDataList);
+
+        // secondary data
+        ArrayList<BulkImportEntryData> secondaryDataList = new ArrayList<BulkImportEntryData>(
+                secondary.size());
+
+        if (secondary != null && !secondary.isEmpty()) {
+            for (EntryInfo info : secondary) {
                 BulkImportEntryData data = new BulkImportEntryData();
 
                 Entry entry = InfoToModelFactory.infoToEntry(info, null);
@@ -1189,63 +1247,35 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                         sequenceFiles.put(sequenceInfo.getName(), file);
                 }
 
-                // type 
-                type = EntryAddType.valueOf(info.getType().name());
-                primaryDataList.add(data);
+                secondaryDataList.add(data);
             }
-
-            // set primary data and attachments and sequence files if any
-            BulkImport bulkImport = new BulkImport();
-            bulkImport.setPrimaryData(primaryDataList);
-            if (!attachmentFiles.isEmpty()) {
-                try {
-                    byte[] bytes = createZip(attachmentFiles);
-                    bulkImport.setAttachmentFile(ArrayUtils.toObject(bytes));
-                } catch (IOException ioe) {
-                    Logger.error(ioe);
-                }
-            }
-
-            if (!sequenceFiles.isEmpty()) {
-                try {
-                    byte[] bytes = createZip(sequenceFiles);
-                    bulkImport.setSequenceFile(ArrayUtils.toObject(bytes));
-                } catch (IOException ioe) {
-                    Logger.error(ioe);
-                }
-            }
-
-            // TODO : secondary data
-            //            ArrayList<BulkImportEntryData> secondaryDataList = new ArrayList<BulkImportEntryData>(
-            //                    secondary.size());
-            // secondary data
-            //            if (secondaryData != null && !secondaryData.isEmpty()) {
-            //                for (int i = 0; i < secondaryData.size(); i += 1) {
-            //                    aso = (ASObject) secondaryData.get(i);
-            //                    aso.setType("org.jbei.ice.lib.utils.BulkImportEntryData");
-            //                    importData = (BulkImportEntryData) ast.convert(aso, BulkImportEntryData.class);
-            //                    data2.add(importData);
-            //                    Entry entry = importData.getEntry();
-            //                    entry.setOwnerEmail(account.getEmail());
-            //                    entry.setOwner(account.getFullName());
-            //                }
-            //
-            //                bulkImport.setSecondaryData(data2);
-            //                bulkImport.setType("strain w/ plasmid");
-            //            } else {
-            //                bulkImport.setType(type);
-            //            }
-            bulkImport.setType(type.toString());
-            BulkImport savedImport = BulkImportManager.createBulkImportRecord(bulkImport);
-            return (savedImport != null);
-
-        } catch (ControllerException ce) {
-            Logger.error(ce);
-            return false;
-        } catch (ManagerException me) {
-            Logger.error(me);
-            return false;
+            bulkImport.setSecondaryData(secondaryDataList);
         }
+
+        // set primary data and attachments and sequence files if any
+        if (!attachmentFiles.isEmpty()) {
+            try {
+                byte[] bytes = createZip(attachmentFiles);
+                bulkImport.setAttachmentFile(ArrayUtils.toObject(bytes));
+            } catch (IOException ioe) {
+                Logger.error(ioe);
+            }
+        }
+
+        if (!sequenceFiles.isEmpty()) {
+            try {
+                byte[] bytes = createZip(sequenceFiles);
+                bulkImport.setSequenceFile(ArrayUtils.toObject(bytes));
+            } catch (IOException ioe) {
+                Logger.error(ioe);
+            }
+        }
+
+        bulkImport.setType(type.toString());
+        Account emailAccount = AccountManager.getByEmail(email);
+        bulkImport.setAccount(emailAccount);
+        return bulkImport;
+
     }
 
     private static byte[] createZip(HashMap<String, File> files) throws IOException {

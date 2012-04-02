@@ -61,6 +61,9 @@ public class InfoValueExtractorFactory {
             return info.getIntellectualProperty();
 
         case BIOSAFETY:
+            Integer level = info.getBioSafetyLevel();
+            if (level == null)
+                return "";
             return info.getBioSafetyLevel().toString();
 
         case NAME:
