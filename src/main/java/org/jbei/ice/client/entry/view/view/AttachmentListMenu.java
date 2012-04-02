@@ -264,7 +264,8 @@ public class AttachmentListMenu extends Composite {
                 public void onClick(ClickEvent event) {
                     String url = GWT.getHostPageBaseURL() + "download?type=attachment&name="
                             + item.getName() + "&id=" + item.getFileId();
-                    Window.open(url, "Attachment Download", "");
+                    Window.Location.replace(url);
+                    //                    Window.open(url, "_blank", "");
                 }
             };
         }
