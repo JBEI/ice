@@ -71,5 +71,4 @@ public class PermissionsDisplayWidget extends Composite {
         rwTree.getItem(0).setState(true, false);
         readTree.getItem(0).setState(true, false);
     }
-
 }

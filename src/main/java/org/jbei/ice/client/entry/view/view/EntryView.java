@@ -13,6 +13,7 @@ import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.client.common.widget.Flash;
+import org.jbei.ice.client.entry.view.PermissionsPresenter;
 import org.jbei.ice.client.entry.view.ViewFactory;
 import org.jbei.ice.client.entry.view.detail.EntryDetailView;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
@@ -457,8 +458,8 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public PermissionsWidget getPermissionsWidget() {
-        return this.permissions;
+    public PermissionsPresenter getPermissionsWidget() {
+        return this.permissions.getPresenter();
     }
 
     @Override

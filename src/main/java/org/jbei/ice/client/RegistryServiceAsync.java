@@ -153,4 +153,9 @@ public interface RegistryServiceAsync {
     void retrieveBulkImport(String sid, long id, AsyncCallback<BulkImportDraftInfo> callback);
 
     void deleteFolder(String sessionId, long folderId, AsyncCallback<FolderDetails> callback);
+
+    void linkifyText(String value, AsyncCallback<String> callback);
+
+    void updatePermission(String sessionId, long id, ArrayList<PermissionInfo> permissions,
+            AsyncCallback<Boolean> callback);
 }

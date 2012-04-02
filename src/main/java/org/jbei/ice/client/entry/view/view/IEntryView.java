@@ -3,6 +3,7 @@ package org.jbei.ice.client.entry.view.view;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.collection.add.form.SampleLocation;
+import org.jbei.ice.client.entry.view.PermissionsPresenter;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.update.IEntryFormUpdateSubmit;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -25,7 +26,7 @@ public interface IEntryView {
 
     IEntryFormUpdateSubmit showUpdateForm(EntryInfo info);
 
-    PermissionsWidget getPermissionsWidget();
+    PermissionsPresenter getPermissionsWidget();
 
     void addSampleButtonHandler(ClickHandler handler);
 

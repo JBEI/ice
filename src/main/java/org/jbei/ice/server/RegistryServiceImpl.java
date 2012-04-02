@@ -57,6 +57,7 @@ import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionManager;
+import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.BulkImportEntryData;
 import org.jbei.ice.lib.utils.JbeirSettings;
@@ -81,6 +82,7 @@ import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
+import org.jbei.ice.web.utils.WebUtils;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -155,6 +157,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.error(e);
             return false;
         }
+    }
+
+    @Override
+    public String linkifyText(String value) {
+        return WebUtils.linkifyText(value);
     }
 
     @Override
@@ -1100,10 +1107,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 Entry entry2 = datum.getEntry();
                 entry2.setOwnerEmail(ownerEmail);
 
-                // TODO : attachments etc as paramaters to the following method call
+                // TODO : attachments etc as parameters to the following method call
                 EntryInfo info = EntryToInfoFactory.getInfo(entry2, null, null, null, false);
                 secondary.add(info);
             }
+
             draftInfo.setSecondary(secondary);
         }
 
@@ -1142,7 +1150,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.error(e);
             return null;
         }
-
     }
 
     @Override
@@ -1275,7 +1282,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         Account emailAccount = AccountManager.getByEmail(email);
         bulkImport.setAccount(emailAccount);
         return bulkImport;
-
     }
 
     private static byte[] createZip(HashMap<String, File> files) throws IOException {
@@ -1686,8 +1692,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
 
         ArrayList<NewsItem> items = new ArrayList<NewsItem>();
-
         ArrayList<News> results;
+
         try {
             results = NewsManager.retrieveAll();
             for (News news : results) {
@@ -1710,24 +1716,22 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             account = retrieveAccountForSid(sessionId);
             if (account == null)
                 return null;
-        } catch (ControllerException e) {
-            Logger.error(e);
-        }
 
-        News news = new News();
-        news.setTitle(item.getHeader());
-        news.setBody(item.getBody());
+            News news = new News();
+            news.setTitle(item.getHeader());
+            news.setBody(item.getBody());
 
-        try {
             News saved = NewsManager.save(news);
             item.setCreationDate(saved.getCreationTime());
             item.setId(String.valueOf(saved.getId()));
             return item;
         } catch (ManagerException e) {
             Logger.error(e);
-            return null;
+        } catch (ControllerException e) {
+            Logger.error(e);
         }
 
+        return null;
     }
 
     @Override
@@ -1737,26 +1741,92 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             account = retrieveAccountForSid(sid);
             if (account == null)
                 return null;
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return null;
-        }
 
-        try {
             Folder folder = FolderManager.get(folderId);
             if (folder == null)
                 return null;
 
+            Logger.info("Updating folder " + folder.getName() + " with id " + folder.getId());
             folder.setName(update.getName());
             folder.setDescription(update.getDescription());
             Folder updated = FolderManager.update(folder);
             update.setId(updated.getId());
             return update;
-
         } catch (ManagerException e) {
             Logger.error(e);
-            return null;
+        } catch (ControllerException e) {
+            Logger.error(e);
         }
+
+        return null;
     }
 
+    @Override
+    public boolean updatePermission(String sessionId, long entryId,
+            ArrayList<PermissionInfo> permissions) {
+
+        Account account;
+        try {
+            account = retrieveAccountForSid(sessionId);
+            if (account == null)
+                return false;
+
+            Logger.info("Updating permissions for entry with id \"" + entryId + "\"");
+            EntryController entryController = new EntryController(account);
+            PermissionsController permissionController = new PermissionsController(account);
+            Entry entry = entryController.get(entryId);
+            if (entry == null)
+                return false;
+
+            HashSet<Account> readAccounts = new HashSet<Account>();
+            HashSet<Account> writeAccounts = new HashSet<Account>();
+            HashSet<Group> readGroups = new HashSet<Group>();
+            HashSet<Group> writeGroups = new HashSet<Group>();
+
+            for (PermissionInfo permissionInfo : permissions) {
+                long id = permissionInfo.getId();
+
+                switch (permissionInfo.getType()) {
+                case READ_ACCOUNT:
+                    Account readAccount = AccountController.get(id);
+                    if (readAccount != null)
+                        readAccounts.add(readAccount);
+                    break;
+
+                case READ_GROUP:
+                    Group readGroup = GroupManager.get(id);
+                    if (readGroup != null)
+                        readGroups.add(readGroup);
+                    break;
+
+                case WRITE_ACCOUNT:
+                    Account writeAccount = AccountController.get(id);
+                    if (writeAccount != null)
+                        writeAccounts.add(writeAccount);
+                    break;
+
+                case WRITE_GROUP:
+                    Group writeGroup = GroupManager.get(id);
+                    if (writeGroup != null)
+                        writeGroups.add(writeGroup);
+                    break;
+                }
+            }
+
+            permissionController.setReadGroup(entry, readGroups);
+            permissionController.setWriteGroup(entry, writeGroups);
+            permissionController.setReadUser(entry, readAccounts);
+            permissionController.setWriteUser(entry, writeAccounts);
+            return true;
+
+        } catch (ControllerException e) {
+            Logger.error(e);
+        } catch (PermissionException e) {
+            Logger.error(e);
+        } catch (ManagerException e) {
+            Logger.error(e);
+        }
+
+        return false;
+    }
 }

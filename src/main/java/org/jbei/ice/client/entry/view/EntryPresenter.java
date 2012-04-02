@@ -2,7 +2,9 @@ package org.jbei.ice.client.entry.view;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
@@ -28,6 +30,7 @@ import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryInfo.EntryType;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -132,7 +135,7 @@ public class EntryPresenter extends AbstractPresenter {
 
         retrievePermissionData();
 
-        // permissions
+        // PERMISSIONS
         display.addPermissionEditClickHandler(new ClickHandler() {
 
             @Override
@@ -148,12 +151,16 @@ public class EntryPresenter extends AbstractPresenter {
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    GWT.log(caught.getMessage());
+                    GWT.log(caught.getMessage()); // TODO : show some indication under the permission widget
                 }
 
                 @Override
                 public void onSuccess(ArrayList<PermissionInfo> result) {
+
+                    display.getPermissionsWidget().setPermissionData(result);
+
                     ArrayList<PermissionItem> data = new ArrayList<PermissionItem>();
+
                     for (PermissionInfo info : result) {
                         PermissionItem item = null;
                         switch (info.getType()) {
@@ -256,7 +263,7 @@ public class EntryPresenter extends AbstractPresenter {
                 currentContext.setCurrent(currentId);
                 retrieveEntryDetails();
                 retrieveAccountsAndGroups();
-                //                retrievePermissionData(contextList.get(idx + 1));
+                retrievePermissionData();
                 display.enablePrev(true);
                 String text = (next + 1) + " of " + size;
                 display.setNavText(text);
@@ -290,7 +297,7 @@ public class EntryPresenter extends AbstractPresenter {
                 currentContext.setCurrent(currentId);
                 retrieveEntryDetails();
                 retrieveAccountsAndGroups();
-                //                retrievePermissionData(contextList.get(idx - 1));
+                retrievePermissionData();
                 display.enableNext(true);
                 String text = (prev + 1) + " of " + nav.getSize();
                 display.setNavText(text);
@@ -309,12 +316,14 @@ public class EntryPresenter extends AbstractPresenter {
     }
 
     private void retrieveAccountsAndGroups() {
+        final PermissionsPresenter pPresent = display.getPermissionsWidget();
+
         service.retrieveAllAccounts(AppController.sessionId,
             new AsyncCallback<LinkedHashMap<Long, String>>() {
 
                 @Override
                 public void onSuccess(LinkedHashMap<Long, String> result) {
-                    display.getPermissionsWidget().setAccountData(result);
+                    pPresent.setAccountData(result);
                 }
 
                 @Override
@@ -333,9 +342,59 @@ public class EntryPresenter extends AbstractPresenter {
 
                 @Override
                 public void onSuccess(LinkedHashMap<Long, String> result) {
-                    display.getPermissionsWidget().setGroupData(result);
+                    pPresent.setGroupData(result);
                 }
             });
+
+        // handler for updating permissions
+        addUpdatePermissionsHandler();
+    }
+
+    private void addUpdatePermissionsHandler() {
+        final PermissionsPresenter pPresent = display.getPermissionsWidget();
+        pPresent.addUpdatePermissionsHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                ArrayList<PermissionInfo> permissions = new ArrayList<PermissionInfo>();
+                for (Entry<PermissionType, HashSet<String>> p : pPresent.getReadSelected()
+                        .entrySet()) {
+
+                    PermissionType type = p.getKey();
+
+                    for (String id : p.getValue()) {
+                        PermissionInfo info = new PermissionInfo(type, Long.decode(id), "");
+                        permissions.add(info);
+                    }
+                }
+
+                for (Entry<PermissionType, HashSet<String>> p : pPresent.getWriteSelected()
+                        .entrySet()) {
+
+                    PermissionType type = p.getKey();
+
+                    for (String id : p.getValue()) {
+                        PermissionInfo info = new PermissionInfo(type, Long.decode(id), "");
+                        permissions.add(info);
+                    }
+                }
+
+                // update
+                service.updatePermission(AppController.sessionId, currentInfo.getId(), permissions,
+                    new AsyncCallback<Boolean>() {
+
+                        @Override
+                        public void onSuccess(Boolean result) {
+                            // TODO Auto-generated method stub
+                        }
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            Window.alert("Error updating permissions");
+                        }
+                    });
+            }
+        });
     }
 
     private void retrieveEntryDetails() {
@@ -395,24 +454,6 @@ public class EntryPresenter extends AbstractPresenter {
                     menuItems.add(new MenuItem(Menu.SAMPLES, result.getSampleStorage().size()));
                     display.setMenuItems(menuItems); // TODO : set menu loading indicator?
                     display.showEntryDetailView(currentInfo, canEdit);
-                }
-            });
-    }
-
-    private void retrievePermissionData(final long entryId) {
-
-        // retrieve data for permission
-        service.retrievePermissionData(AppController.sessionId, entryId,
-            new AsyncCallback<ArrayList<PermissionInfo>>() {
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert("Error occured retrieving permissions: " + caught.getMessage()); // TODO 
-                }
-
-                @Override
-                public void onSuccess(ArrayList<PermissionInfo> result) {
-                    display.getPermissionsWidget().setExistingPermissions(result);
                 }
             });
     }

@@ -48,6 +48,8 @@ public interface RegistryService extends RemoteService {
     ArrayList<EntryInfo> retrieveEntryData(String sid, ArrayList<Long> entries, ColumnField field,
             boolean asc);
 
+    String linkifyText(String value);
+
     /**
      * Returns list of folders as seen on the collections page
      * collections menu
@@ -134,4 +136,6 @@ public interface RegistryService extends RemoteService {
     FolderDetails deleteFolder(String sessionId, long folderId);
 
     SampleStorage createSample(String sessionId, SampleStorage sampleStorage, long entryId);
+
+    boolean updatePermission(String sessionId, long id, ArrayList<PermissionInfo> permissions);
 }

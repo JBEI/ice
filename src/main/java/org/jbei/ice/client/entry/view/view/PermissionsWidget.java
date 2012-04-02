@@ -6,12 +6,15 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.jbei.ice.client.entry.view.PermissionsPresenter;
+import org.jbei.ice.client.entry.view.PermissionsPresenter.IPermissionsView;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
@@ -25,7 +28,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class PermissionsWidget extends Composite {
+public class PermissionsWidget extends Composite implements IPermissionsView {
 
     private ListBox accountList;
     private ListBox groupList;
@@ -35,16 +38,11 @@ public class PermissionsWidget extends Composite {
     private PermissionListBox writeBox;
     private Button saveButton;
     private Button resetButton;
-    private HashMap<Long, String> accountInfo;
-    private HashMap<Long, String> groupInfo;
 
     private TabLayoutPanel tabPanel;
+    private final PermissionsPresenter presenter;
 
     public PermissionsWidget() {
-
-        this.accountInfo = new HashMap<Long, String>();
-        this.groupInfo = new HashMap<Long, String>();
-
         readBox = new PermissionListBox();
         writeBox = new PermissionListBox();
 
@@ -69,6 +67,16 @@ public class PermissionsWidget extends Composite {
         layout.getFlexCellFormatter().setHorizontalAlignment(2, 1, HasAlignment.ALIGN_RIGHT);
 
         initWidget(layout);
+        presenter = new PermissionsPresenter(this);
+    }
+
+    public PermissionsPresenter getPresenter() {
+        return this.presenter;
+    }
+
+    @Override
+    public HandlerRegistration addUpdatePermissionsHandler(ClickHandler handler) {
+        return saveButton.addClickHandler(handler);
     }
 
     /**
@@ -161,10 +169,8 @@ public class PermissionsWidget extends Composite {
         if (data == null || data.isEmpty())
             return;
 
-        this.accountInfo.putAll(data);
         this.accountList.clear();
-
-        for (Map.Entry<Long, String> entry : accountInfo.entrySet()) {
+        for (Map.Entry<Long, String> entry : data.entrySet()) {
             String name = entry.getValue();
 
             if (name.trim().isEmpty())
@@ -177,17 +183,24 @@ public class PermissionsWidget extends Composite {
         if (data == null || data.isEmpty())
             return;
 
-        this.groupInfo.putAll(data);
         this.groupList.clear();
-
-        for (Long id : groupInfo.keySet()) {
-            String name = groupInfo.get(id);
+        for (Long id : data.keySet()) {
+            String name = data.get(id);
             groupList.addItem(name, String.valueOf(id));
         }
     }
 
-    // inner classes
+    @Override
+    public HashMap<PermissionType, HashSet<String>> getReadSelected() {
+        return readBox.getData();
+    }
 
+    @Override
+    public HashMap<PermissionType, HashSet<String>> getWriteSelected() {
+        return writeBox.getData();
+    }
+
+    // inner classes
     private class PermissionListBox implements IsWidget {
         private final ListBox listBox;
         private final HashMap<PermissionType, HashSet<String>> data;
@@ -207,6 +220,7 @@ public class PermissionsWidget extends Composite {
                 typeData = new HashSet<String>();
                 this.data.put(type, typeData);
             } else {
+                // already added
                 if (typeData.contains(value))
                     return;
             }
@@ -217,13 +231,19 @@ public class PermissionsWidget extends Composite {
 
         public void removeSelected() {
             int i = listBox.getSelectedIndex();
+            // TODO : cannot remove from list
 
             while (i != -1) {
                 String value = listBox.getValue(i);
-                data.remove(value);
-                listBox.removeItem(i);
+
+                if (data.remove(value) != null)
+                    listBox.removeItem(i);
                 i = listBox.getSelectedIndex();
             }
+        }
+
+        public HashMap<PermissionType, HashSet<String>> getData() {
+            return this.data;
         }
 
         @Override
