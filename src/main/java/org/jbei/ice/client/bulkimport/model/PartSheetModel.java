@@ -36,7 +36,7 @@ public class PartSheetModel extends SingleInfoSheetModel {
         Header header = datum.getType();
         String value = datum.getValue();
 
-        if (header == null)
+        if (header == null || value == null || value.isEmpty())
             return;
 
         switch (header) {

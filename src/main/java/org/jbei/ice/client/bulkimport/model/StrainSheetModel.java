@@ -39,7 +39,7 @@ public class StrainSheetModel extends SingleInfoSheetModel {
         Header header = datum.getType();
         String value = datum.getValue();
 
-        if (header == null)
+        if (header == null || value == null || value.isEmpty())
             return;
 
         switch (header) {
@@ -59,8 +59,9 @@ public class StrainSheetModel extends SingleInfoSheetModel {
                 info.setBioSafetyLevel(Integer.valueOf(value));
 
             } catch (NumberFormatException nfe) {
-                throw new IllegalArgumentException("Illegal Pairing of Biosafety and value of "
-                        + value);
+                //                 TODO : this is for validation
+                //                                throw new IllegalArgumentException("Illegal Pairing of Biosafety and value of "
+                //                                        + value);
             }
             break;
 

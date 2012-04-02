@@ -6,12 +6,14 @@ import org.jbei.ice.client.bulkimport.model.NewBulkInput;
 import org.jbei.ice.client.bulkimport.panel.SheetHeaderPanel;
 import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
 import org.jbei.ice.client.collection.menu.CollectionMenu;
+import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.shared.EntryAddType;
 
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -153,17 +155,25 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
             feedback.setFailureMessage(msg);
         else
             feedback.setSuccessMessage(msg);
+
+        new Timer() {
+
+            @Override
+            public void run() {
+                feedback.setVisible(false);
+            }
+        }.schedule(10000);
     }
 
     @Override
-    public void clearFeedback() {
-        feedback.setVisible(false);
-    }
-
-    @Override
-    public void setSavedDraftsData(ArrayList<MenuItem> data) {
-        draftsMenu.setMenuItems(data, null);
+    public void setSavedDraftsData(ArrayList<MenuItem> data, IDeleteMenuHandler handler) {
+        draftsMenu.setMenuItems(data, handler);
         layout.setWidget(0, 0, draftsMenu);
+    }
+
+    @Override
+    public void addSavedDraftData(MenuItem item, IDeleteMenuHandler handler) {
+        draftsMenu.addMenuItem(item, handler);
     }
 
     @Override
