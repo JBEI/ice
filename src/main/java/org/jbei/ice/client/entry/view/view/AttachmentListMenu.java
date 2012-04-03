@@ -111,9 +111,6 @@ public class AttachmentListMenu extends Composite {
 
     void setMenuItems(ArrayList<AttachmentItem> items, long entryId) {
         this.entryId = entryId;
-        if (items.isEmpty())
-            return;
-
         int row = 2;
 
         // clear rows 2+
@@ -122,6 +119,8 @@ public class AttachmentListMenu extends Composite {
             row += 1;
         }
 
+        if (items.isEmpty())
+            return;
         row = 2;
 
         for (AttachmentItem item : items) {

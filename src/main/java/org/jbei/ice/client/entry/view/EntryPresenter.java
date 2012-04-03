@@ -414,8 +414,7 @@ public class EntryPresenter extends AbstractPresenter {
                 public void onSuccess(EntryInfo result) {
 
                     if (result == null) {
-                        FeedbackEvent event = new FeedbackEvent(true,
-                                "System returned null entry. Please try again later.");
+                        FeedbackEvent event = new FeedbackEvent(true, "System returned null entry.");
                         eventBus.fireEvent(event);
                         return;
                     }

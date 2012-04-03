@@ -9,11 +9,6 @@
     font-size: 0.70em;
     text-align: center;
     border: 0px;
-    background-color: #f1f1f1;
-    border-top: 2px solid #f1f1f1;
-    border-bottom: 2px solid #f1f1f1;    
-    border: 1px solid #A5A5A5;
-    -webkit-border-radius: 2px;
     margin: 0px;
     font-family: Arial;
     display: inline;
@@ -22,8 +17,6 @@
 }
 
 .downloadStyle:hover {
-    border-top: 2px solid #0082C0;
-    background-color: #f2f2f2;
     opacity: 1;
 }
 

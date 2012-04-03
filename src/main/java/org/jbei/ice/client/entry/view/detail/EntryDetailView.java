@@ -11,6 +11,7 @@ import org.jbei.ice.shared.dto.ParameterInfo;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
@@ -202,8 +203,8 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         sequence.setWidth("100%");
 
         int row = 0;
-        sequence.setWidget(row, 0, new Label("Sequence"));
-        sequence.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_header");
+        sequence.setWidget(row, 0, createSequenceHeader());
+        //        sequence.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_header");
         sequence.getFlexCellFormatter().setColSpan(row, 0, 6);
 
         row += 1;
@@ -212,6 +213,7 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         sequence.getFlexCellFormatter().setColSpan(row, 0, 6);
 
         row += 1;
+
         // check if there is a sequence 
         if (info.isHasSequence()) {
             Flash.Parameters param = new Flash.Parameters();
@@ -221,14 +223,40 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
             sequence.setWidget(row, 0, new Flash(param));
             sequence.getFlexCellFormatter().setHeight(row, 0, "600px");
         } else {
-            sequence.setWidget(row, 0, new HTML(" TODO : links to open in vector editor"));
-            // TODO : add links to upload or create a new one in vector editor
-            // TODO : the latter action opens vector editor in a new window
+            // TODO : add UploadSequencePanel
         }
 
         table.setWidget(currentRow, 0, sequence);
         table.getFlexCellFormatter().setColSpan(currentRow, 0, 4);
         currentRow += 1;
+    }
+
+    private Widget createSequenceHeader() {
+        HTMLPanel panel = new HTMLPanel(
+                "<span style=\"color: #233559; "
+                        + "font-weight: bold; padding: 6px 6px 6px 0px; font-size: 0.80em;\">"
+                        + "SEQUENCE</span><div style=\"float: right\"><span id=\"sequence_link\"></span><span id=\"sequence_options\"></span></div>");
+
+        panel.setStyleName("entry_sequence_sub_header");
+
+        if (info.isHasSequence()) {
+            // delete, open in vector editor, download
+            VectorEditorDialog dialog = new VectorEditorDialog(info.getName());
+            Label label = dialog.getLabel("Open");
+
+            // TODO : addClickHandler and dialog.setWidget(flash)
+            label.addStyleName("display-inline");
+            panel.add(label, "sequence_link");
+
+            SequenceFileDownload download = new SequenceFileDownload();
+            Widget widget = download.asWidget();
+            widget.addStyleName("display-inline");
+            panel.add(download.asWidget(), "sequence_options");
+        } else {
+            // create new , upload
+            //            panel.add(download.asWidget(), "sequence_options");
+        }
+        return panel;
     }
 
     protected void createNotesView() {

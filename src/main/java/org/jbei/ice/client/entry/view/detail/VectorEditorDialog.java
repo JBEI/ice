@@ -5,6 +5,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -16,6 +17,7 @@ public class VectorEditorDialog extends DialogBox {
 
     private FlowPanel container, controls;
     private Anchor close;
+    private final Label label;
 
     public VectorEditorDialog(String title) {
 
@@ -23,6 +25,7 @@ public class VectorEditorDialog extends DialogBox {
         setAnimationEnabled(true);
         setGlassEnabled(true);
 
+        label = new Label();
         container = new FlowPanel();
         container.addStyleName("dialogContainer");
 
@@ -38,6 +41,11 @@ public class VectorEditorDialog extends DialogBox {
         controls = new FlowPanel();
         controls.setStyleName("dialogControls");
         controls.add(close);
+    }
+
+    public Label getLabel(String text) {
+        label.setText(text);
+        return label;
     }
 
     /**
