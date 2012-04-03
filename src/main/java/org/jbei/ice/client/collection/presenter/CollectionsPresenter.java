@@ -328,10 +328,26 @@ public class CollectionsPresenter extends AbstractPresenter {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 StringBuilder builder = new StringBuilder();
-                Set<Long> selected = collectionsDataTable.getSelectedEntrySet();
+                Set<Long> selected = new HashSet<Long>();
                 ExportAsOption option = display.getExportAsModel().getSelectedObject();
+                if (option == null)
+                    return;
+
+                switch (mode) {
+                case COLLECTION:
+                    selected = collectionsDataTable.getSelectedEntrySet();
+                    break;
+
+                case ENTRY:
+                    selected.add(currentContext.getCurrent());
+                    break;
+
+                case SEARCH:
+                    selected = searchPresenter.getEntrySet();
+                    break;
+                }
+
                 if (selected == null || selected.isEmpty()) {
-                    // TODO : show feedback msg
                     display.getExportAsModel().setSelected(option, false);
                     return;
                 }
@@ -339,9 +355,14 @@ public class CollectionsPresenter extends AbstractPresenter {
                 for (long id : selected) {
                     builder.append(id + ", ");
                 }
+
                 switch (option) {
                 case XML:
                     Window.Location.replace("/export?type=xml&entries=" + builder.toString());
+                    break;
+
+                case EXCEL:
+                    Window.Location.replace("/export?type=excel&entries=" + builder.toString());
                     break;
 
                 default:

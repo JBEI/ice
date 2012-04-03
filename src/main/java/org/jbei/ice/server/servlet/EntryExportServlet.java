@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.UUID;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
@@ -21,6 +20,7 @@ import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.utils.IceXlsSerializer;
 import org.jbei.ice.lib.utils.IceXmlSerializer;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.UtilityException;
@@ -67,7 +67,7 @@ public class EntryExportServlet extends HttpServlet {
         if (XML_EXPORT.equalsIgnoreCase(type)) {
             exportXML(entries, response);
         } else if (EXCEL_EXPORT.equalsIgnoreCase(type)) {
-
+            exportExcel(entries, response, controller);
         }
     }
 
@@ -78,7 +78,7 @@ public class EntryExportServlet extends HttpServlet {
         for (String idStr : idStrs) {
             Entry entry = null;
             try {
-                long id = Long.decode(idStr);
+                long id = Long.decode(idStr.trim());
                 entry = controller.get(id);
             } catch (NumberFormatException nfe) {
                 Logger.error("Could not convert string id to long : " + idStr);
@@ -103,12 +103,12 @@ public class EntryExportServlet extends HttpServlet {
 
             // write to file
             String tmpDir = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
-            String saveName = UUID.randomUUID().toString() + ".xml";
+            String saveName = "data.xml";
             File file = new File(tmpDir + File.separator + saveName);
             FileUtils.writeStringToFile(file, xmlDocument);
             Logger.info("Wrote contents to file " + file.getAbsolutePath());
 
-            response.setContentType("application/octet-stream");
+            response.setContentType("text/xml");
             response.setContentLength((int) file.length());
             response.setHeader("Content-Disposition", "attachment;filename=" + saveName);
 
@@ -126,6 +126,39 @@ public class EntryExportServlet extends HttpServlet {
 
         } catch (UtilityException e) {
             Logger.error(e);
+        } catch (IOException e) {
+            Logger.error(e);
+        }
+    }
+
+    private void exportExcel(ArrayList<Entry> entries, HttpServletResponse response,
+            EntryController controller) {
+        try {
+            String xmlDocument = IceXlsSerializer.serialize(controller, entries);
+
+            // write to file
+            String tmpDir = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
+            String saveName = "data.xls";
+            File file = new File(tmpDir + File.separator + saveName);
+            FileUtils.writeStringToFile(file, xmlDocument);
+            Logger.info("Wrote contents to file " + file.getAbsolutePath());
+
+            response.setContentType("application/vnd.ms-excel");
+            response.setContentLength((int) file.length());
+            response.setHeader("Content-Disposition", "attachment;filename=" + saveName);
+
+            OutputStream os = response.getOutputStream();
+            DataInputStream is = new DataInputStream(new FileInputStream(file));
+
+            int read = 0;
+            byte[] bytes = new byte[BYTES_DOWNLOAD];
+
+            while ((read = is.read(bytes)) != -1) {
+                os.write(bytes, 0, read);
+            }
+            os.flush();
+            os.close();
+
         } catch (IOException e) {
             Logger.error(e);
         }
