@@ -108,8 +108,6 @@
     <param-name>slowUploads</param-name>
     <param-value>2</param-value>
   </context-param>
-
-
   
     <servlet>
         <servlet-name>FileUploadServlet</servlet-name>
@@ -130,6 +128,17 @@
     <servlet-mapping>
         <servlet-name>FileDownloadServlet</servlet-name>
         <url-pattern>/download</url-pattern>
+    </servlet-mapping>
+    
+    <!--  export as [file format] servlet -->
+    <servlet>
+        <servlet-name>EntryExportServlet</servlet-name>
+        <servlet-class>org.jbei.ice.server.servlet.EntryExportServlet</servlet-class>
+    </servlet>
+ 
+    <servlet-mapping>
+        <servlet-name>EntryExportServlet</servlet-name>
+        <url-pattern>/export</url-pattern>
     </servlet-mapping>
     
     <welcome-file-list>

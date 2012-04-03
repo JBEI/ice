@@ -184,15 +184,12 @@ public class TipViewContentFactory {
         addField(table, 9, 0, "Bio Safety", entry.getBioSafetyLevel() + "");
         addField(table, 10, 0, "IP Information", entry.getIntellectualProperty());
 
-        table.setHTML(11, 0, "&nbsp;");
+        table.setHTML(11, 0, "<b class=\"entry_tooltip_sub_header\">Samples</b>");
         table.getFlexCellFormatter().setColSpan(11, 0, 4);
 
-        table.setHTML(12, 0, "<b class=\"entry_tooltip_sub_header\">Samples</b>");
-        table.getFlexCellFormatter().setColSpan(12, 0, 4);
-
         Widget samplesWidget = createSamplesWidget(entry.getSampleStorage());
-        table.setWidget(13, 0, samplesWidget);
-        table.getFlexCellFormatter().setColSpan(13, 0, 4);
+        table.setWidget(12, 0, samplesWidget);
+        table.getFlexCellFormatter().setColSpan(12, 0, 4);
     }
 
     private static Widget createSamplesWidget(ArrayList<SampleStorage> data) {

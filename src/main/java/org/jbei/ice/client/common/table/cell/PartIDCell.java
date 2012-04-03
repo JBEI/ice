@@ -58,15 +58,11 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
         final String eventType = event.getType();
 
         if (MOUSEOVER_EVENT_NAME.equalsIgnoreCase(eventType)) {
-            if (withinBounds(parent, event))
-                onMouseOver(parent, event, value);
-            else
-                onMouseOut(parent);
+            onMouseOver(parent, event, value);
         } else if (MOUSEOUT_EVENT_NAME.equalsIgnoreCase(eventType)) {
             onMouseOut(parent);
         } else if (MOUSE_CLICK.equalsIgnoreCase(eventType)) {
-            if (withinBounds(parent, event))
-                onMouseClick(value.getId());
+            onMouseClick(value.getId());
         }
     }
 
@@ -94,27 +90,6 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
             popup.hide();
             popup = null;
         }
-    }
-
-    protected boolean withinBounds(Element parent, NativeEvent event) {
-
-        if (event.getClientY() < ((Element) parent.getFirstChild()).getAbsoluteTop()) {
-            return false;
-        }
-
-        if (event.getClientY() > ((Element) parent.getFirstChild()).getAbsoluteBottom()) {
-            return false;
-        }
-
-        if (event.getClientX() < ((Element) parent.getFirstChild()).getAbsoluteLeft()) {
-            return false;
-        }
-
-        if (event.getClientX() > ((Element) parent.getFirstChild()).getAbsoluteRight()) {
-            return false;
-        }
-
-        return true;
     }
 
     protected void onMouseOver(Element parent, NativeEvent event, EntryInfo value) {

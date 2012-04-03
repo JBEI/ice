@@ -38,7 +38,6 @@ public class FileDownloadServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         Logger.info(FileDownloadServlet.class.getSimpleName() + ": attempt to download file");
-
         Account account;
 
         try {

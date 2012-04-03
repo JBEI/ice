@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.client.collection.event.SubmitHandler;
+import org.jbei.ice.client.collection.menu.ExportAsOption;
 import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.collection.presenter.MoveToSubmitHandler;
@@ -107,4 +108,6 @@ public interface ICollectionView {
     void addRemoveHandler(ClickHandler handler);
 
     void setSubMenuEnable(boolean enableAddTo, boolean enableRemove, boolean enableMoveTo);
+
+    SingleSelectionModel<ExportAsOption> getExportAsModel();
 }

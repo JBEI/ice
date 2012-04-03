@@ -14,6 +14,7 @@ import org.jbei.ice.client.collection.event.FolderEvent;
 import org.jbei.ice.client.collection.event.FolderEventHandler;
 import org.jbei.ice.client.collection.event.FolderRetrieveEvent;
 import org.jbei.ice.client.collection.event.FolderRetrieveEventHandler;
+import org.jbei.ice.client.collection.menu.ExportAsOption;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.collection.model.CollectionsModel;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
@@ -44,6 +45,7 @@ import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.ProvidesKey;
@@ -115,6 +117,9 @@ public class CollectionsPresenter extends AbstractPresenter {
 
         // selection models used for menus
         initMenus();
+
+        // exportashandler
+        initExportAsHandler();
 
         // init text box
         initCreateCollectionHandlers();
@@ -315,6 +320,38 @@ public class CollectionsPresenter extends AbstractPresenter {
         }
 
         retrieveEntriesForFolder(id, null);
+    }
+
+    private void initExportAsHandler() {
+        display.getExportAsModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                StringBuilder builder = new StringBuilder();
+                Set<Long> selected = collectionsDataTable.getSelectedEntrySet();
+                ExportAsOption option = display.getExportAsModel().getSelectedObject();
+                if (selected == null || selected.isEmpty()) {
+                    // TODO : show feedback msg
+                    display.getExportAsModel().setSelected(option, false);
+                    return;
+                }
+
+                for (long id : selected) {
+                    builder.append(id + ", ");
+                }
+                switch (option) {
+                case XML:
+                    Window.Location.replace("/export?type=xml&entries=" + builder.toString());
+                    break;
+
+                default:
+                    Window.alert("Not supported yet");
+                }
+
+                // clear selected
+                display.getExportAsModel().setSelected(option, false);
+            }
+        });
     }
 
     private void showEntryView(EntryContext event) {

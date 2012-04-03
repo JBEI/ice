@@ -10,6 +10,7 @@ import org.jbei.ice.client.collection.event.SubmitHandler;
 import org.jbei.ice.client.collection.menu.CollectionEntryActionMenu;
 import org.jbei.ice.client.collection.menu.CollectionMenu;
 import org.jbei.ice.client.collection.menu.ExportAsMenu;
+import org.jbei.ice.client.collection.menu.ExportAsOption;
 import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.collection.presenter.MoveToSubmitHandler;
@@ -22,6 +23,7 @@ import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
@@ -164,6 +166,13 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
             feedback.setFailureMessage(msg);
         else
             feedback.setSuccessMessage(msg);
+
+        new Timer() {
+            @Override
+            public void run() {
+                feedback.setVisible(false);
+            }
+        }.schedule(10000);
     }
 
     @Override
@@ -245,6 +254,11 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     @Override
     public SingleSelectionModel<MenuItem> getSystemMenuModel() {
         return systemMenu.getSelectionModel();
+    }
+
+    @Override
+    public SingleSelectionModel<ExportAsOption> getExportAsModel() {
+        return exportAs.getSelectionModel();
     }
 
     @Override
