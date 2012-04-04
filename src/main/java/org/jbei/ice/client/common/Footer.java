@@ -100,7 +100,7 @@ public class Footer extends Composite {
     private Widget getFooterText() {
 
         VerticalPanel panel = new VerticalPanel();
-        panel.setStyleName("font-85em");
+        panel.setStyleName("font-80em");
         panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 
         HorizontalPanel line1 = new HorizontalPanel();
