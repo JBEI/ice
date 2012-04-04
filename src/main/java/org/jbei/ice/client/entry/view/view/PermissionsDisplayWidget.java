@@ -58,17 +58,23 @@ public class PermissionsDisplayWidget extends Composite {
     }
 
     public void setPermissionData(ArrayList<PermissionItem> data) {
+        TreeItem rwRoot = rwTree.getItem(0);
+        rwRoot.removeItems();
+
+        TreeItem readRoot = readTree.getItem(0);
+        readRoot.removeItems();
+
         if (data == null)
             return;
 
         for (PermissionItem datum : data) {
             if (datum.isWrite())
-                rwTree.getItem(0).addItem(new TreeItem(datum.getName()));
+                rwRoot.addItem(new TreeItem(datum.getName()));
             else
-                readTree.getItem(0).addItem(new TreeItem(datum.getName()));
+                readRoot.addItem(new TreeItem(datum.getName()));
         }
 
-        rwTree.getItem(0).setState(true, false);
-        readTree.getItem(0).setState(true, false);
+        rwRoot.setState(true, false);
+        readRoot.setState(true, false);
     }
 }
