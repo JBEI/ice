@@ -234,7 +234,7 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
     private Widget createSequenceHeader() {
         HTMLPanel panel = new HTMLPanel(
                 "<span style=\"color: #233559; "
-                        + "font-weight: bold; padding: 6px 6px 6px 0px; font-size: 0.80em;\">"
+                        + "font-weight: bold; font-style: italic; padding: 6px 6px 6px 0px; font-size: 0.80em;\">"
                         + "SEQUENCE</span><div style=\"float: right\"><span id=\"sequence_link\"></span><span id=\"sequence_options\"></span></div>");
 
         panel.setStyleName("entry_sequence_sub_header");

@@ -142,6 +142,7 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 	padding: 6px 6px 6px 0px;
 	text-transform: uppercase;
 	font-size: 0.80em;
+	font-style: italic;
 }
 
 .entry_sequence_sub_header {

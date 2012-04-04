@@ -131,10 +131,9 @@ public class NewPlasmidForm extends NewSingleEntryForm<PlasmidInfo> {
         setLabel(false, "Bio Safety Level", general, row, 2);
         bioSafety = new ListBox();
         bioSafety.setVisibleItemCount(1);
-        bioSafety.addItem(BioSafetyOptions.LEVEL_ONE.getDisplayName(),
-            BioSafetyOptions.LEVEL_ONE.getValue());
-        bioSafety.addItem(BioSafetyOptions.LEVEL_TWO.getDisplayName(),
-            BioSafetyOptions.LEVEL_TWO.getValue());
+        for (BioSafetyOptions option : BioSafetyOptions.values()) {
+            bioSafety.addItem(option.getDisplayName(), option.getValue());
+        }
         bioSafety.setStyleName("input_box");
         general.setWidget(row, 3, bioSafety);
 

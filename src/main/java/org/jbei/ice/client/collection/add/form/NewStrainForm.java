@@ -119,8 +119,9 @@ public class NewStrainForm extends NewSingleEntryForm<StrainInfo> {
         general.setWidget(row, 2, new HTML("<span class=\"font-80em\">Bio Safety Level</span>"));
         bioSafety = new ListBox();
         bioSafety.setVisibleItemCount(1);
-        bioSafety.addItem(BioSafetyOptions.LEVEL_ONE.getDisplayName());
-        bioSafety.addItem(BioSafetyOptions.LEVEL_TWO.getDisplayName());
+        for (BioSafetyOptions option : BioSafetyOptions.values()) {
+            bioSafety.addItem(option.getDisplayName(), option.getValue());
+        }
         bioSafety.setStyleName("input_box");
         general.setWidget(row, 3, bioSafety);
 
@@ -213,7 +214,9 @@ public class NewStrainForm extends NewSingleEntryForm<StrainInfo> {
         strain.setPlasmids(plasmids.getText());
         strain.setKeywords(keywords.getText());
         strain.setReferences(references.getText());
-        strain.setBioSafetyLevel(bioSafety.getSelectedIndex());
+        int bioSafetySelectedIndex = bioSafety.getSelectedIndex();
+        int value = Integer.parseInt(bioSafety.getValue(bioSafetySelectedIndex));
+        strain.setBioSafetyLevel(value);
         strain.setIntellectualProperty(ip.getText());
         strain.setPrincipalInvestigator(principalInvestigator.getText());
     }

@@ -131,8 +131,9 @@ public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> 
         setLabel(false, "Bio Safety Level", general, row, 2);
         bioSafety = new ListBox();
         bioSafety.setVisibleItemCount(1);
-        bioSafety.addItem(BioSafetyOptions.LEVEL_ONE.getDisplayName());
-        bioSafety.addItem(BioSafetyOptions.LEVEL_TWO.getDisplayName());
+        for (BioSafetyOptions option : BioSafetyOptions.values()) {
+            bioSafety.addItem(option.getDisplayName(), option.getValue());
+        }
         bioSafety.setStyleName("input_box");
         general.setWidget(row, 3, bioSafety);
 
@@ -257,7 +258,9 @@ public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> 
         seed.setAlias(alias.getText());
         seed.setKeywords(keywords.getText());
         seed.setReferences(references.getText());
-        seed.setBioSafetyLevel(bioSafety.getSelectedIndex());
+        int bioSafetySelectedIndex = bioSafety.getSelectedIndex();
+        int value = Integer.parseInt(bioSafety.getValue(bioSafetySelectedIndex));
+        seed.setBioSafetyLevel(value);
         seed.setIntellectualProperty(ip.getText());
         seed.setPrincipalInvestigator(principalInvestigator.getText());
 

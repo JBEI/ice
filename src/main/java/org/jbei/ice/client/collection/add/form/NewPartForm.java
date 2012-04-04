@@ -114,8 +114,9 @@ public class NewPartForm extends NewSingleEntryForm<PartInfo> {
         general.setWidget(row, 2, new HTML("<span class=\"font-80em\">Bio Safety Level</span>"));
         bioSafety = new ListBox();
         bioSafety.setVisibleItemCount(1);
-        bioSafety.addItem(BioSafetyOptions.LEVEL_ONE.getDisplayName());
-        bioSafety.addItem(BioSafetyOptions.LEVEL_TWO.getDisplayName());
+        for (BioSafetyOptions option : BioSafetyOptions.values()) {
+            bioSafety.addItem(option.getDisplayName(), option.getValue());
+        }
         bioSafety.setStyleName("input_box");
         general.setWidget(row, 3, bioSafety);
 
@@ -173,7 +174,9 @@ public class NewPartForm extends NewSingleEntryForm<PartInfo> {
         part.setAlias(alias.getText());
         part.setKeywords(keywords.getText());
         part.setReferences(references.getText());
-        part.setBioSafetyLevel(bioSafety.getSelectedIndex());
+        int bioSafetySelectedIndex = bioSafety.getSelectedIndex();
+        int value = Integer.parseInt(bioSafety.getValue(bioSafetySelectedIndex));
+        part.setBioSafetyLevel(value);
         part.setIntellectualProperty(ip.getText());
         part.setPrincipalInvestigator(principalInvestigator.getText());
     }
