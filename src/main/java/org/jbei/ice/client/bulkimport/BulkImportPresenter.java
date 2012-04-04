@@ -15,7 +15,6 @@ import org.jbei.ice.client.bulkimport.events.SavedDraftsEventHandler;
 import org.jbei.ice.client.bulkimport.model.BulkImportModel;
 import org.jbei.ice.client.bulkimport.model.NewBulkInput;
 import org.jbei.ice.client.bulkimport.model.SheetFieldData;
-import org.jbei.ice.client.bulkimport.panel.SheetHeaderPanel;
 import org.jbei.ice.client.bulkimport.sheet.Sheet;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.util.DateUtilities;
@@ -28,16 +27,24 @@ import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 
+/**
+ * Presenter for the bulk import page
+ * 
+ * @author Hector Plahar
+ */
 public class BulkImportPresenter extends AbstractPresenter {
 
     private final IBulkImportView view;
     private final HashMap<EntryAddType, NewBulkInput> sheetCache;
     private final BulkImportModel model;
+    private NewBulkInput currentInput;
 
     public BulkImportPresenter(BulkImportModel model, final IBulkImportView display) {
         this.view = display;
         this.model = model;
         sheetCache = new HashMap<EntryAddType, NewBulkInput>();
+
+        setClickHandlers();
 
         // selection model handlers
         setMenuSelectionModel();
@@ -49,6 +56,23 @@ public class BulkImportPresenter extends AbstractPresenter {
         // retrieveData
         retrieveSavedDrafts();
         retrieveAutoCompleteData();
+    }
+
+    private void setClickHandlers() {
+        SheetDraftUpdateHandler handler = new SheetDraftUpdateHandler();
+        view.setDraftUpateHandler(handler);
+
+        // submit
+        SheetSubmitHandler submitHandler = new SheetSubmitHandler();
+        view.setSubmitHandler(submitHandler);
+
+        // reset
+        SheetResetHandler resetHandler = new SheetResetHandler();
+        view.setResetHandler(resetHandler);
+
+        //        draft save
+        SheetDraftSaveHandler draftSaveHandler = new SheetDraftSaveHandler();
+        view.setDraftSaveHandler(draftSaveHandler);
     }
 
     private void addToggleMenuHandler() {
@@ -72,28 +96,26 @@ public class BulkImportPresenter extends AbstractPresenter {
 
                     @Override
                     public void onDataRetrieval(SavedDraftsEvent event) {
-                        if (event == null)
-                            return; // TODO : error msg
+                        if (event == null) {
+                            view.showFeedback("Could not retrieve data.", true);
+                            return;
+                        }
 
                         BulkImportDraftInfo info = event.getData().get(0);
                         Sheet sheet = new Sheet(info.getType(), info);
+
                         sheet.setAutoCompleteData(AppController.autoCompleteData);
-                        NewBulkInput input = new NewBulkInput(info.getType(), sheet);
+                        currentInput = new NewBulkInput(info.getType(), sheet);
+                        currentInput.setId(info.getId());
+                        String name = info.getName();
+                        if (name == null) {
+                            name = DateUtilities.formatDate(info.getCreated());
+                            info.setName(name);
+                        }
+                        currentInput.setName(name);
 
-                        // submit handler
-                        SheetSubmitHandler handler = new SheetSubmitHandler(input);
-                        input.getSheetHeaderPanel().getSubmit().addClickHandler(handler);
-
-                        // reset
-                        SheetResetHandler resetHandler = new SheetResetHandler(input);
-                        input.getSheetHeaderPanel().getReset().addClickHandler(resetHandler);
-
-                        // save draft
-                        SheetDraftSaveHandler draftSaveHandler = new SheetDraftSaveHandler(input);
-                        input.getSheetHeaderPanel().getDraftSave()
-                                .addClickHandler(draftSaveHandler);
-                        view.setSheet(input);
-                        view.setHeader(item.getName());
+                        view.setSheet(currentInput, false);
+                        view.setHeader(info.getType().getDisplay() + " Bulk Import");
                         view.setMenuVisibility(false);
                     }
                 });
@@ -109,31 +131,17 @@ public class BulkImportPresenter extends AbstractPresenter {
             public void onSelectionChange(SelectionChangeEvent event) {
                 EntryAddType selection = createSelection.getSelectedObject();
 
-                final NewBulkInput input;
-
                 if (sheetCache.containsKey(selection))
-                    input = sheetCache.get(selection);
+                    currentInput = sheetCache.get(selection);
                 else {
                     Sheet sheet = new Sheet(selection, null);
                     sheet.setAutoCompleteData(AppController.autoCompleteData);
-                    input = new NewBulkInput(selection, sheet);
-
-                    // submit handler
-                    SheetSubmitHandler handler = new SheetSubmitHandler(input);
-                    input.getSheetHeaderPanel().getSubmit().addClickHandler(handler);
-
-                    // reset
-                    SheetResetHandler resetHandler = new SheetResetHandler(input);
-                    input.getSheetHeaderPanel().getReset().addClickHandler(resetHandler);
-
-                    // save draft
-                    SheetDraftSaveHandler draftSaveHandler = new SheetDraftSaveHandler(input);
-                    input.getSheetHeaderPanel().getDraftSave().addClickHandler(draftSaveHandler);
+                    currentInput = new NewBulkInput(selection, sheet);
 
                     // header Panel 
-                    sheetCache.put(selection, input);
+                    sheetCache.put(selection, currentInput);
                 }
-                view.setSheet(input);
+                view.setSheet(currentInput, true);
                 view.setHeader(selection.getDisplay() + " Bulk Import");
             }
         });
@@ -147,15 +155,18 @@ public class BulkImportPresenter extends AbstractPresenter {
                 ArrayList<MenuItem> data = new ArrayList<MenuItem>();
                 for (BulkImportDraftInfo info : event.getData()) {
                     String name = info.getName();
-                    if (name == null)
+                    if (name == null) {
                         name = DateUtilities.formatDate(info.getCreated());
+                        info.setName(name);
+                    }
                     MenuItem item = new MenuItem(info.getId(), name, info.getCount(), false);
                     data.add(item);
                 }
 
                 if (!data.isEmpty()) {
-                    view.setSavedDraftsData(data, null); // tOdO : delete handler
-                }
+                    view.setSavedDraftsData(data, null); // TODO : delete handler
+                } else
+                    view.setToggleMenuVisiblity(false);
             }
         });
     }
@@ -176,82 +187,68 @@ public class BulkImportPresenter extends AbstractPresenter {
     // inner classes
     private class SheetSubmitHandler implements ClickHandler {
 
-        private final NewBulkInput input;
-
-        public SheetSubmitHandler(NewBulkInput input) {
-            this.input = input;
-        }
-
         @Override
         public void onClick(ClickEvent event) {
-            boolean isValid = input.getSheet().validate();
+            boolean isValid = currentInput.getSheet().validate();
             if (!isValid) {
                 view.showFeedback("Please correct validation errors.", true);
                 return;
             }
 
-            ArrayList<SheetFieldData[]> cellData = input.getSheet().getCellData();
+            ArrayList<SheetFieldData[]> cellData = currentInput.getSheet().getCellData();
             if (cellData == null || cellData.isEmpty()) {
                 view.showFeedback("Please enter data into the sheet before saving", true);
                 return;
             }
 
-            model.saveData(input.getImportType(), cellData, new BulkImportSubmitEventHandler() {
+            model.saveData(currentInput.getImportType(), cellData,
+                new BulkImportSubmitEventHandler() {
 
-                @Override
-                public void onSubmit(BulkImportSubmitEvent event) {
-                    if (event.isSuccess()) {
-                        //
-                        // TODO : reset
-                        view.showFeedback("Entries submitted successfully for verification.", false);
-                    } else {
-                        view.showFeedback("Error saving entries", true);
+                    @Override
+                    public void onSubmit(BulkImportSubmitEvent event) {
+                        if (event.isSuccess()) {
+                            //
+                            // TODO : reset
+                            view.showFeedback("Entries submitted successfully for verification.",
+                                false);
+                        } else {
+                            view.showFeedback("Error saving entries", true);
+                        }
                     }
-                }
-            });
+                });
         }
     }
 
     private class SheetResetHandler implements ClickHandler {
-        private final NewBulkInput input;
-
-        public SheetResetHandler(NewBulkInput input) {
-            this.input = input;
-        }
 
         @Override
         public void onClick(ClickEvent event) {
-            input.getSheet().clear();
+            // TODO : ask for confirmation
+            currentInput.getSheet().clear();
         }
     }
 
     private class SheetDraftSaveHandler implements ClickHandler {
 
-        private final SheetHeaderPanel panel;
-        private final NewBulkInput input;
-
-        public SheetDraftSaveHandler(NewBulkInput input) {
-            this.panel = input.getSheetHeaderPanel();
-            this.input = input;
-        }
-
         @Override
         public void onClick(ClickEvent event) {
-            String name = panel.getDraftInput().getText();
-            if (name == null || name.isEmpty()) {
-                panel.getDraftInput().setStyleName("bulk_import_draft_input_error");
-                return;
-            }
-
-            // save draft
-            panel.getDraftInput().setStyleName("bulk_import_draft_input");
-            ArrayList<SheetFieldData[]> cellData = input.getSheet().getCellData();
+            String name = view.getDraftName();
+            currentInput.setName(name);
+            // TODO : validation for draft save
+            //            if (name == null || name.isEmpty()) {
+            //                panel.getDraftInput().setStyleName("bulk_import_draft_input_error");
+            //                return;
+            //            }
+            //
+            //            // save draft
+            //            panel.getDraftInput().setStyleName("bulk_import_draft_input");
+            ArrayList<SheetFieldData[]> cellData = currentInput.getSheet().getCellData();
             if (cellData == null || cellData.isEmpty()) {
                 view.showFeedback("Please enter data into the sheet before saving draft", true);
                 return;
             }
 
-            model.saveDraftData(input.getImportType(), name, cellData,
+            model.saveDraftData(currentInput.getImportType(), name, cellData,
                 new BulkImportDraftSubmitEventHandler() {
 
                     @Override
@@ -266,7 +263,44 @@ public class BulkImportPresenter extends AbstractPresenter {
                             MenuItem item = new MenuItem(info.getId(), info.getName(), info
                                     .getCount(), false);
                             view.addSavedDraftData(item, null); // TODO : deleteHandler
-                            panel.setDraftName(event.getDraftInfo().getName());
+                            currentInput.setName(info.getName());
+                            currentInput.setId(info.getId());
+
+                            view.setSheet(currentInput, false);
+                            view.setHeader(currentInput.getImportType().getDisplay()
+                                    + " Bulk Import");
+                        }
+                    }
+                });
+        }
+    }
+
+    private class SheetDraftUpdateHandler implements ClickHandler {
+
+        @Override
+        public void onClick(ClickEvent event) {
+            if (currentInput == null)
+                return;
+
+            long id = currentInput.getId();
+            EntryAddType type = currentInput.getImportType();
+            String name = currentInput.getName();
+            ArrayList<SheetFieldData[]> cellData = currentInput.getSheet().getCellData();
+
+            model.updateDraftData(id, type, name, cellData,
+                new BulkImportDraftSubmitEventHandler() {
+
+                    @Override
+                    public void onSubmit(BulkImportDraftSubmitEvent event) {
+                        if (event == null || event.getDraftInfo() == null)
+                            view.showFeedback("Error updating draft", true);
+                        else {
+                            BulkImportDraftInfo info = event.getDraftInfo();
+                            view.showFeedback("Update successful", false);
+                            // TODO : update menu with new counts
+                            //                            MenuItem item = new MenuItem(info.getId(), info.getName(), info
+                            //                                    .getCount(), false);
+                            //                            view.addSavedDraftData(item, null); // TODO : deleteHandler
                         }
                     }
                 });

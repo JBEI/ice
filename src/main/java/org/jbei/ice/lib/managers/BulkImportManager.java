@@ -64,6 +64,25 @@ public class BulkImportManager {
         }
     }
 
+    public static BulkImport updateBulkImportRecord(long id, BulkImport data)
+            throws ManagerException {
+        if (data == null) {
+            throw new ManagerException("Cannot create record from null data");
+        }
+
+        BulkImport current = retrieveById(id);
+        if (current == null)
+            throw new ManagerException("Record with id " + id + " does not exist");
+
+        try {
+            data.setId(current.getId());
+            data.setCreationTime(current.getCreationTime());
+            return (BulkImport) DAO.save(data);
+        } catch (DAOException e) {
+            throw new ManagerException("Exception updating bulk import record " + id, e);
+        }
+    }
+
     /**
      * Delete the given {@link BulkImport} object in the database.
      * 

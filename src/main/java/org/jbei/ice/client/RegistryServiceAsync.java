@@ -158,4 +158,8 @@ public interface RegistryServiceAsync {
 
     void updatePermission(String sessionId, long id, ArrayList<PermissionInfo> permissions,
             AsyncCallback<Boolean> callback);
+
+    void updateBulkImportDraft(String sessionId, long id, String email, String name,
+            ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary,
+            AsyncCallback<BulkImportDraftInfo> asyncCallback);
 }

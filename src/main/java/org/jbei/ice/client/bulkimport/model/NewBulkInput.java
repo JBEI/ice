@@ -1,6 +1,5 @@
 package org.jbei.ice.client.bulkimport.model;
 
-import org.jbei.ice.client.bulkimport.panel.SheetHeaderPanel;
 import org.jbei.ice.client.bulkimport.sheet.Sheet;
 import org.jbei.ice.shared.EntryAddType;
 
@@ -15,10 +14,11 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  */
 public class NewBulkInput extends Composite {
 
-    private final SheetHeaderPanel panel;
+    private long id;
     private final VerticalPanel layout;
     private final Sheet sheet;
     private final EntryAddType type;
+    private String name;
 
     public NewBulkInput(EntryAddType type, Sheet sheet) {
         layout = new VerticalPanel();
@@ -26,13 +26,7 @@ public class NewBulkInput extends Composite {
         this.sheet = sheet;
         this.type = type;
 
-        panel = new SheetHeaderPanel();
-        layout.add(panel);
         layout.add(sheet);
-    }
-
-    public SheetHeaderPanel getSheetHeaderPanel() {
-        return this.panel;
     }
 
     public Sheet getSheet() {
@@ -41,5 +35,21 @@ public class NewBulkInput extends Composite {
 
     public EntryAddType getImportType() {
         return this.type;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

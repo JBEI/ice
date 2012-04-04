@@ -1247,6 +1247,7 @@ td.datePickerMonth {
     font-weight: bold;
     border-left: 1px solid #F1F1F1;
     text-transform: uppercase;
+    font-style: italic;
 }
 
 .add_new_entry_main_content_header {

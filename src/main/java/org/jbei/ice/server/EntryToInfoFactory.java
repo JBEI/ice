@@ -204,10 +204,16 @@ public class EntryToInfoFactory {
 
         // seed specific
         ArabidopsisSeed seed = (ArabidopsisSeed) entry;
-        PlantType type = PlantType.valueOf(seed.getPlantType().name());
-        info.setPlantType(type);
-        Generation generation = Generation.valueOf(seed.getGeneration().name());
-        info.setGeneration(generation);
+
+        if (seed.getPlantType() != null) {
+            PlantType type = PlantType.valueOf(seed.getPlantType().name());
+            info.setPlantType(type);
+        }
+
+        if (seed.getGeneration() != null) {
+            Generation generation = Generation.valueOf(seed.getGeneration().name());
+            info.setGeneration(generation);
+        }
         info.setHomozygosity(seed.getHomozygosity());
         info.setEcotype(seed.getEcotype());
         info.setParents(seed.getParents());

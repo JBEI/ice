@@ -8,14 +8,13 @@ import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.shared.EntryAddType;
 
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 public interface IBulkImportView {
 
     void setHeader(String header);
-
-    void setSheet(NewBulkInput bulkImput);
 
     Widget asWidget();
 
@@ -34,4 +33,18 @@ public interface IBulkImportView {
     void addToggleMenuHandler(ClickHandler handler);
 
     boolean getMenuVisibility();
+
+    void setToggleMenuVisiblity(boolean visible);
+
+    void setSheet(NewBulkInput input, boolean isNew);
+
+    HandlerRegistration setDraftUpateHandler(ClickHandler handler);
+
+    String getDraftName();
+
+    void setSubmitHandler(ClickHandler submitHandler);
+
+    void setResetHandler(ClickHandler resetHandler);
+
+    void setDraftSaveHandler(ClickHandler draftSaveHandler);
 }

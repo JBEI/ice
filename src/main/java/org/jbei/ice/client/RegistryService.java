@@ -138,4 +138,7 @@ public interface RegistryService extends RemoteService {
     SampleStorage createSample(String sessionId, SampleStorage sampleStorage, long entryId);
 
     boolean updatePermission(String sessionId, long id, ArrayList<PermissionInfo> permissions);
+
+    BulkImportDraftInfo updateBulkImportDraft(String sessionId, long id, String email, String name,
+            ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary);
 }

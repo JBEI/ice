@@ -1093,7 +1093,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         for (BulkImportEntryData datum : data) {
             Entry entry = datum.getEntry();
             entry.setOwnerEmail(ownerEmail);
-            // TODO : attachments etc as paramaters to the following method call
+            // TODO : attachments etc as parameters to the following method call
             EntryInfo info = EntryToInfoFactory.getInfo(entry, null, null, null, false);
             primary.add(info);
         }
@@ -1116,6 +1116,36 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
 
         return draftInfo;
+    }
+
+    @Override
+    public BulkImportDraftInfo updateBulkImportDraft(String sessionId, long id, String email,
+            String name, ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary) {
+        Account account;
+        try {
+            account = retrieveAccountForSid(sessionId);
+            if (account == null)
+                return null;
+
+            BulkImport draft = createBulkImport(account, primary, secondary, email);
+            draft.setName(name);
+            BulkImport result = BulkImportManager.updateBulkImportRecord(id, draft);
+
+            // result to DTO
+            BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
+            draftInfo.setId(result.getId());
+            draftInfo.setCount(result.getPrimaryData().size());
+            draftInfo.setCreated(result.getCreationTime());
+            draftInfo.setName(result.getName());
+            return draftInfo;
+
+        } catch (ManagerException e) {
+            Logger.error(e);
+            return null;
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return null;
+        }
     }
 
     @Override
@@ -1829,4 +1859,5 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         return false;
     }
+
 }

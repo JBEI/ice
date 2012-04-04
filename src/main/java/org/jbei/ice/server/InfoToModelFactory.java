@@ -106,12 +106,18 @@ public class InfoToModelFactory {
             seed.setHarvestDate(seedInfo.getHarvestDate());
             seed.setEcotype(seedInfo.getEcotype());
             seed.setParents(seedInfo.getParents());
-            ArabidopsisSeed.Generation generation = ArabidopsisSeed.Generation.valueOf(seedInfo
-                    .getGeneration().name());
-            seed.setGeneration(generation);
-            ArabidopsisSeed.PlantType plantType = ArabidopsisSeed.PlantType.valueOf(seedInfo
-                    .getPlantType().name());
-            seed.setPlantType(plantType);
+
+            if (seedInfo.getGeneration() != null) {
+                ArabidopsisSeed.Generation generation = ArabidopsisSeed.Generation.valueOf(seedInfo
+                        .getGeneration().name());
+                seed.setGeneration(generation);
+            }
+
+            if (seedInfo.getPlantType() != null) {
+                ArabidopsisSeed.PlantType plantType = ArabidopsisSeed.PlantType.valueOf(seedInfo
+                        .getPlantType().name());
+                seed.setPlantType(plantType);
+            }
 
             entry = seed;
             break;

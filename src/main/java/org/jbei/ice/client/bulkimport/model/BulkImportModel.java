@@ -35,8 +35,7 @@ public class BulkImportModel {
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    Window.alert("error");
-                    //                    feedback.setFailureMessage("Server Error");
+                    Window.alert("Error retrieving saved drafts");
                 }
 
                 @Override
@@ -62,6 +61,36 @@ public class BulkImportModel {
 
         service.saveBulkImportDraft(AppController.sessionId, AppController.accountInfo.getEmail(),
             name, primary, secondary, new AsyncCallback<BulkImportDraftInfo>() {
+
+                @Override
+                public void onSuccess(BulkImportDraftInfo result) {
+                    handler.onSubmit(new BulkImportDraftSubmitEvent(result));
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    handler.onSubmit(null);
+                }
+            });
+    }
+
+    public void updateDraftData(long id, EntryAddType type, String name,
+            ArrayList<SheetFieldData[]> data, final BulkImportDraftSubmitEventHandler handler) {
+        SheetModel model = ModelFactory.getModelForType(type);
+        if (model == null) {
+            handler.onSubmit(null);
+            return;
+        }
+
+        ArrayList<EntryInfo> primary = new ArrayList<EntryInfo>();
+        ArrayList<EntryInfo> secondary = new ArrayList<EntryInfo>();
+
+        // arrays get filled out here
+        model.createInfo(data, primary, secondary);
+
+        service.updateBulkImportDraft(AppController.sessionId, id,
+            AppController.accountInfo.getEmail(), name, primary, secondary,
+            new AsyncCallback<BulkImportDraftInfo>() {
 
                 @Override
                 public void onSuccess(BulkImportDraftInfo result) {
@@ -118,5 +147,4 @@ public class BulkImportModel {
                 }
             });
     }
-
 }
