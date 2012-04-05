@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.managers;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -15,7 +16,7 @@ import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 /**
  * Manager to manipulate {@link Group} objects.
  * 
- * @author Timothy Ham, Zinovii Dmytriv
+ * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  * 
  */
 public class GroupManager {
@@ -118,6 +119,29 @@ public class GroupManager {
             }
         }
         return groups;
+    }
+
+    public static Set<Group> getMatchingGroups(String token, int limit) throws ManagerException {
+        Session session = DAO.newSession();
+        try {
+            token = token.toUpperCase();
+            String queryString = "from " + Group.class.getName() + " where (UPPER(label) like '%"
+                    + token + "%')";
+            Query query = session.createQuery(queryString);
+            query.setFetchSize(limit);
+
+            @SuppressWarnings("unchecked")
+            HashSet<Group> result = new HashSet<Group>(query.list());
+            return result;
+
+        } catch (Exception e) {
+            Logger.error(e);
+            throw new ManagerException("Error retrieving matching groups", e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
     }
 
     /**
@@ -223,39 +247,5 @@ public class GroupManager {
             throw new ManagerException(msg, e);
         }
         return result;
-    }
-
-    public static void main(String[] args) {
-        try {
-
-            /*
-            Group g = create("Test", "test group", null);
-            String uuid = g.getUuid();
-            int id = g.getId();
-            Group gotById = getGroup(g.getId());
-            Group gotByUuid = getGroup(g.getUuid());
-            if (gotById != gotByUuid) {
-            	System.out.println("DOH!!!!");
-            }
-            gotByUuid.setLabel("Test-changed label");
-            Group updatedGroup = update(gotByUuid);
-            System.out.println("" + g.getId() + "=?" + updatedGroup.getId());
-            delete(g);
-            Group deletedGroup = getGroup(id);
-            if (deletedGroup == null) {
-            	System.out.println("OK!");
-            }
-             */
-
-            /*
-            Group jbeiGroup = create("JBEI", "JBEI root group", null);
-            Group fuelSynthesis = create("Fuel Synthesis", "Fuel Synthesis group", jbeiGroup);
-            */
-            get(1);
-
-        } catch (ManagerException e) {
-            e.printStackTrace();
-        }
-
     }
 }

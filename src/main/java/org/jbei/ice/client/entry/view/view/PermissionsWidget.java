@@ -1,306 +1,210 @@
 package org.jbei.ice.client.entry.view.view;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
-import org.jbei.ice.client.entry.view.PermissionsPresenter;
-import org.jbei.ice.client.entry.view.PermissionsPresenter.IPermissionsView;
+import org.jbei.ice.client.entry.view.model.PermissionSuggestOracle;
+import org.jbei.ice.client.entry.view.view.PermissionsPresenter.IPermissionsView;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
-import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 
-import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.TabLayoutPanel;
+import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.SuggestOracle;
+import com.google.gwt.user.client.ui.Tree;
+import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
+
+/**
+ * Widget for displaying the entry permissions
+ * 
+ * @author Hector Plahar
+ */
 
 public class PermissionsWidget extends Composite implements IPermissionsView {
 
-    private ListBox accountList;
-    private ListBox groupList;
-
-    private FlexTable layout;
-    private PermissionListBox readBox;
-    private PermissionListBox writeBox;
-    private Button saveButton;
-    private Button resetButton;
-
-    private TabLayoutPanel tabPanel;
+    private final FlexTable layout;
+    private final Tree readTree;
+    private final Tree rwTree;
+    private final TreeItem readRoot;
+    private final TreeItem rwRoot;
+    private final Label readAddLabel;
+    private final Label writeAddLabel;
     private final PermissionsPresenter presenter;
+    private final SuggestBox readSuggestBox;
+    private final SuggestBox writeSuggestBox;
+    private final TreeItem readItemBoxHolder;
+    private final TreeItem writeItemBoxHolder;
 
     public PermissionsWidget() {
-        readBox = new PermissionListBox();
-        writeBox = new PermissionListBox();
-
         layout = new FlexTable();
+        initWidget(layout);
+
         layout.setCellPadding(0);
         layout.setCellSpacing(0);
+        layout.addStyleName("permissions_display");
 
-        layout.setWidget(0, 0, createMainWidget());
-        layout.getFlexCellFormatter().setRowSpan(0, 0, 2);
-        layout.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
-        layout.setWidget(0, 1, createPermissionBoxWidget(readBox, "Read Allowed", false));
-        layout.setWidget(1, 0, createPermissionBoxWidget(writeBox, "Write Allowed", true));
+        // read
+        readAddLabel = new Label("Add");
+        readAddLabel.setStyleName("edit_permissions_label");
+        readAddLabel.addStyleName("display-inline");
 
-        HorizontalPanel panel = new HorizontalPanel();
-        saveButton = new Button("Save");
-        resetButton = new Button("Reset");
+        // read/write
+        writeAddLabel = new Label("Add");
+        writeAddLabel.setStyleName("edit_permissions_label");
+        writeAddLabel.addStyleName("display-inline");
 
-        panel.add(saveButton);
-        panel.add(resetButton);
-        layout.setWidget(2, 1, panel);
-        layout.getFlexCellFormatter().setRowSpan(2, 1, 2);
-        layout.getFlexCellFormatter().setHorizontalAlignment(2, 1, HasAlignment.ALIGN_RIGHT);
+        layout.setHTML(0, 0, "Permissions");
+        layout.getCellFormatter().setStyleName(0, 0, "permissions_sub_header");
 
-        initWidget(layout);
+        readSuggestBox = new SuggestBox(new PermissionSuggestOracle());
+        readSuggestBox.setWidth("130px");
+        readSuggestBox.setStyleName("permission_input_suggest");
+        readSuggestBox.setLimit(7);
+
+        writeSuggestBox = new SuggestBox(new PermissionSuggestOracle());
+        writeSuggestBox.setWidth("130px");
+        writeSuggestBox.setStyleName("permission_input_suggest");
+        writeSuggestBox.setLimit(7);
+
+        readItemBoxHolder = new TreeItem(readSuggestBox);
+        readItemBoxHolder.setVisible(false);
+        writeItemBoxHolder = new TreeItem(writeSuggestBox);
+        writeItemBoxHolder.setVisible(false);
+
+        readTree = new Tree();
+        readTree.setAnimationEnabled(true);
+        readTree.setStyleName("font-75em");
+
+        readRoot = new TreeItem(createReadRoot());
+        readTree.addItem(readRoot);
+        readRoot.addItem(readItemBoxHolder);
+
+        rwTree = new Tree();
+        rwTree.setAnimationEnabled(true);
+        rwTree.setStyleName("font-75em");
+        rwRoot = new TreeItem(createWriteRoot());
+
+        rwRoot.addItem(writeItemBoxHolder);
+        rwTree.addItem(rwRoot);
+
+        layout.setWidget(1, 0, readTree);
+        layout.setWidget(2, 0, rwTree);
+
+        rwRoot.setState(true, false);
+        readRoot.setState(true, false);
+
         presenter = new PermissionsPresenter(this);
     }
 
-    public PermissionsPresenter getPresenter() {
-        return this.presenter;
+    private Widget createReadRoot() {
+        HTMLPanel panel = new HTMLPanel(
+                "Read Allowed<span style=\"float:right; margin-left: 15px\" id=\"permissions_read_allowed_add_link\"></span>");
+        panel.add(readAddLabel, "permissions_read_allowed_add_link");
+        return panel;
+    }
+
+    private Widget createWriteRoot() {
+        HTMLPanel panel = new HTMLPanel(
+                "Write Allowed<span style=\"float:right; margin-left: 15px\" id=\"permissions_write_allowed_add_link\"></span>");
+        panel.add(writeAddLabel, "permissions_write_allowed_add_link");
+        return panel;
     }
 
     @Override
-    public HandlerRegistration addUpdatePermissionsHandler(ClickHandler handler) {
-        return saveButton.addClickHandler(handler);
+    public HandlerRegistration addReadBoxSelectionHandler(
+            SelectionHandler<SuggestOracle.Suggestion> handler) {
+        return readSuggestBox.addSelectionHandler(handler);
     }
 
-    /**
-     * Creates widget that contains the account list and group list in separate tab
-     * 
-     * @return created widget
-     */
-    private Widget createMainWidget() {
-
-        tabPanel = new TabLayoutPanel(2.2, Unit.EM);
-        tabPanel.setSize("200px", "350px");
-        Label groupsLabel = new Label("Groups");
-        Label usersLabel = new Label("Users");
-
-        // create accounts list
-        accountList = new ListBox(true);
-        accountList.setSize("200px", "350px");
-        accountList.setStyleName("input_box");
-
-        // create groups list
-        groupList = new ListBox(true);
-        groupList.setSize("200px", "350px");
-        groupList.setStyleName("input_box");
-
-        tabPanel.add(accountList, usersLabel);
-        tabPanel.add(groupList, groupsLabel);
-
-        return tabPanel;
+    @Override
+    public HandlerRegistration addWriteBoxSelectionHandler(
+            SelectionHandler<SuggestOracle.Suggestion> handler) {
+        return writeSuggestBox.addSelectionHandler(handler);
     }
 
-    private Widget createPermissionBoxWidget(final PermissionListBox box, String caption,
-            boolean isWrite) {
-
-        FlexTable table = new FlexTable();
-        table.setCellPadding(0);
-        table.setCellSpacing(0);
-
-        Button addRead = new Button("Add >>");
-        addRead.addClickHandler(new AddToClickHandler(isWrite));
-
-        Button removeRead = new Button("Remove");
-        removeRead.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                box.removeSelected();
-            }
-        });
-
-        HTMLPanel panel = new HTMLPanel(
-                "<div style=\"padding: 10px;\"><span id=\"add\"></span><br /><span id=\"remove\"></span></div>");
-
-        panel.add(removeRead, "remove");
-        panel.add(addRead, "add");
-
-        table.setWidget(0, 0, panel);
-        table.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_MIDDLE);
-        table.getFlexCellFormatter().setHeight(0, 0, "150px");
-
-        table.setWidget(0, 1, box);
-        table.getFlexCellFormatter().setRowSpan(0, 1, 2);
-
-        CaptionPanel captionPanel = new CaptionPanel(caption);
-        captionPanel.add(table);
-
-        return captionPanel;
+    @Override
+    public HandlerRegistration setReadAddClickHandler(ClickHandler handler) {
+        return readAddLabel.addClickHandler(handler);
     }
 
-    // public methods
-    public void setExistingPermissions(ArrayList<PermissionInfo> permissions) {
-        if (permissions == null)
-            return;
+    @Override
+    public HandlerRegistration setWriteAddClickHandler(ClickHandler handler) {
+        return writeAddLabel.addClickHandler(handler);
+    }
 
-        for (PermissionInfo info : permissions) {
+    @Override
+    public void setWriteBoxVisibility(boolean visible) {
+        writeItemBoxHolder.setVisible(visible);
+        if (visible)
+            writeSuggestBox.getTextBox().setFocus(true);
+    }
+
+    @Override
+    public void setReadBoxVisibility(boolean visible) {
+        readItemBoxHolder.setVisible(visible);
+        if (visible)
+            readSuggestBox.getTextBox().setFocus(true);
+    }
+
+    public void setPermissionData(ArrayList<PermissionInfo> data) {
+
+        ArrayList<PermissionItem> itemList = new ArrayList<PermissionItem>();
+
+        for (PermissionInfo info : data) {
+            PermissionItem item = null;
             switch (info.getType()) {
             case READ_ACCOUNT:
+                item = new PermissionItem(info.getId(), info.getDisplay(), false, false);
+                break;
+
             case READ_GROUP:
-                readBox.addItem(info.getDisplay(), String.valueOf(info.getId()), info.getType());
+                item = new PermissionItem(info.getId(), info.getDisplay(), true, false);
                 break;
 
             case WRITE_ACCOUNT:
+                item = new PermissionItem(info.getId(), info.getDisplay(), false, true);
+                break;
+
             case WRITE_GROUP:
-                writeBox.addItem(info.getDisplay(), String.valueOf(info.getId()), info.getType());
+                item = new PermissionItem(info.getId(), info.getDisplay(), true, true);
                 break;
             }
+
+            if (item != null)
+                itemList.add(item);
         }
+        setPermissionItems(itemList);
     }
 
-    public void setAccountData(LinkedHashMap<Long, String> data) {
-        if (data == null || data.isEmpty())
+    private void setPermissionItems(ArrayList<PermissionItem> data) {
+
+        if (data == null)
             return;
 
-        this.accountList.clear();
-        for (Map.Entry<Long, String> entry : data.entrySet()) {
-            String name = entry.getValue();
-
-            if (name.trim().isEmpty())
-                continue;
-            accountList.addItem(name, String.valueOf(entry.getKey()));
-        }
-    }
-
-    public void setGroupData(LinkedHashMap<Long, String> data) {
-        if (data == null || data.isEmpty())
-            return;
-
-        this.groupList.clear();
-        for (Long id : data.keySet()) {
-            String name = data.get(id);
-            groupList.addItem(name, String.valueOf(id));
+        for (PermissionItem datum : data) {
+            if (datum.isWrite())
+                rwRoot.addItem(datum.getName());
+            else
+                readRoot.addItem(datum.getName());
         }
     }
 
     @Override
-    public HashMap<PermissionType, HashSet<String>> getReadSelected() {
-        return readBox.getData();
+    public void addReadItem(PermissionItem item) {
+        readRoot.addItem(item.getName());
     }
 
     @Override
-    public HashMap<PermissionType, HashSet<String>> getWriteSelected() {
-        return writeBox.getData();
+    public void addWriteItem(PermissionItem item) {
+        rwRoot.addItem(item.getName());
     }
 
-    // inner classes
-    private class PermissionListBox implements IsWidget {
-        private final ListBox listBox;
-        private final HashMap<PermissionType, HashSet<String>> data;
-
-        public PermissionListBox() {
-
-            listBox = new ListBox(true);
-            listBox.setSize("200px", "150px");
-            listBox.setStyleName("input_box");
-            data = new HashMap<PermissionType, HashSet<String>>();
-        }
-
-        public void addItem(String item, String value, PermissionType type) {
-
-            HashSet<String> typeData = this.data.get(type);
-            if (typeData == null) {
-                typeData = new HashSet<String>();
-                this.data.put(type, typeData);
-            } else {
-                // already added
-                if (typeData.contains(value))
-                    return;
-            }
-
-            typeData.add(value);
-            listBox.addItem(item, value);
-        }
-
-        public void removeSelected() {
-            int i = listBox.getSelectedIndex();
-            // TODO : cannot remove from list
-
-            while (i != -1) {
-                String value = listBox.getValue(i);
-
-                if (data.remove(value) != null)
-                    listBox.removeItem(i);
-                i = listBox.getSelectedIndex();
-            }
-        }
-
-        public HashMap<PermissionType, HashSet<String>> getData() {
-            return this.data;
-        }
-
-        @Override
-        public Widget asWidget() {
-            return listBox;
-        }
-    }
-
-    /**
-     * ClickHandler implementation for adding items from the main
-     * lists (accounts and groups) to the read and write boxes
-     */
-    private class AddToClickHandler implements ClickHandler {
-
-        private final boolean isWrite;
-
-        public AddToClickHandler(boolean isWrite) {
-            this.isWrite = isWrite;
-        }
-
-        @Override
-        public void onClick(ClickEvent event) {
-            int selected = tabPanel.getSelectedIndex();
-
-            if (selected == 0) {
-                // user selected
-                int i = accountList.getSelectedIndex();
-                if (i == -1)
-                    return;
-
-                for (; i < accountList.getItemCount(); i += 1) {
-                    if (accountList.isItemSelected(i)) {
-                        readBox.addItem(accountList.getItemText(i), accountList.getValue(i),
-                            PermissionType.READ_ACCOUNT);
-                        if (isWrite) {
-                            writeBox.addItem(accountList.getItemText(i), accountList.getValue(i),
-                                PermissionType.WRITE_ACCOUNT);
-                        }
-                    }
-                }
-            } else {
-                // group tab selected
-                int j = groupList.getSelectedIndex();
-                if (j == -1)
-                    return;
-
-                for (; j < groupList.getItemCount(); j += 1) {
-                    if (groupList.isItemSelected(j)) {
-                        readBox.addItem(groupList.getItemText(j), groupList.getValue(j),
-                            PermissionType.READ_GROUP);
-                        if (isWrite) {
-                            writeBox.addItem(groupList.getItemText(j), groupList.getValue(j),
-                                PermissionType.WRITE_GROUP);
-                        }
-                    }
-                }
-            }
-        }
+    public PermissionsPresenter getPresenter() {
+        return presenter;
     }
 }

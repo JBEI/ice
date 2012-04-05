@@ -55,6 +55,13 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 	border: 1px solid #24375c;
 }
 
+.permission_input_suggest {
+	border:1px solid #ccc; 
+	font-size: 11px; 
+	color: #555;
+	margin-left: 0px;
+}
+
 .btn_reset_entry_form {
 	padding: 5px;
 	width: 90px;

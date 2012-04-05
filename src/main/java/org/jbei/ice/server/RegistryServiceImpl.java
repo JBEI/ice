@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -82,8 +81,12 @@ import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
+import org.jbei.ice.shared.dto.permission.PermissionSuggestion;
 import org.jbei.ice.web.utils.WebUtils;
 
+import com.google.gwt.user.client.ui.SuggestOracle;
+import com.google.gwt.user.client.ui.SuggestOracle.Request;
+import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 // TODO : this whole class needs to be redone. The logic needs to be moved to controllers/managers
@@ -1608,37 +1611,32 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public LinkedHashMap<Long, String> retrieveAllAccounts(String sessionId) {
+    public SuggestOracle.Response getPermissionSuggestions(Request req) {
 
-        LinkedHashMap<Long, String> results = null;
+        SuggestOracle.Response resp = new SuggestOracle.Response();
+        List<Suggestion> suggestions = new ArrayList<Suggestion>(req.getLimit());
 
         try {
-            Set<Account> accounts = AccountController.getAllByFirstName();
-            results = new LinkedHashMap<Long, String>();
+            // TODO : split tokens if there are spaces. this is for a manager
+            Set<Account> accounts = AccountManager.getMatchingAccounts(req.getQuery(),
+                req.getLimit());
             for (Account account : accounts) {
-                results.put(account.getId(), account.getFullName());
+                PermissionSuggestion object = new PermissionSuggestion(PermissionType.READ_ACCOUNT,
+                        account.getId(), account.getFullName());
+                suggestions.add(object);
             }
-        } catch (ControllerException e) {
-            Logger.error(e);
-        }
-
-        return results;
-    }
-
-    @Override
-    public LinkedHashMap<Long, String> retrieveAllGroups(String sessionId) {
-        LinkedHashMap<Long, String> results = null;
-
-        try {
-            Set<Group> groups = GroupManager.getAll();
-            results = new LinkedHashMap<Long, String>();
+            Set<Group> groups = GroupManager.getMatchingGroups(req.getQuery(), req.getLimit());
             for (Group group : groups) {
-                results.put(group.getId(), group.getLabel());
+                PermissionSuggestion object = new PermissionSuggestion(PermissionType.READ_GROUP,
+                        group.getId(), group.getLabel());
+                suggestions.add(object);
             }
         } catch (ManagerException e) {
             Logger.error(e);
         }
-        return results;
+
+        resp.setSuggestions(suggestions);
+        return resp;
     }
 
     @Override
@@ -1792,8 +1790,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean updatePermission(String sessionId, long entryId,
-            ArrayList<PermissionInfo> permissions) {
+    public boolean addPermission(String sessionId, long entryId, PermissionInfo permissionInfo) {
 
         Account account;
         try {
@@ -1808,45 +1805,34 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (entry == null)
                 return false;
 
-            HashSet<Account> readAccounts = new HashSet<Account>();
-            HashSet<Account> writeAccounts = new HashSet<Account>();
-            HashSet<Group> readGroups = new HashSet<Group>();
-            HashSet<Group> writeGroups = new HashSet<Group>();
+            long id = permissionInfo.getId();
 
-            for (PermissionInfo permissionInfo : permissions) {
-                long id = permissionInfo.getId();
+            switch (permissionInfo.getType()) {
+            case READ_ACCOUNT:
+                Account readAccount = AccountController.get(id);
+                if (readAccount != null)
+                    permissionController.addReadUser(entry, readAccount);
+                break;
 
-                switch (permissionInfo.getType()) {
-                case READ_ACCOUNT:
-                    Account readAccount = AccountController.get(id);
-                    if (readAccount != null)
-                        readAccounts.add(readAccount);
-                    break;
+            case READ_GROUP:
+                Group readGroup = GroupManager.get(id);
+                if (readGroup != null)
+                    permissionController.addReadGroup(entry, readGroup);
+                break;
 
-                case READ_GROUP:
-                    Group readGroup = GroupManager.get(id);
-                    if (readGroup != null)
-                        readGroups.add(readGroup);
-                    break;
+            case WRITE_ACCOUNT:
+                Account writeAccount = AccountController.get(id);
+                if (writeAccount != null)
+                    permissionController.addWriteUser(entry, writeAccount);
+                break;
 
-                case WRITE_ACCOUNT:
-                    Account writeAccount = AccountController.get(id);
-                    if (writeAccount != null)
-                        writeAccounts.add(writeAccount);
-                    break;
-
-                case WRITE_GROUP:
-                    Group writeGroup = GroupManager.get(id);
-                    if (writeGroup != null)
-                        writeGroups.add(writeGroup);
-                    break;
-                }
+            case WRITE_GROUP:
+                Group writeGroup = GroupManager.get(id);
+                if (writeGroup != null)
+                    permissionController.addWriteGroup(entry, writeGroup);
+                break;
             }
 
-            permissionController.setReadGroup(entry, readGroups);
-            permissionController.setWriteGroup(entry, writeGroups);
-            permissionController.setReadUser(entry, readAccounts);
-            permissionController.setWriteUser(entry, writeAccounts);
             return true;
 
         } catch (ControllerException e) {

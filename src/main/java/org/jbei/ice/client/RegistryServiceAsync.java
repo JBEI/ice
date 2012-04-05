@@ -3,7 +3,6 @@ package org.jbei.ice.client;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
 import org.jbei.ice.client.entry.view.model.SampleStorage;
@@ -24,6 +23,7 @@ import org.jbei.ice.shared.dto.StorageInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.SuggestOracle;
 
 public interface RegistryServiceAsync {
 
@@ -44,6 +44,10 @@ public interface RegistryServiceAsync {
             AsyncCallback<ArrayList<EntryInfo>> callback);
 
     void retrieveEntryDetails(String sessionId, long id, AsyncCallback<EntryInfo> callback);
+
+    // permissions
+    void getPermissionSuggestions(SuggestOracle.Request req,
+            AsyncCallback<SuggestOracle.Response> callback);
 
     /**
      * retrieves the list of entries for the folder
@@ -129,10 +133,6 @@ public interface RegistryServiceAsync {
     void retrievePermissionData(String sessionId, Long entryId,
             AsyncCallback<ArrayList<PermissionInfo>> callback);
 
-    void retrieveAllGroups(String sessionId, AsyncCallback<LinkedHashMap<Long, String>> callback);
-
-    void retrieveAllAccounts(String sessionId, AsyncCallback<LinkedHashMap<Long, String>> callback);
-
     // news
 
     void retrieveNewsItems(String sessionId, AsyncCallback<ArrayList<NewsItem>> callback);
@@ -156,10 +156,10 @@ public interface RegistryServiceAsync {
 
     void linkifyText(String value, AsyncCallback<String> callback);
 
-    void updatePermission(String sessionId, long id, ArrayList<PermissionInfo> permissions,
-            AsyncCallback<Boolean> callback);
-
     void updateBulkImportDraft(String sessionId, long id, String email, String name,
             ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary,
             AsyncCallback<BulkImportDraftInfo> asyncCallback);
+
+    void addPermission(String sessionId, long entryId, PermissionInfo permission,
+            AsyncCallback<Boolean> callback);
 }

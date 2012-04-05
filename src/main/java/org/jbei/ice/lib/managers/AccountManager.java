@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.managers;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -8,6 +9,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Moderator;
 import org.jbei.ice.lib.models.SessionData;
@@ -88,6 +90,31 @@ public class AccountManager {
         }
 
         return accounts;
+    }
+
+    public static Set<Account> getMatchingAccounts(String token, int limit) throws ManagerException {
+        Session session = DAO.newSession();
+        try {
+            token = token.toUpperCase();
+            String queryString = "from " + Account.class.getName()
+                    + " where (UPPER(firstName) like '%" + token
+                    + "%') OR (UPPER(lastName) like '%" + token + "%')";
+            Query query = session.createQuery(queryString);
+            query.setFetchSize(limit);
+
+            @SuppressWarnings("unchecked")
+            HashSet<Account> result = new HashSet<Account>(query.list());
+            return result;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Logger.error(e);
+            throw new ManagerException(e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
     }
 
     /**

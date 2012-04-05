@@ -78,6 +78,43 @@ public class PermissionsController extends Controller {
         }
     }
 
+    public void addReadUser(Entry entry, Account account) throws ManagerException,
+            PermissionException {
+        if (PermissionManager.hasWritePermission(entry.getId(), super.getAccount())) {
+            PermissionManager.addReadUser(entry, account);
+        } else {
+            throw new PermissionException("User " + super.getAccount().getEmail()
+                    + " does not have write permissions for entry " + entry.getId());
+        }
+    }
+
+    public void addReadGroup(Entry entry, Group readGroup) throws ManagerException,
+            PermissionException {
+        if (PermissionManager.hasWritePermission(entry.getId(), super.getAccount())) {
+            PermissionManager.addReadGroup(entry, readGroup);
+        } else {
+            throw new PermissionException("Write Permission not permitted");
+        }
+    }
+
+    public void addWriteUser(Entry entry, Account account) throws ManagerException,
+            PermissionException {
+        if (PermissionManager.hasWritePermission(entry.getId(), super.getAccount())) {
+            PermissionManager.addWriteUser(entry, account);
+        } else {
+            throw new PermissionException("Write Permission not permitted");
+        }
+    }
+
+    public void addWriteGroup(Entry entry, Group writeGroup) throws ManagerException,
+            PermissionException {
+        if (PermissionManager.hasWritePermission(entry.getId(), super.getAccount())) {
+            PermissionManager.addWriteGroup(entry, writeGroup);
+        } else {
+            throw new PermissionException("Write Permission not permitted");
+        }
+    }
+
     /**
      * Set write permissions for specified user {@link Account}s to the given {@link Entry}.
      * <p>
@@ -98,4 +135,5 @@ public class PermissionsController extends Controller {
             throw new PermissionException("Write Permission not permitted");
         }
     }
+
 }

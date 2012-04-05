@@ -2,9 +2,6 @@ package org.jbei.ice.client.entry.view;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map.Entry;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
@@ -20,7 +17,7 @@ import org.jbei.ice.client.entry.view.view.EntryView;
 import org.jbei.ice.client.entry.view.view.IEntryView;
 import org.jbei.ice.client.entry.view.view.MenuItem;
 import org.jbei.ice.client.entry.view.view.MenuItem.Menu;
-import org.jbei.ice.client.entry.view.view.PermissionItem;
+import org.jbei.ice.client.entry.view.view.PermissionsPresenter;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.event.FeedbackEvent;
@@ -30,9 +27,7 @@ import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryInfo.EntryType;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
-import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -133,57 +128,70 @@ public class EntryPresenter extends AbstractPresenter {
             }
         });
 
-        retrievePermissionData();
-
         // PERMISSIONS
-        display.addPermissionEditClickHandler(new ClickHandler() {
+        retrievePermissionData();
+        PermissionsPresenter pPresenter = display.getPermissionsWidget();
+        pPresenter.setReadAddSelectionHandler(new ReadBoxSelectionHandler() {
 
             @Override
-            public void onClick(ClickEvent event) {
-                display.showPermissionsWidget();
+            void updatePermission(final PermissionInfo info) {
+                long id = currentInfo.getId();
+                service.addPermission(AppController.sessionId, id, info,
+                    new AsyncCallback<Boolean>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                        }
+
+                        @Override
+                        public void onSuccess(Boolean result) {
+                            if (result)
+                                display.getPermissionsWidget().addReadItem(info);
+                        }
+                    });
+            }
+        });
+
+        pPresenter.setWriteAddSelectionHandler(new ReadBoxSelectionHandler() {
+
+            @Override
+            void updatePermission(final PermissionInfo info) {
+                long id = currentInfo.getId();
+                service.addPermission(AppController.sessionId, id, info,
+                    new AsyncCallback<Boolean>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                        }
+
+                        @Override
+                        public void onSuccess(Boolean result) {
+                            if (result)
+                                display.getPermissionsWidget().addWriteItem(info);
+                        }
+                    });
             }
         });
     }
 
+    /**
+     * retrieves the existing permission for the current entry
+     */
     private void retrievePermissionData() {
         service.retrievePermissionData(AppController.sessionId, this.currentContext.getCurrent(),
             new AsyncCallback<ArrayList<PermissionInfo>>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    GWT.log(caught.getMessage()); // TODO : show some indication under the permission widget
+                    display.getPermissionsWidget().onErrRetrievingExistingPermissions();
                 }
 
                 @Override
                 public void onSuccess(ArrayList<PermissionInfo> result) {
+                    if (result == null)
+                        return;
 
-                    display.getPermissionsWidget().setPermissionData(result);
-
-                    ArrayList<PermissionItem> data = new ArrayList<PermissionItem>();
-
-                    for (PermissionInfo info : result) {
-                        PermissionItem item = null;
-                        switch (info.getType()) {
-                        case READ_ACCOUNT:
-                            item = new PermissionItem(info.getId(), info.getDisplay(), false, false);
-                            break;
-
-                        case READ_GROUP:
-                            item = new PermissionItem(info.getId(), info.getDisplay(), true, false);
-                            break;
-
-                        case WRITE_ACCOUNT:
-                            item = new PermissionItem(info.getId(), info.getDisplay(), false, true);
-                            break;
-
-                        case WRITE_GROUP:
-                            item = new PermissionItem(info.getId(), info.getDisplay(), true, true);
-                            break;
-                        }
-                        if (item != null)
-                            data.add(item);
-                    }
-                    display.setPermissionData(data);
+                    display.setPermissionData(result);
                 }
             });
     }
@@ -316,86 +324,86 @@ public class EntryPresenter extends AbstractPresenter {
     }
 
     private void retrieveAccountsAndGroups() {
-        final PermissionsPresenter pPresent = display.getPermissionsWidget();
+        //        final PermissionsPresenter pPresenter = display.getPermissionsWidget();
 
-        service.retrieveAllAccounts(AppController.sessionId,
-            new AsyncCallback<LinkedHashMap<Long, String>>() {
-
-                @Override
-                public void onSuccess(LinkedHashMap<Long, String> result) {
-                    pPresent.setAccountData(result);
-                }
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert(caught.getMessage());
-                }
-            });
-
-        service.retrieveAllGroups(AppController.sessionId,
-            new AsyncCallback<LinkedHashMap<Long, String>>() {
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert(caught.getMessage());
-                }
-
-                @Override
-                public void onSuccess(LinkedHashMap<Long, String> result) {
-                    pPresent.setGroupData(result);
-                }
-            });
+        //        service.retrieveAllAccounts(AppController.sessionId,
+        //            new AsyncCallback<LinkedHashMap<String, String>>() {
+        //
+        //                @Override
+        //                public void onSuccess(LinkedHashMap<String, String> result) {
+        //                    pPresenter.setAccountData(result);
+        //                }
+        //
+        //                @Override
+        //                public void onFailure(Throwable caught) {
+        //                    Window.alert(caught.getMessage());
+        //                }
+        //            });
+        //
+        //        service.retrieveAllGroups(AppController.sessionId,
+        //            new AsyncCallback<LinkedHashMap<Long, String>>() {
+        //
+        //                @Override
+        //                public void onFailure(Throwable caught) {
+        //                    Window.alert(caught.getMessage());
+        //                }
+        //
+        //                @Override
+        //                public void onSuccess(LinkedHashMap<Long, String> result) {
+        //                    pPresenter.setGroupData(result);
+        //                }
+        //            });
 
         // handler for updating permissions
-        addUpdatePermissionsHandler();
+        //        addUpdatePermissionsHandler();
     }
 
-    private void addUpdatePermissionsHandler() {
-        final PermissionsPresenter pPresent = display.getPermissionsWidget();
-        pPresent.addUpdatePermissionsHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                ArrayList<PermissionInfo> permissions = new ArrayList<PermissionInfo>();
-                for (Entry<PermissionType, HashSet<String>> p : pPresent.getReadSelected()
-                        .entrySet()) {
-
-                    PermissionType type = p.getKey();
-
-                    for (String id : p.getValue()) {
-                        PermissionInfo info = new PermissionInfo(type, Long.decode(id), "");
-                        permissions.add(info);
-                    }
-                }
-
-                for (Entry<PermissionType, HashSet<String>> p : pPresent.getWriteSelected()
-                        .entrySet()) {
-
-                    PermissionType type = p.getKey();
-
-                    for (String id : p.getValue()) {
-                        PermissionInfo info = new PermissionInfo(type, Long.decode(id), "");
-                        permissions.add(info);
-                    }
-                }
-
-                // update
-                service.updatePermission(AppController.sessionId, currentInfo.getId(), permissions,
-                    new AsyncCallback<Boolean>() {
-
-                        @Override
-                        public void onSuccess(Boolean result) {
-                            // TODO Auto-generated method stub
-                        }
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            Window.alert("Error updating permissions");
-                        }
-                    });
-            }
-        });
-    }
+    //    private void addUpdatePermissionsHandler() {
+    //        final PermissionsPresenter pPresent = display.getPermissionsWidget();
+    //        pPresent.addUpdatePermissionsHandler(new ClickHandler() {
+    //
+    //            @Override
+    //            public void onClick(ClickEvent event) {
+    //                ArrayList<PermissionInfo> permissions = new ArrayList<PermissionInfo>();
+    //                for (Entry<PermissionType, HashSet<String>> p : pPresent.getReadSelected()
+    //                        .entrySet()) {
+    //
+    //                    PermissionType type = p.getKey();
+    //
+    //                    for (String id : p.getValue()) {
+    //                        PermissionInfo info = new PermissionInfo(type, Long.decode(id), "");
+    //                        permissions.add(info);
+    //                    }
+    //                }
+    //
+    //                for (Entry<PermissionType, HashSet<String>> p : pPresent.getWriteSelected()
+    //                        .entrySet()) {
+    //
+    //                    PermissionType type = p.getKey();
+    //
+    //                    for (String id : p.getValue()) {
+    //                        PermissionInfo info = new PermissionInfo(type, Long.decode(id), "");
+    //                        permissions.add(info);
+    //                    }
+    //                }
+    //
+    //                // update
+    //                service.updatePermission(AppController.sessionId, currentInfo.getId(), permissions,
+    //                    new AsyncCallback<Boolean>() {
+    //
+    //                        @Override
+    //                        public void onSuccess(Boolean result) {
+    //                            // TODO Auto-generated method stub
+    //                        }
+    //
+    //                        @Override
+    //                        public void onFailure(Throwable caught) {
+    //                            Window.alert("Error updating permissions");
+    //                        }
+    //                    });
+    //            }
+    //        });
+    //    }
 
     private void retrieveEntryDetails() {
 

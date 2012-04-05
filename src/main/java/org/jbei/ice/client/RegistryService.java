@@ -3,7 +3,6 @@ package org.jbei.ice.client;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
 import org.jbei.ice.client.entry.view.model.SampleStorage;
@@ -25,6 +24,8 @@ import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.client.ui.SuggestOracle;
+import com.google.gwt.user.client.ui.SuggestOracle.Request;
 
 /**
  * The client side stub for the RPC service.
@@ -109,10 +110,6 @@ public interface RegistryService extends RemoteService {
 
     ArrayList<PermissionInfo> retrievePermissionData(String sessionId, Long entryId);
 
-    LinkedHashMap<Long, String> retrieveAllGroups(String sessionId);
-
-    LinkedHashMap<Long, String> retrieveAllAccounts(String sessionId);
-
     ArrayList<NewsItem> retrieveNewsItems(String sessionId);
 
     NewsItem createNewsItem(String sessionId, NewsItem item);
@@ -137,8 +134,10 @@ public interface RegistryService extends RemoteService {
 
     SampleStorage createSample(String sessionId, SampleStorage sampleStorage, long entryId);
 
-    boolean updatePermission(String sessionId, long id, ArrayList<PermissionInfo> permissions);
-
     BulkImportDraftInfo updateBulkImportDraft(String sessionId, long id, String email, String name,
             ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary);
+
+    SuggestOracle.Response getPermissionSuggestions(Request req);
+
+    boolean addPermission(String sessionId, long entryId, PermissionInfo permission);
 }

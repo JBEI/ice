@@ -3,11 +3,11 @@ package org.jbei.ice.client.entry.view.view;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.collection.add.form.SampleLocation;
-import org.jbei.ice.client.entry.view.PermissionsPresenter;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.update.IEntryFormUpdateSubmit;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
@@ -68,13 +68,11 @@ public interface IEntryView {
 
     void setSequenceData(ArrayList<SequenceAnalysisInfo> sequenceAnalysis, long entryId);
 
-    void setPermissionData(ArrayList<PermissionItem> data);
-
-    void showPermissionsWidget();
-
-    void addPermissionEditClickHandler(ClickHandler handler);
-
     void setSampleOptions(SampleLocation sampleLocation);
 
     void addSampleSaveHandler(ClickHandler handler);
+
+    //    void addSelectionHandler(SelectionHandler<Suggestion> handler);
+
+    void setPermissionData(ArrayList<PermissionInfo> result);
 }

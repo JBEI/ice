@@ -13,7 +13,6 @@ import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.client.common.widget.Flash;
-import org.jbei.ice.client.entry.view.PermissionsPresenter;
 import org.jbei.ice.client.entry.view.ViewFactory;
 import org.jbei.ice.client.entry.view.detail.EntryDetailView;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
@@ -23,6 +22,7 @@ import org.jbei.ice.client.entry.view.update.IEntryFormUpdateSubmit;
 import org.jbei.ice.client.entry.view.update.UpdateEntryForm;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -42,7 +42,6 @@ public class EntryView extends Composite implements IEntryView {
 
     private FlexTable mainContent;
     private final AttachmentListMenu attachmentMenu;
-    private final PermissionsDisplayWidget permissionsDisplay;
 
     // general header
     private HorizontalPanel generalHeaderPanel;
@@ -101,7 +100,6 @@ public class EntryView extends Composite implements IEntryView {
         uploadPanel = createSequenceUploadPanel();
         uploadPanel.setVisible(false);
         attachmentMenu = new AttachmentListMenu();
-        permissionsDisplay = new PermissionsDisplayWidget();
 
         sequenceAddCancelbutton.addClickHandler(new ClickHandler() {
 
@@ -211,7 +209,7 @@ public class EntryView extends Composite implements IEntryView {
 
         panel.add(entryDetailMenuWrapper, "entry_sub_header_div");
         panel.add(attachmentMenu, "attachments_div");
-        panel.add(permissionsDisplay, "permissions_div");
+        panel.add(permissions, "permissions_div");
 
         mainContent.setWidget(1, 1, panel);
         mainContent.getFlexCellFormatter().setVerticalAlignment(1, 1, HasAlignment.ALIGN_TOP);
@@ -219,10 +217,10 @@ public class EntryView extends Composite implements IEntryView {
         return mainContent;
     }
 
-    @Override
-    public void setPermissionData(ArrayList<PermissionItem> data) {
-        this.permissionsDisplay.setPermissionData(data);
-    }
+    //    @Override
+    //    public void addSelectionHandler(SelectionHandler<SuggestOracle.Suggestion> handler) {
+    //        this.permissions.addReadBoxSelectionHandler(handler);
+    //    }
 
     @Override
     public void setNextHandler(ClickHandler handler) {
@@ -396,16 +394,6 @@ public class EntryView extends Composite implements IEntryView {
         mainContent.setWidget(1, 0, panel);
     }
 
-    @Override
-    public void addPermissionEditClickHandler(ClickHandler handler) {
-        permissionsDisplay.addPermissionEditClickHandler(handler);
-    }
-
-    @Override
-    public void showPermissionsWidget() {
-        mainContent.setWidget(1, 0, permissions);
-    }
-
     public void addSequenceButtonHandler(ClickHandler handler) {
         addSeqButton.addClickHandler(handler);
     }
@@ -486,5 +474,10 @@ public class EntryView extends Composite implements IEntryView {
     @Override
     public void setSequenceFormVisibility(boolean visible) {
         uploadPanel.setVisible(visible);
+    }
+
+    @Override
+    public void setPermissionData(ArrayList<PermissionInfo> result) {
+        this.permissions.setPermissionData(result);
     }
 }
