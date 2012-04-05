@@ -133,8 +133,10 @@ public class CollectionsPresenter extends AbstractPresenter {
             public void onSelectionChange(SelectionChangeEvent event) {
                 if (entryPresenter == null)
                     entryPresenter = new EntryAddPresenter(model.getService(), model.getEventBus());
-                entryPresenter.setType(selectionModel.getSelectedObject());
+                EntryAddType type = selectionModel.getSelectedObject();
+                entryPresenter.setType(type);
                 display.setMainContent(entryPresenter.getView(), false);
+                display.getAddEntrySelectionHandler().setSelected(type, false);
             }
         });
 
