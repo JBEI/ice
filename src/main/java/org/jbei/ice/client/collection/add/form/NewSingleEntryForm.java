@@ -471,9 +471,13 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
             break;
         }
 
-        if (hasValidScheme && sampleName.getText().trim().isEmpty())
+        if (hasValidScheme && sampleName.getText().trim().isEmpty()) {
+            sampleName.setStyleName("entry_input_error");
             if (invalid == null)
                 invalid = sampleName;
+        } else {
+            sampleName.setStyleName("input_box");
+        }
 
         return invalid;
     }
