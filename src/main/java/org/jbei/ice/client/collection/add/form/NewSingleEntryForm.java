@@ -508,6 +508,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         this.entryInfo.setParameters(parameters);
 
         populateSamples();
+        this.entryInfo.setShortDescription(summary.getText());
 
         // notes
         this.entryInfo.setLongDescription(this.notesText.getText());

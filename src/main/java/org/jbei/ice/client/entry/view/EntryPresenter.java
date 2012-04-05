@@ -292,9 +292,8 @@ public class EntryPresenter extends AbstractPresenter {
                 EntryInfo nextInfo = nav.getNext(currentInfo);
 
                 // TODO :this needs to be folded into a single "Retrieve"
-
                 long currentId = nextInfo.getId();
-                History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + currentId);
+                History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + currentId, false);
                 EntryPresenter.this.currentInfo = nextInfo;
                 currentContext.setCurrent(currentId);
                 retrieveEntryDetails();
