@@ -143,6 +143,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                 }
                 view.setSheet(currentInput, true);
                 view.setHeader(selection.getDisplay() + " Bulk Import");
+                createSelection.setSelected(selection, false);
             }
         });
     }
