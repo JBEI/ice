@@ -22,7 +22,6 @@ import org.jbei.ice.client.entry.view.update.IEntryFormUpdateSubmit;
 import org.jbei.ice.client.entry.view.update.UpdateEntryForm;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -476,8 +475,8 @@ public class EntryView extends Composite implements IEntryView {
         uploadPanel.setVisible(visible);
     }
 
-    @Override
-    public void setPermissionData(ArrayList<PermissionInfo> result) {
-        this.permissions.setPermissionData(result);
-    }
+    //    @Override
+    //    public void setPermissionData(ArrayList<PermissionInfo> result) {
+    //        this.permissions.setPermissionData(result);
+    //    }
 }

@@ -20,4 +20,8 @@ public class PermissionItem extends OptionSelect {
     public boolean isWrite() {
         return this.isWrite;
     }
+
+    public boolean equals(PermissionItem item) {
+        return getId() == item.getId() && (isGroup == item.isGroup) && (isWrite == item.isWrite);
+    }
 }

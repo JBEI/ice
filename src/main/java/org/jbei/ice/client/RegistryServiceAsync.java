@@ -162,4 +162,7 @@ public interface RegistryServiceAsync {
 
     void addPermission(String sessionId, long entryId, PermissionInfo permission,
             AsyncCallback<Boolean> callback);
+
+    void removePermission(String sessionId, long entryId, PermissionInfo permissionInfo,
+            AsyncCallback<Boolean> callback);
 }

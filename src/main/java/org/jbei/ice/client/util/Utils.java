@@ -43,26 +43,10 @@ public class Utils {
         return result;
     }
 
-    //
-    //    public static void showProgressCursor() {
-    //
-    //        DOM.setStyleAttribute(RootPanel.getBodyElement(), "cursor", "progress");
-    //    }
-    //
-    //    public static void showNotAllowedCursor() {
-    //        DOM.setStyleAttribute(RootPanel.getBodyElement(), "cursor", "not-allowed");
-    //    }
-    //
-    //    public static void showPointerCursor(Element element) {
-    //
-    //        if (element == null) {
-    //            element = RootPanel.getBodyElement();
-    //        }
-    //
-    //        DOM.setStyleAttribute(element, "cursor", "pointer");
-    //    }
-    //
-    //    public static void showEResizeCursor(Element element) {
-    //        DOM.setStyleAttribute(element, "cursor", "e-resize");
-    //    }
+    public native boolean isValidEmail(String email) /*-{
+		var reg1 = /(@.*@)|(\.\.)|(@\.)|(\.@)|(^\.)/; // not valid 
+		var reg2 = /^.+\@(\[?)[a-zA-Z0-9\-\.]+\.([a-zA-Z]{2,3}|[0-9]{1,3}) (\]?)$/; // valid 
+		return !reg1.test(email) && reg2.test(email);
+    }-*/;
+
 }

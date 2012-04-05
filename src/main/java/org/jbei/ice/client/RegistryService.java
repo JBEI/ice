@@ -140,4 +140,6 @@ public interface RegistryService extends RemoteService {
     SuggestOracle.Response getPermissionSuggestions(Request req);
 
     boolean addPermission(String sessionId, long entryId, PermissionInfo permission);
+
+    boolean removePermission(String sessionId, long entryId, PermissionInfo permissionInfo);
 }

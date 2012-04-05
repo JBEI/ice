@@ -7,7 +7,6 @@ import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.update.IEntryFormUpdateSubmit;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
@@ -74,5 +73,5 @@ public interface IEntryView {
 
     //    void addSelectionHandler(SelectionHandler<Suggestion> handler);
 
-    void setPermissionData(ArrayList<PermissionInfo> result);
+    //    void setPermissionData(ArrayList<PermissionInfo> result);
 }

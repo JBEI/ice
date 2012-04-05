@@ -1,10 +1,7 @@
 package org.jbei.ice.client.entry.view.view;
 
-import java.util.ArrayList;
-
 import org.jbei.ice.client.entry.view.model.PermissionSuggestOracle;
 import org.jbei.ice.client.entry.view.view.PermissionsPresenter.IPermissionsView;
-import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasMouseOutHandlers;
@@ -34,8 +31,6 @@ import com.google.gwt.user.client.ui.Widget;
 public class PermissionsWidget extends Composite implements IPermissionsView {
 
     private final FlexTable layout;
-    private final Tree readTree;
-    private final Tree rwTree;
     private final TreeItem readRoot;
     private final TreeItem rwRoot;
     private final Label readAddLabel;
@@ -82,7 +77,7 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
         writeItemBoxHolder = new TreeItem(writeSuggestBox);
         writeItemBoxHolder.setVisible(false);
 
-        readTree = new Tree();
+        Tree readTree = new Tree();
         readTree.setAnimationEnabled(true);
         readTree.setStyleName("font-75em");
 
@@ -90,7 +85,7 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
         readTree.addItem(readRoot);
         readRoot.addItem(readItemBoxHolder);
 
-        rwTree = new Tree();
+        Tree rwTree = new Tree();
         rwTree.setAnimationEnabled(true);
         rwTree.setStyleName("font-75em");
         rwRoot = new TreeItem(createWriteRoot());
@@ -157,82 +152,85 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
             readSuggestBox.getTextBox().setFocus(true);
     }
 
-    public void setPermissionData(ArrayList<PermissionInfo> data) {
-
-        ArrayList<PermissionItem> itemList = new ArrayList<PermissionItem>();
-
-        for (PermissionInfo info : data) {
-            PermissionItem item = null;
-            switch (info.getType()) {
-            case READ_ACCOUNT:
-                item = new PermissionItem(info.getId(), info.getDisplay(), false, false);
-                break;
-
-            case READ_GROUP:
-                item = new PermissionItem(info.getId(), info.getDisplay(), true, false);
-                break;
-
-            case WRITE_ACCOUNT:
-                item = new PermissionItem(info.getId(), info.getDisplay(), false, true);
-                break;
-
-            case WRITE_GROUP:
-                item = new PermissionItem(info.getId(), info.getDisplay(), true, true);
-                break;
-            }
-
-            if (item != null)
-                itemList.add(item);
-        }
-        setPermissionItems(itemList);
-    }
-
-    private void setPermissionItems(ArrayList<PermissionItem> data) {
-
-        if (data == null)
-            return;
-
+    @Override
+    public void resetPermissionDisplay() {
         readRoot.removeItems();
         readRoot.addItem(readItemBoxHolder);
 
         rwRoot.removeItems();
         rwRoot.addItem(writeItemBoxHolder);
+    }
 
-        for (PermissionItem datum : data) {
-            final TreeNode node = new TreeNode(datum);
-            node.getWidget().addMouseOverHandler(new MouseOverHandler() {
+    @Override
+    public void addReadItem(PermissionItem item, ClickHandler deleteHandler) {
+        final TreeNode node = new TreeNode(item, deleteHandler);
+        node.getWidget().addMouseOverHandler(new MouseOverHandler() {
 
-                @Override
-                public void onMouseOver(MouseOverEvent event) {
-                    node.getWidget().setDeleteLinkVisible(true);
-                }
-            });
+            @Override
+            public void onMouseOver(MouseOverEvent event) {
+                node.getWidget().setDeleteLinkVisible(true);
+            }
+        });
 
-            node.getWidget().addMouseOutHandler(new MouseOutHandler() {
+        node.getWidget().addMouseOutHandler(new MouseOutHandler() {
 
-                @Override
-                public void onMouseOut(MouseOutEvent event) {
-                    node.getWidget().setDeleteLinkVisible(false);
-                }
-            });
+            @Override
+            public void onMouseOut(MouseOutEvent event) {
+                node.getWidget().setDeleteLinkVisible(false);
+            }
+        });
+        readRoot.addItem(node);
+    }
 
-            if (datum.isWrite()) {
-                rwRoot.addItem(node);
-            } else {
-                readRoot.addItem(node);
+    @Override
+    public void addWriteItem(PermissionItem item, ClickHandler deleteHandler) {
+        final TreeNode node = new TreeNode(item, deleteHandler);
+        node.getWidget().addMouseOverHandler(new MouseOverHandler() {
+
+            @Override
+            public void onMouseOver(MouseOverEvent event) {
+                node.getWidget().setDeleteLinkVisible(true);
+            }
+        });
+
+        node.getWidget().addMouseOutHandler(new MouseOutHandler() {
+
+            @Override
+            public void onMouseOut(MouseOutEvent event) {
+                node.getWidget().setDeleteLinkVisible(false);
+            }
+        });
+        rwRoot.addItem(node);
+    }
+
+    @Override
+    public void removeReadItem(PermissionItem item) {
+        TreeItem toRemove = null;
+        for (int i = 1; i < readRoot.getChildCount(); i += 1) {
+            TreeNode node = (TreeNode) readRoot.getChild(i);
+            if (node.getItem().equals(item)) {
+                toRemove = node;
+                break;
             }
         }
+
+        if (toRemove != null)
+            readRoot.removeItem(toRemove);
     }
 
     @Override
-    public void addReadItem(PermissionItem item) {
-        readRoot.addItem(item.getName());
-    }
+    public void removeWriteItem(PermissionItem item) {
+        TreeItem toRemove = null;
+        for (int i = 1; i < rwRoot.getChildCount(); i += 1) {
+            TreeNode node = (TreeNode) rwRoot.getChild(i);
+            if (node.getItem().equals(item)) {
+                toRemove = node;
+                break;
+            }
+        }
 
-    @Override
-    public void addWriteItem(PermissionItem item) {
-        TreeNode treeItem = new TreeNode(item);
-        rwRoot.addItem(treeItem);
+        if (toRemove != null)
+            rwRoot.removeItem(toRemove);
     }
 
     public PermissionsPresenter getPresenter() {
@@ -243,13 +241,18 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
 
         private final PermissionItem item;
 
-        public TreeNode(PermissionItem item) {
-            super(new TreeNodeWidget(item.getName()));
+        public TreeNode(PermissionItem item, ClickHandler deleteHandler) {
+            super(new TreeNodeWidget(item.getName(), deleteHandler));
             this.item = item;
         }
 
+        @Override
         public TreeNodeWidget getWidget() {
             return (TreeNodeWidget) super.getWidget();
+        }
+
+        public PermissionItem getItem() {
+            return this.item;
         }
     }
 
@@ -257,7 +260,7 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
             HasMouseOutHandlers {
         private final Label delete;
 
-        public TreeNodeWidget(String display) {
+        public TreeNodeWidget(String display, ClickHandler handler) {
             HTMLPanel panel = new HTMLPanel(
                     "</span> <span>"
                             + display
@@ -268,6 +271,7 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
             panel.add(delete, "delete_link");
 
             delete.setVisible(false);
+            delete.addClickHandler(handler);
         }
 
         @Override

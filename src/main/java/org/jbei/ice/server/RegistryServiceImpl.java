@@ -1810,7 +1810,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             switch (permissionInfo.getType()) {
             case READ_ACCOUNT:
                 Account readAccount = AccountController.get(id);
-                if (readAccount != null)
+                if (readAccount != null && !readAccount.getEmail().equals(account.getEmail()))
                     permissionController.addReadUser(entry, readAccount);
                 break;
 
@@ -1822,7 +1822,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             case WRITE_ACCOUNT:
                 Account writeAccount = AccountController.get(id);
-                if (writeAccount != null)
+                if (writeAccount != null && !writeAccount.getEmail().equals(account.getEmail()))
                     permissionController.addWriteUser(entry, writeAccount);
                 break;
 
@@ -1846,4 +1846,65 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         return false;
     }
 
+    @Override
+    public boolean removePermission(String sessionId, long entryId, PermissionInfo permissionInfo) {
+
+        Account account;
+        try {
+            account = retrieveAccountForSid(sessionId);
+            if (account == null)
+                return false;
+
+            Logger.info("Removing permissions for entry with id \"" + entryId + "\"");
+            EntryController entryController = new EntryController(account);
+
+            Entry entry = entryController.get(entryId);
+            if (entry == null)
+                return false;
+
+            PermissionsController permissionController = new PermissionsController(account);
+            long id = permissionInfo.getId();
+
+            switch (permissionInfo.getType()) {
+            case READ_ACCOUNT:
+                Account readAccount = AccountController.get(id);
+                if (readAccount != null && !readAccount.getEmail().equals(account.getEmail())) // cannot remove yourself
+                    permissionController.removeReadUser(entry, readAccount);
+                break;
+
+            case READ_GROUP:
+                Group readGroup = GroupManager.get(id);
+                if (readGroup != null)
+                    permissionController.removeReadGroup(entry, readGroup);
+                break;
+
+            case WRITE_ACCOUNT:
+                Account writeAccount = AccountController.get(id);
+                if (writeAccount != null && !writeAccount.getEmail().equals(account.getEmail())) { // cannot remove yourself 
+                    permissionController.removeWriteUser(entry, writeAccount);
+                    permissionController.removeReadUser(entry, writeAccount);
+                }
+                break;
+
+            case WRITE_GROUP:
+                Group writeGroup = GroupManager.get(id);
+                if (writeGroup != null) {
+                    permissionController.removeWriteGroup(entry, writeGroup);
+                    permissionController.removeReadGroup(entry, writeGroup);
+                }
+                break;
+            }
+
+            return true;
+
+        } catch (ControllerException e) {
+            Logger.error(e);
+        } catch (PermissionException e) {
+            Logger.error(e);
+        } catch (ManagerException e) {
+            Logger.error(e);
+        }
+
+        return false;
+    }
 }

@@ -352,6 +352,94 @@ public class PermissionManager {
         }
     }
 
+    public static void removeReadUser(Entry entry, Account account) throws ManagerException {
+        String queryString = "delete  ReadUser readUser where readUser.entry = :entry and readUser.account = :account";
+        Session session = DAO.newSession();
+
+        try {
+            session.getTransaction().begin();
+            Query query = session.createQuery(queryString);
+            query.setEntity("entry", entry);
+            query.setEntity("account", account);
+            query.executeUpdate();
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            String msg = "Could not remove read user \"" + account.getEmail() + "\" for entry \""
+                    + entry.getId() + "\"";
+            throw new ManagerException(msg, e);
+        } finally {
+            if (session != null)
+                session.disconnect();
+        }
+    }
+
+    public static void removeReadGroup(Entry entry, Group group) throws ManagerException {
+        String queryString = "delete  ReadGroup readGroup where readGroup.entry = :entry and readGroup.group = :group";
+        Session session = DAO.newSession();
+
+        try {
+            session.getTransaction().begin();
+            Query query = session.createQuery(queryString);
+            query.setEntity("entry", entry);
+            query.setEntity("group", group);
+            query.executeUpdate();
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            String msg = "Could not remove read group \"" + group.getLabel() + "\" for entry \""
+                    + entry.getId() + "\"";
+            throw new ManagerException(msg, e);
+        } finally {
+            if (session != null)
+                session.disconnect();
+        }
+    }
+
+    public static void removeWriteUser(Entry entry, Account account) throws ManagerException {
+        String queryString = "delete  WriteUser writeUser where writeUser.entry = :entry and writeUser.account = :account";
+        Session session = DAO.newSession();
+
+        try {
+            session.getTransaction().begin();
+            Query query = session.createQuery(queryString);
+            query.setEntity("entry", entry);
+            query.setEntity("account", account);
+            query.executeUpdate();
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            String msg = "Could not remove write user \"" + account.getEmail() + "\" for entry \""
+                    + entry.getId() + "\"";
+            throw new ManagerException(msg, e);
+        } finally {
+            if (session != null)
+                session.disconnect();
+        }
+    }
+
+    public static void removeWriteGroup(Entry entry, Group group) throws ManagerException {
+        String queryString = "delete  WriteGroup writeGroup where writeGroup.entry = :entry and writeGroup.group = :group";
+        Session session = DAO.newSession();
+
+        try {
+            session.getTransaction().begin();
+            Query query = session.createQuery(queryString);
+            query.setEntity("entry", entry);
+            query.setEntity("group", group);
+            query.executeUpdate();
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            String msg = "Could not remove write group \"" + group.getLabel() + "\" for entry \""
+                    + entry.getId() + "\"";
+            throw new ManagerException(msg, e);
+        } finally {
+            if (session != null)
+                session.disconnect();
+        }
+    }
+
     /**
      * Add read permission for the specified {@link Account} to the specified {@link Entry}.
      * <p>
@@ -1069,4 +1157,5 @@ public class PermissionManager {
         }
         return accountGroups;
     }
+
 }

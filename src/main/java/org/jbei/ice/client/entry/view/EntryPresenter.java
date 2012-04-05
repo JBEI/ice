@@ -134,6 +134,7 @@ public class EntryPresenter extends AbstractPresenter {
         // PERMISSIONS
         retrievePermissionData();
         PermissionsPresenter pPresenter = display.getPermissionsWidget();
+
         // TODO :both of these can be combined
         pPresenter.setReadAddSelectionHandler(new ReadBoxSelectionHandler() {
 
@@ -149,7 +150,7 @@ public class EntryPresenter extends AbstractPresenter {
                     break;
                 }
 
-                long id = currentInfo.getId();
+                final long id = currentInfo.getId();
                 service.addPermission(AppController.sessionId, id, info,
                     new AsyncCallback<Boolean>() {
 
@@ -160,7 +161,7 @@ public class EntryPresenter extends AbstractPresenter {
                         @Override
                         public void onSuccess(Boolean result) {
                             if (result)
-                                display.getPermissionsWidget().addReadItem(info);
+                                display.getPermissionsWidget().addReadItem(info, service, id);
                         }
                     });
             }
@@ -171,7 +172,7 @@ public class EntryPresenter extends AbstractPresenter {
             @Override
             void updatePermission(final PermissionInfo info, PermissionType type) {
 
-                long id = currentInfo.getId();
+                final long id = currentInfo.getId();
                 switch (type) {
                 case READ_ACCOUNT:
                     info.setType(PermissionType.WRITE_ACCOUNT);
@@ -191,7 +192,7 @@ public class EntryPresenter extends AbstractPresenter {
                         @Override
                         public void onSuccess(Boolean result) {
                             if (result)
-                                display.getPermissionsWidget().addWriteItem(info);
+                                display.getPermissionsWidget().addWriteItem(info, service, id);
                         }
                     });
             }
@@ -215,7 +216,8 @@ public class EntryPresenter extends AbstractPresenter {
                     if (result == null)
                         return;
 
-                    display.setPermissionData(result);
+                    display.getPermissionsWidget().setPermissionData(result, service,
+                        currentContext.getCurrent());
                 }
             });
     }
@@ -643,4 +645,5 @@ public class EntryPresenter extends AbstractPresenter {
             });
         }
     }
+
 }

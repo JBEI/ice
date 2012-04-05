@@ -88,6 +88,16 @@ public class PermissionsController extends Controller {
         }
     }
 
+    public void removeReadUser(Entry entry, Account account) throws ManagerException,
+            PermissionException {
+        if (PermissionManager.hasWritePermission(entry.getId(), super.getAccount())) {
+            PermissionManager.removeReadUser(entry, account);
+        } else {
+            throw new PermissionException("User " + super.getAccount().getEmail()
+                    + " does not have write permissions for entry " + entry.getId());
+        }
+    }
+
     public void addReadGroup(Entry entry, Group readGroup) throws ManagerException,
             PermissionException {
         if (PermissionManager.hasWritePermission(entry.getId(), super.getAccount())) {
@@ -97,10 +107,37 @@ public class PermissionsController extends Controller {
         }
     }
 
+    public void removeReadGroup(Entry entry, Group readGroup) throws ManagerException,
+            PermissionException {
+        if (PermissionManager.hasWritePermission(entry.getId(), super.getAccount())) {
+            PermissionManager.removeReadGroup(entry, readGroup);
+        } else {
+            throw new PermissionException("Write Permission not permitted");
+        }
+    }
+
     public void addWriteUser(Entry entry, Account account) throws ManagerException,
             PermissionException {
         if (PermissionManager.hasWritePermission(entry.getId(), super.getAccount())) {
             PermissionManager.addWriteUser(entry, account);
+        } else {
+            throw new PermissionException("Write Permission not permitted");
+        }
+    }
+
+    public void removeWriteUser(Entry entry, Account account) throws ManagerException,
+            PermissionException {
+        if (PermissionManager.hasWritePermission(entry.getId(), super.getAccount())) {
+            PermissionManager.removeWriteUser(entry, account);
+        } else {
+            throw new PermissionException("Write Permission not permitted");
+        }
+    }
+
+    public void removeWriteGroup(Entry entry, Group writeGroup) throws ManagerException,
+            PermissionException {
+        if (PermissionManager.hasWritePermission(entry.getId(), super.getAccount())) {
+            PermissionManager.removeWriteGroup(entry, writeGroup);
         } else {
             throw new PermissionException("Write Permission not permitted");
         }
