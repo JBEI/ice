@@ -1,6 +1,7 @@
 package org.jbei.ice.client.entry.view;
 
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 import org.jbei.ice.shared.dto.permission.PermissionSuggestion;
 
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -18,8 +19,8 @@ public abstract class ReadBoxSelectionHandler implements SelectionHandler<Sugges
 
         PermissionInfo info = new PermissionInfo(suggest.getType(), suggest.getId(),
                 suggest.getReplacementString());
-        this.updatePermission(info);
+        this.updatePermission(info, suggest.getType());
     }
 
-    abstract void updatePermission(PermissionInfo info);
+    abstract void updatePermission(PermissionInfo info, PermissionType permissionType);
 }

@@ -7,6 +7,12 @@ import org.jbei.ice.client.entry.view.view.PermissionsPresenter.IPermissionsView
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.HasMouseOutHandlers;
+import com.google.gwt.event.dom.client.HasMouseOverHandlers;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Composite;
@@ -186,11 +192,35 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
         if (data == null)
             return;
 
+        readRoot.removeItems();
+        readRoot.addItem(readItemBoxHolder);
+
+        rwRoot.removeItems();
+        rwRoot.addItem(writeItemBoxHolder);
+
         for (PermissionItem datum : data) {
-            if (datum.isWrite())
-                rwRoot.addItem(datum.getName());
-            else
-                readRoot.addItem(datum.getName());
+            final TreeNode node = new TreeNode(datum);
+            node.getWidget().addMouseOverHandler(new MouseOverHandler() {
+
+                @Override
+                public void onMouseOver(MouseOverEvent event) {
+                    node.getWidget().setDeleteLinkVisible(true);
+                }
+            });
+
+            node.getWidget().addMouseOutHandler(new MouseOutHandler() {
+
+                @Override
+                public void onMouseOut(MouseOutEvent event) {
+                    node.getWidget().setDeleteLinkVisible(false);
+                }
+            });
+
+            if (datum.isWrite()) {
+                rwRoot.addItem(node);
+            } else {
+                readRoot.addItem(node);
+            }
         }
     }
 
@@ -201,10 +231,57 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
 
     @Override
     public void addWriteItem(PermissionItem item) {
-        rwRoot.addItem(item.getName());
+        TreeNode treeItem = new TreeNode(item);
+        rwRoot.addItem(treeItem);
     }
 
     public PermissionsPresenter getPresenter() {
         return presenter;
+    }
+
+    private class TreeNode extends TreeItem {
+
+        private final PermissionItem item;
+
+        public TreeNode(PermissionItem item) {
+            super(new TreeNodeWidget(item.getName()));
+            this.item = item;
+        }
+
+        public TreeNodeWidget getWidget() {
+            return (TreeNodeWidget) super.getWidget();
+        }
+    }
+
+    private class TreeNodeWidget extends Composite implements HasMouseOverHandlers,
+            HasMouseOutHandlers {
+        private final Label delete;
+
+        public TreeNodeWidget(String display) {
+            HTMLPanel panel = new HTMLPanel(
+                    "</span> <span>"
+                            + display
+                            + " &nbsp; </span><span id=\"delete_link\" style=\"color: red; cursor: pointer\">");
+            initWidget(panel);
+            delete = new Label("x");
+            delete.setStyleName("display-inline");
+            panel.add(delete, "delete_link");
+
+            delete.setVisible(false);
+        }
+
+        @Override
+        public HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
+            return addDomHandler(handler, MouseOverEvent.getType());
+        }
+
+        public void setDeleteLinkVisible(boolean visible) {
+            delete.setVisible(visible);
+        }
+
+        @Override
+        public HandlerRegistration addMouseOutHandler(MouseOutHandler handler) {
+            return addDomHandler(handler, MouseOutEvent.getType());
+        }
     }
 }

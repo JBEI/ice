@@ -21,6 +21,10 @@ public class PermissionInfo implements IsSerializable {
         return type;
     }
 
+    public void setType(PermissionType type) {
+        this.type = type;
+    }
+
     public long getId() {
         return id;
     }

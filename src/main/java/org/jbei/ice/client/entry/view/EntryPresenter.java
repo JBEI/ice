@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.collection.presenter.EntryContext;
@@ -27,10 +28,12 @@ import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryInfo.EntryType;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
+import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -131,10 +134,21 @@ public class EntryPresenter extends AbstractPresenter {
         // PERMISSIONS
         retrievePermissionData();
         PermissionsPresenter pPresenter = display.getPermissionsWidget();
+        // TODO :both of these can be combined
         pPresenter.setReadAddSelectionHandler(new ReadBoxSelectionHandler() {
 
             @Override
-            void updatePermission(final PermissionInfo info) {
+            void updatePermission(final PermissionInfo info, PermissionType type) {
+                switch (type) {
+                case WRITE_ACCOUNT:
+                    info.setType(PermissionType.READ_ACCOUNT);
+                    break;
+
+                case WRITE_GROUP:
+                    info.setType(PermissionType.READ_GROUP);
+                    break;
+                }
+
                 long id = currentInfo.getId();
                 service.addPermission(AppController.sessionId, id, info,
                     new AsyncCallback<Boolean>() {
@@ -155,8 +169,18 @@ public class EntryPresenter extends AbstractPresenter {
         pPresenter.setWriteAddSelectionHandler(new ReadBoxSelectionHandler() {
 
             @Override
-            void updatePermission(final PermissionInfo info) {
+            void updatePermission(final PermissionInfo info, PermissionType type) {
+
                 long id = currentInfo.getId();
+                switch (type) {
+                case READ_ACCOUNT:
+                    info.setType(PermissionType.WRITE_ACCOUNT);
+                    break;
+                case READ_GROUP:
+                    info.setType(PermissionType.WRITE_GROUP);
+                    break;
+                }
+
                 service.addPermission(AppController.sessionId, id, info,
                     new AsyncCallback<Boolean>() {
 
@@ -200,6 +224,7 @@ public class EntryPresenter extends AbstractPresenter {
         retrieveAccountsAndGroups();
         setContextNavData();
         retrieveEntryDetails();
+        retrievePermissionData();
     }
 
     private void addEntryViewHandler() {
@@ -250,7 +275,7 @@ public class EntryPresenter extends AbstractPresenter {
             public void onClick(ClickEvent event) {
 
                 IHasNavigableData nav = currentContext.getNav();
-                EntryInfo currentInfo = nav.getCachedData(currentContext.getCurrent());
+                EntryInfo currentInfo = nav.getCachedData(currentContext.getCurrent()); // TODO : how is this current info different from EntryPresenter.this.currentInfo
                 int idx = nav.indexOfCached(currentInfo);
 
                 if (idx == -1) {
@@ -267,7 +292,10 @@ public class EntryPresenter extends AbstractPresenter {
                 EntryInfo nextInfo = nav.getNext(currentInfo);
 
                 // TODO :this needs to be folded into a single "Retrieve"
+
                 long currentId = nextInfo.getId();
+                History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + currentId);
+                EntryPresenter.this.currentInfo = nextInfo;
                 currentContext.setCurrent(currentId);
                 retrieveEntryDetails();
                 retrieveAccountsAndGroups();
