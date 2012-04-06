@@ -235,30 +235,35 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
 
         panel.setStyleName("entry_sequence_sub_header");
 
+        final VectorEditorDialog dialog = new VectorEditorDialog(info.getName());
+        Flash.Parameters param = new Flash.Parameters();
+        param.setEntryId(info.getRecordId());
+        param.setSessiondId(AppController.sessionId);
+        param.setSwfPath("ve/VectorEditor.swf");
+
+        FlexTable table = new FlexTable();
+        table.setWidth("100%");
+        table.setHeight("100%");
+        table.setWidget(0, 0, new Flash(param));
+        dialog.setWidget(table);
+
         if (info.isHasSequence()) {
             // delete, open in vector editor, download
-            final VectorEditorDialog dialog = new VectorEditorDialog(info.getName());
             Label label = dialog.getLabel("Open");
-
-            Flash.Parameters param = new Flash.Parameters();
-            param.setEntryId(info.getRecordId());
-            param.setSessiondId(AppController.sessionId);
-            param.setSwfPath("ve/VectorEditor.swf");
-
-            FlexTable table = new FlexTable();
-            table.setWidth("100%");
-            table.setHeight("100%");
-            table.setWidget(0, 0, new Flash(param));
-            dialog.setWidget(table);//);
-
             label.setStyleName("open_sequence_sub_link");
             panel.add(label, "sequence_link");
+
             SequenceFileDownload download = new SequenceFileDownload(info.getId());
             Widget widget = download.asWidget();
             widget.addStyleName("display-inline");
             panel.add(download.asWidget(), "sequence_options");
+
+            // TODO : delete
         } else {
-            // TODO  create new, upload
+            Label label = dialog.getLabel("Create New");
+            label.setStyleName("open_sequence_sub_link");
+            panel.add(label, "sequence_link");
+
         }
         return panel;
     }

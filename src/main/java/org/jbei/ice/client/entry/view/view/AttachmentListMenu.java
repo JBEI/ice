@@ -12,7 +12,6 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.common.util.ImageUtil;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -261,10 +260,8 @@ public class AttachmentListMenu extends Composite {
 
                 @Override
                 public void onClick(ClickEvent event) {
-                    String url = GWT.getHostPageBaseURL() + "download?type=attachment&name="
-                            + item.getName() + "&id=" + item.getFileId();
-                    Window.Location.replace(url);
-                    //                    Window.open(url, "_blank", "");
+                    Window.Location.replace("/download?type=attachment&name=" + item.getName()
+                            + "&id=" + item.getFileId());
                 }
             };
         }
