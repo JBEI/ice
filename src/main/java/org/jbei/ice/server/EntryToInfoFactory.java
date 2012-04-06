@@ -285,6 +285,7 @@ public class EntryToInfoFactory {
         info.setModificationTime(entry.getModificationTime());
         info.setBioSafetyLevel(entry.getBioSafetyLevel());
         info.setPartId(entry.getPartNumbersAsString());
+        info.setIntellectualProperty(entry.getIntellectualProperty());
         if (!entry.getEntryFundingSources().isEmpty()) {
             EntryFundingSource source = entry.getEntryFundingSources().iterator().next();
             info.setPrincipalInvestigator(source.getFundingSource().getPrincipalInvestigator());
