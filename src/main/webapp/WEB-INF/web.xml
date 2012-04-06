@@ -38,7 +38,7 @@
 
         <filter-mapping>
                 <filter-name>wicket.ice</filter-name>
-                <url-pattern>/*</url-pattern>
+                <url-pattern>/wicket/*</url-pattern>
         </filter-mapping>
 	
 	<filter>

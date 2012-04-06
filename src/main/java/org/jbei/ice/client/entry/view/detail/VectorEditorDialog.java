@@ -2,6 +2,9 @@ package org.jbei.ice.client.entry.view.detail;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -26,8 +29,19 @@ public class VectorEditorDialog extends DialogBox {
         setGlassEnabled(true);
 
         label = new Label();
+        label.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                center();
+            }
+        });
         container = new FlowPanel();
+        addWindowListener();
+
         container.addStyleName("dialogContainer");
+        container.setWidth((Window.getClientWidth() - 50) + "px");
+        container.setHeight((Window.getClientHeight() - 50) + "px");
 
         close = new Anchor();
         close.setStyleName("x");
@@ -46,6 +60,19 @@ public class VectorEditorDialog extends DialogBox {
     public Label getLabel(String text) {
         label.setText(text);
         return label;
+    }
+
+    private void addWindowListener() {
+        Window.addResizeHandler(new ResizeHandler() {
+
+            @Override
+            public void onResize(ResizeEvent event) {
+                int height = event.getHeight();
+                int width = event.getWidth();
+                container.setWidth((width - 30) + "px");
+                container.setHeight((height - 30) + "px");
+            }
+        });
     }
 
     /**
