@@ -1,8 +1,7 @@
 package org.jbei.ice.server.servlet;
 
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -12,7 +11,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.FileUtils;
 import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -22,7 +20,6 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.IceXlsSerializer;
 import org.jbei.ice.lib.utils.IceXmlSerializer;
-import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.UtilityException;
 
 public class EntryExportServlet extends HttpServlet {
@@ -30,7 +27,6 @@ public class EntryExportServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private static final String XML_EXPORT = "xml";
     private static final String EXCEL_EXPORT = "excel";
-    private static final int BYTES_DOWNLOAD = 1024;
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -102,21 +98,19 @@ public class EntryExportServlet extends HttpServlet {
             String xmlDocument = IceXmlSerializer.serializeToJbeiXml(entries);
 
             // write to file
-            String tmpDir = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
             String saveName = "data.xml";
-            File file = new File(tmpDir + File.separator + saveName);
-            FileUtils.writeStringToFile(file, xmlDocument);
-            Logger.info("Wrote contents to file " + file.getAbsolutePath());
+
+            byte[] bytes = xmlDocument.getBytes();
+            ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
 
             response.setContentType("text/xml");
-            response.setContentLength((int) file.length());
+            response.setContentLength(bytes.length);
             response.setHeader("Content-Disposition", "attachment;filename=" + saveName);
 
             OutputStream os = response.getOutputStream();
-            DataInputStream is = new DataInputStream(new FileInputStream(file));
+            DataInputStream is = new DataInputStream(byteInputStream);
 
             int read = 0;
-            byte[] bytes = new byte[BYTES_DOWNLOAD];
 
             while ((read = is.read(bytes)) != -1) {
                 os.write(bytes, 0, read);
@@ -124,9 +118,9 @@ public class EntryExportServlet extends HttpServlet {
             os.flush();
             os.close();
 
-        } catch (UtilityException e) {
-            Logger.error(e);
         } catch (IOException e) {
+            Logger.error(e);
+        } catch (UtilityException e) {
             Logger.error(e);
         }
     }
@@ -134,25 +128,21 @@ public class EntryExportServlet extends HttpServlet {
     private void exportExcel(ArrayList<Entry> entries, HttpServletResponse response,
             EntryController controller) {
         try {
-            String xmlDocument = IceXlsSerializer.serialize(controller, entries);
+            String data = IceXlsSerializer.serialize(controller, entries);
 
             // write to file
-            String tmpDir = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
             String saveName = "data.xls";
-            File file = new File(tmpDir + File.separator + saveName);
-            FileUtils.writeStringToFile(file, xmlDocument);
-            Logger.info("Wrote contents to file " + file.getAbsolutePath());
+            byte[] bytes = data.getBytes();
+            ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
 
             response.setContentType("application/vnd.ms-excel");
-            response.setContentLength((int) file.length());
+            response.setContentLength(bytes.length);
             response.setHeader("Content-Disposition", "attachment;filename=" + saveName);
 
             OutputStream os = response.getOutputStream();
-            DataInputStream is = new DataInputStream(new FileInputStream(file));
+            DataInputStream is = new DataInputStream(byteInputStream);
 
             int read = 0;
-            byte[] bytes = new byte[BYTES_DOWNLOAD];
-
             while ((read = is.read(bytes)) != -1) {
                 os.write(bytes, 0, read);
             }

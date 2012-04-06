@@ -160,6 +160,17 @@
         <url-pattern>/export</url-pattern>
     </servlet-mapping>
     
+    <!--  sequence download -->
+    <servlet>
+        <servlet-name>SequenceDownloadServlet</servlet-name>
+        <servlet-class>org.jbei.ice.server.servlet.SequenceDownloadServlet</servlet-class>
+    </servlet>
+ 
+    <servlet-mapping>
+        <servlet-name>SequenceDownloadServlet</servlet-name>
+        <url-pattern>/sequence</url-pattern>
+    </servlet-mapping>
+    
     <welcome-file-list>
         <welcome-file>Gwt_ice.html</welcome-file>
     </welcome-file-list>

@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -254,12 +253,12 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
 
             label.setStyleName("open_sequence_sub_link");
             panel.add(label, "sequence_link");
-            SequenceFileDownload download = new SequenceFileDownload();
+            SequenceFileDownload download = new SequenceFileDownload(info.getId());
             Widget widget = download.asWidget();
             widget.addStyleName("display-inline");
             panel.add(download.asWidget(), "sequence_options");
         } else {
-            // create new, upload
+            // TODO  create new, upload
         }
         return panel;
     }
@@ -285,37 +284,6 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         table.setWidget(currentRow, 0, notes);
         table.getFlexCellFormatter().setColSpan(currentRow, 0, 4);
         currentRow += 1;
-    }
-
-    // TODO : this is currently a bit expensive
-    public void switchToEditMode() {
-        int rowCount = table.getRowCount();
-        for (int row = 0; row < rowCount; row += 1) {
-            int cellCount = table.getCellCount(row);
-            for (int col = 0; col < cellCount; col += 1) {
-                if (col % 2 == 0)
-                    continue;
-
-                String text = table.getText(row, col);
-                TextBox textBox = new TextBox();
-                textBox.setText(text);
-                table.setWidget(row, col, textBox);
-
-                //                ValueCell cell = (ValueCell) table.getWidget(row, col);
-                //                switch (cell.getType()) {
-                //                case DATE:
-                //                    DatePicker datePicker = new DatePicker();
-                //                    table.setWidget(row, col, datePicker);
-                //                    break;
-                //
-                //                default:
-                //                case SHORT_TEXT:
-                //                    TextBox textBox = new TextBox();
-                //                    textBox.setText(cell.getValue());
-                //                    table.setWidget(row, col, textBox);
-                //                    break;
-            }
-        }
     }
 
     // adds a field to the current table
