@@ -376,6 +376,7 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
         this.entryInfo.setParameters(parameters);
 
         // notes
+        this.entryInfo.setShortDescription(summary.getText());
         this.entryInfo.setLongDescription(this.notesText.getText());
         String longDescType = this.markupOptions.getItemText(this.markupOptions.getSelectedIndex());
         this.entryInfo.setLongDescriptionType(longDescType);
