@@ -146,7 +146,7 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 	border-bottom: 0.13em solid #3C5A99;
 	color: #233559;
 	font-weight: bold;
-	padding: 6px 6px 6px 0px;
+	padding: 4px 4px 4px 0px;
 	text-transform: uppercase;
 	font-size: 0.80em;
 	font-style: italic;
@@ -154,6 +154,20 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 
 .entry_sequence_sub_header {
 	border-bottom: 0.10em solid #3C5A99;
+	padding: 4px 4px 4px 0px;
+}
+
+.open_sequence_sub_link {
+	cursor: pointer;
+	display: inline;
+	opacity: 0.8;
+    color: #393939;
+    font-size: 0.70em;
+    padding-right: 6px;
+}
+
+.open_sequence_sub_link:hover {
+	opacity: 1;
 }
 
 .entry_tooltip_sub_header {
@@ -1498,6 +1512,39 @@ td.datePickerMonth {
 	text-decoration: none;
 	cursor: pointer;
 	color: #185DA0;
+}
+
+.gwt-DialogBox .dialogContainer {
+  position: relative;  
+}
+
+.gwt-DialogBox .dialogControls .x {
+  display: block;
+  height: 13px;
+  width: 13px;  
+  cursor: pointer;
+  background: transparent url(static/images/close.png) center center no-repeat;
+}
+
+.gwt-DialogBox .Caption {
+    background: #E3E8F3;
+    padding: 4px 4px 4px 8px;
+    cursor: default;
+    border-bottom: 1px solid #BBB;
+    border-top: 5px solid #D0E4F6;
+}
+
+.gwt-DialogBox .dialogControls { 
+  position: absolute;
+  top: -24px;
+  right: 4px;
+}
+.gwt-DialogBox .dialogControls a {
+  cursor: pointer;
+}
+.gwt-DialogBox .dialogMiddleCenter {
+	padding: 3px;
+	background: white;
 }
 
 

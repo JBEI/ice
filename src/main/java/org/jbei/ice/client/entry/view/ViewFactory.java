@@ -8,7 +8,7 @@ import org.jbei.ice.client.entry.view.detail.EntryDetailView;
 import org.jbei.ice.client.entry.view.detail.PartDetailView;
 import org.jbei.ice.client.entry.view.detail.PlasmidDetailView;
 import org.jbei.ice.client.entry.view.detail.StrainDetailView;
-import org.jbei.ice.client.entry.view.update.ArabidopsisUpdateForm;
+import org.jbei.ice.client.entry.view.update.UpdateArabidopsisForm;
 import org.jbei.ice.client.entry.view.update.UpdateEntryForm;
 import org.jbei.ice.client.entry.view.update.UpdatePartForm;
 import org.jbei.ice.client.entry.view.update.UpdatePlasmidForm;
@@ -61,7 +61,7 @@ public class ViewFactory {
 
         case ARABIDOPSIS:
             ArabidopsisSeedInfo seedInfo = (ArabidopsisSeedInfo) info;
-            return new ArabidopsisUpdateForm(autoCompleteData, seedInfo);
+            return new UpdateArabidopsisForm(autoCompleteData, seedInfo);
 
         case STRAIN:
             StrainInfo strainInfo = (StrainInfo) info;

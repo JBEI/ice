@@ -6,7 +6,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -45,11 +44,6 @@ public class EntryAddMenu extends Composite implements HasClickHandlers {
 
     public EntryAddType getCurrentSelection() {
         return this.currentSelected;
-    }
-
-    private String formatNumber(long l) {
-        NumberFormat format = NumberFormat.getFormat("##,###");
-        return format.format(l);
     }
 
     // TODO : when this is combined with other menus 

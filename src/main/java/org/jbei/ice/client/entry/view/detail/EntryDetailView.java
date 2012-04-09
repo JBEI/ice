@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -52,9 +51,6 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         // parameters
         showParameters();
 
-        // samples
-        //        showSamples();
-
         // sequence
         createSequenceView();
 
@@ -79,13 +75,13 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
      */
     protected void addCommonShortFields() {
         addShortField("Part ID", info.getPartId(), ValueType.SHORT_TEXT);
-        Hyperlink ownerLink = this.createProfileLink(info.getOwnerEmail(), info.getOwner());
+        Widget ownerLink = this.createProfileLink(info.getOwnerEmail(), info.getOwner());
         addShortField("Owner", ownerLink, ValueType.SHORT_TEXT);
 
         addShortField("Name", info.getName(), ValueType.SHORT_TEXT);
         addShortField("Alias", info.getAlias(), ValueType.SHORT_TEXT);
 
-        Hyperlink link = this.createProfileLink(info.getCreatorEmail(), info.getCreator());
+        Widget link = this.createProfileLink(info.getCreatorEmail(), info.getCreator());
         addShortField("Creator", link, ValueType.SHORT_TEXT);
         addShortField("Principal Investigator", info.getPrincipalInvestigator(),
             ValueType.SHORT_TEXT);
@@ -204,7 +200,6 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
 
         int row = 0;
         sequence.setWidget(row, 0, createSequenceHeader());
-        //        sequence.getFlexCellFormatter().setStyleName(row, 0, "entry_add_sub_header");
         sequence.getFlexCellFormatter().setColSpan(row, 0, 6);
 
         row += 1;
@@ -223,7 +218,7 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
             sequence.setWidget(row, 0, new Flash(param));
             sequence.getFlexCellFormatter().setHeight(row, 0, "600px");
         } else {
-            // TODO : add UploadSequencePanel
+            sequence.setHTML(row, 0, "<span class=\"font-80em\">No sequence provided.</span>");
         }
 
         table.setWidget(currentRow, 0, sequence);
@@ -232,29 +227,43 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
     }
 
     private Widget createSequenceHeader() {
-        HTMLPanel panel = new HTMLPanel(
-                "<span style=\"color: #233559; "
-                        + "font-weight: bold; font-style: italic; padding: 6px 6px 6px 0px; font-size: 0.80em;\">"
-                        + "SEQUENCE</span><div style=\"float: right\"><span id=\"sequence_link\"></span><span id=\"sequence_options\"></span></div>");
+        HTMLPanel panel = new HTMLPanel("<span style=\"color: #233559; "
+                + "font-weight: bold; font-style: italic; font-size: 0.80em;\">"
+                + "SEQUENCE</span><div style=\"float: right\"><span id=\"sequence_link\"></span>"
+                + "<span style=\"color: #262626; font-size: 0.75em;\">|</span>"
+                + " <span id=\"sequence_options\"></span></div>");
 
         panel.setStyleName("entry_sequence_sub_header");
 
+        final VectorEditorDialog dialog = new VectorEditorDialog(info.getName());
+        Flash.Parameters param = new Flash.Parameters();
+        param.setEntryId(info.getRecordId());
+        param.setSessiondId(AppController.sessionId);
+        param.setSwfPath("ve/VectorEditor.swf");
+
+        FlexTable table = new FlexTable();
+        table.setWidth("100%");
+        table.setHeight("100%");
+        table.setWidget(0, 0, new Flash(param));
+        dialog.setWidget(table);
+
         if (info.isHasSequence()) {
             // delete, open in vector editor, download
-            VectorEditorDialog dialog = new VectorEditorDialog(info.getName());
             Label label = dialog.getLabel("Open");
-
-            // TODO : addClickHandler and dialog.setWidget(flash)
-            label.addStyleName("display-inline");
+            label.setStyleName("open_sequence_sub_link");
             panel.add(label, "sequence_link");
 
-            SequenceFileDownload download = new SequenceFileDownload();
+            SequenceFileDownload download = new SequenceFileDownload(info.getId());
             Widget widget = download.asWidget();
             widget.addStyleName("display-inline");
             panel.add(download.asWidget(), "sequence_options");
+
+            // TODO : delete
         } else {
-            // create new , upload
-            //            panel.add(download.asWidget(), "sequence_options");
+            Label label = dialog.getLabel("Create New");
+            label.setStyleName("open_sequence_sub_link");
+            panel.add(label, "sequence_link");
+
         }
         return panel;
     }
@@ -280,37 +289,6 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         table.setWidget(currentRow, 0, notes);
         table.getFlexCellFormatter().setColSpan(currentRow, 0, 4);
         currentRow += 1;
-    }
-
-    // TODO : this is currently a bit expensive
-    public void switchToEditMode() {
-        int rowCount = table.getRowCount();
-        for (int row = 0; row < rowCount; row += 1) {
-            int cellCount = table.getCellCount(row);
-            for (int col = 0; col < cellCount; col += 1) {
-                if (col % 2 == 0)
-                    continue;
-
-                String text = table.getText(row, col);
-                TextBox textBox = new TextBox();
-                textBox.setText(text);
-                table.setWidget(row, col, textBox);
-
-                //                ValueCell cell = (ValueCell) table.getWidget(row, col);
-                //                switch (cell.getType()) {
-                //                case DATE:
-                //                    DatePicker datePicker = new DatePicker();
-                //                    table.setWidget(row, col, datePicker);
-                //                    break;
-                //
-                //                default:
-                //                case SHORT_TEXT:
-                //                    TextBox textBox = new TextBox();
-                //                    textBox.setText(cell.getValue());
-                //                    table.setWidget(row, col, textBox);
-                //                    break;
-            }
-        }
     }
 
     // adds a field to the current table
@@ -367,9 +345,10 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         currentRow += 1;
     }
 
-    private Hyperlink createProfileLink(String email, String name) {
-        Hyperlink link = new Hyperlink(name, Page.PROFILE.getLink() + ";id=" + email);
-        return link;
+    private Widget createProfileLink(String email, String name) {
+        if (email == null || email.isEmpty())
+            return new HTML("<i>" + name + "</i>");
+        return new Hyperlink(name, Page.PROFILE.getLink() + ";id=" + email);
     }
 
     //

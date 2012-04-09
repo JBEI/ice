@@ -1822,14 +1822,18 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             case WRITE_ACCOUNT:
                 Account writeAccount = AccountController.get(id);
-                if (writeAccount != null && !writeAccount.getEmail().equals(account.getEmail()))
+                if (writeAccount != null && !writeAccount.getEmail().equals(account.getEmail())) {
                     permissionController.addWriteUser(entry, writeAccount);
+                    permissionController.addReadUser(entry, writeAccount);
+                }
                 break;
 
             case WRITE_GROUP:
                 Group writeGroup = GroupManager.get(id);
-                if (writeGroup != null)
+                if (writeGroup != null) {
                     permissionController.addWriteGroup(entry, writeGroup);
+                    permissionController.addReadGroup(entry, writeGroup);
+                }
                 break;
             }
 

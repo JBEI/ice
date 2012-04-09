@@ -20,7 +20,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 
-public class ArabidopsisUpdateForm extends UpdateEntryForm<ArabidopsisSeedInfo> {
+public class UpdateArabidopsisForm extends UpdateEntryForm<ArabidopsisSeedInfo> {
 
     private TextBox fundingSource;
     private ListBox status;
@@ -37,7 +37,7 @@ public class ArabidopsisUpdateForm extends UpdateEntryForm<ArabidopsisSeedInfo> 
     private TextArea references;
     private TextArea ip;
 
-    public ArabidopsisUpdateForm(HashMap<AutoCompleteField, ArrayList<String>> data,
+    public UpdateArabidopsisForm(HashMap<AutoCompleteField, ArrayList<String>> data,
             ArabidopsisSeedInfo info) {
         super(data, info);
 

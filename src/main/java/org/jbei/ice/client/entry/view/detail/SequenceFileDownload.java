@@ -11,6 +11,7 @@ import com.google.gwt.resources.client.ImageResource.ImageOptions;
 import com.google.gwt.resources.client.ImageResource.RepeatStyle;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellList;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
@@ -42,7 +43,7 @@ class SequenceFileDownload implements IsWidget {
         Style cellListStyle();
     }
 
-    public SequenceFileDownload() {
+    public SequenceFileDownload(final long entryId) {
         SequenceFileDownloadResource.INSTANCE.cellListStyle().ensureInjected();
         label = new Label("Download");
         label.setStyleName(SequenceFileDownloadResource.INSTANCE.cellListStyle().downloadStyle());
@@ -58,16 +59,21 @@ class SequenceFileDownload implements IsWidget {
 
         options.setRowData(Arrays.asList(DownloadOption.values()));
 
-        final PopupHandler exportAsClickHandler = new PopupHandler(options, label.getElement(), 0,
-                1);
+        final PopupHandler popupHandler = new PopupHandler(options, label.getElement(), 0, 1);
 
-        label.addClickHandler(exportAsClickHandler);
+        label.addClickHandler(popupHandler);
         optionSelection = new SingleSelectionModel<DownloadOption>();
         optionSelection.addSelectionChangeHandler(new Handler() {
 
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                exportAsClickHandler.hidePopup();
+                DownloadOption selected = optionSelection.getSelectedObject();
+                if (selected == null)
+                    return;
+                popupHandler.hidePopup();
+                Window.Location.replace("/sequence?type=" + selected.getType() + "&entry="
+                        + entryId);
+                optionSelection.setSelected(selected, false);
             }
         });
 
@@ -85,16 +91,22 @@ class SequenceFileDownload implements IsWidget {
 
     // download options for sequence files
     public enum DownloadOption {
-        ORIGINAL("Original"), GENBANK("GenBank"), FASTA("FASTA");
+        ORIGINAL("Original", "original"), GENBANK("GenBank", "genbank"), FASTA("FASTA", "fasta");
 
         private String display;
+        private String type;
 
-        private DownloadOption(String display) {
+        private DownloadOption(String display, String type) {
             this.display = display;
+            this.type = type;
         }
 
         public String toString() {
             return this.display;
+        }
+
+        public String getType() {
+            return this.type;
         }
     }
 }
