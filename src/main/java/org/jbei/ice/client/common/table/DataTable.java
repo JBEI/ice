@@ -34,9 +34,9 @@ public abstract class DataTable<T> extends CellTable<T> {
         super(15, EntryResources.INSTANCE);
         setStyleName("data_table");
         Label empty = new Label();
-        empty.setText("Empty");
+        empty.setText("No data available");
+        empty.setStyleName("no_data_style");
         this.setEmptyTableWidget(empty);
-
         columns = createColumns();
     }
 

@@ -32,6 +32,8 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 .no_wrap { white-space: nowrap; }
 .bg_f1 {background-color: #f8f8f0; }
 
+.no_data_style { padding: 8px; background-color: white; font-size: 0.85em }
+
 .btn_submit_entry_form {
 	padding: 5px;
 	width: 90px;
