@@ -170,8 +170,10 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
             @Override
             public String getValue(T object) {
-                // TODO : limit length of returned string
-                return object.getShortDescription();
+                String description = object.getShortDescription();
+                if( description.length() > 130 )
+                    description = description.substring(0, 125) + "...";
+                return description;
             }
         };
 
