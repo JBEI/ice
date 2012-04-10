@@ -612,7 +612,6 @@ a.cell_mouseover:hover {
 }
 
 .button_group_item[disabled]:hover {
-	color: #eaeaea;
 	border-top: 2px solid #f1f1f1;
 	cursor: default;
 }
@@ -677,10 +676,10 @@ a.cell_mouseover:hover {
 }
 
 .collection_user_menu_row_selected {
-	background-color: #f9edbe; 
     cursor: default;
     font-weight: bold;
-    color: #4d5b76;
+    color: #2d3749;
+    background-color: #f1f6fb;
 }
 
 .entry_detail_view_row {
@@ -793,6 +792,26 @@ a.cell_mouseover:hover {
     background: -webkit-linear-gradient(top, bottom, #f5f5f5, #c5c5c5);
     background: -moz-linear-gradient(top, bottom, #f5f5f5, #c5c5c5);
     color: #777;
+}
+
+.search_caption_display {
+	font-size: 0.75em;
+	border: 1px solid #0082c0;
+}
+
+.search_caption_caption {
+	color: #333;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.search_caption_display_content {
+    float: left;
+    font-size: 11px;
+    opacity: 0.8;
+    padding-left: 5px;
+    padding-right: 5px;
+    
 }
 
 .login_input {

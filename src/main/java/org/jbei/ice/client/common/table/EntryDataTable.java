@@ -29,6 +29,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 
 /**
@@ -149,14 +150,15 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
     }
 
     protected DataTableColumn<String> addNameColumn(double width, Unit unit) {
+
         DataTableColumn<String> nameColumn = new DataTableColumn<String>(new TextCell(),
                 ColumnField.NAME) {
 
             @Override
             public String getValue(T object) {
                 String name = object.getName();
-                if( name.length() > 15 )
-                    name = name.substring(0,12) + "...";
+                if (name.length() > 15)
+                    name = name.substring(0, 12) + "...";
                 return name;
             }
         };
@@ -174,8 +176,11 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
             @Override
             public String getValue(T object) {
                 String description = object.getShortDescription();
-                if( description.length() > 130 )
-                    description = description.substring(0, 125) + "...";
+                int size = (int) (Window.getClientWidth() * 0.05);
+                if (size <= 0)
+                    size = 50;
+                if (description.length() > size)
+                    description = description.substring(0, (size - 3)) + "...";
                 return description;
             }
         };
@@ -225,7 +230,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
         this.addColumn(statusColumn, "Status");
         statusColumn.setSortable(true);
-        this.setColumnWidth(statusColumn, 110, Unit.PX);
+        this.setColumnWidth(statusColumn, 90, Unit.PX);
         return statusColumn;
     }
 

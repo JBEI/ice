@@ -32,8 +32,10 @@ public class AdvancedSearchView extends Composite implements IAdvancedSearchView
         initComponents();
 
         // add filters
-        CaptionPanel captionPanel = new CaptionPanel("Search Filters");
-        captionPanel.setWidth("97%");
+        CaptionPanel captionPanel = new CaptionPanel(
+                "<span class=\"search_caption_caption\">Search Filters</span>", true);
+        captionPanel.setWidth("98%");
+        captionPanel.setStyleName("search_caption_display");
         captionPanel.add(filterPanel);
         layout.setWidget(0, 0, captionPanel);
 
@@ -63,10 +65,28 @@ public class AdvancedSearchView extends Composite implements IAdvancedSearchView
     @Override
     public void setSearchFilters(ArrayList<SearchFilterInfo> filters) {
         filterPanel.clear();
+        int size = filters.size();
+        int i = 0;
         for (SearchFilterInfo filter : filters) {
-            String filterString = filter.getType() + filter.getOperator() + filter.getOperand();
-            Label label = new Label(filterString + " ");
+            String filterString = "";
+            if (filter.getType() != null)
+                filterString += filter.getType();
+
+            if (filter.getOperator() != null)
+                filterString += filter.getOperator();
+
+            if (filter.getOperand() != null)
+                filterString += filter.getOperand();
+
+            Label label;
+            if (i == size - 1)
+                label = new Label(filterString);
+            else
+                label = new Label(filterString + ", ");
+
+            label.setStyleName("search_caption_display_content");
             filterPanel.add(label);
+            i += 1;
         }
     }
 

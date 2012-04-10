@@ -2,7 +2,6 @@ package org.jbei.ice.client.common.header;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 
 import org.jbei.ice.client.common.FilterOperand;
 import org.jbei.ice.shared.QueryOperator;
@@ -36,52 +35,108 @@ public class QuickSearchParser {
 
     public static ArrayList<SearchFilterInfo> parse(String value) {
         ArrayList<SearchFilterInfo> filters = new ArrayList<SearchFilterInfo>();
+        value = value.trim();
+
         if (value == null || value.isEmpty())
             return filters;
 
-        // all white spaces as delimiter
         StringBuilder sb = new StringBuilder();
-        for (String str : value.split("\\s+")) {
 
-            SearchFilterInfo info = null;
+        String type = null;
+        String operator = null;
+        String operand = null;
 
-            // 
-            // e.g. name~foo for "name does not contain foo"
-            for (Iterator<String> iter = operatorSymbol.iterator(); iter.hasNext();) {
-                String tmp = iter.next();
-                if (str.contains(tmp)) {
-                    String[] params = str.split(tmp);
-                    SearchFilterType type = SearchFilterType.filterValueOf(params[0]);
-                    if (type == null)
-                        continue;
+        boolean reset = false;
+        final int valueLength = value.length();
+        for (int i = 0; i < valueLength; i += 1) {
 
-                    if (params.length < 2) {
-                        // valid type but incorrectly formed query.
-                        // TODO need to hightlight and let user know
-                        continue;
-                    }
+            // search for a type (till we hit operator) 
+            // if we hit a space then it is a free standing operator
+            sb = new StringBuilder();
+            while (i < valueLength) {
 
-                    info = new SearchFilterInfo(params[0], tmp, params[1]);
-                    if (!sb.toString().isEmpty()) {
-                        filters.add(new SearchFilterInfo(null, null, sb.toString()));
-                        sb = new StringBuilder();
-                    }
+                char c = value.charAt(i);
+                sb.append(c);
+                if (types.contains(sb.toString().trim())) {
+                    type = sb.toString().trim();
+                    i += 1;
                     break;
                 }
+
+                if (c == ' ' || i + 1 == valueLength) {
+                    // free standing query
+                    filters.add(new SearchFilterInfo(null, null, sb.toString().trim()));
+                    reset = true;
+                    break;
+                }
+                i += 1;
             }
 
-            if (info != null) { // non-free style filter
-                filters.add(info);
-            } else {
-                if (sb.toString().isEmpty())
-                    sb.append(str);
+            if (i == valueLength) {
+                type = sb.toString().trim();
+                filters.add(new SearchFilterInfo(null, null, type));
+                break;
+            }
+
+            // reset implies start search for a new type
+            if (reset) {
+                reset = false;
+                continue;
+            }
+
+            // check for operand
+            sb = new StringBuilder();
+            while (i < valueLength) {
+                char c = value.charAt(i);
+                sb.append(c);
+
+                if (operatorSymbol.contains(sb.toString().trim())) {
+                    operator = sb.toString().trim();
+                    i += 1;
+                    break;
+                }
+
+                if (c == ' ') {
+                    // we have encountered a query in the form "status="
+                    // TODO : show some visual indicator
+                    reset = true;
+                    i += 1;
+                    break;
+                }
+                i += 1;
+            }
+
+            // invalid format encountered
+            if (reset) {
+                reset = false;
+                continue;
+            }
+
+            // check for operator 
+            sb = new StringBuilder();
+            boolean startExp = false;
+            while (i < valueLength) {
+                char c = value.charAt(i);
+
+                if (c == '"')
+                    startExp = !startExp;
                 else
-                    sb.append(" " + str);
+                    sb.append(c);
+
+                if (c == ' ' && !startExp) {
+                    operand = sb.toString().trim();
+                    filters.add(new SearchFilterInfo(type, operator, operand));
+                    break;
+                }
+                i += 1;
+            }
+
+            // EOL without space
+            if (i == valueLength && type != null) {
+                filters.add(new SearchFilterInfo(type, operator, sb.toString().trim()));
             }
         }
 
-        if (!sb.toString().isEmpty())
-            filters.add(new SearchFilterInfo(null, null, sb.toString()));
         return filters;
     }
 
@@ -132,52 +187,4 @@ public class QuickSearchParser {
         }
         return value;
     }
-    /*
-    SearchFilterType type = filterOperand.getType();
-    String typeShortName = type.getShortName().toLowerCase();
-    int index = text.indexOf(typeShortName);
-    if (index == -1)
-        return text;
-
-    // scan till . format expected is type operator operand type operator operand
-    StringBuilder sb = new StringBuilder();
-    index += typeShortName.length();
-    while (index < text.length()) {
-        sb.append(text.charAt(index));
-        boolean foundOperator = operatorSymbol.contains(sb.toString());
-        if (foundOperator) {
-
-            String subString = text.substring(index);
-            subString = subString.replaceFirst(sb.toString(), operator);
-
-            // scan and replace 
-            sb = new StringBuilder();
-
-            sb.append(text.substring(0, index));
-
-            if (filterOperand.getPossibleOperands() != null) {
-                for (String possibleOperand : filterOperand.getPossibleOperands()) {
-                    int subStringIndex = subString.indexOf(possibleOperand);
-                    if (subStringIndex == operator.length()) {
-                        subString = subString.replaceFirst(possibleOperand, operand);
-                    }
-                }
-            } else {
-                // free text field. may or may not have quotes
-                // e.g. part_id=foo part_id="foo bar"
-                String replacement = operand;
-                if (operand.contains(" "))
-                    replacement = ("\"" + operand + "\"");
-                GWT.log("replace " + subString.substring(operator.length()) + " with "
-                        + replacement);
-
-            }
-
-            sb.append(subString);
-            return sb.toString();
-        }
-        index += 1;
-    }
-    return text;
-    }*/
 }

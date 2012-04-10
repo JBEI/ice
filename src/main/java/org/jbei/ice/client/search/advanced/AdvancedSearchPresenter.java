@@ -134,22 +134,18 @@ public class AdvancedSearchPresenter {
 
     private class Handler implements AdvancedSearchEvent.AdvancedSearchEventHandler {
 
-        private final ArrayList<SearchFilterInfo> searchFilters;
-
         public Handler(ArrayList<SearchFilterInfo> filters) {
-            this.searchFilters = filters;
+            display.setSearchFilters(filters);
         }
 
         @Override
         public void onSearchCompletion(AdvancedSearchEvent event) {
-            display.setSearchFilters(searchFilters);
             dataProvider.setValues(event.getSearchResults());
             mode = Mode.SEARCH;
         }
 
         @Override
         public void onBlastCompletion(AdvancedSearchEvent event) {
-            display.setSearchFilters(searchFilters);
             blastProvider.setData(event.getResults());
             mode = Mode.BLAST;
         }
