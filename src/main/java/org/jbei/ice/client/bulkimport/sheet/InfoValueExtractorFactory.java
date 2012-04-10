@@ -1,10 +1,13 @@
 package org.jbei.ice.client.bulkimport.sheet;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
+import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.Generation;
+import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.PlantType;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.PartInfo;
@@ -106,15 +109,24 @@ public class InfoValueExtractorFactory {
             return info.getEcotype();
 
         case HARVEST_DATE:
+            Date harvestDate = info.getHarvestDate();
+            if (harvestDate == null)
+                return "";
             return info.getHarvestDate().toString();
 
         case PARENTS:
             return info.getParents();
 
         case GENERATION:
+            Generation generation = info.getGeneration();
+            if (generation == null)
+                return "";
             return info.getGeneration().name();
 
         case PLANT_TYPE:
+            PlantType plantType = info.getPlantType();
+            if (plantType == null)
+                return "";
             return info.getPlantType().toString();
 
             // special case for files
