@@ -104,14 +104,14 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
 
     private Widget createReadRoot() {
         HTMLPanel panel = new HTMLPanel(
-                "Read Allowed<span style=\"float:right; margin-left: 15px\" id=\"permissions_read_allowed_add_link\"></span>");
+                "Read Allowed<span style=\"margin-left: 15px\" id=\"permissions_read_allowed_add_link\"></span>");
         panel.add(readAddLabel, "permissions_read_allowed_add_link");
         return panel;
     }
 
     private Widget createWriteRoot() {
         HTMLPanel panel = new HTMLPanel(
-                "Write Allowed<span style=\"float:right; margin-left: 15px\" id=\"permissions_write_allowed_add_link\"></span>");
+                "Write Allowed<span style=\"margin-left: 15px\" id=\"permissions_write_allowed_add_link\"></span>");
         panel.add(writeAddLabel, "permissions_write_allowed_add_link");
         return panel;
     }

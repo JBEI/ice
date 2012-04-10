@@ -253,8 +253,6 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
 
             layout.setHTML(0, 1, "&nbsp;");
             layout.getFlexCellFormatter().setWidth(0, 1, "10px");
-            int w = mainContent.getOffsetWidth() - 230;
-            layout.getFlexCellFormatter().setWidth(0, 2, w + "px");
         }
     }
 
