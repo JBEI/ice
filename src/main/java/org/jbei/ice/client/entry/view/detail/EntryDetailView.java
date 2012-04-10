@@ -245,6 +245,7 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         table.setWidth("100%");
         table.setHeight("100%");
         table.setWidget(0, 0, new Flash(param));
+        table.getFlexCellFormatter().setHeight(0, 0, "100%");
         dialog.setWidget(table);
 
         if (info.isHasSequence()) {
