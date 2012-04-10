@@ -608,7 +608,13 @@ a.cell_mouseover:hover {
 }
 
 .button_group_item[disabled] {
+	opacity: 0.4;
+}
+
+.button_group_item[disabled]:hover {
 	color: #eaeaea;
+	border-top: 2px solid #f1f1f1;
+	cursor: default;
 }
 
 .button_group_item:hover {

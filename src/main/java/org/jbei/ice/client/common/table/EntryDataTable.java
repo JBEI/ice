@@ -154,7 +154,10 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
             @Override
             public String getValue(T object) {
-                return object.getName();
+                String name = object.getName();
+                if( name.length() > 15 )
+                    name = name.substring(0,12) + "...";
+                return name;
             }
         };
 
