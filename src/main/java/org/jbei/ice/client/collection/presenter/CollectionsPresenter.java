@@ -170,6 +170,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                     History.newItem(Page.ENTRY_VIEW.getLink() + ";id="
                             + event.getContext().getCurrent(), false);
                     display.setMainContent(entryViewPresenter.getView(), false);
+                    display.setCurrentMenuSelection(event.getContext().getCurrent());
                     mode = Mode.ENTRY;
                     return;
                 }
@@ -384,6 +385,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         currentContext = event;
         History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + event.getCurrent(), false);
         display.setMainContent(entryViewPresenter.getView(), false);
+        display.setCurrentMenuSelection(event.getCurrent());
     }
 
     private void search(ArrayList<SearchFilterInfo> operands) {
@@ -614,6 +616,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                 }
 
                 History.newItem(Page.COLLECTIONS.getLink() + ";id=" + id, false);
+                display.setCurrentMenuSelection(id);
                 ArrayList<Long> entries = folder.getContents();
                 entryDataProvider.setValues(entries);
 
