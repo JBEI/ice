@@ -134,6 +134,8 @@ public class CollectionsPresenter extends AbstractPresenter {
                 if (entryPresenter == null)
                     entryPresenter = new EntryAddPresenter(model.getService(), model.getEventBus());
                 EntryAddType type = selectionModel.getSelectedObject();
+                if (type == null)
+                    return;
                 entryPresenter.setType(type);
                 display.setMainContent(entryPresenter.getView(), false);
                 display.getAddEntrySelectionHandler().setSelected(type, false);

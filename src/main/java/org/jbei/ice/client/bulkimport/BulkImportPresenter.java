@@ -130,6 +130,8 @@ public class BulkImportPresenter extends AbstractPresenter {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 EntryAddType selection = createSelection.getSelectedObject();
+                if (selection == null)
+                    return;
 
                 if (sheetCache.containsKey(selection))
                     currentInput = sheetCache.get(selection);
