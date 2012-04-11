@@ -9,13 +9,18 @@
 		<property name="hibernate.connection.password">t@stuz@r</property>
 		
 		<!-- The settings below uses a file based database with some example test data. 
-
 		<property name="hibernate.connection.url">jdbc:hsqldb:file:src/test/java/example_db/example_db</property>
 		<property name="hibernate.connection.driver_class">org.hsqldb.jdbcDriver</property>
 		<property name="hibernate.connection.username">sa</property>
 		<property name="hibernate.dialect">org.hibernate.dialect.HSQLDialect</property>
-		
 		 -->
+		 
+		<!-- The setting below uses a memory based database. 
+		 <property name="hibernate.connection.url">jdbc:hsqldb:mem:ice</property>
+		<property name="hibernate.connection.driver_class">org.hsqldb.jdbcDriver</property>
+		<property name="hibernate.connection.username">sa</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.HSQLDialect</property>
+		-->
 		<property name="hibernate.connection.pool_size">3</property>
 		<property name="hibernate.c3p0.min_size">3</property>
 		<property name="hibernate.c3p0.max_size">15</property>
