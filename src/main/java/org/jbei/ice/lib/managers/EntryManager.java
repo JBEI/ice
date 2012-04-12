@@ -3,18 +3,22 @@ package org.jbei.ice.lib.managers;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import javax.persistence.NonUniqueResultException;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.ArabidopsisSeed;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
@@ -200,8 +204,8 @@ public class EntryManager {
      * @return Number of visible entries.
      * @throws ManagerException
      */
-    @SuppressWarnings("unchecked")
-    public static long getNumberOfVisibleEntries() throws ManagerException {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static long getNumberOfVisibleEntries(Account account) throws ManagerException {
         Group everybodyGroup;
 
         long result = 0;
@@ -223,6 +227,19 @@ public class EntryManager {
             } else {
                 result = results.size();
             }
+
+            if (account == null)
+                return result;
+
+            // get all visible entries
+            queryString = "select id from ReadUser readUser where readUser.account = :account";
+            query = session.createQuery(queryString);
+            query.setParameter("account", account);
+            List accountResults = query.list();
+            if (accountResults != null) {
+                result += accountResults.size();
+            }
+
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve number of visible entries!", e);
         } finally {
@@ -232,6 +249,43 @@ public class EntryManager {
         }
 
         return result;
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static Set<Long> getAllVisibleEntries(Account account) throws ManagerException {
+
+        Group everybodyGroup;
+        Session session = null;
+        Set<Long> visibleEntries = new HashSet<Long>();
+
+        try {
+            everybodyGroup = GroupManager.getEverybodyGroup();
+            session = DAO.newSession();
+            String queryString = "select id from ReadGroup readGroup where readGroup.group = :group";
+            Query query = session.createQuery(queryString);
+            query.setParameter("group", everybodyGroup);
+            List results = query.list();
+            visibleEntries.addAll(((ArrayList<Long>) results));
+
+            if (account == null)
+                return visibleEntries;
+
+            // get all visible entries
+            queryString = "select id from ReadUser readUser where readUser.account = :account";
+            query = session.createQuery(queryString);
+            query.setParameter("account", account);
+            List accountResults = query.list();
+            visibleEntries.addAll(((ArrayList<Long>) accountResults));
+
+            return visibleEntries;
+
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve number of visible entries!", e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
     }
 
     /**
@@ -263,6 +317,21 @@ public class EntryManager {
         }
 
         return entries;
+    }
+
+    public static long getAllEntryCount() throws ManagerException {
+        Session session = DAO.newSession();
+        try {
+            Criteria criteria = session.createCriteria(Entry.class.getName());
+            Integer result = (Integer) criteria.setProjection(Projections.rowCount())
+                    .uniqueResult();
+            return result.longValue();
+        } finally {
+            if (session.isOpen())
+                session.close();
+        }
+
+        //        int count = ((Long)getSession().createQuery("select count(*) from Entry").uniqueResult()).intValue();
     }
 
     /**

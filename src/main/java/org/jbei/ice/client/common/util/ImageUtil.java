@@ -41,6 +41,12 @@ public class ImageUtil {
         @Source("org/jbei/ice/client/resource/image/prev.png")
         ImageResource prevImage();
 
+        @Source("org/jbei/ice/client/resource/image/side_expand.png")
+        ImageResource showSideImage();
+
+        @Source("org/jbei/ice/client/resource/image/side_expand2.png")
+        ImageResource hideSideImage();
+
     }
 
     public static Image getSampleIcon() {
@@ -81,5 +87,13 @@ public class ImageUtil {
 
     public static Image getPrevIcon() {
         return new Image(Resources.INSTANCE.prevImage());
+    }
+
+    public static Image getShowSideImage() {
+        return new Image(Resources.INSTANCE.showSideImage());
+    }
+
+    public static Image getHideSideImage() {
+        return new Image(Resources.INSTANCE.hideSideImage());
     }
 }

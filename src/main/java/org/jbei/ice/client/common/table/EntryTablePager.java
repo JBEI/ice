@@ -91,7 +91,7 @@ public class EntryTablePager extends AbstractPager {
     private final NavLink btn50Count;
     private final NavLink btn100Count;
 
-    protected final int JUMP_PAGE_COUNT = 9;
+    public final static int JUMP_PAGE_COUNT = 5;
     private int start;
 
     public EntryTablePager() {
@@ -286,7 +286,7 @@ public class EntryTablePager extends AbstractPager {
         HasRows display = getDisplay();
         int dataSize = display.getRowCount();
         if (dataSize == 0)
-            return "No Results";
+            return "";
 
         // Default text is 1 based.
         NumberFormat formatter = NumberFormat.getFormat("#,###");

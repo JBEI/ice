@@ -18,8 +18,8 @@ public class BulkImportDataProvider extends SortableDataProvider<BulkImport> {
     @Override
     public Iterator<? extends BulkImport> iterator(int first, int count) {
         try {
-            List<BulkImport> results = BulkImportManager.retrieveAll()
-                    .subList(first, first + count);
+            List<BulkImport> results = BulkImportManager.retrieveSavedDrafts().subList(first,
+                first + count);
             return results.iterator();
         } catch (ManagerException e) {
             throw new ViewException(e);
@@ -29,7 +29,7 @@ public class BulkImportDataProvider extends SortableDataProvider<BulkImport> {
     @Override
     public int size() {
         try {
-            return BulkImportManager.retrieveAll().size();
+            return BulkImportManager.retrieveSavedDrafts().size();
         } catch (ManagerException e) {
             throw new ViewException(e);
         }

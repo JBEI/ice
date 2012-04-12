@@ -127,6 +127,20 @@ public class AttachmentManager {
         return attachments;
     }
 
+    //    public static boolean hasAttachment(Entry entry) throws ManagerException {
+    //        Session session = DAO.newSession();
+    //        try {
+    //
+    //        } catch (HibernateException e) {
+    //            throw new ManagerException("Failed to retrieve attachment by entry: " + entry.getId(),
+    //                    e);
+    //        } finally {
+    //            if (session.isOpen()) {
+    //                session.close();
+    //            }
+    //        }
+    //    }
+
     /**
      * Retrieves attachment referenced by a unique file identifier
      * 

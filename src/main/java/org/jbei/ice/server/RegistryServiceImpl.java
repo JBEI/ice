@@ -42,7 +42,6 @@ import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.managers.StorageManager;
 import org.jbei.ice.lib.managers.TraceSequenceManager;
 import org.jbei.ice.lib.managers.UtilsManager;
-import org.jbei.ice.lib.managers.WorkspaceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.BulkImport;
@@ -113,6 +112,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             boolean isModerator = AccountController.isModerator(account);
             info.setModerator(isModerator);
 
+            long visibleEntryCount;
+            if (isModerator)
+                visibleEntryCount = EntryManager.getAllEntryCount();
+            else
+                visibleEntryCount = EntryManager.getNumberOfVisibleEntries(account);
+
+            info.setVisibleEntryCount(visibleEntryCount);
+
             return info;
         } catch (InvalidCredentialsException e) {
             Logger.warn("Invalid credentials provided by user: " + name);
@@ -132,13 +139,19 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (AccountController.isAuthenticated(sid)) {
                 Account account = AccountController.getAccountBySessionKey(sid);
                 AccountInfo info = this.accountToInfo(account);
-                long visibleEntryCount = EntryManager.getNumberOfVisibleEntries();
-                info.setVisibleEntryCount(visibleEntryCount);
                 int entryCount = EntryManager.getEntryCountBy(info.getEmail());
                 info.setUserEntryCount(entryCount);
 
                 boolean isModerator = AccountController.isModerator(account);
                 info.setModerator(isModerator);
+
+                long visibleEntryCount;
+                if (isModerator)
+                    visibleEntryCount = EntryManager.getAllEntryCount();
+                else
+                    visibleEntryCount = EntryManager.getNumberOfVisibleEntries(account);
+
+                info.setVisibleEntryCount(visibleEntryCount);
 
                 return info;
             }
@@ -399,7 +412,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public FolderDetails retrieveAllEntryIDs(String sid) {
+    public FolderDetails retrieveAllVisibleEntryIDs(String sid) {
         Account account = null;
 
         try {
@@ -407,22 +420,26 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            Logger.info(account.getEmail() + " retrieving all entry ids");
+            Logger.info(account.getEmail() + " retrieving all visible entry ids");
             EntryController entryController = new EntryController(account);
-            ArrayList<Long> entries = entryController.getAllEntryIDs();
+
+            ArrayList<Long> entries;
+            if (AccountManager.isModerator(account))
+                entries = entryController.getAllEntryIDs();
+            else {
+                entries = new ArrayList<Long>();
+                entries.addAll(entryController.getAllVisibleEntryIDs(account));
+            }
+
             FolderDetails details = new FolderDetails(-1, "Available Entries", true);
             details.setContents(entries);
             return details;
         } catch (ControllerException e) {
             Logger.error(e);
-            return null;
+        } catch (ManagerException e) {
+            Logger.error(e);
         }
-    }
-
-    @Override
-    public long retrieveAvailableEntryCount(String sessionId) {
-        // TODO Auto-generated method stub
-        return -1;
+        return null;
     }
 
     protected Account retrieveAccountForSid(String sid) throws ControllerException {
@@ -433,28 +450,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
 
         return AccountController.getAccountBySessionKey(sid);
-    }
-
-    @Override
-    public ArrayList<Long> retrieveRecentlyViewed(String sid) {
-        try {
-            Account account = this.retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
-            return WorkspaceManager.getRecentlyViewedByAccount(account);
-        } catch (ManagerException e) {
-            Logger.error(e);
-            return null;
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return null;
-        }
-    }
-
-    @Override
-    public ArrayList<Long> retrieveWorkspaceEntries(String sid) {
-        return new ArrayList<Long>();
     }
 
     @Override
@@ -588,38 +583,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         buffer.append("</p>");
         return buffer.toString();
 
-    }
-
-    @Override
-    public AccountInfo retrieveAccountInfo(String sid, String userId) {
-        try {
-            this.retrieveAccountForSid(sid);
-            Account account = retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
-            account = AccountManager.getByEmail(userId);
-            if (account == null)
-                return null;
-
-            AccountInfo info = accountToInfo(account);
-
-            // get the count for samples
-            int sampleCount = SampleManager.getSampleCountBy(info.getEmail());
-            info.setUserSampleCount(sampleCount);
-            long visibleEntryCount = EntryManager.getNumberOfVisibleEntries();
-            info.setVisibleEntryCount(visibleEntryCount);
-            int entryCount = EntryManager.getEntryCountBy(info.getEmail());
-            info.setUserEntryCount(entryCount);
-
-            return info;
-        } catch (ManagerException e) {
-            Logger.error(e);
-            return null;
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return null;
-        }
     }
 
     @Override
@@ -992,7 +955,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             // get the count for samples
             int sampleCount = SampleManager.getSampleCountBy(accountInfo.getEmail());
             accountInfo.setUserSampleCount(sampleCount);
-            long visibleEntryCount = EntryManager.getNumberOfVisibleEntries();
+            boolean isModerator = AccountManager.isModerator(account);
+            long visibleEntryCount;
+            if (isModerator)
+                visibleEntryCount = EntryManager.getAllEntryCount();
+            else
+                visibleEntryCount = EntryManager.getNumberOfVisibleEntries(account);
             accountInfo.setVisibleEntryCount(visibleEntryCount);
             int entryCount = EntryManager.getEntryCountBy(accountInfo.getEmail());
             accountInfo.setUserEntryCount(entryCount);
@@ -1014,6 +982,43 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             return profile;
 
+        } catch (ManagerException e) {
+            Logger.error(e);
+            return null;
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return null;
+        }
+    }
+
+    @Override
+    public AccountInfo retrieveAccountInfo(String sid, String userId) {
+        try {
+            this.retrieveAccountForSid(sid);
+            Account account = retrieveAccountForSid(sid);
+            if (account == null)
+                return null;
+
+            account = AccountManager.getByEmail(userId);
+            if (account == null)
+                return null;
+
+            AccountInfo info = accountToInfo(account);
+
+            // get the count for samples
+            int sampleCount = SampleManager.getSampleCountBy(info.getEmail());
+            info.setUserSampleCount(sampleCount);
+            boolean isModerator = AccountManager.isModerator(account);
+            long visibleEntryCount;
+            if (isModerator)
+                visibleEntryCount = EntryManager.getAllEntryCount();
+            else
+                visibleEntryCount = EntryManager.getNumberOfVisibleEntries(account);
+            info.setVisibleEntryCount(visibleEntryCount);
+            int entryCount = EntryManager.getEntryCountBy(info.getEmail());
+            info.setUserEntryCount(entryCount);
+
+            return info;
         } catch (ManagerException e) {
             Logger.error(e);
             return null;
@@ -1197,6 +1202,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return false;
 
             BulkImport bulkImport = createBulkImport(account, primary, secondary, email);
+            bulkImport.setDraft(false);
             BulkImport savedImport = BulkImportManager.createBulkImportRecord(bulkImport);
             return (savedImport != null);
 

@@ -116,7 +116,7 @@ public class BulkImportPresenter extends AbstractPresenter {
 
                         view.setSheet(currentInput, false);
                         view.setHeader(info.getType().getDisplay() + " Bulk Import");
-                        view.setMenuVisibility(false);
+                        //                        view.setMenuVisibility(false);
                     }
                 });
             }
@@ -162,7 +162,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                         name = DateUtilities.formatDate(info.getCreated());
                         info.setName(name);
                     }
-                    MenuItem item = new MenuItem(info.getId(), name, info.getCount(), false);
+                    MenuItem item = new MenuItem(info.getId(), name, info.getCount(), true); // TODO : temporarily disabling the edit/delete icon
                     data.add(item);
                 }
 
@@ -264,8 +264,9 @@ public class BulkImportPresenter extends AbstractPresenter {
                                 "Draft \"" + info.getName() + "\" with <b>" + info.getCount()
                                         + "</b> entry/ies successfully saved", false);
                             MenuItem item = new MenuItem(info.getId(), info.getName(), info
-                                    .getCount(), false);
-                            view.addSavedDraftData(item, null); // TODO : deleteHandler
+                                    .getCount(), true); // TODO : temporarily disabling the edit/delete icon
+                            // TODO : deleteHandler
+                            view.addSavedDraftData(item, null);
                             currentInput.setName(info.getName());
                             currentInput.setId(info.getId());
 

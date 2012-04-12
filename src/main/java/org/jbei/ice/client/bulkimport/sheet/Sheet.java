@@ -90,7 +90,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
     private final HashMap<Integer, String> sequenceRowFileIds;
     private final BulkImportDraftInfo info;
 
-    private final static int ROW_COUNT = 5;
+    private final static int ROW_COUNT = 100;
 
     public Sheet(EntryAddType type, BulkImportDraftInfo info) {
 

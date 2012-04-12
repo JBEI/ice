@@ -456,28 +456,29 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         }
 
         // samples
-        String location = sampleLocation.getValue(sampleLocation.getSelectedIndex());
-
-        ArrayList<String> passedLocationList = passedLocation.getListForLocation(location);
-        boolean hasValidScheme = false;
-        for (TextBox scheme : sampleLocationScheme) {
-
-            String schemeText = scheme.getText();
-
-            if (passedLocationList != null && passedLocationList.contains(schemeText.trim()))
-                continue;
-
-            hasValidScheme = true;
-            break;
-        }
-
-        if (hasValidScheme && sampleName.getText().trim().isEmpty()) {
-            sampleName.setStyleName("entry_input_error");
-            if (invalid == null)
-                invalid = sampleName;
-        } else {
-            sampleName.setStyleName("input_box");
-        }
+        // TODO : there is a bug here
+        //        String location = sampleLocation.getValue(sampleLocation.getSelectedIndex());
+        //
+        //        ArrayList<String> passedLocationList = passedLocation.getListForLocation(location);
+        //        boolean hasValidScheme = false;
+        //        for (TextBox scheme : sampleLocationScheme) {
+        //
+        //            String schemeText = scheme.getText();
+        //
+        //            if (passedLocationList != null && passedLocationList.contains(schemeText.trim()))
+        //                continue;
+        //
+        //            hasValidScheme = true;
+        //            break;
+        //        }
+        //
+        //        if (hasValidScheme && sampleName.getText().trim().isEmpty()) {
+        //            sampleName.setStyleName("entry_input_error");
+        //            if (invalid == null)
+        //                invalid = sampleName;
+        //        } else {
+        //            sampleName.setStyleName("input_box");
+        //        }
 
         return invalid;
     }

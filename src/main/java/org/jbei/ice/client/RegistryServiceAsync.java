@@ -55,18 +55,12 @@ public interface RegistryServiceAsync {
     void retrieveEntriesForFolder(String sessionId, long folderId,
             AsyncCallback<FolderDetails> callback);
 
-    void retrieveAvailableEntryCount(String sessionId, AsyncCallback<Long> callback);
-
     void retrieveUserEntries(String sid, String userId, AsyncCallback<FolderDetails> asyncCallback);
 
-    void retrieveAllEntryIDs(String sid, AsyncCallback<FolderDetails> asyncCallback);
-
-    void retrieveRecentlyViewed(String sid, AsyncCallback<ArrayList<Long>> callback);
+    void retrieveAllVisibleEntryIDs(String sid, AsyncCallback<FolderDetails> asyncCallback);
 
     void retrieveSamplesByDepositor(String sid, String email, ColumnField field, boolean asc,
             AsyncCallback<LinkedList<Long>> callback);
-
-    void retrieveWorkspaceEntries(String sid, AsyncCallback<ArrayList<Long>> callback);
 
     void retrieveAutoCompleteData(String sid,
             AsyncCallback<HashMap<AutoCompleteField, ArrayList<String>>> callback);

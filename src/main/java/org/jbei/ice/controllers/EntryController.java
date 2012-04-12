@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -26,9 +27,9 @@ import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 
 /**
  * ABI to manipulate {@link Entry}s.
- *
+ * 
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
- *
+ * 
  */
 public class EntryController extends Controller {
     public EntryController(Account account) {
@@ -40,7 +41,7 @@ public class EntryController extends Controller {
      * <p>
      * Generates a new Part Number, the record id (UUID), version id, and timestamps as necessary.
      * Sets the record globally visible and schedule an index rebuild.
-     *
+     * 
      * @param entry
      * @return entry that was saved in the database.
      * @throws ControllerException
@@ -54,7 +55,7 @@ public class EntryController extends Controller {
      * <p>
      * Generates a new Part Number, the record id (UUID), version id, and timestamps as necessary.
      * Optionally set the record globally visible or schedule an index rebuild.
-     *
+     * 
      * @param entry
      * @param scheduleIndexRebuild
      *            Set true to schedule search index rebuild.
@@ -87,7 +88,7 @@ public class EntryController extends Controller {
 
     /**
      * Retrieve {@link Entry} from the database by id.
-     *
+     * 
      * @param id
      * @return entry retrieved from the database.
      * @throws ControllerException
@@ -111,7 +112,7 @@ public class EntryController extends Controller {
 
     /**
      * Retrieve {@link Entry} from the database by recordId (uuid).
-     *
+     * 
      * @param recordId
      * @return entry retrieved from the database.
      * @throws ControllerException
@@ -141,7 +142,7 @@ public class EntryController extends Controller {
      * Retrieve {@link Entry} from the database by part number.
      * <p>
      * Throws exception if multiple entries have the same part number.
-     *
+     * 
      * @param partNumber
      * @return entry retrieved from the database.
      * @throws ControllerException
@@ -167,7 +168,7 @@ public class EntryController extends Controller {
      * Retrieve {@link Entry} from the database by name.
      * <p>
      * Throws exception if multiple entries have the same name.
-     *
+     * 
      * @param name
      * @return entry retrieved from the database.
      * @throws ControllerException
@@ -195,7 +196,7 @@ public class EntryController extends Controller {
      * <p>
      * The identifier can be the database id, record id, or by part number. Will throw an exception
      * if multiple entries match the query identifier.
-     *
+     * 
      * @param identifier
      * @return entry retrieved from the database.
      * @throws ControllerException
@@ -259,7 +260,7 @@ public class EntryController extends Controller {
 
     /**
      * Checks if the user has read permission to the given {@link Entry}.
-     *
+     * 
      * @param entry
      * @return True if user has read permission.
      * @throws ControllerException
@@ -274,7 +275,7 @@ public class EntryController extends Controller {
 
     /**
      * Checks if the user has write permission to the given {@link Entry}
-     *
+     * 
      * @param entry
      * @return True if user has write permission.
      * @throws ControllerException
@@ -289,7 +290,7 @@ public class EntryController extends Controller {
 
     /**
      * Checks if the user has read permission to the {@link Entry} with the given database id.
-     *
+     * 
      * @param entryId
      * @return True if user has read permission.
      * @throws ControllerException
@@ -300,7 +301,7 @@ public class EntryController extends Controller {
 
     /**
      * Checks if the user has write permission to the {@link Entry} with the given database id.
-     *
+     * 
      * @param entryId
      * @return True if user has write permission.
      * @throws ControllerException
@@ -311,7 +312,7 @@ public class EntryController extends Controller {
 
     /**
      * Checks if the user has read permission to the {@link Entry} with the given record id.
-     *
+     * 
      * @param entryId
      * @return True if user has read permission.
      * @throws ControllerException
@@ -322,7 +323,7 @@ public class EntryController extends Controller {
 
     /**
      * Checks if the user has write permission to the {@link Entry} with the given record id.
-     *
+     * 
      * @param entryId
      * @return True if user has write permission.
      * @throws ControllerException
@@ -333,7 +334,7 @@ public class EntryController extends Controller {
 
     /**
      * Checks if the given entry has a {@link Sequence} associated with it.
-     *
+     * 
      * @param entry
      * @return True if sequence is associated.
      * @throws ControllerException
@@ -355,7 +356,7 @@ public class EntryController extends Controller {
 
     /**
      * Checks if the given entry has {@link Sample}s associated with it.
-     *
+     * 
      * @param entry
      * @return True if there are associated samples.
      * @throws ControllerException
@@ -376,7 +377,7 @@ public class EntryController extends Controller {
 
     /**
      * Checks if the given entry has {@link Attachment}s associated with it.
-     *
+     * 
      * @param entry
      * @return True if there are associated attachments.
      * @throws ControllerException
@@ -397,7 +398,7 @@ public class EntryController extends Controller {
 
     /**
      * Retrieve all entries from the database. Use with caution, as query can be slow.
-     *
+     * 
      * @return List of all {@link Entry entries}.
      * @throws ControllerException
      */
@@ -407,7 +408,7 @@ public class EntryController extends Controller {
 
     /**
      * Retrieve entries from the database sorted by the field, offset and limited.
-     *
+     * 
      * @param offset
      * @param limit
      * @param field
@@ -433,9 +434,17 @@ public class EntryController extends Controller {
         return entries;
     }
 
+    public Set<Long> getAllVisibleEntryIDs(Account account) throws ControllerException {
+        try {
+            return EntryManager.getAllVisibleEntries(account);
+        } catch (ManagerException e) {
+            throw new ControllerException(e);
+        }
+    }
+
     public ArrayList<Long> getAllEntryIDs() throws ControllerException {
         try {
-            return EntryManager.getEntries("id", true);
+            return EntryManager.getEntries("creationTime", true);
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
@@ -447,7 +456,7 @@ public class EntryController extends Controller {
      * This number is accurate when the number of visible entries by everyone on the system is less
      * than 100. After that, it is approximate (number of visible entries to everyone) for
      * performance reasons.
-     *
+     * 
      * @return number of Entries viewable by the user.
      * @throws ControllerException
      */
@@ -470,7 +479,7 @@ public class EntryController extends Controller {
 
     /**
      * Retrieve from the database entries owned the owner's email.
-     *
+     * 
      * @param owner
      * @param offset
      * @param limit
@@ -502,7 +511,7 @@ public class EntryController extends Controller {
 
     /**
      * Retrieve entries from the database with the specified database id's.
-     *
+     * 
      * @param ids
      *            List of id's.
      * @return ArrayList of entries.
@@ -523,7 +532,7 @@ public class EntryController extends Controller {
 
     /**
      * Retrieve the number of publicly visible entries (Entries visible to the Everybody group).
-     *
+     * 
      * @return Number of entries.
      * @throws ControllerException
      */
@@ -531,7 +540,7 @@ public class EntryController extends Controller {
         long numberOfVisibleEntries = 0;
 
         try {
-            numberOfVisibleEntries = EntryManager.getNumberOfVisibleEntries();
+            numberOfVisibleEntries = EntryManager.getNumberOfVisibleEntries(null);
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
@@ -541,7 +550,7 @@ public class EntryController extends Controller {
 
     /**
      * Retrieve the number of entries owned by the owner email.
-     *
+     * 
      * @param owner
      *            Email of the account.
      * @return Number of entries.
@@ -566,7 +575,7 @@ public class EntryController extends Controller {
 
     /**
      * Save the entry into the database. Then schedule index rebuild.
-     *
+     * 
      * @param entry
      * @return Saved entry.
      * @throws ControllerException
@@ -578,7 +587,7 @@ public class EntryController extends Controller {
 
     /**
      * Save the entry into the database. Optionally schedule an index rebuild.
-     *
+     * 
      * @param entry
      * @param scheduleIndexRebuild
      *            Set True to schedule index rebuild.
@@ -616,7 +625,7 @@ public class EntryController extends Controller {
 
     /**
      * Delete the entry in the database. Schedule an index rebuild.
-     *
+     * 
      * @param entry
      * @throws ControllerException
      * @throws PermissionException
@@ -627,7 +636,7 @@ public class EntryController extends Controller {
 
     /**
      * Delete the entry in the database. Optionally schedule an index rebuild.
-     *
+     * 
      * @param entry
      * @param scheduleIndexRebuild
      *            True if index rebuild is scheduled.
@@ -672,7 +681,7 @@ public class EntryController extends Controller {
 
     /**
      * Retrieve the {@link EntryPermissionVerifier}.R
-     *
+     * 
      * @return entryPermissionVerifier.
      */
     protected EntryPermissionVerifier getEntryPermissionVerifier() {
@@ -684,7 +693,7 @@ public class EntryController extends Controller {
      * <p>
      * Given an ArrayList of entry database id's, keep only id's that the user has read access to,
      * and offset and limited for paging.
-     *
+     * 
      * @param ids
      * @param offset
      * @param limit
@@ -726,7 +735,7 @@ public class EntryController extends Controller {
      * Filter {@link Entry} id's for display.
      * <p>
      * Given a List of entry id's, keep only id's that user has read access to.
-     *
+     * 
      * @param ids
      * @return List of Entry ids.
      * @throws ControllerException

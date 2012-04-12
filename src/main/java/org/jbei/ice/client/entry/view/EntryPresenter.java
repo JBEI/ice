@@ -291,7 +291,7 @@ public class EntryPresenter extends AbstractPresenter {
                 if (next + 1 == size)
                     display.enableNext(false);
 
-                EntryInfo nextInfo = nav.getNext(currentInfo);
+                EntryInfo nextInfo = nav.getNext(currentInfo); // TODO : nextInfo can be null. look at the implementation of getNext for more info
 
                 // TODO :this needs to be folded into a single "Retrieve"
                 long currentId = nextInfo.getId();
@@ -386,53 +386,6 @@ public class EntryPresenter extends AbstractPresenter {
         // handler for updating permissions
         //        addUpdatePermissionsHandler();
     }
-
-    //    private void addUpdatePermissionsHandler() {
-    //        final PermissionsPresenter pPresent = display.getPermissionsWidget();
-    //        pPresent.addUpdatePermissionsHandler(new ClickHandler() {
-    //
-    //            @Override
-    //            public void onClick(ClickEvent event) {
-    //                ArrayList<PermissionInfo> permissions = new ArrayList<PermissionInfo>();
-    //                for (Entry<PermissionType, HashSet<String>> p : pPresent.getReadSelected()
-    //                        .entrySet()) {
-    //
-    //                    PermissionType type = p.getKey();
-    //
-    //                    for (String id : p.getValue()) {
-    //                        PermissionInfo info = new PermissionInfo(type, Long.decode(id), "");
-    //                        permissions.add(info);
-    //                    }
-    //                }
-    //
-    //                for (Entry<PermissionType, HashSet<String>> p : pPresent.getWriteSelected()
-    //                        .entrySet()) {
-    //
-    //                    PermissionType type = p.getKey();
-    //
-    //                    for (String id : p.getValue()) {
-    //                        PermissionInfo info = new PermissionInfo(type, Long.decode(id), "");
-    //                        permissions.add(info);
-    //                    }
-    //                }
-    //
-    //                // update
-    //                service.updatePermission(AppController.sessionId, currentInfo.getId(), permissions,
-    //                    new AsyncCallback<Boolean>() {
-    //
-    //                        @Override
-    //                        public void onSuccess(Boolean result) {
-    //                            // TODO Auto-generated method stub
-    //                        }
-    //
-    //                        @Override
-    //                        public void onFailure(Throwable caught) {
-    //                            Window.alert("Error updating permissions");
-    //                        }
-    //                    });
-    //            }
-    //        });
-    //    }
 
     private void retrieveEntryDetails() {
 

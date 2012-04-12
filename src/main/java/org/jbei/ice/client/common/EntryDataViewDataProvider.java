@@ -7,6 +7,7 @@ import java.util.List;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.table.DataTable;
+import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
 
@@ -200,7 +201,7 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
                 return false;
         }
 
-        results.clear();
+        //        results.clear();
         lastSortAsc = sortAsc;
         lastSortField = sortField;
         fetchEntryData(sortField, sortAsc, rangeStart, rangeEnd);
@@ -225,7 +226,7 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
         // TODO : this is because we clear results and when we do not retrieve enough (factor below) 
         // TODO : solution is to go to page one when user sorts
 
-        int factor = (rangeEnd - rangeStart) * 9; // get nine pages in advance
+        int factor = (rangeEnd - rangeStart) * EntryTablePager.JUMP_PAGE_COUNT; // get 4 pages in advance
         factor = (factor + rangeEnd) > valuesIds.size() ? valuesIds.size() : (factor + rangeEnd);
         List<Long> subList = valuesIds.subList(rangeStart, factor);
         final ArrayList<Long> realValues = new ArrayList<Long>(subList);

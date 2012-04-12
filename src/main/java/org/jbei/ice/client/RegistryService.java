@@ -61,15 +61,9 @@ public interface RegistryService extends RemoteService {
 
     FolderDetails retrieveEntriesForFolder(String sessionId, long folderId);
 
-    long retrieveAvailableEntryCount(String sessionId);
-
     FolderDetails retrieveUserEntries(String sid, String userId);
 
-    FolderDetails retrieveAllEntryIDs(String sid);
-
-    ArrayList<Long> retrieveRecentlyViewed(String sid);
-
-    ArrayList<Long> retrieveWorkspaceEntries(String sid);
+    FolderDetails retrieveAllVisibleEntryIDs(String sid);
 
     HashMap<AutoCompleteField, ArrayList<String>> retrieveAutoCompleteData(String sid);
 

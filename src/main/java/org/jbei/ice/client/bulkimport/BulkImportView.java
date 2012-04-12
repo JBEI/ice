@@ -9,6 +9,7 @@ import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.FeedbackPanel;
+import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.shared.EntryAddType;
 
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -20,6 +21,7 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 
@@ -31,14 +33,12 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     private CreateEntryMenu create; // TODO: needs its own menu
     private FeedbackPanel feedback;
     private FlexTable layout;
-    //    private ToggleButton toggle;
+    private ToggleButton toggle;
     private Button updateButton;
     private Button saveButton;
     private Button resetButton;
     private Button saveDraftButton;
     private TextBox inputName;
-
-    private Button toggle;
 
     @Override
     protected void initComponents() {
@@ -47,11 +47,9 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         create = new CreateEntryMenu();
         feedback = new FeedbackPanel("450px");
         contentHeader = new Label("");
-        //        toggle = new ToggleButton("+", "-");
-
-        toggle = new Button("+");
+        toggle = new ToggleButton(ImageUtil.getShowSideImage(), ImageUtil.getHideSideImage());
+        toggle.setStyleName("bulk_import_menu_toggle");
         toggle.setVisible(false);
-        //                toggle.setWidth("10px");
 
         // bulk import draft update button
         updateButton = new Button("Update");
@@ -226,18 +224,20 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         layout.setWidget(0, 0, draftsMenu);
         layout.getFlexCellFormatter().setWidth(0, 0, "220px");
         toggle.setVisible(true);
+        toggle.setDown(true);
     }
 
     @Override
     public void addSavedDraftData(MenuItem item, IDeleteMenuHandler handler) {
         draftsMenu.addMenuItem(item, handler);
         toggle.setVisible(true);
+        toggle.setDown(true);
     }
 
     @Override
     public void setMenuVisibility(boolean visible) {
         draftsMenu.setVisible(visible);
-        // TODO : toggle push button when you switch to it
+        toggle.setDown(visible);
 
         if (!visible) {
             layout.setHTML(0, 0, "");

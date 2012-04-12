@@ -123,6 +123,28 @@ public class BulkImportManager {
         return list;
     }
 
+    @SuppressWarnings("unchecked")
+    public static List<BulkImport> retrieveSavedDrafts() throws ManagerException {
+        Session session = DAO.newSession();
+        List<BulkImport> list = new ArrayList<BulkImport>();
+
+        try {
+            session.beginTransaction();
+            Query query = session.createQuery("from " + BulkImport.class.getName()
+                    + " where isDraft = false");
+            list.addAll(query.list());
+        } catch (HibernateException he) {
+            session.getTransaction().rollback();
+            throw new ManagerException("Error retrieving list of saved bulk import drafts", he);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+
+        return list;
+    }
+
     /**
      * Retrieve a {@link BulkImport} object by its id.
      * 

@@ -83,7 +83,7 @@ public class CollectionsModel {
         if (id == 0)
             retrieveEntriesForCurrentUser(handler);
         else if (id == -1)
-            retrieveAllEntries(handler);
+            retrieveAllVisibleEntries(handler);
         else {
             service.retrieveEntriesForFolder(AppController.sessionId, id,
                 new AsyncCallback<FolderDetails>() {
@@ -101,19 +101,20 @@ public class CollectionsModel {
         }
     }
 
-    public void retrieveAllEntries(final FolderRetrieveEventHandler handler) {
-        service.retrieveAllEntryIDs(AppController.sessionId, new AsyncCallback<FolderDetails>() {
+    public void retrieveAllVisibleEntries(final FolderRetrieveEventHandler handler) {
+        service.retrieveAllVisibleEntryIDs(AppController.sessionId,
+            new AsyncCallback<FolderDetails>() {
 
-            @Override
-            public void onSuccess(FolderDetails result) {
-                handler.onFolderRetrieve(new FolderRetrieveEvent(result));
-            }
+                @Override
+                public void onSuccess(FolderDetails result) {
+                    handler.onFolderRetrieve(new FolderRetrieveEvent(result));
+                }
 
-            @Override
-            public void onFailure(Throwable caught) {
-                handler.onFolderRetrieve(null);
-            }
-        });
+                @Override
+                public void onFailure(Throwable caught) {
+                    handler.onFolderRetrieve(null);
+                }
+            });
     }
 
     public void retrieveEntriesForCurrentUser(final FolderRetrieveEventHandler handler) {
