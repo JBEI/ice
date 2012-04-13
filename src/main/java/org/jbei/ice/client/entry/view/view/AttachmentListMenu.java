@@ -118,8 +118,12 @@ public class AttachmentListMenu extends Composite {
             row += 1;
         }
 
-        if (items.isEmpty())
+        if (items.isEmpty()) {
+            layout.setHTML(2, 0,
+                "<span style=\"padding: 4px\" class=\"font-75em\">No attachments available</span>");
             return;
+        }
+
         row = 2;
 
         for (AttachmentItem item : items) {
@@ -176,7 +180,7 @@ public class AttachmentListMenu extends Composite {
 
         uploader.add(panel, 1);
         uploader.add(saveAttachment);
-        uploader.setWidth("180px");
+        uploader.getForm().setWidth("180px");
 
         // TODO : use presenter @see AttachmentListPresenter
         uploader.addOnStartUploadHandler(new OnStartUploaderHandler() {
