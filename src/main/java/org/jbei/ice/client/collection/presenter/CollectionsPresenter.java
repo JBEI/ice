@@ -35,6 +35,7 @@ import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -48,7 +49,6 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 
@@ -110,8 +110,9 @@ public class CollectionsPresenter extends AbstractPresenter {
                 };
             }
         };
-        this.userListProvider = new ListDataProvider<FolderDetails>(new KeyProvider());
-        this.systemListProvider = new ListDataProvider<FolderDetails>(new KeyProvider());
+        this.userListProvider = new ListDataProvider<FolderDetails>(new FolderDetailsKeyProvider());
+        this.systemListProvider = new ListDataProvider<FolderDetails>(
+                new FolderDetailsKeyProvider());
         this.entryDataProvider = new EntryDataViewDataProvider(collectionsDataTable,
                 model.getService());
 
@@ -196,7 +197,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         display.addAddToSubmitHandler(addHandler);
 
         // move to handler
-        MoveToSubmitHandler moveHandler = new MoveToSubmitHandler(display, new HasEntry()) {
+        MoveToHandler moveHandler = new MoveToHandler(model, display, new HasEntry()) {
 
             @Override
             protected long getSource() {
@@ -204,55 +205,16 @@ public class CollectionsPresenter extends AbstractPresenter {
             }
 
             @Override
-            protected void moveEntriesToFolder(final Set<Long> destinationFolders,
-                    final ArrayList<Long> entryIds) {
-                // TODO : both this and "add to" use the wrong handler. this becomes more of an issue when the presenter listens on the event bus
-                model.moveEntriesToFolder(currentFolder, new ArrayList<Long>(destinationFolders),
-                    entryIds, new FolderRetrieveEventHandler() {
+            protected void clearTableSelection() {
+                collectionsDataTable.clearSelection();
+            }
 
-                        @Override
-                        public void onFolderRetrieve(FolderRetrieveEvent event) {
-                            if (event == null || event.getItems() == null) {
-                                display.showFeedbackMessage(
-                                    "An error occured while moving entries. Please try again.",
-                                    true);
-                                return;
-                            }
-
-                            ArrayList<FolderDetails> results = event.getItems();
-                            ArrayList<MenuItem> items = new ArrayList<MenuItem>();
-                            int size = 0;
-                            String name = "";
-
-                            for (FolderDetails result : results) {
-                                items.add(new MenuItem(result.getId(), result.getName(), result
-                                        .getCount(), result.isSystemFolder()));
-                                if (result.getId() != currentFolder) {
-                                    size += 1;
-                                    name = result.getName();
-                                }
-                            }
-                            display.updateMenuItemCounts(items);
-                            String entryDisp = (entryIds.size() == 1) ? "entry" : "entries";
-                            String msg = "<b>" + entryIds.size() + "</b> " + entryDisp
-                                    + " successfully moved to ";
-
-                            if (size == 1 && !name.isEmpty()) {
-                                if (name.length() > 24) {
-                                    name = "<abbr title=\"" + results.get(0).getName() + "\">"
-                                            + name.substring(0, 21) + "...</abbr>";
-                                }
-                                msg += ("\"<b>" + name + "</b>\" collection.");
-                            } else {
-                                msg += ("<b>" + size + "</b> collections.");
-                            }
-
-                            retrieveEntriesForFolder(currentFolder, msg);
-                            collectionsDataTable.clearSelection();
-                        }
-                    });
+            @Override
+            protected void retrieveFolderEntries(long folder, String msg) {
+                retrieveEntriesForFolder(folder, msg);
             }
         };
+
         display.addMoveSubmitHandler(moveHandler);
 
         // remove handler
@@ -600,6 +562,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         entryDataProvider.updateRowCount(0, false);
         display.setDataView(collectionsDataTable);
 
+        GWT.log("Retrieving entries for id " + id);
         model.retrieveEntriesForFolder(id, new FolderRetrieveEventHandler() {
 
             @Override
@@ -616,13 +579,15 @@ public class CollectionsPresenter extends AbstractPresenter {
                     return;
                 }
 
-                History.newItem(Page.COLLECTIONS.getLink() + ";id=" + id, false);
-                display.setCurrentMenuSelection(id);
+                GWT.log("Returned entries for " + folder.getId());
+
+                History.newItem(Page.COLLECTIONS.getLink() + ";id=" + folder.getId(), false);
+                display.setCurrentMenuSelection(folder.getId());
                 ArrayList<Long> entries = folder.getContents();
                 entryDataProvider.setValues(entries);
 
                 display.setSubMenuEnable(true, !folder.isSystemFolder(), !folder.isSystemFolder());
-                currentFolder = id;
+                currentFolder = folder.getId();
                 mode = Mode.COLLECTION;
                 if (msg != null && !msg.isEmpty())
                     display.showFeedbackMessage(msg, false);
@@ -634,14 +599,6 @@ public class CollectionsPresenter extends AbstractPresenter {
     public void go(HasWidgets container) {
         container.clear();
         container.add(this.display.asWidget());
-    }
-
-    private class KeyProvider implements ProvidesKey<FolderDetails> {
-
-        @Override
-        public Long getKey(FolderDetails item) {
-            return item.getId();
-        }
     }
 
     private class HasEntry implements IHasEntryId {

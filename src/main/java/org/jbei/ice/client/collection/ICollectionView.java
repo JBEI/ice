@@ -8,7 +8,7 @@ import org.jbei.ice.client.collection.event.SubmitHandler;
 import org.jbei.ice.client.collection.menu.ExportAsOption;
 import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
 import org.jbei.ice.client.collection.menu.MenuItem;
-import org.jbei.ice.client.collection.presenter.MoveToSubmitHandler;
+import org.jbei.ice.client.collection.presenter.MoveToHandler;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.shared.EntryAddType;
@@ -103,7 +103,7 @@ public interface ICollectionView {
 
     void addAddToSubmitHandler(SubmitHandler handler);
 
-    void addMoveSubmitHandler(MoveToSubmitHandler moveHandler);
+    void addMoveSubmitHandler(MoveToHandler moveHandler);
 
     void addRemoveHandler(ClickHandler handler);
 

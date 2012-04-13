@@ -11,6 +11,7 @@ import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList;
@@ -127,7 +128,7 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
 
     public void setValues(List<Long> data) {
         reset();
-
+        GWT.log("Setting contents " + data.size());
         this.valuesIds.addAll(data);
         updateRowCount(data.size(), true);
 

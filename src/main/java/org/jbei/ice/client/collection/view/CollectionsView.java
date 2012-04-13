@@ -13,7 +13,7 @@ import org.jbei.ice.client.collection.menu.ExportAsMenu;
 import org.jbei.ice.client.collection.menu.ExportAsOption;
 import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
 import org.jbei.ice.client.collection.menu.MenuItem;
-import org.jbei.ice.client.collection.presenter.MoveToSubmitHandler;
+import org.jbei.ice.client.collection.presenter.MoveToHandler;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.FeedbackPanel;
@@ -272,7 +272,7 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
-    public void addMoveSubmitHandler(MoveToSubmitHandler moveHandler) {
+    public void addMoveSubmitHandler(MoveToHandler moveHandler) {
         subMenu.setMoveToSubmitHandler(moveHandler);
     }
 

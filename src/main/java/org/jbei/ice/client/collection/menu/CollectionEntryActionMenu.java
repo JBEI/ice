@@ -3,7 +3,7 @@ package org.jbei.ice.client.collection.menu;
 import java.util.List;
 
 import org.jbei.ice.client.collection.event.SubmitHandler;
-import org.jbei.ice.client.collection.presenter.MoveToSubmitHandler;
+import org.jbei.ice.client.collection.presenter.MoveToHandler;
 import org.jbei.ice.client.collection.view.OptionSelect;
 
 import com.google.gwt.core.client.GWT;
@@ -135,7 +135,7 @@ public class CollectionEntryActionMenu implements IsWidget {
         this.move.removeOption(option);
     }
 
-    public void setMoveToSubmitHandler(MoveToSubmitHandler moveHandler) {
+    public void setMoveToSubmitHandler(MoveToHandler moveHandler) {
         this.move.addSubmitHandler(moveHandler);
     }
 
