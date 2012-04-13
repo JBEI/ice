@@ -6,6 +6,7 @@ import org.jbei.ice.client.Page;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.client.common.table.cell.UrlCell;
+import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.SampleInfo;
 
@@ -44,7 +45,7 @@ public class SamplesDataTable extends HasEntryDataTable<SampleInfo> {
 
             @Override
             public String getValue(SampleInfo object) {
-                return object.getCreationTime().toString();
+                return DateUtilities.formatDate(object.getCreationTime());
             }
         };
 

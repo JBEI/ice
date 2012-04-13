@@ -16,4 +16,6 @@ public interface IProfileView {
     void setHeaderText(String text);
 
     HasEntryDataTable<SampleInfo> getSamplesTable();
+
+    void setSampleView();
 }

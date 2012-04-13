@@ -59,7 +59,7 @@ public class ProfilePresenter extends AbstractPresenter {
                     display.setContents(panel);
                     break;
                 case SAMPLES:
-                    display.setContents(display.getSamplesTable());
+                    display.setSampleView();
                     break;
                 }
             }

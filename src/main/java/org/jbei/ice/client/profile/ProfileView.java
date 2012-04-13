@@ -10,12 +10,12 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ProfileView extends AbstractLayout implements IProfileView {
 
     private SamplesDataTable samplesTable;
+    private Widget sampleView;
 
     private Label contentHeader;
     private ProfileViewMenu menu;
@@ -26,7 +26,7 @@ public class ProfileView extends AbstractLayout implements IProfileView {
         contentHeader = new Label("");
         mainContent = new FlexTable();
         //        createEntriesTablePanel();
-        this.createSamplesTablePanel();
+        sampleView = this.createSamplesTablePanel();
 
         FlexTable contentTable = new FlexTable();
         contentTable.setWidth("100%");
@@ -77,22 +77,30 @@ public class ProfileView extends AbstractLayout implements IProfileView {
         contentHeader.setText(text);
     }
 
-    private VerticalPanel createSamplesTablePanel() {
+    private Widget createSamplesTablePanel() {
 
         samplesTable = new SamplesDataTable();
-        VerticalPanel panel = new VerticalPanel();
-        panel.setWidth("100%");
+        FlexTable table = new FlexTable();
+        table.setWidth("100%");
+        table.setCellPadding(0);
+        table.setCellSpacing(0);
+
         samplesTable.addStyleName("gray_border");
-        panel.add(samplesTable);
+        table.setWidget(0, 0, samplesTable);
         EntryTablePager tablePager = new EntryTablePager();
         tablePager.setDisplay(samplesTable);
-        panel.add(tablePager);
+        table.setWidget(1, 0, tablePager);
 
-        return panel;
+        return table;
     }
 
     @Override
     public HasEntryDataTable<SampleInfo> getSamplesTable() {
         return this.samplesTable;
+    }
+
+    @Override
+    public void setSampleView() {
+        mainContent.setWidget(1, 0, sampleView);
     }
 }
