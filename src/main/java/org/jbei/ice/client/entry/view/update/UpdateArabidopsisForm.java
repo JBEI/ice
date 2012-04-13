@@ -256,4 +256,35 @@ public class UpdateArabidopsisForm extends UpdateEntryForm<ArabidopsisSeedInfo> 
 
         return general;
     }
+
+    @Override
+    public void populateEntry() {
+        super.populateEntry();
+
+        // plasmid specific fields
+        ArabidopsisSeedInfo seed = super.getEntryInfo();
+        seed.setSelectionMarkers(markers.getText());
+        seed.setLinks(this.links.getText());
+        seed.setName(this.name.getText());
+        seed.setStatus(status.getValue(status.getSelectedIndex()));
+
+        seed.setReferences(this.references.getText());
+        int bioSafetySelectedIndex = bioSafety.getSelectedIndex();
+        int value = Integer.parseInt(bioSafety.getValue(bioSafetySelectedIndex));
+        seed.setBioSafetyLevel(value);
+        seed.setIntellectualProperty(this.ip.getText());
+        seed.setFundingSource(this.fundingSource.getText());
+        seed.setPrincipalInvestigator(this.principalInvestigator.getText());
+        seed.setKeywords(this.keywords.getText());
+
+        // below are the fields peculiar to this specialization
+        Generation gen = Generation.valueOf(generation.getValue(generation.getSelectedIndex()));
+        seed.setGeneration(gen);
+        PlantType type = PlantType.valueOf(plantType.getValue(plantType.getSelectedIndex()));
+        seed.setPlantType(type);
+        seed.setHomozygosity(homozygosity.getText());
+        seed.setEcotype(this.ecoType.getText());
+        seed.setHarvestDate(this.harvestDate.getDatePicker().getValue());
+        seed.setParents(parents.getText());
+    }
 }

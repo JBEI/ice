@@ -380,6 +380,11 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
         this.entryInfo.setLongDescription(this.notesText.getText());
         String longDescType = this.markupOptions.getItemText(this.markupOptions.getSelectedIndex());
         this.entryInfo.setLongDescriptionType(longDescType);
+
+        entryInfo.setAlias(this.alias.getText());
+        entryInfo.setCreator(this.creator.getText());
+        entryInfo.setCreatorEmail(this.creatorEmail.getText());
+        entryInfo.setShortDescription(this.summary.getText());
     }
 
     @Override

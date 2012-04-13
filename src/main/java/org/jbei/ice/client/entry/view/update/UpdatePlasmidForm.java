@@ -224,58 +224,14 @@ public class UpdatePlasmidForm extends UpdateEntryForm<PlasmidInfo> {
         return general;
     }
 
-    protected String getAlias() {
-        return this.alias.getText();
-    }
-
-    protected String getCreator() {
-        return this.creator.getText();
-    }
-
-    protected String getCreatorEmail() {
-        return this.creatorEmail.getText();
-    }
-
     protected String getStatus() {
         int selectedIndex = this.status.getSelectedIndex();
         return this.status.getValue(selectedIndex);
     }
 
-    protected String getSummary() {
-        return this.summary.getText();
-    }
-
     protected String getBioSafetyLevel() {
         int selected = this.bioSafety.getSelectedIndex();
         return this.bioSafety.getValue(selected);
-    }
-
-    protected String getFundingSource() {
-        return this.fundingSource.getText();
-    }
-
-    protected String getPrincipalInvestigator() {
-        return this.principalInvestigator.getText();
-    }
-
-    protected String getKeywords() {
-        return this.keywords.getText();
-    }
-
-    protected String getReferences() {
-        return this.references.getText();
-    }
-
-    protected String getLinks() {
-        return this.links.getText();
-    }
-
-    protected String getName() {
-        return this.name.getText();
-    }
-
-    protected String getMarkers() {
-        return this.name.getText();
     }
 
     @Override
@@ -285,45 +241,21 @@ public class UpdatePlasmidForm extends UpdateEntryForm<PlasmidInfo> {
         // plasmid specific fields
         PlasmidInfo info = super.getEntryInfo();
         info.setSelectionMarkers(markers.getText());
-        info.setLinks(getLinks());
-        info.setName(getName());
-        info.setSelectionMarkers(getMarkers());
-
-        info.setAlias(getAlias());
-        info.setCreator(getCreator());
-        info.setCreatorEmail(getCreatorEmail());
+        info.setLinks(this.links.getText());
+        info.setName(this.name.getText());
         info.setStatus(getStatus());
-        info.setKeywords(getKeywords());
-        info.setShortDescription(getSummary());
-        info.setReferences(getReferences());
+
+        info.setReferences(this.references.getText());
         info.setBioSafetyLevel(Integer.parseInt(getBioSafetyLevel()));
         info.setIntellectualProperty(this.ip.getText());
-        info.setFundingSource(getFundingSource());
-        info.setPrincipalInvestigator(getPrincipalInvestigator());
+        info.setFundingSource(this.fundingSource.getText());
+        info.setPrincipalInvestigator(this.principalInvestigator.getText());
+        info.setKeywords(this.keywords.getText());
 
         // below are the fields peculiar to this specialization
-        info.setBackbone(getBackbone());
-        info.setOriginOfReplication(getOriginOfReplication());
-        info.setPromoters(getPromoters());
-        info.setCircular(getCircular());
-    }
-
-    private String getBackbone() {
-        String text = this.backbone.getText();
-        if (text == null)
-            return "";
-        return text;
-    }
-
-    private String getOriginOfReplication() {
-        return this.origin.getText();
-    }
-
-    private String getPromoters() {
-        return this.promoters.getText();
-    }
-
-    private boolean getCircular() {
-        return this.circular.getValue();
+        info.setBackbone(this.backbone.getText());
+        info.setOriginOfReplication(this.origin.getText());
+        info.setPromoters(this.promoters.getText());
+        info.setCircular(this.circular.getValue());
     }
 }

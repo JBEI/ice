@@ -158,4 +158,22 @@ public class UpdatePartForm extends UpdateEntryForm<PartInfo> {
 
         return general;
     }
+
+    @Override
+    public void populateEntry() {
+        super.populateEntry();
+        PartInfo part = getEntryInfo();
+        part.setName(name.getText());
+        part.setCreator(creator.getText());
+        part.setCreatorEmail(creatorEmail.getText());
+        part.setStatus(status.getValue(status.getSelectedIndex()));
+        part.setAlias(alias.getText());
+        part.setKeywords(keywords.getText());
+        part.setReferences(references.getText());
+        int bioSafetySelectedIndex = bioSafety.getSelectedIndex();
+        int value = Integer.parseInt(bioSafety.getValue(bioSafetySelectedIndex));
+        part.setBioSafetyLevel(value);
+        part.setIntellectualProperty(ip.getText());
+        part.setPrincipalInvestigator(principalInvestigator.getText());
+    }
 }

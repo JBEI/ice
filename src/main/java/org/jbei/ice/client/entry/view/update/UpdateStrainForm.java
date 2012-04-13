@@ -32,7 +32,7 @@ public class UpdateStrainForm extends UpdateEntryForm<StrainInfo> {
     public UpdateStrainForm(HashMap<AutoCompleteField, ArrayList<String>> data, StrainInfo info) {
         super(data, info);
 
-        // fill out plasmid fields
+        // fill out strain fields
         this.fundingSource.setText(info.getFundingSource());
         for (int i = 0; i < this.status.getItemCount(); i += 1) {
             if (status.getValue(i).equals(info.getStatus())) {
@@ -202,4 +202,24 @@ public class UpdateStrainForm extends UpdateEntryForm<StrainInfo> {
         return general;
     }
 
+    @Override
+    public void populateEntry() {
+        super.populateEntry();
+        StrainInfo strain = getEntryInfo();
+        strain.setName(name.getText());
+        strain.setCreator(creator.getText());
+        strain.setCreatorEmail(creatorEmail.getText());
+        strain.setStatus(status.getValue(status.getSelectedIndex()));
+        strain.setAlias(alias.getText());
+        strain.setHost(host.getText());
+        strain.setGenotypePhenotype(genPhen.getText());
+        strain.setPlasmids(plasmids.getText());
+        strain.setKeywords(keywords.getText());
+        strain.setReferences(references.getText());
+        int bioSafetySelectedIndex = bioSafety.getSelectedIndex();
+        int value = Integer.parseInt(bioSafety.getValue(bioSafetySelectedIndex));
+        strain.setBioSafetyLevel(value);
+        strain.setIntellectualProperty(ip.getText());
+        strain.setPrincipalInvestigator(principalInvestigator.getText());
+    }
 }
