@@ -1,8 +1,8 @@
 package org.jbei.ice.client.common.widget;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -11,32 +11,36 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Hector Plahar
  * 
  */
-public class Flash extends Widget {
+public class Flash implements IsWidget {
 
     public static String SWF_LOCATION = "static/swf/";
+    private final HTML widget;
 
     public Flash(Parameters params) {
-        setElement(DOM.createDiv());
-        DOM.setElementAttribute(getElement(), "style", "height: 100%");
-        Element element = getFlashElement(params);
-        DOM.appendChild(getElement(), element);
+        String url = GWT.getHostPageBaseURL();
+        String html = "<object classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540002\" id=\"VectorEditor\" width=\"100%\" height=\"100%\" codebase=\"https://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab\"> "
+                + "<param name=\"movie\" value=\"VectorEditor.swf\">"
+                + "<param name=\"quality\" value=\"high\">"
+                + "<param name=\"bgcolor\" value=\"#869ca7\">"
+                + "<param name=\"wmode\" value=\"window\">"
+                + "<param name=\"allowScriptAccess\" value=\"sameDomain\">"
+                + "<embed src=\""
+                + url
+                + "static/swf/"
+                + params.getSwfPath()
+                + "?entryId="
+                + params.getEntryId()
+                + "&amp;sessionId="
+                + params.getSessiondId()
+                + "\" quality=\"high\" bgcolor=\"#869ca7\" width=\"100%\" height=\"100%\" name=\"VectorEditor\" align=\"middle\" play=\"true\" loop=\"false\" type=\"application/x-shockwave-flash\" pluginspage=\"http://www.adobe.com/go/getflashplayer\"></object>";
+        widget = new HTML(html);
+        widget.setHeight("100%");
+        widget.setWidth("100%");
     }
 
-    public Element getFlashElement(Parameters params) {
-        String url = GWT.getHostPageBaseURL();
-        Element el = DOM.createElement("EMBED");
-        DOM.setElementAttribute(el, "src", url + SWF_LOCATION + params.getSwfPath() + "?entryId="
-                + params.getEntryId() + "&sessionId=" + params.getSessiondId());
-        DOM.setElementAttribute(el, "width", "100%");
-        DOM.setElementAttribute(el, "height", "100%");
-        DOM.setElementPropertyBoolean(el, "play", true);
-        DOM.setElementAttribute(el, "wmode", "transparent");
-        DOM.setElementPropertyBoolean(el, "loop", false);
-        DOM.setElementAttribute(el, "quality", "high");
-        DOM.setElementAttribute(el, "bgcolor", "#869ca7");
-        DOM.setElementAttribute(el, "align", "middle");
-        DOM.setElementAttribute(el, "pluginspage", "http://www.adobe.com/go/getflashplayer");
-        return el;
+    @Override
+    public Widget asWidget() {
+        return widget;
     }
 
     public static class Parameters {
@@ -68,4 +72,5 @@ public class Flash extends Widget {
             this.swf = swf;
         }
     }
+
 }
