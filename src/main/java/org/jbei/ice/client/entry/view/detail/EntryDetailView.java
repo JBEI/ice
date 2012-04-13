@@ -265,6 +265,12 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
             label.setStyleName("open_sequence_sub_link");
             panel.add(label, "sequence_link");
 
+            // upload sequence
+            SequenceFileUpload upload = new SequenceFileUpload(info.getId());
+            Widget widget = upload.asWidget();
+            widget.addStyleName("display-inline");
+            panel.add(upload.asWidget(), "sequence_options");
+            //            upload.getSelectionModel().addSelectionChangeHandler(new Sele)
         }
         return panel;
     }
