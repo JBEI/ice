@@ -146,18 +146,25 @@ public class FolderManager {
         }
     }
 
-    public static Folder addFolderContents(long folderId, ArrayList<Long> entryIds)
+    public static Folder addFolderContents(long folderId, ArrayList<Entry> entrys)
             throws ManagerException {
         Session session = DAO.newSession();
         try {
-            Folder folder = get(folderId);
-            ArrayList<Entry> entries = EntryManager.getEntriesByIdSet(entryIds);
-            if (entries == null)
-                return folder;
-
-            folder.getContents().addAll(entries);
-            return update(folder);
+            session.beginTransaction();
+            Query query = session.createQuery("from " + Folder.class.getName() + " where id = :id");
+            query.setLong("id", folderId);
+            Folder folder = (Folder) query.uniqueResult();
+            folder.getContents().size();
+            folder.getContents().addAll(entrys);
+            folder.setCreationTime(new Date(System.currentTimeMillis()));
+            session.saveOrUpdate(folder);
+            session.getTransaction().commit();
+            return folder;
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            return null;
         } finally {
+
             if (session.isOpen())
                 session.close();
         }

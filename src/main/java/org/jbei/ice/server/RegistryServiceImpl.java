@@ -861,7 +861,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             if (contents != null && !contents.isEmpty()) {
 
-                FolderManager.addFolderContents(folder.getId(), contents);
+                ArrayList<Entry> entrys = EntryManager.getEntriesByIdSet(contents);
+                FolderManager.addFolderContents(folder.getId(), entrys);
                 details.setContents(contents);
                 details.setCount(contents.size());
             }
@@ -885,7 +886,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
 
                 for (long folderId : destination) {
-                    Folder folder = FolderManager.addFolderContents(folderId, entryIds);
+                    ArrayList<Entry> entrys = EntryManager.getEntriesByIdSet(entryIds);
+                    Folder folder = FolderManager.addFolderContents(folderId, entrys);
                     FolderDetails details = new FolderDetails(folder.getId(), folder.getName(),
                             false);
                     int folderSize = FolderManager.getFolderSize(folder.getId());
@@ -935,7 +937,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         // TODO : see todo in moveToUserCollection
         try {
             for (long folderId : destination) {
-                Folder folder = FolderManager.addFolderContents(folderId, entryIds);
+                ArrayList<Entry> entrys = EntryManager.getEntriesByIdSet(entryIds);
+                Folder folder = FolderManager.addFolderContents(folderId, entrys);
                 FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), false);
                 int folderSize = FolderManager.getFolderSize(folder.getId()); // TODO : this call may not be needed
                 details.setCount(folderSize);

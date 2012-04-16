@@ -10,7 +10,6 @@ import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.shared.GwtEvent;
@@ -30,7 +29,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements IHasEntryHandlers {
 
-    private static PopupPanel popup;
+    private PopupPanel popup;
     private static final String MOUSEOVER_EVENT_NAME = "mouseover";
     private static final String MOUSEOUT_EVENT_NAME = "mouseout";
     private static final String MOUSE_CLICK = "click";
@@ -39,10 +38,7 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
 
     public PartIDCell(EntryContext.Type mode) {
         super(MOUSEOVER_EVENT_NAME, MOUSEOUT_EVENT_NAME, MOUSE_CLICK);
-
         this.mode = mode;
-        popup = new PopupPanel(true);
-        popup.setStyleName("add_to_popup");
     }
 
     @Override
@@ -63,11 +59,16 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
         final String eventType = event.getType();
 
         if (MOUSEOVER_EVENT_NAME.equalsIgnoreCase(eventType)) {
-            onMouseOver(parent, event, value);
+            if (withinBounds(parent, event))
+                onMouseOver(parent, event, value);
+            else
+                onMouseOut(parent);
+
         } else if (MOUSEOUT_EVENT_NAME.equalsIgnoreCase(eventType)) {
             onMouseOut(parent);
         } else if (MOUSE_CLICK.equalsIgnoreCase(eventType)) {
-            onMouseClick(value.getId());
+            if (withinBounds(parent, event))
+                onMouseClick(value.getId());
         }
     }
 
@@ -92,12 +93,34 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
     }
 
     protected void onMouseOut(Element parent) {
-        GWT.log("Mouse Out" + parent.getChildCount());
-        popup.hide();
+        if (popup != null) {
+            popup.hide();
+            popup = null;
+        }
+    }
+
+    protected boolean withinBounds(Element parent, NativeEvent event) {
+
+        if (event.getClientY() < ((Element) parent.getFirstChild()).getAbsoluteTop()) {
+            return false;
+        }
+
+        if (event.getClientY() > ((Element) parent.getFirstChild()).getAbsoluteBottom()) {
+            return false;
+        }
+
+        if (event.getClientX() < ((Element) parent.getFirstChild()).getAbsoluteLeft()) {
+            return false;
+        }
+
+        if (event.getClientX() > ((Element) parent.getFirstChild()).getAbsoluteRight()) {
+            return false;
+        }
+
+        return true;
     }
 
     protected void onMouseOver(Element parent, NativeEvent event, EntryInfo value) {
-        GWT.log("Mouse Over" + parent.getChildCount());
         final int x = event.getClientX() + 30 + Window.getScrollLeft();
         final int y = event.getClientY() + Window.getScrollTop();
 
@@ -105,9 +128,8 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
 
             @Override
             public void onSucess(Widget contents) {
-                Widget currentWidget = popup.getWidget();
-                if (currentWidget != null)
-                    popup.remove(currentWidget);
+                popup = new PopupPanel(true);
+                popup.setStyleName("add_to_popup");
                 popup.add(contents);
 
                 // 450 is expected height of popup. adjust accordingly or the bottom will be hidden
