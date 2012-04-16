@@ -144,15 +144,30 @@ public class EntryViewFactory {
         view.setName(entry.getNamesAsString());
         view.setShortDescription(entry.getShortDescription());
         view.setCreationTime(entry.getCreationTime());
+        view.setStatus(entry.getStatus());
 
+        // attachments
         boolean hasAttachment = false;
         try {
             hasAttachment = (AttachmentManager.getByEntry(entry).size() > 0);
         } catch (ManagerException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Logger.error(e);
         }
         view.setHasAttachment(hasAttachment);
+
+        // has sample
+        try {
+            view.setHasSample(SampleManager.getSamplesByEntry(entry).size() > 0);
+        } catch (ManagerException e) {
+            Logger.error(e);
+        }
+
+        // has sequence
+        try {
+            view.setHasSequence(SequenceManager.getByEntry(entry) != null);
+        } catch (ManagerException e) {
+            Logger.error(e);
+        }
 
         return view;
     }
