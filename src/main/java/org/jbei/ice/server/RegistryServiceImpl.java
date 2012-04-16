@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -184,6 +185,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public ArrayList<EntryInfo> retrieveEntryData(String sid, ArrayList<Long> entryIds,
             ColumnField type, boolean asc) {
 
+        Logger.info("Retrieving entry details for " + entryIds.size() + " entries");
+        long start = System.currentTimeMillis();
+
         // TODO: Use Controller and put all of the logic in there
         if (type == null)
             type = ColumnField.CREATED;
@@ -229,7 +233,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             for (Entry entry : entries) {
 
-                EntryInfo view = EntryViewFactory.createTipView(entry);
+                EntryInfo view = EntryViewFactory.createTableViewData(entry);
                 if (view == null)
                     continue;
 
@@ -341,10 +345,18 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Account system = AccountController.getSystemAccount();
             boolean isSystem = system.getEmail().equals(folder.getOwnerEmail());
             FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), isSystem);
+
             int folderSize = FolderManager.getFolderSize(folderId);
+
             details.setCount(folderSize);
             details.setDescription(folder.getDescription());
-            ArrayList<Long> contents = FolderManager.getFolderContents(folderId, false);
+            ArrayList<Long> contents = new ArrayList<Long>();
+
+            ArrayList<BigInteger> userContents = FolderManager.getFolderContents(folderId, false);
+
+            for (BigInteger id : userContents) {
+                contents.add(id.longValue());
+            }
 
             details.setContents(contents);
             return details;
@@ -379,7 +391,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             int folderSize = FolderManager.getFolderSize(folderId);
             details.setCount(folderSize);
             details.setDescription(folder.getDescription());
-            ArrayList<Long> contents = FolderManager.getFolderContents(folderId, false);
+            ArrayList<Long> contents = new ArrayList<Long>();
+            ArrayList<BigInteger> userContents = FolderManager.getFolderContents(folderId, false);
+
+            for (BigInteger id : userContents) {
+                contents.add(id.longValue());
+            }
+
             details.setContents(contents);
             if (FolderManager.delete(folder))
                 return details;
@@ -522,12 +540,19 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             EntryInfo info = EntryToInfoFactory.getInfo(entry, attachments, sampleMap, sequences,
                 hasSequence);
 
-            // TODO : move this to client
-            // TODO : convert notes. this will eventually be pushed to client
+            //
+            // TODO the parsed versions are separated out into complementary fields
+            //
             String html = RichTextRenderer.richTextToHtml(info.getLongDescriptionType(),
                 info.getLongDescription());
             String parsed = getParsedNotes(html);
-            info.setLongDescription(parsed);
+            info.setLongDescription(info.getLongDescription());
+            info.setParsedDescription(parsed);
+            String parsedShortDesc = WebUtils.linkifyText(account, info.getShortDescription());
+            info.setLinkifiedShortDescription(parsedShortDesc);
+            //            String parsedLinks = WebUtils.linkifyText(account, info.getLinks());
+            //            info.setLinkifiedLinks(parsedLinks);
+            // end TODO
 
             // group with write permissions
             info.setCanEdit(PermissionManager.hasWritePermission(entry, account));
@@ -850,6 +875,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             details.setDescription(folder.getDescription());
 
             if (contents != null && !contents.isEmpty()) {
+
                 FolderManager.addFolderContents(folder.getId(), contents);
                 details.setContents(contents);
                 details.setCount(contents.size());
@@ -1811,45 +1837,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (entry == null)
                 return false;
 
-            long id = permissionInfo.getId();
-
-            switch (permissionInfo.getType()) {
-            case READ_ACCOUNT:
-                Account readAccount = AccountController.get(id);
-                if (readAccount != null && !readAccount.getEmail().equals(account.getEmail()))
-                    permissionController.addReadUser(entry, readAccount);
-                break;
-
-            case READ_GROUP:
-                Group readGroup = GroupManager.get(id);
-                if (readGroup != null)
-                    permissionController.addReadGroup(entry, readGroup);
-                break;
-
-            case WRITE_ACCOUNT:
-                Account writeAccount = AccountController.get(id);
-                if (writeAccount != null && !writeAccount.getEmail().equals(account.getEmail())) {
-                    permissionController.addWriteUser(entry, writeAccount);
-                    permissionController.addReadUser(entry, writeAccount);
-                }
-                break;
-
-            case WRITE_GROUP:
-                Group writeGroup = GroupManager.get(id);
-                if (writeGroup != null) {
-                    permissionController.addWriteGroup(entry, writeGroup);
-                    permissionController.addReadGroup(entry, writeGroup);
-                }
-                break;
-            }
-
+            permissionController.addPermission(permissionInfo.getType(), entry,
+                permissionInfo.getId());
             return true;
 
         } catch (ControllerException e) {
             Logger.error(e);
         } catch (PermissionException e) {
-            Logger.error(e);
-        } catch (ManagerException e) {
             Logger.error(e);
         }
 
@@ -1867,51 +1861,18 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             Logger.info("Removing permissions for entry with id \"" + entryId + "\"");
             EntryController entryController = new EntryController(account);
-
             Entry entry = entryController.get(entryId);
             if (entry == null)
                 return false;
 
             PermissionsController permissionController = new PermissionsController(account);
-            long id = permissionInfo.getId();
-
-            switch (permissionInfo.getType()) {
-            case READ_ACCOUNT:
-                Account readAccount = AccountController.get(id);
-                if (readAccount != null && !readAccount.getEmail().equals(account.getEmail())) // cannot remove yourself
-                    permissionController.removeReadUser(entry, readAccount);
-                break;
-
-            case READ_GROUP:
-                Group readGroup = GroupManager.get(id);
-                if (readGroup != null)
-                    permissionController.removeReadGroup(entry, readGroup);
-                break;
-
-            case WRITE_ACCOUNT:
-                Account writeAccount = AccountController.get(id);
-                if (writeAccount != null && !writeAccount.getEmail().equals(account.getEmail())) { // cannot remove yourself 
-                    permissionController.removeWriteUser(entry, writeAccount);
-                    permissionController.removeReadUser(entry, writeAccount);
-                }
-                break;
-
-            case WRITE_GROUP:
-                Group writeGroup = GroupManager.get(id);
-                if (writeGroup != null) {
-                    permissionController.removeWriteGroup(entry, writeGroup);
-                    permissionController.removeReadGroup(entry, writeGroup);
-                }
-                break;
-            }
-
+            permissionController.removePermission(permissionInfo.getType(), entry,
+                permissionInfo.getId());
             return true;
 
         } catch (ControllerException e) {
             Logger.error(e);
         } catch (PermissionException e) {
-            Logger.error(e);
-        } catch (ManagerException e) {
             Logger.error(e);
         }
 

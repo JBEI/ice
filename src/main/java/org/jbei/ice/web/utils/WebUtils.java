@@ -1,6 +1,8 @@
 package org.jbei.ice.web.utils;
 
 import java.util.ArrayList;
+import org.jbei.ice.lib.logging.Logger;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -11,6 +13,7 @@ import org.apache.wicket.PageParameters;
 import org.apache.wicket.protocol.http.WebRequestCycle;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.JbeirSettings;
@@ -206,7 +209,14 @@ public class WebUtils {
     }
 
     public static String linkifyText(String text) {
-        String newText = wikiLinkifyText(text);
+        String newText = wikiLinkifyText(IceSession.get().getAccount(), text);
+        newText = urlLinkifyText(newText);
+
+        return newText;
+    }
+
+    public static String linkifyText(Account account, String text) {
+        String newText = wikiLinkifyText(account, text);
         newText = urlLinkifyText(newText);
 
         return newText;
@@ -219,11 +229,12 @@ public class WebUtils {
      *            IceLink text.
      * @return Html &lt;a&gt; link.
      */
-    private static String wikiLinkifyText(String text) {
+    private static String wikiLinkifyText(Account account, String text) {
+
         String newText = "";
 
         try {
-            EntryController entryController = new EntryController(IceSession.get().getAccount());
+            EntryController entryController = new EntryController(account);
 
             Pattern basicWikiLinkPattern = Pattern.compile("\\[\\["
                     + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":.*?\\]\\]");
@@ -275,6 +286,7 @@ public class WebUtils {
                 newText = before + makeEntryLink(jbeiLinks.get(i)) + after;
             }
         } catch (Exception e) {
+            Logger.error(e);
             return text;
         }
 

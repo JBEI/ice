@@ -176,6 +176,9 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
             @Override
             public String getValue(T object) {
                 String description = object.getShortDescription();
+                if (description == null)
+                    return "";
+
                 int size = (int) (Window.getClientWidth() * 0.05);
                 if (size <= 0)
                     size = 50;

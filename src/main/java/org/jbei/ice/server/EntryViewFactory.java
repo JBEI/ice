@@ -24,6 +24,7 @@ import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.Generation;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.PlantType;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.EntryInfo.EntryType;
 import org.jbei.ice.shared.dto.PartInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
@@ -130,6 +131,30 @@ public class EntryViewFactory {
         }
 
         return info;
+    }
+
+    public static EntryInfo createTableViewData(Entry entry) {
+
+        EntryType type = EntryType.nameToType(entry.getRecordType());
+
+        EntryInfo view = new EntryInfo(type);
+        view.setId(entry.getId());
+        view.setRecordId(entry.getRecordId());
+        view.setPartId(entry.getPartNumbersAsString());
+        view.setName(entry.getNamesAsString());
+        view.setShortDescription(entry.getShortDescription());
+        view.setCreationTime(entry.getCreationTime());
+
+        boolean hasAttachment = false;
+        try {
+            hasAttachment = (AttachmentManager.getByEntry(entry).size() > 0);
+        } catch (ManagerException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        view.setHasAttachment(hasAttachment);
+
+        return view;
     }
 
     public static EntryInfo createTipView(Entry entry) {

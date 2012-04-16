@@ -3,6 +3,10 @@ package org.jbei.ice.client.common;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.RegistryService;
+import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.table.EntrySampleTable;
@@ -12,7 +16,9 @@ import org.jbei.ice.shared.dto.PartInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -24,9 +30,30 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author Hector Plahar
  */
+// TODO : need better separation of concerns
 public class TipViewContentFactory {
 
-    public static Widget getContents(EntryInfo entry) {
+    private static final RegistryServiceAsync service = GWT.create(RegistryService.class);
+
+    public static void getContents(EntryInfo entry, final Callback<Widget> callback) {
+
+        service.retrieveEntryDetails(AppController.sessionId, entry.getId(),
+            new AsyncCallback<EntryInfo>() {
+
+                @Override
+                public void onSuccess(EntryInfo result) {
+                    callback.onSucess(getContents(result));
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    callback.onFailure();
+                }
+            });
+
+    }
+
+    private static Widget getContents(EntryInfo entry) {
 
         FlexTable parent = new FlexTable();
         parent.setWidth("650px");

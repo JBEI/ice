@@ -104,7 +104,7 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
      * Adds fields that are long (span an entire row)
      */
     protected void addCommonLongFields() {
-        addLongField("Links", info.getLinks());
+        addLongField("Links", info.getLinkifiedLinks());
         addLongField("Keywords", info.getKeywords());
         addLongField("Summary", info.getShortDescription());
         addLongField("References", info.getReferences());
@@ -315,24 +315,35 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         if (value == null)
             value = "";
         table.setHTML(currentRow, currentCol, "<span class=\"font-80em\">" + value + "</span>");
+        table.getFlexCellFormatter().setStyleName(currentRow, currentCol, "min_width_170");
+        table.getFlexCellFormatter().setVerticalAlignment(currentRow, currentCol,
+            HasAlignment.ALIGN_TOP);
+
         currentCol += 1;
     }
 
     // adds a field to the current table
     protected void addShortField(String labelString, Widget value, ValueType valueType) {
-        if (currentCol >= 4) { // TODO : maybe add a parameter that determines whether to show on next row or not
+        if (currentCol >= 4) {
             currentCol = 0;
             currentRow += 1;
         }
 
         table.setHTML(currentRow, currentCol, "<b class=\"font-80em color_444\">" + labelString
                 + "</b>");
+        table.getFlexCellFormatter().setVerticalAlignment(currentRow, currentCol,
+            HasAlignment.ALIGN_TOP);
         table.getFlexCellFormatter().setWidth(currentRow, currentCol, "170px");
+
         currentCol += 1;
         //        ValueCell cell = new ValueCell(value, valueType);
 
         value.addStyleName("font-80em");
         table.setWidget(currentRow, currentCol, value); // TODO add a style to put space after this or something
+        table.getFlexCellFormatter().setStyleName(currentRow, currentCol, "min_width_170");
+        table.getFlexCellFormatter().setVerticalAlignment(currentRow, currentCol,
+            HasAlignment.ALIGN_TOP);
+
         currentCol += 1;
     }
 

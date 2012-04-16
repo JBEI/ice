@@ -19,10 +19,10 @@ public class Flash implements IsWidget {
     public Flash(Parameters params) {
         String url = GWT.getHostPageBaseURL();
         String html = "<object classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540002\" id=\"VectorEditor\" width=\"100%\" height=\"100%\" codebase=\"https://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab\"> "
-                + "<param name=\"movie\" value=\"VectorEditor.swf\">"
+                + "<param name=\"movie\" value=\"VectorEditor.swf\">" // TODO : this goes along with swfPath
                 + "<param name=\"quality\" value=\"high\">"
                 + "<param name=\"bgcolor\" value=\"#869ca7\">"
-                + "<param name=\"wmode\" value=\"window\">"
+                + "<param name=\"wmode\" value=\"transparency\">"
                 + "<param name=\"allowScriptAccess\" value=\"sameDomain\">"
                 + "<embed src=\""
                 + url

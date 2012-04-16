@@ -2,17 +2,131 @@ package org.jbei.ice.lib.permissions;
 
 import java.util.Set;
 
+import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.common.Controller;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.EntryPermissionVerifier;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.GroupManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Group;
+import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 
 public class PermissionsController extends Controller {
 
     public PermissionsController(Account account) {
         super(account, new EntryPermissionVerifier());
+    }
+
+    /**
+     * Adds permission to a specific entry
+     * 
+     * @param type
+     *            type of permission being added
+     * @param entry
+     *            entry permission is being added to
+     * @param id
+     *            unique identifier for account or group that is to be granted permissions.
+     * @throws ControllerException
+     */
+    public void addPermission(PermissionType type, Entry entry, long id) throws ControllerException {
+        Account account = super.getAccount();
+        try {
+            switch (type) {
+            case READ_ACCOUNT:
+                Account readAccount = AccountController.get(id);
+                if (readAccount != null && !readAccount.getEmail().equals(account.getEmail()))
+                    addReadUser(entry, readAccount);
+                break;
+
+            case READ_GROUP:
+                Group readGroup = GroupManager.get(id);
+                if (readGroup != null)
+                    addReadGroup(entry, readGroup);
+                break;
+
+            case WRITE_ACCOUNT:
+                Account writeAccount = AccountController.get(id);
+                if (writeAccount != null && !writeAccount.getEmail().equals(account.getEmail())) {
+                    addWriteUser(entry, writeAccount);
+                    addReadUser(entry, writeAccount);
+                }
+                break;
+
+            case WRITE_GROUP:
+                Group writeGroup = GroupManager.get(id);
+                if (writeGroup != null) {
+                    addWriteGroup(entry, writeGroup);
+                    addReadGroup(entry, writeGroup);
+                }
+                break;
+            }
+        } catch (PermissionException pe) {
+            Logger.error(pe);
+            throw new ControllerException("User " + account.getEmail()
+                    + " does not have permissions to modify entry permissions for " + entry.getId());
+        } catch (ManagerException me) {
+            Logger.error(me);
+            throw new ControllerException(me);
+        }
+    }
+
+    /**
+     * Removes a type of permission from an entry
+     * 
+     * @param type
+     *            type of permission to remove
+     * @param entry
+     *            entry
+     * @param id
+     *            identifier for group or account being removed
+     * @throws ControllerException
+     */
+    public void removePermission(PermissionType type, Entry entry, long id)
+            throws ControllerException {
+
+        Account account = super.getAccount();
+        try {
+
+            switch (type) {
+            case READ_ACCOUNT:
+                Account readAccount = AccountController.get(id);
+                if (readAccount != null && !readAccount.getEmail().equals(account.getEmail())) // cannot remove yourself
+                    removeReadUser(entry, readAccount);
+                break;
+
+            case READ_GROUP:
+                Group readGroup = GroupManager.get(id);
+                if (readGroup != null)
+                    removeReadGroup(entry, readGroup);
+                break;
+
+            case WRITE_ACCOUNT:
+                Account writeAccount = AccountController.get(id);
+                if (writeAccount != null && !writeAccount.getEmail().equals(account.getEmail())) { // cannot remove yourself 
+                    removeWriteUser(entry, writeAccount);
+                    removeReadUser(entry, writeAccount);
+                }
+                break;
+
+            case WRITE_GROUP:
+                Group writeGroup = GroupManager.get(id);
+                if (writeGroup != null) {
+                    removeWriteGroup(entry, writeGroup);
+                    removeReadGroup(entry, writeGroup);
+                }
+                break;
+            }
+        } catch (PermissionException pe) {
+            Logger.error(pe);
+            throw new ControllerException("User " + account.getEmail()
+                    + " does not have permissions to modify entry permissions for " + entry.getId());
+        } catch (ManagerException me) {
+            Logger.error(me);
+            throw new ControllerException(me);
+        }
     }
 
     /**

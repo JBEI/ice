@@ -16,6 +16,9 @@ public class EntryInfo implements IsSerializable {
         private String name;
         private String display;
 
+        EntryType() {
+        }
+
         EntryType(String display, String name) {
             this.display = display;
             this.name = name;
@@ -57,7 +60,9 @@ public class EntryInfo implements IsSerializable {
     private String keywords;
     private String status;
     private String shortDescription;
+    private String linkifiedShortDescription;
     private String longDescription;
+    private String parsedDescription;
     private String longDescriptionType;
     private String references;
     private Date creationTime;
@@ -66,6 +71,7 @@ public class EntryInfo implements IsSerializable {
     private String intellectualProperty;
     private String partId;
     private String links; // comma separated list of links
+    private String linkifiedLinks;
     private String principalInvestigator;
     private String selectionMarkers;
     private String fundingSource;
@@ -77,6 +83,10 @@ public class EntryInfo implements IsSerializable {
     private ArrayList<SequenceAnalysisInfo> sequenceAnalysis;
     private ArrayList<ParameterInfo> parameters;
     private boolean canEdit; // whether current user that requested this entry info has write privs
+
+    public EntryInfo() {
+
+    }
 
     public EntryInfo(EntryType type) {
         this.type = type;
@@ -342,5 +352,29 @@ public class EntryInfo implements IsSerializable {
 
     public void setCanEdit(boolean canEdit) {
         this.canEdit = canEdit;
+    }
+
+    public String getParsedDescription() {
+        return parsedDescription;
+    }
+
+    public void setParsedDescription(String parsedDescription) {
+        this.parsedDescription = parsedDescription;
+    }
+
+    public String getLinkifiedLinks() {
+        return linkifiedLinks;
+    }
+
+    public void setLinkifiedLinks(String linkifiedLinks) {
+        this.linkifiedLinks = linkifiedLinks;
+    }
+
+    public String getLinkifiedShortDescription() {
+        return linkifiedShortDescription;
+    }
+
+    public void setLinkifiedShortDescription(String linkifiedShortDescription) {
+        this.linkifiedShortDescription = linkifiedShortDescription;
     }
 }

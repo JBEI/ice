@@ -1,5 +1,7 @@
 package org.jbei.ice.web.dataProviders;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -39,7 +41,7 @@ public class FolderDataProvider extends AbstractEntriesDataProvider {
         boolean asc = this.getSort().isAscending();
 
         try {
-            List<Long> list = FolderManager.getFolderContents(this.folder.getId(), asc);
+            ArrayList<BigInteger> list = FolderManager.getFolderContents(this.folder.getId(), asc);
             List<Entry> results = null;
             if ("oneName.name".equals(sortParam)) {
                 List<Long> sortedEntries = EntryManager.getEntriesSortByName(asc);

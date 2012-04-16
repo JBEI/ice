@@ -39,7 +39,6 @@ public class FolderManager {
             Query query = session.createQuery("from " + Folder.class.getName() + " where id = :id");
             query.setLong("id", id);
             result = (Folder) query.uniqueResult();
-            result.getContents().size();
         } catch (Exception e) {
             String msg = "Could not get folder by id: " + id + " " + e.toString();
             Logger.error(msg, e);
@@ -103,8 +102,9 @@ public class FolderManager {
      * @return List of Entry ids.
      * @throws ManagerException
      */
-    public static ArrayList<Long> getFolderContents(long id, boolean asc) throws ManagerException {
-        ArrayList<Long> results = new ArrayList<Long>();
+    @SuppressWarnings("unchecked")
+    public static ArrayList<BigInteger> getFolderContents(long id, boolean asc)
+            throws ManagerException {
         Session session = DAO.newSession();
         try {
 
@@ -112,13 +112,7 @@ public class FolderManager {
                     .createSQLQuery("SELECT entry_id FROM folder_entry WHERE folder_id = :id");
             query.setLong("id", id);
 
-            @SuppressWarnings("unchecked")
-            List<BigInteger> l = query.list();
-            for (BigInteger bi : l) {
-                results.add(bi.longValue());
-            }
-
-            return results;
+            return (ArrayList<BigInteger>) query.list();
 
         } finally {
             if (session.isOpen()) {

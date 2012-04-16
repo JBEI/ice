@@ -75,5 +75,4 @@ public class FolderDetails implements IsSerializable {
     public void setContents(ArrayList<Long> contents) {
         this.contents = contents;
     }
-
 }

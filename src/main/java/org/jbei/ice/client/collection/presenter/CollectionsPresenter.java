@@ -348,7 +348,6 @@ public class CollectionsPresenter extends AbstractPresenter {
         currentContext = event;
         History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + event.getCurrent(), false);
         display.setMainContent(entryViewPresenter.getView(), false);
-        //        display.setCurrentMenuSelection(event.getCurrent());
     }
 
     private void search(ArrayList<SearchFilterInfo> operands) {

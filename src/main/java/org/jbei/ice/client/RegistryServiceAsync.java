@@ -100,7 +100,7 @@ public interface RegistryServiceAsync {
             AsyncCallback<FolderDetails> callback);
 
     void createUserCollection(String sid, String name, String description,
-            ArrayList<Long> contents, AsyncCallback<FolderDetails> callback);
+            ArrayList<Long> arrayList, AsyncCallback<FolderDetails> callback);
 
     void retrieveUserCollections(String sessionId, String userId,
             AsyncCallback<ArrayList<FolderDetails>> callback);
