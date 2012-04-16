@@ -100,7 +100,8 @@ public class AccountManager {
                     + " where (UPPER(firstName) like '%" + token
                     + "%') OR (UPPER(lastName) like '%" + token + "%')";
             Query query = session.createQuery(queryString);
-            query.setFetchSize(limit);
+            if (limit > 0)
+                query.setMaxResults(limit);
 
             @SuppressWarnings("unchecked")
             HashSet<Account> result = new HashSet<Account>(query.list());

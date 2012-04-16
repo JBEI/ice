@@ -193,7 +193,6 @@ public class EntryPresenter extends AbstractPresenter {
     }
 
     private void showCurrentEntryView() {
-        retrieveAccountsAndGroups();
         setContextNavData();
         retrieveEntryDetails();
         retrievePermissionData();
@@ -269,7 +268,6 @@ public class EntryPresenter extends AbstractPresenter {
                 EntryPresenter.this.currentInfo = nextInfo;
                 currentContext.setCurrent(currentId);
                 retrieveEntryDetails();
-                retrieveAccountsAndGroups();
                 retrievePermissionData();
                 display.enablePrev(true);
                 String text = (next + 1) + " of " + size;
@@ -303,7 +301,6 @@ public class EntryPresenter extends AbstractPresenter {
                 long currentId = prevInfo.getId();
                 currentContext.setCurrent(currentId);
                 retrieveEntryDetails();
-                retrieveAccountsAndGroups();
                 retrievePermissionData();
                 display.enableNext(true);
                 String text = (prev + 1) + " of " + nav.getSize();
@@ -320,41 +317,6 @@ public class EntryPresenter extends AbstractPresenter {
                 eventBus.fireEvent(new ShowEntryListEvent(currentContext));
             }
         });
-    }
-
-    private void retrieveAccountsAndGroups() {
-        //        final PermissionsPresenter pPresenter = display.getPermissionsWidget();
-
-        //        service.retrieveAllAccounts(AppController.sessionId,
-        //            new AsyncCallback<LinkedHashMap<String, String>>() {
-        //
-        //                @Override
-        //                public void onSuccess(LinkedHashMap<String, String> result) {
-        //                    pPresenter.setAccountData(result);
-        //                }
-        //
-        //                @Override
-        //                public void onFailure(Throwable caught) {
-        //                    Window.alert(caught.getMessage());
-        //                }
-        //            });
-        //
-        //        service.retrieveAllGroups(AppController.sessionId,
-        //            new AsyncCallback<LinkedHashMap<Long, String>>() {
-        //
-        //                @Override
-        //                public void onFailure(Throwable caught) {
-        //                    Window.alert(caught.getMessage());
-        //                }
-        //
-        //                @Override
-        //                public void onSuccess(LinkedHashMap<Long, String> result) {
-        //                    pPresenter.setGroupData(result);
-        //                }
-        //            });
-
-        // handler for updating permissions
-        //        addUpdatePermissionsHandler();
     }
 
     private void retrieveEntryDetails() {
@@ -414,7 +376,8 @@ public class EntryPresenter extends AbstractPresenter {
                     menuItems.add(new MenuItem(Menu.SEQ_ANALYSIS, result.getSequenceAnalysis()
                             .size()));
                     menuItems.add(new MenuItem(Menu.SAMPLES, result.getSampleStorage().size()));
-                    display.setMenuItems(menuItems); // TODO : set menu loading indicator?
+                    display.setMenuItems(menuItems);
+                    display.getDetailMenu().setSelection(Menu.GENERAL);
                     display.showEntryDetailView(currentInfo, canEdit);
                 }
             });

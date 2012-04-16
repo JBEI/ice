@@ -141,15 +141,23 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
     @Override
     public void setWriteBoxVisibility(boolean visible) {
         writeItemBoxHolder.setVisible(visible);
-        if (visible)
+        if (visible) {
+            writeAddLabel.setText("Close");
+            writeSuggestBox.setText("");
             writeSuggestBox.getTextBox().setFocus(true);
+        } else
+            writeAddLabel.setText("Add");
     }
 
     @Override
     public void setReadBoxVisibility(boolean visible) {
         readItemBoxHolder.setVisible(visible);
-        if (visible)
+        if (visible) {
+            readAddLabel.setText("Close");
+            readSuggestBox.setText("");
             readSuggestBox.getTextBox().setFocus(true);
+        } else
+            readAddLabel.setText("Add");
     }
 
     @Override
@@ -242,7 +250,7 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
         private final PermissionItem item;
 
         public TreeNode(PermissionItem item, ClickHandler deleteHandler) {
-            super(new TreeNodeWidget(item.getName(), deleteHandler));
+            super(new TreeNodeWidget(item.getName(), deleteHandler, item.isGroup()));
             this.item = item;
         }
 
@@ -260,11 +268,14 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
             HasMouseOutHandlers {
         private final Label delete;
 
-        public TreeNodeWidget(String display, ClickHandler handler) {
-            HTMLPanel panel = new HTMLPanel(
-                    "</span> <span>"
-                            + display
-                            + " &nbsp; </span><span id=\"delete_link\" style=\"color: red; cursor: pointer\">");
+        public TreeNodeWidget(String display, ClickHandler handler, boolean isGroup) {
+            String html = "<span>";
+            if (isGroup)
+                html += "<img src=\"static/images/users16.png\" width=\"11px\" height=\"11px\" alt=\"Group\" /> &nbsp;";
+            html += display
+                    + " &nbsp; </span><span id=\"delete_link\" style=\"color: red; cursor: pointer\"></span>";
+
+            HTMLPanel panel = new HTMLPanel(html);
             initWidget(panel);
             delete = new Label("x");
             delete.setStyleName("display-inline");

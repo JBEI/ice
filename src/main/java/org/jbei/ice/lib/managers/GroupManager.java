@@ -128,7 +128,8 @@ public class GroupManager {
             String queryString = "from " + Group.class.getName() + " where (UPPER(label) like '%"
                     + token + "%')";
             Query query = session.createQuery(queryString);
-            query.setFetchSize(limit);
+            if (limit > 0)
+                query.setMaxResults(limit);
 
             @SuppressWarnings("unchecked")
             HashSet<Group> result = new HashSet<Group>(query.list());

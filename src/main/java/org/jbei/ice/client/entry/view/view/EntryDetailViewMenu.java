@@ -29,21 +29,6 @@ public class EntryDetailViewMenu extends Composite implements HasClickHandlers {
         table.setCellPadding(0);
         table.setCellSpacing(0);
         table.setStyleName("entry_view_left_menu");
-        //        table.setHTML(0, 0, "&nbsp;"); // place holder for header
-        //        table.getFlexCellFormatter().setStyleName(0, 0, "entry_view_sub_menu_header");
-
-        //        leftColumnLayout.setWidget(2, 0, new HTML("&nbsp;"));
-        //
-        //        FlexTable permission = new FlexTable();
-        //        permission.setCellPadding(0);
-        //        permission.setCellSpacing(0);
-        //        permissionLink = new HTML("</b>Permissions</b>");
-        //        permission.setWidget(0, 0, permissionLink);
-        //
-        //        leftColumnLayout.setWidget(3, 0, permission);
-        //
-        //        return leftColumnLayout;
-
     }
 
     public MenuItem getCurrentSelection() {

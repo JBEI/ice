@@ -732,10 +732,12 @@ a.cell_mouseover:hover {
 }
 
 .gwt-SuggestBoxPopup .item {
+	font-size: 0.75em;
 }
 
 .gwt-SuggestBoxPopup .item-selected {
-	background-color: #0082C0;
+	font-size: 0.75em;
+	background-color: #669acc;
 }
 /* END */
 
