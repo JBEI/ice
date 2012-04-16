@@ -3,12 +3,11 @@ package org.jbei.ice.client.common.table;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jbei.ice.client.Page;
 import org.jbei.ice.client.collection.menu.IHasEntryHandlers;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.entry.IHasEntryId;
+import org.jbei.ice.client.common.table.cell.EntryOwnerCell;
 import org.jbei.ice.client.common.table.cell.PartIDCell;
-import org.jbei.ice.client.common.table.cell.UrlCell;
 import org.jbei.ice.client.common.table.column.ImageColumn;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
@@ -28,7 +27,6 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.cellview.client.Header;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 
@@ -193,18 +191,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
     }
 
     protected DataTableColumn<EntryInfo> addOwnerColumn() {
-        UrlCell<EntryInfo> cell = new UrlCell<EntryInfo>() {
-
-            @Override
-            protected String getCellValue(EntryInfo object) {
-                return object.getOwner();
-            }
-
-            @Override
-            protected void onClick(EntryInfo object) {
-                History.newItem(Page.PROFILE.getLink() + ";id=" + object.getOwnerEmail());
-            }
-        };
+        EntryOwnerCell<EntryInfo> cell = new EntryOwnerCell<EntryInfo>();
 
         DataTableColumn<EntryInfo> ownerColumn = new DataTableColumn<EntryInfo>(cell,
                 ColumnField.OWNER) {

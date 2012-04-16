@@ -174,7 +174,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public ArrayList<EntryInfo> retrieveEntryData(String sid, ArrayList<Long> entryIds,
             ColumnField type, boolean asc) {
 
-        Logger.info("Retrieving entry details for " + entryIds.size() + " entries");
+        Logger.info("Retrieving entry data for " + entryIds.size() + " entries");
 
         // TODO: Use Controller and put all of the logic in there
         if (type == null)
@@ -188,12 +188,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             ArrayList<EntryInfo> results = new ArrayList<EntryInfo>();
             List<Entry> entries = null;
 
-            //            EntryController controller = new EntryController(account);
             switch (type) {
             case TYPE:
-
                 entries = EntryManager.getEntriesByIdSetSortByType(entryIds, asc);
-                //                entries = controller.
                 break;
 
             case PART_ID:

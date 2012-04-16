@@ -145,6 +145,8 @@ public class EntryViewFactory {
         view.setShortDescription(entry.getShortDescription());
         view.setCreationTime(entry.getCreationTime());
         view.setStatus(entry.getStatus());
+        view.setOwner(entry.getOwner());
+        view.setOwnerEmail(entry.getOwnerEmail());
 
         // attachments
         boolean hasAttachment = false;
