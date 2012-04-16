@@ -13,6 +13,13 @@ import org.jbei.ice.shared.dto.SearchFilterInfo;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
+/**
+ * Model for advanced search that communicates search requests
+ * to the remote service
+ * 
+ * @author Hector Plahar
+ * 
+ */
 public class AdvancedSearchModel {
 
     private final RegistryServiceAsync service;

@@ -339,6 +339,13 @@ a.cell_mouseover:hover {
 	font-size: 0.65em;
 }
 
+.entry_loading_indicator {
+	z-index: 2147483647;
+	filter: alpha(opacity=60);
+	opacity: 0.6; 
+	background-color: #FFF;
+}
+
 .entry_view_content {
 	border-right: 1px solid #e4e4e4;
 	border-top: 1px solid #e4e4e4;

@@ -196,7 +196,7 @@ public class EntryView extends Composite implements IEntryView {
         mainContent.getFlexCellFormatter().setColSpan(0, 0, 2);
 
         // second row
-        mainContent.setWidget(1, 0, new Label("Loading..."));
+        mainContent.setWidget(1, 0, new EntryLoadingWidget());
         mainContent.getFlexCellFormatter().setStyleName(1, 0, "entry_view_content");
         mainContent.getFlexCellFormatter().setVerticalAlignment(1, 0, HasAlignment.ALIGN_TOP);
         mainContent.getCellFormatter().setWidth(1, 0, "100%");
@@ -215,11 +215,6 @@ public class EntryView extends Composite implements IEntryView {
 
         return mainContent;
     }
-
-    //    @Override
-    //    public void addSelectionHandler(SelectionHandler<SuggestOracle.Suggestion> handler) {
-    //        this.permissions.addReadBoxSelectionHandler(handler);
-    //    }
 
     @Override
     public void setNextHandler(ClickHandler handler) {
@@ -349,8 +344,9 @@ public class EntryView extends Composite implements IEntryView {
         EntryDetailView<? extends EntryInfo> detailView = ViewFactory.createDetailView(info);
         editGeneralButton.setVisible(showEdit);
         mainContent.setWidget(0, 0, generalHeaderPanel);
-        mainContent.setWidget(1, 0, detailView);
         mainContent.getCellFormatter().setHeight(0, 0, "30px");
+
+        mainContent.setWidget(1, 0, detailView);
     }
 
     @Override
@@ -367,6 +363,11 @@ public class EntryView extends Composite implements IEntryView {
     public void showSampleView() {
         mainContent.setWidget(0, 0, samplesPanel);
         mainContent.setWidget(1, 0, sampleTable);
+    }
+
+    @Override
+    public void showLoadingIndicator() {
+        mainContent.setWidget(1, 0, new EntryLoadingWidget());
     }
 
     @Override
@@ -474,9 +475,4 @@ public class EntryView extends Composite implements IEntryView {
     public void setSequenceFormVisibility(boolean visible) {
         uploadPanel.setVisible(visible);
     }
-
-    //    @Override
-    //    public void setPermissionData(ArrayList<PermissionInfo> result) {
-    //        this.permissions.setPermissionData(result);
-    //    }
 }

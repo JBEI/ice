@@ -71,7 +71,5 @@ public interface IEntryView {
 
     void addSampleSaveHandler(ClickHandler handler);
 
-    //    void addSelectionHandler(SelectionHandler<Suggestion> handler);
-
-    //    void setPermissionData(ArrayList<PermissionInfo> result);
+    void showLoadingIndicator();
 }
