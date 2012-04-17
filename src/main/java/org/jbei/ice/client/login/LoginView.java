@@ -2,6 +2,7 @@ package org.jbei.ice.client.login;
 
 import org.jbei.ice.client.common.Footer;
 
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -127,10 +128,15 @@ public class LoginView extends Composite implements ILoginView {
     }
 
     @Override
-    public void setSubmitHandler(KeyPressHandler handler) {
+    public void setSubmitKeyPressHandler(KeyPressHandler handler) {
         submitButton.addKeyPressHandler(handler);
         passwordInput.addKeyPressHandler(handler);
         loginInput.addKeyPressHandler(handler);
+    }
+
+    @Override
+    public void setSubmitClickHandler(ClickHandler handler) {
+        submitButton.addClickHandler(handler);
     }
 
     @Override
@@ -146,6 +152,13 @@ public class LoginView extends Composite implements ILoginView {
     @Override
     public boolean rememberUserOnComputer() {
         return remember.getValue();
+    }
+
+    @Override
+    public void setInputFieldsEnable(boolean enable) {
+        this.passwordInput.setEnabled(enable);
+        this.loginInput.setEnabled(enable);
+        this.submitButton.setEnabled(enable);
     }
 
     @Override
@@ -168,10 +181,5 @@ public class LoginView extends Composite implements ILoginView {
         passwordInput.removeStyleName("login_input_error");
         loginInput.removeStyleName("login_input_error");
         passwordErrorLabel.setVisible(false);
-    }
-
-    @Override
-    public Button getSubmitButton() {
-        return this.submitButton;
     }
 }

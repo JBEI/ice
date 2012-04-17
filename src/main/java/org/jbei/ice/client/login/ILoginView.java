@@ -1,7 +1,7 @@
 package org.jbei.ice.client.login;
 
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -29,13 +29,15 @@ public interface ILoginView {
 
     void clearErrorMessages();
 
+    void setInputFieldsEnable(boolean enable);
+
     void setLoginNameError(String errMsg);
 
     void setLoginPassError(String errMsg);
 
-    void setSubmitHandler(KeyPressHandler handler);
+    void setSubmitKeyPressHandler(KeyPressHandler handler);
 
-    Button getSubmitButton();
+    void setSubmitClickHandler(ClickHandler handler);
 
     Widget asWidget();
 }

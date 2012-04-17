@@ -16,7 +16,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 
 /**
- * Submits user entered login credentials for validation
+ * Presenter for the login page
+ * Submits user entered login credentials to the server for validation
  * 
  * @author Hector Plahar
  */
@@ -36,6 +37,7 @@ public class LoginPresenter extends AbstractPresenter {
 
     protected void login() {
         this.display.clearErrorMessages();
+        this.display.setInputFieldsEnable(false);
 
         String loginName = this.display.getLoginName();
         String loginPass = this.display.getLoginPass();
@@ -53,45 +55,50 @@ public class LoginPresenter extends AbstractPresenter {
             error = true;
         }
 
-        if (error)
+        if (error) {
+            display.setInputFieldsEnable(true);
             return;
+        }
 
         // client validation passed. attempt to login
         Utils.showWaitCursor(null);
-        display.getSubmitButton().setEnabled(false);
         service.login(loginName, loginPass, new AsyncCallback<AccountInfo>() {
 
             @Override
             public void onSuccess(AccountInfo result) {
-                resetCursor();
+
                 if (result == null) {
                     display.setLoginPassError("The username and/or password you entered is incorrect!");
+                    enableInputFields();
                     return;
                 }
 
-                resetCursor();
                 eventBus.fireEvent(new LoginEvent(result, display.rememberUserOnComputer()));
+                enableInputFields();
             }
 
             @Override
             public void onFailure(Throwable caught) {
-                resetCursor();
                 display.setLoginPassError("There was an error validating your account. Please try again.");
+                enableInputFields();
+            }
+
+            private void enableInputFields() {
+                display.setInputFieldsEnable(true);
+                resetCursor();
             }
         });
     }
 
     private void resetCursor() {
-        display.getSubmitButton().setEnabled(true);
         Utils.showDefaultCursor(null);
     }
 
     protected final void setHandler() {
         SubmitHandler handler = new SubmitHandler();
 
-        this.display.setSubmitHandler(handler);
-        this.display.getSubmitButton().addKeyPressHandler(handler);
-        this.display.getSubmitButton().addClickHandler(new ClickHandler() {
+        this.display.setSubmitKeyPressHandler(handler);
+        this.display.setSubmitClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
