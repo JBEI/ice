@@ -71,7 +71,6 @@ public class FileUploadServlet extends UploadAction {
     public String executeAction(HttpServletRequest request, List<FileItem> sessionFiles)
             throws UploadActionException {
 
-        // TODO : check cookie
         Account account;
 
         try {
@@ -106,8 +105,7 @@ public class FileUploadServlet extends UploadAction {
             try {
                 item.write(file);
             } catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                Logger.error(e);
                 continue;
             }
 
@@ -121,8 +119,7 @@ public class FileUploadServlet extends UploadAction {
                 try {
                     return uploadSequenceTraceFile(file, entryId, account, saveName);
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    Logger.error(e);
                 }
             } else if (BULK_ATTACHMENT_TYPE.equalsIgnoreCase(type)) {
 
@@ -246,15 +243,14 @@ public class FileUploadServlet extends UploadAction {
             attachment.setFileName(filename);
 
             FileInputStream inputStream = new FileInputStream(file);
+            // TODO : this save method also writes the attachment to file
             Attachment saved = AttachmentManager.save(attachment, inputStream);
             if (saved != null)
                 return saved.getFileId();
         } catch (ManagerException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Logger.error(e);
         } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Logger.error(e);
         }
 
         return null;

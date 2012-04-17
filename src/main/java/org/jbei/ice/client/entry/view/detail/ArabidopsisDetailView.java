@@ -11,13 +11,13 @@ public class ArabidopsisDetailView extends EntryDetailView<ArabidopsisSeedInfo> 
 
     @Override
     protected void addShortFieldValues() {
-        addShortField("Plant Type", info.getPlantType().toString(), ValueType.SHORT_TEXT);
-        addShortField("Generation", info.getGeneration().toString(), ValueType.SHORT_TEXT);
-        addShortField("Homozygosity", info.getHomozygosity(), ValueType.SHORT_TEXT);
-        addShortField("Ecotype", info.getEcotype(), ValueType.SHORT_TEXT);
+        addShortField("Plant Type", info.getPlantType().toString());
+        addShortField("Generation", info.getGeneration().toString());
+        addShortField("Homozygosity", info.getHomozygosity());
+        addShortField("Ecotype", info.getEcotype());
         String harvestDate = DateUtilities.formatDate(info.getHarvestDate());
-        addShortField("Harvested", harvestDate, ValueType.SHORT_TEXT);
-        addShortField("Parents", info.getParents(), ValueType.SHORT_TEXT);
+        addShortField("Harvested", harvestDate);
+        addShortField("Parents", info.getParents());
     }
 
     @Override

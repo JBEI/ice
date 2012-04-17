@@ -73,7 +73,10 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
     }
 
     protected void onMouseClick(long recordId) {
-        popup.hide();
+        if (popup != null) {
+            popup.hide();
+            popup = null;
+        }
         dispatchEntryViewEvent(recordId);
     }
 
@@ -147,7 +150,7 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
 
             @Override
             public void onFailure() {
-                // TODO : doing nothing seems sufficient
+                // doing nothing seems fine. no tooltip will be displayed
             }
         });
 

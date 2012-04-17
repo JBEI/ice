@@ -16,6 +16,11 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 
+/**
+ * Presenter for the news page
+ * 
+ * @author Hector Plahar
+ */
 public class NewsPresenter extends AbstractPresenter {
 
     private final RegistryServiceAsync service;

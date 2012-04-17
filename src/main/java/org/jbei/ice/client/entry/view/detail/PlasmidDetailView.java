@@ -24,9 +24,9 @@ public class PlasmidDetailView extends EntryDetailView<PlasmidInfo> {
     @Override
     protected void addShortFieldValues() {
         if (info.getStrains().isEmpty())
-            addShortField("Strains", "", null);
+            addShortField("Strains", "");
         else {
-            addShortField("Strains", new StrainWidget(info.getStrains()), null);
+            addShortField("Strains", new StrainWidget(info.getStrains()));
         }
     }
 

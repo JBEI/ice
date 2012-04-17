@@ -159,4 +159,7 @@ public interface RegistryServiceAsync {
 
     void removePermission(String sessionId, long entryId, PermissionInfo permissionInfo,
             AsyncCallback<Boolean> callback);
+
+    void saveSequence(String sessionId, long entry, String sequenceUser,
+            AsyncCallback<Boolean> callback);
 }

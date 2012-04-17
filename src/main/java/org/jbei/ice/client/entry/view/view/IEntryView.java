@@ -3,6 +3,7 @@ package org.jbei.ice.client.entry.view.view;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.collection.add.form.SampleLocation;
+import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.update.IEntryFormUpdateSubmit;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -21,7 +22,7 @@ public interface IEntryView {
 
     void showSequenceView(EntryInfo info, boolean showFlash);
 
-    void showEntryDetailView(EntryInfo info, boolean showEdit);
+    SequenceViewPanelPresenter showEntryDetailView(EntryInfo info, boolean showEdit);
 
     IEntryFormUpdateSubmit showUpdateForm(EntryInfo info);
 

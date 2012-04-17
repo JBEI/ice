@@ -1552,8 +1552,19 @@ td.datePickerMonth {
 	color: #185DA0;
 }
 
+.gwt-DialogBox {
+    border: 1px solid #ccc;	
+}
+
 .gwt-DialogBox .dialogContainer {
   position: relative;  
+  padding: 4px;
+}
+
+.upload_sequence_feedback {
+	padding: 5px; 
+	font-size: 0.75em;
+	color: #CC3333;
 }
 
 .gwt-DialogBox .dialogControls .x {

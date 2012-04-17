@@ -1,8 +1,6 @@
 package org.jbei.ice.client.entry.view.detail;
 
-import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Page;
-import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.StatusType;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -11,7 +9,6 @@ import org.jbei.ice.shared.dto.ParameterInfo;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
@@ -31,6 +28,8 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
     protected final T info;
     private int currentRow = 0;
     private int currentCol = 0;
+
+    private SequenceViewPanel sequencePanel;
 
     public EntryDetailView(T info) {
 
@@ -58,6 +57,10 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         createNotesView();
     }
 
+    public SequenceViewPanel getSequencePanel() {
+        return this.sequencePanel;
+    }
+
     /**
      * Abstract class to be implemented by all specializations
      * to show their specific (non-generic) fields.
@@ -66,38 +69,31 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
 
     protected abstract void addLongFields();
 
-    public T getInfo() {
-        return info;
-    }
-
     /**
      * Adds, to the layout, fields that are short and common to all entry types
      */
     protected void addCommonShortFields() {
-        addShortField("Part ID", info.getPartId(), ValueType.SHORT_TEXT);
+        addShortField("Part ID", info.getPartId());
         Widget ownerLink = this.createProfileLink(info.getOwnerEmail(), info.getOwner());
-        addShortField("Owner", ownerLink, ValueType.SHORT_TEXT);
+        addShortField("Owner", ownerLink);
 
-        addShortField("Name", info.getName(), ValueType.SHORT_TEXT);
-        addShortField("Alias", info.getAlias(), ValueType.SHORT_TEXT);
+        addShortField("Name", info.getName());
+        addShortField("Alias", info.getAlias());
 
         Widget link = this.createProfileLink(info.getCreatorEmail(), info.getCreator());
-        addShortField("Creator", link, ValueType.SHORT_TEXT);
-        addShortField("Principal Investigator", info.getPrincipalInvestigator(),
-            ValueType.SHORT_TEXT);
+        addShortField("Creator", link);
+        addShortField("Principal Investigator", info.getPrincipalInvestigator());
 
-        addShortField("Created", DateUtilities.formatDate(info.getCreationTime()), ValueType.DATE);
-        addShortField("Funding Source", info.getFundingSource(), ValueType.SHORT_TEXT);
+        addShortField("Created", DateUtilities.formatDate(info.getCreationTime()));
+        addShortField("Funding Source", info.getFundingSource());
 
         String statusString = StatusType.displayValueOf(info.getStatus());
         if (statusString.equals(""))
             statusString = info.getStatus();
-        addShortField("Status", statusString, ValueType.SHORT_TEXT);
-        addShortField("Bio Safety Level", Integer.toString(info.getBioSafetyLevel()),
-            ValueType.SHORT_TEXT);
+        addShortField("Status", statusString);
+        addShortField("Bio Safety Level", Integer.toString(info.getBioSafetyLevel()));
 
-        addShortField("Modified", DateUtilities.formatDate(info.getModificationTime()),
-            ValueType.SHORT_TEXT);
+        addShortField("Modified", DateUtilities.formatDate(info.getModificationTime()));
     }
 
     /**
@@ -192,87 +188,11 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         currentRow += 1;
     }
 
-    protected void createSequenceView() {
-        FlexTable sequence = new FlexTable();
-        sequence.setCellPadding(0);
-        sequence.setCellSpacing(0);
-        sequence.setWidth("100%");
-
-        int row = 0;
-        sequence.setWidget(row, 0, createSequenceHeader());
-        sequence.getFlexCellFormatter().setColSpan(row, 0, 6);
-
-        row += 1;
-        sequence.setWidget(row, 0, new Label(""));
-        sequence.getFlexCellFormatter().setHeight(row, 0, "10px");
-        sequence.getFlexCellFormatter().setColSpan(row, 0, 6);
-
-        row += 1;
-
-        // check if there is a sequence 
-        if (info.isHasSequence()) {
-            Flash.Parameters param = new Flash.Parameters();
-            param.setEntryId(info.getRecordId());
-            param.setSessiondId(AppController.sessionId);
-            param.setSwfPath("vv/VectorViewer.swf");
-            sequence.setWidget(row, 0, new Flash(param));
-            sequence.getFlexCellFormatter().setHeight(row, 0, "600px");
-        } else {
-            sequence.setHTML(row, 0, "<span class=\"font-80em\">No sequence provided.</span>");
-        }
-
-        table.setWidget(currentRow, 0, sequence);
+    public void createSequenceView() {
+        sequencePanel = new SequenceViewPanel(this.info);
+        table.setWidget(currentRow, 0, sequencePanel);
         table.getFlexCellFormatter().setColSpan(currentRow, 0, 4);
         currentRow += 1;
-    }
-
-    private Widget createSequenceHeader() {
-        HTMLPanel panel = new HTMLPanel("<span style=\"color: #233559; "
-                + "font-weight: bold; font-style: italic; font-size: 0.80em;\">"
-                + "SEQUENCE</span><div style=\"float: right\"><span id=\"sequence_link\"></span>"
-                + "<span style=\"color: #262626; font-size: 0.75em;\">|</span>"
-                + " <span id=\"sequence_options\"></span></div>");
-
-        panel.setStyleName("entry_sequence_sub_header");
-
-        final VectorEditorDialog dialog = new VectorEditorDialog(info.getName());
-        Flash.Parameters param = new Flash.Parameters();
-        param.setEntryId(info.getRecordId());
-        param.setSessiondId(AppController.sessionId);
-        param.setSwfPath("ve/VectorEditor.swf");
-
-        FlexTable table = new FlexTable();
-        table.setWidth("100%");
-        table.setHeight("100%");
-        table.setWidget(0, 0, new Flash(param));
-        table.getFlexCellFormatter().setHeight(0, 0, "100%");
-        dialog.setWidget(table);
-
-        if (info.isHasSequence()) {
-            // delete, open in vector editor, download
-            Label label = dialog.getLabel("Open");
-            label.setStyleName("open_sequence_sub_link");
-            panel.add(label, "sequence_link");
-
-            SequenceFileDownload download = new SequenceFileDownload(info.getId());
-            Widget widget = download.asWidget();
-            widget.addStyleName("display-inline");
-            panel.add(download.asWidget(), "sequence_options");
-
-            // TODO : delete
-        } else {
-            Label label = dialog.getLabel("Create New");
-            label.setStyleName("open_sequence_sub_link");
-            panel.add(label, "sequence_link");
-
-            // upload sequence
-            SequenceFileUpload upload = new SequenceFileUpload(info.getId());
-            Widget widget = upload.asWidget();
-            widget.addStyleName("display-inline");
-            panel.add(upload.asWidget(), "sequence_options");
-            //            upload.getSelectionModel().addSelectionChangeHandler(new Sele)
-        }
-        return panel;
     }
 
     protected void createNotesView() {
@@ -299,7 +219,7 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
     }
 
     // adds a field to the current table
-    protected void addShortField(String labelString, String value, ValueType valueType) {
+    protected void addShortField(String labelString, String value) {
         if (currentCol >= 4) { // TODO : maybe add a parameter that determines whether to show on next row or not
             currentCol = 0;
             currentRow += 1;
@@ -323,7 +243,7 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
     }
 
     // adds a field to the current table
-    protected void addShortField(String labelString, Widget value, ValueType valueType) {
+    protected void addShortField(String labelString, Widget value) {
         if (currentCol >= 4) {
             currentCol = 0;
             currentRow += 1;
@@ -367,36 +287,5 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         if (email == null || email.isEmpty())
             return new HTML("<i>" + name + "</i>");
         return new Hyperlink(name, Page.PROFILE.getLink() + ";id=" + email);
-    }
-
-    //
-    // inner classes
-    //
-    protected class ValueCell extends Label {
-        private final String value;
-        private final ValueType type;
-
-        public ValueCell(String value, ValueType type) {
-            super(value);
-            this.value = value;
-            this.type = type;
-        }
-
-        public String getValue() {
-            return this.value;
-        }
-
-        public ValueType getType() {
-            return this.type;
-        }
-    }
-
-    /**
-     * Represents the different type of field values in order
-     * to accurately map them to their edit components. e.g. a DATE
-     * ValueType will map to a DatePicker
-     */
-    protected enum ValueType {
-        DATE, MARKER_AUTO_COMPLETE, SHORT_TEXT, LONG_TEXT, SELECTION
     }
 }

@@ -17,6 +17,7 @@ import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SampleController;
 import org.jbei.ice.controllers.SearchController;
+import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.StorageController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
@@ -42,9 +43,11 @@ import org.jbei.ice.lib.models.Folder;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.models.News;
 import org.jbei.ice.lib.models.Sample;
+import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
+import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.permissions.PermissionsController;
@@ -52,6 +55,7 @@ import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.BulkImportEntryData;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.lib.utils.RichTextRenderer;
+import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.server.bulkimport.BulkImportController;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.ColumnField;
@@ -1740,6 +1744,59 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.error(e);
         }
 
+        return false;
+    }
+
+    @Override
+    public boolean saveSequence(String sessionId, long entryId, String sequenceUser) {
+
+        Account account;
+        Entry entry;
+
+        try {
+            account = retrieveAccountForSid(sessionId);
+            if (account == null)
+                return false;
+
+            EntryController entryController = new EntryController(account);
+            entry = entryController.get(entryId);
+            if (entry == null) {
+                Logger.error("Could not retrieve entry with id " + entryId);
+                return false;
+            }
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return false;
+        } catch (PermissionException e) {
+            Logger.error(e);
+            return false;
+        }
+
+        SequenceController sequenceController = new SequenceController(account);
+        IDNASequence dnaSequence = SequenceController.parse(sequenceUser);
+
+        if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
+            String errorMsg = "Couldn't parse sequence file! Supported formats: "
+                    + GeneralParser.getInstance().availableParsersToString()
+                    + ". "
+                    + "If you believe this is an error, please contact the administrator with your file";
+
+            Logger.error(errorMsg);
+            return false;
+        }
+
+        Sequence sequence = null;
+
+        try {
+            sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+            sequence.setSequenceUser(sequenceUser);
+            sequence.setEntry(entry);
+            return sequenceController.save(sequence) != null;
+        } catch (ControllerException e) {
+            Logger.error(e);
+        } catch (PermissionException e) {
+            Logger.error(e);
+        }
         return false;
     }
 }

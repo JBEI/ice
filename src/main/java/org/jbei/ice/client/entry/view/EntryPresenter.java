@@ -8,6 +8,7 @@ import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.IHasNavigableData;
+import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
 import org.jbei.ice.client.entry.view.update.IEntryFormUpdateSubmit;
 import org.jbei.ice.client.entry.view.view.AttachmentItem;
 import org.jbei.ice.client.entry.view.view.EntryDetailViewMenu;
@@ -42,6 +43,7 @@ public class EntryPresenter extends AbstractPresenter {
     private final IEntryView display;
     private EntryInfo currentInfo;
     private EntryContext currentContext;
+    private SequenceViewPanelPresenter sequencePresenter;
 
     private final EntryModel model;
 
@@ -55,8 +57,7 @@ public class EntryPresenter extends AbstractPresenter {
         this.model = new EntryModel(service, this.display, eventBus);
 
         addEntryViewHandler();
-        MenuSelectionHandler handler = new MenuSelectionHandler(display.getDetailMenu());
-        display.getDetailMenu().addClickHandler(handler);
+        new MenuSelectionHandler(display.getDetailMenu());
         setContextNavHandlers();
 
         showCurrentEntryView();
@@ -103,7 +104,7 @@ public class EntryPresenter extends AbstractPresenter {
 
         // PERMISSIONS
         retrievePermissionData();
-        PermissionsPresenter pPresenter = display.getPermissionsWidget();
+        final PermissionsPresenter pPresenter = display.getPermissionsWidget();
 
         // TODO :both of these can be combined
         pPresenter.setReadAddSelectionHandler(new ReadBoxSelectionHandler() {
@@ -131,7 +132,7 @@ public class EntryPresenter extends AbstractPresenter {
                         @Override
                         public void onSuccess(Boolean result) {
                             if (result)
-                                display.getPermissionsWidget().addReadItem(info, service, id);
+                                pPresenter.addReadItem(info, service, id);
                         }
                     });
             }
@@ -162,7 +163,7 @@ public class EntryPresenter extends AbstractPresenter {
                         @Override
                         public void onSuccess(Boolean result) {
                             if (result)
-                                display.getPermissionsWidget().addWriteItem(info, service, id);
+                                pPresenter.addWriteItem(info, service, id);
                         }
                     });
             }
@@ -378,7 +379,9 @@ public class EntryPresenter extends AbstractPresenter {
                     menuItems.add(new MenuItem(Menu.SAMPLES, result.getSampleStorage().size()));
                     display.setMenuItems(menuItems);
                     display.getDetailMenu().setSelection(Menu.GENERAL);
-                    display.showEntryDetailView(currentInfo, canEdit);
+                    sequencePresenter = display.showEntryDetailView(currentInfo, canEdit);
+                    sequencePresenter.addFileUploadHandler(new UploadPasteSequenceHandler(service,
+                            sequencePresenter));
                 }
             });
     }
@@ -403,6 +406,7 @@ public class EntryPresenter extends AbstractPresenter {
 
         public MenuSelectionHandler(EntryDetailViewMenu menu) {
             this.menu = menu;
+            this.menu.addClickHandler(this);
         }
 
         @Override
@@ -418,7 +422,9 @@ public class EntryPresenter extends AbstractPresenter {
             case GENERAL:
                 boolean canEdit = (AppController.accountInfo.isModerator() || currentInfo
                         .isCanEdit());
-                display.showEntryDetailView(currentInfo, canEdit);
+                sequencePresenter = display.showEntryDetailView(currentInfo, canEdit);
+                sequencePresenter.addFileUploadHandler(new UploadPasteSequenceHandler(service,
+                        sequencePresenter));
                 break;
 
             case SEQ_ANALYSIS:
@@ -499,5 +505,4 @@ public class EntryPresenter extends AbstractPresenter {
             });
         }
     }
-
 }

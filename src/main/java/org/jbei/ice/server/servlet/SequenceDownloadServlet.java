@@ -72,7 +72,7 @@ public class SequenceDownloadServlet extends HttpServlet {
             return;
         }
 
-        Logger.info(SequenceDownloadServlet.class.getSimpleName() + account.getEmail() + ": "
+        Logger.info(SequenceDownloadServlet.class.getSimpleName() + " " + account.getEmail() + ": "
                 + "entryid = " + entryId + ", type=" + type);
 
         if ("original".equals(type))
@@ -118,8 +118,8 @@ public class SequenceDownloadServlet extends HttpServlet {
 
         String sequenceString = sequence.getSequenceUser();
         if (sequenceString == null || sequenceString.isEmpty()) {
-            Logger.info("Sequence user parameter is empty for entry " + entry.getId()
-                    + " and sequence " + sequence.getId());
+            Logger.info("Sequence user parameter (sequence string) is empty for entry "
+                    + entry.getId() + " and sequence " + sequence.getId());
             return;
         }
 

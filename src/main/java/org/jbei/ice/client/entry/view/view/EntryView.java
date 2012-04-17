@@ -4,6 +4,7 @@ import gwtupload.client.IUploadStatus.Status;
 import gwtupload.client.IUploader;
 import gwtupload.client.IUploader.OnFinishUploaderHandler;
 import gwtupload.client.IUploader.OnStartUploaderHandler;
+import gwtupload.client.IUploader.UploadedInfo;
 import gwtupload.client.SingleUploader;
 
 import java.util.ArrayList;
@@ -15,6 +16,8 @@ import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.entry.view.ViewFactory;
 import org.jbei.ice.client.entry.view.detail.EntryDetailView;
+import org.jbei.ice.client.entry.view.detail.SequenceViewPanel;
+import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.table.EntrySampleTable;
 import org.jbei.ice.client.entry.view.table.EntrySequenceTable;
@@ -305,7 +308,8 @@ public class EntryView extends Composite implements IEntryView {
             @Override
             public void onFinish(IUploader uploader) {
                 if (uploader.getStatus() == Status.SUCCESS) {
-                    //                    UploadedInfo info = uploader.getServerInfo();
+                    UploadedInfo info = uploader.getServerInfo();
+                    // TODO : if info.message not empty, then we have a problem
                     uploader.reset();
                     uploadPanel.setVisible(false);
                 } else {
@@ -340,13 +344,14 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public void showEntryDetailView(EntryInfo info, boolean showEdit) {
+    public SequenceViewPanelPresenter showEntryDetailView(EntryInfo info, boolean showEdit) {
         EntryDetailView<? extends EntryInfo> detailView = ViewFactory.createDetailView(info);
         editGeneralButton.setVisible(showEdit);
         mainContent.setWidget(0, 0, generalHeaderPanel);
         mainContent.getCellFormatter().setHeight(0, 0, "30px");
-
         mainContent.setWidget(1, 0, detailView);
+        SequenceViewPanel sequencePanel = detailView.getSequencePanel();
+        return sequencePanel.getPresenter();
     }
 
     @Override

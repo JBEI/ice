@@ -4,38 +4,34 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.TextArea;
 
-public class PasteSequenceWidget extends Composite {
+public class PasteSequenceWidget extends FlexTable {
 
     private Button saveButton;
     private Button cancelButton;
-    private FlexTable table;
     private TextArea area;
     private DialogBox box;
     private HandlerRegistration saveRegistration;
 
     public PasteSequenceWidget() {
-        table = new FlexTable();
-        table.setWidth("100%");
-        table.setCellPadding(0);
-        table.setCellSpacing(0);
-        initWidget(table);
+
+        setWidth("100%");
+        setCellPadding(0);
+        setCellSpacing(0);
 
         initComponents();
 
-        table.setWidget(1, 0, area);
-        table.getFlexCellFormatter().setColSpan(1, 0, 2);
+        setWidget(0, 0, area);
+        getFlexCellFormatter().setColSpan(0, 0, 2);
 
-        table.setWidget(2, 0, saveButton);
-        table.getCellFormatter().setHorizontalAlignment(2, 0, HasAlignment.ALIGN_RIGHT);
-        table.setWidget(2, 1, cancelButton);
-        table.getCellFormatter().setWidth(2, 1, "70px");
-
+        setWidget(1, 0, saveButton);
+        getCellFormatter().setHorizontalAlignment(1, 0, HasAlignment.ALIGN_RIGHT);
+        setWidget(1, 1, cancelButton);
+        getCellFormatter().setWidth(1, 1, "70px");
     }
 
     private void initComponents() {
@@ -45,9 +41,11 @@ public class PasteSequenceWidget extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
+                area.setText("");
                 box.hide();
             }
         });
+
         area = new TextArea();
         area.setStyleName("input_box");
         area.setWidth("600px");
@@ -87,5 +85,10 @@ public class PasteSequenceWidget extends Composite {
     public void showDialog() {
         area.setText("");
         box.center();
+    }
+
+    public void hideDialog() {
+        area.setText("");
+        box.hide();
     }
 }

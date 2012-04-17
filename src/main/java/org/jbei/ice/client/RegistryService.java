@@ -136,4 +136,6 @@ public interface RegistryService extends RemoteService {
     boolean addPermission(String sessionId, long entryId, PermissionInfo permission);
 
     boolean removePermission(String sessionId, long entryId, PermissionInfo permissionInfo);
+
+    boolean saveSequence(String sessionId, long entry, String sequenceUser);
 }

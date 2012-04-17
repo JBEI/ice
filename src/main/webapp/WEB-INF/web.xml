@@ -171,6 +171,17 @@
         <url-pattern>/sequence</url-pattern>
     </servlet-mapping>
     
+    <!--  sequence upload -->
+    <servlet>
+        <servlet-name>SequenceUploadServlet</servlet-name>
+        <servlet-class>org.jbei.ice.server.servlet.SequenceUploadServlet</servlet-class>
+    </servlet>
+ 
+    <servlet-mapping>
+        <servlet-name>SequenceUploadServlet</servlet-name>
+        <url-pattern>/sequence_upload</url-pattern>
+    </servlet-mapping>
+    
     <welcome-file-list>
         <welcome-file>Gwt_ice.html</welcome-file>
     </welcome-file-list>
