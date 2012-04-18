@@ -1,7 +1,9 @@
 package org.jbei.ice.server;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.lib.models.ArabidopsisSeed;
@@ -10,6 +12,7 @@ import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.Link;
 import org.jbei.ice.lib.models.Name;
+import org.jbei.ice.lib.models.Parameter;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.models.Plasmid;
@@ -18,6 +21,7 @@ import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryInfo.EntryType;
+import org.jbei.ice.shared.dto.ParameterInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
 import org.jbei.ice.web.common.CommaSeparatedField;
@@ -168,7 +172,26 @@ public class InfoToModelFactory {
         entryFundingSources.add(newEntryFundingSource);
         entry.setEntryFundingSources(entryFundingSources);
 
+        // parameters 
+        List<Parameter> parameters = getParameters(info.getParameters(), entry);
+        entry.setParameters(parameters);
+
         return entry;
+    }
+
+    private static List<Parameter> getParameters(ArrayList<ParameterInfo> infos, Entry entry) {
+        List<Parameter> parameters = new ArrayList<Parameter>();
+
+        for (ParameterInfo info : infos) {
+            Parameter param = new Parameter();
+            Parameter.ParameterType type = Parameter.ParameterType.valueOf(info.getType().name());
+            param.setParameterType(type);
+            param.setEntry(entry);
+            param.setKey(info.getName());
+            param.setValue(info.getValue());
+            parameters.add(param);
+        }
+        return parameters;
     }
 
     private static HashSet<SelectionMarker> getSelectionMarkers(String markerStr, Entry entry) {

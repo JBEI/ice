@@ -118,7 +118,7 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 .entry_add_parameter {
 	text-align: right;
 	padding-right: 10px;
-	width: 150px;
+	width: 160px;
 }
 
 .entry_general_info_header { 
@@ -1597,4 +1597,8 @@ td.datePickerMonth {
 	background: white;
 }
 
+.dialog_box_glass {
+	background-color: #000;
+	opacity: 0.2;
+}
 

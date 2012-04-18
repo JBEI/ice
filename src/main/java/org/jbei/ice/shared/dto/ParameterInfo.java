@@ -15,9 +15,10 @@ public class ParameterInfo implements IsSerializable {
     public ParameterInfo() {
     }
 
-    public ParameterInfo(String name, String value) { // TODO : type
+    public ParameterInfo(String name, String value) {
         this.name = name;
         this.value = value;
+        this.type = getValueType(value);
     }
 
     public String getName() {
@@ -42,5 +43,19 @@ public class ParameterInfo implements IsSerializable {
 
     public void setType(Type type) {
         this.type = type;
+    }
+
+    public static Type getValueType(String value) {
+        value = value.toLowerCase().trim();
+        if ("yes".equals(value) || "no".equals(value) || "true".equals(value)
+                || "false".equals(value))
+            return Type.BOOLEAN;
+
+        try {
+            Integer.decode(value);
+            return Type.NUMBER;
+        } catch (NumberFormatException nfe) {
+            return Type.TEXT;
+        }
     }
 }

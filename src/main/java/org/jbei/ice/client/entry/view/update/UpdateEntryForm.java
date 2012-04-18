@@ -215,8 +215,7 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
         parameters.getFlexCellFormatter().setHeight(1, 0, "10px");
         parameters.getFlexCellFormatter().setColSpan(1, 0, 6);
 
-        // TODO : parameter widget here
-        parametersPanel = new ParametersPanel(parameters, 2);
+        parametersPanel = new ParametersPanel(parameters, 2, getEntry().getParameters());
 
         return parameters;
     }

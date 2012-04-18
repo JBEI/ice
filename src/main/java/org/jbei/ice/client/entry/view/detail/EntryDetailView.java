@@ -136,7 +136,8 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
                         + paramInfo.getName() + "</b>"));
                 parameters.getFlexCellFormatter().setWidth(row, col, "170px");
                 col += 1;
-                parameters.setWidget(row, col, new Label(paramInfo.getValue()));
+                parameters.setWidget(row, col,
+                    new HTML("<span class=\"font-80em\">" + paramInfo.getValue() + "</span>"));
                 //                parameters.getFlexCellFormatter().setWidth(row, col, "220px");
                 col += 1;
             }
@@ -231,7 +232,6 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
             HasAlignment.ALIGN_TOP);
         table.getFlexCellFormatter().setWidth(currentRow, currentCol, "170px");
         currentCol += 1;
-        //        ValueCell cell = new ValueCell(value, valueType);
         if (value == null)
             value = "";
         table.setHTML(currentRow, currentCol, "<span class=\"font-80em\">" + value + "</span>");
@@ -256,10 +256,9 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         table.getFlexCellFormatter().setWidth(currentRow, currentCol, "170px");
 
         currentCol += 1;
-        //        ValueCell cell = new ValueCell(value, valueType);
 
         value.addStyleName("font-80em");
-        table.setWidget(currentRow, currentCol, value); // TODO add a style to put space after this or something
+        table.setWidget(currentRow, currentCol, value);
         table.getFlexCellFormatter().setStyleName(currentRow, currentCol, "min_width_170");
         table.getFlexCellFormatter().setVerticalAlignment(currentRow, currentCol,
             HasAlignment.ALIGN_TOP);

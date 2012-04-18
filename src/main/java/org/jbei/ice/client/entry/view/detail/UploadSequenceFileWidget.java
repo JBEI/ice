@@ -77,6 +77,7 @@ public class UploadSequenceFileWidget extends Composite {
         box.setModal(true);
         box.setHTML("Upload Sequence File");
         box.setGlassEnabled(true);
+        box.setGlassStyleName("dialog_box_glass");
         box.setWidget(this);
     }
 
