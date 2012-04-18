@@ -13,6 +13,7 @@ import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.managers.StorageManager;
 import org.jbei.ice.lib.managers.UtilsManager;
+import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.ArabidopsisSeed;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
@@ -30,7 +31,6 @@ import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
-import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.utils.WebUtils;
 
 public class EntryViewFactory {
@@ -175,7 +175,7 @@ public class EntryViewFactory {
         return view;
     }
 
-    public static EntryInfo createTipView(Entry entry) {
+    public static EntryInfo createTipView(Account account, Entry entry) {
 
         Entry.EntryType type = Entry.EntryType.nameToType(entry.getRecordType());
         switch (type) {
@@ -190,7 +190,7 @@ public class EntryViewFactory {
             Strain strain = (Strain) entry;
             view.setHost(strain.getHost());
             view.setGenotypePhenotype(strain.getGenotypePhenotype());
-            String link = WebUtils.linkifyText(IceSession.get().getAccount(), strain.getPlasmids());
+            String link = WebUtils.linkifyText(account, strain.getPlasmids());
             view.setPlasmids(link);
             view.setSelectionMarkers(strain.getSelectionMarkersAsString());
 

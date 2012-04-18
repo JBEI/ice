@@ -807,7 +807,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                     SampleInfo info = new SampleInfo();
                     info.setSampleId(String.valueOf(sample.getId()));
                     info.setCreationTime(sample.getCreationTime());
-                    EntryInfo view = EntryViewFactory.createTipView(sample.getEntry());
+                    EntryInfo view = EntryViewFactory.createTipView(account, sample.getEntry());
                     info.setEntryInfo(view);
                     info.setLabel(sample.getLabel());
                     info.setNotes(sample.getNotes());

@@ -153,7 +153,7 @@ public class TipViewContentFactory {
         addField(table, 1, 2, "Selection Markers", view.getSelectionMarkers());
         addField(table, 2, 2, "Host", view.getHost());
         addField(table, 3, 2, "Genotype/Phenotype", view.getGenotypePhenotype());
-        addField(table, 4, 2, "Plasmids", view.getPlasmids());
+        addField(table, 4, 2, "Plasmids", view.getLinkifiedPlasmids());
         addField(table, 5, 2, "Modified", generateDate(view.getModificationTime()));
         addField(table, 6, 2, "Funding Source", view.getFundingSource());
     }
@@ -204,7 +204,7 @@ public class TipViewContentFactory {
         addField(table, 2, 0, "Alias", entry.getAlias());
         addField(table, 3, 0, "Creator", entry.getCreator());
         addField(table, 4, 0, "Owner", entry.getOwner());
-        addField(table, 5, 0, "Links", entry.getLinks());
+        addField(table, 5, 0, "Links", entry.getLinkifiedLinks());
         addField(table, 6, 0, "Principal Investigator", entry.getPrincipalInvestigator());
         addField(table, 7, 0, "Keywords", entry.getKeywords());
         addField(table, 8, 0, "References", entry.getReferences());
