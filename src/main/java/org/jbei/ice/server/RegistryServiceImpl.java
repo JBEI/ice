@@ -170,11 +170,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public String linkifyText(String value) {
-        return WebUtils.linkifyText(value);
-    }
-
-    @Override
     public ArrayList<EntryInfo> retrieveEntryData(String sid, ArrayList<Long> entryIds,
             ColumnField type, boolean asc) {
 
@@ -406,6 +401,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
+            Logger.info(account.getEmail() + " retrieving user entries");
             EntryController entryController = new EntryController(account);
             FolderDetails details = new FolderDetails(0, "My Entries", true);
             ArrayList<Long> entries = entryController.getEntryIdsByOwner(userId);
@@ -526,11 +522,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             boolean hasSequence = (SequenceManager.getByEntry(entry) != null);
 
-            EntryInfo info = EntryToInfoFactory.getInfo(entry, attachments, sampleMap, sequences,
-                hasSequence);
+            EntryInfo info = EntryToInfoFactory.getInfo(account, entry, attachments, sampleMap,
+                sequences, hasSequence);
 
             //
-            // TODO the parsed versions are separated out into complementary fields
+            //  the parsed versions are separated out into complementary fields
             //
             String html = RichTextRenderer.richTextToHtml(info.getLongDescriptionType(),
                 info.getLongDescription());
@@ -539,9 +535,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             info.setParsedDescription(parsed);
             String parsedShortDesc = WebUtils.linkifyText(account, info.getShortDescription());
             info.setLinkifiedShortDescription(parsedShortDesc);
-            //            String parsedLinks = WebUtils.linkifyText(account, info.getLinks());
-            //            info.setLinkifiedLinks(parsedLinks);
-            // end TODO
+            String parsedLinks = WebUtils.linkifyText(account, info.getLinks());
+            info.setLinkifiedLinks(parsedLinks);
 
             // group with write permissions
             info.setCanEdit(PermissionManager.hasWritePermission(entry, account));
@@ -886,11 +881,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             ArrayList<Long> destination, ArrayList<Long> entryIds) {
 
         try {
+            ArrayList<Entry> entrys = EntryManager.getEntriesByIdSet(entryIds);
             if (FolderManager.removeFolderContents(source, entryIds) != null) {
                 ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
 
                 for (long folderId : destination) {
-                    ArrayList<Entry> entrys = EntryManager.getEntriesByIdSet(entryIds);
                     Folder folder = FolderManager.addFolderContents(folderId, entrys);
                     FolderDetails details = new FolderDetails(folder.getId(), folder.getName(),
                             false);
@@ -922,8 +917,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), false);
-            int folderSize = FolderManager.getFolderSize(folder.getId());
-            details.setCount(folderSize);
+            details.setCount(folder.getContents().size());
             details.setDescription(folder.getDescription());
             return details;
         } catch (ManagerException e) {
@@ -938,14 +932,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
 
-        // TODO : see todo in moveToUserCollection
         try {
+            ArrayList<Entry> entrys = EntryManager.getEntriesByIdSet(entryIds);
             for (long folderId : destination) {
-                ArrayList<Entry> entrys = EntryManager.getEntriesByIdSet(entryIds);
                 Folder folder = FolderManager.addFolderContents(folderId, entrys);
                 FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), false);
-                int folderSize = FolderManager.getFolderSize(folder.getId()); // TODO : this call may not be needed
-                details.setCount(folderSize);
+                details.setCount(folder.getContents().size());
                 details.setDescription(folder.getDescription());
                 results.add(details);
             }
@@ -1087,9 +1079,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public BulkImportDraftInfo retrieveBulkImport(String sid, long id) {
 
         BulkImport bi;
+        Account account;
 
         try {
-            Account account = retrieveAccountForSid(sid);
+            account = retrieveAccountForSid(sid);
             if (account == null)
                 return null;
 
@@ -1120,7 +1113,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Entry entry = datum.getEntry();
             entry.setOwnerEmail(ownerEmail);
             // TODO : attachments etc as parameters to the following method call
-            EntryInfo info = EntryToInfoFactory.getInfo(entry, null, null, null, false);
+            EntryInfo info = EntryToInfoFactory.getInfo(account, entry, null, null, null, false);
             primary.add(info);
         }
         draftInfo.setPrimary(primary);
@@ -1134,7 +1127,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 entry2.setOwnerEmail(ownerEmail);
 
                 // TODO : attachments etc as parameters to the following method call
-                EntryInfo info = EntryToInfoFactory.getInfo(entry2, null, null, null, false);
+                EntryInfo info = EntryToInfoFactory.getInfo(account, entry2, null, null, null,
+                    false);
                 secondary.add(info);
             }
 

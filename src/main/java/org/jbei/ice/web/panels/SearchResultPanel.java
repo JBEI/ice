@@ -99,8 +99,8 @@ public class SearchResultPanel extends SortableDataTablePanel<SearchResult> {
                     value = value.substring(0, MAX_LONG_FIELD_LENGTH) + "...";
                 }
 
-                return new Label(componentId, WebUtils.linkifyText(value))
-                        .setEscapeModelStrings(false);
+                return new Label(componentId, WebUtils.linkifyText(IceSession.get().getAccount(),
+                    value)).setEscapeModelStrings(false);
             }
         });
     }

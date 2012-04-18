@@ -170,6 +170,7 @@ public class UpdatePartForm extends UpdateEntryForm<PartInfo> {
         part.setCreatorEmail(creatorEmail.getText());
         part.setStatus(status.getValue(status.getSelectedIndex()));
         part.setAlias(alias.getText());
+        part.setLinks(links.getText());
         part.setKeywords(keywords.getText());
         part.setReferences(references.getText());
         int bioSafetySelectedIndex = bioSafety.getSelectedIndex();

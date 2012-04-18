@@ -33,8 +33,8 @@ public class SampleItemViewPanel extends Panel {
         add(new Label("counter", counter.toString()));
         add(new Label("label", sample.getLabel()));
         add(new Label("depositor", sample.getDepositor()));
-        add(new Label("notes", WebUtils.linkifyText(sample.getNotes()))
-                .setEscapeModelStrings(false));
+        add(new Label("notes", WebUtils.linkifyText(IceSession.get().getAccount(),
+            sample.getNotes())).setEscapeModelStrings(false));
 
         class DeleteSampleLink extends AjaxFallbackLink<String> {
             private static final long serialVersionUID = 1L;
@@ -91,8 +91,8 @@ public class SampleItemViewPanel extends Panel {
                 if (edit) {
                     Sample sample = thisPanel.getSample();
                     int myIndex = sampleViewPanel.getPanels().indexOf(thisPanel);
-                    Panel newSampleEditPanel = new SampleItemEditPanel("sampleItemPanel",
-                            sample, true);
+                    Panel newSampleEditPanel = new SampleItemEditPanel("sampleItemPanel", sample,
+                            true);
                     sampleViewPanel.getPanels().remove(myIndex);
                     sampleViewPanel.getPanels().add(myIndex, newSampleEditPanel);
                     getPage().replace(sampleViewPanel);

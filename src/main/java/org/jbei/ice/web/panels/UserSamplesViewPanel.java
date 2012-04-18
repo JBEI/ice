@@ -104,8 +104,8 @@ public class UserSamplesViewPanel extends SortableDataTablePanel<Sample> {
 
             @Override
             protected Component evaluate(String componentId, Sample sample, int row) {
-                return new Label(componentId, WebUtils.linkifyText(sample.getNotes()))
-                        .setEscapeModelStrings(false);
+                return new Label(componentId, WebUtils.linkifyText(IceSession.get().getAccount(),
+                    sample.getNotes())).setEscapeModelStrings(false);
             }
         });
     }

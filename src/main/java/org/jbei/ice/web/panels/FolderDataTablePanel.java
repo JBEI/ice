@@ -164,8 +164,8 @@ public class FolderDataTablePanel extends SortableDataTablePanel<Entry> {
 
             @Override
             protected Component evaluate(String componentId, Entry entry, int row) {
-                String trimmedDescription = trimLongField(
-                    WebUtils.linkifyText(entry.getShortDescription()), MAX_LONG_FIELD_LENGTH);
+                String trimmedDescription = trimLongField(WebUtils.linkifyText(IceSession.get()
+                        .getAccount(), entry.getShortDescription()), MAX_LONG_FIELD_LENGTH);
                 return new Label(componentId, trimmedDescription).setEscapeModelStrings(false);
             }
         });

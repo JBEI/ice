@@ -8,6 +8,7 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
 import org.jbei.ice.web.utils.WebUtils;
 
@@ -25,13 +26,13 @@ public class PlasmidSimpleViewPanel extends SimpleEntryViewPanel<Plasmid> {
     }
 
     protected void renderOriginOfReplication() {
-        add(new Label("originOfReplication", WebUtils.linkifyText(getEntry()
-                .getOriginOfReplication())).setEscapeModelStrings(false));
+        add(new Label("originOfReplication", WebUtils.linkifyText(IceSession.get().getAccount(),
+            getEntry().getOriginOfReplication())).setEscapeModelStrings(false));
     }
 
     protected void renderPromoters() {
-        add(new Label("promoters", WebUtils.linkifyText(getEntry().getPromoters()))
-                .setEscapeModelStrings(false));
+        add(new Label("promoters", WebUtils.linkifyText(IceSession.get().getAccount(), getEntry()
+                .getPromoters())).setEscapeModelStrings(false));
     }
 
     protected void renderLinksToStrain() {
@@ -43,11 +44,13 @@ public class PlasmidSimpleViewPanel extends SimpleEntryViewPanel<Plasmid> {
             throw new ViewException(e);
         }
 
-        add(new Label("linksToStrains", WebUtils.makeEntryLinks(temp)).setEscapeModelStrings(false));
+        add(new Label("linksToStrains",
+                WebUtils.makeEntryLinks(IceSession.get().getAccount(), temp))
+                .setEscapeModelStrings(false));
     }
 
     protected void renderBackbone() {
-        add(new Label("backbone", WebUtils.linkifyText(getEntry().getBackbone()))
-                .setEscapeModelStrings(false));
+        add(new Label("backbone", WebUtils.linkifyText(IceSession.get().getAccount(), getEntry()
+                .getBackbone())).setEscapeModelStrings(false));
     }
 }

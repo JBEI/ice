@@ -148,8 +148,6 @@ public interface RegistryServiceAsync {
 
     void deleteFolder(String sessionId, long folderId, AsyncCallback<FolderDetails> callback);
 
-    void linkifyText(String value, AsyncCallback<String> callback);
-
     void updateBulkImportDraft(String sessionId, long id, String email, String name,
             ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary,
             AsyncCallback<BulkImportDraftInfo> asyncCallback);

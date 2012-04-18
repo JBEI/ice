@@ -35,7 +35,6 @@ import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -90,7 +89,6 @@ public class CollectionsPresenter extends AbstractPresenter {
         this.showEntryView(event);
     }
 
-    // TODO : really need to do something about the size of this constructor
     public CollectionsPresenter(final CollectionsModel model, final ICollectionView display) {
         this.display = display;
         this.model = model;
@@ -218,59 +216,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         display.addMoveSubmitHandler(moveHandler);
 
         // remove handler
-        ClickHandler removeHandler = new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-
-                final ArrayList<Long> ids = new ArrayList<Long>(
-                        new HasEntry().getSelectedEntrySet());
-                if (ids.isEmpty())
-                    return;
-
-                model.removeEntriesFromFolder(currentFolder, ids, new FolderRetrieveEventHandler() {
-
-                    @Override
-                    public void onFolderRetrieve(FolderRetrieveEvent event) {
-                        if (event == null || event.getItems() == null) {
-                            display.showFeedbackMessage(
-                                "An error occured while removing entries. Please try again.", true);
-                            return;
-                        }
-
-                        FolderDetails result = event.getItems().get(0);
-                        if (result == null)
-                            return;
-
-                        ArrayList<MenuItem> items = new ArrayList<MenuItem>();
-                        MenuItem updateItem = new MenuItem(result.getId(), result.getName(), result
-                                .getCount(), result.isSystemFolder());
-                        items.add(updateItem);
-                        display.updateMenuItemCounts(items);
-
-                        String entryDisp = (ids.size() == 1) ? "entry" : "entries";
-                        String msg = "<b>" + ids.size() + "</b> " + entryDisp
-                                + " successfully removed from";
-
-                        int size = ids.size();
-                        if (size == 1) {
-                            String name = result.getName();
-                            if (name.length() > 24) {
-                                name = "<abbr title=\"" + result.getName() + "\">"
-                                        + name.substring(0, 21) + "...</abbr>";
-                            }
-                            msg += ("\"<b>" + name + "</b>\" collection.");
-                        } else {
-                            msg += ("<b>" + size + "</b> collections.");
-                        }
-
-                        retrieveEntriesForFolder(currentFolder, msg);
-                        collectionsDataTable.clearSelection();
-                    }
-                });
-            }
-        };
-        display.addRemoveHandler(removeHandler);
+        display.addRemoveHandler(new RemoveHandler());
     }
 
     public CollectionsPresenter(CollectionsModel model, final ICollectionView display, String param) {
@@ -561,7 +507,6 @@ public class CollectionsPresenter extends AbstractPresenter {
         entryDataProvider.updateRowCount(0, false);
         display.setDataView(collectionsDataTable);
 
-        GWT.log("Retrieving entries for id " + id);
         model.retrieveEntriesForFolder(id, new FolderRetrieveEventHandler() {
 
             @Override
@@ -577,8 +522,6 @@ public class CollectionsPresenter extends AbstractPresenter {
                     display.showFeedbackMessage("Could not retrieve collection with id " + id, true);
                     return;
                 }
-
-                GWT.log("Returned entries for " + folder.getId());
 
                 History.newItem(Page.COLLECTIONS.getLink() + ";id=" + folder.getId(), false);
                 display.setCurrentMenuSelection(folder.getId());
@@ -618,6 +561,52 @@ public class CollectionsPresenter extends AbstractPresenter {
                     set.add(currentContext.getCurrent());
                 return set;
             }
+        }
+    }
+
+    private class RemoveHandler implements ClickHandler {
+
+        @Override
+        public void onClick(ClickEvent event) {
+
+            final ArrayList<Long> ids = new ArrayList<Long>(new HasEntry().getSelectedEntrySet());
+            if (ids.isEmpty())
+                return;
+
+            model.removeEntriesFromFolder(currentFolder, ids, new FolderRetrieveEventHandler() {
+
+                @Override
+                public void onFolderRetrieve(FolderRetrieveEvent event) {
+                    if (event == null || event.getItems() == null) {
+                        display.showFeedbackMessage(
+                            "An error occured while removing entries. Please try again.", true);
+                        return;
+                    }
+
+                    FolderDetails result = event.getItems().get(0);
+                    if (result == null)
+                        return;
+
+                    ArrayList<MenuItem> items = new ArrayList<MenuItem>();
+                    MenuItem updateItem = new MenuItem(result.getId(), result.getName(), result
+                            .getCount(), result.isSystemFolder());
+                    items.add(updateItem);
+                    display.updateMenuItemCounts(items);
+
+                    String entryDisp = (ids.size() == 1) ? "entry" : "entries";
+                    String msg = "<b>" + ids.size() + "</b> " + entryDisp
+                            + " successfully removed from";
+
+                    String name = result.getName();
+                    if (name.length() > 20)
+                        msg += " collection.";
+                    else
+                        msg += ("\"<b>" + name + "</b>\" collection.");
+
+                    retrieveEntriesForFolder(currentFolder, msg);
+                    collectionsDataTable.clearSelection();
+                }
+            });
         }
     }
 }

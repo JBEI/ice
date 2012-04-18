@@ -48,10 +48,7 @@ public class AdvancedSearchModel {
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    //                    eventBus.fireEvent(event);
-                    //                    display.setBlastVisibility(false);
-                    // TODO proper error handler
-                    //                    Window.alert("Could not retrieve blast results");
+                    handler.onBlastCompletion(null);
                 }
             });
     }
@@ -84,15 +81,12 @@ public class AdvancedSearchModel {
 
                     blastResult.removeAll(toRemove);
                     handler.onBlastCompletion(new AdvancedSearchEvent(blastResult));
-
                     reset();
                 }
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    // TODO : handle failure
-                    //                    display.setBlastVisibility(false);
-                    //                    blastProvider.reset();
+                    handler.onBlastCompletion(null);
                     reset();
                 }
 
@@ -116,11 +110,8 @@ public class AdvancedSearchModel {
 
                 @Override
                 public void onFailure(Throwable caught) {
+                    handler.onSearchCompletion(null);
                     reset();
-                    //                    Window.alert("Call failed: " + caught.getMessage());
-                    //                    display.setSearchVisibility(false);
-                    //                    dataProvider.reset();
-                    // TODO 
                 }
 
                 public void reset() {

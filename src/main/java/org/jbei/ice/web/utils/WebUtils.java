@@ -1,25 +1,20 @@
 package org.jbei.ice.web.utils;
 
 import java.util.ArrayList;
-import org.jbei.ice.lib.logging.Logger;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.wicket.PageParameters;
-import org.apache.wicket.protocol.http.WebRequestCycle;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.common.ViewException;
-import org.jbei.ice.web.pages.EntryViewPage;
 
 /**
  * Utility methods for web pages.
@@ -37,13 +32,10 @@ public class WebUtils {
      *            link to create.
      * @return Html of the link.
      */
-    private static String makeEntryLink(IceLink iceLink) {
+    private static String makeEntryLink(Account account, IceLink iceLink) {
         String result = null;
 
-        EntryController entryController = new EntryController(IceSession.get().getAccount());
-
-        CharSequence relativePath = WebRequestCycle.get().urlFor(EntryViewPage.class,
-            new PageParameters());
+        EntryController entryController = new EntryController(account);
 
         long id = 0;
         Entry entry = null;
@@ -69,7 +61,7 @@ public class WebUtils {
             descriptiveLabel = iceLink.getDescriptiveLabel();
         }
 
-        result = "<a href=" + relativePath + "/" + id + ">" + descriptiveLabel + "</a>";
+        result = "<a href=/entry/view/" + id + ">" + descriptiveLabel + "</a>";
 
         return result;
     }
@@ -81,17 +73,17 @@ public class WebUtils {
      *            id of the Entry.
      * @return Html of the clickable link.
      */
-    private static String makeEntryLink(long id) {
+    private static String makeEntryLink(Account account, long id) {
         String result = "";
 
-        EntryController entryController = new EntryController(IceSession.get().getAccount());
+        EntryController entryController = new EntryController(account);
 
-        CharSequence relativePath = WebRequestCycle.get().urlFor(EntryViewPage.class,
-            new PageParameters());
+        //        CharSequence relativePath = WebRequestCycle.get().urlFor(EntryViewPage.class,
+        //            new PageParameters());
         // TODO: Tim; this is not very elegant at all. Is there a better way than to generate <a> tag manually?
         try {
             if (entryController.hasReadPermissionById(id)) {
-                result = "<a href=" + relativePath.toString() + "/" + id + ">"
+                result = "<a href=/entry/view/" + id + ">"
                         + entryController.get(id).getOnePartNumber().getPartNumber() + "</a>";
             }
         } catch (ControllerException e) {
@@ -109,11 +101,11 @@ public class WebUtils {
      * @param entries
      * @return Space separate html links.
      */
-    public static String makeEntryLinks(Collection<? extends Entry> entries) {
+    public static String makeEntryLinks(Account account, Collection<? extends Entry> entries) {
         StringBuilder result = new StringBuilder();
 
         for (Entry entry : entries) {
-            result.append(makeEntryLink(entry.getId()));
+            result.append(makeEntryLink(account, entry.getId()));
             result.append(" ");
         }
         return result.toString();
@@ -208,13 +200,6 @@ public class WebUtils {
         return newText;
     }
 
-    public static String linkifyText(String text) {
-        String newText = wikiLinkifyText(IceSession.get().getAccount(), text);
-        newText = urlLinkifyText(newText);
-
-        return newText;
-    }
-
     public static String linkifyText(Account account, String text) {
         String newText = wikiLinkifyText(account, text);
         newText = urlLinkifyText(newText);
@@ -283,7 +268,7 @@ public class WebUtils {
             for (int i = jbeiLinks.size() - 1; i > -1; i = i - 1) {
                 String before = newText.substring(0, starts.get(i));
                 String after = newText.substring(ends.get(i));
-                newText = before + makeEntryLink(jbeiLinks.get(i)) + after;
+                newText = before + makeEntryLink(account, jbeiLinks.get(i)) + after;
             }
         } catch (Exception e) {
             Logger.error(e);

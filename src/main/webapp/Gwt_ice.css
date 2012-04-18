@@ -676,8 +676,7 @@ a.cell_mouseover:hover {
 	background-color: #f1f6fb;
 	border: 1px solid #aab2bd;
 	cursor: pointer;
-	color: #2d3749;
-	padding: 5px;
+	color: #70822e;
 }
 
 .collection_user_menu_row_selected {
@@ -685,8 +684,7 @@ a.cell_mouseover:hover {
     font-weight: bold;
     color: #2d3749;
     background-color: #f1f6fb;
-    border-right: 1px solid #f1f6fb; 
-    border-top: 1px solid #f1f6fb;
+    border: 1px solid #aab2bd;
 }
 
 .entry_detail_view_row {

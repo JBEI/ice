@@ -18,7 +18,7 @@ public class StrainDetailView extends EntryDetailView<StrainInfo> {
     protected void addShortFieldValues() {
         addShortField("Genotype/Phenotype", info.getGenotypePhenotype());
         addShortField("Host", info.getHost());
-        addShortField("Plasmids", info.getPlasmids());
+        addShortField("Plasmids", info.getLinkifiedPlasmids());
     }
 
     @Override

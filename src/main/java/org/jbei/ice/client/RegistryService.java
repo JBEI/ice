@@ -49,8 +49,6 @@ public interface RegistryService extends RemoteService {
     ArrayList<EntryInfo> retrieveEntryData(String sid, ArrayList<Long> entries, ColumnField field,
             boolean asc);
 
-    String linkifyText(String value);
-
     /**
      * Returns list of folders as seen on the collections page
      * collections menu

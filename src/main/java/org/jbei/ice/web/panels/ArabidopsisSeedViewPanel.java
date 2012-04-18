@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.Model;
 import org.jbei.ice.lib.models.ArabidopsisSeed;
+import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.utils.WebUtils;
 
 public class ArabidopsisSeedViewPanel extends AbstractEntryViewPanel<ArabidopsisSeed> {
@@ -23,17 +24,17 @@ public class ArabidopsisSeedViewPanel extends AbstractEntryViewPanel<Arabidopsis
     }
 
     protected void renderHomozygosity() {
-        add(new Label("homozygosity", WebUtils.linkifyText(getEntry().getHomozygosity()))
-                .setEscapeModelStrings(false));
+        add(new Label("homozygosity", WebUtils.linkifyText(IceSession.get().getAccount(),
+            getEntry().getHomozygosity())).setEscapeModelStrings(false));
     }
 
     protected void renderEcotype() {
-        add(new Label("ecotype", WebUtils.linkifyText(getEntry().getEcotype()))
-                .setEscapeModelStrings(false));
+        add(new Label("ecotype", WebUtils.linkifyText(IceSession.get().getAccount(), getEntry()
+                .getEcotype())).setEscapeModelStrings(false));
     }
 
     protected void renderParents() {
-        add(new Label("parents", WebUtils.linkifyText(getEntry() // 
+        add(new Label("parents", WebUtils.linkifyText(IceSession.get().getAccount(), getEntry() // 
                 .getParents())).setEscapeModelStrings(false));
     }
 

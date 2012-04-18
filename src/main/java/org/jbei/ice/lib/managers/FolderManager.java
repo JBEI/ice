@@ -125,11 +125,20 @@ public class FolderManager {
             throws ManagerException {
         Session session = DAO.newSession();
         try {
-            Folder folder = get(folderId);
+            session.beginTransaction();
+            Query query = session.createQuery("from " + Folder.class.getName() + " where id = :id");
+            query.setLong("id", folderId);
+            Folder folder = (Folder) query.uniqueResult();
+            if (folder == null)
+                throw new ManagerException("Cannot retrieve folder with id \"" + folderId + "\"");
+
+            folder.getContents().size();
             boolean isSystemFolder = folder.getOwnerEmail().equals(
                 AccountManager.getSystemAccount().getEmail());
-            if (isSystemFolder)
+            if (isSystemFolder) {
+                session.getTransaction().commit();
                 throw new ManagerException("Cannot modify non user folder " + folder.getName());
+            }
 
             Iterator<Entry> it = folder.getContents().iterator();
 
@@ -138,8 +147,14 @@ public class FolderManager {
                 if (entryIds.contains(entry.getId()))
                     it.remove();
             }
-            return update(folder);
 
+            folder.setModificationTime(new Date(System.currentTimeMillis()));
+            session.saveOrUpdate(folder);
+            session.getTransaction().commit();
+            return folder;
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            return null;
         } finally {
             if (session.isOpen())
                 session.close();
@@ -156,7 +171,7 @@ public class FolderManager {
             Folder folder = (Folder) query.uniqueResult();
             folder.getContents().size();
             folder.getContents().addAll(entrys);
-            folder.setCreationTime(new Date(System.currentTimeMillis()));
+            folder.setModificationTime(new Date(System.currentTimeMillis()));
             session.saveOrUpdate(folder);
             session.getTransaction().commit();
             return folder;

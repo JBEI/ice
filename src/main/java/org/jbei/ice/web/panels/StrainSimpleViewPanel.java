@@ -3,6 +3,7 @@ package org.jbei.ice.web.panels;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.Model;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.web.IceSession;
 import org.jbei.ice.web.utils.WebUtils;
 
 public class StrainSimpleViewPanel extends SimpleEntryViewPanel<Strain> {
@@ -18,17 +19,17 @@ public class StrainSimpleViewPanel extends SimpleEntryViewPanel<Strain> {
     }
 
     protected void renderHost() {
-        add(new Label("host", WebUtils.linkifyText(getEntry().getHost()))
-                .setEscapeModelStrings(false));
+        add(new Label("host", WebUtils.linkifyText(IceSession.get().getAccount(), getEntry()
+                .getHost())).setEscapeModelStrings(false));
     }
 
     protected void renderGenotypePhenotype() {
-        add(new Label("genotypePhenotype", WebUtils.linkifyText(getEntry().getGenotypePhenotype()))
-                .setEscapeModelStrings(false));
+        add(new Label("genotypePhenotype", WebUtils.linkifyText(IceSession.get().getAccount(),
+            getEntry().getGenotypePhenotype())).setEscapeModelStrings(false));
     }
 
     protected void renderPlasmids() {
-        add(new Label("plasmids", WebUtils.linkifyText(getEntry().getPlasmids()))
-                .setEscapeModelStrings(false));
+        add(new Label("plasmids", WebUtils.linkifyText(IceSession.get().getAccount(), getEntry()
+                .getPlasmids())).setEscapeModelStrings(false));
     }
 }

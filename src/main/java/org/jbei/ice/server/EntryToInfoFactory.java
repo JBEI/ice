@@ -10,6 +10,7 @@ import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.UtilsManager;
+import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.ArabidopsisSeed;
 import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
@@ -36,6 +37,7 @@ import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
+import org.jbei.ice.web.utils.WebUtils;
 
 /**
  * Factory for converting {@link Entry}s to their corresponding {@link EntryInfo} data transfer
@@ -47,7 +49,7 @@ import org.jbei.ice.shared.dto.StrainInfo;
  */
 public class EntryToInfoFactory {
 
-    public static EntryInfo getInfo(Entry entry, List<Attachment> attachments,
+    public static EntryInfo getInfo(Account account, Entry entry, List<Attachment> attachments,
             Map<Sample, LinkedList<Storage>> samples, List<TraceSequence> sequences,
             boolean hasSequence) {
         EntryInfo info = null;
@@ -55,7 +57,7 @@ public class EntryToInfoFactory {
         if (Entry.PLASMID_ENTRY_TYPE.equals(entry.getRecordType())) {
             info = plasmidInfo(entry);
         } else if (Entry.STRAIN_ENTRY_TYPE.equals(entry.getRecordType())) {
-            info = strainInfo((Strain) entry);
+            info = strainInfo(account, (Strain) entry);
         } else if (Entry.ARABIDOPSIS_SEED_ENTRY_TYPE.equals(entry.getRecordType())) {
             info = seedInfo(entry);
         } else if (Entry.PART_ENTRY_TYPE.equals(entry.getRecordType())) {
@@ -222,13 +224,14 @@ public class EntryToInfoFactory {
         return info;
     }
 
-    private static StrainInfo strainInfo(Strain strain) {
+    private static StrainInfo strainInfo(Account account, Strain strain) {
         StrainInfo info = new StrainInfo();
         info = (StrainInfo) getCommon(info, strain);
 
         // strain specific
         info.setGenotypePhenotype(strain.getGenotypePhenotype());
         info.setPlasmids(strain.getPlasmids());
+        info.setLinkifiedPlasmids(WebUtils.linkifyText(account, info.getPlasmids()));
         info.setHost(strain.getHost());
 
         return info;

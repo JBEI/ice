@@ -91,8 +91,8 @@ public class UserRecentlyViewedPanel extends SortableDataTablePanel<Workspace> {
 
             @Override
             protected Component evaluate(String componentId, Workspace space, int row) {
-                String trimmedDescription = trimLongField(
-                    WebUtils.linkifyText(space.getEntry().getShortDescription()),
+                String trimmedDescription = trimLongField(WebUtils.linkifyText(IceSession.get()
+                        .getAccount(), space.getEntry().getShortDescription()),
                     MAX_LONG_FIELD_LENGTH);
                 return new Label(componentId, trimmedDescription).setEscapeModelStrings(false);
             }

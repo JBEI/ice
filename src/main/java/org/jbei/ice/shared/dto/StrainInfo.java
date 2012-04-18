@@ -5,6 +5,7 @@ public class StrainInfo extends EntryInfo {
     private String host;
     private String genotypePhenotype;
     private String plasmids;
+    private String linkifiedPlasmids;
 
     public StrainInfo() {
         super(EntryType.STRAIN);
@@ -32,5 +33,13 @@ public class StrainInfo extends EntryInfo {
 
     public void setPlasmids(String plasmids) {
         this.plasmids = plasmids;
+    }
+
+    public String getLinkifiedPlasmids() {
+        return linkifiedPlasmids;
+    }
+
+    public void setLinkifiedPlasmids(String linkifiedPlasmids) {
+        this.linkifiedPlasmids = linkifiedPlasmids;
     }
 }

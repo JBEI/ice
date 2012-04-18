@@ -140,12 +140,16 @@ public class AdvancedSearchPresenter {
 
         @Override
         public void onSearchCompletion(AdvancedSearchEvent event) {
+            if (event == null)
+                return;
             dataProvider.setValues(event.getSearchResults());
             mode = Mode.SEARCH;
         }
 
         @Override
         public void onBlastCompletion(AdvancedSearchEvent event) {
+            if (event == null)
+                return;
             blastProvider.setData(event.getResults());
             mode = Mode.BLAST;
         }

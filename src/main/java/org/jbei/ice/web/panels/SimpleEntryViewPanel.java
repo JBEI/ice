@@ -24,20 +24,23 @@ public class SimpleEntryViewPanel<T extends Entry> extends AbstractEntryViewPane
 
     @Override
     protected void renderSummary() {
-        add(new MultiLineLabel("shortDescription", trimLongField(WebUtils.linkifyText(getEntry()
-                .getShortDescription()), MAX_LONG_FIELD_LENGTH)).setEscapeModelStrings(false));
+        add(new MultiLineLabel("shortDescription", trimLongField(
+            WebUtils.linkifyText(IceSession.get().getAccount(), getEntry().getShortDescription()),
+            MAX_LONG_FIELD_LENGTH)).setEscapeModelStrings(false));
     }
 
     @Override
     protected void renderNotes() {
-        add(new MultiLineLabel("longDescription", trimLongField(WebUtils.linkifyText(getEntry()
-                .getLongDescription()), MAX_LONG_FIELD_LENGTH)).setEscapeModelStrings(false));
+        add(new MultiLineLabel("longDescription", trimLongField(
+            WebUtils.linkifyText(IceSession.get().getAccount(), getEntry().getLongDescription()),
+            MAX_LONG_FIELD_LENGTH)).setEscapeModelStrings(false));
     }
 
     @Override
     protected void renderReferences() {
-        add(new MultiLineLabel("references", trimLongField(WebUtils.linkifyText(getEntry()
-                .getReferences()), MAX_LONG_FIELD_LENGTH)).setEscapeModelStrings(false));
+        add(new MultiLineLabel("references", trimLongField(
+            WebUtils.linkifyText(IceSession.get().getAccount(), getEntry().getReferences()),
+            MAX_LONG_FIELD_LENGTH)).setEscapeModelStrings(false));
     }
 
     protected void renderIcons() {

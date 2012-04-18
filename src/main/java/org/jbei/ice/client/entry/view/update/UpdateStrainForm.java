@@ -215,6 +215,7 @@ public class UpdateStrainForm extends UpdateEntryForm<StrainInfo> {
         strain.setAlias(alias.getText());
         strain.setHost(host.getText());
         strain.setGenotypePhenotype(genPhen.getText());
+        strain.setLinks(links.getText());
         strain.setPlasmids(plasmids.getText());
         strain.setKeywords(keywords.getText());
         strain.setReferences(references.getText());

@@ -169,8 +169,8 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
     }
 
     protected void renderLinks() {
-        add(new Label("links", WebUtils.linkifyText(getEntry().getLinksAsString()))
-                .setEscapeModelStrings(false));
+        add(new Label("links", WebUtils.linkifyText(IceSession.get().getAccount(), getEntry()
+                .getLinksAsString())).setEscapeModelStrings(false));
     }
 
     protected void renderCreationTime() {
@@ -198,18 +198,18 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
     }
 
     protected void renderSummary() {
-        add(new MultiLineLabel("shortDescription", WebUtils.linkifyText(getEntry()
-                .getShortDescription())).setEscapeModelStrings(false));
+        add(new MultiLineLabel("shortDescription", WebUtils.linkifyText(IceSession.get()
+                .getAccount(), getEntry().getShortDescription())).setEscapeModelStrings(false));
     }
 
     protected void renderNotes() {
-        add(new MultiLineLabel("longDescription", WebUtils.linkifyText(getEntry()
-                .getLongDescription())).setEscapeModelStrings(false));
+        add(new MultiLineLabel("longDescription", WebUtils.linkifyText(IceSession.get()
+                .getAccount(), getEntry().getLongDescription())).setEscapeModelStrings(false));
     }
 
     protected void renderReferences() {
-        add(new MultiLineLabel("references", WebUtils.linkifyText(getEntry().getReferences()))
-                .setEscapeModelStrings(false));
+        add(new MultiLineLabel("references", WebUtils.linkifyText(IceSession.get().getAccount(),
+            getEntry().getReferences())).setEscapeModelStrings(false));
     }
 
     protected void renderBioSafetyLevel() {
@@ -229,8 +229,8 @@ public class AbstractEntryViewPanel<T extends Entry> extends Panel {
             intellectualProperty = getEntry().getIntellectualProperty();
         }
 
-        add(new Label("intellectualProperty", WebUtils.linkifyText(intellectualProperty))
-                .setEscapeModelStrings(false));
+        add(new Label("intellectualProperty", WebUtils.linkifyText(IceSession.get().getAccount(),
+            intellectualProperty)).setEscapeModelStrings(false));
     }
 
     protected void renderPrincipalInvestigator() {

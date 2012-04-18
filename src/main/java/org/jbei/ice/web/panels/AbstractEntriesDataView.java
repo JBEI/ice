@@ -51,8 +51,9 @@ public abstract class AbstractEntriesDataView<T> extends DataView<T> {
     }
 
     protected void renderDescription(Item<T> item) {
-        item.add(new Label("description", trimLongField(WebUtils.linkifyText(getEntry(item)
-                .getShortDescription()), MAX_LONG_FIELD_LENGTH)).setEscapeModelStrings(false));
+        item.add(new Label("description", trimLongField(WebUtils.linkifyText(IceSession.get()
+                .getAccount(), getEntry(item).getShortDescription()), MAX_LONG_FIELD_LENGTH))
+                .setEscapeModelStrings(false));
     }
 
     protected void renderStatus(Item<T> item) {
