@@ -695,13 +695,16 @@ a.cell_mouseover:hover {
 }
 
 .entry_detail_view_row:hover {
-    background-color: #F2F2F2;
-    /* border: 1px solid #aab2bd; */
+    background-color: #F3F1D9;
+    color: #70822e;
     cursor: pointer;
 }
 
 .entry_detail_view_row_selected {
-    background-color: #f9edbe; 
+     background-color: #F3F1D9;
+        border-top: 1px solid #efe9a0;
+        border-bottom: 1px solid #efe9a0;
+        border-right: 1px solid #efe9a0;
     cursor: default;
     font-weight: bold;
     color: #4d5b76;

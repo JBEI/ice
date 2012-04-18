@@ -8,6 +8,7 @@ import org.jbei.ice.lib.models.ArabidopsisSeed;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
+import org.jbei.ice.lib.models.Link;
 import org.jbei.ice.lib.models.Name;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Part.AssemblyStandard;
@@ -19,6 +20,7 @@ import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryInfo.EntryType;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
+import org.jbei.ice.web.common.CommaSeparatedField;
 
 /**
  * Factory object for converting data transfer objects to model
@@ -150,6 +152,10 @@ public class InfoToModelFactory {
         entry.setLongDescription(info.getLongDescription());
         entry.setLongDescriptionType(info.getLongDescriptionType());
         entry.setVersionId(info.getVersionId());
+        CommaSeparatedField<Link> linksField = new CommaSeparatedField<Link>(Link.class, "getLink",
+                "setLink");
+        linksField.setString(info.getLinks());
+        entry.setLinks(linksField.getItemsAsSet());
 
         FundingSource fundingSource = new FundingSource();
         fundingSource.setFundingSource((info.getFundingSource() != null) ? info.getFundingSource()
