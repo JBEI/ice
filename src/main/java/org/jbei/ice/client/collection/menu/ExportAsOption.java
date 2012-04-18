@@ -8,7 +8,8 @@ package org.jbei.ice.client.collection.menu;
  */
 public enum ExportAsOption {
 
-    PRINTABLE("Printable"), EXCEL("Excel"), XML("XML");
+    //    PRINTABLE("Printable"), 
+    EXCEL("Excel"), XML("XML");
 
     private String display;
 

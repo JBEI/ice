@@ -29,16 +29,18 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements IHasEntryHandlers {
 
-    private PopupPanel popup;
+    private static PopupPanel popup = new PopupPanel(true);;
     private static final String MOUSEOVER_EVENT_NAME = "mouseover";
     private static final String MOUSEOUT_EVENT_NAME = "mouseout";
     private static final String MOUSE_CLICK = "click";
     private HandlerManager handlerManager;
     private final EntryContext.Type mode;
+    private boolean hidden = false;
 
     public PartIDCell(EntryContext.Type mode) {
         super(MOUSEOVER_EVENT_NAME, MOUSEOUT_EVENT_NAME, MOUSE_CLICK);
         this.mode = mode;
+        popup.setStyleName("add_to_popup");
     }
 
     @Override
@@ -73,10 +75,8 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
     }
 
     protected void onMouseClick(long recordId) {
-        if (popup != null) {
-            popup.hide();
-            popup = null;
-        }
+        hidden = true;
+        popup.hide();
         dispatchEntryViewEvent(recordId);
     }
 
@@ -96,10 +96,8 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
     }
 
     protected void onMouseOut(Element parent) {
-        if (popup != null) {
-            popup.hide();
-            popup = null;
-        }
+        hidden = true;
+        popup.hide();
     }
 
     protected boolean withinBounds(Element parent, NativeEvent event) {
@@ -124,6 +122,7 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
     }
 
     protected void onMouseOver(Element parent, NativeEvent event, EntryInfo value) {
+        hidden = false;
         final int x = event.getClientX() + 30 + Window.getScrollLeft();
         final int y = event.getClientY() + Window.getScrollTop();
 
@@ -131,9 +130,10 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
 
             @Override
             public void onSucess(Widget contents) {
-                popup = new PopupPanel(true);
-                popup.setStyleName("add_to_popup");
-                popup.add(contents);
+                if (hidden)
+                    return;
+
+                popup.setWidget(contents);
 
                 // 450 is expected height of popup. adjust accordingly or the bottom will be hidden
                 int bounds = 450 + y;
