@@ -120,10 +120,9 @@ public class UpdatePlasmidForm extends UpdateEntryForm<PlasmidInfo> {
         setLabel(false, "Status", general, row, 0);
         status = new ListBox();
         status.setVisibleItemCount(1);
-        status.addItem(StatusType.COMPLETE.getDisplayName(), StatusType.COMPLETE.getDisplayName());
-        status.addItem(StatusType.IN_PROGRESS.getDisplayName(),
-            StatusType.IN_PROGRESS.getDisplayName());
-        status.addItem(StatusType.PLANNED.getDisplayName(), StatusType.PLANNED.getDisplayName());
+        for (StatusType type : StatusType.values()) {
+            status.addItem(type.getDisplayName());
+        }
         status.setStyleName("input_box");
         general.setWidget(row, 1, status);
 
@@ -132,10 +131,9 @@ public class UpdatePlasmidForm extends UpdateEntryForm<PlasmidInfo> {
         setLabel(false, "Bio Safety Level", general, row, 0);
         bioSafety = new ListBox();
         bioSafety.setVisibleItemCount(1);
-        bioSafety.addItem(BioSafetyOptions.LEVEL_ONE.getDisplayName(),
-            BioSafetyOptions.LEVEL_ONE.getValue());
-        bioSafety.addItem(BioSafetyOptions.LEVEL_TWO.getDisplayName(),
-            BioSafetyOptions.LEVEL_TWO.getValue());
+        for (BioSafetyOptions options : BioSafetyOptions.values()) {
+            bioSafety.addItem(options.getDisplayName(), options.getValue());
+        }
         bioSafety.setStyleName("input_box");
         general.setWidget(row, 1, bioSafety);
 

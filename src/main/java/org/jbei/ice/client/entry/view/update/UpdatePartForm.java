@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BioSafetyOptions;
+import org.jbei.ice.shared.StatusType;
 import org.jbei.ice.shared.dto.PartInfo;
 
 import com.google.gwt.user.client.ui.FlexTable;
@@ -100,9 +101,9 @@ public class UpdatePartForm extends UpdateEntryForm<PartInfo> {
         general.setWidget(row, 0, new HTML("<span class=\"font-80em\">Status</span>"));
         status = new ListBox();
         status.setVisibleItemCount(1);
-        status.addItem("Complete");
-        status.addItem("In Progress");
-        status.addItem("Planned");
+        for (StatusType type : StatusType.values()) {
+            status.addItem(type.getDisplayName());
+        }
         status.setStyleName("input_box");
         general.setWidget(row, 1, status);
 
@@ -111,8 +112,9 @@ public class UpdatePartForm extends UpdateEntryForm<PartInfo> {
         general.setWidget(row, 0, new HTML("<span class=\"font-80em\">Bio Safety Level</span>"));
         bioSafety = new ListBox();
         bioSafety.setVisibleItemCount(1);
-        bioSafety.addItem(BioSafetyOptions.LEVEL_ONE.getDisplayName());
-        bioSafety.addItem(BioSafetyOptions.LEVEL_TWO.getDisplayName());
+        for (BioSafetyOptions options : BioSafetyOptions.values()) {
+            bioSafety.addItem(options.getDisplayName(), options.getValue());
+        }
         bioSafety.setStyleName("input_box");
         general.setWidget(row, 1, bioSafety);
 
