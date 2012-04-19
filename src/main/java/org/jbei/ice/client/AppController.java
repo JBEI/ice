@@ -243,7 +243,9 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             break;
 
         case STORAGE:
-            presenter = new StoragePresenter(this.service, this.eventBus, new StorageView(), param);
+            StorageView view = new StorageView();
+            addHeaderSearchHandler(view);
+            presenter = new StoragePresenter(this.service, this.eventBus, view, param);
             break;
 
         case NEWS:
@@ -251,6 +253,9 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             addHeaderSearchHandler(nView);
             presenter = new NewsPresenter(this.service, this.eventBus, nView);
             break;
+
+        //        case ADMIN:
+        //            break;
 
         case LOGIN:
         default:
@@ -320,15 +325,13 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         this.container = container;
 
         // check if there is a stored session that is valid
-        // TODO : what if sessionId is still set and is different
-
         final String sessionId = Cookies.getCookie(COOKIE_NAME);
         if (sessionId != null) {
 
             service.sessionValid(sessionId, new AsyncCallback<AccountInfo>() {
 
                 @Override
-                public void onSuccess(AccountInfo result) {// TODO : this does not return session Id
+                public void onSuccess(AccountInfo result) {
                     if (result != null) {
                         AppController.accountInfo = result;
                         AppController.sessionId = sessionId;

@@ -1293,7 +1293,7 @@ td.datePickerMonth {
 }
 
 .bulk_import_header {
-	border-top: 2px solid #4787ED;
+	border-top: 2px solid #0082c0;
 	font-size: 0.80em;
     padding: 8px;
     color: #333;
@@ -1301,6 +1301,7 @@ td.datePickerMonth {
     border-left: 1px solid #F1F1F1;
     text-transform: uppercase;
     font-style: italic;
+    background-color: #f5f4ea;
 }
 
 .add_new_entry_main_content_header {
@@ -1341,48 +1342,7 @@ td.datePickerMonth {
 .gwt-MenuBar .gwt-MenuItem-selected {
 	
 }
-/*
-.gwt-MenuBar .gwt-MenuItemSeparator
-    section breaks between menu items
-.gwt-MenuBar .gwt-MenuItemSeparator .menuSeparatorInner
-    inner component of section separators
-.gwt-MenuBarPopup .menuPopupTopLeft
-    the top left cell
-.gwt-MenuBarPopup .menuPopupTopLeftInner
-    the inner element of the cell
-.gwt-MenuBarPopup .menuPopupTopCenter
-    the top center cell
-.gwt-MenuBarPopup .menuPopupTopCenterInner
-    the inner element of the cell
-.gwt-MenuBarPopup .menuPopupTopRight
-    the top right cell
-.gwt-MenuBarPopup .menuPopupTopRightInner
-    the inner element of the cell
-.gwt-MenuBarPopup .menuPopupMiddleLeft
-    the middle left cell
-.gwt-MenuBarPopup .menuPopupMiddleLeftInner
-    the inner element of the cell
-.gwt-MenuBarPopup .menuPopupMiddleCenter
-    the middle center cell
-.gwt-MenuBarPopup .menuPopupMiddleCenterInner
-    the inner element of the cell
-.gwt-MenuBarPopup .menuPopupMiddleRight
-    the middle right cell
-.gwt-MenuBarPopup .menuPopupMiddleRightInner
-    the inner element of the cell
-.gwt-MenuBarPopup .menuPopupBottomLeft
-    the bottom left cell
-.gwt-MenuBarPopup .menuPopupBottomLeftInner
-    the inner element of the cell
-.gwt-MenuBarPopup .menuPopupBottomCenter
-    the bottom center cell
-.gwt-MenuBarPopup .menuPopupBottomCenterInner
-    the inner element of the cell
-.gwt-MenuBarPopup .menuPopupBottomRight
-    the bottom right cell
-.gwt-MenuBarPopup .menuPopupBottomRightInner
-    the inner element of the cell  */
-/* GWT UPLOAD */
+
 .GWTUpld {
 	font-family: Verdana, Arial;
 	font-size: 12px;
@@ -1592,5 +1552,32 @@ td.datePickerMonth {
 .dialog_box_glass {
 	background-color: #000;
 	opacity: 0.2;
+}
+
+.saved_draft_input {
+	height: 20px; padding: 2px; width: 250px; border: 1px solid #ccc;
+}
+
+.saved_draft_input_error {
+    border: 1px solid #CC3333;  background: #FCC; height: 20px; padding: 2px; width: 250px;
+}
+
+.saved_draft_button {
+	font-weight: bold; background-color: #f1f2f3; border: 1px solid #ccc; padding: 3px; font-family: Helvetica, arial; font-size: 0.72em; -moz-border-radius: 2px 2px; border-radius: 2px 2px; -webkit-border-radius: 2px 2px;
+}
+
+.saved_draft_button[disabled] {
+	background-color: #f1f2f3; border: 1px solid #efefef; padding: 3px; color: #999; font-family: Helvetica, arial; font-size: 0.72em; -moz-border-radius: 2px 4px; border-radius: 2px 4px; -webkit-border-radius: 2px 4px;
+}
+
+.saved_draft_button:hover {
+	font-weight: bold;
+	color: #000;
+	background-color: #ccc;
+    -moz-box-shadow: 1px 1px 1px #bbb;
+    -webkit-box-shadow: 1px 1px 1px #bbb;
+    box-shadow: 1px 1px 1px #bbb;
+    border: 1px solid #777;
+    cursor: pointer;
 }
 

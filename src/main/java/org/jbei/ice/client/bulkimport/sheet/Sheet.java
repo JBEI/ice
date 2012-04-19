@@ -415,14 +415,19 @@ public class Sheet extends Composite implements SheetPresenter.View {
     }
 
     // TODO : use a bit map or bit arrays to track user entered values for more efficient lookup
+    // currently goes through each row and cell and checks to cell value
     @Override
     public boolean isEmptyRow(int row) {
         int cellCount = sheetTable.getCellCount(row);
 
         for (int i = 0; i < cellCount; i += 1) {
             HasText widget = (HasText) sheetTable.getWidget(row, i);
+            if (widget == null)
+                continue;
 
-            if (!widget.getText().isEmpty())
+            String text = widget.getText();
+
+            if (text != null && !text.trim().isEmpty())
                 return false;
         }
 

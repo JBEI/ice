@@ -8,6 +8,8 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.Account;
@@ -61,6 +63,27 @@ public class BulkImportManager {
             return (BulkImport) DAO.save(data);
         } catch (DAOException e) {
             throw new ManagerException("Exception saving bulkImport record", e);
+        }
+    }
+
+    /**
+     * Saves bulk import in preparation for verification
+     * 
+     * @param data
+     *            bulk import data to save
+     * @return saved bulk import record
+     * @throws ManagerException
+     */
+    public static void submitBulkImportForVerification(BulkImport data) throws ManagerException {
+        if (data == null)
+            throw new ManagerException("Cannot submit null data");
+
+        try {
+            Account account = AccountController.getSystemAccount();
+            data.setAccount(account);
+            createBulkImportRecord(data);
+        } catch (ControllerException e) {
+            throw new ManagerException(e);
         }
     }
 

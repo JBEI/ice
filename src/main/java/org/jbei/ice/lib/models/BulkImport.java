@@ -69,9 +69,6 @@ public class BulkImport implements IModel {
     @Column(name = "creation_time")
     private Date creationTime;
 
-    @Column(name = "is_draft")
-    private boolean isDraft = true;
-
     public BulkImport() {
     }
 
@@ -161,13 +158,5 @@ public class BulkImport implements IModel {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public boolean isDraft() {
-        return isDraft;
-    }
-
-    public void setDraft(boolean isDraft) {
-        this.isDraft = isDraft;
     }
 }

@@ -3,6 +3,7 @@ package org.jbei.ice.client.bulkimport;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.bulkimport.model.NewBulkInput;
+import org.jbei.ice.client.bulkimport.widget.SaveDraftInput;
 import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
 import org.jbei.ice.client.collection.menu.CollectionMenu;
 import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
@@ -20,7 +21,6 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -37,8 +37,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     private Button updateButton;
     private Button saveButton;
     private Button resetButton;
-    private Button saveDraftButton;
-    private TextBox inputName;
+    private SaveDraftInput draftInput;
 
     @Override
     protected void initComponents() {
@@ -55,9 +54,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         updateButton = new Button("Update");
         saveButton = new Button("Submit");
         resetButton = new Button("Reset");
-        saveDraftButton = new Button("Save Draft");
-
-        inputName = new TextBox();
+        draftInput = new SaveDraftInput();
     }
 
     @Override
@@ -76,6 +73,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
 
         // right content. fills entire space when there are no drafts
         layout.setWidget(0, 2, createMainContent());
+        layout.getFlexCellFormatter().setVerticalAlignment(0, 2, HasAlignment.ALIGN_TOP);
 
         return layout;
     }
@@ -97,7 +95,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
 
     @Override
     public void setDraftSaveHandler(ClickHandler draftSaveHandler) {
-        this.saveDraftButton.addClickHandler(draftSaveHandler);
+        this.draftInput.addSaveDraftHandler(draftSaveHandler);
     }
 
     protected Widget createMainContent() {
@@ -155,7 +153,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
                     "<span style=\"vertical-align: middle\">"
                             + bulkImport.getName()
                             + "</span>"
-                            + "<span style=\"float: right; width: 600px; text-align: right\" id=\"bulk_import_submit\">"
+                            + "<span style=\"float: right; text-align: right\" id=\"bulk_import_submit\">"
                             + "<span id=\"bulk_import_feedback\"></span> &nbsp; <span id=\"bulk_import_draft_update\"></span></span>");
 
             panel.add(updateButton, "bulk_import_draft_update");
@@ -164,13 +162,11 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
             panel.add(saveButton, "bulk_import_submit");
         } else {
             panel = new HTMLPanel(
-                    "<span style=\"vertical-align: middle\" id=\"bulk_import_input\"></span>  &nbsp; "
-                            + "<span style=\"vertical-align: middle\" id=\"bulk_import_draft_save\"></span>"
-                            + "<span style=\"float: right; width: 600px; text-align: right\" id=\"bulk_import_submit\">"
+                    "<span style=\"vertical-align: middle\" id=\"bulk_import_input\"></span> "
+                            + "<span style=\"float: right;  text-align: right\" id=\"bulk_import_submit\">"
                             + "<span id=\"bulk_import_feedback\"></span> &nbsp; <span id=\"bulk_import_draft_reset\"></span></span>");
 
-            panel.add(inputName, "bulk_import_input");
-            panel.add(saveDraftButton, "bulk_import_draft_save");
+            panel.add(draftInput, "bulk_import_input");
             panel.add(resetButton, "bulk_import_draft_reset");
             panel.add(feedback, "bulk_import_feedback");
             feedback.addStyleName("display-inline");
@@ -194,7 +190,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
 
     @Override
     public String getDraftName() {
-        return this.inputName.getText();
+        return this.draftInput.getDraftName();
     }
 
     @Override
@@ -245,8 +241,6 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
 
             layout.setHTML(0, 1, "");
             layout.getFlexCellFormatter().setWidth(0, 1, "0px");
-            int w = mainContent.getOffsetWidth() + 230;
-            layout.getFlexCellFormatter().setWidth(0, 2, w + "px");
         } else {
             layout.setWidget(0, 0, draftsMenu);
             layout.getFlexCellFormatter().setWidth(0, 0, "220px");

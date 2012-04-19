@@ -70,7 +70,7 @@ public class BulkImportPresenter extends AbstractPresenter {
         SheetResetHandler resetHandler = new SheetResetHandler();
         view.setResetHandler(resetHandler);
 
-        //        draft save
+        // draft save
         SheetDraftSaveHandler draftSaveHandler = new SheetDraftSaveHandler();
         view.setDraftSaveHandler(draftSaveHandler);
     }
@@ -92,12 +92,12 @@ public class BulkImportPresenter extends AbstractPresenter {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 final MenuItem item = draftSelection.getSelectedObject();
-                model.retrieveUserSavedDrafts(item.getId(), new SavedDraftsEventHandler() {
+                model.retrieveBulkImport(item.getId(), new SavedDraftsEventHandler() {
 
                     @Override
                     public void onDataRetrieval(SavedDraftsEvent event) {
                         if (event == null) {
-                            view.showFeedback("Could not retrieve data.", true);
+                            view.showFeedback("Could not retrieve your saved drafts.", true);
                             return;
                         }
 
@@ -145,6 +145,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                 }
                 view.setSheet(currentInput, true);
                 view.setHeader(selection.getDisplay() + " Bulk Import");
+                view.setMenuVisibility(false);
                 createSelection.setSelected(selection, false);
             }
         });
@@ -204,7 +205,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                 return;
             }
 
-            model.saveData(currentInput.getImportType(), cellData,
+            model.submitBulkImport(currentInput.getImportType(), cellData,
                 new BulkImportSubmitEventHandler() {
 
                     @Override
@@ -251,7 +252,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                 return;
             }
 
-            model.saveDraftData(currentInput.getImportType(), name, cellData,
+            model.saveBulkImportDraftData(currentInput.getImportType(), name, cellData,
                 new BulkImportDraftSubmitEventHandler() {
 
                     @Override
@@ -291,7 +292,7 @@ public class BulkImportPresenter extends AbstractPresenter {
             String name = currentInput.getName();
             ArrayList<SheetFieldData[]> cellData = currentInput.getSheet().getCellData();
 
-            model.updateDraftData(id, type, name, cellData,
+            model.updateBulkImportDraft(id, type, name, cellData,
                 new BulkImportDraftSubmitEventHandler() {
 
                     @Override

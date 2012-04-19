@@ -45,7 +45,7 @@ public class BulkImportModel {
             });
     }
 
-    public void saveDraftData(EntryAddType type, String name, ArrayList<SheetFieldData[]> data,
+    public void saveBulkImportDraftData(EntryAddType type, String name, ArrayList<SheetFieldData[]> data,
             final BulkImportDraftSubmitEventHandler handler) {
         SheetModel model = ModelFactory.getModelForType(type);
         if (model == null) {
@@ -58,6 +58,19 @@ public class BulkImportModel {
 
         // arrays get filled out here
         model.createInfo(data, primary, secondary);
+
+        // creator info does not appear to be filled out anywhere
+        String creator = AppController.accountInfo.getFullName();
+        String creatorEmail = AppController.accountInfo.getEmail();
+        for (EntryInfo info : primary) {
+            info.setCreator(creator);
+            info.setCreatorEmail(creatorEmail);
+        }
+
+        for (EntryInfo info : secondary) {
+            info.setCreator(creator);
+            info.setCreatorEmail(creatorEmail);
+        }
 
         service.saveBulkImportDraft(AppController.sessionId, AppController.accountInfo.getEmail(),
             name, primary, secondary, new AsyncCallback<BulkImportDraftInfo>() {
@@ -74,7 +87,7 @@ public class BulkImportModel {
             });
     }
 
-    public void updateDraftData(long id, EntryAddType type, String name,
+    public void updateBulkImportDraft(long id, EntryAddType type, String name,
             ArrayList<SheetFieldData[]> data, final BulkImportDraftSubmitEventHandler handler) {
         SheetModel model = ModelFactory.getModelForType(type);
         if (model == null) {
@@ -104,7 +117,7 @@ public class BulkImportModel {
             });
     }
 
-    public void saveData(EntryAddType type, ArrayList<SheetFieldData[]> data,
+    public void submitBulkImport(EntryAddType type, ArrayList<SheetFieldData[]> data,
             final BulkImportSubmitEventHandler handler) {
         SheetModel model = ModelFactory.getModelForType(type);
         if (model != null) {
@@ -130,7 +143,7 @@ public class BulkImportModel {
         }
     }
 
-    public void retrieveUserSavedDrafts(long id, final SavedDraftsEventHandler handler) {
+    public void retrieveBulkImport(long id, final SavedDraftsEventHandler handler) {
         service.retrieveBulkImport(AppController.sessionId, id,
             new AsyncCallback<BulkImportDraftInfo>() {
 
