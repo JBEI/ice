@@ -2,8 +2,8 @@ html {
 	height: 98%;
 }
 
-body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
-	font: normal 100% Arial, sans-serif;
+body { 
+	font: normal 100% Helvetica, Arial, sans-serif;
 	background: #ffffff;
 	padding: 0;
 	height: 100%;
@@ -86,15 +86,6 @@ body { /*color: #454545; */ /* font: 0.8em/1.5em Arial, sans-serif; */
 	cursor: pointer;  
 	border: 1px solid #1568d6; 
 	-webkit-border-radius: 1px;
-
-    /*-webkit-box-shadow: 2px 2px 2px #f3f3f3;
-    border: 1px solid #AAA;
-	background-color: #EEE;
-	color: #444;
-	-moz-border-radius: 5px;
-	-webkit-border-radius: 5px;
-	border-radius: 2px;
-	border-bottom: 1px solid #9f9f9f; */
 }
 
 .top_menu:hover {
@@ -683,8 +674,12 @@ a.cell_mouseover:hover {
     cursor: default;
     font-weight: bold;
     color: #2d3749;
-    background-color: #f1f6fb;
+    background-color: #f7aa58;
     border: 1px solid #aab2bd;
+}
+
+.collection_user_menu_row_selected .menu_count {
+    color: #333;	
 }
 
 .entry_detail_view_row {
@@ -1070,7 +1065,6 @@ a:hover {
 }
 
 .button_to_link {
-	padding: 2px 6px 2px 6px;
 	border: 1px solid #ccc;
 	background-color: white;
 	color: #185DA0;
@@ -1078,8 +1072,7 @@ a:hover {
 	cursor: default;
 }
 
-.button_to_link_hover {
-	padding: 2px 6px 2px 6px;
+.button_to_link:hover {
 	border: 1px solid #ccc;
 	background-color: white;
 	color: #9EC068;
@@ -1088,9 +1081,8 @@ a:hover {
 }
 
 .button_to_link_disabled {
-	padding: 2px 6px 2px 6px;
 	border: 1px solid #ccc;
-	background-color: white;
+	background-color: #D5CFCF;
 	font-size: 12px;
 	color: #555;
 	cursor: default;

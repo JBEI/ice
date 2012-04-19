@@ -101,30 +101,19 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
     }
 
     protected boolean withinBounds(Element parent, NativeEvent event) {
-
-        if (event.getClientY() < ((Element) parent.getFirstChild()).getAbsoluteTop()) {
-            return false;
-        }
-
-        if (event.getClientY() > ((Element) parent.getFirstChild()).getAbsoluteBottom()) {
-            return false;
-        }
-
-        if (event.getClientX() < ((Element) parent.getFirstChild()).getAbsoluteLeft()) {
-            return false;
-        }
-
-        if (event.getClientX() > ((Element) parent.getFirstChild()).getAbsoluteRight()) {
-            return false;
-        }
-
-        return true;
+        Element cellElement = event.getEventTarget().cast();
+        Element element = cellElement.getFirstChildElement();
+        if (element == null)
+            return true;
+        return false;
     }
 
     protected void onMouseOver(Element parent, NativeEvent event, EntryInfo value) {
+
         hidden = false;
         final int x = event.getClientX() + 30 + Window.getScrollLeft();
         final int y = event.getClientY() + Window.getScrollTop();
+        // TODO : set popup loading widget
 
         TipViewContentFactory.getContents(value, new Callback<Widget>() {
 
