@@ -46,8 +46,7 @@ public interface RegistryService extends RemoteService {
 
     ArrayList<BlastResultInfo> blastSearch(String sid, String searchString, QueryOperator program);
 
-    ArrayList<EntryInfo> retrieveEntryData(String sid, ArrayList<Long> entries, ColumnField field,
-            boolean asc);
+    ArrayList<EntryInfo> retrieveEntryData(String sid, ArrayList<Long> entries);
 
     /**
      * Returns list of folders as seen on the collections page
@@ -136,4 +135,7 @@ public interface RegistryService extends RemoteService {
     boolean removePermission(String sessionId, long entryId, PermissionInfo permissionInfo);
 
     boolean saveSequence(String sessionId, long entry, String sequenceUser);
+
+    LinkedList<Long> sortEntryList(String sessionId, LinkedList<Long> ids, ColumnField field,
+            boolean asc);
 }

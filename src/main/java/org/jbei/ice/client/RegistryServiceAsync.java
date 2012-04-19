@@ -40,10 +40,13 @@ public interface RegistryServiceAsync {
     void retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters,
             AsyncCallback<ArrayList<Long>> asyncCallback);
 
-    void retrieveEntryData(String sid, ArrayList<Long> entries, ColumnField field, boolean asc,
+    void retrieveEntryData(String sid, ArrayList<Long> entries,
             AsyncCallback<ArrayList<EntryInfo>> callback);
 
     void retrieveEntryDetails(String sessionId, long id, AsyncCallback<EntryInfo> callback);
+
+    void sortEntryList(String sessionId, LinkedList<Long> ids, ColumnField field, boolean asc,
+            AsyncCallback<LinkedList<Long>> callback);
 
     // permissions
     void getPermissionSuggestions(SuggestOracle.Request req,

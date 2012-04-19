@@ -26,7 +26,7 @@ import com.google.gwt.view.client.Range;
 public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> implements
         IHasNavigableData {
 
-    protected final List<Long> valuesIds;
+    protected final LinkedList<Long> valuesIds;
     protected LinkedList<EntryInfo> results;
     private final RegistryServiceAsync service;
     private final DataTable<EntryInfo> table;
@@ -147,7 +147,7 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
     }
 
     public void refresh() {
-        table.setVisibleRangeAndClearData(table.getVisibleRange(), true);
+        table.setVisibleRangeAndClearData(table.getVisibleRange(), true); // triggers onRangeChange() call
         updateRowCount(this.valuesIds.size(), true); // tODO : this may need to go after the call to updateRowData() in onRangeChanged
     }
 
@@ -217,12 +217,33 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
      * @param rangeStart
      * @param rangeEnd
      */
-    protected void fetchEntryData(ColumnField field, boolean ascending, final int rangeStart,
-            final int rangeEnd) {
+    protected void fetchEntryData(final ColumnField field, final boolean ascending,
+            final int rangeStart, final int rangeEnd) {
 
         if (valuesIds == null || valuesIds.isEmpty())
             return;
 
+        // TODO : sort the list on the server
+        service.sortEntryList(AppController.sessionId, valuesIds, field, ascending,
+            new AsyncCallback<LinkedList<Long>>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    // TODO : notify of failure
+                    retrieveEntryData(rangeStart, rangeEnd);
+                }
+
+                @Override
+                public void onSuccess(LinkedList<Long> result) {
+                    valuesIds.clear();
+                    valuesIds.addAll(result);
+                    retrieveEntryData(rangeStart, rangeEnd);
+                }
+            });
+    }
+
+    // this method should be called after sorting, if sorting is desired
+    protected void retrieveEntryData(final int rangeStart, final int rangeEnd) {
         // TODO : index out of bounds exception here when we page to the last page and sort
         // TODO : this is because we clear results and when we do not retrieve enough (factor below) 
         // TODO : solution is to go to page one when user sorts
@@ -232,7 +253,7 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
         List<Long> subList = valuesIds.subList(rangeStart, factor);
         final ArrayList<Long> realValues = new ArrayList<Long>(subList);
 
-        service.retrieveEntryData(AppController.sessionId, realValues, field, ascending,
+        service.retrieveEntryData(AppController.sessionId, realValues,
             new AsyncCallback<ArrayList<EntryInfo>>() {
 
                 @Override
@@ -251,4 +272,5 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
                 }
             });
     }
+
 }

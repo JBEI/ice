@@ -170,14 +170,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<EntryInfo> retrieveEntryData(String sid, ArrayList<Long> entryIds,
-            ColumnField type, boolean asc) {
+    public ArrayList<EntryInfo> retrieveEntryData(String sid, ArrayList<Long> entryIds) {
 
         Logger.info("Retrieving entry data for " + entryIds.size() + " entries");
-
-        // TODO: Use Controller and put all of the logic in there
-        if (type == null)
-            type = ColumnField.CREATED;
 
         try {
             Account account = this.retrieveAccountForSid(sid);
@@ -187,30 +182,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             ArrayList<EntryInfo> results = new ArrayList<EntryInfo>();
             List<Entry> entries = null;
 
-            switch (type) {
-            case TYPE:
-                entries = EntryManager.getEntriesByIdSetSortByType(entryIds, asc);
-                break;
-
-            case PART_ID:
-                entries = EntryManager.getEntriesByIdSetSortByPartNumber(entryIds, asc);
-                break;
-
-            case STATUS:
-                entries = EntryManager.getEntriesByIdSetSortByStatus(entryIds, asc);
-                break;
-
-            case NAME:
-                entries = EntryManager.getEntriesByIdSetSortByName(entryIds, asc);
-                break;
-
-            case CREATED:
-                entries = EntryManager.getEntriesByIdSetSortByCreated(entryIds, asc);
-                break;
-
-            default:
-                entries = EntryManager.getEntriesByIdSet(entryIds);
-            }
+            entries = EntryManager.getEntriesByIdSet(entryIds);
 
             if (entries == null)
                 return results;
@@ -227,6 +199,28 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             return results;
         } catch (ManagerException e) {
             Logger.error("Error retrieving entry id set", e);
+            return null;
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return null;
+        }
+    }
+
+    @Override
+    public LinkedList<Long> sortEntryList(String sessionId, LinkedList<Long> ids,
+            ColumnField field, boolean asc) {
+
+        try {
+            Account account = this.retrieveAccountForSid(sessionId);
+            if (account == null)
+                return null;
+
+            Logger.info("Sorting entry list of size " + ids.size() + " by " + field.getName()
+                    + (asc ? " ASC" : " DESC"));
+
+            return EntryManager.sortList(ids, field, asc);
+        } catch (ManagerException me) {
+            Logger.error(me);
             return null;
         } catch (ControllerException e) {
             Logger.error(e);

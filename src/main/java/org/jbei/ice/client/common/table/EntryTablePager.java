@@ -2,10 +2,6 @@ package org.jbei.ice.client.common.table;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.cellview.client.AbstractPager;
 import com.google.gwt.user.client.ui.Button;
@@ -31,33 +27,13 @@ public class EntryTablePager extends AbstractPager {
 
             super(String.valueOf(page));
             this.page = page;
-            addStyles();
+            this.setStyleName("button_to_link");
         }
 
         public NavLink(String html, ClickHandler handler) {
 
             super(html, handler);
-            addStyles();
-        }
-
-        protected void addStyles() {
-
             this.setStyleName("button_to_link");
-            this.addMouseOverHandler(new MouseOverHandler() {
-
-                @Override
-                public void onMouseOver(MouseOverEvent event) {
-                    setStyleName("button_to_link_hover");
-                }
-            });
-
-            this.addMouseOutHandler(new MouseOutHandler() {
-
-                @Override
-                public void onMouseOut(MouseOutEvent event) {
-                    setStyleName("button_to_link");
-                }
-            });
         }
 
         public void setDisabled(boolean isDisabled) {

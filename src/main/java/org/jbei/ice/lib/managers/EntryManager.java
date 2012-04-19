@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -33,6 +34,7 @@ import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.shared.ColumnField;
 
 /**
  * Manager to manipulate {@link Entry} objects in the database.
@@ -627,79 +629,54 @@ public class EntryManager {
         return entries;
     }
 
-    public static List<Entry> getEntriesByIdSetSortByType(List<Long> ids, boolean ascending)
+    public static LinkedList<Long> sortList(LinkedList<Long> ids, ColumnField field, boolean asc)
             throws ManagerException {
+        if (ids == null)
+            throw new ManagerException("Cannot sort empty list");
 
-        ArrayList<Entry> entries = new ArrayList<Entry>();
+        if (ids.isEmpty())
+            return ids;
 
-        if (ids.size() == 0) {
-            return entries;
+        if (field == null)
+            field = ColumnField.CREATED;
+
+        String fieldName = "";
+        switch (field) {
+
+        case TYPE:
+            fieldName = "record_type";
+            break;
+
+        case STATUS:
+            fieldName = "status";
+            break;
+
+        case CREATED:
+        default:
+            fieldName = "creation_time";
+            break;
+
         }
 
         String filter = Utils.join(", ", ids);
-        String orderSuffix = (" ORDER BY record_type " + (ascending ? "ASC" : "DESC"));
-        String queryString = "from " + Entry.class.getName() + " WHERE id in (" + filter + ")"
-                + orderSuffix;
-        return retrieveEntriesByQuery(queryString);
-    }
+        String orderSuffix = (" ORDER BY " + fieldName + (asc ? " ASC" : " DESC"));
+        String queryString = "select id from entries where id in (" + filter + ")" + orderSuffix;
+        Session session = null;
 
-    public static List<Entry> getEntriesByIdSetSortByStatus(List<Long> ids, boolean ascending)
-            throws ManagerException {
-        ArrayList<Entry> entries = new ArrayList<Entry>();
-
-        if (ids.size() == 0) {
-            return entries;
+        try {
+            session = DAO.newSession();
+            session.beginTransaction();
+            SQLQuery query = session.createSQLQuery(queryString);
+            @SuppressWarnings("unchecked")
+            LinkedList<Long> result = new LinkedList<Long>(query.list());
+            session.getTransaction().commit();
+            return result;
+        } catch (RuntimeException e) {
+            throw new ManagerException(e);
+        } finally {
+            if (session != null)
+                session.close();
         }
-
-        String filter = Utils.join(", ", ids);
-        String orderSuffix = (" ORDER BY status " + (ascending ? "ASC" : "DESC"));
-        String queryString = "from " + Entry.class.getName() + " WHERE id in (" + filter + ")"
-                + orderSuffix;
-        return retrieveEntriesByQuery(queryString);
-    }
-
-    public static List<Entry> getEntriesByIdSetSortByPartNumber(List<Long> ids, boolean ascending)
-            throws ManagerException {
-        ArrayList<Entry> entries = new ArrayList<Entry>();
-
-        if (ids.size() == 0) {
-            return entries;
-        }
-
-        //        String filter = Utils.join(", ", ids);
-        // TODO : add the filter to filter in the database and not here
-        List<Long> sortedEntries = EntryManager.getEntriesSortByPartNumber(ascending);
-        sortedEntries.retainAll(ids);
-        return EntryManager.getEntriesByIdSetSort(sortedEntries, "id", ascending);
-    }
-
-    public static List<Entry> getEntriesByIdSetSortByName(List<Long> ids, boolean ascending)
-            throws ManagerException {
-        ArrayList<Entry> entries = new ArrayList<Entry>();
-
-        if (ids.size() == 0) {
-            return entries;
-        }
-
-        //        String filter = Utils.join(", ", ids);
-        // TODO : add the filter to filter in the database and not here
-        List<Long> sortedEntries = EntryManager.getEntriesSortByName(ascending);
-        sortedEntries.retainAll(ids);
-        return EntryManager.getEntriesByIdSetSort(sortedEntries, "id", ascending);
-    }
-
-    public static List<Entry> getEntriesByIdSetSortByCreated(List<Long> ids, boolean ascending)
-            throws ManagerException {
-        ArrayList<Entry> entries = new ArrayList<Entry>();
-
-        if (ids.size() == 0)
-            return entries;
-
-        String filter = Utils.join(", ", ids);
-        String orderSuffix = (" ORDER BY creation_time " + (ascending ? "ASC" : "DESC"));
-        String queryString = "from " + Entry.class.getName() + " WHERE id in (" + filter + ")"
-                + orderSuffix;
-        return retrieveEntriesByQuery(queryString);
     }
 
     @SuppressWarnings("unchecked")
@@ -1022,4 +999,5 @@ public class EntryManager {
             JbeirSettings.getSetting("PART_NUMBER_DELIMITER"),
             JbeirSettings.getSetting("PART_NUMBER_DIGITAL_SUFFIX"));
     }
+
 }

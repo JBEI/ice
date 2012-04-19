@@ -182,6 +182,9 @@ public class InfoToModelFactory {
     private static List<Parameter> getParameters(ArrayList<ParameterInfo> infos, Entry entry) {
         List<Parameter> parameters = new ArrayList<Parameter>();
 
+        if (infos == null)
+            return parameters;
+
         for (ParameterInfo info : infos) {
             Parameter param = new Parameter();
             Parameter.ParameterType type = Parameter.ParameterType.valueOf(info.getType().name());
