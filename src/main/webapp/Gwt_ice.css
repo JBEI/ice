@@ -325,7 +325,25 @@ a.cell_mouseover:hover {
 
 .attachment_small_text {
 	color: #999;
-	font-size: 0.65em;
+	font-size: 0.63em;
+}
+
+.entry_attachment_submit_button {
+  background-color: #f3f3f3; border: 1px solid #ccc; padding: 4px; font-weight: bold; color: #666; font-family: arial; font-size: 0.7em; box-shadow: 0 0 1px 0px #ddd; border-radius: 2px; cursor: pointer; float: right;
+}
+
+.entry_attachment_submit_button:hover {
+    background-color: #f1f2f3; border: 1px solid #999; padding: 4px; font-weight: bold; color: #333; font-family: arial; font-size: 0.7em; box-shadow: 0 0 1px 1px #ddd; border-radius: 2px; cursor: pointer;
+}
+
+.attachment_description_input {
+	border: 1px solid #ccc; width: 170px; padding: 5px; color: #777; font-size: 0.95em; font-family: Helvetica, Arial;
+}
+
+.GWTUpld .changed {
+    color: white;
+    font-weight: bold;
+    background-color: #0082C0;
 }
 
 .entry_loading_indicator {
@@ -391,7 +409,7 @@ a.cell_mouseover:hover {
 	border-bottom: 1px solid #f1f1f1; 
 }
 
-.entry_view_right_menu_2 {
+.attachment_list_menu {
 	border-top: 1px solid #c1c1c1;
 	width: 180px;
 	border-bottom: 1px solid #c1c1c1;
@@ -688,7 +706,7 @@ a.cell_mouseover:hover {
 .entry_detail_view_row {
     border-right: 1px solid #F2F2F2; 
     border-top: 1px solid #F2F2F2;
-    padding: 3px;
+    padding: 5px;
     color: #0082c0;
 }
 

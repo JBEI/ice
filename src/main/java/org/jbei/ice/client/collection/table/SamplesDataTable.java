@@ -2,7 +2,6 @@ package org.jbei.ice.client.collection.table;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.client.Page;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.client.common.table.cell.UrlCell;
@@ -12,7 +11,6 @@ import org.jbei.ice.shared.dto.SampleInfo;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.user.client.History;
 
 public class SamplesDataTable extends HasEntryDataTable<SampleInfo> {
 
@@ -96,7 +94,8 @@ public class SamplesDataTable extends HasEntryDataTable<SampleInfo> {
 
             @Override
             protected void onClick(SampleInfo info) {
-                History.newItem(Page.STORAGE.getLink() + ";id=" + info.getLocationId());
+                //                History.newItem(Page.STORAGE.getLink() + ";id=" + info.getLocationId());
+                // TODO 
             }
         };
 

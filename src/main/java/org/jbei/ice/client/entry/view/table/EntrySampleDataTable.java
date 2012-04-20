@@ -54,8 +54,8 @@ public class EntrySampleDataTable extends DataTable<SampleStorage> {
                     return;
 
                 Tree tree = new Tree();
-                Hyperlink rootLink = new Hyperlink(list.get(0).getDisplay(), Page.STORAGE.getLink()
-                        + ";id=" + list.get(0).getId());
+                Hyperlink rootLink = new Hyperlink(list.get(0).getDisplay(), ";id="
+                        + list.get(0).getId());
                 TreeItem root = new TreeItem(rootLink);
                 tree.addItem(root);
                 TreeItem tmp;
@@ -63,8 +63,8 @@ public class EntrySampleDataTable extends DataTable<SampleStorage> {
                 if (list.size() > 1) {
                     for (int i = 1; i < list.size(); i += 1) {
                         StorageInfo info = list.get(i);
-                        Hyperlink infoLink = new Hyperlink(info.getDisplay(),
-                                Page.STORAGE.getLink() + ";id=" + info.getId());
+                        // TODO 
+                        Hyperlink infoLink = new Hyperlink(info.getDisplay(), "");
                         tmp = new TreeItem(infoLink);
                         root.addItem(tmp);
                         root = tmp;
@@ -205,7 +205,8 @@ public class EntrySampleDataTable extends DataTable<SampleStorage> {
 
         protected ColumnField getSortField() {
             ColumnSortList sortList = EntrySampleDataTable.this.getColumnSortList();
-            int colIndex = EntrySampleDataTable.this.getColumns().indexOf(sortList.get(0).getColumn());
+            int colIndex = EntrySampleDataTable.this.getColumns().indexOf(
+                sortList.get(0).getColumn());
             if (colIndex == -1)
                 return null; // TODO : this will be pretty unusual
 

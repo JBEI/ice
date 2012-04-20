@@ -11,6 +11,7 @@ import gwtupload.client.SingleUploader;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.common.util.ImageUtil;
+import org.jbei.ice.client.entry.view.view.AttachmentListMenuPresenter.IAttachmentListMenuView;
 
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -20,12 +21,11 @@ import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -34,15 +34,22 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class AttachmentListMenu extends Composite {
+/**
+ * Widget that displays list of entry attachments in the entry detail view.
+ * Allows user to download and also upload an attachment
+ * 
+ * @author Hector Plahar
+ */
+public class AttachmentListMenu extends Composite implements IAttachmentListMenuView {
 
     private final FlexTable layout;
-    private Button cancelAttachmentSubmission;
     private Button saveAttachment;
     private Widget attachmentForm;
-    private final AttachmentMenuPresenter presenter;
+    private final AttachmentListMenuPresenter presenter;
     private Image quickAdd;
     private long entryId;
+    private final TextArea attachmentDescription;
+    private final String DESCRIPTION_MSG = "Enter File Description";
 
     public AttachmentListMenu() {
         layout = new FlexTable();
@@ -50,49 +57,46 @@ public class AttachmentListMenu extends Composite {
 
         layout.setCellPadding(0);
         layout.setCellSpacing(0);
-        layout.addStyleName("entry_view_right_menu_2"); // TODO cannot find what I am using 1 for
+        layout.addStyleName("attachment_list_menu");
         HorizontalPanel panel = new HorizontalPanel();
         panel.add(new HTML("Attachments"));
 
         quickAdd = ImageUtil.getPlusIcon();
         quickAdd.setStyleName("collection_quick_add_image");
-        quickAdd.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                switchButton();
-            }
-        });
+        attachmentDescription = new TextArea();
+        attachmentDescription.setStyleName("attachment_description_input");
+        attachmentDescription.setText(DESCRIPTION_MSG);
 
         panel.add(quickAdd);
         panel.setWidth("100%");
         panel.setCellHorizontalAlignment(quickAdd, HasAlignment.ALIGN_RIGHT);
 
-        saveAttachment = new Button("Save");
-        cancelAttachmentSubmission = new Button("Cancel");
+        saveAttachment = new Button();
         attachmentForm = createAddToAttachment();
 
         layout.setWidget(0, 0, panel);
         layout.getCellFormatter().setStyleName(0, 0, "entry_view_sub_menu_header");
         layout.setWidget(1, 0, attachmentForm);
 
-        cancelAttachmentSubmission.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                switchButton();
-            }
-        });
-
         attachmentForm.setVisible(false);
-        presenter = new AttachmentMenuPresenter(this);
 
         // this is replaced when menu data is set
-        layout.setHTML(2, 0,
-            "<span style=\"padding: 4px\" class=\"font-75em\">No attachments available</span>");
+        layout.setHTML(2, 0, "No attachments available");
+        layout.getCellFormatter().setStyleName(2, 0, "font-75em");
+        layout.getCellFormatter().addStyleName(2, 0, "pad-6");
+
+        presenter = new AttachmentListMenuPresenter(this);
     }
 
-    public void switchButton() {
+    public HandlerRegistration addQuickAddHandler(ClickHandler handler) {
+        return quickAdd.addClickHandler(handler);
+    }
+
+    /**
+     * sets the attachment upload form visibility and the
+     * corresponding button user clicks to enable/disable it
+     */
+    public void switchAttachmentAddButton() {
         if (attachmentForm == null)
             return;
 
@@ -104,7 +108,6 @@ public class AttachmentListMenu extends Composite {
             quickAdd.setUrl(ImageUtil.getMinusIcon().getUrl());
             quickAdd.setStyleName("collection_quick_add_image");
             attachmentForm.setVisible(true);
-            //            quickAddBox.setFocus(true);// TODO 
         }
     }
 
@@ -119,8 +122,9 @@ public class AttachmentListMenu extends Composite {
         }
 
         if (items.isEmpty()) {
-            layout.setHTML(2, 0,
-                "<span style=\"padding: 4px\" class=\"font-75em\">No attachments available</span>");
+            layout.setHTML(2, 0, "No attachments available");
+            layout.getCellFormatter().setStyleName(2, 0, "font-75em");
+            layout.getCellFormatter().addStyleName(2, 0, "pad-6");
             return;
         }
 
@@ -143,51 +147,48 @@ public class AttachmentListMenu extends Composite {
 
     protected Widget createAddToAttachment() {
 
+        final VerticalPanel vPanel = new VerticalPanel();
+        vPanel.setWidth("180px");
+
         SingleUploader uploader = new SingleUploader(FileInputType.BROWSER_INPUT, null,
                 saveAttachment) {
             @Override
             public Panel getUploaderPanel() {
-                VerticalPanel vPanel = new VerticalPanel();
-                vPanel.setWidth("180px");
                 return vPanel;
             }
         };
-        uploader.setAutoSubmit(false);
-        final String desc = "Enter File Description";
-        final TextArea area = new TextArea();
-        area.setText(desc);
-        HTMLPanel panel = new HTMLPanel(
-                "<br><div style=\"word-wrap: break-word\" id=\"attachment_input_description\"></div>");
-        panel.add(area, "attachment_input_description");
 
-        area.addFocusHandler(new FocusHandler() {
+        saveAttachment.setText("Submit");
+        saveAttachment.setStyleName("entry_attachment_submit_button");
+        uploader.setAutoSubmit(false);
+
+        attachmentDescription.addFocusHandler(new FocusHandler() {
 
             @Override
             public void onFocus(FocusEvent event) {
-                if (desc.equalsIgnoreCase(area.getText().trim()))
-                    area.setText("");
+                if (DESCRIPTION_MSG.equalsIgnoreCase(attachmentDescription.getText().trim()))
+                    attachmentDescription.setText("");
             }
         });
 
-        area.addBlurHandler(new BlurHandler() {
+        attachmentDescription.addBlurHandler(new BlurHandler() {
 
             @Override
             public void onBlur(BlurEvent event) {
-                if (area.getText().trim().isEmpty())
-                    area.setText(desc);
+                if (attachmentDescription.getText().trim().isEmpty())
+                    attachmentDescription.setText(DESCRIPTION_MSG);
             }
         });
 
-        uploader.add(panel, 1);
-        uploader.add(saveAttachment);
-        uploader.getForm().setWidth("180px");
+        uploader.add(attachmentDescription, 1);
+        uploader.setFileInputSize(13);
 
-        // TODO : use presenter @see AttachmentListPresenter
         uploader.addOnStartUploadHandler(new OnStartUploaderHandler() {
 
             @Override
             public void onStart(IUploader uploader) {
-                String attDesc = desc.equals(area.getText()) ? "" : area.getText();
+                String attDesc = DESCRIPTION_MSG.equals(attachmentDescription.getText()) ? ""
+                        : attachmentDescription.getText();
                 uploader.setServletPath(uploader.getServletPath() + "?desc=" + attDesc + "&eid="
                         + entryId + "&type=attachment");
             }
@@ -196,12 +197,13 @@ public class AttachmentListMenu extends Composite {
         uploader.addOnFinishUploadHandler(new OnFinishUploaderHandler() {
             public void onFinish(IUploader uploader) {
                 if (uploader.getStatus() == Status.SUCCESS) {
-                    switchButton();
+                    switchAttachmentAddButton();
                     UploadedInfo info = uploader.getServerInfo();
                     String fileId = info.message;
-                    String attDesc = desc.equals(area.getText()) ? "" : area.getText();
-                    AttachmentItem item = new AttachmentItem(layout.getRowCount() + 1, info.name,
-                            attDesc);
+                    String attDesc = DESCRIPTION_MSG.equals(attachmentDescription.getText()) ? ""
+                            : attachmentDescription.getText();
+                    int rowCount = layout.getRowCount();
+                    AttachmentItem item = new AttachmentItem(rowCount + 1, info.name, attDesc);
                     item.setFileId(fileId);
                     addMenuItem(item);
                     uploader.reset();
@@ -214,14 +216,9 @@ public class AttachmentListMenu extends Composite {
         return uploader;
     }
 
-    private class MenuCell extends Composite implements HasClickHandlers {
-
-        private final HTMLPanel panel;
-        private final AttachmentItem item;
+    private class MenuCell extends HTML implements HasClickHandlers {
 
         public MenuCell(AttachmentItem item) {
-
-            this.item = item;
 
             String name = item.getName();
             if (name.length() > 20) {
@@ -230,44 +227,19 @@ public class AttachmentListMenu extends Composite {
 
             String description = (item.getDescription() == null || item.getDescription().isEmpty()) ? "No description provided"
                     : item.getDescription();
-            String html = "<span style=\"padding: 5px\" class=\"collection_user_menu\">"
-                    + name
-                    + "</span><br /><span class=\"attachment_small_text\" style=\"padding-left: 2px\">"
-                    + description + "</span>";
+            String html = "<span class=\"collection_user_menu\">" + name
+                    + "</span><br><div class=\"attachment_small_text\">" + description + "</div>";
 
-            panel = new HTMLPanel(html);
-            panel.setStyleName("entry_detail_view_row");
-            panel.setTitle(item.getName());
-            initWidget(panel);
+            setStyleName("entry_detail_view_row");
+            SafeHtmlBuilder sb = new SafeHtmlBuilder();
+            sb.appendHtmlConstant(html);
+            setHTML(sb.toSafeHtml());
+            setTitle(item.getName());
         }
 
         @Override
         public HandlerRegistration addClickHandler(ClickHandler handler) {
             return addDomHandler(handler, ClickEvent.getType());
-        }
-
-        private AttachmentItem getItem() {
-            return this.item;
-        }
-    }
-
-    public class AttachmentMenuPresenter {
-
-        private final AttachmentListMenu view;
-
-        public AttachmentMenuPresenter(AttachmentListMenu view) {
-            this.view = view;
-        }
-
-        public ClickHandler getCellClickHandler(final AttachmentItem item) {
-            return new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    Window.Location.replace("/download?type=attachment&name=" + item.getName()
-                            + "&id=" + item.getFileId());
-                }
-            };
         }
     }
 }

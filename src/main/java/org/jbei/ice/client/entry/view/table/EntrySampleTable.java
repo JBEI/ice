@@ -82,8 +82,7 @@ public class EntrySampleTable extends Composite {
 
         Tree tree = new Tree();
         addTreeHandler(tree);
-        Hyperlink rootLink = new Hyperlink(list.get(0).getDisplay(), Page.STORAGE.getLink()
-                + ";id=" + list.get(0).getId());
+        Hyperlink rootLink = new Hyperlink(list.get(0).getDisplay(), ";id=" + list.get(0).getId());
         TreeItem root = new TreeItem(rootLink);
         tree.addItem(root);
         TreeItem tmp;
@@ -91,8 +90,7 @@ public class EntrySampleTable extends Composite {
         if (list.size() > 1) {
             for (int i = 1; i < list.size(); i += 1) {
                 StorageInfo info = list.get(i);
-                Hyperlink infoLink = new Hyperlink(info.getDisplay(), Page.STORAGE.getLink()
-                        + ";id=" + info.getId());
+                Hyperlink infoLink = new Hyperlink(info.getDisplay(), ";id=" + info.getId());
                 tmp = new TreeItem(infoLink);
                 root.addItem(tmp);
                 root = tmp;

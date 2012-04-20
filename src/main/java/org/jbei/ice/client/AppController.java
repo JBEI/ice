@@ -29,8 +29,6 @@ import org.jbei.ice.client.news.NewsPresenter;
 import org.jbei.ice.client.news.NewsView;
 import org.jbei.ice.client.profile.ProfilePresenter;
 import org.jbei.ice.client.profile.ProfileView;
-import org.jbei.ice.client.storage.StoragePresenter;
-import org.jbei.ice.client.storage.StorageView;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
@@ -240,12 +238,6 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             BulkImportView importView = new BulkImportView();
             addHeaderSearchHandler(importView);
             presenter = new BulkImportPresenter(model, importView);
-            break;
-
-        case STORAGE:
-            StorageView view = new StorageView();
-            addHeaderSearchHandler(view);
-            presenter = new StoragePresenter(this.service, this.eventBus, view, param);
             break;
 
         case NEWS:

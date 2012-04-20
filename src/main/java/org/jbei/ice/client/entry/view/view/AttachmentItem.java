@@ -2,7 +2,11 @@ package org.jbei.ice.client.entry.view.view;
 
 import org.jbei.ice.client.collection.view.OptionSelect;
 
-// attachment menu item
+/**
+ * item representing an entry attachment
+ * 
+ * @author Hector Plahar
+ */
 public class AttachmentItem extends OptionSelect {
 
     private final String description;
