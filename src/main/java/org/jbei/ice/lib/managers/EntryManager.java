@@ -598,8 +598,8 @@ public class EntryManager {
      * @throws ManagerException
      */
     @SuppressWarnings("unchecked")
-    public static ArrayList<Entry> getEntriesByIdSet(List<Long> ids) throws ManagerException {
-        ArrayList<Entry> entries = null;
+    public static LinkedList<Entry> getEntriesByIdSet(List<Long> ids) throws ManagerException {
+        LinkedList<Entry> entries = null;
 
         if (ids.size() == 0) {
             return entries;
@@ -612,12 +612,7 @@ public class EntryManager {
             Query query = session.createQuery("from " + Entry.class.getName() + " WHERE id in ("
                     + filter + ")");
 
-            @SuppressWarnings("rawtypes")
-            ArrayList list = (ArrayList) query.list();
-
-            if (list != null) {
-                entries = list;
-            }
+            return new LinkedList<Entry>(query.list());
         } catch (HibernateException e) {
             throw new ManagerException("Failed to retrieve entries!", e);
         } finally {
@@ -625,8 +620,81 @@ public class EntryManager {
                 session.close();
             }
         }
+    }
 
-        return entries;
+    public static List<Entry> getEntriesByIdSetSortByType(List<Long> ids, boolean ascending)
+            throws ManagerException {
+
+        ArrayList<Entry> entries = new ArrayList<Entry>();
+
+        if (ids.size() == 0) {
+            return entries;
+        }
+
+        String filter = Utils.join(", ", ids);
+        String orderSuffix = (" ORDER BY record_type " + (ascending ? "ASC" : "DESC"));
+        String queryString = "from " + Entry.class.getName() + " WHERE id in (" + filter + ")"
+                + orderSuffix;
+        return retrieveEntriesByQuery(queryString);
+    }
+
+    public static List<Entry> getEntriesByIdSetSortByName(List<Long> ids, boolean ascending)
+            throws ManagerException {
+        ArrayList<Entry> entries = new ArrayList<Entry>();
+
+        if (ids.size() == 0) {
+            return entries;
+        }
+
+        //        String filter = Utils.join(", ", ids);
+        // TODO : add the filter to filter in the database and not here
+        List<Long> sortedEntries = EntryManager.getEntriesSortByName(ascending);
+        sortedEntries.retainAll(ids);
+        return EntryManager.getEntriesByIdSetSort(sortedEntries, "id", ascending);
+    }
+
+    public static List<Entry> getEntriesByIdSetSortByCreated(List<Long> ids, boolean ascending)
+            throws ManagerException {
+        ArrayList<Entry> entries = new ArrayList<Entry>();
+
+        if (ids.size() == 0)
+            return entries;
+
+        String filter = Utils.join(", ", ids);
+        String orderSuffix = (" ORDER BY creation_time " + (ascending ? "ASC" : "DESC"));
+        String queryString = "from " + Entry.class.getName() + " WHERE id in (" + filter + ")"
+                + orderSuffix;
+        return retrieveEntriesByQuery(queryString);
+    }
+
+    public static List<Entry> getEntriesByIdSetSortByPartNumber(List<Long> ids, boolean ascending)
+            throws ManagerException {
+        ArrayList<Entry> entries = new ArrayList<Entry>();
+
+        if (ids.size() == 0) {
+            return entries;
+        }
+
+        //        String filter = Utils.join(", ", ids);
+        // TODO : add the filter to filter in the database and not here
+        List<Long> sortedEntries = EntryManager.getEntriesSortByPartNumber(ascending);
+        sortedEntries.retainAll(ids);
+        return EntryManager.getEntriesByIdSetSort(sortedEntries, "id", ascending);
+    }
+
+    public static List<Entry> getEntriesByIdSetSortByStatus(List<Long> ids, boolean ascending)
+            throws ManagerException {
+        ArrayList<Entry> entries = new ArrayList<Entry>();
+
+        if (ids.size() == 0) {
+            return entries;
+        }
+
+        String filter = Utils.join(", ", ids);
+        String orderSuffix = (" ORDER BY status " + (ascending ? "ASC" : "DESC"));
+        String queryString = "from " + Entry.class.getName() + " WHERE id in (" + filter + ")"
+                + orderSuffix;
+        return retrieveEntriesByQuery(queryString);
     }
 
     public static LinkedList<Long> sortList(LinkedList<Long> ids, ColumnField field, boolean asc)

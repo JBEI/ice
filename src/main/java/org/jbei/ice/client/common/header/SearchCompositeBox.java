@@ -3,6 +3,7 @@ package org.jbei.ice.client.common.header;
 import org.jbei.ice.client.common.header.HeaderView.Resources;
 
 import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FocusPanel;
@@ -41,6 +42,7 @@ public class SearchCompositeBox extends Composite {
 
         // text box
         box = new TextBox();
+
         box.setWidth("330px");
         box.setStyleName("quick_search_input");
         grid.setWidget(0, 1, box);
@@ -90,5 +92,9 @@ public class SearchCompositeBox extends Composite {
 
     public void removeSearchWidget(Widget filter) {
         widgetHolder.remove(filter);
+    }
+
+    public void addTextBoxKeyDownHandler(KeyDownHandler keyDownHandler) {
+        box.addKeyDownHandler(keyDownHandler);
     }
 }

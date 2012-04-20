@@ -4,7 +4,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.TextBox;
 
 public class SaveDraftInput extends Composite {
@@ -17,13 +17,17 @@ public class SaveDraftInput extends Composite {
         saveDraftButton.setStyleName("saved_draft_button");
         inputName = new TextBox();
         inputName.setStyleName("saved_draft_input");
-        String html = "<span id=\"save_draft_inputbox\"></span>&nbsp;<span id=\"save_draft_button\"></span>";
-        HTMLPanel panel = new HTMLPanel(html);
-        panel.setStyleName("display-inline");
-        initWidget(panel);
+        FlexTable layout = new FlexTable();
+        layout.setStyleName("display-inline");
+        //        String html = "<span id=\"save_draft_inputbox\"></span>&nbsp;<span id=\"save_draft_button\" style=\"float: right\"></span>";
+        //        HTMLPanel panel = new HTMLPanel(html);
+        //        panel.setStyleName("display-inline");
+        initWidget(layout);
 
-        panel.add(inputName, "save_draft_inputbox");
-        panel.add(saveDraftButton, "save_draft_button");
+        //        panel.add(inputName, "save_draft_inputbox");
+        //        panel.add(saveDraftButton, "save_draft_button");
+        layout.setWidget(0, 0, inputName);
+        layout.setWidget(0, 1, saveDraftButton);
     }
 
     public String getDraftName() {

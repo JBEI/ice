@@ -37,7 +37,7 @@ public class SearchController extends Controller {
         super(account, new EntryPermissionVerifier());
     }
 
-    public Set<Long> runSearch(ArrayList<QueryFilter> filters) {
+    public Set<Long> runSearch(ArrayList<QueryFilter> filters) throws ControllerException {
         if (filters == null || filters.isEmpty())
             return new HashSet<Long>();
 
@@ -54,28 +54,15 @@ public class SearchController extends Controller {
                 continue;
 
             if (type == null) {
-                String cleanedQuery = cleanQuery(operand);
                 hasStringQuery = true;
-                try {
-                    ArrayList<SearchResult> searchResults = AggregateSearch.query(cleanedQuery,
-                        getAccount());
-                    if (searchResults != null) {
+                ArrayList<SearchResult> searchResults = find(operand);
+                if (searchResults != null) {
 
-                        // filter results by permission
-                        for (SearchResult searchResult : searchResults) {
-                            Entry entry = searchResult.getEntry();
-                            try {
-                                if (entryController.hasReadPermission(entry)) {
-                                    stringQueryResult.add(entry.getId());
-                                }
-                            } catch (ControllerException ce) {
-                                Logger.error("Error retrieving permission for entry "
-                                        + entry.getId());
-                            }
-                        }
+                    // filter results by permission
+                    for (SearchResult searchResult : searchResults) {
+                        Entry entry = searchResult.getEntry();
+                        stringQueryResult.add(entry.getId());
                     }
-                } catch (SearchException se) {
-                    Logger.error("Error running aggregate query: " + se.getMessage());
                 }
             } else {
 
@@ -93,7 +80,7 @@ public class SearchController extends Controller {
                             break;
                     }
                 } catch (ManagerException me) {
-                    // TODO : ME thrown when running search filter
+                    throw new ControllerException(me);
                 }
             }
         }

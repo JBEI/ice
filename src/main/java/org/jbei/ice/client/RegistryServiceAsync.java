@@ -40,8 +40,8 @@ public interface RegistryServiceAsync {
     void retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters,
             AsyncCallback<ArrayList<Long>> asyncCallback);
 
-    void retrieveEntryData(String sid, ArrayList<Long> entries,
-            AsyncCallback<ArrayList<EntryInfo>> callback);
+    void retrieveEntryData(String sid, ColumnField field, boolean ascending,
+            LinkedList<Long> entries, AsyncCallback<LinkedList<EntryInfo>> callback);
 
     void retrieveEntryDetails(String sessionId, long id, AsyncCallback<EntryInfo> callback);
 

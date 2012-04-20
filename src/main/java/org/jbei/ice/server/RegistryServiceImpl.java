@@ -127,7 +127,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public AccountInfo sessionValid(String sid) {
-        Logger.info("Checking session validity for \"" + sid + "\"");
 
         try {
             if (AccountController.isAuthenticated(sid)) {
@@ -170,7 +169,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<EntryInfo> retrieveEntryData(String sid, ArrayList<Long> entryIds) {
+    public LinkedList<EntryInfo> retrieveEntryData(String sid, ColumnField field, boolean asc,
+            LinkedList<Long> entryIds) {
 
         Logger.info("Retrieving entry data for " + entryIds.size() + " entries");
 
@@ -179,10 +179,33 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            ArrayList<EntryInfo> results = new ArrayList<EntryInfo>();
+            LinkedList<EntryInfo> results = new LinkedList<EntryInfo>();
             List<Entry> entries = null;
 
-            entries = EntryManager.getEntriesByIdSet(entryIds);
+            switch (field) {
+            case TYPE:
+                entries = EntryManager.getEntriesByIdSetSortByType(entryIds, asc);
+                break;
+
+            case PART_ID:
+                entries = EntryManager.getEntriesByIdSetSortByPartNumber(entryIds, asc);
+                break;
+
+            case STATUS:
+                entries = EntryManager.getEntriesByIdSetSortByStatus(entryIds, asc);
+                break;
+
+            case NAME:
+                entries = EntryManager.getEntriesByIdSetSortByName(entryIds, asc);
+                break;
+
+            case CREATED:
+                entries = EntryManager.getEntriesByIdSetSortByCreated(entryIds, asc);
+                break;
+
+            default:
+                entries = EntryManager.getEntriesByIdSet(entryIds);
+            }
 
             if (entries == null)
                 return results;
@@ -854,7 +877,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             if (contents != null && !contents.isEmpty()) {
 
-                ArrayList<Entry> entrys = EntryManager.getEntriesByIdSet(contents);
+                ArrayList<Entry> entrys = new ArrayList<Entry>(
+                        EntryManager.getEntriesByIdSet(contents));
                 FolderManager.addFolderContents(folder.getId(), entrys);
                 details.setContents(contents);
                 details.setCount(contents.size());
@@ -875,7 +899,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             ArrayList<Long> destination, ArrayList<Long> entryIds) {
 
         try {
-            ArrayList<Entry> entrys = EntryManager.getEntriesByIdSet(entryIds);
+            ArrayList<Entry> entrys = new ArrayList<Entry>(EntryManager.getEntriesByIdSet(entryIds));
             if (FolderManager.removeFolderContents(source, entryIds) != null) {
                 ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
 
@@ -927,7 +951,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
 
         try {
-            ArrayList<Entry> entrys = EntryManager.getEntriesByIdSet(entryIds);
+            ArrayList<Entry> entrys = new ArrayList<Entry>(EntryManager.getEntriesByIdSet(entryIds));
             for (long folderId : destination) {
                 Folder folder = FolderManager.addFolderContents(folderId, entrys);
                 FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), false);

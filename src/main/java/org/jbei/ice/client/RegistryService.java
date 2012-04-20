@@ -46,7 +46,8 @@ public interface RegistryService extends RemoteService {
 
     ArrayList<BlastResultInfo> blastSearch(String sid, String searchString, QueryOperator program);
 
-    ArrayList<EntryInfo> retrieveEntryData(String sid, ArrayList<Long> entries);
+    LinkedList<EntryInfo> retrieveEntryData(String sid, ColumnField field, boolean ascending,
+            LinkedList<Long> entries);
 
     /**
      * Returns list of folders as seen on the collections page

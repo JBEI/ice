@@ -230,20 +230,21 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
                 @Override
                 public void onFailure(Throwable caught) {
                     // TODO : notify of failure
-                    retrieveEntryData(rangeStart, rangeEnd);
+                    retrieveEntryData(field, ascending, rangeStart, rangeEnd);
                 }
 
                 @Override
                 public void onSuccess(LinkedList<Long> result) {
                     valuesIds.clear();
                     valuesIds.addAll(result);
-                    retrieveEntryData(rangeStart, rangeEnd);
+                    retrieveEntryData(field, ascending, rangeStart, rangeEnd);
                 }
             });
     }
 
     // this method should be called after sorting, if sorting is desired
-    protected void retrieveEntryData(final int rangeStart, final int rangeEnd) {
+    protected void retrieveEntryData(final ColumnField field, final boolean ascending,
+            final int rangeStart, final int rangeEnd) {
         // TODO : index out of bounds exception here when we page to the last page and sort
         // TODO : this is because we clear results and when we do not retrieve enough (factor below) 
         // TODO : solution is to go to page one when user sorts
@@ -251,10 +252,10 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
         int factor = (rangeEnd - rangeStart) * EntryTablePager.JUMP_PAGE_COUNT; // get 4 pages in advance
         factor = (factor + rangeEnd) > valuesIds.size() ? valuesIds.size() : (factor + rangeEnd);
         List<Long> subList = valuesIds.subList(rangeStart, factor);
-        final ArrayList<Long> realValues = new ArrayList<Long>(subList);
+        final LinkedList<Long> realValues = new LinkedList<Long>(subList);
 
-        service.retrieveEntryData(AppController.sessionId, realValues,
-            new AsyncCallback<ArrayList<EntryInfo>>() {
+        service.retrieveEntryData(AppController.sessionId, field, ascending, realValues,
+            new AsyncCallback<LinkedList<EntryInfo>>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
@@ -262,7 +263,7 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
                 }
 
                 @Override
-                public void onSuccess(ArrayList<EntryInfo> result) {
+                public void onSuccess(LinkedList<EntryInfo> result) {
 
                     results.addAll(result);
                     int end = rangeEnd;

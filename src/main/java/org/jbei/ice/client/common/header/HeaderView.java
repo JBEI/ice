@@ -14,6 +14,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -120,6 +123,15 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
         }
 
         searchInput = new SearchCompositeBox();
+        searchInput.addTextBoxKeyDownHandler(new KeyDownHandler() {
+
+            @Override
+            public void onKeyDown(KeyDownEvent event) {
+                if (event.getNativeKeyCode() != KeyCodes.KEY_ENTER)
+                    return;
+                searchBtn.click();
+            }
+        });
 
         layout.setWidget(0, 0, searchInput);
         layout.getFlexCellFormatter().setRowSpan(0, 0, 2);
