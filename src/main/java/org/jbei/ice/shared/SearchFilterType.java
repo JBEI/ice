@@ -21,8 +21,8 @@ public enum SearchFilterType {
 
     NAME_OR_ALIAS("Name or Alias", "name", true), PART_NUMBER("Part ID", "id", false), TYPE("Type",
             "type", false), STATUS("Status", "status", false), OWNER("Owner", "owner", true), CREATOR(
-            "Creator", "creator", false), KEYWORDS("Keywords", "keywords", false), DESCRIPTION(
-            "Description (Summary/Notes/References)", "description", false), HAS_ATTACHMENT(
+            "Creator", "creator", true), KEYWORDS("Keywords", "keywords", false), DESCRIPTION(
+            "Description (Summary/Notes/References)", "description", true), HAS_ATTACHMENT(
             "Has Attachment", "has_attach", false), HAS_SEQUENCE("Has Sequence", "has_seq", false), HAS_SAMPLE(
             "Has Sample", "has_sample", false), BIO_SAFETY_LEVEL("Bio Safety Level",
             "safety_level", false), INTELLECTUAL_PROPERTY("Intellectual Property", "ip", false), PRINCIPAL_INVESTIGATOR(

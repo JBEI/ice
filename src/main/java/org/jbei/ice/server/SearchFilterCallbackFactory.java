@@ -24,6 +24,8 @@ public class SearchFilterCallbackFactory {
         ArrayList<QueryFilterParams> params = new ArrayList<QueryFilterParams>();
 
         FilterCallback[] callbackList = getQueryFilters(type);
+        if (callbackList == null)
+            return params;
 
         for (FilterCallback callback : callbackList) {
             String criterion = callback.createCriterion(operator, operand);
@@ -63,12 +65,14 @@ public class SearchFilterCallbackFactory {
             callback = new FilterCallback[2];
             callback[0] = new EntryFilterCallback("lower(entry.creator)");
             callback[1] = new EntryFilterCallback("lower(entry.creatorEmail)");
+            break;
 
         case DESCRIPTION:
             callback = new FilterCallback[3];
             callback[0] = new EntryFilterCallback("lower(entry.shortDescription)");
             callback[1] = new EntryFilterCallback("lower(entry.longDescription)");
             callback[2] = new EntryFilterCallback("lower(entry.references)");
+            break;
 
         default:
             callback = null;

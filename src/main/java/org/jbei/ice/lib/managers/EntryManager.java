@@ -599,10 +599,8 @@ public class EntryManager {
      */
     @SuppressWarnings("unchecked")
     public static LinkedList<Entry> getEntriesByIdSet(List<Long> ids) throws ManagerException {
-        LinkedList<Entry> entries = null;
-
         if (ids.size() == 0) {
-            return entries;
+            return new LinkedList<Entry>();
         }
 
         String filter = Utils.join(", ", ids);
