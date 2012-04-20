@@ -73,4 +73,5 @@ public interface IEntryView {
     void addSampleSaveHandler(ClickHandler handler);
 
     void showLoadingIndicator();
+
 }

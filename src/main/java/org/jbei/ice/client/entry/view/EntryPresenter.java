@@ -36,6 +36,11 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * Presenter for entry view
+ * 
+ * @author Hector Plahar
+ */
 public class EntryPresenter extends AbstractPresenter {
 
     private final RegistryServiceAsync service;
@@ -399,6 +404,8 @@ public class EntryPresenter extends AbstractPresenter {
     //
     // inner classes
     //
+
+    /* Handler for the entry detail menu*/
     public class MenuSelectionHandler implements ClickHandler {
 
         private final EntryDetailViewMenu menu;

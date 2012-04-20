@@ -22,7 +22,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
  */
 public class AggregateSearch {
     /**
-     * Perform ful text aggregated query on entries.
+     * Perform full text aggregated query on entries.
      * <p>
      * This weighs positively on {@link Entry}.name or .alias fields, or matches in
      * {@link PartNumber}.partNumber.

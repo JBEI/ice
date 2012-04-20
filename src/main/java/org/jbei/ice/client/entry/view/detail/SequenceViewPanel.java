@@ -12,6 +12,11 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * Widget that displays the sequence file on the general view
+ * 
+ * @author Hector Plahar
+ */
 public class SequenceViewPanel extends Composite implements ISequenceView {
 
     private final SequenceFileDownload sequenceDownload;

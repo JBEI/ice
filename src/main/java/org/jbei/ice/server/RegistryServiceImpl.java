@@ -954,8 +954,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             ArrayList<Entry> entrys = new ArrayList<Entry>(EntryManager.getEntriesByIdSet(entryIds));
             for (long folderId : destination) {
                 Folder folder = FolderManager.addFolderContents(folderId, entrys);
+                if (folder == null)
+                    folder = FolderManager.get(folderId);
                 FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), false);
-                details.setCount(folder.getContents().size());
+                int size = FolderManager.getFolderSize(folderId);
+                details.setCount(size);
                 details.setDescription(folder.getDescription());
                 results.add(details);
             }

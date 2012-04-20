@@ -6,6 +6,15 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
+/**
+ * Cell that renders a url and allows sub-classes to implement on-click.
+ * This comes in handy when history management is desired
+ * 
+ * @author Hector Plahar
+ * 
+ * @param <T>
+ *            object type cell will render
+ */
 public abstract class UrlCell<T> extends AbstractCell<T> {
 
     private static final String MOUSEOVER_EVENT_NAME = "mouseover";
@@ -30,7 +39,6 @@ public abstract class UrlCell<T> extends AbstractCell<T> {
             ValueUpdater<T> valueUpdater) {
 
         super.onBrowserEvent(context, parent, value, event, valueUpdater);
-
         final String eventType = event.getType();
 
         if (MOUSE_CLICK.equalsIgnoreCase(eventType)) {
@@ -40,24 +48,11 @@ public abstract class UrlCell<T> extends AbstractCell<T> {
     }
 
     protected boolean withinBounds(Element parent, NativeEvent event) {
-
-        if (event.getClientY() < ((Element) parent.getFirstChild()).getAbsoluteTop()) {
-            return false;
-        }
-
-        if (event.getClientY() > ((Element) parent.getFirstChild()).getAbsoluteBottom()) {
-            return false;
-        }
-
-        if (event.getClientX() < ((Element) parent.getFirstChild()).getAbsoluteLeft()) {
-            return false;
-        }
-
-        if (event.getClientX() > ((Element) parent.getFirstChild()).getAbsoluteRight()) {
-            return false;
-        }
-
-        return true;
+        Element cellElement = event.getEventTarget().cast();
+        Element element = cellElement.getFirstChildElement();
+        if (element == null)
+            return true;
+        return false;
     }
 
     /**
