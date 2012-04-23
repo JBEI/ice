@@ -87,6 +87,7 @@ public class GeneralParser {
         // However, maintain these for backward compatibility for now.
         parsers.add(new IceGenbankParser());
         parsers.add(new FastaParser());
+        parsers.add(new SbolParser());
         //parsers.add(new ApeParser()); // TODO depricate
         //parsers.add(new GenbankLocusFriendlyParser()); // TODO depricate
         //parsers.add(new GenbankParser()); // TODO depricate
