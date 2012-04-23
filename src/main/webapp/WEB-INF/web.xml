@@ -14,7 +14,7 @@
 	</security-constraint>
 
 	<display-name>ice</display-name>
-
+	
 	<filter>
            <filter-name>UrlRewriteFilter</filter-name>
            <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
@@ -64,6 +64,14 @@
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
+	
+	<listener>
+        <listener-class>org.jbei.ice.server.servlet.IceServletContextListener</listener-class>
+    </listener>
+    
+    <listener>
+		<listener-class>org.jbei.ice.server.servlet.IceServletSessionListener</listener-class>
+	</listener>
 
 	<servlet>
 		<servlet-name>CXFServlet</servlet-name>
@@ -99,7 +107,7 @@
          Put the number of milliseconds to sleep in each block received in the server.
          false or 0, means don't use slow uploads  -->
     <param-name>slowUploads</param-name>
-    <param-value>0</param-value>
+    <param-value>1000</param-value>
   </context-param>
   
     <servlet>
