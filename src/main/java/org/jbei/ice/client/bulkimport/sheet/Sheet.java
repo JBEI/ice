@@ -21,7 +21,6 @@ import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -187,7 +186,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         DOM.setStyleAttribute(rowIndexWrapper.getElement(), "overflowX", "hidden");
 
         //  - 260 accounts for left menu bar. get actual width
-        headerWrapper.setWidth((Window.getClientWidth() - 20 - 15) + "px"); // TODO : the 15px accounts for the scroll bar. Not sure yet how to get the scrollbar width
+        headerWrapper.setWidth((Window.getClientWidth() - 1 - 15) + "px"); // TODO : the 15px accounts for the scroll bar. Not sure yet how to get the scrollbar width
 
         createHeaderCells();
 
@@ -233,13 +232,10 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         case Event.ONMOUSEUP:
             if (DOM.eventGetButton(event) == Event.BUTTON_LEFT) {
-
-                GWT.log("Event.BUTTON_LEFT", null);
-                //                listener.onClick(this, event);
+                // TODO ???
             }
 
             if (DOM.eventGetButton(event) == Event.BUTTON_RIGHT) {
-                GWT.log("Event.BUTTON_RIGHT", null);
                 event.stopPropagation();
                 event.preventDefault();
             }
@@ -562,6 +558,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
             }
 
             // TODO : handle other field types
+            //  BINARY, DATE, AUTO_COMPLETE, MULTI_SELECT, FILE_INPUT;
         }
     }
 

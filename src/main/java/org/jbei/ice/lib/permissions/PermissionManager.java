@@ -17,7 +17,6 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Group;
-import org.jbei.ice.web.IceSession;
 
 /**
  * Manager to manipulate Permissions.
@@ -26,17 +25,6 @@ import org.jbei.ice.web.IceSession;
  * 
  */
 public class PermissionManager {
-
-    /**
-     * Check if the logged in user has read permission to the given {@link Entry} by entryId.
-     * 
-     * @param entryId
-     *            id of the Entry.
-     * @return True if user has read permission to the specified entry.
-     */
-    public static boolean hasReadPermission(long entryId) {
-        return hasReadPermission(entryId, IceSession.get().getAccount());
-    }
 
     /**
      * Check if the {@link Account} associated with the given sessionKey has read permission to the
@@ -121,30 +109,6 @@ public class PermissionManager {
             }
         }
 
-        return result;
-    }
-
-    /**
-     * Check if the current {@link Account} has write permission to the specified {@link Entry}.
-     * 
-     * @param entryId
-     *            id of the specified Entry.
-     * @return True if current user has write permission to the specified Entry.
-     */
-    public static boolean hasWritePermission(long entryId) {
-        boolean result = false;
-        Entry entry;
-
-        try {
-            entry = EntryManager.get(entryId);
-            if (entry != null) {
-                result = hasWritePermission(entry);
-
-            }
-        } catch (ManagerException e) {
-            String msg = "manager exception during permission lookup: " + e.toString();
-            Logger.warn(msg);
-        }
         return result;
     }
 
@@ -242,9 +206,6 @@ public class PermissionManager {
      *            Entry to be queried.
      * @return True if the current user has read permission.
      */
-    public static boolean hasReadPermission(Entry entry) {
-        return hasReadPermission(entry, IceSession.get().getAccount());
-    }
 
     public static boolean hasReadPermission(Entry entry, Account account) {
         boolean result = false;
@@ -255,35 +216,6 @@ public class PermissionManager {
                 } else {
                     result = userHasReadPermission(entry, account)
                             | groupHasReadPermission(entry, account);
-                }
-            } catch (ManagerException e) {
-                e.printStackTrace();
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Checks if the current {@link Account} logged in has write permission to the given
-     * {@link Entry}.
-     * 
-     * @param entry
-     *            Entry to be queried.
-     * @return True if the current user has wrte permission.
-     */
-    public static boolean hasWritePermission(Entry entry) {
-        boolean result = false;
-
-        Account account;
-        account = IceSession.get().getAccount();
-
-        if (entry != null && account != null) {
-            try {
-                if (AccountManager.isModerator(account)) {
-                    result = true;
-                } else {
-                    result = userHasWritePermission(entry, account)
-                            | groupHasWritePermission(entry, account);
                 }
             } catch (ManagerException e) {
                 e.printStackTrace();

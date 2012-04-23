@@ -47,6 +47,9 @@ public class ImageUtil {
         @Source("org/jbei/ice/client/resource/image/side_expand2.png")
         ImageResource hideSideImage();
 
+        @Source("org/jbei/ice/client/resource/image/upload.png")
+        ImageResource uploadImage();
+
     }
 
     public static Image getSampleIcon() {
@@ -95,5 +98,9 @@ public class ImageUtil {
 
     public static Image getHideSideImage() {
         return new Image(Resources.INSTANCE.hideSideImage());
+    }
+
+    public static Image getUploadImage() {
+        return new Image(Resources.INSTANCE.uploadImage());
     }
 }

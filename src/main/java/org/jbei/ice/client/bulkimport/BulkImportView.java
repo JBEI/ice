@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
@@ -38,6 +39,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     private Button saveButton;
     private Button resetButton;
     private SaveDraftInput draftInput;
+    private Image uploadCsv;
 
     @Override
     protected void initComponents() {
@@ -46,6 +48,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         create = new CreateEntryMenu();
         feedback = new FeedbackPanel("450px");
         contentHeader = new Label("");
+        contentHeader.setStyleName("display-inline");
         toggle = new ToggleButton(ImageUtil.getShowSideImage(), ImageUtil.getHideSideImage());
         toggle.setStyleName("bulk_import_menu_toggle");
         toggle.setVisible(false);
@@ -55,6 +58,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         saveButton = new Button("Submit");
         resetButton = new Button("Reset");
         draftInput = new SaveDraftInput();
+        uploadCsv = ImageUtil.getUploadImage();
     }
 
     @Override
@@ -180,7 +184,12 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         mainContent.setHTML(1, 0, "&nbsp;");
         mainContent.getFlexCellFormatter().setColSpan(1, 0, index);
 
-        mainContent.setWidget(2, 0, contentHeader);
+        HTMLPanel bulkImportHeader = new HTMLPanel(
+                "<span id=\"bulk_import_header_title\"></span><span style=\"float: right\" id=\"upload_csv_icon\"></span>");
+        bulkImportHeader.add(contentHeader, "bulk_import_header_title");
+        bulkImportHeader.add(uploadCsv, "upload_csv_icon");
+
+        mainContent.setWidget(2, 0, bulkImportHeader);
         mainContent.getCellFormatter().setStyleName(2, 0, "bulk_import_header");
         mainContent.getFlexCellFormatter().setColSpan(2, 0, index);
 
