@@ -20,6 +20,7 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.composers.SequenceComposerException;
 import org.jbei.ice.lib.composers.formatters.FastaFormatter;
 import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
+import org.jbei.ice.lib.composers.formatters.SbolFormatter;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sequence;
@@ -36,7 +37,7 @@ public class SequenceViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
 
     private Sequence sequence;
-    private Entry entry;
+    private final Entry entry;
 
     private String sequenceUser;
     private EmptyPanel emptySequenceFormPanel;
@@ -102,7 +103,7 @@ public class SequenceViewPanel extends Panel {
                         .getParent();
 
                 SequenceNewFormPanel addNewSequence = new SequenceNewFormPanel("sequenceFormPanel",
-                        (SequenceViewPanel) sequenceViewPanel, entry);
+                        sequenceViewPanel, entry);
                 addNewSequence.setOutputMarkupId(true);
 
                 sequenceViewPanel.addOrReplace(addNewSequence);
@@ -137,6 +138,7 @@ public class SequenceViewPanel extends Panel {
             renderOriginalDownloadLink(fragment);
             renderGenbankDownloadLink(fragment);
             renderFastaDownloadLink(fragment);
+            renderSbolDownloadLink(fragment);
             renderVectorEditorLink(fragment);
             renderVectorViewerEmbededObject(fragment);
 
@@ -236,8 +238,7 @@ public class SequenceViewPanel extends Panel {
                             .getNamesAsString());
                     genbankFormatter
                             .setCircular((sequence.getEntry() instanceof Plasmid) ? ((Plasmid) sequence
-                                    .getEntry()).getCircular()
-                                    : false);
+                                    .getEntry()).getCircular() : false);
 
                     sequenceString = SequenceController.compose(sequence, genbankFormatter);
                 } catch (SequenceComposerException e) {
@@ -268,6 +269,27 @@ public class SequenceViewPanel extends Panel {
 
                 setResponsePage(new DownloadPage(entry.getPartNumbersAsString() + ".fasta",
                         "text/plain", sequenceString));
+            }
+        };
+
+        container.add(downloadLink);
+    }
+
+    private void renderSbolDownloadLink(WebMarkupContainer container) {
+        Link<Object> downloadLink = new Link<Object>("sbolDownloadLink") {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void onClick() {
+                String sequenceString = null;
+                try {
+                    sequenceString = SequenceController.compose(sequence, new SbolFormatter());
+                } catch (SequenceComposerException e) {
+                    throw new ViewException("Failed to generate fasta file for download!", e);
+                }
+
+                setResponsePage(new DownloadPage(entry.getPartNumbersAsString() + ".xml",
+                        "text/xml", sequenceString));
             }
         };
 

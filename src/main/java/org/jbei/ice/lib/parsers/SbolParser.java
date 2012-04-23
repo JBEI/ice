@@ -1,9 +1,18 @@
 package org.jbei.ice.lib.parsers;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
+import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
+import org.sbolstandard.core.DnaComponent;
+import org.sbolstandard.core.SBOLDocument;
+import org.sbolstandard.core.SBOLFactory;
+import org.sbolstandard.core.SBOLRootObject;
+import org.sbolstandard.core.SBOLValidationException;
 
 /**
- * Parse and generate SBOL (v 1.1) files.
+ * Parse SBOL (v 1.1) files.
  * 
  * @author Timothy Ham
  * 
@@ -11,6 +20,7 @@ import org.jbei.ice.lib.vo.IDNASequence;
 public class SbolParser extends AbstractParser {
 
     private static final String SBOL_PARSER = "SBOL";
+
     @Override
     public String getName() {
         return SBOL_PARSER;
@@ -24,8 +34,29 @@ public class SbolParser extends AbstractParser {
 
     @Override
     public IDNASequence parse(String textSequence) throws InvalidFormatParserException {
-        // TODO Auto-generated method stub
-        return null;
+        FeaturedDNASequence featuredDnaSequence = null;
+        try {
+            SBOLDocument document = SBOLFactory.read(new ByteArrayInputStream(textSequence
+                    .getBytes()));
+            SBOLRootObject content = document.getContents().get(0);
+            if (!(content instanceof DnaComponent)) {
+                throw new InvalidFormatParserException("Could not parse SBOL file!");
+            }
+            DnaComponent dnaComponent = (DnaComponent) content;
+
+            featuredDnaSequence = new FeaturedDNASequence();
+            featuredDnaSequence.setName(dnaComponent.getName());
+            featuredDnaSequence.setSequence(dnaComponent.getDnaSequence().getNucleotides());
+            featuredDnaSequence.setIdentifier(dnaComponent.getDisplayId());
+            featuredDnaSequence.setIsCircular(false);
+
+        } catch (SBOLValidationException e) {
+            throw new InvalidFormatParserException("Could not parse SBOL file!", e);
+        } catch (IOException e) {
+            throw new InvalidFormatParserException("Could not parse SBOL file!", e);
+        }
+
+        return featuredDnaSequence;
     }
 
     @Override
