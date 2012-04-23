@@ -1,10 +1,13 @@
 package org.jbei.ice.client.entry.view.view;
 
+import gwtupload.client.BaseUploadStatus;
 import gwtupload.client.IFileInput.FileInputType;
 import gwtupload.client.IUploadStatus.Status;
 import gwtupload.client.IUploader;
+import gwtupload.client.IUploader.OnCancelUploaderHandler;
 import gwtupload.client.IUploader.OnFinishUploaderHandler;
 import gwtupload.client.IUploader.OnStartUploaderHandler;
+import gwtupload.client.IUploader.OnStatusChangedHandler;
 import gwtupload.client.IUploader.UploadedInfo;
 import gwtupload.client.SingleUploader;
 
@@ -22,13 +25,16 @@ import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -150,8 +156,8 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         final VerticalPanel vPanel = new VerticalPanel();
         vPanel.setWidth("180px");
 
-        SingleUploader uploader = new SingleUploader(FileInputType.BROWSER_INPUT, null,
-                saveAttachment) {
+        SingleUploader uploader = new SingleUploader(FileInputType.BROWSER_INPUT,
+                new AttachmentUploadStatus(), saveAttachment) {
             @Override
             public Panel getUploaderPanel() {
                 return vPanel;
@@ -161,6 +167,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         saveAttachment.setText("Submit");
         saveAttachment.setStyleName("entry_attachment_submit_button");
         uploader.setAutoSubmit(false);
+        uploader.getForm().setWidth("180px");
 
         attachmentDescription.addFocusHandler(new FocusHandler() {
 
@@ -191,6 +198,17 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
                         : attachmentDescription.getText();
                 uploader.setServletPath(uploader.getServletPath() + "?desc=" + attDesc + "&eid="
                         + entryId + "&type=attachment");
+                attachmentDescription.setVisible(false);
+            }
+        });
+
+        uploader.addOnStatusChangedHandler(new OnStatusChangedHandler() {
+
+            @Override
+            public void onStatusChanged(IUploader uploader) {
+                if (uploader.getStatus() == Status.ERROR) {
+                    Window.alert(uploader.getServerResponse());
+                }
             }
         });
 
@@ -206,10 +224,22 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
                     AttachmentItem item = new AttachmentItem(rowCount + 1, info.name, attDesc);
                     item.setFileId(fileId);
                     addMenuItem(item);
+                    attachmentDescription.setText(DESCRIPTION_MSG);
+                    attachmentDescription.setVisible(true);
                     uploader.reset();
                 } else {
                     // TODO : notify user of error
                 }
+            }
+        });
+
+        uploader.addOnCancelUploadHandler(new OnCancelUploaderHandler() {
+
+            @Override
+            public void onCancel(IUploader uploader) {
+                uploader.cancel();
+                attachmentDescription.setText(DESCRIPTION_MSG);
+                attachmentDescription.setVisible(true);
             }
         });
 
@@ -240,6 +270,51 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         @Override
         public HandlerRegistration addClickHandler(ClickHandler handler) {
             return addDomHandler(handler, ClickEvent.getType());
+        }
+    }
+
+    // inner classes
+    private class AttachmentUploadStatus extends BaseUploadStatus {
+
+        private Widget prg;
+
+        @Override
+        protected Panel getPanel() {
+            return new VerticalPanel();
+        }
+
+        @Override
+        protected Label getCancelLabel() {
+            return new Label(" ");
+        }
+
+        protected void setProgressWidget(Widget progress) {
+            if (prg != null) {
+                panel.remove(prg);
+            }
+            prg = progress;
+            panel.add(prg);
+            prg.setVisible(false);
+        }
+
+        @Override
+        protected void addElementsToPanel() {
+            panel.add(fileNameLabel);
+            HTMLPanel wrapper = new HTMLPanel(
+                    "<span id=\"status_upload\"></span><span id=\"cancel_upload\"></span>");
+
+            wrapper.add(cancelLabel, "cancel_upload");
+            wrapper.add(statusLabel, "status_upload");
+            panel.add(wrapper);
+        }
+
+        @Override
+        public void setFileName(String name) {
+            if (name.length() > 25) {
+                name.lastIndexOf('.');
+                name = name.substring(0, 22) + "...";
+            }
+            fileNameLabel.setText(name);
         }
     }
 }
