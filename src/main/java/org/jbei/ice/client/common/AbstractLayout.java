@@ -39,7 +39,7 @@ public abstract class AbstractLayout extends Composite {
      */
     protected void initComponents() {
         headerView = new HeaderView();
-        headerMenu = HeaderMenu.getInstance();
+        headerMenu = new HeaderMenu();
     }
 
     protected Widget createHeader() {

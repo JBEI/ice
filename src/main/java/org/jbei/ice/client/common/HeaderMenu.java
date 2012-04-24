@@ -13,16 +13,7 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 
 public class HeaderMenu extends Composite {
 
-    private static HeaderMenu INSTANCE;
-
-    public static HeaderMenu getInstance() {
-        if (INSTANCE == null)
-            INSTANCE = new HeaderMenu();
-
-        return INSTANCE;
-    }
-
-    private HeaderMenu() {
+    public HeaderMenu() {
 
         String html = "<div id=\"dark\"><div id=\"indented\">"
                 + "<ul>"

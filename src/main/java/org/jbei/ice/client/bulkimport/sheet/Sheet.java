@@ -516,6 +516,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
                 uploader = new SingleUploader(FileInputType.LABEL);
                 uploader.setAutoSubmit(true);
                 uploader.getWidget().setSize("129px", "26px");
+                uploader.getForm().setSize("129px", "26px");
 
                 //                uploader.getWidget().setStyleName();
 
@@ -741,6 +742,9 @@ public class Sheet extends Composite implements SheetPresenter.View {
             break;
         }
 
+        if (ret == null)
+            ret = "";
+
         return ret;
     }
 
@@ -769,7 +773,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
             if (lastReplaced != null) {
                 String inputText = getLastWidgetText();
                 lastReplaced.setTitle(inputText);
-                if (inputText.length() > 15)
+                if (inputText != null && inputText.length() > 15)
                     inputText = (inputText.substring(0, 13) + "...");
                 lastReplaced.setText(inputText);
 
