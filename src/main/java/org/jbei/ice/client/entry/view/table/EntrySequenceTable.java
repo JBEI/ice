@@ -46,11 +46,8 @@ public class EntrySequenceTable extends Composite {
          * The styles used in this widget.
          */
         @Override
-        @Source("org/jbei/ice/client/resource/css/EntryTable.css")
-        DataTableStyle cellTableStyle();
-    }
-
-    public interface DataTableStyle extends Style {
+        @Source("org/jbei/ice/client/resource/css/EntrySequenceTable.css")
+        Style cellTableStyle();
     }
 
     public EntrySequenceTable() {
@@ -61,7 +58,6 @@ public class EntrySequenceTable extends Composite {
         panel.setWidth("100%");
 
         initWidget(panel);
-        //        table.setStyleName("entry_sequence_table");
         table.setWidth("100%");
         dataProvider = new ListDataProvider<SequenceAnalysisInfo>();
         dataProvider.addDataDisplay(table);
@@ -73,6 +69,7 @@ public class EntrySequenceTable extends Composite {
         // other table props
         pager = new SimplePager();
         pager.setDisplay(table);
+        pager.setStyleName("font-75em");
 
         panel.add(table);
         panel.add(pager);
