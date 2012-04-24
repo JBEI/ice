@@ -4,7 +4,7 @@
 	<groupId>org.jbei</groupId>
 	<artifactId>gd-ice</artifactId>
 	<packaging>war</packaging>
-	<version>2.0-SNAPSHOT</version>
+	<version>3.0-SNAPSHOT</version>
 	<!-- TODO project name  -->
 	<name>gd-ice</name>
 	<description>Inventory of Composable Elements (ICE) for Synthetic Biology</description>
@@ -232,6 +232,12 @@
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-bundle-minimal</artifactId>
 			<version>2.2.5</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>slf4j-jdk14</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.cxf.dosgi</groupId>
@@ -288,11 +294,6 @@
 			<groupId>commons-fileupload</groupId>
 			<artifactId>commons-fileupload</artifactId>
 			<version>1.2.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi</artifactId>
-			<version>3.8</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -476,7 +477,6 @@
     </plugins>
 	</reporting>
 	<properties>
-		<wicket.version>1.4.8</wicket.version>
 		<jetty.version>6.1.26</jetty.version>
 	</properties>
 </project>
