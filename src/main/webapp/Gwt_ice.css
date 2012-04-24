@@ -663,6 +663,7 @@ a.cell_mouseover:hover {
     background-color: #F3F3F3;
     padding: 8px;
     text-transform: uppercase;
+    font-family: ff-din-web-condensed, helvetica;
 }
 
 .collection_quick_add_image:hover {

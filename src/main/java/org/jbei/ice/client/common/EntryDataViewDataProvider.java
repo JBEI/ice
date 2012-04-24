@@ -84,12 +84,25 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
     @Override
     public EntryInfo getNext(EntryInfo info) {
         int idx = results.indexOf(info);
-        // TODO : need to check valuesIds also
+        int size = results.size();
+
         // we just may have reached the end of the cache and need to retrieve more
         if (idx == -1 || results.size() <= idx + 1)
             return null;
 
-        // TODO : if we are at the end of results and there is still more, fetch Data
+        if (idx + 1 == size) {
+            GWT.log("Retrieving extra info");
+            final Range range = this.getRanges()[0];
+            final int rangeStart = range.getStart();
+            final int rangeEnd;
+
+            if ((rangeStart + range.getLength()) > valuesIds.size())
+                rangeEnd = valuesIds.size();
+            else
+                rangeEnd = (rangeStart + range.getLength());
+
+            retrieveEntryData(lastSortField, lastSortAsc, rangeStart, rangeEnd);
+        }
         return results.get(idx + 1);
     }
 
