@@ -1,5 +1,7 @@
 package org.jbei.ice.shared;
 
+import java.util.ArrayList;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public enum BioSafetyOptions implements IsSerializable {
@@ -20,5 +22,23 @@ public enum BioSafetyOptions implements IsSerializable {
 
     public String getValue() {
         return this.value;
+    }
+
+    public static Integer intValue(String value) {
+        for (BioSafetyOptions option : BioSafetyOptions.values()) {
+            if (option.displayName.equals(value) || option.getValue().equals(value)) {
+                return Integer.valueOf(option.getValue());
+
+            }
+        }
+        return null;
+    }
+
+    public static ArrayList<String> getDisplayList() {
+        ArrayList<String> list = new ArrayList<String>();
+        for (BioSafetyOptions option : BioSafetyOptions.values()) {
+            list.add(option.displayName);
+        }
+        return list;
     }
 }

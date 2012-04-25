@@ -1,5 +1,6 @@
 package org.jbei.ice.server;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.jbei.ice.client.RegistryService;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.controllers.AccountController;
@@ -63,6 +65,7 @@ import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -71,6 +74,7 @@ import org.jbei.ice.shared.dto.NewsItem;
 import org.jbei.ice.shared.dto.ProfileInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
+import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
@@ -1133,8 +1137,45 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         for (BulkImportEntryData datum : data) {
             Entry entry = datum.getEntry();
             entry.setOwnerEmail(ownerEmail);
-            // TODO : attachments etc as parameters to the following method call
+
             EntryInfo info = EntryToInfoFactory.getInfo(account, entry, null, null, null, false);
+            byte[] array = ArrayUtils.toPrimitive(bi.getAttachmentFile());
+
+            // check for attachments
+            if (array != null) {
+                ArrayList<AttachmentInfo> attInfos = new ArrayList<AttachmentInfo>();
+                try {
+                    LinkedList<String> fileNames = BulkImportController.extractZip(array);
+                    for (String name : fileNames) {
+                        AttachmentInfo attachment = new AttachmentInfo();
+                        attachment.setFilename(name);
+                        attInfos.add(attachment);
+                    }
+
+                } catch (IOException e) {
+                    Logger.error(e);
+                }
+                info.setAttachments(attInfos);
+            }
+
+            // check for sequences
+            array = ArrayUtils.toPrimitive(bi.getSequenceFile());
+            if (array != null) {
+                ArrayList<SequenceAnalysisInfo> seqInfos = new ArrayList<SequenceAnalysisInfo>();
+                try {
+                    LinkedList<String> fileNames = BulkImportController.extractZip(array);
+                    for (String name : fileNames) {
+                        SequenceAnalysisInfo sequence = new SequenceAnalysisInfo();
+                        sequence.setName(name);
+                        seqInfos.add(sequence);
+                    }
+
+                } catch (IOException e) {
+                    Logger.error(e);
+                }
+                info.setSequenceAnalysis(seqInfos);
+            }
+
             primary.add(info);
         }
         draftInfo.setPrimary(primary);
@@ -1147,12 +1188,46 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 Entry entry2 = datum.getEntry();
                 entry2.setOwnerEmail(ownerEmail);
 
-                // TODO : attachments etc as parameters to the following method call
                 EntryInfo info = EntryToInfoFactory.getInfo(account, entry2, null, null, null,
                     false);
+                byte[] array = ArrayUtils.toPrimitive(bi.getAttachmentFile());
+
+                // check for attachments
+                if (array != null) {
+                    ArrayList<AttachmentInfo> attInfos = new ArrayList<AttachmentInfo>();
+                    try {
+                        LinkedList<String> fileNames = BulkImportController.extractZip(array);
+                        for (String name : fileNames) {
+                            AttachmentInfo attachment = new AttachmentInfo();
+                            attachment.setFilename(name);
+                            attInfos.add(attachment);
+                        }
+
+                    } catch (IOException e) {
+                        Logger.error(e);
+                    }
+                    info.setAttachments(attInfos);
+                }
+
+                // check for sequences
+                array = ArrayUtils.toPrimitive(bi.getSequenceFile());
+                if (array != null) {
+                    ArrayList<SequenceAnalysisInfo> seqInfos = new ArrayList<SequenceAnalysisInfo>();
+                    try {
+                        LinkedList<String> fileNames = BulkImportController.extractZip(array);
+                        for (String name : fileNames) {
+                            SequenceAnalysisInfo sequence = new SequenceAnalysisInfo();
+                            sequence.setName(name);
+                            seqInfos.add(sequence);
+                        }
+
+                    } catch (IOException e) {
+                        Logger.error(e);
+                    }
+                    info.setSequenceAnalysis(seqInfos);
+                }
                 secondary.add(info);
             }
-
             draftInfo.setSecondary(secondary);
         }
 
@@ -1169,9 +1244,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             BulkImportController controller = new BulkImportController(account);
-            BulkImport draft = controller.createBulkImport(account, primary, secondary, email);
-            draft.setName(name);
-            BulkImport result = BulkImportManager.updateBulkImportRecord(id, draft);
+            BulkImport result = controller.updateBulkImportDraft(id, name, account, primary,
+                secondary, email);
 
             // result to DTO
             BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
@@ -1181,9 +1255,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             draftInfo.setName(result.getName());
             return draftInfo;
 
-        } catch (ManagerException e) {
-            Logger.error(e);
-            return null;
         } catch (ControllerException e) {
             Logger.error(e);
             return null;

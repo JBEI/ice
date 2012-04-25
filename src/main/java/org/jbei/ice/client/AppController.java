@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
+import org.jbei.ice.client.admin.AdminPresenter;
+import org.jbei.ice.client.admin.AdminView;
 import org.jbei.ice.client.bulkimport.BulkImportPresenter;
 import org.jbei.ice.client.bulkimport.BulkImportView;
 import org.jbei.ice.client.bulkimport.model.BulkImportModel;
@@ -56,6 +58,8 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
     public static String sessionId;
+
+    // TODO : see permissions auto complete for how to run this on the server and avoid sending data back and forth
     public static HashMap<AutoCompleteField, ArrayList<String>> autoCompleteData;
     public static AccountInfo accountInfo;
 
@@ -246,8 +250,11 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             presenter = new NewsPresenter(this.service, this.eventBus, nView);
             break;
 
-        //        case ADMIN:
-        //            break;
+        case ADMIN:
+            AdminView aView = new AdminView();
+            addHeaderSearchHandler(aView);
+            presenter = new AdminPresenter(this.service, this.eventBus, aView);
+            break;
 
         case LOGIN:
         default:
@@ -258,6 +265,7 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         presenter.go(this.container);
     }
 
+    // TODO : this can go into the abstract presenter at some point
     private void addHeaderSearchHandler(final AbstractLayout view) {
         if (view == null)
             return;

@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.jbei.ice.client.bulkimport.model.SheetFieldData;
+import org.jbei.ice.client.bulkimport.sheet.Header;
+import org.jbei.ice.client.bulkimport.sheet.ImportTypeHeaders;
 import org.jbei.ice.shared.AutoCompleteField;
+import org.jbei.ice.shared.EntryAddType;
 
 import com.google.gwt.user.client.Window;
 
@@ -27,9 +30,11 @@ public class SheetPresenter {
 
     private final View view;
     private HashMap<AutoCompleteField, ArrayList<String>> data;
+    private final EntryAddType type;
 
-    public SheetPresenter(View view) {
+    public SheetPresenter(View view, EntryAddType type) {
         this.view = view;
+        this.type = type;
     }
 
     public void reset() {
@@ -46,5 +51,22 @@ public class SheetPresenter {
             return null;
 
         return data.get(field);
+    }
+
+    public EntryAddType getType() {
+        return this.type;
+    }
+
+    public Header[] getTypeHeaders() {
+        return ImportTypeHeaders.getHeadersForType(type);
+    }
+
+    /**
+     * @return size of the field, which also equates to
+     *         the number of columns displayed in the sheet. This is based on the number of
+     *         headers for the entry type
+     */
+    public int getFieldSize() {
+        return getTypeHeaders().length;
     }
 }

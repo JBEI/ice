@@ -3,6 +3,7 @@ package org.jbei.ice.client.bulkimport.model;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.bulkimport.sheet.Header;
+import org.jbei.ice.shared.BioSafetyOptions;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
@@ -55,14 +56,9 @@ public class StrainSheetModel extends SingleInfoSheetModel {
             break;
 
         case BIOSAFETY:
-            try {
-                info.setBioSafetyLevel(Integer.valueOf(value));
-
-            } catch (NumberFormatException nfe) {
-                //                 TODO : this is for validation
-                //                                throw new IllegalArgumentException("Illegal Pairing of Biosafety and value of "
-                //                                        + value);
-            }
+            Integer optionValue = BioSafetyOptions.intValue(value);
+            if (optionValue != null)
+                info.setBioSafetyLevel(optionValue);
             break;
 
         case NAME:
@@ -109,6 +105,7 @@ public class StrainSheetModel extends SingleInfoSheetModel {
             analysisInfo.setFileId(datum.getId());
             seq.add(analysisInfo);
             info.setHasSequence(true);
+            info.setSequenceAnalysis(seq);
             break;
 
         case ATT_FILENAME:
@@ -123,6 +120,7 @@ public class StrainSheetModel extends SingleInfoSheetModel {
             att.setFileId(datum.getId());
             attInfo.add(att);
             info.setHasAttachment(true);
+            info.setAttachments(attInfo);
             break;
 
         case SELECTION_MARKERS:

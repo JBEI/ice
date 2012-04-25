@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public abstract class AbstractLayout extends Composite {
 
-    private HeaderView headerView; // TODO : convert to interface
+    private HeaderView headerView;
     private HeaderMenu headerMenu;
 
     public AbstractLayout() {

@@ -201,7 +201,7 @@ public class BulkImportPresenter extends AbstractPresenter {
 
             ArrayList<SheetFieldData[]> cellData = currentInput.getSheet().getCellData();
             if (cellData == null || cellData.isEmpty()) {
-                view.showFeedback("Please enter data into the sheet before saving", true);
+                view.showFeedback("Please enter data into the sheet before saving.", true);
                 return;
             }
 
@@ -216,7 +216,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                             view.showFeedback("Entries submitted successfully for verification.",
                                 false);
                         } else {
-                            view.showFeedback("Error saving entries", true);
+                            view.showFeedback("Error saving entries.", true);
                         }
                     }
                 });

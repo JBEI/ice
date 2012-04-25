@@ -3,6 +3,7 @@ package org.jbei.ice.client.bulkimport.model;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.bulkimport.sheet.Header;
+import org.jbei.ice.shared.BioSafetyOptions;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
@@ -63,13 +64,9 @@ public class StrainWithPlasmidModel extends SheetModel {
             break;
 
         case BIOSAFETY:
-            try {
-                strain.setBioSafetyLevel(Integer.valueOf(value));
-
-            } catch (NumberFormatException nfe) {
-                throw new IllegalArgumentException("Illegal Pairing of Biosafety and value of "
-                        + value);
-            }
+            Integer optionValue = BioSafetyOptions.intValue(value);
+            if (optionValue != null)
+                strain.setBioSafetyLevel(optionValue);
             break;
 
         case STRAIN_NAME:
@@ -116,6 +113,7 @@ public class StrainWithPlasmidModel extends SheetModel {
             analysisInfo.setFileId(datum.getId());
             seq.add(analysisInfo);
             strain.setHasSequence(true);
+            strain.setSequenceAnalysis(seq);
             break;
 
         case STRAIN_ATT_FILENAME:
@@ -130,6 +128,7 @@ public class StrainWithPlasmidModel extends SheetModel {
             att.setFileId(datum.getId());
             attInfo.add(att);
             strain.setHasAttachment(true);
+            strain.setAttachments(attInfo);
             break;
 
         case STRAIN_SELECTION_MARKERS:
@@ -173,13 +172,9 @@ public class StrainWithPlasmidModel extends SheetModel {
             break;
 
         case BIOSAFETY:
-            try {
-                info.setBioSafetyLevel(Integer.valueOf(value));
-
-            } catch (NumberFormatException nfe) {
-                throw new IllegalArgumentException("Illegal Pairing of Biosafety and value of "
-                        + value);
-            }
+            Integer optionValue = BioSafetyOptions.intValue(value);
+            if (optionValue != null)
+                info.setBioSafetyLevel(optionValue);
             break;
 
         case PLASMID_NAME:
@@ -226,6 +221,7 @@ public class StrainWithPlasmidModel extends SheetModel {
             analysisInfo.setFileId(datum.getId());
             seq.add(analysisInfo);
             info.setHasSequence(true);
+            info.setSequenceAnalysis(seq);
             break;
 
         case PLASMID_ATT_FILENAME:
@@ -240,6 +236,7 @@ public class StrainWithPlasmidModel extends SheetModel {
             att.setFileId(datum.getId());
             attInfo.add(att);
             info.setHasAttachment(true);
+            info.setAttachments(attInfo);
             break;
 
         case PLASMID_SELECTION_MARKERS:

@@ -306,15 +306,13 @@ a.cell_mouseover:hover {
     border-top: 1px solid #ccc;
     width: 130px;
     height: 19px;
-    font-size: 0.80em;
+    font-size: 0.75em;
 }
 
 .cell_input {
-	border: 1px solid #333;
-	width: 129px;
-	height: 15px;
 	font-size: 0.70em;
-	padding: 3px 0px 0px 0px;
+	padding: 0px;
+	display: block; margin: 0; height: 18px; width: 129px; border: 1px solid #333; 
 }
 
 .cell_selected {

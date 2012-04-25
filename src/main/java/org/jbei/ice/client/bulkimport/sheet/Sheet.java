@@ -17,6 +17,7 @@ import org.jbei.ice.client.bulkimport.SheetPresenter;
 import org.jbei.ice.client.bulkimport.model.SheetFieldData;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.shared.AutoCompleteField;
+import org.jbei.ice.shared.BioSafetyOptions;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -76,7 +77,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
     private final int WIDTH = 40; //300;
     private final int HEIGHT = 320;
 
-    private final EntryAddType type;
+    //    private final EntryAddType type;
     private int headerCol;
 
     protected final SheetPresenter presenter;
@@ -93,7 +94,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     public Sheet(EntryAddType type, BulkImportDraftInfo info) {
 
-        this.type = type;
         this.info = info;
 
         headerCol = 0;
@@ -125,7 +125,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         // then wrap it in a scroll panel that expands to fill area given by browser
         wrapper = new ScrollPanel(panel);
-        wrapper.setWidth((Window.getClientWidth() - WIDTH - 25) + "px");
+        wrapper.setWidth((Window.getClientWidth() - WIDTH - 4) + "px");
         wrapper.setHeight((Window.getClientHeight() - HEIGHT) + "px");
 
         colIndex = new FlexTable();
@@ -149,12 +149,14 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         // init
         headerWrapper = new ScrollPanel(header);
-        init();
+
         addScrollHandlers();
         addResizeHandler();
 
         // presenter
-        presenter = new SheetPresenter(this);
+        presenter = new SheetPresenter(this, type);
+
+        init();
     }
 
     private void addResizeHandler() {
@@ -162,7 +164,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
             @Override
             public void onResize(ResizeEvent event) {
-                headerWrapper.setWidth((wrapper.getOffsetWidth() - 15 + 40) + "px"); // TODO : ditto on 15px here also and the 40 is for the leader_header
+                headerWrapper.setWidth((wrapper.getOffsetWidth() - 15 + WIDTH) + "px"); // TODO : ditto on 15px here also and the 40 is for the leader_header
             }
         });
     }
@@ -219,27 +221,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     public void setAutoCompleteData(HashMap<AutoCompleteField, ArrayList<String>> data) {
         presenter.setAutoCompleteData(data);
-    }
-
-    @Override
-    public void onBrowserEvent(Event event) {
-        super.onBrowserEvent(event);
-
-        switch (DOM.eventGetType(event)) {
-        case Event.ONDBLCLICK:
-            Window.alert("double click");
-            break;
-
-        case Event.ONMOUSEUP:
-            if (DOM.eventGetButton(event) == Event.BUTTON_LEFT) {
-                // TODO ???
-            }
-
-            if (DOM.eventGetButton(event) == Event.BUTTON_RIGHT) {
-                event.stopPropagation();
-                event.preventDefault();
-            }
-        }
     }
 
     private void addWindowResizeHandler() {
@@ -326,7 +307,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
     protected Widget createHeaderCells() {
         addLeadHeader();
 
-        Header[] headers = ImportTypeHeaders.getHeadersForType(type);
+        Header[] headers = presenter.getTypeHeaders();
         new SheetHeader(headers, headerCol, row, header);
 
         headerCol += headers.length;
@@ -360,7 +341,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
             if (isEmptyRow(i))
                 continue;
 
-            final int FIELDS = ImportTypeHeaders.getHeadersForType(type).length;
+            final int FIELDS = presenter.getFieldSize();
 
             for (int j = 0; j < FIELDS; j += 1) {
                 HasText widget = (HasText) sheetTable.getWidget(row, i);
@@ -374,7 +355,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
     public ArrayList<SheetFieldData[]> getCellData() {
         ArrayList<SheetFieldData[]> cellData = new ArrayList<SheetFieldData[]>();
 
-        Header[] headers = ImportTypeHeaders.getHeadersForType(type);
+        Header[] headers = presenter.getTypeHeaders();
         SheetFieldData[] row = null;
 
         for (int i = 0; i < sheetTable.getRowCount(); i += 1) {
@@ -386,13 +367,16 @@ public class Sheet extends Composite implements SheetPresenter.View {
             int y = 0;
             for (Header header : headers) {
 
-                String id;
-                if (header == Header.ATT_FILENAME) {
+                String id = "";
+                switch (header) {
+                case ATT_FILENAME:
                     id = attachmentRowFileIds.get(i);
-                } else if (header == Header.SEQ_FILENAME) {
+                    break;
+
+                case SEQ_FILENAME:
                     id = sequenceRowFileIds.get(i);
-                } else
-                    id = "";
+                    break;
+                }
 
                 HasText widget = (HasText) sheetTable.getWidget(i, y);
                 row[y] = new SheetFieldData(header, id, widget.getText());
@@ -440,7 +424,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
             // TODO : sometimes input box is active and user clicks submit
             int y = 0;
-            for (Header header : ImportTypeHeaders.getHeadersForType(type)) {
+            for (Header header : presenter.getTypeHeaders()) {
                 Widget widget = sheetTable.getWidget(i, y);
                 if (widget instanceof Label) {
                     Label label = (Label) widget;
@@ -461,7 +445,9 @@ public class Sheet extends Composite implements SheetPresenter.View {
         return validates;
     }
 
-    // put textinput in cell
+    /**
+     * Replaces the cell with an input widget that is determined by the type of header
+     */
     private void switchToInput() {
 
         // get widget at current position. expect it to be a label
@@ -486,80 +472,85 @@ public class Sheet extends Composite implements SheetPresenter.View {
         inputRow = currentRow;
 
         // replace
-        final Header currentHeader = ImportTypeHeaders.getHeadersForType(this.type)[currentIndex];
-        FieldType fieldType = currentHeader.geFieldType();
+        final Header currentHeader = presenter.getTypeHeaders()[currentIndex];
         String text = sheetTable.getText(currentRow, currentIndex);
 
-        if (fieldType == null) {
+        // TODO : cache. this is called repeatedly for each click, resulting in the objects in here being created 
+        switch (currentHeader) {
+        case BIOSAFETY:
+            MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
+            oracle = new MultiWordSuggestOracle();
+
+            oracle.addAll(BioSafetyOptions.getDisplayList());
+            MultipleTextBox textBox = new MultipleTextBox();
+            box = new SuggestBox(oracle, textBox);
+            box.setStyleName("cell_input");
+            box.setWidth("129px");
+            box.setText(text);
+            sheetTable.setWidget(currentRow, currentIndex, box);
+            textBox.setFocus(true);
+            break;
+
+        case SELECTION_MARKERS:
+            AutoCompleteField field = AutoCompleteField.fieldValue(currentHeader.name());
+            ArrayList<String> list = presenter.getAutoCompleteData(field);
+
+            oracle = new MultiWordSuggestOracle();
+            oracle.addAll(new TreeSet<String>(list));
+            textBox = new MultipleTextBox();
+            box = new SuggestBox(oracle, textBox);
+            box.setStyleName("cell_input");
+            box.setWidth("129px");
+            box.setText(text);
+            sheetTable.setWidget(currentRow, currentIndex, box);
+            textBox.setFocus(true);
+            break;
+
+        case ATT_FILENAME:
+        case SEQ_FILENAME:
+            uploader = new SingleUploader(FileInputType.LABEL);
+            uploader.setAutoSubmit(true);
+            uploader.getWidget().setSize("129px", "26px");
+            uploader.getForm().setSize("129px", "26px");
+
+            uploader.addOnStartUploadHandler(new OnStartUploaderHandler() {
+
+                @Override
+                public void onStart(IUploader uploader) {
+                    uploader.setServletPath(uploader.getServletPath()
+                            + "?type=bulk_attachment&sid=" + AppController.sessionId);
+                }
+            });
+
+            uploader.addOnFinishUploadHandler(new OnFinishUploaderHandler() {
+                @Override
+                public void onFinish(IUploader uploader) {
+                    if (uploader.getStatus() == Status.SUCCESS) {
+                        UploadedInfo info = uploader.getServerInfo();
+                        if (info.message.isEmpty())
+                            return; // TODO : hook into error message
+
+                        // attachment or 
+                        if (currentHeader == Header.ATT_FILENAME) {
+                            attachmentRowFileIds.put(currentRow, info.message);
+                        } else if (currentHeader == Header.SEQ_FILENAME) {
+                            sequenceRowFileIds.put(currentRow, info.message);
+                        }
+
+                        filename = info.name;
+                        selectCell(currentRow, currentIndex, currentRow, currentIndex);
+                    } else {
+                        // TODO : notify user of error
+                    }
+                }
+            });
+            sheetTable.setWidget(currentRow, currentIndex, uploader.getWidget());
+            break;
+
+        default:
             input.setText(text);
             sheetTable.setWidget(currentRow, currentIndex, input);
             input.setFocus(true);
-        } else {
-            // TODO : cache 
-            switch (fieldType) {
-            case AUTO_COMPLETE:
-                AutoCompleteField field = AutoCompleteField.fieldValue(currentHeader.name());
-                ArrayList<String> list = presenter.getAutoCompleteData(field);
-
-                MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
-                oracle.addAll(new TreeSet<String>(list));
-                MultipleTextBox textBox = new MultipleTextBox();
-                box = new SuggestBox(oracle, textBox);
-                box.setStyleName("cell_input");
-                box.setWidth("129px");
-                box.setText(text);
-                sheetTable.setWidget(currentRow, currentIndex, box);
-                textBox.setFocus(true);
-                break;
-
-            case FILE_INPUT:
-                uploader = new SingleUploader(FileInputType.LABEL);
-                uploader.setAutoSubmit(true);
-                uploader.getWidget().setSize("129px", "26px");
-                uploader.getForm().setSize("129px", "26px");
-
-                //                uploader.getWidget().setStyleName();
-
-                uploader.addOnStartUploadHandler(new OnStartUploaderHandler() {
-
-                    @Override
-                    public void onStart(IUploader uploader) {
-                        uploader.setServletPath(uploader.getServletPath()
-                                + "?type=bulk_attachment&sid=" + AppController.sessionId);
-                    }
-                });
-
-                uploader.addOnFinishUploadHandler(new OnFinishUploaderHandler() {
-                    @Override
-                    public void onFinish(IUploader uploader) {
-                        if (uploader.getStatus() == Status.SUCCESS) {
-                            UploadedInfo info = uploader.getServerInfo();
-                            if (info.message.isEmpty())
-                                return; // TODO : hook into error message
-
-                            // attachment or 
-                            if (currentHeader == Header.ATT_FILENAME) {
-                                attachmentRowFileIds.put(currentRow, info.message);
-                            } else if (currentHeader == Header.SEQ_FILENAME) {
-                                sequenceRowFileIds.put(currentRow, info.message);
-                            }
-
-                            filename = info.name;
-                            selectCell(currentRow, currentIndex, currentRow, currentIndex);
-                        } else {
-                            // TODO : notify user of error
-                        }
-                    }
-                });
-                sheetTable.setWidget(currentRow, currentIndex, uploader.getWidget());
-                break;
-
-            case DATE:
-                break;
-            }
-
-            // TODO : handle other field types
-            //  BINARY, DATE, AUTO_COMPLETE, MULTI_SELECT, FILE_INPUT;
         }
     }
 
@@ -575,9 +566,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
             return;
 
         // exit for up arrow press in auto complete box
-        Header currentHeader = ImportTypeHeaders.getHeadersForType(this.type)[currentIndex];
-        FieldType fieldType = currentHeader.geFieldType();
-        if (fieldType == FieldType.AUTO_COMPLETE)
+        Header currentHeader = presenter.getTypeHeaders()[currentIndex];
+        if (currentHeader.hasAutoComplete())
             return;
 
         selectCell(currentRow, currentIndex, currentRow - 1, currentIndex);
@@ -591,9 +581,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
             return;
 
         // exit for down arrow press in auto complete box
-        Header currentHeader = ImportTypeHeaders.getHeadersForType(this.type)[currentIndex];
-        FieldType fieldType = currentHeader.geFieldType();
-        if (fieldType == FieldType.AUTO_COMPLETE)
+        Header currentHeader = presenter.getTypeHeaders()[currentIndex];
+        if (currentHeader.hasAutoComplete())
             return;
 
         selectCell(currentRow, currentIndex, currentRow + 1, currentIndex);
@@ -674,7 +663,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         int index = row - 1; // row includes the headers but this is 0-indexed
 
         // type is already set in the constructor 
-        Header[] headers = ImportTypeHeaders.getHeadersForType(this.type);
+        Header[] headers = presenter.getTypeHeaders();
         int headersSize = headers.length;
 
         for (int i = 0; i < headersSize; i += 1) {
@@ -685,8 +674,9 @@ public class Sheet extends Composite implements SheetPresenter.View {
                 if (info.getSecondary() != null)
                     secondaryInfo = info.getSecondary().get(index);
 
-                String value = InfoValueExtractorFactory.extractValue(this.type, headers[i],
-                    primaryInfo, secondaryInfo, index, attachmentRowFileIds, sequenceRowFileIds);
+                String value = InfoValueExtractorFactory.extractValue(presenter.getType(),
+                    headers[i], primaryInfo, secondaryInfo, index, attachmentRowFileIds,
+                    sequenceRowFileIds);
                 if (value == null)
                     value = "";
 
@@ -715,37 +705,28 @@ public class Sheet extends Composite implements SheetPresenter.View {
      * @return
      */
     private String getLastWidgetText() {
-        Header currentHeader = ImportTypeHeaders.getHeadersForType(this.type)[inputIndex];
-        FieldType fieldType = currentHeader.geFieldType();
+        Header currentHeader = presenter.getTypeHeaders()[inputIndex];
         String ret = "";
-        if (fieldType == null) {
-            ret = input.getText();
-            input.setText("");
-            return ret;
-        }
 
-        switch (fieldType) {
+        switch (currentHeader) {
 
-        case AUTO_COMPLETE:
+        case SELECTION_MARKERS: // TODO : for comma separated suggest boxes, if you append, the previous data is lost;
+        case BIOSAFETY:
             ret = box.getText();
             box.setText("");
-            break;
+            return ret;
 
-        case FILE_INPUT:
+        case ATT_FILENAME:
+        case SEQ_FILENAME:
             ret = filename;
             filename = "";
-            break;
+            return ret;
 
         default:
             ret = input.getText();
             input.setText("");
-            break;
+            return ret;
         }
-
-        if (ret == null)
-            ret = "";
-
-        return ret;
     }
 
     //
