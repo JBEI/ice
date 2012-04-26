@@ -101,14 +101,15 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
                     return;
 
                 presenter.optionSelected(event.getValue());
-                // TODO : we can either trigger a submit when user clicks a single cell
+                // we can either trigger a submit when user clicks a single cell
                 // or has the check box selected only (user then has to click submit)
-                // currently choosing the latter
-                //                dispatchSubmitEvent(); // 
+                // currently choosing the latter option
+                // dispatchSubmitEvent(); 
             }
         });
 
-        submitButton = new Button("Submit"); // TODO : styles
+        submitButton = new Button("Submit");
+        submitButton.setStyleName("saved_draft_button");
         submitButton.addKeyPressHandler(new EnterClickHandler(submitButton));
         submitButton.addClickHandler(new ClickHandler() {
 
@@ -119,7 +120,8 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
             }
         });
 
-        clearButton = new Button("Clear"); // TODO : styles
+        clearButton = new Button("Clear");
+        clearButton.setStyleName("saved_draft_button");
         clearButton.addKeyPressHandler(new EnterClickHandler(submitButton));
 
         Widget popup = createPopupWidget();

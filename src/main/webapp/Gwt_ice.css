@@ -278,6 +278,10 @@ a.cell_mouseover:hover {
 	background: #FCC;
 }
 
+.uploader_cell {
+	font-size:0.75em; border-right: 1px solid #CCC; border-top: 1px solid #CCC; height: 20px; width: 131px;
+}
+
 .cell_resize:hover {
 	background-color: #333;
 	cursor: e-resize;
@@ -338,11 +342,6 @@ a.cell_mouseover:hover {
 	border: 1px solid #ccc; width: 170px; padding: 5px; color: #777; font-size: 0.95em; font-family: Helvetica, Arial;
 }
 
-.GWTUpld .changed {
-    color: white;
-    font-weight: bold;
-    background-color: #0082C0;
-}
 
 .entry_loading_indicator {
 	z-index: 2147483647;
@@ -1403,22 +1402,22 @@ td.datePickerMonth {
 	height: 100%;
 }
 
-.GWTUpld .upld-status .status {
+ .upld-status .status {
 	padding-left: 8px;
 	white-space: nowrap;
 	height: 100%;
 }
 
-.GWTUpld .upld-status .status-success {
+ .upld-status .status-success {
 	color: green;
 }
 
-.GWTUpld .upld-status .status-error,.GWTUpld .upld-status .status-canceled
+ .upld-status .status-error, .upld-status .status-canceled
 	{
 	color: red;
 }
 
-.GWTUpld .prgbar-back {
+ .prgbar-back {
 	background: #ffffff none repeat scroll 0 0;
 	border: 1px solid #999999;
 	height: 12px;
@@ -1427,19 +1426,19 @@ td.datePickerMonth {
 	width: 170px;
 }
 
-* html .GWTUpld .prgbar-back {
+* html  .prgbar-back {
 	height: 12px;
 	margin-top: 2px;
 }
 
-.GWTUpld .prgbar-done {
+ .prgbar-done {
 	background: #d4e4ff none repeat scroll 0 0;
 	font-size: 0;
 	height: 100%;
 	float: left;
 }
 
-.GWTUpld .prgbar-msg {
+ .prgbar-msg {
 	position: absolute;
 	z-index: 9;
 	font-size: 9px;
@@ -1447,16 +1446,17 @@ td.datePickerMonth {
 	margin-left: 3px;
 }
 
-* html .GWTUpld .prgbar-msg {
+* html  .prgbar-msg {
 	top: 0px;
 	left: 4px;
 }
 
-.GWTUpld .changed {
-	color: red;
-	font-weight: bold;
-	text-decoration: blink;
+ .changed {
+    color: white;
+    font-weight: bold;
+    background-color: #0082C0;
 }
+
 
 .gwt-PopupPanel .GWTUpld {
 	border: 2px groove #F6A828;
@@ -1558,9 +1558,11 @@ td.datePickerMonth {
   top: -24px;
   right: 4px;
 }
+
 .gwt-DialogBox .dialogControls a {
   cursor: pointer;
 }
+
 .gwt-DialogBox .dialogMiddleCenter {
 	padding: 3px;
 	background: white;
@@ -1583,11 +1585,13 @@ td.datePickerMonth {
 	background-color: #f3f3f3; border: 1px solid #ccc; padding: 4px; font-weight: bold; color: #666; font-family: arial; font-size: 0.7em; box-shadow: 0 0 1px 0px #ddd; border-radius: 2px; cursor: pointer;
 }
 
-.saved_draft_button[disabled] {
-	background-color: #f1f2f3; border: 1px solid #efefef; padding: 4px; color: #999; font-family: Helvetica, arial; font-size: 0.7em; -moz-border-radius: 2px 4px; border-radius: 2px 4px; -webkit-border-radius: 2px 4px;
+.saved_draft_button:hover {
+    background-color: #f1f2f3; border: 1px solid #999; padding: 4px; font-weight: bold; color: #333; font-family: arial; font-size: 0.7em; box-shadow: 0 0 1px 1px #ddd; border-radius: 2px; cursor: pointer;
 }
 
-.saved_draft_button:hover {
-	background-color: #f1f2f3; border: 1px solid #999; padding: 4px; font-weight: bold; color: #333; font-family: arial; font-size: 0.7em; box-shadow: 0 0 1px 1px #ddd; border-radius: 2px; cursor: pointer;
+.saved_draft_button[disabled], .saved_draft_button[disabled]:hover {
+	background-color: #f1f2f3; border: 1px solid #efefef; padding: 4px; color: #bbb; font-family: Helvetica, arial; font-size: 0.7em; -moz-border-radius: 2px 4px; border-radius: 2px 4px; -webkit-border-radius: 2px 4px; box-shadow: 0 0 0 0 #ddd; cursor: default;
 }
+
+
 

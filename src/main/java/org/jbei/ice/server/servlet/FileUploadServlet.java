@@ -125,7 +125,7 @@ public class FileUploadServlet extends UploadAction {
 
                 return uploadBulkAttachment(file, saveName);
             } else if (BULK_SEQUENCE_TYPE.equalsIgnoreCase(type)) {
-
+                // TODO : ??
             }
         }
 

@@ -16,12 +16,8 @@ import java.util.ArrayList;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.client.entry.view.view.AttachmentListMenuPresenter.IAttachmentListMenuView;
 
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.FocusEvent;
-import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -30,11 +26,9 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -55,7 +49,6 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
     private Image quickAdd;
     private long entryId;
     private final TextArea attachmentDescription;
-    private final String DESCRIPTION_MSG = "Enter File Description";
 
     public AttachmentListMenu() {
         layout = new FlexTable();
@@ -71,7 +64,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         quickAdd.setStyleName("collection_quick_add_image");
         attachmentDescription = new TextArea();
         attachmentDescription.setStyleName("attachment_description_input");
-        attachmentDescription.setText(DESCRIPTION_MSG);
+        attachmentDescription.getElement().setAttribute("placeholder", "Enter File Description");
 
         panel.add(quickAdd);
         panel.setWidth("100%");
@@ -165,27 +158,10 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         };
 
         saveAttachment.setText("Submit");
+        saveAttachment.setEnabled(false);
         saveAttachment.setStyleName("entry_attachment_submit_button");
         uploader.setAutoSubmit(false);
         uploader.getForm().setWidth("180px");
-
-        attachmentDescription.addFocusHandler(new FocusHandler() {
-
-            @Override
-            public void onFocus(FocusEvent event) {
-                if (DESCRIPTION_MSG.equalsIgnoreCase(attachmentDescription.getText().trim()))
-                    attachmentDescription.setText("");
-            }
-        });
-
-        attachmentDescription.addBlurHandler(new BlurHandler() {
-
-            @Override
-            public void onBlur(BlurEvent event) {
-                if (attachmentDescription.getText().trim().isEmpty())
-                    attachmentDescription.setText(DESCRIPTION_MSG);
-            }
-        });
 
         uploader.add(attachmentDescription, 1);
         uploader.setFileInputSize(13);
@@ -194,8 +170,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
 
             @Override
             public void onStart(IUploader uploader) {
-                String attDesc = DESCRIPTION_MSG.equals(attachmentDescription.getText()) ? ""
-                        : attachmentDescription.getText();
+                String attDesc = attachmentDescription.getText().trim();
                 uploader.setServletPath(uploader.getServletPath() + "?desc=" + attDesc + "&eid="
                         + entryId + "&type=attachment");
                 attachmentDescription.setVisible(false);
@@ -206,8 +181,15 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
 
             @Override
             public void onStatusChanged(IUploader uploader) {
-                if (uploader.getStatus() == Status.ERROR) {
+                switch (uploader.getStatus()) {
+                case ERROR:
                     Window.alert(uploader.getServerResponse());
+                    saveAttachment.setEnabled(false);
+                    break;
+
+                case CHANGED:
+                    saveAttachment.setEnabled(true);
+                    break;
                 }
             }
         });
@@ -218,18 +200,18 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
                     switchAttachmentAddButton();
                     UploadedInfo info = uploader.getServerInfo();
                     String fileId = info.message;
-                    String attDesc = DESCRIPTION_MSG.equals(attachmentDescription.getText()) ? ""
-                            : attachmentDescription.getText();
+                    String attDesc = attachmentDescription.getText().trim();
                     int rowCount = layout.getRowCount();
                     AttachmentItem item = new AttachmentItem(rowCount + 1, info.name, attDesc);
                     item.setFileId(fileId);
                     addMenuItem(item);
-                    attachmentDescription.setText(DESCRIPTION_MSG);
                     attachmentDescription.setVisible(true);
                     uploader.reset();
                 } else {
                     // TODO : notify user of error
                 }
+
+                attachmentDescription.setVisible(true);
             }
         });
 
@@ -238,8 +220,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
             @Override
             public void onCancel(IUploader uploader) {
                 uploader.cancel();
-                attachmentDescription.setText(DESCRIPTION_MSG);
-                attachmentDescription.setVisible(true);
+                //                attachmentDescription.setVisible(true);
             }
         });
 
@@ -276,36 +257,10 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
     // inner classes
     private class AttachmentUploadStatus extends BaseUploadStatus {
 
-        private Widget prg;
-
-        @Override
-        protected Panel getPanel() {
-            return new VerticalPanel();
-        }
-
-        @Override
-        protected Label getCancelLabel() {
-            return new Label(" ");
-        }
-
-        protected void setProgressWidget(Widget progress) {
-            if (prg != null) {
-                panel.remove(prg);
-            }
-            prg = progress;
-            panel.add(prg);
-            prg.setVisible(false);
-        }
-
         @Override
         protected void addElementsToPanel() {
-            panel.add(fileNameLabel);
-            HTMLPanel wrapper = new HTMLPanel(
-                    "<span id=\"status_upload\"></span><span id=\"cancel_upload\"></span>");
-
-            wrapper.add(cancelLabel, "cancel_upload");
-            wrapper.add(statusLabel, "status_upload");
-            panel.add(wrapper);
+            panel.add(statusLabel);
+            panel.add(cancelLabel);
         }
 
         @Override

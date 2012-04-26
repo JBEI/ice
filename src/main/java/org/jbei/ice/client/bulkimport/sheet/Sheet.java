@@ -3,6 +3,7 @@ package org.jbei.ice.client.bulkimport.sheet;
 import gwtupload.client.IFileInput.FileInputType;
 import gwtupload.client.IUploadStatus.Status;
 import gwtupload.client.IUploader;
+import gwtupload.client.IUploader.OnCancelUploaderHandler;
 import gwtupload.client.IUploader.OnFinishUploaderHandler;
 import gwtupload.client.IUploader.OnStartUploaderHandler;
 import gwtupload.client.IUploader.UploadedInfo;
@@ -508,10 +509,12 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         case ATT_FILENAME:
         case SEQ_FILENAME:
-            uploader = new SingleUploader(FileInputType.LABEL);
+            Label label = new Label("Upload file"); // TODO : style
+
+            final FileUploadStatus uploaderStatus = new FileUploadStatus();
+            uploader = new SingleUploader(FileInputType.CUSTOM.with(label), uploaderStatus);
             uploader.setAutoSubmit(true);
-            uploader.getWidget().setSize("129px", "26px");
-            uploader.getForm().setSize("129px", "26px");
+            uploader.getWidget().setStyleName("uploader_cell");
 
             uploader.addOnStartUploadHandler(new OnStartUploaderHandler() {
 
@@ -519,6 +522,17 @@ public class Sheet extends Composite implements SheetPresenter.View {
                 public void onStart(IUploader uploader) {
                     uploader.setServletPath(uploader.getServletPath()
                             + "?type=bulk_attachment&sid=" + AppController.sessionId);
+                    //                    sheetTable.setWidget(currentRow, currentIndex,
+                    //                        uploaderStatus.getProgressWidget());
+                }
+            });
+
+            uploader.addOnCancelUploadHandler(new OnCancelUploaderHandler() {
+
+                @Override
+                public void onCancel(IUploader uploader) {
+                    uploader.cancel();
+                    uploader.reset();
                 }
             });
 

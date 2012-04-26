@@ -7,7 +7,7 @@ public class PlasmidInfo extends EntryInfo {
     private String backbone;
     private String originOfReplication;
     private String promoters;
-    private boolean circular;
+    private Boolean circular;
     private HashMap<Long, String> strains; // id -> partNumber
 
     public PlasmidInfo() {
@@ -39,12 +39,12 @@ public class PlasmidInfo extends EntryInfo {
         this.promoters = promoters;
     }
 
-    public boolean getCircular() {
+    public Boolean getCircular() {
         return circular;
     }
 
     public void setCircular(boolean circular) {
-        this.circular = circular;
+        this.circular = new Boolean(circular);
     }
 
     public HashMap<Long, String> getStrains() {

@@ -212,7 +212,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                     public void onSubmit(BulkImportSubmitEvent event) {
                         if (event.isSuccess()) {
                             //
-                            // TODO : reset
+                            // TODO : reset sheet to avoid re-submission
                             view.showFeedback("Entries submitted successfully for verification.",
                                 false);
                         } else {

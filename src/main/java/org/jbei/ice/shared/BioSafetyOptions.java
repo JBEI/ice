@@ -24,6 +24,14 @@ public enum BioSafetyOptions implements IsSerializable {
         return this.value;
     }
 
+    public static BioSafetyOptions enumValue(Integer i) {
+        for (BioSafetyOptions option : BioSafetyOptions.values()) {
+            if (Integer.valueOf(option.value) == i)
+                return option;
+        }
+        return null;
+    }
+
     public static Integer intValue(String value) {
         for (BioSafetyOptions option : BioSafetyOptions.values()) {
             if (option.displayName.equals(value) || option.getValue().equals(value)) {

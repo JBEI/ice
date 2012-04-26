@@ -4,7 +4,6 @@
   <inherits name='com.google.gwt.user.User'/>
   <inherits name="gwtupload.GWTUpload"/>
   
-  <stylesheet src="Upload.css"/>
   <!--  Inherit the default GWT style sheet.  You can change       -->
   <!-- the theme of your GWT application by uncommenting          -->
   <!-- any one of the following lines.                            -->

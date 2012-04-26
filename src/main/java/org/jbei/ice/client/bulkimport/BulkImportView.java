@@ -55,8 +55,11 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
 
         // bulk import draft update button
         updateButton = new Button("Update");
+        updateButton.setStyleName("saved_draft_button");
         saveButton = new Button("Submit");
+        saveButton.setStyleName("saved_draft_button");
         resetButton = new Button("Reset");
+        resetButton.setStyleName("saved_draft_button");
         draftInput = new SaveDraftInput();
         uploadCsv = ImageUtil.getUploadImage();
     }
@@ -158,7 +161,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
                             + bulkImport.getName()
                             + "</span>"
                             + "<span style=\"float: right; text-align: right\" id=\"bulk_import_submit\">"
-                            + "<span id=\"bulk_import_feedback\"></span> &nbsp; <span id=\"bulk_import_draft_update\"></span></span>");
+                            + "<span id=\"bulk_import_feedback\"></span> &nbsp; <span id=\"bulk_import_draft_update\"></span>&nbsp;</span>");
 
             panel.add(updateButton, "bulk_import_draft_update");
             panel.add(feedback, "bulk_import_feedback");
@@ -168,7 +171,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
             panel = new HTMLPanel(
                     "<span style=\"vertical-align: middle\" id=\"bulk_import_input\"></span> "
                             + "<span style=\"float: right;  text-align: right\" id=\"bulk_import_submit\">"
-                            + "<span id=\"bulk_import_feedback\"></span> &nbsp; <span id=\"bulk_import_draft_reset\"></span></span>");
+                            + "<span id=\"bulk_import_feedback\"></span> &nbsp; <span id=\"bulk_import_draft_reset\"></span>&nbsp;</span>");
 
             panel.add(draftInput, "bulk_import_input");
             panel.add(resetButton, "bulk_import_draft_reset");
