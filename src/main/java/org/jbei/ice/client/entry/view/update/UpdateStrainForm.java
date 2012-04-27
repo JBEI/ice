@@ -3,6 +3,7 @@ package org.jbei.ice.client.entry.view.update;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.StrainInfo;
 
@@ -158,7 +159,8 @@ public class UpdateStrainForm extends UpdateEntryForm<StrainInfo> {
         strain.setHost(host.getText());
         strain.setGenotypePhenotype(genPhen.getText());
         strain.setPlasmids(plasmids.getText());
-        strain.setSelectionMarkers(markers.getText());
+        String selectionMarkers = ((MultipleTextBox) markers.getTextBox()).getWholeText();
+        strain.setSelectionMarkers(selectionMarkers);
     }
 
     @Override

@@ -3,6 +3,7 @@ package org.jbei.ice.client.entry.view.update;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 
@@ -108,7 +109,6 @@ public class UpdatePlasmidForm extends UpdateEntryForm<PlasmidInfo> {
         // circular
         row += 1;
         setLabel(false, "Circular", general, row, 0);
-        circular.setValue(true);
         general.setWidget(row, 1, circular);
         general.getFlexCellFormatter().setColSpan(row, 1, 3);
 
@@ -180,7 +180,8 @@ public class UpdatePlasmidForm extends UpdateEntryForm<PlasmidInfo> {
         // plasmid specific fields
         PlasmidInfo info = super.getEntryInfo();
 
-        info.setSelectionMarkers(markers.getText());
+        String selectionMarkers = ((MultipleTextBox) markers.getTextBox()).getWholeText();
+        info.setSelectionMarkers(selectionMarkers);
         info.setBackbone(this.backbone.getText());
         info.setOriginOfReplication(this.origin.getText());
         info.setPromoters(this.promoters.getText());

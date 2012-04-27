@@ -37,7 +37,6 @@ public class UpdatePartForm extends UpdateEntryForm<PartInfo> {
         // alias
         row += 1;
         setLabel(false, "Alias", general, row, 0);
-        general.getFlexCellFormatter().setWidth(row, 2, "170px");
         general.setWidget(row, 1, alias);
 
         // creator

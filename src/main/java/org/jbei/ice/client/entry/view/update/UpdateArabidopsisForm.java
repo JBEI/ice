@@ -3,6 +3,7 @@ package org.jbei.ice.client.entry.view.update;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.Generation;
@@ -61,6 +62,7 @@ public class UpdateArabidopsisForm extends UpdateEntryForm<ArabidopsisSeedInfo> 
 
     }
 
+    @Override
     protected void initComponents() {
         super.initComponents();
         markers = createAutoCompleteForSelectionMarkers("300px");
@@ -217,7 +219,8 @@ public class UpdateArabidopsisForm extends UpdateEntryForm<ArabidopsisSeedInfo> 
         super.populateEntry();
 
         ArabidopsisSeedInfo seed = super.getEntryInfo();
-        seed.setSelectionMarkers(markers.getText());
+        String selectionMarkers = ((MultipleTextBox) markers.getTextBox()).getWholeText();
+        seed.setSelectionMarkers(selectionMarkers);
 
         // below are the fields peculiar to this specialization
         Generation gen = Generation.valueOf(generation.getValue(generation.getSelectedIndex()));

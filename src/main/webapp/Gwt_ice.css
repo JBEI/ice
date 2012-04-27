@@ -172,6 +172,8 @@ body {
 .input_box {
 	background: none repeat scroll 0 0 #FFFFFF;
 	border: 1px solid #BBBBBB;
+	font-family: Helvetica, Arial;
+	font-size: 0.80em;
 }
 
 .entry_add_notes_input {
@@ -1066,11 +1068,6 @@ a:hover {
 	margin-right: 2px;
 }
 
-.gwt-TextBox,.input_box {
-	background: none repeat scroll 0 0 #FFFFFF;
-	border: 1px solid #BBBBBB;
-}
-
 .pager {
 	border: 1px solid #CCC;
 	width: 100%;
@@ -1333,6 +1330,8 @@ td.datePickerMonth {
 	color: #444;
 	font-weight: bold;
 	border-left: 1px solid #F1F1F1;
+    text-transform: uppercase;
+    font-style: italic;
 }
 
 .add_new_entry_sub_content {

@@ -123,7 +123,9 @@ public class ParametersPanel {
 
             // plus, minus buttons for adding and removing rows. first row does not have the minus button
             plus = new Button("+");
+            plus.setStyleName("pull_down");
             minus = new Button("-");
+            minus.setStyleName("pull_down");
             table.setWidget(row, 4, plus);
             if (!firstRow) {
                 table.getFlexCellFormatter().setWidth(row, 4, "20px");

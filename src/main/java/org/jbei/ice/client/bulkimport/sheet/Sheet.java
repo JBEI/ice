@@ -724,9 +724,9 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         switch (currentHeader) {
 
-        case SELECTION_MARKERS: // TODO : for comma separated suggest boxes, if you append, the previous data is lost;
+        case SELECTION_MARKERS:
         case BIOSAFETY:
-            ret = box.getText();
+            ret = ((MultipleTextBox) box.getTextBox()).getWholeText();
             box.setText("");
             return ret;
 

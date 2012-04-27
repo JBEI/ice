@@ -12,6 +12,8 @@ import org.jbei.ice.client.collection.add.form.ParametersPanel.Parameter;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.shared.AutoCompleteField;
+import org.jbei.ice.shared.BioSafetyOptions;
+import org.jbei.ice.shared.StatusType;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.ParameterInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
@@ -28,6 +30,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -56,6 +59,13 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
     protected TextBox alias;
     protected TextBox principalInvestigator;
     protected TextArea summary;
+    protected TextBox fundingSource;
+    protected ListBox status;
+    protected ListBox bioSafety;
+    protected TextBox links;
+    protected TextBox keywords;
+    protected TextArea references;
+    protected TextArea ip;
 
     private final T entryInfo;
     private ParametersPanel parametersPanel;
@@ -73,13 +83,32 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
     public NewSingleEntryForm(HashMap<AutoCompleteField, ArrayList<String>> data,
             String creatorName, String creatorEmail, T entryInfo) {
         layout = new FlexTable();
+        initWidget(layout);
+
         this.data = data;
         initComponents();
 
         this.entryInfo = entryInfo;
         this.creator.setText(creatorName);
         this.creatorEmail.setText(creatorEmail);
+
+        initLayout();
     }
+
+    protected void initLayout() {
+
+        layout.setWidth("100%");
+        layout.setCellPadding(2);
+        layout.setCellSpacing(0);
+
+        layout.setWidget(0, 0, createGeneralWidget());
+        layout.setWidget(1, 0, createParametersWidget());
+        layout.setWidget(2, 0, createSampleWidget());
+        layout.setWidget(3, 0, createNotesWidget());
+        layout.setWidget(4, 0, createSubmitCancelButtons());
+    }
+
+    protected abstract Widget createGeneralWidget();
 
     protected void initComponents() {
         submit = new Button("Submit");
@@ -92,10 +121,31 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         name = createStandardTextBox("205px");
         alias = createStandardTextBox("205px");
         principalInvestigator = createStandardTextBox("205px");
-
         summary = createTextArea("640px", "50px");
-
         sampleLocationScheme = new ArrayList<TextBox>();
+
+        fundingSource = createStandardTextBox("205px");
+        status = new ListBox();
+        status.setVisibleItemCount(1);
+        for (StatusType type : StatusType.values()) {
+            status.addItem(type.getDisplayName());
+        }
+        status.setStyleName("pull_down");
+
+        bioSafety = new ListBox();
+        bioSafety.setVisibleItemCount(1);
+        for (BioSafetyOptions options : BioSafetyOptions.values()) {
+            bioSafety.addItem(options.getDisplayName(), options.getValue());
+        }
+        bioSafety.setStyleName("pull_down");
+
+        links = createStandardTextBox("300px");
+        keywords = createStandardTextBox("640px");
+        references = createTextArea("640px", "50px");
+        ip = createTextArea("640px", "50px");
+        notesText = new TextArea();
+
+        sample = new FlexTable();
     }
 
     public T getEntryInfo() {
@@ -110,6 +160,27 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
     @Override
     public Button getCancel() {
         return this.cancel;
+    }
+
+    protected Widget createTextBoxWithHelp(Widget box, String helpText) {
+        String html = "<span id=\"box_id\"></span><span class=\"help_text\">" + helpText
+                + "</span>";
+        HTMLPanel panel = new HTMLPanel(html);
+        panel.addAndReplaceElement(box, "box_id");
+        return panel;
+    }
+
+    protected void setLabel(boolean required, String label, FlexTable layout, int row, int col) {
+        String html;
+        if (required)
+            html = "<span class=\"font-80em\" style=\"white-space:nowrap\">" + label
+                    + "  <span class=\"required\">*</span></span>";
+        else
+            html = "<span class=\"font-80em\" style=\"white-space:nowrap\">" + label + "</span>";
+
+        layout.setHTML(row, col, html);
+        layout.getFlexCellFormatter().setVerticalAlignment(row, col, HasAlignment.ALIGN_TOP);
+        layout.getFlexCellFormatter().setWidth(row, col, "170px");
     }
 
     protected Widget createNotesWidget() {
@@ -322,7 +393,6 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         parameters.getFlexCellFormatter().setHeight(1, 0, "10px");
         parameters.getFlexCellFormatter().setColSpan(1, 0, 6);
 
-        // TODO : parameter widget here
         parametersPanel = new ParametersPanel(parameters, 2);
 
         return parameters;
@@ -385,10 +455,6 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         box.setWidth(width);
         return box;
     }
-
-    //
-    // Abstract Methods
-    // 
 
     @Override
     public FocusWidget validateForm() {
@@ -509,16 +575,31 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
                 parameters.add(new ParameterInfo(name, value));
             }
         }
-
         this.entryInfo.setParameters(parameters);
 
         populateSamples();
-        this.entryInfo.setShortDescription(summary.getText());
 
-        // notes
+        this.entryInfo.setShortDescription(summary.getText());
         this.entryInfo.setLongDescription(this.notesText.getText());
         String longDescType = this.markupOptions.getItemText(this.markupOptions.getSelectedIndex());
         this.entryInfo.setLongDescriptionType(longDescType);
+
+        entryInfo.setName(name.getText());
+        entryInfo.setAlias(this.alias.getText());
+        entryInfo.setCreator(this.creator.getText());
+        entryInfo.setCreatorEmail(this.creatorEmail.getText());
+        entryInfo.setShortDescription(this.summary.getText());
+
+        entryInfo.setStatus(status.getValue(status.getSelectedIndex()));
+        entryInfo.setLinks(links.getText());
+        entryInfo.setKeywords(keywords.getText());
+        entryInfo.setReferences(references.getText());
+        int bioSafetySelectedIndex = bioSafety.getSelectedIndex();
+        int value = Integer.parseInt(bioSafety.getValue(bioSafetySelectedIndex));
+        entryInfo.setBioSafetyLevel(value);
+        entryInfo.setIntellectualProperty(ip.getText());
+        entryInfo.setPrincipalInvestigator(principalInvestigator.getText());
+
     }
 
     protected void populateSamples() {
