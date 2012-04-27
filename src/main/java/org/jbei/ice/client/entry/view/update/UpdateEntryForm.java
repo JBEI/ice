@@ -9,6 +9,8 @@ import org.jbei.ice.client.collection.add.form.ParametersPanel;
 import org.jbei.ice.client.collection.add.form.ParametersPanel.Parameter;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.shared.AutoCompleteField;
+import org.jbei.ice.shared.BioSafetyOptions;
+import org.jbei.ice.shared.StatusType;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.ParameterInfo;
 
@@ -20,6 +22,7 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
@@ -49,34 +52,30 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
 
     protected TextBox creator;
     protected TextBox creatorEmail;
+
+    protected TextBox fundingSource;
+    protected ListBox status;
+    protected ListBox bioSafety;
+    protected TextBox links;
+    protected TextBox keywords;
+    protected TextArea references;
+    protected TextArea ip;
+
+    private HandlerRegistration submitRegistration;
+    private HandlerRegistration cancelRegistration;
     private final T entryInfo;
     private ListBox markupOptions;
     private TextArea notesText;
     private ParametersPanel parametersPanel;
-
-    private HandlerRegistration submitRegistration;
-    private HandlerRegistration cancelRegistration;
 
     public UpdateEntryForm(HashMap<AutoCompleteField, ArrayList<String>> data, T entryInfo) {
         layout = new FlexTable();
         initWidget(layout);
 
         this.data = data;
-
         this.entryInfo = entryInfo;
-        submit = new Button("Submit");
-        submit.setStyleName("btn_submit_entry_form");
-        cancel = new Button("Cancel");
-        cancel.setStyleName("btn_reset_entry_form");
 
-        creator = createStandardTextBox("205px");
-        creatorEmail = createStandardTextBox("205px");
-
-        name = createStandardTextBox("205px");
-        alias = createStandardTextBox("205px");
-        principalInvestigator = createStandardTextBox("205px");
-
-        summary = createTextArea("640px", "50px");
+        initComponents();
 
         this.creator.setText(entryInfo.getCreator());
         this.creatorEmail.setText(entryInfo.getCreatorEmail());
@@ -85,12 +84,63 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
         this.principalInvestigator.setText(entryInfo.getPrincipalInvestigator());
         this.summary.setText(entryInfo.getShortDescription());
 
-        initComponents();
+        this.fundingSource.setText(entryInfo.getFundingSource());
+        for (int i = 0; i < this.status.getItemCount(); i += 1) {
+            if (status.getValue(i).equals(entryInfo.getStatus())) {
+                status.setSelectedIndex(i);
+                break;
+            }
+        }
 
+        for (int i = 0; i < this.bioSafety.getItemCount(); i += 1) {
+            if (bioSafety.getValue(i).equalsIgnoreCase(entryInfo.getBioSafetyLevel().toString())) {
+                this.bioSafety.setSelectedIndex(i);
+                break;
+            }
+        }
+        links.setText(entryInfo.getLinks());
+        keywords.setText(entryInfo.getKeywords());
+        ip.setText(entryInfo.getIntellectualProperty());
         this.notesText.setText(entryInfo.getLongDescription());
+
+        status.setVisibleItemCount(1);
+        for (StatusType type : StatusType.values()) {
+            status.addItem(type.getDisplayName());
+        }
+        status.setStyleName("input_box");
+
+        bioSafety.setVisibleItemCount(1);
+        for (BioSafetyOptions options : BioSafetyOptions.values()) {
+            bioSafety.addItem(options.getDisplayName(), options.getValue());
+        }
+        bioSafety.setStyleName("input_box");
+
+        initLayout();
     }
 
+    // create text boxes and other components
     protected void initComponents() {
+        submit = new Button("Submit");
+        submit.setStyleName("btn_submit_entry_form");
+        cancel = new Button("Cancel");
+        cancel.setStyleName("btn_reset_entry_form");
+        creator = createStandardTextBox("205px");
+        creatorEmail = createStandardTextBox("205px");
+        name = createStandardTextBox("205px");
+        alias = createStandardTextBox("205px");
+        principalInvestigator = createStandardTextBox("205px");
+        summary = createTextArea("640px", "50px");
+        fundingSource = createStandardTextBox("205px");
+        status = new ListBox();
+        bioSafety = new ListBox();
+        links = createStandardTextBox("300px");
+        keywords = createStandardTextBox("640px");
+        references = createTextArea("640px", "50px");
+        ip = createTextArea("640px", "50px");
+        notesText = new TextArea();
+    }
+
+    protected void initLayout() {
 
         layout.setWidth("100%");
         layout.setCellPadding(2);
@@ -133,14 +183,15 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
     }
 
     protected void setLabel(boolean required, String label, FlexTable layout, int row, int col) {
-        Widget labelWidget;
+        String html;
         if (required)
-            labelWidget = new HTML("<span class=\"font-80em\">" + label
-                    + "</span> <span class=\"required\">*</span>");
+            html = "<span class=\"font-80em\" style=\"white-space:nowrap\">" + label
+                    + "  <span class=\"required\">*</span></span>";
         else
-            labelWidget = new HTML("<span class=\"font-80em\">" + label + "</span>");
+            html = "<span class=\"font-80em\" style=\"white-space:nowrap\">" + label + "</span>";
 
-        layout.setWidget(row, col, labelWidget);
+        layout.setHTML(row, col, html);
+        layout.getFlexCellFormatter().setVerticalAlignment(row, col, HasAlignment.ALIGN_TOP);
         layout.getFlexCellFormatter().setWidth(row, col, "170px");
     }
 
@@ -179,7 +230,6 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
         notes.setWidget(3, 0, new Label(""));
         notes.getFlexCellFormatter().setWidth(3, 0, "170px");
 
-        notesText = new TextArea();
         notesText.setStyleName("entry_add_notes_input");
         notes.setWidget(3, 1, notesText);
 
@@ -278,10 +328,6 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
         return box;
     }
 
-    //
-    // Abstract Methods
-    // 
-
     @Override
     public FocusWidget validateForm() {
 
@@ -374,16 +420,26 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
 
         this.entryInfo.setParameters(parameters);
 
-        // notes
         this.entryInfo.setShortDescription(summary.getText());
         this.entryInfo.setLongDescription(this.notesText.getText());
         String longDescType = this.markupOptions.getItemText(this.markupOptions.getSelectedIndex());
         this.entryInfo.setLongDescriptionType(longDescType);
 
+        entryInfo.setName(name.getText());
         entryInfo.setAlias(this.alias.getText());
         entryInfo.setCreator(this.creator.getText());
         entryInfo.setCreatorEmail(this.creatorEmail.getText());
         entryInfo.setShortDescription(this.summary.getText());
+
+        entryInfo.setStatus(status.getValue(status.getSelectedIndex()));
+        entryInfo.setLinks(links.getText());
+        entryInfo.setKeywords(keywords.getText());
+        entryInfo.setReferences(references.getText());
+        int bioSafetySelectedIndex = bioSafety.getSelectedIndex();
+        int value = Integer.parseInt(bioSafety.getValue(bioSafetySelectedIndex));
+        entryInfo.setBioSafetyLevel(value);
+        entryInfo.setIntellectualProperty(ip.getText());
+        entryInfo.setPrincipalInvestigator(principalInvestigator.getText());
     }
 
     @Override

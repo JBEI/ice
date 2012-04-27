@@ -23,5 +23,6 @@ public class StrainDetailView extends EntryDetailView<StrainInfo> {
 
     @Override
     protected void addLongFields() {
+        addLongField("Selection Markers", info.getSelectionMarkers());
     }
 }

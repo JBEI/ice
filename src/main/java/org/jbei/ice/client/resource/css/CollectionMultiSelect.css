@@ -15,8 +15,12 @@
 }
 
 .cellTableCell {
-	font-size: 0.70em;
 	padding: 2px;
+    overflow: hidden;
+    border-bottom: 1px solid #F3F3F3;
+    color: #333333;
+    font-family: arial;
+    font-size: 0.75em;
     overflow: hidden;
 }
 
@@ -52,9 +56,11 @@
 }
 
 .cellTableEvenRow {
+	background-color: #FcFcFc;
 }
 
 .cellTableEvenRowCell {
+	
 }
 
 .cellTableOddRow {
@@ -86,6 +92,7 @@
 }
 
 .cellTableSelectedRowCell {
+	background-color: #f3f1d9;
 }
 
 /**

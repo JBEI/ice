@@ -79,7 +79,7 @@ public class LoginPresenter extends AbstractPresenter {
 
             @Override
             public void onFailure(Throwable caught) {
-                display.setLoginPassError("There was an error validating your account. Please try again.");
+                display.setLoginPassError("Could not retrieve authentication details.");
                 enableInputFields();
             }
 

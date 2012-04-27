@@ -13,8 +13,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -55,14 +53,15 @@ public class LoginView extends Composite implements ILoginView {
     }
 
     private Widget getRegisterPasswordPanel() {
+        return new HTML("&nbsp;");
         // TODO : use jbei settings to check if user can change password (PASSWORD_CHANGE_ALLOWED)
-        HorizontalPanel panel = new HorizontalPanel();
-        panel.setStyleName("font-85em");
-        panel.setSpacing(10);
-        panel.add(new Hyperlink("Forgot your password?", "foo"));
-        panel.add(new HTML("<span style=\"color: #ccc\">|</span>"));
-        panel.add(new Hyperlink("Register", "foo1"));
-        return panel;
+        //        HorizontalPanel panel = new HorizontalPanel();
+        //        panel.setStyleName("font-85em");
+        //        panel.setSpacing(10);
+        //        panel.add(new Hyperlink("Forgot your password?", "foo"));
+        //        panel.add(new HTML("<span style=\"color: #ccc\">|</span>"));
+        //        panel.add(new Hyperlink("Register", "foo1"));
+        //        return panel;
     }
 
     private void initComponents() {

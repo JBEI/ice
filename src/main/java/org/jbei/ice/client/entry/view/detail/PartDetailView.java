@@ -15,7 +15,5 @@ public class PartDetailView extends EntryDetailView<PartInfo> {
 
     @Override
     protected void addLongFields() {
-        // TODO Auto-generated method stub
-
     }
 }

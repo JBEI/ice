@@ -87,7 +87,7 @@
 
 @sprite .cellTableSelectedRow {
     gwt-image: 'cellTableSelectedBackground';
-    background-color: #ffc;
+    background-color: #f3f1d9;
     color: white;
     height: auto;
     overflow: auto;
