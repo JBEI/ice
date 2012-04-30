@@ -13,6 +13,7 @@ import gwtupload.client.SingleUploader;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.client.entry.view.view.AttachmentListMenuPresenter.IAttachmentListMenuView;
 
@@ -172,7 +173,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
             public void onStart(IUploader uploader) {
                 String attDesc = attachmentDescription.getText().trim();
                 uploader.setServletPath(uploader.getServletPath() + "?desc=" + attDesc + "&eid="
-                        + entryId + "&type=attachment");
+                        + entryId + "&type=attachment&sid=" + AppController.sessionId); // TODO : accessing session id directly from controller
                 attachmentDescription.setVisible(false);
             }
         });
