@@ -117,7 +117,7 @@ public class LoginPresenter extends AbstractPresenter {
 
         @Override
         public void onKeyPress(KeyPressEvent event) {
-            if (event.getCharCode() != KeyCodes.KEY_ENTER)
+            if (event.getNativeEvent().getKeyCode() != KeyCodes.KEY_ENTER)
                 return;
 
             login();

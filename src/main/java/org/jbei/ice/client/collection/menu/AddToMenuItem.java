@@ -248,7 +248,8 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
 
         @Override
         public void onKeyPress(KeyPressEvent event) {
-            if (event.getCharCode() != KeyCodes.KEY_ENTER)
+            int code = event.getNativeEvent().getKeyCode();
+            if (code != KeyCodes.KEY_ENTER)
                 return;
             hasClick.click();
         }

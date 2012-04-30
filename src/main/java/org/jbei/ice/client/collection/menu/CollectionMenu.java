@@ -6,6 +6,7 @@ import java.util.Set;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.shared.FolderDetails;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -23,7 +24,6 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -72,7 +72,6 @@ public class CollectionMenu extends Composite {
             // quick add widgets
             quickAddBox = new TextBox();
             quickAddBox.setStyleName("input_box");
-            quickAddBox.setText("Enter new collection name...");
             quickAddBox.setWidth("99%");
             quickAddButton = ImageUtil.getPlusIcon();
             quickAddButton.setStyleName("collection_quick_add_image");
@@ -168,7 +167,7 @@ public class CollectionMenu extends Composite {
 
             @Override
             public void onKeyPress(KeyPressEvent event) {
-                if (event.getCharCode() != KeyCodes.KEY_ENTER)
+                if (event.getNativeEvent().getKeyCode() != KeyCodes.KEY_ENTER)
                     return;
 
                 if (!validate())
@@ -351,12 +350,12 @@ public class CollectionMenu extends Composite {
             return;
 
         if (quickAddBox.isVisible()) {
-            quickAddButton.setUrl(ImageUtil.getPlusIcon().getUrl()); //Resources.INSTANCE.plusImage().getSafeUri());
+            quickAddButton.setUrl(ImageUtil.getPlusIcon().getUrl());
             quickAddButton.setStyleName("collection_quick_add_image");
             quickAddBox.setVisible(false);
             quickAddBox.setStyleName("input_box");
         } else {
-            quickAddButton.setUrl(ImageUtil.getMinusIcon().getUrl()); //Resources.INSTANCE.minusImage().getSafeUri());
+            quickAddButton.setUrl(ImageUtil.getMinusIcon().getUrl());
             quickAddButton.setStyleName("collection_quick_add_image");
             quickAddBox.setText("");
             quickAddBox.setVisible(true);
@@ -508,7 +507,7 @@ public class CollectionMenu extends Composite {
         private void setRightPanel(Widget widget) {
             Widget toReplace = panel.getWidget(0);
             if (toReplace == null)
-                Window.alert("Cannot replace widget");
+                GWT.log("Cannot replace widget"); // TODO
             else {
                 panel.remove(0);
                 panel.add(widget, folderId);
