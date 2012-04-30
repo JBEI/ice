@@ -35,9 +35,20 @@ public class SequenceDownloadServlet extends HttpServlet {
         Logger.info(SequenceDownloadServlet.class.getSimpleName()
                 + ": attempt to download sequence");
         Account account;
+        String entryId = request.getParameter("entry");
+        String type = request.getParameter(TYPE);
+        String sid = request.getParameter("sid");
 
         try {
             account = isLoggedIn(request.getCookies());
+            if (account == null) {
+                if (!AccountController.isAuthenticated(sid))
+                    return;
+                account = AccountController.getAccountBySessionKey(sid);
+                if (account == null)
+                    return;
+            }
+
         } catch (ControllerException ce) {
             Logger.error(ce);
             String url = request.getRequestURL().toString();
@@ -48,9 +59,6 @@ public class SequenceDownloadServlet extends HttpServlet {
                     + ": authenication failed. Redirecting user to " + url);
             return;
         }
-
-        String entryId = request.getParameter("entry");
-        String type = request.getParameter(TYPE);
 
         EntryController entryController = new EntryController(account);
         Entry entry = null;

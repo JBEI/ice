@@ -38,10 +38,24 @@ public class FileDownloadServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         Logger.info(FileDownloadServlet.class.getSimpleName() + ": attempt to download file");
+
+        String fileId = request.getParameter("id");
+        String type = request.getParameter("type");
+        String name = request.getParameter("name");
+        String sid = request.getParameter("sid");
+
         Account account;
 
         try {
             account = isLoggedIn(request.getCookies());
+            if (account == null) {
+                if (!AccountController.isAuthenticated(sid))
+                    return;
+                account = AccountController.getAccountBySessionKey(sid);
+                if (account == null)
+                    return;
+            }
+
         } catch (ControllerException ce) {
             Logger.error(ce);
             String url = request.getRequestURL().toString();
@@ -53,9 +67,6 @@ public class FileDownloadServlet extends HttpServlet {
             return;
         }
 
-        String fileId = request.getParameter("id");
-        String type = request.getParameter("type");
-        String name = request.getParameter("name");
         Logger.info(FileDownloadServlet.class.getSimpleName() + ": user = " + account.getEmail()
                 + ", file type = " + type + ", name = " + name + ", file id = " + fileId);
 

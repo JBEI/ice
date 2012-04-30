@@ -71,13 +71,20 @@ public class FileUploadServlet extends UploadAction {
     public String executeAction(HttpServletRequest request, List<FileItem> sessionFiles)
             throws UploadActionException {
 
+        String desc = request.getParameter("desc");
+        String type = request.getParameter("type");
+        String entryId = request.getParameter("eid");
+        String sid = request.getParameter("sid");
         Account account;
 
         try {
             account = isLoggedIn(request.getCookies());
             if (account == null) {
-                // TODO : check session id
-                return "";
+                if (!AccountController.isAuthenticated(sid))
+                    return "";
+                account = AccountController.getAccountBySessionKey(sid);
+                if (account == null)
+                    return "";
             }
 
         } catch (ControllerException ce) {
@@ -89,10 +96,6 @@ public class FileUploadServlet extends UploadAction {
                     + ": authenication failed. Redirecting user to " + url);
             return "";
         }
-
-        String desc = request.getParameter("desc");
-        String type = request.getParameter("type");
-        String entryId = request.getParameter("eid");
 
         for (FileItem item : sessionFiles) {
             if (item.isFormField())
