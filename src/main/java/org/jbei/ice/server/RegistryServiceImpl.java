@@ -55,6 +55,8 @@ import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.BulkImportEntryData;
+import org.jbei.ice.lib.utils.Emailer;
+import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.lib.utils.RichTextRenderer;
 import org.jbei.ice.lib.vo.IDNASequence;
@@ -1883,5 +1885,20 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.error(e);
         }
         return false;
+    }
+
+    @Override
+    public boolean sendFeedback(String email, String message) {
+        Emailer.send(email, JbeirSettings.getSetting("PROJECT_NAME"),
+            "Thank you for sending your feedback.\n\nBest regards,\nRegistry Team");
+
+        Emailer.send(JbeirSettings.getSetting("ADMIN_EMAIL"), "Registry site feedback", message);
+        if (!JbeirSettings.getSetting("ADMIN_EMAIL").equals(
+            JbeirSettings.getSetting("MODERATOR_EMAIL"))) {
+            Emailer.send(JbeirSettings.getSetting("MODERATOR_EMAIL"), "Registry site feedback",
+                message);
+        }
+
+        return true;
     }
 }

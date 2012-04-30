@@ -18,6 +18,7 @@ body {
 .font-70em { font-size: 0.70em; }
 .font-bold { font-weight: bold; }
 .pad-6 { padding: 6px; }
+.pad-3 { padding: 3px; }
 .pad-right-10 { padding-right: 10px; }
 .pad-15 { padding: 15px; }
 .pad-40 { padding: 40px; }
@@ -348,7 +349,6 @@ a.cell_mouseover:hover {
 	border: 1px solid #ccc; width: 170px; padding: 5px; color: #777; font-size: 0.95em; font-family: Helvetica, Arial;
 }
 
-
 .entry_loading_indicator {
 	z-index: 2147483647;
 	filter: alpha(opacity=60);
@@ -436,7 +436,6 @@ a.cell_mouseover:hover {
 	cursor: pointer;
 }
 
-
 .permissions_sub_header {
 	font-size: 0.80em;
 	padding: 6px;
@@ -460,7 +459,6 @@ a.cell_mouseover:hover {
 }
 
 /* HEADER MENU */
-
 #dark {
 	background: none repeat scroll 0 0 #444;
 	color: #FFFFFF;
@@ -499,8 +497,7 @@ a.cell_mouseover:hover {
 	padding: 6px;
 	display: block;
 	color: #fff;
-	text-decoration: none;
-	
+	text-decoration: none;	
 }
 
 #indented ul li a:hover {
@@ -1066,6 +1063,15 @@ a:hover {
 .gwt-Button {
 	margin-left: 2px;
 	margin-right: 2px;
+	background-color: #f3f3f3; border: 1px solid #ccc; padding: 4px; font-weight: bold; color: #666; font-family: arial; font-size: 0.7em; box-shadow: 0 0 1px 0px #ddd; border-radius: 2px; cursor: pointer;
+}
+
+.gwt-Button:hover {
+    background-color: #f1f2f3; border: 1px solid #999; padding: 4px; font-weight: bold; color: #333; font-family: arial; font-size: 0.7em; box-shadow: 0 0 1px 1px #ddd; border-radius: 2px; cursor: pointer;
+}
+
+.gwt-Button[disabled], .gwt-Button[disabled]:hover {
+    background-color: #f1f2f3; border: 1px solid #efefef; padding: 4px; color: #bbb; font-family: Helvetica, arial; font-size: 0.7em; -moz-border-radius: 2px 4px; border-radius: 2px 4px; -webkit-border-radius: 2px 4px; box-shadow: 0 0 0 0 #ddd; cursor: default;
 }
 
 .pager {
@@ -1597,7 +1603,6 @@ td.datePickerMonth {
 }
 
 /* NEWS */
-
 .news_archive {
 	padding: 6px;
 	background-color: #F6F9FF;
@@ -1611,6 +1616,29 @@ td.datePickerMonth {
 
 .news_archive_header:hover {
 	color: #70822e;
+}
+
+/* FOOTER */
+.footer_feedback_widget {
+	
+}
+
+.footer_email_input {
+	background: none repeat scroll 0 0 #FFFFFF;
+    border: 1px solid #BBBBBB;
+    font-family: Helvetica, Arial;
+    font-size: 0.95em;
+    padding: 3px;
+    width: 240px;
+}
+
+.footer_email_input_error {
+	border: 1px solid #CC3333;
+    background: #FCC;
+    font-family: Helvetica, Arial;
+    font-size: 0.95em;
+    padding: 3px;
+    width: 240px;
 }
 
 

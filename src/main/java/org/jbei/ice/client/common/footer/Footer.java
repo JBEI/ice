@@ -1,10 +1,16 @@
-package org.jbei.ice.client.common;
+package org.jbei.ice.client.common.footer;
 
-import org.jbei.ice.client.Page;
+import org.jbei.ice.client.RegistryService;
+import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.common.widget.PopupHandler;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -12,7 +18,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -44,8 +49,10 @@ public class Footer extends Composite {
     }
 
     private final Resources resources = GWT.create(Resources.class);
+    private final RegistryServiceAsync service = GWT.create(RegistryService.class);
 
     private static Footer INSTANCE;
+    private FeedbackWidget feedbackWidget;
 
     public static Footer getInstance() {
         if (INSTANCE == null)
@@ -61,6 +68,9 @@ public class Footer extends Composite {
         layout.setCellSpacing(0);
         layout.setWidth("100%");
         initWidget(layout);
+
+        // feedback widget
+        feedbackWidget = new FeedbackWidget();
 
         // add line
         layout.setWidget(0, 0, getLine());
@@ -120,7 +130,20 @@ public class Footer extends Composite {
                 "http://code.google.com/p/gd-ice/issues/entry?template=Report%20Bug");
         line3.add(bugReport);
         line3.add(new HTML("&nbsp; | &nbsp; "));
-        Hyperlink feedback = new Hyperlink("Feedback", Page.FEEDBACK.getToken());
+        Label feedback = new Label("Feedback");
+
+        final PopupHandler handler = new PopupHandler(feedbackWidget, feedback.getElement(), -250,
+                -200);
+        feedbackWidget.addCloseHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                feedbackWidget.clear();
+                handler.hidePopup();
+            }
+        });
+        addSubmitHandler(handler);
+        feedback.addClickHandler(handler);
         line3.add(feedback);
 
         line3.add(new HTML("&nbsp; | &nbsp; "));
@@ -129,5 +152,31 @@ public class Footer extends Composite {
 
         panel.add(line3);
         return panel;
+    }
+
+    // TODO : presenter logic in view
+    private void addSubmitHandler(final PopupHandler handler) {
+        feedbackWidget.addSubmitHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                String email = feedbackWidget.getEmail();
+                String message = feedbackWidget.getMessage();
+
+                service.sendFeedback(email, message, new AsyncCallback<Boolean>() {
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Window.alert("There was an error submitting your feedback. We apologize for the inconvenience\n\n"
+                                + caught.getMessage());
+                    }
+                });
+                handler.hidePopup();
+            }
+        });
     }
 }

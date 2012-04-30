@@ -1,5 +1,6 @@
 package org.jbei.ice.client.common;
 
+import org.jbei.ice.client.common.footer.Footer;
 import org.jbei.ice.client.common.header.HeaderView;
 
 import com.google.gwt.user.client.ui.Composite;

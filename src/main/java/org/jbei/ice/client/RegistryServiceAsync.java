@@ -163,4 +163,6 @@ public interface RegistryServiceAsync {
 
     void saveSequence(String sessionId, long entry, String sequenceUser,
             AsyncCallback<Boolean> callback);
+
+    void sendFeedback(String email, String msg, AsyncCallback<Boolean> callback);
 }

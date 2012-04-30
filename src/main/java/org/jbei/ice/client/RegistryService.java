@@ -139,4 +139,6 @@ public interface RegistryService extends RemoteService {
 
     LinkedList<Long> sortEntryList(String sessionId, LinkedList<Long> ids, ColumnField field,
             boolean asc);
+
+    boolean sendFeedback(String email, String msg);
 }

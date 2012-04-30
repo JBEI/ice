@@ -7,8 +7,8 @@ package org.jbei.ice.client;
  */
 public enum Page {
     LOGIN("login"), MAIN("main"), COLLECTIONS("collections"), ADD_ENTRY("add"), BULK_IMPORT("bulk"), ENTRY_VIEW(
-            "entry"), PROFILE("profile"), FEEDBACK("feedback"), ADMIN("admin"), QUERY("query"), BLAST(
-            "blast"), DEBUG("debug"), LOGOUT("logout"), NEWS("news");
+            "entry"), PROFILE("profile"), ADMIN("admin"), QUERY("query"), BLAST("blast"), DEBUG(
+            "debug"), LOGOUT("logout"), NEWS("news");
 
     private String token;
 

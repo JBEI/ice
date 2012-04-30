@@ -1,6 +1,6 @@
 package org.jbei.ice.client.login;
 
-import org.jbei.ice.client.common.Footer;
+import org.jbei.ice.client.common.footer.Footer;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyPressHandler;

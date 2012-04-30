@@ -16,7 +16,8 @@ public class PopupHandler implements ClickHandler {
         this.popup = new PopupPanel();
         this.popup.setStyleName("add_to_popup");
         this.popup.setAutoHideEnabled(true);
-        this.popup.addAutoHidePartner(autoHide);
+        if (autoHide != null)
+            this.popup.addAutoHidePartner(autoHide);
         this.popup.setWidget(widget);
         this.popup.setGlassEnabled(false);
         this.xOffset = xoffset;
