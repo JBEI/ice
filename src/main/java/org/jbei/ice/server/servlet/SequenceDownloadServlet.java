@@ -17,6 +17,7 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.composers.SequenceComposerException;
 import org.jbei.ice.lib.composers.formatters.FastaFormatter;
 import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
+import org.jbei.ice.lib.composers.formatters.SbolFormatter;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
@@ -89,8 +90,10 @@ public class SequenceDownloadServlet extends HttpServlet {
             getGenbank(response, entry, account);
         else if ("fasta".equals(type))
             getFasta(response, entry, account);
+        else if ("sbol".equals(type))
+            getSBOL(response, entry, account);
         else
-            Logger.error("Unrecognized sequence download type");
+            Logger.error("Unrecognized sequence download type " + type);
     }
 
     private Account isLoggedIn(Cookie[] cookies) throws ControllerException {
@@ -249,6 +252,55 @@ public class SequenceDownloadServlet extends HttpServlet {
             ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
 
             response.setContentType("text/plain");
+            response.setContentLength(bytes.length);
+            response.setHeader("Content-Disposition", "attachment;filename=" + filename);
+
+            OutputStream os = response.getOutputStream();
+            DataInputStream is = new DataInputStream(byteInputStream);
+
+            int read = 0;
+
+            while ((read = is.read(bytes)) != -1) {
+                os.write(bytes, 0, read);
+            }
+            os.flush();
+            os.close();
+
+        } catch (IOException e) {
+            Logger.error(e);
+        }
+    }
+
+    private void getSBOL(HttpServletResponse response, Entry entry, Account account) {
+        SequenceController sequenceController = new SequenceController(account);
+        Sequence sequence = null;
+
+        try {
+            sequence = sequenceController.getByEntry(entry);
+            if (sequence == null) {
+                Logger.info("No sequence associated with entry " + entry.getId());
+                return;
+            }
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return;
+        }
+
+        String sequenceString = null;
+        try {
+            sequenceString = SequenceController.compose(sequence, new SbolFormatter());
+        } catch (SequenceComposerException e) {
+            Logger.error("Failed to generate sbol file for download!", e);
+            return;
+        }
+
+        String filename = entry.getPartNumbersAsString() + ".xml";
+
+        try {
+            byte[] bytes = sequenceString.getBytes();
+            ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
+
+            response.setContentType("text/xml");
             response.setContentLength(bytes.length);
             response.setHeader("Content-Disposition", "attachment;filename=" + filename);
 

@@ -91,7 +91,8 @@ class SequenceFileDownload implements IsWidget {
 
     // download options for sequence files
     public enum DownloadOption {
-        ORIGINAL("Original", "original"), GENBANK("GenBank", "genbank"), FASTA("FASTA", "fasta");
+        ORIGINAL("Original", "original"), GENBANK("GenBank", "genbank"), FASTA("FASTA", "fasta"), SBOL(
+                "SBOL", "sbol");
 
         private String display;
         private String type;
