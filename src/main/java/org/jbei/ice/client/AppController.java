@@ -35,14 +35,16 @@ import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 
@@ -69,6 +71,20 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
         bind();
     }
 
+    /**
+     * Adds a window close event that clears the cookies when the user
+     * closes the window and has not selected "remember me"
+     */
+    private void addCookieClearOnWindowClose() {
+        Window.addCloseHandler(new CloseHandler<Window>() {
+
+            @Override
+            public void onClose(CloseEvent<Window> event) {
+                logout();
+            }
+        });
+    }
+
     private void bind() {
         History.addValueChangeHandler(this);
 
@@ -80,11 +96,11 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
                 AppController.sessionId = event.getSessionId();
                 accountInfo = event.getAccountInfo();
 
-                if (event.isRememberUser()) {
-                    Date expires = new Date(System.currentTimeMillis() + COOKIE_TIMEOUT);
-                    // TODO : set the domain ? 
-                    Cookies.setCookie(COOKIE_NAME, sessionId, expires, null, COOKIE_PATH, true);
-                }
+                Date expires = new Date(System.currentTimeMillis() + COOKIE_TIMEOUT);
+                Cookies.setCookie(COOKIE_NAME, sessionId, expires, null, COOKIE_PATH, true);
+                if (!event.isRememberUser())
+                    addCookieClearOnWindowClose();
+
                 goToMainPage();
             }
         });
@@ -116,8 +132,6 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    // TODO : not still quite sure what the complete ramifications are
-                    GWT.log("Failed to retrieve the autocomplete data: " + caught.getMessage());
                 }
 
                 @Override
