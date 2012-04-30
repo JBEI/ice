@@ -359,8 +359,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         notes.setWidget(3, 0, new Label(""));
         notes.getFlexCellFormatter().setWidth(3, 0, "170px");
 
-        TextArea plasmidNotesArea = new TextArea();
-        plasmidNotesArea.setStyleName("entry_add_notes_input");
+        plasmidNotesArea = createTextArea("640px", "200px");
         notes.setWidget(3, 1, plasmidNotesArea);
 
         return notes;
@@ -490,8 +489,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         notes.setWidget(3, 0, new Label(""));
         notes.getFlexCellFormatter().setWidth(3, 0, "170px");
 
-        strainNotesArea = new TextArea();
-        strainNotesArea.setStyleName("entry_add_notes_input");
+        strainNotesArea = createTextArea("640px", "200px");
         notes.setWidget(3, 1, strainNotesArea);
 
         return notes;

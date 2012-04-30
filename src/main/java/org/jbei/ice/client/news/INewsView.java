@@ -1,7 +1,12 @@
 package org.jbei.ice.client.news;
 
+import java.util.ArrayList;
+
+import org.jbei.ice.shared.dto.NewsItem;
+
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 public interface INewsView {
 
@@ -18,4 +23,8 @@ public interface INewsView {
     void setAddNewsVisibility(boolean visible);
 
     void setAddNewsButtonVisibilty(boolean visible);
+
+    void setArchiveContents(ArrayList<NewsItem> contents);
+
+    SingleSelectionModel<NewsItem> getArchiveSelectionModel();
 }

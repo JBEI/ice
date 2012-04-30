@@ -4,13 +4,18 @@ import java.util.Date;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 
+/**
+ * Utilities class for manipulating datetimes
+ * 
+ * @author Hector Plahar
+ */
 public class DateUtilities {
 
     public static String formatDate(Date date) {
         if (date == null)
             return "";
 
-        DateTimeFormat format = DateTimeFormat.getFormat("MMM d, y hh:mm a");
+        DateTimeFormat format = DateTimeFormat.getFormat("MMM d, y h:mm a");
         return format.format(date);
     }
 }

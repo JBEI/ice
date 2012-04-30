@@ -107,13 +107,13 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
         for (StatusType type : StatusType.values()) {
             status.addItem(type.getDisplayName());
         }
-        status.setStyleName("input_box");
+        status.setStyleName("pull_down");
 
         bioSafety.setVisibleItemCount(1);
         for (BioSafetyOptions options : BioSafetyOptions.values()) {
             bioSafety.addItem(options.getDisplayName(), options.getValue());
         }
-        bioSafety.setStyleName("input_box");
+        bioSafety.setStyleName("pull_down");
 
         initLayout();
     }

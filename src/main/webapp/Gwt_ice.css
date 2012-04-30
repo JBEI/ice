@@ -1596,5 +1596,21 @@ td.datePickerMonth {
 	background-color: #f1f2f3; border: 1px solid #efefef; padding: 4px; color: #bbb; font-family: Helvetica, arial; font-size: 0.7em; -moz-border-radius: 2px 4px; border-radius: 2px 4px; -webkit-border-radius: 2px 4px; box-shadow: 0 0 0 0 #ddd; cursor: default;
 }
 
+/* NEWS */
+
+.news_archive {
+	padding: 6px;
+	background-color: #F6F9FF;
+	border: 1px solid #ECF0F4;
+	border-radius: 2px 6px 2px 6px;
+}
+
+.news_archive_header {
+	font-weight: bold; font-size: 0.85em; cursor: pointer; color: #0082C0;
+}
+
+.news_archive_header:hover {
+	color: #70822e;
+}
 
 

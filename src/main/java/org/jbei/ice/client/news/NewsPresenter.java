@@ -1,7 +1,6 @@
 package org.jbei.ice.client.news;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
@@ -15,12 +14,18 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 /**
- * Presenter for the news page
+ * Presenter for the news page. Currently relies on the fact that
+ * there are very few news items and so it loads all of them in memory.
+ * Should be re-done to handle large number of news postings
  * 
  * @author Hector Plahar
  */
+
 public class NewsPresenter extends AbstractPresenter {
 
     private final RegistryServiceAsync service;
@@ -28,10 +33,26 @@ public class NewsPresenter extends AbstractPresenter {
     private final INewsView display;
 
     public NewsPresenter(RegistryServiceAsync service, HandlerManager eventBus, INewsView news) {
+
         this.service = service;
         this.eventBus = eventBus;
         this.display = news;
         bind();
+
+        final SingleSelectionModel<NewsItem> model = this.display.getArchiveSelectionModel();
+        model.addSelectionChangeHandler(new Handler() {
+
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                NewsItem selected = model.getSelectedObject();
+                if (selected == null)
+                    return;
+
+                String dateFormat = DateUtilities.formatDate(selected.getCreationDate());
+                display.addNewsItem(selected.getId(), dateFormat, selected.getHeader(),
+                    selected.getBody());
+            }
+        });
     }
 
     private void bind() {
@@ -48,17 +69,14 @@ public class NewsPresenter extends AbstractPresenter {
                 public void onSuccess(ArrayList<NewsItem> result) {
                     if (result == null)
                         return;
+                    display.setArchiveContents(result);
 
-                    if (result.isEmpty()) {
+                    if (result.isEmpty())
+                        return;
 
-                    } else {
-                        Collections.reverse(result); // TODO :
-                        for (NewsItem item : result) {
-                            String dateFormat = DateUtilities.formatDate(item.getCreationDate());
-                            display.addNewsItem(item.getId(), dateFormat, item.getHeader(),
-                                item.getBody());
-                        }
-                    }
+                    NewsItem item = result.get(0);
+                    String dateFormat = DateUtilities.formatDate(item.getCreationDate());
+                    display.addNewsItem(item.getId(), dateFormat, item.getHeader(), item.getBody());
                 }
 
                 @Override
@@ -99,6 +117,7 @@ public class NewsPresenter extends AbstractPresenter {
 
             @Override
             public void onFailure(Throwable caught) {
+                // TODO : error feedback
                 Window.alert(caught.getMessage());
             }
 

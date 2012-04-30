@@ -68,11 +68,11 @@ public class UpdateArabidopsisForm extends UpdateEntryForm<ArabidopsisSeedInfo> 
         markers = createAutoCompleteForSelectionMarkers("300px");
         generation = new ListBox();
         generation.setVisibleItemCount(1);
-        generation.setStyleName("input_box");
+        generation.setStyleName("pull_down");
 
         plantType = new ListBox();
         plantType.setVisibleItemCount(1);
-        plantType.setStyleName("input_box");
+        plantType.setStyleName("pull_down");
 
         harvestDate = new DateBox();
         harvestDate.setStyleName("input_box");

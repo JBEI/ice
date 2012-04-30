@@ -41,14 +41,14 @@ public class NewArabidopsisForm extends NewSingleEntryForm<ArabidopsisSeedInfo> 
         for (Generation gen : Generation.values()) {
             generation.addItem(gen.toString(), gen.name());
         }
-        generation.setStyleName("input_box");
+        generation.setStyleName("pull_down");
 
         plantType = new ListBox();
         plantType.setVisibleItemCount(1);
         for (PlantType type : PlantType.values()) {
             plantType.addItem(type.toString(), type.name());
         }
-        plantType.setStyleName("input_box");
+        plantType.setStyleName("pull_down");
 
         harvestDate = new DateBox();
         harvestDate.setStyleName("input_box");

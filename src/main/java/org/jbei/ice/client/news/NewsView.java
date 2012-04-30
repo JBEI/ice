@@ -1,7 +1,10 @@
 package org.jbei.ice.client.news;
 
+import java.util.ArrayList;
+
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.home.ArchiveMenu;
+import org.jbei.ice.shared.dto.NewsItem;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -11,26 +14,25 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 public class NewsView extends AbstractLayout implements INewsView {
 
     private ArchiveMenu menu;
     private FlexTable contentTable;
-    private VerticalPanel news;
     private FlexTable newsAdd;
     private TextBox title;
     private TextArea area;
     private Button submitNews;
     private Button cancelNews;
     private Button addNewButton;
+    private FlexTable newsContent;
 
     @Override
     protected void initComponents() {
         super.initComponents();
 
-        news = new VerticalPanel();
         menu = new ArchiveMenu();
         contentTable = new FlexTable();
 
@@ -62,8 +64,8 @@ public class NewsView extends AbstractLayout implements INewsView {
         contentTable.setWidth("100%");
         contentTable.setWidget(0, 0, menu);
         contentTable.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
+        contentTable.getFlexCellFormatter().setWidth(0, 0, "380px");
 
-        // TODO : middle sliver goes here
         contentTable.setWidget(0, 1, createMainContent());
         contentTable.getFlexCellFormatter().setVerticalAlignment(0, 1, HasAlignment.ALIGN_TOP);
 
@@ -83,15 +85,15 @@ public class NewsView extends AbstractLayout implements INewsView {
     }
 
     private Widget createMainContent() {
-        FlexTable table = new FlexTable();
-        table.setWidth("100%");
-        table.setWidget(0, 0, createAddButton());
-        table.getFlexCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_RIGHT);
+        newsContent = new FlexTable();
+        newsContent.setWidth("100%");
+        newsContent.setWidget(0, 0, createAddButton());
+        newsContent.getFlexCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_RIGHT);
 
-        table.setWidget(1, 0, newsAdd);
-        table.setWidget(2, 0, news);
+        newsContent.setWidget(1, 0, newsAdd);
+        newsContent.setHTML(2, 0, "&nbsp;");
 
-        return table;
+        return newsContent;
     }
 
     @Override
@@ -102,13 +104,19 @@ public class NewsView extends AbstractLayout implements INewsView {
     @Override
     public void addNewsItem(String id, String date, String header, String body) {
         // TODO move styles to css
-        String html = "<div style=\"border-bottom: 1px solid #f1f1f1; margin-bottom: 10px; padding: 6px;\"><b style=\"color: #211f19; font-size: 1.20em\">"
+        String html = "<div><span style=\"color: #211f19; font-size: 1.40em\">"
                 + header
-                + "</b><br><span style=\"font-size: 0.75em; color: #a1a1a1\">"
+                + "</span><br><span style=\"font-size: 0.70em; color: #919191; text-transform: uppercase\">"
                 + date
-                + "</span><br><br><div class=\"font-80em\">" + body + "</div></div>";
+                + "</span><br><div class=\"font-80em\" style=\"line-height: 1.4; margin: .75em 0 0;\">"
+                + body + "</div></div>";
         HTMLPanel panel = new HTMLPanel(html);
-        news.insert(panel, 0);
+        newsContent.setWidget(2, 0, panel);
+    }
+
+    @Override
+    public void setArchiveContents(ArrayList<NewsItem> contents) {
+        menu.setContents(contents);
     }
 
     @Override
@@ -134,5 +142,10 @@ public class NewsView extends AbstractLayout implements INewsView {
     @Override
     public void setAddNewsButtonVisibilty(boolean visible) {
         this.addNewButton.setVisible(visible);
+    }
+
+    @Override
+    public SingleSelectionModel<NewsItem> getArchiveSelectionModel() {
+        return menu.getSelectionModel();
     }
 }
