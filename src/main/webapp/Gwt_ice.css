@@ -1620,7 +1620,11 @@ td.datePickerMonth {
 
 /* FOOTER */
 .footer_feedback_widget {
-	
+	cursor: pointer; color: #0082C0;
+}
+
+.footer_feedback_widget:hover {
+	color: #70822e;
 }
 
 .footer_email_input {

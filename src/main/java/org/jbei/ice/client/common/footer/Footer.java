@@ -131,6 +131,7 @@ public class Footer extends Composite {
         line3.add(bugReport);
         line3.add(new HTML("&nbsp; | &nbsp; "));
         Label feedback = new Label("Feedback");
+        feedback.setStyleName("footer_feedback_widget");
 
         final PopupHandler handler = new PopupHandler(feedbackWidget, feedback.getElement(), -250,
                 -200);
