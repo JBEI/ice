@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jbei.ice.client.collection.menu.IHasEntryHandlers;
-import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.entry.IHasEntryId;
 import org.jbei.ice.client.common.table.cell.EntryOwnerCell;
 import org.jbei.ice.client.common.table.cell.PartIDCell;
@@ -107,18 +106,6 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         return typeCol;
     }
 
-    protected DataTableColumn<EntryInfo> addPartIdColumn(boolean sortable, double width, Unit unit,
-            EntryViewEventHandler handler, EntryContext.Type mode) {
-
-        PartIDCell<EntryInfo> cell = new PartIDCell<EntryInfo>(mode);
-        cell.addEntryHandler(handler);
-        DataTableColumn<EntryInfo> partIdColumn = new PartIdColumn(cell);
-        this.setColumnWidth(partIdColumn, width, unit);
-        partIdColumn.setSortable(sortable);
-        this.addColumn(partIdColumn, "Part ID");
-        return partIdColumn;
-    }
-
     public class PartIdColumn extends DataTable<T>.DataTableColumn<EntryInfo> implements
             IHasEntryHandlers {
 
@@ -162,7 +149,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         };
 
         this.addColumn(nameColumn, "Name");
-        nameColumn.setSortable(true);
+        nameColumn.setSortable(false);
         this.setColumnWidth(nameColumn, width, unit);
         return nameColumn;
     }

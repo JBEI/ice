@@ -41,7 +41,7 @@ public abstract class CollectionDataTable extends EntryDataTable<EntryInfo> {
         columns.add(super.addSelectionColumn());
         columns.add(super.addTypeColumn(true, 60, Unit.PX));
 
-        DataTableColumn<EntryInfo> partIdCol = addPartIdColumn(true, 120, Unit.PX);
+        DataTableColumn<EntryInfo> partIdCol = addPartIdColumn(false, 120, Unit.PX);
         columns.add(partIdCol);
         columns.add(super.addNameColumn(120, Unit.PX));
         columns.add(super.addSummaryColumn());
