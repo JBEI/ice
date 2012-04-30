@@ -209,7 +209,7 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
     public void createPullDownHandler() {
         if (this.searchInput != null) {
             PopupHandler handler = new PopupHandler(option, this.searchInput.getTextBox()
-                    .getElement(), -342, 8);
+                    .getElement(), -342, 8, false);
             this.searchInput.getPullDownArea().addClickHandler(handler);
         }
     }

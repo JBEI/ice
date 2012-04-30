@@ -12,14 +12,15 @@ public class PopupHandler implements ClickHandler {
     private final int xOffset;
     private final int yOffset;
 
-    public PopupHandler(Widget widget, Element autoHide, int xoffset, int yoffset) {
+    public PopupHandler(Widget widget, Element autoHide, int xoffset, int yoffset,
+            boolean enableGlass) {
         this.popup = new PopupPanel();
         this.popup.setStyleName("add_to_popup");
         this.popup.setAutoHideEnabled(true);
         if (autoHide != null)
             this.popup.addAutoHidePartner(autoHide);
         this.popup.setWidget(widget);
-        this.popup.setGlassEnabled(false);
+        this.popup.setGlassEnabled(enableGlass);
         this.xOffset = xoffset;
         this.yOffset = yoffset;
     }

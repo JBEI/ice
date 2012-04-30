@@ -134,7 +134,7 @@ public class Footer extends Composite {
         feedback.setStyleName("footer_feedback_widget");
 
         final PopupHandler handler = new PopupHandler(feedbackWidget, feedback.getElement(), -250,
-                -200);
+                -200, true);
         feedbackWidget.addCloseHandler(new ClickHandler() {
 
             @Override

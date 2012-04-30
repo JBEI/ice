@@ -69,7 +69,7 @@ class SequenceFileUpload implements IsWidget, IView {
 
         options.setRowData(Arrays.asList(UploadOption.values()));
 
-        popupHandler = new PopupHandler(options, label.getElement(), 0, 1);
+        popupHandler = new PopupHandler(options, label.getElement(), 0, 1, false);
         label.addClickHandler(popupHandler);
 
         optionSelection = new SingleSelectionModel<UploadOption>();

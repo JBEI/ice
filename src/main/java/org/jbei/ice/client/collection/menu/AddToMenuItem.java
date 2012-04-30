@@ -125,7 +125,7 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
         clearButton.addKeyPressHandler(new EnterClickHandler(submitButton));
 
         Widget popup = createPopupWidget();
-        addToHandler = new PopupHandler(popup, addWidget.getElement(), -1, 1);
+        addToHandler = new PopupHandler(popup, addWidget.getElement(), -1, 1, false);
         addWidget.addClickHandler(addToHandler);
 
         Resources.INSTANCE.subMenuStyle().ensureInjected();

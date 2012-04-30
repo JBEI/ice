@@ -59,7 +59,7 @@ class SequenceFileDownload implements IsWidget {
 
         options.setRowData(Arrays.asList(DownloadOption.values()));
 
-        final PopupHandler popupHandler = new PopupHandler(options, label.getElement(), 0, 1);
+        final PopupHandler popupHandler = new PopupHandler(options, label.getElement(), 0, 1, false);
 
         label.addClickHandler(popupHandler);
         optionSelection = new SingleSelectionModel<DownloadOption>();
