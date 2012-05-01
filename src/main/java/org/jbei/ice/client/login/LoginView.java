@@ -101,7 +101,10 @@ public class LoginView extends Composite implements ILoginView {
                 + "-webkit-box-shadow: 0px 1px 1px #999\"></div>"); // TODO : move it to styles
 
         String html = "<span>Username</span><br><span id=\"user_login_input\"></span><div id=\"user_login_error_message\"></div>"
-                + "<br><span>Password</span><br><span id=\"user_password_input\"></span><div id=\"user_password_error_message\"></div>";
+                + "<br><span>Password "
+                //                + "(forgot password)" // TODO
+
+                + "</span><br><span id=\"user_password_input\"></span><div id=\"user_password_error_message\"></div>";
 
         HTMLPanel htmlPanel = new HTMLPanel(html);
         htmlPanel.add(loginInput, "user_login_input");
