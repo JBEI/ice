@@ -44,6 +44,7 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -75,6 +76,9 @@ public class CollectionsPresenter extends AbstractPresenter {
     private Mode mode = Mode.COLLECTION;
     private EntryContext currentContext; // this can sometimes be null
     private final DeleteItemHandler deleteHandler;
+
+    // handlers 
+    private HandlerRegistration searchHandler;
 
     public CollectionsPresenter(CollectionsModel model, final ICollectionView display,
             ArrayList<SearchFilterInfo> operands) {
@@ -141,13 +145,16 @@ public class CollectionsPresenter extends AbstractPresenter {
             }
         });
 
-        model.getEventBus().addHandler(SearchEvent.TYPE, new SearchEventHandler() {
+        if (searchHandler == null) {
+            searchHandler = model.getEventBus().addHandler(SearchEvent.TYPE,
+                new SearchEventHandler() {
 
-            @Override
-            public void onSearch(SearchEvent event) {
-                search(event.getFilters());
-            }
-        });
+                    @Override
+                    public void onSearch(SearchEvent event) {
+                        search(event.getFilters());
+                    }
+                });
+        }
 
         // show entry context
         model.getEventBus().addHandler(ShowEntryListEvent.TYPE, new ShowEntryListEventHandler() {
@@ -458,48 +465,7 @@ public class CollectionsPresenter extends AbstractPresenter {
         });
 
         // retrieve folders to use as menu
-        model.retrieveFolders(new FolderRetrieveEventHandler() {
-
-            @Override
-            public void onFolderRetrieve(FolderRetrieveEvent event) {
-                ArrayList<FolderDetails> folders = event.getItems();
-                Collections.reverse(folders);
-
-                ArrayList<MenuItem> userMenuItems = new ArrayList<MenuItem>();
-                ArrayList<FolderDetails> userFolders = new ArrayList<FolderDetails>();
-
-                ArrayList<MenuItem> systemMenuItems = new ArrayList<MenuItem>();
-                ArrayList<FolderDetails> systemFolder = new ArrayList<FolderDetails>();
-
-                for (FolderDetails folder : folders) {
-                    MenuItem item = new MenuItem(folder.getId(), folder.getName(), folder
-                            .getCount(), folder.isSystemFolder());
-
-                    if (folder.isSystemFolder()) {
-                        systemMenuItems.add(item);
-                        systemFolder.add(folder);
-                    } else {
-                        userMenuItems.add(item);
-                        userFolders.add(folder);
-                        display.addSubMenuFolder(new OptionSelect(folder.getId(), folder.getName()));
-                    }
-                }
-
-                // my entries
-                MenuItem item = new MenuItem(0, "My Entries", AppController.accountInfo
-                        .getUserEntryCount(), true);
-                userMenuItems.add(0, item);
-                MenuItem allEntriesItem = new MenuItem(-1, "Available Entries",
-                        AppController.accountInfo.getVisibleEntryCount(), true);
-                systemMenuItems.add(0, allEntriesItem);
-                display.setSystemCollectionMenuItems(systemMenuItems);
-                DeleteItemHandler deleteHandler = new DeleteItemHandler(model.getService());
-                display.setUserCollectionMenuItems(userMenuItems, deleteHandler);
-
-                userListProvider.getList().addAll(userFolders);
-                systemListProvider.getList().addAll(systemFolder);
-            }
-        });
+        model.retrieveFolders(new CollectionRetrieveHandler());
     }
 
     private void retrieveEntriesForFolder(final long id, final String msg) {
@@ -543,6 +509,50 @@ public class CollectionsPresenter extends AbstractPresenter {
         container.add(this.display.asWidget());
     }
 
+    private class CollectionRetrieveHandler implements FolderRetrieveEventHandler {
+
+        @Override
+        public void onFolderRetrieve(FolderRetrieveEvent event) {
+            ArrayList<FolderDetails> folders = event.getItems();
+            Collections.reverse(folders);
+
+            ArrayList<MenuItem> userMenuItems = new ArrayList<MenuItem>();
+            ArrayList<FolderDetails> userFolders = new ArrayList<FolderDetails>();
+
+            ArrayList<MenuItem> systemMenuItems = new ArrayList<MenuItem>();
+            ArrayList<FolderDetails> systemFolder = new ArrayList<FolderDetails>();
+
+            for (FolderDetails folder : folders) {
+                MenuItem item = new MenuItem(folder.getId(), folder.getName(), folder.getCount(),
+                        folder.isSystemFolder());
+
+                if (folder.isSystemFolder()) {
+                    systemMenuItems.add(item);
+                    systemFolder.add(folder);
+                } else {
+                    userMenuItems.add(item);
+                    userFolders.add(folder);
+                    display.addSubMenuFolder(new OptionSelect(folder.getId(), folder.getName()));
+                }
+            }
+
+            // my entries
+            MenuItem item = new MenuItem(0, "My Entries",
+                    AppController.accountInfo.getUserEntryCount(), true);
+            userMenuItems.add(0, item);
+            MenuItem allEntriesItem = new MenuItem(-1, "Available Entries",
+                    AppController.accountInfo.getVisibleEntryCount(), true);
+            systemMenuItems.add(0, allEntriesItem);
+            display.setSystemCollectionMenuItems(systemMenuItems);
+            DeleteItemHandler deleteHandler = new DeleteItemHandler(model.getService());
+            display.setUserCollectionMenuItems(userMenuItems, deleteHandler);
+
+            userListProvider.getList().addAll(userFolders);
+            systemListProvider.getList().addAll(systemFolder);
+        }
+    }
+
+    //inner classes
     private class HasEntry implements IHasEntryId {
 
         @Override
