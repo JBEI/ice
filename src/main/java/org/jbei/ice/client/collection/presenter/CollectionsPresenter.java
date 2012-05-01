@@ -328,7 +328,8 @@ public class CollectionsPresenter extends AbstractPresenter {
 
         case SEARCH:
             mode = Mode.SEARCH;
-            display.setMainContent(searchPresenter.getView(), true);
+            if (searchPresenter != null)
+                display.setMainContent(searchPresenter.getView(), true);
             break;
         }
     }
