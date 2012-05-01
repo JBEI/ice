@@ -107,8 +107,7 @@ public class EntryPresenter extends AbstractPresenter {
             }
         });
 
-        // PERMISSIONS
-        retrievePermissionData();
+        // PERMISSIONS (handlers for adding read/write)
         final PermissionsPresenter pPresenter = display.getPermissionsWidget();
 
         // TODO :both of these can be combined
@@ -137,7 +136,7 @@ public class EntryPresenter extends AbstractPresenter {
                         @Override
                         public void onSuccess(Boolean result) {
                             if (result)
-                                pPresenter.addReadItem(info, service, id);
+                                pPresenter.addReadItem(info, service, id, currentInfo.isCanEdit());
                         }
                     });
             }
@@ -168,7 +167,7 @@ public class EntryPresenter extends AbstractPresenter {
                         @Override
                         public void onSuccess(Boolean result) {
                             if (result)
-                                pPresenter.addWriteItem(info, service, id);
+                                pPresenter.addWriteItem(info, service, id, currentInfo.isCanEdit());
                         }
                     });
             }
@@ -201,7 +200,6 @@ public class EntryPresenter extends AbstractPresenter {
     private void showCurrentEntryView() {
         setContextNavData();
         retrieveEntryDetails();
-        retrievePermissionData();
     }
 
     private void addEntryViewHandler() {
@@ -274,7 +272,6 @@ public class EntryPresenter extends AbstractPresenter {
                 EntryPresenter.this.currentInfo = nextInfo;
                 currentContext.setCurrent(currentId);
                 retrieveEntryDetails();
-                retrievePermissionData();
                 display.enablePrev(true);
                 String text = (next + 1) + " of " + size;
                 display.setNavText(text);
@@ -307,7 +304,6 @@ public class EntryPresenter extends AbstractPresenter {
                 long currentId = prevInfo.getId();
                 currentContext.setCurrent(currentId);
                 retrieveEntryDetails();
-                retrievePermissionData();
                 display.enableNext(true);
                 String text = (prev + 1) + " of " + nav.getSize();
                 display.setNavText(text);
@@ -358,6 +354,7 @@ public class EntryPresenter extends AbstractPresenter {
                     // can user edit ?
                     boolean canEdit = (AppController.accountInfo.isModerator() || result
                             .isCanEdit());
+                    display.getPermissionsWidget().setCanEdit(canEdit);
 
                     // attachments
                     ArrayList<AttachmentInfo> attachments = result.getAttachments();
@@ -387,6 +384,9 @@ public class EntryPresenter extends AbstractPresenter {
                     sequencePresenter = display.showEntryDetailView(currentInfo, canEdit);
                     sequencePresenter.addFileUploadHandler(new UploadPasteSequenceHandler(service,
                             sequencePresenter));
+
+                    // retrieve associated permission
+                    retrievePermissionData();
                 }
             });
     }

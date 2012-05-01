@@ -44,6 +44,7 @@ public class PermissionsPresenter {
     }
 
     private final IPermissionsView view;
+    private boolean canEdit;
 
     public PermissionsPresenter(final IPermissionsView view) {
         this.view = view;
@@ -63,25 +64,31 @@ public class PermissionsPresenter {
         view.addWriteBoxSelectionHandler(handler);
     }
 
-    public void addReadItem(PermissionInfo info, RegistryServiceAsync service, long entryId) {
+    public void addReadItem(PermissionInfo info, RegistryServiceAsync service, long entryId,
+            boolean canEdit) {
         boolean isGroup = (info.getType() == PermissionType.READ_GROUP || info.getType() == PermissionType.WRITE_GROUP);
         boolean isWrite = (info.getType() == PermissionType.WRITE_GROUP || info.getType() == PermissionType.WRITE_ACCOUNT);
         PermissionItem item = new PermissionItem(info.getId(), info.getDisplay(), isGroup, isWrite);
-        DeletePermissionHandler handler = new DeletePermissionHandler(service, info, entryId,
-                new DeletePermissionCallback());
+        DeletePermissionHandler handler = null;
+        if (canEdit)
+            handler = new DeletePermissionHandler(service, info, entryId,
+                    new DeletePermissionCallback());
         view.addReadItem(item, handler);
         view.setReadBoxVisibility(false);
     }
 
-    public void addWriteItem(PermissionInfo info, RegistryServiceAsync service, long entryId) {
+    public void addWriteItem(PermissionInfo info, RegistryServiceAsync service, long entryId,
+            boolean canEdit) {
         boolean isGroup = (info.getType() == PermissionType.READ_GROUP || info.getType() == PermissionType.WRITE_GROUP);
         boolean isWrite = (info.getType() == PermissionType.WRITE_GROUP || info.getType() == PermissionType.WRITE_ACCOUNT);
         PermissionItem item = new PermissionItem(info.getId(), info.getDisplay(), isGroup, isWrite);
-        DeletePermissionHandler handler = new DeletePermissionHandler(service, info, entryId,
-                new DeletePermissionCallback());
+        DeletePermissionHandler handler = null;
+        if (canEdit)
+            handler = new DeletePermissionHandler(service, info, entryId,
+                    new DeletePermissionCallback());
         view.addWriteItem(item, handler);
         view.setWriteBoxVisibility(false);
-        addReadItem(info, service, entryId);
+        addReadItem(info, service, entryId, canEdit);
     }
 
     public void setPermissionData(ArrayList<PermissionInfo> infoList, RegistryServiceAsync service,
@@ -95,8 +102,10 @@ public class PermissionsPresenter {
 
         for (PermissionInfo info : infoList) {
             PermissionItem item = null;
-            DeletePermissionHandler handler = new DeletePermissionHandler(service, info, entryId,
-                    new DeletePermissionCallback());
+            DeletePermissionHandler handler = null;
+            if (isCanEdit())
+                handler = new DeletePermissionHandler(service, info, entryId,
+                        new DeletePermissionCallback());
 
             switch (info.getType()) {
             case READ_ACCOUNT:
@@ -123,6 +132,14 @@ public class PermissionsPresenter {
             if (item != null)
                 itemList.add(item);
         }
+    }
+
+    public boolean isCanEdit() {
+        return canEdit;
+    }
+
+    public void setCanEdit(boolean canEdit) {
+        this.canEdit = canEdit;
     }
 
     private class DeletePermissionCallback extends Callback<PermissionInfo> {

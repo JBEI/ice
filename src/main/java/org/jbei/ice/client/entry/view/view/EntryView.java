@@ -351,6 +351,9 @@ public class EntryView extends Composite implements IEntryView {
         mainContent.getCellFormatter().setHeight(0, 0, "30px");
         mainContent.setWidget(1, 0, detailView);
         SequenceViewPanel sequencePanel = detailView.getSequencePanel();
+
+        this.permissions.addReadWriteLinks(showEdit);
+
         return sequencePanel.getPresenter();
     }
 

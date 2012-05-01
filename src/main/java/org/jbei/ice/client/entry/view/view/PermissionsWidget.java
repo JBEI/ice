@@ -33,13 +33,15 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
     private final FlexTable layout;
     private final TreeItem readRoot;
     private final TreeItem rwRoot;
-    private final Label readAddLabel;
-    private final Label writeAddLabel;
+    private Label readAddLabel;
+    private Label writeAddLabel;
     private final PermissionsPresenter presenter;
     private final SuggestBox readSuggestBox;
     private final SuggestBox writeSuggestBox;
     private final TreeItem readItemBoxHolder;
     private final TreeItem writeItemBoxHolder;
+    private HTMLPanel readPanel;
+    private HTMLPanel writePanel;
 
     public PermissionsWidget() {
         layout = new FlexTable();
@@ -49,15 +51,7 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
         layout.setCellSpacing(0);
         layout.addStyleName("permissions_display");
 
-        // read
-        readAddLabel = new Label("Add");
-        readAddLabel.setStyleName("edit_permissions_label");
-        readAddLabel.addStyleName("display-inline");
-
-        // read/write
-        writeAddLabel = new Label("Add");
-        writeAddLabel.setStyleName("edit_permissions_label");
-        writeAddLabel.addStyleName("display-inline");
+        initComponents();
 
         layout.setHTML(0, 0, "Permissions");
         layout.getCellFormatter().setStyleName(0, 0, "permissions_sub_header");
@@ -102,18 +96,41 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
         presenter = new PermissionsPresenter(this);
     }
 
+    private void initComponents() {
+        // read
+        readAddLabel = new Label("Add");
+        readAddLabel.setStyleName("edit_permissions_label");
+        readAddLabel.addStyleName("display-inline");
+
+        // read/write
+        writeAddLabel = new Label("Add");
+        writeAddLabel.setStyleName("edit_permissions_label");
+        writeAddLabel.addStyleName("display-inline");
+    }
+
     private Widget createReadRoot() {
-        HTMLPanel panel = new HTMLPanel(
+        readPanel = new HTMLPanel(
                 "Read Allowed<span style=\"margin-left: 15px\" id=\"permissions_read_allowed_add_link\"></span>");
-        panel.add(readAddLabel, "permissions_read_allowed_add_link");
-        return panel;
+        readPanel.add(readAddLabel, "permissions_read_allowed_add_link");
+        return readPanel;
     }
 
     private Widget createWriteRoot() {
-        HTMLPanel panel = new HTMLPanel(
+        writePanel = new HTMLPanel(
                 "Write Allowed<span style=\"margin-left: 15px\" id=\"permissions_write_allowed_add_link\"></span>");
-        panel.add(writeAddLabel, "permissions_write_allowed_add_link");
-        return panel;
+        writePanel.add(writeAddLabel, "permissions_write_allowed_add_link");
+        return writePanel;
+    }
+
+    /**
+     * Adds links that allows user to modify permissions.
+     * User should have write access
+     * 
+     * @param showEdit
+     */
+    public void addReadWriteLinks(boolean showEdit) {
+        readAddLabel.setVisible(showEdit);
+        writeAddLabel.setVisible(showEdit);
     }
 
     @Override
@@ -172,42 +189,46 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
     @Override
     public void addReadItem(PermissionItem item, ClickHandler deleteHandler) {
         final TreeNode node = new TreeNode(item, deleteHandler);
-        node.getWidget().addMouseOverHandler(new MouseOverHandler() {
+        if (deleteHandler != null) {
+            node.getWidget().addMouseOverHandler(new MouseOverHandler() {
 
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                node.getWidget().setDeleteLinkVisible(true);
-            }
-        });
+                @Override
+                public void onMouseOver(MouseOverEvent event) {
+                    node.getWidget().setDeleteLinkVisible(true);
+                }
+            });
 
-        node.getWidget().addMouseOutHandler(new MouseOutHandler() {
+            node.getWidget().addMouseOutHandler(new MouseOutHandler() {
 
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                node.getWidget().setDeleteLinkVisible(false);
-            }
-        });
+                @Override
+                public void onMouseOut(MouseOutEvent event) {
+                    node.getWidget().setDeleteLinkVisible(false);
+                }
+            });
+        }
         readRoot.addItem(node);
     }
 
     @Override
     public void addWriteItem(PermissionItem item, ClickHandler deleteHandler) {
         final TreeNode node = new TreeNode(item, deleteHandler);
-        node.getWidget().addMouseOverHandler(new MouseOverHandler() {
+        if (deleteHandler != null) {
+            node.getWidget().addMouseOverHandler(new MouseOverHandler() {
 
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                node.getWidget().setDeleteLinkVisible(true);
-            }
-        });
+                @Override
+                public void onMouseOver(MouseOverEvent event) {
+                    node.getWidget().setDeleteLinkVisible(true);
+                }
+            });
 
-        node.getWidget().addMouseOutHandler(new MouseOutHandler() {
+            node.getWidget().addMouseOutHandler(new MouseOutHandler() {
 
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                node.getWidget().setDeleteLinkVisible(false);
-            }
-        });
+                @Override
+                public void onMouseOut(MouseOutEvent event) {
+                    node.getWidget().setDeleteLinkVisible(false);
+                }
+            });
+        }
         rwRoot.addItem(node);
     }
 
@@ -279,10 +300,12 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
             initWidget(panel);
             delete = new Label("x");
             delete.setStyleName("display-inline");
-            panel.add(delete, "delete_link");
-
             delete.setVisible(false);
-            delete.addClickHandler(handler);
+
+            if (handler != null) {
+                panel.add(delete, "delete_link");
+                delete.addClickHandler(handler);
+            }
         }
 
         @Override
