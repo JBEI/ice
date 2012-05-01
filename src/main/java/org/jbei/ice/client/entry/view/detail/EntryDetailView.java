@@ -6,6 +6,7 @@ import org.jbei.ice.shared.StatusType;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.ParameterInfo;
 
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -275,7 +276,14 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
 
         if (value == null)
             value = "";
-        table.setHTML(currentRow, 1, "<span class=\"font-80em\">" + value + "</span>");
+
+        int width = Window.getClientWidth() - 530;
+        if (width <= 0)
+            width = 100;
+
+        table.setHTML(currentRow, 1,
+            "<span class=\"font-80em\" style=\"display: block; word-wrap: break-word; width: "
+                    + width + "px\">" + value + "</span>");
         table.getFlexCellFormatter().setColSpan(currentRow, 1, 3);
 
         currentCol = 0;
