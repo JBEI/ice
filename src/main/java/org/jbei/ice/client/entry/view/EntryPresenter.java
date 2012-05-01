@@ -341,7 +341,8 @@ public class EntryPresenter extends AbstractPresenter {
                 public void onSuccess(EntryInfo result) {
 
                     if (result == null) {
-                        FeedbackEvent event = new FeedbackEvent(true, "System returned null entry.");
+                        FeedbackEvent event = new FeedbackEvent(true,
+                                "Could not retrieve entry with id \"" + entryId + "\"");
                         eventBus.fireEvent(event);
                         return;
                     }

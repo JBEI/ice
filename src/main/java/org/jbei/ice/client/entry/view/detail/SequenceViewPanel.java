@@ -5,7 +5,10 @@ import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter.ISequenceView;
 import org.jbei.ice.shared.dto.EntryInfo;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -24,7 +27,6 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
     private final EntryInfo info;
     private final FlexTable layout;
     private HTMLPanel headerPanel;
-    private VectorEditorDialog dialog;
     private final SequenceViewPanelPresenter presenter;
 
     public SequenceViewPanel(EntryInfo info) {
@@ -86,21 +88,7 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
                 + " <span id=\"sequence_options\"></span></div>");
 
         headerPanel.setStyleName("entry_sequence_sub_header");
-
-        dialog = new VectorEditorDialog(info.getName());
-        Flash.Parameters param = new Flash.Parameters();
-        param.setEntryId(info.getRecordId());
-        param.setSessiondId(AppController.sessionId);
-        param.setSwfPath("ve/VectorEditor.swf");
-
-        FlexTable table = new FlexTable();
-        table.setWidth("100%");
-        table.setHeight("100%");
-        table.setWidget(0, 0, new Flash(param));
-        table.getFlexCellFormatter().setHeight(0, 0, "100%");
-        dialog.setWidget(table);
         updateSequenceHeaders();
-
         return headerPanel;
     }
 
@@ -110,14 +98,16 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
 
         if (info.isHasSequence()) {
             // delete, open in vector editor, download
-            Label label = dialog.getLabel("Open");
+            Label label = new Label("Open");
+            label.addClickHandler(new SequenceHeaderHandler());
             label.setStyleName("open_sequence_sub_link");
             headerPanel.add(label, "sequence_link");
             headerPanel.add(sequenceDownload.asWidget(), "sequence_options");
 
             // TODO : delete
         } else {
-            Label label = dialog.getLabel("Create New");
+            Label label = new Label("Create New");
+            label.addClickHandler(new SequenceHeaderHandler());
             label.setStyleName("open_sequence_sub_link");
             headerPanel.add(label, "sequence_link");
             headerPanel.add(sequenceUpload.asWidget(), "sequence_options");
@@ -137,5 +127,16 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
     @Override
     public void hideDialog() {
         sequenceUpload.hidePasteDialog();
+    }
+
+    private class SequenceHeaderHandler implements ClickHandler {
+
+        @Override
+        public void onClick(ClickEvent event) {
+            String url = GWT.getHostPageBaseURL();
+            url += "static/swf/ve/VectorEditor.swf?entryId=" + info.getRecordId() + "&sessionId="
+                    + AppController.sessionId;
+            Window.open(url, info.getName(), "");
+        }
     }
 }
