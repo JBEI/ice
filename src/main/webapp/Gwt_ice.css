@@ -1611,7 +1611,7 @@ td.datePickerMonth {
 }
 
 .news_archive_header {
-	font-weight: bold; font-size: 0.85em; cursor: pointer; color: #0082C0;
+	 font-size: 0.85em; cursor: pointer; color: #0082C0;
 }
 
 .news_archive_header:hover {
