@@ -1,4 +1,4 @@
-Welcome to the JBEI Registry Software Version 2 (ICE). We hope you
+Welcome to the JBEI Registry Software Version 3 (ICE). We hope you
 find our tools useful. More information, feature requests, bug
 reports, as well as discussions are available from our Google Project
 page: http://code.google.com/p/gd-ice/

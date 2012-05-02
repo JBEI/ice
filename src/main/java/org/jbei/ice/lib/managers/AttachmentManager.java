@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.wicket.util.io.Streams;
+import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -127,6 +127,56 @@ public class AttachmentManager {
         return attachments;
     }
 
+    //    public static boolean hasAttachment(Entry entry) throws ManagerException {
+    //        Session session = DAO.newSession();
+    //        try {
+    //
+    //        } catch (HibernateException e) {
+    //            throw new ManagerException("Failed to retrieve attachment by entry: " + entry.getId(),
+    //                    e);
+    //        } finally {
+    //            if (session.isOpen()) {
+    //                session.close();
+    //            }
+    //        }
+    //    }
+
+    /**
+     * Retrieves attachment referenced by a unique file identifier
+     * 
+     * @param fileId
+     *            unique file identifier
+     * @return retrieved attachment; null if none is found or there is a problem retrieving
+     *         attachment
+     * @throws ManagerException
+     *             on Hibernate exception
+     */
+    public static Attachment getByFileId(String fileId) throws ManagerException {
+        Attachment attachment = null;
+
+        Session session = DAO.newSession();
+        try {
+            Query query = session.createQuery("from " + Attachment.class.getName()
+                    + " where fileId = :fileId");
+
+            query.setParameter("fileId", fileId);
+
+            Object queryResult = query.uniqueResult();
+
+            if (queryResult != null) {
+                attachment = (Attachment) queryResult;
+            }
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve attachment by fileId: " + fileId, e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+
+        return attachment;
+    }
+
     /**
      * Retrieve the {@link File} from the disk of the given {@link Attachment}.
      * 
@@ -174,7 +224,7 @@ public class AttachmentManager {
             FileOutputStream outputStream = new FileOutputStream(file);
 
             try {
-                Streams.copy(inputStream, outputStream, 4096);
+                IOUtils.copy(inputStream, outputStream);
             } finally {
                 outputStream.close();
             }
@@ -200,4 +250,5 @@ public class AttachmentManager {
             throw new ManagerException(e);
         }
     }
+
 }

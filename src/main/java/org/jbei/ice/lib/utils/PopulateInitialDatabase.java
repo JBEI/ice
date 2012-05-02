@@ -66,18 +66,6 @@ public class PopulateInitialDatabase {
     public static String adminAccountEmail = "Administrator";
     public static String adminAccountDefaultPassword = "Administrator";
 
-    public static void main(String[] args) {
-        /*
-        createFirstGroup();
-        populatePermissionReadGroup();
-         */
-        try {
-            normalizeAllFundingSources();
-        } catch (DAOException e) {
-            e.printStackTrace();
-        }
-    }
-
     /**
      * Populate an empty database with necessary objects and values.
      * <p>
@@ -274,7 +262,7 @@ public class PopulateInitialDatabase {
         if (adminAccount == null) {
             adminAccount = new Account();
             adminAccount.setEmail(adminAccountEmail);
-            adminAccount.setLastName("");
+            adminAccount.setLastName("Administrator");
             adminAccount.setFirstName("");
             adminAccount.setInitials("");
             adminAccount.setInstitution("");
@@ -408,29 +396,6 @@ public class PopulateInitialDatabase {
                     Logger.debug(e.toString());
                 }
 
-            }
-        }
-    }
-
-    /**
-     * Process funding sources. For schema update only.
-     * 
-     * @throws DAOException
-     */
-    public static void normalizeAllFundingSources() throws DAOException {
-        ArrayList<Entry> allEntries = null;
-
-        try {
-            allEntries = EntryManager.getAllEntries();
-        } catch (ManagerException e) {
-            e.printStackTrace();
-        }
-
-        for (Entry entry : allEntries) {
-            Set<EntryFundingSource> entryFundingSources = entry.getEntryFundingSources();
-
-            for (EntryFundingSource entryFundingSource : entryFundingSources) {
-                normalizeFundingSources(entryFundingSource.getFundingSource());
             }
         }
     }

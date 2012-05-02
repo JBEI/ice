@@ -8,8 +8,11 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.BulkImport;
 
 /**
@@ -19,6 +22,27 @@ import org.jbei.ice.lib.models.BulkImport;
  * 
  */
 public class BulkImportManager {
+
+    @SuppressWarnings("unchecked")
+    public static ArrayList<BulkImport> retrieveByUser(Account account) throws ManagerException {
+
+        Session session = DAO.newSession();
+        Query query = session.createQuery("from " + BulkImport.class.getName()
+                + " where account = :account");
+        query.setEntity("account", account);
+
+        try {
+            ArrayList<BulkImport> result = new ArrayList<BulkImport>(query.list());
+            return result;
+        } catch (Exception e) {
+            throw new ManagerException("Error retrieving bulk import record", e);
+        } finally {
+
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+    }
 
     /**
      * Create a new {@link BulkImport} object in the database.
@@ -39,6 +63,46 @@ public class BulkImportManager {
             return (BulkImport) DAO.save(data);
         } catch (DAOException e) {
             throw new ManagerException("Exception saving bulkImport record", e);
+        }
+    }
+
+    /**
+     * Saves bulk import in preparation for verification
+     * 
+     * @param data
+     *            bulk import data to save
+     * @return saved bulk import record
+     * @throws ManagerException
+     */
+    public static void submitBulkImportForVerification(BulkImport data) throws ManagerException {
+        if (data == null)
+            throw new ManagerException("Cannot submit null data");
+
+        try {
+            Account account = AccountController.getSystemAccount();
+            data.setAccount(account);
+            createBulkImportRecord(data);
+        } catch (ControllerException e) {
+            throw new ManagerException(e);
+        }
+    }
+
+    public static BulkImport updateBulkImportRecord(long id, BulkImport data)
+            throws ManagerException {
+        if (data == null) {
+            throw new ManagerException("Cannot create record from null data");
+        }
+
+        BulkImport current = retrieveById(id);
+        if (current == null)
+            throw new ManagerException("Record with id " + id + " does not exist");
+
+        try {
+            data.setId(current.getId());
+            data.setCreationTime(current.getCreationTime());
+            return (BulkImport) DAO.save(data);
+        } catch (DAOException e) {
+            throw new ManagerException("Exception updating bulk import record " + id, e);
         }
     }
 
@@ -73,6 +137,28 @@ public class BulkImportManager {
             list.addAll(query.list());
         } catch (HibernateException he) {
             throw new ManagerException("Error retrieving list of bulk imports", he);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+
+        return list;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<BulkImport> retrieveSavedDrafts() throws ManagerException {
+        Session session = DAO.newSession();
+        List<BulkImport> list = new ArrayList<BulkImport>();
+
+        try {
+            session.beginTransaction();
+            Query query = session.createQuery("from " + BulkImport.class.getName()
+                    + " where isDraft = false");
+            list.addAll(query.list());
+        } catch (HibernateException he) {
+            session.getTransaction().rollback();
+            throw new ManagerException("Error retrieving list of saved bulk import drafts", he);
         } finally {
             if (session.isOpen()) {
                 session.close();

@@ -17,7 +17,6 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Group;
-import org.jbei.ice.web.IceSession;
 
 /**
  * Manager to manipulate Permissions.
@@ -26,17 +25,6 @@ import org.jbei.ice.web.IceSession;
  * 
  */
 public class PermissionManager {
-
-    /**
-     * Check if the logged in user has read permission to the given {@link Entry} by entryId.
-     * 
-     * @param entryId
-     *            id of the Entry.
-     * @return True if user has read permission to the specified entry.
-     */
-    public static boolean hasReadPermission(long entryId) {
-        return hasReadPermission(entryId, IceSession.get().getAccount());
-    }
 
     /**
      * Check if the {@link Account} associated with the given sessionKey has read permission to the
@@ -121,30 +109,6 @@ public class PermissionManager {
             }
         }
 
-        return result;
-    }
-
-    /**
-     * Check if the current {@link Account} has write permission to the specified {@link Entry}.
-     * 
-     * @param entryId
-     *            id of the specified Entry.
-     * @return True if current user has write permission to the specified Entry.
-     */
-    public static boolean hasWritePermission(long entryId) {
-        boolean result = false;
-        Entry entry;
-
-        try {
-            entry = EntryManager.get(entryId);
-            if (entry != null) {
-                result = hasWritePermission(entry);
-
-            }
-        } catch (ManagerException e) {
-            String msg = "manager exception during permission lookup: " + e.toString();
-            Logger.warn(msg);
-        }
         return result;
     }
 
@@ -242,9 +206,6 @@ public class PermissionManager {
      *            Entry to be queried.
      * @return True if the current user has read permission.
      */
-    public static boolean hasReadPermission(Entry entry) {
-        return hasReadPermission(entry, IceSession.get().getAccount());
-    }
 
     public static boolean hasReadPermission(Entry entry, Account account) {
         boolean result = false;
@@ -255,35 +216,6 @@ public class PermissionManager {
                 } else {
                     result = userHasReadPermission(entry, account)
                             | groupHasReadPermission(entry, account);
-                }
-            } catch (ManagerException e) {
-                e.printStackTrace();
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Checks if the current {@link Account} logged in has write permission to the given
-     * {@link Entry}.
-     * 
-     * @param entry
-     *            Entry to be queried.
-     * @return True if the current user has wrte permission.
-     */
-    public static boolean hasWritePermission(Entry entry) {
-        boolean result = false;
-
-        Account account;
-        account = IceSession.get().getAccount();
-
-        if (entry != null && account != null) {
-            try {
-                if (AccountManager.isModerator(account)) {
-                    result = true;
-                } else {
-                    result = userHasWritePermission(entry, account)
-                            | groupHasWritePermission(entry, account);
                 }
             } catch (ManagerException e) {
                 e.printStackTrace();
@@ -349,6 +281,94 @@ public class PermissionManager {
             throw new ManagerException(msg, e);
         } catch (DAOException e) {
             throw new ManagerException(e);
+        }
+    }
+
+    public static void removeReadUser(Entry entry, Account account) throws ManagerException {
+        String queryString = "delete  ReadUser readUser where readUser.entry = :entry and readUser.account = :account";
+        Session session = DAO.newSession();
+
+        try {
+            session.getTransaction().begin();
+            Query query = session.createQuery(queryString);
+            query.setEntity("entry", entry);
+            query.setEntity("account", account);
+            query.executeUpdate();
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            String msg = "Could not remove read user \"" + account.getEmail() + "\" for entry \""
+                    + entry.getId() + "\"";
+            throw new ManagerException(msg, e);
+        } finally {
+            if (session != null)
+                session.disconnect();
+        }
+    }
+
+    public static void removeReadGroup(Entry entry, Group group) throws ManagerException {
+        String queryString = "delete  ReadGroup readGroup where readGroup.entry = :entry and readGroup.group = :group";
+        Session session = DAO.newSession();
+
+        try {
+            session.getTransaction().begin();
+            Query query = session.createQuery(queryString);
+            query.setEntity("entry", entry);
+            query.setEntity("group", group);
+            query.executeUpdate();
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            String msg = "Could not remove read group \"" + group.getLabel() + "\" for entry \""
+                    + entry.getId() + "\"";
+            throw new ManagerException(msg, e);
+        } finally {
+            if (session != null)
+                session.disconnect();
+        }
+    }
+
+    public static void removeWriteUser(Entry entry, Account account) throws ManagerException {
+        String queryString = "delete  WriteUser writeUser where writeUser.entry = :entry and writeUser.account = :account";
+        Session session = DAO.newSession();
+
+        try {
+            session.getTransaction().begin();
+            Query query = session.createQuery(queryString);
+            query.setEntity("entry", entry);
+            query.setEntity("account", account);
+            query.executeUpdate();
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            String msg = "Could not remove write user \"" + account.getEmail() + "\" for entry \""
+                    + entry.getId() + "\"";
+            throw new ManagerException(msg, e);
+        } finally {
+            if (session != null)
+                session.disconnect();
+        }
+    }
+
+    public static void removeWriteGroup(Entry entry, Group group) throws ManagerException {
+        String queryString = "delete  WriteGroup writeGroup where writeGroup.entry = :entry and writeGroup.group = :group";
+        Session session = DAO.newSession();
+
+        try {
+            session.getTransaction().begin();
+            Query query = session.createQuery(queryString);
+            query.setEntity("entry", entry);
+            query.setEntity("group", group);
+            query.executeUpdate();
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            String msg = "Could not remove write group \"" + group.getLabel() + "\" for entry \""
+                    + entry.getId() + "\"";
+            throw new ManagerException(msg, e);
+        } finally {
+            if (session != null)
+                session.disconnect();
         }
     }
 
@@ -1069,4 +1089,5 @@ public class PermissionManager {
         }
         return accountGroups;
     }
+
 }

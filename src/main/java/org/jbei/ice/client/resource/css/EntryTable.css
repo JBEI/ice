@@ -1,0 +1,127 @@
+.cellTableWidget {
+}
+
+.cellTableFirstColumn {
+}
+
+.cellTableLastColumn {
+}
+
+@sprite .cellTableFooter {	
+  gwt-image: 'cellTableFooterBackground';
+  background-color: #b4d0f8;
+  border-top: 1px solid #88b0f2;
+  border-left: 1px solid #88b0f2;
+  border-right: 1px solid #eef;
+  padding: 0px 10px;
+  text-align: left;
+  color: #4b4a4a;
+  text-shadow: #ddf 1px 1px 0;
+  overflow: hidden;
+}
+
+/**
+ * Applied to headers cells.
+ */
+.cellTableHeader {
+	border-bottom: 1px solid #6f7277;
+    text-align: left;
+    color: #4b4a4a;
+    text-shadow: #ddf 1px 1px 0;
+    overflow: hidden;
+    background-color: #eaeaea;
+    font-size: 0.75em;
+    white-space: nowrap;
+    border-right: 1px solid #ccc;
+    border-top: 1px solid #ccc; 
+    padding: 3px;
+    text-transform: uppercase;
+}
+
+/* Applied to every cell */
+.cellTableCell {
+  padding: 3px; 
+  font-size: 0.80em;
+  color: #333;
+  font-family: arial;
+  overflow: hidden;
+  border-right: 1px solid #ccc;
+  border-top: 1px solid #ccc;  
+}
+
+.cellTableFirstColumnFooter {
+  border-left: 0px;
+}
+
+.cellTableFirstColumnHeader {
+  border-left: 0px;
+}
+
+.cellTableLastColumnFooter {
+}
+
+.cellTableLastColumnHeader {
+}
+
+.cellTableSortableHeader {
+	color: #003f7f;
+    cursor: pointer;
+    cursor: hand;
+}
+
+.cellTableSortableHeader:hover {
+    color: #222;
+}
+
+.cellTableSortedHeaderAscending {
+}
+
+.cellTableSortedHeaderDescending {
+}
+
+.cellTableEvenRow {
+    background-color: #FFFFFF;
+}
+
+.cellTableOddRow {
+    background-color: #FAFAFA;
+    border: selectionBorderWidth solid #f3f7fb;
+}
+
+.cellTableEvenRowCell {
+}
+
+.cellTableOddRowCell {
+}
+
+.cellTableHoveredRow {
+    background-color: #F6F6F6;
+}
+
+.cellTableHoveredRowCell {
+}
+
+.cellTableKeyboardSelectedRow {
+}
+
+.cellTableKeyboardSelectedRowCell {
+}
+
+@sprite .cellTableSelectedRow {
+    gwt-image: 'cellTableSelectedBackground';
+    background-color: #f3f1d9;
+    color: white;
+    height: auto;
+    overflow: auto;
+}
+
+.cellTableSelectedRowCell {
+    background: #ffc;
+}
+
+.cellTableKeyboardSelectedCell {
+}
+
+.cellTableLoading {
+    margin: 30px;
+}

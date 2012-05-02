@@ -14,33 +14,17 @@
 	</security-constraint>
 
 	<display-name>ice</display-name>
-
-	<!--
-		There are three means to configure Wickets configuration mode and they are tested in the order
-		given. 1) A system property: -Dwicket.configuration 2) servlet specific <init-param> 3) context
-		specific <context-param> The value might be either "development" (reloading when templates change)
-		or "deployment". If no configuration is found, "development" is the default.
-	-->
-
-	<!-- Wicket Application -->
+	
 	<filter>
-		<filter-name>wicket.ice</filter-name>
-		<filter-class>org.apache.wicket.protocol.http.WicketFilter</filter-class>
-		<init-param>
-			<param-name>applicationClassName</param-name>
-			<param-value>org.jbei.ice.web.WicketApplication</param-value>
-		</init-param>
-		<init-param>
-			<param-name>configuration</param-name>
-			<param-value>deployment</param-value>
-		</init-param>
-	</filter>
-
-	<filter-mapping>
-		<filter-name>wicket.ice</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
-
+           <filter-name>UrlRewriteFilter</filter-name>
+           <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+    </filter>
+    <filter-mapping>
+       <filter-name>UrlRewriteFilter</filter-name>
+       <url-pattern>/*</url-pattern>
+       <dispatcher>REQUEST</dispatcher>
+       <dispatcher>FORWARD</dispatcher>
+    </filter-mapping>
 
 	<!-- BlazeDS -->
 	<servlet>
@@ -57,6 +41,18 @@
 		<servlet-name>MessageBrokerServlet</servlet-name>
 		<url-pattern>/messagebroker/*</url-pattern>
 	</servlet-mapping>
+	
+	<!-- re-writer servlet for specific url mapping 
+	<servlet>
+                <servlet-name>rewriter</servlet-name>
+                <servlet-class>org.jbei.ice.server.URLRewriter</servlet-class>
+        </servlet> 
+        
+	<servlet-mapping>
+	   <servlet-name>rewriter</servlet-name>
+	   <url-pattern>/entry/view</url-pattern>
+	</servlet-mapping>
+	-->
 
 
 	<!-- Apache CXF WebServices -->
@@ -67,6 +63,14 @@
 
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	
+	<listener>
+        <listener-class>org.jbei.ice.server.servlet.IceServletContextListener</listener-class>
+    </listener>
+    
+    <listener>
+		<listener-class>org.jbei.ice.server.servlet.IceServletSessionListener</listener-class>
 	</listener>
 
 	<servlet>
@@ -79,4 +83,88 @@
 		<servlet-name>CXFServlet</servlet-name>
 		<url-pattern>/api/*</url-pattern>
 	</servlet-mapping>
+	
+	<!-- GWT -->
+    <servlet>
+        <servlet-name>gwtIceServlet</servlet-name>
+        <servlet-class>org.jbei.ice.server.RegistryServiceImpl</servlet-class>
+    </servlet>
+  
+    <servlet-mapping>
+        <servlet-name>gwtIceServlet</servlet-name>
+        <url-pattern>/gwt_ice/ice</url-pattern>
+    </servlet-mapping>
+    
+    <!-- file upload -->
+    
+    <context-param>
+    <!-- max size of the upload request -->
+    <param-name>maxSize</param-name>
+    <param-value>3145728</param-value>
+  </context-param>
+  <context-param>
+    <!-- Useful in development mode to slow down the uploads in fast networks.
+         Put the number of milliseconds to sleep in each block received in the server.
+         false or 0, means don't use slow uploads  -->
+    <param-name>slowUploads</param-name>
+    <param-value>10000</param-value>
+  </context-param>
+  
+    <servlet>
+        <servlet-name>FileUploadServlet</servlet-name>
+        <servlet-class>org.jbei.ice.server.servlet.FileUploadServlet</servlet-class>
+    </servlet>
+    
+    <servlet-mapping>
+        <servlet-name>FileUploadServlet</servlet-name>
+        <url-pattern>*.gupld</url-pattern>
+    </servlet-mapping>
+    
+    <!--  file download -->
+    <servlet>
+        <servlet-name>FileDownloadServlet</servlet-name>
+        <servlet-class>org.jbei.ice.server.servlet.FileDownloadServlet</servlet-class>
+    </servlet>
+ 
+    <servlet-mapping>
+        <servlet-name>FileDownloadServlet</servlet-name>
+        <url-pattern>/download</url-pattern>
+    </servlet-mapping>
+    
+    <!--  export as [file format] servlet -->
+    <servlet>
+        <servlet-name>EntryExportServlet</servlet-name>
+        <servlet-class>org.jbei.ice.server.servlet.EntryExportServlet</servlet-class>
+    </servlet>
+ 
+    <servlet-mapping>
+        <servlet-name>EntryExportServlet</servlet-name>
+        <url-pattern>/export</url-pattern>
+    </servlet-mapping>
+    
+    <!--  sequence download -->
+    <servlet>
+        <servlet-name>SequenceDownloadServlet</servlet-name>
+        <servlet-class>org.jbei.ice.server.servlet.SequenceDownloadServlet</servlet-class>
+    </servlet>
+ 
+    <servlet-mapping>
+        <servlet-name>SequenceDownloadServlet</servlet-name>
+        <url-pattern>/sequence</url-pattern>
+    </servlet-mapping>
+    
+    <!--  sequence upload -->
+    <servlet>
+        <servlet-name>SequenceUploadServlet</servlet-name>
+        <servlet-class>org.jbei.ice.server.servlet.SequenceUploadServlet</servlet-class>
+    </servlet>
+ 
+    <servlet-mapping>
+        <servlet-name>SequenceUploadServlet</servlet-name>
+        <url-pattern>/sequence_upload</url-pattern>
+    </servlet-mapping>
+    
+    <welcome-file-list>
+        <welcome-file>Gwt_ice.html</welcome-file>
+    </welcome-file-list>
 </web-app>

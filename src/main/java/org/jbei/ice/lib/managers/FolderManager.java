@@ -2,6 +2,8 @@ package org.jbei.ice.lib.managers;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.HibernateException;
@@ -12,6 +14,7 @@ import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
+import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Folder;
 
 /**
@@ -36,7 +39,6 @@ public class FolderManager {
             Query query = session.createQuery("from " + Folder.class.getName() + " where id = :id");
             query.setLong("id", id);
             result = (Folder) query.uniqueResult();
-            result.getContents().size();
         } catch (Exception e) {
             String msg = "Could not get folder by id: " + id + " " + e.toString();
             Logger.error(msg, e);
@@ -48,6 +50,21 @@ public class FolderManager {
         }
 
         return result;
+    }
+
+    public static boolean delete(Folder folder) throws ManagerException {
+        if (folder == null)
+            throw new ManagerException("Failed to delete null folder!");
+
+        try {
+            DAO.delete(folder);
+            return true;
+        } catch (DAOException e) {
+            String msg = "Could not delete folder " + folder.getName() + " with id "
+                    + folder.getId();
+            Logger.error(msg, e);
+            throw new ManagerException(msg, e);
+        }
     }
 
     /**
@@ -85,8 +102,9 @@ public class FolderManager {
      * @return List of Entry ids.
      * @throws ManagerException
      */
-    public static ArrayList<Long> getFolderContents(long id, boolean asc) throws ManagerException {
-        ArrayList<Long> results = new ArrayList<Long>();
+    @SuppressWarnings("unchecked")
+    public static ArrayList<BigInteger> getFolderContents(long id, boolean asc)
+            throws ManagerException {
         Session session = DAO.newSession();
         try {
 
@@ -94,18 +112,76 @@ public class FolderManager {
                     .createSQLQuery("SELECT entry_id FROM folder_entry WHERE folder_id = :id");
             query.setLong("id", id);
 
-            @SuppressWarnings("unchecked")
-            List<BigInteger> l = query.list();
-            for (BigInteger bi : l) {
-                results.add(bi.longValue());
-            }
-
-            return results;
+            return (ArrayList<BigInteger>) query.list();
 
         } finally {
             if (session.isOpen()) {
                 session.close();
             }
+        }
+    }
+
+    public static Folder removeFolderContents(long folderId, ArrayList<Long> entryIds)
+            throws ManagerException {
+        Session session = DAO.newSession();
+        try {
+            session.beginTransaction();
+            Query query = session.createQuery("from " + Folder.class.getName() + " where id = :id");
+            query.setLong("id", folderId);
+            Folder folder = (Folder) query.uniqueResult();
+            if (folder == null)
+                throw new ManagerException("Cannot retrieve folder with id \"" + folderId + "\"");
+
+            folder.getContents().size();
+            boolean isSystemFolder = folder.getOwnerEmail().equals(
+                AccountManager.getSystemAccount().getEmail());
+            if (isSystemFolder) {
+                session.getTransaction().commit();
+                throw new ManagerException("Cannot modify non user folder " + folder.getName());
+            }
+
+            Iterator<Entry> it = folder.getContents().iterator();
+
+            while (it.hasNext()) {
+                Entry entry = it.next();
+                if (entryIds.contains(entry.getId()))
+                    it.remove();
+            }
+
+            folder.setModificationTime(new Date(System.currentTimeMillis()));
+            session.saveOrUpdate(folder);
+            session.getTransaction().commit();
+            return folder;
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            return null;
+        } finally {
+            if (session.isOpen())
+                session.close();
+        }
+    }
+
+    public static Folder addFolderContents(long folderId, ArrayList<Entry> entrys)
+            throws ManagerException {
+        Session session = DAO.newSession();
+        try {
+            session.beginTransaction();
+            Query query = session.createQuery("from " + Folder.class.getName() + " where id = :id");
+            query.setLong("id", folderId);
+            Folder folder = (Folder) query.uniqueResult();
+            folder.getContents().size();
+            folder.getContents().addAll(entrys);
+            folder.setModificationTime(new Date(System.currentTimeMillis()));
+            session.saveOrUpdate(folder);
+            session.getTransaction().commit();
+            return folder;
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            return null;
+        } finally {
+
+            if (session.isOpen())
+                session.close();
         }
     }
 
@@ -154,6 +230,7 @@ public class FolderManager {
      */
     public static Folder update(Folder folder) throws ManagerException {
         try {
+            folder.setModificationTime(new Date(System.currentTimeMillis()));
             DAO.save(folder);
         } catch (DAOException e) {
             String msg = "Could not save folder: " + folder.getName() + " " + e.toString();
@@ -165,6 +242,7 @@ public class FolderManager {
     }
 
     public static Folder save(Folder folder) throws ManagerException {
+        folder.setCreationTime(new Date(System.currentTimeMillis()));
         return update(folder);
     }
 }

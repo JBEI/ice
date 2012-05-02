@@ -205,6 +205,24 @@ public class AttachmentController extends Controller {
     }
 
     /**
+     * Retrieves attachment referenced by unique file id
+     * 
+     * @param fileId
+     * @return retrieved file
+     * @throws ControllerException
+     */
+    public Attachment getAttachmentByFileId(String fileId) throws ControllerException {
+        Attachment attachment = null;
+        try {
+            attachment = AttachmentManager.getByFileId(fileId);
+        } catch (ManagerException e) {
+            throw new ControllerException(e);
+        }
+
+        return attachment;
+    }
+
+    /**
      * Return the {@link AttachmentPermissionVerifier}.
      * 
      * @return permssionVerifier

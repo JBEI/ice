@@ -103,10 +103,9 @@ public class StorageManager {
             return null;
         }
 
-        if (results.size() > 1) {
-            throw new ManagerException("Expecting single result, received " + results.size()
-                    + " for " + barcode);
-        }
+        if (results.size() > 1)
+            throw new ManagerException("Expecting single result, received \"" + results.size()
+                    + "\" for index " + barcode);
 
         return results.get(0);
     }
@@ -238,6 +237,32 @@ public class StorageManager {
      * @param entryType
      * @return List of Storage objects with schemes.
      */
+    @SuppressWarnings("unchecked")
+    public static List<Storage> getAllStorageRoot() throws ManagerException {
+        ArrayList<Storage> result = null;
+        Session session = DAO.newSession();
+        try {
+            Query query = session.createQuery("FROM " + Storage.class.getName()
+                    + " storage WHERE storage.storageType = :storageType");
+            query.setParameter("storageType", StorageType.GENERIC);
+
+            @SuppressWarnings("rawtypes")
+            List list = query.list();
+            if (list != null)
+                result = (ArrayList<Storage>) list;
+
+        } catch (Exception e) {
+            String msg = "Could not get all generic types: " + e.toString();
+            Logger.error(msg, e);
+            throw new ManagerException(msg);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+        return result;
+    }
+
     @SuppressWarnings("unchecked")
     public static List<Storage> getStorageSchemesForEntryType(String entryType) {
         ArrayList<Storage> result = new ArrayList<Storage>();

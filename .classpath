@@ -2,7 +2,20 @@
 <classpath>
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry kind="src" path="src/test/java"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER"/>
-	<classpathentry kind="output" path="target/"/>
+	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/home/hplahar/Apps/eclipse_j2ee_indigo_ice/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.r37v201108301710/gwt-2.4.0/gwt-user.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/home/hplahar/Apps/eclipse_j2ee_indigo_ice/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.r37v201108301710/gwt-2.4.0/doc/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/hplahar/Apps/eclipse_j2ee_indigo_ice/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.r37v201108301710/gwt-2.4.0/gwt-dev.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/home/hplahar/Apps/eclipse_j2ee_indigo_ice/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.r37v201108301710/gwt-2.4.0/doc/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/hplahar/Apps/eclipse_j2ee_indigo_ice/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.r37v201108301710/gwt-2.4.0/validation-api-1.0.0.GA.jar" sourcepath="/home/hplahar/Apps/eclipse_j2ee_indigo_ice/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.r37v201108301710/gwt-2.4.0/validation-api-1.0.0.GA-sources.jar"/>
+	<classpathentry kind="lib" path="/home/hplahar/Apps/eclipse_j2ee_indigo_ice/plugins/com.google.gwt.eclipse.sdkbundle_2.4.0.r37v201108301710/gwt-2.4.0/validation-api-1.0.0.GA-sources.jar"/>
+	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

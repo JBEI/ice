@@ -36,6 +36,9 @@ public class BulkImport implements IModel {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
     private long id;
 
+    @Column(name = "name")
+    private String name;
+
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "account_id")
     private Account account;
@@ -147,5 +150,13 @@ public class BulkImport implements IModel {
 
     public void setCreationTime(Date date) {
         creationTime = date;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

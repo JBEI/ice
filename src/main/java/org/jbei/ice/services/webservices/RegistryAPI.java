@@ -210,7 +210,7 @@ public class RegistryAPI {
         long result = 0;
 
         try {
-            result = EntryManager.getNumberOfVisibleEntries();
+            result = EntryManager.getNumberOfVisibleEntries(null);
         } catch (ManagerException e) {
             Logger.error(e);
 

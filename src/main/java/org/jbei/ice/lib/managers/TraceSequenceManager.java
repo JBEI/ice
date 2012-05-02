@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import org.apache.wicket.util.io.Streams;
+import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -176,7 +176,7 @@ public class TraceSequenceManager {
             FileOutputStream outputStream = new FileOutputStream(file);
 
             try {
-                Streams.copy(inputStream, outputStream, 4096);
+                IOUtils.copy(inputStream, outputStream);
             } finally {
                 outputStream.close();
             }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -396,16 +397,6 @@ public class EntryController extends Controller {
     }
 
     /**
-     * Retrieve all entries from the database. Use with caution, as query can be slow.
-     * 
-     * @return List of all {@link Entry entries}.
-     * @throws ControllerException
-     */
-    public List<Entry> getEntries() throws ControllerException {
-        return getEntries(0, -1, null, true);
-    }
-
-    /**
      * Retrieve entries from the database sorted by the field, offset and limited.
      * 
      * @param offset
@@ -431,6 +422,22 @@ public class EntryController extends Controller {
         }
 
         return entries;
+    }
+
+    public Set<Long> getAllVisibleEntryIDs(Account account) throws ControllerException {
+        try {
+            return EntryManager.getAllVisibleEntries(account);
+        } catch (ManagerException e) {
+            throw new ControllerException(e);
+        }
+    }
+
+    public ArrayList<Long> getAllEntryIDs() throws ControllerException {
+        try {
+            return EntryManager.getEntries("creationTime", true);
+        } catch (ManagerException e) {
+            throw new ControllerException(e);
+        }
     }
 
     /**
@@ -504,7 +511,7 @@ public class EntryController extends Controller {
         ArrayList<Entry> entries = null;
         try {
             ids = filterEntriesByPermission(ids);
-            entries = EntryManager.getEntriesByIdSet(ids);
+            entries = new ArrayList<Entry>(EntryManager.getEntriesByIdSet(ids));
 
         } catch (ManagerException e) {
             throw new ControllerException(e);
@@ -523,7 +530,7 @@ public class EntryController extends Controller {
         long numberOfVisibleEntries = 0;
 
         try {
-            numberOfVisibleEntries = EntryManager.getNumberOfVisibleEntries();
+            numberOfVisibleEntries = EntryManager.getNumberOfVisibleEntries(null);
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
@@ -543,6 +550,14 @@ public class EntryController extends Controller {
 
         try {
             return EntryManager.getEntriesByOwner(owner).size();
+        } catch (ManagerException e) {
+            throw new ControllerException(e);
+        }
+    }
+
+    public ArrayList<Long> getEntryIdsByOwner(String ownerEmail) throws ControllerException {
+        try {
+            return EntryManager.getEntriesByOwner(ownerEmail);
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
