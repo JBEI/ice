@@ -141,4 +141,6 @@ public interface RegistryService extends RemoteService {
             boolean asc);
 
     boolean sendFeedback(String email, String msg);
+
+    String getSetting(String name);
 }

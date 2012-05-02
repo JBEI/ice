@@ -27,12 +27,51 @@ public class LoginPresenter extends AbstractPresenter {
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
     private final ILoginView display;
+    private Mode mode;
 
     public LoginPresenter(RegistryServiceAsync service, HandlerManager eventBus, ILoginView display) {
         this.service = service;
         this.eventBus = eventBus;
         this.display = display;
+
+        determineCanChangePassword();
+        determineCanRegister();
         setHandler();
+    }
+
+    protected void determineCanChangePassword() {
+        service.getSetting("PASSWORD_CHANGE_ALLOWED", new AsyncCallback<String>() {
+
+            @Override
+            public void onSuccess(String result) {
+                if (!"yes".equalsIgnoreCase(result) && !"true".equalsIgnoreCase(result))
+                    return;
+
+                display.addForgotPasswordHandler(new ForgotPasswordHandler());
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+        });
+    }
+
+    protected void determineCanRegister() {
+        service.getSetting("NEW_REGISTRATION_ALLOWED", new AsyncCallback<String>() {
+
+            @Override
+            public void onSuccess(String result) {
+                if (!"yes".equalsIgnoreCase(result) && !"true".equalsIgnoreCase(result))
+                    return;
+
+                display.addRegisterHandler(new RegisterHandler());
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+        });
+
     }
 
     protected void login() {
@@ -113,6 +152,25 @@ public class LoginPresenter extends AbstractPresenter {
         container.add(this.display.asWidget());
     }
 
+    // inner classes
+
+    private class ForgotPasswordHandler implements ClickHandler {
+
+        @Override
+        public void onClick(ClickEvent event) {
+            mode = Mode.FORGOT_PASSWORD;
+            display.switchToForgotPasswordMode();
+        }
+    }
+
+    private class RegisterHandler implements ClickHandler {
+        @Override
+        public void onClick(ClickEvent event) {
+            mode = Mode.REGISTER;
+            display.switchToRegisterMode();
+        }
+    }
+
     public class SubmitHandler implements KeyPressHandler, ClickHandler {
 
         @Override
@@ -127,5 +185,9 @@ public class LoginPresenter extends AbstractPresenter {
         public void onClick(ClickEvent event) {
             login();
         }
+    }
+
+    private enum Mode {
+        FORGOT_PASSWORD, REGISTER;
     }
 }

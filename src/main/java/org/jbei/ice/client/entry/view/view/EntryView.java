@@ -392,6 +392,7 @@ public class EntryView extends Composite implements IEntryView {
             Flash.Parameters params = new Flash.Parameters();
             params.setSwfPath("sc/SequenceChecker.swf");
             params.setSessiondId(AppController.sessionId);
+            params.setMovieName("SequenceChecker.swf");
             params.setEntryId(info.getRecordId());
 
             Flash flash = new Flash(params);

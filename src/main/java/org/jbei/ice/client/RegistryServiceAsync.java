@@ -165,4 +165,6 @@ public interface RegistryServiceAsync {
             AsyncCallback<Boolean> callback);
 
     void sendFeedback(String email, String msg, AsyncCallback<Boolean> callback);
+
+    void getSetting(String name, AsyncCallback<String> callback);
 }

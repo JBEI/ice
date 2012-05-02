@@ -15,6 +15,7 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountPreferences;
 import org.jbei.ice.lib.models.SessionData;
+import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.PersistentSessionDataWrapper;
@@ -344,5 +345,27 @@ public class AccountController {
             throw new ControllerException(e);
         }
         return account;
+    }
+
+    public static void resetUserPassword(String email, String url) throws ControllerException {
+        Account account = getByEmail(email);
+
+        if (account == null)
+            return;
+
+        String newPassword = Utils.generateUUID().substring(24);
+        account.setPassword(AccountController.encryptPassword(newPassword));
+        AccountController.save(account);
+        String subject = "JBEI Registry Password Reminder";
+        String body = "A request has been made to reset your password.\n\n";
+        body = body + "Your new password is " + newPassword + ".\n\n";
+        body = body + "Please go to the following link and change your password.\n\n";
+        body = body + url;
+
+        try {
+            Emailer.send(account.getEmail(), subject, body);
+        } catch (Exception e) {
+            throw new ControllerException(e);
+        }
     }
 }

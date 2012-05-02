@@ -40,4 +40,12 @@ public interface ILoginView {
     void setSubmitClickHandler(ClickHandler handler);
 
     Widget asWidget();
+
+    void addForgotPasswordHandler(ClickHandler forgotPasswordHandler);
+
+    void addRegisterHandler(ClickHandler handler);
+
+    void switchToForgotPasswordMode();
+
+    void switchToRegisterMode();
 }

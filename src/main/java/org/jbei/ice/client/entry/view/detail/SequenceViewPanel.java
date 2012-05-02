@@ -73,6 +73,7 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
             param.setEntryId(info.getRecordId());
             param.setSessiondId(AppController.sessionId);
             param.setSwfPath("vv/VectorViewer.swf");
+            param.setMovieName("VectorViewer.swf");
             layout.setWidget(2, 0, new Flash(param));
             layout.getFlexCellFormatter().setHeight(2, 0, "600px");
         } else {

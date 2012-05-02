@@ -94,6 +94,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     private static final long serialVersionUID = 1L;
 
     @Override
+    public String getSetting(String name) {
+        return JbeirSettings.getSetting(name);
+    }
+
+    @Override
     public AccountInfo login(String name, String pass) {
 
         try {

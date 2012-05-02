@@ -21,10 +21,14 @@ public class SheetHeader {
     protected void addHeader(Header h) {
         String label = h.toString();
         String top = label.length() > 15 ? "-2px" : "-8px";
-        String html = "<div style=\"position: relative; top: " + top
-                + "; left: -3px; float: right; font-size: 11px; "
-                + "border-radius: 1em 1em 1em 1em; color: #333; padding: 0 5px; "
-                + "font-weight: bold; background-color: #f8f8f0; cursor: pointer\">?</div>" + label;
+        String html = "";
+        if (!h.getDescription().isEmpty()) {
+            html = "<div style=\"position: relative; top: " + top
+                    + "; left: -3px; float: right; font-size: 11px; "
+                    + "border-radius: 1em 1em 1em 1em; color: #333; padding: 0 5px; "
+                    + "font-weight: bold; background-color: #f8f8f0; cursor: pointer\">?</div>";
+        }
+        html += label;
         if (h.isRequired())
             html += (" <span class=\"required\">*</span>");
         HTML cell = new HTML(html);

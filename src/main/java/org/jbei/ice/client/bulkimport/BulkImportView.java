@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.bulkimport.model.NewBulkInput;
 import org.jbei.ice.client.bulkimport.widget.SaveDraftInput;
-import org.jbei.ice.client.collection.add.menu.CreateEntryMenu;
+import org.jbei.ice.client.bulkimport.widget.SelectTypeMenu;
 import org.jbei.ice.client.collection.menu.CollectionMenu;
 import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
 import org.jbei.ice.client.collection.menu.MenuItem;
@@ -31,7 +31,8 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     private CollectionMenu draftsMenu; // TODO
     private Label contentHeader;
     private FlexTable mainContent;
-    private CreateEntryMenu create; // TODO: needs its own menu
+    private FlexTable mainHeader;
+    private SelectTypeMenu create;
     private FeedbackPanel feedback;
     private FlexTable layout;
     private ToggleButton toggle;
@@ -45,7 +46,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     protected void initComponents() {
         super.initComponents();
         draftsMenu = new CollectionMenu(false, "SAVED DRAFTS");
-        create = new CreateEntryMenu();
+        create = new SelectTypeMenu();
         feedback = new FeedbackPanel("450px");
         contentHeader = new Label("");
         contentHeader.setStyleName("display-inline");
@@ -62,6 +63,8 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         resetButton.setStyleName("saved_draft_button");
         draftInput = new SaveDraftInput();
         uploadCsv = ImageUtil.getUploadImage();
+
+        mainHeader = new FlexTable();
     }
 
     @Override
@@ -112,13 +115,18 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         mainContent.setCellSpacing(0);
         mainContent.setWidth("100%");
 
-        HTMLPanel panel = new HTMLPanel(
-                "<span id=\"toggle_side\"></span>&nbsp<span id=\"create_btn\"></span>");
-        panel.add(toggle, "toggle_side");
-        panel.add(create.asWidget(), "create_btn");
+        //        HTMLPanel panel = new HTMLPanel(
+        //                "<span id=\"toggle_side\"></span>&nbsp<span id=\"create_btn\"></span>");
+        //        panel.add(toggle, "toggle_side");
+        //        panel.add(create.asWidget(), "create_btn");
+        mainHeader.setWidget(0, 0, toggle);
+        mainHeader.setWidget(0, 1, create.asWidget());
+        mainHeader.setHTML(0, 2, "");
+        mainHeader.setHTML(0, 3, "");
+        mainHeader.setWidget(0, 4, feedback);
+        feedback.setFailureMessage("This is a test");
 
-        mainContent.setWidget(0, 0, panel);
-        mainContent.getFlexCellFormatter().setWidth(0, 0, "150px");
+        mainContent.setWidget(0, 0, mainHeader);
 
         int count = mainContent.getCellCount(0);
 
@@ -156,17 +164,18 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
 
         HTMLPanel panel;
         if (!isNew) {
-            panel = new HTMLPanel(
-                    "<span style=\"vertical-align: middle\">"
-                            + bulkImport.getName()
-                            + "</span>"
-                            + "<span style=\"float: right; text-align: right\" id=\"bulk_import_submit\">"
-                            + "<span id=\"bulk_import_feedback\"></span> &nbsp; <span id=\"bulk_import_draft_update\"></span>&nbsp;</span>");
-
-            panel.add(updateButton, "bulk_import_draft_update");
-            panel.add(feedback, "bulk_import_feedback");
-            feedback.addStyleName("display-inline");
-            panel.add(saveButton, "bulk_import_submit");
+            //            mainContent.setWidget(row, column, widget);
+            //            panel = new HTMLPanel(
+            //                    "<span style=\"vertical-align: middle\">"
+            //                            + bulkImport.getName()
+            //                            + "</span>"
+            //                            + "<span style=\"float: right; text-align: right\" id=\"bulk_import_submit\">"
+            //                            + "<span id=\"bulk_import_feedback\"></span> &nbsp; <span id=\"bulk_import_draft_update\"></span>&nbsp;</span>");
+            //
+            //            panel.add(updateButton, "bulk_import_draft_update");
+            //            panel.add(feedback, "bulk_import_feedback");
+            //            feedback.addStyleName("display-inline");
+            //            panel.add(saveButton, "bulk_import_submit");
         } else {
             panel = new HTMLPanel(
                     "<span style=\"vertical-align: middle\" id=\"bulk_import_input\"></span> "
@@ -180,7 +189,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
             panel.add(saveButton, "bulk_import_submit");
         }
 
-        mainContent.setWidget(0, 1, panel);
+        //        mainContent.setWidget(0, 1, panel);
 
         int index = mainContent.getCellCount(0);
 

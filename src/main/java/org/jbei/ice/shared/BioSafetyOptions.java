@@ -20,6 +20,11 @@ public enum BioSafetyOptions implements IsSerializable {
         return this.displayName;
     }
 
+    @Override
+    public String toString() {
+        return this.displayName;
+    }
+
     public String getValue() {
         return this.value;
     }

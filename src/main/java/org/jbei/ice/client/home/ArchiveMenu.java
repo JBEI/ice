@@ -47,7 +47,7 @@ public class ArchiveMenu extends Composite {
         });
         label.setStyleName("news_archive_header");
         HTMLPanel panel = new HTMLPanel(
-                "<span id=\"news_title\"></span><span style=\"font-size: 0.75em; color: #333\">"
+                "<span id=\"news_title\"></span><br><span style=\"font-size: 0.75em; color: #333\">"
                         + DateUtilities.formatDate(item.getCreationDate()) + "</span>");
         panel.add(label, "news_title");
         return panel;

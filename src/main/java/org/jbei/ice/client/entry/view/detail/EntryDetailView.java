@@ -277,9 +277,9 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         if (value == null)
             value = "";
 
-        int width = Window.getClientWidth() - 530;
+        int width = Window.getClientWidth() - 680;
         if (width <= 0)
-            width = 100;
+            width = 200;
 
         table.setHTML(currentRow, 1,
             "<span class=\"font-80em\" style=\"display: block; word-wrap: break-word; width: "

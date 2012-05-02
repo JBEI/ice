@@ -34,6 +34,7 @@ body {
 .no_wrap { white-space: nowrap; }
 .bg_f1 { background-color: #f8f8f0; }
 .min_width_170 { min-width: 170px; }
+.z-index-low {z-index: -2}
 
 .no_data_style { padding: 8px; background-color: white; font-size: 0.85em }
 
@@ -510,6 +511,7 @@ a.cell_mouseover:hover {
 	border: 1px solid #A5A5A5;
 	-webkit-box-shadow: 4px 4px 7px #DDD;
 	-moz-box-shadow:  4px 4px 7px #DDD;
+	z-index: 999;
 }
 
 .nav {
@@ -759,7 +761,7 @@ a.cell_mouseover:hover {
 
 /* LOGIN */
 .login_panel {
-	padding: 20px; width: 500px; border: 1px solid #f1f1f1; -moz-box-shadow: 0 0 7px #bbb; -webkit-box-shadow: 0 0 7px #bbb; box-shadow: 0 0 7px #bbb;
+	padding: 20px; width: 500px; border: 1px solid #f1f1f1; -moz-box-shadow: 0 0 7px #bbb; -webkit-box-shadow: 0 0 7px #bbb; box-shadow: 0 0 7px #bbb; margin-top: 45px;
 }
 .login_table {
 	background-color: #f1f1f1; 
@@ -1611,7 +1613,7 @@ td.datePickerMonth {
 }
 
 .news_archive_header {
-	 font-size: 0.85em; cursor: pointer; color: #0082C0;
+	 font-size: 0.85em; cursor: pointer; color: #0082C0; display: inline;
 }
 
 .news_archive_header:hover {
