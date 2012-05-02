@@ -3,6 +3,7 @@ package org.jbei.ice.client.collection.add;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Page;
@@ -10,6 +11,9 @@ import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.add.form.EntryCreateWidget;
 import org.jbei.ice.client.collection.add.form.IEntryFormSubmit;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
+import org.jbei.ice.client.collection.menu.MenuItem;
+import org.jbei.ice.client.collection.presenter.CollectionsPresenter;
+import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.EntryInfo;
@@ -23,6 +27,12 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
 
+/**
+ * Presenter for adding entries
+ * 
+ * @author Hector Plahar
+ */
+
 public class EntryAddPresenter {
 
     private final RegistryServiceAsync service;
@@ -30,11 +40,14 @@ public class EntryAddPresenter {
     private final EntryAddView display;
     private final HashMap<EntryAddType, EntryCreateWidget> formsCache;
     private final HashMap<EntryType, SampleLocation> locationCache;
+    private final CollectionsPresenter presenter;
 
-    public EntryAddPresenter(RegistryServiceAsync service, HandlerManager eventBus) {
+    public EntryAddPresenter(CollectionsPresenter presenter, RegistryServiceAsync service,
+            HandlerManager eventBus) {
         this.service = service;
         this.eventBus = eventBus;
         this.display = new EntryAddView();
+        this.presenter = presenter;
 
         formsCache = new HashMap<EntryAddType, EntryCreateWidget>();
         locationCache = new HashMap<EntryType, SampleLocation>();
@@ -119,12 +132,21 @@ public class EntryAddPresenter {
         if (entrySet == null || entrySet.isEmpty())
             return;
 
+        Set<Long> list = new HashSet<Long>();
+        list.add(Long.valueOf(0));
+        presenter.getView().setBusyIndicator(list);
+
         this.service.createEntry(AppController.sessionId, entrySet,
             new AsyncCallback<ArrayList<Long>>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
                     eventBus.fireEvent(new FeedbackEvent(true, "Server error. Please try again."));
+                    MenuItem item = new MenuItem(0, "My Entries", AppController.accountInfo
+                            .getUserEntryCount(), true);
+                    ArrayList<MenuItem> items = new ArrayList<MenuItem>();
+                    items.add(item);
+                    presenter.getView().updateMenuItemCounts(items);
                 }
 
                 @Override
@@ -136,7 +158,16 @@ public class EntryAddPresenter {
                     } else {
                         if (entrySet.size() == 1) {
                             long id = result.get(0);
-                            History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + id);
+                            EntryContext context = new EntryContext(EntryContext.Type.COLLECTION);
+                            context.setCurrent(id);
+                            presenter.showEntryView(context);
+                            AppController.accountInfo.setUserEntryCount(AppController.accountInfo
+                                    .getUserEntryCount() + 1);
+                            MenuItem item = new MenuItem(0, "My Entries", AppController.accountInfo
+                                    .getUserEntryCount(), true);
+                            ArrayList<MenuItem> items = new ArrayList<MenuItem>();
+                            items.add(item);
+                            presenter.getView().updateMenuItemCounts(items);
                         } else {
                             History.newItem(Page.COLLECTIONS.getLink());
                         }

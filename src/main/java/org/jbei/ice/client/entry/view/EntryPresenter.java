@@ -202,6 +202,11 @@ public class EntryPresenter extends AbstractPresenter {
         retrieveEntryDetails();
     }
 
+    public void setCurrentContext(EntryContext context) {
+        this.currentContext = context;
+        showCurrentEntryView();
+    }
+
     private void addEntryViewHandler() {
         eventBus.addHandler(EntryViewEvent.TYPE, new EntryViewEventHandler() {
 
