@@ -469,6 +469,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                 if (event == null || event.getItems() == null) {
                     display.showFeedbackMessage("Error connecting to server. Please try again",
                         true);
+                    entryDataProvider.setValues(null);
                     return;
                 }
 

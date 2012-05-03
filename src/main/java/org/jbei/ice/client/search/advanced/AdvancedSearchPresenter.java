@@ -10,7 +10,6 @@ import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.search.blast.BlastSearchDataProvider;
 import org.jbei.ice.client.search.event.AdvancedSearchEvent;
 import org.jbei.ice.shared.QueryOperator;
-import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.event.shared.HandlerManager;
@@ -52,9 +51,8 @@ public class AdvancedSearchPresenter {
         };
 
         // hide the results table
-        dataProvider = new AdvancedSearchDataProvider(table, rpcService);
-        blastProvider = new BlastSearchDataProvider(display.getBlastResultTable(),
-                new ArrayList<BlastResultInfo>(), rpcService);
+        dataProvider = new EntryDataViewDataProvider(table, rpcService);
+        blastProvider = new BlastSearchDataProvider(display.getBlastResultTable(), rpcService);
 
         this.model = new AdvancedSearchModel(rpcService, eventBus);
     }
@@ -93,6 +91,7 @@ public class AdvancedSearchPresenter {
             this.model.performBlast(filterCopy, blastInfo.getOperand(), program, new Handler(
                     searchFilters));
         } else {
+            dataProvider.updateRowCount(0, false);
             display.setSearchVisibility(table, true);
             table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
 
