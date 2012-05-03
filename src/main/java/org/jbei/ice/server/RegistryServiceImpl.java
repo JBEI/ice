@@ -411,8 +411,16 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             }
 
             details.setContents(contents);
+
+            if (contents.size() > 0) {
+                // delete the contents first
+                if (FolderManager.removeFolderContents(folder.getId(), contents) == null)
+                    return null;
+            }
+
             if (FolderManager.delete(folder))
                 return details;
+
         } catch (ManagerException e) {
             Logger.error(e);
         } catch (ControllerException e) {

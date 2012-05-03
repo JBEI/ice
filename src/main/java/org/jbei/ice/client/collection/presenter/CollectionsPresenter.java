@@ -69,7 +69,6 @@ public class CollectionsPresenter extends AbstractPresenter {
     // selection menu
     private final CollectionsModel model;
     private AdvancedSearchPresenter searchPresenter;
-    //    private EntryAddPresenter entryPresenter;
     private EntryPresenter entryViewPresenter;
     private long currentFolder;
     private Mode mode = Mode.COLLECTION;
@@ -297,10 +296,10 @@ public class CollectionsPresenter extends AbstractPresenter {
             return;
 
         if (searchPresenter == null)
-            searchPresenter = new AdvancedSearchPresenter(model.getService(), model.getEventBus(),
-                    operands);
+            searchPresenter = new AdvancedSearchPresenter(model.getService(), model.getEventBus());
 
         display.setMainContent(searchPresenter.getView(), true);
+        searchPresenter.search(operands);
         mode = Mode.SEARCH;
     }
 
@@ -476,6 +475,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                 FolderDetails folder = event.getItems().get(0);
                 if (folder == null) {
                     display.showFeedbackMessage("Could not retrieve collection with id " + id, true);
+                    entryDataProvider.setValues(null);
                     return;
                 }
 

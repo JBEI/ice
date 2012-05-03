@@ -152,7 +152,8 @@ public class EntryViewFactory {
         // attachments
         boolean hasAttachment = false;
         try {
-            hasAttachment = (AttachmentManager.getByEntry(entry).size() > 0);
+            //            hasAttachment = (AttachmentManager.getByEntry(entry).size() > 0);
+            hasAttachment = AttachmentManager.hasAttachment(entry);
         } catch (ManagerException e) {
             Logger.error(e);
         }
@@ -160,14 +161,14 @@ public class EntryViewFactory {
 
         // has sample
         try {
-            view.setHasSample(SampleManager.getSamplesByEntry(entry).size() > 0);
+            view.setHasSample(SampleManager.hasSample(entry));
         } catch (ManagerException e) {
             Logger.error(e);
         }
 
         // has sequence
         try {
-            view.setHasSequence(SequenceManager.getByEntry(entry) != null);
+            view.setHasSequence(SequenceManager.hasSequence(entry));
         } catch (ManagerException e) {
             Logger.error(e);
         }

@@ -60,7 +60,7 @@ public class FolderManager {
             DAO.delete(folder);
             return true;
         } catch (DAOException e) {
-            String msg = "Could not delete folder " + folder.getName() + " with id "
+            String msg = "Could not delete folder \"" + folder.getName() + "\" with id "
                     + folder.getId();
             Logger.error(msg, e);
             throw new ManagerException(msg, e);

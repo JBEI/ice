@@ -2,8 +2,10 @@ package org.jbei.ice.client.search.advanced;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.client.common.header.BlastSearchFilter;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.search.blast.BlastResultsTable;
+import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -67,27 +69,38 @@ public class AdvancedSearchView extends Composite implements IAdvancedSearchView
         filterPanel.clear();
         int size = filters.size();
         int i = 0;
+
         for (SearchFilterInfo filter : filters) {
-            String filterString = "";
-            if (filter.getType() != null)
-                filterString += filter.getType();
 
-            if (filter.getOperator() != null)
-                filterString += filter.getOperator();
+            if (isBlast(filter)) {
+                filterPanel.add(new BlastSearchFilter(filter.getOperand(), filter.getOperator()));
+            } else {
+                String filterString = "";
+                if (filter.getType() != null)
+                    filterString += filter.getType();
 
-            if (filter.getOperand() != null)
-                filterString += filter.getOperand();
+                if (filter.getOperator() != null)
+                    filterString += filter.getOperator();
 
-            Label label;
-            if (i == size - 1)
-                label = new Label(filterString);
-            else
-                label = new Label(filterString + ", ");
+                if (filter.getOperand() != null)
+                    filterString += filter.getOperand();
 
-            label.setStyleName("search_caption_display_content");
-            filterPanel.add(label);
+                Label label;
+                if (i == size - 1)
+                    label = new Label(filterString);
+                else
+                    label = new Label(filterString + ", ");
+
+                label.setStyleName("search_caption_display_content");
+                filterPanel.add(label);
+            }
             i += 1;
         }
+    }
+
+    private boolean isBlast(SearchFilterInfo filter) {
+        return QueryOperator.BLAST_N.value().equals(filter.getType())
+                || QueryOperator.TBLAST_X.value().equals(filter.getType());
     }
 
     @Override

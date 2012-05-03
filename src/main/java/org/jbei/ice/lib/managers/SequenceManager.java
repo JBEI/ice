@@ -7,6 +7,8 @@ import java.util.Set;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
@@ -163,6 +165,24 @@ public class SequenceManager {
         }
         normalizeAnnotationLocations(sequence);
         return sequence;
+    }
+
+    public static boolean hasSequence(Entry entry) throws ManagerException {
+        Session session = DAO.newSession();
+        try {
+
+            Integer itemCount = (Integer) session.createCriteria(Sequence.class)
+                    .setProjection(Projections.countDistinct("id"))
+                    .add(Restrictions.eq("entry", entry)).uniqueResult();
+
+            return itemCount.intValue() > 0;
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve sequence by entry: " + entry.getId(), e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
     }
 
     /**

@@ -7,8 +7,6 @@ import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
-import org.jbei.ice.client.event.SearchEvent;
-import org.jbei.ice.client.event.SearchEventHandler;
 import org.jbei.ice.client.search.blast.BlastSearchDataProvider;
 import org.jbei.ice.client.search.event.AdvancedSearchEvent;
 import org.jbei.ice.shared.QueryOperator;
@@ -17,9 +15,14 @@ import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.event.shared.HandlerManager;
 
+/**
+ * Presenter for searches
+ * 
+ * @author Hector Plahar
+ * 
+ */
 public class AdvancedSearchPresenter {
 
-    // again another temp measure which will be replaced by EntryContext
     private enum Mode {
         BLAST, SEARCH;
     }
@@ -54,38 +57,23 @@ public class AdvancedSearchPresenter {
                 new ArrayList<BlastResultInfo>(), rpcService);
 
         this.model = new AdvancedSearchModel(rpcService, eventBus);
-
-        // register for search events
-        eventBus.addHandler(SearchEvent.TYPE, new SearchEventHandler() {
-
-            @Override
-            public void onSearch(SearchEvent event) {
-                search(event.getFilters());
-            }
-        });
-
     }
 
-    public AdvancedSearchPresenter(final RegistryServiceAsync rpcService,
-            final HandlerManager eventBus, ArrayList<SearchFilterInfo> operands) {
-        this(rpcService, eventBus);
-        search(operands);
-    }
-
-    protected void search(final ArrayList<SearchFilterInfo> searchFilters) {
+    public void search(final ArrayList<SearchFilterInfo> searchFilters) {
         if (searchFilters == null)
             return;
 
         // currently support only a single blast search with filters
         // search for blast operator
+        ArrayList<SearchFilterInfo> filterCopy = new ArrayList<SearchFilterInfo>(searchFilters);
         SearchFilterInfo blastInfo = null;
-        for (SearchFilterInfo filter : searchFilters) {
+        for (SearchFilterInfo filter : filterCopy) {
             QueryOperator operator = QueryOperator.operatorValueOf(filter.getOperator());
             if (operator == null)
                 continue;
 
             if (operator == QueryOperator.TBLAST_X || operator == QueryOperator.BLAST_N) {
-                if (searchFilters.remove(filter)) {
+                if (filterCopy.remove(filter)) {
                     blastInfo = filter;
                 }
                 break;
@@ -102,13 +90,13 @@ public class AdvancedSearchPresenter {
 
             // get blast results and filter 
             QueryOperator program = QueryOperator.operatorValueOf(blastInfo.getOperator());
-            this.model.performBlast(searchFilters, blastInfo.getOperand(), program, new Handler(
+            this.model.performBlast(filterCopy, blastInfo.getOperand(), program, new Handler(
                     searchFilters));
         } else {
             display.setSearchVisibility(table, true);
             table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
 
-            this.model.retrieveSearchResults(searchFilters, new Handler(searchFilters));
+            this.model.retrieveSearchResults(filterCopy, new Handler(searchFilters));
         }
     }
 

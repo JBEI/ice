@@ -31,6 +31,7 @@ public class DeleteItemHandler implements IDeleteMenuHandler {
 
             @Override
             public void onSuccess(FolderDetails result) {
+                // TODO : if result == null
                 folder.put(result.getId(), result.getContents());
             }
 
