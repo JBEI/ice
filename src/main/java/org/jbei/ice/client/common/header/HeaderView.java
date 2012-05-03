@@ -92,6 +92,10 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
         searchBtn.addClickHandler(handler);
     }
 
+    public void setSearchButtonEnable(boolean enable) {
+        searchBtn.setEnabled(enable);
+    }
+
     public void setAddFilterHandler(ClickHandler handler) {
         option.getAddFilter().addClickHandler(handler);
     }

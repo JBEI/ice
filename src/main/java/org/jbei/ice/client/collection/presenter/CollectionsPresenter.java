@@ -9,7 +9,6 @@ import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.collection.ICollectionView;
-import org.jbei.ice.client.collection.add.EntryAddPresenter;
 import org.jbei.ice.client.collection.event.FolderEvent;
 import org.jbei.ice.client.collection.event.FolderEventHandler;
 import org.jbei.ice.client.collection.event.FolderRetrieveEvent;
@@ -70,7 +69,6 @@ public class CollectionsPresenter extends AbstractPresenter {
     // selection menu
     private final CollectionsModel model;
     private AdvancedSearchPresenter searchPresenter;
-    private EntryAddPresenter entryPresenter;
     private EntryPresenter entryViewPresenter;
     private long currentFolder;
     private Mode mode = Mode.COLLECTION;
@@ -130,20 +128,9 @@ public class CollectionsPresenter extends AbstractPresenter {
         // create entry handler
         final SingleSelectionModel<EntryAddType> selectionModel = display
                 .getAddEntrySelectionHandler();
-        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                if (entryPresenter == null)
-                    entryPresenter = new EntryAddPresenter(model.getService(), model.getEventBus());
-                EntryAddType type = selectionModel.getSelectedObject();
-                if (type == null)
-                    return;
-                entryPresenter.setType(type);
-                display.setMainContent(entryPresenter.getView(), false);
-                display.getAddEntrySelectionHandler().setSelected(type, false);
-            }
-        });
+        CreateNewEntrySelectionHandler handler = new CreateNewEntrySelectionHandler(this,
+                model.getService(), model.getEventBus(), display, selectionModel);
+        selectionModel.addSelectionChangeHandler(handler);
 
         if (searchHandler == null) {
             searchHandler = model.getEventBus().addHandler(SearchEvent.TYPE,
@@ -294,12 +281,13 @@ public class CollectionsPresenter extends AbstractPresenter {
         });
     }
 
-    private void showEntryView(EntryContext event) {
+    public void showEntryView(EntryContext event) {
         if (entryViewPresenter == null)
             entryViewPresenter = new EntryPresenter(model.getService(), model.getEventBus(), event);
         mode = Mode.ENTRY;
         currentContext = event;
         History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + event.getCurrent(), false);
+        entryViewPresenter.setCurrentContext(event);
         display.setMainContent(entryViewPresenter.getView(), false);
     }
 
@@ -308,10 +296,10 @@ public class CollectionsPresenter extends AbstractPresenter {
             return;
 
         if (searchPresenter == null)
-            searchPresenter = new AdvancedSearchPresenter(model.getService(), model.getEventBus(),
-                    operands);
+            searchPresenter = new AdvancedSearchPresenter(model.getService(), model.getEventBus());
 
         display.setMainContent(searchPresenter.getView(), true);
+        searchPresenter.search(operands);
         mode = Mode.SEARCH;
     }
 
@@ -481,12 +469,14 @@ public class CollectionsPresenter extends AbstractPresenter {
                 if (event == null || event.getItems() == null) {
                     display.showFeedbackMessage("Error connecting to server. Please try again",
                         true);
+                    entryDataProvider.setValues(null);
                     return;
                 }
 
                 FolderDetails folder = event.getItems().get(0);
                 if (folder == null) {
                     display.showFeedbackMessage("Could not retrieve collection with id " + id, true);
+                    entryDataProvider.setValues(null);
                     return;
                 }
 
@@ -619,5 +609,9 @@ public class CollectionsPresenter extends AbstractPresenter {
                 }
             });
         }
+    }
+
+    public ICollectionView getView() {
+        return display;
     }
 }
