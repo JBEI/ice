@@ -96,7 +96,7 @@ public class CollectionsPresenter extends AbstractPresenter {
     public CollectionsPresenter(final CollectionsModel model, final ICollectionView display) {
         this.display = display;
         this.model = model;
-        this.deleteHandler = new DeleteItemHandler(model.getService());
+        this.deleteHandler = new DeleteItemHandler(model.getService(), display);
 
         // initialize all parameters
         this.collectionsDataTable = new CollectionDataTable(new EntryTablePager()) {
@@ -562,7 +562,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                     AppController.accountInfo.getVisibleEntryCount(), true);
             systemMenuItems.add(0, allEntriesItem);
             display.setSystemCollectionMenuItems(systemMenuItems);
-            DeleteItemHandler deleteHandler = new DeleteItemHandler(model.getService());
+            DeleteItemHandler deleteHandler = new DeleteItemHandler(model.getService(), display);
             display.setUserCollectionMenuItems(userMenuItems, deleteHandler);
 
             userListProvider.getList().addAll(userFolders);
