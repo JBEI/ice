@@ -37,7 +37,7 @@ public class CreateNewEntrySelectionHandler implements SelectionChangeEvent.Hand
         if (type == null)
             return;
         presenter.setType(type);
-        display.setMainContent(presenter.getView(), false);
+        display.setMainContent(presenter.getView());
         display.getAddEntrySelectionHandler().setSelected(type, false);
     }
 }

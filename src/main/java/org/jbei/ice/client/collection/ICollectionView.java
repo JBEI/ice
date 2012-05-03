@@ -83,7 +83,7 @@ public interface ICollectionView {
      */
     void setDataView(CollectionDataTable table);
 
-    void setMainContent(Widget mainContent, boolean showSubMenu);
+    void setMainContent(Widget mainContent);
 
     void showFeedbackMessage(String msg, boolean errMsg);
 
@@ -110,4 +110,6 @@ public interface ICollectionView {
     void setSubMenuEnable(boolean enableAddTo, boolean enableRemove, boolean enableMoveTo);
 
     SingleSelectionModel<ExportAsOption> getExportAsModel();
+
+    void enableExportAs(boolean enable);
 }

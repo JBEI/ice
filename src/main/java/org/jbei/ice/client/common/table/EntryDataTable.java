@@ -91,6 +91,10 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         selectionModel.clear();
     }
 
+    public EntrySelectionModel<T> getSelectionModel() {
+        return this.selectionModel;
+    }
+
     protected DataTableColumn<String> addTypeColumn(boolean sortable, double width, Unit unit) {
         DataTableColumn<String> typeCol = new DataTableColumn<String>(new TextCell(),
                 ColumnField.TYPE) {

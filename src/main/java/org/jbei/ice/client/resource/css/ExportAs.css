@@ -15,6 +15,7 @@
     
     border: 1px solid #A5A5A5;
     -webkit-border-radius: 2px;
+    border-radius: 2px;
     margin: 0px;
     font-family: Arial;
 }
@@ -22,6 +23,34 @@
 .subMenuExport:hover {
     border-top: 2px solid #0082C0;
     background-color: #f2f2f2;
+}
+
+.subMenuExport[disabled] {
+	height: 26px;
+    width: 92px;
+    gwt-image: 'sortDown';
+    background-position: 75px 9px;
+    padding-right: 13px;    
+    cursor: pointer;
+    color: #393939;
+    font-weight: bold;
+    font-size: 0.75em;
+    text-align: center;
+    border: 0px;
+    background-color: #f1f1f1;
+    border-top: 2px solid #f1f1f1;
+    
+    border: 1px solid #A5A5A5;
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+    margin: 0px;
+    font-family: Arial;
+    
+    opacity: 0.4;
+}
+
+.subMenuExport[disabled]:hover {
+    cursor: default;
 }
 
 .cellListKeyboardSelectedItem {

@@ -625,6 +625,12 @@ a.cell_mouseover:hover {
     font-family: Arial;
 }
 
+.button_group_item:hover {
+    border-top: 2px solid #0082C0;
+    background-color: #f2f2f2;
+    color: #0f3f33;
+}
+
 .button_group_item[disabled] {
 	opacity: 0.4;
 }
@@ -632,12 +638,6 @@ a.cell_mouseover:hover {
 .button_group_item[disabled]:hover {
 	border-top: 2px solid #f1f1f1;
 	cursor: default;
-}
-
-.button_group_item:hover {
-    border-top: 2px solid #0082C0;
-    background-color: #f2f2f2;
-    color: #0f3f33;
 }
 
 .firstItem {

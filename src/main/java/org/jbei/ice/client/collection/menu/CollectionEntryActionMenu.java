@@ -72,20 +72,25 @@ public class CollectionEntryActionMenu implements IsWidget {
     private final static int WIDTH = 240;
 
     public CollectionEntryActionMenu() {
+
         this.menuHolder = new FlexTable();
         this.menuHolder.setStyleName("button_group");
         this.menuHolder.setWidth(WIDTH + "px");
         this.menuHolder.setCellPadding(0);
         this.menuHolder.setCellSpacing(0);
 
-        add = new AddToMenuItem<OptionSelect>("Add To", true);
+        this.add = new AddToMenuItem<OptionSelect>("Add To", true);
         this.menuHolder.setWidget(0, 0, add);
+        this.add.setEnabled(false);
 
-        removeButton = createRemoveMenu();
+        this.removeButton = createRemoveMenu();
         this.menuHolder.setWidget(0, 1, removeButton);
+        this.removeButton.setEnabled(false);
 
-        move = new AddToMenuItem<OptionSelect>("Move To", false);
+        this.move = new AddToMenuItem<OptionSelect>("Move To", false);
         this.menuHolder.setWidget(0, 2, move);
+        this.move.setEnabled(false);
+
         Resources.INSTANCE.subMenuStyle().ensureInjected();
     }
 
@@ -145,7 +150,7 @@ public class CollectionEntryActionMenu implements IsWidget {
 
     public void setEnable(boolean enableAddTo, boolean enableRemove, boolean enableMoveTo) {
         this.add.setEnabled(enableAddTo);
-        removeButton.setEnabled(enableRemove);
+        this.removeButton.setEnabled(enableRemove);
         this.move.setEnabled(enableMoveTo);
     }
 }
