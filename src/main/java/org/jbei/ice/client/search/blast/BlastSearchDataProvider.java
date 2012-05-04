@@ -12,39 +12,15 @@ import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.BlastResultInfo;
 
 import com.google.gwt.user.cellview.client.ColumnSortList;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
 
 public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastResultInfo> {
 
     public BlastSearchDataProvider(HasEntryDataTable<BlastResultInfo> view,
-            ArrayList<BlastResultInfo> data, RegistryServiceAsync service) {
+            RegistryServiceAsync service) {
 
         super(view, service, ColumnField.BIT_SCORE);
-
-        for (BlastResultInfo info : data) {
-            valueIds.add(info.getEntryInfo().getId());
-        }
-
-        results.addAll(data);
-        updateRowCount(data.size(), true);
-
-        // retrieve the first page of results and updateRowData
-        final Range range = this.getRanges()[0];
-        final int rangeStart = range.getStart();
-        final int rangeEnd;
-        if ((rangeStart + range.getLength()) > valueIds.size())
-            rangeEnd = valueIds.size();
-        else
-            rangeEnd = (rangeStart + range.getLength());
-
-        //        view.setVisibleRangeAndClearData(range, false);
-
-        // TODO : you have access to the sort info from the table
-        // TODO : this goes with the above todo. if we clear all the sort info then we use default else use the top sort
-        // TODO : look at the sort method for an example of how to do this
-        fetchHasEntryData(this.getSortField(), true, rangeStart, rangeEnd);
     }
 
     @Override
@@ -58,13 +34,14 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastR
         } else {
 
             // TODO : with blast, all results are returned need to redo
-            Window.alert("Results has size " + results.size() + " but requesting range ["
-                    + rangeStart + ", " + rangeEnd + "]");
+            //            Window.alert("Results has size " + results.size() + " but requesting range ["
+            //                    + rangeStart + ", " + rangeEnd + "]");
         }
     }
 
     @Override
     protected void onRangeChanged(HasData<BlastResultInfo> display) {
+
         if (results.isEmpty()) // problem here is that when the display is added to the dataProvider, onRangeChanged() is triggered
             return;
 
@@ -127,11 +104,12 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastR
     }
 
     public void setData(ArrayList<BlastResultInfo> data) {
+        reset();
 
-        valueIds.clear();
-
-        for (BlastResultInfo info : data) {
-            valueIds.add(info.getEntryInfo().getId());
+        if (data != null) {
+            for (BlastResultInfo info : data) {
+                valueIds.add(info.getEntryInfo().getId());
+            }
         }
 
         this.results.clear();

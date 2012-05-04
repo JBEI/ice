@@ -9,6 +9,8 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
@@ -47,6 +49,24 @@ public class SampleManager {
         }
 
         return sample;
+    }
+
+    public static boolean hasSample(Entry entry) throws ManagerException {
+        Session session = DAO.newSession();
+        try {
+
+            Integer itemCount = (Integer) session.createCriteria(Sample.class)
+                    .setProjection(Projections.countDistinct("id"))
+                    .add(Restrictions.eq("entry", entry)).uniqueResult();
+
+            return itemCount.intValue() > 0;
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve sample by entry: " + entry.getId(), e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
     }
 
     /**

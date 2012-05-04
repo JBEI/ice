@@ -19,6 +19,12 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
 
+/**
+ * Menu widget for creating new entry
+ * 
+ * @author Hector Plahar
+ */
+
 public class CreateEntryMenu implements IsWidget {
 
     interface Style extends CellList.Style {
@@ -34,7 +40,6 @@ public class CreateEntryMenu implements IsWidget {
         @ImageOptions(repeatStyle = RepeatStyle.None)
         ImageResource sortDown();
 
-        // TODO : fold with all pull downs (e.g. ExportAs) and make a generic one
         @Source("org/jbei/ice/client/resource/css/CreateEntry.css")
         Style cellListStyle();
     }
@@ -60,7 +65,8 @@ public class CreateEntryMenu implements IsWidget {
 
         options.setRowData(Arrays.asList(EntryAddType.values()));
 
-        final PopupHandler clickHandler = new PopupHandler(options, createEntry.getElement(), 0, 0, false);
+        final PopupHandler clickHandler = new PopupHandler(options, createEntry.getElement(), 0, 0,
+                false);
 
         createEntry.addClickHandler(clickHandler);
         optionSelection = new SingleSelectionModel<EntryAddType>();

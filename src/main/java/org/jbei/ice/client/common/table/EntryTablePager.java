@@ -211,7 +211,6 @@ public class EntryTablePager extends AbstractPager {
         panel.add(btn100Count);
 
         // styles       
-
         panel.setWidth("90px");
         return panel;
     }
@@ -253,7 +252,6 @@ public class EntryTablePager extends AbstractPager {
             btn50Count.setDisabled(false);
             btn100Count.setDisabled(true);
             break;
-
         }
     }
 

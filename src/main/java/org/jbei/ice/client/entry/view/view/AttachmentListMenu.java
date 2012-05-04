@@ -239,8 +239,13 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
 
             String description = (item.getDescription() == null || item.getDescription().isEmpty()) ? "No description provided"
                     : item.getDescription();
-            String html = "<span class=\"collection_user_menu\">" + name
-                    + "</span><br><div class=\"attachment_small_text\">" + description + "</div>";
+            String html = "<span class=\"collection_user_menu\">" + name + "</span><br>";
+
+            if (description.length() > 163)
+                html += "<div title=\"" + description + "\" class=\"attachment_small_text\">"
+                        + description.subSequence(0, 160) + "...</div>";
+            else
+                html += "<div class=\"attachment_small_text\">" + description + "</div>";
 
             setStyleName("entry_detail_view_row");
             SafeHtmlBuilder sb = new SafeHtmlBuilder();

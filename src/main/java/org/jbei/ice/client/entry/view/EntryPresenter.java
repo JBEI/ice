@@ -35,6 +35,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SelectionChangeEvent;
 
 /**
  * Presenter for entry view
@@ -62,7 +63,8 @@ public class EntryPresenter extends AbstractPresenter {
         this.model = new EntryModel(service, this.display, eventBus);
 
         addEntryViewHandler();
-        new MenuSelectionHandler(display.getDetailMenu());
+        display.getDetailMenu().addSelectionChangeHandler(
+            new MenuSelectionHandler(display.getDetailMenu()));
         setContextNavHandlers();
 
         showCurrentEntryView();
@@ -109,69 +111,8 @@ public class EntryPresenter extends AbstractPresenter {
 
         // PERMISSIONS (handlers for adding read/write)
         final PermissionsPresenter pPresenter = display.getPermissionsWidget();
-
-        // TODO :both of these can be combined
-        pPresenter.setReadAddSelectionHandler(new ReadBoxSelectionHandler() {
-
-            @Override
-            void updatePermission(final PermissionInfo info, PermissionType type) {
-                switch (type) {
-                case WRITE_ACCOUNT:
-                    info.setType(PermissionType.READ_ACCOUNT);
-                    break;
-
-                case WRITE_GROUP:
-                    info.setType(PermissionType.READ_GROUP);
-                    break;
-                }
-
-                final long id = currentInfo.getId();
-                service.addPermission(AppController.sessionId, id, info,
-                    new AsyncCallback<Boolean>() {
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                        }
-
-                        @Override
-                        public void onSuccess(Boolean result) {
-                            if (result)
-                                pPresenter.addReadItem(info, service, id, currentInfo.isCanEdit());
-                        }
-                    });
-            }
-        });
-
-        pPresenter.setWriteAddSelectionHandler(new ReadBoxSelectionHandler() {
-
-            @Override
-            void updatePermission(final PermissionInfo info, PermissionType type) {
-
-                final long id = currentInfo.getId();
-                switch (type) {
-                case READ_ACCOUNT:
-                    info.setType(PermissionType.WRITE_ACCOUNT);
-                    break;
-                case READ_GROUP:
-                    info.setType(PermissionType.WRITE_GROUP);
-                    break;
-                }
-
-                service.addPermission(AppController.sessionId, id, info,
-                    new AsyncCallback<Boolean>() {
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                        }
-
-                        @Override
-                        public void onSuccess(Boolean result) {
-                            if (result)
-                                pPresenter.addWriteItem(info, service, id, currentInfo.isCanEdit());
-                        }
-                    });
-            }
-        });
+        pPresenter.setReadAddSelectionHandler(new PermissionReadBoxHandler(false));
+        pPresenter.setWriteAddSelectionHandler(new PermissionReadBoxHandler(true));
     }
 
     /**
@@ -200,6 +141,11 @@ public class EntryPresenter extends AbstractPresenter {
     private void showCurrentEntryView() {
         setContextNavData();
         retrieveEntryDetails();
+    }
+
+    public void setCurrentContext(EntryContext context) {
+        this.currentContext = context;
+        showCurrentEntryView();
     }
 
     private void addEntryViewHandler() {
@@ -244,6 +190,15 @@ public class EntryPresenter extends AbstractPresenter {
     }
 
     private void setContextNavHandlers() {
+
+        // menu 
+        ArrayList<MenuItem> menuItems = new ArrayList<MenuItem>();
+        menuItems.add(new MenuItem(Menu.GENERAL, -1));
+        menuItems.add(new MenuItem(Menu.SEQ_ANALYSIS, 0));
+        menuItems.add(new MenuItem(Menu.SAMPLES, 0));
+        display.setMenuItems(menuItems);
+        display.getDetailMenu().setSelection(Menu.GENERAL);
+
         display.setNextHandler(new ClickHandler() {
 
             @Override
@@ -371,20 +326,39 @@ public class EntryPresenter extends AbstractPresenter {
 
                     display.setAttachments(items, entryId);
                     // menu views
+                    display.getDetailMenu().updateMenuCount(Menu.SEQ_ANALYSIS,
+                        result.getSequenceAnalysis().size());
+                    display.getDetailMenu().updateMenuCount(Menu.SAMPLES,
+                        result.getSampleStorage().size());
+
                     display.setSampleData(result.getSampleStorage());
                     display.setSequenceData(result.getSequenceAnalysis(), entryId);
 
-                    // menu 
-                    ArrayList<MenuItem> menuItems = new ArrayList<MenuItem>();
-                    menuItems.add(new MenuItem(Menu.GENERAL, -1));
-                    menuItems.add(new MenuItem(Menu.SEQ_ANALYSIS, result.getSequenceAnalysis()
-                            .size()));
-                    menuItems.add(new MenuItem(Menu.SAMPLES, result.getSampleStorage().size()));
-                    display.setMenuItems(menuItems);
-                    display.getDetailMenu().setSelection(Menu.GENERAL);
-                    sequencePresenter = display.showEntryDetailView(currentInfo, canEdit);
-                    sequencePresenter.addFileUploadHandler(new UploadPasteSequenceHandler(service,
-                            sequencePresenter));
+                    MenuItem selection = display.getDetailMenu().getCurrentSelection();
+                    Menu menu;
+                    if (selection == null) {
+                        menu = Menu.GENERAL;
+                    } else {
+                        menu = selection.getMenu();
+                    }
+
+                    switch (menu) {
+
+                    case GENERAL:
+                        sequencePresenter = display.showEntryDetailView(currentInfo, canEdit);
+                        sequencePresenter.addFileUploadHandler(new UploadPasteSequenceHandler(
+                                service, sequencePresenter));
+                        break;
+
+                    case SEQ_ANALYSIS:
+                        boolean showFlash = (selection.getCount() > 0);
+                        display.showSequenceView(currentInfo, showFlash);
+                        break;
+
+                    case SAMPLES:
+                        display.showSampleView();
+                        break;
+                    }
 
                     // retrieve associated permission
                     retrievePermissionData();
@@ -406,26 +380,69 @@ public class EntryPresenter extends AbstractPresenter {
     // inner classes
     //
 
-    /* Handler for the entry detail menu*/
-    public class MenuSelectionHandler implements ClickHandler {
+    private class PermissionReadBoxHandler extends ReadBoxSelectionHandler {
+
+        private final boolean isWrite;
+
+        public PermissionReadBoxHandler(boolean isWrite) {
+            this.isWrite = isWrite;
+        }
+
+        @Override
+        void updatePermission(final PermissionInfo info, PermissionType permissionType) {
+            switch (permissionType) {
+            case WRITE_ACCOUNT:
+                info.setType(PermissionType.READ_ACCOUNT);
+                break;
+
+            case WRITE_GROUP:
+                info.setType(PermissionType.READ_GROUP);
+                break;
+            }
+
+            final long id = currentInfo.getId();
+            service.addPermission(AppController.sessionId, id, info, new AsyncCallback<Boolean>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                }
+
+                @Override
+                public void onSuccess(Boolean result) {
+                    if (!result)
+                        return;
+
+                    if (isWrite) {
+                        display.getPermissionsWidget().addReadItem(info, service, id,
+                            currentInfo.isCanEdit());
+                    } else {
+                        display.getPermissionsWidget().addWriteItem(info, service, id,
+                            currentInfo.isCanEdit());
+                    }
+                }
+            });
+        }
+    }
+
+    /*Handler for the entry detail menu*/
+    public class MenuSelectionHandler implements SelectionChangeEvent.Handler {
 
         private final EntryDetailViewMenu menu;
         private MenuItem selection;
 
         public MenuSelectionHandler(EntryDetailViewMenu menu) {
             this.menu = menu;
-            this.menu.addClickHandler(this);
         }
 
         @Override
-        public void onClick(ClickEvent event) {
-            if (selection == menu.getCurrentSelection())
+        public void onSelectionChange(SelectionChangeEvent event) {
+            if (selection == menu.getCurrentSelection() || menu.getCurrentSelection() == null)
                 return;
 
             selection = menu.getCurrentSelection();
             menu.setSelection(selection.getMenu());
 
-            switch (menu.getCurrentSelection().getMenu()) {
+            switch (selection.getMenu()) {
 
             case GENERAL:
                 boolean canEdit = (AppController.accountInfo.isModerator() || currentInfo

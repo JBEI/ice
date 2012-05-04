@@ -141,9 +141,10 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
 
     public void setValues(List<Long> data) {
         reset();
-        GWT.log("Setting contents " + data.size());
-        this.valuesIds.addAll(data);
-        updateRowCount(data.size(), true);
+        if (data != null)
+            this.valuesIds.addAll(data);
+
+        updateRowCount(this.valuesIds.size(), true);
 
         // retrieve the first page of results and updateRowData
         final Range range = this.getRanges()[0];
@@ -179,6 +180,7 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
         // did not need to sort so use the cache
         ArrayList<EntryInfo> show = new ArrayList<EntryInfo>();
         show.addAll(results.subList(rangeStart, rangeEnd));
+
         updateRowData(rangeStart, show);
     }
 
@@ -218,6 +220,7 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
         //        results.clear();
         lastSortAsc = sortAsc;
         lastSortField = sortField;
+
         fetchEntryData(sortField, sortAsc, rangeStart, rangeEnd);
         return true;
     }
@@ -267,6 +270,8 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
         List<Long> subList = valuesIds.subList(rangeStart, factor);
         final LinkedList<Long> realValues = new LinkedList<Long>(subList);
 
+        final long start = System.currentTimeMillis();
+
         service.retrieveEntryData(AppController.sessionId, field, ascending, realValues,
             new AsyncCallback<LinkedList<EntryInfo>>() {
 
@@ -277,6 +282,9 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
 
                 @Override
                 public void onSuccess(LinkedList<EntryInfo> result) {
+
+                    long time = System.currentTimeMillis() - start;
+                    GWT.log("Retrieve took " + time + "ms");
 
                     results.addAll(result);
                     int end = rangeEnd;

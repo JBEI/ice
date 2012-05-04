@@ -147,7 +147,7 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
 
         Page currentPage = getPage(History.getToken());
         if (currentPage == Page.COLLECTIONS)
-            return; // collections is also listening on the eventBus for search events so do not respond
+            return; // collections is also listening on the eventBus for search events so do not respond. 
 
         History.newItem(Page.COLLECTIONS.getLink(), false);
         final CollectionsView cView = new CollectionsView();
@@ -288,6 +288,7 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
 
             @Override
             public void onClick(ClickEvent event) {
+                view.getHeader().setSearchButtonEnable(false);
                 ArrayList<SearchFilterInfo> parse = QuickSearchParser.parse(view.getHeader()
                         .getSearchInput());
                 SearchFilterInfo blastInfo = view.getHeader().getBlastInfo();
@@ -296,6 +297,7 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
                 SearchEvent searchInProgressEvent = new SearchEvent();
                 searchInProgressEvent.setFilters(parse);
                 eventBus.fireEvent(searchInProgressEvent);
+                view.getHeader().setSearchButtonEnable(true);
             }
         });
     }

@@ -411,8 +411,16 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             }
 
             details.setContents(contents);
+
+            if (contents.size() > 0) {
+                // delete the contents first
+                if (FolderManager.removeFolderContents(folder.getId(), contents) == null)
+                    return null;
+            }
+
             if (FolderManager.delete(folder))
                 return details;
+
         } catch (ManagerException e) {
             Logger.error(e);
         } catch (ControllerException e) {
@@ -678,8 +686,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             SearchController search = new SearchController(account);
-            Set<Long> filterResults = search.runSearch(queryFilters);
+            Set<Long> filterResults = search.runSearch(queryFilters); // TODO : this takes a while
             results.addAll(filterResults);
+
             return results;
         } catch (ControllerException e) {
             Logger.error(e);
@@ -689,22 +698,32 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public ArrayList<BlastResultInfo> blastSearch(String sid, String query, QueryOperator program) {
+
         try {
             Account account = this.retrieveAccountForSid(sid);
             if (account == null)
                 return null;
 
+            ArrayList<BlastResultInfo> blastResults;
+
             SearchController searchController = new SearchController(account);
             switch (program) {
             case BLAST_N:
-                return searchController.runBlastN(query);
+                blastResults = searchController.runBlastN(query);
+                break;
+
             case TBLAST_X:
-                return searchController.runTblastx(query);
-                //                String proteinQuery = SequenceUtils.translateToProtein(query);  as far as I can tell this is only for display to user
+                blastResults = searchController.runTblastx(query);
+                break;
+            //                String proteinQuery = SequenceUtils.translateToProtein(query);  as far as I can tell this is only for display to user
 
             default:
                 return null;
             }
+
+            return blastResults;
+
+            // filter results
 
         } catch (ControllerException ce) {
             Logger.error(ce);

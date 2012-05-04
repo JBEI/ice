@@ -72,10 +72,15 @@ public class ExportAsMenu implements IsWidget {
         });
 
         options.setSelectionModel(optionSelection);
+        exportAs.setEnabled(false);
     }
 
     public SingleSelectionModel<ExportAsOption> getSelectionModel() {
         return this.optionSelection;
+    }
+
+    public void enable(boolean enable) {
+        this.exportAs.setEnabled(enable);
     }
 
     @Override

@@ -3,6 +3,7 @@ package org.jbei.ice.client.collection.menu;
 import java.util.ArrayList;
 import java.util.Set;
 
+import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.shared.FolderDetails;
 
@@ -374,6 +375,31 @@ public class CollectionMenu extends Composite {
     }
 
     // inner class
+
+    // TODO : this needs to go into a presenter;
+    class DeleteCallBack extends Callback<MenuItem> {
+
+        private final IDeleteMenuHandler deleteHandler;
+
+        public DeleteCallBack(IDeleteMenuHandler deleteHandler) {
+            this.deleteHandler = deleteHandler;
+        }
+
+        @Override
+        public void onSucess(MenuItem item) {
+            MenuHiderTimer timer = new MenuHiderTimer(table, editRow);
+            DeletedCell deletedCell = new DeletedCell(currentEditSelection,
+                    deleteHandler.getUndoHandler(item, CollectionMenu.this, timer));
+            table.setWidget(editRow, editIndex, deletedCell);
+            timer.schedule(6000);
+        }
+
+        @Override
+        public void onFailure() {
+            // do nothing on failure since an error msg will be shown to the user
+        }
+    }
+
     class MenuCell extends Composite implements HasClickHandlers {
 
         private final HTMLPanel panel;
@@ -422,15 +448,7 @@ public class CollectionMenu extends Composite {
                         editRow = cell.getRowIndex();
                         editIndex = cell.getCellIndex();
                         currentEditSelection = getMenuItem();
-
-                        // folderId
-                        if (deleteHandler.delete(item.getId())) {
-                            MenuHiderTimer timer = new MenuHiderTimer(table, editRow);
-                            DeletedCell deletedCell = new DeletedCell(currentEditSelection,
-                                    deleteHandler.getUndoHandler(item, CollectionMenu.this, timer));
-                            table.setWidget(editRow, editIndex, deletedCell);
-                            timer.schedule(13000);
-                        }
+                        deleteHandler.delete(item.getId(), new DeleteCallBack(deleteHandler));
                     }
                 });
             }
@@ -524,4 +542,5 @@ public class CollectionMenu extends Composite {
             return format.format(l);
         }
     }
+
 }

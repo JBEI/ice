@@ -44,7 +44,7 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
             public void onColumnSort(ColumnSortEvent event) {
                 super.onColumnSort(event);
 
-                results.clear();
+                //                results.clear();
                 int pageSize = dataTable.getVisibleRange().getLength();
                 dataTable.setVisibleRange(0, pageSize);
             }
@@ -147,6 +147,9 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
 
     protected ColumnField getSortField() {
         ColumnSortList sortList = this.dataTable.getColumnSortList();
+        if (sortList.size() == 0)
+            return ColumnField.BIT_SCORE;
+
         int colIndex = this.dataTable.getColumns().indexOf(sortList.get(0).getColumn());
         if (colIndex == -1)
             return null; // TODO : this will be pretty unusual
@@ -183,7 +186,7 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
 
         this.dataTable.getColumnSortList().clear();
         DataTable<T>.DataTableColumn<?> defaultSortField = this.dataTable
-                .getColumn(ColumnField.CREATED);
+                .getColumn(ColumnField.BIT_SCORE);
 
         if (defaultSortField != null) {
             ColumnSortInfo info = new ColumnSortList.ColumnSortInfo(defaultSortField, lastSortAsc);
