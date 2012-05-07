@@ -20,10 +20,14 @@
     </rule>
     
     <rule>
-            <from>/entry/view/(.*)</from>
-            <to type="redirect">/#page=entry;id=$1</to>
-        </rule>
-
+        <from>/entry/view/(.*)</from>
+        <to type="redirect">/#page=entry;id=$1</to>
+    </rule>
+    
+    <rule>
+        <from>/folders(.*)</from>
+        <to type="redirect">/#page=collections</to>
+    </rule>
 
     <outbound-rule>
         <note>
