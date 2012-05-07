@@ -103,6 +103,9 @@ public class AdvancedSearchPresenter {
         switch (mode) {
         case SEARCH:
         default:
+            if (table.getSelectionModel().isAllSelected()) {
+                return dataProvider.getData();
+            }
             return table.getSelectedEntrySet();
 
         case BLAST:

@@ -580,7 +580,11 @@ public class CollectionsPresenter extends AbstractPresenter {
             switch (mode) {
             case COLLECTION:
             default:
-                return collectionsDataTable.getSelectedEntrySet();
+                if (collectionsDataTable.getSelectionModel().isAllSelected()) {
+                    return entryDataProvider.getData();
+                } else {
+                    return collectionsDataTable.getSelectedEntrySet();
+                }
 
             case SEARCH:
                 return searchPresenter.getEntrySet();
