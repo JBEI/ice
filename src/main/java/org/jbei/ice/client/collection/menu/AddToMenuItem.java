@@ -144,7 +144,7 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
      */
     protected Widget createPopupWidget() {
         FlexTable wrapper = new FlexTable();
-        wrapper.addStyleName("background_white"); // TODO : generic style
+        wrapper.addStyleName("background_white");
         wrapper.setWidget(0, 0, table);
         wrapper.getFlexCellFormatter().setColSpan(0, 0, 2);
 

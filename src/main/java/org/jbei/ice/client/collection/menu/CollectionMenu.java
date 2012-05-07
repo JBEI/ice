@@ -7,7 +7,6 @@ import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.shared.FolderDetails;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -525,11 +524,10 @@ public class CollectionMenu extends Composite {
         private void setRightPanel(Widget widget) {
             Widget toReplace = panel.getWidget(0);
             if (toReplace == null)
-                GWT.log("Cannot replace widget"); // TODO
-            else {
-                panel.remove(0);
-                panel.add(widget, folderId);
-            }
+                return;
+
+            panel.remove(0);
+            panel.add(widget, folderId);
         }
 
         @Override
