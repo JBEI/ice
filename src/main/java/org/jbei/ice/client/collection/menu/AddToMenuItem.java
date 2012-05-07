@@ -22,6 +22,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
@@ -107,6 +108,10 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
                 // dispatchSubmitEvent(); 
             }
         });
+
+        // message to display when no collections are created
+        table.setEmptyTableWidget(new HTML(
+                "<i class=\"font-75em\">No user collections available.</i>"));
 
         submitButton = new Button("Submit");
         submitButton.setStyleName("saved_draft_button");

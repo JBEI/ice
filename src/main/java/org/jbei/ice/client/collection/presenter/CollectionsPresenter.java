@@ -232,6 +232,8 @@ public class CollectionsPresenter extends AbstractPresenter {
                 // can user edit current folder?
                 if (!currentFolder.isSystemFolder()) {
                     display.setSubMenuEnable(enable, enable, enable);
+                } else {
+                    display.setSubMenuEnable(enable, false, false);
                 }
             }
         });
