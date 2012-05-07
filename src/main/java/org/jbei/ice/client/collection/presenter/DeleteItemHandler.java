@@ -45,6 +45,7 @@ public class DeleteItemHandler implements IDeleteMenuHandler {
                 MenuItem item = new MenuItem(result.getId(), result.getName(), result.getCount(),
                         result.isSystemFolder());
                 deleteCallback.onSucess(item);
+                view.removeSubMenuFolder(item);
             }
 
             @Override

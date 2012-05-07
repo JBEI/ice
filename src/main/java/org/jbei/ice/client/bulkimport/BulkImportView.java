@@ -2,6 +2,7 @@ package org.jbei.ice.client.bulkimport;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.bulkimport.model.NewBulkInput;
 import org.jbei.ice.client.bulkimport.widget.SaveDraftInput;
 import org.jbei.ice.client.bulkimport.widget.SelectTypeMenu;
@@ -11,6 +12,7 @@ import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.client.common.util.ImageUtil;
+import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.shared.EntryAddType;
 
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -84,6 +86,28 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         // right content. fills entire space when there are no drafts
         layout.setWidget(0, 2, createMainContent());
         layout.getFlexCellFormatter().setVerticalAlignment(0, 2, HasAlignment.ALIGN_TOP);
+
+        /**
+         * Replacing all content with existing flex bulk import implementation. When all the bugs
+         * are ironed out for this the js version (in ice3.1)
+         * just remove this block.
+         * 
+         * Start remove block
+         */
+
+        layout.clear();
+        Flash.Parameters params = new Flash.Parameters();
+        params.setSwfPath("bi/EntryBulkImport.swf");
+        params.setSessiondId(AppController.sessionId);
+        params.setMovieName("EntryBulkImport.swf");
+
+        Flash flash = new Flash(params);
+        layout.setWidget(0, 0, flash);
+        layout.getFlexCellFormatter().setHeight(0, 0, "600px");
+
+        /**
+         * End remove block
+         */
 
         return layout;
     }
