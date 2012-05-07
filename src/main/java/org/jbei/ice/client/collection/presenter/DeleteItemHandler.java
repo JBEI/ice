@@ -83,6 +83,7 @@ public class DeleteItemHandler implements IDeleteMenuHandler {
                             MenuItem newItem = new MenuItem(result.getId(), result.getName(),
                                     result.getCount(), result.isSystemFolder());
                             menu.updateMenuItem(item.getId(), newItem, DeleteItemHandler.this);
+                            view.addSubMenuFolder(newItem);
                         }
                     });
             }

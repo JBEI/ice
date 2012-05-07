@@ -175,7 +175,7 @@ public class FolderManager {
             session.saveOrUpdate(folder);
             session.getTransaction().commit();
             return folder;
-        } catch (HibernateException e) {
+        } catch (Exception e) {
             session.getTransaction().rollback();
             return null;
         } finally {
