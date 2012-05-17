@@ -112,4 +112,6 @@ public interface ICollectionView {
     SingleSelectionModel<ExportAsOption> getExportAsModel();
 
     void enableExportAs(boolean enable);
+
+    void addQuickAddBlurHandler(BlurHandler blurHandler);
 }

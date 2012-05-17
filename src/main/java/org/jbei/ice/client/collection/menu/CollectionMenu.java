@@ -9,6 +9,7 @@ import org.jbei.ice.shared.FolderDetails;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
+import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -54,6 +55,8 @@ public class CollectionMenu extends Composite {
     // quick add
     private TextBox quickAddBox;
     private Image quickAddButton;
+    private HandlerRegistration quickAddBoxHandlerRegisteration;
+    private HandlerRegistration quickAddBoxKeyHandlerRegisteration;
 
     public CollectionMenu(boolean addQuickEdit, String header) {
         table = new FlexTable();
@@ -163,7 +166,10 @@ public class CollectionMenu extends Composite {
         if (quickAddBox == null)
             return;
 
-        quickAddBox.addKeyPressHandler(new KeyPressHandler() {
+        if (quickAddBoxKeyHandlerRegisteration != null)
+            quickAddBoxKeyHandlerRegisteration.removeHandler();
+
+        quickAddBoxKeyHandlerRegisteration = quickAddBox.addKeyPressHandler(new KeyPressHandler() {
 
             @Override
             public void onKeyPress(KeyPressEvent event) {
@@ -175,6 +181,23 @@ public class CollectionMenu extends Composite {
 
                 quickAddBox.setVisible(false);
                 handler.onKeyPress(event);
+            }
+        });
+    }
+
+    public void addQuickAddBlurHandler(final BlurHandler blurHandler) {
+        if (quickAddBox == null)
+            return;
+
+        if (quickAddBoxHandlerRegisteration != null)
+            quickAddBoxHandlerRegisteration.removeHandler();
+        quickAddBoxHandlerRegisteration = quickAddBox.addBlurHandler(new BlurHandler() {
+
+            @Override
+            public void onBlur(BlurEvent event) {
+                if (!validate())
+                    return;
+                blurHandler.onBlur(event);
             }
         });
     }

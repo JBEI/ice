@@ -198,6 +198,11 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
+    public void addQuickAddBlurHandler(BlurHandler blurHandler) {
+        this.userMenu.addQuickAddBlurHandler(blurHandler);
+    }
+
+    @Override
     public void updateMenuItemCounts(ArrayList<MenuItem> item) {
         this.userMenu.updateCounts(item);
     }

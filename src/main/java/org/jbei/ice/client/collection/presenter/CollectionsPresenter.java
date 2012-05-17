@@ -123,7 +123,7 @@ public class CollectionsPresenter extends AbstractPresenter {
 
         initCollectionTableSelectionHandler();
 
-        // exportashandler
+        // handler for exporting
         initExportAsHandler();
 
         // init text box
@@ -355,6 +355,17 @@ public class CollectionsPresenter extends AbstractPresenter {
 
     private void initCreateCollectionHandlers() {
         this.display.setQuickAddVisibility(false);
+
+        this.display.addQuickAddBlurHandler(new BlurHandler() {
+
+            @Override
+            public void onBlur(BlurEvent event) {
+                display.setQuickAddVisibility(false);
+                saveCollection(display.getCollectionInputValue());
+                display.hideQuickAddInput();
+            }
+        });
+
         this.display.addQuickAddKeyHandler(new KeyPressHandler() {
 
             @Override
@@ -381,8 +392,6 @@ public class CollectionsPresenter extends AbstractPresenter {
 
             @Override
             public void onKeyDown(KeyDownEvent event) {
-                if (event.getNativeKeyCode() != KeyCodes.KEY_ENTER)
-                    return;
                 handle();
             }
         });
