@@ -511,6 +511,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                     return;
                 }
 
+                collectionsDataTable.clearSelection();
                 History.newItem(Page.COLLECTIONS.getLink() + ";id=" + folder.getId(), false);
                 display.setCurrentMenuSelection(folder.getId());
                 ArrayList<Long> entries = folder.getContents();
