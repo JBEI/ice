@@ -52,9 +52,6 @@ public class AdvancedSearchView extends Composite implements IAdvancedSearchView
 
         blastTable = new BlastResultsTable();
 
-        // search pager
-        pager = new EntryTablePager();
-
         blastPager = new EntryTablePager();
         blastPager.setDisplay(blastTable);
     }
@@ -105,11 +102,16 @@ public class AdvancedSearchView extends Composite implements IAdvancedSearchView
 
     @Override
     public void setSearchVisibility(AdvancedSearchResultsTable table, boolean visible) {
-        pager.setDisplay(table);
+        if (pager == null) {
+            pager = new EntryTablePager();
+            pager.setDisplay(table);
+        }
+
         pager.setVisible(visible);
         table.setVisible(visible);
 
         if (visible) {
+            table.clearSelection();
             layout.setWidget(2, 0, table);
             layout.setWidget(3, 0, pager);
         }

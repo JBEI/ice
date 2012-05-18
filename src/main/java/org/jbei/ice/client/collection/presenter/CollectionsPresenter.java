@@ -136,16 +136,16 @@ public class CollectionsPresenter extends AbstractPresenter {
                 model.getService(), model.getEventBus(), display, selectionModel);
         selectionModel.addSelectionChangeHandler(handler);
 
-        if (searchHandler == null) {
-            searchHandler = model.getEventBus().addHandler(SearchEvent.TYPE,
-                new SearchEventHandler() {
+        if (searchHandler != null)
+            searchHandler.removeHandler();
 
-                    @Override
-                    public void onSearch(SearchEvent event) {
-                        search(event.getFilters());
-                    }
-                });
-        }
+        searchHandler = model.getEventBus().addHandler(SearchEvent.TYPE, new SearchEventHandler() {
+
+            @Override
+            public void onSearch(SearchEvent event) {
+                search(event.getFilters());
+            }
+        });
 
         // show entry context
         model.getEventBus().addHandler(ShowEntryListEvent.TYPE, new ShowEntryListEventHandler() {
@@ -326,8 +326,18 @@ public class CollectionsPresenter extends AbstractPresenter {
         if (operands == null)
             return;
 
-        if (searchPresenter == null)
+        if (searchPresenter == null) {
             searchPresenter = new AdvancedSearchPresenter(model.getService(), model.getEventBus());
+            searchPresenter.addTableSelectionModelChangeHandler(new Handler() {
+
+                @Override
+                public void onSelectionChange(SelectionChangeEvent event) {
+                    boolean enable = (searchPresenter.getResultSelectedSet().size() > 0);
+                    display.setSubMenuEnable(enable, false, false);
+                    display.enableExportAs(enable);
+                }
+            });
+        }
 
         display.setMainContent(searchPresenter.getView());
         searchPresenter.search(operands);

@@ -168,7 +168,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
                 if (description == null)
                     return "";
 
-                int size = (int) (Window.getClientWidth() * 0.05);
+                int size = (int) (Window.getClientWidth() * 0.03);
                 if (size <= 0)
                     size = 50;
                 if (description.length() > size)
@@ -195,7 +195,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
         this.addColumn(ownerColumn, "Owner");
         ownerColumn.setSortable(true);
-        this.setColumnWidth(ownerColumn, 110, Unit.PX);
+        this.setColumnWidth(ownerColumn, 150, Unit.PX);
         return ownerColumn;
     }
 
