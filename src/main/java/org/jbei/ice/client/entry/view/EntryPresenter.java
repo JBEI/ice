@@ -390,15 +390,6 @@ public class EntryPresenter extends AbstractPresenter {
 
         @Override
         void updatePermission(final PermissionInfo info, PermissionType permissionType) {
-            switch (permissionType) {
-            case WRITE_ACCOUNT:
-                info.setType(PermissionType.READ_ACCOUNT);
-                break;
-
-            case WRITE_GROUP:
-                info.setType(PermissionType.READ_GROUP);
-                break;
-            }
 
             final long id = currentInfo.getId();
             service.addPermission(AppController.sessionId, id, info, new AsyncCallback<Boolean>() {
@@ -413,10 +404,10 @@ public class EntryPresenter extends AbstractPresenter {
                         return;
 
                     if (isWrite) {
-                        display.getPermissionsWidget().addReadItem(info, service, id,
+                        display.getPermissionsWidget().addWriteItem(info, service, id,
                             currentInfo.isCanEdit());
                     } else {
-                        display.getPermissionsWidget().addWriteItem(info, service, id,
+                        display.getPermissionsWidget().addReadItem(info, service, id,
                             currentInfo.isCanEdit());
                     }
                 }
@@ -517,7 +508,7 @@ public class EntryPresenter extends AbstractPresenter {
                 public void onSuccess(Boolean success) {
                     if (!success) {
                         FeedbackEvent event = new FeedbackEvent(true,
-                                "Your entry could not be updated. Please try again.");
+                                "Your entry could not be updated.");
                         eventBus.fireEvent(event);
                     } else {
                         showCurrentEntryView();
