@@ -1,8 +1,10 @@
 package org.jbei.ice.client.common;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
@@ -79,6 +81,12 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
     @Override
     public int indexOfCached(EntryInfo info) {
         return results.indexOf(info);
+    }
+
+    public Set<Long> getData() {
+        if (this.valuesIds == null)
+            return null;
+        return new HashSet<Long>(this.valuesIds);
     }
 
     @Override

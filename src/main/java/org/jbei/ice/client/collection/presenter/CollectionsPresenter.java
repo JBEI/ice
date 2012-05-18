@@ -1,7 +1,6 @@
 package org.jbei.ice.client.collection.presenter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,6 +19,7 @@ import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.collection.view.OptionSelect;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.common.entry.IHasEntryId;
+import org.jbei.ice.client.common.table.EntrySelectionModel;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.entry.view.EntryPresenter;
 import org.jbei.ice.client.event.EntryViewEvent;
@@ -32,6 +32,7 @@ import org.jbei.ice.client.event.ShowEntryListEventHandler;
 import org.jbei.ice.client.search.advanced.AdvancedSearchPresenter;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.FolderDetails;
+import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -49,6 +50,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 public class CollectionsPresenter extends AbstractPresenter {
@@ -70,7 +72,7 @@ public class CollectionsPresenter extends AbstractPresenter {
     private final CollectionsModel model;
     private AdvancedSearchPresenter searchPresenter;
     private EntryPresenter entryViewPresenter;
-    private long currentFolder;
+    private FolderDetails currentFolder;
     private Mode mode = Mode.COLLECTION;
     private EntryContext currentContext; // this can sometimes be null
     private final DeleteItemHandler deleteHandler;
@@ -94,7 +96,7 @@ public class CollectionsPresenter extends AbstractPresenter {
     public CollectionsPresenter(final CollectionsModel model, final ICollectionView display) {
         this.display = display;
         this.model = model;
-        this.deleteHandler = new DeleteItemHandler(model.getService());
+        this.deleteHandler = new DeleteItemHandler(model.getService(), display);
 
         // initialize all parameters
         this.collectionsDataTable = new CollectionDataTable(new EntryTablePager()) {
@@ -119,7 +121,9 @@ public class CollectionsPresenter extends AbstractPresenter {
         // selection models used for menus
         initMenus();
 
-        // exportashandler
+        initCollectionTableSelectionHandler();
+
+        // handler for exporting
         initExportAsHandler();
 
         // init text box
@@ -132,16 +136,16 @@ public class CollectionsPresenter extends AbstractPresenter {
                 model.getService(), model.getEventBus(), display, selectionModel);
         selectionModel.addSelectionChangeHandler(handler);
 
-        if (searchHandler == null) {
-            searchHandler = model.getEventBus().addHandler(SearchEvent.TYPE,
-                new SearchEventHandler() {
+        if (searchHandler != null)
+            searchHandler.removeHandler();
 
-                    @Override
-                    public void onSearch(SearchEvent event) {
-                        search(event.getFilters());
-                    }
-                });
-        }
+        searchHandler = model.getEventBus().addHandler(SearchEvent.TYPE, new SearchEventHandler() {
+
+            @Override
+            public void onSearch(SearchEvent event) {
+                search(event.getFilters());
+            }
+        });
 
         // show entry context
         model.getEventBus().addHandler(ShowEntryListEvent.TYPE, new ShowEntryListEventHandler() {
@@ -161,14 +165,6 @@ public class CollectionsPresenter extends AbstractPresenter {
 
             @Override
             public void onEntryView(EntryViewEvent event) {
-                if (entryViewPresenter != null) {
-                    History.newItem(Page.ENTRY_VIEW.getLink() + ";id="
-                            + event.getContext().getCurrent(), false);
-                    display.setMainContent(entryViewPresenter.getView(), false);
-                    mode = Mode.ENTRY;
-                    return;
-                }
-
                 showEntryView(event.getContext());
             }
         });
@@ -193,7 +189,7 @@ public class CollectionsPresenter extends AbstractPresenter {
 
             @Override
             protected long getSource() {
-                return currentFolder;
+                return currentFolder.getId();
             }
 
             @Override
@@ -211,6 +207,28 @@ public class CollectionsPresenter extends AbstractPresenter {
 
         // remove handler
         display.addRemoveHandler(new RemoveHandler());
+    }
+
+    private void initCollectionTableSelectionHandler() {
+        final EntrySelectionModel<EntryInfo> selectionModel = this.collectionsDataTable
+                .getSelectionModel();
+        this.collectionsDataTable.getSelectionModel().addSelectionChangeHandler(new Handler() {
+
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+
+                boolean enable = (selectionModel.getSelectedSet().size() > 0);
+
+                display.enableExportAs(enable);
+
+                // can user edit current folder?
+                if (!currentFolder.isSystemFolder()) {
+                    display.setSubMenuEnable(enable, enable, enable);
+                } else {
+                    display.setSubMenuEnable(enable, false, false);
+                }
+            }
+        });
     }
 
     public CollectionsPresenter(CollectionsModel model, final ICollectionView display, String param) {
@@ -288,17 +306,35 @@ public class CollectionsPresenter extends AbstractPresenter {
         currentContext = event;
         History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + event.getCurrent(), false);
         entryViewPresenter.setCurrentContext(event);
-        display.setMainContent(entryViewPresenter.getView(), false);
+        display.enableExportAs(true);
+        display.setMainContent(entryViewPresenter.getView());
+        boolean enable;
+        if (currentFolder != null)
+            enable = !currentFolder.isSystemFolder();
+        else
+            enable = false;
+
+        display.setSubMenuEnable(true, enable, enable);
     }
 
     private void search(ArrayList<SearchFilterInfo> operands) {
         if (operands == null)
             return;
 
-        if (searchPresenter == null)
+        if (searchPresenter == null) {
             searchPresenter = new AdvancedSearchPresenter(model.getService(), model.getEventBus());
+            searchPresenter.addTableSelectionModelChangeHandler(new Handler() {
 
-        display.setMainContent(searchPresenter.getView(), true);
+                @Override
+                public void onSelectionChange(SelectionChangeEvent event) {
+                    boolean enable = (searchPresenter.getResultSelectedSet().size() > 0);
+                    display.setSubMenuEnable(enable, false, false);
+                    display.enableExportAs(enable);
+                }
+            });
+        }
+
+        display.setMainContent(searchPresenter.getView());
         searchPresenter.search(operands);
         mode = Mode.SEARCH;
     }
@@ -317,13 +353,27 @@ public class CollectionsPresenter extends AbstractPresenter {
         case SEARCH:
             mode = Mode.SEARCH;
             if (searchPresenter != null)
-                display.setMainContent(searchPresenter.getView(), true);
+                display.setMainContent(searchPresenter.getView());
             break;
         }
     }
 
     private void initCreateCollectionHandlers() {
         this.display.setQuickAddVisibility(false);
+
+        this.display.addQuickAddBlurHandler(new BlurHandler() {
+
+            @Override
+            public void onBlur(BlurEvent event) {
+                if (display.getQuickEditVisibility() == false)
+                    return;
+
+                display.setQuickAddVisibility(false);
+                saveCollection(display.getCollectionInputValue());
+                display.hideQuickAddInput();
+            }
+        });
+
         this.display.addQuickAddKeyHandler(new KeyPressHandler() {
 
             @Override
@@ -350,8 +400,6 @@ public class CollectionsPresenter extends AbstractPresenter {
 
             @Override
             public void onKeyDown(KeyDownEvent event) {
-                if (event.getNativeKeyCode() != KeyCodes.KEY_ENTER)
-                    return;
                 handle();
             }
         });
@@ -461,6 +509,8 @@ public class CollectionsPresenter extends AbstractPresenter {
         display.setCurrentMenuSelection(id);
         entryDataProvider.updateRowCount(0, false);
         display.setDataView(collectionsDataTable);
+        display.enableExportAs(false);
+        display.setSubMenuEnable(false, false, false);
 
         model.retrieveEntriesForFolder(id, new FolderRetrieveEventHandler() {
 
@@ -480,13 +530,13 @@ public class CollectionsPresenter extends AbstractPresenter {
                     return;
                 }
 
+                collectionsDataTable.clearSelection();
                 History.newItem(Page.COLLECTIONS.getLink() + ";id=" + folder.getId(), false);
                 display.setCurrentMenuSelection(folder.getId());
                 ArrayList<Long> entries = folder.getContents();
                 entryDataProvider.setValues(entries);
 
-                display.setSubMenuEnable(true, !folder.isSystemFolder(), !folder.isSystemFolder());
-                currentFolder = folder.getId();
+                currentFolder = folder;
                 mode = Mode.COLLECTION;
                 if (msg != null && !msg.isEmpty())
                     display.showFeedbackMessage(msg, false);
@@ -505,7 +555,6 @@ public class CollectionsPresenter extends AbstractPresenter {
         @Override
         public void onFolderRetrieve(FolderRetrieveEvent event) {
             ArrayList<FolderDetails> folders = event.getItems();
-            Collections.reverse(folders);
 
             ArrayList<MenuItem> userMenuItems = new ArrayList<MenuItem>();
             ArrayList<FolderDetails> userFolders = new ArrayList<FolderDetails>();
@@ -535,7 +584,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                     AppController.accountInfo.getVisibleEntryCount(), true);
             systemMenuItems.add(0, allEntriesItem);
             display.setSystemCollectionMenuItems(systemMenuItems);
-            DeleteItemHandler deleteHandler = new DeleteItemHandler(model.getService());
+            DeleteItemHandler deleteHandler = new DeleteItemHandler(model.getService(), display);
             display.setUserCollectionMenuItems(userMenuItems, deleteHandler);
 
             userListProvider.getList().addAll(userFolders);
@@ -551,7 +600,11 @@ public class CollectionsPresenter extends AbstractPresenter {
             switch (mode) {
             case COLLECTION:
             default:
-                return collectionsDataTable.getSelectedEntrySet();
+                if (collectionsDataTable.getSelectionModel().isAllSelected()) {
+                    return entryDataProvider.getData();
+                } else {
+                    return collectionsDataTable.getSelectedEntrySet();
+                }
 
             case SEARCH:
                 return searchPresenter.getEntrySet();
@@ -574,40 +627,41 @@ public class CollectionsPresenter extends AbstractPresenter {
             if (ids.isEmpty())
                 return;
 
-            model.removeEntriesFromFolder(currentFolder, ids, new FolderRetrieveEventHandler() {
+            model.removeEntriesFromFolder(currentFolder.getId(), ids,
+                new FolderRetrieveEventHandler() {
 
-                @Override
-                public void onFolderRetrieve(FolderRetrieveEvent event) {
-                    if (event == null || event.getItems() == null) {
-                        display.showFeedbackMessage(
-                            "An error occured while removing entries. Please try again.", true);
-                        return;
+                    @Override
+                    public void onFolderRetrieve(FolderRetrieveEvent event) {
+                        if (event == null || event.getItems() == null) {
+                            display.showFeedbackMessage(
+                                "An error occured while removing entries. Please try again.", true);
+                            return;
+                        }
+
+                        FolderDetails result = event.getItems().get(0);
+                        if (result == null)
+                            return;
+
+                        ArrayList<MenuItem> items = new ArrayList<MenuItem>();
+                        MenuItem updateItem = new MenuItem(result.getId(), result.getName(), result
+                                .getCount(), result.isSystemFolder());
+                        items.add(updateItem);
+                        display.updateMenuItemCounts(items);
+
+                        String entryDisp = (ids.size() == 1) ? "entry" : "entries";
+                        String msg = "<b>" + ids.size() + "</b> " + entryDisp
+                                + " successfully removed from";
+
+                        String name = result.getName();
+                        if (name.length() > 20)
+                            msg += " collection.";
+                        else
+                            msg += ("\"<b>" + name + "</b>\" collection.");
+
+                        retrieveEntriesForFolder(currentFolder.getId(), msg);
+                        collectionsDataTable.clearSelection();
                     }
-
-                    FolderDetails result = event.getItems().get(0);
-                    if (result == null)
-                        return;
-
-                    ArrayList<MenuItem> items = new ArrayList<MenuItem>();
-                    MenuItem updateItem = new MenuItem(result.getId(), result.getName(), result
-                            .getCount(), result.isSystemFolder());
-                    items.add(updateItem);
-                    display.updateMenuItemCounts(items);
-
-                    String entryDisp = (ids.size() == 1) ? "entry" : "entries";
-                    String msg = "<b>" + ids.size() + "</b> " + entryDisp
-                            + " successfully removed from";
-
-                    String name = result.getName();
-                    if (name.length() > 20)
-                        msg += " collection.";
-                    else
-                        msg += ("\"<b>" + name + "</b>\" collection.");
-
-                    retrieveEntriesForFolder(currentFolder, msg);
-                    collectionsDataTable.clearSelection();
-                }
-            });
+                });
         }
     }
 

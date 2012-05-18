@@ -175,7 +175,7 @@ public class FolderManager {
             session.saveOrUpdate(folder);
             session.getTransaction().commit();
             return folder;
-        } catch (HibernateException e) {
+        } catch (Exception e) {
             session.getTransaction().rollback();
             return null;
         } finally {
@@ -204,7 +204,7 @@ public class FolderManager {
         Session session = DAO.newSession();
         try {
             String queryString = "from " + Folder.class.getName()
-                    + " WHERE ownerEmail = :ownerEmail";
+                    + " WHERE ownerEmail = :ownerEmail order by creationTime desc";
             Query query = session.createQuery(queryString);
 
             query.setParameter("ownerEmail", account.getEmail());

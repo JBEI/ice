@@ -3,12 +3,13 @@ package org.jbei.ice.client.collection.menu;
 import java.util.ArrayList;
 import java.util.Set;
 
+import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.shared.FolderDetails;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
+import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -54,6 +55,8 @@ public class CollectionMenu extends Composite {
     // quick add
     private TextBox quickAddBox;
     private Image quickAddButton;
+    private HandlerRegistration quickAddBoxHandlerRegisteration;
+    private HandlerRegistration quickAddBoxKeyHandlerRegisteration;
 
     public CollectionMenu(boolean addQuickEdit, String header) {
         table = new FlexTable();
@@ -163,7 +166,10 @@ public class CollectionMenu extends Composite {
         if (quickAddBox == null)
             return;
 
-        quickAddBox.addKeyPressHandler(new KeyPressHandler() {
+        if (quickAddBoxKeyHandlerRegisteration != null)
+            quickAddBoxKeyHandlerRegisteration.removeHandler();
+
+        quickAddBoxKeyHandlerRegisteration = quickAddBox.addKeyPressHandler(new KeyPressHandler() {
 
             @Override
             public void onKeyPress(KeyPressEvent event) {
@@ -175,6 +181,23 @@ public class CollectionMenu extends Composite {
 
                 quickAddBox.setVisible(false);
                 handler.onKeyPress(event);
+            }
+        });
+    }
+
+    public void addQuickAddBlurHandler(final BlurHandler blurHandler) {
+        if (quickAddBox == null)
+            return;
+
+        if (quickAddBoxHandlerRegisteration != null)
+            quickAddBoxHandlerRegisteration.removeHandler();
+        quickAddBoxHandlerRegisteration = quickAddBox.addBlurHandler(new BlurHandler() {
+
+            @Override
+            public void onBlur(BlurEvent event) {
+                if (!validate())
+                    return;
+                blurHandler.onBlur(event);
             }
         });
     }
@@ -374,6 +397,31 @@ public class CollectionMenu extends Composite {
     }
 
     // inner class
+
+    // TODO : this needs to go into a presenter;
+    class DeleteCallBack extends Callback<MenuItem> {
+
+        private final IDeleteMenuHandler deleteHandler;
+
+        public DeleteCallBack(IDeleteMenuHandler deleteHandler) {
+            this.deleteHandler = deleteHandler;
+        }
+
+        @Override
+        public void onSucess(MenuItem item) {
+            MenuHiderTimer timer = new MenuHiderTimer(table, editRow);
+            DeletedCell deletedCell = new DeletedCell(currentEditSelection,
+                    deleteHandler.getUndoHandler(item, CollectionMenu.this, timer));
+            table.setWidget(editRow, editIndex, deletedCell);
+            timer.schedule(6000);
+        }
+
+        @Override
+        public void onFailure() {
+            // do nothing on failure since an error msg will be shown to the user
+        }
+    }
+
     class MenuCell extends Composite implements HasClickHandlers {
 
         private final HTMLPanel panel;
@@ -422,15 +470,7 @@ public class CollectionMenu extends Composite {
                         editRow = cell.getRowIndex();
                         editIndex = cell.getCellIndex();
                         currentEditSelection = getMenuItem();
-
-                        // folderId
-                        if (deleteHandler.delete(item.getId())) {
-                            MenuHiderTimer timer = new MenuHiderTimer(table, editRow);
-                            DeletedCell deletedCell = new DeletedCell(currentEditSelection,
-                                    deleteHandler.getUndoHandler(item, CollectionMenu.this, timer));
-                            table.setWidget(editRow, editIndex, deletedCell);
-                            timer.schedule(13000);
-                        }
+                        deleteHandler.delete(item.getId(), new DeleteCallBack(deleteHandler));
                     }
                 });
             }
@@ -507,11 +547,10 @@ public class CollectionMenu extends Composite {
         private void setRightPanel(Widget widget) {
             Widget toReplace = panel.getWidget(0);
             if (toReplace == null)
-                GWT.log("Cannot replace widget"); // TODO
-            else {
-                panel.remove(0);
-                panel.add(widget, folderId);
-            }
+                return;
+
+            panel.remove(0);
+            panel.add(widget, folderId);
         }
 
         @Override
@@ -524,4 +563,5 @@ public class CollectionMenu extends Composite {
             return format.format(l);
         }
     }
+
 }

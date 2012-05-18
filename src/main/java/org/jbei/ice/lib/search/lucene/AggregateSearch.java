@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.search.lucene;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 
 import org.jbei.ice.controllers.EntryController;
@@ -59,11 +60,14 @@ public class AggregateSearch {
             queries = new ArrayList<String[]>();
             queries.add(new String[] { "part_number", "=" + queryString });
             queryResultIds = Query.getInstance().query(queries);
-            for (Long id : queryResultIds) {
+            Iterator<Long> iter = queryResultIds.iterator();
+            while (iter.hasNext()) {
+                long id = iter.next();
                 if (!entryController.hasReadPermissionById(id)) {
-                    queryResultIds.remove(id);
+                    iter.remove();
                 }
             }
+
             Collections.reverse(queryResultIds);
             matchedEntries = entryController.getEntriesByIdSet(queryResultIds);
             if (matchedEntries != null) {

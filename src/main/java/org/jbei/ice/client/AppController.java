@@ -37,14 +37,11 @@ import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 
@@ -53,6 +50,7 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
 
     // cookie times out in three days (current value set in Ice)
     private static final int COOKIE_TIMEOUT = (1000 * 60 * 60 * 24) * 3;
+    private static final int DAY_TIMEOUT = (1000 * 60 * 60 * 24);
     private static final String COOKIE_NAME = "gd-ice";
     private static final String COOKIE_PATH = "/";
 
@@ -75,15 +73,15 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
      * Adds a window close event that clears the cookies when the user
      * closes the window and has not selected "remember me"
      */
-    private void addCookieClearOnWindowClose() {
-        Window.addCloseHandler(new CloseHandler<Window>() {
-
-            @Override
-            public void onClose(CloseEvent<Window> event) {
-                logout();
-            }
-        });
-    }
+    //    private void addCookieClearOnWindowClose() {
+    //        Window.addCloseHandler(new CloseHandler<Window>() {
+    //
+    //            @Override
+    //            public void onClose(CloseEvent<Window> event) {
+    //                logout();
+    //            }
+    //        });
+    //    }
 
     private void bind() {
         History.addValueChangeHandler(this);
@@ -96,10 +94,15 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
                 AppController.sessionId = event.getSessionId();
                 accountInfo = event.getAccountInfo();
 
-                Date expires = new Date(System.currentTimeMillis() + COOKIE_TIMEOUT);
-                Cookies.setCookie(COOKIE_NAME, sessionId, expires, null, COOKIE_PATH, true);
+                Date expires;
                 if (!event.isRememberUser())
-                    addCookieClearOnWindowClose();
+                    expires = new Date(System.currentTimeMillis() + DAY_TIMEOUT);
+                else
+                    expires = new Date(System.currentTimeMillis() + COOKIE_TIMEOUT);
+
+                Cookies.setCookie(COOKIE_NAME, sessionId, expires, null, COOKIE_PATH, true);
+                //                if (!event.isRememberUser())
+                //                    addCookieClearOnWindowClose();
 
                 goToMainPage();
             }
@@ -159,7 +162,7 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
 
     private void showEntryView(EntryViewEvent event) {
         Page currentPage = getPage(History.getToken());
-        if (currentPage == Page.COLLECTIONS)
+        if (currentPage == Page.COLLECTIONS || currentPage == Page.ENTRY_VIEW)
             return;
 
         CollectionsView cView = new CollectionsView();

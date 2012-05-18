@@ -145,6 +145,7 @@ public class InfoToModelFactory {
         HashSet<SelectionMarker> markers = getSelectionMarkers(info.getSelectionMarkers(), entry);
         entry.setSelectionMarkers(markers);
         entry.setOwner(info.getOwner());
+        entry.setReferences(info.getReferences());
         entry.setRecordId(info.getRecordId());
         entry.setOwnerEmail(info.getOwnerEmail());
         entry.setCreator(info.getCreator());
@@ -155,6 +156,7 @@ public class InfoToModelFactory {
         entry.setShortDescription(info.getShortDescription());
         entry.setLongDescription(info.getLongDescription());
         entry.setLongDescriptionType(info.getLongDescriptionType());
+        entry.setIntellectualProperty(info.getIntellectualProperty());
         entry.setVersionId(info.getVersionId());
         CommaSeparatedField<Link> linksField = new CommaSeparatedField<Link>(Link.class, "getLink",
                 "setLink");

@@ -121,8 +121,6 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
 
     @Override
     public void setDataView(CollectionDataTable table) {
-        feedback.setVisible(false);
-
         rightContents.setWidget(0, 1, subMenu);
         String width = (subMenu.getWidth() + 12) + "px";
         rightContents.getFlexCellFormatter().setWidth(0, 1, width);
@@ -136,8 +134,7 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     }
 
     @Override
-    public void setMainContent(Widget mainContent, boolean showSubMenu) {
-        feedback.setVisible(false);
+    public void setMainContent(Widget mainContent) {
         rightContents.setWidget(0, 1, subMenu);
         rightContents.setWidget(2, 0, mainContent);
         rightContents.getFlexCellFormatter().setColSpan(2, 0, 4);
@@ -172,7 +169,7 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
             public void run() {
                 feedback.setVisible(false);
             }
-        }.schedule(10000);
+        }.schedule(20000);
     }
 
     @Override
@@ -198,6 +195,11 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     @Override
     public void addQuickAddKeyHandler(KeyPressHandler handler) {
         this.userMenu.addQuickAddKeyPressHandler(handler);
+    }
+
+    @Override
+    public void addQuickAddBlurHandler(BlurHandler blurHandler) {
+        this.userMenu.addQuickAddBlurHandler(blurHandler);
     }
 
     @Override
@@ -259,6 +261,11 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
     @Override
     public SingleSelectionModel<ExportAsOption> getExportAsModel() {
         return exportAs.getSelectionModel();
+    }
+
+    @Override
+    public void enableExportAs(boolean enable) {
+        this.exportAs.enable(enable);
     }
 
     @Override

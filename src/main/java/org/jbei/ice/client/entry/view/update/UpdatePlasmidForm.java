@@ -35,6 +35,7 @@ public class UpdatePlasmidForm extends UpdateEntryForm<PlasmidInfo> {
         backbone.setText(info.getBackbone());
         origin.setText(info.getOriginOfReplication());
         promoters.setText(info.getPromoters());
+        markers.setText(info.getSelectionMarkers());
     }
 
     @Override

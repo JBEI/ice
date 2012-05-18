@@ -5,14 +5,17 @@ import java.util.Set;
 
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
+import org.jbei.ice.client.common.table.EntrySelectionModel;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.search.blast.BlastSearchDataProvider;
 import org.jbei.ice.client.search.event.AdvancedSearchEvent;
 import org.jbei.ice.shared.QueryOperator;
+import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 
 /**
  * Presenter for searches
@@ -57,6 +60,15 @@ public class AdvancedSearchPresenter {
         this.model = new AdvancedSearchModel(rpcService, eventBus);
     }
 
+    public void addTableSelectionModelChangeHandler(Handler handler) {
+        final EntrySelectionModel<EntryInfo> selectionModel = this.table.getSelectionModel();
+        selectionModel.addSelectionChangeHandler(handler);
+    }
+
+    public Set<EntryInfo> getResultSelectedSet() {
+        return this.table.getSelectionModel().getSelectedSet();
+    }
+
     public void search(final ArrayList<SearchFilterInfo> searchFilters) {
         if (searchFilters == null)
             return;
@@ -88,14 +100,14 @@ public class AdvancedSearchPresenter {
 
             // get blast results and filter 
             QueryOperator program = QueryOperator.operatorValueOf(blastInfo.getOperator());
-            this.model.performBlast(filterCopy, blastInfo.getOperand(), program, new Handler(
+            this.model.performBlast(filterCopy, blastInfo.getOperand(), program, new EventHandler(
                     searchFilters));
         } else {
             dataProvider.updateRowCount(0, false);
             display.setSearchVisibility(table, true);
             table.setVisibleRangeAndClearData(table.getVisibleRange(), false);
 
-            this.model.retrieveSearchResults(filterCopy, new Handler(searchFilters));
+            this.model.retrieveSearchResults(filterCopy, new EventHandler(searchFilters));
         }
     }
 
@@ -103,6 +115,9 @@ public class AdvancedSearchPresenter {
         switch (mode) {
         case SEARCH:
         default:
+            if (table.getSelectionModel().isAllSelected()) {
+                return dataProvider.getData();
+            }
             return table.getSelectedEntrySet();
 
         case BLAST:
@@ -119,9 +134,9 @@ public class AdvancedSearchPresenter {
     // inner class
     //
 
-    private class Handler implements AdvancedSearchEvent.AdvancedSearchEventHandler {
+    private class EventHandler implements AdvancedSearchEvent.AdvancedSearchEventHandler {
 
-        public Handler(ArrayList<SearchFilterInfo> filters) {
+        public EventHandler(ArrayList<SearchFilterInfo> filters) {
             display.setSearchFilters(filters);
         }
 
@@ -141,4 +156,5 @@ public class AdvancedSearchPresenter {
             mode = Mode.BLAST;
         }
     }
+
 }

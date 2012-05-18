@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.collection.ICollectionView;
 import org.jbei.ice.client.collection.menu.CollectionMenu;
 import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
 import org.jbei.ice.client.collection.menu.MenuHiderTimer;
@@ -19,32 +21,46 @@ public class DeleteItemHandler implements IDeleteMenuHandler {
 
     private final HashMap<Long, ArrayList<Long>> folder;
     private final RegistryServiceAsync service;
+    private final ICollectionView view;
 
-    public DeleteItemHandler(RegistryServiceAsync service) {
+    public DeleteItemHandler(RegistryServiceAsync service, ICollectionView view) {
         folder = new HashMap<Long, ArrayList<Long>>();
         this.service = service;
+        this.view = view;
     }
 
     @Override
-    public boolean delete(long id) {
+    public void delete(long id, final Callback<MenuItem> deleteCallback) {
         service.deleteFolder(AppController.sessionId, id, new AsyncCallback<FolderDetails>() {
 
             @Override
             public void onSuccess(FolderDetails result) {
-                // TODO : if result == null
+                if (result == null) {
+                    view.showFeedbackMessage("Error deleting folder.", true);
+                    deleteCallback.onFailure();
+                    return;
+                }
+
                 folder.put(result.getId(), result.getContents());
+                MenuItem item = new MenuItem(result.getId(), result.getName(), result.getCount(),
+                        result.isSystemFolder());
+                deleteCallback.onSucess(item);
+                view.removeSubMenuFolder(item);
             }
 
             @Override
             public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
+                view.showFeedbackMessage("Error deleting folder.", true);
+                deleteCallback.onFailure();
             }
         });
 
-        return true;
     }
 
     @Override
+    /**
+     * Handler for undoing a delete action
+     */
     public ClickHandler getUndoHandler(final MenuItem item, final CollectionMenu menu,
             final MenuHiderTimer timer) {
         return new ClickHandler() {
@@ -58,7 +74,7 @@ public class DeleteItemHandler implements IDeleteMenuHandler {
 
                         @Override
                         public void onFailure(Throwable caught) {
-                            // TODO Auto-generated method stub
+                            view.showFeedbackMessage("Error restoring folder.", true);
                         }
 
                         @Override
@@ -67,6 +83,7 @@ public class DeleteItemHandler implements IDeleteMenuHandler {
                             MenuItem newItem = new MenuItem(result.getId(), result.getName(),
                                     result.getCount(), result.isSystemFolder());
                             menu.updateMenuItem(item.getId(), newItem, DeleteItemHandler.this);
+                            view.addSubMenuFolder(newItem);
                         }
                     });
             }

@@ -172,7 +172,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         status = new ListBox();
         status.setVisibleItemCount(1);
         for (StatusType type : StatusType.values()) {
-            status.addItem(type.toString(), type.name());
+            status.addItem(type.getDisplayName());
         }
         status.setStyleName("pull_down");
         general.setWidget(row, 1, status);
@@ -350,8 +350,8 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         plasmidNotesMarkupOptions = new ListBox();
         plasmidNotesMarkupOptions.setVisibleItemCount(1);
         plasmidNotesMarkupOptions.addItem("Text");
-        plasmidNotesMarkupOptions.addItem("Wiki");
-        plasmidNotesMarkupOptions.addItem("Confluence");
+        //        plasmidNotesMarkupOptions.addItem("Wiki");
+        //        plasmidNotesMarkupOptions.addItem("Confluence");
         plasmidNotesMarkupOptions.setStyleName("pull_down");
         notes.setWidget(2, 1, plasmidNotesMarkupOptions);
 
@@ -480,8 +480,8 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         strainNotesMarkupOptions = new ListBox();
         strainNotesMarkupOptions.setVisibleItemCount(1);
         strainNotesMarkupOptions.addItem("Text");
-        strainNotesMarkupOptions.addItem("Wiki");
-        strainNotesMarkupOptions.addItem("Confluence");
+        //        strainNotesMarkupOptions.addItem("Wiki");
+        //        strainNotesMarkupOptions.addItem("Confluence");
         strainNotesMarkupOptions.setStyleName("pull_down");
         notes.setWidget(2, 1, strainNotesMarkupOptions);
 

@@ -54,8 +54,9 @@ public class BulkImportPresenter extends AbstractPresenter {
         addToggleMenuHandler();
 
         // retrieveData
-        retrieveSavedDrafts();
-        retrieveAutoCompleteData();
+        // TODO : uncomment this for new version (ice3.1)
+        //        retrieveSavedDrafts();
+        //        retrieveAutoCompleteData();
     }
 
     private void setClickHandlers() {

@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.utils;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
@@ -136,11 +137,11 @@ public class LblLdapAuthenticationWrapper {
             whitelistGroups.add(element);
         }
 
-        String queryPrefix = "cn=";
-        String querySuffix = ",ou=JBEI-Groups,ou=Groups,o=Lawrence Berkeley Laboratory,c=US";
-        String filter = "(objectClass=*)";
+        String groupDn = JbeirSettings.getSetting("LBL_LDAP_GROUP_BASE_DN");
+        String groupQueryString = JbeirSettings.getSetting("LBL_LDAP_GROUP_QUERY");
+        String userDn = JbeirSettings.getSetting("LBL_LDAP_USER_BASE_DN");
+        String userQueryString = JbeirSettings.getSetting("LBL_LDAP_USER_QUERY");
 
-        ArrayList<String> whiteList = new ArrayList<String>();
         SearchControls searchControls = new SearchControls();
         searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
         searchControls.setCountLimit(0);
@@ -149,32 +150,34 @@ public class LblLdapAuthenticationWrapper {
                 dirContext = getContext();
             }
 
-            for (String group : whitelistGroups) {
-                String queryString = queryPrefix + group + querySuffix;
-                SearchResult searchResult = dirContext.search(queryString, filter, searchControls)
-                        .nextElement();
-                NamingEnumeration<?> uniqueMembers = searchResult.getAttributes()
-                        .get("uniquemember").getAll();
-                while (uniqueMembers.hasMore()) {
-                    String temp = (String) uniqueMembers.next();
-                    whiteList.add(temp.toLowerCase());
+            // find user
+            NamingEnumeration<SearchResult> userResults;
+            String userQuery = MessageFormat.format(userQueryString, loginName);
+            userResults = dirContext.search(userDn, userQuery, searchControls);
+            if (userResults.hasMore()) {
+                // find user groups
+                NamingEnumeration<SearchResult> groupResults;
+                SearchResult user = userResults.next();
+                String query = MessageFormat.format(groupQueryString, user.getNameInNamespace());
+                groupResults = dirContext.search(groupDn, query, searchControls);
+                while (groupResults.hasMore()) {
+                    String name = groupResults.next().getAttributes().get("cn").get().toString();
+                    if (whitelistGroups.contains(name)) {
+                        result = true;
+                    }
                 }
-                uniqueMembers.close();
-
+                groupResults.close();
             }
-            if (whiteList.contains(loginName.toLowerCase())) {
-                result = true;
-            }
+            userResults.close();
         } catch (NamingException e) {
-            throw new LblLdapAuthenticationWrapperException(
-                    "Failed to fetch wiki ldap users whitelist!", e);
+            throw new LblLdapAuthenticationWrapperException("Failed to fetch wiki user", e);
         }
 
         String msg = null;
         if (result) {
-            msg = loginName.toLowerCase() + " is in whitelist.";
+            msg = loginName.toLowerCase() + " is in wiki.";
         } else {
-            msg = loginName.toLowerCase() + " is not in whitelist.";
+            msg = loginName.toLowerCase() + " is not in wiki.";
         }
 
         Logger.info(msg);

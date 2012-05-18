@@ -1,6 +1,7 @@
 package org.jbei.ice.client.entry.view.view;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.RegistryServiceAsync;
@@ -45,11 +46,15 @@ public class PermissionsPresenter {
 
     private final IPermissionsView view;
     private boolean canEdit;
+    private final ArrayList<PermissionInfo> readList; // list of read permissions (includes groups)
+    private final ArrayList<PermissionInfo> writeList; // list of write permissions (includes groups)
 
     public PermissionsPresenter(final IPermissionsView view) {
         this.view = view;
         this.view.setReadAddClickHandler(new ReadAddHandler());
         this.view.setWriteAddClickHandler(new WriteAddHandler());
+        readList = new ArrayList<PermissionInfo>();
+        writeList = new ArrayList<PermissionInfo>();
     }
 
     public void onErrRetrievingExistingPermissions() {
@@ -66,29 +71,60 @@ public class PermissionsPresenter {
 
     public void addReadItem(PermissionInfo info, RegistryServiceAsync service, long entryId,
             boolean canEdit) {
+        view.setReadBoxVisibility(false);
+        if (inReadList(info))
+            return;
+
+        DeletePermissionHandler handler = null;
+        if (canEdit) {
+            handler = new DeletePermissionHandler(service, info, entryId,
+                    new DeletePermissionCallback());
+        }
+
         boolean isGroup = (info.getType() == PermissionType.READ_GROUP || info.getType() == PermissionType.WRITE_GROUP);
         boolean isWrite = (info.getType() == PermissionType.WRITE_GROUP || info.getType() == PermissionType.WRITE_ACCOUNT);
         PermissionItem item = new PermissionItem(info.getId(), info.getDisplay(), isGroup, isWrite);
-        DeletePermissionHandler handler = null;
-        if (canEdit)
-            handler = new DeletePermissionHandler(service, info, entryId,
-                    new DeletePermissionCallback());
         view.addReadItem(item, handler);
-        view.setReadBoxVisibility(false);
+        readList.add(info);
     }
 
     public void addWriteItem(PermissionInfo info, RegistryServiceAsync service, long entryId,
             boolean canEdit) {
+
+        view.setWriteBoxVisibility(false);
+        addReadItem(info, service, entryId, canEdit);
+
+        if (inWriteList(info))
+            return;
+
+        DeletePermissionHandler handler = null;
+        if (canEdit) {
+            handler = new DeletePermissionHandler(service, info, entryId,
+                    new DeletePermissionCallback());
+        }
+
         boolean isGroup = (info.getType() == PermissionType.READ_GROUP || info.getType() == PermissionType.WRITE_GROUP);
         boolean isWrite = (info.getType() == PermissionType.WRITE_GROUP || info.getType() == PermissionType.WRITE_ACCOUNT);
         PermissionItem item = new PermissionItem(info.getId(), info.getDisplay(), isGroup, isWrite);
-        DeletePermissionHandler handler = null;
-        if (canEdit)
-            handler = new DeletePermissionHandler(service, info, entryId,
-                    new DeletePermissionCallback());
         view.addWriteItem(item, handler);
-        view.setWriteBoxVisibility(false);
-        addReadItem(info, service, entryId, canEdit);
+        writeList.add(info);
+
+    }
+
+    private boolean inWriteList(PermissionInfo info) {
+        for (PermissionInfo permission : writeList) {
+            if (info.getId() == permission.getId() && info.getType() == permission.getType())
+                return true;
+        }
+        return false;
+    }
+
+    private boolean inReadList(PermissionInfo info) {
+        for (PermissionInfo permission : readList) {
+            if (info.getId() == permission.getId() && info.getType() == permission.getType())
+                return true;
+        }
+        return false;
     }
 
     public void setPermissionData(ArrayList<PermissionInfo> infoList, RegistryServiceAsync service,
@@ -111,21 +147,25 @@ public class PermissionsPresenter {
             case READ_ACCOUNT:
                 item = new PermissionItem(info.getId(), info.getDisplay(), false, false);
                 view.addReadItem(item, handler);
+                readList.add(info);
                 break;
 
             case READ_GROUP:
                 item = new PermissionItem(info.getId(), info.getDisplay(), true, false);
                 view.addReadItem(item, handler);
+                readList.add(info);
                 break;
 
             case WRITE_ACCOUNT:
                 item = new PermissionItem(info.getId(), info.getDisplay(), false, true);
                 view.addWriteItem(item, handler);
+                writeList.add(info);
                 break;
 
             case WRITE_GROUP:
                 item = new PermissionItem(info.getId(), info.getDisplay(), true, true);
                 view.addWriteItem(item, handler);
+                writeList.add(info);
                 break;
             }
 
@@ -153,24 +193,38 @@ public class PermissionsPresenter {
             case READ_ACCOUNT:
                 item = new PermissionItem(info.getId(), info.getDisplay(), false, false);
                 view.removeReadItem(item);
+                removeFromList(readList, info);
                 break;
 
             case READ_GROUP:
                 item = new PermissionItem(info.getId(), info.getDisplay(), true, false);
                 view.removeReadItem(item);
+                removeFromList(readList, info);
                 break;
 
             case WRITE_ACCOUNT:
                 item = new PermissionItem(info.getId(), info.getDisplay(), false, true);
                 view.removeWriteItem(item);
-                view.removeReadItem(item);
+                removeFromList(writeList, info);
                 break;
 
             case WRITE_GROUP:
                 item = new PermissionItem(info.getId(), info.getDisplay(), true, true);
                 view.removeWriteItem(item);
-                view.removeReadItem(item);
+                removeFromList(writeList, info);
                 break;
+            }
+        }
+
+        private void removeFromList(ArrayList<PermissionInfo> list, PermissionInfo info) {
+            if (list == null || list.isEmpty() || info == null)
+                return;
+
+            Iterator<PermissionInfo> iter = list.iterator();
+            while (iter.hasNext()) {
+                PermissionInfo next = iter.next();
+                if (next.getId() == info.getId() && next.getType() == info.getType())
+                    iter.remove();
             }
         }
 

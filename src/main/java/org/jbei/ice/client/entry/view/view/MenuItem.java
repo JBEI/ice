@@ -3,7 +3,7 @@ package org.jbei.ice.client.entry.view.view;
 public class MenuItem {
 
     private final Menu menu;
-    private final int count;
+    private int count;
 
     public MenuItem(Menu menu, int count) {
         this.menu = menu;
@@ -16,6 +16,10 @@ public class MenuItem {
 
     public int getCount() {
         return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
     }
 
     public enum Menu {

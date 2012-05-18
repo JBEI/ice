@@ -91,6 +91,10 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         selectionModel.clear();
     }
 
+    public EntrySelectionModel<T> getSelectionModel() {
+        return this.selectionModel;
+    }
+
     protected DataTableColumn<String> addTypeColumn(boolean sortable, double width, Unit unit) {
         DataTableColumn<String> typeCol = new DataTableColumn<String>(new TextCell(),
                 ColumnField.TYPE) {
@@ -164,7 +168,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
                 if (description == null)
                     return "";
 
-                int size = (int) (Window.getClientWidth() * 0.05);
+                int size = (int) (Window.getClientWidth() * 0.03);
                 if (size <= 0)
                     size = 50;
                 if (description.length() > size)
@@ -190,8 +194,8 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         };
 
         this.addColumn(ownerColumn, "Owner");
-        ownerColumn.setSortable(true);
-        this.setColumnWidth(ownerColumn, 110, Unit.PX);
+        ownerColumn.setSortable(false);
+        this.setColumnWidth(ownerColumn, 150, Unit.PX);
         return ownerColumn;
     }
 
