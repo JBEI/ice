@@ -316,10 +316,13 @@ public class CollectionsPresenter extends AbstractPresenter {
         entryViewPresenter.setCurrentContext(event);
         display.enableExportAs(true);
         display.setMainContent(entryViewPresenter.getView());
-        if (currentFolder != null) {
-            boolean enable = !currentFolder.isSystemFolder();
-            display.setSubMenuEnable(enable, enable, enable);
-        }
+        boolean enable;
+        if (currentFolder != null)
+            enable = !currentFolder.isSystemFolder();
+        else
+            enable = false;
+
+        display.setSubMenuEnable(true, enable, enable);
     }
 
     private void search(ArrayList<SearchFilterInfo> operands) {
