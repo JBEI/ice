@@ -48,6 +48,7 @@ public class CreateSampleForm extends Composite {
         table.setWidth("100%");
         table.setStyleName("bg_f1");
         table.addStyleName("font-80em");
+        table.addStyleName("pad-6");
         initWidget(table);
         sampleLocationScheme = new ArrayList<TextBox>();
 
