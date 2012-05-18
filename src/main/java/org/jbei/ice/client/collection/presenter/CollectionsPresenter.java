@@ -365,6 +365,9 @@ public class CollectionsPresenter extends AbstractPresenter {
 
             @Override
             public void onBlur(BlurEvent event) {
+                if (display.getQuickEditVisibility() == false)
+                    return;
+
                 display.setQuickAddVisibility(false);
                 saveCollection(display.getCollectionInputValue());
                 display.hideQuickAddInput();
