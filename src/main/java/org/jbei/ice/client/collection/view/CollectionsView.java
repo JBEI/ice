@@ -169,7 +169,7 @@ public class CollectionsView extends AbstractLayout implements ICollectionView {
             public void run() {
                 feedback.setVisible(false);
             }
-        }.schedule(10000);
+        }.schedule(20000);
     }
 
     @Override
