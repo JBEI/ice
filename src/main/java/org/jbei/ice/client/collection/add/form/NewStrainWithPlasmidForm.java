@@ -172,7 +172,7 @@ public class NewStrainWithPlasmidForm extends Composite implements IEntryFormSub
         status = new ListBox();
         status.setVisibleItemCount(1);
         for (StatusType type : StatusType.values()) {
-            status.addItem(type.toString(), type.name());
+            status.addItem(type.getDisplayName());
         }
         status.setStyleName("pull_down");
         general.setWidget(row, 1, status);

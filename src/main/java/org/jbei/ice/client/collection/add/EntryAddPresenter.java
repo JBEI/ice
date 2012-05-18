@@ -161,16 +161,17 @@ public class EntryAddPresenter {
                             EntryContext context = new EntryContext(EntryContext.Type.COLLECTION);
                             context.setCurrent(id);
                             presenter.showEntryView(context);
-                            AppController.accountInfo.setUserEntryCount(AppController.accountInfo
-                                    .getUserEntryCount() + 1);
-                            MenuItem item = new MenuItem(0, "My Entries", AppController.accountInfo
-                                    .getUserEntryCount(), true);
-                            ArrayList<MenuItem> items = new ArrayList<MenuItem>();
-                            items.add(item);
-                            presenter.getView().updateMenuItemCounts(items);
                         } else {
                             History.newItem(Page.COLLECTIONS.getLink());
                         }
+
+                        AppController.accountInfo.setUserEntryCount(AppController.accountInfo
+                                .getUserEntryCount() + entrySet.size());
+                        MenuItem item = new MenuItem(0, "My Entries", AppController.accountInfo
+                                .getUserEntryCount(), true);
+                        ArrayList<MenuItem> items = new ArrayList<MenuItem>();
+                        items.add(item);
+                        presenter.getView().updateMenuItemCounts(items);
                     }
                 }
             });

@@ -156,6 +156,7 @@ public class InfoToModelFactory {
         entry.setShortDescription(info.getShortDescription());
         entry.setLongDescription(info.getLongDescription());
         entry.setLongDescriptionType(info.getLongDescriptionType());
+        entry.setIntellectualProperty(info.getIntellectualProperty());
         entry.setVersionId(info.getVersionId());
         CommaSeparatedField<Link> linksField = new CommaSeparatedField<Link>(Link.class, "getLink",
                 "setLink");
