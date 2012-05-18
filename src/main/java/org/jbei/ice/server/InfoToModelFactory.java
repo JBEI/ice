@@ -145,6 +145,7 @@ public class InfoToModelFactory {
         HashSet<SelectionMarker> markers = getSelectionMarkers(info.getSelectionMarkers(), entry);
         entry.setSelectionMarkers(markers);
         entry.setOwner(info.getOwner());
+        entry.setReferences(info.getReferences());
         entry.setRecordId(info.getRecordId());
         entry.setOwnerEmail(info.getOwnerEmail());
         entry.setCreator(info.getCreator());

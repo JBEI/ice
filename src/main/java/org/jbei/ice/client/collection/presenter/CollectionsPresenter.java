@@ -165,14 +165,6 @@ public class CollectionsPresenter extends AbstractPresenter {
 
             @Override
             public void onEntryView(EntryViewEvent event) {
-                if (entryViewPresenter != null) {
-                    History.newItem(Page.ENTRY_VIEW.getLink() + ";id="
-                            + event.getContext().getCurrent(), false);
-                    display.setMainContent(entryViewPresenter.getView());
-                    mode = Mode.ENTRY;
-                    return;
-                }
-
                 showEntryView(event.getContext());
             }
         });
@@ -514,6 +506,8 @@ public class CollectionsPresenter extends AbstractPresenter {
         display.setCurrentMenuSelection(id);
         entryDataProvider.updateRowCount(0, false);
         display.setDataView(collectionsDataTable);
+        display.enableExportAs(false);
+        display.setSubMenuEnable(false, false, false);
 
         model.retrieveEntriesForFolder(id, new FolderRetrieveEventHandler() {
 
