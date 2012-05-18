@@ -201,8 +201,8 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         markupOptions = new ListBox();
         markupOptions.setVisibleItemCount(1);
         markupOptions.addItem("Text");
-        markupOptions.addItem("Wiki");
-        markupOptions.addItem("Confluence");
+        //        markupOptions.addItem("Wiki");
+        //        markupOptions.addItem("Confluence");
         markupOptions.setStyleName("pull_down");
         notes.setWidget(2, 1, markupOptions);
 
@@ -522,7 +522,7 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
         }
 
         // samples
-        // TODO : there is a bug here
+        // TODO : there is a bug here. uncomment when fixed
         //        String location = sampleLocation.getValue(sampleLocation.getSelectedIndex());
         //
         //        ArrayList<String> passedLocationList = passedLocation.getListForLocation(location);
