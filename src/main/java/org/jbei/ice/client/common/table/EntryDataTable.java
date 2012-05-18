@@ -194,7 +194,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         };
 
         this.addColumn(ownerColumn, "Owner");
-        ownerColumn.setSortable(true);
+        ownerColumn.setSortable(false);
         this.setColumnWidth(ownerColumn, 150, Unit.PX);
         return ownerColumn;
     }
