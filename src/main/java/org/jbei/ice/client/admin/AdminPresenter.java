@@ -16,6 +16,11 @@ import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 
+/**
+ * Presenter for the admin page
+ * 
+ * @author Hector Plahar
+ */
 public class AdminPresenter extends AbstractPresenter {
 
     private final AdminView view;

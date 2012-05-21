@@ -1647,4 +1647,33 @@ td.datePickerMonth {
     width: 240px;
 }
 
+/* the panel itself  */
+.gwt-TabLayoutPanel {
+	
+}
+    
+ /* the tab bar element  */
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelTabs {
+	font-size: 0.9em;
+}
+    
+/* an individual tab */
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelTab {
+	
+}
+    
+/* an element nested in each tab (useful for styling)  */
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelTabInner {
+	
+}
+    
+/* applied to all child content widgets  */
+.gwt-TabLayoutPanel .gwt-TabLayoutPanelContent {
+	border: 1px solid #cecece;
+	padding: 8px;
+}
+    
+
+
+
 

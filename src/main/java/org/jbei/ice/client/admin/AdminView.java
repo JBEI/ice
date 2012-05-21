@@ -9,9 +9,11 @@ import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 
@@ -19,17 +21,15 @@ public class AdminView extends AbstractLayout {
 
     private FlexTable contentTable;
     private CollectionMenu draftsMenu; // TODO
+    private TabLayoutPanel panel;
 
     @Override
     protected void initComponents() {
         super.initComponents();
 
         contentTable = new FlexTable();
+        panel = new TabLayoutPanel(1.5, Unit.EM);
         draftsMenu = new CollectionMenu(false, "BULK IMPORT");
-    }
-
-    @Override
-    protected Widget createContents() {
 
         contentTable.setWidth("100%");
         contentTable.setHTML(0, 0, "&nbsp;");
@@ -39,7 +39,17 @@ public class AdminView extends AbstractLayout {
         contentTable.setWidget(0, 1, createMainContent());
         contentTable.getFlexCellFormatter().setVerticalAlignment(0, 1, HasAlignment.ALIGN_TOP);
 
-        return contentTable;
+        panel.add(new HTML("contents"), "Home");
+        panel.add(contentTable, "Verify Bulk Import");
+        panel.setHeight("100%");
+        panel.getElement().getStyle().setMarginBottom(10.0, Unit.PX);
+
+    }
+
+    @Override
+    protected Widget createContents() {
+
+        return panel;
     }
 
     protected Widget createMainContent() {
@@ -72,6 +82,8 @@ public class AdminView extends AbstractLayout {
                 + result.getId()
                 + "&amp;sessionId="
                 + AppController.sessionId
+                + "&importId="
+                + result.getId()
                 + "\" quality=\"high\" bgcolor=\"#869ca7\" width=\"100%\" wmode=\"opaque\" height=\"100%\" name=\"VectorEditor\" align=\"middle\" play=\"true\" loop=\"false\" type=\"application/x-shockwave-flash\" pluginspage=\"http://www.adobe.com/go/getflashplayer\"></object>";
         HTML widget = new HTML(html);
         widget.setStyleName("z-index-low");
