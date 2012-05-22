@@ -85,6 +85,12 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
         this.summary.setText(entryInfo.getShortDescription());
 
         this.fundingSource.setText(entryInfo.getFundingSource());
+        status.setVisibleItemCount(1);
+        for (StatusType type : StatusType.values()) {
+            status.addItem(type.getDisplayName());
+        }
+        status.setStyleName("pull_down");
+
         for (int i = 0; i < this.status.getItemCount(); i += 1) {
             if (status.getValue(i).equals(entryInfo.getStatus())) {
                 status.setSelectedIndex(i);
@@ -92,6 +98,11 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
             }
         }
 
+        bioSafety.setVisibleItemCount(1);
+        for (BioSafetyOptions options : BioSafetyOptions.values()) {
+            bioSafety.addItem(options.getDisplayName(), options.getValue());
+        }
+        bioSafety.setStyleName("pull_down");
         for (int i = 0; i < this.bioSafety.getItemCount(); i += 1) {
             if (bioSafety.getValue(i).equalsIgnoreCase(entryInfo.getBioSafetyLevel().toString())) {
                 this.bioSafety.setSelectedIndex(i);
@@ -102,18 +113,6 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
         keywords.setText(entryInfo.getKeywords());
         ip.setText(entryInfo.getIntellectualProperty());
         this.notesText.setText(entryInfo.getLongDescription());
-
-        status.setVisibleItemCount(1);
-        for (StatusType type : StatusType.values()) {
-            status.addItem(type.getDisplayName());
-        }
-        status.setStyleName("pull_down");
-
-        bioSafety.setVisibleItemCount(1);
-        for (BioSafetyOptions options : BioSafetyOptions.values()) {
-            bioSafety.addItem(options.getDisplayName(), options.getValue());
-        }
-        bioSafety.setStyleName("pull_down");
 
         initLayout();
     }
