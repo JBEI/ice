@@ -17,7 +17,6 @@ import org.jbei.ice.shared.dto.ProfileInfo;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Label;
@@ -37,7 +36,11 @@ public class ProfilePresenter extends AbstractPresenter {
     private final VerticalPanel panel;
 
     public ProfilePresenter(final RegistryServiceAsync service, final HandlerManager eventBus,
-            final IProfileView display, final String userId) {
+            final IProfileView display, String userId) {
+
+        if (userId == null || userId.isEmpty()) {
+            userId = AppController.accountInfo.getEmail();
+        }
 
         this.service = service;
         this.eventBus = eventBus;
@@ -55,7 +58,6 @@ public class ProfilePresenter extends AbstractPresenter {
                     display.setContents(accountWidget);
                     break;
                 case ENTRIES:
-
                     display.setContents(panel);
                     break;
                 case SAMPLES:
@@ -81,7 +83,7 @@ public class ProfilePresenter extends AbstractPresenter {
                 }
 
                 AccountInfo info = profileInfo.getAccountInfo();
-                display.setHeaderText(info.getFirstName() + " " + info.getLastName());
+                display.setHeaderText(info.getFirstName() + " " + info.getLastName(), null, null);
                 accountWidget.setAccountInfo(info);
                 display.setContents(accountWidget);
 
@@ -100,7 +102,6 @@ public class ProfilePresenter extends AbstractPresenter {
 
             @Override
             public void onFailure(Throwable caught) {
-                Window.alert("Failed to retrieve account info for user : " + userId);
             }
         });
 
@@ -127,6 +128,40 @@ public class ProfilePresenter extends AbstractPresenter {
 
         provider = new EntryDataViewDataProvider(this.table, service);
         samplesDataProvider = new SamplesDataProvider(display.getSamplesTable(), service);
+
+        // check
+    }
+
+    private void checkCanEditProfile() {
+        service.getSetting("PROFILE_EDIT_ALLOWED", new AsyncCallback<String>() {
+
+            @Override
+            public void onSuccess(String result) {
+                boolean canEdit = false;
+                if ("yes".equalsIgnoreCase(result) || "true".equalsIgnoreCase(result)) {
+                    canEdit = true;
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+        });
+    }
+
+    private void checkCanChangePassword() {
+        service.getSetting("PASSWORD_CHANGE_ALLOWED", new AsyncCallback<String>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void onSuccess(String result) {
+                // TODO Auto-generated method stub
+            }
+        });
     }
 
     @Override

@@ -104,12 +104,14 @@ public abstract class HasEntryDataViewDataProvider<T extends HasEntryInfo> exten
     protected boolean sort(int rangeStart, int rangeEnd) {
 
         ColumnSortList sortList = this.dataTable.getColumnSortList();
-        final boolean sortAsc;
+        boolean sortAsc = lastSortAsc;
         final ColumnField sortField;
+        int colIndex = -1;
+        if (sortList.size() > 0) {
+            sortAsc = sortList.get(0).isAscending();
+            colIndex = this.dataTable.getColumns().indexOf(sortList.get(0).getColumn());
+        }
 
-        sortAsc = sortList.get(0).isAscending();
-
-        int colIndex = this.dataTable.getColumns().indexOf(sortList.get(0).getColumn());
         if (colIndex < 0)
             sortField = lastSortField;
         else

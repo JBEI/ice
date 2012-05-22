@@ -188,7 +188,7 @@ public class LoginPresenter extends AbstractPresenter {
         info.setLastName(details.getLastName());
         info.setInitials(details.getInitials());
         info.setInstitution(details.getInstitution());
-        String url = GWT.getHostPageBaseURL() + Page.PROFILE.getLink();
+        String url = GWT.getHostPageBaseURL() + "#" + Page.PROFILE.getLink();
 
         service.createNewAccount(info, url, new AsyncCallback<AccountInfo>() {
 
