@@ -36,6 +36,7 @@ public class LoginView extends Composite implements ILoginView {
     private FlexTable loginTable;
 
     private FlexTable inputTable;
+    private FlowPanel mainPanel;
 
     public LoginView() {
         FlexTable layout = new FlexTable();
@@ -84,8 +85,7 @@ public class LoginView extends Composite implements ILoginView {
         // register
         registerLabel = new Label("Register");
         registerLabel.setStyleName("footer_feedback_widget");
-        registerLabel.addStyleName("font-85em");
-        registerLabel.addStyleName("pad-6");
+        registerLabel.addStyleName("font-70em");
         registerLabel.addStyleName("display-inline");
         registerLabel.setVisible(false);
 
@@ -105,9 +105,9 @@ public class LoginView extends Composite implements ILoginView {
     }
 
     protected Widget createContents() {
-        FlowPanel panel = new FlowPanel();
-        panel.add(createLoginWidget());
-        return panel;
+        mainPanel = new FlowPanel();
+        mainPanel.add(createLoginWidget());
+        return mainPanel;
     }
 
     private Widget createLoginWidget() {
@@ -124,9 +124,10 @@ public class LoginView extends Composite implements ILoginView {
                 + "-webkit-box-shadow: 0px 1px 1px #999\"></div>"); // TODO : move it to styles
 
         HTMLPanel userInputPanel = new HTMLPanel(
-                "<span class=\"font-90em\">Username</span><br><span id=\"user_login_input\"></span><div id=\"user_login_error_message\"></div>");
+                "<span class=\"font-90em\">Username<span id=\"register_link\" style=\"float: right\"></span></span><br><span id=\"user_login_input\"></span><div id=\"user_login_error_message\"></div>");
         userInputPanel.add(loginInput, "user_login_input");
         userInputPanel.add(loginErrorLabel, "user_login_error_message");
+        userInputPanel.add(registerLabel, "register_link");
 
         HTMLPanel passwordInputPanel = new HTMLPanel(
                 "<span><span id=\"password_label\"></span><span id=\"forgot_password_link\" style=\"float: right\"></span></span><br><span id=\"user_password_input\"></span><div id=\"user_password_error_message\"></div>");
@@ -238,6 +239,8 @@ public class LoginView extends Composite implements ILoginView {
     }
 
     public void switchToRegisterMode() {
-        loginTable.setHTML(1, 0, "<b>REGISTRATION</b>");
+        RegistrationPanel regiPanel = new RegistrationPanel();
+        mainPanel.clear();
+        mainPanel.add(regiPanel);
     }
 }
