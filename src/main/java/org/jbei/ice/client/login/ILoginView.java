@@ -47,5 +47,11 @@ public interface ILoginView {
 
     void switchToForgotPasswordMode();
 
-    void switchToRegisterMode();
+    void switchToRegisterMode(ClickHandler submitHandler, ClickHandler cancelHandler);
+
+    RegistrationDetails getRegistrationDetails();
+
+    void switchToLoginMode();
+
+    void informOfDuplidateRegistrationEmail();
 }

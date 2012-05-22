@@ -51,6 +51,37 @@ public class AccountController {
         return account;
     }
 
+    public static String createNewAccount(String firstName, String lastName, String initials,
+            String email, String institution, String description) throws ControllerException {
+        if (email == null || email.isEmpty()) {
+            throw new ControllerException("Cannot create account with null email");
+        }
+
+        if (getByEmail(email) != null) {
+            throw new ControllerException("Account with email \"" + email + "\" already exists");
+        }
+
+        if (initials == null) {
+            initials = "";
+        }
+        if (institution == null) {
+            institution = "";
+        }
+        if (description == null) {
+            description = "";
+        }
+
+        String newPassword = Utils.generateUUID().substring(24);
+        Account account = new Account(firstName, lastName, initials, email,
+                AccountController.encryptPassword(newPassword), institution, description);
+        account.setIp("");
+        account.setIsSubscribed(1);
+        account.setCreationTime(Calendar.getInstance().getTime());
+        if (AccountController.save(account) == null)
+            throw new ControllerException("Could not save new account");
+        return newPassword;
+    }
+
     /**
      * Retrieve all account from the database, sorted by Given (First) Name.
      * 

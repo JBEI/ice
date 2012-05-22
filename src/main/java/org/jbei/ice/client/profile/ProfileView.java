@@ -6,8 +6,10 @@ import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.shared.dto.SampleInfo;
 
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
@@ -20,6 +22,7 @@ public class ProfileView extends AbstractLayout implements IProfileView {
     private Label contentHeader;
     private ProfileViewMenu menu;
     private FlexTable mainContent;
+    private HTMLPanel profileHeader;
 
     @Override
     protected Widget createContents() {
@@ -28,15 +31,28 @@ public class ProfileView extends AbstractLayout implements IProfileView {
         //        createEntriesTablePanel();
         sampleView = this.createSamplesTablePanel();
 
+        profileHeader = new HTMLPanel(
+                "<span id=\"profile_header_text\"></span><div style=\"float: right\"><span id=\"sequence_link\"></span>"
+                        + "<span style=\"color: #262626; font-size: 0.75em;\">|</span>"
+                        + " <span id=\"sequence_options\"></span></div>");
+        profileHeader.add(contentHeader, "profile_header_text");
+
         FlexTable contentTable = new FlexTable();
         contentTable.setWidth("100%");
         contentTable.setWidget(0, 0, createMenu());
         contentTable.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
+
         // TODO : middle sliver goes here
         contentTable.setWidget(0, 1, createMainContent());
         contentTable.getCellFormatter().setWidth(0, 1, "100%");
         contentTable.getFlexCellFormatter().setVerticalAlignment(0, 1, HasAlignment.ALIGN_TOP);
         return contentTable;
+    }
+
+    @Override
+    public void setHeaderText(String text, ClickHandler editHandler,
+            ClickHandler changePasswordHandler) {
+        contentHeader.setText(text);
     }
 
     protected Widget createMenu() {
@@ -49,7 +65,7 @@ public class ProfileView extends AbstractLayout implements IProfileView {
         mainContent.setWidth("100%");
         mainContent.setCellSpacing(0);
         mainContent.addStyleName("add_new_entry_main_content_wrapper");
-        mainContent.setWidget(0, 0, contentHeader);
+        mainContent.setWidget(0, 0, profileHeader);
         mainContent.getCellFormatter().setStyleName(0, 0, "add_new_entry_main_content_header");
 
         // sub content
@@ -70,11 +86,6 @@ public class ProfileView extends AbstractLayout implements IProfileView {
     @Override
     public ProfileViewMenu getMenu() {
         return this.menu;
-    }
-
-    @Override
-    public void setHeaderText(String text) {
-        contentHeader.setText(text);
     }
 
     private Widget createSamplesTablePanel() {

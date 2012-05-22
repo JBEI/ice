@@ -137,6 +137,72 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public AccountInfo retrieveAccount(String email) {
+        Account account = null;
+        try {
+            account = AccountController.getByEmail(email);
+        } catch (ControllerException e) {
+            Logger.error("Error retrieving account", e);
+        }
+
+        if (account == null)
+            return null;
+
+        AccountInfo info = new AccountInfo();
+        info.setEmail(account.getEmail());
+        info.setFirstName(account.getFirstName());
+        info.setLastName(account.getLastName());
+        return info;
+    }
+
+    @Override
+    public AccountInfo createNewAccount(AccountInfo info, String url) {
+
+        try {
+            String newPassword = AccountController.createNewAccount(info.getFirstName(),
+                info.getLastName(), info.getInitials(), info.getEmail(), info.getInstitution(),
+                info.getDescription());
+
+            if (url != null && !url.isEmpty()) {
+                // send email
+                String subject = "Account created successfully";
+
+                StringBuilder stringBuilder = new StringBuilder();
+
+                stringBuilder
+                        .append("Dear " + info.getEmail())
+                        .append(
+                            ", \n\nThank you for creating a "
+                                    + JbeirSettings.getSetting("PROJECT_NAME"))
+                        .append(" account. \nBy accessing ")
+                        .append("this site with the password provided at the bottom ")
+                        .append("you agree to the following terms:\n\n");
+
+                String terms = "Biological Parts IP Disclaimer: \n\n"
+                        + "The JBEI Registry of Biological Parts Software is licensed under a standard BSD\n"
+                        + "license. Permission or license to use the biological parts registered in\n"
+                        + "the JBEI Registry of Biological Parts is not included in the BSD license\n"
+                        + "to use the JBEI Registry Software. Berkeley Lab and JBEI make no representation\n"
+                        + "that the use of the biological parts registered in the JBEI Registry of\n"
+                        + "Biological Parts will not infringe any patent or other proprietary right.";
+
+                stringBuilder.append(terms);
+
+                stringBuilder.append("\n\nYour new password is: ").append(newPassword)
+                        .append("\nPlease go to the following link and change your password:\n\n")
+                        .append(url);
+
+                Emailer.send(info.getEmail(), subject, stringBuilder.toString());
+            }
+
+            return info;
+        } catch (ControllerException e) {
+            Logger.error("Error creating new account", e);
+            return null;
+        }
+    }
+
+    @Override
     public AccountInfo sessionValid(String sid) {
 
         try {
