@@ -143,4 +143,8 @@ public interface RegistryService extends RemoteService {
     boolean sendFeedback(String email, String msg);
 
     String getSetting(String name);
+
+    AccountInfo retrieveAccount(String email);
+
+    AccountInfo createNewAccount(AccountInfo info, String url);
 }

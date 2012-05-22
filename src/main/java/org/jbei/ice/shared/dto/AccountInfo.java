@@ -6,6 +6,7 @@ public class AccountInfo implements IsSerializable {
 
     private String sessionId;
     private String email;
+    private String initials;
     private String firstName;
     private String lastName;
     private String institution;
@@ -118,5 +119,13 @@ public class AccountInfo implements IsSerializable {
 
     public void setModerator(boolean isModerator) {
         this.isModerator = isModerator;
+    }
+
+    public String getInitials() {
+        return initials;
+    }
+
+    public void setInitials(String initials) {
+        this.initials = initials;
     }
 }

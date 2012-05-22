@@ -167,4 +167,8 @@ public interface RegistryServiceAsync {
     void sendFeedback(String email, String msg, AsyncCallback<Boolean> callback);
 
     void getSetting(String name, AsyncCallback<String> callback);
+
+    void retrieveAccount(String email, AsyncCallback<AccountInfo> callback);
+
+    void createNewAccount(AccountInfo info, String url, AsyncCallback<AccountInfo> callback);
 }

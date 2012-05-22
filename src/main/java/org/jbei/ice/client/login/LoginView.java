@@ -34,6 +34,7 @@ public class LoginView extends Composite implements ILoginView {
     private Label rememberLabel;
     private Label passwordLabel;
     private FlexTable loginTable;
+    private RegistrationPanel regiPanel;
 
     private FlexTable inputTable;
     private FlowPanel mainPanel;
@@ -124,7 +125,7 @@ public class LoginView extends Composite implements ILoginView {
                 + "-webkit-box-shadow: 0px 1px 1px #999\"></div>"); // TODO : move it to styles
 
         HTMLPanel userInputPanel = new HTMLPanel(
-                "<span class=\"font-90em\">Username<span id=\"register_link\" style=\"float: right\"></span></span><br><span id=\"user_login_input\"></span><div id=\"user_login_error_message\"></div>");
+                "<span><span class=\"font-90em\">Username</span><span id=\"register_link\" style=\"float: right\"></span></span><br><span id=\"user_login_input\"></span><div id=\"user_login_error_message\"></div>");
         userInputPanel.add(loginInput, "user_login_input");
         userInputPanel.add(loginErrorLabel, "user_login_error_message");
         userInputPanel.add(registerLabel, "register_link");
@@ -228,6 +229,7 @@ public class LoginView extends Composite implements ILoginView {
         registerLabel.setVisible(true);
     }
 
+    @Override
     public void switchToForgotPasswordMode() {
         submitButton.setText("Submit");
         remember.setVisible(false);
@@ -238,9 +240,30 @@ public class LoginView extends Composite implements ILoginView {
         loginTable.setHTML(1, 0, "<b>PASSWORD REMINDER</b>");
     }
 
-    public void switchToRegisterMode() {
-        RegistrationPanel regiPanel = new RegistrationPanel();
+    @Override
+    public void switchToRegisterMode(ClickHandler submitHandler, ClickHandler cancelHandler) {
+        regiPanel = new RegistrationPanel();
+        regiPanel.getPresenter().addCancelHandler(cancelHandler);
+        regiPanel.getPresenter().addSubmitHandler(submitHandler);
         mainPanel.clear();
         mainPanel.add(regiPanel);
+    }
+
+    @Override
+    public void informOfDuplidateRegistrationEmail() {
+        if (regiPanel == null)
+            return;
+        regiPanel.showAlreadyRegisteredEmailAlert();
+    }
+
+    @Override
+    public void switchToLoginMode() {
+        mainPanel.clear();
+        mainPanel.add(createLoginWidget());
+    }
+
+    @Override
+    public RegistrationDetails getRegistrationDetails() {
+        return regiPanel.getDetails();
     }
 }

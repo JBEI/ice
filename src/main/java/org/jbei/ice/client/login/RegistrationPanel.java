@@ -1,5 +1,7 @@
 package org.jbei.ice.client.login;
 
+import org.jbei.ice.client.login.RegistrationPanelPresenter.IRegistrationPanelView;
+
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Button;
@@ -8,21 +10,26 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-public class RegistrationPanel extends Composite {
+public class RegistrationPanel extends Composite implements IRegistrationPanelView {
 
     private FlowPanel panel = new FlowPanel();
     private Button submit;
+    private Label cancel;
     private TextBox givenName;
     private TextBox familyName;
     private TextBox initials;
     private TextBox email;
     private TextArea aboutYourself;
     private TextBox institution;
-    private HandlerRegistration registration;
+    private Label alreadyRegistered;
+    private HTMLPanel emailPanel;
+
+    private final RegistrationPanelPresenter presenter;
 
     public RegistrationPanel() {
 
@@ -30,6 +37,13 @@ public class RegistrationPanel extends Composite {
 
         panel.setStyleName("login_panel");
         submit.setStyleName("login_btn");
+
+        cancel.setStyleName("footer_feedback_widget");
+        cancel.addStyleName("font-80em");
+        cancel.addStyleName("display-inline");
+
+        alreadyRegistered.setStyleName("required");
+        alreadyRegistered.addStyleName("font-70em");
 
         FlexTable registrationTable = new FlexTable();
         registrationTable.setStyleName("login_table");
@@ -46,23 +60,62 @@ public class RegistrationPanel extends Composite {
 
         panel.add(registrationTable);
         initWidget(panel);
+        presenter = new RegistrationPanelPresenter(this);
     }
 
-    public void addSubmitHandler(ClickHandler handler) {
-        if (registration != null) {
-            registration.removeHandler();
+    public RegistrationPanelPresenter getPresenter() {
+        return this.presenter;
+    }
+
+    @Override
+    public boolean validates() {
+        boolean validates = true;
+        if (givenName.getText().isEmpty()) {
+            givenName.setStyleName("input_box_error");
+            validates = false;
+        } else {
+            givenName.setStyleName("input_box");
         }
-        registration = submit.addClickHandler(handler);
+
+        if (familyName.getText().isEmpty()) {
+            familyName.setStyleName("input_box_error");
+            validates = false;
+        } else {
+            familyName.setStyleName("input_box");
+        }
+
+        if (email.getText().isEmpty()) {
+            email.setStyleName("input_box_error");
+            validates = false;
+        } else {
+            email.setStyleName("input_box");
+        }
+
+        return validates;
+    }
+
+    @Override
+    public HandlerRegistration addSubmitHandler(ClickHandler handler) {
+        return submit.addClickHandler(handler);
+    }
+
+    @Override
+    public HandlerRegistration addCancelHandler(ClickHandler handler) {
+        return cancel.addClickHandler(handler);
     }
 
     private void initComponents() {
         submit = new Button("Submit");
+        cancel = new Label("Cancel");
         givenName = createStandardTextBox("205px");
         familyName = createStandardTextBox("205px");
         initials = createStandardTextBox("50px");
         email = createStandardTextBox("205px");
         institution = createStandardTextBox("205px");
         aboutYourself = createTextArea("250px", "100px");
+        alreadyRegistered = new Label("Aready registered");
+        emailPanel = new HTMLPanel(
+                "<span id=\"email_input_box\"></span> <span id=\"email_error_msg\"></span>");
     }
 
     private Widget createInputTable() {
@@ -103,7 +156,9 @@ public class RegistrationPanel extends Composite {
                     "<span class=\"font-80em\" style=\"white-space:nowrap\">Email <span class=\"required\">*</span></span>");
         inputTable.getFlexCellFormatter().setVerticalAlignment(3, 0, HasAlignment.ALIGN_TOP);
         inputTable.getFlexCellFormatter().setWidth(3, 0, "150px");
-        inputTable.setWidget(3, 1, email);
+
+        emailPanel.add(email, "email_input_box");
+        inputTable.setWidget(3, 1, emailPanel);
 
         // institution
         inputTable.setHTML(4, 0,
@@ -120,11 +175,13 @@ public class RegistrationPanel extends Composite {
         inputTable.setWidget(5, 1, aboutYourself);
 
         HTMLPanel buttonPanel = new HTMLPanel(
-                "<span id=\"cancel_link\"></span>&nbsp;<span id=\"submit_button\"></span>");
+                "<span id=\"submit_button\"></span> <span id=\"registration_cancel_link\"></span>");
         buttonPanel.add(submit, "submit_button");
+        buttonPanel.add(cancel, "registration_cancel_link");
 
-        inputTable.setHTML(6, 0, "&nbsp;");
-        inputTable.setWidget(6, 1, buttonPanel);
+        inputTable.getFlexCellFormatter().setColSpan(6, 0, 2);
+        inputTable.setWidget(6, 0, buttonPanel);
+        inputTable.getCellFormatter().setHorizontalAlignment(6, 0, HasAlignment.ALIGN_CENTER);
 
         return inputTable;
     }
@@ -142,5 +199,22 @@ public class RegistrationPanel extends Composite {
         area.setWidth(width);
         area.setHeight(height);
         return area;
+    }
+
+    @Override
+    public RegistrationDetails getDetails() {
+        RegistrationDetails details = new RegistrationDetails();
+        details.setAbout(this.aboutYourself.getText());
+        details.setEmail(this.email.getText());
+        details.setFirstName(this.givenName.getText());
+        details.setLastName(this.familyName.getText());
+        details.setInstitution(this.institution.getText());
+        details.setInitials(this.initials.getText());
+        return details;
+    }
+
+    public void showAlreadyRegisteredEmailAlert() {
+        email.setStyleName("input_box_error");
+        emailPanel.add(alreadyRegistered, "email_error_msg");
     }
 }
