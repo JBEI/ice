@@ -92,7 +92,7 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
         status.setStyleName("pull_down");
 
         for (int i = 0; i < this.status.getItemCount(); i += 1) {
-            if (status.getValue(i).equals(entryInfo.getStatus())) {
+            if (status.getValue(i).equalsIgnoreCase(entryInfo.getStatus())) {
                 status.setSelectedIndex(i);
                 break;
             }
