@@ -1,5 +1,6 @@
 package org.jbei.ice.client.profile;
 
+import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.collection.table.SamplesDataTable;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.table.EntryTablePager;
@@ -14,6 +15,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ProfileView extends AbstractLayout implements IProfileView {
@@ -85,6 +87,7 @@ public class ProfileView extends AbstractLayout implements IProfileView {
 
     @Override
     public void setContents(AccountInfo info) {
+
         if (info == null) {
             Label widget = new Label(
                     "Could not retrieve user account information. Please try again.");
@@ -94,6 +97,15 @@ public class ProfileView extends AbstractLayout implements IProfileView {
             mainContent.setWidget(1, 0, accountWidget);
             contentHeader.setText(info.getFirstName() + " " + info.getLastName());
         }
+    }
+
+    @Override
+    public void setEntryContent(CollectionDataTable collectionsDataTable) {
+        VerticalPanel panel = new VerticalPanel();
+        panel.setWidth("100%");
+        panel.add(collectionsDataTable);
+        panel.add(collectionsDataTable.getPager());
+        mainContent.setWidget(1, 0, panel);
     }
 
     @Override

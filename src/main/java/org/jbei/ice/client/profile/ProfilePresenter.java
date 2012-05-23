@@ -1,6 +1,7 @@
 package org.jbei.ice.client.profile;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
@@ -12,6 +13,8 @@ import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.login.RegistrationDetails;
+import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.AccountInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -20,7 +23,6 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
  * Presenter for the profile page
@@ -30,16 +32,15 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class ProfilePresenter extends AbstractPresenter {
 
     private final String sid = AppController.sessionId;
-    private final EntryDataViewDataProvider provider; // entries tab view data provider
     private final SamplesDataProvider samplesDataProvider;
 
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
     private final IProfileView display;
 
-    private CollectionDataTable table;
-    private final VerticalPanel panel;
     private AccountInfo currentInfo;
+    private EntryDataViewDataProvider entryDataProvider;
+    private final CollectionDataTable collectionsDataTable;
 
     public ProfilePresenter(final RegistryServiceAsync service, final HandlerManager eventBus,
             final IProfileView display, String userId) {
@@ -64,11 +65,11 @@ public class ProfilePresenter extends AbstractPresenter {
                     break;
 
                 case ENTRIES:
-                    //                    display.setContents(panel);
+                    retrieveUserEntries();
                     break;
 
                 case SAMPLES:
-                    display.setSampleView();
+                    retrieveUserSamples();
                     break;
                 }
             }
@@ -101,33 +102,65 @@ public class ProfilePresenter extends AbstractPresenter {
             }
         });
 
-        this.table = new CollectionDataTable(new EntryTablePager()) {
+        samplesDataProvider = new SamplesDataProvider(display.getSamplesTable(), service);
+
+        this.collectionsDataTable = new CollectionDataTable(new EntryTablePager()) {
 
             @Override
             protected EntryViewEventHandler getHandler() {
                 return new EntryViewEventHandler() {
                     @Override
                     public void onEntryView(EntryViewEvent event) {
-                        event.setNavigable(provider);
+                        event.setNavigable(entryDataProvider);
                         eventBus.fireEvent(event);
                     }
                 };
             }
         };
-        panel = new VerticalPanel();
-        panel.setWidth("100%");
-        //                    entriesTable.addStyleName("gray_border");
-        panel.add(table);
-        EntryTablePager tablePager = new EntryTablePager();
-        tablePager.setDisplay(table);
-        panel.add(tablePager);
-
-        provider = new EntryDataViewDataProvider(this.table, service);
-        samplesDataProvider = new SamplesDataProvider(display.getSamplesTable(), service);
+        this.entryDataProvider = new EntryDataViewDataProvider(collectionsDataTable, service);
 
         // check
         checkCanEditProfile();
         checkCanChangePassword();
+    }
+
+    private void retrieveUserEntries() {
+        service.retrieveUserEntries(AppController.sessionId, AppController.accountInfo.getEmail(),
+            new AsyncCallback<FolderDetails>() {
+
+                @Override
+                public void onSuccess(FolderDetails folder) {
+                    if (folder == null) {
+                        entryDataProvider.setValues(null);
+                        return;
+                    }
+
+                    collectionsDataTable.clearSelection();
+                    ArrayList<Long> entries = folder.getContents();
+                    entryDataProvider.setValues(entries);
+                    display.setEntryContent(collectionsDataTable);
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                }
+            });
+    }
+
+    private void retrieveUserSamples() {
+        service.retrieveSamplesByDepositor(AppController.sessionId, currentInfo.getEmail(),
+            ColumnField.CREATED, false, new AsyncCallback<LinkedList<Long>>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                }
+
+                @Override
+                public void onSuccess(LinkedList<Long> result) {
+                    samplesDataProvider.setValues(new ArrayList<Long>(result));
+                    display.setSampleView();
+                }
+            });
     }
 
     private void checkCanEditProfile() {

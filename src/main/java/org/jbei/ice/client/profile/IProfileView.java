@@ -1,5 +1,6 @@
 package org.jbei.ice.client.profile;
 
+import org.jbei.ice.client.collection.table.CollectionDataTable;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.client.login.RegistrationDetails;
 import org.jbei.ice.shared.dto.AccountInfo;
@@ -32,4 +33,6 @@ public interface IProfileView {
     String getUpdatedPassword();
 
     void editProfile(AccountInfo currentInfo, ClickHandler submitHandler, ClickHandler cancelHandler);
+
+    void setEntryContent(CollectionDataTable collectionsDataTable);
 }
