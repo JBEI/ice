@@ -173,4 +173,6 @@ public interface RegistryServiceAsync {
 
     void updateAccountPassword(String sid, String email, String password,
             AsyncCallback<Boolean> callback);
+
+    void handleForgotPassword(String email, String url, AsyncCallback<Boolean> callback);
 }

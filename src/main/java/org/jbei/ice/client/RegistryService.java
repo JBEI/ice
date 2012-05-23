@@ -150,4 +150,6 @@ public interface RegistryService extends RemoteService {
     AccountInfo updateAccount(String sid, String email, AccountInfo info);
 
     boolean updateAccountPassword(String sid, String email, String password);
+
+    boolean handleForgotPassword(String email, String url);
 }
