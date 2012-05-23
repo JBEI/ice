@@ -60,6 +60,7 @@ import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.lib.utils.RichTextRenderer;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.server.bulkimport.BulkImportController;
 import org.jbei.ice.shared.AutoCompleteField;
@@ -134,6 +135,77 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.error(e);
         }
         return null;
+    }
+
+    @Override
+    public boolean handleForgotPassword(String email, String url) {
+
+        Account account = null;
+
+        try {
+            account = AccountController.getByEmail(email);
+        } catch (ControllerException e) {
+            return false;
+        }
+
+        String newPassword = Utils.generateUUID().substring(24);
+
+        if (url != null && !url.isEmpty()) {
+            String subject = JbeirSettings.getSetting("PROJECT_NAME") + " Password Reminder";
+            String body = "Someone (maybe you) have requested to reset your password.\n\n";
+            body = body + "Your new password is " + newPassword + ".\n\n";
+            body = body + "Please go to the following link and change your password.\n\n";
+            body = body + url;
+            Emailer.send(account.getEmail(), subject, body);
+        }
+        return true;
+    }
+
+    @Override
+    public AccountInfo createNewAccount(AccountInfo info, String url) {
+
+        try {
+            String newPassword = AccountController.createNewAccount(info.getFirstName(),
+                info.getLastName(), info.getInitials(), info.getEmail(), info.getInstitution(),
+                info.getDescription());
+
+            if (url != null && !url.isEmpty()) {
+                // send email
+                String subject = "Account created successfully";
+
+                StringBuilder stringBuilder = new StringBuilder();
+
+                stringBuilder
+                        .append("Dear " + info.getEmail())
+                        .append(
+                            ", \n\nThank you for creating a "
+                                    + JbeirSettings.getSetting("PROJECT_NAME"))
+                        .append(" account. \nBy accessing ")
+                        .append("this site with the password provided at the bottom ")
+                        .append("you agree to the following terms:\n\n");
+
+                String terms = "Biological Parts IP Disclaimer: \n\n"
+                        + "The JBEI Registry of Biological Parts Software is licensed under a standard BSD\n"
+                        + "license. Permission or license to use the biological parts registered in\n"
+                        + "the JBEI Registry of Biological Parts is not included in the BSD license\n"
+                        + "to use the JBEI Registry Software. Berkeley Lab and JBEI make no representation\n"
+                        + "that the use of the biological parts registered in the JBEI Registry of\n"
+                        + "Biological Parts will not infringe any patent or other proprietary right.";
+
+                stringBuilder.append(terms);
+
+                stringBuilder.append("\n\nYour new password is: ").append(newPassword)
+                        .append("\nPlease go to the following link and change your password:\n\n")
+                        .append(url);
+
+                Emailer.send(info.getEmail(), subject, stringBuilder.toString());
+            }
+
+            return info;
+        } catch (ControllerException e) {
+            Logger.error("Error creating new account", e);
+            return null;
+        }
     }
 
     @Override
@@ -213,53 +285,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         } catch (ControllerException e) {
             Logger.error(e);
             return false;
-        }
-    }
-
-    @Override
-    public AccountInfo createNewAccount(AccountInfo info, String url) {
-
-        try {
-            String newPassword = AccountController.createNewAccount(info.getFirstName(),
-                info.getLastName(), info.getInitials(), info.getEmail(), info.getInstitution(),
-                info.getDescription());
-
-            if (url != null && !url.isEmpty()) {
-                // send email
-                String subject = "Account created successfully";
-
-                StringBuilder stringBuilder = new StringBuilder();
-
-                stringBuilder
-                        .append("Dear " + info.getEmail())
-                        .append(
-                            ", \n\nThank you for creating a "
-                                    + JbeirSettings.getSetting("PROJECT_NAME"))
-                        .append(" account. \nBy accessing ")
-                        .append("this site with the password provided at the bottom ")
-                        .append("you agree to the following terms:\n\n");
-
-                String terms = "Biological Parts IP Disclaimer: \n\n"
-                        + "The JBEI Registry of Biological Parts Software is licensed under a standard BSD\n"
-                        + "license. Permission or license to use the biological parts registered in\n"
-                        + "the JBEI Registry of Biological Parts is not included in the BSD license\n"
-                        + "to use the JBEI Registry Software. Berkeley Lab and JBEI make no representation\n"
-                        + "that the use of the biological parts registered in the JBEI Registry of\n"
-                        + "Biological Parts will not infringe any patent or other proprietary right.";
-
-                stringBuilder.append(terms);
-
-                stringBuilder.append("\n\nYour new password is: ").append(newPassword)
-                        .append("\nPlease go to the following link and change your password:\n\n")
-                        .append(url);
-
-                Emailer.send(info.getEmail(), subject, stringBuilder.toString());
-            }
-
-            return info;
-        } catch (ControllerException e) {
-            Logger.error("Error creating new account", e);
-            return null;
         }
     }
 

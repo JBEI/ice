@@ -4,6 +4,7 @@ import org.jbei.ice.client.common.footer.Footer;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
@@ -35,6 +36,7 @@ public class LoginView extends Composite implements ILoginView {
     private Label passwordLabel;
     private FlexTable loginTable;
     private RegistrationPanel regiPanel;
+    private HandlerRegistration submitRegistration;
 
     private FlexTable inputTable;
     private FlowPanel mainPanel;
@@ -170,7 +172,9 @@ public class LoginView extends Composite implements ILoginView {
 
     @Override
     public void setSubmitClickHandler(ClickHandler handler) {
-        submitButton.addClickHandler(handler);
+        if (submitRegistration != null)
+            submitRegistration.removeHandler();
+        submitRegistration = submitButton.addClickHandler(handler);
     }
 
     @Override

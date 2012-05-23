@@ -203,7 +203,6 @@ public class LoginPresenter extends AbstractPresenter {
                 display.switchToLoginMode();
             }
         });
-
     }
 
     // inner classes
@@ -214,7 +213,53 @@ public class LoginPresenter extends AbstractPresenter {
         public void onClick(ClickEvent event) {
             mode = Mode.FORGOT_PASSWORD;
             display.switchToForgotPasswordMode();
+            display.setSubmitClickHandler(new ClickHandler() {
+
+                @Override
+                public void onClick(ClickEvent event) {
+                    attemptToSendUserPassword();
+                }
+            });
         }
+    }
+
+    private void attemptToSendUserPassword() {
+        final String login = display.getLoginName();
+        service.retrieveAccount(login, new AsyncCallback<AccountInfo>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert("Could not retrieve user account");
+            }
+
+            @Override
+            public void onSuccess(AccountInfo result) {
+                if (result == null) {
+                    Window.alert("Account with id \"" + login + "\"");
+                    return;
+                }
+
+                generateNewPasswordAndSend(login);
+            }
+        });
+    }
+
+    private void generateNewPasswordAndSend(String email) {
+        String url = GWT.getHostPageBaseURL() + "#" + Page.PROFILE.getLink();
+        service.handleForgotPassword(email, url, new AsyncCallback<Boolean>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+                if (result) {
+                    Window.alert("A new password has been emailed to you");
+                    display.switchToLoginMode();
+                }
+            }
+        });
     }
 
     private class RegisterHandler implements ClickHandler {
