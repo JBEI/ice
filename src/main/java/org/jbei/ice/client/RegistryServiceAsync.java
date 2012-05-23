@@ -16,7 +16,6 @@ import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryInfo.EntryType;
 import org.jbei.ice.shared.dto.NewsItem;
-import org.jbei.ice.shared.dto.ProfileInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
@@ -88,10 +87,7 @@ public interface RegistryServiceAsync {
     void createSample(String sessionId, SampleStorage sampleStorage, long entryId,
             AsyncCallback<SampleStorage> callback);
 
-    /**
-     * Profile
-     */
-    void retrieveProfileInfo(String sid, String userId, AsyncCallback<ProfileInfo> callback);
+    void retrieveProfileInfo(String sid, String userId, AsyncCallback<AccountInfo> callback);
 
     /**
      * Collections
@@ -171,4 +167,10 @@ public interface RegistryServiceAsync {
     void retrieveAccount(String email, AsyncCallback<AccountInfo> callback);
 
     void createNewAccount(AccountInfo info, String url, AsyncCallback<AccountInfo> callback);
+
+    void updateAccount(String sid, String email, AccountInfo info,
+            AsyncCallback<AccountInfo> callback);
+
+    void updateAccountPassword(String sid, String email, String password,
+            AsyncCallback<Boolean> callback);
 }

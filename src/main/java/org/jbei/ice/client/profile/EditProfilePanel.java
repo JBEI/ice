@@ -2,6 +2,9 @@ package org.jbei.ice.client.profile;
 
 import org.jbei.ice.client.login.RegistrationDetails;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -28,16 +31,25 @@ public class EditProfilePanel extends Composite {
     private TextArea aboutYourself;
     private TextBox institution;
     private final RegistrationDetails details;
+    private FlexTable inputTable;
+    private HandlerRegistration submitRegistration;
+    private HandlerRegistration cancelRegistration;
 
     public EditProfilePanel(RegistrationDetails details) {
         this.details = details;
         initComponents();
         createInputTable();
+        initWidget(inputTable);
     }
 
     private void initComponents() {
+        inputTable = new FlexTable();
         submit = new Button("Submit");
         cancel = new Label("Cancel");
+        cancel.setStyleName("footer_feedback_widget");
+        cancel.addStyleName("font-75em");
+        cancel.addStyleName("display-inline");
+
         givenName = createStandardTextBox("205px");
         givenName.setText(details.getFirstName());
         familyName = createStandardTextBox("205px");
@@ -68,6 +80,32 @@ public class EditProfilePanel extends Composite {
         return area;
     }
 
+    public boolean validates() {
+        boolean validates = true;
+        if (givenName.getText().isEmpty()) {
+            givenName.setStyleName("input_box_error");
+            validates = false;
+        } else {
+            givenName.setStyleName("input_box");
+        }
+
+        if (familyName.getText().isEmpty()) {
+            familyName.setStyleName("input_box_error");
+            validates = false;
+        } else {
+            familyName.setStyleName("input_box");
+        }
+
+        if (email.getText().isEmpty()) {
+            email.setStyleName("input_box_error");
+            validates = false;
+        } else {
+            email.setStyleName("input_box");
+        }
+
+        return validates;
+    }
+
     public RegistrationDetails getDetails() {
         details.setAbout(this.aboutYourself.getText());
         details.setEmail(this.email.getText());
@@ -79,7 +117,6 @@ public class EditProfilePanel extends Composite {
     }
 
     private Widget createInputTable() {
-        FlexTable inputTable = new FlexTable();
 
         // given name
         inputTable
@@ -142,5 +179,26 @@ public class EditProfilePanel extends Composite {
         inputTable.getCellFormatter().setHorizontalAlignment(6, 0, HasAlignment.ALIGN_CENTER);
 
         return inputTable;
+    }
+
+    public void addSubmitClickHandler(final ClickHandler handler) {
+        if (submitRegistration != null)
+            submitRegistration.removeHandler();
+        submitRegistration = submit.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                if (!validates())
+                    return;
+
+                handler.onClick(event);
+            }
+        });
+    }
+
+    public void addCancelHandler(ClickHandler handler) {
+        if (cancelRegistration != null)
+            cancelRegistration.removeHandler();
+        cancelRegistration = cancel.addClickHandler(handler);
     }
 }

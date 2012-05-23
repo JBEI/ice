@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -73,7 +74,6 @@ import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryInfo.EntryType;
 import org.jbei.ice.shared.dto.NewsItem;
-import org.jbei.ice.shared.dto.ProfileInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
@@ -153,6 +153,67 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         info.setFirstName(account.getFirstName());
         info.setLastName(account.getLastName());
         return info;
+    }
+
+    @Override
+    public AccountInfo updateAccount(String sid, String email, AccountInfo info) {
+        Account account = null;
+
+        try {
+            account = retrieveAccountForSid(sid);
+            if (account == null)
+                return null;
+
+            // require a user is a moderator or updating self account
+            if (!AccountController.isModerator(account) && !email.equals(account.getEmail()))
+                return null;
+
+            account = AccountController.getByEmail(email);
+            if (account == null)
+                return null;
+
+            account.setIsSubscribed(1);
+            account.setModificationTime(Calendar.getInstance().getTime());
+
+            account.setFirstName(info.getFirstName());
+            account.setLastName(info.getLastName());
+            account.setInitials(info.getInitials());
+            account.setInstitution(info.getInstitution());
+            account.setDescription(info.getDescription());
+
+            AccountController.save(account);
+
+            return info;
+
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return null;
+        }
+    }
+
+    @Override
+    public boolean updateAccountPassword(String sid, String email, String password) {
+        Account account = null;
+
+        try {
+            account = retrieveAccountForSid(sid);
+            if (account == null)
+                return false;
+
+            account = AccountController.getByEmail(email);
+            if (account == null)
+                return false;
+
+            account.setIsSubscribed(1);
+            account.setModificationTime(Calendar.getInstance().getTime());
+            account.setPassword(AccountController.encryptPassword(password));
+            AccountController.save(account);
+            return true;
+
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return false;
+        }
     }
 
     @Override
@@ -719,6 +780,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         info.setLastName(account.getLastName());
         info.setInstitution(account.getInstitution());
         info.setDescription(account.getDescription());
+        info.setInitials(account.getInitials());
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d yyyy");
         Date memberSinceDate = account.getCreationTime();
@@ -1066,7 +1128,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ProfileInfo retrieveProfileInfo(String sid, String userId) {
+    public AccountInfo retrieveProfileInfo(String sid, String userId) {
 
         try {
             Account account = retrieveAccountForSid(sid);
@@ -1092,22 +1154,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             int entryCount = EntryManager.getEntryCountBy(accountInfo.getEmail());
             accountInfo.setUserEntryCount(entryCount);
 
-            ProfileInfo profile = new ProfileInfo();
-            profile.setAccountInfo(accountInfo);
-
-            if (entryCount > 0) {
-                // get user entries
-                ArrayList<Long> entries = EntryManager.getEntriesByOwner(userId);
-                profile.setUserEntries(entries);
-            }
-
-            if (sampleCount > 0) {
-                // get user samples
-                ArrayList<Long> samples = SampleManager.getSampleIdsByOwner(userId);
-                profile.setUserSamples(samples);
-            }
-
-            return profile;
+            return accountInfo;
 
         } catch (ManagerException e) {
             Logger.error(e);

@@ -16,7 +16,6 @@ import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryInfo.EntryType;
 import org.jbei.ice.shared.dto.NewsItem;
-import org.jbei.ice.shared.dto.ProfileInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
@@ -91,7 +90,7 @@ public interface RegistryService extends RemoteService {
     ArrayList<FolderDetails> moveToUserCollection(String sid, long source,
             ArrayList<Long> destination, ArrayList<Long> entryIds);
 
-    ProfileInfo retrieveProfileInfo(String sid, String userId);
+    AccountInfo retrieveProfileInfo(String sid, String userId);
 
     ArrayList<Long> createEntry(String sid, HashSet<EntryInfo> info);
 
@@ -147,4 +146,8 @@ public interface RegistryService extends RemoteService {
     AccountInfo retrieveAccount(String email);
 
     AccountInfo createNewAccount(AccountInfo info, String url);
+
+    AccountInfo updateAccount(String sid, String email, AccountInfo info);
+
+    boolean updateAccountPassword(String sid, String email, String password);
 }

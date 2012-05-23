@@ -1673,4 +1673,14 @@ td.datePickerMonth {
 	padding: 8px;
 }
 
+.profile_header {
+    font-size: 0.85em;
+    padding: 10px;
+    color: #444;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-style: italic;
+    display: inline;
+}
+
 

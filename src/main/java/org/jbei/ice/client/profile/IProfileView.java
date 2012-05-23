@@ -1,6 +1,8 @@
 package org.jbei.ice.client.profile;
 
 import org.jbei.ice.client.common.table.HasEntryDataTable;
+import org.jbei.ice.client.login.RegistrationDetails;
+import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -10,13 +12,24 @@ public interface IProfileView {
 
     Widget asWidget();
 
-    void setContents(Widget widget);
-
     ProfileViewMenu getMenu();
-
-    void setHeaderText(String text, ClickHandler editHandler, ClickHandler changePasswordHandler);
 
     HasEntryDataTable<SampleInfo> getSamplesTable();
 
     void setSampleView();
+
+    void addEditProfileLinkHandler(ClickHandler editProfileHandler);
+
+    void addChangePasswordLinkHandler(ClickHandler changePasswordHandler);
+
+    void setContents(AccountInfo info);
+
+    void changePasswordPanel(AccountInfo currentInfo, ClickHandler submitHandler,
+            ClickHandler cancelHandler);
+
+    RegistrationDetails getUpdatedDetails();
+
+    String getUpdatedPassword();
+
+    void editProfile(AccountInfo currentInfo, ClickHandler submitHandler, ClickHandler cancelHandler);
 }

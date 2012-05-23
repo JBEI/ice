@@ -11,17 +11,22 @@ import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
+import org.jbei.ice.client.login.RegistrationDetails;
 import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.ProfileInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * Presenter for the profile page
+ * 
+ * @author Hector Plahar
+ */
 public class ProfilePresenter extends AbstractPresenter {
 
     private final String sid = AppController.sessionId;
@@ -31,9 +36,10 @@ public class ProfilePresenter extends AbstractPresenter {
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
     private final IProfileView display;
-    private AboutWidget accountWidget;
+
     private CollectionDataTable table;
     private final VerticalPanel panel;
+    private AccountInfo currentInfo;
 
     public ProfilePresenter(final RegistryServiceAsync service, final HandlerManager eventBus,
             final IProfileView display, String userId) {
@@ -45,7 +51,6 @@ public class ProfilePresenter extends AbstractPresenter {
         this.service = service;
         this.eventBus = eventBus;
         this.display = display;
-        accountWidget = new AboutWidget();
 
         this.display.getMenu().addClickHandler(new ClickHandler() {
 
@@ -55,11 +60,13 @@ public class ProfilePresenter extends AbstractPresenter {
                 switch (selected.getType()) {
                 default:
                 case ABOUT:
-                    display.setContents(accountWidget);
+                    display.setContents(currentInfo);
                     break;
+
                 case ENTRIES:
-                    display.setContents(panel);
+                    //                    display.setContents(panel);
                     break;
+
                 case SAMPLES:
                     display.setSampleView();
                     break;
@@ -67,37 +74,26 @@ public class ProfilePresenter extends AbstractPresenter {
             }
         });
 
-        //        this.display.getMenu().setSelectionModel(selectionModel);
-        this.service.retrieveProfileInfo(sid, userId, new AsyncCallback<ProfileInfo>() {
+        this.service.retrieveProfileInfo(sid, userId, new AsyncCallback<AccountInfo>() {
 
             @Override
-            public void onSuccess(ProfileInfo profileInfo) {
-                // TODO : some accounts do not have registered accounts and so need to check for that and disable link
-                // TODO : e.g. filemaker 
+            public void onSuccess(AccountInfo profileInfo) {
 
                 if (profileInfo == null) {
-                    Label label = new Label(
-                            "Could not retrieve user account information. Please try again.");
-                    display.setContents(label);
+                    display.setContents(null);
                     return;
                 }
 
-                AccountInfo info = profileInfo.getAccountInfo();
-                display.setHeaderText(info.getFirstName() + " " + info.getLastName(), null, null);
-                accountWidget.setAccountInfo(info);
-                display.setContents(accountWidget);
+                currentInfo = profileInfo;
+                display.setContents(currentInfo);
 
                 // set menu
                 ArrayList<CellEntry> menu = new ArrayList<CellEntry>();
                 CellEntry about = new CellEntry(MenuType.ABOUT, -1);
                 menu.add(about);
-                menu.add(new CellEntry(MenuType.ENTRIES, info.getUserEntryCount()));
-                menu.add(new CellEntry(MenuType.SAMPLES, info.getUserSampleCount()));
+                menu.add(new CellEntry(MenuType.ENTRIES, currentInfo.getUserEntryCount()));
+                menu.add(new CellEntry(MenuType.SAMPLES, currentInfo.getUserSampleCount()));
                 display.getMenu().setRowData(menu);
-
-                // set data
-                provider.setValues(profileInfo.getUserEntries());
-                samplesDataProvider.setValues(profileInfo.getUserSamples());
             }
 
             @Override
@@ -130,6 +126,8 @@ public class ProfilePresenter extends AbstractPresenter {
         samplesDataProvider = new SamplesDataProvider(display.getSamplesTable(), service);
 
         // check
+        checkCanEditProfile();
+        checkCanChangePassword();
     }
 
     private void checkCanEditProfile() {
@@ -137,9 +135,8 @@ public class ProfilePresenter extends AbstractPresenter {
 
             @Override
             public void onSuccess(String result) {
-                boolean canEdit = false;
                 if ("yes".equalsIgnoreCase(result) || "true".equalsIgnoreCase(result)) {
-                    canEdit = true;
+                    display.addEditProfileLinkHandler(new EditProfileHandler());
                 }
             }
 
@@ -153,13 +150,14 @@ public class ProfilePresenter extends AbstractPresenter {
         service.getSetting("PASSWORD_CHANGE_ALLOWED", new AsyncCallback<String>() {
 
             @Override
-            public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
+            public void onSuccess(String result) {
+                if ("yes".equalsIgnoreCase(result) || "true".equalsIgnoreCase(result)) {
+                    display.addChangePasswordLinkHandler(new ChangePasswordHandler());
+                }
             }
 
             @Override
-            public void onSuccess(String result) {
-                // TODO Auto-generated method stub
+            public void onFailure(Throwable caught) {
             }
         });
     }
@@ -168,5 +166,88 @@ public class ProfilePresenter extends AbstractPresenter {
     public void go(HasWidgets container) {
         container.clear();
         container.add(this.display.asWidget());
+    }
+
+    private class EditProfileHandler implements ClickHandler {
+
+        @Override
+        public void onClick(ClickEvent event) {
+            display.editProfile(currentInfo, new SaveProfileHandler(), new ShowCurrentInfoHandler());
+        }
+    }
+
+    private class SaveProfileHandler implements ClickHandler {
+
+        @Override
+        public void onClick(ClickEvent event) {
+            RegistrationDetails details = display.getUpdatedDetails();
+            if (details == null)
+                return;
+
+            if (!details.getEmail().equals(currentInfo.getEmail())) {
+                return;
+            }
+
+            currentInfo.setDescription(details.getAbout());
+            currentInfo.setFirstName(details.getFirstName());
+            currentInfo.setLastName(details.getLastName());
+            currentInfo.setInitials(details.getInitials());
+            currentInfo.setInstitution(details.getInstitution());
+
+            service.updateAccount(AppController.sessionId, currentInfo.getEmail(), currentInfo,
+                new AsyncCallback<AccountInfo>() {
+
+                    @Override
+                    public void onSuccess(AccountInfo result) {
+                        currentInfo = result;
+                        display.setContents(currentInfo);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Window.alert("Could not connect to the server for update");
+                    }
+                });
+        }
+    }
+
+    private class ShowCurrentInfoHandler implements ClickHandler {
+        @Override
+        public void onClick(ClickEvent event) {
+            display.setContents(currentInfo);
+        }
+    }
+
+    private class ChangePasswordHandler implements ClickHandler {
+
+        @Override
+        public void onClick(ClickEvent event) {
+            display.changePasswordPanel(currentInfo, new UpdatePasswordClickHandler(),
+                new ShowCurrentInfoHandler());
+        }
+    }
+
+    private class UpdatePasswordClickHandler implements ClickHandler {
+
+        @Override
+        public void onClick(ClickEvent event) {
+            String password = display.getUpdatedPassword();
+            if (password.isEmpty())
+                return;
+
+            service.updateAccountPassword(AppController.sessionId, currentInfo.getEmail(),
+                password, new AsyncCallback<Boolean>() {
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        if (result)
+                            display.setContents(currentInfo);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                    }
+                });
+        }
     }
 }

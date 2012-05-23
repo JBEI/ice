@@ -4,6 +4,8 @@ import org.jbei.ice.client.collection.table.SamplesDataTable;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
+import org.jbei.ice.client.login.RegistrationDetails;
+import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -23,18 +25,25 @@ public class ProfileView extends AbstractLayout implements IProfileView {
     private ProfileViewMenu menu;
     private FlexTable mainContent;
     private HTMLPanel profileHeader;
+    private AboutWidget accountWidget;
+    private EditProfilePanel panel;
+    private ChangePasswordPanel changePasswordPanel;
 
     @Override
     protected Widget createContents() {
         contentHeader = new Label("");
+        contentHeader.setStyleName("profile_header");
+
+        accountWidget = new AboutWidget();
+
         mainContent = new FlexTable();
         //        createEntriesTablePanel();
         sampleView = this.createSamplesTablePanel();
 
         profileHeader = new HTMLPanel(
-                "<span id=\"profile_header_text\"></span><div style=\"float: right\"><span id=\"sequence_link\"></span>"
+                "<span id=\"profile_header_text\"></span><div style=\"float: right\"><span id=\"edit_profile_link\"></span>"
                         + "<span style=\"color: #262626; font-size: 0.75em;\">|</span>"
-                        + " <span id=\"sequence_options\"></span></div>");
+                        + " <span id=\"change_password_link\"></span></div>");
         profileHeader.add(contentHeader, "profile_header_text");
 
         FlexTable contentTable = new FlexTable();
@@ -42,17 +51,14 @@ public class ProfileView extends AbstractLayout implements IProfileView {
         contentTable.setWidget(0, 0, createMenu());
         contentTable.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
 
-        // TODO : middle sliver goes here
         contentTable.setWidget(0, 1, createMainContent());
         contentTable.getCellFormatter().setWidth(0, 1, "100%");
         contentTable.getFlexCellFormatter().setVerticalAlignment(0, 1, HasAlignment.ALIGN_TOP);
         return contentTable;
     }
 
-    @Override
-    public void setHeaderText(String text, ClickHandler editHandler,
-            ClickHandler changePasswordHandler) {
-        contentHeader.setText(text);
+    public String getUpdatedPassword() {
+        return changePasswordPanel.getPassword();
     }
 
     protected Widget createMenu() {
@@ -66,7 +72,6 @@ public class ProfileView extends AbstractLayout implements IProfileView {
         mainContent.setCellSpacing(0);
         mainContent.addStyleName("add_new_entry_main_content_wrapper");
         mainContent.setWidget(0, 0, profileHeader);
-        mainContent.getCellFormatter().setStyleName(0, 0, "add_new_entry_main_content_header");
 
         // sub content
         mainContent.setWidget(1, 0, new HTML("&nbsp;"));
@@ -79,8 +84,16 @@ public class ProfileView extends AbstractLayout implements IProfileView {
     }
 
     @Override
-    public void setContents(Widget widget) {
-        mainContent.setWidget(1, 0, widget);
+    public void setContents(AccountInfo info) {
+        if (info == null) {
+            Label widget = new Label(
+                    "Could not retrieve user account information. Please try again.");
+            mainContent.setWidget(1, 0, widget);
+        } else {
+            accountWidget.setAccountInfo(info);
+            mainContent.setWidget(1, 0, accountWidget);
+            contentHeader.setText(info.getFirstName() + " " + info.getLastName());
+        }
     }
 
     @Override
@@ -113,5 +126,56 @@ public class ProfileView extends AbstractLayout implements IProfileView {
     @Override
     public void setSampleView() {
         mainContent.setWidget(1, 0, sampleView);
+    }
+
+    @Override
+    public void addEditProfileLinkHandler(ClickHandler editProfileHandler) {
+        Label label = new Label("Edit Profile");
+        label.addClickHandler(editProfileHandler);
+        label.setStyleName("open_sequence_sub_link");
+        profileHeader.add(label, "edit_profile_link");
+    }
+
+    @Override
+    public void addChangePasswordLinkHandler(ClickHandler changePasswordHandler) {
+        Label label = new Label("Change Password");
+        label.addClickHandler(changePasswordHandler);
+        label.setStyleName("open_sequence_sub_link");
+        profileHeader.add(label, "change_password_link");
+    }
+
+    @Override
+    public void editProfile(AccountInfo currentInfo, ClickHandler submitHandler,
+            ClickHandler cancelHandler) {
+        RegistrationDetails details = new RegistrationDetails();
+        details.setAbout(currentInfo.getDescription());
+        details.setFirstName(currentInfo.getFirstName());
+        details.setLastName(currentInfo.getLastName());
+        details.setInstitution(currentInfo.getInstitution());
+        details.setInitials(currentInfo.getInitials());
+        details.setEmail(currentInfo.getEmail());
+        panel = new EditProfilePanel(details);
+        panel.addSubmitClickHandler(submitHandler);
+        panel.addCancelHandler(cancelHandler);
+
+        mainContent.setWidget(1, 0, panel);
+    }
+
+    @Override
+    public RegistrationDetails getUpdatedDetails() {
+        if (panel == null)
+            return null;
+
+        return panel.getDetails();
+    }
+
+    @Override
+    public void changePasswordPanel(AccountInfo currentInfo, ClickHandler submitHandler,
+            ClickHandler cancelHandler) {
+        changePasswordPanel = new ChangePasswordPanel(currentInfo.getEmail());
+        changePasswordPanel.addSubmitClickHandler(submitHandler);
+        changePasswordPanel.addCancelHandler(cancelHandler);
+
+        mainContent.setWidget(1, 0, changePasswordPanel);
     }
 }
