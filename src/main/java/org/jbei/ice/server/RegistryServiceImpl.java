@@ -341,12 +341,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public LinkedList<EntryInfo> retrieveEntryData(String sid, ColumnField field, boolean asc,
             LinkedList<Long> entryIds) {
 
-        Logger.info("Retrieving entry data for " + entryIds.size() + " entries");
-
         try {
             Account account = this.retrieveAccountForSid(sid);
             if (account == null)
                 return null;
+
+            Logger.info(account.getEmail() + ": retrieving entry data for " + entryIds.size()
+                    + " entries");
 
             LinkedList<EntryInfo> results = new LinkedList<EntryInfo>();
             List<Entry> entries = null;
@@ -407,8 +408,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            Logger.info("Sorting entry list of size " + ids.size() + " by " + field.getName()
-                    + (asc ? " ASC" : " DESC"));
+            Logger.info(account.getEmail() + ": sorting entry list of size " + ids.size() + " by "
+                    + field.getName() + (asc ? " ASC" : " DESC"));
 
             return EntryManager.sortList(ids, field, asc);
         } catch (ManagerException me) {
@@ -429,6 +430,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
+            Logger.info(account.getEmail() + ": retrieving user collections for user " + userId);
             Account userAccount = AccountController.getByEmail(userId);
 
             // get user folder
@@ -463,6 +465,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
+            Logger.info(account.getEmail() + ": retrieving  collections");
             Account system = AccountController.getSystemAccount();
             List<Folder> folders = FolderManager.getFoldersByOwner(system);
 
@@ -507,7 +510,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            Logger.info(account.getEmail() + " retrieving entries for folder " + folderId);
+            Logger.info(account.getEmail() + ": retrieving entries for folder " + folderId);
             Folder folder = FolderManager.get(folderId);
             if (folder == null)
                 return null;
@@ -545,7 +548,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            Logger.info(account.getEmail() + " deleting folder " + folderId);
+            Logger.info(account.getEmail() + ": deleting folder " + folderId);
             Folder folder = FolderManager.get(folderId);
             if (folder == null)
                 return null;
@@ -595,7 +598,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            Logger.info(account.getEmail() + " retrieving user entries");
+            Logger.info(account.getEmail() + ": retrieving user entries for " + userId);
             EntryController entryController = new EntryController(account);
             FolderDetails details = new FolderDetails(0, "My Entries", true);
             ArrayList<Long> entries = entryController.getEntryIdsByOwner(userId);
@@ -617,7 +620,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            Logger.info(account.getEmail() + " retrieving all visible entry ids");
+            Logger.info(account.getEmail() + ": retrieving all visible entry ids");
             EntryController entryController = new EntryController(account);
 
             ArrayList<Long> entries;
@@ -693,6 +696,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             if (!PermissionManager.hasReadPermission(entry, account))
                 return null;
+
+            Logger.info(account.getEmail() + ": entry details for entry " + id);
 
             ArrayList<Attachment> attachments = AttachmentManager.getByEntry(entry);
             ArrayList<Sample> samples = SampleManager.getSamplesByEntry(entry);
@@ -1035,8 +1040,20 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public FolderDetails retrieveFolderDetails(String sid, long folderId) {
+        Account account = null;
+
         try {
+            account = this.retrieveAccountForSid(sid);
+            if (account == null)
+                return null;
+
             Folder folder = FolderManager.get(folderId);
+            if (folder == null)
+                return null;
+
+            Logger.info(account.getEmail() + ": retrieving folder details for folder "
+                    + folder.getName());
+
             long id = folder.getId();
             boolean isSystemFolder = folder.getOwnerEmail().equals(
                 AccountManager.getSystemAccount().getEmail());
@@ -1047,9 +1064,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             return details;
 
         } catch (ManagerException e) {
-            Logger.error(e.getMessage());
-            return null;
+            Logger.error(e);
+        } catch (ControllerException e) {
+            Logger.error(e);
         }
+
+        return null;
     }
 
     @Override
@@ -1057,6 +1077,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             ArrayList<Long> contents) {
         try {
             Account account = this.retrieveAccountForSid(sid);
+            if (account == null)
+                return null;
+
+            Logger.info(account.getEmail() + ": creating new folder with name " + name);
+
             Folder folder = new Folder(name);
             folder.setOwnerEmail(account.getEmail());
             folder.setDescription(description);
@@ -1088,6 +1113,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             ArrayList<Long> destination, ArrayList<Long> entryIds) {
 
         try {
+            Account account = this.retrieveAccountForSid(sid);
+            if (account == null)
+                return null;
+
+            Logger.info(account.getEmail() + ": moving entries to user collection.");
+
             ArrayList<Entry> entrys = new ArrayList<Entry>(EntryManager.getEntriesByIdSet(entryIds));
             if (FolderManager.removeFolderContents(source, entryIds) != null) {
                 ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
@@ -1112,13 +1143,22 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             }
         } catch (ManagerException e) {
             Logger.error(e);
+        } catch (ControllerException e) {
+            Logger.error(e);
         }
+
         return null;
     }
 
     @Override
     public FolderDetails removeFromUserCollection(String sid, long source, ArrayList<Long> entryIds) {
         try {
+            Account account = this.retrieveAccountForSid(sid);
+            if (account == null)
+                return null;
+
+            Logger.info(account.getEmail() + ": removing from user collection.");
+
             Folder folder = FolderManager.removeFolderContents(source, entryIds);
             if (folder == null)
                 return null;
@@ -1129,8 +1169,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             return details;
         } catch (ManagerException e) {
             Logger.error(e);
-            return null;
+        } catch (ControllerException e) {
+            Logger.error(e);
         }
+
+        return null;
     }
 
     @Override
@@ -1140,6 +1183,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
 
         try {
+            Account account = this.retrieveAccountForSid(sid);
+            if (account == null)
+                return null;
+
+            Logger.info(account.getEmail() + ": adding entries to collection.");
+
             ArrayList<Entry> entrys = new ArrayList<Entry>(EntryManager.getEntriesByIdSet(entryIds));
             for (long folderId : destination) {
                 Folder folder = FolderManager.addFolderContents(folderId, entrys);
@@ -1154,8 +1203,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             return results;
         } catch (ManagerException e) {
             Logger.error(e);
-            return null;
+        } catch (ControllerException e) {
+            Logger.error(e);
         }
+        return null;
     }
 
     @Override
@@ -1169,6 +1220,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             account = AccountManager.getByEmail(userId);
             if (account == null)
                 return null;
+
+            Logger.info(account.getEmail() + ": retrieving profile info for " + userId);
 
             AccountInfo accountInfo = accountToInfo(account);
 
@@ -1196,6 +1249,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
     }
 
+    // TODO : this can probably be merged with the above
     @Override
     public AccountInfo retrieveAccountInfo(String sid, String userId) {
         try {
@@ -1494,7 +1548,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public ArrayList<Long> createEntry(String sid, HashSet<EntryInfo> infoSet) {
 
-        Logger.info("Creating \"" + infoSet.size() + "\" entries");
         ArrayList<Long> result = new ArrayList<Long>();
         Account account = null;
 
@@ -1507,6 +1560,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             return result;
         }
 
+        Logger.info(account.getEmail() + ": creating \"" + infoSet.size() + "\" entries");
         EntryController controller = new EntryController(account);
         SampleController sampleController = new SampleController(account);
         StorageController storageController = new StorageController(account);
@@ -1596,7 +1650,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public SampleStorage createSample(String sessionId, SampleStorage sampleStorage, long entryId) {
 
-        Logger.info("Creating sample for entry with id " + entryId);
         Account account = null;
 
         try {
@@ -1607,6 +1660,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.error(ce);
             return null;
         }
+
+        Logger.info(account.getEmail() + ": creating sample for entry with id " + entryId);
 
         EntryController controller = new EntryController(account);
         SampleController sampleController = new SampleController(account);
@@ -1696,6 +1751,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return false;
 
+            Logger.info(account.getEmail() + ": updating entry " + info.getId());
             EntryController controller = new EntryController(account);
             Entry existing = controller.getByRecordId(info.getRecordId());
 
@@ -1929,7 +1985,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (folder == null)
                 return null;
 
-            Logger.info("Updating folder " + folder.getName() + " with id " + folder.getId());
+            Logger.info(account.getEmail() + ": updating folder " + folder.getName() + " with id "
+                    + folder.getId());
             folder.setName(update.getName());
             folder.setDescription(update.getDescription());
             Folder updated = FolderManager.update(folder);
@@ -1953,7 +2010,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return false;
 
-            Logger.info("Updating permissions for entry with id \"" + entryId + "\"");
+            Logger.info(account.getEmail() + ": updating permissions for entry with id \""
+                    + entryId + "\"");
             EntryController entryController = new EntryController(account);
             PermissionsController permissionController = new PermissionsController(account);
             Entry entry = entryController.get(entryId);
@@ -1982,7 +2040,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return false;
 
-            Logger.info("Removing permissions for entry with id \"" + entryId + "\"");
+            Logger.info(account.getEmail() + ": removing permissions for entry with id \""
+                    + entryId + "\"");
             EntryController entryController = new EntryController(account);
             Entry entry = entryController.get(entryId);
             if (entry == null)
@@ -2013,6 +2072,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return false;
 
+            Logger.info(account.getEmail() + ": saving sequence for entry " + entryId);
             EntryController entryController = new EntryController(account);
             entry = entryController.get(entryId);
             if (entry == null) {
