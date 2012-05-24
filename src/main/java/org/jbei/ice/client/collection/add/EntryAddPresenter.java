@@ -24,6 +24,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
 
@@ -132,6 +133,7 @@ public class EntryAddPresenter {
         if (entrySet == null || entrySet.isEmpty())
             return;
 
+        display.setSubmitEnable(false);
         Set<Long> list = new HashSet<Long>();
         list.add(Long.valueOf(0));
         presenter.getView().setBusyIndicator(list);
@@ -147,6 +149,8 @@ public class EntryAddPresenter {
                     ArrayList<MenuItem> items = new ArrayList<MenuItem>();
                     items.add(item);
                     presenter.getView().updateMenuItemCounts(items);
+                    Window.scrollTo(0, 0);
+                    display.setSubmitEnable(true);
                 }
 
                 @Override
@@ -173,6 +177,7 @@ public class EntryAddPresenter {
                         items.add(item);
                         presenter.getView().updateMenuItemCounts(items);
                     }
+                    display.setSubmitEnable(true);
                 }
             });
     }

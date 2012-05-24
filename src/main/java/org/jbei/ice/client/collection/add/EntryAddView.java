@@ -59,4 +59,8 @@ public class EntryAddView extends Composite {
     public EntryCreateWidget getCurrentForm() {
         return this.currentForm;
     }
+
+    public void setSubmitEnable(boolean b) {
+        this.currentForm.getEntrySubmitForm().getSubmit().setEnabled(b);
+    }
 }
