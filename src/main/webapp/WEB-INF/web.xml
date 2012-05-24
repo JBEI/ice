@@ -42,19 +42,6 @@
 		<url-pattern>/messagebroker/*</url-pattern>
 	</servlet-mapping>
 	
-	<!-- re-writer servlet for specific url mapping 
-	<servlet>
-                <servlet-name>rewriter</servlet-name>
-                <servlet-class>org.jbei.ice.server.URLRewriter</servlet-class>
-        </servlet> 
-        
-	<servlet-mapping>
-	   <servlet-name>rewriter</servlet-name>
-	   <url-pattern>/entry/view</url-pattern>
-	</servlet-mapping>
-	-->
-
-
 	<!-- Apache CXF WebServices -->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
