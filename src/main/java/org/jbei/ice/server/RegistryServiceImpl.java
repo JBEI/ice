@@ -149,6 +149,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
 
         String newPassword = Utils.generateUUID().substring(24);
+        account.setPassword(AccountController.encryptPassword(newPassword));
+        try {
+            AccountController.save(account);
+        } catch (ControllerException e) {
+            return false;
+        }
 
         if (url != null && !url.isEmpty()) {
             String subject = JbeirSettings.getSetting("PROJECT_NAME") + " Password Reminder";
