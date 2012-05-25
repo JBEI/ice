@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.admin.usermanagement.AdminPanelPresenter;
+import org.jbei.ice.client.admin.reports.ReportPresenter;
 import org.jbei.ice.client.admin.usermanagement.UserPresenter;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.util.DateUtilities;
@@ -30,6 +30,8 @@ public class AdminPresenter extends AbstractPresenter {
     private final AdminView view;
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
+    private UserPresenter userPresenter;
+    private ReportPresenter reportPresenter;
 
     public AdminPresenter(RegistryServiceAsync service, HandlerManager eventBus, AdminView view) {
         this.service = service;
@@ -39,6 +41,9 @@ public class AdminPresenter extends AbstractPresenter {
         retrieveSavedDrafts();
         setMenuSelectionModel();
         addSelectionChangeHandler();
+
+        // initialize presenters
+        reportPresenter = new ReportPresenter(service);
     }
 
     /**
@@ -51,12 +56,16 @@ public class AdminPresenter extends AbstractPresenter {
             @Override
             public void onSelection(SelectionEvent<Integer> event) {
 
-                AdminPanelPresenter presenter;
                 switch (event.getSelectedItem()) {
 
                 case 1:
-                    presenter = new UserPresenter(service);
-                    view.setTabPresenter(1, presenter);
+                    if (userPresenter == null)
+                        userPresenter = new UserPresenter(service);
+                    view.setTabPresenter(1, userPresenter);
+                    break;
+
+                case 2:
+                    view.setTabPresenter(2, reportPresenter);
                     break;
 
                 default:
@@ -64,7 +73,6 @@ public class AdminPresenter extends AbstractPresenter {
                 }
             }
         });
-
     }
 
     private void retrieveSavedDrafts() {

@@ -177,4 +177,6 @@ public interface RegistryServiceAsync {
     void handleForgotPassword(String email, String url, AsyncCallback<Boolean> callback);
 
     void retrieveAllUserAccounts(String sid, AsyncCallback<ArrayList<AccountInfo>> callback);
+
+    void retrieveEntryCounts(String sessionId, AsyncCallback<HashMap<EntryType, Long>> callback);
 }

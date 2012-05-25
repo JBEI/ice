@@ -129,7 +129,7 @@ public class SequenceUploadServlet extends UploadAction {
             return "Error saving sequence";
         } catch (PermissionException e) {
             Logger.error(e);
-            return "User does not have permissions save sequence";
+            return "User does not have permissions to save sequence";
         }
 
         return "";

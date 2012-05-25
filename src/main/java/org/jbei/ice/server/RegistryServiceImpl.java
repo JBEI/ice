@@ -2182,4 +2182,37 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         return true;
     }
+
+    @Override
+    public HashMap<EntryType, Long> retrieveEntryCounts(String sessionId) {
+        // admin only 
+        Account account = null;
+        try {
+            account = retrieveAccountForSid(sessionId);
+            if (account == null)
+                return null;
+
+            if (!AccountController.isModerator(account)) {
+                Logger.warn(account.getEmail()
+                        + ": attempting to retrieve admin only feature (entry Counts)");
+                return null;
+            }
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+        }
+
+        Logger.info(account.getEmail() + ": retrieving entry type counts");
+        HashMap<EntryType, Long> counts = new HashMap<EntryType, Long>();
+        for (EntryType type : EntryType.values()) {
+            long count;
+            try {
+                count = EntryManager.retrieveEntryByType(type.getName());
+                counts.put(type, count);
+            } catch (ManagerException e) {
+                Logger.error("Could not retrieve counts for " + type.getName(), e);
+            }
+        }
+
+        return counts;
+    }
 }

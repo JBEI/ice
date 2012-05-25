@@ -154,4 +154,6 @@ public interface RegistryService extends RemoteService {
     boolean handleForgotPassword(String email, String url);
 
     ArrayList<AccountInfo> retrieveAllUserAccounts(String sid);
+
+    HashMap<EntryType, Long> retrieveEntryCounts(String sessionId);
 }

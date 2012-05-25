@@ -17,6 +17,7 @@ import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.Account;
@@ -66,6 +67,20 @@ public class EntryManager {
         }
 
         return result;
+    }
+
+    public static long retrieveEntryByType(String type) throws ManagerException {
+        Session session = DAO.newSession();
+        try {
+            Criteria criteria = session.createCriteria(Entry.class.getName()).add(
+                Restrictions.eq("recordType", type));
+            Integer result = (Integer) criteria.setProjection(Projections.rowCount())
+                    .uniqueResult();
+            return result.longValue();
+        } finally {
+            if (session.isOpen())
+                session.close();
+        }
     }
 
     /**

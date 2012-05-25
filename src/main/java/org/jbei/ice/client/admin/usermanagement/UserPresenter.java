@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.admin.AdminPanel;
+import org.jbei.ice.client.admin.AdminPanelPresenter;
 import org.jbei.ice.shared.dto.AccountInfo;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -41,6 +42,8 @@ public class UserPresenter implements AdminPanelPresenter {
 
     @Override
     public void go(AdminPanel container) {
+        if (dataProvider.getDataDisplays().contains(container.getDisplay()))
+            return;
         dataProvider.addDataDisplay(container.getDisplay());
     }
 }
