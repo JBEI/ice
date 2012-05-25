@@ -6,7 +6,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Widget for display flash objects. TODO : currently sequence vector editor
+ * Widget for display flash objects.
  * 
  * @author Hector Plahar
  * 

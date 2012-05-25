@@ -42,6 +42,8 @@ public class PermissionsPresenter {
         void removeWriteItem(PermissionItem item);
 
         void resetPermissionDisplay();
+
+        void setWidgetVisibility(boolean visible);
     }
 
     private final IPermissionsView view;
@@ -55,6 +57,7 @@ public class PermissionsPresenter {
         this.view.setWriteAddClickHandler(new WriteAddHandler());
         readList = new ArrayList<PermissionInfo>();
         writeList = new ArrayList<PermissionInfo>();
+        this.view.setWidgetVisibility(false);
     }
 
     public void onErrRetrievingExistingPermissions() {
@@ -174,12 +177,17 @@ public class PermissionsPresenter {
         }
     }
 
+    public void setVisible(boolean visible) {
+        this.view.setWidgetVisibility(visible);
+    }
+
     public boolean isCanEdit() {
         return canEdit;
     }
 
     public void setCanEdit(boolean canEdit) {
         this.canEdit = canEdit;
+        this.view.setWidgetVisibility(canEdit);
     }
 
     private class DeletePermissionCallback extends Callback<PermissionInfo> {

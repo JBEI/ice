@@ -187,6 +187,11 @@ public class PermissionsWidget extends Composite implements IPermissionsView {
     }
 
     @Override
+    public void setWidgetVisibility(boolean visible) {
+        this.setVisible(visible);
+    }
+
+    @Override
     public void addReadItem(PermissionItem item, ClickHandler deleteHandler) {
         final TreeNode node = new TreeNode(item, deleteHandler);
         if (deleteHandler != null) {
