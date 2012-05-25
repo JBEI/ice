@@ -152,4 +152,6 @@ public interface RegistryService extends RemoteService {
     boolean updateAccountPassword(String sid, String email, String password);
 
     boolean handleForgotPassword(String email, String url);
+
+    ArrayList<AccountInfo> retrieveAllUserAccounts(String sid);
 }

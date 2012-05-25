@@ -138,6 +138,56 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    // Admin
+    public ArrayList<AccountInfo> retrieveAllUserAccounts(String sid) {
+
+        try {
+            Account account = retrieveAccountForSid(sid);
+            if (account == null)
+                return null;
+
+            boolean isModerator = AccountController.isModerator(account);
+            if (!isModerator) {
+                Logger.warn(account.getEmail()
+                        + " attempting to retrieve all user accounts without moderation privileges");
+                return null;
+            }
+
+            Logger.info(account.getEmail() + ": retrieving all user accounts");
+
+            // retrieve all user accounts
+            Set<Account> accounts = AccountController.getAllByFirstName();
+            if (accounts == null)
+                return null;
+
+            ArrayList<AccountInfo> infos = new ArrayList<AccountInfo>();
+            for (Account userAccount : accounts) {
+                AccountInfo info = new AccountInfo();
+                int count;
+                try {
+                    count = EntryManager.getEntryCountBy(userAccount.getEmail());
+                    info.setUserEntryCount(count);
+                } catch (ManagerException e) {
+                    Logger.error("Error retrieving entry count for user " + userAccount.getEmail());
+                    info.setUserEntryCount(-1);
+                }
+
+                info.setEmail(userAccount.getEmail());
+                info.setModerator(AccountController.isModerator(userAccount));
+                info.setFirstName(userAccount.getFirstName());
+                info.setLastName(userAccount.getLastName());
+                infos.add(info);
+            }
+
+            return infos;
+
+        } catch (ControllerException e) {
+            Logger.error(e);
+        }
+        return null;
+    }
+
+    @Override
     public boolean handleForgotPassword(String email, String url) {
 
         Account account = null;
@@ -694,10 +744,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (entry == null)
                 return null;
 
-            if (!PermissionManager.hasReadPermission(entry, account))
+            if (!PermissionManager.hasReadPermission(entry, account)) {
+                Logger.info(account.getEmail() + ": attempting to view entry details for entry "
+                        + id + " but does not have read permission");
                 return null;
+            }
 
-            Logger.info(account.getEmail() + ": entry details for entry " + id);
+            Logger.info(account.getEmail() + ": retrieving entry details for " + id);
 
             ArrayList<Attachment> attachments = AttachmentManager.getByEntry(entry);
             ArrayList<Sample> samples = SampleManager.getSamplesByEntry(entry);

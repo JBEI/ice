@@ -5,10 +5,14 @@ import java.util.ArrayList;
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.admin.usermanagement.AdminPanelPresenter;
+import org.jbei.ice.client.admin.usermanagement.UserPresenter;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -34,6 +38,33 @@ public class AdminPresenter extends AbstractPresenter {
 
         retrieveSavedDrafts();
         setMenuSelectionModel();
+        addSelectionChangeHandler();
+    }
+
+    /**
+     * Adds a tab selection change handler to the view
+     */
+    private void addSelectionChangeHandler() {
+
+        this.view.addLayoutHandler(new SelectionHandler<Integer>() {
+
+            @Override
+            public void onSelection(SelectionEvent<Integer> event) {
+
+                AdminPanelPresenter presenter;
+                switch (event.getSelectedItem()) {
+
+                case 1:
+                    presenter = new UserPresenter(service);
+                    view.setTabPresenter(1, presenter);
+                    break;
+
+                default:
+                    return;
+                }
+            }
+        });
+
     }
 
     private void retrieveSavedDrafts() {

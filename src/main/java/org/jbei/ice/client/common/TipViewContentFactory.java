@@ -93,6 +93,8 @@ public class TipViewContentFactory {
     }
 
     private static void setHeader(FlexTable layout, EntryInfo entry) {
+        if (entry == null)
+            return;
         boolean hasSample = entry.isHasSample();
         boolean hasAttachment = entry.isHasAttachment();
         boolean hasSequence = entry.isHasSequence();

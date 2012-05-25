@@ -263,9 +263,10 @@ public class EntryManager {
         try {
             everybodyGroup = GroupManager.getEverybodyGroup();
             session = DAO.newSession();
-            String queryString = "select id from ReadGroup readGroup where readGroup.group = :group";
-            Query query = session.createQuery(queryString);
-            query.setParameter("group", everybodyGroup);
+            String queryString = "select entry_id from permission_read_groups where group_id = "
+                    + everybodyGroup.getId();
+            Query query = session.createSQLQuery(queryString);
+            //            query.setParameter("group", everybodyGroup);
             List results = query.list();
             visibleEntries.addAll(((ArrayList<Long>) results));
 
@@ -273,9 +274,10 @@ public class EntryManager {
                 return visibleEntries;
 
             // get all visible entries
-            queryString = "select id from ReadUser readUser where readUser.account = :account";
-            query = session.createQuery(queryString);
-            query.setParameter("account", account);
+            queryString = "select entry_id from permission_read_users where account_id = "
+                    + account.getId();
+            query = session.createSQLQuery(queryString);
+            //            query.setParameter("account", account);
             List accountResults = query.list();
             visibleEntries.addAll(((ArrayList<Long>) accountResults));
 

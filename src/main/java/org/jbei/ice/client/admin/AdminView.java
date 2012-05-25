@@ -3,6 +3,8 @@ package org.jbei.ice.client.admin;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.admin.usermanagement.AdminPanelPresenter;
+import org.jbei.ice.client.admin.usermanagement.EditUserPanel;
 import org.jbei.ice.client.collection.menu.CollectionMenu;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.common.AbstractLayout;
@@ -10,6 +12,7 @@ import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasAlignment;
@@ -35,20 +38,28 @@ public class AdminView extends AbstractLayout {
         contentTable.setHTML(0, 0, "&nbsp;");
         contentTable.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
 
-        // TODO : middle sliver goes here
         contentTable.setWidget(0, 1, createMainContent());
         contentTable.getFlexCellFormatter().setVerticalAlignment(0, 1, HasAlignment.ALIGN_TOP);
 
-        panel.add(new HTML("contents"), "Home");
         panel.add(contentTable, "Verify Bulk Import");
         panel.setHeight("100%");
         panel.getElement().getStyle().setMarginBottom(10.0, Unit.PX);
 
+        // user management
+        EditUserPanel editUser = new EditUserPanel();
+        panel.add(editUser, editUser.getTitle());
+    }
+
+    public void addLayoutHandler(SelectionHandler<Integer> handler) {
+        panel.addSelectionHandler(handler);
+    }
+
+    public void setTabPresenter(int index, AdminPanelPresenter presenter) {
+        presenter.go((AdminPanel) panel.getWidget(index));
     }
 
     @Override
     protected Widget createContents() {
-
         return panel;
     }
 

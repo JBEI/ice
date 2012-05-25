@@ -175,4 +175,6 @@ public interface RegistryServiceAsync {
             AsyncCallback<Boolean> callback);
 
     void handleForgotPassword(String email, String url, AsyncCallback<Boolean> callback);
+
+    void retrieveAllUserAccounts(String sid, AsyncCallback<ArrayList<AccountInfo>> callback);
 }
