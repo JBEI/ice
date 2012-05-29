@@ -66,7 +66,7 @@ public class EntrySampleTable extends Composite {
     private void addLabelCol(int row, SampleInfo sampleInfo) {
         SafeHtmlBuilder sb = new SafeHtmlBuilder();
         sb.appendHtmlConstant("<span class=\"font-bold\">");
-        sb.appendEscaped(sampleInfo.getLabel());
+        sb.appendEscaped(sampleInfo.getLabel() == null ? "" : sampleInfo.getLabel());
         sb.appendHtmlConstant("</span><br><span style=\"color: #999\" class=\"font-85em\">");
         sb.appendEscaped(sampleInfo.getNotes() == null ? "" : sampleInfo.getNotes());
         sb.appendHtmlConstant("</span>");
