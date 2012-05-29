@@ -3,6 +3,7 @@ package org.jbei.ice.client.entry.view.detail;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter.ISequenceView;
+import org.jbei.ice.client.entry.view.view.DeleteSequenceHandler;
 import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.core.client.GWT;
@@ -28,6 +29,7 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
     private final FlexTable layout;
     private HTMLPanel headerPanel;
     private final SequenceViewPanelPresenter presenter;
+    private DeleteSequenceHandler deleteHandler;
 
     public SequenceViewPanel(EntryInfo info) {
         this.info = info;
@@ -53,10 +55,16 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
         this.presenter = new SequenceViewPanelPresenter(this);
     }
 
+    public void setDeleteHandler(DeleteSequenceHandler handler) {
+        this.deleteHandler = handler;
+        updateSequenceHeaders();
+    }
+
     public EntryInfo getInfo() {
         return this.info;
     }
 
+    @Override
     public String getSequence() {
         return sequenceUpload.getPastedSequence();
     }
@@ -78,15 +86,17 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
             layout.getFlexCellFormatter().setHeight(2, 0, "600px");
         } else {
             layout.setHTML(2, 0, "<span class=\"font-80em\">No sequence provided.</span>");
+            layout.getFlexCellFormatter().setHeight(2, 0, "20px");
         }
     }
 
     private Widget createSequenceHeader() {
-        headerPanel = new HTMLPanel("<span style=\"color: #233559; "
-                + "font-weight: bold; font-style: italic; font-size: 0.80em;\">"
-                + "SEQUENCE</span><div style=\"float: right\"><span id=\"sequence_link\"></span>"
-                + "<span style=\"color: #262626; font-size: 0.75em;\">|</span>"
-                + " <span id=\"sequence_options\"></span></div>");
+        headerPanel = new HTMLPanel(
+                "<span style=\"color: #233559; "
+                        + "font-weight: bold; font-style: italic; font-size: 0.80em;\">"
+                        + "SEQUENCE</span><div style=\"float: right\"><span id=\"delete_sequence_link\"></span><span id=\"sequence_link\"></span>"
+                        + "<span style=\"color: #262626; font-size: 0.75em;\">|</span>"
+                        + " <span id=\"sequence_options\"></span></div>");
 
         headerPanel.setStyleName("entry_sequence_sub_header");
         updateSequenceHeaders();
@@ -104,8 +114,8 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
             label.setStyleName("open_sequence_sub_link");
             headerPanel.add(label, "sequence_link");
             headerPanel.add(sequenceDownload.asWidget(), "sequence_options");
-
-            // TODO : delete
+            if (deleteHandler != null)
+                showSequenceDeleteLink(deleteHandler);
         } else {
             Label label = new Label("Create New");
             label.addClickHandler(new SequenceHeaderHandler());
@@ -128,6 +138,15 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
     @Override
     public void hideDialog() {
         sequenceUpload.hidePasteDialog();
+    }
+
+    @Override
+    public void showSequenceDeleteLink(DeleteSequenceHandler deleteHandler) {
+        // owners and admins are the only ones that can edit
+        if (presenter != null && presenter.isCanEdit()) {
+            DeleteSequenceData delete = new DeleteSequenceData(presenter, deleteHandler);
+            headerPanel.add(delete.getLabelWidget(), "delete_sequence_link");
+        }
     }
 
     private class SequenceHeaderHandler implements ClickHandler {

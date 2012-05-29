@@ -344,8 +344,10 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public SequenceViewPanelPresenter showEntryDetailView(EntryInfo info, boolean showEdit) {
+    public SequenceViewPanelPresenter showEntryDetailView(EntryInfo info, boolean showEdit,
+            DeleteSequenceHandler deleteHandler) {
         EntryDetailView<? extends EntryInfo> detailView = ViewFactory.createDetailView(info);
+        detailView.getSequencePanel().setDeleteHandler(deleteHandler);
         editGeneralButton.setVisible(showEdit);
         mainContent.setWidget(0, 0, generalHeaderPanel);
         mainContent.getCellFormatter().setHeight(0, 0, "30px");
@@ -353,7 +355,7 @@ public class EntryView extends Composite implements IEntryView {
         SequenceViewPanel sequencePanel = detailView.getSequencePanel();
 
         this.permissions.addReadWriteLinks(showEdit);
-
+        sequencePanel.getPresenter().setIsCanEdit(showEdit, deleteHandler);
         return sequencePanel.getPresenter();
     }
 

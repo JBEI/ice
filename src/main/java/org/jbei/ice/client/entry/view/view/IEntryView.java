@@ -22,7 +22,8 @@ public interface IEntryView {
 
     void showSequenceView(EntryInfo info, boolean showFlash);
 
-    SequenceViewPanelPresenter showEntryDetailView(EntryInfo info, boolean showEdit);
+    SequenceViewPanelPresenter showEntryDetailView(EntryInfo info, boolean showEdit,
+            DeleteSequenceHandler deleteHandler);
 
     IEntryFormUpdateSubmit showUpdateForm(EntryInfo info);
 

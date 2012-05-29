@@ -179,4 +179,6 @@ public interface RegistryServiceAsync {
     void retrieveAllUserAccounts(String sid, AsyncCallback<ArrayList<AccountInfo>> callback);
 
     void retrieveEntryCounts(String sessionId, AsyncCallback<HashMap<EntryType, Long>> callback);
+
+    void removeSequence(String sid, long entryId, AsyncCallback<Boolean> callback);
 }

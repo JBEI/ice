@@ -11,6 +11,7 @@ import org.jbei.ice.client.common.IHasNavigableData;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
 import org.jbei.ice.client.entry.view.update.IEntryFormUpdateSubmit;
 import org.jbei.ice.client.entry.view.view.AttachmentItem;
+import org.jbei.ice.client.entry.view.view.DeleteSequenceHandler;
 import org.jbei.ice.client.entry.view.view.EntryDetailViewMenu;
 import org.jbei.ice.client.entry.view.view.EntryView;
 import org.jbei.ice.client.entry.view.view.IEntryView;
@@ -345,7 +346,8 @@ public class EntryPresenter extends AbstractPresenter {
                     switch (menu) {
 
                     case GENERAL:
-                        sequencePresenter = display.showEntryDetailView(currentInfo, canEdit);
+                        sequencePresenter = display.showEntryDetailView(currentInfo, canEdit,
+                            new DeleteSequenceHandler(service, entryId));
                         sequencePresenter.addFileUploadHandler(new UploadPasteSequenceHandler(
                                 service, sequencePresenter));
                         break;
@@ -438,7 +440,8 @@ public class EntryPresenter extends AbstractPresenter {
             case GENERAL:
                 boolean canEdit = (AppController.accountInfo.isModerator() || currentInfo
                         .isCanEdit());
-                sequencePresenter = display.showEntryDetailView(currentInfo, canEdit);
+                sequencePresenter = display.showEntryDetailView(currentInfo, canEdit,
+                    new DeleteSequenceHandler(service, currentInfo.getId()));
                 sequencePresenter.addFileUploadHandler(new UploadPasteSequenceHandler(service,
                         sequencePresenter));
                 break;

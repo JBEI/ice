@@ -156,4 +156,6 @@ public interface RegistryService extends RemoteService {
     ArrayList<AccountInfo> retrieveAllUserAccounts(String sid);
 
     HashMap<EntryType, Long> retrieveEntryCounts(String sessionId);
+
+    boolean removeSequence(String sid, long entryId);
 }

@@ -1,5 +1,6 @@
 package org.jbei.ice.client.entry.view.detail;
 
+import org.jbei.ice.client.entry.view.view.DeleteSequenceHandler;
 import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -20,9 +21,12 @@ public class SequenceViewPanelPresenter {
         void setHasSequence(boolean hasSequence);
 
         void hideDialog();
+
+        void showSequenceDeleteLink(DeleteSequenceHandler deleteHandler);
     }
 
     private final ISequenceView view;
+    private boolean canEdit;
 
     public SequenceViewPanelPresenter(ISequenceView view) {
         this.view = view;
@@ -48,5 +52,15 @@ public class SequenceViewPanelPresenter {
 
     public void setHasSequence(boolean result) {
         view.setHasSequence(result);
+    }
+
+    public void setIsCanEdit(boolean canEdit, DeleteSequenceHandler deleteHandler) {
+        this.canEdit = canEdit;
+        if (canEdit && view.getInfo().isHasSequence())
+            view.showSequenceDeleteLink(deleteHandler);
+    }
+
+    public boolean isCanEdit() {
+        return this.canEdit;
     }
 }

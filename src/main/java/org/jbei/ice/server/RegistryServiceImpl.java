@@ -1341,6 +1341,49 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public boolean removeSequence(String sid, long entryId) {
+
+        try {
+            Account account = retrieveAccountForSid(sid);
+            if (account == null)
+                return false;
+
+            Entry entry = null;
+            EntryController entryController = new EntryController(account);
+
+            try {
+                entry = entryController.get(entryId);
+                if (entry == null) {
+                    Logger.info("Could not retrieve entry with id " + entryId);
+                    return false;
+                }
+            } catch (PermissionException e) {
+                Logger.warn(account.getEmail() + " attempting to retrieve entry " + entryId
+                        + " but does not have permissions");
+            }
+
+            SequenceController sequenceController = new SequenceController(account);
+            Sequence sequence = sequenceController.getByEntry(entry);
+
+            if (sequence != null) {
+                try {
+                    sequenceController.delete(sequence);
+                    Logger.info("User '" + entryController.getAccount().getEmail()
+                            + "' removed sequence: '" + entryId + "'");
+                    return true;
+                } catch (PermissionException e) {
+                    Logger.warn(account.getEmail() + " attempting to delete sequence for entry "
+                            + entryId + " but does not have permissions");
+                }
+            }
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return false;
+        }
+        return false;
+    }
+
+    @Override
     public ArrayList<BulkImportDraftInfo> retrieveImportDraftData(String sid, String email) {
         try {
             Account account = retrieveAccountForSid(sid);
