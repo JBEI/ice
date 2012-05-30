@@ -41,6 +41,7 @@ public class ProfilePresenter extends AbstractPresenter {
     private AccountInfo currentInfo;
     private EntryDataViewDataProvider entryDataProvider;
     private final CollectionDataTable collectionsDataTable;
+    private final String userId;
 
     public ProfilePresenter(final RegistryServiceAsync service, final HandlerManager eventBus,
             final IProfileView display, String userId) {
@@ -49,6 +50,7 @@ public class ProfilePresenter extends AbstractPresenter {
             userId = AppController.accountInfo.getEmail();
         }
 
+        this.userId = userId;
         this.service = service;
         this.eventBus = eventBus;
         this.display = display;
@@ -125,7 +127,7 @@ public class ProfilePresenter extends AbstractPresenter {
     }
 
     private void retrieveUserEntries() {
-        service.retrieveUserEntries(AppController.sessionId, AppController.accountInfo.getEmail(),
+        service.retrieveUserEntries(AppController.sessionId, this.userId,
             new AsyncCallback<FolderDetails>() {
 
                 @Override
@@ -169,7 +171,10 @@ public class ProfilePresenter extends AbstractPresenter {
             @Override
             public void onSuccess(String result) {
                 if ("yes".equalsIgnoreCase(result) || "true".equalsIgnoreCase(result)) {
-                    display.addEditProfileLinkHandler(new EditProfileHandler());
+                    // must be admin or current logged in user
+                    if (AppController.accountInfo.isModerator()
+                            || AppController.accountInfo.getEmail().equals(userId))
+                        display.addEditProfileLinkHandler(new EditProfileHandler());
                 }
             }
 
@@ -185,7 +190,9 @@ public class ProfilePresenter extends AbstractPresenter {
             @Override
             public void onSuccess(String result) {
                 if ("yes".equalsIgnoreCase(result) || "true".equalsIgnoreCase(result)) {
-                    display.addChangePasswordLinkHandler(new ChangePasswordHandler());
+                    // must be currently logged in user to change password
+                    if (AppController.accountInfo.getEmail().equals(userId))
+                        display.addChangePasswordLinkHandler(new ChangePasswordHandler());
                 }
             }
 
