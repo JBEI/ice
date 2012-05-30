@@ -67,8 +67,6 @@ public interface RegistryServiceAsync {
     void retrieveAutoCompleteData(String sid,
             AsyncCallback<HashMap<AutoCompleteField, ArrayList<String>>> callback);
 
-    void retrieveAccountInfo(String sid, String userId, AsyncCallback<AccountInfo> callback);
-
     void blastSearch(String sid, String searchString, QueryOperator program,
             AsyncCallback<ArrayList<BlastResultInfo>> callback);
 

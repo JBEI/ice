@@ -29,6 +29,7 @@ import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -309,7 +310,9 @@ public class EntryView extends Composite implements IEntryView {
             public void onFinish(IUploader uploader) {
                 if (uploader.getStatus() == Status.SUCCESS) {
                     UploadedInfo info = uploader.getServerInfo();
-                    // TODO : if info.message not empty, then we have a problem
+                    if (info.message != null && !info.message.isEmpty()) {
+                        Window.alert("There was a problem uploading your file\n" + info.message);
+                    }
                     uploader.reset();
                     uploadPanel.setVisible(false);
                 } else {
