@@ -349,8 +349,6 @@ public class EntryManager {
             if (session.isOpen())
                 session.close();
         }
-
-        //        int count = ((Long)getSession().createQuery("select count(*) from Entry").uniqueResult()).intValue();
     }
 
     /**

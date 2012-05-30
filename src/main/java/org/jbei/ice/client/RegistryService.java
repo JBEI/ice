@@ -66,8 +66,6 @@ public interface RegistryService extends RemoteService {
 
     EntryInfo retrieveEntryDetails(String sid, long id);
 
-    AccountInfo retrieveAccountInfo(String sid, String userId);
-
     AccountInfo retrieveAccountInfoForSession(String sid);
 
     ArrayList<StorageInfo> retrieveChildren(String sid, long id);

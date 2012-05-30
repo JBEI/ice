@@ -1270,11 +1270,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
+            Logger.info(account.getEmail() + ": retrieving profile info for " + userId);
+
             account = AccountManager.getByEmail(userId);
             if (account == null)
                 return null;
-
-            Logger.info(account.getEmail() + ": retrieving profile info for " + userId);
 
             AccountInfo accountInfo = accountToInfo(account);
 
@@ -1293,44 +1293,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             return accountInfo;
 
-        } catch (ManagerException e) {
-            Logger.error(e);
-            return null;
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return null;
-        }
-    }
-
-    // TODO : this can probably be merged with the above
-    @Override
-    public AccountInfo retrieveAccountInfo(String sid, String userId) {
-        try {
-            this.retrieveAccountForSid(sid);
-            Account account = retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
-            account = AccountManager.getByEmail(userId);
-            if (account == null)
-                return null;
-
-            AccountInfo info = accountToInfo(account);
-
-            // get the count for samples
-            int sampleCount = SampleManager.getSampleCountBy(info.getEmail());
-            info.setUserSampleCount(sampleCount);
-            boolean isModerator = AccountManager.isModerator(account);
-            long visibleEntryCount;
-            if (isModerator)
-                visibleEntryCount = EntryManager.getAllEntryCount();
-            else
-                visibleEntryCount = EntryManager.getNumberOfVisibleEntries(account);
-            info.setVisibleEntryCount(visibleEntryCount);
-            int entryCount = EntryManager.getEntryCountBy(info.getEmail());
-            info.setUserEntryCount(entryCount);
-
-            return info;
         } catch (ManagerException e) {
             Logger.error(e);
             return null;
