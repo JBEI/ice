@@ -1,5 +1,10 @@
 package org.jbei.ice.client.entry.view;
 
+import gwtupload.client.IUploadStatus.Status;
+import gwtupload.client.IUploader;
+import gwtupload.client.IUploader.OnFinishUploaderHandler;
+import gwtupload.client.IUploader.UploadedInfo;
+
 import java.util.ArrayList;
 
 import org.jbei.ice.client.AbstractPresenter;
@@ -24,6 +29,7 @@ import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.event.ShowEntryListEvent;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 
@@ -114,6 +120,9 @@ public class EntryPresenter extends AbstractPresenter {
         final PermissionsPresenter pPresenter = display.getPermissionsWidget();
         pPresenter.setReadAddSelectionHandler(new PermissionReadBoxHandler(false));
         pPresenter.setWriteAddSelectionHandler(new PermissionReadBoxHandler(true));
+
+        // sequence upload handler
+        display.setSequenceFinishUploadHandler(new SequenceUploaderFinishHandler());
     }
 
     /**
@@ -275,6 +284,33 @@ public class EntryPresenter extends AbstractPresenter {
                 eventBus.fireEvent(new ShowEntryListEvent(currentContext));
             }
         });
+    }
+
+    private void retrieveEntrySequenceDetails() {
+
+        final long entryId = currentContext.getCurrent();
+        service.retrieveEntryTraceSequences(AppController.sessionId, entryId,
+            new AsyncCallback<ArrayList<SequenceAnalysisInfo>>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    FeedbackEvent event = new FeedbackEvent(true, "Error connecting to the server");
+                    eventBus.fireEvent(event);
+                }
+
+                @Override
+                public void onSuccess(ArrayList<SequenceAnalysisInfo> result) {
+                    if (result == null) {
+                        FeedbackEvent event = new FeedbackEvent(true,
+                                "Could not retrieve sequence trace files");
+                        eventBus.fireEvent(event);
+                        return;
+                    }
+
+                    display.setSequenceData(result, entryId);
+                    display.getDetailMenu().updateMenuCount(Menu.SEQ_ANALYSIS, result.size());
+                }
+            });
     }
 
     private void retrieveEntryDetails() {
@@ -522,6 +558,26 @@ public class EntryPresenter extends AbstractPresenter {
                     }
                 }
             });
+        }
+    }
+
+    private class SequenceUploaderFinishHandler implements OnFinishUploaderHandler {
+
+        @Override
+        public void onFinish(IUploader uploader) {
+            if (uploader.getStatus() == Status.SUCCESS) {
+                UploadedInfo info = uploader.getServerInfo();
+                //                    uploader.reset();
+                //                    uploadPanel.setVisible(false);
+                retrieveEntrySequenceDetails();
+            } else {
+                UploadedInfo info = uploader.getServerInfo();
+                if (uploader.getStatus() == Status.ERROR) {
+                    Window.alert("There was a problem uploading your file.\n\nPlease contact your administrator if this problem persists");
+                }
+            }
+            uploader.reset();
+            display.setSequenceFormVisibility(false);
         }
     }
 }

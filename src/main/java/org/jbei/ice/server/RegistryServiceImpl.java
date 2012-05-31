@@ -734,6 +734,29 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public ArrayList<SequenceAnalysisInfo> retrieveEntryTraceSequences(String sid, long entryId) {
+        try {
+            Account account = retrieveAccountForSid(sid);
+            if (account == null)
+                return null;
+
+            Entry entry = EntryManager.get(entryId);
+            if (entry == null)
+                return null;
+
+            List<TraceSequence> sequences = TraceSequenceManager.getByEntry(entry);
+            return EntryToInfoFactory.getSequenceAnaylsis(sequences);
+
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+        } catch (ManagerException me) {
+            Logger.error(me);
+        }
+
+        return null;
+    }
+
+    @Override
     public EntryInfo retrieveEntryDetails(String sid, long id) {
         try {
             Account account = retrieveAccountForSid(sid);

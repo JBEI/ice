@@ -152,11 +152,9 @@ public class FileUploadServlet extends UploadAction {
         try {
             entry = EntryManager.get(Long.decode(entryId));
         } catch (NumberFormatException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            Logger.error("Exception decoding entry id ", e1);
         } catch (ManagerException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            Logger.error("Exception retrieving entry with decoded entryId " + entryId, e1);
         }
         if (entry == null)
             return "Could not retrieve entry with id : " + entryId;

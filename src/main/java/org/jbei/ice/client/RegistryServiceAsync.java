@@ -18,6 +18,7 @@ import org.jbei.ice.shared.dto.EntryInfo.EntryType;
 import org.jbei.ice.shared.dto.NewsItem;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
+import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
@@ -179,4 +180,7 @@ public interface RegistryServiceAsync {
     void retrieveEntryCounts(String sessionId, AsyncCallback<HashMap<EntryType, Long>> callback);
 
     void removeSequence(String sid, long entryId, AsyncCallback<Boolean> callback);
+
+    void retrieveEntryTraceSequences(String sid, long entryId,
+            AsyncCallback<ArrayList<SequenceAnalysisInfo>> callback);
 }

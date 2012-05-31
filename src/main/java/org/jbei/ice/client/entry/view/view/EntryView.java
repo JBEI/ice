@@ -1,10 +1,8 @@
 package org.jbei.ice.client.entry.view.view;
 
-import gwtupload.client.IUploadStatus.Status;
 import gwtupload.client.IUploader;
 import gwtupload.client.IUploader.OnFinishUploaderHandler;
 import gwtupload.client.IUploader.OnStartUploaderHandler;
-import gwtupload.client.IUploader.UploadedInfo;
 import gwtupload.client.SingleUploader;
 
 import java.util.ArrayList;
@@ -28,8 +26,8 @@ import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -75,6 +73,8 @@ public class EntryView extends Composite implements IEntryView {
     private final Label headerLabel;
     private final EntrySampleTable sampleTable;
     private final EntrySequenceTable sequenceTable;
+    private HandlerRegistration sequenceUploadFinish;
+    private SingleUploader sequenceUploader;
 
     private Button sequenceAddCancelbutton;
     private long entryId;
@@ -185,6 +185,14 @@ public class EntryView extends Composite implements IEntryView {
         return form;
     }
 
+    @Override
+    public void setSequenceFinishUploadHandler(OnFinishUploaderHandler handler) {
+        if (sequenceUploadFinish != null)
+            sequenceUploadFinish.removeHandler();
+
+        sequenceUploadFinish = sequenceUploader.addOnFinishUploadHandler(handler);
+    }
+
     /**
      * Center content
      */
@@ -293,10 +301,10 @@ public class EntryView extends Composite implements IEntryView {
         FlexTable table = new FlexTable();
         table.setWidth("100%");
 
-        final SingleUploader uploader = new SingleUploader();
-        uploader.setAutoSubmit(true);
+        sequenceUploader = new SingleUploader();
+        sequenceUploader.setAutoSubmit(true);
 
-        uploader.addOnStartUploadHandler(new OnStartUploaderHandler() {
+        sequenceUploader.addOnStartUploadHandler(new OnStartUploaderHandler() {
 
             @Override
             public void onStart(IUploader uploader) {
@@ -305,25 +313,28 @@ public class EntryView extends Composite implements IEntryView {
             }
         });
 
-        uploader.addOnFinishUploadHandler(new OnFinishUploaderHandler() {
-            @Override
-            public void onFinish(IUploader uploader) {
-                if (uploader.getStatus() == Status.SUCCESS) {
-                    UploadedInfo info = uploader.getServerInfo();
-                    if (info.message != null && !info.message.isEmpty()) {
-                        Window.alert("There was a problem uploading your file\n" + info.message);
-                    }
-                    uploader.reset();
-                    uploadPanel.setVisible(false);
-                } else {
-                    // TODO : notify user of error
-                }
-            }
-        });
+        //        ew OnFinishUploaderHandler() {
+        //
+        //            @Override
+        //            public void onFinish(IUploader uploader) {
+        //                    if (uploader.getStatus() == Status.SUCCESS) {
+        //                        UploadedInfo info = uploader.getServerInfo();
+        //                        //                    uploader.reset();
+        //                        //                    uploadPanel.setVisible(false);
+        //                    } else {
+        //                        UploadedInfo info = uploader.getServerInfo();
+        //                        if (uploader.getStatus() == Status.ERROR) {
+        //                            Window.alert("There was a problem uploading your file.\n\nPlease contact your administrator if this problem persists");
+        //                        }
+        //                    }
+        //                    uploader.reset();
+        //                }
+        //                uploadPanel.setVisible(false);
+        //        });
 
         String html = "<div style=\"outline:none; padding: 4px\"><span id=\"upload\"></span><span style=\"color: #777777;font-size: 9px;\">Fasta, GenBank, or ABI formats, optionally in zip file.</span></div>";
         HTMLPanel panel = new HTMLPanel(html);
-        panel.add(uploader, "upload");
+        panel.add(sequenceUploader, "upload");
 
         table.setWidget(0, 0, panel);
         sequenceAddCancelbutton = new Button("Cancel");
