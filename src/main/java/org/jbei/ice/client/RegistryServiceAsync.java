@@ -184,6 +184,6 @@ public interface RegistryServiceAsync {
     void retrieveEntryTraceSequences(String sid, long entryId,
             AsyncCallback<ArrayList<SequenceAnalysisInfo>> callback);
 
-    void deleteEntryTraceSequences(String sid, long entryId, String fileId,
+    void deleteEntryTraceSequences(String sid, long entryId, ArrayList<String> seqId,
             AsyncCallback<ArrayList<SequenceAnalysisInfo>> callback);
 }

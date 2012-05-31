@@ -6,6 +6,7 @@ import gwtupload.client.IUploader.OnFinishUploaderHandler;
 import gwtupload.client.IUploader.UploadedInfo;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
@@ -348,6 +349,9 @@ public class EntryPresenter extends AbstractPresenter {
                     boolean canEdit = (AppController.accountInfo.isModerator() || result
                             .isCanEdit());
                     display.getPermissionsWidget().setCanEdit(canEdit);
+                    if (canEdit) {
+                        display.setSequenceDeleteHandler(new DeleteSequenceTraceHandler());
+                    }
 
                     // attachments
                     ArrayList<AttachmentInfo> attachments = result.getAttachments();
@@ -581,29 +585,29 @@ public class EntryPresenter extends AbstractPresenter {
         }
     }
 
+    // TODO : this can be moved to external file
     public class DeleteSequenceTraceHandler implements ClickHandler {
-        private String seqId;
-
-        public DeleteSequenceTraceHandler() {
-
-        }
-
-        public void setId(String sid) {
-            this.seqId = sid;
-        }
 
         @Override
         public void onClick(ClickEvent event) {
             final long entryId = currentInfo.getId();
-            if (seqId == null || seqId.isEmpty())
+            Set<SequenceAnalysisInfo> selected = display.getSequenceTableSelectionModel()
+                    .getSelectedSet();
+            if (selected == null || selected.isEmpty())
                 return;
-            service.deleteEntryTraceSequences(AppController.sessionId, entryId, seqId,
+
+            ArrayList<String> fileIds = new ArrayList<String>();
+            for (SequenceAnalysisInfo info : selected) {
+                fileIds.add(info.getFileId());
+            }
+
+            service.deleteEntryTraceSequences(AppController.sessionId, entryId, fileIds,
                 new AsyncCallback<ArrayList<SequenceAnalysisInfo>>() {
 
                     @Override
                     public void onSuccess(ArrayList<SequenceAnalysisInfo> result) {
                         if (result == null) {
-                            Window.alert("There was a problem deleting your sequence file. \n\nPlease contact your administrator if this problem persists");
+                            Window.alert("There was a problem deleting the sequence file(s). \n\nPlease contact your administrator if this problem persists");
                             return;
                         }
 
@@ -613,7 +617,7 @@ public class EntryPresenter extends AbstractPresenter {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        Window.alert("Could not delete you trace sequence file");
+                        Window.alert("Could not delete trace sequence file");
                     }
                 });
         }

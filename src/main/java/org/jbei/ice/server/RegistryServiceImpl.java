@@ -759,7 +759,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public ArrayList<SequenceAnalysisInfo> deleteEntryTraceSequences(String sid, long entryId,
-            String fileId) {
+            ArrayList<String> fileId) {
 
         try {
             Account account = retrieveAccountForSid(sid);
@@ -771,12 +771,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             SequenceAnalysisController controller = new SequenceAnalysisController(account);
-            TraceSequence sequence = controller.getTraceSequenceByFileId(fileId);
-            if (sequence == null) {
-                Logger.warn("Could not retrieve trace sequence by file Id " + fileId);
-                return null;
+            for (String id : fileId) {
+                TraceSequence sequence = controller.getTraceSequenceByFileId(id);
+                if (sequence == null) {
+                    Logger.warn("Could not retrieve trace sequence by file Id " + id);
+                    continue;
+                }
+                controller.removeTraceSequence(sequence);
             }
-            controller.removeTraceSequence(sequence);
             List<TraceSequence> sequences = TraceSequenceManager.getByEntry(entry);
             return EntryToInfoFactory.getSequenceAnaylsis(sequences);
 

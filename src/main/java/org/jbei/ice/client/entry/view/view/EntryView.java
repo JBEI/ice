@@ -38,6 +38,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.MultiSelectionModel;
 
 public class EntryView extends Composite implements IEntryView {
 
@@ -73,6 +74,7 @@ public class EntryView extends Composite implements IEntryView {
     private final Label headerLabel;
     private final EntrySampleTable sampleTable;
     private final EntrySequenceTable sequenceTable;
+    private final SequenceAnalysisHeaderPanel traceHeaderPanel;
     private HandlerRegistration sequenceUploadFinish;
     private SingleUploader sequenceUploader;
 
@@ -126,13 +128,26 @@ public class EntryView extends Composite implements IEntryView {
         // sample panel
         initSamplePanel();
         sampleTable = new EntrySampleTable();
+
+        // sequence panel
         sequenceTable = new EntrySequenceTable();
+        traceHeaderPanel = new SequenceAnalysisHeaderPanel(sequenceTable.getSelectionModel());
 
         // general panel
         initGeneralPanel();
 
         // sequence
         initSequencePanel();
+    }
+
+    @Override
+    public MultiSelectionModel<SequenceAnalysisInfo> getSequenceTableSelectionModel() {
+        return sequenceTable.getSelectionModel();
+    }
+
+    @Override
+    public void setSequenceDeleteHandler(ClickHandler handler) {
+        traceHeaderPanel.setDeleteHandler(handler);
     }
 
     private void initSequencePanel() {
@@ -313,25 +328,6 @@ public class EntryView extends Composite implements IEntryView {
             }
         });
 
-        //        ew OnFinishUploaderHandler() {
-        //
-        //            @Override
-        //            public void onFinish(IUploader uploader) {
-        //                    if (uploader.getStatus() == Status.SUCCESS) {
-        //                        UploadedInfo info = uploader.getServerInfo();
-        //                        //                    uploader.reset();
-        //                        //                    uploadPanel.setVisible(false);
-        //                    } else {
-        //                        UploadedInfo info = uploader.getServerInfo();
-        //                        if (uploader.getStatus() == Status.ERROR) {
-        //                            Window.alert("There was a problem uploading your file.\n\nPlease contact your administrator if this problem persists");
-        //                        }
-        //                    }
-        //                    uploader.reset();
-        //                }
-        //                uploadPanel.setVisible(false);
-        //        });
-
         String html = "<div style=\"outline:none; padding: 4px\"><span id=\"upload\"></span><span style=\"color: #777777;font-size: 9px;\">Fasta, GenBank, or ABI formats, optionally in zip file.</span></div>";
         HTMLPanel panel = new HTMLPanel(html);
         panel.add(sequenceUploader, "upload");
@@ -370,10 +366,6 @@ public class EntryView extends Composite implements IEntryView {
 
         this.permissions.addReadWriteLinks(showEdit);
         sequencePanel.getPresenter().setIsCanEdit(showEdit, deleteHandler);
-
-        // showEdit for sequence table as well
-        sequenceTable.setShowAdminFeature(showEdit);
-
         return sequencePanel.getPresenter();
     }
 
@@ -405,6 +397,7 @@ public class EntryView extends Composite implements IEntryView {
 
         VerticalPanel panel = new VerticalPanel();
         panel.setWidth("100%");
+        panel.add(traceHeaderPanel);
         panel.add(uploadPanel);
         panel.add(sequenceTable);
 
@@ -491,6 +484,7 @@ public class EntryView extends Composite implements IEntryView {
 
         VerticalPanel panel = new VerticalPanel();
         panel.setWidth("100%");
+        panel.add(traceHeaderPanel);
         panel.add(uploadPanel);
         panel.add(sequenceTable);
 
