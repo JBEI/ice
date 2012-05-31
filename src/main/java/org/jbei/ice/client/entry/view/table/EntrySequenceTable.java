@@ -6,6 +6,7 @@ import org.jbei.ice.client.Page;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 
+import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -23,7 +24,10 @@ import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.MultiSelectionModel;
+import com.google.gwt.view.client.ProvidesKey;
 
 /**
  * Table for displaying sequence trace files
@@ -32,8 +36,8 @@ import com.google.gwt.view.client.ListDataProvider;
  */
 public class EntrySequenceTable extends Composite {
     private CellTable<SequenceAnalysisInfo> table;
-    private boolean showAdminFeature;
     private final ListDataProvider<SequenceAnalysisInfo> dataProvider;
+    private MultiSelectionModel<SequenceAnalysisInfo> selectionModel;
     private final SimplePager pager;
     private final VerticalPanel panel;
 
@@ -61,11 +65,11 @@ public class EntrySequenceTable extends Composite {
         dataProvider = new ListDataProvider<SequenceAnalysisInfo>();
         dataProvider.addDataDisplay(table);
 
+        // selection model
+        setSelectionModel();
+
         // add columns
-        addNameColumn();
-        addDepositorColumn();
-        if (showAdminFeature)
-            addEditColumn();
+        addColumns();
 
         // other table props
         pager = new SimplePager();
@@ -77,15 +81,40 @@ public class EntrySequenceTable extends Composite {
         panel.setCellHorizontalAlignment(pager, HasAlignment.ALIGN_CENTER);
     }
 
-    public void setShowAdminFeature(boolean show) {
-        this.showAdminFeature = show;
-        if (show) {
-            addEditColumn();
-        }
+    private void setSelectionModel() {
+        selectionModel = new MultiSelectionModel<SequenceAnalysisInfo>(
+                new ProvidesKey<SequenceAnalysisInfo>() {
+
+                    @Override
+                    public String getKey(SequenceAnalysisInfo item) {
+                        return item.getFileId();
+                    }
+                });
+
+        table.setSelectionModel(selectionModel,
+            DefaultSelectionEventManager.<SequenceAnalysisInfo> createCheckboxManager());
     }
 
-    protected void addEditColumn() {
+    private void addColumns() {
+        createSelectionColumn();
+        addNameColumn();
+        addDepositorColumn();
+    }
 
+    public MultiSelectionModel<SequenceAnalysisInfo> getSelectionModel() {
+        return this.selectionModel;
+    }
+
+    private void createSelectionColumn() {
+        Column<SequenceAnalysisInfo, Boolean> checkColumn = new Column<SequenceAnalysisInfo, Boolean>(
+                new CheckboxCell(true, false)) {
+            @Override
+            public Boolean getValue(SequenceAnalysisInfo object) {
+                return selectionModel.isSelected(object);
+            }
+        };
+        table.addColumn(checkColumn);
+        table.setColumnWidth(checkColumn, 40, Unit.PX);
     }
 
     protected void addNameColumn() {

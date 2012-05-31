@@ -13,6 +13,7 @@ import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.MultiSelectionModel;
 
 public interface IEntryView {
 
@@ -78,5 +79,9 @@ public interface IEntryView {
     void setSequenceFinishUploadHandler(OnFinishUploaderHandler handler);
 
     void setSequenceData(ArrayList<SequenceAnalysisInfo> data, EntryInfo info);
+
+    MultiSelectionModel<SequenceAnalysisInfo> getSequenceTableSelectionModel();
+
+    void setSequenceDeleteHandler(ClickHandler handler);
 
 }
