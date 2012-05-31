@@ -1,7 +1,5 @@
 package org.jbei.ice.client.admin;
 
-import org.jbei.ice.shared.dto.AccountInfo;
-
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.view.client.HasData;
 
@@ -11,12 +9,12 @@ import com.google.gwt.view.client.HasData;
  * @author Hector Plahar
  * 
  */
-public interface AdminPanel extends IsWidget {
+public interface AdminPanel<T> extends IsWidget {
 
     /**
      * @return title of the panel
      */
     String getTabTitle();
 
-    HasData<AccountInfo> getDisplay();
+    HasData<T> getDisplay();
 }
