@@ -166,7 +166,7 @@ public class EntryToInfoFactory {
         return info;
     }
 
-    private static ArrayList<SequenceAnalysisInfo> getSequenceAnaylsis(List<TraceSequence> sequences) {
+    public static ArrayList<SequenceAnalysisInfo> getSequenceAnaylsis(List<TraceSequence> sequences) {
         ArrayList<SequenceAnalysisInfo> infos = new ArrayList<SequenceAnalysisInfo>();
         if (sequences == null)
             return infos;

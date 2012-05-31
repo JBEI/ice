@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.HasData;
 
-public class EditUserPanel extends Composite implements AdminPanel {
+public class EditUserPanel extends Composite implements AdminPanel<AccountInfo> {
 
     private ScrollPanel panel;
     private final UserTable grid;

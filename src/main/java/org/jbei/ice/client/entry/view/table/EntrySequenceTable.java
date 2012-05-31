@@ -32,10 +32,9 @@ import com.google.gwt.view.client.ListDataProvider;
  */
 public class EntrySequenceTable extends Composite {
     private CellTable<SequenceAnalysisInfo> table;
-    private final boolean showAdminFeature = false; // TODO 
+    private boolean showAdminFeature;
     private final ListDataProvider<SequenceAnalysisInfo> dataProvider;
     private final SimplePager pager;
-
     private final VerticalPanel panel;
 
     protected interface EntryResources extends Resources {
@@ -65,6 +64,8 @@ public class EntrySequenceTable extends Composite {
         // add columns
         addNameColumn();
         addDepositorColumn();
+        if (showAdminFeature)
+            addEditColumn();
 
         // other table props
         pager = new SimplePager();
@@ -74,6 +75,17 @@ public class EntrySequenceTable extends Composite {
         panel.add(table);
         panel.add(pager);
         panel.setCellHorizontalAlignment(pager, HasAlignment.ALIGN_CENTER);
+    }
+
+    public void setShowAdminFeature(boolean show) {
+        this.showAdminFeature = show;
+        if (show) {
+            addEditColumn();
+        }
+    }
+
+    protected void addEditColumn() {
+
     }
 
     protected void addNameColumn() {

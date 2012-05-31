@@ -18,6 +18,7 @@ import org.jbei.ice.shared.dto.EntryInfo.EntryType;
 import org.jbei.ice.shared.dto.NewsItem;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
+import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.StorageInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
@@ -156,4 +157,9 @@ public interface RegistryService extends RemoteService {
     HashMap<EntryType, Long> retrieveEntryCounts(String sessionId);
 
     boolean removeSequence(String sid, long entryId);
+
+    ArrayList<SequenceAnalysisInfo> retrieveEntryTraceSequences(String sid, long entryId);
+
+    ArrayList<SequenceAnalysisInfo> deleteEntryTraceSequences(String sid, long entryId,
+            String fileId);
 }

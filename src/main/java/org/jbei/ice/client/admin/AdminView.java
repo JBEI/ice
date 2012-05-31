@@ -3,6 +3,7 @@ package org.jbei.ice.client.admin;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.admin.group.EditGroupsPanel;
 import org.jbei.ice.client.admin.reports.ReportPanel;
 import org.jbei.ice.client.admin.usermanagement.EditUserPanel;
 import org.jbei.ice.client.collection.menu.CollectionMenu;
@@ -52,6 +53,10 @@ public class AdminView extends AbstractLayout {
         // report
         ReportPanel reportPanel = new ReportPanel();
         panel.add(reportPanel, reportPanel.getTabTitle());
+
+        // groups
+        EditGroupsPanel editGroup = new EditGroupsPanel();
+        panel.add(editGroup, editGroup.getTabTitle());
     }
 
     public void addLayoutHandler(SelectionHandler<Integer> handler) {

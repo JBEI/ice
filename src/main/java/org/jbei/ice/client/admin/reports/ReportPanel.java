@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.HasData;
 
-public class ReportPanel extends Composite implements AdminPanel {
+public class ReportPanel extends Composite implements AdminPanel<AccountInfo> {
 
     private VerticalPanel panel;
 

@@ -1,5 +1,7 @@
 package org.jbei.ice.client.entry.view.view;
 
+import gwtupload.client.IUploader.OnFinishUploaderHandler;
+
 import java.util.ArrayList;
 
 import org.jbei.ice.client.collection.add.form.SampleLocation;
@@ -67,12 +69,14 @@ public interface IEntryView {
 
     void setSampleData(ArrayList<SampleStorage> data);
 
-    void setSequenceData(ArrayList<SequenceAnalysisInfo> sequenceAnalysis, long entryId);
-
     void setSampleOptions(SampleLocation sampleLocation);
 
     void addSampleSaveHandler(ClickHandler handler);
 
     void showLoadingIndicator();
+
+    void setSequenceFinishUploadHandler(OnFinishUploaderHandler handler);
+
+    void setSequenceData(ArrayList<SequenceAnalysisInfo> data, EntryInfo info);
 
 }

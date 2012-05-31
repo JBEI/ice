@@ -97,6 +97,7 @@ public class FileUploadServlet extends UploadAction {
             return "";
         }
 
+        String result = "";
         for (FileItem item : sessionFiles) {
             if (item.isFormField())
                 continue;
@@ -104,6 +105,8 @@ public class FileUploadServlet extends UploadAction {
             String saveName = item.getName().replaceAll("[\\\\/><\\|\\s\"'{}()\\[\\]]+", "_");
             String tmpDir = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
             File file = new File(tmpDir + File.separator + saveName);
+            if (!file.exists())
+                continue;
 
             try {
                 item.write(file);
@@ -115,25 +118,27 @@ public class FileUploadServlet extends UploadAction {
             if (ATTACHMENT_TYPE.equalsIgnoreCase(type)) {
                 if (entryId == null || entryId.isEmpty())
                     return "No entry id specified for file upload";
-                return uploadAttachment(file, entryId, desc, saveName);
+                result = uploadAttachment(file, entryId, desc, saveName);
             } else if (SEQUENCE_TYPE.equalsIgnoreCase(type)) {
                 if (entryId == null || entryId.isEmpty())
-                    return "No entry id specified for file upload";
+                    result = "No entry id specified for file upload";
                 try {
-                    return uploadSequenceTraceFile(file, entryId, account, saveName);
+                    result = uploadSequenceTraceFile(file, entryId, account, saveName);
                 } catch (IOException e) {
                     Logger.error(e);
                 }
             } else if (BULK_ATTACHMENT_TYPE.equalsIgnoreCase(type)) {
 
-                return uploadBulkAttachment(file, saveName);
+                result = uploadBulkAttachment(file, saveName);
             } else if (BULK_SEQUENCE_TYPE.equalsIgnoreCase(type)) {
                 // TODO : ??
             }
+
+            break;
         }
 
         removeSessionFileItems(request);
-        return "";
+        return result;
 
     }
 
@@ -152,11 +157,9 @@ public class FileUploadServlet extends UploadAction {
         try {
             entry = EntryManager.get(Long.decode(entryId));
         } catch (NumberFormatException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            Logger.error("Exception decoding entry id ", e1);
         } catch (ManagerException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            Logger.error("Exception retrieving entry with decoded entryId " + entryId, e1);
         }
         if (entry == null)
             return "Could not retrieve entry with id : " + entryId;
