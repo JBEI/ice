@@ -69,8 +69,6 @@ public interface IEntryView {
 
     void setSampleData(ArrayList<SampleStorage> data);
 
-    void setSequenceData(ArrayList<SequenceAnalysisInfo> sequenceAnalysis, long entryId);
-
     void setSampleOptions(SampleLocation sampleLocation);
 
     void addSampleSaveHandler(ClickHandler handler);
@@ -78,5 +76,7 @@ public interface IEntryView {
     void showLoadingIndicator();
 
     void setSequenceFinishUploadHandler(OnFinishUploaderHandler handler);
+
+    void setSequenceData(ArrayList<SequenceAnalysisInfo> data, EntryInfo info);
 
 }

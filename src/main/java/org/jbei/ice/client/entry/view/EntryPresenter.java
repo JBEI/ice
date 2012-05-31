@@ -307,7 +307,7 @@ public class EntryPresenter extends AbstractPresenter {
                         return;
                     }
 
-                    display.setSequenceData(result, entryId);
+                    display.setSequenceData(result, currentInfo);
                     display.getDetailMenu().updateMenuCount(Menu.SEQ_ANALYSIS, result.size());
                 }
             });
@@ -369,7 +369,7 @@ public class EntryPresenter extends AbstractPresenter {
                         result.getSampleStorage().size());
 
                     display.setSampleData(result.getSampleStorage());
-                    display.setSequenceData(result.getSequenceAnalysis(), entryId);
+                    display.setSequenceData(result.getSequenceAnalysis(), result);
 
                     MenuItem selection = display.getDetailMenu().getCurrentSelection();
                     Menu menu;
@@ -578,6 +578,44 @@ public class EntryPresenter extends AbstractPresenter {
             }
             uploader.reset();
             display.setSequenceFormVisibility(false);
+        }
+    }
+
+    public class DeleteSequenceTraceHandler implements ClickHandler {
+        private String seqId;
+
+        public DeleteSequenceTraceHandler() {
+
+        }
+
+        public void setId(String sid) {
+            this.seqId = sid;
+        }
+
+        @Override
+        public void onClick(ClickEvent event) {
+            final long entryId = currentInfo.getId();
+            if (seqId == null || seqId.isEmpty())
+                return;
+            service.deleteEntryTraceSequences(AppController.sessionId, entryId, seqId,
+                new AsyncCallback<ArrayList<SequenceAnalysisInfo>>() {
+
+                    @Override
+                    public void onSuccess(ArrayList<SequenceAnalysisInfo> result) {
+                        if (result == null) {
+                            Window.alert("There was a problem deleting your sequence file. \n\nPlease contact your administrator if this problem persists");
+                            return;
+                        }
+
+                        display.setSequenceData(result, currentInfo);
+                        display.getDetailMenu().updateMenuCount(Menu.SEQ_ANALYSIS, result.size());
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Window.alert("Could not delete you trace sequence file");
+                    }
+                });
         }
     }
 }

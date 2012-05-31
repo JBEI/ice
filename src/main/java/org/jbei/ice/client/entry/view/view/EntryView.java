@@ -370,6 +370,10 @@ public class EntryView extends Composite implements IEntryView {
 
         this.permissions.addReadWriteLinks(showEdit);
         sequencePanel.getPresenter().setIsCanEdit(showEdit, deleteHandler);
+
+        // showEdit for sequence table as well
+        sequenceTable.setShowAdminFeature(showEdit);
+
         return sequencePanel.getPresenter();
     }
 
@@ -481,9 +485,28 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public void setSequenceData(ArrayList<SequenceAnalysisInfo> data, long entryId) {
+    public void setSequenceData(ArrayList<SequenceAnalysisInfo> data, EntryInfo info) {
         sequenceTable.setData(data);
-        this.entryId = entryId;
+        this.entryId = info.getId();
+
+        VerticalPanel panel = new VerticalPanel();
+        panel.setWidth("100%");
+        panel.add(uploadPanel);
+        panel.add(sequenceTable);
+
+        if (info.isHasSequence()) {
+            Flash.Parameters params = new Flash.Parameters();
+            params.setSwfPath("sc/SequenceChecker.swf");
+            params.setSessiondId(AppController.sessionId);
+            params.setMovieName("SequenceChecker.swf");
+            params.setEntryId(info.getRecordId());
+
+            Flash flash = new Flash(params);
+            panel.add(flash);
+            panel.setCellHeight(flash, "600px");
+        }
+
+        mainContent.setWidget(1, 0, panel);
     }
 
     @Override

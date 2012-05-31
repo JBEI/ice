@@ -20,6 +20,7 @@ import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SampleController;
 import org.jbei.ice.controllers.SearchController;
+import org.jbei.ice.controllers.SequenceAnalysisController;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.StorageController;
 import org.jbei.ice.controllers.common.ControllerException;
@@ -751,6 +752,40 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.error(ce);
         } catch (ManagerException me) {
             Logger.error(me);
+        }
+
+        return null;
+    }
+
+    @Override
+    public ArrayList<SequenceAnalysisInfo> deleteEntryTraceSequences(String sid, long entryId,
+            String fileId) {
+
+        try {
+            Account account = retrieveAccountForSid(sid);
+            if (account == null)
+                return null;
+
+            Entry entry = EntryManager.get(entryId);
+            if (entry == null)
+                return null;
+
+            SequenceAnalysisController controller = new SequenceAnalysisController(account);
+            TraceSequence sequence = controller.getTraceSequenceByFileId(fileId);
+            if (sequence == null) {
+                Logger.warn("Could not retrieve trace sequence by file Id " + fileId);
+                return null;
+            }
+            controller.removeTraceSequence(sequence);
+            List<TraceSequence> sequences = TraceSequenceManager.getByEntry(entry);
+            return EntryToInfoFactory.getSequenceAnaylsis(sequences);
+
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+        } catch (ManagerException me) {
+            Logger.error(me);
+        } catch (PermissionException e) {
+            Logger.error(e);
         }
 
         return null;
