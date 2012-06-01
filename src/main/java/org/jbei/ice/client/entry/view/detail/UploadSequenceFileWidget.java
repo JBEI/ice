@@ -30,6 +30,7 @@ public class UploadSequenceFileWidget extends Composite {
     private SingleUploader uploader;
     private final long entryId;
     private final Label feedback;
+    private OnFinishUploaderHandler handler;
 
     public UploadSequenceFileWidget(long eid) {
         FlexTable layout = new FlexTable();
@@ -54,6 +55,10 @@ public class UploadSequenceFileWidget extends Composite {
         layout.getCellFormatter().setHorizontalAlignment(2, 0, HasAlignment.ALIGN_RIGHT);
         layout.setWidget(2, 1, cancelButton);
         layout.getCellFormatter().setWidth(2, 1, "70px");
+    }
+
+    public void setFinishHandler(OnFinishUploaderHandler handler) {
+        this.handler = handler;
     }
 
     private void initComponents() {
@@ -130,6 +135,9 @@ public class UploadSequenceFileWidget extends Composite {
                         feedback.setVisible(false);
                         uploader.reset();
                         box.hide();
+
+                        if (handler != null)
+                            handler.onFinish(uploader);
                         return;
                     }
 

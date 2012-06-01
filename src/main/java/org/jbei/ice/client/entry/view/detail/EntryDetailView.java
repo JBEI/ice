@@ -1,5 +1,7 @@
 package org.jbei.ice.client.entry.view.detail;
 
+import gwtupload.client.IUploader.OnFinishUploaderHandler;
+
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.StatusType;
@@ -31,6 +33,7 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
     private int currentCol = 0;
 
     private SequenceViewPanel sequencePanel;
+    private OnFinishUploaderHandler handler;
 
     public EntryDetailView(T info) {
 
@@ -195,6 +198,10 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
         table.setWidget(currentRow, 0, sequencePanel);
         table.getFlexCellFormatter().setColSpan(currentRow, 0, 4);
         currentRow += 1;
+    }
+
+    public void addSequenceFileUploadFinishHandler(OnFinishUploaderHandler handler) {
+        sequencePanel.setFinishHandler(handler);
     }
 
     protected void createNotesView() {
