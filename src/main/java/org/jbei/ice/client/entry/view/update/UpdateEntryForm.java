@@ -220,8 +220,8 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
         markupOptions = new ListBox();
         markupOptions.setVisibleItemCount(1);
         markupOptions.addItem("Text");
-        markupOptions.addItem("Wiki");
-        markupOptions.addItem("Confluence");
+        //        markupOptions.addItem("Wiki");
+        //        markupOptions.addItem("Confluence");
         markupOptions.setStyleName("entry_add_standard_input_box");
         notes.setWidget(2, 1, markupOptions);
 
