@@ -24,6 +24,7 @@ import org.jbei.ice.client.entry.view.view.IEntryView;
 import org.jbei.ice.client.entry.view.view.MenuItem;
 import org.jbei.ice.client.entry.view.view.MenuItem.Menu;
 import org.jbei.ice.client.entry.view.view.PermissionsPresenter;
+import org.jbei.ice.client.entry.view.view.SequenceFileUploadHandler;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.event.FeedbackEvent;
@@ -388,8 +389,11 @@ public class EntryPresenter extends AbstractPresenter {
                     case GENERAL:
                         sequencePresenter = display.showEntryDetailView(currentInfo, canEdit,
                             new DeleteSequenceHandler(service, entryId));
-                        sequencePresenter.addFileUploadHandler(new UploadPasteSequenceHandler(
+                        sequencePresenter.addSequencePasteHandler(new UploadPasteSequenceHandler(
                                 service, sequencePresenter));
+                        sequencePresenter
+                                .addSequenceFileUploadHandler(new SequenceFileUploadHandler(
+                                        sequencePresenter));
                         break;
 
                     case SEQ_ANALYSIS:
@@ -493,7 +497,9 @@ public class EntryPresenter extends AbstractPresenter {
                         .isCanEdit());
                 sequencePresenter = display.showEntryDetailView(currentInfo, canEdit,
                     new DeleteSequenceHandler(service, currentInfo.getId()));
-                sequencePresenter.addFileUploadHandler(new UploadPasteSequenceHandler(service,
+                sequencePresenter.addSequencePasteHandler(new UploadPasteSequenceHandler(service,
+                        sequencePresenter));
+                sequencePresenter.addSequenceFileUploadHandler(new SequenceFileUploadHandler(
                         sequencePresenter));
                 break;
 
