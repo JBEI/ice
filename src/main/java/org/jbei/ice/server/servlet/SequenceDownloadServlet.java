@@ -142,7 +142,7 @@ public class SequenceDownloadServlet extends HttpServlet {
 
             response.setContentType("text/plain");
             response.setContentLength(bytes.length);
-            response.setHeader("Content-Disposition", "attachment;filename=" + filename);
+            response.setHeader("Content-Disposition", "attachment;filename=\"" + filename + "\"");
 
             OutputStream os = response.getOutputStream();
             DataInputStream is = new DataInputStream(byteInputStream);
@@ -202,7 +202,7 @@ public class SequenceDownloadServlet extends HttpServlet {
 
             response.setContentType("text/plain");
             response.setContentLength(bytes.length);
-            response.setHeader("Content-Disposition", "attachment;filename=" + filename);
+            response.setHeader("Content-Disposition", "attachment;filename=\"" + filename + "\"");
 
             OutputStream os = response.getOutputStream();
             DataInputStream is = new DataInputStream(byteInputStream);
@@ -253,7 +253,7 @@ public class SequenceDownloadServlet extends HttpServlet {
 
             response.setContentType("text/plain");
             response.setContentLength(bytes.length);
-            response.setHeader("Content-Disposition", "attachment;filename=" + filename);
+            response.setHeader("Content-Disposition", "attachment;filename=\"" + filename + "\"");
 
             OutputStream os = response.getOutputStream();
             DataInputStream is = new DataInputStream(byteInputStream);
@@ -302,7 +302,7 @@ public class SequenceDownloadServlet extends HttpServlet {
 
             response.setContentType("text/xml");
             response.setContentLength(bytes.length);
-            response.setHeader("Content-Disposition", "attachment;filename=" + filename);
+            response.setHeader("Content-Disposition", "attachment;filename=\"" + filename + "\"");
 
             OutputStream os = response.getOutputStream();
             DataInputStream is = new DataInputStream(byteInputStream);
