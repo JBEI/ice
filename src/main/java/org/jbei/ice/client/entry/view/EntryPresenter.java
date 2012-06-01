@@ -434,6 +434,17 @@ public class EntryPresenter extends AbstractPresenter {
         void updatePermission(final PermissionInfo info, PermissionType permissionType) {
 
             final long id = currentInfo.getId();
+            if (isWrite) {
+                switch (info.getType()) {
+                case READ_ACCOUNT:
+                    info.setType(PermissionType.WRITE_ACCOUNT);
+                    break;
+                case READ_GROUP:
+                    info.setType(PermissionType.WRITE_GROUP);
+                    break;
+                }
+            }
+
             service.addPermission(AppController.sessionId, id, info, new AsyncCallback<Boolean>() {
 
                 @Override
