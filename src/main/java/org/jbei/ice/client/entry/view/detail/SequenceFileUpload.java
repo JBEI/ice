@@ -1,5 +1,7 @@
 package org.jbei.ice.client.entry.view.detail;
 
+import gwtupload.client.IUploader.OnFinishUploaderHandler;
+
 import java.util.Arrays;
 
 import org.jbei.ice.client.common.widget.PopupHandler;
@@ -77,6 +79,10 @@ class SequenceFileUpload implements IsWidget, IView {
         pasteSequenceWidget = new PasteSequenceWidget();
         fileUploadWidget = new UploadSequenceFileWidget(entryId);
         presenter = new SequenceFileUploadPresenter(this);
+    }
+
+    public void setFileUploadWidgetFinishHandler(OnFinishUploaderHandler handler) {
+        this.fileUploadWidget.setFinishHandler(handler);
     }
 
     public SequenceFileUploadPresenter getPresenter() {

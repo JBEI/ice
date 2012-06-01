@@ -25,9 +25,6 @@ public interface IEntryView {
 
     void showSequenceView(EntryInfo info, boolean showFlash);
 
-    SequenceViewPanelPresenter showEntryDetailView(EntryInfo info, boolean showEdit,
-            DeleteSequenceHandler deleteHandler);
-
     IEntryFormUpdateSubmit showUpdateForm(EntryInfo info);
 
     PermissionsPresenter getPermissionsWidget();
@@ -83,5 +80,8 @@ public interface IEntryView {
     MultiSelectionModel<SequenceAnalysisInfo> getSequenceTableSelectionModel();
 
     void setSequenceDeleteHandler(ClickHandler handler);
+
+    SequenceViewPanelPresenter showEntryDetailView(EntryInfo info, boolean showEdit,
+            DeleteSequenceHandler deleteHandler);
 
 }

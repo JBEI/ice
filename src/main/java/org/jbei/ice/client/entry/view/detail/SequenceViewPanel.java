@@ -1,5 +1,7 @@
 package org.jbei.ice.client.entry.view.detail;
 
+import gwtupload.client.IUploader.OnFinishUploaderHandler;
+
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.common.widget.Flash;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter.ISequenceView;
@@ -53,6 +55,11 @@ public class SequenceViewPanel extends Composite implements ISequenceView {
         layout.getFlexCellFormatter().setColSpan(1, 0, 6);
         updateSequenceContents();
         this.presenter = new SequenceViewPanelPresenter(this);
+    }
+
+    @Override
+    public void setFinishHandler(OnFinishUploaderHandler handler) {
+        sequenceUpload.setFileUploadWidgetFinishHandler(handler);
     }
 
     public void setDeleteHandler(DeleteSequenceHandler handler) {

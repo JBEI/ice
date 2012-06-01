@@ -1,5 +1,7 @@
 package org.jbei.ice.client.entry.view.detail;
 
+import gwtupload.client.IUploader.OnFinishUploaderHandler;
+
 import org.jbei.ice.client.entry.view.view.DeleteSequenceHandler;
 import org.jbei.ice.shared.dto.EntryInfo;
 
@@ -23,6 +25,8 @@ public class SequenceViewPanelPresenter {
         void hideDialog();
 
         void showSequenceDeleteLink(DeleteSequenceHandler deleteHandler);
+
+        void setFinishHandler(OnFinishUploaderHandler handler);
     }
 
     private final ISequenceView view;
@@ -32,8 +36,12 @@ public class SequenceViewPanelPresenter {
         this.view = view;
     }
 
-    public void addFileUploadHandler(ClickHandler handler) {
+    public void addSequencePasteHandler(ClickHandler handler) {
         this.view.addSubmitSequencePasteHandler(handler);
+    }
+
+    public void addSequenceFileUploadHandler(OnFinishUploaderHandler handler) {
+        this.view.setFinishHandler(handler);
     }
 
     public void updateSequenceView() {
