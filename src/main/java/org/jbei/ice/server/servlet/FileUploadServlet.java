@@ -105,8 +105,6 @@ public class FileUploadServlet extends UploadAction {
             String saveName = item.getName().replaceAll("[\\\\/><\\|\\s\"'{}()\\[\\]]+", "_");
             String tmpDir = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
             File file = new File(tmpDir + File.separator + saveName);
-            if (!file.exists())
-                continue;
 
             try {
                 item.write(file);
