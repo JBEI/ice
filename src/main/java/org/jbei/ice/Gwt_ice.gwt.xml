@@ -3,7 +3,6 @@
   <!-- Inherit the core Web Toolkit stuff.                        -->
   <inherits name='com.google.gwt.user.User'/>
   <inherits name="gwtupload.GWTUpload"/>
-  <inherits name='com.google.gwt.visualization.Visualization'/>
 
   <!--  css for file upload -->  
   <stylesheet src="Upload.css"/>

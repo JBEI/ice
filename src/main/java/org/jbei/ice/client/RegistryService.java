@@ -162,4 +162,6 @@ public interface RegistryService extends RemoteService {
 
     ArrayList<SequenceAnalysisInfo> deleteEntryTraceSequences(String sid, long entryId,
             ArrayList<String> seqId);
+
+    ArrayList<BulkImportDraftInfo> retrieveDraftsPendingVerification(String sid);
 }

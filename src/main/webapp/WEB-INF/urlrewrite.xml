@@ -28,6 +28,16 @@
         <from>/folders(.*)</from>
         <to type="redirect">/#page=collections</to>
     </rule>
+    
+    <rule>
+        <from>/admin(.*)</from>
+        <to type="redirect">/#page=admin</to>
+    </rule>
+    
+    <rule>
+        <from>/login</from>
+        <to type="redirect">/#page=login</to>
+    </rule>
 
     <outbound-rule>
         <note>
