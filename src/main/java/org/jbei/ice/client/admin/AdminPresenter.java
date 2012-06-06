@@ -83,8 +83,7 @@ public class AdminPresenter extends AbstractPresenter {
     }
 
     private void retrieveSavedDrafts() {
-        service.retrieveImportDraftData(AppController.sessionId,
-            AppController.accountInfo.getEmail(), // TODO : retrieve all instead of current user only
+        service.retrieveDraftsPendingVerification(AppController.sessionId,
             new AsyncCallback<ArrayList<BulkImportDraftInfo>>() {
 
                 @Override

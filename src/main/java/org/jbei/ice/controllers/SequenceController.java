@@ -17,8 +17,6 @@ import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
-import org.jbei.ice.lib.models.Part;
-import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
@@ -119,16 +117,19 @@ public class SequenceController extends Controller {
         }
 
         try {
-            if (sequence.getEntry() instanceof Part) {
-                Part part = (Part) sequence.getEntry();
-                AssemblyController assemblyController = new AssemblyController(getAccount());
-                AssemblyStandard assemblyType = assemblyController
-                        .determineAssemblyStandard(sequence);
-                part.setPackageFormat(assemblyType);
+            // TODO : not sure what the intent of this is and it is causing problems so
+            // TODO : commenting this out for now until it is sorted out 
 
-                assemblyController.populateAssemblyAnnotations(sequence);
-
-            }
+            //            if (sequence.getEntry() instanceof Part) {
+            //                Part part = (Part) sequence.getEntry();
+            //                AssemblyController assemblyController = new AssemblyController(getAccount());
+            //                AssemblyStandard assemblyType = assemblyController
+            //                        .determineAssemblyStandard(sequence);
+            //                part.setPackageFormat(assemblyType);
+            //
+            //                assemblyController.populateAssemblyAnnotations(sequence);
+            //
+            //            }
             result = SequenceManager.saveSequence(sequence);
             if (scheduleIndexRebuild) {
                 ApplicationContoller.scheduleBlastIndexRebuildJob();

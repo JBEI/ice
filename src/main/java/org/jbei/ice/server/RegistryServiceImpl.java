@@ -1443,6 +1443,47 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
+    public ArrayList<BulkImportDraftInfo> retrieveDraftsPendingVerification(String sid) {
+        try {
+            Account account = retrieveAccountForSid(sid);
+            if (account == null)
+                return null;
+
+            if (!AccountManager.isModerator(account))
+                return null;
+
+            ArrayList<BulkImport> results = new ArrayList<BulkImport>();
+            results.addAll(BulkImportManager.retrieveAll());
+            ArrayList<BulkImportDraftInfo> info = new ArrayList<BulkImportDraftInfo>();
+
+            if (results != null) {
+                for (BulkImport draft : results) {
+                    BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
+                    List<BulkImportEntryData> primary = draft.getPrimaryData();
+                    if (primary != null)
+                        draftInfo.setCount(draft.getPrimaryData().size());
+                    else
+                        draftInfo.setCount(-1);
+                    draftInfo.setCreated(draft.getCreationTime());
+                    draftInfo.setId(draft.getId());
+                    draftInfo.setName(draft.getName());
+                    draftInfo.setType(EntryAddType.stringToType(draft.getType()));
+                    info.add(draftInfo);
+                }
+            }
+
+            return info;
+
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+            return null;
+        } catch (ManagerException me) {
+            Logger.error(me);
+            return null;
+        }
+    }
+
+    @Override
     public BulkImportDraftInfo retrieveBulkImport(String sid, long id) {
 
         BulkImport bi;

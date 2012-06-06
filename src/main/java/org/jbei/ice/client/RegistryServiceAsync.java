@@ -83,6 +83,9 @@ public interface RegistryServiceAsync {
     void retrieveImportDraftData(String sid, String email,
             AsyncCallback<ArrayList<BulkImportDraftInfo>> callback);
 
+    void retrieveDraftsPendingVerification(String sid,
+            AsyncCallback<ArrayList<BulkImportDraftInfo>> callback);
+
     void createSample(String sessionId, SampleStorage sampleStorage, long entryId,
             AsyncCallback<SampleStorage> callback);
 
