@@ -15,6 +15,7 @@ import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryInfo.EntryType;
+import org.jbei.ice.shared.dto.GroupInfo;
 import org.jbei.ice.shared.dto.NewsItem;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
@@ -189,4 +190,6 @@ public interface RegistryServiceAsync {
 
     void deleteEntryTraceSequences(String sid, long entryId, ArrayList<String> seqId,
             AsyncCallback<ArrayList<SequenceAnalysisInfo>> callback);
+
+    void retrieveAllGroups(String sessionId, AsyncCallback<ArrayList<GroupInfo>> callback);
 }
