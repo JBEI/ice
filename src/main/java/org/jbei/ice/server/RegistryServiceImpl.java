@@ -75,6 +75,7 @@ import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryInfo.EntryType;
+import org.jbei.ice.shared.dto.GroupInfo;
 import org.jbei.ice.shared.dto.NewsItem;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
@@ -2320,5 +2321,51 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
 
         return counts;
+    }
+
+    // Groups //
+    @Override
+    public ArrayList<GroupInfo> retrieveAllGroups(String sessionId) {
+
+        Account account = null;
+        try {
+            account = retrieveAccountForSid(sessionId);
+            if (account == null)
+                return null;
+
+            if (!AccountController.isModerator(account)) {
+                Logger.warn(account.getEmail()
+                        + ": attempting to retrieve admin only feature (groups)");
+                return null;
+            }
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+        }
+
+        // retrieve all groups
+        Logger.info(account.getEmail() + ": retrieving all entries");
+        try {
+            Set<Group> groups = GroupManager.getAll();
+            if (groups == null)
+                return null;
+
+            ArrayList<GroupInfo> infos = new ArrayList<GroupInfo>();
+            for (Group group : groups) {
+                GroupInfo info = new GroupInfo();
+                info.setId(group.getId());
+                info.setLabel(group.getLabel());
+                info.setDescription(group.getDescription());
+                Group parent = group.getParent();
+                if (parent != null) {
+                    info.setParentId(parent.getId());
+                }
+                infos.add(info);
+            }
+
+            return infos;
+        } catch (ManagerException e1) {
+            Logger.error(e1);
+            return null;
+        }
     }
 }

@@ -15,6 +15,7 @@ import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryInfo.EntryType;
+import org.jbei.ice.shared.dto.GroupInfo;
 import org.jbei.ice.shared.dto.NewsItem;
 import org.jbei.ice.shared.dto.SampleInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
@@ -164,4 +165,6 @@ public interface RegistryService extends RemoteService {
             ArrayList<String> seqId);
 
     ArrayList<BulkImportDraftInfo> retrieveDraftsPendingVerification(String sid);
+
+    ArrayList<GroupInfo> retrieveAllGroups(String sessionId);
 }

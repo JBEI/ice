@@ -33,10 +33,8 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
     private int currentCol = 0;
 
     private SequenceViewPanel sequencePanel;
-    private OnFinishUploaderHandler handler;
 
     public EntryDetailView(T info) {
-
         this.info = info;
         table = new FlexTable();
         table.setWidth("100%");
@@ -205,6 +203,7 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
     }
 
     protected void createNotesView() {
+
         FlexTable notes = new FlexTable();
         notes.setCellPadding(0);
         notes.setCellSpacing(0);
@@ -220,7 +219,12 @@ public abstract class EntryDetailView<T extends EntryInfo> extends Composite {
 
         row += 1;
         String description = (info.getLongDescription() == null) ? "" : info.getLongDescription();
-        notes.setHTML(row, 0, "<span class=\"font-80em\">" + description + "</span>");
+        int width = Window.getClientWidth() - 680;
+        if (width <= 0)
+            width = 200;
+        notes.setHTML(row, 0,
+            "<span class=\"font-80em\" style=\"display: block; word-wrap: break-word; width: "
+                    + width + "px\">" + description + "</span>");
 
         table.setWidget(currentRow, 0, notes);
         table.getFlexCellFormatter().setColSpan(currentRow, 0, 4);

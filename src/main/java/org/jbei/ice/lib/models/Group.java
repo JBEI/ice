@@ -1,7 +1,5 @@
 package org.jbei.ice.lib.models;
 
-import java.util.Set;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -47,15 +45,6 @@ public class Group implements IModel {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent")
     protected Group parent;
-
-    public Set<Account> getUsers() {
-        return null;
-
-    }
-
-    public void updateUsers() {
-
-    }
 
     // Getters and setters
     public long getId() {

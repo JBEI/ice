@@ -1,7 +1,6 @@
 package org.jbei.ice.client.admin;
 
+public interface AdminPanelPresenter<T> {
 
-public interface AdminPanelPresenter {
-
-    void go(AdminPanel container);
+    void go(AdminPanel<T> container);
 }
