@@ -10,6 +10,14 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.ui.Label;
 
+/**
+ * Generic data table
+ * 
+ * @author Hector Plahar
+ * 
+ * @param <T>
+ *            type whose fields are to be displayed
+ */
 public abstract class DataTable<T> extends CellTable<T> {
 
     protected interface EntryResources extends Resources {

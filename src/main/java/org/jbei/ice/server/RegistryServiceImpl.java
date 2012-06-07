@@ -855,6 +855,77 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
     }
 
+    @Override
+    public EntryInfo retrieveEntryTipDetails(String sid, long id) {
+        try {
+            Account account = retrieveAccountForSid(sid);
+            if (account == null)
+                return null;
+
+            Entry entry = EntryManager.get(id);
+            if (entry == null)
+                return null;
+
+            if (!PermissionManager.hasReadPermission(entry, account)) {
+                Logger.info(account.getEmail() + ": attempting to view entry details for entry "
+                        + id + " but does not have read permission");
+                return null;
+            }
+
+            Logger.info(account.getEmail() + ": retrieving entry details for " + id);
+
+            ArrayList<Attachment> attachments = AttachmentManager.getByEntry(entry);
+            ArrayList<Sample> samples = SampleManager.getSamplesByEntry(entry);
+            List<TraceSequence> sequences = TraceSequenceManager.getByEntry(entry);
+
+            Map<Sample, LinkedList<Storage>> sampleMap = new HashMap<Sample, LinkedList<Storage>>();
+            for (Sample sample : samples) {
+                Storage storage = sample.getStorage();
+
+                LinkedList<Storage> storageList = new LinkedList<Storage>();
+
+                List<Storage> storages = StorageManager.getStoragesUptoScheme(storage);
+                if (storages != null)
+                    storageList.addAll(storages);
+                Storage scheme = StorageManager.getSchemeContainingParentStorage(storage);
+                if (scheme != null)
+                    storageList.add(scheme);
+
+                sampleMap.put(sample, storageList);
+            }
+
+            boolean hasSequence = (SequenceManager.getByEntry(entry) != null);
+
+            EntryInfo info = EntryToInfoFactory.getInfo(account, entry, attachments, sampleMap,
+                sequences, hasSequence);
+
+            //
+            //  the parsed versions are separated out into complementary fields
+            //
+            String html = RichTextRenderer.richTextToHtml(info.getLongDescriptionType(),
+                info.getLongDescription());
+            String parsed = getParsedNotes(html);
+            info.setLongDescription(info.getLongDescription());
+            info.setParsedDescription(parsed);
+            String parsedShortDesc = WebUtils.linkifyText(account, info.getShortDescription());
+            info.setLinkifiedShortDescription(parsedShortDesc);
+            String parsedLinks = WebUtils.linkifyText(account, info.getLinks());
+            info.setLinkifiedLinks(parsedLinks);
+
+            // group with write permissions
+            info.setCanEdit(PermissionManager.hasWritePermission(entry, account));
+
+            return info;
+
+        } catch (ManagerException e) {
+            Logger.error(e);
+            return null;
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return null;
+        }
+    }
+
     private String getParsedNotes(String s) {
         if (s == null) {
             return null;

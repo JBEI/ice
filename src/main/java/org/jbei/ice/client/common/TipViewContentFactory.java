@@ -1,6 +1,5 @@
 package org.jbei.ice.client.common;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 import org.jbei.ice.client.AppController;
@@ -8,8 +7,6 @@ import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.RegistryService;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.util.ImageUtil;
-import org.jbei.ice.client.entry.view.model.SampleStorage;
-import org.jbei.ice.client.entry.view.table.EntrySampleTable;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.PartInfo;
@@ -20,7 +17,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Widget;
@@ -37,12 +33,17 @@ public class TipViewContentFactory {
 
     public static void getContents(EntryInfo entry, final Callback<Widget> callback) {
 
-        service.retrieveEntryDetails(AppController.sessionId, entry.getId(),
+        service.retrieveEntryTipDetails(AppController.sessionId, entry.getId(),
             new AsyncCallback<EntryInfo>() {
 
                 @Override
                 public void onSuccess(EntryInfo result) {
-                    callback.onSucess(getContents(result));
+                    if (result == null) {
+                        callback.onFailure();
+                        return;
+                    }
+                    Widget contents = getContents(result);
+                    callback.onSucess(contents);
                 }
 
                 @Override
@@ -213,23 +214,23 @@ public class TipViewContentFactory {
         addField(table, 9, 0, "Bio Safety", entry.getBioSafetyLevel() + "");
         addField(table, 10, 0, "IP Information", entry.getIntellectualProperty());
 
-        table.setHTML(11, 0, "<b class=\"entry_tooltip_sub_header\">Samples</b>");
-        table.getFlexCellFormatter().setColSpan(11, 0, 4);
+        //        table.setHTML(11, 0, "<b class=\"entry_tooltip_sub_header\">Samples</b>");
+        //        table.getFlexCellFormatter().setColSpan(11, 0, 4);
 
-        Widget samplesWidget = createSamplesWidget(entry.getSampleStorage());
-        table.setWidget(12, 0, samplesWidget);
-        table.getFlexCellFormatter().setColSpan(12, 0, 4);
+        //        Widget samplesWidget = createSamplesWidget(entry.getSampleStorage());
+        //        table.setWidget(12, 0, samplesWidget);
+        //        table.getFlexCellFormatter().setColSpan(12, 0, 4);
     }
 
-    private static Widget createSamplesWidget(ArrayList<SampleStorage> data) {
-        if (data == null || data.isEmpty())
-            return new HTML("<span class=\"font-75em\">No samples</span>");
-
-        EntrySampleTable sampleTable = new EntrySampleTable();
-        sampleTable.setData(data);
-
-        return sampleTable;
-    }
+    //    private static Widget createSamplesWidget(ArrayList<SampleStorage> data) {
+    //        if (data == null || data.isEmpty())
+    //            return new HTML("<span class=\"font-75em\">No samples</span>");
+    //
+    //        EntrySampleTable sampleTable = new EntrySampleTable();
+    //        sampleTable.setData(data);
+    //
+    //        return sampleTable;
+    //    }
 
     private static String generateDate(Date date) {
         if (date == null)

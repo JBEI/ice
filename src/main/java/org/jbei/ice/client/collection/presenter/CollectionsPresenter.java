@@ -180,7 +180,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                 }
             });
 
-        // handler for "add to" submenu
+        // handler for "add to" sub menu
         AddToHandler addHandler = new AddToHandler(display, new HasEntry(), model,
                 this.collectionsDataTable);
         display.addAddToSubmitHandler(addHandler);

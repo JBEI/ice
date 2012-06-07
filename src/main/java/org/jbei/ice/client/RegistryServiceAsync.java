@@ -46,6 +46,8 @@ public interface RegistryServiceAsync {
 
     void retrieveEntryDetails(String sessionId, long id, AsyncCallback<EntryInfo> callback);
 
+    void retrieveEntryTipDetails(String sessionId, long id, AsyncCallback<EntryInfo> callback);
+
     void sortEntryList(String sessionId, LinkedList<Long> ids, ColumnField field, boolean asc,
             AsyncCallback<LinkedList<Long>> callback);
 
