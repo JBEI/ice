@@ -508,8 +508,10 @@ public class BiobrickAUtils implements IAssemblyUtils {
             newPart.setCreator("System");
             newPart.setCreatorEmail("System");
             EntryController entryController = null;
+            AccountController controller = new AccountController();
+
             try {
-                entryController = new EntryController(AccountController.getSystemAccount());
+                entryController = new EntryController(controller.getSystemAccount());
                 newPart = (Part) entryController.createEntry(newPart);
             } catch (ControllerException e) {
                 throw new UtilityException(e);
@@ -588,8 +590,7 @@ public class BiobrickAUtils implements IAssemblyUtils {
             newFeatures.add(temp);
             newPartSequenceFeatures.addAll(newFeatures);
             try {
-                sequenceController = new SequenceController(
-                        org.jbei.ice.lib.account.AccountController.getSystemAccount());
+                sequenceController = new SequenceController(controller.getSystemAccount());
                 newPartSequence = sequenceController.save(newPartSequence);
             } catch (PermissionException e) {
                 throw new UtilityException(e);

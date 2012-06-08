@@ -416,6 +416,7 @@ public class BiobrickBUtils implements IAssemblyUtils {
     private Sequence joinBiobrickB(Sequence part1Sequence, Sequence part2Sequence)
             throws UtilityException {
         Sequence result = null;
+        AccountController controller = new AccountController();
         Part part1 = (Part) part1Sequence.getEntry();
         Part part2 = (Part) part2Sequence.getEntry();
         if (part1.getPackageFormat().equals(Part.AssemblyStandard.BIOBRICKB)
@@ -460,8 +461,7 @@ public class BiobrickBUtils implements IAssemblyUtils {
             newPart.setCreatorEmail("System");
             EntryController entryController = null;
             try {
-                entryController = new EntryController(
-                        org.jbei.ice.lib.account.AccountController.getSystemAccount());
+                entryController = new EntryController(controller.getSystemAccount());
                 newPart = (Part) entryController.createEntry(newPart);
             } catch (ControllerException e) {
                 throw new UtilityException(e);
@@ -531,7 +531,7 @@ public class BiobrickBUtils implements IAssemblyUtils {
             newFeatures.add(temp);
             newPartSequenceFeatures.addAll(newFeatures);
             try {
-                sequenceController = new SequenceController(AccountController.getSystemAccount());
+                sequenceController = new SequenceController(controller.getSystemAccount());
                 newPartSequence = sequenceController.save(newPartSequence);
             } catch (ControllerException e) {
                 throw new UtilityException(e);

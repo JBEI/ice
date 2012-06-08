@@ -50,7 +50,7 @@ public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Ser
             if (lblLdapAuthenticationWrapper.isWikiUser(loginId)) {
                 lblLdapAuthenticationWrapper.authenticate(loginId, password);
 
-                account = AccountController.getByEmail(loginId + LBL_LDAP_EMAIL_SUFFIX);
+                account = accountController.getByEmail(loginId + LBL_LDAP_EMAIL_SUFFIX);
 
                 Date currentTime = Calendar.getInstance().getTime();
 

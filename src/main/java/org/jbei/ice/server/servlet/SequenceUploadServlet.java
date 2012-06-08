@@ -25,7 +25,9 @@ public class SequenceUploadServlet extends UploadAction {
 
     private static final long serialVersionUID = 1L;
 
-    private Account isLoggedIn(Cookie[] cookies) throws ControllerException {
+    private Account isLoggedIn(AccountController controller, Cookie[] cookies)
+            throws ControllerException {
+
         for (Cookie cookie : cookies) {
             if ("gd-ice".equals(cookie.getName())) {
                 String sid = cookie.getValue();
@@ -34,7 +36,7 @@ public class SequenceUploadServlet extends UploadAction {
 
                 if (!AccountController.isAuthenticated(sid))
                     return null;
-                return AccountController.getAccountBySessionKey(sid);
+                return controller.getAccountBySessionKey(sid);
             }
         }
         return null;
@@ -45,14 +47,15 @@ public class SequenceUploadServlet extends UploadAction {
             throws UploadActionException {
 
         Account account;
+        AccountController controller = new AccountController();
 
         try {
-            account = isLoggedIn(request.getCookies());
+            account = isLoggedIn(controller, request.getCookies());
             if (account == null) {
                 String sessionId = request.getParameter("sid");
                 if (sessionId == null)
                     return "Could not validate account";
-                account = AccountController.getAccountBySessionKey(sessionId);
+                account = controller.getAccountBySessionKey(sessionId);
                 if (account == null)
                     return "Could not validate account";
             }

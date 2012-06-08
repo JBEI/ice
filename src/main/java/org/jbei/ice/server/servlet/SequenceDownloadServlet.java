@@ -39,13 +39,14 @@ public class SequenceDownloadServlet extends HttpServlet {
         String entryId = request.getParameter("entry");
         String type = request.getParameter(TYPE);
         String sid = request.getParameter("sid");
+        AccountController controller = new AccountController();
 
         try {
             account = isLoggedIn(request.getCookies());
             if (account == null) {
                 if (!AccountController.isAuthenticated(sid))
                     return;
-                account = AccountController.getAccountBySessionKey(sid);
+                account = controller.getAccountBySessionKey(sid);
                 if (account == null)
                     return;
             }
@@ -97,6 +98,8 @@ public class SequenceDownloadServlet extends HttpServlet {
     }
 
     private Account isLoggedIn(Cookie[] cookies) throws ControllerException {
+        AccountController controller = new AccountController();
+
         for (Cookie cookie : cookies) {
             if ("gd-ice".equals(cookie.getName())) {
                 String sid = cookie.getValue();
@@ -105,7 +108,7 @@ public class SequenceDownloadServlet extends HttpServlet {
 
                 if (!AccountController.isAuthenticated(sid))
                     return null;
-                return AccountController.getAccountBySessionKey(sid);
+                return controller.getAccountBySessionKey(sid);
             }
         }
         return null;

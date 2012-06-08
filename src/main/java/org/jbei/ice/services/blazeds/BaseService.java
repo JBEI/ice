@@ -15,20 +15,24 @@ import org.jbei.ice.lib.models.Account;
 public class BaseService {
     public static final String BASE_SERVICE_NAME = "BlazeDS";
 
+    protected final AccountController accountController;
+
+    public BaseService() {
+        accountController = new AccountController();
+    }
+
     protected Account getAccountBySessionId(String sessionId) {
         Account account = null;
 
         try {
-            account = AccountController.getAccountBySessionKey(sessionId);
+            account = accountController.getAccountBySessionKey(sessionId);
         } catch (ControllerException e) {
             Logger.error("Failed to get account by sessionId: " + sessionId, e);
-
             return null;
         }
 
         if (account == null) {
             Logger.warn(getServiceName() + "User by sessionId doesn't exist: " + sessionId);
-
             return null;
         }
 

@@ -103,13 +103,14 @@ public class KeioStrainImportHelper {
             ManagerException, UtilityException {
 
         Storage strainSchemeRoot = getStrainRoot();
+        AccountController controller = new AccountController();
 
         ArrayList<Storage> keioSchemes = new ArrayList<Storage>();
         keioSchemes.add(new Storage("Plate", "Keio Copy Plate", StorageType.PLATE96, "", null));
         keioSchemes.add(new Storage("Well", "Keio Copy Well", StorageType.WELL, "", null));
         keioSchemes.add(new Storage("Tube", "Keio Copy Tube", StorageType.TUBE, "", null));
 
-        String systemEmail = AccountController.getSystemAccount().getEmail();
+        String systemEmail = controller.getSystemAccount().getEmail();
         Storage keioScheme = new Storage("Keio Working Copy", "Keio Collection",
                 StorageType.SCHEME, systemEmail, strainSchemeRoot);
         keioScheme.setSchemes(keioSchemes);
@@ -122,12 +123,13 @@ public class KeioStrainImportHelper {
             ControllerException, ManagerException {
 
         Storage strainSchemeRoot = getStrainRoot();
+        AccountController controller = new AccountController();
 
         ArrayList<Storage> keioSchemes = new ArrayList<Storage>();
         keioSchemes.add(new Storage("Plate", "Keio Copy ", StorageType.PLATE96, "", null));
         keioSchemes.add(new Storage("Well", "Keio Copy ", StorageType.WELL, "", null));
 
-        String systemEmail = AccountController.getSystemAccount().getEmail();
+        String systemEmail = controller.getSystemAccount().getEmail();
         Storage keioSchemeBackup = new Storage("Keio Copy", "Keio Copy", StorageType.SCHEME,
                 systemEmail, strainSchemeRoot);
         keioSchemeBackup.setSchemes(keioSchemes);
@@ -283,6 +285,7 @@ public class KeioStrainImportHelper {
         Storage workingCopyScheme = null;
         Storage backupScheme = null;
         int count = 0;
+        AccountController controller = new AccountController();
 
         try {
             workingCopyScheme = createKeioWorkingCopyScheme();
@@ -306,7 +309,7 @@ public class KeioStrainImportHelper {
 
             try {
                 String email = row.getValueFor(Header.CREATOR_EMAIL);
-                account = AccountController.getByEmail(email);
+                account = controller.getByEmail(email);
             } catch (ControllerException e2) {
                 throw new UtilityException(e2);
             }

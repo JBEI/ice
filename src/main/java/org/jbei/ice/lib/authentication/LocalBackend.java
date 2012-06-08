@@ -33,7 +33,7 @@ public class LocalBackend implements IAuthenticationBackend {
         Account account = null;
 
         try {
-            account = AccountController.getByEmail(userId);
+            account = controller.getByEmail(userId);
 
             if ((account == null) || (!controller.isValidPassword(account, password))) {
                 throw new InvalidCredentialsException("Invalid Username or Password!");

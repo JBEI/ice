@@ -416,9 +416,9 @@ public class RegistryAMFAPI extends BaseService {
             if (accountPreferences != null) {
                 accountPreferences.setPreferences(serializedPreferences);
 
-                AccountController.saveAccountPreferences(accountPreferences);
+                accountController.saveAccountPreferences(accountPreferences);
             } else {
-                AccountController.saveAccountPreferences(new AccountPreferences(account,
+                accountController.saveAccountPreferences(new AccountPreferences(account,
                         serializedPreferences, ""));
             }
 
@@ -503,10 +503,9 @@ public class RegistryAMFAPI extends BaseService {
 
             if (accountPreferences != null) {
                 accountPreferences.setRestrictionEnzymes(serializedUserRestrictionEnzymes);
-
-                AccountController.saveAccountPreferences(accountPreferences);
+                accountController.saveAccountPreferences(accountPreferences);
             } else {
-                AccountController.saveAccountPreferences(new AccountPreferences(account, "",
+                accountController.saveAccountPreferences(new AccountPreferences(account, "",
                         serializedUserRestrictionEnzymes));
             }
 

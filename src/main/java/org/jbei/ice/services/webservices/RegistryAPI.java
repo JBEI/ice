@@ -163,9 +163,10 @@ public class RegistryAPI {
     public boolean isModerator(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "login") String login) throws SessionException, ServiceException {
         Account account = validateAccount(sessionId);
+        AccountController controller = new AccountController();
 
         try {
-            return AccountController.isModerator(account);
+            return controller.isModerator(account);
         } catch (ControllerException e) {
             Logger.error(e);
             throw new ServiceException("Error accessing account for " + login);
@@ -1670,16 +1671,17 @@ public class RegistryAPI {
             throws ServiceException, PermissionException, SessionException {
         log(sessionId, "createStrainsample: " + recordId + "," + location + "," + barcode);
         Account account = null;
+        AccountController controller = new AccountController();
 
         try {
-            account = AccountController.getAccountBySessionKey(sessionId);
+            account = controller.getAccountBySessionKey(sessionId);
         } catch (ControllerException e) {
             Logger.error(e);
             throw new ServiceException("Registry Service Internal Error!");
         }
 
         try {
-            if (!AccountController.isModerator(account)) {
+            if (!controller.isModerator(account)) {
                 log("Account " + account.getEmail() + " attempting to access createStrainSample()");
                 throw new PermissionException("Account does not have permissions");
             }
@@ -2151,9 +2153,10 @@ public class RegistryAPI {
         }
 
         Account account = null;
+        AccountController controller = new AccountController();
 
         try {
-            account = AccountController.getAccountBySessionKey(sessionId);
+            account = controller.getAccountBySessionKey(sessionId);
         } catch (ControllerException e) {
             Logger.error(e);
 

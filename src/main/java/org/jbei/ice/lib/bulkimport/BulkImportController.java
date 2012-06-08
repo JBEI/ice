@@ -1,4 +1,4 @@
-package org.jbei.ice.server.bulkimport;
+package org.jbei.ice.lib.bulkimport;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -285,7 +285,8 @@ public class BulkImportController extends Controller {
         bulkImport.setType(type.toString());
         Account emailAccount;
         try {
-            emailAccount = AccountController.getByEmail(email);
+            AccountController controller = new AccountController();
+            emailAccount = controller.getByEmail(email);
             bulkImport.setAccount(emailAccount);
         } catch (ControllerException e) {
             Logger.error(e);

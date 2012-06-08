@@ -163,7 +163,9 @@ public class EntryExportServlet extends HttpServlet {
 
                 if (!AccountController.isAuthenticated(sid))
                     return null;
-                return AccountController.getAccountBySessionKey(sid);
+
+                AccountController controller = new AccountController();
+                return controller.getAccountBySessionKey(sid);
             }
         }
         return null;

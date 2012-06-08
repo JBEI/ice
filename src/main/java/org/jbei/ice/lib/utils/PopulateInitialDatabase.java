@@ -270,8 +270,10 @@ public class PopulateInitialDatabase {
     private static void createSystemAccount() throws UtilityException {
         // Check for, and create system account
         Account systemAccount = null;
+        AccountController controller = new AccountController();
+
         try {
-            systemAccount = AccountController.getByEmail(systemAccountEmail);
+            systemAccount = controller.getByEmail(systemAccountEmail);
         } catch (ControllerException e) {
             throw new UtilityException(e);
         }
@@ -293,7 +295,6 @@ public class PopulateInitialDatabase {
             systemAccount.setLastLoginTime(currentTime);
 
             try {
-                AccountController controller = new AccountController();
                 controller.save(systemAccount);
             } catch (ControllerException e) {
                 String msg = "Could not create system account: " + e.toString();

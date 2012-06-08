@@ -35,6 +35,7 @@ import org.jbei.ice.web.PersistentSessionDataWrapper;
 
 public class AccountController {
 
+    private static String SYSTEM_ACCOUNT_EMAIL = "system";
     private final AccountDAO dao; // TODO : setter injection
 
     public AccountController() {
@@ -171,7 +172,7 @@ public class AccountController {
             Moderator adminModerator = new Moderator();
             adminModerator.setAccount(adminAccount);
             dao.saveModerator(adminModerator);
-        } catch (ManagerException e) {
+        } catch (DAOException e) {
             String msg = "Could not create administrator account";
             Logger.error(msg, e);
             throw new ControllerException(e);
@@ -186,12 +187,12 @@ public class AccountController {
      * @return Accounts
      * @throws ControllerException
      */
-    public static Set<Account> getAllByFirstName() throws ControllerException {
+    public Set<Account> getAllByFirstName() throws ControllerException {
         Set<Account> accounts = null;
 
         try {
-            accounts = AccountDAO.getAllByFirstName();
-        } catch (ManagerException e) {
+            accounts = dao.getAllByFirstName();
+        } catch (DAOException e) {
             throw new ControllerException(e);
         }
 
@@ -206,12 +207,12 @@ public class AccountController {
      * @return {@link Account}
      * @throws ControllerException
      */
-    public static Account getByEmail(String email) throws ControllerException {
+    public Account getByEmail(String email) throws ControllerException {
         Account account = null;
 
         try {
-            account = AccountDAO.getByEmail(email);
-        } catch (ManagerException e) {
+            account = dao.getByEmail(email);
+        } catch (DAOException e) {
             throw new ControllerException(e);
         }
 
@@ -245,12 +246,12 @@ public class AccountController {
      * @return True, if the account is a moderator.
      * @throws ControllerException
      */
-    public static Boolean isModerator(Account account) throws ControllerException {
+    public Boolean isModerator(Account account) throws ControllerException {
         Boolean result = false;
 
         try {
-            result = AccountDAO.isModerator(account);
-        } catch (ManagerException e) {
+            result = dao.isModerator(account);
+        } catch (DAOException e) {
             throw new ControllerException(e);
         }
 
@@ -286,12 +287,12 @@ public class AccountController {
      * @return Account associated with the session key.
      * @throws ControllerException
      */
-    public static Account getAccountBySessionKey(String sessionKey) throws ControllerException {
+    public Account getAccountBySessionKey(String sessionKey) throws ControllerException {
         Account account = null;
 
         try {
-            account = AccountDAO.getAccountByAuthToken(sessionKey);
-        } catch (ManagerException e) {
+            account = dao.getAccountByAuthToken(sessionKey);
+        } catch (DAOException e) {
             throw new ControllerException(e);
         }
 
@@ -364,8 +365,7 @@ public class AccountController {
                 accountPreferences = new AccountPreferences();
 
                 accountPreferences.setAccount(account);
-
-                AccountController.saveAccountPreferences(accountPreferences);
+                saveAccountPreferences(accountPreferences);
             }
 
             account.setIp(ip);
@@ -404,7 +404,7 @@ public class AccountController {
         if (info == null)
             return info;
 
-        boolean isModerator = AccountController.isModerator(account);
+        boolean isModerator = isModerator(account);
         info.setModerator(isModerator);
         info.setSessionId(sessionData.getSessionKey());
 
@@ -463,7 +463,7 @@ public class AccountController {
      * @param accountPreferences
      * @throws ControllerException
      */
-    public static void saveAccountPreferences(AccountPreferences accountPreferences)
+    public void saveAccountPreferences(AccountPreferences accountPreferences)
             throws ControllerException {
         try {
             AccountPreferencesManager.save(accountPreferences);
@@ -478,11 +478,11 @@ public class AccountController {
      * @return Account for the system account.
      * @throws ControllerException
      */
-    public static Account getSystemAccount() throws ControllerException {
+    public Account getSystemAccount() throws ControllerException {
         Account account = null;
         try {
-            account = AccountDAO.getByEmail("system");
-        } catch (ManagerException e) {
+            account = dao.getByEmail(SYSTEM_ACCOUNT_EMAIL);
+        } catch (DAOException e) {
             throw new ControllerException(e);
         }
         return account;
@@ -513,15 +513,15 @@ public class AccountController {
     public Set<Account> getMatchingAccounts(String query, int limit) throws ControllerException {
         try {
             return dao.getMatchingAccounts(query, limit);
-        } catch (ManagerException e) {
+        } catch (DAOException e) {
             throw new ControllerException(e);
         }
     }
 
-    public static Account getAccountByAuthToken(String sessionKey) throws ControllerException {
+    public Account getAccountByAuthToken(String sessionKey) throws ControllerException {
         try {
-            return AccountDAO.getAccountByAuthToken(sessionKey);
-        } catch (ManagerException e) {
+            return dao.getAccountByAuthToken(sessionKey);
+        } catch (DAOException e) {
             throw new ControllerException(e);
         }
     }

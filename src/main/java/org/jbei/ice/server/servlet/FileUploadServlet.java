@@ -57,7 +57,8 @@ public class FileUploadServlet extends UploadAction {
 
                 if (!AccountController.isAuthenticated(sid))
                     return null;
-                return AccountController.getAccountBySessionKey(sid);
+                AccountController controller = new AccountController();
+                return controller.getAccountBySessionKey(sid);
             }
         }
         return null;
@@ -82,7 +83,8 @@ public class FileUploadServlet extends UploadAction {
             if (account == null) {
                 if (!AccountController.isAuthenticated(sid))
                     return "";
-                account = AccountController.getAccountBySessionKey(sid);
+                AccountController controller = new AccountController();
+                account = controller.getAccountBySessionKey(sid);
                 if (account == null)
                     return "";
             }

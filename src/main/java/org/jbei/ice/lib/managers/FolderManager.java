@@ -127,6 +127,8 @@ public class FolderManager {
 
     public static Folder removeFolderContents(long folderId, ArrayList<Long> entryIds)
             throws ManagerException {
+        AccountController controller = new AccountController();
+
         Session session = DAO.newSession();
         try {
             session.beginTransaction();
@@ -140,7 +142,7 @@ public class FolderManager {
             boolean isSystemFolder = false;
             try {
                 isSystemFolder = folder.getOwnerEmail().equals(
-                    AccountController.getSystemAccount().getEmail());
+                    controller.getSystemAccount().getEmail());
             } catch (ControllerException e) {
                 e.printStackTrace();
             }

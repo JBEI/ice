@@ -25,6 +25,7 @@ import org.jbei.ice.controllers.StorageController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
+import org.jbei.ice.lib.bulkimport.BulkImportController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.BulkImportManager;
@@ -60,7 +61,6 @@ import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.lib.utils.RichTextRenderer;
 import org.jbei.ice.lib.vo.IDNASequence;
-import org.jbei.ice.server.bulkimport.BulkImportController;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.EntryAddType;
@@ -123,13 +123,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public ArrayList<AccountInfo> retrieveAllUserAccounts(String sid) {
+        AccountController controller = new AccountController();
 
         try {
             Account account = retrieveAccountForSid(sid);
             if (account == null)
                 return null;
 
-            boolean isModerator = AccountController.isModerator(account);
+            boolean isModerator = controller.isModerator(account);
             if (!isModerator) {
                 Logger.warn(account.getEmail()
                         + " attempting to retrieve all user accounts without moderation privileges");
@@ -139,7 +140,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.info(account.getEmail() + ": retrieving all user accounts");
 
             // retrieve all user accounts
-            Set<Account> accounts = AccountController.getAllByFirstName();
+            Set<Account> accounts = controller.getAllByFirstName();
             if (accounts == null)
                 return null;
 
@@ -156,7 +157,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 }
 
                 info.setEmail(userAccount.getEmail());
-                info.setModerator(AccountController.isModerator(userAccount));
+                info.setModerator(controller.isModerator(userAccount));
                 info.setFirstName(userAccount.getFirstName());
                 info.setLastName(userAccount.getLastName());
                 infos.add(info);
@@ -254,8 +255,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public AccountInfo retrieveAccount(String email) {
         Account account = null;
+        AccountController controller = new AccountController();
+
         try {
-            account = AccountController.getByEmail(email);
+            account = controller.getByEmail(email);
         } catch (ControllerException e) {
             Logger.error("Error retrieving account", e);
         }
@@ -273,6 +276,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public AccountInfo updateAccount(String sid, String email, AccountInfo info) {
         Account account = null;
+        AccountController controller = new AccountController();
 
         try {
             account = retrieveAccountForSid(sid);
@@ -280,10 +284,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             // require a user is a moderator or updating self account
-            if (!AccountController.isModerator(account) && !email.equals(account.getEmail()))
+            if (!controller.isModerator(account) && !email.equals(account.getEmail()))
                 return null;
 
-            account = AccountController.getByEmail(email);
+            account = controller.getByEmail(email);
             if (account == null)
                 return null;
 
@@ -296,7 +300,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             account.setInstitution(info.getInstitution());
             account.setDescription(info.getDescription());
 
-            AccountController controller = new AccountController();
             controller.save(account);
 
             return info;
@@ -310,14 +313,16 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public AccountInfo sessionValid(String sid) {
 
+        AccountController controller = new AccountController();
+
         try {
             if (AccountController.isAuthenticated(sid)) {
-                Account account = AccountController.getAccountBySessionKey(sid);
+                Account account = controller.getAccountBySessionKey(sid);
                 AccountInfo info = this.accountToInfo(account);
                 int entryCount = EntryManager.getEntryCountBy(info.getEmail());
                 info.setUserEntryCount(entryCount);
 
-                boolean isModerator = AccountController.isModerator(account);
+                boolean isModerator = controller.isModerator(account);
                 info.setModerator(isModerator);
 
                 long visibleEntryCount;
@@ -444,7 +449,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             Logger.info(account.getEmail() + ": retrieving user collections for user " + userId);
-            Account userAccount = AccountController.getByEmail(userId);
+            AccountController controller = new AccountController();
+            Account userAccount = controller.getByEmail(userId);
 
             // get user folder
             List<Folder> userFolders = FolderManager.getFoldersByOwner(userAccount);
@@ -479,7 +485,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             Logger.info(account.getEmail() + ": retrieving  collections");
-            Account system = AccountController.getSystemAccount();
+            AccountController controller = new AccountController();
+            Account system = controller.getSystemAccount();
             List<Folder> folders = FolderManager.getFoldersByOwner(system);
 
             for (Folder folder : folders) {
@@ -528,7 +535,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (folder == null)
                 return null;
 
-            Account system = AccountController.getSystemAccount();
+            AccountController controller = new AccountController();
+            Account system = controller.getSystemAccount();
             boolean isSystem = system.getEmail().equals(folder.getOwnerEmail());
             FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), isSystem);
 
@@ -560,7 +568,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (folder == null)
                 return null;
 
-            Account system = AccountController.getSystemAccount();
+            AccountController controller = new AccountController();
+            Account system = controller.getSystemAccount();
             boolean isSystem = system.getEmail().equals(folder.getOwnerEmail());
             if (isSystem) {
                 Logger.info("Cannot delete system folder");
@@ -616,6 +625,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public FolderDetails retrieveAllVisibleEntryIDs(String sid) {
         Account account = null;
+        AccountController controller = new AccountController();
 
         try {
             account = retrieveAccountForSid(sid);
@@ -626,7 +636,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             EntryController entryController = new EntryController(account);
 
             ArrayList<Long> entries;
-            if (AccountController.isModerator(account))
+            if (controller.isModerator(account))
                 entries = entryController.getAllEntryIDs();
             else {
                 entries = new ArrayList<Long>();
@@ -644,12 +654,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     protected Account retrieveAccountForSid(String sid) throws ControllerException {
         boolean isAuthenticated = AccountController.isAuthenticated(sid);
+        AccountController controller = new AccountController();
+
         if (!isAuthenticated) {
             Logger.info("Session failed authentication: " + sid);
             return null;
         }
 
-        return AccountController.getAccountBySessionKey(sid);
+        return controller.getAccountBySessionKey(sid);
     }
 
     @Override
@@ -1174,6 +1186,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public FolderDetails retrieveFolderDetails(String sid, long folderId) {
         Account account = null;
+        AccountController controller = new AccountController();
 
         try {
             account = this.retrieveAccountForSid(sid);
@@ -1189,7 +1202,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             long id = folder.getId();
             boolean isSystemFolder = folder.getOwnerEmail().equals(
-                AccountController.getSystemAccount().getEmail());
+                controller.getSystemAccount().getEmail());
             FolderDetails details = new FolderDetails(id, folder.getName(), isSystemFolder);
             BigInteger folderSize = FolderManager.getFolderSize(id);
             details.setCount(folderSize);
@@ -1353,8 +1366,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             Logger.info(account.getEmail() + ": retrieving profile info for " + userId);
-
-            account = AccountController.getByEmail(userId);
+            AccountController controller = new AccountController();
+            account = controller.getByEmail(userId);
             if (account == null)
                 return null;
 
@@ -1363,7 +1376,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             // get the count for samples
             int sampleCount = SampleManager.getSampleCountBy(accountInfo.getEmail());
             accountInfo.setUserSampleCount(sampleCount);
-            boolean isModerator = AccountController.isModerator(account);
+            boolean isModerator = controller.isModerator(account);
             long visibleEntryCount;
             if (isModerator)
                 visibleEntryCount = EntryManager.getAllEntryCount();
@@ -1471,7 +1484,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            if (!AccountController.isModerator(account))
+            AccountController controller = new AccountController();
+            if (!controller.isModerator(account))
                 return null;
 
             ArrayList<BulkImport> results = new ArrayList<BulkImport>();
@@ -2317,12 +2331,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public HashMap<EntryType, Long> retrieveEntryCounts(String sessionId) {
         // admin only 
         Account account = null;
+        AccountController controller = new AccountController();
+
         try {
             account = retrieveAccountForSid(sessionId);
             if (account == null)
                 return null;
 
-            if (!AccountController.isModerator(account)) {
+            if (!controller.isModerator(account)) {
                 Logger.warn(account.getEmail()
                         + ": attempting to retrieve admin only feature (entry Counts)");
                 return null;
@@ -2351,12 +2367,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public ArrayList<GroupInfo> retrieveAllGroups(String sessionId) {
 
         Account account = null;
+        AccountController controller = new AccountController();
+
         try {
             account = retrieveAccountForSid(sessionId);
             if (account == null)
                 return null;
 
-            if (!AccountController.isModerator(account)) {
+            if (!controller.isModerator(account)) {
                 Logger.warn(account.getEmail()
                         + ": attempting to retrieve admin only feature (groups)");
                 return null;

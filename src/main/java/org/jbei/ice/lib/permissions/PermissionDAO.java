@@ -42,8 +42,10 @@ public class PermissionDAO extends HibernateRepository {
         boolean result = false;
 
         Account account = null;
+        AccountController controller = new AccountController();
+
         try {
-            account = AccountController.getAccountByAuthToken(sessionKey);
+            account = controller.getAccountByAuthToken(sessionKey);
 
             if (account != null) {
                 result = hasReadPermission(recordId, account)
@@ -69,10 +71,11 @@ public class PermissionDAO extends HibernateRepository {
      */
     public static boolean hasReadPermission(String recordId, Account account) {
         boolean result = false;
+        AccountController controller = new AccountController();
 
         if (recordId != null && !recordId.isEmpty() && account != null) {
             try {
-                if (AccountController.isModerator(account)) {
+                if (controller.isModerator(account)) {
                     result = true;
                 } else {
                     result = groupHasReadPermission(recordId, account)
@@ -97,10 +100,11 @@ public class PermissionDAO extends HibernateRepository {
      */
     public static boolean hasReadPermission(long entryId, Account account) {
         boolean result = false;
+        AccountController controller = new AccountController();
 
         if (entryId > 0 && account != null) {
             try {
-                if (AccountController.isModerator(account)) {
+                if (controller.isModerator(account)) {
                     result = true;
                 } else {
                     result = groupHasReadPermission(entryId, account)
@@ -127,8 +131,10 @@ public class PermissionDAO extends HibernateRepository {
     public static boolean hasWritePermission(long entryId, String sessionKey) {
         boolean result = false;
         Entry entry;
+        AccountController controller = new AccountController();
+
         try {
-            Account account = AccountController.getAccountByAuthToken(sessionKey);
+            Account account = controller.getAccountByAuthToken(sessionKey);
             if (account != null) {
                 entry = EntryManager.get(entryId);
                 if (entry != null) {
@@ -214,8 +220,10 @@ public class PermissionDAO extends HibernateRepository {
     public static boolean hasReadPermission(Entry entry, Account account) {
         boolean result = false;
         if (entry != null && account != null) {
+            AccountController controller = new AccountController();
+
             try {
-                if (AccountController.isModerator(account)) {
+                if (controller.isModerator(account)) {
                     result = true;
                 } else {
                     result = userHasReadPermission(entry, account)
@@ -240,8 +248,10 @@ public class PermissionDAO extends HibernateRepository {
     public static boolean hasWritePermission(Entry entry, Account account) {
         boolean result = false;
         if (entry != null && account != null) {
+            AccountController controller = new AccountController();
+
             try {
-                if (AccountController.isModerator(account)) {
+                if (controller.isModerator(account)) {
                     result = true;
                 } else {
                     result = userHasWritePermission(entry, account)

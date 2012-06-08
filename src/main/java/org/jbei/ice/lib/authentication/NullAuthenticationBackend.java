@@ -25,9 +25,10 @@ public class NullAuthenticationBackend implements IAuthenticationBackend {
         }
 
         Account account = null;
+        AccountController controller = new AccountController();
 
         try {
-            account = AccountController.getByEmail(userId);
+            account = controller.getByEmail(userId);
         } catch (ControllerException e) {
             throw new AuthenticationBackendException(e);
         }
