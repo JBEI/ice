@@ -15,7 +15,6 @@ import java.util.Set;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
@@ -28,6 +27,7 @@ import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.vo.IDNASequence;
+import org.jbei.ice.server.account.AccountDAO;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -117,7 +117,7 @@ public class ImportHelper {
         for (HashMap<String, String> item : parsedContent) {
             Account account = null;
             try {
-                account = AccountManager.getByEmail(item.get("creatorEmail"));
+                account = AccountDAO.getByEmail(item.get("creatorEmail"));
             } catch (ManagerException e2) {
                 throw new UtilityException(e2);
             }
@@ -322,7 +322,7 @@ public class ImportHelper {
 
             Account account = null;
             try {
-                account = AccountManager.getByEmail(item.get("creatorEmail"));
+                account = AccountDAO.getByEmail(item.get("creatorEmail"));
             } catch (ManagerException e2) {
                 throw new UtilityException(e2);
             }

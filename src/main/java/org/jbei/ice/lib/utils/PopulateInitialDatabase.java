@@ -12,11 +12,11 @@ import java.util.regex.Pattern;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.ConfigurationManager;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.GroupManager;
@@ -31,7 +31,6 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.Group;
-import org.jbei.ice.lib.models.Moderator;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.models.SequenceFeatureAttribute;
 import org.jbei.ice.lib.models.Storage;
@@ -252,40 +251,14 @@ public class PopulateInitialDatabase {
      * @throws UtilityException
      */
     private static void createAdminAccount() throws UtilityException {
-        Account adminAccount = null;
         try {
-            adminAccount = AccountManager.getByEmail(adminAccountEmail);
-        } catch (ManagerException e) {
+            AccountController controller = new AccountController();
+            Account adminAccount = controller.createAdminAccount(adminAccountEmail,
+                adminAccountDefaultPassword);
+            if (adminAccount == null)
+                throw new UtilityException("Could not create admin account");
+        } catch (ControllerException e) {
             throw new UtilityException(e);
-        }
-
-        if (adminAccount == null) {
-            adminAccount = new Account();
-            adminAccount.setEmail(adminAccountEmail);
-            adminAccount.setLastName("Administrator");
-            adminAccount.setFirstName("");
-            adminAccount.setInitials("");
-            adminAccount.setInstitution("");
-            adminAccount
-                    .setPassword(AccountController.encryptPassword(adminAccountDefaultPassword));
-            adminAccount.setDescription("Administrator Account");
-            adminAccount.setIsSubscribed(0);
-
-            adminAccount.setIp("");
-            Date currentTime = Calendar.getInstance().getTime();
-            adminAccount.setCreationTime(currentTime);
-            adminAccount.setModificationTime(currentTime);
-            adminAccount.setLastLoginTime(currentTime);
-
-            try {
-                AccountManager.save(adminAccount);
-                Moderator adminModerator = new Moderator();
-                adminModerator.setAccount(adminAccount);
-                AccountManager.saveModerator(adminModerator);
-            } catch (ManagerException e) {
-                String msg = "Could not create administrator account: " + e.toString();
-                Logger.error(msg, e);
-            }
         }
     }
 
@@ -298,8 +271,8 @@ public class PopulateInitialDatabase {
         // Check for, and create system account
         Account systemAccount = null;
         try {
-            systemAccount = AccountManager.getByEmail(systemAccountEmail);
-        } catch (ManagerException e) {
+            systemAccount = AccountController.getByEmail(systemAccountEmail);
+        } catch (ControllerException e) {
             throw new UtilityException(e);
         }
         if (systemAccount == null) {
@@ -320,8 +293,9 @@ public class PopulateInitialDatabase {
             systemAccount.setLastLoginTime(currentTime);
 
             try {
-                AccountManager.save(systemAccount);
-            } catch (ManagerException e) {
+                AccountController controller = new AccountController();
+                controller.save(systemAccount);
+            } catch (ControllerException e) {
                 String msg = "Could not create system account: " + e.toString();
                 Logger.error(msg, e);
             }

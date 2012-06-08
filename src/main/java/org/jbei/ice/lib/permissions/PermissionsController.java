@@ -2,10 +2,10 @@ package org.jbei.ice.lib.permissions;
 
 import java.util.Set;
 
-import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.EntryPermissionVerifier;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.GroupManager;
 import org.jbei.ice.lib.managers.ManagerException;
@@ -16,8 +16,11 @@ import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 
 public class PermissionsController extends Controller {
 
+    private final AccountController accountController;
+
     public PermissionsController(Account account) {
         super(account, new EntryPermissionVerifier());
+        accountController = new AccountController();
     }
 
     /**
@@ -36,7 +39,7 @@ public class PermissionsController extends Controller {
         try {
             switch (type) {
             case READ_ACCOUNT:
-                Account readAccount = AccountController.get(id);
+                Account readAccount = accountController.get(id);
                 if (readAccount != null && !readAccount.getEmail().equals(account.getEmail()))
                     addReadUser(entry, readAccount);
                 break;
@@ -48,7 +51,7 @@ public class PermissionsController extends Controller {
                 break;
 
             case WRITE_ACCOUNT:
-                Account writeAccount = AccountController.get(id);
+                Account writeAccount = accountController.get(id);
                 if (writeAccount != null && !writeAccount.getEmail().equals(account.getEmail())) {
                     addWriteUser(entry, writeAccount);
                     addReadUser(entry, writeAccount);
@@ -92,7 +95,7 @@ public class PermissionsController extends Controller {
 
             switch (type) {
             case READ_ACCOUNT:
-                Account readAccount = AccountController.get(id);
+                Account readAccount = accountController.get(id);
                 if (readAccount != null && !readAccount.getEmail().equals(account.getEmail())) // cannot remove yourself
                     removeReadUser(entry, readAccount);
                 break;
@@ -104,7 +107,7 @@ public class PermissionsController extends Controller {
                 break;
 
             case WRITE_ACCOUNT:
-                Account writeAccount = AccountController.get(id);
+                Account writeAccount = accountController.get(id);
                 if (writeAccount != null && !writeAccount.getEmail().equals(account.getEmail())) { // cannot remove yourself 
                     removeWriteUser(entry, writeAccount);
                     removeReadUser(entry, writeAccount);

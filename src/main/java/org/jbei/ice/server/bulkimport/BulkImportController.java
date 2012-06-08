@@ -19,8 +19,8 @@ import org.apache.commons.lang.ArrayUtils;
 import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.EntryPermissionVerifier;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.BulkImportManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
@@ -285,9 +285,9 @@ public class BulkImportController extends Controller {
         bulkImport.setType(type.toString());
         Account emailAccount;
         try {
-            emailAccount = AccountManager.getByEmail(email);
+            emailAccount = AccountController.getByEmail(email);
             bulkImport.setAccount(emailAccount);
-        } catch (ManagerException e) {
+        } catch (ControllerException e) {
             Logger.error(e);
             return null;
         }

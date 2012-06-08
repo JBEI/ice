@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.authentication;
 
-import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.models.Account;
 
 /**

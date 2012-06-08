@@ -11,7 +11,6 @@ import javax.jws.WebParam;
 import javax.jws.WebService;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SampleController;
 import org.jbei.ice.controllers.SearchController;
@@ -19,11 +18,11 @@ import org.jbei.ice.controllers.SequenceAnalysisController;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.StorageController;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.composers.formatters.FastaFormatter;
 import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.StorageManager;
@@ -78,7 +77,8 @@ public class RegistryAPI {
         String sessionId = null;
 
         try {
-            SessionData sessionData = AccountController.authenticate(login, password);
+            AccountController controller = new AccountController();
+            SessionData sessionData = controller.authenticate(login, password);
 
             sessionId = sessionData.getSessionKey();
         } catch (InvalidCredentialsException e) {
@@ -1679,11 +1679,11 @@ public class RegistryAPI {
         }
 
         try {
-            if (!AccountManager.isModerator(account)) {
+            if (!AccountController.isModerator(account)) {
                 log("Account " + account.getEmail() + " attempting to access createStrainSample()");
                 throw new PermissionException("Account does not have permissions");
             }
-        } catch (ManagerException e) {
+        } catch (ControllerException e) {
             log(e.getMessage());
             throw new ServiceException("Registry Service Internal Error!");
         }

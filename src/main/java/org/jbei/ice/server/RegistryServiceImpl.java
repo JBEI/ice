@@ -16,8 +16,6 @@ import java.util.Set;
 import org.apache.commons.lang.ArrayUtils;
 import org.jbei.ice.client.RegistryService;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
-import org.jbei.ice.controllers.AccountController;
-import org.jbei.ice.controllers.AttachmentController;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SampleController;
 import org.jbei.ice.controllers.SearchController;
@@ -25,9 +23,9 @@ import org.jbei.ice.controllers.SequenceAnalysisController;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.StorageController;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.BulkImportManager;
 import org.jbei.ice.lib.managers.EntryManager;
@@ -106,7 +104,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public AccountInfo login(String name, String pass) {
 
         try {
-            SessionData sessionData = AccountController.authenticate(name, pass);
+            AccountController controller = new AccountController();
+            SessionData sessionData = controller.authenticate(name, pass);
             Logger.info("User by login '" + name + "' successfully logged in");
 
             Account account = sessionData.getAccount();
@@ -666,7 +665,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             EntryController entryController = new EntryController(account);
 
             ArrayList<Long> entries;
-            if (AccountManager.isModerator(account))
+            if (AccountDAO.isModerator(account))
                 entries = entryController.getAllEntryIDs();
             else {
                 entries = new ArrayList<Long>();
@@ -1231,7 +1230,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             long id = folder.getId();
             boolean isSystemFolder = folder.getOwnerEmail().equals(
-                AccountManager.getSystemAccount().getEmail());
+                AccountDAO.getSystemAccount().getEmail());
             FolderDetails details = new FolderDetails(id, folder.getName(), isSystemFolder);
             BigInteger folderSize = FolderManager.getFolderSize(id);
             details.setCount(folderSize);
@@ -1396,7 +1395,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             Logger.info(account.getEmail() + ": retrieving profile info for " + userId);
 
-            account = AccountManager.getByEmail(userId);
+            account = AccountDAO.getByEmail(userId);
             if (account == null)
                 return null;
 
@@ -1405,7 +1404,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             // get the count for samples
             int sampleCount = SampleManager.getSampleCountBy(accountInfo.getEmail());
             accountInfo.setUserSampleCount(sampleCount);
-            boolean isModerator = AccountManager.isModerator(account);
+            boolean isModerator = AccountDAO.isModerator(account);
             long visibleEntryCount;
             if (isModerator)
                 visibleEntryCount = EntryManager.getAllEntryCount();
@@ -1513,7 +1512,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            if (!AccountManager.isModerator(account))
+            if (!AccountDAO.isModerator(account))
                 return null;
 
             ArrayList<BulkImport> results = new ArrayList<BulkImport>();
@@ -2052,8 +2051,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         try {
             // TODO : split tokens if there are spaces. this is for a manager
-            Set<Account> accounts = AccountManager.getMatchingAccounts(req.getQuery(),
-                req.getLimit());
+            AccountController controller = new AccountController();
+            Set<Account> accounts = controller.getMatchingAccounts(req.getQuery(), req.getLimit());
             for (Account account : accounts) {
                 PermissionSuggestion object = new PermissionSuggestion(PermissionType.READ_ACCOUNT,
                         account.getId(), account.getFullName());
@@ -2066,6 +2065,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 suggestions.add(object);
             }
         } catch (ManagerException e) {
+            Logger.error(e);
+        } catch (ControllerException e) {
             Logger.error(e);
         }
 

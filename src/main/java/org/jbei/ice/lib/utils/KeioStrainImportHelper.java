@@ -15,7 +15,6 @@ import java.util.Set;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SampleController;
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.ConfigurationManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.StorageManager;
@@ -32,6 +31,7 @@ import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.server.account.AccountDAO;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -108,7 +108,7 @@ public class KeioStrainImportHelper {
         keioSchemes.add(new Storage("Well", "Keio Copy Well", StorageType.WELL, "", null));
         keioSchemes.add(new Storage("Tube", "Keio Copy Tube", StorageType.TUBE, "", null));
 
-        String systemEmail = AccountManager.getSystemAccount().getEmail();
+        String systemEmail = AccountDAO.getSystemAccount().getEmail();
         Storage keioScheme = new Storage("Keio Working Copy", "Keio Collection",
                 StorageType.SCHEME, systemEmail, strainSchemeRoot);
         keioScheme.setSchemes(keioSchemes);
@@ -125,7 +125,7 @@ public class KeioStrainImportHelper {
         keioSchemes.add(new Storage("Plate", "Keio Copy ", StorageType.PLATE96, "", null));
         keioSchemes.add(new Storage("Well", "Keio Copy ", StorageType.WELL, "", null));
 
-        String systemEmail = AccountManager.getSystemAccount().getEmail();
+        String systemEmail = AccountDAO.getSystemAccount().getEmail();
         Storage keioSchemeBackup = new Storage("Keio Copy", "Keio Copy", StorageType.SCHEME,
                 systemEmail, strainSchemeRoot);
         keioSchemeBackup.setSchemes(keioSchemes);
@@ -302,7 +302,7 @@ public class KeioStrainImportHelper {
 
             try {
                 String email = row.getValueFor(Header.CREATOR_EMAIL);
-                account = AccountManager.getByEmail(email);
+                account = AccountDAO.getByEmail(email);
             } catch (ManagerException e2) {
                 throw new UtilityException(e2);
             }

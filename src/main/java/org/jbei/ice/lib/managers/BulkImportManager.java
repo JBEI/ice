@@ -8,7 +8,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
-import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
@@ -79,7 +78,7 @@ public class BulkImportManager {
             throw new ManagerException("Cannot submit null data");
 
         try {
-            Account account = AccountController.getSystemAccount();
+            Account account = org.jbei.ice.lib.account.AccountController.getSystemAccount();
             data.setAccount(account);
             createBulkImportRecord(data);
         } catch (ControllerException e) {

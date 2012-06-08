@@ -10,6 +10,8 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
@@ -135,8 +137,13 @@ public class FolderManager {
                 throw new ManagerException("Cannot retrieve folder with id \"" + folderId + "\"");
 
             folder.getContents().size();
-            boolean isSystemFolder = folder.getOwnerEmail().equals(
-                AccountManager.getSystemAccount().getEmail());
+            boolean isSystemFolder = false;
+            try {
+                isSystemFolder = folder.getOwnerEmail().equals(
+                    AccountController.getSystemAccount().getEmail());
+            } catch (ControllerException e) {
+                e.printStackTrace();
+            }
             if (isSystemFolder) {
                 session.getTransaction().commit();
                 throw new ManagerException("Cannot modify non user folder " + folder.getName());

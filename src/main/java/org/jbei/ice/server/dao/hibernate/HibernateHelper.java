@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.dao;
+package org.jbei.ice.server.dao.hibernate;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -8,13 +8,17 @@ import org.jbei.ice.lib.logging.Logger;
 /**
  * Helper class to Initialize Hibernate, and obtain new sessions.
  * 
- * @author Zinovii Dmytriv, Timothy Ham
- * 
+ * @author Zinovii Dmytriv, Timothy Ham, Hector Plahar
  */
 public class HibernateHelper {
+
+    // thread safe global object that is instantiated once
     private static SessionFactory sessionFactory;
 
-    // public methods
+    // singleton
+    private HibernateHelper() {
+    }
+
     /**
      * Open a new {@link Session} from the sessionFactory.
      * 
@@ -31,15 +35,6 @@ public class HibernateHelper {
         initialize(Type.MOCK);
     }
 
-    // private methods
-    private HibernateHelper() {
-        // singleton
-    }
-
-    private enum Type {
-        NORMAL, MOCK;
-    }
-
     private static synchronized void initialize(Type type) {
         if (sessionFactory == null) { // initialize only when there is no previous sessionFactory
             if (type == Type.MOCK) {
@@ -53,6 +48,7 @@ public class HibernateHelper {
                 }
             } else {
                 try {
+                    // Create the SessionFactory from hibernate.cfg.xml
                     sessionFactory = new AnnotationConfiguration().configure()
                             .buildSessionFactory();
                 } catch (Throwable e) {
@@ -74,6 +70,13 @@ public class HibernateHelper {
             initialize(Type.NORMAL);
         }
         return sessionFactory;
+    }
+
+    /**
+     * initialization types
+     */
+    private enum Type {
+        NORMAL, MOCK;
     }
 
 }

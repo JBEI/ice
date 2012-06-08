@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.utils.LblLdapAuthenticationWrapper;
 import org.jbei.ice.lib.utils.LblLdapAuthenticationWrapper.LblLdapAuthenticationWrapperException;
@@ -15,11 +15,16 @@ import org.jbei.ice.lib.utils.LblLdapAuthenticationWrapper.LblLdapAuthentication
  * aka LBL). This class could be used as a template for creating one's own ldap authentication back
  * end.
  * 
- * @author Timothy Ham, Zinovii Dmytriv, Joanna Chen
+ * @author Timothy Ham, Zinovii Dmytriv, Joanna Chen, Hector Plahar
  * 
  */
 public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Serializable {
     private static String LBL_LDAP_EMAIL_SUFFIX = "@lbl.gov";
+    private AccountController accountController;
+
+    public LblLdapAuthenticationBackend() {
+        accountController = new AccountController();
+    }
 
     @Override
     public String getBackendName() {
@@ -65,7 +70,7 @@ public class LblLdapAuthenticationBackend implements IAuthenticationBackend, Ser
                 account.setIp("");
                 account.setModificationTime(currentTime);
 
-                AccountController.save(account);
+                accountController.save(account);
             } else {
                 // try local backend
                 LocalBackend localBackend = new LocalBackend();

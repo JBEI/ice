@@ -1,7 +1,7 @@
 package org.jbei.ice.services.blazeds;
 
-import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.logging.UsageLogger;
 import org.jbei.ice.lib.models.Account;

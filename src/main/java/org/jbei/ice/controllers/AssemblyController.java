@@ -1,22 +1,15 @@
 package org.jbei.ice.controllers;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.EntryPermissionVerifier;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.AccountManager;
-import org.jbei.ice.lib.managers.EntryManager;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.BiobrickAUtils;
 import org.jbei.ice.lib.utils.BiobrickBUtils;
@@ -218,103 +211,101 @@ public class AssemblyController extends Controller {
         return result;
     }
 
-    public static void main(String[] args) {
+    //    public static void main(String[] args) {
+    //
+    //        mainRunBiobrickJoinTest();
+    //
+    //        //mainRunJoin();
+    //
+    //        /*
+    //        InnerFeature feature = (InnerFeature) SequenceManager.getFeature(1347);
+    //        System.out.println(feature.toString());
+    //        */
+    //    }
 
-        mainRunBiobrickJoinTest();
+    //    private static void mainRunBiobrickJoinTest() {
+    //        AssemblyController as = null;
+    //        try {
+    //            as = new AssemblyController(AccountDAO.get(86));
+    //        } catch (ManagerException e1) {
+    //            // TODO Auto-generated catch block
+    //            e1.printStackTrace();
+    //        }
+    //        try {
+    //
+    //            // bbb
+    //            //Part part1 = (Part) EntryManager.get(4431);
+    //            //Part part2 = (Part) EntryManager.get(4430);
+    //            // bba
+    //            Part part1 = (Part) EntryManager.get(4444);
+    //            Part part2 = (Part) EntryManager.get(4444);
+    //
+    //            Sequence sequence1 = SequenceManager.getByEntry(part1);
+    //            Sequence sequence2 = SequenceManager.getByEntry(part2);
+    //
+    //            Sequence result = as.joinBiobricks(sequence1, sequence2);
+    //            System.out.println(result.getEntry().getId());
+    //        } catch (ManagerException e) {
+    //            e.printStackTrace();
+    //        } catch (ControllerException e) {
+    //            // TODO Auto-generated catch block
+    //            e.printStackTrace();
+    //        }
+    //
+    //    }
 
-        //mainRunJoin();
+    //    private static void mainRunBiobrickBTest() throws PermissionException, ControllerException {
+    //        AssemblyController as = null;
+    //        try {
+    //            as = new AssemblyController(AccountDAO.get(86));
+    //        } catch (ManagerException e1) {
+    //            // TODO Auto-generated catch block
+    //            e1.printStackTrace();
+    //        }
+    //        try {
+    //            Part part2 = (Part) EntryManager.get(4394);
+    //            Sequence part2Sequence = SequenceManager.getByEntry(part2);
+    //
+    //            Set<SequenceFeature> sequenceFeatures = part2Sequence.getSequenceFeatures();
+    //
+    //            ////Part result = as.joinBiobrickB(part2, part2);
+    //
+    //            SequenceFeatureCollection temp = as.determineAssemblyFeatures(part2Sequence);
+    //            //sequenceFeatures.addAll(temp);
+    //            //SequenceManager.saveSequence(part2Sequence);
+    //
+    //            System.out.println("===\n" + part2.getOnePartNumber().getPartNumber() + ": "
+    //                    + part2Sequence.getSequence().length());
+    //            for (SequenceFeature item : temp) {
+    //
+    //                System.out.println(item.getName() + ": ");
+    //            }
+    //
+    //            //sequenceFeatures.addAll(determineAssemblyFeatures(part2));
+    //            // SequenceManager.saveSequence(part2Sequence);
+    //        } catch (ManagerException e) {
+    //            // TODO Auto-generated catch block
+    //            e.printStackTrace();
+    //        }
+    //
+    //    }
 
-        /*
-        InnerFeature feature = (InnerFeature) SequenceManager.getFeature(1347);
-        System.out.println(feature.toString());
-        */
-    }
-
-    private static void mainRunBiobrickJoinTest() {
-        AssemblyController as = null;
-        try {
-            as = new AssemblyController(AccountManager.get(86));
-        } catch (ManagerException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-        try {
-
-            // bbb
-            //Part part1 = (Part) EntryManager.get(4431);
-            //Part part2 = (Part) EntryManager.get(4430);
-            // bba
-            Part part1 = (Part) EntryManager.get(4444);
-            Part part2 = (Part) EntryManager.get(4444);
-
-            Sequence sequence1 = SequenceManager.getByEntry(part1);
-            Sequence sequence2 = SequenceManager.getByEntry(part2);
-
-            Sequence result = as.joinBiobricks(sequence1, sequence2);
-            System.out.println(result.getEntry().getId());
-        } catch (ManagerException e) {
-            e.printStackTrace();
-        } catch (ControllerException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-    }
-
-    @SuppressWarnings("unused")
-    private static void mainRunBiobrickBTest() throws PermissionException, ControllerException {
-        AssemblyController as = null;
-        try {
-            as = new AssemblyController(AccountManager.get(86));
-        } catch (ManagerException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-        try {
-            Part part2 = (Part) EntryManager.get(4394);
-            Sequence part2Sequence = SequenceManager.getByEntry(part2);
-
-            Set<SequenceFeature> sequenceFeatures = part2Sequence.getSequenceFeatures();
-
-            ////Part result = as.joinBiobrickB(part2, part2);
-
-            SequenceFeatureCollection temp = as.determineAssemblyFeatures(part2Sequence);
-            //sequenceFeatures.addAll(temp);
-            //SequenceManager.saveSequence(part2Sequence);
-
-            System.out.println("===\n" + part2.getOnePartNumber().getPartNumber() + ": "
-                    + part2Sequence.getSequence().length());
-            for (SequenceFeature item : temp) {
-
-                System.out.println(item.getName() + ": ");
-            }
-
-            //sequenceFeatures.addAll(determineAssemblyFeatures(part2));
-            // SequenceManager.saveSequence(part2Sequence);
-        } catch (ManagerException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-    }
-
-    @SuppressWarnings("unused")
-    private static void mainRunJoin() {
-        try {
-            Part part1 = (Part) EntryManager.get(4394);
-            Sequence part1Sequence = SequenceManager.getByEntry(part1);
-            Set<SequenceFeature> sequenceFeatures = part1Sequence.getSequenceFeatures();
-            //sequenceFeatures.addAll(determineAssemblyFeatures(part1));
-            //SequenceManager.saveSequence(part1Sequence);
-            AssemblyController as = new AssemblyController(AccountManager.get(86));
-            ////Part newPart = as.joinBiobrickA(part1, part1);
-
-            System.out.println(sequenceFeatures.size());
-        } catch (ManagerException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
+    //    private static void mainRunJoin() {
+    //        try {
+    //            Part part1 = (Part) EntryManager.get(4394);
+    //            Sequence part1Sequence = SequenceManager.getByEntry(part1);
+    //            Set<SequenceFeature> sequenceFeatures = part1Sequence.getSequenceFeatures();
+    //            //sequenceFeatures.addAll(determineAssemblyFeatures(part1));
+    //            //SequenceManager.saveSequence(part1Sequence);
+    //            AssemblyController as = new AssemblyController(AccountDAO.get(86));
+    //            ////Part newPart = as.joinBiobrickA(part1, part1);
+    //
+    //            System.out.println(sequenceFeatures.size());
+    //        } catch (ManagerException e) {
+    //            // TODO Auto-generated catch block
+    //            e.printStackTrace();
+    //        }
+    //    }
 
     public void setAssemblyUtils(ArrayList<IAssemblyUtils> assemblyUtils) {
         this.assemblyUtils = assemblyUtils;

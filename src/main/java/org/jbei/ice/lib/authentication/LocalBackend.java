@@ -1,16 +1,23 @@
 package org.jbei.ice.lib.authentication;
 
-import org.jbei.ice.controllers.AccountController;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.models.Account;
 
 /**
  * Backend for authentication using the database. This is the default backend.
  * 
- * @author Zinovii Dmytriv, Timothy Ham
+ * @author Zinovii Dmytriv, Timothy Ham, Hector Plahar
  * 
  */
 public class LocalBackend implements IAuthenticationBackend {
+
+    private final AccountController controller;
+
+    public LocalBackend() {
+        controller = new AccountController();
+    }
+
     @Override
     public String getBackendName() {
         return "LocalBackend";
@@ -28,7 +35,7 @@ public class LocalBackend implements IAuthenticationBackend {
         try {
             account = AccountController.getByEmail(userId);
 
-            if ((account == null) || (!AccountController.isValidPassword(account, password))) {
+            if ((account == null) || (!controller.isValidPassword(account, password))) {
                 throw new InvalidCredentialsException("Invalid Username or Password!");
             }
         } catch (ControllerException e) {

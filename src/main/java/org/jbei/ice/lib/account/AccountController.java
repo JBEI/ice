@@ -1,6 +1,7 @@
-package org.jbei.ice.controllers;
+package org.jbei.ice.lib.account;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Set;
 
 import org.jbei.ice.controllers.common.ControllerException;
@@ -9,27 +10,33 @@ import org.jbei.ice.lib.authentication.AuthenticationBackendManager;
 import org.jbei.ice.lib.authentication.AuthenticationBackendManager.AuthenticationBackendManagerException;
 import org.jbei.ice.lib.authentication.IAuthenticationBackend;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
-import org.jbei.ice.lib.managers.AccountManager;
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AccountPreferencesManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountPreferences;
+import org.jbei.ice.lib.models.Moderator;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.utils.Emailer;
-import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.web.PersistentSessionDataWrapper;
 
 /**
  * ABI to manipulate {@link Account} objects.
  * <p>
- * This class contains methods that wrap {@link AccountManager} to manipulate {@link Account}
- * objects.
+ * This class contains methods that wrap {@link AccountDAO} to manipulate {@link Account} objects.
  * 
- * @author Timothy Ham, Zinovii Dmytriv
+ * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 
 public class AccountController {
+
+    private final AccountDAO dao;
+
+    public AccountController() {
+        dao = new AccountDAO();
+    }
 
     /**
      * Retrieve account from the database by database id.
@@ -39,19 +46,38 @@ public class AccountController {
      * @return Account for the id
      * @throws ControllerException
      */
-    public static Account get(long id) throws ControllerException {
+    public Account get(long id) throws ControllerException {
         Account account = null;
 
         try {
-            account = AccountManager.get(id);
-        } catch (ManagerException e) {
+            account = dao.get(id);
+        } catch (DAOException e) {
             throw new ControllerException(e);
         }
 
         return account;
     }
 
-    public static String createNewAccount(String firstName, String lastName, String initials,
+    /**
+     * Creates a new account using the parameters passed.
+     * A random password is initially generated , encrypted and assigned to the account
+     * 
+     * @param firstName
+     *            account first name
+     * @param lastName
+     *            account last name
+     * @param initials
+     *            account initials
+     * @param email
+     *            unique identifier for account
+     * @param institution
+     *            account institution affiliation
+     * @param description
+     * @return
+     * @throws ControllerException
+     *             in the event email is already assigned to another user or is empty
+     */
+    public String createNewAccount(String firstName, String lastName, String initials,
             String email, String institution, String description) throws ControllerException {
         if (email == null || email.isEmpty()) {
             throw new ControllerException("Cannot create account with null email");
@@ -72,14 +98,52 @@ public class AccountController {
         }
 
         String newPassword = Utils.generateUUID().substring(24);
-        Account account = new Account(firstName, lastName, initials, email,
-                AccountController.encryptPassword(newPassword), institution, description);
+        String encryptedPassword = AccountUtils.encryptPassword(newPassword);
+        Account account = new Account(firstName, lastName, initials, email, encryptedPassword,
+                institution, description);
         account.setIp("");
         account.setIsSubscribed(1);
         account.setCreationTime(Calendar.getInstance().getTime());
-        if (AccountController.save(account) == null)
+        if (save(account) == null)
             throw new ControllerException("Could not save new account");
         return newPassword;
+    }
+
+    public Account createAdminAccount(String adminAccountEmail, String adminPassword)
+            throws ControllerException {
+        if (getByEmail(adminAccountEmail) != null) {
+            throw new ControllerException("Account with email \"" + adminAccountEmail
+                    + "\" already exists");
+        }
+
+        Account adminAccount = new Account();
+        adminAccount.setEmail(adminAccountEmail);
+        adminAccount.setLastName("Administrator");
+        adminAccount.setFirstName("");
+        adminAccount.setInitials("");
+        adminAccount.setInstitution("");
+        adminAccount.setPassword(AccountUtils.encryptPassword(adminPassword));
+        adminAccount.setDescription("Administrator Account");
+        adminAccount.setIsSubscribed(0);
+
+        adminAccount.setIp("");
+        Date currentTime = Calendar.getInstance().getTime();
+        adminAccount.setCreationTime(currentTime);
+        adminAccount.setModificationTime(currentTime);
+        adminAccount.setLastLoginTime(currentTime);
+
+        try {
+            save(adminAccount);
+            Moderator adminModerator = new Moderator();
+            adminModerator.setAccount(adminAccount);
+            dao.saveModerator(adminModerator);
+        } catch (ManagerException e) {
+            String msg = "Could not create administrator account";
+            Logger.error(msg, e);
+            throw new ControllerException(e);
+        }
+
+        return adminAccount;
     }
 
     /**
@@ -92,7 +156,7 @@ public class AccountController {
         Set<Account> accounts = null;
 
         try {
-            accounts = AccountManager.getAllByFirstName();
+            accounts = AccountDAO.getAllByFirstName();
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
@@ -112,7 +176,7 @@ public class AccountController {
         Account account = null;
 
         try {
-            account = AccountManager.getByEmail(email);
+            account = AccountDAO.getByEmail(email);
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
@@ -127,12 +191,12 @@ public class AccountController {
      * @return {@link Account} that has been saved.
      * @throws ControllerException
      */
-    public static Account save(Account account) throws ControllerException {
+    public Account save(Account account) throws ControllerException {
         Account result = null;
 
         try {
-            result = AccountManager.save(account);
-        } catch (ManagerException e) {
+            result = dao.save(account);
+        } catch (DAOException e) {
             throw new ControllerException(e);
         }
 
@@ -150,7 +214,7 @@ public class AccountController {
         Boolean result = false;
 
         try {
-            result = AccountManager.isModerator(account);
+            result = AccountDAO.isModerator(account);
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
@@ -166,15 +230,14 @@ public class AccountController {
      * @return True if correct password.
      * @throws ControllerException
      */
-    public static Boolean isValidPassword(Account account, String password)
-            throws ControllerException {
+    public Boolean isValidPassword(Account account, String password) throws ControllerException {
         if (account == null) {
             throw new ControllerException("Failed to verify password for null Account!");
         }
 
         Boolean result = false;
 
-        if (account.getPassword().equals(encryptPassword(password))) {
+        if (account.getPassword().equals(AccountUtils.encryptPassword(password))) {
             result = true;
         }
 
@@ -192,22 +255,12 @@ public class AccountController {
         Account account = null;
 
         try {
-            account = AccountManager.getAccountByAuthToken(sessionKey);
+            account = AccountDAO.getAccountByAuthToken(sessionKey);
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
 
         return account;
-    }
-
-    /**
-     * Return the encrypted version of the given password, using the salt from the settings file.
-     * 
-     * @param password
-     * @return 40 character encrypted string.
-     */
-    public static String encryptPassword(String password) {
-        return Utils.encryptSHA(JbeirSettings.getSetting("SECRET_KEY") + password);
     }
 
     /**
@@ -244,7 +297,7 @@ public class AccountController {
      * @throws InvalidCredentialsException
      * @throws ControllerException
      */
-    public static SessionData authenticate(String login, String password, String ip)
+    public SessionData authenticate(String login, String password, String ip)
             throws InvalidCredentialsException, ControllerException {
         SessionData result = null;
         IAuthenticationBackend authenticationBackend = null;
@@ -305,7 +358,7 @@ public class AccountController {
      * @throws InvalidCredentialsException
      * @throws ControllerException
      */
-    public static SessionData authenticate(String login, String password)
+    public SessionData authenticate(String login, String password)
             throws InvalidCredentialsException, ControllerException {
         return authenticate(login, password, "");
     }
@@ -371,22 +424,22 @@ public class AccountController {
     public static Account getSystemAccount() throws ControllerException {
         Account account = null;
         try {
-            account = AccountManager.getByEmail("system");
+            account = AccountDAO.getByEmail("system");
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }
         return account;
     }
 
-    public static void resetUserPassword(String email, String url) throws ControllerException {
+    public void resetUserPassword(String email, String url) throws ControllerException {
         Account account = getByEmail(email);
 
         if (account == null)
             return;
 
         String newPassword = Utils.generateUUID().substring(24);
-        account.setPassword(AccountController.encryptPassword(newPassword));
-        AccountController.save(account);
+        account.setPassword(AccountUtils.encryptPassword(newPassword));
+        save(account);
         String subject = "JBEI Registry Password Reminder";
         String body = "A request has been made to reset your password.\n\n";
         body = body + "Your new password is " + newPassword + ".\n\n";
@@ -396,6 +449,14 @@ public class AccountController {
         try {
             Emailer.send(account.getEmail(), subject, body);
         } catch (Exception e) {
+            throw new ControllerException(e);
+        }
+    }
+
+    public Set<Account> getMatchingAccounts(String query, int limit) throws ControllerException {
+        try {
+            return dao.getMatchingAccounts(query, limit);
+        } catch (ManagerException e) {
             throw new ControllerException(e);
         }
     }

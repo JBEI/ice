@@ -10,13 +10,13 @@ import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.AccountManager;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.GroupManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Group;
+import org.jbei.ice.server.account.AccountDAO;
 
 /**
  * Manager to manipulate Permissions.
@@ -41,7 +41,7 @@ public class PermissionManager {
 
         Account account = null;
         try {
-            account = AccountManager.getAccountByAuthToken(sessionKey);
+            account = AccountDAO.getAccountByAuthToken(sessionKey);
 
             if (account != null) {
                 result = hasReadPermission(recordId, account)
@@ -70,7 +70,7 @@ public class PermissionManager {
 
         if (recordId != null && !recordId.isEmpty() && account != null) {
             try {
-                if (AccountManager.isModerator(account)) {
+                if (AccountDAO.isModerator(account)) {
                     result = true;
                 } else {
                     result = groupHasReadPermission(recordId, account)
@@ -98,7 +98,7 @@ public class PermissionManager {
 
         if (entryId > 0 && account != null) {
             try {
-                if (AccountManager.isModerator(account)) {
+                if (AccountDAO.isModerator(account)) {
                     result = true;
                 } else {
                     result = groupHasReadPermission(entryId, account)
@@ -126,7 +126,7 @@ public class PermissionManager {
         boolean result = false;
         Entry entry;
         try {
-            Account account = AccountManager.getAccountByAuthToken(sessionKey);
+            Account account = AccountDAO.getAccountByAuthToken(sessionKey);
             if (account != null) {
                 entry = EntryManager.get(entryId);
                 if (entry != null) {
@@ -211,7 +211,7 @@ public class PermissionManager {
         boolean result = false;
         if (entry != null && account != null) {
             try {
-                if (AccountManager.isModerator(account)) {
+                if (AccountDAO.isModerator(account)) {
                     result = true;
                 } else {
                     result = userHasReadPermission(entry, account)
@@ -237,7 +237,7 @@ public class PermissionManager {
         boolean result = false;
         if (entry != null && account != null) {
             try {
-                if (AccountManager.isModerator(account)) {
+                if (AccountDAO.isModerator(account)) {
                     result = true;
                 } else {
                     result = userHasWritePermission(entry, account)

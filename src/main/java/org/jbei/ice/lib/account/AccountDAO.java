@@ -1,26 +1,30 @@
-package org.jbei.ice.lib.managers;
+package org.jbei.ice.lib.account;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Moderator;
 import org.jbei.ice.lib.models.SessionData;
+import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
 /**
- * Manager to manipulate {@link Account} objects in the database.
+ * DAO to manipulate {@link Account} objects in the database.
  * 
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  * 
  */
-public class AccountManager {
+class AccountDAO extends HibernateRepository {
 
     private static String SYSTEM_ACCOUNT_EMAIL = "system";
 
@@ -31,25 +35,21 @@ public class AccountManager {
      * @return Account
      * @throws ManagerException
      */
-    public static Account get(long id) throws ManagerException {
-        Account account = null;
+    public Account get(long id) throws DAOException {
+        return (Account) super.get(Account.class, id);
+    }
 
-        Session session = DAO.newSession();
-        try {
-            Query query = session
-                    .createQuery("from " + Account.class.getName() + " where id = :id");
-            query.setParameter("id", id);
+    public ArrayList<Account> getAllAccounts() {
+        Session session = newSession();
+        session.beginTransaction();
 
-            account = (Account) query.uniqueResult();
-        } catch (HibernateException e) {
-            throw new ManagerException("Failed to retrieve Account by id: " + String.valueOf(id), e);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
-        }
+        @SuppressWarnings("unchecked")
+        ArrayList<Account> reports = (ArrayList<Account>) session.createCriteria(Account.class)
+                .list();
+        Hibernate.initialize(reports);
 
-        return account;
+        session.getTransaction().commit();
+        return reports;
     }
 
     /**
@@ -92,7 +92,7 @@ public class AccountManager {
         return accounts;
     }
 
-    public static Set<Account> getMatchingAccounts(String token, int limit) throws ManagerException {
+    public Set<Account> getMatchingAccounts(String token, int limit) throws ManagerException {
         Session session = DAO.newSession();
         try {
             token = token.toUpperCase();
@@ -195,20 +195,8 @@ public class AccountManager {
      * @return Saved account.
      * @throws ManagerException
      */
-    public static Account save(Account account) throws ManagerException {
-        if (account == null) {
-            throw new ManagerException("Failed to save null Account!");
-        }
-
-        Account result = null;
-
-        try {
-            result = (Account) DAO.save(account);
-        } catch (DAOException e) {
-            throw new ManagerException("Failed to save Account: " + account.getFullName(), e);
-        }
-
-        return result;
+    public Account save(Account account) throws DAOException {
+        return (Account) super.save(account);
     }
 
     /**
@@ -273,7 +261,7 @@ public class AccountManager {
      * @return Saved Moderator.
      * @throws ManagerException
      */
-    public static Moderator saveModerator(Moderator moderator) throws ManagerException {
+    public Moderator saveModerator(Moderator moderator) throws ManagerException {
         if (moderator == null) {
             throw new ManagerException("Failed to save null Moderator");
         }
