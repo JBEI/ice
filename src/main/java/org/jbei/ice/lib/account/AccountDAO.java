@@ -49,18 +49,6 @@ class AccountDAO extends HibernateRepository {
         return reports;
     }
 
-    //    /**
-    //     * Retrieve the System {@link Account}.
-    //     * <p>
-    //     * The System account has full privileges, but is not a log in account.
-    //     * 
-    //     * @return System Account
-    //     * @throws ManagerException
-    //     */
-    //    public Account getSystemAccount() throws ManagerException {
-    //        return getByEmail(SYSTEM_ACCOUNT_EMAIL);
-    //    }
-
     /**
      * Retrieve all {@link Account}s sorted by the firstName field.
      * 

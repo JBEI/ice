@@ -100,12 +100,16 @@ public class FileUploadServlet extends UploadAction {
         }
 
         String result = "";
+        String tmpDir = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
+
         for (FileItem item : sessionFiles) {
             if (item.isFormField())
                 continue;
 
             String saveName = item.getName().replaceAll("[\\\\/><\\|\\s\"'{}()\\[\\]]+", "_");
-            String tmpDir = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
+            if (saveName.isEmpty())
+                continue;
+
             File file = new File(tmpDir + File.separator + saveName);
 
             try {
