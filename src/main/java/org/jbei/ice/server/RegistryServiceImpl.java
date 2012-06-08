@@ -47,12 +47,11 @@ import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.models.News;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.parsers.GeneralParser;
+import org.jbei.ice.lib.permissions.PermissionDAO;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.permissions.PermissionManager;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.BulkImportEntryData;
@@ -60,7 +59,6 @@ import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.lib.utils.RichTextRenderer;
-import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.server.bulkimport.BulkImportController;
 import org.jbei.ice.shared.AutoCompleteField;
@@ -90,7 +88,6 @@ import com.google.gwt.user.client.ui.SuggestOracle.Request;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
-// TODO : this whole class needs to be redone. The logic needs to be moved to controllers/managers
 public class RegistryServiceImpl extends RemoteServiceServlet implements RegistryService {
 
     private static final long serialVersionUID = 1L;
@@ -105,29 +102,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         try {
             AccountController controller = new AccountController();
-            SessionData sessionData = controller.authenticate(name, pass);
-            Logger.info("User by login '" + name + "' successfully logged in");
-
-            Account account = sessionData.getAccount();
-            AccountInfo info = this.accountToInfo(account);
+            AccountInfo info = controller.authenticate(name, pass);
             if (info == null)
                 return null;
 
-            info.setSessionId(sessionData.getSessionKey());
+            Logger.info("User by login '" + name + "' successfully logged in");
+
             int entryCount = EntryManager.getEntryCountBy(info.getEmail());
             info.setUserEntryCount(entryCount);
-
-            boolean isModerator = AccountController.isModerator(account);
-            info.setModerator(isModerator);
-
-            long visibleEntryCount;
-            if (isModerator)
-                visibleEntryCount = EntryManager.getAllEntryCount();
-            else
-                visibleEntryCount = EntryManager.getNumberOfVisibleEntries(account);
-
-            info.setVisibleEntryCount(visibleEntryCount);
-
             return info;
         } catch (InvalidCredentialsException e) {
             Logger.warn("Invalid credentials provided by user: " + name);
@@ -140,7 +122,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    // Admin
     public ArrayList<AccountInfo> retrieveAllUserAccounts(String sid) {
 
         try {
@@ -191,39 +172,43 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public boolean handleForgotPassword(String email, String url) {
+        AccountController controller = new AccountController();
+        try {
+            Logger.info("Resetting password for user " + email);
+            controller.resetPassword(email, true, url);
+            return true;
+        } catch (ControllerException e) {
+            Logger.error("Error resetting password for user " + email, e);
+            return false;
+        }
+    }
 
+    @Override
+    public boolean updateAccountPassword(String sid, String email, String password) {
         Account account = null;
 
         try {
-            account = AccountController.getByEmail(email);
+            account = retrieveAccountForSid(sid);
+            if (account == null)
+                return false;
+
+            Logger.info(account.getEmail() + ": updating password for account " + email);
+            AccountController controller = new AccountController();
+            controller.updatePassword(email, password);
+            return true;
+
         } catch (ControllerException e) {
+            Logger.error(e);
             return false;
         }
-
-        String newPassword = Utils.generateUUID().substring(24);
-        account.setPassword(AccountController.encryptPassword(newPassword));
-        try {
-            AccountController.save(account);
-        } catch (ControllerException e) {
-            return false;
-        }
-
-        if (url != null && !url.isEmpty()) {
-            String subject = JbeirSettings.getSetting("PROJECT_NAME") + " Password Reminder";
-            String body = "Someone (maybe you) have requested to reset your password.\n\n";
-            body = body + "Your new password is " + newPassword + ".\n\n";
-            body = body + "Please go to the following link and change your password.\n\n";
-            body = body + url;
-            Emailer.send(account.getEmail(), subject, body);
-        }
-        return true;
     }
 
     @Override
     public AccountInfo createNewAccount(AccountInfo info, String url) {
 
         try {
-            String newPassword = AccountController.createNewAccount(info.getFirstName(),
+            AccountController controller = new AccountController();
+            String newPassword = controller.createNewAccount(info.getFirstName(),
                 info.getLastName(), info.getInitials(), info.getEmail(), info.getInstitution(),
                 info.getDescription());
 
@@ -311,38 +296,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             account.setInstitution(info.getInstitution());
             account.setDescription(info.getDescription());
 
-            AccountController.save(account);
+            AccountController controller = new AccountController();
+            controller.save(account);
 
             return info;
 
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
-        }
-    }
-
-    @Override
-    public boolean updateAccountPassword(String sid, String email, String password) {
-        Account account = null;
-
-        try {
-            account = retrieveAccountForSid(sid);
-            if (account == null)
-                return false;
-
-            account = AccountController.getByEmail(email);
-            if (account == null)
-                return false;
-
-            account.setIsSubscribed(1);
-            account.setModificationTime(Calendar.getInstance().getTime());
-            account.setPassword(AccountController.encryptPassword(password));
-            AccountController.save(account);
-            return true;
-
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return false;
         }
     }
 
@@ -665,7 +626,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             EntryController entryController = new EntryController(account);
 
             ArrayList<Long> entries;
-            if (AccountDAO.isModerator(account))
+            if (AccountController.isModerator(account))
                 entries = entryController.getAllEntryIDs();
             else {
                 entries = new ArrayList<Long>();
@@ -676,8 +637,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             details.setContents(entries);
             return details;
         } catch (ControllerException e) {
-            Logger.error(e);
-        } catch (ManagerException e) {
             Logger.error(e);
         }
         return null;
@@ -794,7 +753,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (entry == null)
                 return null;
 
-            if (!PermissionManager.hasReadPermission(entry, account)) {
+            if (!PermissionDAO.hasReadPermission(entry, account)) {
                 Logger.info(account.getEmail() + ": attempting to view entry details for entry "
                         + id + " but does not have read permission");
                 return null;
@@ -841,7 +800,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             info.setLinkifiedLinks(parsedLinks);
 
             // group with write permissions
-            info.setCanEdit(PermissionManager.hasWritePermission(entry, account));
+            info.setCanEdit(PermissionDAO.hasWritePermission(entry, account));
 
             return info;
 
@@ -865,7 +824,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (entry == null)
                 return null;
 
-            if (!PermissionManager.hasReadPermission(entry, account)) {
+            if (!PermissionDAO.hasReadPermission(entry, account)) {
                 Logger.info(account.getEmail() + ": attempting to view entry details for entry "
                         + id + " but does not have read permission");
                 return null;
@@ -912,7 +871,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             info.setLinkifiedLinks(parsedLinks);
 
             // group with write permissions
-            info.setCanEdit(PermissionManager.hasWritePermission(entry, account));
+            info.setCanEdit(PermissionDAO.hasWritePermission(entry, account));
 
             return info;
 
@@ -1230,7 +1189,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             long id = folder.getId();
             boolean isSystemFolder = folder.getOwnerEmail().equals(
-                AccountDAO.getSystemAccount().getEmail());
+                AccountController.getSystemAccount().getEmail());
             FolderDetails details = new FolderDetails(id, folder.getName(), isSystemFolder);
             BigInteger folderSize = FolderManager.getFolderSize(id);
             details.setCount(folderSize);
@@ -1395,7 +1354,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             Logger.info(account.getEmail() + ": retrieving profile info for " + userId);
 
-            account = AccountDAO.getByEmail(userId);
+            account = AccountController.getByEmail(userId);
             if (account == null)
                 return null;
 
@@ -1404,7 +1363,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             // get the count for samples
             int sampleCount = SampleManager.getSampleCountBy(accountInfo.getEmail());
             accountInfo.setUserSampleCount(sampleCount);
-            boolean isModerator = AccountDAO.isModerator(account);
+            boolean isModerator = AccountController.isModerator(account);
             long visibleEntryCount;
             if (isModerator)
                 visibleEntryCount = EntryManager.getAllEntryCount();
@@ -1512,7 +1471,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            if (!AccountDAO.isModerator(account))
+            if (!AccountController.isModerator(account))
                 return null;
 
             ArrayList<BulkImport> results = new ArrayList<BulkImport>();
@@ -2090,7 +2049,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (entry == null)
                 return null;
 
-            if (!PermissionManager.hasReadPermission(entry, account))
+            if (!PermissionDAO.hasReadPermission(entry, account))
                 return null;
         } catch (ControllerException e) {
             Logger.error(e);
@@ -2101,7 +2060,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         results = new ArrayList<PermissionInfo>();
 
         try {
-            Set<Account> readAccounts = PermissionManager.getReadUser(entry);
+            Set<Account> readAccounts = PermissionDAO.getReadUser(entry);
             for (Account readAccount : readAccounts) {
                 results.add(new PermissionInfo(PermissionType.READ_ACCOUNT, readAccount.getId(),
                         readAccount.getFullName()));
@@ -2111,7 +2070,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
 
         try {
-            Set<Account> writeAccounts = PermissionManager.getWriteUser(entry);
+            Set<Account> writeAccounts = PermissionDAO.getWriteUser(entry);
             for (Account writeAccount : writeAccounts) {
                 results.add(new PermissionInfo(PermissionType.WRITE_ACCOUNT, writeAccount.getId(),
                         writeAccount.getFullName()));
@@ -2121,7 +2080,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
 
         try {
-            Set<Group> readGroups = PermissionManager.getReadGroup(entry);
+            Set<Group> readGroups = PermissionDAO.getReadGroup(entry);
             for (Group group : readGroups) {
                 results.add(new PermissionInfo(PermissionType.READ_GROUP, group.getId(), group
                         .getLabel()));
@@ -2131,7 +2090,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
 
         try {
-            Set<Group> writeGroups = PermissionManager.getWriteGroup(entry);
+            Set<Group> writeGroups = PermissionDAO.getWriteGroup(entry);
             for (Group group : writeGroups) {
                 results.add(new PermissionInfo(PermissionType.WRITE_GROUP, group.getId(), group
                         .getLabel()));

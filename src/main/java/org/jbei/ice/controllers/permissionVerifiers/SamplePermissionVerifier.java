@@ -5,7 +5,7 @@ import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.models.Storage;
-import org.jbei.ice.lib.permissions.PermissionManager;
+import org.jbei.ice.lib.permissions.PermissionDAO;
 
 /**
  * Permission Verifier for {@link Sample}s and {@link Storage}s.
@@ -39,7 +39,7 @@ public class SamplePermissionVerifier implements IPermissionVerifier {
     private boolean hasWritePermissionSample(Sample sample, Account account) {
         Entry entry = sample.getEntry();
 
-        if (entry != null && PermissionManager.hasWritePermission(entry, account)) {
+        if (entry != null && PermissionDAO.hasWritePermission(entry, account)) {
             return true;
         }
 

@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.permissions;
 
 /**
- * Exception class for {@link PermissionManager}.
+ * Exception class for {@link PermissionDAO}.
  * 
  * @author Timothy Ham, Zinovii Dmytriv
  * 

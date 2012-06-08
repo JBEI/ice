@@ -15,6 +15,7 @@ import java.util.Set;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SampleController;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.managers.ConfigurationManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.StorageManager;
@@ -31,7 +32,6 @@ import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.server.account.AccountDAO;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -99,7 +99,8 @@ public class KeioStrainImportHelper {
         }
     }
 
-    public static Storage createKeioWorkingCopyScheme() throws ManagerException, UtilityException {
+    public static Storage createKeioWorkingCopyScheme() throws ControllerException,
+            ManagerException, UtilityException {
 
         Storage strainSchemeRoot = getStrainRoot();
 
@@ -108,7 +109,7 @@ public class KeioStrainImportHelper {
         keioSchemes.add(new Storage("Well", "Keio Copy Well", StorageType.WELL, "", null));
         keioSchemes.add(new Storage("Tube", "Keio Copy Tube", StorageType.TUBE, "", null));
 
-        String systemEmail = AccountDAO.getSystemAccount().getEmail();
+        String systemEmail = AccountController.getSystemAccount().getEmail();
         Storage keioScheme = new Storage("Keio Working Copy", "Keio Collection",
                 StorageType.SCHEME, systemEmail, strainSchemeRoot);
         keioScheme.setSchemes(keioSchemes);
@@ -117,7 +118,8 @@ public class KeioStrainImportHelper {
         return keioScheme;
     }
 
-    public static Storage createKeioBackupCopyScheme() throws UtilityException, ManagerException {
+    public static Storage createKeioBackupCopyScheme() throws UtilityException,
+            ControllerException, ManagerException {
 
         Storage strainSchemeRoot = getStrainRoot();
 
@@ -125,7 +127,7 @@ public class KeioStrainImportHelper {
         keioSchemes.add(new Storage("Plate", "Keio Copy ", StorageType.PLATE96, "", null));
         keioSchemes.add(new Storage("Well", "Keio Copy ", StorageType.WELL, "", null));
 
-        String systemEmail = AccountDAO.getSystemAccount().getEmail();
+        String systemEmail = AccountController.getSystemAccount().getEmail();
         Storage keioSchemeBackup = new Storage("Keio Copy", "Keio Copy", StorageType.SCHEME,
                 systemEmail, strainSchemeRoot);
         keioSchemeBackup.setSchemes(keioSchemes);
@@ -287,6 +289,8 @@ public class KeioStrainImportHelper {
             backupScheme = createKeioBackupCopyScheme();
         } catch (ManagerException m) {
             throw new UtilityException(m);
+        } catch (ControllerException e) {
+            throw new UtilityException(e);
         }
 
         for (StrainRow row : parsedContent) {
@@ -302,8 +306,8 @@ public class KeioStrainImportHelper {
 
             try {
                 String email = row.getValueFor(Header.CREATOR_EMAIL);
-                account = AccountDAO.getByEmail(email);
-            } catch (ManagerException e2) {
+                account = AccountController.getByEmail(email);
+            } catch (ControllerException e2) {
                 throw new UtilityException(e2);
             }
 

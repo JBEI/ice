@@ -13,13 +13,16 @@ import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AccountPreferencesManager;
+import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountPreferences;
 import org.jbei.ice.lib.models.Moderator;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.utils.Emailer;
+import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.web.PersistentSessionDataWrapper;
 
 /**
@@ -32,7 +35,7 @@ import org.jbei.ice.web.PersistentSessionDataWrapper;
 
 public class AccountController {
 
-    private final AccountDAO dao;
+    private final AccountDAO dao; // TODO : setter injection
 
     public AccountController() {
         dao = new AccountDAO();
@@ -56,6 +59,37 @@ public class AccountController {
         }
 
         return account;
+    }
+
+    public void resetPassword(String email, boolean sendEmail, String url)
+            throws ControllerException {
+        Account account = getByEmail(email);
+        if (account == null)
+            throw new ControllerException("Could not retrieve account for account id " + email);
+
+        String newPassword = Utils.generateUUID().substring(24);
+        String encryptedNewPassword = AccountUtils.encryptPassword(newPassword);
+        account.setPassword(encryptedNewPassword);
+
+        save(account);
+
+        if (sendEmail && url != null && !url.isEmpty()) {
+            String subject = JbeirSettings.getSetting("PROJECT_NAME") + " Password Reminder";
+            String body = "Someone (maybe you) have requested to reset your password.\n\n";
+            body = body + "Your new password is " + newPassword + ".\n\n";
+            body = body + "Please go to the following link and change your password.\n\n";
+            body = body + url;
+            Emailer.send(account.getEmail(), subject, body);
+        }
+    }
+
+    public void updatePassword(String email, String password) throws ControllerException {
+        Account account = getByEmail(email);
+        if (account == null)
+            throw new ControllerException("Could not retrieve account for account id " + email);
+
+        account.setPassword(AccountUtils.encryptPassword(password));
+        save(account);
     }
 
     /**
@@ -195,6 +229,7 @@ public class AccountController {
         Account result = null;
 
         try {
+            account.setModificationTime(Calendar.getInstance().getTime());
             result = dao.save(account);
         } catch (DAOException e) {
             throw new ControllerException(e);
@@ -354,13 +389,35 @@ public class AccountController {
      * 
      * @param login
      * @param password
-     * @return {@link SessionData}
+     * @return {@link AccountInfo}
      * @throws InvalidCredentialsException
      * @throws ControllerException
      */
-    public SessionData authenticate(String login, String password)
-            throws InvalidCredentialsException, ControllerException {
-        return authenticate(login, password, "");
+    public AccountInfo authenticate(String login, String password)
+            throws InvalidCredentialsException, ControllerException, ManagerException {
+        SessionData sessionData = authenticate(login, password, "");
+        if (sessionData == null)
+            return null;
+
+        Account account = sessionData.getAccount();
+        AccountInfo info = AccountUtils.accountToInfo(account);
+        if (info == null)
+            return info;
+
+        boolean isModerator = AccountController.isModerator(account);
+        info.setModerator(isModerator);
+        info.setSessionId(sessionData.getSessionKey());
+
+        // TODO : this should technically be moved out to the callee
+        long visibleEntryCount;
+        if (isModerator)
+            visibleEntryCount = EntryManager.getAllEntryCount();
+        else
+            visibleEntryCount = EntryManager.getNumberOfVisibleEntries(account);
+
+        info.setVisibleEntryCount(visibleEntryCount);
+
+        return info;
     }
 
     /**
@@ -456,6 +513,14 @@ public class AccountController {
     public Set<Account> getMatchingAccounts(String query, int limit) throws ControllerException {
         try {
             return dao.getMatchingAccounts(query, limit);
+        } catch (ManagerException e) {
+            throw new ControllerException(e);
+        }
+    }
+
+    public static Account getAccountByAuthToken(String sessionKey) throws ControllerException {
+        try {
+            return AccountDAO.getAccountByAuthToken(sessionKey);
         } catch (ManagerException e) {
             throw new ControllerException(e);
         }

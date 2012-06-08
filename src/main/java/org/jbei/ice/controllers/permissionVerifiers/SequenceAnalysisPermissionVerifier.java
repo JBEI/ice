@@ -4,7 +4,7 @@ import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.TraceSequence;
-import org.jbei.ice.lib.permissions.PermissionManager;
+import org.jbei.ice.lib.permissions.PermissionDAO;
 
 /**
  * Permission Verifier for {@link TraceSequence}s.
@@ -32,7 +32,7 @@ public class SequenceAnalysisPermissionVerifier implements IPermissionVerifier {
             return false;
         }
 
-        if (PermissionManager.hasWritePermission(entry, account)) {
+        if (PermissionDAO.hasWritePermission(entry, account)) {
             return true;
         }
 

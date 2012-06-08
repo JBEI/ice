@@ -22,7 +22,7 @@ import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.permissions.PermissionManager;
+import org.jbei.ice.lib.permissions.PermissionDAO;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 
 /**
@@ -72,7 +72,7 @@ public class EntryController extends Controller {
             createdEntry = EntryManager.createEntry(entry);
 
             if (doAddReadGroup) {
-                PermissionManager.addReadGroup(createdEntry, GroupManager.getEverybodyGroup());
+                PermissionDAO.addReadGroup(createdEntry, GroupManager.getEverybodyGroup());
             }
 
             if (scheduleIndexRebuild) {
@@ -647,10 +647,10 @@ public class EntryController extends Controller {
         entry.setOwnerEmail(PopulateInitialDatabase.systemAccountEmail);
         // save(entry, true); // Cannot use save, as owner has changed. Must call manager directly
         try {
-            PermissionManager.setReadGroup(entry, new HashSet<Group>());
-            PermissionManager.setWriteGroup(entry, new HashSet<Group>());
-            PermissionManager.setReadUser(entry, new HashSet<Account>());
-            PermissionManager.setWriteUser(entry, new HashSet<Account>());
+            PermissionDAO.setReadGroup(entry, new HashSet<Group>());
+            PermissionDAO.setWriteGroup(entry, new HashSet<Group>());
+            PermissionDAO.setReadUser(entry, new HashSet<Account>());
+            PermissionDAO.setWriteUser(entry, new HashSet<Account>());
         } catch (ManagerException e) {
             throw new ControllerException("Failed to change permissions for deleted entry.", e);
         }

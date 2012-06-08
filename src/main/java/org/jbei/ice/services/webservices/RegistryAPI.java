@@ -36,7 +36,6 @@ import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.models.Strain;
@@ -50,6 +49,7 @@ import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
+import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.web.common.ViewException;
 
 /**
@@ -78,9 +78,9 @@ public class RegistryAPI {
 
         try {
             AccountController controller = new AccountController();
-            SessionData sessionData = controller.authenticate(login, password);
+            AccountInfo info = controller.authenticate(login, password);
+            sessionId = info.getSessionId();
 
-            sessionId = sessionData.getSessionKey();
         } catch (InvalidCredentialsException e) {
             Logger.warn("Invalid credentials provided by user: " + login);
 

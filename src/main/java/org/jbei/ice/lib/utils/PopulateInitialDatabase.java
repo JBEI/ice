@@ -35,7 +35,7 @@ import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.models.SequenceFeatureAttribute;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
-import org.jbei.ice.lib.permissions.PermissionManager;
+import org.jbei.ice.lib.permissions.PermissionDAO;
 
 /**
  * Populate an empty database with necessary objects and values.
@@ -90,13 +90,13 @@ public class PopulateInitialDatabase {
             // Since everyone group doesn't exist, assume database is new
             // Put all other db initialization below.
             createFirstGroup();
+
+            createSystemAccount();
+            createAdminAccount();
+
+            populateDefaultStorageLocationsAndSchemes();
+            updateDatabaseSchema();
         }
-
-        createSystemAccount();
-        createAdminAccount();
-
-        populateDefaultStorageLocationsAndSchemes();
-        updateDatabaseSchema();
     }
 
     /**
@@ -357,10 +357,10 @@ public class PopulateInitialDatabase {
             }
             for (Entry entry : allEntries) {
                 try {
-                    Set<Group> groups = PermissionManager.getReadGroup(entry);
+                    Set<Group> groups = PermissionDAO.getReadGroup(entry);
                     int originalSize = groups.size();
                     groups.add(group1);
-                    PermissionManager.setReadGroup(entry, groups);
+                    PermissionDAO.setReadGroup(entry, groups);
 
                     String msg = "updated id:" + entry.getId() + " from " + originalSize + " to "
                             + groups.size() + ".";

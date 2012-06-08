@@ -7,6 +7,8 @@ import java.util.Set;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
@@ -16,15 +18,15 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Group;
-import org.jbei.ice.server.account.AccountDAO;
+import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
 /**
- * Manager to manipulate Permissions.
+ * DAO to manipulate Permissions.
  * 
- * @author Timothy Ham, Zinovii Dmytriv
+ * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  * 
  */
-public class PermissionManager {
+public class PermissionDAO extends HibernateRepository {
 
     /**
      * Check if the {@link Account} associated with the given sessionKey has read permission to the
@@ -41,13 +43,13 @@ public class PermissionManager {
 
         Account account = null;
         try {
-            account = AccountDAO.getAccountByAuthToken(sessionKey);
+            account = AccountController.getAccountByAuthToken(sessionKey);
 
             if (account != null) {
                 result = hasReadPermission(recordId, account)
                         || groupHasReadPermission(recordId, account);
             }
-        } catch (ManagerException e) {
+        } catch (ControllerException e) {
             // if lookup fails, doesn't have permission
             String msg = "manager exception during permission lookup: " + e.toString();
             Logger.warn(msg);
@@ -70,13 +72,13 @@ public class PermissionManager {
 
         if (recordId != null && !recordId.isEmpty() && account != null) {
             try {
-                if (AccountDAO.isModerator(account)) {
+                if (AccountController.isModerator(account)) {
                     result = true;
                 } else {
                     result = groupHasReadPermission(recordId, account)
                             || userHasReadPermission(recordId, account);
                 }
-            } catch (ManagerException e) {
+            } catch (ControllerException e) {
                 e.printStackTrace();
             }
         }
@@ -98,13 +100,13 @@ public class PermissionManager {
 
         if (entryId > 0 && account != null) {
             try {
-                if (AccountDAO.isModerator(account)) {
+                if (AccountController.isModerator(account)) {
                     result = true;
                 } else {
                     result = groupHasReadPermission(entryId, account)
                             || userHasReadPermission(entryId, account);
                 }
-            } catch (ManagerException e) {
+            } catch (ControllerException e) {
                 e.printStackTrace();
             }
         }
@@ -126,7 +128,7 @@ public class PermissionManager {
         boolean result = false;
         Entry entry;
         try {
-            Account account = AccountDAO.getAccountByAuthToken(sessionKey);
+            Account account = AccountController.getAccountByAuthToken(sessionKey);
             if (account != null) {
                 entry = EntryManager.get(entryId);
                 if (entry != null) {
@@ -136,6 +138,8 @@ public class PermissionManager {
         } catch (ManagerException e) {
             String msg = "manager exception during permission lookup: " + e.toString();
             Logger.warn(msg);
+        } catch (ControllerException e) {
+            Logger.error(e);
         }
         return result;
     }
@@ -211,13 +215,13 @@ public class PermissionManager {
         boolean result = false;
         if (entry != null && account != null) {
             try {
-                if (AccountDAO.isModerator(account)) {
+                if (AccountController.isModerator(account)) {
                     result = true;
                 } else {
                     result = userHasReadPermission(entry, account)
                             | groupHasReadPermission(entry, account);
                 }
-            } catch (ManagerException e) {
+            } catch (ControllerException e) {
                 e.printStackTrace();
             }
         }
@@ -237,13 +241,13 @@ public class PermissionManager {
         boolean result = false;
         if (entry != null && account != null) {
             try {
-                if (AccountDAO.isModerator(account)) {
+                if (AccountController.isModerator(account)) {
                     result = true;
                 } else {
                     result = userHasWritePermission(entry, account)
                             | groupHasWritePermission(entry, account);
                 }
-            } catch (ManagerException e) {
+            } catch (ControllerException e) {
                 e.printStackTrace();
             }
         }
