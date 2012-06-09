@@ -17,10 +17,13 @@ public class AttachmentListMenuPresenter {
         void switchAttachmentAddButton();
 
         HandlerRegistration addQuickAddHandler(ClickHandler handler);
+        
+        void addMenuItem(AttachmentItem item, int currentCount);
     }
 
     private final IAttachmentListMenuView view;
     private HandlerRegistration quickAddHandler;
+    private int itemCount;
 
     public AttachmentListMenuPresenter(IAttachmentListMenuView view) {
         this.view = view;
@@ -38,6 +41,14 @@ public class AttachmentListMenuPresenter {
                 view.switchAttachmentAddButton();
             }
         });
+    }
+    
+    public void addAttachmentItem(AttachmentItem item ) {
+        if( item == null)
+            return;
+        
+        view.addMenuItem(item, itemCount);
+        itemCount += 1;
     }
 
     /**

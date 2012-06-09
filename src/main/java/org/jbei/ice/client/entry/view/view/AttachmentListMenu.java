@@ -138,8 +138,17 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         }
     }
 
-    void addMenuItem(AttachmentItem item) {
-        int row = layout.getRowCount();
+    /**
+     * Add attachment item to the menu
+     * @param item
+     */
+    public void addMenuItem(AttachmentItem item, int itemCount) {
+        int row;
+        if( itemCount ==0)
+            row =2;
+        else
+         row = layout.getRowCount();
+        
         final MenuCell cell = new MenuCell(item);
         cell.addClickHandler(presenter.getCellClickHandler(item));
         layout.setWidget(row, 0, cell);
@@ -205,7 +214,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
                     int rowCount = layout.getRowCount();
                     AttachmentItem item = new AttachmentItem(rowCount + 1, info.name, attDesc);
                     item.setFileId(fileId);
-                    addMenuItem(item);
+                    presenter.addAttachmentItem(item);
                     attachmentDescription.setVisible(true);
                     uploader.reset();
                 } else {
