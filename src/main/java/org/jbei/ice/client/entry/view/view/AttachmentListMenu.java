@@ -15,21 +15,27 @@ import java.util.ArrayList;
 
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.common.util.ImageUtil;
+import org.jbei.ice.client.entry.view.HasAttachmentDeleteHandler;
 import org.jbei.ice.client.entry.view.view.AttachmentListMenuPresenter.IAttachmentListMenuView;
 
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.event.dom.client.HasMouseOutHandlers;
+import com.google.gwt.event.dom.client.HasMouseOverHandlers;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -44,10 +50,10 @@ import com.google.gwt.user.client.ui.Widget;
 public class AttachmentListMenu extends Composite implements IAttachmentListMenuView {
 
     private final FlexTable layout;
-    private Button saveAttachment;
-    private Widget attachmentForm;
+    private final Button saveAttachment;
+    private final Widget attachmentForm;
     private final AttachmentListMenuPresenter presenter;
-    private Image quickAdd;
+    private final Image quickAdd;
     private long entryId;
     private final TextArea attachmentDescription;
 
@@ -88,6 +94,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         presenter = new AttachmentListMenuPresenter(this);
     }
 
+    @Override
     public HandlerRegistration addQuickAddHandler(ClickHandler handler) {
         return quickAdd.addClickHandler(handler);
     }
@@ -96,6 +103,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
      * sets the attachment upload form visibility and the
      * corresponding button user clicks to enable/disable it
      */
+    @Override
     public void switchAttachmentAddButton() {
         if (attachmentForm == null)
             return;
@@ -111,7 +119,8 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         }
     }
 
-    void setMenuItems(ArrayList<AttachmentItem> items, long entryId) {
+    void setMenuItems(ArrayList<AttachmentItem> items, long entryId,
+            HasAttachmentDeleteHandler handler) {
         this.entryId = entryId;
         int row = 2;
 
@@ -132,7 +141,8 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
 
         for (AttachmentItem item : items) {
             final MenuCell cell = new MenuCell(item);
-            cell.addClickHandler(presenter.getCellClickHandler(item));
+            cell.setDownloadHandler(presenter.getCellClickHandler(item));
+            cell.addDeleteHandler(presenter.getDeleteClickHandler(handler, item));
             layout.setWidget(row, 0, cell);
             row += 1;
         }
@@ -140,17 +150,22 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
 
     /**
      * Add attachment item to the menu
+     * 
      * @param item
      */
-    public void addMenuItem(AttachmentItem item, int itemCount) {
+    @Override
+    public void addMenuItem(AttachmentItem item, int itemCount, HasAttachmentDeleteHandler handler) {
         int row;
-        if( itemCount ==0)
-            row =2;
-        else
-         row = layout.getRowCount();
-        
+        if (itemCount == 0) {
+            row = 2;
+            layout.getCellFormatter().removeStyleName(2, 0, "font-75em");
+            layout.getCellFormatter().removeStyleName(2, 0, "pad-6");
+        } else
+            row = layout.getRowCount();
+
         final MenuCell cell = new MenuCell(item);
-        cell.addClickHandler(presenter.getCellClickHandler(item));
+        cell.setDownloadHandler(presenter.getCellClickHandler(item));
+        cell.addDeleteHandler(presenter.getDeleteClickHandler(handler, item));
         layout.setWidget(row, 0, cell);
     }
 
@@ -205,6 +220,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         });
 
         uploader.addOnFinishUploadHandler(new OnFinishUploaderHandler() {
+            @Override
             public void onFinish(IUploader uploader) {
                 if (uploader.getStatus() == Status.SUCCESS) {
                     switchAttachmentAddButton();
@@ -237,7 +253,12 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         return uploader;
     }
 
-    private class MenuCell extends HTML implements HasClickHandlers {
+    private class MenuCell extends Composite implements HasMouseOverHandlers, HasMouseOutHandlers {
+
+        private final Image delete;
+        private final HTMLPanel panel;
+        private final AttachmentItem item;
+        private final Label fileName;
 
         public MenuCell(AttachmentItem item) {
 
@@ -246,26 +267,70 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
                 name = (name.substring(0, 18) + "...");
             }
 
+            this.item = item;
+            fileName = new Label(name);
+            fileName.setStyleName("display-inline");
+            delete = ImageUtil.getDeleteIcon();
+            delete.setVisible(false);
+
             String description = (item.getDescription() == null || item.getDescription().isEmpty()) ? "No description provided"
                     : item.getDescription();
-            String html = "<span class=\"collection_user_menu\">" + name + "</span><br>";
+            String html = "<span class=\"collection_user_menu\">"
+                    + "<span id=\"attachment_file_name\"></style> "
+                    + "&nbsp;<span id=\"delete_link\" style=\"cursor: pointer; float: right\"></span></span><br>";
 
             if (description.length() > 163)
-                html += "<div title=\"" + description + "\" class=\"attachment_small_text\">"
-                        + description.subSequence(0, 160) + "...</div>";
+                html += "<span title=\"" + description + "\" class=\"attachment_small_text\">"
+                        + description.subSequence(0, 160) + "...</span>";
             else
-                html += "<div class=\"attachment_small_text\">" + description + "</div>";
+                html += "<span class=\"attachment_small_text\">" + description + "</span>";
 
+            panel = new HTMLPanel(html);
+
+            initWidget(panel);
+            panel.add(delete, "delete_link");
+            panel.add(fileName, "attachment_file_name");
             setStyleName("entry_detail_view_row");
-            SafeHtmlBuilder sb = new SafeHtmlBuilder();
-            sb.appendHtmlConstant(html);
-            setHTML(sb.toSafeHtml());
-            setTitle(item.getName());
+
+            // show delete icon on mouse over
+            this.addMouseOverHandler(new MouseOverHandler() {
+
+                @Override
+                public void onMouseOver(MouseOverEvent event) {
+                    delete.setVisible(true);
+                }
+            });
+
+            // hide delete icon on mouse out
+            this.addMouseOutHandler(new MouseOutHandler() {
+
+                @Override
+                public void onMouseOut(MouseOutEvent event) {
+                    delete.setVisible(false);
+                }
+            });
+        }
+
+        public void setDownloadHandler(ClickHandler handler) {
+            fileName.addClickHandler(handler);
+        }
+
+        public void addDeleteHandler(ClickHandler handler) {
+            delete.addClickHandler(handler);
         }
 
         @Override
-        public HandlerRegistration addClickHandler(ClickHandler handler) {
-            return addDomHandler(handler, ClickEvent.getType());
+        public HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
+            return addDomHandler(handler, MouseOverEvent.getType());
+        }
+
+        @Override
+        public HandlerRegistration addMouseOutHandler(MouseOutHandler handler) {
+            return addDomHandler(handler, MouseOutEvent.getType());
+        }
+
+        public AttachmentItem getItem() {
+            return this.item;
         }
     }
 
@@ -285,6 +350,29 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
                 name = name.substring(0, 22) + "...";
             }
             fileNameLabel.setText(name);
+        }
+    }
+
+    public void removeAttachment(AttachmentItem item) {
+        int rowCount = layout.getRowCount();
+
+        for (int i = 2; i < rowCount; i += 1) {
+            Widget widget = layout.getWidget(i, 0);
+            if (!(widget instanceof MenuCell)) {
+                continue;
+            }
+
+            MenuCell cell = (MenuCell) widget;
+            if (cell.getItem().getFileId().equals(item.getFileId())) {
+                layout.removeRow(i);
+                break;
+            }
+        }
+
+        if (layout.getRowCount() == 2) {
+            layout.setHTML(2, 0, "No attachments available");
+            layout.getCellFormatter().setStyleName(2, 0, "font-75em");
+            layout.getCellFormatter().addStyleName(2, 0, "pad-6");
         }
     }
 }

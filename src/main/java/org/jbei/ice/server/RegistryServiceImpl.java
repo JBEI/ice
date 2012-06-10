@@ -17,6 +17,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.jbei.ice.client.RegistryService;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.controllers.AccountController;
+import org.jbei.ice.controllers.AttachmentController;
 import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SampleController;
 import org.jbei.ice.controllers.SearchController;
@@ -2367,5 +2368,28 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.error(e1);
             return null;
         }
+    }
+
+    @Override
+    public boolean deleteEntryAttachment(String sid, long entryId, String fileId) {
+        Account account = null;
+        try {
+            account = retrieveAccountForSid(sid);
+            if (account == null)
+                return false;
+
+            AttachmentController controller = new AttachmentController(account);
+            Attachment attachment = controller.getAttachmentByFileId(fileId);
+            if (attachment == null)
+                return false;
+
+            controller.delete(attachment);
+            return true;
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+        } catch (PermissionException e) {
+            Logger.error(e);
+        }
+        return false;
     }
 }

@@ -1,5 +1,7 @@
 package org.jbei.ice.client.entry.view.view;
 
+import org.jbei.ice.client.entry.view.HasAttachmentDeleteHandler;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -17,8 +19,8 @@ public class AttachmentListMenuPresenter {
         void switchAttachmentAddButton();
 
         HandlerRegistration addQuickAddHandler(ClickHandler handler);
-        
-        void addMenuItem(AttachmentItem item, int currentCount);
+
+        void addMenuItem(AttachmentItem item, int itemCount, HasAttachmentDeleteHandler handler);
     }
 
     private final IAttachmentListMenuView view;
@@ -42,11 +44,11 @@ public class AttachmentListMenuPresenter {
             }
         });
     }
-    
-    public void addAttachmentItem(AttachmentItem item ) {
-        if( item == null)
+
+    public void addAttachmentItem(AttachmentItem item) {
+        if (item == null)
             return;
-        
+
         view.addMenuItem(item, itemCount);
         itemCount += 1;
     }
@@ -64,6 +66,18 @@ public class AttachmentListMenuPresenter {
             public void onClick(ClickEvent event) {
                 Window.Location.replace("/download?type=attachment&name=" + item.getName() + "&id="
                         + item.getFileId());
+            }
+        };
+    }
+
+    public ClickHandler getDeleteClickHandler(final HasAttachmentDeleteHandler handler,
+            final AttachmentItem item) {
+        return new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                if (Window.confirm("This action cannot be undone.\n\nContinue?"))
+                    handler.deleteAttachment(item);
             }
         };
     }

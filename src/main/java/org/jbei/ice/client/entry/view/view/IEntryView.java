@@ -5,6 +5,7 @@ import gwtupload.client.IUploader.OnFinishUploaderHandler;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.collection.add.form.SampleLocation;
+import org.jbei.ice.client.entry.view.HasAttachmentDeleteHandler;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.update.IEntryFormUpdateSubmit;
@@ -55,8 +56,6 @@ public interface IEntryView {
 
     void setNavText(String text);
 
-    void setAttachments(ArrayList<AttachmentItem> items, long entryId);
-
     boolean getSequenceFormVisibility();
 
     void setSequenceFormVisibility(boolean visible);
@@ -84,4 +83,8 @@ public interface IEntryView {
     SequenceViewPanelPresenter showEntryDetailView(EntryInfo info, boolean showEdit,
             DeleteSequenceHandler deleteHandler);
 
+    void setAttachments(ArrayList<AttachmentItem> items, long entryId,
+            HasAttachmentDeleteHandler handler);
+
+    void removeAttachment(AttachmentItem item);
 }

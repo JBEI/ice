@@ -191,5 +191,8 @@ public interface RegistryServiceAsync {
     void deleteEntryTraceSequences(String sid, long entryId, ArrayList<String> seqId,
             AsyncCallback<ArrayList<SequenceAnalysisInfo>> callback);
 
+    void deleteEntryAttachment(String sid, long entryId, String fileId,
+            AsyncCallback<Boolean> callback);
+
     void retrieveAllGroups(String sessionId, AsyncCallback<ArrayList<GroupInfo>> callback);
 }
