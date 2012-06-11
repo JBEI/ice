@@ -25,15 +25,17 @@ public class AccountDAOTest extends TestCase {
         Assert.assertNull(dao.get(0));
         Account account = new Account();
         account.setEmail("test_email");
+        account.setFirstName("First");
+        account.setLastName("Last");
+        account.setInitials("FL");
+        account.setInstitution("");
+        account.setDescription("");
+        account.setIp("127.0.0.1");
+        account.setPassword("40ntH@cKm3br0");
         Account saved = dao.save(account);
         Assert.assertNotNull(saved);
         Account ret = dao.get(saved.getId());
         Assert.assertTrue(saved.getEmail().equals(ret.getEmail()));
-    }
-
-    @Test
-    public void testNothing() {
-        Assert.assertTrue(false);
     }
 
     @After
