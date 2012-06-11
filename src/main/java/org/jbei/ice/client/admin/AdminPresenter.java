@@ -6,7 +6,6 @@ import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.admin.group.GroupPresenter;
-import org.jbei.ice.client.admin.reports.ReportPresenter;
 import org.jbei.ice.client.admin.usermanagement.UserPresenter;
 import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.util.DateUtilities;
@@ -32,7 +31,6 @@ public class AdminPresenter extends AbstractPresenter {
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
     private UserPresenter userPresenter;
-    private ReportPresenter reportPresenter;
     private GroupPresenter groupPresenter;
 
     public AdminPresenter(RegistryServiceAsync service, HandlerManager eventBus, AdminView view) {
@@ -45,7 +43,6 @@ public class AdminPresenter extends AbstractPresenter {
         addSelectionChangeHandler();
 
         // initialize presenters
-        reportPresenter = new ReportPresenter(service);
         groupPresenter = new GroupPresenter(service);
     }
 
@@ -68,11 +65,7 @@ public class AdminPresenter extends AbstractPresenter {
                     break;
 
                 case 2:
-                    view.setTabPresenter(2, reportPresenter);
-                    break;
-
-                case 3:
-                    view.setTabPresenter(3, groupPresenter);
+                    view.setTabPresenter(2, groupPresenter);
                     break;
 
                 default:
