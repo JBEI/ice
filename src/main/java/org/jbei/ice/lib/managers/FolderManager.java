@@ -103,16 +103,18 @@ public class FolderManager {
      * @throws ManagerException
      */
     @SuppressWarnings("unchecked")
-    public static ArrayList<BigInteger> getFolderContents(long id, boolean asc)
-            throws ManagerException {
+    public static ArrayList<Long> getFolderContents(long id, boolean asc) throws ManagerException {
         Session session = DAO.newSession();
         try {
 
+            //            Criteria c = session.createCriteria(Folder.class).setProjection(
+            //                Projections.distinct(Projections.property("entry_id")));
+            //            c.
             SQLQuery query = session
                     .createSQLQuery("SELECT entry_id FROM folder_entry WHERE folder_id = :id");
             query.setLong("id", id);
-
-            return (ArrayList<BigInteger>) query.list();
+            List list = query.list();
+            return (ArrayList<Long>) list;
 
         } finally {
             if (session.isOpen()) {

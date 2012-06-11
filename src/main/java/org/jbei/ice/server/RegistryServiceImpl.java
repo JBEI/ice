@@ -1,7 +1,6 @@
 package org.jbei.ice.server;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -575,13 +574,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             details.setCount(folderSize);
             details.setDescription(folder.getDescription());
-            ArrayList<Long> contents = new ArrayList<Long>();
+            ArrayList<Long> contents = FolderManager.getFolderContents(folderId, false);
 
-            ArrayList<BigInteger> userContents = FolderManager.getFolderContents(folderId, false);
-
-            for (BigInteger id : userContents) {
-                contents.add(id.longValue());
-            }
+            //            for (BigInteger id : userContents) {
+            //                contents.add(id.longValue());
+            //            }
 
             details.setContents(contents);
             return details;
@@ -616,12 +613,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             int folderSize = FolderManager.getFolderSize(folderId);
             details.setCount(folderSize);
             details.setDescription(folder.getDescription());
-            ArrayList<Long> contents = new ArrayList<Long>();
-            ArrayList<BigInteger> userContents = FolderManager.getFolderContents(folderId, false);
+            ArrayList<Long> contents = FolderManager.getFolderContents(folderId, false);
 
-            for (BigInteger id : userContents) {
-                contents.add(id.longValue());
-            }
+            //            for (BigInteger id : userContents) {
+            //                contents.add(id.longValue());
+            //            }
 
             details.setContents(contents);
 
