@@ -5,12 +5,10 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Moderator;
@@ -43,7 +41,7 @@ class AccountDAO extends HibernateRepository {
         @SuppressWarnings("unchecked")
         ArrayList<Account> reports = (ArrayList<Account>) session.createCriteria(Account.class)
                 .list();
-        Hibernate.initialize(reports);
+        //        Hibernate.initialize(reports);
 
         session.getTransaction().commit();
         return reports;
@@ -58,15 +56,16 @@ class AccountDAO extends HibernateRepository {
     @SuppressWarnings("unchecked")
     public Set<Account> getAllByFirstName() throws DAOException {
         LinkedHashSet<Account> accounts = new LinkedHashSet<Account>();
-
         Session session = newSession();
+
+        session.beginTransaction();
         try {
             String queryString = "from " + Account.class.getName() + " order by firstName";
-
             Query query = session.createQuery(queryString);
-
             accounts.addAll(query.list());
+            session.getTransaction().commit();
         } catch (HibernateException e) {
+            session.getTransaction().rollback();
             throw new DAOException("Failed to retrieve all accounts", e);
         } finally {
             if (session.isOpen()) {
@@ -80,6 +79,7 @@ class AccountDAO extends HibernateRepository {
     public Set<Account> getMatchingAccounts(String token, int limit) throws DAOException {
         Session session = newSession();
         try {
+            session.beginTransaction();
             token = token.toUpperCase();
             String queryString = "from " + Account.class.getName()
                     + " where (UPPER(firstName) like '%" + token
@@ -90,11 +90,10 @@ class AccountDAO extends HibernateRepository {
 
             @SuppressWarnings("unchecked")
             HashSet<Account> result = new HashSet<Account>(query.list());
+            session.getTransaction().commit();
             return result;
-
         } catch (Exception e) {
-            e.printStackTrace();
-            Logger.error(e);
+            session.getTransaction().rollback();
             throw new DAOException(e);
         } finally {
             if (session.isOpen()) {

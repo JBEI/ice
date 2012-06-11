@@ -62,6 +62,18 @@ public class AccountController {
         return account;
     }
 
+    /**
+     * Changes user's password
+     * 
+     * @param email
+     *            unique account identifier
+     * @param sendEmail
+     *            whether to notify user of password change
+     * @param url
+     *            current site url
+     * @throws ControllerException
+     *             if account could not be retrieved using unique identifier
+     */
     public void resetPassword(String email, boolean sendEmail, String url)
             throws ControllerException {
         Account account = getByEmail(email);
@@ -84,6 +96,12 @@ public class AccountController {
         }
     }
 
+    /**
+     * 
+     * @param email
+     * @param password
+     * @throws ControllerException
+     */
     public void updatePassword(String email, String password) throws ControllerException {
         Account account = getByEmail(email);
         if (account == null)

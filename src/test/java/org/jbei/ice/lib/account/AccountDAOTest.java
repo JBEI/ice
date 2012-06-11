@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.account;
 
+import java.util.ArrayList;
+
 import junit.framework.TestCase;
 
 import org.jbei.ice.lib.dao.DAOException;
@@ -36,6 +38,23 @@ public class AccountDAOTest extends TestCase {
         Assert.assertNotNull(saved);
         Account ret = dao.get(saved.getId());
         Assert.assertTrue(saved.getEmail().equals(ret.getEmail()));
+    }
+
+    @Test
+    public void testGetAllAccounts() throws DAOException {
+        Account account = new Account();
+        account.setEmail("test_email");
+        account.setFirstName("First");
+        account.setLastName("Last");
+        account.setInitials("FL");
+        account.setInstitution("");
+        account.setDescription("");
+        account.setIp("127.0.0.1");
+        account.setPassword("40ntH@cKm3br0");
+        Account saved = dao.save(account);
+        Assert.assertNotNull(saved);
+        ArrayList<Account> allAccounts = dao.getAllAccounts();
+        Assert.assertEquals(1, allAccounts.size());
     }
 
     @After

@@ -5,6 +5,7 @@ import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.server.dao.IRepository;
 
 /**
  * Hibernate Persistence
@@ -12,7 +13,7 @@ import org.jbei.ice.lib.logging.Logger;
  * @author Hector Plahar, Zinovii Dmytriv, Timothy Ham
  */
 
-public class HibernateRepository {
+public class HibernateRepository implements IRepository {
 
     /**
      * Start a new Hibernate {@link Session}.
