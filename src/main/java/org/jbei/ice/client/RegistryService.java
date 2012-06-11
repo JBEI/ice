@@ -167,4 +167,6 @@ public interface RegistryService extends RemoteService {
     ArrayList<BulkImportDraftInfo> retrieveDraftsPendingVerification(String sid);
 
     ArrayList<GroupInfo> retrieveAllGroups(String sessionId);
+
+    boolean deleteEntryAttachment(String sid, String fileId);
 }

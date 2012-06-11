@@ -125,6 +125,30 @@ public class EntryPresenter extends AbstractPresenter {
 
         // sequence upload handler
         display.setSequenceFinishUploadHandler(new SequenceUploaderFinishHandler());
+
+        // attachment delete handler
+        display.setAttachmentDeleteHandler(new HasAttachmentDeleteHandler() {
+
+            @Override
+            public void deleteAttachment(final AttachmentItem item) {
+                service.deleteEntryAttachment(AppController.sessionId, item.getFileId(),
+                    new AsyncCallback<Boolean>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            Window.alert("Failed to delete attachment");
+                        }
+
+                        @Override
+                        public void onSuccess(Boolean result) {
+                            if (result)
+                                display.removeAttachment(item);
+                            else
+                                Window.alert("Failed to delete attachment");
+                        }
+                    });
+            }
+        });
     }
 
     /**
@@ -367,6 +391,7 @@ public class EntryPresenter extends AbstractPresenter {
                     }
 
                     display.setAttachments(items, entryId);
+
                     // menu views
                     display.getDetailMenu().updateMenuCount(Menu.SEQ_ANALYSIS,
                         result.getSequenceAnalysis().size());
@@ -602,7 +627,6 @@ public class EntryPresenter extends AbstractPresenter {
         }
     }
 
-    // TODO : this can be moved to external file
     public class DeleteSequenceTraceHandler implements ClickHandler {
 
         @Override

@@ -1,5 +1,6 @@
 package org.jbei.ice.shared;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -14,7 +15,7 @@ public class FolderDetails implements IsSerializable {
 
     private long id;
     private String folderName;
-    private long count;
+    private BigInteger count;
     private boolean systemFolder;
     private String description;
     private ArrayList<Long> contents;
@@ -44,11 +45,11 @@ public class FolderDetails implements IsSerializable {
         this.folderName = name;
     }
 
-    public long getCount() {
+    public BigInteger getCount() {
         return count;
     }
 
-    public void setCount(long count) {
+    public void setCount(BigInteger count) {
         this.count = count;
     }
 

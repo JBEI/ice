@@ -77,8 +77,8 @@ public class AddToHandler implements SubmitHandler {
                     ArrayList<FolderDetails> results = event.getItems();
                     ArrayList<MenuItem> items = new ArrayList<MenuItem>();
                     for (FolderDetails result : results) {
-                        items.add(new MenuItem(result.getId(), result.getName(), result.getCount(),
-                                result.isSystemFolder()));
+                        items.add(new MenuItem(result.getId(), result.getName(), result.getCount()
+                                .longValue(), result.isSystemFolder()));
                     }
                     view.updateMenuItemCounts(items);
                     String entryDisp = (entryIds.size() == 1) ? "entry" : "entries";

@@ -563,5 +563,4 @@ public class CollectionMenu extends Composite {
             return format.format(l);
         }
     }
-
 }

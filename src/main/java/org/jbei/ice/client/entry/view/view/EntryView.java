@@ -12,6 +12,7 @@ import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.client.common.widget.Flash;
+import org.jbei.ice.client.entry.view.HasAttachmentDeleteHandler;
 import org.jbei.ice.client.entry.view.ViewFactory;
 import org.jbei.ice.client.entry.view.detail.EntryDetailView;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanel;
@@ -198,6 +199,11 @@ public class EntryView extends Composite implements IEntryView {
 
         mainContent.setWidget(1, 0, form);
         return form;
+    }
+
+    @Override
+    public void removeAttachment(AttachmentItem item) {
+        attachmentMenu.removeAttachment(item);
     }
 
     @Override
@@ -475,6 +481,11 @@ public class EntryView extends Composite implements IEntryView {
     @Override
     public void setAttachments(ArrayList<AttachmentItem> items, long entryId) {
         attachmentMenu.setMenuItems(items, entryId);
+    }
+
+    @Override
+    public void setAttachmentDeleteHandler(HasAttachmentDeleteHandler handler) {
+        attachmentMenu.setDeleteHandler(handler);
     }
 
     @Override
