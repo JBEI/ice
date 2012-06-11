@@ -56,6 +56,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
     private final Image quickAdd;
     private long entryId;
     private final TextArea attachmentDescription;
+    private HasAttachmentDeleteHandler handler;
 
     public AttachmentListMenu() {
         layout = new FlexTable();
@@ -119,8 +120,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         }
     }
 
-    void setMenuItems(ArrayList<AttachmentItem> items, long entryId,
-            HasAttachmentDeleteHandler handler) {
+    void setMenuItems(ArrayList<AttachmentItem> items, long entryId) {
         this.entryId = entryId;
         int row = 2;
 
@@ -154,7 +154,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
      * @param item
      */
     @Override
-    public void addMenuItem(AttachmentItem item, int itemCount, HasAttachmentDeleteHandler handler) {
+    public void addMenuItem(AttachmentItem item, int itemCount) {
         int row;
         if (itemCount == 0) {
             row = 2;
@@ -275,15 +275,14 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
 
             String description = (item.getDescription() == null || item.getDescription().isEmpty()) ? "No description provided"
                     : item.getDescription();
-            String html = "<span class=\"collection_user_menu\">"
-                    + "<span id=\"attachment_file_name\"></style> "
-                    + "&nbsp;<span id=\"delete_link\" style=\"cursor: pointer; float: right\"></span></span><br>";
+            String html = "<span class=\"collection_user_menu\"><span id=\"attachment_file_name\"></style>"
+                    + "<span id=\"delete_link\" style=\"cursor: pointer; float: right\"></span></span><br>";
 
             if (description.length() > 163)
                 html += "<span title=\"" + description + "\" class=\"attachment_small_text\">"
                         + description.subSequence(0, 160) + "...</span>";
             else
-                html += "<span class=\"attachment_small_text\">" + description + "</span>";
+                html += "<span style=\"color: #999;font-size: 11px\">" + description + "</span>";
 
             panel = new HTMLPanel(html);
 
@@ -374,5 +373,9 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
             layout.getCellFormatter().setStyleName(2, 0, "font-75em");
             layout.getCellFormatter().addStyleName(2, 0, "pad-6");
         }
+    }
+
+    public void setDeleteHandler(HasAttachmentDeleteHandler handler) {
+        this.handler = handler;
     }
 }

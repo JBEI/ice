@@ -479,9 +479,13 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
-    public void setAttachments(ArrayList<AttachmentItem> items, long entryId,
-            HasAttachmentDeleteHandler handler) {
-        attachmentMenu.setMenuItems(items, entryId, handler);
+    public void setAttachments(ArrayList<AttachmentItem> items, long entryId) {
+        attachmentMenu.setMenuItems(items, entryId);
+    }
+
+    @Override
+    public void setAttachmentDeleteHandler(HasAttachmentDeleteHandler handler) {
+        attachmentMenu.setDeleteHandler(handler);
     }
 
     @Override

@@ -125,6 +125,27 @@ public class EntryPresenter extends AbstractPresenter {
 
         // sequence upload handler
         display.setSequenceFinishUploadHandler(new SequenceUploaderFinishHandler());
+
+        // attachment delete handler
+        display.setAttachmentDeleteHandler(new HasAttachmentDeleteHandler() {
+
+            @Override
+            public void deleteAttachment(final AttachmentItem item) {
+                service.deleteEntryAttachment(AppController.sessionId, item.getFileId(),
+                    new AsyncCallback<Boolean>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            Window.alert("Failed to delete attachment");
+                        }
+
+                        @Override
+                        public void onSuccess(Boolean result) {
+                            display.removeAttachment(item);
+                        }
+                    });
+            }
+        });
     }
 
     /**
@@ -366,25 +387,8 @@ public class EntryPresenter extends AbstractPresenter {
                         }
                     }
 
-                    display.setAttachments(items, entryId, new HasAttachmentDeleteHandler() {
+                    display.setAttachments(items, entryId);
 
-                        @Override
-                        public void deleteAttachment(final AttachmentItem item) {
-                            service.deleteEntryAttachment(AppController.sessionId, entryId,
-                                item.getFileId(), new AsyncCallback<Boolean>() {
-
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        Window.alert("Failed to delete attachment");
-                                    }
-
-                                    @Override
-                                    public void onSuccess(Boolean result) {
-                                        display.removeAttachment(item);
-                                    }
-                                });
-                        }
-                    });
                     // menu views
                     display.getDetailMenu().updateMenuCount(Menu.SEQ_ANALYSIS,
                         result.getSequenceAnalysis().size());

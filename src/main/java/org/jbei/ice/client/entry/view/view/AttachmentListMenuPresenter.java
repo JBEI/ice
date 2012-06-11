@@ -20,7 +20,7 @@ public class AttachmentListMenuPresenter {
 
         HandlerRegistration addQuickAddHandler(ClickHandler handler);
 
-        void addMenuItem(AttachmentItem item, int itemCount, HasAttachmentDeleteHandler handler);
+        void addMenuItem(AttachmentItem item, int itemCount);
     }
 
     private final IAttachmentListMenuView view;

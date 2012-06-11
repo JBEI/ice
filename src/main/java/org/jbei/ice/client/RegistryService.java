@@ -168,5 +168,5 @@ public interface RegistryService extends RemoteService {
 
     ArrayList<GroupInfo> retrieveAllGroups(String sessionId);
 
-    boolean deleteEntryAttachment(String sid, long entryId, String fileId);
+    boolean deleteEntryAttachment(String sid, String fileId);
 }

@@ -2371,7 +2371,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean deleteEntryAttachment(String sid, long entryId, String fileId) {
+    public boolean deleteEntryAttachment(String sid, String fileId) {
         Account account = null;
         try {
             account = retrieveAccountForSid(sid);

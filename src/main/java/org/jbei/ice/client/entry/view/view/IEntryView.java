@@ -83,8 +83,9 @@ public interface IEntryView {
     SequenceViewPanelPresenter showEntryDetailView(EntryInfo info, boolean showEdit,
             DeleteSequenceHandler deleteHandler);
 
-    void setAttachments(ArrayList<AttachmentItem> items, long entryId,
-            HasAttachmentDeleteHandler handler);
+    void setAttachmentDeleteHandler(HasAttachmentDeleteHandler handler);
 
     void removeAttachment(AttachmentItem item);
+
+    void setAttachments(ArrayList<AttachmentItem> items, long entryId);
 }
