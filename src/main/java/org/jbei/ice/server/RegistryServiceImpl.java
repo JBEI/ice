@@ -1,6 +1,7 @@
 package org.jbei.ice.server;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -491,7 +492,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 for (Folder folder : userFolders) {
                     long id = folder.getId();
                     FolderDetails details = new FolderDetails(id, folder.getName(), false);
-                    int folderSize = FolderManager.getFolderSize(id);
+                    BigInteger folderSize = FolderManager.getFolderSize(id);
                     details.setCount(folderSize);
                     details.setDescription(folder.getDescription());
                     results.add(details);
@@ -524,7 +525,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             for (Folder folder : folders) {
                 long id = folder.getId();
                 FolderDetails details = new FolderDetails(id, folder.getName(), true);
-                int folderSize = FolderManager.getFolderSize(id);
+                BigInteger folderSize = FolderManager.getFolderSize(id);
                 details.setCount(folderSize);
                 details.setDescription(folder.getDescription());
                 results.add(details);
@@ -536,7 +537,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 for (Folder folder : userFolders) {
                     long id = folder.getId();
                     FolderDetails details = new FolderDetails(id, folder.getName(), false);
-                    int folderSize = FolderManager.getFolderSize(id);
+                    BigInteger folderSize = FolderManager.getFolderSize(id);
                     details.setCount(folderSize);
                     details.setDescription(folder.getDescription());
                     results.add(details);
@@ -571,15 +572,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             boolean isSystem = system.getEmail().equals(folder.getOwnerEmail());
             FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), isSystem);
 
-            int folderSize = FolderManager.getFolderSize(folderId);
+            BigInteger folderSize = FolderManager.getFolderSize(folderId);
 
             details.setCount(folderSize);
             details.setDescription(folder.getDescription());
             ArrayList<Long> contents = FolderManager.getFolderContents(folderId, false);
-
-            //            for (BigInteger id : userContents) {
-            //                contents.add(id.longValue());
-            //            }
 
             details.setContents(contents);
             return details;
@@ -611,14 +608,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             }
 
             FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), isSystem);
-            int folderSize = FolderManager.getFolderSize(folderId);
+            BigInteger folderSize = FolderManager.getFolderSize(folderId);
             details.setCount(folderSize);
             details.setDescription(folder.getDescription());
             ArrayList<Long> contents = FolderManager.getFolderContents(folderId, false);
-
-            //            for (BigInteger id : userContents) {
-            //                contents.add(id.longValue());
-            //            }
 
             details.setContents(contents);
 
@@ -1169,7 +1162,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             boolean isSystemFolder = folder.getOwnerEmail().equals(
                 AccountManager.getSystemAccount().getEmail());
             FolderDetails details = new FolderDetails(id, folder.getName(), isSystemFolder);
-            int folderSize = FolderManager.getFolderSize(id);
+            BigInteger folderSize = FolderManager.getFolderSize(id);
             details.setCount(folderSize);
             details.setDescription(folder.getDescription());
             return details;
@@ -1206,7 +1199,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                         EntryManager.getEntriesByIdSet(contents));
                 FolderManager.addFolderContents(folder.getId(), entrys);
                 details.setContents(contents);
-                details.setCount(contents.size());
+                BigInteger size = BigInteger.valueOf(contents.size());
+                details.setCount(size);
             }
 
             return details;
@@ -1238,14 +1232,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                     Folder folder = FolderManager.addFolderContents(folderId, entrys);
                     FolderDetails details = new FolderDetails(folder.getId(), folder.getName(),
                             false);
-                    int folderSize = FolderManager.getFolderSize(folder.getId());
+                    BigInteger folderSize = FolderManager.getFolderSize(folder.getId());
                     details.setCount(folderSize);
                     details.setDescription(folder.getDescription());
                     results.add(details);
                 }
 
                 Folder sourceFolder = FolderManager.get(source);
-                int folderSize = FolderManager.getFolderSize(source);
+                BigInteger folderSize = FolderManager.getFolderSize(source);
                 FolderDetails sourceDetails = new FolderDetails(sourceFolder.getId(),
                         sourceFolder.getName(), false);
                 sourceDetails.setCount(folderSize);
@@ -1275,7 +1269,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), false);
-            details.setCount(folder.getContents().size());
+            BigInteger folderSize = FolderManager.getFolderSize(source);
+            details.setCount(folderSize);
             details.setDescription(folder.getDescription());
             return details;
         } catch (ManagerException e) {
@@ -1306,7 +1301,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 if (folder == null)
                     folder = FolderManager.get(folderId);
                 FolderDetails details = new FolderDetails(folder.getId(), folder.getName(), false);
-                int size = FolderManager.getFolderSize(folderId);
+                BigInteger size = FolderManager.getFolderSize(folderId);
                 details.setCount(size);
                 details.setDescription(folder.getDescription());
                 results.add(details);

@@ -78,13 +78,13 @@ public class FolderManager {
      *             on any exception retrieving the folder or its contents
      * 
      */
-    public static int getFolderSize(long id) throws ManagerException {
+    public static BigInteger getFolderSize(long id) throws ManagerException {
         Session session = DAO.newSession();
         try {
             SQLQuery query = session
                     .createSQLQuery("select count(*) from folder_entry where folder_id = :id ");
             query.setLong("id", id);
-            return ((BigInteger) query.uniqueResult()).intValue();
+            return ((BigInteger) query.uniqueResult());
         } finally {
             if (session.isOpen()) {
                 session.close();
