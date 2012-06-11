@@ -141,7 +141,10 @@ public class EntryPresenter extends AbstractPresenter {
 
                         @Override
                         public void onSuccess(Boolean result) {
-                            display.removeAttachment(item);
+                            if (result)
+                                display.removeAttachment(item);
+                            else
+                                Window.alert("Failed to delete attachment");
                         }
                     });
             }
