@@ -6,8 +6,8 @@ import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.EntryPermissionVerifier;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.GroupManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
@@ -17,10 +17,12 @@ import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 public class PermissionsController extends Controller {
 
     private final AccountController accountController;
+    private final GroupController groupController;
 
     public PermissionsController(Account account) {
         super(account, new EntryPermissionVerifier());
         accountController = new AccountController();
+        groupController = new GroupController();
     }
 
     /**
@@ -45,7 +47,7 @@ public class PermissionsController extends Controller {
                 break;
 
             case READ_GROUP:
-                Group readGroup = GroupManager.get(id);
+                Group readGroup = groupController.getGroupById(id);
                 if (readGroup != null)
                     addReadGroup(entry, readGroup);
                 break;
@@ -59,7 +61,7 @@ public class PermissionsController extends Controller {
                 break;
 
             case WRITE_GROUP:
-                Group writeGroup = GroupManager.get(id);
+                Group writeGroup = groupController.getGroupById(id);
                 if (writeGroup != null) {
                     addWriteGroup(entry, writeGroup);
                     addReadGroup(entry, writeGroup);
@@ -101,7 +103,7 @@ public class PermissionsController extends Controller {
                 break;
 
             case READ_GROUP:
-                Group readGroup = GroupManager.get(id);
+                Group readGroup = groupController.getGroupById(id);
                 if (readGroup != null)
                     removeReadGroup(entry, readGroup);
                 break;
@@ -115,7 +117,7 @@ public class PermissionsController extends Controller {
                 break;
 
             case WRITE_GROUP:
-                Group writeGroup = GroupManager.get(id);
+                Group writeGroup = groupController.getGroupById(id);
                 if (writeGroup != null) {
                     removeWriteGroup(entry, writeGroup);
                     removeReadGroup(entry, writeGroup);

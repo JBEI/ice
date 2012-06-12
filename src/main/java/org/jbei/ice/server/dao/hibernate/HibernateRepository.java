@@ -1,6 +1,7 @@
 package org.jbei.ice.server.dao.hibernate;
 
 import org.hibernate.HibernateException;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.IModel;
@@ -73,7 +74,7 @@ public class HibernateRepository implements IRepository {
      * @throws DAOException
      *             in the event of a problem saving or null model parameter
      */
-    public Object save(IModel model) throws DAOException {
+    public Object saveOrUpdate(IModel model) throws DAOException {
         if (model == null) {
             throw new DAOException("Failed to save null model!");
         }
@@ -119,7 +120,6 @@ public class HibernateRepository implements IRepository {
      */
     public Object get(Class<? extends IModel> theClass, long id) throws DAOException {
         Object result = null;
-
         Session session = newSession();
 
         try {
@@ -140,6 +140,35 @@ public class HibernateRepository implements IRepository {
             }
         }
 
+        return result;
+    }
+
+    public Object getByUUID(Class<? extends IModel> theClass, String uuid) throws DAOException {
+        Object result;
+
+        Session session = newSession();
+
+        try {
+            session.getTransaction().begin();
+            Query query = session.createQuery("from " + theClass.getName() + " where uuid = :uuid");
+            query.setString("uuid", uuid);
+            result = query.uniqueResult();
+            session.getTransaction().commit();
+
+        } catch (HibernateException e) {
+            throw new DAOException("dbGet failed for " + theClass.getCanonicalName() + " and uuid="
+                    + uuid, e);
+        } catch (Exception e1) {
+            // Something really bad happened.
+            session.getTransaction().rollback();
+            Logger.error(e1);
+            resetSessionFactory(session);
+            throw new DAOException("Unkown database exception ", e1);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
         return result;
     }
 

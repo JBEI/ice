@@ -11,9 +11,9 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.EntryManager;
-import org.jbei.ice.lib.managers.GroupManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
@@ -1095,10 +1095,11 @@ public class PermissionDAO extends HibernateRepository {
         }
 
         // Everyone belongs to the everyone group
+        GroupController controller = new GroupController();
         try {
-            Group everybodyGroup = GroupManager.getEverybodyGroup();
+            Group everybodyGroup = controller.createOrRetrievePublicGroup();
             accountGroups.add(everybodyGroup.getId());
-        } catch (ManagerException e) {
+        } catch (ControllerException e) {
             Logger.warn("could not get everybody group: " + e.toString());
         }
         return accountGroups;

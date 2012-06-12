@@ -180,7 +180,7 @@ class AccountDAO extends HibernateRepository {
      * @throws ManagerException
      */
     public Account save(Account account) throws DAOException {
-        return (Account) super.save(account);
+        return (Account) super.saveOrUpdate(account);
     }
 
     /**
@@ -248,6 +248,6 @@ class AccountDAO extends HibernateRepository {
             throw new DAOException("Cannot to save null Moderator");
         }
 
-        return (Moderator) save(moderator);
+        return (Moderator) saveOrUpdate(moderator);
     }
 }

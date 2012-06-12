@@ -16,10 +16,10 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ConfigurationManager;
 import org.jbei.ice.lib.managers.EntryManager;
-import org.jbei.ice.lib.managers.GroupManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.StorageManager;
 import org.jbei.ice.lib.models.Account;
@@ -40,7 +40,7 @@ import org.jbei.ice.lib.permissions.PermissionDAO;
 /**
  * Populate an empty database with necessary objects and values.
  * 
- * @author Timothy Ham, Zinovii Dmytriv
+ * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  * 
  */
 public class PopulateInitialDatabase {
@@ -79,23 +79,24 @@ public class PopulateInitialDatabase {
      * @throws UtilityException
      */
     public static void initializeDatabase() throws UtilityException {
+        GroupController groupController = new GroupController();
         Group group1 = null;
         try {
-            group1 = GroupManager.get(everyoneGroup);
-        } catch (ManagerException e) {
+            group1 = groupController.getGroupByUUID(everyoneGroup);
+            if (group1 == null) {
+                // Since everyone group doesn't exist, assume database is new
+                // Put all other db initialization below.
+                groupController.createOrRetrievePublicGroup();
+
+                createSystemAccount();
+                createAdminAccount();
+
+                populateDefaultStorageLocationsAndSchemes();
+                updateDatabaseSchema();
+            }
+
+        } catch (ControllerException e) {
             throw new UtilityException(e);
-        }
-
-        if (group1 == null) {
-            // Since everyone group doesn't exist, assume database is new
-            // Put all other db initialization below.
-            createFirstGroup();
-
-            createSystemAccount();
-            createAdminAccount();
-
-            populateDefaultStorageLocationsAndSchemes();
-            updateDatabaseSchema();
         }
     }
 
@@ -304,51 +305,17 @@ public class PopulateInitialDatabase {
     }
 
     /**
-     * Check for and create the everyone group.
-     * 
-     * @return Everyone group.
-     */
-    public static Group createFirstGroup() {
-        Group group1 = null;
-        try {
-            group1 = GroupManager.get(everyoneGroup);
-
-        } catch (ManagerException e) {
-            String msg = "Could not get everyone group " + e.toString();
-            Logger.info(msg);
-        }
-
-        if (group1 == null) {
-            Group group = new Group();
-            group.setLabel("Everyone");
-            group.setDescription("Everyone");
-            group.setParent(null);
-
-            group.setUuid(everyoneGroup);
-            try {
-                GroupManager.save(group);
-                Logger.info("Creating everyone group");
-                group1 = group;
-            } catch (ManagerException e) {
-                String msg = "Could not save everyone group: " + e.toString();
-                Logger.error(msg, e);
-            }
-        }
-
-        return group1;
-    }
-
-    /**
      * Populate the permission read group. For schema upgrade only.
      */
-    public static void populatePermissionReadGroup() {
+    public static void populatePermissionReadGroup(GroupController controller) {
         Group group1 = null;
         try {
-            group1 = GroupManager.get(everyoneGroup);
-        } catch (ManagerException e) {
+            group1 = controller.getGroupByUUID(everyoneGroup);
+        } catch (ControllerException e) {
             // nothing happens
             Logger.debug(e.toString());
         }
+
         if (group1 != null) {
             ArrayList<Entry> allEntries = null;
             try {

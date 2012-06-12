@@ -9,9 +9,9 @@ import java.util.Set;
 import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.EntryPermissionVerifier;
+import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.EntryManager;
-import org.jbei.ice.lib.managers.GroupManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
@@ -21,8 +21,8 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionDAO;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 
 /**
@@ -67,12 +67,13 @@ public class EntryController extends Controller {
     public Entry createEntry(Entry entry, boolean scheduleIndexRebuild, boolean doAddReadGroup)
             throws ControllerException {
         Entry createdEntry = null;
+        GroupController controller = new GroupController();
 
         try {
             createdEntry = EntryManager.createEntry(entry);
 
             if (doAddReadGroup) {
-                PermissionDAO.addReadGroup(createdEntry, GroupManager.getEverybodyGroup());
+                PermissionDAO.addReadGroup(createdEntry, controller.createOrRetrievePublicGroup());
             }
 
             if (scheduleIndexRebuild) {

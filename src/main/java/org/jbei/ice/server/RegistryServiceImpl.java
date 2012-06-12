@@ -27,12 +27,12 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.bulkimport.BulkImportController;
+import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.BulkImportManager;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.FolderManager;
-import org.jbei.ice.lib.managers.GroupManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.NewsManager;
 import org.jbei.ice.lib.managers.SampleManager;
@@ -2134,14 +2134,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                         account.getId(), account.getFullName());
                 suggestions.add(object);
             }
-            Set<Group> groups = GroupManager.getMatchingGroups(req.getQuery(), req.getLimit());
+            GroupController groupController = new GroupController();
+            Set<Group> groups = groupController.getMatchingGroups(req.getQuery(), req.getLimit());
             for (Group group : groups) {
                 PermissionSuggestion object = new PermissionSuggestion(PermissionType.READ_GROUP,
                         group.getId(), group.getLabel());
                 suggestions.add(object);
             }
-        } catch (ManagerException e) {
-            Logger.error(e);
         } catch (ControllerException e) {
             Logger.error(e);
         }
@@ -2471,6 +2470,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         Account account = null;
         AccountController controller = new AccountController();
+        GroupController groupController = new GroupController();
 
         try {
             account = retrieveAccountForSid(sessionId);
@@ -2488,29 +2488,31 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         // retrieve all groups
         Logger.info(account.getEmail() + ": retrieving all entries");
+        Set<Group> groups = null;
         try {
-            Set<Group> groups = GroupManager.getAll();
-            if (groups == null)
-                return null;
-
-            ArrayList<GroupInfo> infos = new ArrayList<GroupInfo>();
-            for (Group group : groups) {
-                GroupInfo info = new GroupInfo();
-                info.setId(group.getId());
-                info.setLabel(group.getLabel());
-                info.setDescription(group.getDescription());
-                Group parent = group.getParent();
-                if (parent != null) {
-                    info.setParentId(parent.getId());
-                }
-                infos.add(info);
-            }
-
-            return infos;
-        } catch (ManagerException e1) {
-            Logger.error(e1);
+            groups = groupController.getAllGroups();
+        } catch (ControllerException e) {
+            Logger.error(e);
             return null;
         }
+
+        if (groups == null)
+            return null;
+
+        ArrayList<GroupInfo> infos = new ArrayList<GroupInfo>();
+        for (Group group : groups) {
+            GroupInfo info = new GroupInfo();
+            info.setId(group.getId());
+            info.setLabel(group.getLabel());
+            info.setDescription(group.getDescription());
+            Group parent = group.getParent();
+            if (parent != null) {
+                info.setParentId(parent.getId());
+            }
+            infos.add(info);
+        }
+
+        return infos;
     }
 
     @Override

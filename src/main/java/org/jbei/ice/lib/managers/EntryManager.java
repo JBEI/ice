@@ -18,8 +18,10 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.ArabidopsisSeed;
 import org.jbei.ice.lib.models.Entry;
@@ -223,13 +225,18 @@ public class EntryManager {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static long getNumberOfVisibleEntries(Account account) throws ManagerException {
-        Group everybodyGroup;
+        Group everybodyGroup = null;
 
         long result = 0;
         Session session = null;
 
         try {
-            everybodyGroup = GroupManager.getEverybodyGroup();
+            GroupController controller = new GroupController();
+            try {
+                everybodyGroup = controller.createOrRetrievePublicGroup();
+            } catch (ControllerException e) {
+                e.printStackTrace();
+            }
             session = DAO.newSession();
             String queryString = "select id from ReadGroup readGroup where readGroup.group = :group";
 
@@ -271,12 +278,17 @@ public class EntryManager {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static Set<Long> getAllVisibleEntries(Account account) throws ManagerException {
 
-        Group everybodyGroup;
+        Group everybodyGroup = null;
         Session session = null;
         Set<Long> visibleEntries = new HashSet<Long>();
 
         try {
-            everybodyGroup = GroupManager.getEverybodyGroup();
+            GroupController controller = new GroupController();
+            try {
+                everybodyGroup = controller.createOrRetrievePublicGroup();
+            } catch (ControllerException e) {
+                e.printStackTrace();
+            }
             session = DAO.newSession();
             String queryString = "select entry_id from permission_read_groups where group_id = "
                     + everybodyGroup.getId();
