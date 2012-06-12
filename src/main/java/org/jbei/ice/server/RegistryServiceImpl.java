@@ -46,9 +46,11 @@ import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Folder;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.models.News;
+import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.Storage;
+import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionDAO;
@@ -1760,10 +1762,37 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         SampleController sampleController = new SampleController(account);
         StorageController storageController = new StorageController(account);
 
+        // TODO : this is a hack and will be resolved correctly in 3.1
+        boolean strainWithPlasmid = (infoSet.size() == 2);
+        boolean linked = false;
+        Strain strain = null;
+        Plasmid plasmid = null;
+
         for (EntryInfo info : infoSet) {
             Entry entry = InfoToModelFactory.infoToEntry(info, null);
             try {
                 entry = controller.createEntry(entry);
+                if (strainWithPlasmid) {
+                    switch (info.getType()) {
+                    case PLASMID:
+                        plasmid = (Plasmid) entry;
+                        break;
+
+                    case STRAIN:
+                        strain = (Strain) entry;
+                        if (plasmid != null) {
+                            String plasmidPartNumberString = "[["
+                                    + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":"
+                                    + plasmid.getOnePartNumber().getPartNumber() + "|"
+                                    + plasmid.getOneName().getName() + "]]";
+                            strain.setPlasmids(plasmidPartNumberString);
+                            linked = true;
+                        }
+                        break;
+
+                    default:
+                    }
+                }
             } catch (ControllerException ce) {
                 Logger.error(ce);
                 continue;
@@ -1837,6 +1866,22 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             }
 
             result.add(entry.getId());
+        }
+
+        if (strainWithPlasmid && !linked) {
+            if (plasmid != null) {
+                String plasmidPartNumberString = "[[" + JbeirSettings.getSetting("WIKILINK_PREFIX")
+                        + ":" + plasmid.getOnePartNumber().getPartNumber() + "|"
+                        + plasmid.getOneName().getName() + "]]";
+                strain.setPlasmids(plasmidPartNumberString);
+                try {
+                    controller.save(strain);
+                } catch (ControllerException e) {
+                    Logger.error(e);
+                } catch (PermissionException e) {
+                    Logger.error(e);
+                }
+            }
         }
 
         return result;
