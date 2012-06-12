@@ -30,7 +30,6 @@ import org.jbei.ice.lib.bulkimport.BulkImportController;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AttachmentManager;
-import org.jbei.ice.lib.managers.BulkImportManager;
 import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.FolderManager;
 import org.jbei.ice.lib.managers.ManagerException;
@@ -1450,7 +1449,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            ArrayList<BulkImport> results = BulkImportManager.retrieveByUser(account);
+            BulkImportController biController = new BulkImportController(account);
+            ArrayList<BulkImport> results = biController.retrieveByUser(account);
             ArrayList<BulkImportDraftInfo> info = new ArrayList<BulkImportDraftInfo>();
 
             if (results != null) {
@@ -1474,9 +1474,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         } catch (ControllerException ce) {
             Logger.error(ce);
             return null;
-        } catch (ManagerException me) {
-            Logger.error(me);
-            return null;
         }
     }
 
@@ -1491,8 +1488,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (!controller.isModerator(account))
                 return null;
 
-            ArrayList<BulkImport> results = new ArrayList<BulkImport>();
-            results.addAll(BulkImportManager.retrieveAll());
+            BulkImportController biController = new BulkImportController(account);
+
+            ArrayList<BulkImport> results = new ArrayList<BulkImport>(biController.retrieveAll());
             ArrayList<BulkImportDraftInfo> info = new ArrayList<BulkImportDraftInfo>();
 
             if (results != null) {
@@ -1523,9 +1521,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         } catch (ControllerException ce) {
             Logger.error(ce);
-            return null;
-        } catch (ManagerException me) {
-            Logger.error(me);
             return null;
         }
     }
@@ -1590,10 +1585,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            bi = BulkImportManager.retrieveById(id);
-        } catch (ManagerException me) {
-            Logger.error(me);
-            return null;
+            BulkImportController biController = new BulkImportController(account);
+            bi = biController.retrieveById(id);
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
@@ -1756,7 +1749,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             BulkImportController controller = new BulkImportController(account);
             BulkImport draft = controller.createBulkImport(account, primary, secondary, email);
             draft.setName(name);
-            BulkImport result = BulkImportManager.createBulkImportRecord(draft);
+
+            BulkImportController biController = new BulkImportController(account);
+            BulkImport result = biController.createBulkImportRecord(draft);
 
             // result to DTO
             BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
@@ -1766,9 +1761,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             draftInfo.setName(result.getName());
             return draftInfo;
 
-        } catch (ManagerException e) {
-            Logger.error(e);
-            return null;
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
@@ -1788,14 +1780,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             BulkImportController controller = new BulkImportController(account);
             BulkImport bulkImport = controller.createBulkImport(account, primary, secondary, email);
-            BulkImportManager.submitBulkImportForVerification(bulkImport);
+            controller.submitBulkImportForVerification(bulkImport);
             return true;
 
         } catch (ControllerException ce) {
             Logger.error(ce);
-            return false;
-        } catch (ManagerException me) {
-            Logger.error(me);
             return false;
         }
     }

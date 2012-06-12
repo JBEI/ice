@@ -24,10 +24,10 @@ import org.jbei.ice.controllers.SequenceAnalysisController;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.bulkimport.BulkImportController;
 import org.jbei.ice.lib.composers.SequenceComposerException;
 import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.BulkImportManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.UtilsManager;
 import org.jbei.ice.lib.models.Account;
@@ -1092,8 +1092,9 @@ public class RegistryAMFAPI extends BaseService {
         Logger.info("RetrieveBulkImportEntryType: " + importId);
         long id = Long.decode(importId);
         try {
-            return BulkImportManager.retrieveType(id);
-        } catch (ManagerException e) {
+            BulkImportController controller = new BulkImportController(account);
+            return controller.retrieveType(id);
+        } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
             return null;
         }
@@ -1122,7 +1123,8 @@ public class RegistryAMFAPI extends BaseService {
 
         try {
             ASObject results = new ASObject();
-            BulkImport bi = BulkImportManager.retrieveById(id);
+            BulkImportController controller = new BulkImportController(account);
+            BulkImport bi = controller.retrieveById(id);
             String ownerEmail = bi.getAccount().getEmail();
             results.put("type", bi.getType());
             results.put("sequenceZipfile", bi.getSequenceFile());
@@ -1160,7 +1162,7 @@ public class RegistryAMFAPI extends BaseService {
             }
 
             return results;
-        } catch (ManagerException e) {
+        } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
             return null;
         }
@@ -1246,11 +1248,9 @@ public class RegistryAMFAPI extends BaseService {
                 bulkImport.setType(type);
             }
 
-            BulkImport savedImport = BulkImportManager.createBulkImportRecord(bulkImport);
+            BulkImportController controller = new BulkImportController(account);
+            BulkImport savedImport = controller.createBulkImportRecord(bulkImport);
             return savedImport.getPrimaryData().size();
-        } catch (ManagerException e) {
-            Logger.error(getLoggerPrefix(), e);
-            return 0;
         } catch (Exception e) {
             Logger.error(getLoggerPrefix(), e);
             return 0;
@@ -1285,7 +1285,8 @@ public class RegistryAMFAPI extends BaseService {
         }
 
         try {
-            BulkImport bi = BulkImportManager.retrieveById(Integer.decode(importId));
+            BulkImportController controller = new BulkImportController(account);
+            BulkImport bi = controller.retrieveById(Integer.decode(importId));
             String email = bi.getAccount().getEmail();
             entry.setOwnerEmail(email);
             entry.setOwner(bi.getAccount().getFullName());
@@ -1362,7 +1363,8 @@ public class RegistryAMFAPI extends BaseService {
 
         // set accounts
         try {
-            BulkImport bi = BulkImportManager.retrieveById(Integer.decode(importId));
+            BulkImportController controller = new BulkImportController(account);
+            BulkImport bi = controller.retrieveById(Integer.decode(importId));
             String email = bi.getAccount().getEmail();
             String owner = bi.getAccount().getFullName();
 

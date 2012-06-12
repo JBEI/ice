@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -20,9 +21,8 @@ import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.EntryPermissionVerifier;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.BulkImportManager;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.BulkImport;
 import org.jbei.ice.lib.models.Entry;
@@ -37,9 +37,11 @@ import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 public class BulkImportController extends Controller {
 
     private final String TEMPORARY_DIRECTORY = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
+    private final BulkImportDAO dao;
 
     public BulkImportController(Account account) {
         super(account, new EntryPermissionVerifier());
+        dao = new BulkImportDAO();
     }
 
     public BulkImport updateBulkImportDraft(long id, String name, Account account,
@@ -47,7 +49,7 @@ public class BulkImportController extends Controller {
             throws ControllerException {
 
         try {
-            BulkImport savedDraft = BulkImportManager.retrieveById(id);
+            BulkImport savedDraft = dao.retrieveById(id);
             // callee should consider creating a new record and updating 
             if (savedDraft == null)
                 throw new ControllerException("Could not located bulk import record with id " + id);
@@ -56,9 +58,9 @@ public class BulkImportController extends Controller {
             getDataForUpdate(savedDraft, primary, account, true);
             getDataForUpdate(savedDraft, secondary, account, false);
 
-            BulkImport result = BulkImportManager.updateBulkImportRecord(id, savedDraft);
+            BulkImport result = dao.updateBulkImportRecord(id, savedDraft);
             return result;
-        } catch (ManagerException me) {
+        } catch (DAOException me) {
             throw new ControllerException(me);
         }
     }
@@ -353,4 +355,51 @@ public class BulkImportController extends Controller {
         return files;
     }
 
+    public List<BulkImport> retrieveAll() throws ControllerException {
+        try {
+            return dao.retrieveAll();
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+    }
+
+    public ArrayList<BulkImport> retrieveByUser(Account account) throws ControllerException {
+        try {
+            return dao.retrieveByUser(account);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+    }
+
+    public BulkImport retrieveById(long id) throws ControllerException {
+        try {
+            return dao.retrieveById(id);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+    }
+
+    public BulkImport createBulkImportRecord(BulkImport draft) throws ControllerException {
+        try {
+            return dao.createBulkImportRecord(draft);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+    }
+
+    public void submitBulkImportForVerification(BulkImport bulkImport) throws ControllerException {
+        try {
+            dao.submitBulkImportForVerification(bulkImport);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+    }
+
+    public String retrieveType(long id) throws ControllerException {
+        try {
+            return dao.retrieveType(id);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+    }
 }

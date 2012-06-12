@@ -1,5 +1,7 @@
 package org.jbei.ice.server.dao.hibernate;
 
+import java.util.List;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -170,6 +172,27 @@ public class HibernateRepository implements IRepository {
             }
         }
         return result;
+    }
+
+    @SuppressWarnings("rawtypes")
+    public List retrieveAll(Class<? extends IModel> theClass) throws DAOException {
+        Session session = newSession();
+
+        try {
+            List results = null;
+            session.getTransaction().begin();
+            Query query = session.createQuery("from " + theClass.getName());
+            results = query.list();
+            session.getTransaction().commit();
+            return results;
+        } catch (HibernateException he) {
+            session.getTransaction().rollback();
+            throw new DAOException("retrieve all failed for " + theClass.getCanonicalName(), he);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
     }
 
     /**

@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.managers;
+package org.jbei.ice.lib.bulkimport;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,8 +12,10 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.BulkImport;
+import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
 /**
  * Manage {@link BulkImport} objects in the database.
@@ -21,10 +23,10 @@ import org.jbei.ice.lib.models.BulkImport;
  * @author Hector Plahar
  * 
  */
-public class BulkImportManager {
+class BulkImportDAO extends HibernateRepository {
 
     @SuppressWarnings("unchecked")
-    public static ArrayList<BulkImport> retrieveByUser(Account account) throws ManagerException {
+    public ArrayList<BulkImport> retrieveByUser(Account account) throws DAOException {
 
         Session session = DAO.newSession();
         Query query = session.createQuery("from " + BulkImport.class.getName()
@@ -35,7 +37,7 @@ public class BulkImportManager {
             ArrayList<BulkImport> result = new ArrayList<BulkImport>(query.list());
             return result;
         } catch (Exception e) {
-            throw new ManagerException("Error retrieving bulk import record", e);
+            throw new DAOException("Error retrieving bulk import record", e);
         } finally {
 
             if (session != null && session.isOpen()) {
@@ -51,10 +53,10 @@ public class BulkImportManager {
      * @return Saved BulkImport
      * @throws ManagerException
      */
-    public static BulkImport createBulkImportRecord(BulkImport data) throws ManagerException {
+    public BulkImport createBulkImportRecord(BulkImport data) throws DAOException {
 
         if (data == null) {
-            throw new ManagerException("Cannot create record from null data");
+            throw new DAOException("Cannot create record from null data");
         }
 
         try {
@@ -62,7 +64,7 @@ public class BulkImportManager {
             data.setCreationTime(creationDate);
             return (BulkImport) DAO.save(data);
         } catch (DAOException e) {
-            throw new ManagerException("Exception saving bulkImport record", e);
+            throw new DAOException("Exception saving bulkImport record", e);
         }
     }
 
@@ -74,9 +76,9 @@ public class BulkImportManager {
      * @return saved bulk import record
      * @throws ManagerException
      */
-    public static void submitBulkImportForVerification(BulkImport data) throws ManagerException {
+    public void submitBulkImportForVerification(BulkImport data) throws DAOException {
         if (data == null)
-            throw new ManagerException("Cannot submit null data");
+            throw new DAOException("Cannot submit null data");
 
         try {
             AccountController controller = new AccountController();
@@ -84,26 +86,25 @@ public class BulkImportManager {
             data.setAccount(account);
             createBulkImportRecord(data);
         } catch (ControllerException e) {
-            throw new ManagerException(e);
+            throw new DAOException(e);
         }
     }
 
-    public static BulkImport updateBulkImportRecord(long id, BulkImport data)
-            throws ManagerException {
+    public BulkImport updateBulkImportRecord(long id, BulkImport data) throws DAOException {
         if (data == null) {
-            throw new ManagerException("Cannot create record from null data");
+            throw new DAOException("Cannot create record from null data");
         }
 
         BulkImport current = retrieveById(id);
         if (current == null)
-            throw new ManagerException("Record with id " + id + " does not exist");
+            throw new DAOException("Record with id " + id + " does not exist");
 
         try {
             data.setId(current.getId());
             data.setCreationTime(current.getCreationTime());
             return (BulkImport) DAO.save(data);
         } catch (DAOException e) {
-            throw new ManagerException("Exception updating bulk import record " + id, e);
+            throw new DAOException("Exception updating bulk import record " + id, e);
         }
     }
 
@@ -113,13 +114,8 @@ public class BulkImportManager {
      * @param bulkImport
      * @throws ManagerException
      */
-    public static void delete(BulkImport bulkImport) throws ManagerException {
-        try {
-            DAO.delete(bulkImport);
-        } catch (DAOException e) {
-
-            throw new ManagerException("Failed to delete bulk import", e);
-        }
+    public void delete(BulkImport bulkImport) throws DAOException {
+        super.delete(bulkImport);
     }
 
     /**
@@ -129,26 +125,14 @@ public class BulkImportManager {
      * @throws ManagerException
      */
     @SuppressWarnings("unchecked")
-    public static List<BulkImport> retrieveAll() throws ManagerException {
-        Session session = DAO.newSession();
+    public List<BulkImport> retrieveAll() throws DAOException {
         List<BulkImport> list = new ArrayList<BulkImport>();
-
-        try {
-            Query query = session.createQuery("from " + BulkImport.class.getName());
-            list.addAll(query.list());
-        } catch (HibernateException he) {
-            throw new ManagerException("Error retrieving list of bulk imports", he);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
-        }
-
+        list.addAll(super.retrieveAll(BulkImport.class));
         return list;
     }
 
     @SuppressWarnings("unchecked")
-    public static List<BulkImport> retrieveSavedDrafts() throws ManagerException {
+    public static List<BulkImport> retrieveSavedDrafts() throws DAOException {
         Session session = DAO.newSession();
         List<BulkImport> list = new ArrayList<BulkImport>();
 
@@ -159,7 +143,7 @@ public class BulkImportManager {
             list.addAll(query.list());
         } catch (HibernateException he) {
             session.getTransaction().rollback();
-            throw new ManagerException("Error retrieving list of saved bulk import drafts", he);
+            throw new DAOException("Error retrieving list of saved bulk import drafts", he);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -177,20 +161,8 @@ public class BulkImportManager {
      * @return BulkImport object.
      * @throws ManagerException
      */
-    public static BulkImport retrieveById(long importId) throws ManagerException {
-        Session session = DAO.newSession();
-        Query query = session.createQuery("from " + BulkImport.class.getName() + " where id = :id");
-        query.setLong("id", importId);
-        try {
-            return (BulkImport) query.uniqueResult();
-        } catch (Exception e) {
-            throw new ManagerException("Error retrieving bulk import record", e);
-        } finally {
-
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
-        }
+    public BulkImport retrieveById(long importId) throws DAOException {
+        return (BulkImport) super.get(BulkImport.class, importId);
     }
 
     /**
@@ -201,14 +173,14 @@ public class BulkImportManager {
      * @return Type
      * @throws ManagerException
      */
-    public static String retrieveType(long id) throws ManagerException {
+    public String retrieveType(long id) throws DAOException {
         Session session = DAO.newSession();
         try {
             SQLQuery query = session.createSQLQuery("select type from bulk_import where id = :id ");
             query.setLong("id", id);
             return (String) query.uniqueResult();
         } catch (Exception e) {
-            throw new ManagerException("Error retrieving bulk import record type", e);
+            throw new DAOException("Error retrieving bulk import record type", e);
         } finally {
             if (session != null && session.isOpen()) {
                 session.close();
