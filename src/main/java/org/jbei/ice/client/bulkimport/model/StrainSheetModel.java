@@ -11,9 +11,6 @@ import org.jbei.ice.shared.dto.StrainInfo;
 
 public class StrainSheetModel extends SingleInfoSheetModel {
 
-    public StrainSheetModel() {
-    }
-
     @Override
     public void createInfo(ArrayList<SheetFieldData[]> data, ArrayList<EntryInfo> primaryData,
             ArrayList<EntryInfo> secondaryData) {

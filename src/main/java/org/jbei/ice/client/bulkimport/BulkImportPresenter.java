@@ -6,6 +6,8 @@ import java.util.Map.Entry;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.admin.bulkimport.BulkImportMenuItem;
+import org.jbei.ice.client.admin.bulkimport.DeleteBulkImportHandler;
 import org.jbei.ice.client.bulkimport.events.BulkImportDraftSubmitEvent;
 import org.jbei.ice.client.bulkimport.events.BulkImportDraftSubmitEvent.BulkImportDraftSubmitEventHandler;
 import org.jbei.ice.client.bulkimport.events.BulkImportSubmitEvent;
@@ -16,7 +18,6 @@ import org.jbei.ice.client.bulkimport.model.BulkImportModel;
 import org.jbei.ice.client.bulkimport.model.NewBulkInput;
 import org.jbei.ice.client.bulkimport.model.SheetFieldData;
 import org.jbei.ice.client.bulkimport.sheet.Sheet;
-import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
@@ -80,18 +81,18 @@ public class BulkImportPresenter extends AbstractPresenter {
 
             @Override
             public void onClick(ClickEvent event) {
-                view.setMenuVisibility(!view.getMenuVisibility());
+                view.setDraftMenuVisibility(!view.getMenuVisibility());
             }
         });
     }
 
     private void setMenuSelectionModel() {
-        final SingleSelectionModel<MenuItem> draftSelection = view.getDraftMenuModel();
+        final SingleSelectionModel<BulkImportMenuItem> draftSelection = view.getDraftMenuModel();
         draftSelection.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                final MenuItem item = draftSelection.getSelectedObject();
+                final BulkImportMenuItem item = draftSelection.getSelectedObject();
                 model.retrieveBulkImport(item.getId(), new SavedDraftsEventHandler() {
 
                     @Override
@@ -116,7 +117,7 @@ public class BulkImportPresenter extends AbstractPresenter {
 
                         view.setSheet(currentInput, false);
                         view.setHeader(info.getType().getDisplay() + " Bulk Import");
-                        //                        view.setMenuVisibility(false);
+                        //                                                view.setMenuVisibility(false);
                     }
                 });
             }
@@ -136,7 +137,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                 if (sheetCache.containsKey(selection))
                     currentInput = sheetCache.get(selection);
                 else {
-                    Sheet sheet = new Sheet(selection, null);
+                    Sheet sheet = new Sheet(selection);
                     sheet.setAutoCompleteData(AppController.autoCompleteData);
                     currentInput = new NewBulkInput(selection, sheet);
 
@@ -145,7 +146,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                 }
                 view.setSheet(currentInput, true);
                 view.setHeader(selection.getDisplay() + " Bulk Import");
-                view.setMenuVisibility(false);
+                view.setDraftMenuVisibility(false);
                 createSelection.setSelected(selection, false);
             }
         });
@@ -156,19 +157,18 @@ public class BulkImportPresenter extends AbstractPresenter {
 
             @Override
             public void onDataRetrieval(SavedDraftsEvent event) {
-                ArrayList<MenuItem> data = new ArrayList<MenuItem>();
+                ArrayList<BulkImportMenuItem> data = new ArrayList<BulkImportMenuItem>();
                 for (BulkImportDraftInfo info : event.getData()) {
                     String name = info.getName();
-                    if (name == null) {
-                        name = DateUtilities.formatDate(info.getCreated());
-                        info.setName(name);
-                    }
-                    MenuItem item = new MenuItem(info.getId(), name, info.getCount(), true); // TODO : temporarily disabling the edit/delete icon
+                    String dateTime = DateUtilities.formatShorterDate(info.getCreated());
+                    BulkImportMenuItem item = new BulkImportMenuItem(info.getId(), name, info
+                            .getCount(), dateTime, info.getType().toString(), info.getAccount()
+                            .getEmail());
                     data.add(item);
                 }
 
                 if (!data.isEmpty()) {
-                    view.setSavedDraftsData(data, null); // TODO : delete handler
+                    view.setSavedDraftsData(data, new DeleteBulkImportHandler(model.getService()));
                 } else
                     view.setToggleMenuVisiblity(false);
             }
@@ -264,10 +264,13 @@ public class BulkImportPresenter extends AbstractPresenter {
                             view.showFeedback(
                                 "Draft \"" + info.getName() + "\" with <b>" + info.getCount()
                                         + "</b> entry/ies successfully saved", false);
-                            MenuItem item = new MenuItem(info.getId(), info.getName(), info
-                                    .getCount(), true); // TODO : temporarily disabling the edit/delete icon
-                            // TODO : deleteHandler
-                            view.addSavedDraftData(item, null);
+                            String dateTime = DateUtilities.formatShorterDate(info.getCreated());
+                            BulkImportMenuItem item = new BulkImportMenuItem(info.getId(), info
+                                    .getName(), info.getCount(), dateTime, info.getType()
+                                    .toString(), info.getAccount().getEmail());
+
+                            view.addSavedDraftData(item,
+                                new DeleteBulkImportHandler(model.getService()));
                             currentInput.setName(info.getName());
                             currentInput.setId(info.getId());
 

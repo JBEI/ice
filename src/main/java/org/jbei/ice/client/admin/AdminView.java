@@ -3,7 +3,7 @@ package org.jbei.ice.client.admin;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.AppController;
-import org.jbei.ice.client.admin.bulkimport.AdminBulkImportMenu;
+import org.jbei.ice.client.admin.bulkimport.SavedDraftsMenu;
 import org.jbei.ice.client.admin.bulkimport.BulkImportMenuItem;
 import org.jbei.ice.client.admin.bulkimport.IDeleteMenuHandler;
 import org.jbei.ice.client.admin.group.EditGroupsPanel;
@@ -25,7 +25,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 public class AdminView extends AbstractLayout {
 
     private FlexTable contentTable;
-    private AdminBulkImportMenu draftsMenu;
+    private SavedDraftsMenu draftsMenu;
     private TabLayoutPanel panel;
 
     @Override
@@ -34,7 +34,7 @@ public class AdminView extends AbstractLayout {
 
         contentTable = new FlexTable();
         panel = new TabLayoutPanel(1.5, Unit.EM);
-        draftsMenu = new AdminBulkImportMenu("BULK IMPORT");
+        draftsMenu = new SavedDraftsMenu("BULK IMPORT");
 
         contentTable.setWidth("100%");
         contentTable.setHTML(0, 0, "&nbsp;");

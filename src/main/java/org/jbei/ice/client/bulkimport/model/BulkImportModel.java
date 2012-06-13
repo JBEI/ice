@@ -45,8 +45,8 @@ public class BulkImportModel {
             });
     }
 
-    public void saveBulkImportDraftData(EntryAddType type, String name, ArrayList<SheetFieldData[]> data,
-            final BulkImportDraftSubmitEventHandler handler) {
+    public void saveBulkImportDraftData(EntryAddType type, String name,
+            ArrayList<SheetFieldData[]> data, final BulkImportDraftSubmitEventHandler handler) {
         SheetModel model = ModelFactory.getModelForType(type);
         if (model == null) {
             handler.onSubmit(null);
@@ -159,5 +159,9 @@ public class BulkImportModel {
                     handler.onDataRetrieval(new SavedDraftsEvent(data));
                 }
             });
+    }
+
+    public RegistryServiceAsync getService() {
+        return this.service;
     }
 }

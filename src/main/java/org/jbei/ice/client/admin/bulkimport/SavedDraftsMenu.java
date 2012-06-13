@@ -26,7 +26,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-public class AdminBulkImportMenu extends Composite {
+public class SavedDraftsMenu extends Composite {
 
     private final FlexTable table;
     private BulkImportMenuItem currentEditSelection;
@@ -34,7 +34,7 @@ public class AdminBulkImportMenu extends Composite {
     private int row;
     private final SingleSelectionModel<BulkImportMenuItem> selectionModel;
 
-    public AdminBulkImportMenu(String header) {
+    public SavedDraftsMenu(String header) {
         table = new FlexTable();
         table.setCellPadding(0);
         table.setCellSpacing(0);

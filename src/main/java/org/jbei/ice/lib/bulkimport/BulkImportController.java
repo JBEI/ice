@@ -402,4 +402,13 @@ public class BulkImportController extends Controller {
             throw new ControllerException(e);
         }
     }
+
+    public void deleteDraft(BulkImport draft) throws ControllerException {
+        try {
+            dao.delete(draft);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+
+    }
 }

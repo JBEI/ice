@@ -1463,8 +1463,17 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                         draftInfo.setCount(-1);
                     draftInfo.setCreated(draft.getCreationTime());
                     draftInfo.setId(draft.getId());
+
+                    Account draftAccount = draft.getAccount();
                     draftInfo.setName(draft.getName());
                     draftInfo.setType(EntryAddType.stringToType(draft.getType()));
+
+                    // set the account info
+                    AccountInfo accountInfo = new AccountInfo();
+                    accountInfo.setEmail(draftAccount.getEmail());
+                    accountInfo.setFirstName(draftAccount.getFirstName());
+                    accountInfo.setLastName(draftAccount.getLastName());
+                    draftInfo.setAccount(accountInfo);
                     info.add(draftInfo);
                 }
             }
@@ -1532,17 +1541,19 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            if (!AccountManager.isModerator(account))
+            AccountController controller = new AccountController();
+            if (!controller.isModerator(account))
                 return null;
 
-            BulkImport draft = BulkImportManager.retrieveById(draftId);
+            BulkImportController biController = new BulkImportController(account);
+            BulkImport draft = biController.retrieveById(draftId);
             if (draft == null)
                 return null;
 
             Logger.info(account.getEmail() + ": deleting bulk import draft with id "
                     + draft.getId());
 
-            BulkImportManager.delete(draft);
+            biController.deleteDraft(draft);
 
             BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
             List<BulkImportEntryData> primary = draft.getPrimaryData();
@@ -1566,9 +1577,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         } catch (ControllerException ce) {
             Logger.error(ce);
-            return null;
-        } catch (ManagerException me) {
-            Logger.error(me);
             return null;
         }
 

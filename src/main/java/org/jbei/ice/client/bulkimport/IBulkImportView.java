@@ -2,9 +2,9 @@ package org.jbei.ice.client.bulkimport;
 
 import java.util.ArrayList;
 
+import org.jbei.ice.client.admin.bulkimport.BulkImportMenuItem;
+import org.jbei.ice.client.admin.bulkimport.IDeleteMenuHandler;
 import org.jbei.ice.client.bulkimport.model.NewBulkInput;
-import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
-import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.shared.EntryAddType;
 
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -20,15 +20,15 @@ public interface IBulkImportView {
 
     void showFeedback(String msg, boolean isError);
 
-    void setSavedDraftsData(ArrayList<MenuItem> data, IDeleteMenuHandler handler);
+    void setSavedDraftsData(ArrayList<BulkImportMenuItem> data, IDeleteMenuHandler handler);
 
-    void addSavedDraftData(MenuItem item, IDeleteMenuHandler handler);
+    void addSavedDraftData(BulkImportMenuItem item, IDeleteMenuHandler handler);
 
-    SingleSelectionModel<MenuItem> getDraftMenuModel();
+    SingleSelectionModel<BulkImportMenuItem> getDraftMenuModel();
 
     SingleSelectionModel<EntryAddType> getImportCreateModel();
 
-    void setMenuVisibility(boolean visible);
+    void setDraftMenuVisibility(boolean visible);
 
     void addToggleMenuHandler(ClickHandler handler);
 

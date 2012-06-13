@@ -91,7 +91,11 @@ public class Sheet extends Composite implements SheetPresenter.View {
     private final HashMap<Integer, String> sequenceRowFileIds;
     private final BulkImportDraftInfo info;
 
-    private final static int ROW_COUNT = 100;
+    private final static int ROW_COUNT = 1;
+
+    public Sheet(EntryAddType type) {
+        this(type, null);
+    }
 
     public Sheet(EntryAddType type, BulkImportDraftInfo info) {
 
@@ -150,6 +154,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         // init
         headerWrapper = new ScrollPanel(header);
+        headerWrapper.setWidth((Window.getClientWidth() - WIDTH - 4) + "px");
 
         addScrollHandlers();
         addResizeHandler();
@@ -187,9 +192,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         DOM.setStyleAttribute(rowIndexWrapper.getElement(), "overflowY", "hidden");
         DOM.setStyleAttribute(rowIndexWrapper.getElement(), "overflowX", "hidden");
-
-        //  - 260 accounts for left menu bar. get actual width
-        headerWrapper.setWidth((Window.getClientWidth() - 1 - 15) + "px"); // TODO : the 15px accounts for the scroll bar. Not sure yet how to get the scrollbar width
 
         createHeaderCells();
 

@@ -1,6 +1,6 @@
 package org.jbei.ice.client.admin.bulkimport;
 
-import org.jbei.ice.client.admin.bulkimport.AdminBulkImportMenu.MenuCell;
+import org.jbei.ice.client.admin.bulkimport.SavedDraftsMenu.MenuCell;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
