@@ -5,9 +5,10 @@ import java.util.ArrayList;
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.admin.bulkimport.BulkImportMenuItem;
+import org.jbei.ice.client.admin.bulkimport.DeleteBulkImportHandler;
 import org.jbei.ice.client.admin.group.GroupPresenter;
 import org.jbei.ice.client.admin.usermanagement.UserPresenter;
-import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 
@@ -86,31 +87,30 @@ public class AdminPresenter extends AbstractPresenter {
 
                 @Override
                 public void onSuccess(ArrayList<BulkImportDraftInfo> result) {
-                    ArrayList<MenuItem> data = new ArrayList<MenuItem>();
+                    ArrayList<BulkImportMenuItem> data = new ArrayList<BulkImportMenuItem>();
                     for (BulkImportDraftInfo info : result) {
                         String name = info.getName();
-                        if (name == null) {
-                            name = DateUtilities.formatDate(info.getCreated());
-                            info.setName(name);
-                        }
-                        MenuItem item = new MenuItem(info.getId(), name, info.getCount(), true);
+                        String dateTime = DateUtilities.formatShorterDate(info.getCreated());
+                        BulkImportMenuItem item = new BulkImportMenuItem(info.getId(), name, info
+                                .getCount(), dateTime, info.getType().toString(), info.getAccount()
+                                .getEmail());
                         data.add(item);
                     }
 
                     if (!data.isEmpty()) {
-                        view.setSavedDraftsData(data);
+                        view.setSavedDraftsData(data, new DeleteBulkImportHandler(service));
                     }
                 }
             });
     }
 
     private void setMenuSelectionModel() {
-        final SingleSelectionModel<MenuItem> draftSelection = view.getDraftMenuModel();
+        final SingleSelectionModel<BulkImportMenuItem> draftSelection = view.getDraftMenuModel();
         draftSelection.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                final MenuItem item = draftSelection.getSelectedObject();
+                final BulkImportMenuItem item = draftSelection.getSelectedObject();
 
                 service.retrieveBulkImport(AppController.sessionId, item.getId(),
                     new AsyncCallback<BulkImportDraftInfo>() {

@@ -171,4 +171,6 @@ public interface RegistryService extends RemoteService {
     boolean deleteEntryAttachment(String sid, String fileId);
 
     EntryInfo retrieveEntryTipDetails(String sessionId, long id);
+
+    BulkImportDraftInfo deleteDraftPendingVerification(String sid, long draftId);
 }

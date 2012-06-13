@@ -15,7 +15,15 @@ public class DateUtilities {
         if (date == null)
             return "";
 
-        DateTimeFormat format = DateTimeFormat.getFormat("MMM d, y h:mm a");
+        DateTimeFormat format = DateTimeFormat.getFormat("MMM dd, y h:mm a");
+        return format.format(date);
+    }
+
+    public static String formatShorterDate(Date date) {
+        if (date == null)
+            return "";
+
+        DateTimeFormat format = DateTimeFormat.getFormat("MM/dd/yyyy H:mm");
         return format.format(date);
     }
 }

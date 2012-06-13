@@ -3,11 +3,12 @@ package org.jbei.ice.client.admin;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.admin.bulkimport.AdminBulkImportMenu;
+import org.jbei.ice.client.admin.bulkimport.BulkImportMenuItem;
+import org.jbei.ice.client.admin.bulkimport.IDeleteMenuHandler;
 import org.jbei.ice.client.admin.group.EditGroupsPanel;
 import org.jbei.ice.client.admin.reports.ReportPanel;
 import org.jbei.ice.client.admin.usermanagement.EditUserPanel;
-import org.jbei.ice.client.collection.menu.CollectionMenu;
-import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 
@@ -24,7 +25,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 public class AdminView extends AbstractLayout {
 
     private FlexTable contentTable;
-    private CollectionMenu draftsMenu; // TODO
+    private AdminBulkImportMenu draftsMenu;
     private TabLayoutPanel panel;
 
     @Override
@@ -33,7 +34,7 @@ public class AdminView extends AbstractLayout {
 
         contentTable = new FlexTable();
         panel = new TabLayoutPanel(1.5, Unit.EM);
-        draftsMenu = new CollectionMenu(false, "BULK IMPORT");
+        draftsMenu = new AdminBulkImportMenu("BULK IMPORT");
 
         contentTable.setWidth("100%");
         contentTable.setHTML(0, 0, "&nbsp;");
@@ -76,13 +77,13 @@ public class AdminView extends AbstractLayout {
         return new HTML("&nbsp;");
     }
 
-    public void setSavedDraftsData(ArrayList<MenuItem> data) {
-        draftsMenu.setMenuItems(data, null);
+    public void setSavedDraftsData(ArrayList<BulkImportMenuItem> data, IDeleteMenuHandler handler) {
+        draftsMenu.setMenuItems(data, handler);
         contentTable.setWidget(0, 0, draftsMenu);
         contentTable.getFlexCellFormatter().setWidth(0, 0, "220px");
     }
 
-    public SingleSelectionModel<MenuItem> getDraftMenuModel() {
+    public SingleSelectionModel<BulkImportMenuItem> getDraftMenuModel() {
         return draftsMenu.getSelectionModel();
     }
 

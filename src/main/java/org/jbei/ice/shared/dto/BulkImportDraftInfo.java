@@ -19,6 +19,7 @@ public class BulkImportDraftInfo implements IsSerializable {
     // these are empty
     private ArrayList<EntryInfo> primary;
     private ArrayList<EntryInfo> secondary;
+    private AccountInfo account;
 
     public long getId() {
         return id;
@@ -74,5 +75,13 @@ public class BulkImportDraftInfo implements IsSerializable {
 
     public void setSecondary(ArrayList<EntryInfo> secondary) {
         this.secondary = secondary;
+    }
+
+    public AccountInfo getAccount() {
+        return account;
+    }
+
+    public void setAccount(AccountInfo account) {
+        this.account = account;
     }
 }

@@ -89,6 +89,9 @@ public interface RegistryServiceAsync {
     void retrieveDraftsPendingVerification(String sid,
             AsyncCallback<ArrayList<BulkImportDraftInfo>> callback);
 
+    void deleteDraftPendingVerification(String sid, long draftId,
+            AsyncCallback<BulkImportDraftInfo> callback);
+
     void createSample(String sessionId, SampleStorage sampleStorage, long entryId,
             AsyncCallback<SampleStorage> callback);
 
