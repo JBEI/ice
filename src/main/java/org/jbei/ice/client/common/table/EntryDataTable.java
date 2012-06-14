@@ -14,6 +14,7 @@ import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
@@ -25,6 +26,8 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
@@ -158,22 +161,26 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         return nameColumn;
     }
 
-    protected DataTableColumn<String> addSummaryColumn() {
-        DataTableColumn<String> summaryColumn = new DataTableColumn<String>(new TextCell(),
+    protected DataTableColumn<SafeHtml> addSummaryColumn() {
+        DataTableColumn<SafeHtml> summaryColumn = new DataTableColumn<SafeHtml>(new SafeHtmlCell(),
                 ColumnField.SUMMARY) {
 
             @Override
-            public String getValue(T object) {
+            public SafeHtml getValue(T object) {
                 String description = object.getShortDescription();
                 if (description == null)
-                    return "";
+                    return SafeHtmlUtils.EMPTY_SAFE_HTML;
 
-                int size = (int) (Window.getClientWidth() * 0.03);
+                int size = (int) (Window.getClientWidth() - 850);
                 if (size <= 0)
                     size = 50;
-                if (description.length() > size)
-                    description = description.substring(0, (size - 3)) + "...";
-                return description;
+
+                return SafeHtmlUtils
+                        .fromSafeConstant("<div style=\"width: "
+                                + size
+                                + "px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;\" title=\""
+                                + object.getShortDescription().replaceAll("\"", "'") + "\">"
+                                + object.getShortDescription() + "</div>");
             }
         };
 
