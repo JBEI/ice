@@ -199,4 +199,7 @@ public interface RegistryServiceAsync {
     void deleteEntryAttachment(String sid, String fileId, AsyncCallback<Boolean> callback);
 
     void retrieveAllGroups(String sessionId, AsyncCallback<ArrayList<GroupInfo>> callback);
+
+    void deleteEntry(String sessionId, EntryInfo info,
+            AsyncCallback<ArrayList<FolderDetails>> callback);
 }

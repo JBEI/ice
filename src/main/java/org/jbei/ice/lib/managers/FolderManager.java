@@ -115,6 +115,7 @@ public class FolderManager {
             SQLQuery query = session
                     .createSQLQuery("SELECT entry_id FROM folder_entry WHERE folder_id = :id");
             query.setLong("id", id);
+            @SuppressWarnings("rawtypes")
             List list = query.list();
             return (ArrayList<Long>) list;
 
@@ -125,10 +126,14 @@ public class FolderManager {
         }
     }
 
-    public static Folder removeFolderContents(long folderId, ArrayList<Long> entryIds)
-            throws ManagerException {
-        AccountController controller = new AccountController();
-
+    public static Folder removeFolderContents(Account account, long folderId,
+            ArrayList<Long> entryIds) throws ManagerException {
+        boolean isModerator;
+        try {
+            isModerator = AccountController.isModerator(account);
+        } catch (ControllerException e1) {
+            throw new ManagerException(e1);
+        }
         Session session = DAO.newSession();
         try {
             session.beginTransaction();
@@ -138,19 +143,18 @@ public class FolderManager {
             if (folder == null)
                 throw new ManagerException("Cannot retrieve folder with id \"" + folderId + "\"");
 
-            folder.getContents().size();
-            boolean isSystemFolder = false;
-            try {
-                isSystemFolder = folder.getOwnerEmail().equals(
-                    controller.getSystemAccount().getEmail());
-            } catch (ControllerException e) {
-                e.printStackTrace();
-            }
-            if (isSystemFolder) {
+            boolean isSystemFolder = folder.getOwnerEmail().equals(
+                AccountManager.getSystemAccount().getEmail());
+            if (isSystemFolder && !isModerator) {
                 session.getTransaction().commit();
                 throw new ManagerException("Cannot modify non user folder " + folder.getName());
             }
 
+            // TODO : Entry has to implement getHashCode() and equals() and then 
+            // TODO : we can do 
+            // TODO folder.getContents().remove(entry)
+
+            folder.getContents().size();
             Iterator<Entry> it = folder.getContents().iterator();
 
             while (it.hasNext()) {
@@ -222,6 +226,31 @@ public class FolderManager {
             folders = new ArrayList<Folder>(query.list());
 
         } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve folders!", e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+
+        return folders;
+    }
+
+    @SuppressWarnings({ "unchecked" })
+    public static List<Folder> getFoldersByEntry(Entry entry) throws ManagerException {
+        ArrayList<Folder> folders = new ArrayList<Folder>();
+        Session session = DAO.newSession();
+
+        try {
+            session.getTransaction().begin();
+            String hql = "select distinct folder from " + Folder.class.getName()
+                    + " folder join folder.contents contents where :entry in contents";
+            Query query = session.createQuery(hql);
+            query.setParameter("entry", entry);
+            folders.addAll(query.list());
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
             throw new ManagerException("Failed to retrieve folders!", e);
         } finally {
             if (session.isOpen()) {

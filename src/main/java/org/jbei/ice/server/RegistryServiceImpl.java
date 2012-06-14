@@ -588,7 +588,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             if (contents.size() > 0) {
                 // delete the contents first
-                if (FolderManager.removeFolderContents(folder.getId(), contents) == null)
+                if (FolderManager.removeFolderContents(account, folder.getId(), contents) == null)
                     return null;
             }
 
@@ -1269,7 +1269,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.info(account.getEmail() + ": moving entries to user collection.");
 
             ArrayList<Entry> entrys = new ArrayList<Entry>(EntryManager.getEntriesByIdSet(entryIds));
-            if (FolderManager.removeFolderContents(source, entryIds) != null) {
+            if (FolderManager.removeFolderContents(account, source, entryIds) != null) {
                 ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
 
                 for (long folderId : destination) {
@@ -1308,7 +1308,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             Logger.info(account.getEmail() + ": removing from user collection.");
 
-            Folder folder = FolderManager.removeFolderContents(source, entryIds);
+            Folder folder = FolderManager.removeFolderContents(account, source, entryIds);
             if (folder == null)
                 return null;
 
@@ -2533,5 +2533,56 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.error(e);
         }
         return false;
+    }
+
+    @Override
+    public ArrayList<FolderDetails> deleteEntry(String sessionId, EntryInfo info) {
+        Account account = null;
+
+        try {
+            account = retrieveAccountForSid(sessionId);
+            if (account == null)
+                return null;
+
+            Logger.info(account.getEmail() + ": deleting entry " + info.getId());
+            EntryController controller = new EntryController(account);
+            Entry entry = controller.get(info.getId());
+            if (entry == null)
+                return null;
+
+            controller.delete(entry);
+
+            ArrayList<FolderDetails> folderList = new ArrayList<FolderDetails>();
+            List<Folder> folders = FolderManager.getFoldersByEntry(entry);
+            String systemEmail = AccountController.getSystemAccount().getEmail();
+            ArrayList<Long> entryIds = new ArrayList<Long>();
+            entryIds.add(entry.getId());
+            if (folders != null) {
+                for (Folder folder : folders) {
+                    try {
+                        Folder returned = FolderManager.removeFolderContents(account,
+                            folder.getId(), entryIds);
+                        boolean isSystem = systemEmail.equals(returned.getOwnerEmail());
+                        FolderDetails details = new FolderDetails(returned.getId(),
+                                returned.getName(), isSystem);
+                        BigInteger size = FolderManager.getFolderSize(folder.getId());
+                        details.setCount(size);
+                        folderList.add(details);
+                    } catch (ManagerException me) {
+                        continue;
+                    }
+                }
+            }
+
+            return folderList;
+
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+        } catch (PermissionException e) {
+            Logger.error(e);
+        } catch (ManagerException e) {
+            Logger.error(e);
+        }
+        return null;
     }
 }

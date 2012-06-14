@@ -24,9 +24,5 @@ public interface IEntryFormUpdateSubmit {
 
     void populateEntry();
 
-    boolean hasSubmitHandler();
-
-    boolean hasCancelHandler();
-
     EntryInfo getEntry();
 }

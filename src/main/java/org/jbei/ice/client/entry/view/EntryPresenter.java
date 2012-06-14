@@ -12,6 +12,7 @@ import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.collection.presenter.CollectionsPresenter.DeleteEntryHandler;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.IHasNavigableData;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
@@ -100,11 +101,8 @@ public class EntryPresenter extends AbstractPresenter {
                 if (formUpdate == null)
                     return;
 
-                if (!formUpdate.hasCancelHandler())
-                    formUpdate.addCancelHandler(new UpdateFormCancelHandler());
-
-                if (!formUpdate.hasSubmitHandler())
-                    formUpdate.addSubmitHandler(new UpdateFormSubmitHandler(formUpdate));
+                formUpdate.addCancelHandler(new UpdateFormCancelHandler());
+                formUpdate.addSubmitHandler(new UpdateFormSubmitHandler(formUpdate));
             }
         });
 
@@ -150,6 +148,21 @@ public class EntryPresenter extends AbstractPresenter {
             }
         });
     }
+
+    //    public void setDeleteEntryHandler(new  DeleteEntryHandler() ) {
+    //     // delete handler
+    //        display.addDeleteEntryHandler(new ClickHandler() {
+    //
+    //            @Override
+    //            public void onClick(ClickEvent event) {
+    //                if (!Window.confirm("Confirm deletion of entry " + currentInfo.getPartId()))
+    //                    return;
+    //
+    //                deleteCurrentEntry();
+    //            }
+    //        });
+    //       
+    //    }
 
     /**
      * retrieves the existing permission for the current entry
@@ -447,6 +460,23 @@ public class EntryPresenter extends AbstractPresenter {
         return this.display.asWidget();
     }
 
+    public EntryInfo getCurrentInfo() {
+        return currentInfo;
+    }
+
+    public void setDeleteHandler(final DeleteEntryHandler deleteEntryHandler) {
+        display.addDeleteEntryHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                if (!Window.confirm("Confirm deletion of entry " + currentInfo.getPartId()))
+                    return;
+
+                deleteEntryHandler.onClick(event);
+            }
+        });
+    }
+
     //
     // inner classes
     //
@@ -663,4 +693,5 @@ public class EntryPresenter extends AbstractPresenter {
                 });
         }
     }
+
 }

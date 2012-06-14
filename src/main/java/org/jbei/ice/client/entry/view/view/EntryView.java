@@ -49,6 +49,8 @@ public class EntryView extends Composite implements IEntryView {
     // general header
     private HorizontalPanel generalHeaderPanel;
     private Button editGeneralButton;
+    private Label deleteLabel;
+    private HandlerRegistration deleteRegistration;
 
     // sequence Analysis
     private HTMLPanel seqPanel;
@@ -166,10 +168,13 @@ public class EntryView extends Composite implements IEntryView {
         generalHeaderPanel.setVerticalAlignment(HasAlignment.ALIGN_MIDDLE);
         editGeneralButton = new Button("Edit");
         editGeneralButton.setStyleName("top_menu");
+        deleteLabel = new Label("Delete");
+        deleteLabel.setStyleName("entry_delete_link");
         generalHeaderPanel.add(goBack);
         generalHeaderPanel.add(headerLabel);
         headerLabel.setStyleName("entry_general_info_header");
         generalHeaderPanel.add(editGeneralButton);
+        generalHeaderPanel.add(deleteLabel);
     }
 
     private void initSamplePanel() {
@@ -365,6 +370,7 @@ public class EntryView extends Composite implements IEntryView {
         EntryDetailView<? extends EntryInfo> detailView = ViewFactory.createDetailView(info);
         detailView.getSequencePanel().setDeleteHandler(deleteHandler);
         editGeneralButton.setVisible(showEdit);
+        deleteLabel.setVisible(showEdit);
         mainContent.setWidget(0, 0, generalHeaderPanel);
         mainContent.getCellFormatter().setHeight(0, 0, "30px");
         mainContent.setWidget(1, 0, detailView);
@@ -383,6 +389,14 @@ public class EntryView extends Composite implements IEntryView {
     @Override
     public void addGeneralEditButtonHandler(ClickHandler handler) {
         editGeneralButton.addClickHandler(handler);
+    }
+
+    @Override
+    public void addDeleteEntryHandler(ClickHandler handler) {
+        if (deleteRegistration != null)
+            deleteRegistration.removeHandler();
+
+        deleteRegistration = deleteLabel.addClickHandler(handler);
     }
 
     @Override

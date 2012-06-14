@@ -88,4 +88,6 @@ public interface IEntryView {
     void removeAttachment(AttachmentItem item);
 
     void setAttachments(ArrayList<AttachmentItem> items, long entryId);
+
+    void addDeleteEntryHandler(ClickHandler handler);
 }

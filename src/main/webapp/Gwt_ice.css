@@ -112,6 +112,18 @@ body {
     padding: 2px;
 }
 
+.entry_delete_link {
+	font-family: Arial; 
+	font-size: 0.75em; 
+	padding-left: 10px; 
+	color: #0082C0;
+	cursor: pointer;
+}
+
+.entry_delete_link:hover {
+	color: #9EC068;
+}
+
 .entry_add_parameter {
 	text-align: right;
 	padding-right: 10px;

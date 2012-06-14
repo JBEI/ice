@@ -48,6 +48,7 @@ import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -301,8 +302,10 @@ public class CollectionsPresenter extends AbstractPresenter {
     }
 
     public void showEntryView(EntryContext event) {
-        if (entryViewPresenter == null)
+        if (entryViewPresenter == null) {
             entryViewPresenter = new EntryPresenter(model.getService(), model.getEventBus(), event);
+            entryViewPresenter.setDeleteHandler(new DeleteEntryHandler());
+        }
         mode = Mode.ENTRY;
         currentContext = event;
         History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + event.getCurrent(), false);
@@ -661,6 +664,63 @@ public class CollectionsPresenter extends AbstractPresenter {
 
                         retrieveEntriesForFolder(currentFolder.getId(), msg);
                         collectionsDataTable.clearSelection();
+                    }
+                });
+        }
+    }
+
+    public class DeleteEntryHandler implements ClickHandler {
+
+        @Override
+        public void onClick(ClickEvent event) {
+            EntryInfo toDelete = entryViewPresenter.getCurrentInfo();
+            if (toDelete == null)
+                return;
+
+            model.getService().deleteEntry(AppController.sessionId, toDelete,
+                new AsyncCallback<ArrayList<FolderDetails>>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        FeedbackEvent event = new FeedbackEvent(true, "Error deleting entry");
+                        model.getEventBus().fireEvent(event);
+                    }
+
+                    @Override
+                    public void onSuccess(ArrayList<FolderDetails> result) {
+                        if (result == null) {
+                            FeedbackEvent event = new FeedbackEvent(true, "Error deleting entry");
+                            model.getEventBus().fireEvent(event);
+                            return;
+                        }
+
+                        History.newItem(Page.COLLECTIONS.getLink() + ";id=" + currentFolder.getId());
+                        ArrayList<MenuItem> menuItems = new ArrayList<MenuItem>();
+                        FeedbackEvent event = new FeedbackEvent(false, "Entry deleted successfully");
+                        model.getEventBus().fireEvent(event);
+
+                        for (FolderDetails detail : result) {
+                            MenuItem item = new MenuItem(detail.getId(), detail.getName(), detail
+                                    .getCount().longValue(), detail.isSystemFolder());
+                            menuItems.add(item);
+                        }
+
+                        if (currentFolder.getId() == 0) {
+                            AppController.accountInfo.setUserEntryCount(AppController.accountInfo
+                                    .getUserEntryCount() - 1);
+                            MenuItem myItems = new MenuItem(0, "My Entries",
+                                    AppController.accountInfo.getUserEntryCount(), true);
+                            menuItems.add(myItems);
+                        }
+
+                        AppController.accountInfo.setVisibleEntryCount(AppController.accountInfo
+                                .getVisibleEntryCount() - 1);
+                        MenuItem allEntriesItem = new MenuItem(-1, "Available Entries",
+                                AppController.accountInfo.getVisibleEntryCount(), true);
+                        menuItems.add(allEntriesItem);
+
+                        display.updateMenuItemCounts(menuItems);
+
                     }
                 });
         }

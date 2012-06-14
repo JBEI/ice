@@ -171,16 +171,6 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
         cancelRegistration = this.cancel.addClickHandler(handler);
     }
 
-    @Override
-    public boolean hasSubmitHandler() {
-        return (submitRegistration != null);
-    }
-
-    @Override
-    public boolean hasCancelHandler() {
-        return (cancelRegistration != null);
-    }
-
     protected void setLabel(boolean required, String label, FlexTable layout, int row, int col) {
         String html;
         if (required)
