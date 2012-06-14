@@ -20,7 +20,7 @@ import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.EntryInfo.EntryType;
+import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.ParameterInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
@@ -54,7 +54,7 @@ public class InfoToModelFactory {
             } else
                 plasmid = (Plasmid) entry;
 
-            plasmid.setRecordType(Entry.PLASMID_ENTRY_TYPE);
+            plasmid.setRecordType(EntryType.PLASMID.getName());
             PlasmidInfo plasmidInfo = (PlasmidInfo) info;
 
             plasmid.setBackbone(plasmidInfo.getBackbone());
@@ -72,7 +72,7 @@ public class InfoToModelFactory {
             } else
                 strain = (Strain) entry;
 
-            strain.setRecordType(Entry.STRAIN_ENTRY_TYPE);
+            strain.setRecordType(EntryType.STRAIN.getName());
             StrainInfo strainInfo = (StrainInfo) info;
 
             strain.setHost(strainInfo.getHost());
@@ -89,7 +89,7 @@ public class InfoToModelFactory {
                 entry = part;
             } else
                 part = (Part) entry;
-            part.setRecordType(Entry.PART_ENTRY_TYPE);
+            part.setRecordType(EntryType.PART.getName());
 
             // default is RAW until sequence is supplied.
             part.setPackageFormat(AssemblyStandard.RAW);
@@ -105,7 +105,7 @@ public class InfoToModelFactory {
             } else
                 seed = (ArabidopsisSeed) entry;
 
-            seed.setRecordType(Entry.ARABIDOPSIS_SEED_ENTRY_TYPE);
+            seed.setRecordType(EntryType.ARABIDOPSIS.getName());
             ArabidopsisSeedInfo seedInfo = (ArabidopsisSeedInfo) info;
 
             seed.setHomozygosity(seedInfo.getHomozygosity());

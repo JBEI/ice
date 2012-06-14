@@ -13,7 +13,7 @@ public class AccountInfo implements IsSerializable {
     private String description;
     private String since;
     private int entriesAvailable;
-    private int userEntryCount;
+    private long userEntryCount;
     private int userSampleCount;
     private long visibleEntryCount;
     private boolean isModerator;
@@ -89,12 +89,12 @@ public class AccountInfo implements IsSerializable {
         this.entriesAvailable = entriesAvailable;
     }
 
-    public int getUserEntryCount() {
+    public long getUserEntryCount() {
         return userEntryCount;
     }
 
-    public void setUserEntryCount(int userEntryCount) {
-        this.userEntryCount = userEntryCount;
+    public void setUserEntryCount(long ownerEntryCount) {
+        this.userEntryCount = ownerEntryCount;
     }
 
     public int getUserSampleCount() {

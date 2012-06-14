@@ -1,10 +1,8 @@
-package org.jbei.ice.lib.managers;
+package org.jbei.ice.lib.entry;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -22,57 +20,30 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.group.GroupController;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.models.ArabidopsisSeed;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.models.Link;
 import org.jbei.ice.lib.models.Name;
-import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.PartNumber;
-import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
-import org.jbei.ice.lib.models.Strain;
-import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 import org.jbei.ice.shared.ColumnField;
 
 /**
- * Manager to manipulate {@link Entry} objects in the database.
+ * DAO to manipulate {@link Entry} objects in the database.
  * 
- * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
- * 
+ * @author Hector Plahar, Timothy Ham, Zinovii Dmytriv,
  */
-public class EntryManager {
-    /**
-     * Create a new {@link Entry} object in the database.
-     * 
-     * @param entry
-     * @return Saved Entry object.
-     * @throws ManagerException
-     */
-    public static Entry createEntry(Entry entry) throws ManagerException {
-        Entry result = null;
+class EntryDAO extends HibernateRepository {
 
-        if (entry == null) {
-            result = null;
-        } else if (entry instanceof Plasmid) {
-            result = createPlasmid((Plasmid) entry);
-        } else if (entry instanceof Strain) {
-            result = createStrain((Strain) entry);
-        } else if (entry instanceof Part) {
-            result = createPart((Part) entry);
-        } else if (entry instanceof ArabidopsisSeed) {
-            result = createArabidopsisSeed((ArabidopsisSeed) entry);
-        }
-
-        return result;
-    }
-
-    public static long retrieveEntryByType(String type) throws ManagerException {
-        Session session = DAO.newSession();
+    public long retrieveEntryByType(String type) throws DAOException {
+        Session session = newSession();
         try {
             Criteria criteria = session.createCriteria(Entry.class.getName()).add(
                 Restrictions.eq("recordType", type));
@@ -92,29 +63,8 @@ public class EntryManager {
      * @return Entry.
      * @throws ManagerException
      */
-    public static Entry get(long id) throws ManagerException {
-        Entry entry = null;
-
-        Session session = DAO.newSession();
-        try {
-            Query query = session.createQuery("from " + Entry.class.getName() + " where id = :id");
-
-            query.setParameter("id", id);
-
-            Object queryResult = query.uniqueResult();
-
-            if (queryResult != null) {
-                entry = (Entry) queryResult;
-            }
-        } catch (HibernateException e) {
-            throw new ManagerException("Failed to retrieve entry by id: " + id, e);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
-        }
-
-        return entry;
+    public Entry get(long id) throws DAOException {
+        return (Entry) super.get(Entry.class, id);
     }
 
     /**
@@ -124,23 +74,23 @@ public class EntryManager {
      * @return Entry.
      * @throws ManagerException
      */
-    public static Entry getByRecordId(String recordId) throws ManagerException {
+    public Entry getByRecordId(String recordId) throws DAOException {
         Entry entry = null;
 
         Session session = DAO.newSession();
         try {
+            session.getTransaction().begin();
             Query query = session.createQuery("from " + Entry.class.getName()
                     + " where recordId = :recordId");
-
-            query.setParameter("recordId", recordId);
-
+            query.setString("recordId", recordId);
             Object queryResult = query.uniqueResult();
+            session.getTransaction().commit();
 
             if (queryResult != null) {
                 entry = (Entry) queryResult;
             }
         } catch (HibernateException e) {
-            throw new ManagerException("Failed to retrieve entry by recordId: " + recordId, e);
+            throw new DAOException("Failed to retrieve entry by recordId: " + recordId, e);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -159,23 +109,24 @@ public class EntryManager {
      * @return Entry.
      * @throws ManagerException
      */
-    public static Entry getByPartNumber(String partNumber) throws ManagerException {
+    public Entry getByPartNumber(String partNumber) throws DAOException {
         Entry entry = null;
 
-        Session session = DAO.newSession();
+        Session session = newSession();
+
         try {
+            session.getTransaction().begin();
             Query query = session.createQuery("from " + PartNumber.class.getName()
                     + " where partNumber = :partNumber");
-
             query.setParameter("partNumber", partNumber);
-
             Object queryResult = query.uniqueResult();
 
             if (queryResult != null) {
                 entry = ((PartNumber) queryResult).getEntry();
             }
+            session.getTransaction().commit();
         } catch (HibernateException e) {
-            throw new ManagerException("Failed to retrieve entry by partNumber: " + partNumber, e);
+            throw new DAOException("Failed to retrieve entry by partNumber: " + partNumber, e);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -192,11 +143,12 @@ public class EntryManager {
      * @return Entry.
      * @throws ManagerException
      */
-    public static Entry getByName(String name) throws ManagerException {
+    public Entry getByName(String name) throws DAOException {
         Entry entry = null;
-        Session session = DAO.newSession();
+        Session session = newSession();
 
         try {
+            session.getTransaction().begin();
             Query query = session.createQuery("from " + Name.class.getName()
                     + " where name = :name");
             query.setParameter("name", name);
@@ -206,8 +158,9 @@ public class EntryManager {
             }
 
             entry = ((Name) queryResult).getEntry();
+            session.getTransaction().commit();
         } catch (HibernateException e) {
-            throw new ManagerException("Failed to retrieve entry by JBEI name: " + name, e);
+            throw new DAOException("Failed to retrieve entry by JBEI name: " + name, e);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -215,6 +168,24 @@ public class EntryManager {
         }
 
         return entry;
+    }
+
+    public int getOwnerEntryCount(String owner) throws ManagerException {
+        Session session = newSession();
+        try {
+            Criteria criteria = session.createCriteria(Entry.class.getName()).add(
+                Restrictions.eq("owner", owner));
+            Integer result = (Integer) criteria.setProjection(Projections.rowCount())
+                    .uniqueResult();
+
+            return result.intValue();
+        } catch (HibernateException e) {
+            throw new ManagerException("Failed to retrieve entry count by owner " + owner, e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
     }
 
     /**
@@ -276,20 +247,15 @@ public class EntryManager {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static Set<Long> getAllVisibleEntries(Account account) throws ManagerException {
+    public Set<Long> getAllVisibleEntries(Group everybodyGroup, Account account)
+            throws DAOException {
 
-        Group everybodyGroup = null;
         Session session = null;
         Set<Long> visibleEntries = new HashSet<Long>();
 
         try {
-            GroupController controller = new GroupController();
-            try {
-                everybodyGroup = controller.createOrRetrievePublicGroup();
-            } catch (ControllerException e) {
-                e.printStackTrace();
-            }
-            session = DAO.newSession();
+            session = newSession();
+            session.getTransaction().begin();
             String queryString = "select entry_id from permission_read_groups where group_id = "
                     + everybodyGroup.getId();
             Query query = session.createSQLQuery(queryString);
@@ -297,8 +263,10 @@ public class EntryManager {
             List results = query.list();
             visibleEntries.addAll(((ArrayList<Long>) results));
 
-            if (account == null)
+            if (account == null) {
+                session.getTransaction().commit();
                 return visibleEntries;
+            }
 
             // get all visible entries
             queryString = "select entry_id from permission_read_users where account_id = "
@@ -307,11 +275,12 @@ public class EntryManager {
             //            query.setParameter("account", account);
             List accountResults = query.list();
             visibleEntries.addAll(((ArrayList<Long>) accountResults));
-
+            session.getTransaction().commit();
             return visibleEntries;
 
         } catch (HibernateException e) {
-            throw new ManagerException("Failed to retrieve number of visible entries!", e);
+            session.getTransaction().rollback();
+            throw new DAOException("Failed to retrieve number of visible entries!", e);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -323,35 +292,18 @@ public class EntryManager {
      * Retrieve all entries in the database.
      * 
      * @return ArrayList of Entries.
-     * @throws ManagerException
+     * @throws DAOException
      */
-    @SuppressWarnings("unchecked")
-    public static ArrayList<Entry> getAllEntries() throws ManagerException {
-        ArrayList<Entry> entries = null;
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public ArrayList<Entry> getAllEntries() throws DAOException {
 
-        Session session = DAO.newSession();
-        try {
-            Query query = session.createQuery("from " + Entry.class.getName());
-
-            @SuppressWarnings("rawtypes")
-            List list = query.list();
-
-            if (list != null) {
-                entries = (ArrayList<Entry>) list;
-            }
-        } catch (HibernateException e) {
-            throw new ManagerException("Failed to retrieve entries!", e);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
-        }
-
+        List results = super.retrieveAll(Entry.class);
+        ArrayList<Entry> entries = new ArrayList<Entry>(results);
         return entries;
     }
 
-    public static long getAllEntryCount() throws ManagerException {
-        Session session = DAO.newSession();
+    public long getAllEntryCount() throws ManagerException {
+        Session session = newSession();
         try {
             Criteria criteria = session.createCriteria(Entry.class.getName());
             Integer result = (Integer) criteria.setProjection(Projections.rowCount())
@@ -374,17 +326,14 @@ public class EntryManager {
      * @throws ManagerException
      */
     @SuppressWarnings("unchecked")
-    public static ArrayList<Long> getEntries(String field, boolean ascending)
-            throws ManagerException {
+    public ArrayList<Long> getEntries(String field, boolean ascending) throws DAOException {
         ArrayList<Long> entries = null;
 
-        Session session = DAO.newSession();
+        Session session = newSession();
         try {
             String orderSuffix = (field == null) ? ""
                     : (" ORDER BY e." + field + " " + (ascending ? "ASC" : "DESC"));
-
             String queryString = "select id from " + Entry.class.getName() + " e " + orderSuffix;
-
             Query query = session.createQuery(queryString);
 
             @SuppressWarnings("rawtypes")
@@ -394,7 +343,7 @@ public class EntryManager {
                 entries = (ArrayList<Long>) list;
             }
         } catch (HibernateException e) {
-            throw new ManagerException("Failed to retrieve entries!", e);
+            throw new DAOException("Failed to retrieve entries!", e);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -412,16 +361,15 @@ public class EntryManager {
      * @throws ManagerException
      */
     @SuppressWarnings("unchecked")
-    public static ArrayList<Long> getEntriesByOwner(String owner) throws ManagerException {
+    public ArrayList<Long> getEntriesByOwner(String owner) throws DAOException {
         ArrayList<Long> entries = null;
 
-        Session session = DAO.newSession();
+        Session session = newSession();
         try {
             String queryString = "select id from " + Entry.class.getName()
                     + " where ownerEmail = :ownerEmail";
 
             Query query = session.createQuery(queryString);
-
             query.setParameter("ownerEmail", owner);
 
             @SuppressWarnings("rawtypes")
@@ -431,7 +379,7 @@ public class EntryManager {
                 entries = (ArrayList<Long>) list;
             }
         } catch (HibernateException e) {
-            throw new ManagerException("Failed to retrieve entries by owner: " + owner, e);
+            throw new DAOException("Failed to retrieve entries by owner: " + owner, e);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -439,22 +387,6 @@ public class EntryManager {
         }
 
         return entries;
-    }
-
-    public static int getEntryCountBy(String owner) throws ManagerException {
-        Session session = DAO.newSession();
-        try {
-            SQLQuery query = session
-                    .createSQLQuery("SELECT COUNT(id) FROM entries WHERE owner_email = :owner ");
-            query.setString("owner", owner);
-            return ((BigInteger) query.uniqueResult()).intValue();
-        } catch (HibernateException e) {
-            throw new ManagerException("Failed to retrieve entry count by owner " + owner, e);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
-        }
     }
 
     /**
@@ -512,8 +444,8 @@ public class EntryManager {
      * @throws ManagerException
      */
     @SuppressWarnings("unchecked")
-    public static List<Entry> getEntriesByIdSetSort(List<Long> ids, String field, boolean ascending)
-            throws ManagerException {
+    public List<Entry> getEntriesByIdSetSort(List<Long> ids, String field, boolean ascending)
+            throws DAOException {
         ArrayList<Entry> entries = new ArrayList<Entry>();
 
         if (ids.size() == 0) {
@@ -522,11 +454,12 @@ public class EntryManager {
 
         String filter = Utils.join(", ", ids);
 
-        Session session = DAO.newSession();
+        Session session = newSession();
         try {
             String orderSuffix = (field == null) ? ""
                     : (" ORDER BY e." + field + " " + (ascending ? "ASC" : "DESC"));
 
+            session.getTransaction().begin();
             Query query = session.createQuery("from " + Entry.class.getName() + " e WHERE id in ("
                     + filter + ")" + orderSuffix);
 
@@ -536,8 +469,10 @@ public class EntryManager {
             if (list != null) {
                 entries.addAll(list);
             }
+            session.getTransaction().commit();
         } catch (HibernateException e) {
-            throw new ManagerException("Failed to retrieve entries!", e);
+            session.getTransaction().rollback();
+            throw new DAOException("Failed to retrieve entries!", e);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -555,17 +490,17 @@ public class EntryManager {
      * @throws ManagerException
      */
     @SuppressWarnings("unchecked")
-    public static List<Long> getEntriesSortByName(boolean ascending) throws ManagerException {
+    public List<Long> getEntriesSortByName(boolean ascending) throws DAOException {
         ArrayList<Long> entries = new ArrayList<Long>();
 
-        Session session = DAO.newSession();
+        Session session = newSession();
         try {
 
             String queryString = "SELECT entries_id FROM names ORDER BY name "
                     + (ascending ? "ASC" : "DESC");
 
+            session.getTransaction().begin();
             Query query = session.createSQLQuery(queryString);
-
             List<Integer> list = query.list();
 
             if (list != null) {
@@ -573,6 +508,10 @@ public class EntryManager {
                     entries.add(val.longValue());
                 }
             }
+            session.getTransaction().commit();
+        } catch (HibernateException he) {
+            session.getTransaction().rollback();
+            throw new DAOException(he);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -587,20 +526,20 @@ public class EntryManager {
      * 
      * @param ascending
      * @return List of Entry ids.
-     * @throws ManagerException
+     * @throws DAOException
      */
     @SuppressWarnings("unchecked")
-    public static List<Long> getEntriesSortByPartNumber(boolean ascending) throws ManagerException {
+    public List<Long> getEntriesSortByPartNumber(boolean ascending) throws DAOException {
         ArrayList<Long> entries = new ArrayList<Long>();
 
-        Session session = DAO.newSession();
+        Session session = newSession();
         try {
 
             String queryString = "SELECT entries_id FROM part_numbers ORDER BY part_number "
                     + (ascending ? "ASC" : "DESC");
 
+            session.getTransaction().begin();
             Query query = session.createSQLQuery(queryString);
-
             List<Integer> list = query.list();
 
             if (list != null) {
@@ -608,6 +547,11 @@ public class EntryManager {
                     entries.add(val.longValue());
                 }
             }
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            session.getTransaction().rollback();
+            Logger.error(e);
+            throw new DAOException(e);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -625,21 +569,24 @@ public class EntryManager {
      * @throws ManagerException
      */
     @SuppressWarnings("unchecked")
-    public static LinkedList<Entry> getEntriesByIdSet(List<Long> ids) throws ManagerException {
+    public LinkedList<Entry> getEntriesByIdSet(List<Long> ids) throws DAOException {
         if (ids.size() == 0) {
             return new LinkedList<Entry>();
         }
 
         String filter = Utils.join(", ", ids);
 
-        Session session = DAO.newSession();
+        Session session = newSession();
         try {
+            session.getTransaction().begin();
             Query query = session.createQuery("from " + Entry.class.getName() + " WHERE id in ("
                     + filter + ")");
-
-            return new LinkedList<Entry>(query.list());
+            LinkedList<Entry> results = new LinkedList<Entry>(query.list());
+            session.getTransaction().commit();
+            return results;
         } catch (HibernateException e) {
-            throw new ManagerException("Failed to retrieve entries!", e);
+            session.getTransaction().rollback();
+            throw new DAOException("Failed to retrieve entries!", e);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -647,8 +594,8 @@ public class EntryManager {
         }
     }
 
-    public static List<Entry> getEntriesByIdSetSortByType(List<Long> ids, boolean ascending)
-            throws ManagerException {
+    public List<Entry> getEntriesByIdSetSortByType(List<Long> ids, boolean ascending)
+            throws DAOException {
 
         ArrayList<Entry> entries = new ArrayList<Entry>();
 
@@ -663,8 +610,8 @@ public class EntryManager {
         return retrieveEntriesByQuery(queryString);
     }
 
-    public static List<Entry> getEntriesByIdSetSortByName(List<Long> ids, boolean ascending)
-            throws ManagerException {
+    public List<Entry> getEntriesByIdSetSortByName(List<Long> ids, boolean ascending)
+            throws DAOException {
         ArrayList<Entry> entries = new ArrayList<Entry>();
 
         if (ids.size() == 0) {
@@ -673,13 +620,13 @@ public class EntryManager {
 
         //        String filter = Utils.join(", ", ids);
         // TODO : add the filter to filter in the database and not here
-        List<Long> sortedEntries = EntryManager.getEntriesSortByName(ascending);
+        List<Long> sortedEntries = getEntriesSortByName(ascending);
         sortedEntries.retainAll(ids);
-        return EntryManager.getEntriesByIdSetSort(sortedEntries, "id", ascending);
+        return getEntriesByIdSetSort(sortedEntries, "id", ascending);
     }
 
-    public static List<Entry> getEntriesByIdSetSortByCreated(List<Long> ids, boolean ascending)
-            throws ManagerException {
+    public List<Entry> getEntriesByIdSetSortByCreated(List<Long> ids, boolean ascending)
+            throws DAOException {
         ArrayList<Entry> entries = new ArrayList<Entry>();
 
         if (ids.size() == 0)
@@ -692,8 +639,8 @@ public class EntryManager {
         return retrieveEntriesByQuery(queryString);
     }
 
-    public static List<Entry> getEntriesByIdSetSortByPartNumber(List<Long> ids, boolean ascending)
-            throws ManagerException {
+    public List<Entry> getEntriesByIdSetSortByPartNumber(List<Long> ids, boolean ascending)
+            throws DAOException {
         ArrayList<Entry> entries = new ArrayList<Entry>();
 
         if (ids.size() == 0) {
@@ -702,13 +649,13 @@ public class EntryManager {
 
         //        String filter = Utils.join(", ", ids);
         // TODO : add the filter to filter in the database and not here
-        List<Long> sortedEntries = EntryManager.getEntriesSortByPartNumber(ascending);
+        List<Long> sortedEntries = getEntriesSortByPartNumber(ascending);
         sortedEntries.retainAll(ids);
-        return EntryManager.getEntriesByIdSetSort(sortedEntries, "id", ascending);
+        return getEntriesByIdSetSort(sortedEntries, "id", ascending);
     }
 
-    public static List<Entry> getEntriesByIdSetSortByStatus(List<Long> ids, boolean ascending)
-            throws ManagerException {
+    public List<Entry> getEntriesByIdSetSortByStatus(List<Long> ids, boolean ascending)
+            throws DAOException {
         ArrayList<Entry> entries = new ArrayList<Entry>();
 
         if (ids.size() == 0) {
@@ -722,10 +669,10 @@ public class EntryManager {
         return retrieveEntriesByQuery(queryString);
     }
 
-    public static LinkedList<Long> sortList(LinkedList<Long> ids, ColumnField field, boolean asc)
-            throws ManagerException {
+    public LinkedList<Long> sortList(LinkedList<Long> ids, ColumnField field, boolean asc)
+            throws DAOException {
         if (ids == null)
-            throw new ManagerException("Cannot sort empty list");
+            throw new DAOException("Cannot sort empty list");
 
         if (ids.isEmpty())
             return ids;
@@ -765,7 +712,7 @@ public class EntryManager {
             session.getTransaction().commit();
             return result;
         } catch (RuntimeException e) {
-            throw new ManagerException(e);
+            throw new DAOException(e);
         } finally {
             if (session != null)
                 session.close();
@@ -773,9 +720,10 @@ public class EntryManager {
     }
 
     @SuppressWarnings("unchecked")
-    protected static List<Entry> retrieveEntriesByQuery(String queryString) throws ManagerException {
-        Session session = DAO.newSession();
+    protected List<Entry> retrieveEntriesByQuery(String queryString) throws DAOException {
+        Session session = newSession();
         try {
+            session.getTransaction().begin();
             Query query = session.createQuery(queryString);
             ArrayList<Entry> entries = new ArrayList<Entry>();
 
@@ -785,9 +733,11 @@ public class EntryManager {
             if (list != null) {
                 entries.addAll(list);
             }
+            session.getTransaction().commit();
             return entries;
         } catch (HibernateException e) {
-            throw new ManagerException("Failed to retrieve entries!", e);
+            session.getTransaction().rollback();
+            throw new DAOException("Failed to retrieve entries!", e);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -876,112 +826,6 @@ public class EntryManager {
     }
 
     /**
-     * Create a new {@link Plasmid} object in the database.
-     * 
-     * @param newPlasmid
-     * @return Saved Plasmid object.
-     * @throws ManagerException
-     */
-    private static Plasmid createPlasmid(Plasmid newPlasmid) throws ManagerException {
-        Plasmid savedPlasmid = null;
-
-        newPlasmid = (Plasmid) createGenericEntry(newPlasmid);
-        newPlasmid.setRecordType(Entry.PLASMID_ENTRY_TYPE);
-
-        savedPlasmid = (Plasmid) save(newPlasmid);
-
-        return savedPlasmid;
-    }
-
-    /**
-     * create a new {@link Strain} object in the database.
-     * 
-     * @param newStrain
-     * @return saved Strain object.
-     * @throws ManagerException
-     */
-    private static Strain createStrain(Strain newStrain) throws ManagerException {
-        Strain savedStrain = null;
-
-        newStrain = (Strain) createGenericEntry(newStrain);
-        newStrain.setRecordType(Entry.STRAIN_ENTRY_TYPE);
-
-        savedStrain = (Strain) save(newStrain);
-
-        return savedStrain;
-    }
-
-    /**
-     * Create a new {@link Part} object in the database.
-     * 
-     * @param newPart
-     * @return Saved Part object.
-     * @throws ManagerException
-     */
-    private static Part createPart(Part newPart) throws ManagerException {
-        Part savedPart = null;
-
-        newPart = (Part) createGenericEntry(newPart);
-        newPart.setRecordType(Entry.PART_ENTRY_TYPE);
-
-        savedPart = (Part) save(newPart);
-
-        return savedPart;
-    }
-
-    /**
-     * Create a new {@link ArabidopsisSeed} object in the database.
-     * 
-     * @param newArabidopsisSeed
-     * @return Saved ArabidopsisSeed object.
-     * @throws ManagerException
-     */
-    private static ArabidopsisSeed createArabidopsisSeed(ArabidopsisSeed newArabidopsisSeed)
-            throws ManagerException {
-        ArabidopsisSeed savedArabidopsisSeed = null;
-
-        newArabidopsisSeed = (ArabidopsisSeed) createGenericEntry(newArabidopsisSeed);
-        newArabidopsisSeed.setRecordType(Entry.ARABIDOPSIS_SEED_ENTRY_TYPE);
-
-        savedArabidopsisSeed = (ArabidopsisSeed) save(newArabidopsisSeed);
-
-        return savedArabidopsisSeed;
-    }
-
-    /**
-     * Create an {@link Entry} object in the database.
-     * <p>
-     * Call to this method assigning the next {@link PartNumber}, and a random recordId, sets the
-     * creationTime or the modificationTime. It does not set the recordType, which are handled by
-     * the appropriate create methods for each recordType.
-     * 
-     * @param newEntry
-     * @return Saved Entry object.
-     * @throws ManagerException
-     */
-    private static Entry createGenericEntry(Entry newEntry) throws ManagerException {
-        String number = getNextPartNumber();
-        PartNumber partNumber = new PartNumber();
-        partNumber.setPartNumber(number);
-        Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
-        partNumbers.add(partNumber);
-        newEntry.getPartNumbers().add(partNumber);
-        if (newEntry.getRecordId() == null || "".equals(newEntry.getRecordId())) {
-            newEntry.setRecordId(Utils.generateUUID());
-        }
-        if (newEntry.getVersionId() == null || "".equals(newEntry.getVersionId())) {
-            newEntry.setVersionId(newEntry.getRecordId());
-        }
-        if (newEntry.getCreationTime() == null) {
-            newEntry.setCreationTime(Calendar.getInstance().getTime());
-        } else {
-            newEntry.setModificationTime(Calendar.getInstance().getTime());
-        }
-
-        return newEntry;
-    }
-
-    /**
      * Save {@link FundingSource} object into the database.
      * 
      * @param fundingSource
@@ -1034,7 +878,7 @@ public class EntryManager {
      * @throws ManagerException
      */
     @SuppressWarnings("unchecked")
-    private static String generateNextPartNumber(String prefix, String delimiter, String suffix)
+    String generateNextPartNumber(String prefix, String delimiter, String suffix)
             throws ManagerException {
         Session session = DAO.newSession();
         try {
@@ -1079,18 +923,6 @@ public class EntryManager {
                 session.close();
             }
         }
-    }
-
-    /**
-     * Generate the next part number string using system settings.
-     * 
-     * @return The next part number.
-     * @throws ManagerException
-     */
-    private static String getNextPartNumber() throws ManagerException {
-        return generateNextPartNumber(JbeirSettings.getSetting("PART_NUMBER_PREFIX"),
-            JbeirSettings.getSetting("PART_NUMBER_DELIMITER"),
-            JbeirSettings.getSetting("PART_NUMBER_DIGITAL_SUFFIX"));
     }
 
 }

@@ -11,7 +11,6 @@ import javax.jws.WebParam;
 import javax.jws.WebService;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SampleController;
 import org.jbei.ice.controllers.SearchController;
 import org.jbei.ice.controllers.SequenceAnalysisController;
@@ -22,8 +21,8 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.composers.formatters.FastaFormatter;
 import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.StorageManager;
 import org.jbei.ice.lib.models.Account;
@@ -187,8 +186,9 @@ public class RegistryAPI {
             @WebParam(name = "name") String name) throws ServiceException {
         log(sessionId, "getEntryByName: " + name);
         try {
-            EntryController entryController = getEntryController(sessionId);
-            return entryController.getByName(name);
+            Account account = validateAccount(sessionId);
+            EntryController entryController = new EntryController();
+            return entryController.getByName(account, name);
         } catch (ControllerException e) {
             Logger.error(e);
             throw new ServiceException("Registry Service Internal Error!");
@@ -211,14 +211,10 @@ public class RegistryAPI {
         long result = 0;
 
         try {
-            result = EntryManager.getNumberOfVisibleEntries(null);
-        } catch (ManagerException e) {
-            Logger.error(e);
-
-            throw new ServiceException("Registry Service Internal Error!");
+            EntryController controller = new EntryController();
+            result = controller.getNumberOfVisibleEntries(null);
         } catch (Exception e) {
             Logger.error(e);
-
             throw new ServiceException("Registry Service Internal Error!");
         }
 
@@ -355,14 +351,13 @@ public class RegistryAPI {
             ServicePermissionException {
         log(sessionId, "getByRecordId: " + entryId);
         Entry entry = null;
+        Account account = validateAccount(sessionId);
 
         try {
-            EntryController entryController = getEntryController(sessionId);
-
-            entry = entryController.getByRecordId(entryId);
+            EntryController entryController = new EntryController();
+            entry = entryController.getByRecordId(account, entryId);
         } catch (ControllerException e) {
             Logger.error(e);
-
             throw new ServiceException("Registry Service Internal Error!");
         } catch (PermissionException e) {
             throw new ServicePermissionException("No permissions to read this entry by entryId: "
@@ -393,21 +388,19 @@ public class RegistryAPI {
             ServiceException, ServicePermissionException {
         log(sessionId, "getByPartNumber: " + partNumber);
         Entry entry = null;
+        Account account = validateAccount(sessionId);
 
         try {
-            EntryController entryController = getEntryController(sessionId);
-
-            entry = entryController.getByPartNumber(partNumber);
+            EntryController entryController = new EntryController();
+            entry = entryController.getByPartNumber(account, partNumber);
         } catch (ControllerException e) {
             Logger.error(e);
-
             throw new ServiceException("Registry Service Internal Error!");
         } catch (PermissionException e) {
             throw new ServicePermissionException(
                     "No permissions to read this entry by partNumber: " + partNumber);
         } catch (Exception e) {
             Logger.error(e);
-
             throw new ServiceException("Registry Service Internal Error!");
         }
 
@@ -431,18 +424,17 @@ public class RegistryAPI {
             ServicePermissionException {
         log(sessionId, "hasReadPermission: " + entryId);
         boolean result = false;
+        Account account = validateAccount(sessionId);
 
         try {
-            EntryController entryController = getEntryController(sessionId);
-
-            result = entryController.hasReadPermissionByRecordId(entryId);
+            EntryController entryController = new EntryController();
+            Entry entry = entryController.getByRecordId(account, entryId);
+            result = entryController.hasReadPermission(account, entry);
         } catch (ControllerException e) {
             Logger.error(e);
-
             throw new ServiceException("Registry Service Internal Error!");
         } catch (Exception e) {
             Logger.error(e);
-
             throw new ServiceException("Registry Service Internal Error!");
         }
 
@@ -464,18 +456,17 @@ public class RegistryAPI {
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException {
         log(sessionId, "hasWritePermissions: " + entryId);
         boolean result = false;
+        Account account = validateAccount(sessionId);
 
         try {
-            EntryController entryController = getEntryController(sessionId);
-
-            result = entryController.hasWritePermissionByRecordId(entryId);
+            EntryController entryController = new EntryController();
+            Entry entry = entryController.getByRecordId(account, entryId);
+            result = entryController.hasWritePermission(account, entry);
         } catch (ControllerException e) {
             Logger.error(e);
-
             throw new ServiceException("Registry Service Internal Error!");
         } catch (Exception e) {
             Logger.error(e);
-
             throw new ServiceException("Registry Service Internal Error!");
         }
 
@@ -497,22 +488,18 @@ public class RegistryAPI {
             @WebParam(name = "plasmid") Plasmid plasmid) throws SessionException, ServiceException {
         log(sessionId, "createPlasmid");
         Entry newEntry = null;
+        Account account = validateAccount(sessionId);
         try {
-            EntryController entryController = getEntryController(sessionId);
-
+            EntryController entryController = new EntryController();
             Entry remoteEntry = createEntry(sessionId, plasmid);
-
             newEntry = entryController.createEntry(remoteEntry);
-
-            log("User '" + entryController.getAccount().getEmail() + "' created plasmid: '"
-                    + plasmid.getRecordId() + "', " + plasmid.getId());
+            log("User '" + account.getEmail() + "' created plasmid: '" + plasmid.getRecordId()
+                    + "', " + plasmid.getId());
         } catch (ControllerException e) {
             Logger.error(e);
-
             throw new ServiceException("Registry Service Internal Error!");
         } catch (Exception e) {
             Logger.error(e);
-
             throw new ServiceException("Registry Service Internal Error!");
         }
 
@@ -534,22 +521,19 @@ public class RegistryAPI {
             @WebParam(name = "strain") Strain strain) throws SessionException, ServiceException {
         log(sessionId, "createStrain");
         Entry newEntry = null;
+        Account account = validateAccount(sessionId);
+
         try {
-            EntryController entryController = getEntryController(sessionId);
-
+            EntryController entryController = new EntryController();
             Entry remoteEntry = createEntry(sessionId, strain);
-
             newEntry = entryController.createEntry(remoteEntry);
-
-            log("User '" + entryController.getAccount().getEmail() + "' created strain: '"
-                    + strain.getRecordId() + "', " + strain.getId());
+            log("User '" + account.getEmail() + "' created strain: '" + strain.getRecordId()
+                    + "', " + strain.getId());
         } catch (ControllerException e) {
             Logger.error(e);
-
             throw new ServiceException("Registry Service Internal Error!");
         } catch (Exception e) {
             Logger.error(e);
-
             throw new ServiceException("Registry Service Internal Error!");
         }
 
@@ -571,22 +555,18 @@ public class RegistryAPI {
             @WebParam(name = "part") Part part) throws SessionException, ServiceException {
         log(sessionId, "createPart");
         Entry newEntry = null;
+        Account account = validateAccount(sessionId);
         try {
-            EntryController entryController = getEntryController(sessionId);
-
+            EntryController entryController = new EntryController();
             Entry remoteEntry = createEntry(sessionId, part);
-
             newEntry = entryController.createEntry(remoteEntry);
-
-            log("User '" + entryController.getAccount().getEmail() + "' created part: '"
-                    + part.getRecordId() + "', " + part.getId());
+            log("User '" + account.getEmail() + "' created part: '" + part.getRecordId() + "', "
+                    + part.getId());
         } catch (ControllerException e) {
             Logger.error(e);
-
             throw new ServiceException("Registry Service Internal Error!");
         } catch (Exception e) {
             Logger.error(e);
-
             throw new ServiceException("Registry Service Internal Error!");
         }
 
@@ -610,14 +590,15 @@ public class RegistryAPI {
             ServicePermissionException {
         log(sessionId, "updatePlasmid");
         Entry savedEntry = null;
+        Account account = validateAccount(sessionId);
 
         try {
-            EntryController entryController = getEntryController(sessionId);
+            EntryController entryController = new EntryController();
 
-            savedEntry = entryController.save(updateEntry(sessionId, plasmid));
+            savedEntry = entryController.save(account, updateEntry(account, plasmid));
 
-            log("User '" + entryController.getAccount().getEmail() + "' update plasmid: '"
-                    + savedEntry.getRecordId() + "', " + savedEntry.getId());
+            log("User '" + account.getEmail() + "' update plasmid: '" + savedEntry.getRecordId()
+                    + "', " + savedEntry.getId());
         } catch (ControllerException e) {
             Logger.error(e);
 
@@ -650,14 +631,15 @@ public class RegistryAPI {
             ServicePermissionException {
         log(sessionId, "updateStrain");
         Entry savedEntry = null;
+        Account account = validateAccount(sessionId);
 
         try {
-            EntryController entryController = getEntryController(sessionId);
+            EntryController entryController = new EntryController();
 
-            savedEntry = entryController.save(updateEntry(sessionId, strain));
+            savedEntry = entryController.save(account, updateEntry(account, strain));
 
-            log("User '" + entryController.getAccount().getEmail() + "' update strain: '"
-                    + savedEntry.getRecordId() + "', " + savedEntry.getId());
+            log("User '" + account.getEmail() + "' update strain: '" + savedEntry.getRecordId()
+                    + "', " + savedEntry.getId());
         } catch (ControllerException e) {
             Logger.error(e);
 
@@ -690,14 +672,14 @@ public class RegistryAPI {
             ServicePermissionException {
         log(sessionId, "updatePart");
         Entry savedEntry = null;
+        Account account = validateAccount(sessionId);
 
         try {
-            EntryController entryController = getEntryController(sessionId);
+            EntryController entryController = new EntryController();
+            savedEntry = entryController.save(account, updateEntry(account, part));
 
-            savedEntry = entryController.save(updateEntry(sessionId, part));
-
-            log("User '" + entryController.getAccount().getEmail() + "' update part: '"
-                    + savedEntry.getRecordId() + "', " + savedEntry.getId());
+            log("User '" + account.getEmail() + "' update part: '" + savedEntry.getRecordId()
+                    + "', " + savedEntry.getId());
         } catch (ControllerException e) {
             Logger.error(e);
 
@@ -852,13 +834,19 @@ public class RegistryAPI {
      */
     protected Entry updateEntry(String sessionId, Entry entry) throws SessionException,
             ServiceException, ServicePermissionException {
-        Entry currentEntry = null;
 
+        Account account = validateAccount(sessionId);
+        return updateEntry(account, entry);
+    }
+
+    private Entry updateEntry(Account account, Entry entry) throws SessionException,
+            ServiceException, ServicePermissionException {
+        Entry currentEntry = null;
         try {
-            EntryController entryController = getEntryController(sessionId);
+            EntryController entryController = new EntryController();
 
             try {
-                currentEntry = entryController.getByRecordId(entry.getRecordId());
+                currentEntry = entryController.getByRecordId(account, entry.getRecordId());
             } catch (PermissionException e) {
                 throw new ServicePermissionException("No permissions to read this entry!");
             }
@@ -867,7 +855,7 @@ public class RegistryAPI {
                 throw new ServiceException("Invalid recordId for entry!");
             }
 
-            if (!entryController.hasWritePermission(currentEntry)) {
+            if (!entryController.hasWritePermission(account, currentEntry)) {
                 throw new ServicePermissionException("No permissions to change this entry!");
             }
         } catch (ControllerException e) {
@@ -1089,15 +1077,13 @@ public class RegistryAPI {
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
         log(sessionId, "removeEntry: " + entryId);
+        Account account = validateAccount(sessionId);
+
         try {
-            EntryController entryController = getEntryController(sessionId);
-
-            Entry entry = entryController.getByRecordId(entryId);
-
-            entryController.delete(entry);
-
-            log("User '" + entryController.getAccount().getEmail() + "' removed entry: '" + entryId
-                    + "'");
+            EntryController entryController = new EntryController();
+            Entry entry = entryController.getByRecordId(account, entryId);
+            entryController.delete(account, entry);
+            log("User '" + account.getEmail() + "' removed entry: '" + entryId + "'");
         } catch (ControllerException e) {
             Logger.error(e);
 
@@ -1128,18 +1114,16 @@ public class RegistryAPI {
             ServicePermissionException {
         log(sessionId, "getSequence: " + entryId);
         FeaturedDNASequence sequence = null;
+        Account account = validateAccount(sessionId);
 
         try {
             SequenceController sequenceController = getSequenceController(sessionId);
-            EntryController entryController = getEntryController(sessionId);
-
-            Entry entry = entryController.getByRecordId(entryId);
-
+            EntryController entryController = new EntryController();
+            Entry entry = entryController.getByRecordId(account, entryId);
             sequence = SequenceController.sequenceToDNASequence(sequenceController
                     .getByEntry(entry));
 
-            log("User '" + entryController.getAccount().getEmail() + "' pulled sequence: '"
-                    + entryId + "'");
+            log("User '" + account.getEmail() + "' pulled sequence: '" + entryId + "'");
         } catch (PermissionException e) {
             throw new ServicePermissionException("No permission to read this entry");
         } catch (ControllerException e) {
@@ -1173,21 +1157,20 @@ public class RegistryAPI {
             ServicePermissionException {
         log(sessionId, "getOriginalGenbankSequence: " + entryId);
         String genbankSequence = "";
+        Account account = validateAccount(sessionId);
 
         try {
             SequenceController sequenceController = getSequenceController(sessionId);
-            EntryController entryController = getEntryController(sessionId);
-
-            Entry entry = entryController.getByRecordId(entryId);
-
+            EntryController entryController = new EntryController();
+            Entry entry = entryController.getByRecordId(account, entryId);
             Sequence sequence = sequenceController.getByEntry(entry);
 
             if (sequence != null) {
                 genbankSequence = sequence.getSequenceUser();
             }
 
-            log("User '" + entryController.getAccount().getEmail()
-                    + "' pulled original genbank sequence: '" + entryId + "'");
+            log("User '" + account.getEmail() + "' pulled original genbank sequence: '" + entryId
+                    + "'");
         } catch (PermissionException e) {
             throw new ServicePermissionException("No permission to read this entry");
         } catch (ControllerException e) {
@@ -1220,13 +1203,12 @@ public class RegistryAPI {
             ServicePermissionException {
         log(sessionId, "getGenBankSequence: " + entryId);
         String genbankSequence = "";
+        Account account = validateAccount(sessionId);
 
         try {
             SequenceController sequenceController = getSequenceController(sessionId);
-            EntryController entryController = getEntryController(sessionId);
-
-            Entry entry = entryController.getByRecordId(entryId);
-
+            EntryController entryController = new EntryController();
+            Entry entry = entryController.getByRecordId(account, entryId);
             Sequence sequence = sequenceController.getByEntry(entry);
 
             if (sequence != null) {
@@ -1238,8 +1220,8 @@ public class RegistryAPI {
                 genbankSequence = SequenceController.compose(sequence, genbankFormatter);
             }
 
-            log("User '" + entryController.getAccount().getEmail()
-                    + "' pulled generated genbank sequence: '" + entryId + "'");
+            log("User '" + account.getEmail() + "' pulled generated genbank sequence: '" + entryId
+                    + "'");
         } catch (PermissionException e) {
             throw new ServicePermissionException("No permission to read this entry");
         } catch (ControllerException e) {
@@ -1272,12 +1254,13 @@ public class RegistryAPI {
             ServicePermissionException {
         log(sessionId, "getFastaSequence: " + entryId);
         String fastaSequence = "";
+        Account account = validateAccount(sessionId);
 
         try {
             SequenceController sequenceController = getSequenceController(sessionId);
-            EntryController entryController = getEntryController(sessionId);
+            EntryController entryController = new EntryController();
 
-            Entry entry = entryController.getByRecordId(entryId);
+            Entry entry = entryController.getByRecordId(account, entryId);
 
             Sequence sequence = sequenceController.getByEntry(entry);
 
@@ -1286,8 +1269,8 @@ public class RegistryAPI {
                     new FastaFormatter(entry.getNamesAsString()));
             }
 
-            log("User '" + entryController.getAccount().getEmail()
-                    + "' pulled generated fasta sequence: '" + entryId + "'");
+            log("User '" + account.getEmail() + "' pulled generated fasta sequence: '" + entryId
+                    + "'");
         } catch (PermissionException e) {
             throw new ServicePermissionException("No permission to read this entry");
         } catch (ControllerException e) {
@@ -1324,13 +1307,14 @@ public class RegistryAPI {
         log(sessionId, "createSequence: " + entryId);
         Entry entry = null;
         FeaturedDNASequence savedFeaturedDNASequence = null;
+        Account account = validateAccount(sessionId);
 
         try {
-            EntryController entryController = getEntryController(sessionId);
+            EntryController entryController = new EntryController();
             SequenceController sequenceController = getSequenceController(sessionId);
 
             try {
-                entry = entryController.getByRecordId(entryId);
+                entry = entryController.getByRecordId(account, entryId);
             } catch (PermissionException e) {
                 throw new ServicePermissionException("No permissions to read this entry!");
             }
@@ -1352,8 +1336,7 @@ public class RegistryAPI {
                 savedFeaturedDNASequence = SequenceController
                         .sequenceToDNASequence(sequenceController.save(sequence));
 
-                log("User '" + entryController.getAccount().getEmail() + "' saved sequence: '"
-                        + entryId + "'");
+                log("User '" + account.getEmail() + "' saved sequence: '" + entryId + "'");
             } catch (PermissionException e) {
                 throw new ServicePermissionException("No permissions to save this sequence!");
             }
@@ -1397,27 +1380,26 @@ public class RegistryAPI {
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
         log(sessionId, "removeSequence: " + entryId);
-        try {
-            EntryController entryController = getEntryController(sessionId);
+        Account account = validateAccount(sessionId);
 
+        try {
+            EntryController entryController = new EntryController();
             Entry entry = null;
 
             try {
-                entry = entryController.getByRecordId(entryId);
+                entry = entryController.getByRecordId(account, entryId);
             } catch (PermissionException e) {
                 throw new ServicePermissionException("No permission to read this entry");
             }
 
             SequenceController sequenceController = getSequenceController(sessionId);
-
             Sequence sequence = sequenceController.getByEntry(entry);
 
             if (sequence != null) {
                 try {
                     sequenceController.delete(sequence);
 
-                    log("User '" + entryController.getAccount().getEmail()
-                            + "' removed sequence: '" + entryId + "'");
+                    log("User '" + account.getEmail() + "' removed sequence: '" + entryId + "'");
                 } catch (PermissionException e) {
                     throw new ServicePermissionException("No permission to delete sequence");
                 }
@@ -1451,7 +1433,8 @@ public class RegistryAPI {
             @WebParam(name = "entryId") String entryId, @WebParam(name = "sequence") String sequence)
             throws SessionException, ServiceException, ServicePermissionException {
         log(sessionId, "uploadSequence: " + entryId);
-        EntryController entryController = getEntryController(sessionId);
+        Account account = validateAccount(sessionId);
+        EntryController entryController = new EntryController();
         SequenceController sequenceController = getSequenceController(sessionId);
 
         FeaturedDNASequence dnaSequence = (FeaturedDNASequence) SequenceController.parse(sequence);
@@ -1467,7 +1450,7 @@ public class RegistryAPI {
         Sequence modelSequence = null;
         try {
             try {
-                entry = entryController.getByRecordId(entryId);
+                entry = entryController.getByRecordId(account, entryId);
 
                 if (entryController.hasSequence(entry)) {
                     throw new ServiceException(
@@ -1487,8 +1470,7 @@ public class RegistryAPI {
 
                 savedFeaturedDNASequence = SequenceController.sequenceToDNASequence(savedSequence);
 
-                log("User '" + entryController.getAccount().getEmail()
-                        + "' uploaded new sequence: '" + entryId + "'");
+                log("User '" + account.getEmail() + "' uploaded new sequence: '" + entryId + "'");
             } catch (PermissionException e) {
                 throw new ServicePermissionException("No permissions to save sequence to entry!", e);
             }
@@ -1519,11 +1501,12 @@ public class RegistryAPI {
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
         log(sessionId, "retrieveEntrySamples: " + entryId);
-        SampleController sampleController = getSampleController(sessionId);
-        EntryController entryController = getEntryController(sessionId);
+        Account account = validateAccount(sessionId);
+        SampleController sampleController = new SampleController(account);
+        EntryController entryController = new EntryController();
 
         try {
-            Entry entry = entryController.getByRecordId(entryId);
+            Entry entry = entryController.getByRecordId(account, entryId);
             return sampleController.getSamples(entry);
         } catch (ControllerException e) {
             Logger.error(e);
@@ -1728,7 +1711,7 @@ public class RegistryAPI {
             Storage newLocation = StorageManager.getLocation(strainScheme, new String[] { rack,
                     location, barcode });
 
-            Entry entry = getEntryController(sessionId).getByRecordId(recordId);
+            Entry entry = new EntryController().getByRecordId(account, recordId);
             if (entry == null) {
                 throw new ServiceException("Could not retrieve entry with id " + recordId);
             }
@@ -1871,13 +1854,14 @@ public class RegistryAPI {
             @WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "recordId") String recordId) throws ServiceException, SessionException {
         log(sessionId, "listTraceSequenceFiles: " + recordId);
+        Account account = validateAccount(sessionId);
         List<TraceSequence> result = new ArrayList<TraceSequence>();
         SequenceAnalysisController sequenceAnalysisController = getSequenceAnalysisController(sessionId);
-        EntryController entryController = getEntryController(sessionId);
+        EntryController entryController = new EntryController();
 
         Entry entry = null;
         try {
-            entry = entryController.getByRecordId(recordId);
+            entry = entryController.getByRecordId(account, recordId);
             if (entry == null) {
                 throw new ServiceException("Could not retrieve entry");
             }
@@ -1932,7 +1916,7 @@ public class RegistryAPI {
         TraceSequence result = null;
 
         SequenceAnalysisController sequenceAnalysisController = getSequenceAnalysisController(sessionId);
-        EntryController entryController = getEntryController(sessionId);
+        EntryController entryController = new EntryController();
         byte[] bytes = SerializationUtils.deserializeBase64StringToBytes(base64FileData);
         if (bytes == null) {
             throw new ServiceException("Invalid File Data!");
@@ -1941,7 +1925,7 @@ public class RegistryAPI {
         String depositor = account.getEmail();
         Entry entry = null;
         try {
-            entry = entryController.getByRecordId(recordId);
+            entry = entryController.getByRecordId(account, recordId);
             if (entry == null) {
                 throw new ServiceException("Could not retrieve entry!");
             }
@@ -2090,22 +2074,6 @@ public class RegistryAPI {
     }
 
     /**
-     * Retrieve the {@link EntryController} instance for the given session key.
-     * 
-     * @param sessionId
-     *            Session key.
-     * @return EntryController object.
-     * @throws SessionException
-     * @throws ServiceException
-     */
-    protected EntryController getEntryController(@WebParam(name = "sessionId") String sessionId)
-            throws SessionException, ServiceException {
-        Account account = validateAccount(sessionId);
-
-        return new EntryController(account);
-    }
-
-    /**
      * Retrieve the {@link SequenceController} instance for the given session key.
      * 
      * @param sessionId
@@ -2118,7 +2086,6 @@ public class RegistryAPI {
             @WebParam(name = "sessionId") String sessionId) throws ServiceException,
             SessionException {
         Account account = validateAccount(sessionId);
-
         return new SequenceController(account);
     }
 
@@ -2159,13 +2126,11 @@ public class RegistryAPI {
             account = controller.getAccountBySessionKey(sessionId);
         } catch (ControllerException e) {
             Logger.error(e);
-
             throw new ServiceException("Registry Service Internal Error!");
         }
 
         if (account == null) {
             Logger.error("Failed to lookup account!");
-
             throw new ServiceException("Registry Service Internal Error!");
         }
 

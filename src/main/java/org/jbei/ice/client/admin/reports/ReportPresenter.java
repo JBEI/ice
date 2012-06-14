@@ -5,7 +5,7 @@ import java.util.HashMap;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.admin.AdminPanel;
 import org.jbei.ice.client.admin.AdminPanelPresenter;
-import org.jbei.ice.shared.dto.EntryInfo.EntryType;
+import org.jbei.ice.shared.dto.EntryType;
 
 public class ReportPresenter implements AdminPanelPresenter {
 

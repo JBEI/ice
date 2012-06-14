@@ -9,6 +9,7 @@ import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.IStrainValueObject;
+import org.jbei.ice.shared.dto.EntryType;
 
 /**
  * Store Strain specific fields.
@@ -39,6 +40,7 @@ public class Strain extends Entry implements IStrainValueObject, IModel {
     private String plasmids;
 
     public Strain() {
+        setRecordType(EntryType.STRAIN.getName());
     }
 
     public Strain(String recordId, String versionId, String recordType, String owner,

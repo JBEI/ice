@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.apache.commons.lang.StringUtils;
-import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Part;
 import org.jbei.ice.lib.models.Plasmid;

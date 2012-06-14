@@ -7,8 +7,8 @@ import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
@@ -35,13 +35,13 @@ public class WebUtils {
     private static String makeEntryLink(Account account, IceLink iceLink) {
         String result = null;
 
-        EntryController entryController = new EntryController(account);
+        EntryController entryController = new EntryController();
 
         long id = 0;
         Entry entry = null;
 
         try {
-            entry = entryController.getByPartNumber(iceLink.getPartNumber());
+            entry = entryController.getByPartNumber(account, iceLink.getPartNumber());
         } catch (ControllerException e) {
             throw new ViewException(e);
         } catch (PermissionException e) {
@@ -76,16 +76,15 @@ public class WebUtils {
     private static String makeEntryLink(Account account, long id) {
         String result = "";
 
-        EntryController entryController = new EntryController(account);
+        EntryController entryController = new EntryController();
 
         //        CharSequence relativePath = WebRequestCycle.get().urlFor(EntryViewPage.class,
         //            new PageParameters());
         // TODO: Tim; this is not very elegant at all. Is there a better way than to generate <a> tag manually?
         try {
-            if (entryController.hasReadPermissionById(id)) {
-                result = "<a href=/entry/view/" + id + ">"
-                        + entryController.get(id).getOnePartNumber().getPartNumber() + "</a>";
-            }
+            Entry entry = entryController.get(account, id);
+            result = "<a href=/entry/view/" + id + ">" + entry.getOnePartNumber().getPartNumber()
+                    + "</a>";
         } catch (ControllerException e) {
             throw new ViewException(e);
         } catch (PermissionException e) {
@@ -219,7 +218,7 @@ public class WebUtils {
         String newText = "";
 
         try {
-            EntryController entryController = new EntryController(account);
+            EntryController entryController = new EntryController();
 
             Pattern basicWikiLinkPattern = Pattern.compile("\\[\\["
                     + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":.*?\\]\\]");
@@ -254,7 +253,7 @@ public class WebUtils {
                 }
 
                 if (partNumber != null) {
-                    Entry entry = entryController.getByPartNumber(partNumber);
+                    Entry entry = entryController.getByPartNumber(account, partNumber);
 
                     if (entry != null) {
                         jbeiLinks.add(new IceLink(partNumber, descriptive));

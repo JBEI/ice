@@ -29,7 +29,7 @@ import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.Generation;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.PlantType;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.EntryInfo.EntryType;
+import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.ParameterInfo;
 import org.jbei.ice.shared.dto.PartInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
@@ -53,16 +53,29 @@ public class EntryToInfoFactory {
             Map<Sample, LinkedList<Storage>> samples, List<TraceSequence> sequences,
             boolean hasSequence) {
         EntryInfo info = null;
+        EntryType type = EntryType.nameToType(entry.getRecordType());
+        if (type == null)
+            return null;
 
-        if (Entry.PLASMID_ENTRY_TYPE.equals(entry.getRecordType())) {
+        switch (type) {
+        case PLASMID:
             info = plasmidInfo(entry);
-        } else if (Entry.STRAIN_ENTRY_TYPE.equals(entry.getRecordType())) {
+            break;
+
+        case STRAIN:
             info = strainInfo(account, (Strain) entry);
-        } else if (Entry.ARABIDOPSIS_SEED_ENTRY_TYPE.equals(entry.getRecordType())) {
+            break;
+
+        case ARABIDOPSIS:
             info = seedInfo(entry);
-        } else if (Entry.PART_ENTRY_TYPE.equals(entry.getRecordType())) {
+            break;
+
+        case PART:
             info = partInfo(entry);
-        } else {
+            break;
+
+        default:
+            Logger.error("Do not know how to handle entry type " + type);
             return null;
         }
 
@@ -311,31 +324,12 @@ public class EntryToInfoFactory {
         return info;
     }
 
-    static EntryType getEntryType(Entry entry) {
-
-        if (Entry.PART_ENTRY_TYPE.equals(entry.getRecordType()))
-            return EntryType.PART;
-
-        if (Entry.ARABIDOPSIS_SEED_ENTRY_TYPE.equals(entry.getRecordType()))
-            return EntryType.ARABIDOPSIS;
-
-        if (Entry.STRAIN_ENTRY_TYPE.equals(entry.getRecordType()))
-            return EntryType.STRAIN;
-
-        if (Entry.PLASMID_ENTRY_TYPE.equals(entry.getRecordType()))
-            return EntryType.PLASMID;
-
-        return null;
-    }
-
-    // todo ; this is a temp "fix" till all the factorys that perform DTO conversions
-    // are consolidated. this is meant to retrieve the minimum needed
-
     public static EntryInfo getSummaryInfo(Entry entry) {
 
         EntryInfo info = null;
+        EntryType type = EntryType.nameToType(entry.getRecordType());
 
-        switch (getEntryType(entry)) {
+        switch (type) {
         case ARABIDOPSIS:
             info = new ArabidopsisSeedInfo();
             break;

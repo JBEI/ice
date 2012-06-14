@@ -11,7 +11,7 @@ import org.jbei.ice.shared.BioSafetyOptions;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
 import org.jbei.ice.shared.StatusType;
-import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.EntryType;
 
 /**
  * Factory for retrieving the operands and operations for
@@ -37,7 +37,7 @@ public class SearchFilterOperandFactory {
 
         case TYPE:
             operands.clear();
-            for (EntryInfo.EntryType value : EntryInfo.EntryType.values())
+            for (EntryType value : EntryType.values())
                 operands.add(new OperandValue(value.getDisplay(), value.getName()));
             return new TypeOperand(type, operands, QueryOperator.IS, QueryOperator.IS_NOT);
 

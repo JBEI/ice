@@ -11,11 +11,15 @@ import java.util.TreeSet;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.dao.DAO;
+import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.UtilsManager;
+import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.EntryFundingSource;
 import org.jbei.ice.lib.models.Part;
@@ -23,6 +27,7 @@ import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.search.blast.Blast;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastResult;
@@ -100,7 +105,7 @@ public class Query {
         filters.add(new StringFilter("name_or_alias", "Name Or Alias", "filterNameOrAlias"));
         //filters.add(new StringFilter("name", "Name", "filterName"));
         filters.add(new StringFilter("part_number", "Part ID", "filterPartNumber"));
-        filters.add(new SelectionFilter("type", "Type", "filterType", Entry
+        filters.add(new SelectionFilter("type", "Type", "filterType", EntryUtil
                 .getEntryTypeOptionsMap()));
         filters.add(new SelectionFilter("status", "Status", "filterStatus", Entry
                 .getStatusOptionsMap()));
@@ -952,15 +957,25 @@ public class Query {
             int minLength) {
         HashSet<Long> rawResults = new HashSet<Long>();
         Blast b = new Blast();
-
+        EntryController entryController = new EntryController();
+        AccountController controller = new AccountController();
         try {
+            Account systemAccount = controller.getSystemAccount();
+
             ArrayList<BlastResult> blastResults = b.query(queryString, type);
 
             if (blastResults != null) {
                 for (BlastResult blastResult : blastResults) {
                     if (blastResult.getPercentId() >= minPercentIdentity
                             && blastResult.getAlignmentLength() >= minLength) {
-                        Entry entry = EntryManager.getByRecordId(blastResult.getSubjectId());
+                        Entry entry;
+                        try {
+                            entry = entryController.getByRecordId(systemAccount,
+                                blastResult.getSubjectId());
+                        } catch (PermissionException e) {
+                            Logger.warn("Could not add entry to blast result because of insufficient permissions");
+                            continue;
+                        }
                         rawResults.add(entry.getId());
                     }
                 }
@@ -972,26 +987,11 @@ public class Query {
         } catch (BlastException e) {
             // return empty result for this query
             Logger.info("Could not run advanced blastn: " + e.toString());
-        } catch (ManagerException e) {
+        } catch (ControllerException e) {
             // return empty result for this query
             Logger.info("Could not run advanced blastn: " + e.toString());
         }
 
         return rawResults;
-    }
-
-    public static void main(String[] args) {
-        /*Query q = new Query();
-        // HashSet<Integer> results = q.filterName("!~Keasling");
-        // HashSet<Integer> results = q.filterSelectionMarker("*");
-
-        ArrayList<String[]> data = new ArrayList<String[]>();
-        data.add(new String[] { "name_or_alias", "~kan" });
-        LinkedHashSet<Entry> results = q.query(data);
-
-        for (Entry entry : results) {
-            System.out.println("" + entry.getId());
-        }
-        System.out.println("Total: " + results.size());*/
     }
 }

@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
@@ -18,6 +17,7 @@ import org.jbei.ice.lib.composers.SequenceComposerException;
 import org.jbei.ice.lib.composers.formatters.FastaFormatter;
 import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.composers.formatters.SbolFormatter;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
@@ -62,10 +62,10 @@ public class SequenceDownloadServlet extends HttpServlet {
             return;
         }
 
-        EntryController entryController = new EntryController(account);
+        EntryController entryController = new EntryController();
         Entry entry = null;
         try {
-            entry = entryController.get(Long.parseLong(entryId));
+            entry = entryController.get(account, Long.parseLong(entryId));
         } catch (NumberFormatException e) {
             Logger.error(e);
             return;

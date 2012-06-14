@@ -148,7 +148,7 @@ public class PermissionsController extends Controller {
      */
     public void setReadGroup(Entry entry, Set<Group> groups) throws ManagerException,
             PermissionException {
-        if (PermissionDAO.hasWritePermission(entry.getId(), super.getAccount())) {
+        if (PermissionDAO.hasWritePermission(entry, super.getAccount())) {
             PermissionDAO.setReadGroup(entry, groups);
         } else {
             throw new PermissionException("Write Permission not permitted");
@@ -169,7 +169,7 @@ public class PermissionsController extends Controller {
      */
     public void setWriteGroup(Entry entry, Set<Group> groups) throws ManagerException,
             PermissionException {
-        if (PermissionDAO.hasWritePermission(entry.getId(), super.getAccount())) {
+        if (PermissionDAO.hasWritePermission(entry, super.getAccount())) {
             PermissionDAO.setWriteGroup(entry, groups);
         } else {
             throw new PermissionException("Write Permission not permitted");
@@ -190,7 +190,7 @@ public class PermissionsController extends Controller {
      */
     public void setReadUser(Entry entry, Set<Account> accounts) throws ManagerException,
             PermissionException {
-        if (PermissionDAO.hasWritePermission(entry.getId(), super.getAccount())) {
+        if (PermissionDAO.hasWritePermission(entry, super.getAccount())) {
             PermissionDAO.setReadUser(entry, accounts);
         } else {
             throw new PermissionException("Write Permission not permitted");
@@ -199,7 +199,7 @@ public class PermissionsController extends Controller {
 
     public void addReadUser(Entry entry, Account account) throws ManagerException,
             PermissionException {
-        if (PermissionDAO.hasWritePermission(entry.getId(), super.getAccount())) {
+        if (PermissionDAO.hasWritePermission(entry, super.getAccount())) {
             PermissionDAO.addReadUser(entry, account);
         } else {
             throw new PermissionException("User " + super.getAccount().getEmail()
@@ -209,7 +209,7 @@ public class PermissionsController extends Controller {
 
     public void removeReadUser(Entry entry, Account account) throws ManagerException,
             PermissionException {
-        if (PermissionDAO.hasWritePermission(entry.getId(), super.getAccount())) {
+        if (PermissionDAO.hasWritePermission(entry, super.getAccount())) {
             PermissionDAO.removeReadUser(entry, account);
         } else {
             throw new PermissionException("User " + super.getAccount().getEmail()
@@ -219,7 +219,7 @@ public class PermissionsController extends Controller {
 
     public void addReadGroup(Entry entry, Group readGroup) throws ManagerException,
             PermissionException {
-        if (PermissionDAO.hasWritePermission(entry.getId(), super.getAccount())) {
+        if (PermissionDAO.hasWritePermission(entry, super.getAccount())) {
             PermissionDAO.addReadGroup(entry, readGroup);
         } else {
             throw new PermissionException("Write Permission not permitted");
@@ -228,7 +228,7 @@ public class PermissionsController extends Controller {
 
     public void removeReadGroup(Entry entry, Group readGroup) throws ManagerException,
             PermissionException {
-        if (PermissionDAO.hasWritePermission(entry.getId(), super.getAccount())) {
+        if (PermissionDAO.hasWritePermission(entry, super.getAccount())) {
             PermissionDAO.removeReadGroup(entry, readGroup);
         } else {
             throw new PermissionException("Write Permission not permitted");
@@ -237,7 +237,7 @@ public class PermissionsController extends Controller {
 
     public void addWriteUser(Entry entry, Account account) throws ManagerException,
             PermissionException {
-        if (PermissionDAO.hasWritePermission(entry.getId(), super.getAccount())) {
+        if (PermissionDAO.hasWritePermission(entry, super.getAccount())) {
             PermissionDAO.addWriteUser(entry, account);
         } else {
             throw new PermissionException("Write Permission not permitted");
@@ -246,7 +246,7 @@ public class PermissionsController extends Controller {
 
     public void removeWriteUser(Entry entry, Account account) throws ManagerException,
             PermissionException {
-        if (PermissionDAO.hasWritePermission(entry.getId(), super.getAccount())) {
+        if (PermissionDAO.hasWritePermission(entry, super.getAccount())) {
             PermissionDAO.removeWriteUser(entry, account);
         } else {
             throw new PermissionException("Write Permission not permitted");
@@ -255,7 +255,7 @@ public class PermissionsController extends Controller {
 
     public void removeWriteGroup(Entry entry, Group writeGroup) throws ManagerException,
             PermissionException {
-        if (PermissionDAO.hasWritePermission(entry.getId(), super.getAccount())) {
+        if (PermissionDAO.hasWritePermission(entry, super.getAccount())) {
             PermissionDAO.removeWriteGroup(entry, writeGroup);
         } else {
             throw new PermissionException("Write Permission not permitted");
@@ -264,7 +264,7 @@ public class PermissionsController extends Controller {
 
     public void addWriteGroup(Entry entry, Group writeGroup) throws ManagerException,
             PermissionException {
-        if (PermissionDAO.hasWritePermission(entry.getId(), super.getAccount())) {
+        if (PermissionDAO.hasWritePermission(entry, super.getAccount())) {
             PermissionDAO.addWriteGroup(entry, writeGroup);
         } else {
             throw new PermissionException("Write Permission not permitted");
@@ -285,7 +285,7 @@ public class PermissionsController extends Controller {
      */
     public void setWriteUser(Entry entry, Set<Account> accounts) throws ManagerException,
             PermissionException {
-        if (PermissionDAO.hasWritePermission(entry.getId(), super.getAccount())) {
+        if (PermissionDAO.hasWritePermission(entry, super.getAccount())) {
             PermissionDAO.setWriteUser(entry, accounts);
         } else {
             throw new PermissionException("Write Permission not permitted");

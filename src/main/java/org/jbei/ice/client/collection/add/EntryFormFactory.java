@@ -11,7 +11,7 @@ import org.jbei.ice.client.collection.add.form.NewStrainForm;
 import org.jbei.ice.client.collection.add.form.NewStrainWithPlasmidForm;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.EntryInfo.EntryType;
+import org.jbei.ice.shared.dto.EntryType;
 
 public class EntryFormFactory {
     /**

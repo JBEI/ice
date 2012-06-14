@@ -3,9 +3,9 @@ package org.jbei.ice.client.profile;
 public class CellEntry {
 
     private MenuType type;
-    private int count;
+    private long count;
 
-    public CellEntry(MenuType type, int count) {
+    public CellEntry(MenuType type, long count) {
         this.type = type;
         this.count = count;
     }
@@ -14,7 +14,7 @@ public class CellEntry {
         return type;
     }
 
-    public int getCount() {
+    public long getCount() {
         return count;
     }
 }

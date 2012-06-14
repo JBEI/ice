@@ -13,7 +13,6 @@ import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
@@ -113,96 +112,6 @@ public class PermissionDAO extends HibernateRepository {
             } catch (ControllerException e) {
                 e.printStackTrace();
             }
-        }
-
-        return result;
-    }
-
-    /**
-     * Check if the {@link Account} associated with the given session key has write permission to
-     * the specified {@link Entry}.
-     * 
-     * @param entryId
-     *            id of the Entry
-     * @param sessionKey
-     *            session key
-     * @return True if the user has write permission.
-     */
-    public static boolean hasWritePermission(long entryId, String sessionKey) {
-        boolean result = false;
-        Entry entry;
-        AccountController controller = new AccountController();
-
-        try {
-            Account account = controller.getAccountByAuthToken(sessionKey);
-            if (account != null) {
-                entry = EntryManager.get(entryId);
-                if (entry != null) {
-                    result = hasWritePermission(entry, account);
-                }
-            }
-        } catch (ManagerException e) {
-            String msg = "manager exception during permission lookup: " + e.toString();
-            Logger.warn(msg);
-        } catch (ControllerException e) {
-            Logger.error(e);
-        }
-        return result;
-    }
-
-    /**
-     * Check if the {@link Account} associated with the given session key has write permission to
-     * the specified {@link Entry}.
-     * 
-     * @param recordId
-     *            recordId of the Entry.
-     * @param account
-     *            Account to be queried.
-     * @return True if the account has write permission to the specified Entry.
-     */
-    public static boolean hasWritePermission(String recordId, Account account) {
-        boolean result = false;
-        Entry entry;
-
-        try {
-            entry = EntryManager.getByRecordId(recordId);
-
-            if (entry != null) {
-                result = hasWritePermission(entry, account);
-            }
-        } catch (ManagerException e) {
-            // if lookup fails, doesn't have permission
-            String msg = "manager exception during permission lookup: " + e.toString();
-            Logger.warn(msg);
-        }
-
-        return result;
-    }
-
-    /**
-     * Check if the {@link Account} associated with the given session key has write permission to
-     * the specified {@link Entry}.
-     * 
-     * @param entryId
-     *            id of the Entry.
-     * @param account
-     *            Account to be queried.
-     * @return True if the account has write permission to the specified Entry.
-     */
-    public static boolean hasWritePermission(long entryId, Account account) {
-        boolean result = false;
-        Entry entry;
-
-        try {
-            entry = EntryManager.get(entryId);
-
-            if (entry != null) {
-                result = hasWritePermission(entry, account);
-            }
-        } catch (ManagerException e) {
-            // if lookup fails, doesn't have permission
-            String msg = "manager exception during permission lookup: " + e.toString();
-            Logger.warn(msg);
         }
 
         return result;

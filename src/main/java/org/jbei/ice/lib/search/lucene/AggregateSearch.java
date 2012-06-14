@@ -1,11 +1,10 @@
 package org.jbei.ice.lib.search.lucene;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 
-import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.PartNumber;
@@ -37,7 +36,7 @@ public class AggregateSearch {
      */
     public static ArrayList<SearchResult> query(String queryString, Account account)
             throws SearchException {
-        EntryController entryController = new EntryController(account);
+        EntryController entryController = new EntryController();
 
         ArrayList<SearchResult> result = new ArrayList<SearchResult>();
 
@@ -48,10 +47,9 @@ public class AggregateSearch {
             ArrayList<SearchResult> exactNameResult = new ArrayList<SearchResult>();
             queries.add(new String[] { "name_or_alias", "=" + queryString });
             ArrayList<Long> queryResultIds = Query.getInstance().query(queries);
-            queryResultIds = new ArrayList<Long>(
-                    entryController.filterEntriesByPermission(queryResultIds));
             Collections.reverse(queryResultIds);
-            ArrayList<Entry> matchedEntries = entryController.getEntriesByIdSet(queryResultIds);
+            ArrayList<Entry> matchedEntries = entryController.getEntriesByIdSet(account,
+                queryResultIds);
 
             if (matchedEntries != null) {
                 exactNameMatches.addAll(matchedEntries);
@@ -60,16 +58,8 @@ public class AggregateSearch {
             queries = new ArrayList<String[]>();
             queries.add(new String[] { "part_number", "=" + queryString });
             queryResultIds = Query.getInstance().query(queries);
-            Iterator<Long> iter = queryResultIds.iterator();
-            while (iter.hasNext()) {
-                long id = iter.next();
-                if (!entryController.hasReadPermissionById(id)) {
-                    iter.remove();
-                }
-            }
-
             Collections.reverse(queryResultIds);
-            matchedEntries = entryController.getEntriesByIdSet(queryResultIds);
+            matchedEntries = entryController.getEntriesByIdSet(account, queryResultIds);
             if (matchedEntries != null) {
                 exactNameMatches.addAll(matchedEntries);
             }
@@ -83,11 +73,9 @@ public class AggregateSearch {
             queries = new ArrayList<String[]>();
             queries.add(new String[] { "name_or_alias", "~" + queryString });
             queryResultIds = Query.getInstance().query(queries);
-            queryResultIds = new ArrayList<Long>(
-                    entryController.filterEntriesByPermission(queryResultIds));
             Collections.reverse(queryResultIds);
-            ArrayList<Entry> matchedSubstringEntries = entryController
-                    .getEntriesByIdSet(queryResultIds);
+            ArrayList<Entry> matchedSubstringEntries = entryController.getEntriesByIdSet(account,
+                queryResultIds);
             if (matchedSubstringEntries != null) {
                 substringMatches.addAll(matchedSubstringEntries);
             }
@@ -95,10 +83,8 @@ public class AggregateSearch {
             queries = new ArrayList<String[]>();
             queries.add(new String[] { "part_number", "~" + queryString });
             queryResultIds = Query.getInstance().query(queries);
-            queryResultIds = new ArrayList<Long>(
-                    entryController.filterEntriesByPermission(queryResultIds));
             Collections.reverse(queryResultIds);
-            matchedSubstringEntries = entryController.getEntriesByIdSet(queryResultIds);
+            matchedSubstringEntries = entryController.getEntriesByIdSet(account, queryResultIds);
             if (matchedSubstringEntries != null) {
                 substringMatches.addAll(matchedSubstringEntries);
             }

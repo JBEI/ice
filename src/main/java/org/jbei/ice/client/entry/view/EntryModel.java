@@ -10,7 +10,7 @@ import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.entry.view.view.IEntryView;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.EntryInfo.EntryType;
+import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.SampleInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;

@@ -17,7 +17,6 @@ import org.apache.commons.lang.ArrayUtils;
 import org.jbei.ice.client.RegistryService;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.controllers.AttachmentController;
-import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SampleController;
 import org.jbei.ice.controllers.SearchController;
 import org.jbei.ice.controllers.SequenceAnalysisController;
@@ -25,12 +24,11 @@ import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.StorageController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.bulkimport.BulkImportController;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AttachmentManager;
-import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.FolderManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.NewsManager;
@@ -73,7 +71,7 @@ import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.EntryInfo.EntryType;
+import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.GroupInfo;
 import org.jbei.ice.shared.dto.NewsItem;
 import org.jbei.ice.shared.dto.SampleInfo;
@@ -90,6 +88,7 @@ import com.google.gwt.user.client.ui.SuggestOracle.Request;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
+// TODO : throw authentication exception in interface and here
 public class RegistryServiceImpl extends RemoteServiceServlet implements RegistryService {
 
     private static final long serialVersionUID = 1L;
@@ -109,12 +108,22 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             Logger.info("User by login '" + name + "' successfully logged in");
+            Account account = controller.getByEmail(info.getEmail());
+            EntryController entryController = new EntryController();
+            boolean isModerator = controller.isModerator(account);
 
-            int entryCount = EntryManager.getEntryCountBy(info.getEmail());
-            info.setUserEntryCount(entryCount);
+            long visibleEntryCount;
+            if (isModerator)
+                visibleEntryCount = entryController.getAllEntryCount();
+            else
+                visibleEntryCount = entryController.getNumberOfVisibleEntries(account);
+
+            info.setVisibleEntryCount(visibleEntryCount);
+
+            // get the count of the user's entries
+            long ownerEntryCount = entryController.getOwnerEntryCount(account);
+            info.setUserEntryCount(ownerEntryCount);
             return info;
-        } catch (InvalidCredentialsException e) {
-            Logger.warn("Invalid credentials provided by user: " + name);
         } catch (ControllerException e) {
             Logger.error(e);
         } catch (Exception e) {
@@ -129,9 +138,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         try {
             Account account = retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
             boolean isModerator = controller.isModerator(account);
             if (!isModerator) {
                 Logger.warn(account.getEmail()
@@ -140,6 +146,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             }
 
             Logger.info(account.getEmail() + ": retrieving all user accounts");
+            EntryController entryController = new EntryController();
 
             // retrieve all user accounts
             Set<Account> accounts = controller.getAllByFirstName();
@@ -149,11 +156,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             ArrayList<AccountInfo> infos = new ArrayList<AccountInfo>();
             for (Account userAccount : accounts) {
                 AccountInfo info = new AccountInfo();
-                int count;
+                long count;
                 try {
-                    count = EntryManager.getEntryCountBy(userAccount.getEmail());
+                    count = entryController.getOwnerEntryCount(userAccount);
                     info.setUserEntryCount(count);
-                } catch (ManagerException e) {
+                } catch (ControllerException e) {
                     Logger.error("Error retrieving entry count for user " + userAccount.getEmail());
                     info.setUserEntryCount(-1);
                 }
@@ -192,8 +199,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         try {
             account = retrieveAccountForSid(sid);
-            if (account == null)
-                return false;
 
             Logger.info(account.getEmail() + ": updating password for account " + email);
             AccountController controller = new AccountController();
@@ -316,12 +321,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public AccountInfo sessionValid(String sid) {
 
         AccountController controller = new AccountController();
+        EntryController entryController = new EntryController();
 
         try {
             if (AccountController.isAuthenticated(sid)) {
                 Account account = controller.getAccountBySessionKey(sid);
                 AccountInfo info = this.accountToInfo(account);
-                int entryCount = EntryManager.getEntryCountBy(info.getEmail());
+                int entryCount = entryController.getOwnerEntryCountBy(info.getEmail());
                 info.setUserEntryCount(entryCount);
 
                 boolean isModerator = controller.isModerator(account);
@@ -329,17 +335,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
                 long visibleEntryCount;
                 if (isModerator)
-                    visibleEntryCount = EntryManager.getAllEntryCount();
+                    visibleEntryCount = entryController.getAllEntryCount();
                 else
-                    visibleEntryCount = EntryManager.getNumberOfVisibleEntries(account);
+                    visibleEntryCount = entryController.getNumberOfVisibleEntries(account);
 
                 info.setVisibleEntryCount(visibleEntryCount);
-
                 return info;
             }
         } catch (ControllerException e) {
-            Logger.error(e);
-        } catch (ManagerException e) {
             Logger.error(e);
         }
         return null;
@@ -368,51 +371,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             Logger.info(account.getEmail() + ": retrieving entry data for " + entryIds.size()
                     + " entries");
-
-            LinkedList<EntryInfo> results = new LinkedList<EntryInfo>();
-            List<Entry> entries = null;
-
-            switch (field) {
-            case TYPE:
-                entries = EntryManager.getEntriesByIdSetSortByType(entryIds, asc);
-                break;
-
-            case PART_ID:
-                entries = EntryManager.getEntriesByIdSetSortByPartNumber(entryIds, asc);
-                break;
-
-            case STATUS:
-                entries = EntryManager.getEntriesByIdSetSortByStatus(entryIds, asc);
-                break;
-
-            case NAME:
-                entries = EntryManager.getEntriesByIdSetSortByName(entryIds, asc);
-                break;
-
-            case CREATED:
-                entries = EntryManager.getEntriesByIdSetSortByCreated(entryIds, asc);
-                break;
-
-            default:
-                entries = EntryManager.getEntriesByIdSet(entryIds);
-            }
-
-            if (entries == null)
-                return results;
-
-            for (Entry entry : entries) {
-
-                EntryInfo view = EntryViewFactory.createTableViewData(entry);
-                if (view == null)
-                    continue;
-
-                results.add(view);
-            }
-
-            return results;
-        } catch (ManagerException e) {
-            Logger.error("Error retrieving entry id set", e);
-            return null;
+            EntryController entryController = new EntryController();
+            return entryController.retrieveEntriesByIdSetSort(entryIds, field, asc);
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
@@ -431,10 +391,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.info(account.getEmail() + ": sorting entry list of size " + ids.size() + " by "
                     + field.getName() + (asc ? " ASC" : " DESC"));
 
-            return EntryManager.sortList(ids, field, asc);
-        } catch (ManagerException me) {
-            Logger.error(me);
-            return null;
+            EntryController controller = new EntryController();
+            return controller.sortList(ids, field, asc);
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
@@ -612,7 +570,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             Logger.info(account.getEmail() + ": retrieving user entries for " + userId);
-            EntryController entryController = new EntryController(account);
+            EntryController entryController = new EntryController();
             FolderDetails details = new FolderDetails(0, "My Entries", true);
             ArrayList<Long> entries = entryController.getEntryIdsByOwner(userId);
             details.setContents(entries);
@@ -635,7 +593,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             Logger.info(account.getEmail() + ": retrieving all visible entry ids");
-            EntryController entryController = new EntryController(account);
+            EntryController entryController = new EntryController();
 
             ArrayList<Long> entries;
             if (controller.isModerator(account))
@@ -659,7 +617,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         AccountController controller = new AccountController();
 
         if (!isAuthenticated) {
-            Logger.info("Session failed authentication: " + sid);
+            //            throw new AuthenticationBackendException("Session failed authentication: " + sid);
             return null;
         }
 
@@ -704,7 +662,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            Entry entry = EntryManager.get(entryId);
+            Entry entry = new EntryController().get(account, entryId);
             if (entry == null)
                 return null;
 
@@ -713,8 +671,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         } catch (ControllerException ce) {
             Logger.error(ce);
-        } catch (ManagerException me) {
-            Logger.error(me);
+        } catch (PermissionException e) {
+            Logger.error(e);
+        } catch (ManagerException e) {
+            Logger.error(e);
         }
 
         return null;
@@ -729,7 +689,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            Entry entry = EntryManager.get(entryId);
+            Entry entry = new EntryController().get(account, entryId);
             if (entry == null)
                 return null;
 
@@ -763,17 +723,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            Entry entry = EntryManager.get(id);
-            if (entry == null)
-                return null;
-
-            if (!PermissionDAO.hasReadPermission(entry, account)) {
-                Logger.info(account.getEmail() + ": attempting to view entry details for entry "
-                        + id + " but does not have read permission");
+            Logger.info(account.getEmail() + ": retrieving entry details for " + id);
+            Entry entry;
+            try {
+                entry = new EntryController().get(account, id);
+            } catch (PermissionException e) {
+                Logger.warn(e.getMessage());
                 return null;
             }
-
-            Logger.info(account.getEmail() + ": retrieving entry details for " + id);
 
             ArrayList<Attachment> attachments = AttachmentManager.getByEntry(entry);
             ArrayList<Sample> samples = SampleManager.getSamplesByEntry(entry);
@@ -834,11 +791,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            Entry entry = EntryManager.get(id);
-            if (entry == null)
-                return null;
-
-            if (!PermissionDAO.hasReadPermission(entry, account)) {
+            Entry entry;
+            try {
+                entry = new EntryController().get(account, id);
+            } catch (PermissionException e) {
                 Logger.info(account.getEmail() + ": attempting to view entry details for entry "
                         + id + " but does not have read permission");
                 return null;
@@ -1228,6 +1184,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
+            EntryController entryController = new EntryController();
             Logger.info(account.getEmail() + ": creating new folder with name " + name);
 
             Folder folder = new Folder(name);
@@ -1239,8 +1196,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             if (contents != null && !contents.isEmpty()) {
 
-                ArrayList<Entry> entrys = new ArrayList<Entry>(
-                        EntryManager.getEntriesByIdSet(contents));
+                ArrayList<Entry> entrys = new ArrayList<Entry>(entryController.getEntriesByIdSet(
+                    account, contents));
                 FolderManager.addFolderContents(folder.getId(), entrys);
                 details.setContents(contents);
                 BigInteger size = BigInteger.valueOf(contents.size());
@@ -1267,6 +1224,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             Logger.info(account.getEmail() + ": moving entries to user collection.");
+            EntryController entryController = new EntryController();
 
             ArrayList<Entry> entrys = new ArrayList<Entry>(EntryManager.getEntriesByIdSet(entryIds));
             if (FolderManager.removeFolderContents(account, source, entryIds) != null) {
@@ -1338,8 +1296,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             Logger.info(account.getEmail() + ": adding entries to collection.");
+            EntryController entryController = new EntryController();
 
-            ArrayList<Entry> entrys = new ArrayList<Entry>(EntryManager.getEntriesByIdSet(entryIds));
+            ArrayList<Entry> entrys = new ArrayList<Entry>(entryController.getEntriesByIdSet(
+                account, entryIds));
             for (long folderId : destination) {
                 Folder folder = FolderManager.addFolderContents(folderId, entrys);
                 if (folder == null)
@@ -1369,6 +1329,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             Logger.info(account.getEmail() + ": retrieving profile info for " + userId);
             AccountController controller = new AccountController();
+            EntryController entryController = new EntryController();
             account = controller.getByEmail(userId);
             if (account == null)
                 return null;
@@ -1381,11 +1342,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             boolean isModerator = controller.isModerator(account);
             long visibleEntryCount;
             if (isModerator)
-                visibleEntryCount = EntryManager.getAllEntryCount();
+                visibleEntryCount = entryController.getAllEntryCount();
             else
-                visibleEntryCount = EntryManager.getNumberOfVisibleEntries(account);
+                visibleEntryCount = entryController.getNumberOfVisibleEntries(account);
             accountInfo.setVisibleEntryCount(visibleEntryCount);
-            int entryCount = EntryManager.getEntryCountBy(accountInfo.getEmail());
+            int entryCount = entryController.getOwnerEntryCountBy(accountInfo.getEmail());
             accountInfo.setUserEntryCount(entryCount);
 
             return accountInfo;
@@ -1408,10 +1369,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return false;
 
             Entry entry = null;
-            EntryController entryController = new EntryController(account);
+            EntryController entryController = new EntryController();
 
             try {
-                entry = entryController.get(entryId);
+                entry = entryController.get(account, entryId);
                 if (entry == null) {
                     Logger.info("Could not retrieve entry with id " + entryId);
                     return false;
@@ -1427,8 +1388,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (sequence != null) {
                 try {
                     sequenceController.delete(sequence);
-                    Logger.info("User '" + entryController.getAccount().getEmail()
-                            + "' removed sequence: '" + entryId + "'");
+                    Logger.info("User '" + account.getEmail() + "' removed sequence: '" + entryId
+                            + "'");
                     return true;
                 } catch (PermissionException e) {
                     Logger.warn(account.getEmail() + " attempting to delete sequence for entry "
@@ -1813,7 +1774,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
 
         Logger.info(account.getEmail() + ": creating \"" + infoSet.size() + "\" entries");
-        EntryController controller = new EntryController(account);
+        EntryController controller = new EntryController();
         SampleController sampleController = new SampleController(account);
         StorageController storageController = new StorageController(account);
 
@@ -1930,7 +1891,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                         + plasmid.getOneName().getName() + "]]";
                 strain.setPlasmids(plasmidPartNumberString);
                 try {
-                    controller.save(strain);
+                    controller.save(account, strain);
                 } catch (ControllerException e) {
                     Logger.error(e);
                 } catch (PermissionException e) {
@@ -1958,13 +1919,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         Logger.info(account.getEmail() + ": creating sample for entry with id " + entryId);
 
-        EntryController controller = new EntryController(account);
+        EntryController controller = new EntryController();
         SampleController sampleController = new SampleController(account);
         StorageController storageController = new StorageController(account);
 
         Entry entry = null;
         try {
-            entry = controller.get(entryId);
+            entry = controller.get(account, entryId);
             if (entry == null) {
                 Logger.error("Could not retrieve entry with id " + entryId
                         + ". Skipping sample creation");
@@ -2047,15 +2008,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return false;
 
             Logger.info(account.getEmail() + ": updating entry " + info.getId());
-            EntryController controller = new EntryController(account);
-            Entry existing = controller.getByRecordId(info.getRecordId());
+            EntryController controller = new EntryController();
+            Entry existing = controller.getByRecordId(account, info.getRecordId());
 
             Entry entry = InfoToModelFactory.infoToEntry(info, existing);
-
-            if (controller.hasWritePermission(entry)) {
-                controller.save(existing);
-                return true;
-            }
+            controller.save(account, entry);
+            return true;
 
         } catch (ControllerException e) {
             Logger.error(e);
@@ -2158,16 +2116,17 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            entry = EntryManager.get(entryId);
+            EntryController controller = new EntryController();
+            entry = controller.get(account, entryId);
             if (entry == null)
                 return null;
 
-            if (!PermissionDAO.hasReadPermission(entry, account))
-                return null;
         } catch (ControllerException e) {
             Logger.error(e);
-        } catch (ManagerException me) {
-            Logger.error(me);
+            return null;
+        } catch (PermissionException e) {
+            Logger.error(e);
+            return null;
         }
 
         results = new ArrayList<PermissionInfo>();
@@ -2308,9 +2267,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             Logger.info(account.getEmail() + ": updating permissions for entry with id \""
                     + entryId + "\"");
-            EntryController entryController = new EntryController(account);
+            EntryController entryController = new EntryController();
             PermissionsController permissionController = new PermissionsController(account);
-            Entry entry = entryController.get(entryId);
+            Entry entry = entryController.get(account, entryId);
             if (entry == null)
                 return false;
 
@@ -2338,8 +2297,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             Logger.info(account.getEmail() + ": removing permissions for entry with id \""
                     + entryId + "\"");
-            EntryController entryController = new EntryController(account);
-            Entry entry = entryController.get(entryId);
+            EntryController entryController = new EntryController();
+            Entry entry = entryController.get(account, entryId);
             if (entry == null)
                 return false;
 
@@ -2369,8 +2328,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return false;
 
             Logger.info(account.getEmail() + ": saving sequence for entry " + entryId);
-            EntryController entryController = new EntryController(account);
-            entry = entryController.get(entryId);
+            EntryController entryController = new EntryController();
+            entry = entryController.get(account, entryId);
             if (entry == null) {
                 Logger.error("Could not retrieve entry with id " + entryId);
                 return false;
@@ -2431,6 +2390,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         // admin only 
         Account account = null;
         AccountController controller = new AccountController();
+        EntryController entryController = new EntryController();
 
         try {
             account = retrieveAccountForSid(sessionId);
@@ -2451,9 +2411,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         for (EntryType type : EntryType.values()) {
             long count;
             try {
-                count = EntryManager.retrieveEntryByType(type.getName());
+                count = entryController.retrieveEntryByType(account, type.getName());
                 counts.put(type, count);
-            } catch (ManagerException e) {
+            } catch (ControllerException e) {
                 Logger.error("Could not retrieve counts for " + type.getName(), e);
             }
         }

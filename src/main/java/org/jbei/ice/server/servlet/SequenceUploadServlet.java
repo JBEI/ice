@@ -9,10 +9,10 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.fileupload.FileItem;
-import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
@@ -74,10 +74,10 @@ public class SequenceUploadServlet extends UploadAction {
         String type = request.getParameter("type");
 
         // check entry
-        EntryController entryController = new EntryController(account);
+        EntryController entryController = new EntryController();
         Entry entry;
         try {
-            entry = entryController.get(Long.decode(entryId));
+            entry = entryController.get(account, Long.decode(entryId));
         } catch (NumberFormatException e1) {
             Logger.error(e1);
             return "Invalid entry Id received: " + entryId;

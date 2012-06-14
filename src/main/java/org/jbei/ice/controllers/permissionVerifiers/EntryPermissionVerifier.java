@@ -8,7 +8,7 @@ import org.jbei.ice.lib.permissions.PermissionDAO;
 /**
  * General Permission Verifier for Entry.
  * 
- * @author Zinovii Dmytriv
+ * @author Hector Plahar, Zinovii Dmytriv
  * 
  */
 public class EntryPermissionVerifier implements IPermissionVerifier {
@@ -26,15 +26,7 @@ public class EntryPermissionVerifier implements IPermissionVerifier {
         return PermissionDAO.hasReadPermission(id, account);
     }
 
-    public boolean hasWritePermissionsById(long id, Account account) {
-        return PermissionDAO.hasWritePermission(id, account);
-    }
-
     public boolean hasReadPermissionsByRecordId(String entryId, Account account) {
         return PermissionDAO.hasReadPermission(entryId, account);
-    }
-
-    public boolean hasWritePermissionsByRecordId(String entryId, Account account) {
-        return PermissionDAO.hasWritePermission(entryId, account);
     }
 }

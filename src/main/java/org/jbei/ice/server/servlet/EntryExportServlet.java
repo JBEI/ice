@@ -11,9 +11,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
@@ -55,8 +55,8 @@ public class EntryExportServlet extends HttpServlet {
         Logger.info(EntryExportServlet.class.getSimpleName() + ": user = " + account.getEmail()
                 + ", type = " + type + ", entries = " + commaSeparated);
 
-        EntryController controller = new EntryController(account);
-        ArrayList<Entry> entries = retrieveEntries(commaSeparated, controller);
+        EntryController controller = new EntryController();
+        ArrayList<Entry> entries = retrieveEntries(account, commaSeparated, controller);
         if (entries == null || entries.isEmpty())
             return;
 
@@ -67,7 +67,8 @@ public class EntryExportServlet extends HttpServlet {
         }
     }
 
-    private ArrayList<Entry> retrieveEntries(String commaSeparated, EntryController controller) {
+    private ArrayList<Entry> retrieveEntries(Account account, String commaSeparated,
+            EntryController controller) {
         ArrayList<Entry> entries = new ArrayList<Entry>();
         String[] idStrs = commaSeparated.split(",");
 
@@ -75,7 +76,7 @@ public class EntryExportServlet extends HttpServlet {
             Entry entry = null;
             try {
                 long id = Long.decode(idStr.trim());
-                entry = controller.get(id);
+                entry = controller.get(account, id);
             } catch (NumberFormatException nfe) {
                 Logger.error("Could not convert string id to long : " + idStr);
                 continue;

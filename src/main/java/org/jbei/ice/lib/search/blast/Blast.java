@@ -21,7 +21,7 @@ import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.seq.RNATools;
 import org.biojava.bio.symbol.IllegalSymbolException;
 import org.biojava.bio.symbol.SymbolList;
-import org.jbei.ice.controllers.ApplicationContoller;
+import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
@@ -68,7 +68,7 @@ public class Blast {
         if (!isBlastDatabaseExists()) {
             Logger.info("Creating blast db for the first time");
 
-            ApplicationContoller.scheduleBlastIndexRebuildJob(1000);
+            ApplicationController.scheduleBlastIndexRebuildJob(1000);
         }
     }
 
@@ -217,7 +217,7 @@ public class Blast {
         if (!isBlastDatabaseExists()) {
             Logger.info("Creating blast database for the first time");
 
-            ApplicationContoller.scheduleBlastIndexRebuildJob(5000);
+            ApplicationController.scheduleBlastIndexRebuildJob(5000);
         } else {
             while (isRebuilding()) {
                 try {
@@ -509,7 +509,7 @@ public class Blast {
                 boolean circular = false;
                 if (idLineFields.length == 1) {
                     Logger.info("Old Blast db format detected. Schedule rebuild");
-                    ApplicationContoller.scheduleBlastIndexRebuildJob(5000);
+                    ApplicationController.scheduleBlastIndexRebuildJob(5000);
                 } else if (idLineFields.length == 3) {
                     idLine = idLineFields[0].trim();
                     sLength = Integer.parseInt(idLineFields[1]);

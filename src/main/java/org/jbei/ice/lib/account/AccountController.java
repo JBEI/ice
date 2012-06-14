@@ -13,7 +13,6 @@ import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AccountPreferencesManager;
-import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.AccountPreferences;
@@ -425,16 +424,6 @@ public class AccountController {
         boolean isModerator = isModerator(account);
         info.setModerator(isModerator);
         info.setSessionId(sessionData.getSessionKey());
-
-        // TODO : this should technically be moved out to the callee
-        long visibleEntryCount;
-        if (isModerator)
-            visibleEntryCount = EntryManager.getAllEntryCount();
-        else
-            visibleEntryCount = EntryManager.getNumberOfVisibleEntries(account);
-
-        info.setVisibleEntryCount(visibleEntryCount);
-
         return info;
     }
 

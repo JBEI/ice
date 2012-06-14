@@ -12,10 +12,10 @@ import org.biojava.bio.symbol.IllegalSymbolException;
 import org.biojava.utils.SimpleThreadPool;
 import org.jbei.ice.bio.enzymes.RestrictionEnzymesManager;
 import org.jbei.ice.bio.enzymes.RestrictionEnzymesManagerException;
-import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SequenceManager;
 import org.jbei.ice.lib.models.AnnotationLocation;
@@ -511,7 +511,7 @@ public class BiobrickAUtils implements IAssemblyUtils {
             AccountController controller = new AccountController();
 
             try {
-                entryController = new EntryController(controller.getSystemAccount());
+                entryController = new EntryController();
                 newPart = (Part) entryController.createEntry(newPart);
             } catch (ControllerException e) {
                 throw new UtilityException(e);

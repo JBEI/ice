@@ -13,11 +13,13 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.jbei.ice.shared.dto.EntryType;
+
 /**
  * Store Arabidopsis Seed specific fields.
  * <p>
  * <ul>
- * <li><b>hobozygosity: </b></li>
+ * <li><b>homozygosity: </b></li>
  * <li><b>ecotype: </b></li>
  * <li><b>harvestDate: </b></li>
  * <li><b>parents:</b></li>
@@ -75,6 +77,10 @@ public class ArabidopsisSeed extends Entry {
     @Column(name = "plant_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private PlantType plantType;
+
+    public ArabidopsisSeed() {
+        setRecordType(EntryType.ARABIDOPSIS.getName());
+    }
 
     /**
      * Return a Map to look up {@link Generation} to its string representation.

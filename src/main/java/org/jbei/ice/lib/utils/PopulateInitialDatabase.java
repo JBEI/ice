@@ -16,10 +16,10 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ConfigurationManager;
-import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.StorageManager;
 import org.jbei.ice.lib.models.Account;
@@ -316,12 +316,13 @@ public class PopulateInitialDatabase {
             Logger.debug(e.toString());
         }
 
+        EntryController entryController = new EntryController();
         if (group1 != null) {
             ArrayList<Entry> allEntries = null;
             try {
-                allEntries = EntryManager.getAllEntries();
-            } catch (ManagerException e1) {
-                e1.printStackTrace();
+                allEntries = entryController.getAllEntries();
+            } catch (ControllerException e) {
+                Logger.error(e);
             }
             for (Entry entry : allEntries) {
                 try {

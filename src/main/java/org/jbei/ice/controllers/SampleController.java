@@ -134,7 +134,7 @@ public class SampleController extends Controller {
             savedSample = SampleManager.saveSample(sample);
 
             if (scheduleIndexRebuild) {
-                ApplicationContoller.scheduleSearchIndexRebuildJob();
+                ApplicationController.scheduleSearchIndexRebuildJob();
             }
         } catch (ManagerException e) {
             throw new ControllerException(e);
@@ -180,7 +180,7 @@ public class SampleController extends Controller {
             }
 
             if (scheduleIndexRebuild) {
-                ApplicationContoller.scheduleSearchIndexRebuildJob();
+                ApplicationController.scheduleSearchIndexRebuildJob();
             }
         } catch (ManagerException e) {
             throw new ControllerException(e);

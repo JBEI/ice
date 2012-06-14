@@ -14,7 +14,7 @@ import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BlastResultInfo;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.EntryInfo.EntryType;
+import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.GroupInfo;
 import org.jbei.ice.shared.dto.NewsItem;
 import org.jbei.ice.shared.dto.SampleInfo;

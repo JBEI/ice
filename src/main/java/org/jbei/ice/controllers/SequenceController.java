@@ -132,7 +132,7 @@ public class SequenceController extends Controller {
             //            }
             result = SequenceManager.saveSequence(sequence);
             if (scheduleIndexRebuild) {
-                ApplicationContoller.scheduleBlastIndexRebuildJob();
+                ApplicationController.scheduleBlastIndexRebuildJob();
             }
         } catch (ManagerException e) {
             throw new ControllerException(e);
@@ -198,7 +198,7 @@ public class SequenceController extends Controller {
         }
 
         if (scheduleIndexRebuild) {
-            ApplicationContoller.scheduleBlastIndexRebuildJob();
+            ApplicationController.scheduleBlastIndexRebuildJob();
         }
 
         return result;
@@ -237,7 +237,7 @@ public class SequenceController extends Controller {
             SequenceManager.deleteSequence(sequence);
 
             if (scheduleIndexRebuild) {
-                ApplicationContoller.scheduleBlastIndexRebuildJob();
+                ApplicationController.scheduleBlastIndexRebuildJob();
             }
         } catch (ManagerException e) {
             throw new ControllerException(e);

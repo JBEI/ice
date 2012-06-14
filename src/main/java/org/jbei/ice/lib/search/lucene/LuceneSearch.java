@@ -21,11 +21,14 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.util.Version;
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.UtilsManager;
+import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.FundingSource;
 import org.jbei.ice.lib.models.Part;
@@ -33,6 +36,7 @@ import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sample;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Job;
 import org.jbei.ice.lib.utils.JobCue;
@@ -94,7 +98,7 @@ public class LuceneSearch {
             indexWriter = new IndexWriter(directory, new StandardAnalyzer(Version.LUCENE_CURRENT),
                     true, IndexWriter.MaxFieldLength.UNLIMITED);
 
-            ArrayList<Entry> entries = EntryManager.getAllEntries();
+            ArrayList<Entry> entries = new EntryController().getAllEntries();
 
             for (Entry entry : entries) {
                 Document document = createDocument(entry);
@@ -111,7 +115,7 @@ public class LuceneSearch {
             throw new SearchException(e);
         } catch (IOException e) {
             throw new SearchException(e);
-        } catch (ManagerException e) {
+        } catch (ControllerException e) {
             throw new SearchException(e);
         }
     }
@@ -129,6 +133,8 @@ public class LuceneSearch {
     public ArrayList<SearchResult> query(String queryString) throws SearchException {
         ArrayList<SearchResult> result = new ArrayList<SearchResult>();
         Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
+        EntryController controller = new EntryController();
+        AccountController accountController = new AccountController();
 
         if (newIndex == true) {
             newIndex = false;
@@ -146,6 +152,7 @@ public class LuceneSearch {
                 query = parser.parse(queryString);
                 IndexSearcher searcher = getIndexSearcher();
                 TopDocs hits = searcher.search(query, SEARCH_MAX_RESULT);
+                Account systemAccount = accountController.getSystemAccount();
 
                 ArrayList<ScoreDoc> hitsArray = new ArrayList<ScoreDoc>(
                         Arrays.asList(hits.scoreDocs));
@@ -155,13 +162,20 @@ public class LuceneSearch {
                     int docId = scoreDoc.doc;
                     Document doc = indexSearcher.doc(docId);
                     String recordId = doc.get("Record ID");
-                    result.add(new SearchResult(EntryManager.getByRecordId(recordId), score));
+                    Entry entry;
+                    try {
+                        entry = controller.getByRecordId(systemAccount, recordId);
+                    } catch (PermissionException e) {
+                        Logger.warn("No permission to add search result " + recordId);
+                        continue;
+                    }
+                    result.add(new SearchResult(entry, score));
                 }
             } catch (ParseException e) {
                 throw new SearchException(e);
             } catch (IOException e) {
                 throw new SearchException(e);
-            } catch (ManagerException e) {
+            } catch (ControllerException e) {
                 throw new SearchException(e);
             }
         }

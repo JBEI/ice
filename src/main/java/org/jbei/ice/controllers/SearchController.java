@@ -8,13 +8,14 @@ import java.util.Set;
 import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.EntryPermissionVerifier;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.logging.UsageLogger;
-import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SearchManager;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.search.blast.Blast;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastResult;
@@ -43,7 +44,7 @@ public class SearchController extends Controller {
 
         Set<Long> results = null;
         Set<Long> stringQueryResult = new HashSet<Long>(); // plain text query typed into the search box. has no type
-        EntryController entryController = new EntryController(getAccount());
+        EntryController entryController = new EntryController();
         boolean hasStringQuery = false;
 
         for (QueryFilter filter : filters) {
@@ -99,7 +100,14 @@ public class SearchController extends Controller {
             while (resultsIter.hasNext()) {
                 Long next = resultsIter.next();
                 try {
-                    if (!entryController.hasReadPermissionById(next))
+                    Entry nextEntry;
+                    try {
+                        nextEntry = entryController.get(getAccount(), next);
+                    } catch (PermissionException e) {
+                        Logger.error(e);
+                        continue;
+                    }
+                    if (!entryController.hasReadPermission(getAccount(), nextEntry))
                         resultsIter.remove();
                 } catch (ControllerException ce) {
                     Logger.error("Error retrieving permission for entry Id " + next);
@@ -127,7 +135,7 @@ public class SearchController extends Controller {
         try {
             UsageLogger.info(String.format("Searching for: %s", cleanedQuery));
 
-            EntryController entryController = new EntryController(getAccount());
+            EntryController entryController = new EntryController();
 
             ArrayList<SearchResult> searchResults = AggregateSearch.query(cleanedQuery,
                 getAccount());
@@ -135,7 +143,7 @@ public class SearchController extends Controller {
                 for (SearchResult searchResult : searchResults) {
                     Entry entry = searchResult.getEntry();
 
-                    if (entryController.hasReadPermission(entry)) {
+                    if (entryController.hasReadPermission(getAccount(), entry)) {
                         results.add(searchResult);
                     }
                 }
@@ -220,16 +228,22 @@ public class SearchController extends Controller {
         try {
             Logger.info(String.format("Blast '%s' searching for %s", program, query));
 
-            EntryController entryController = new EntryController(getAccount());
+            EntryController entryController = new EntryController();
 
             Blast blast = new Blast();
 
             ArrayList<BlastResult> blastResults = blast.query(query, program);
             if (blastResults != null) {
                 for (BlastResult blastResult : blastResults) {
-                    Entry entry = EntryManager.getByRecordId(blastResult.getSubjectId());
-
-                    if (entry != null && entryController.hasReadPermission(entry)) {
+                    Entry entry;
+                    try {
+                        entry = entryController.getByRecordId(getAccount(),
+                            blastResult.getSubjectId());
+                    } catch (PermissionException e) {
+                        Logger.error(e);
+                        continue;
+                    }
+                    if (entry != null && entryController.hasReadPermission(getAccount(), entry)) {
                         blastResult.setEntry(entry);
 
                         results.add(blastResult);
@@ -240,8 +254,6 @@ public class SearchController extends Controller {
             Logger.info(String.format("Blast found %d results",
                 (results == null) ? 0 : results.size()));
         } catch (BlastException e) {
-            throw new ControllerException(e);
-        } catch (ManagerException e) {
             throw new ControllerException(e);
         } catch (ProgramTookTooLongException e) {
             throw new ProgramTookTooLongException(e);
@@ -270,15 +282,22 @@ public class SearchController extends Controller {
         try {
             Logger.info(String.format("Blast '%s' searching for %s", program, query));
 
-            EntryController entryController = new EntryController(getAccount());
+            EntryController entryController = new EntryController();
             Blast blast = new Blast();
 
             ArrayList<BlastResult> blastResults = blast.query(query, program);
             if (blastResults != null) {
                 for (BlastResult blastResult : blastResults) {
-                    Entry entry = EntryManager.getByRecordId(blastResult.getSubjectId());
+                    Entry entry;
+                    try {
+                        entry = entryController.getByRecordId(getAccount(),
+                            blastResult.getSubjectId());
+                    } catch (PermissionException e) {
+                        Logger.error(e);
+                        continue;
+                    }
 
-                    if (entry != null && entryController.hasReadPermission(entry)) {
+                    if (entry != null && entryController.hasReadPermission(getAccount(), entry)) {
                         blastResult.setEntry(entry);
 
                         // slowness here
@@ -301,11 +320,8 @@ public class SearchController extends Controller {
                 (results == null) ? 0 : results.size()));
         } catch (BlastException e) {
             throw new ControllerException(e);
-        } catch (ManagerException e) {
-            throw new ControllerException(e);
         }
 
         return results;
     }
-
 }

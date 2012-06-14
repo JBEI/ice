@@ -18,7 +18,6 @@ import org.jbei.ice.bio.enzymes.RestrictionEnzyme;
 import org.jbei.ice.bio.enzymes.RestrictionEnzymesManager;
 import org.jbei.ice.bio.enzymes.RestrictionEnzymesManagerException;
 import org.jbei.ice.controllers.AttachmentController;
-import org.jbei.ice.controllers.EntryController;
 import org.jbei.ice.controllers.ProjectController;
 import org.jbei.ice.controllers.SequenceAnalysisController;
 import org.jbei.ice.controllers.SequenceController;
@@ -27,6 +26,7 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.bulkimport.BulkImportController;
 import org.jbei.ice.lib.composers.SequenceComposerException;
 import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.UtilsManager;
@@ -85,14 +85,13 @@ public class RegistryAMFAPI extends BaseService {
             return null;
         }
 
-        EntryController entryController = new EntryController(account);
+        EntryController entryController = new EntryController();
 
         Entry entry = null;
         try {
-            entry = entryController.getByRecordId(entryId);
+            entry = entryController.getByRecordId(account, entryId);
         } catch (ControllerException e) {
             Logger.error("Failed to get entry!", e);
-
             return null;
         } catch (PermissionException e) {
             Logger.warn(getLoggerPrefix() + "User " + account.getFullName()
@@ -122,13 +121,13 @@ public class RegistryAMFAPI extends BaseService {
             return result;
         }
 
-        EntryController entryController = new EntryController(account);
+        EntryController entryController = new EntryController();
 
         try {
-            Entry entry = entryController.getByRecordId(entryId);
+            Entry entry = entryController.getByRecordId(account, entryId);
 
             if (entry != null) {
-                result = entryController.hasWritePermission(entry);
+                result = entryController.hasWritePermission(account, entry);
             }
         } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
@@ -160,11 +159,11 @@ public class RegistryAMFAPI extends BaseService {
             return null;
         }
 
-        EntryController entryController = new EntryController(account);
+        EntryController entryController = new EntryController();
 
         Entry entry = null;
         try {
-            entry = entryController.getByRecordId(entryId);
+            entry = entryController.getByRecordId(account, entryId);
         } catch (ControllerException e) {
             Logger.error("Failed to get entry!", e);
 
@@ -212,11 +211,11 @@ public class RegistryAMFAPI extends BaseService {
             return result;
         }
 
-        EntryController entryController = new EntryController(account);
+        EntryController entryController = new EntryController();
         SequenceController sequenceController = new SequenceController(account);
 
         try {
-            Entry entry = entryController.getByRecordId(entryId);
+            Entry entry = entryController.getByRecordId(account, entryId);
 
             if (entry == null) {
                 return false;
@@ -259,14 +258,14 @@ public class RegistryAMFAPI extends BaseService {
             return null;
         }
 
-        EntryController entryController = new EntryController(account);
+        EntryController entryController = new EntryController();
         SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController(
                 account);
 
         Entry entry;
         List<TraceSequence> traces;
         try {
-            entry = entryController.getByRecordId(entryId);
+            entry = entryController.getByRecordId(account, entryId);
 
             if (entry == null) {
                 return null;
@@ -1295,7 +1294,7 @@ public class RegistryAMFAPI extends BaseService {
         } catch (Exception e1) {
         }
 
-        if (Entry.PART_ENTRY_TYPE.equals(entry.getRecordType())) {
+        if ("part".equalsIgnoreCase(entry.getRecordType())) {
             ((Part) entry).setPackageFormat(Part.AssemblyStandard.RAW);
         }
 
@@ -1303,7 +1302,7 @@ public class RegistryAMFAPI extends BaseService {
             entry.setLongDescriptionType(Entry.MarkupType.text.name());
         }
 
-        EntryController entryController = new EntryController(account);
+        EntryController entryController = new EntryController();
         Entry saved = null;
         try {
             saved = entryController.createEntry(entry);
@@ -1390,7 +1389,7 @@ public class RegistryAMFAPI extends BaseService {
             plasmid.setLongDescriptionType(Entry.MarkupType.text.name());
         }
 
-        EntryController entryController = new EntryController(account);
+        EntryController entryController = new EntryController();
 
         // save plasmid
         Plasmid newPlasmid = null;

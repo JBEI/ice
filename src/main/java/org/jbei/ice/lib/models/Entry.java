@@ -110,11 +110,6 @@ import org.jbei.ice.lib.utils.JbeirSettings;
 public class Entry implements IEntryValueObject, IModel {
     private static final long serialVersionUID = 1L;
 
-    public static final String STRAIN_ENTRY_TYPE = "strain";
-    public static final String PLASMID_ENTRY_TYPE = "plasmid";
-    public static final String PART_ENTRY_TYPE = "part";
-    public static final String ARABIDOPSIS_SEED_ENTRY_TYPE = "arabidopsis";
-
     //TODO actually use these types
     /**
      * Mark up types for longDescription.
@@ -124,37 +119,6 @@ public class Entry implements IEntryValueObject, IModel {
      */
     public enum MarkupType {
         text, wiki, confluence
-    }
-
-    // TODO actually use these types
-    /**
-     * Available recordTypes.
-     * 
-     * @author Timothy Ham
-     * 
-     */
-    public enum EntryType {
-        strain(STRAIN_ENTRY_TYPE), plasmid(PLASMID_ENTRY_TYPE), part(PART_ENTRY_TYPE), arabidopsis(
-                ARABIDOPSIS_SEED_ENTRY_TYPE);
-
-        private String name;
-
-        EntryType(String name) {
-            this.name = name;
-        }
-
-        public static EntryType nameToType(String name) {
-            for (EntryType type : EntryType.values()) {
-                if (name.equals(type.getName()))
-                    return type;
-            }
-
-            return null;
-        }
-
-        public String getName() {
-            return this.name;
-        }
     }
 
     // TODO use these enums. Currently "in progress" with a space is used. 
@@ -777,19 +741,4 @@ public class Entry implements IEntryValueObject, IModel {
         return resultMap;
     }
 
-    /**
-     * Generate the options map of entry types containing friendly names for entryType field.
-     * 
-     * @return Map of entry types and names.
-     */
-    public static Map<String, String> getEntryTypeOptionsMap() {
-        Map<String, String> resultMap = new LinkedHashMap<String, String>();
-
-        resultMap.put(Entry.EntryType.plasmid.name(), "Plasmid");
-        resultMap.put(Entry.EntryType.strain.name(), "Strain");
-        resultMap.put(Entry.EntryType.part.name(), "Part");
-        resultMap.put(Entry.EntryType.arabidopsis.name(), "Arabidopsis");
-
-        return resultMap;
-    }
 }

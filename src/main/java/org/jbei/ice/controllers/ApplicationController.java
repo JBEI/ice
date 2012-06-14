@@ -6,10 +6,10 @@ import org.jbei.ice.lib.utils.JobCue;
 /**
  * ABI to manipulate system wide events.
  * 
- * @author Timothy Ham, Zinovii Dmytriv
+ * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  * 
  */
-public class ApplicationContoller {
+public class ApplicationController {
 
     /**
      * Interval for processing events in miliseconds.

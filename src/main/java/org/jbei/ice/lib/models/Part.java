@@ -14,6 +14,7 @@ import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.IPartValueObject;
+import org.jbei.ice.shared.dto.EntryType;
 
 /**
  * Store Part specific fields.
@@ -51,6 +52,7 @@ public class Part extends Entry implements IPartValueObject, IModel {
     private String pkgdDnaRevHash;
 
     public Part() {
+        setRecordType(EntryType.PART.getName());
     }
 
     public Part(String recordId, String versionId, String recordType, String owner,

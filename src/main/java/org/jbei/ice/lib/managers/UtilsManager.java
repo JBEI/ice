@@ -10,12 +10,17 @@ import java.util.regex.Pattern;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.dao.DAO;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.PartNumber;
 import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Strain;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 
@@ -225,12 +230,25 @@ public class UtilsManager {
         Pattern descriptivePattern = Pattern.compile("\\[\\["
                 + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":(.*)\\|(.*)\\]\\]");
 
+        EntryController entryController = new EntryController();
+        AccountController accountController = new AccountController();
+        Account account;
+        try {
+            // TODO : temp measure till utils manager is also converted
+            account = accountController.getSystemAccount();
+        } catch (ControllerException e) {
+            Logger.error(e);
+            throw new ManagerException(e);
+        }
+
         for (long strainId : strainIds) {
             Strain strain;
             try {
-                strain = (Strain) EntryManager.get(strainId);
-            } catch (ManagerException e) {
+                strain = (Strain) entryController.get(account, strainId);
+            } catch (ControllerException e) {
                 throw new ManagerException("Failed retrieving strain");
+            } catch (PermissionException e) {
+                throw new ManagerException(e);
             }
 
             String[] strainPlasmids = strain.getPlasmids().split(",");

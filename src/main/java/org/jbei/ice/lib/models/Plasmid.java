@@ -9,6 +9,7 @@ import javax.persistence.Table;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.models.interfaces.IPlasmidValueObject;
+import org.jbei.ice.shared.dto.EntryType;
 
 /**
  * Store Plasmid specific fields.
@@ -43,6 +44,7 @@ public class Plasmid extends Entry implements IPlasmidValueObject, IModel {
     private boolean circular;
 
     public Plasmid() {
+        setRecordType(EntryType.PLASMID.getName());
     }
 
     public Plasmid(String recordId, String versionId, String recordType, String owner,

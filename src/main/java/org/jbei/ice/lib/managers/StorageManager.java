@@ -10,10 +10,10 @@ import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Configuration.ConfigurationKey;
-import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.shared.dto.EntryType;
 
 /**
  * Manager to manipulate {@link Storage} objects in the database.
@@ -269,18 +269,27 @@ public class StorageManager {
         Session session = DAO.newSession();
         try {
             String uuid = null;
-            if (Entry.STRAIN_ENTRY_TYPE.equals(entryType)) {
+            EntryType type = EntryType.nameToType(entryType);
+            if (type == null)
+                return null;
+
+            switch (type) {
+            case STRAIN:
                 uuid = ConfigurationManager.get(ConfigurationKey.STRAIN_STORAGE_ROOT).getValue();
+                break;
 
-            } else if (Entry.PLASMID_ENTRY_TYPE.equals(entryType)) {
+            case PLASMID:
                 uuid = ConfigurationManager.get(ConfigurationKey.PLASMID_STORAGE_ROOT).getValue();
+                break;
 
-            } else if (Entry.PART_ENTRY_TYPE.equals(entryType)) {
+            case PART:
                 uuid = ConfigurationManager.get(ConfigurationKey.PART_STORAGE_ROOT).getValue();
+                break;
 
-            } else if (Entry.ARABIDOPSIS_SEED_ENTRY_TYPE.equals(entryType)) {
+            case ARABIDOPSIS:
                 uuid = ConfigurationManager.get(ConfigurationKey.ARABIDOPSIS_STORAGE_ROOT)
                         .getValue();
+                break;
             }
 
             if (uuid != null) {

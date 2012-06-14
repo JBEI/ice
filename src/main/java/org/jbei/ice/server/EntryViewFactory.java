@@ -25,7 +25,7 @@ import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.Generation;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.PlantType;
 import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.EntryInfo.EntryType;
+import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.PartInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.SampleInfo;
@@ -178,10 +178,10 @@ public class EntryViewFactory {
 
     public static EntryInfo createTipView(Account account, Entry entry) {
 
-        Entry.EntryType type = Entry.EntryType.nameToType(entry.getRecordType());
+        EntryType type = EntryType.nameToType(entry.getRecordType());
         switch (type) {
 
-        case strain: {
+        case STRAIN: {
             StrainInfo view = new StrainInfo();
 
             // common
@@ -198,7 +198,7 @@ public class EntryViewFactory {
             return view;
         }
 
-        case arabidopsis: {
+        case ARABIDOPSIS: {
 
             ArabidopsisSeedInfo view = new ArabidopsisSeedInfo();
             getCommon(view, entry);
@@ -217,7 +217,7 @@ public class EntryViewFactory {
             return view;
         }
 
-        case part: {
+        case PART: {
             PartInfo view = new PartInfo();
 
             getCommon(view, entry);
@@ -227,7 +227,7 @@ public class EntryViewFactory {
             return view;
         }
 
-        case plasmid: {
+        case PLASMID: {
             PlasmidInfo view = new PlasmidInfo();
             getCommon(view, entry);
 

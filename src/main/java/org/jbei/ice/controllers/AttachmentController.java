@@ -94,7 +94,7 @@ public class AttachmentController extends Controller {
             savedAttachment = AttachmentManager.save(attachment, inputStream);
 
             if (scheduleIndexRebuild) {
-                ApplicationContoller.scheduleSearchIndexRebuildJob();
+                ApplicationController.scheduleSearchIndexRebuildJob();
             }
         } catch (ManagerException e) {
             throw new ControllerException(e);
@@ -133,7 +133,7 @@ public class AttachmentController extends Controller {
             AttachmentManager.delete(attachment);
 
             if (scheduleIndexRebuild) {
-                ApplicationContoller.scheduleSearchIndexRebuildJob();
+                ApplicationController.scheduleSearchIndexRebuildJob();
             }
         } catch (ManagerException e) {
             throw new ControllerException(e);

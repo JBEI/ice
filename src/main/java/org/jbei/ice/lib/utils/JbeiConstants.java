@@ -46,24 +46,4 @@ public class JbeiConstants {
 
         return result;
     }
-
-    /**
-     * Return friendly names for {@link Entry}.recordType.
-     * 
-     * @param key
-     * @return friendly name.
-     */
-    public final static String getRecordType(String key) {
-        String result = "";
-        if (key.equals(Entry.PART_ENTRY_TYPE)) {
-            result = "Part";
-        } else if (key.equals(Entry.PLASMID_ENTRY_TYPE)) {
-            result = "Plasmid";
-        } else if (key.equals(Entry.STRAIN_ENTRY_TYPE)) {
-            result = "Strain";
-        } else if (key.equals(Entry.ARABIDOPSIS_SEED_ENTRY_TYPE)) {
-            result = "Arabidopsis Seed";
-        }
-        return result;
-    }
 }

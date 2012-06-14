@@ -25,13 +25,14 @@ import org.apache.commons.io.IOUtils;
 import org.jbei.ice.controllers.SequenceAnalysisController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.AttachmentManager;
-import org.jbei.ice.lib.managers.EntryManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Attachment;
 import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
@@ -101,6 +102,20 @@ public class FileUploadServlet extends UploadAction {
 
         String result = "";
         String tmpDir = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
+        EntryController controller = new EntryController();
+        Entry entry = null;
+        try {
+            entry = controller.get(account, Long.decode(entryId));
+        } catch (NumberFormatException e) {
+            Logger.error(e);
+        } catch (ControllerException e) {
+            Logger.error(e);
+        } catch (PermissionException e) {
+            Logger.error(e);
+        }
+
+        if (entry == null)
+            return "Could not retrieve entry with id : " + entryId;
 
         for (FileItem item : sessionFiles) {
             if (item.isFormField())
@@ -122,12 +137,12 @@ public class FileUploadServlet extends UploadAction {
             if (ATTACHMENT_TYPE.equalsIgnoreCase(type)) {
                 if (entryId == null || entryId.isEmpty())
                     return "No entry id specified for file upload";
-                result = uploadAttachment(file, entryId, desc, saveName);
+                result = uploadAttachment(entry, file, entryId, desc, saveName);
             } else if (SEQUENCE_TYPE.equalsIgnoreCase(type)) {
                 if (entryId == null || entryId.isEmpty())
                     result = "No entry id specified for file upload";
                 try {
-                    result = uploadSequenceTraceFile(file, entryId, account, saveName);
+                    result = uploadSequenceTraceFile(entry, file, entryId, account, saveName);
                 } catch (IOException e) {
                     Logger.error(e);
                 }
@@ -154,19 +169,8 @@ public class FileUploadServlet extends UploadAction {
     }
 
     // TODO : this needs to go to manager/controller
-    private String uploadSequenceTraceFile(File file, String entryId, Account account,
+    private String uploadSequenceTraceFile(Entry entry, File file, String entryId, Account account,
             String uploadFileName) throws IOException {
-
-        Entry entry = null;
-        try {
-            entry = EntryManager.get(Long.decode(entryId));
-        } catch (NumberFormatException e1) {
-            Logger.error("Exception decoding entry id ", e1);
-        } catch (ManagerException e1) {
-            Logger.error("Exception retrieving entry with decoded entryId " + entryId, e1);
-        }
-        if (entry == null)
-            return "Could not retrieve entry with id : " + entryId;
 
         SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController(
                 account);
@@ -241,12 +245,10 @@ public class FileUploadServlet extends UploadAction {
     }
 
     // TODO : check for path information in filename. safari includes it
-    private String uploadAttachment(File file, String entryId, String desc, String filename) {
+    private String uploadAttachment(Entry entry, File file, String entryId, String desc,
+            String filename) {
 
         try {
-            Entry entry = EntryManager.get(Long.decode(entryId));
-            if (entry == null)
-                return "Could not retrieve entry with id : " + entryId;
             Attachment attachment = new Attachment();
             attachment.setEntry(entry);
             attachment.setDescription(desc);
