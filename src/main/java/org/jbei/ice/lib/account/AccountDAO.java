@@ -28,7 +28,7 @@ class AccountDAO extends HibernateRepository {
      * 
      * @param id
      * @return Account
-     * @throws ManagerException
+     * @throws DAOException
      */
     public Account get(long id) throws DAOException {
         return (Account) super.get(Account.class, id);
@@ -51,7 +51,7 @@ class AccountDAO extends HibernateRepository {
      * Retrieve all {@link Account}s sorted by the firstName field.
      * 
      * @return Set of {@link Account}s.
-     * @throws ManagerException
+     * @throws DAOException
      */
     @SuppressWarnings("unchecked")
     public Set<Account> getAllByFirstName() throws DAOException {
@@ -107,7 +107,7 @@ class AccountDAO extends HibernateRepository {
      * 
      * @param email
      * @return Account
-     * @throws ManagerException
+     * @throws DAOException
      */
     public Account getByEmail(String email) throws DAOException {
         Account account = null;
@@ -140,7 +140,7 @@ class AccountDAO extends HibernateRepository {
      * 
      * @param account
      * @return True if the {@link Account} is a moderator.
-     * @throws ManagerException
+     * @throws DAOException
      */
     public Boolean isModerator(Account account) throws DAOException {
         if (account == null) {
@@ -177,7 +177,7 @@ class AccountDAO extends HibernateRepository {
      * 
      * @param account
      * @return Saved account.
-     * @throws ManagerException
+     * @throws DAOException
      */
     public Account save(Account account) throws DAOException {
         return (Account) super.saveOrUpdate(account);
@@ -188,7 +188,7 @@ class AccountDAO extends HibernateRepository {
      * 
      * @param account
      * @return True if successful.
-     * @throws ManagerException
+     * @throws DAOException
      */
     public Boolean delete(Account account) throws DAOException {
         if (account == null) {
@@ -206,7 +206,7 @@ class AccountDAO extends HibernateRepository {
      * 
      * @param authToken
      * @return Account.
-     * @throws ManagerException
+     * @throws DAOException
      */
     public Account getAccountByAuthToken(String authToken) throws DAOException {
         Account account = null;

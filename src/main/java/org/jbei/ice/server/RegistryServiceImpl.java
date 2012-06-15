@@ -195,7 +195,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public boolean updateAccountPassword(String sid, String email, String password) {
-        Account account = null;
+        Account account;
 
         try {
             account = retrieveAccountForSid(sid);
@@ -282,7 +282,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public AccountInfo updateAccount(String sid, String email, AccountInfo info) {
-        Account account = null;
+        Account account;
         AccountController controller = new AccountController();
 
         try {
@@ -584,7 +584,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public FolderDetails retrieveAllVisibleEntryIDs(String sid) {
-        Account account = null;
+        Account account;
         AccountController controller = new AccountController();
 
         try {
@@ -1008,7 +1008,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public ArrayList<StorageInfo> retrieveChildren(String sid, long id) {
         ArrayList<StorageInfo> result = new ArrayList<StorageInfo>();
-        List<Storage> children = null;
+        List<Storage> children;
 
         try {
             Storage currentStorage = StorageManager.get(id, true);
@@ -1143,7 +1143,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public FolderDetails retrieveFolderDetails(String sid, long folderId) {
-        Account account = null;
+        Account account;
         AccountController controller = new AccountController();
 
         try {
@@ -1226,7 +1226,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.info(account.getEmail() + ": moving entries to user collection.");
             EntryController entryController = new EntryController();
 
-            ArrayList<Entry> entrys = new ArrayList<Entry>(EntryManager.getEntriesByIdSet(entryIds));
+            ArrayList<Entry> entrys = new ArrayList<Entry>(entryController.getEntriesByIdSet(account, entryIds));
             if (FolderManager.removeFolderContents(account, source, entryIds) != null) {
                 ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
 
@@ -1463,28 +1463,26 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             ArrayList<BulkImport> results = new ArrayList<BulkImport>(biController.retrieveAll());
             ArrayList<BulkImportDraftInfo> info = new ArrayList<BulkImportDraftInfo>();
 
-            if (results != null) {
-                for (BulkImport draft : results) {
-                    BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
-                    List<BulkImportEntryData> primary = draft.getPrimaryData();
-                    if (primary != null)
-                        draftInfo.setCount(draft.getPrimaryData().size());
-                    else
-                        draftInfo.setCount(-1);
-                    draftInfo.setCreated(draft.getCreationTime());
-                    draftInfo.setId(draft.getId());
-                    Account draftAccount = draft.getAccount();
-                    draftInfo.setName(draftAccount.getFullName());
-                    draftInfo.setType(EntryAddType.stringToType(draft.getType()));
+            for (BulkImport draft : results) {
+                BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
+                List<BulkImportEntryData> primary = draft.getPrimaryData();
+                if (primary != null)
+                    draftInfo.setCount(draft.getPrimaryData().size());
+                else
+                    draftInfo.setCount(-1);
+                draftInfo.setCreated(draft.getCreationTime());
+                draftInfo.setId(draft.getId());
+                Account draftAccount = draft.getAccount();
+                draftInfo.setName(draftAccount.getFullName());
+                draftInfo.setType(EntryAddType.stringToType(draft.getType()));
 
-                    // set the account info
-                    AccountInfo accountInfo = new AccountInfo();
-                    accountInfo.setEmail(draftAccount.getEmail());
-                    accountInfo.setFirstName(draftAccount.getFirstName());
-                    accountInfo.setLastName(draftAccount.getLastName());
-                    draftInfo.setAccount(accountInfo);
-                    info.add(draftInfo);
-                }
+                // set the account info
+                AccountInfo accountInfo = new AccountInfo();
+                accountInfo.setEmail(draftAccount.getEmail());
+                accountInfo.setFirstName(draftAccount.getFirstName());
+                accountInfo.setLastName(draftAccount.getLastName());
+                draftInfo.setAccount(accountInfo);
+                info.add(draftInfo);
             }
 
             return info;
@@ -1686,7 +1684,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             BulkImportController controller = new BulkImportController(account);
             BulkImport result = controller.updateBulkImportDraft(id, name, account, primary,
-                secondary, email);
+                secondary);
 
             // result to DTO
             BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
@@ -1850,7 +1848,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                         }
 
                         Logger.info("Creating sample with locations " + sb.toString());
-                        Storage storage = null;
+                        Storage storage;
                         try {
                             Storage scheme = StorageManager.get(
                                 Long.parseLong(sampleInfo.getLocationId()), false);
@@ -1906,7 +1904,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public SampleStorage createSample(String sessionId, SampleStorage sampleStorage, long entryId) {
 
-        Account account = null;
+        Account account;
 
         try {
             account = retrieveAccountForSid(sessionId);
@@ -2108,7 +2106,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public ArrayList<PermissionInfo> retrievePermissionData(String sessionId, Long entryId) {
 
         ArrayList<PermissionInfo> results = null;
-        Entry entry = null;
+        Entry entry;
 
         final Account account;
         try {
@@ -2445,7 +2443,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         // retrieve all groups
         Logger.info(account.getEmail() + ": retrieving all entries");
-        Set<Group> groups = null;
+        Set<Group> groups;
         try {
             groups = groupController.getAllGroups();
         } catch (ControllerException e) {
@@ -2474,7 +2472,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public boolean deleteEntryAttachment(String sid, String fileId) {
-        Account account = null;
+        Account account;
         try {
             account = retrieveAccountForSid(sid);
             if (account == null)
@@ -2497,7 +2495,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public ArrayList<FolderDetails> deleteEntry(String sessionId, EntryInfo info) {
-        Account account = null;
+        Account account;
 
         try {
             account = retrieveAccountForSid(sessionId);
@@ -2505,16 +2503,18 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             Logger.info(account.getEmail() + ": deleting entry " + info.getId());
-            EntryController controller = new EntryController(account);
-            Entry entry = controller.get(info.getId());
+            EntryController controller = new EntryController();
+            AccountController accountController = new AccountController();
+
+            Entry entry = controller.get(account, info.getId());
             if (entry == null)
                 return null;
 
-            controller.delete(entry);
+            controller.delete(account, entry);
 
             ArrayList<FolderDetails> folderList = new ArrayList<FolderDetails>();
             List<Folder> folders = FolderManager.getFoldersByEntry(entry);
-            String systemEmail = AccountController.getSystemAccount().getEmail();
+            String systemEmail = accountController.getSystemAccount().getEmail();
             ArrayList<Long> entryIds = new ArrayList<Long>();
             entryIds.add(entry.getId());
             if (folders != null) {

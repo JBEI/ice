@@ -129,8 +129,12 @@ public class FolderManager {
     public static Folder removeFolderContents(Account account, long folderId,
             ArrayList<Long> entryIds) throws ManagerException {
         boolean isModerator;
+        AccountController controller = new AccountController();
+        Account systemAccount;
+
         try {
-            isModerator = AccountController.isModerator(account);
+            systemAccount = controller.getSystemAccount();
+            isModerator = controller.isModerator(account);
         } catch (ControllerException e1) {
             throw new ManagerException(e1);
         }
@@ -144,7 +148,7 @@ public class FolderManager {
                 throw new ManagerException("Cannot retrieve folder with id \"" + folderId + "\"");
 
             boolean isSystemFolder = folder.getOwnerEmail().equals(
-                AccountManager.getSystemAccount().getEmail());
+                    systemAccount.getEmail());
             if (isSystemFolder && !isModerator) {
                 session.getTransaction().commit();
                 throw new ManagerException("Cannot modify non user folder " + folder.getName());

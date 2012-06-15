@@ -59,7 +59,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     private final FocusPanel panel;
     protected final FlexTable layout;
-    protected FlexTable sheetTable; // table use to represent the spreadsheet
+    protected FlexTable sheetTable; // table used to represent the spreadsheet
     protected int row; // current row in the spreadsheet
 
     private Label lastReplaced; // cache of the last widget that was replaced
@@ -71,14 +71,13 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     protected final FlexTable colIndex;
     protected final ScrollPanel wrapper;
-    protected final ScrollPanel rowIndexWrapper;
+    protected final ScrollPanel colIndexWrapper;
     protected final FlexTable header;
     protected final ScrollPanel headerWrapper;
 
     private final int WIDTH = 40; //300;
-    private final int HEIGHT = 320;
+    private final int HEIGHT = 340;
 
-    //    private final EntryAddType type;
     private int headerCol;
 
     protected final SheetPresenter presenter;
@@ -86,12 +85,11 @@ public class Sheet extends Composite implements SheetPresenter.View {
     private final TextBox input;
     private SuggestBox box;
     private String filename;
-    private SingleUploader uploader;
     private final HashMap<Integer, String> attachmentRowFileIds;
     private final HashMap<Integer, String> sequenceRowFileIds;
     private final BulkImportDraftInfo info;
 
-    private final static int ROW_COUNT = 1;
+    private final static int ROW_COUNT = 5;
 
     public Sheet(EntryAddType type) {
         this(type, null);
@@ -130,15 +128,15 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         // then wrap it in a scroll panel that expands to fill area given by browser
         wrapper = new ScrollPanel(panel);
-        wrapper.setWidth((Window.getClientWidth() - WIDTH - 4) + "px");
-        wrapper.setHeight((Window.getClientHeight() - HEIGHT) + "px");
+        wrapper.setWidth((Window.getClientWidth() - WIDTH - 10) + "px");
+        wrapper.setHeight((Window.getClientHeight() - HEIGHT - 25) + "px");
 
         colIndex = new FlexTable();
         colIndex.setCellPadding(0);
         colIndex.setCellSpacing(0);
         colIndex.setStyleName("sheet_col_index");
-        rowIndexWrapper = new ScrollPanel(colIndex);
-        rowIndexWrapper.setHeight((Window.getClientHeight() - HEIGHT - 14) + "px");
+        colIndexWrapper = new ScrollPanel(colIndex);
+        colIndexWrapper.setHeight((Window.getClientHeight() - HEIGHT - 25) + "px");
 
         addPanelHandlers();
         addWindowResizeHandler();
@@ -154,23 +152,34 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         // init
         headerWrapper = new ScrollPanel(header);
-        headerWrapper.setWidth((Window.getClientWidth() - WIDTH - 4) + "px");
+        headerWrapper.setWidth((Window.getClientWidth() - 25) + "px");
 
         addScrollHandlers();
-        addResizeHandler();
 
         // presenter
         presenter = new SheetPresenter(this, type);
-
         init();
     }
 
-    private void addResizeHandler() {
+    private void addWindowResizeHandler() {
         Window.addResizeHandler(new ResizeHandler() {
 
             @Override
             public void onResize(ResizeEvent event) {
-                headerWrapper.setWidth((wrapper.getOffsetWidth() - 15 + WIDTH) + "px"); // TODO : ditto on 15px here also and the 40 is for the leader_header
+
+                int wrapperWidth = (event.getWidth() - WIDTH) - 1;
+                if (wrapperWidth >= 0)
+                    wrapper.setWidth(wrapperWidth + "px");
+
+                int wrapperHeight = (event.getHeight() - HEIGHT - 30);
+                if (wrapperHeight >= 0)
+                    wrapper.setHeight(wrapperHeight + "px");
+
+                int rowIndexHeight = (event.getHeight() - HEIGHT - 30 - 15);
+                if (rowIndexHeight >= 0)
+                    colIndexWrapper.setHeight(rowIndexHeight + "px");
+
+                headerWrapper.setWidth((event.getWidth() - 16) + "px");
             }
         });
     }
@@ -181,7 +190,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
             @Override
             public void onScroll(ScrollEvent event) {
                 headerWrapper.setHorizontalScrollPosition(wrapper.getHorizontalScrollPosition());
-                rowIndexWrapper.setVerticalScrollPosition(wrapper.getVerticalScrollPosition());
+                colIndexWrapper.setVerticalScrollPosition(wrapper.getVerticalScrollPosition());
             }
         });
     }
@@ -190,15 +199,15 @@ public class Sheet extends Composite implements SheetPresenter.View {
         DOM.setStyleAttribute(headerWrapper.getElement(), "overflowY", "hidden");
         DOM.setStyleAttribute(headerWrapper.getElement(), "overflowX", "hidden");
 
-        DOM.setStyleAttribute(rowIndexWrapper.getElement(), "overflowY", "hidden");
-        DOM.setStyleAttribute(rowIndexWrapper.getElement(), "overflowX", "hidden");
+        DOM.setStyleAttribute(colIndexWrapper.getElement(), "overflowY", "hidden");
+        DOM.setStyleAttribute(colIndexWrapper.getElement(), "overflowX", "hidden");
 
         createHeaderCells();
 
         // get header
         layout.setWidget(0, 0, headerWrapper);
         layout.getFlexCellFormatter().setColSpan(0, 0, 2);
-        layout.setWidget(1, 0, rowIndexWrapper);
+        layout.setWidget(1, 0, colIndexWrapper);
         layout.getFlexCellFormatter().setVerticalAlignment(1, 0, HasAlignment.ALIGN_TOP);
         layout.setWidget(1, 1, wrapper);
         layout.getFlexCellFormatter().setVerticalAlignment(1, 1, HasAlignment.ALIGN_TOP);
@@ -226,27 +235,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
         presenter.setAutoCompleteData(data);
     }
 
-    private void addWindowResizeHandler() {
-        Window.addResizeHandler(new ResizeHandler() {
-
-            @Override
-            public void onResize(ResizeEvent event) {
-
-                int wrapperWidth = (event.getWidth() - WIDTH);
-                if (wrapperWidth >= 0)
-                    wrapper.setWidth(wrapperWidth + "px");
-
-                int wrapperHeight = (event.getHeight() - HEIGHT - 30);
-                if (wrapperHeight >= 0)
-                    wrapper.setHeight(wrapperHeight + "px");
-
-                int rowIndexHeight = (event.getHeight() - HEIGHT - 30 - 15);
-                if (rowIndexHeight >= 0)
-                    rowIndexWrapper.setHeight(rowIndexHeight + "px");
-            }
-        });
-    }
-
     private void addPanelHandlers() {
 
         panel.addKeyDownHandler(new KeyDownHandler() {
@@ -267,7 +255,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
                     dealWithLeftArrowPress();
                     event.preventDefault();
                 } else {
-
                     int code = event.getNativeKeyCode();
 
                     if (KeyCodes.KEY_TAB == code || KeyCodes.KEY_ENTER == code) {
@@ -334,7 +321,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         HTML cell = new HTML("&nbsp;");
         cell.setStyleName("tail_cell_column_header");
         header.setWidget(row, headerCol, cell);
-        header.getFlexCellFormatter().setStyleName(row, headerCol, "tail_cell_column_header_td");
+//        header.getFlexCellFormatter().setStyleName(row, headerCol, "tail_cell_column_header_td");
         headerCol += 1;
     }
 
@@ -359,7 +346,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         ArrayList<SheetFieldData[]> cellData = new ArrayList<SheetFieldData[]>();
 
         Header[] headers = presenter.getTypeHeaders();
-        SheetFieldData[] row = null;
+        SheetFieldData[] row;
 
         for (int i = 0; i < sheetTable.getRowCount(); i += 1) {
             if (isEmptyRow(i))
@@ -372,13 +359,13 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
                 String id = "";
                 switch (header) {
-                case ATT_FILENAME:
-                    id = attachmentRowFileIds.get(i);
-                    break;
+                    case ATT_FILENAME:
+                        id = attachmentRowFileIds.get(i);
+                        break;
 
-                case SEQ_FILENAME:
-                    id = sequenceRowFileIds.get(i);
-                    break;
+                    case SEQ_FILENAME:
+                        id = sequenceRowFileIds.get(i);
+                        break;
                 }
 
                 HasText widget = (HasText) sheetTable.getWidget(i, y);
@@ -480,93 +467,92 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         // TODO : cache. this is called repeatedly for each click, resulting in the objects in here being created 
         switch (currentHeader) {
-        case BIOSAFETY:
-            MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
-            oracle = new MultiWordSuggestOracle();
+            case BIOSAFETY:
+                MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
 
-            oracle.addAll(BioSafetyOptions.getDisplayList());
-            MultipleTextBox textBox = new MultipleTextBox();
-            box = new SuggestBox(oracle, textBox);
-            box.setStyleName("cell_input");
-            box.setWidth("129px");
-            box.setText(text);
-            sheetTable.setWidget(currentRow, currentIndex, box);
-            textBox.setFocus(true);
-            break;
+                oracle.addAll(BioSafetyOptions.getDisplayList());
+                MultipleTextBox textBox = new MultipleTextBox();
+                box = new SuggestBox(oracle, textBox);
+                box.setStyleName("cell_input");
+                box.setWidth("129px");
+                box.setText(text);
+                sheetTable.setWidget(currentRow, currentIndex, box);
+                textBox.setFocus(true);
+                break;
 
-        case SELECTION_MARKERS:
-            AutoCompleteField field = AutoCompleteField.fieldValue(currentHeader.name());
-            ArrayList<String> list = presenter.getAutoCompleteData(field);
+            case SELECTION_MARKERS:
+                AutoCompleteField field = AutoCompleteField.fieldValue(currentHeader.name());
+                ArrayList<String> list = presenter.getAutoCompleteData(field);
 
-            oracle = new MultiWordSuggestOracle();
-            oracle.addAll(new TreeSet<String>(list));
-            textBox = new MultipleTextBox();
-            box = new SuggestBox(oracle, textBox);
-            box.setStyleName("cell_input");
-            box.setWidth("129px");
-            box.setText(text);
-            sheetTable.setWidget(currentRow, currentIndex, box);
-            textBox.setFocus(true);
-            break;
+                oracle = new MultiWordSuggestOracle();
+                oracle.addAll(new TreeSet<String>(list));
+                textBox = new MultipleTextBox();
+                box = new SuggestBox(oracle, textBox);
+                box.setStyleName("cell_input");
+                box.setWidth("129px");
+                box.setText(text);
+                sheetTable.setWidget(currentRow, currentIndex, box);
+                textBox.setFocus(true);
+                break;
 
-        case ATT_FILENAME:
-        case SEQ_FILENAME:
-            Label label = new Label("Upload file"); // TODO : style
+            case ATT_FILENAME:
+            case SEQ_FILENAME:
+                Label label = new Label("Upload file"); // TODO : style
 
-            final FileUploadStatus uploaderStatus = new FileUploadStatus();
-            uploader = new SingleUploader(FileInputType.CUSTOM.with(label), uploaderStatus);
-            uploader.setAutoSubmit(true);
-            uploader.getWidget().setStyleName("uploader_cell");
+                final FileUploadStatus uploaderStatus = new FileUploadStatus();
+                SingleUploader uploader = new SingleUploader(FileInputType.CUSTOM.with(label), uploaderStatus);
+                uploader.setAutoSubmit(true);
+                uploader.getWidget().setStyleName("uploader_cell");
 
-            uploader.addOnStartUploadHandler(new OnStartUploaderHandler() {
+                uploader.addOnStartUploadHandler(new OnStartUploaderHandler() {
 
-                @Override
-                public void onStart(IUploader uploader) {
-                    uploader.setServletPath(uploader.getServletPath()
-                            + "?type=bulk_attachment&sid=" + AppController.sessionId);
-                    //                    sheetTable.setWidget(currentRow, currentIndex,
-                    //                        uploaderStatus.getProgressWidget());
-                }
-            });
-
-            uploader.addOnCancelUploadHandler(new OnCancelUploaderHandler() {
-
-                @Override
-                public void onCancel(IUploader uploader) {
-                    uploader.cancel();
-                    uploader.reset();
-                }
-            });
-
-            uploader.addOnFinishUploadHandler(new OnFinishUploaderHandler() {
-                @Override
-                public void onFinish(IUploader uploader) {
-                    if (uploader.getStatus() == Status.SUCCESS) {
-                        UploadedInfo info = uploader.getServerInfo();
-                        if (info.message.isEmpty())
-                            return; // TODO : hook into error message
-
-                        // attachment or 
-                        if (currentHeader == Header.ATT_FILENAME) {
-                            attachmentRowFileIds.put(currentRow, info.message);
-                        } else if (currentHeader == Header.SEQ_FILENAME) {
-                            sequenceRowFileIds.put(currentRow, info.message);
-                        }
-
-                        filename = info.name;
-                        selectCell(currentRow, currentIndex, currentRow, currentIndex);
-                    } else {
-                        // TODO : notify user of error
+                    @Override
+                    public void onStart(IUploader uploader) {
+                        uploader.setServletPath(uploader.getServletPath()
+                                + "?type=bulk_attachment&sid=" + AppController.sessionId);
+                        //                    sheetTable.setWidget(currentRow, currentIndex,
+                        //                        uploaderStatus.getProgressWidget());
                     }
-                }
-            });
-            sheetTable.setWidget(currentRow, currentIndex, uploader.getWidget());
-            break;
+                });
 
-        default:
-            input.setText(text);
-            sheetTable.setWidget(currentRow, currentIndex, input);
-            input.setFocus(true);
+                uploader.addOnCancelUploadHandler(new OnCancelUploaderHandler() {
+
+                    @Override
+                    public void onCancel(IUploader uploader) {
+                        uploader.cancel();
+                        uploader.reset();
+                    }
+                });
+
+                uploader.addOnFinishUploadHandler(new OnFinishUploaderHandler() {
+                    @Override
+                    public void onFinish(IUploader uploader) {
+                        if (uploader.getStatus() == Status.SUCCESS) {
+                            UploadedInfo info = uploader.getServerInfo();
+                            if (info.message.isEmpty())
+                                return; // TODO : hook into error message
+
+                            // attachment or
+                            if (currentHeader == Header.ATT_FILENAME) {
+                                attachmentRowFileIds.put(currentRow, info.message);
+                            } else if (currentHeader == Header.SEQ_FILENAME) {
+                                sequenceRowFileIds.put(currentRow, info.message);
+                            }
+
+                            filename = info.name;
+                            selectCell(currentRow, currentIndex, currentRow, currentIndex);
+                        } else {
+                            // TODO : notify user of error
+                        }
+                    }
+                });
+                sheetTable.setWidget(currentRow, currentIndex, uploader.getWidget());
+                break;
+
+            default:
+                input.setText(text);
+                sheetTable.setWidget(currentRow, currentIndex, input);
+                input.setFocus(true);
         }
     }
 
@@ -691,8 +677,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
                     secondaryInfo = info.getSecondary().get(index);
 
                 String value = InfoValueExtractorFactory.extractValue(presenter.getType(),
-                    headers[i], primaryInfo, secondaryInfo, index, attachmentRowFileIds,
-                    sequenceRowFileIds);
+                        headers[i], primaryInfo, secondaryInfo, index, attachmentRowFileIds,
+                        sequenceRowFileIds);
                 if (value == null)
                     value = "";
 
@@ -706,7 +692,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
             widget.setStyleName("cell");
 
             sheetTable.setWidget(row, i, widget);
-            sheetTable.getFlexCellFormatter().setStyleName(row, i, "td_cell");
+//            sheetTable.getFlexCellFormatter().setStyleName(row, i, "td_cell");
         }
         row += 1;
     }
@@ -717,8 +703,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
      * and return the text for that. E.g. if the user entered a value in the suggest
      * box (for auto complete boxes), this method determines that and returns the value
      * for the box instead of the value for the input (Textbox), which is for regular fields.
-     * 
-     * @return
+     *
+     * @return text of last widget user interacted with
      */
     private String getLastWidgetText() {
         Header currentHeader = presenter.getTypeHeaders()[inputIndex];
@@ -726,22 +712,22 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         switch (currentHeader) {
 
-        case SELECTION_MARKERS:
-        case BIOSAFETY:
-            ret = ((MultipleTextBox) box.getTextBox()).getWholeText();
-            box.setText("");
-            return ret;
+            case SELECTION_MARKERS:
+            case BIOSAFETY:
+                ret = ((MultipleTextBox) box.getTextBox()).getWholeText();
+                box.setText("");
+                return ret;
 
-        case ATT_FILENAME:
-        case SEQ_FILENAME:
-            ret = filename;
-            filename = "";
-            return ret;
+            case ATT_FILENAME:
+            case SEQ_FILENAME:
+                ret = filename;
+                filename = "";
+                return ret;
 
-        default:
-            ret = input.getText();
-            input.setText("");
-            return ret;
+            default:
+                ret = input.getText();
+                input.setText("");
+                return ret;
         }
     }
 

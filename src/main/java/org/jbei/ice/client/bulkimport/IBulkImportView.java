@@ -34,11 +34,11 @@ public interface IBulkImportView {
 
     boolean getMenuVisibility();
 
-    void setToggleMenuVisiblity(boolean visible);
+    void setToggleMenuVisibility(boolean visible);
 
     void setSheet(NewBulkInput input, boolean isNew);
 
-    HandlerRegistration setDraftUpateHandler(ClickHandler handler);
+    HandlerRegistration setDraftUpdateHandler(ClickHandler handler);
 
     String getDraftName();
 

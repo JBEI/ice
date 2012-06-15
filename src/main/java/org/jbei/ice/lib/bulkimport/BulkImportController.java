@@ -1,20 +1,5 @@
 package org.jbei.ice.lib.bulkimport;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.jbei.ice.controllers.common.Controller;
@@ -34,6 +19,12 @@ import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 
+import java.io.*;
+import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
+
 public class BulkImportController extends Controller {
 
     private final String TEMPORARY_DIRECTORY = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
@@ -45,11 +36,12 @@ public class BulkImportController extends Controller {
     }
 
     public BulkImport updateBulkImportDraft(long id, String name, Account account,
-            ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary, String email)
+                                            ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary)
             throws ControllerException {
 
         try {
             BulkImport savedDraft = dao.retrieveById(id);
+
             // callee should consider creating a new record and updating 
             if (savedDraft == null)
                 throw new ControllerException("Could not located bulk import record with id " + id);
@@ -58,15 +50,14 @@ public class BulkImportController extends Controller {
             getDataForUpdate(savedDraft, primary, account, true);
             getDataForUpdate(savedDraft, secondary, account, false);
 
-            BulkImport result = dao.updateBulkImportRecord(id, savedDraft);
-            return result;
+           return dao.saveBulkImport(savedDraft);
         } catch (DAOException me) {
             throw new ControllerException(me);
         }
     }
 
     private void getDataForUpdate(BulkImport bulkImport, ArrayList<EntryInfo> infoList,
-            Account account, boolean isPrimary) {
+                                  Account account, boolean isPrimary) {
 
         if (infoList == null || infoList.isEmpty())
             return;
@@ -130,7 +121,9 @@ public class BulkImportController extends Controller {
             dataList.add(data);
         }
 
-        bulkImport.setType(type.toString());
+        if (type != null)
+            bulkImport.setType(type.toString());
+
         if (isPrimary)
             bulkImport.setPrimaryData(dataList);
         else
@@ -169,15 +162,15 @@ public class BulkImportController extends Controller {
 
     /**
      * Creates a new bulk import record from the given parameters
-     * 
+     *
      * @param account
      * @param primary
      * @param secondary
      * @param email
-     * @return
+     * @return the newly created bulk import object
      */
     public BulkImport createBulkImport(Account account, ArrayList<EntryInfo> primary,
-            ArrayList<EntryInfo> secondary, String email) {
+                                       ArrayList<EntryInfo> secondary, String email) {
 
         ArrayList<BulkImportEntryData> primaryDataList = new ArrayList<BulkImportEntryData>(
                 primary.size());
@@ -232,7 +225,7 @@ public class BulkImportController extends Controller {
         ArrayList<BulkImportEntryData> secondaryDataList = new ArrayList<BulkImportEntryData>(
                 secondary.size());
 
-        if (secondary != null && !secondary.isEmpty()) {
+        if (!secondary.isEmpty()) {
             for (EntryInfo info : secondary) {
                 BulkImportEntryData data = new BulkImportEntryData();
 
@@ -284,7 +277,8 @@ public class BulkImportController extends Controller {
             }
         }
 
-        bulkImport.setType(type.toString());
+        if (type != null)
+            bulkImport.setType(type.toString());
         Account emailAccount;
         try {
             AccountController controller = new AccountController();
@@ -326,11 +320,11 @@ public class BulkImportController extends Controller {
     private static byte[] createZip(HashMap<String, File> files) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ZipOutputStream zipfile = new ZipOutputStream(bos);
-        String fileName = null;
-        ZipEntry zipentry = null;
-        Iterator<String> iter = files.keySet().iterator();
-        while (iter.hasNext()) {
-            fileName = iter.next();
+        String fileName;
+        ZipEntry zipentry;
+        Iterator<String> iterator = files.keySet().iterator();
+        while (iterator.hasNext()) {
+            fileName = iterator.next();
             zipentry = new ZipEntry(fileName);
             zipfile.putNextEntry(zipentry);
             File file = files.get(fileName);
@@ -380,8 +374,11 @@ public class BulkImportController extends Controller {
     }
 
     public BulkImport createBulkImportRecord(BulkImport draft) throws ControllerException {
+        Date creationDate = new Date(System.currentTimeMillis());
+        draft.setCreationTime(creationDate);
+
         try {
-            return dao.createBulkImportRecord(draft);
+            return dao.saveBulkImport(draft);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -409,6 +406,5 @@ public class BulkImportController extends Controller {
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
-
     }
 }

@@ -47,7 +47,7 @@ public class ImageUtil {
         @Source("org/jbei/ice/client/resource/image/side_expand2.png")
         ImageResource hideSideImage();
 
-        @Source("org/jbei/ice/client/resource/image/upload.png")
+        @Source("org/jbei/ice/client/resource/image/upload_file.png")
         ImageResource uploadImage();
 
     }

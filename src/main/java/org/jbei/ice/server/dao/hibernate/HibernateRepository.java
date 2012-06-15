@@ -102,7 +102,7 @@ public class HibernateRepository implements IRepository {
             session.getTransaction().rollback();
             Logger.error(e1);
             resetSessionFactory(session);
-            throw new DAOException("Unkown database exception ", e1);
+            throw new DAOException("Unknown database exception ", e1);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -165,7 +165,7 @@ public class HibernateRepository implements IRepository {
             session.getTransaction().rollback();
             Logger.error(e1);
             resetSessionFactory(session);
-            throw new DAOException("Unkown database exception ", e1);
+            throw new DAOException("Unknown database exception ", e1);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -206,5 +206,4 @@ public class HibernateRepository implements IRepository {
         session.close();
         session.getSessionFactory().close();
     }
-
 }

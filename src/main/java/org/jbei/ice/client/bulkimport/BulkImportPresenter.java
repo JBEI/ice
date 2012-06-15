@@ -61,7 +61,7 @@ public class BulkImportPresenter extends AbstractPresenter {
 
     private void setClickHandlers() {
         SheetDraftUpdateHandler handler = new SheetDraftUpdateHandler();
-        view.setDraftUpateHandler(handler);
+        view.setDraftUpdateHandler(handler);
 
         // submit
         SheetSubmitHandler submitHandler = new SheetSubmitHandler();
@@ -170,7 +170,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                 if (!data.isEmpty()) {
                     view.setSavedDraftsData(data, new DeleteBulkImportHandler(model.getService()));
                 } else
-                    view.setToggleMenuVisiblity(false);
+                    view.setToggleMenuVisibility(false);
             }
         });
     }
