@@ -1,11 +1,13 @@
 package org.jbei.ice.client.collection.add;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FocusWidget;
 import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.add.form.EntryCreateWidget;
@@ -15,22 +17,20 @@ import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.collection.presenter.CollectionsPresenter;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.event.FeedbackEvent;
+import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.SampleInfo;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FocusWidget;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Presenter for adding entries
- * 
+ *
  * @author Hector Plahar
  */
 
@@ -44,7 +44,7 @@ public class EntryAddPresenter {
     private final CollectionsPresenter presenter;
 
     public EntryAddPresenter(CollectionsPresenter presenter, RegistryServiceAsync service,
-            HandlerManager eventBus) {
+                             HandlerManager eventBus) {
         this.service = service;
         this.eventBus = eventBus;
         this.display = new EntryAddView();
@@ -75,24 +75,24 @@ public class EntryAddPresenter {
 
         switch (selected) {
 
-        case ARABIDOPSIS:
-            type = EntryType.ARABIDOPSIS;
-            break;
+            case ARABIDOPSIS:
+                type = EntryType.ARABIDOPSIS;
+                break;
 
-        case PLASMID:
-            type = EntryType.PLASMID;
-            break;
+            case PLASMID:
+                type = EntryType.PLASMID;
+                break;
 
-        case PART:
-            type = EntryType.PART;
-            break;
+            case PART:
+                type = EntryType.PART;
+                break;
 
-        case STRAIN:
-            type = EntryType.STRAIN;
-            break;
+            case STRAIN:
+                type = EntryType.STRAIN;
+                break;
 
-        default:
-            return;
+            default:
+                return;
         }
 
         SampleLocation cacheLocation = locationCache.get(type);
@@ -102,35 +102,34 @@ public class EntryAddPresenter {
         }
 
         service.retrieveStorageSchemes(AppController.sessionId, type,
-            new AsyncCallback<HashMap<SampleInfo, ArrayList<String>>>() {
+                                       new AsyncCallback<HashMap<SampleInfo, ArrayList<String>>>() {
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    eventBus.fireEvent(new FeedbackEvent(true,
-                            "Failed to retrieve the sample location data."));
-                }
+                                           @Override
+                                           public void onFailure(Throwable caught) {
+                                               eventBus.fireEvent(new FeedbackEvent(true,
+                                                                                    "Failed to retrieve the sample " +
+                                                                                            "location data."));
+                                           }
 
-                @Override
-                public void onSuccess(HashMap<SampleInfo, ArrayList<String>> result) {
-                    if (result == null)
-                        return;
+                                           @Override
+                                           public void onSuccess(HashMap<SampleInfo, ArrayList<String>> result) {
+                                               if (result == null)
+                                                   return;
 
-                    SampleLocation sampleLocation = new SampleLocation(result);
-                    locationCache.put(type, sampleLocation);
+                                               SampleLocation sampleLocation = new SampleLocation(result);
+                                               locationCache.put(type, sampleLocation);
 
-                    display.getCurrentForm().getEntrySubmitForm().setSampleLocation(sampleLocation);
-                }
-            });
+                                               display.getCurrentForm().getEntrySubmitForm().setSampleLocation
+                                                       (sampleLocation);
+                                           }
+                                       });
     }
 
     /**
      * Makes an rpc to save the set of entrys
-     * 
-     * @param hasEntry
-     *            set of entrys to be saved.
      */
-    protected void save(final HashSet<EntryInfo> entrySet) {
-        if (entrySet == null || entrySet.isEmpty())
+    protected void save(final EntryInfo primary, final EntryInfo secondary) {
+        if (primary == null)
             return;
 
         display.setSubmitEnable(false);
@@ -138,58 +137,89 @@ public class EntryAddPresenter {
         list.add(Long.valueOf(0));
         presenter.getView().setBusyIndicator(list);
 
-        this.service.createEntry(AppController.sessionId, entrySet,
-            new AsyncCallback<ArrayList<Long>>() {
+        if (secondary == null) {
+
+            new IceAsyncCallback<Long>() {
 
                 @Override
-                public void onFailure(Throwable caught) {
-                    eventBus.fireEvent(new FeedbackEvent(true, "Server error. Please try again."));
+                protected void callService(AsyncCallback<Long> callback) {
+                    try {
+                        service.createEntry(AppController.sessionId, primary, callback);
+                    } catch (AuthenticationException e) {
+                        History.newItem(Page.LOGIN.getLink());
+                    }
+                }
+
+                @Override
+                public void onSuccess(Long result) {
+                    EntryContext context = new EntryContext(EntryContext.Type.COLLECTION);
+                    context.setCurrent(result);
+                    presenter.showEntryView(context);
+
+                    AppController.accountInfo.setUserEntryCount(AppController.accountInfo
+                                                                             .getUserEntryCount() + 1);
                     MenuItem item = new MenuItem(0, "My Entries", AppController.accountInfo
-                            .getUserEntryCount(), true);
+                                                                               .getUserEntryCount(), true);
                     ArrayList<MenuItem> items = new ArrayList<MenuItem>();
                     items.add(item);
                     presenter.getView().updateMenuItemCounts(items);
-                    Window.scrollTo(0, 0);
                     display.setSubmitEnable(true);
+                }
+            }.go(eventBus);
+        } else {
+            // save strain with plasmid
+            final HashSet<EntryInfo> entrySet = new HashSet<EntryInfo>();
+            entrySet.add(primary);
+            entrySet.add(secondary);
+
+            new IceAsyncCallback<ArrayList<Long>>() {
+
+                @Override
+                protected void callService(AsyncCallback<ArrayList<Long>> callback) {
+                    try {
+                        service.createStrainWithPlasmid(AppController.sessionId, entrySet, callback);
+                    } catch (AuthenticationException e) {
+                        History.newItem(Page.LOGIN.getLink());
+                    }
                 }
 
                 @Override
                 public void onSuccess(ArrayList<Long> result) {
-                    if (result.size() != entrySet.size()) {
-                        FeedbackEvent event = new FeedbackEvent(true,
-                                "Your entry could not be created. Please try again.");
-                        eventBus.fireEvent(event);
-                    } else {
-                        if (entrySet.size() == 1) {
-                            long id = result.get(0);
-                            EntryContext context = new EntryContext(EntryContext.Type.COLLECTION);
-                            context.setCurrent(id);
-                            presenter.showEntryView(context);
-                        } else {
-                            History.newItem(Page.COLLECTIONS.getLink());
-                        }
 
-                        AppController.accountInfo.setUserEntryCount(AppController.accountInfo
-                                .getUserEntryCount() + entrySet.size());
-                        MenuItem item = new MenuItem(0, "My Entries", AppController.accountInfo
-                                .getUserEntryCount(), true);
-                        ArrayList<MenuItem> items = new ArrayList<MenuItem>();
-                        items.add(item);
-                        presenter.getView().updateMenuItemCounts(items);
-                    }
+                    History.newItem(Page.COLLECTIONS.getLink());
+
+                    AppController.accountInfo.setUserEntryCount(AppController.accountInfo
+                                                                             .getUserEntryCount() + entrySet.size());
+                    MenuItem item = new MenuItem(0, "My Entries", AppController.accountInfo
+                                                                               .getUserEntryCount(), true);
+                    ArrayList<MenuItem> items = new ArrayList<MenuItem>();
+                    items.add(item);
+                    presenter.getView().updateMenuItemCounts(items);
                     display.setSubmitEnable(true);
                 }
-            });
+            }.go(eventBus);
+        }
+
+//        public void onFailure(Throwable caught) {
+//            eventBus.fireEvent(new FeedbackEvent(true, "Server error. Please try again."));
+//            MenuItem item = new MenuItem(0, "My Entries", AppController.accountInfo
+//                                                                       .getUserEntryCount(), true);
+//            ArrayList<MenuItem> items = new ArrayList<MenuItem>();
+//            items.add(item);
+//            presenter.getView().updateMenuItemCounts(items);
+//            Window.scrollTo(0, 0);
+//            display.setSubmitEnable(true);
+//        }
     }
 
     /**
      * creates a new form based on specific types of entries.
      * To create a new entry/form, add the type to {@link EntryAddType} and create a new form here
-     * 
-     * @param type
-     *            EntryType
+     *
+     * @param type EntryType
      * @return form specific to type
      */
+
     protected EntryCreateWidget getEntryForm(EntryAddType type) {
 
         if (formsCache.containsKey(type))
@@ -199,7 +229,8 @@ public class EntryAddPresenter {
         String creatorEmail = AppController.accountInfo.getEmail();
 
         final EntryCreateWidget form = EntryFormFactory.entryForm(type,
-            AppController.autoCompleteData, creatorName, creatorEmail);
+                                                                  AppController.autoCompleteData, creatorName,
+                                                                  creatorEmail);
 
         if (form == null)
             return null;
@@ -214,13 +245,15 @@ public class EntryAddPresenter {
                 if (focus != null) {
                     focus.setFocus(true);
                     FeedbackEvent feedback = new FeedbackEvent(true,
-                            "Please fill out all required fields");
+                                                               "Please fill out all required fields");
                     eventBus.fireEvent(feedback);
                     return;
                 }
 
                 formSubmit.populateEntries();
-                save(formSubmit.getEntries());
+                EntryInfo primary = formSubmit.getPrimaryEntry();
+                EntryInfo secondary = formSubmit.getSecondaryEntry();
+                save(primary, secondary);
             }
         });
 

@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.collection.ICollectionView;
 import org.jbei.ice.client.collection.event.FolderEvent;
@@ -30,6 +31,7 @@ import org.jbei.ice.client.event.SearchEvent;
 import org.jbei.ice.client.event.SearchEventHandler;
 import org.jbei.ice.client.event.ShowEntryListEvent;
 import org.jbei.ice.client.event.ShowEntryListEventHandler;
+import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.search.advanced.AdvancedSearchPresenter;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.FolderDetails;
@@ -98,7 +100,7 @@ public class CollectionsPresenter extends AbstractPresenter {
     public CollectionsPresenter(final CollectionsModel model, final ICollectionView display) {
         this.display = display;
         this.model = model;
-        this.deleteHandler = new DeleteItemHandler(model.getService(), display);
+        this.deleteHandler = new DeleteItemHandler(model.getService(), model.getEventBus(), display);
 
         // initialize all parameters
         this.collectionsDataTable = new CollectionDataTable(new EntryTablePager()) {
@@ -588,7 +590,7 @@ public class CollectionsPresenter extends AbstractPresenter {
                     AppController.accountInfo.getVisibleEntryCount(), true);
             systemMenuItems.add(0, allEntriesItem);
             display.setSystemCollectionMenuItems(systemMenuItems);
-            DeleteItemHandler deleteHandler = new DeleteItemHandler(model.getService(), display);
+            DeleteItemHandler deleteHandler = new DeleteItemHandler(model.getService(), model.getEventBus(), display);
             display.setUserCollectionMenuItems(userMenuItems, deleteHandler);
 
             userListProvider.getList().addAll(userFolders);
@@ -673,56 +675,55 @@ public class CollectionsPresenter extends AbstractPresenter {
 
         @Override
         public void onClick(ClickEvent event) {
-            EntryInfo toDelete = entryViewPresenter.getCurrentInfo();
+            final EntryInfo toDelete = entryViewPresenter.getCurrentInfo();
             if (toDelete == null)
                 return;
 
-            model.getService().deleteEntry(AppController.sessionId, toDelete,
-                new AsyncCallback<ArrayList<FolderDetails>>() {
+            new IceAsyncCallback<ArrayList<FolderDetails>>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        FeedbackEvent event = new FeedbackEvent(true, "Error deleting entry");
-                        model.getEventBus().fireEvent(event);
+                @Override
+                protected void callService(AsyncCallback<ArrayList<FolderDetails>> callback) {
+                    try {
+                        model.getService().deleteEntry(AppController.sessionId, toDelete, callback);
+                    } catch (AuthenticationException e) {
+                        History.newItem(Page.LOGIN.getLink());
+                    }
+                }
+
+                @Override
+                public void onSuccess(ArrayList<FolderDetails> result) {
+                    History.newItem(Page.COLLECTIONS.getLink() + ";id=" +
+                                            currentFolder.getId());
+                    ArrayList<MenuItem> menuItems = new ArrayList<MenuItem>();
+                    FeedbackEvent event = new FeedbackEvent(false,
+                                                            "Entry deleted " +
+                                                                    "successfully");
+                    model.getEventBus().fireEvent(event);
+
+                    for (FolderDetails detail : result) {
+                        MenuItem item = new MenuItem(detail.getId(),
+                                                     detail.getName(), detail
+                                .getCount().longValue(), detail.isSystemFolder());
+                        menuItems.add(item);
                     }
 
-                    @Override
-                    public void onSuccess(ArrayList<FolderDetails> result) {
-                        if (result == null) {
-                            FeedbackEvent event = new FeedbackEvent(true, "Error deleting entry");
-                            model.getEventBus().fireEvent(event);
-                            return;
-                        }
-
-                        History.newItem(Page.COLLECTIONS.getLink() + ";id=" + currentFolder.getId());
-                        ArrayList<MenuItem> menuItems = new ArrayList<MenuItem>();
-                        FeedbackEvent event = new FeedbackEvent(false, "Entry deleted successfully");
-                        model.getEventBus().fireEvent(event);
-
-                        for (FolderDetails detail : result) {
-                            MenuItem item = new MenuItem(detail.getId(), detail.getName(), detail
-                                    .getCount().longValue(), detail.isSystemFolder());
-                            menuItems.add(item);
-                        }
-
-                        if (currentFolder.getId() == 0) {
-                            AppController.accountInfo.setUserEntryCount(AppController.accountInfo
-                                    .getUserEntryCount() - 1);
-                            MenuItem myItems = new MenuItem(0, "My Entries",
-                                    AppController.accountInfo.getUserEntryCount(), true);
-                            menuItems.add(myItems);
-                        }
-
-                        AppController.accountInfo.setVisibleEntryCount(AppController.accountInfo
-                                .getVisibleEntryCount() - 1);
-                        MenuItem allEntriesItem = new MenuItem(-1, "Available Entries",
-                                AppController.accountInfo.getVisibleEntryCount(), true);
-                        menuItems.add(allEntriesItem);
-
-                        display.updateMenuItemCounts(menuItems);
-
+                    if (currentFolder.getId() == 0) {
+                        AppController.accountInfo.setUserEntryCount(AppController.accountInfo
+                                                                                 .getUserEntryCount() - 1);
+                        MenuItem myItems = new MenuItem(0, "My Entries",
+                                                        AppController.accountInfo.getUserEntryCount(), true);
+                        menuItems.add(myItems);
                     }
-                });
+
+                    AppController.accountInfo.setVisibleEntryCount(AppController.accountInfo
+                                                                                .getVisibleEntryCount() - 1);
+                    MenuItem allEntriesItem = new MenuItem(-1, "Available Entries",
+                                                           AppController.accountInfo.getVisibleEntryCount(), true);
+                    menuItems.add(allEntriesItem);
+
+                    display.updateMenuItemCounts(menuItems);
+                }
+            }.go(model.getEventBus());
         }
     }
 

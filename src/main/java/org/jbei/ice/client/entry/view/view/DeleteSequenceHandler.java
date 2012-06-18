@@ -25,19 +25,23 @@ public class DeleteSequenceHandler implements ClickHandler {
 
     @Override
     public void onClick(ClickEvent event) {
-        service.removeSequence(AppController.sessionId, entryId, new AsyncCallback<Boolean>() {
+        try {
+            service.removeSequence(AppController.sessionId, entryId, new AsyncCallback<Boolean>() {
 
-            @Override
-            public void onSuccess(Boolean result) {
-                if (callback != null)
-                    callback.onSucess(true);
-            }
+                @Override
+                public void onSuccess(Boolean result) {
+                    if (callback != null)
+                        callback.onSucess(true);
+                }
 
-            @Override
-            public void onFailure(Throwable caught) {
-                if (callback != null)
-                    callback.onFailure();
-            }
-        });
+                @Override
+                public void onFailure(Throwable caught) {
+                    if (callback != null)
+                        callback.onFailure();
+                }
+            });
+        } catch (org.jbei.ice.client.exception.AuthenticationException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
     }
 }

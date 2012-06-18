@@ -77,31 +77,35 @@ public class AdminPresenter extends AbstractPresenter {
     }
 
     private void retrieveSavedDrafts() {
-        service.retrieveDraftsPendingVerification(AppController.sessionId,
-            new AsyncCallback<ArrayList<BulkImportDraftInfo>>() {
+        try {
+            service.retrieveDraftsPendingVerification(AppController.sessionId,
+                new AsyncCallback<ArrayList<BulkImportDraftInfo>>() {
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert("Error retrieving saved drafts");
-                }
-
-                @Override
-                public void onSuccess(ArrayList<BulkImportDraftInfo> result) {
-                    ArrayList<BulkImportMenuItem> data = new ArrayList<BulkImportMenuItem>();
-                    for (BulkImportDraftInfo info : result) {
-                        String name = info.getName();
-                        String dateTime = DateUtilities.formatShorterDate(info.getCreated());
-                        BulkImportMenuItem item = new BulkImportMenuItem(info.getId(), name, info
-                                .getCount(), dateTime, info.getType().toString(), info.getAccount()
-                                .getEmail());
-                        data.add(item);
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Window.alert("Error retrieving saved drafts");
                     }
 
-                    if (!data.isEmpty()) {
-                        view.setSavedDraftsData(data, new DeleteBulkImportHandler(service));
+                    @Override
+                    public void onSuccess(ArrayList<BulkImportDraftInfo> result) {
+                        ArrayList<BulkImportMenuItem> data = new ArrayList<BulkImportMenuItem>();
+                        for (BulkImportDraftInfo info : result) {
+                            String name = info.getName();
+                            String dateTime = DateUtilities.formatShorterDate(info.getCreated());
+                            BulkImportMenuItem item = new BulkImportMenuItem(info.getId(), name, info
+                                    .getCount(), dateTime, info.getType().toString(), info.getAccount()
+                                    .getEmail());
+                            data.add(item);
+                        }
+
+                        if (!data.isEmpty()) {
+                            view.setSavedDraftsData(data, new DeleteBulkImportHandler(service));
+                        }
                     }
-                }
-            });
+                });
+        } catch (org.jbei.ice.client.exception.AuthenticationException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
     }
 
     private void setMenuSelectionModel() {
@@ -112,24 +116,28 @@ public class AdminPresenter extends AbstractPresenter {
             public void onSelectionChange(SelectionChangeEvent event) {
                 final BulkImportMenuItem item = draftSelection.getSelectedObject();
 
-                service.retrieveBulkImport(AppController.sessionId, item.getId(),
-                    new AsyncCallback<BulkImportDraftInfo>() {
+                try {
+                    service.retrieveBulkImport(AppController.sessionId, item.getId(),
+                        new AsyncCallback<BulkImportDraftInfo>() {
 
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            Window.alert("Could not retrieve your saved drafts.");
-                        }
-
-                        @Override
-                        public void onSuccess(BulkImportDraftInfo result) {
-                            if (result == null) {
+                            @Override
+                            public void onFailure(Throwable caught) {
                                 Window.alert("Could not retrieve your saved drafts.");
-                                return;
                             }
 
-                            view.setSheet(result, false);
-                        }
-                    });
+                            @Override
+                            public void onSuccess(BulkImportDraftInfo result) {
+                                if (result == null) {
+                                    Window.alert("Could not retrieve your saved drafts.");
+                                    return;
+                                }
+
+                                view.setSheet(result, false);
+                            }
+                        });
+                } catch (org.jbei.ice.client.exception.AuthenticationException e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                }
             }
         });
     }

@@ -22,22 +22,26 @@ public class UserPresenter implements AdminPanelPresenter {
     }
 
     private void retrieveAllUsers() {
-        service.retrieveAllUserAccounts(AppController.sessionId,
-            new AsyncCallback<ArrayList<AccountInfo>>() {
+        try {
+            service.retrieveAllUserAccounts(AppController.sessionId,
+                new AsyncCallback<ArrayList<AccountInfo>>() {
 
-                @Override
-                public void onSuccess(ArrayList<AccountInfo> result) {
-                    if (result == null)
-                        return;
+                    @Override
+                    public void onSuccess(ArrayList<AccountInfo> result) {
+                        if (result == null)
+                            return;
 
-                    dataProvider.getList().clear();
-                    dataProvider.getList().addAll(result);
-                }
+                        dataProvider.getList().clear();
+                        dataProvider.getList().addAll(result);
+                    }
 
-                @Override
-                public void onFailure(Throwable caught) {
-                }
-            });
+                    @Override
+                    public void onFailure(Throwable caught) {
+                    }
+                });
+        } catch (org.jbei.ice.client.exception.AuthenticationException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
     }
 
     @Override

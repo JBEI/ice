@@ -29,20 +29,24 @@ public class BulkImportModel {
     }
 
     public void retrieveDraftMenuData(final SavedDraftsEventHandler handler) {
-        service.retrieveImportDraftData(AppController.sessionId,
-            AppController.accountInfo.getEmail(),
-            new AsyncCallback<ArrayList<BulkImportDraftInfo>>() {
+        try {
+            service.retrieveImportDraftData(AppController.sessionId,
+                AppController.accountInfo.getEmail(),
+                new AsyncCallback<ArrayList<BulkImportDraftInfo>>() {
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert("Error retrieving saved drafts");
-                }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Window.alert("Error retrieving saved drafts");
+                    }
 
-                @Override
-                public void onSuccess(ArrayList<BulkImportDraftInfo> result) {
-                    handler.onDataRetrieval(new SavedDraftsEvent(result));
-                }
-            });
+                    @Override
+                    public void onSuccess(ArrayList<BulkImportDraftInfo> result) {
+                        handler.onDataRetrieval(new SavedDraftsEvent(result));
+                    }
+                });
+        } catch (org.jbei.ice.client.exception.AuthenticationException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
     }
 
     public void saveBulkImportDraftData(EntryAddType type, String name,
@@ -72,19 +76,23 @@ public class BulkImportModel {
             info.setCreatorEmail(creatorEmail);
         }
 
-        service.saveBulkImportDraft(AppController.sessionId, AppController.accountInfo.getEmail(),
-            name, primary, secondary, new AsyncCallback<BulkImportDraftInfo>() {
+        try {
+            service.saveBulkImportDraft(AppController.sessionId, AppController.accountInfo.getEmail(),
+                name, primary, secondary, new AsyncCallback<BulkImportDraftInfo>() {
 
-                @Override
-                public void onSuccess(BulkImportDraftInfo result) {
-                    handler.onSubmit(new BulkImportDraftSubmitEvent(result));
-                }
+                    @Override
+                    public void onSuccess(BulkImportDraftInfo result) {
+                        handler.onSubmit(new BulkImportDraftSubmitEvent(result));
+                    }
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    handler.onSubmit(null);
-                }
-            });
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        handler.onSubmit(null);
+                    }
+                });
+        } catch (org.jbei.ice.client.exception.AuthenticationException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
     }
 
     public void updateBulkImportDraft(long id, EntryAddType type, String name,
@@ -101,20 +109,24 @@ public class BulkImportModel {
         // arrays get filled out here
         model.createInfo(data, primary, secondary);
 
-        service.updateBulkImportDraft(AppController.sessionId, id,
-            AppController.accountInfo.getEmail(), name, primary, secondary,
-            new AsyncCallback<BulkImportDraftInfo>() {
+        try {
+            service.updateBulkImportDraft(AppController.sessionId, id,
+                AppController.accountInfo.getEmail(), name, primary, secondary,
+                new AsyncCallback<BulkImportDraftInfo>() {
 
-                @Override
-                public void onSuccess(BulkImportDraftInfo result) {
-                    handler.onSubmit(new BulkImportDraftSubmitEvent(result));
-                }
+                    @Override
+                    public void onSuccess(BulkImportDraftInfo result) {
+                        handler.onSubmit(new BulkImportDraftSubmitEvent(result));
+                    }
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    handler.onSubmit(null);
-                }
-            });
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        handler.onSubmit(null);
+                    }
+                });
+        } catch (org.jbei.ice.client.exception.AuthenticationException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
     }
 
     public void submitBulkImport(EntryAddType type, ArrayList<SheetFieldData[]> data,
@@ -127,38 +139,46 @@ public class BulkImportModel {
             // arrays get filled out here
             model.createInfo(data, primary, secondary);
 
-            service.submitBulkImport(AppController.sessionId, AppController.accountInfo.getEmail(),
-                primary, secondary, new AsyncCallback<Boolean>() {
+            try {
+                service.submitBulkImport(AppController.sessionId, AppController.accountInfo.getEmail(),
+                    primary, secondary, new AsyncCallback<Boolean>() {
 
-                    @Override
-                    public void onSuccess(Boolean result) {
-                        handler.onSubmit(new BulkImportSubmitEvent(result));
-                    }
+                        @Override
+                        public void onSuccess(Boolean result) {
+                            handler.onSubmit(new BulkImportSubmitEvent(result));
+                        }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        handler.onSubmit(new BulkImportSubmitEvent(false));
-                    }
-                });
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            handler.onSubmit(new BulkImportSubmitEvent(false));
+                        }
+                    });
+            } catch (org.jbei.ice.client.exception.AuthenticationException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
         }
     }
 
     public void retrieveBulkImport(long id, final SavedDraftsEventHandler handler) {
-        service.retrieveBulkImport(AppController.sessionId, id,
-            new AsyncCallback<BulkImportDraftInfo>() {
+        try {
+            service.retrieveBulkImport(AppController.sessionId, id,
+                new AsyncCallback<BulkImportDraftInfo>() {
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    handler.onDataRetrieval(null);
-                }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        handler.onDataRetrieval(null);
+                    }
 
-                @Override
-                public void onSuccess(BulkImportDraftInfo result) {
-                    ArrayList<BulkImportDraftInfo> data = new ArrayList<BulkImportDraftInfo>();
-                    data.add(result);
-                    handler.onDataRetrieval(new SavedDraftsEvent(data));
-                }
-            });
+                    @Override
+                    public void onSuccess(BulkImportDraftInfo result) {
+                        ArrayList<BulkImportDraftInfo> data = new ArrayList<BulkImportDraftInfo>();
+                        data.add(result);
+                        handler.onDataRetrieval(new SavedDraftsEvent(data));
+                    }
+                });
+        } catch (org.jbei.ice.client.exception.AuthenticationException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
     }
 
     public RegistryServiceAsync getService() {

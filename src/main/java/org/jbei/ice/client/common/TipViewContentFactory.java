@@ -33,24 +33,28 @@ public class TipViewContentFactory {
 
     public static void getContents(EntryInfo entry, final Callback<Widget> callback) {
 
-        service.retrieveEntryTipDetails(AppController.sessionId, entry.getId(),
-            new AsyncCallback<EntryInfo>() {
+        try {
+            service.retrieveEntryTipDetails(AppController.sessionId, entry.getId(),
+                new AsyncCallback<EntryInfo>() {
 
-                @Override
-                public void onSuccess(EntryInfo result) {
-                    if (result == null) {
-                        callback.onFailure();
-                        return;
+                    @Override
+                    public void onSuccess(EntryInfo result) {
+                        if (result == null) {
+                            callback.onFailure();
+                            return;
+                        }
+                        Widget contents = getContents(result);
+                        callback.onSucess(contents);
                     }
-                    Widget contents = getContents(result);
-                    callback.onSucess(contents);
-                }
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    callback.onFailure();
-                }
-            });
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        callback.onFailure();
+                    }
+                });
+        } catch (org.jbei.ice.client.exception.AuthenticationException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
 
     }
 

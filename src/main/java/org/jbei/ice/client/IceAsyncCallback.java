@@ -1,8 +1,11 @@
 package org.jbei.ice.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.jbei.ice.client.event.FeedbackEvent;
+import org.jbei.ice.client.util.Utils;
 
 /**
  * Abstract AsyncCallback that leaves it up to the user
@@ -13,21 +16,20 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  * 
  * @param <T>
  */
-public abstract class AsyncCall<T> implements AsyncCallback<T> {
+public abstract class IceAsyncCallback<T> implements AsyncCallback<T> {
 
     @Override
     public void onFailure(Throwable caught) {
-        // TODO generalized fail message
-        Window.alert("There was a failure: " + caught.getMessage());
+        Window.alert("Error connecting to the server");
     }
 
-    public void go() {
+    public void go(HandlerManager eventBus) {
         int retryCount = 3;
         showBusyIndicator();
-        execute(retryCount);
+        execute(retryCount, eventBus);
     }
 
-    private void execute(final int retryCount) {
+    private void execute(final int retryCount, final HandlerManager eventBus) {
         callService(new AsyncCallback<T>() {
 
             @Override
@@ -35,16 +37,20 @@ public abstract class AsyncCall<T> implements AsyncCallback<T> {
                 GWT.log(caught.toString(), caught);
                 if (retryCount <= 0) {
                     hideBusyIndicator();
-                    AsyncCall.this.onFailure(caught);
+                    IceAsyncCallback.this.onFailure(caught);
                 } else {
-                    execute(retryCount - 1);
+                    execute(retryCount - 1, eventBus);
                 }
             }
 
             @Override
             public void onSuccess(T result) {
                 hideBusyIndicator();
-                AsyncCall.this.onSuccess(result);
+                if( result == null ) {
+                    eventBus.fireEvent(new FeedbackEvent(true, "Error contacting server"));
+                    return;
+                }
+                IceAsyncCallback.this.onSuccess(result);
             }
         });
     }
@@ -52,11 +58,10 @@ public abstract class AsyncCall<T> implements AsyncCallback<T> {
     protected abstract void callService(AsyncCallback<T> callback);
 
     protected void showBusyIndicator() {
-
+        Utils.showWaitCursor(null);
     }
 
     protected void hideBusyIndicator() {
-
+        Utils.showDefaultCursor(null);
     }
-
 }

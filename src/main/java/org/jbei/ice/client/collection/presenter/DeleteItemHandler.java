@@ -3,14 +3,19 @@ package org.jbei.ice.client.collection.presenter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.History;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.IceAsyncCallback;
+import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.ICollectionView;
 import org.jbei.ice.client.collection.menu.CollectionMenu;
 import org.jbei.ice.client.collection.menu.IDeleteMenuHandler;
 import org.jbei.ice.client.collection.menu.MenuHiderTimer;
 import org.jbei.ice.client.collection.menu.MenuItem;
+import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.FolderDetails;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -22,8 +27,10 @@ public class DeleteItemHandler implements IDeleteMenuHandler {
     private final HashMap<Long, ArrayList<Long>> folder;
     private final RegistryServiceAsync service;
     private final ICollectionView view;
+    private final HandlerManager eventBus;
 
-    public DeleteItemHandler(RegistryServiceAsync service, ICollectionView view) {
+    public DeleteItemHandler(RegistryServiceAsync service, HandlerManager eventBus, ICollectionView view) {
+        this.eventBus = eventBus;
         folder = new HashMap<Long, ArrayList<Long>>();
         this.service = service;
         this.view = view;
@@ -69,23 +76,28 @@ public class DeleteItemHandler implements IDeleteMenuHandler {
             public void onClick(ClickEvent event) {
                 if (!folder.containsKey(item.getId()))
                     return;
-                service.createUserCollection(AppController.sessionId, item.getName(), "",
-                    folder.get(item.getId()), new AsyncCallback<FolderDetails>() {
 
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            view.showFeedbackMessage("Error restoring folder.", true);
-                        }
+                new IceAsyncCallback<FolderDetails>() {
 
-                        @Override
-                        public void onSuccess(FolderDetails result) {
-                            timer.cancel();
-                            MenuItem newItem = new MenuItem(result.getId(), result.getName(),
-                                    result.getCount().longValue(), result.isSystemFolder());
-                            menu.updateMenuItem(item.getId(), newItem, DeleteItemHandler.this);
-                            view.addSubMenuFolder(newItem);
+                    @Override
+                    protected void callService(AsyncCallback<FolderDetails> callback) {
+                        try {
+                            service.createUserCollection(AppController.sessionId, item.getName(), "",
+                                                         folder.get(item.getId()), callback);
+                        } catch (AuthenticationException e) {
+                            History.newItem(Page.LOGIN.getLink());
                         }
-                    });
+                    }
+
+                    @Override
+                    public void onSuccess(FolderDetails result) {
+                        timer.cancel();
+                        MenuItem newItem = new MenuItem(result.getId(), result.getName(),
+                                                        result.getCount().longValue(), result.isSystemFolder());
+                        menu.updateMenuItem(item.getId(), newItem, DeleteItemHandler.this);
+                        view.addSubMenuFolder(newItem);
+                    }
+                }.go(eventBus);
             }
         };
     }

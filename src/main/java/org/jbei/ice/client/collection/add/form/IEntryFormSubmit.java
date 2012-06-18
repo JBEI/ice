@@ -1,7 +1,5 @@
 package org.jbei.ice.client.collection.add.form;
 
-import java.util.HashSet;
-
 import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.user.client.ui.Button;
@@ -10,8 +8,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Interface for entry form submissions
- * TODO : nothing here suggests that it is for entry
- * 
+ *
  * @author Hector Plahar
  */
 
@@ -27,7 +24,9 @@ public interface IEntryFormSubmit {
 
     void populateEntries();
 
-    HashSet<EntryInfo> getEntries();
+    EntryInfo getPrimaryEntry();
+
+    EntryInfo getSecondaryEntry();
 
     void setSampleLocation(SampleLocation sampleLocation);
 }

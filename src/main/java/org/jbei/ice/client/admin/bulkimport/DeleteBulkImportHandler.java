@@ -19,27 +19,31 @@ public class DeleteBulkImportHandler implements IDeleteMenuHandler {
     @Override
     public void delete(long draftId, final Callback<BulkImportMenuItem> deleteCallback) {
 
-        service.deleteDraftPendingVerification(AppController.sessionId, draftId,
-            new AsyncCallback<BulkImportDraftInfo>() {
+        try {
+            service.deleteDraftPendingVerification(AppController.sessionId, draftId,
+                new AsyncCallback<BulkImportDraftInfo>() {
 
-                @Override
-                public void onSuccess(BulkImportDraftInfo result) {
-                    if (result == null) {
-                        deleteCallback.onFailure();
-                        return;
+                    @Override
+                    public void onSuccess(BulkImportDraftInfo result) {
+                        if (result == null) {
+                            deleteCallback.onFailure();
+                            return;
+                        }
+                        String name = result.getName();
+                        String dateTime = DateUtilities.formatShorterDate(result.getCreated());
+                        BulkImportMenuItem item = new BulkImportMenuItem(result.getId(), name, result
+                                .getCount(), dateTime, result.getType().toString(), result.getAccount()
+                                .getEmail());
+                        deleteCallback.onSucess(item);
                     }
-                    String name = result.getName();
-                    String dateTime = DateUtilities.formatShorterDate(result.getCreated());
-                    BulkImportMenuItem item = new BulkImportMenuItem(result.getId(), name, result
-                            .getCount(), dateTime, result.getType().toString(), result.getAccount()
-                            .getEmail());
-                    deleteCallback.onSucess(item);
-                }
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    deleteCallback.onFailure();
-                }
-            });
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        deleteCallback.onFailure();
+                    }
+                });
+        } catch (org.jbei.ice.client.exception.AuthenticationException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
     }
 }

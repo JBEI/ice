@@ -633,9 +633,12 @@ public abstract class NewSingleEntryForm<T extends EntryInfo> extends Composite 
     }
 
     @Override
-    public HashSet<EntryInfo> getEntries() {
-        HashSet<EntryInfo> entries = new HashSet<EntryInfo>();
-        entries.add(getEntryInfo());
-        return entries;
+    public EntryInfo getPrimaryEntry() {
+        return getEntryInfo();
+    }
+
+    @Override
+    public EntryInfo getSecondaryEntry() {
+        return null;
     }
 }

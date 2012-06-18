@@ -1,10 +1,16 @@
 package org.jbei.ice.client.profile;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HasWidgets;
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.IceAsyncCallback;
+import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.SamplesDataProvider;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
@@ -12,21 +18,18 @@ import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
+import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.login.RegistrationDetails;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.dto.AccountInfo;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HasWidgets;
+import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * Presenter for the profile page
- * 
+ *
  * @author Hector Plahar
  */
 public class ProfilePresenter extends AbstractPresenter {
@@ -44,11 +47,7 @@ public class ProfilePresenter extends AbstractPresenter {
     private final String userId;
 
     public ProfilePresenter(final RegistryServiceAsync service, final HandlerManager eventBus,
-            final IProfileView display, String userId) {
-
-        if (userId == null || userId.isEmpty()) {
-            userId = AppController.accountInfo.getEmail();
-        }
+                            final IProfileView display, final String userId) {
 
         this.userId = userId;
         this.service = service;
@@ -61,32 +60,35 @@ public class ProfilePresenter extends AbstractPresenter {
             public void onClick(ClickEvent event) {
                 CellEntry selected = display.getMenu().getSelection();
                 switch (selected.getType()) {
-                default:
-                case ABOUT:
-                    display.setContents(currentInfo);
-                    break;
+                    default:
+                    case ABOUT:
+                        display.setContents(currentInfo);
+                        break;
 
-                case ENTRIES:
-                    retrieveUserEntries();
-                    break;
+                    case ENTRIES:
+                        retrieveUserEntries();
+                        break;
 
-                case SAMPLES:
-                    retrieveUserSamples();
-                    break;
+                    case SAMPLES:
+                        retrieveUserSamples();
+                        break;
                 }
             }
         });
 
-        this.service.retrieveProfileInfo(sid, userId, new AsyncCallback<AccountInfo>() {
+        new IceAsyncCallback<AccountInfo>() {
+
+            @Override
+            protected void callService(AsyncCallback<AccountInfo> callback) {
+                try {
+                    service.retrieveProfileInfo(AppController.sessionId, userId, callback);
+                } catch (AuthenticationException e) {
+                    History.newItem(Page.LOGIN.getLink());
+                }
+            }
 
             @Override
             public void onSuccess(AccountInfo profileInfo) {
-
-                if (profileInfo == null) {
-                    display.setContents(null);
-                    return;
-                }
-
                 currentInfo = profileInfo;
                 display.setContents(currentInfo);
 
@@ -98,11 +100,8 @@ public class ProfilePresenter extends AbstractPresenter {
                 menu.add(new CellEntry(MenuType.SAMPLES, currentInfo.getUserSampleCount()));
                 display.getMenu().setRowData(menu);
             }
+        }.go(eventBus);
 
-            @Override
-            public void onFailure(Throwable caught) {
-            }
-        });
 
         samplesDataProvider = new SamplesDataProvider(display.getSamplesTable(), service);
 
@@ -128,41 +127,41 @@ public class ProfilePresenter extends AbstractPresenter {
 
     private void retrieveUserEntries() {
         service.retrieveUserEntries(AppController.sessionId, this.userId,
-            new AsyncCallback<FolderDetails>() {
+                                    new AsyncCallback<FolderDetails>() {
 
-                @Override
-                public void onSuccess(FolderDetails folder) {
-                    if (folder == null) {
-                        entryDataProvider.setValues(null);
-                        return;
-                    }
+                                        @Override
+                                        public void onSuccess(FolderDetails folder) {
+                                            if (folder == null) {
+                                                entryDataProvider.setValues(null);
+                                                return;
+                                            }
 
-                    collectionsDataTable.clearSelection();
-                    ArrayList<Long> entries = folder.getContents();
-                    entryDataProvider.setValues(entries);
-                    display.setEntryContent(collectionsDataTable);
-                }
+                                            collectionsDataTable.clearSelection();
+                                            ArrayList<Long> entries = folder.getContents();
+                                            entryDataProvider.setValues(entries);
+                                            display.setEntryContent(collectionsDataTable);
+                                        }
 
-                @Override
-                public void onFailure(Throwable caught) {
-                }
-            });
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                        }
+                                    });
     }
 
     private void retrieveUserSamples() {
         service.retrieveSamplesByDepositor(AppController.sessionId, currentInfo.getEmail(),
-            ColumnField.CREATED, false, new AsyncCallback<LinkedList<Long>>() {
+                                           ColumnField.CREATED, false, new AsyncCallback<LinkedList<Long>>() {
 
-                @Override
-                public void onFailure(Throwable caught) {
-                }
+            @Override
+            public void onFailure(Throwable caught) {
+            }
 
-                @Override
-                public void onSuccess(LinkedList<Long> result) {
-                    samplesDataProvider.setValues(new ArrayList<Long>(result));
-                    display.setSampleView();
-                }
-            });
+            @Override
+            public void onSuccess(LinkedList<Long> result) {
+                samplesDataProvider.setValues(new ArrayList<Long>(result));
+                display.setSampleView();
+            }
+        });
     }
 
     private void checkCanEditProfile() {
@@ -234,20 +233,24 @@ public class ProfilePresenter extends AbstractPresenter {
             currentInfo.setInitials(details.getInitials());
             currentInfo.setInstitution(details.getInstitution());
 
-            service.updateAccount(AppController.sessionId, currentInfo.getEmail(), currentInfo,
-                new AsyncCallback<AccountInfo>() {
+            try {
+                service.updateAccount(AppController.sessionId, currentInfo.getEmail(), currentInfo,
+                                      new AsyncCallback<AccountInfo>() {
 
-                    @Override
-                    public void onSuccess(AccountInfo result) {
-                        currentInfo = result;
-                        display.setContents(currentInfo);
-                    }
+                                          @Override
+                                          public void onSuccess(AccountInfo result) {
+                                              currentInfo = result;
+                                              display.setContents(currentInfo);
+                                          }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Window.alert("Could not connect to the server for update");
-                    }
-                });
+                                          @Override
+                                          public void onFailure(Throwable caught) {
+                                              Window.alert("Could not connect to the server for update");
+                                          }
+                                      });
+            } catch (org.jbei.ice.client.exception.AuthenticationException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
         }
     }
 
@@ -263,7 +266,7 @@ public class ProfilePresenter extends AbstractPresenter {
         @Override
         public void onClick(ClickEvent event) {
             display.changePasswordPanel(currentInfo, new UpdatePasswordClickHandler(),
-                new ShowCurrentInfoHandler());
+                                        new ShowCurrentInfoHandler());
         }
     }
 
@@ -275,8 +278,9 @@ public class ProfilePresenter extends AbstractPresenter {
             if (password.isEmpty())
                 return;
 
-            service.updateAccountPassword(AppController.sessionId, currentInfo.getEmail(),
-                password, new AsyncCallback<Boolean>() {
+            try {
+                service.updateAccountPassword(AppController.sessionId, currentInfo.getEmail(),
+                                              password, new AsyncCallback<Boolean>() {
 
                     @Override
                     public void onSuccess(Boolean result) {
@@ -288,6 +292,9 @@ public class ProfilePresenter extends AbstractPresenter {
                     public void onFailure(Throwable caught) {
                     }
                 });
+            } catch (org.jbei.ice.client.exception.AuthenticationException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
         }
     }
 }

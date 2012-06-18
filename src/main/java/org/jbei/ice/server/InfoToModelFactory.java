@@ -34,6 +34,10 @@ import org.jbei.ice.web.common.CommaSeparatedField;
  */
 public class InfoToModelFactory {
 
+    public static Entry infoToEntry(EntryInfo info) {
+        return infoToEntry(info, null) ;
+    }
+
     /**
      * 
      * @param info

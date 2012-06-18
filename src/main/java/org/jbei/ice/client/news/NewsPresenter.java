@@ -1,28 +1,30 @@
 package org.jbei.ice.client.news;
 
-import java.util.ArrayList;
-
-import org.jbei.ice.client.AbstractPresenter;
-import org.jbei.ice.client.AppController;
-import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.shared.dto.NewsItem;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
+import org.jbei.ice.client.AbstractPresenter;
+import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.IceAsyncCallback;
+import org.jbei.ice.client.Page;
+import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.client.util.DateUtilities;
+import org.jbei.ice.shared.dto.NewsItem;
+
+import java.util.ArrayList;
 
 /**
  * Presenter for the news page. Currently relies on the fact that
  * there are very few news items and so it loads all of them in memory.
  * Should be re-done to handle large number of news postings
- * 
+ *
  * @author Hector Plahar
  */
 
@@ -50,7 +52,7 @@ public class NewsPresenter extends AbstractPresenter {
 
                 String dateFormat = DateUtilities.formatDate(selected.getCreationDate());
                 display.addNewsItem(selected.getId(), dateFormat, selected.getHeader(),
-                    selected.getBody());
+                                    selected.getBody());
             }
         });
     }
@@ -62,28 +64,28 @@ public class NewsPresenter extends AbstractPresenter {
             display.setAddNewsButtonVisibilty(false);
         }
 
-        service.retrieveNewsItems(AppController.sessionId,
-            new AsyncCallback<ArrayList<NewsItem>>() {
-
-                @Override
-                public void onSuccess(ArrayList<NewsItem> result) {
-                    if (result == null)
-                        return;
-                    display.setArchiveContents(result);
-
-                    if (result.isEmpty())
-                        return;
-
-                    NewsItem item = result.get(0);
-                    String dateFormat = DateUtilities.formatDate(item.getCreationDate());
-                    display.addNewsItem(item.getId(), dateFormat, item.getHeader(), item.getBody());
+        new IceAsyncCallback<ArrayList<NewsItem>>() {
+            @Override
+            protected void callService(AsyncCallback<ArrayList<NewsItem>> callback) {
+                try {
+                    service.retrieveNewsItems(AppController.sessionId, callback);
+                } catch (AuthenticationException e) {
+                    History.newItem(Page.LOGIN.getLink());
                 }
+            }
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert("failed to retrieve news");
-                }
-            });
+            @Override
+            public void onSuccess(ArrayList<NewsItem> result) {
+                display.setArchiveContents(result);
+
+                if (result.isEmpty())
+                    return;
+
+                NewsItem item = result.get(0);
+                String dateFormat = DateUtilities.formatDate(item.getCreationDate());
+                display.addNewsItem(item.getId(), dateFormat, item.getHeader(), item.getBody());
+            }
+        }.go(eventBus);
 
         display.getSubmitButton().addClickHandler(new ClickHandler() {
 
@@ -108,17 +110,20 @@ public class NewsPresenter extends AbstractPresenter {
         });
     }
 
-    private void save(NewsItem item) {
+    private void save(final NewsItem item) {
 
         if (!AppController.accountInfo.isModerator())
             return;
 
-        service.createNewsItem(AppController.sessionId, item, new AsyncCallback<NewsItem>() {
+        new IceAsyncCallback<NewsItem>() {
 
             @Override
-            public void onFailure(Throwable caught) {
-                // TODO : error feedback
-                Window.alert(caught.getMessage());
+            protected void callService(AsyncCallback<NewsItem> callback) {
+                try {
+                    service.createNewsItem(AppController.sessionId, item, callback);
+                } catch (AuthenticationException e) {
+                    History.newItem(Page.LOGIN.getLink());
+                }
             }
 
             @Override
@@ -126,7 +131,7 @@ public class NewsPresenter extends AbstractPresenter {
                 String dateStr = DateUtilities.formatDate(result.getCreationDate());
                 display.addNewsItem(result.getId(), dateStr, result.getHeader(), result.getBody());
             }
-        });
+        }.go(eventBus);
     }
 
     @Override

@@ -85,30 +85,34 @@ public class EntryModel {
             if (sample == null)
                 return;
 
-            service.createSample(AppController.sessionId, sample, currentInfo.getId(),
-                new AsyncCallback<SampleStorage>() {
+            try {
+                service.createSample(AppController.sessionId, sample, currentInfo.getId(),
+                    new AsyncCallback<SampleStorage>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        FeedbackEvent feedback = new FeedbackEvent(true, "Could not save sample");
-                        eventBus.fireEvent(feedback);
-                    }
-
-                    @Override
-                    public void onSuccess(SampleStorage result) {
-                        if (result == null) {
-                            FeedbackEvent feedback = new FeedbackEvent(true,
-                                    "Could not save sample");
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            FeedbackEvent feedback = new FeedbackEvent(true, "Could not save sample");
                             eventBus.fireEvent(feedback);
-                            return;
                         }
-                        display.setSampleFormVisibility(false);
-                        currentInfo.getSampleStorage().add(result);
-                        display.setSampleData(currentInfo.getSampleStorage());
-                        // TODO : update counts and show the loading indicator when the sample is being created
-                        // TODO : on click.
-                    }
-                });
+
+                        @Override
+                        public void onSuccess(SampleStorage result) {
+                            if (result == null) {
+                                FeedbackEvent feedback = new FeedbackEvent(true,
+                                        "Could not save sample");
+                                eventBus.fireEvent(feedback);
+                                return;
+                            }
+                            display.setSampleFormVisibility(false);
+                            currentInfo.getSampleStorage().add(result);
+                            display.setSampleData(currentInfo.getSampleStorage());
+                            // TODO : update counts and show the loading indicator when the sample is being created
+                            // TODO : on click.
+                        }
+                    });
+            } catch (org.jbei.ice.client.exception.AuthenticationException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
         }
     }
 }

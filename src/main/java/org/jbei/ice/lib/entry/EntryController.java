@@ -1,12 +1,5 @@
 package org.jbei.ice.lib.entry;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
 import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.EntryPermissionVerifier;
@@ -17,12 +10,7 @@ import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.managers.SampleManager;
 import org.jbei.ice.lib.managers.SequenceManager;
-import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.models.Attachment;
-import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Group;
-import org.jbei.ice.lib.models.Sample;
-import org.jbei.ice.lib.models.Sequence;
+import org.jbei.ice.lib.models.*;
 import org.jbei.ice.lib.permissions.PermissionDAO;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.JbeirSettings;
@@ -31,11 +19,14 @@ import org.jbei.ice.server.EntryViewFactory;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
 
+import java.util.*;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * ABI to manipulate {@link Entry}s.
- * 
+ *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
- * 
  */
 public class EntryController {
 
@@ -49,10 +40,10 @@ public class EntryController {
 
     /**
      * Create an entry in the database.
-     * <p>
+     * <p/>
      * Generates a new Part Number, the record id (UUID), version id, and timestamps as necessary.
      * Sets the record globally visible and schedule an index rebuild.
-     * 
+     *
      * @param entry
      * @return entry that was saved in the database.
      * @throws ControllerException
@@ -61,17 +52,36 @@ public class EntryController {
         return createEntry(entry, true, true);
     }
 
+    public HashSet<Entry> createStrainWithPlasmid(Strain strain, Plasmid plasmid) throws ControllerException {
+        checkNotNull(strain);
+        checkNotNull(plasmid);
+
+        HashSet<Entry> results = new HashSet<Entry>();
+
+        plasmid = (Plasmid) createEntry(plasmid);
+        results.add(plasmid);
+
+        String plasmidPartNumberString = "[["
+                + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":"
+                + plasmid.getOnePartNumber().getPartNumber() + "|"
+                + plasmid.getOneName().getName() + "]]";
+        strain.setPlasmids(plasmidPartNumberString);
+        strain = (Strain) createEntry(strain);
+        results.add(strain);
+        return results;
+    }
+
     /**
      * Generate the next part number string using system settings.
-     * 
+     *
      * @return The next part number.
-     * @throws ManagerException
+     * @throws ControllerException
      */
     private String getNextPartNumber() throws ControllerException {
         try {
             return dao.generateNextPartNumber(JbeirSettings.getSetting("PART_NUMBER_PREFIX"),
-                JbeirSettings.getSetting("PART_NUMBER_DELIMITER"),
-                JbeirSettings.getSetting("PART_NUMBER_DIGITAL_SUFFIX"));
+                                              JbeirSettings.getSetting("PART_NUMBER_DELIMITER"),
+                                              JbeirSettings.getSetting("PART_NUMBER_DIGITAL_SUFFIX"));
         } catch (ManagerException e) {
             Logger.error(e);
             throw new ControllerException(e);
@@ -80,15 +90,13 @@ public class EntryController {
 
     /**
      * Create an entry in the database.
-     * <p>
+     * <p/>
      * Generates a new Part Number, the record id (UUID), version id, and timestamps as necessary.
      * Optionally set the record globally visible or schedule an index rebuild.
-     * 
+     *
      * @param entry
-     * @param scheduleIndexRebuild
-     *            Set true to schedule search index rebuild.
-     * @param makePublic
-     *            Set true to make record globally visible.
+     * @param scheduleIndexRebuild Set true to schedule search index rebuild.
+     * @param makePublic           Set true to make record globally visible.
      * @return entry that was saved in the database.
      * @throws ControllerException
      */
@@ -117,7 +125,7 @@ public class EntryController {
 
     /**
      * Retrieve {@link Entry} from the database by id.
-     * 
+     *
      * @param id
      * @return entry retrieved from the database.
      * @throws ControllerException
@@ -141,7 +149,7 @@ public class EntryController {
 
     /**
      * Retrieve {@link Entry} from the database by recordId (uuid).
-     * 
+     *
      * @param recordId
      * @return entry retrieved from the database.
      * @throws ControllerException
@@ -166,9 +174,9 @@ public class EntryController {
 
     /**
      * Retrieve {@link Entry} from the database by part number.
-     * <p>
+     * <p/>
      * Throws exception if multiple entries have the same part number.
-     * 
+     *
      * @param partNumber
      * @return entry retrieved from the database.
      * @throws ControllerException
@@ -193,9 +201,9 @@ public class EntryController {
 
     /**
      * Retrieve {@link Entry} from the database by name.
-     * <p>
+     * <p/>
      * Throws exception if multiple entries have the same name.
-     * 
+     *
      * @param name
      * @return entry retrieved from the database.
      * @throws ControllerException
@@ -221,7 +229,7 @@ public class EntryController {
 
     /**
      * Checks if the user has read permission to the given {@link Entry}.
-     * 
+     *
      * @param entry
      * @return True if user has read permission.
      * @throws ControllerException
@@ -236,7 +244,7 @@ public class EntryController {
 
     /**
      * Checks if the user has write permission to the given {@link Entry}
-     * 
+     *
      * @param entry
      * @return True if user has write permission.
      * @throws ControllerException
@@ -250,7 +258,7 @@ public class EntryController {
 
     /**
      * Checks if the given entry has a {@link Sequence} associated with it.
-     * 
+     *
      * @param entry
      * @return True if sequence is associated.
      * @throws ControllerException
@@ -265,7 +273,7 @@ public class EntryController {
 
     /**
      * Checks if the given entry has {@link Sample}s associated with it.
-     * 
+     *
      * @param entry
      * @return True if there are associated samples.
      * @throws ControllerException
@@ -280,7 +288,7 @@ public class EntryController {
 
     /**
      * Checks if the given entry has {@link Attachment}s associated with it.
-     * 
+     *
      * @param entry
      * @return True if there are associated attachments.
      * @throws ControllerException
@@ -313,9 +321,8 @@ public class EntryController {
 
     /**
      * Retrieve the number of publicly visible entries (Entries visible to the Everybody group).
-     * 
+     *
      * @param account
-     * 
      * @return Number of entries.
      * @throws ControllerException
      */
@@ -341,7 +348,7 @@ public class EntryController {
 
     /**
      * Save the entry into the database. Then schedule index rebuild.
-     * 
+     *
      * @param entry
      * @return Saved entry.
      * @throws ControllerException
@@ -353,10 +360,9 @@ public class EntryController {
 
     /**
      * Save the entry into the database. Optionally schedule an index rebuild.
-     * 
+     *
      * @param entry
-     * @param scheduleIndexRebuild
-     *            Set True to schedule index rebuild.
+     * @param scheduleIndexRebuild Set True to schedule index rebuild.
      * @return Entry saved into the database.
      * @throws ControllerException
      * @throws PermissionException
@@ -391,7 +397,7 @@ public class EntryController {
 
     /**
      * Delete the entry in the database. Schedule an index rebuild.
-     * 
+     *
      * @param entry
      * @throws ControllerException
      * @throws PermissionException
@@ -403,10 +409,9 @@ public class EntryController {
 
     /**
      * Delete the entry in the database. Optionally schedule an index rebuild.
-     * 
+     *
      * @param entry
-     * @param scheduleIndexRebuild
-     *            True if index rebuild is scheduled.
+     * @param scheduleIndexRebuild True if index rebuild is scheduled.
      * @throws ControllerException
      * @throws PermissionException
      */
@@ -448,9 +453,9 @@ public class EntryController {
 
     /**
      * Filter {@link Entry} id's for display.
-     * <p>
+     * <p/>
      * Given a List of entry id's, keep only id's that user has read access to.
-     * 
+     *
      * @param ids
      * @return List of Entry ids.
      * @throws ControllerException
@@ -498,35 +503,35 @@ public class EntryController {
     }
 
     public LinkedList<EntryInfo> retrieveEntriesByIdSetSort(LinkedList<Long> entryIds,
-            ColumnField field, boolean asc) throws ControllerException {
+                                                            ColumnField field, boolean asc) throws ControllerException {
 
         List<Entry> entries;
 
         try {
 
             switch (field) {
-            case TYPE:
-                entries = dao.getEntriesByIdSetSortByType(entryIds, asc);
-                break;
+                case TYPE:
+                    entries = dao.getEntriesByIdSetSortByType(entryIds, asc);
+                    break;
 
-            case PART_ID:
-                entries = dao.getEntriesByIdSetSortByPartNumber(entryIds, asc);
-                break;
+                case PART_ID:
+                    entries = dao.getEntriesByIdSetSortByPartNumber(entryIds, asc);
+                    break;
 
-            case STATUS:
-                entries = dao.getEntriesByIdSetSortByStatus(entryIds, asc);
-                break;
+                case STATUS:
+                    entries = dao.getEntriesByIdSetSortByStatus(entryIds, asc);
+                    break;
 
-            case NAME:
-                entries = dao.getEntriesByIdSetSortByName(entryIds, asc);
-                break;
+                case NAME:
+                    entries = dao.getEntriesByIdSetSortByName(entryIds, asc);
+                    break;
 
-            case CREATED:
-                entries = dao.getEntriesByIdSetSortByCreated(entryIds, asc);
-                break;
+                case CREATED:
+                    entries = dao.getEntriesByIdSetSortByCreated(entryIds, asc);
+                    break;
 
-            default:
-                entries = dao.getEntriesByIdSet(entryIds);
+                default:
+                    entries = dao.getEntriesByIdSet(entryIds);
             }
         } catch (DAOException ce) {
             throw new ControllerException("Could not retrieve entries by sort ", ce);

@@ -1,94 +1,42 @@
 package org.jbei.ice.server;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.gwt.user.client.ui.SuggestOracle;
+import com.google.gwt.user.client.ui.SuggestOracle.Request;
+import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.apache.commons.lang.ArrayUtils;
 import org.jbei.ice.client.RegistryService;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
-import org.jbei.ice.controllers.AttachmentController;
-import org.jbei.ice.controllers.SampleController;
-import org.jbei.ice.controllers.SearchController;
-import org.jbei.ice.controllers.SequenceAnalysisController;
-import org.jbei.ice.controllers.SequenceController;
-import org.jbei.ice.controllers.StorageController;
+import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.controllers.*;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.bulkimport.BulkImportController;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.AttachmentManager;
-import org.jbei.ice.lib.managers.FolderManager;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.NewsManager;
-import org.jbei.ice.lib.managers.SampleManager;
-import org.jbei.ice.lib.managers.SequenceManager;
-import org.jbei.ice.lib.managers.StorageManager;
-import org.jbei.ice.lib.managers.TraceSequenceManager;
-import org.jbei.ice.lib.managers.UtilsManager;
-import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.models.Attachment;
-import org.jbei.ice.lib.models.BulkImport;
-import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Folder;
-import org.jbei.ice.lib.models.Group;
-import org.jbei.ice.lib.models.News;
-import org.jbei.ice.lib.models.Plasmid;
-import org.jbei.ice.lib.models.Sample;
-import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.models.Storage;
-import org.jbei.ice.lib.models.Strain;
-import org.jbei.ice.lib.models.TraceSequence;
+import org.jbei.ice.lib.managers.*;
+import org.jbei.ice.lib.models.*;
+import org.jbei.ice.lib.news.NewsController;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionDAO;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
-import org.jbei.ice.lib.utils.BulkImportEntryData;
-import org.jbei.ice.lib.utils.Emailer;
-import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.lib.utils.PopulateInitialDatabase;
-import org.jbei.ice.lib.utils.RichTextRenderer;
+import org.jbei.ice.lib.utils.*;
 import org.jbei.ice.lib.vo.IDNASequence;
-import org.jbei.ice.shared.AutoCompleteField;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.FolderDetails;
-import org.jbei.ice.shared.QueryOperator;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.AttachmentInfo;
-import org.jbei.ice.shared.dto.BlastResultInfo;
-import org.jbei.ice.shared.dto.BulkImportDraftInfo;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.EntryType;
-import org.jbei.ice.shared.dto.GroupInfo;
-import org.jbei.ice.shared.dto.NewsItem;
-import org.jbei.ice.shared.dto.SampleInfo;
-import org.jbei.ice.shared.dto.SearchFilterInfo;
-import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
-import org.jbei.ice.shared.dto.StorageInfo;
+import org.jbei.ice.shared.*;
+import org.jbei.ice.shared.dto.*;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 import org.jbei.ice.shared.dto.permission.PermissionSuggestion;
 import org.jbei.ice.web.utils.WebUtils;
 
-import com.google.gwt.user.client.ui.SuggestOracle;
-import com.google.gwt.user.client.ui.SuggestOracle.Request;
-import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
-// TODO : throw authentication exception in interface and here
 public class RegistryServiceImpl extends RemoteServiceServlet implements RegistryService {
 
     private static final long serialVersionUID = 1L;
@@ -133,7 +81,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<AccountInfo> retrieveAllUserAccounts(String sid) {
+    public ArrayList<AccountInfo> retrieveAllUserAccounts(String sid) throws AuthenticationException {
         AccountController controller = new AccountController();
 
         try {
@@ -141,7 +89,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             boolean isModerator = controller.isModerator(account);
             if (!isModerator) {
                 Logger.warn(account.getEmail()
-                        + " attempting to retrieve all user accounts without moderation privileges");
+                                    + " attempting to retrieve all user accounts without moderation privileges");
                 return null;
             }
 
@@ -181,7 +129,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean handleForgotPassword(String email, String url) {
+    public boolean handleForgotPassword(String email, String url) throws AuthenticationException {
         AccountController controller = new AccountController();
         try {
             Logger.info("Resetting password for user " + email);
@@ -194,7 +142,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean updateAccountPassword(String sid, String email, String password) {
+    public boolean updateAccountPassword(String sid, String email, String password) throws AuthenticationException {
         Account account;
 
         try {
@@ -217,20 +165,19 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         try {
             AccountController controller = new AccountController();
             String newPassword = controller.createNewAccount(info.getFirstName(),
-                info.getLastName(), info.getInitials(), info.getEmail(), info.getInstitution(),
-                info.getDescription());
+                                                             info.getLastName(), info.getInitials(), info.getEmail(),
+                                                             info.getInstitution(),
+                                                             info.getDescription());
 
             if (url != null && !url.isEmpty()) {
                 // send email
                 String subject = "Account created successfully";
-
                 StringBuilder stringBuilder = new StringBuilder();
 
                 stringBuilder
-                        .append("Dear " + info.getEmail())
-                        .append(
-                            ", \n\nThank you for creating a "
-                                    + JbeirSettings.getSetting("PROJECT_NAME"))
+                        .append("Dear " + info.getEmail() + ", ")
+                        .append("\n\nThank you for creating a "
+                                        + JbeirSettings.getSetting("PROJECT_NAME"))
                         .append(" account. \nBy accessing ")
                         .append("this site with the password provided at the bottom ")
                         .append("you agree to the following terms:\n\n");
@@ -246,8 +193,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 stringBuilder.append(terms);
 
                 stringBuilder.append("\n\nYour new password is: ").append(newPassword)
-                        .append("\nPlease go to the following link and change your password:\n\n")
-                        .append(url);
+                             .append("\nPlease go to the following link and change your password:\n\n")
+                             .append(url);
 
                 Emailer.send(info.getEmail(), subject, stringBuilder.toString());
             }
@@ -281,7 +228,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public AccountInfo updateAccount(String sid, String email, AccountInfo info) {
+    public AccountInfo updateAccount(String sid, String email, AccountInfo info) throws AuthenticationException {
         Account account;
         AccountController controller = new AccountController();
 
@@ -362,15 +309,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public LinkedList<EntryInfo> retrieveEntryData(String sid, ColumnField field, boolean asc,
-            LinkedList<Long> entryIds) {
+                                                   LinkedList<Long> entryIds) throws AuthenticationException {
 
         try {
             Account account = this.retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
             Logger.info(account.getEmail() + ": retrieving entry data for " + entryIds.size()
-                    + " entries");
+                                + " entries");
             EntryController entryController = new EntryController();
             return entryController.retrieveEntriesByIdSetSort(entryIds, field, asc);
         } catch (ControllerException e) {
@@ -381,15 +325,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public LinkedList<Long> sortEntryList(String sessionId, LinkedList<Long> ids,
-            ColumnField field, boolean asc) {
+                                          ColumnField field, boolean asc) throws AuthenticationException {
 
         try {
             Account account = this.retrieveAccountForSid(sessionId);
-            if (account == null)
-                return null;
-
             Logger.info(account.getEmail() + ": sorting entry list of size " + ids.size() + " by "
-                    + field.getName() + (asc ? " ASC" : " DESC"));
+                                + field.getName() + (asc ? " ASC" : " DESC"));
 
             EntryController controller = new EntryController();
             return controller.sortList(ids, field, asc);
@@ -400,14 +341,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<FolderDetails> retrieveUserCollections(String sessionId, String userId) {
+    public ArrayList<FolderDetails> retrieveUserCollections(String sessionId, String userId)
+            throws AuthenticationException {
         ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
 
         try {
             Account account = retrieveAccountForSid(sessionId);
-            if (account == null)
-                return null;
-
             Logger.info(account.getEmail() + ": retrieving user collections for user " + userId);
             AccountController controller = new AccountController();
             Account userAccount = controller.getByEmail(userId);
@@ -424,7 +363,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                     results.add(details);
                 }
             }
-
             return results;
         } catch (ControllerException ce) {
             Logger.error(ce);
@@ -436,14 +374,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<FolderDetails> retrieveCollections(String sessionId) {
+    public ArrayList<FolderDetails> retrieveCollections(String sessionId) throws AuthenticationException {
 
         ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
         try {
             Account account = retrieveAccountForSid(sessionId);
-            if (account == null)
-                return null;
-
             Logger.info(account.getEmail() + ": retrieving  collections");
             AccountController controller = new AccountController();
             Account system = controller.getSystemAccount();
@@ -483,13 +418,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public FolderDetails retrieveEntriesForFolder(String sessionId, long folderId) {
+    public FolderDetails retrieveEntriesForFolder(String sessionId, long folderId) throws AuthenticationException {
 
         try {
             Account account = this.retrieveAccountForSid(sessionId);
-            if (account == null)
-                return null;
-
             Logger.info(account.getEmail() + ": retrieving entries for folder " + folderId);
             Folder folder = FolderManager.get(folderId);
             if (folder == null)
@@ -517,12 +449,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public FolderDetails deleteFolder(String sessionId, long folderId) {
+    public FolderDetails deleteFolder(String sessionId, long folderId) throws AuthenticationException {
         try {
             Account account = this.retrieveAccountForSid(sessionId);
-            if (account == null)
-                return null;
-
             Logger.info(account.getEmail() + ": deleting folder " + folderId);
             Folder folder = FolderManager.get(folderId);
             if (folder == null)
@@ -562,13 +491,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public FolderDetails retrieveUserEntries(String sid, String userId) {
+    public FolderDetails retrieveUserEntries(String sid, String userId) throws AuthenticationException {
 
         try {
             Account account = this.retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
             Logger.info(account.getEmail() + ": retrieving user entries for " + userId);
             EntryController entryController = new EntryController();
             FolderDetails details = new FolderDetails(0, "My Entries", true);
@@ -583,15 +509,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public FolderDetails retrieveAllVisibleEntryIDs(String sid) {
+    public FolderDetails retrieveAllVisibleEntryIDs(String sid) throws AuthenticationException {
         Account account;
         AccountController controller = new AccountController();
 
         try {
             account = retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
             Logger.info(account.getEmail() + ": retrieving all visible entry ids");
             EntryController entryController = new EntryController();
 
@@ -612,14 +535,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         return null;
     }
 
-    protected Account retrieveAccountForSid(String sid) throws ControllerException {
+    protected Account retrieveAccountForSid(String sid) throws ControllerException, AuthenticationException {
         boolean isAuthenticated = AccountController.isAuthenticated(sid);
         AccountController controller = new AccountController();
 
-        if (!isAuthenticated) {
-            //            throw new AuthenticationBackendException("Session failed authentication: " + sid);
-            return null;
-        }
+        if (!isAuthenticated)
+            throw new AuthenticationException("Session failed authentication: " + sid);
 
         return controller.getAccountBySessionKey(sid);
     }
@@ -656,7 +577,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<SequenceAnalysisInfo> retrieveEntryTraceSequences(String sid, long entryId) {
+    public ArrayList<SequenceAnalysisInfo> retrieveEntryTraceSequences(String sid, long entryId)
+            throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
             if (account == null)
@@ -681,14 +603,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<SequenceAnalysisInfo> deleteEntryTraceSequences(String sid, long entryId,
-            ArrayList<String> fileId) {
+    public ArrayList<SequenceAnalysisInfo> deleteEntryTraceSequences(String sid, long entryId, ArrayList<String> fileId)
+            throws AuthenticationException {
 
         try {
             Account account = retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
             Entry entry = new EntryController().get(account, entryId);
             if (entry == null)
                 return null;
@@ -717,12 +636,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public EntryInfo retrieveEntryDetails(String sid, long id) {
+    public EntryInfo retrieveEntryDetails(String sid, long id) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
             Logger.info(account.getEmail() + ": retrieving entry details for " + id);
             Entry entry;
             try {
@@ -741,7 +657,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 Storage storage = sample.getStorage();
 
                 LinkedList<Storage> storageList = new LinkedList<Storage>();
-
                 List<Storage> storages = StorageManager.getStoragesUptoScheme(storage);
                 if (storages != null)
                     storageList.addAll(storages);
@@ -755,13 +670,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             boolean hasSequence = (SequenceManager.getByEntry(entry) != null);
 
             EntryInfo info = EntryToInfoFactory.getInfo(account, entry, attachments, sampleMap,
-                sequences, hasSequence);
+                                                        sequences, hasSequence);
 
             //
             //  the parsed versions are separated out into complementary fields
             //
             String html = RichTextRenderer.richTextToHtml(info.getLongDescriptionType(),
-                info.getLongDescription());
+                                                          info.getLongDescription());
             String parsed = getParsedNotes(html);
             info.setLongDescription(info.getLongDescription());
             info.setParsedDescription(parsed);
@@ -785,18 +700,15 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public EntryInfo retrieveEntryTipDetails(String sid, long id) {
+    public EntryInfo retrieveEntryTipDetails(String sid, long id) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
             Entry entry;
             try {
                 entry = new EntryController().get(account, id);
             } catch (PermissionException e) {
                 Logger.info(account.getEmail() + ": attempting to view entry details for entry "
-                        + id + " but does not have read permission");
+                                    + id + " but does not have read permission");
                 return null;
             }
 
@@ -825,13 +737,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             boolean hasSequence = (SequenceManager.getByEntry(entry) != null);
 
             EntryInfo info = EntryToInfoFactory.getInfo(account, entry, attachments, sampleMap,
-                sequences, hasSequence);
+                                                        sequences, hasSequence);
 
             //
             //  the parsed versions are separated out into complementary fields
             //
             String html = RichTextRenderer.richTextToHtml(info.getLongDescriptionType(),
-                info.getLongDescription());
+                                                          info.getLongDescription());
             String parsed = getParsedNotes(html);
             info.setLongDescription(info.getLongDescription());
             info.setParsedDescription(parsed);
@@ -867,23 +779,23 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             final char c = s.charAt(i);
 
             switch (c) {
-            case '\n':
-                newlineCount++;
-                break;
+                case '\n':
+                    newlineCount++;
+                    break;
 
-            case '\r':
-                break;
+                case '\r':
+                    break;
 
-            default:
-                if (newlineCount == 1) {
-                    buffer.append("<br/>");
-                } else if (newlineCount > 1) {
-                    buffer.append("</p><p>");
-                }
+                default:
+                    if (newlineCount == 1) {
+                        buffer.append("<br/>");
+                    } else if (newlineCount > 1) {
+                        buffer.append("</p><p>");
+                    }
 
-                buffer.append(c);
-                newlineCount = 0;
-                break;
+                    buffer.append(c);
+                    newlineCount = 0;
+                    break;
             }
         }
         if (newlineCount == 1) {
@@ -903,6 +815,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             account = retrieveAccountForSid(sid);
             return accountToInfo(account);
         } catch (ControllerException e) {
+            Logger.error(e);
+        } catch (AuthenticationException e) {
             Logger.error(e);
         }
 
@@ -934,7 +848,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     // 
 
     @Override
-    public ArrayList<Long> retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters) {
+    public ArrayList<Long> retrieveSearchResults(String sid, ArrayList<SearchFilterInfo> filters)
+            throws AuthenticationException {
         ArrayList<Long> results = new ArrayList<Long>();
 
         if (filters == null || filters.isEmpty())
@@ -949,9 +864,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         try {
 
             Account account = this.retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
             SearchController search = new SearchController(account);
             Set<Long> filterResults = search.runSearch(queryFilters); // TODO : this takes a while
             results.addAll(filterResults);
@@ -964,28 +876,27 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<BlastResultInfo> blastSearch(String sid, String query, QueryOperator program) {
+    public ArrayList<BlastResultInfo> blastSearch(String sid, String query, QueryOperator program)
+            throws AuthenticationException {
 
         try {
             Account account = this.retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
             ArrayList<BlastResultInfo> blastResults;
 
             SearchController searchController = new SearchController(account);
             switch (program) {
-            case BLAST_N:
-                blastResults = searchController.runBlastN(query);
-                break;
+                case BLAST_N:
+                    blastResults = searchController.runBlastN(query);
+                    break;
 
-            case TBLAST_X:
-                blastResults = searchController.runTblastx(query);
-                break;
-            //                String proteinQuery = SequenceUtils.translateToProtein(query);  as far as I can tell this is only for display to user
+                case TBLAST_X:
+                    blastResults = searchController.runTblastx(query);
+                    break;
+                //                String proteinQuery = SequenceUtils.translateToProtein(query);  as far as I can
+                // tell this is only for display to user
 
-            default:
-                return null;
+                default:
+                    return null;
             }
 
             return blastResults;
@@ -1073,18 +984,15 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     // Uses email identifier from session if parameter instance is null
     @Override
-    public LinkedList<Long> retrieveSamplesByDepositor(String sid, String email, ColumnField field,
-            boolean asc) {
+    public LinkedList<Long> retrieveSamplesByDepositor(String sid, String email, ColumnField field, boolean asc)
+            throws AuthenticationException {
 
         Account account = null;
         try {
             account = this.retrieveAccountForSid(sid);
         } catch (ControllerException e) {
-            e.printStackTrace();
+            Logger.error(e);
         }
-        if (account == null)
-            return null;
-
         if (field == null)
             field = ColumnField.CREATED;
 
@@ -1102,15 +1010,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public LinkedList<SampleInfo> retrieveSampleInfo(String sid, LinkedList<Long> sampleIds,
-            ColumnField sortField, boolean asc) {
+                                                     ColumnField sortField, boolean asc)
+            throws AuthenticationException {
         LinkedList<SampleInfo> data = null;
-        Account account = null;
 
         try {
-            account = this.retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
+            Account account = this.retrieveAccountForSid(sid);
             SampleController sampleController = new SampleController(account);
 
             LinkedList<Sample> results = sampleController.retrieveSamplesByIdSet(sampleIds, asc);
@@ -1142,25 +1047,22 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public FolderDetails retrieveFolderDetails(String sid, long folderId) {
+    public FolderDetails retrieveFolderDetails(String sid, long folderId) throws AuthenticationException {
         Account account;
         AccountController controller = new AccountController();
 
         try {
             account = this.retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
             Folder folder = FolderManager.get(folderId);
             if (folder == null)
                 return null;
 
             Logger.info(account.getEmail() + ": retrieving folder details for folder "
-                    + folder.getName());
+                                + folder.getName());
 
             long id = folder.getId();
             boolean isSystemFolder = folder.getOwnerEmail().equals(
-                controller.getSystemAccount().getEmail());
+                    controller.getSystemAccount().getEmail());
             FolderDetails details = new FolderDetails(id, folder.getName(), isSystemFolder);
             BigInteger folderSize = FolderManager.getFolderSize(id);
             details.setCount(folderSize);
@@ -1178,12 +1080,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public FolderDetails createUserCollection(String sid, String name, String description,
-            ArrayList<Long> contents) {
+                                              ArrayList<Long> contents) throws AuthenticationException {
         try {
             Account account = this.retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
             EntryController entryController = new EntryController();
             Logger.info(account.getEmail() + ": creating new folder with name " + name);
 
@@ -1197,7 +1096,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (contents != null && !contents.isEmpty()) {
 
                 ArrayList<Entry> entrys = new ArrayList<Entry>(entryController.getEntriesByIdSet(
-                    account, contents));
+                        account, contents));
                 FolderManager.addFolderContents(folder.getId(), entrys);
                 details.setContents(contents);
                 BigInteger size = BigInteger.valueOf(contents.size());
@@ -1218,13 +1117,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public ArrayList<FolderDetails> moveToUserCollection(String sid, long source,
-            ArrayList<Long> destination, ArrayList<Long> entryIds) {
+                                                         ArrayList<Long> destination, ArrayList<Long> entryIds)
+            throws AuthenticationException {
 
         try {
             Account account = this.retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
             Logger.info(account.getEmail() + ": moving entries to user collection.");
             EntryController entryController = new EntryController();
 
@@ -1235,7 +1132,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 for (long folderId : destination) {
                     Folder folder = FolderManager.addFolderContents(folderId, entrys);
                     FolderDetails details = new FolderDetails(folder.getId(), folder.getName(),
-                            false);
+                                                              false);
                     BigInteger folderSize = FolderManager.getFolderSize(folder.getId());
                     details.setCount(folderSize);
                     details.setDescription(folder.getDescription());
@@ -1245,7 +1142,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 Folder sourceFolder = FolderManager.get(source);
                 BigInteger folderSize = FolderManager.getFolderSize(source);
                 FolderDetails sourceDetails = new FolderDetails(sourceFolder.getId(),
-                        sourceFolder.getName(), false);
+                                                                sourceFolder.getName(), false);
                 sourceDetails.setCount(folderSize);
                 results.add(sourceDetails);
                 return results;
@@ -1260,12 +1157,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public FolderDetails removeFromUserCollection(String sid, long source, ArrayList<Long> entryIds) {
+    public FolderDetails removeFromUserCollection(String sid, long source, ArrayList<Long> entryIds) throws
+            AuthenticationException {
         try {
             Account account = this.retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
             Logger.info(account.getEmail() + ": removing from user collection.");
 
             Folder folder = FolderManager.removeFolderContents(account, source, entryIds);
@@ -1288,20 +1183,17 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public ArrayList<FolderDetails> addEntriesToCollection(String sid, ArrayList<Long> destination,
-            ArrayList<Long> entryIds) {
+                                                           ArrayList<Long> entryIds) throws AuthenticationException {
 
         ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
 
         try {
             Account account = this.retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
             Logger.info(account.getEmail() + ": adding entries to collection.");
             EntryController entryController = new EntryController();
 
             ArrayList<Entry> entrys = new ArrayList<Entry>(entryController.getEntriesByIdSet(
-                account, entryIds));
+                    account, entryIds));
             for (long folderId : destination) {
                 Folder folder = FolderManager.addFolderContents(folderId, entrys);
                 if (folder == null)
@@ -1322,13 +1214,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public AccountInfo retrieveProfileInfo(String sid, String userId) {
+    public AccountInfo retrieveProfileInfo(String sid, String userId) throws AuthenticationException {
 
         try {
             Account account = retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
             Logger.info(account.getEmail() + ": retrieving profile info for " + userId);
             AccountController controller = new AccountController();
             EntryController entryController = new EntryController();
@@ -1363,7 +1252,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean removeSequence(String sid, long entryId) {
+    public boolean removeSequence(String sid, long entryId) throws AuthenticationException {
 
         try {
             Account account = retrieveAccountForSid(sid);
@@ -1381,7 +1270,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 }
             } catch (PermissionException e) {
                 Logger.warn(account.getEmail() + " attempting to retrieve entry " + entryId
-                        + " but does not have permissions");
+                                    + " but does not have permissions");
             }
 
             SequenceController sequenceController = new SequenceController(account);
@@ -1391,11 +1280,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 try {
                     sequenceController.delete(sequence);
                     Logger.info("User '" + account.getEmail() + "' removed sequence: '" + entryId
-                            + "'");
+                                        + "'");
                     return true;
                 } catch (PermissionException e) {
                     Logger.warn(account.getEmail() + " attempting to delete sequence for entry "
-                            + entryId + " but does not have permissions");
+                                        + entryId + " but does not have permissions");
                 }
             }
         } catch (ControllerException e) {
@@ -1406,7 +1295,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<BulkImportDraftInfo> retrieveImportDraftData(String sid, String email) {
+    public ArrayList<BulkImportDraftInfo> retrieveImportDraftData(String sid,
+                                                                  String email) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
             if (account == null)
@@ -1450,7 +1340,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<BulkImportDraftInfo> retrieveDraftsPendingVerification(String sid) {
+    public ArrayList<BulkImportDraftInfo> retrieveDraftsPendingVerification(String sid) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
             if (account == null)
@@ -1496,7 +1386,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public BulkImportDraftInfo deleteDraftPendingVerification(String sid, long draftId) {
+    public BulkImportDraftInfo deleteDraftPendingVerification(String sid, long draftId) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
             if (account == null)
@@ -1512,7 +1402,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             Logger.info(account.getEmail() + ": deleting bulk import draft with id "
-                    + draft.getId());
+                                + draft.getId());
 
             biController.deleteDraft(draft);
 
@@ -1544,7 +1434,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public BulkImportDraftInfo retrieveBulkImport(String sid, long id) {
+    public BulkImportDraftInfo retrieveBulkImport(String sid, long id) throws AuthenticationException {
 
         BulkImport bi;
         Account account;
@@ -1630,7 +1520,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 entry2.setOwnerEmail(ownerEmail);
 
                 EntryInfo info = EntryToInfoFactory.getInfo(account, entry2, null, null, null,
-                    false);
+                                                            false);
                 byte[] array = ArrayUtils.toPrimitive(bi.getAttachmentFile());
 
                 // check for attachments
@@ -1677,7 +1567,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public BulkImportDraftInfo updateBulkImportDraft(String sessionId, long id, String email,
-            String name, ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary) {
+                                                     String name, ArrayList<EntryInfo> primary,
+                                                     ArrayList<EntryInfo> secondary) throws AuthenticationException {
         Account account;
         try {
             account = retrieveAccountForSid(sessionId);
@@ -1686,7 +1577,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             BulkImportController controller = new BulkImportController(account);
             BulkImport result = controller.updateBulkImportDraft(id, name, account, primary,
-                secondary);
+                                                                 secondary);
 
             // result to DTO
             BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
@@ -1704,7 +1595,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public BulkImportDraftInfo saveBulkImportDraft(String sid, String email, String name,
-            ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary) {
+                                                   ArrayList<EntryInfo> primary,
+                                                   ArrayList<EntryInfo> secondary) throws AuthenticationException {
 
         Account account;
         try {
@@ -1738,7 +1630,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public boolean submitBulkImport(String sid, String email, ArrayList<EntryInfo> primary,
-            ArrayList<EntryInfo> secondary) {
+                                    ArrayList<EntryInfo> secondary) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
             if (account == null)
@@ -1758,69 +1650,17 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
     }
 
+
     @Override
-    public ArrayList<Long> createEntry(String sid, HashSet<EntryInfo> infoSet) {
-
-        ArrayList<Long> result = new ArrayList<Long>();
-        Account account = null;
-
+    public Long createEntry(String sid, EntryInfo info) throws AuthenticationException {
         try {
-            account = retrieveAccountForSid(sid);
-            if (account == null)
-                return result;
-        } catch (ControllerException ce) {
-            Logger.error(ce);
-            return result;
-        }
+            Account account = this.retrieveAccountForSid(sid);
+            Logger.info(account.getEmail() + ": creating new entry");
+            EntryController controller = new EntryController();
+            Entry entry = InfoToModelFactory.infoToEntry(info);
 
-        Logger.info(account.getEmail() + ": creating \"" + infoSet.size() + "\" entries");
-        EntryController controller = new EntryController();
-        SampleController sampleController = new SampleController(account);
-        StorageController storageController = new StorageController(account);
-
-        // TODO : this is a hack and will be resolved correctly in 3.1
-        boolean strainWithPlasmid = (infoSet.size() == 2);
-        boolean linked = false;
-        Strain strain = null;
-        Plasmid plasmid = null;
-
-        for (EntryInfo info : infoSet) {
-            Entry entry = InfoToModelFactory.infoToEntry(info, null);
-            try {
-                entry = controller.createEntry(entry);
-                if (strainWithPlasmid) {
-                    switch (info.getType()) {
-                    case PLASMID:
-                        plasmid = (Plasmid) entry;
-                        break;
-
-                    case STRAIN:
-                        strain = (Strain) entry;
-                        if (plasmid != null) {
-                            String plasmidPartNumberString = "[["
-                                    + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":"
-                                    + plasmid.getOnePartNumber().getPartNumber() + "|"
-                                    + plasmid.getOneName().getName() + "]]";
-                            strain.setPlasmids(plasmidPartNumberString);
-                            try {
-                                controller.save(account, strain);
-                                linked = true;
-                            } catch (ControllerException e) {
-                                Logger.error(e);
-                            } catch (PermissionException e) {
-                                Logger.error(e);
-                            }
-                        }
-                        break;
-
-                    default:
-                    }
-                }
-            } catch (ControllerException ce) {
-                Logger.error(ce);
-                continue;
-            }
-
+            SampleController sampleController = new SampleController(account);
+            StorageController storageController = new StorageController(account);
             ArrayList<SampleStorage> sampleMap = info.getSampleStorage();
 
             if (sampleMap != null) {
@@ -1829,7 +1669,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                     LinkedList<StorageInfo> locations = sampleStorage.getStorageList();
 
                     Sample sample = sampleController.createSample(sampleInfo.getLabel(),
-                        account.getEmail(), sampleInfo.getNotes());
+                                                                  account.getEmail(), sampleInfo.getNotes());
                     sample.setEntry(entry);
 
                     if (locations == null || locations.isEmpty()) {
@@ -1860,7 +1700,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                         Storage storage;
                         try {
                             Storage scheme = StorageManager.get(
-                                Long.parseLong(sampleInfo.getLocationId()), false);
+                                    Long.parseLong(sampleInfo.getLocationId()), false);
                             storage = StorageManager.getLocation(scheme, labels);
                             storage = storageController.update(storage);
                             sample.setStorage(storage);
@@ -1881,37 +1721,66 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                             sampleController.saveSample(sample);
                         } catch (ControllerException e) {
                             Logger.error(e);
-                        } catch (PermissionException e) { // having to deal with permission exceptions do not make sense in this context since entry was created by user
+                        } catch (PermissionException e) { // having to deal with permission exceptions do not make
+                            // sense in this context since entry was created by user
                             Logger.error(e);
                         }
                     }
                 }
             }
 
-            result.add(entry.getId());
+            return controller.createEntry(entry).getId();
+        } catch (ControllerException e) {
+            Logger.error(e);
+            return null;
         }
-
-        if (strainWithPlasmid && !linked) {
-            if (plasmid != null) {
-                String plasmidPartNumberString = "[[" + JbeirSettings.getSetting("WIKILINK_PREFIX")
-                        + ":" + plasmid.getOnePartNumber().getPartNumber() + "|"
-                        + plasmid.getOneName().getName() + "]]";
-                strain.setPlasmids(plasmidPartNumberString);
-                try {
-                    controller.save(account, strain);
-                } catch (ControllerException e) {
-                    Logger.error(e);
-                } catch (PermissionException e) {
-                    Logger.error(e);
-                }
-            }
-        }
-
-        return result;
     }
 
     @Override
-    public SampleStorage createSample(String sessionId, SampleStorage sampleStorage, long entryId) {
+    public ArrayList<Long> createStrainWithPlasmid(String sid, HashSet<EntryInfo> infoSet) throws
+            AuthenticationException {
+
+        Account account;
+
+        try {
+            account = retrieveAccountForSid(sid);
+
+
+            Logger.info(account.getEmail() + ": creating strain with plasmid");
+            EntryController controller = new EntryController();
+
+
+            Strain strain = null;
+            Plasmid plasmid = null;
+
+            for (EntryInfo info : infoSet) {
+                Entry entry = InfoToModelFactory.infoToEntry(info);
+                switch (info.getType()) {
+                    case PLASMID:
+                        plasmid = (Plasmid) entry;
+                        break;
+
+                    case STRAIN:
+                        strain = (Strain) entry;
+                        break;
+                }
+            }
+            HashSet<Entry> results = controller.createStrainWithPlasmid(strain, plasmid);
+            ArrayList<Long> ids = new ArrayList<Long>();
+
+            for (Entry result : results) {
+                ids.add(result.getId());
+            }
+            return ids;
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+            return null;
+        }
+    }
+
+    @Override
+    public SampleStorage createSample(String sessionId, SampleStorage sampleStorage,
+                                      long entryId) throws AuthenticationException {
 
         Account account;
 
@@ -1935,7 +1804,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             entry = controller.get(account, entryId);
             if (entry == null) {
                 Logger.error("Could not retrieve entry with id " + entryId
-                        + ". Skipping sample creation");
+                                     + ". Skipping sample creation");
                 return null;
             }
         } catch (ControllerException e) {
@@ -1950,7 +1819,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         LinkedList<StorageInfo> locations = sampleStorage.getStorageList();
 
         Sample sample = sampleController.createSample(sampleInfo.getLabel(), account.getEmail(),
-            sampleInfo.getNotes());
+                                                      sampleInfo.getNotes());
         sample.setEntry(entry);
 
         if (locations == null || locations.isEmpty()) {
@@ -2007,7 +1876,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean updateEntry(String sid, EntryInfo info) {
+    public boolean updateEntry(String sid, EntryInfo info) throws AuthenticationException {
 
         try {
             Account account = retrieveAccountForSid(sid);
@@ -2032,7 +1901,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public HashMap<SampleInfo, ArrayList<String>> retrieveStorageSchemes(String sessionId,
-            EntryType type) {
+                                                                         EntryType type) {
 
         HashMap<SampleInfo, ArrayList<String>> schemeMap = new HashMap<SampleInfo, ArrayList<String>>();
 
@@ -2060,19 +1929,19 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             }
 
             switch (type) {
-            case STRAIN:
-                sampleInfo.setLabel(PopulateInitialDatabase.DEFAULT_STRAIN_STORAGE_SCHEME_NAME);
-                break;
-            case PLASMID:
-                sampleInfo.setLabel(PopulateInitialDatabase.DEFAULT_PLASMID_STORAGE_SCHEME_NAME);
-                break;
-            case PART:
-                sampleInfo.setLabel(PopulateInitialDatabase.DEFAULT_PART_STORAGE_SCHEME_NAME);
-                break;
-            case ARABIDOPSIS:
-                sampleInfo
-                        .setLabel(PopulateInitialDatabase.DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME);
-                break;
+                case STRAIN:
+                    sampleInfo.setLabel(PopulateInitialDatabase.DEFAULT_STRAIN_STORAGE_SCHEME_NAME);
+                    break;
+                case PLASMID:
+                    sampleInfo.setLabel(PopulateInitialDatabase.DEFAULT_PLASMID_STORAGE_SCHEME_NAME);
+                    break;
+                case PART:
+                    sampleInfo.setLabel(PopulateInitialDatabase.DEFAULT_PART_STORAGE_SCHEME_NAME);
+                    break;
+                case ARABIDOPSIS:
+                    sampleInfo
+                            .setLabel(PopulateInitialDatabase.DEFAULT_ARABIDOPSIS_STORAGE_SCHEME_NAME);
+                    break;
             }
 
             schemeMap.put(sampleInfo, schemeOptions);
@@ -2093,14 +1962,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Set<Account> accounts = controller.getMatchingAccounts(req.getQuery(), req.getLimit());
             for (Account account : accounts) {
                 PermissionSuggestion object = new PermissionSuggestion(PermissionType.READ_ACCOUNT,
-                        account.getId(), account.getFullName());
+                                                                       account.getId(), account.getFullName());
                 suggestions.add(object);
             }
             GroupController groupController = new GroupController();
             Set<Group> groups = groupController.getMatchingGroups(req.getQuery(), req.getLimit());
             for (Group group : groups) {
                 PermissionSuggestion object = new PermissionSuggestion(PermissionType.READ_GROUP,
-                        group.getId(), group.getLabel());
+                                                                       group.getId(), group.getLabel());
                 suggestions.add(object);
             }
         } catch (ControllerException e) {
@@ -2112,7 +1981,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<PermissionInfo> retrievePermissionData(String sessionId, Long entryId) {
+    public ArrayList<PermissionInfo> retrievePermissionData(String sessionId, Long entryId)
+            throws AuthenticationException {
 
         ArrayList<PermissionInfo> results = null;
         Entry entry;
@@ -2120,9 +1990,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         final Account account;
         try {
             account = retrieveAccountForSid(sessionId);
-            if (account == null)
-                return null;
-
             EntryController controller = new EntryController();
             entry = controller.get(account, entryId);
             if (entry == null)
@@ -2142,7 +2009,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Set<Account> readAccounts = PermissionDAO.getReadUser(entry);
             for (Account readAccount : readAccounts) {
                 results.add(new PermissionInfo(PermissionType.READ_ACCOUNT, readAccount.getId(),
-                        readAccount.getFullName()));
+                                               readAccount.getFullName()));
             }
         } catch (ManagerException me) {
             Logger.error(me);
@@ -2152,7 +2019,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Set<Account> writeAccounts = PermissionDAO.getWriteUser(entry);
             for (Account writeAccount : writeAccounts) {
                 results.add(new PermissionInfo(PermissionType.WRITE_ACCOUNT, writeAccount.getId(),
-                        writeAccount.getFullName()));
+                                               writeAccount.getFullName()));
             }
         } catch (ManagerException me) {
             Logger.error(me);
@@ -2181,13 +2048,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<NewsItem> retrieveNewsItems(String sessionId) {
+    public ArrayList<NewsItem> retrieveNewsItems(String sessionId) throws AuthenticationException {
 
-        Account account;
         try {
-            account = retrieveAccountForSid(sessionId);
-            if (account == null)
-                return null;
+            retrieveAccountForSid(sessionId);
         } catch (ControllerException e) {
             Logger.error(e);
         }
@@ -2196,13 +2060,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         ArrayList<News> results;
 
         try {
-            results = NewsManager.retrieveAll();
+
+            results = new NewsController().retrieveAll();
             for (News news : results) {
                 NewsItem item = new NewsItem(String.valueOf(news.getId()), news.getCreationTime(),
-                        news.getTitle(), news.getBody());
+                                             news.getTitle(), news.getBody());
                 items.add(item);
             }
-        } catch (ManagerException e) {
+        } catch (ControllerException e) {
             Logger.error(e);
         }
 
@@ -2210,24 +2075,20 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public NewsItem createNewsItem(String sessionId, NewsItem item) {
+    public NewsItem createNewsItem(String sessionId, NewsItem item) throws AuthenticationException {
 
         Account account;
         try {
             account = retrieveAccountForSid(sessionId);
-            if (account == null)
-                return null;
-
             News news = new News();
             news.setTitle(item.getHeader());
             news.setBody(item.getBody());
 
-            News saved = NewsManager.save(news);
+            NewsController controller = new NewsController();
+            News saved = controller.save(news);
             item.setCreationDate(saved.getCreationTime());
             item.setId(String.valueOf(saved.getId()));
             return item;
-        } catch (ManagerException e) {
-            Logger.error(e);
         } catch (ControllerException e) {
             Logger.error(e);
         }
@@ -2236,19 +2097,16 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public FolderDetails updateFolder(String sid, long folderId, FolderDetails update) {
+    public FolderDetails updateFolder(String sid, long folderId, FolderDetails update) throws AuthenticationException {
         Account account;
         try {
             account = retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
             Folder folder = FolderManager.get(folderId);
             if (folder == null)
                 return null;
 
             Logger.info(account.getEmail() + ": updating folder " + folder.getName() + " with id "
-                    + folder.getId());
+                                + folder.getId());
             folder.setName(update.getName());
             folder.setDescription(update.getDescription());
             Folder updated = FolderManager.update(folder);
@@ -2264,7 +2122,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean addPermission(String sessionId, long entryId, PermissionInfo permissionInfo) {
+    public boolean addPermission(String sessionId, long entryId, PermissionInfo permissionInfo) throws
+            AuthenticationException {
 
         Account account;
         try {
@@ -2273,7 +2132,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return false;
 
             Logger.info(account.getEmail() + ": updating permissions for entry with id \""
-                    + entryId + "\"");
+                                + entryId + "\"");
             EntryController entryController = new EntryController();
             PermissionsController permissionController = new PermissionsController(account);
             Entry entry = entryController.get(account, entryId);
@@ -2281,7 +2140,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return false;
 
             permissionController.addPermission(permissionInfo.getType(), entry,
-                permissionInfo.getId());
+                                               permissionInfo.getId());
             return true;
 
         } catch (ControllerException e) {
@@ -2294,7 +2153,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean removePermission(String sessionId, long entryId, PermissionInfo permissionInfo) {
+    public boolean removePermission(String sessionId, long entryId, PermissionInfo permissionInfo) throws
+            AuthenticationException {
 
         Account account;
         try {
@@ -2303,7 +2163,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return false;
 
             Logger.info(account.getEmail() + ": removing permissions for entry with id \""
-                    + entryId + "\"");
+                                + entryId + "\"");
             EntryController entryController = new EntryController();
             Entry entry = entryController.get(account, entryId);
             if (entry == null)
@@ -2311,7 +2171,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             PermissionsController permissionController = new PermissionsController(account);
             permissionController.removePermission(permissionInfo.getType(), entry,
-                permissionInfo.getId());
+                                                  permissionInfo.getId());
             return true;
 
         } catch (ControllerException e) {
@@ -2324,7 +2184,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean saveSequence(String sessionId, long entryId, String sequenceUser) {
+    public boolean saveSequence(String sessionId, long entryId, String sequenceUser) throws AuthenticationException {
 
         Account account;
         Entry entry;
@@ -2380,20 +2240,20 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public boolean sendFeedback(String email, String message) {
         Emailer.send(email, JbeirSettings.getSetting("PROJECT_NAME"),
-            "Thank you for sending your feedback.\n\nBest regards,\nRegistry Team");
+                     "Thank you for sending your feedback.\n\nBest regards,\nRegistry Team");
 
         Emailer.send(JbeirSettings.getSetting("ADMIN_EMAIL"), "Registry site feedback", message);
         if (!JbeirSettings.getSetting("ADMIN_EMAIL").equals(
-            JbeirSettings.getSetting("MODERATOR_EMAIL"))) {
+                JbeirSettings.getSetting("MODERATOR_EMAIL"))) {
             Emailer.send(JbeirSettings.getSetting("MODERATOR_EMAIL"), "Registry site feedback",
-                message);
+                         message);
         }
 
         return true;
     }
 
     @Override
-    public HashMap<EntryType, Long> retrieveEntryCounts(String sessionId) {
+    public HashMap<EntryType, Long> retrieveEntryCounts(String sessionId) throws AuthenticationException {
         // admin only 
         Account account = null;
         AccountController controller = new AccountController();
@@ -2406,7 +2266,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             if (!controller.isModerator(account)) {
                 Logger.warn(account.getEmail()
-                        + ": attempting to retrieve admin only feature (entry Counts)");
+                                    + ": attempting to retrieve admin only feature (entry Counts)");
                 return null;
             }
         } catch (ControllerException ce) {
@@ -2430,7 +2290,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     // Groups //
     @Override
-    public ArrayList<GroupInfo> retrieveAllGroups(String sessionId) {
+    public ArrayList<GroupInfo> retrieveAllGroups(String sessionId) throws AuthenticationException {
 
         Account account = null;
         AccountController controller = new AccountController();
@@ -2443,7 +2303,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             if (!controller.isModerator(account)) {
                 Logger.warn(account.getEmail()
-                        + ": attempting to retrieve admin only feature (groups)");
+                                    + ": attempting to retrieve admin only feature (groups)");
                 return null;
             }
         } catch (ControllerException ce) {
@@ -2480,7 +2340,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean deleteEntryAttachment(String sid, String fileId) {
+    public boolean deleteEntryAttachment(String sid, String fileId) throws AuthenticationException {
         Account account;
         try {
             account = retrieveAccountForSid(sid);
@@ -2503,7 +2363,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<FolderDetails> deleteEntry(String sessionId, EntryInfo info) {
+    public ArrayList<FolderDetails> deleteEntry(String sessionId, EntryInfo info) throws AuthenticationException {
         Account account;
 
         try {
@@ -2530,10 +2390,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 for (Folder folder : folders) {
                     try {
                         Folder returned = FolderManager.removeFolderContents(account,
-                            folder.getId(), entryIds);
+                                                                             folder.getId(), entryIds);
                         boolean isSystem = systemEmail.equals(returned.getOwnerEmail());
                         FolderDetails details = new FolderDetails(returned.getId(),
-                                returned.getName(), isSystem);
+                                                                  returned.getName(), isSystem);
                         BigInteger size = FolderManager.getFolderSize(folder.getId());
                         details.setCount(size);
                         folderList.add(details);

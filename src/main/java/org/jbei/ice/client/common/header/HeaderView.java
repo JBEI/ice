@@ -3,7 +3,6 @@ package org.jbei.ice.client.common.header;
 import java.util.LinkedHashMap;
 
 import org.jbei.ice.client.AppController;
-import org.jbei.ice.client.ILogoutHandler;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.common.FilterOperand;
 import org.jbei.ice.client.common.widget.PopupHandler;
@@ -31,7 +30,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class HeaderView extends Composite implements ILogoutHandler { // TODO: should implement IHasLogOut instead of handler
+public class HeaderView extends Composite  {
 
     interface Resources extends ClientBundle {
 
@@ -194,11 +193,6 @@ public class HeaderView extends Composite implements ILogoutHandler { // TODO: s
 
     public SearchCompositeBox getSearchComposite() {
         return this.searchInput;
-    }
-
-    @Override
-    public HasClickHandlers getClickHandler() {
-        return this.logout;
     }
 
     public SearchFilterInfo getBlastInfo() {

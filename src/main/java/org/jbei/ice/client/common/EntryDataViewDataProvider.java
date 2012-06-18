@@ -248,22 +248,26 @@ public class EntryDataViewDataProvider extends AsyncDataProvider<EntryInfo> impl
             return;
 
         // TODO : sort the list on the server
-        service.sortEntryList(AppController.sessionId, valuesIds, field, ascending,
-            new AsyncCallback<LinkedList<Long>>() {
+        try {
+            service.sortEntryList(AppController.sessionId, valuesIds, field, ascending,
+                new AsyncCallback<LinkedList<Long>>() {
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    // TODO : notify of failure
-                    retrieveEntryData(field, ascending, rangeStart, rangeEnd);
-                }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        // TODO : notify of failure
+                        retrieveEntryData(field, ascending, rangeStart, rangeEnd);
+                    }
 
-                @Override
-                public void onSuccess(LinkedList<Long> result) {
-                    valuesIds.clear();
-                    valuesIds.addAll(result);
-                    retrieveEntryData(field, ascending, rangeStart, rangeEnd);
-                }
-            });
+                    @Override
+                    public void onSuccess(LinkedList<Long> result) {
+                        valuesIds.clear();
+                        valuesIds.addAll(result);
+                        retrieveEntryData(field, ascending, rangeStart, rangeEnd);
+                    }
+                });
+        } catch (org.jbei.ice.client.exception.AuthenticationException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
     }
 
     // this method should be called after sorting, if sorting is desired

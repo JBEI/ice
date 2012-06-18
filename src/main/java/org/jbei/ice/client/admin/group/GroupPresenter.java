@@ -22,22 +22,26 @@ public class GroupPresenter implements AdminPanelPresenter<GroupInfo> {
     }
 
     private void retrieveAllGroups() {
-        service.retrieveAllGroups(AppController.sessionId,
-            new AsyncCallback<ArrayList<GroupInfo>>() {
+        try {
+            service.retrieveAllGroups(AppController.sessionId,
+                new AsyncCallback<ArrayList<GroupInfo>>() {
 
-                @Override
-                public void onSuccess(ArrayList<GroupInfo> result) {
-                    if (result == null)
-                        return;
+                    @Override
+                    public void onSuccess(ArrayList<GroupInfo> result) {
+                        if (result == null)
+                            return;
 
-                    dataProvider.getList().clear();
-                    dataProvider.getList().addAll(result);
-                }
+                        dataProvider.getList().clear();
+                        dataProvider.getList().addAll(result);
+                    }
 
-                @Override
-                public void onFailure(Throwable caught) {
-                }
-            });
+                    @Override
+                    public void onFailure(Throwable caught) {
+                    }
+                });
+        } catch (org.jbei.ice.client.exception.AuthenticationException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
     }
 
     @Override

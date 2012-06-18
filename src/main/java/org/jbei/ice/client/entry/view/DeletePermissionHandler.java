@@ -42,20 +42,24 @@ public class DeletePermissionHandler implements ClickHandler {
 
     @Override
     public void onClick(ClickEvent event) {
-        service.removePermission(AppController.sessionId, entryId, info,
-            new AsyncCallback<Boolean>() {
+        try {
+            service.removePermission(AppController.sessionId, entryId, info,
+                new AsyncCallback<Boolean>() {
 
-                @Override
-                public void onSuccess(Boolean result) {
-                    if (callback != null)
-                        callback.onSucess(info);
-                }
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        if (callback != null)
+                            callback.onSucess(info);
+                    }
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    if (callback != null)
-                        callback.onFailure();
-                }
-            });
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        if (callback != null)
+                            callback.onFailure();
+                    }
+                });
+        } catch (org.jbei.ice.client.exception.AuthenticationException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
     }
 }

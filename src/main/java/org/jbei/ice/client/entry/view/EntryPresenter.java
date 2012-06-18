@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.presenter.CollectionsPresenter.DeleteEntryHandler;
@@ -30,6 +31,7 @@ import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.event.ShowEntryListEvent;
+import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
@@ -75,8 +77,8 @@ public class EntryPresenter extends AbstractPresenter {
         addEntryViewHandler();
         display.getDetailMenu().addSelectionChangeHandler(
             new MenuSelectionHandler(display.getDetailMenu()));
-        setContextNavHandlers();
 
+        setContextNavHandlers();
         showCurrentEntryView();
 
         // SAMPLE
@@ -129,22 +131,25 @@ public class EntryPresenter extends AbstractPresenter {
 
             @Override
             public void deleteAttachment(final AttachmentItem item) {
-                service.deleteEntryAttachment(AppController.sessionId, item.getFileId(),
-                    new AsyncCallback<Boolean>() {
+                new IceAsyncCallback<Boolean>() {
 
-                        @Override
-                        public void onFailure(Throwable caught) {
+                    @Override
+                    protected void callService(AsyncCallback<Boolean> callback) {
+                        try {
+                            service.deleteEntryAttachment(AppController.sessionId, item.getFileId(), callback);
+                        } catch (AuthenticationException e) {
+                            History.newItem(Page.LOGIN.getLink());
+                        }
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        if (result)
+                            display.removeAttachment(item);
+                        else
                             Window.alert("Failed to delete attachment");
-                        }
-
-                        @Override
-                        public void onSuccess(Boolean result) {
-                            if (result)
-                                display.removeAttachment(item);
-                            else
-                                Window.alert("Failed to delete attachment");
-                        }
-                    });
+                    }
+                }.go(eventBus);
             }
         });
     }
@@ -168,23 +173,23 @@ public class EntryPresenter extends AbstractPresenter {
      * retrieves the existing permission for the current entry
      */
     private void retrievePermissionData() {
-        service.retrievePermissionData(AppController.sessionId, this.currentContext.getCurrent(),
-            new AsyncCallback<ArrayList<PermissionInfo>>() {
+        new IceAsyncCallback<ArrayList<PermissionInfo>>() {
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    display.getPermissionsWidget().onErrRetrievingExistingPermissions();
+            @Override
+            protected void callService(AsyncCallback<ArrayList<PermissionInfo>> callback) {
+                try {
+                    service.retrievePermissionData(AppController.sessionId, currentContext.getCurrent(), callback);
+                } catch (AuthenticationException e) {
+                    History.newItem(Page.LOGIN.getLink());
                 }
+            }
 
-                @Override
-                public void onSuccess(ArrayList<PermissionInfo> result) {
-                    if (result == null)
-                        return;
-
-                    display.getPermissionsWidget().setPermissionData(result, service,
-                        currentContext.getCurrent());
-                }
-            });
+            @Override
+            public void onSuccess(ArrayList<PermissionInfo> result) {
+                display.getPermissionsWidget().setPermissionData(result, service,
+                                                                 currentContext.getCurrent());
+            }
+        }.go(eventBus);
     }
 
     private void showCurrentEntryView() {
@@ -328,28 +333,23 @@ public class EntryPresenter extends AbstractPresenter {
     private void retrieveEntrySequenceDetails() {
 
         final long entryId = currentContext.getCurrent();
-        service.retrieveEntryTraceSequences(AppController.sessionId, entryId,
-            new AsyncCallback<ArrayList<SequenceAnalysisInfo>>() {
+        new IceAsyncCallback<ArrayList<SequenceAnalysisInfo>>() {
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    FeedbackEvent event = new FeedbackEvent(true, "Error connecting to the server");
-                    eventBus.fireEvent(event);
+            @Override
+            protected void callService(AsyncCallback<ArrayList<SequenceAnalysisInfo>> callback) {
+                try {
+                    service.retrieveEntryTraceSequences(AppController.sessionId, entryId, callback);
+                } catch (AuthenticationException e) {
+                    History.newItem(Page.LOGIN.getLink());
                 }
+            }
 
-                @Override
-                public void onSuccess(ArrayList<SequenceAnalysisInfo> result) {
-                    if (result == null) {
-                        FeedbackEvent event = new FeedbackEvent(true,
-                                "Could not retrieve sequence trace files");
-                        eventBus.fireEvent(event);
-                        return;
-                    }
-
-                    display.setSequenceData(result, currentInfo);
-                    display.getDetailMenu().updateMenuCount(Menu.SEQ_ANALYSIS, result.size());
-                }
-            });
+            @Override
+            public void onSuccess(ArrayList<SequenceAnalysisInfo> result) {
+                display.setSequenceData(result, currentInfo);
+                display.getDetailMenu().updateMenuCount(Menu.SEQ_ANALYSIS, result.size());
+            }
+        }.go(eventBus);
     }
 
     private void retrieveEntryDetails() {
@@ -435,7 +435,10 @@ public class EntryPresenter extends AbstractPresenter {
                         break;
 
                     case SEQ_ANALYSIS:
-                        boolean showFlash = (selection.getCount() > 0);
+                        boolean showFlash = false;
+                        if (selection != null) {
+                            showFlash = (selection.getCount() > 0);
+                        }
                         display.showSequenceView(currentInfo, showFlash);
                         break;
 
@@ -504,26 +507,28 @@ public class EntryPresenter extends AbstractPresenter {
                 }
             }
 
-            service.addPermission(AppController.sessionId, id, info, new AsyncCallback<Boolean>() {
+            new IceAsyncCallback<Boolean>() {
 
                 @Override
-                public void onFailure(Throwable caught) {
+                protected void callService(AsyncCallback<Boolean> callback) {
+                    try {
+                        service.addPermission(AppController.sessionId, id, info, callback);
+                    } catch (AuthenticationException e) {
+                        History.newItem(Page.LOGIN.getLink());
+                    }
                 }
 
                 @Override
                 public void onSuccess(Boolean result) {
-                    if (!result)
-                        return;
-
                     if (isWrite) {
                         display.getPermissionsWidget().addWriteItem(info, service, id,
-                            currentInfo.isCanEdit());
+                                                                    currentInfo.isCanEdit());
                     } else {
                         display.getPermissionsWidget().addReadItem(info, service, id,
-                            currentInfo.isCanEdit());
+                                                                   currentInfo.isCanEdit());
                     }
                 }
-            });
+            }.go(eventBus);
         }
     }
 
@@ -604,36 +609,35 @@ public class EntryPresenter extends AbstractPresenter {
 
         /**
          * Makes an rpc to save the set of entrys
-         * 
-         * @param hasEntry
-         *            set of entrys to be saved.
          */
         protected void update(final EntryInfo info) {
             if (info == null)
                 return;
 
-            service.updateEntry(AppController.sessionId, info, new AsyncCallback<Boolean>() {
+            new IceAsyncCallback<Boolean>() {
 
                 @Override
-                public void onFailure(Throwable caught) {
-                    eventBus.fireEvent(new FeedbackEvent(true, "Server error. Please try again."));
+                protected void callService(AsyncCallback<Boolean> callback) {
+                    try {
+                        service.updateEntry(AppController.sessionId, info, callback);
+                    } catch (AuthenticationException e) {
+                        History.newItem(Page.LOGIN.getLink());
+                    }
                 }
 
                 @Override
-                public void onSuccess(Boolean success) {
-                    if (!success) {
-                        FeedbackEvent event = new FeedbackEvent(true,
-                                "Your entry could not be updated.");
+                public void onSuccess(Boolean result) {
+                    if (!result) {
+                        FeedbackEvent event = new FeedbackEvent(true, "Your entry could not be updated.");
                         eventBus.fireEvent(event);
                     } else {
                         showCurrentEntryView();
-                        FeedbackEvent event = new FeedbackEvent(false,
-                                "Entry successfully updated.");
+                        FeedbackEvent event = new FeedbackEvent(false, "Entry successfully updated.");
                         eventBus.fireEvent(event);
                         Window.scrollTo(0, 0);
                     }
                 }
-            });
+            }.go(eventBus);
         }
     }
 
@@ -667,31 +671,28 @@ public class EntryPresenter extends AbstractPresenter {
             if (selected == null || selected.isEmpty())
                 return;
 
-            ArrayList<String> fileIds = new ArrayList<String>();
+            final ArrayList<String> fileIds = new ArrayList<String>();
             for (SequenceAnalysisInfo info : selected) {
                 fileIds.add(info.getFileId());
             }
 
-            service.deleteEntryTraceSequences(AppController.sessionId, entryId, fileIds,
-                new AsyncCallback<ArrayList<SequenceAnalysisInfo>>() {
+            new IceAsyncCallback<ArrayList<SequenceAnalysisInfo>>() {
 
-                    @Override
-                    public void onSuccess(ArrayList<SequenceAnalysisInfo> result) {
-                        if (result == null) {
-                            Window.alert("There was a problem deleting the sequence file(s). \n\nPlease contact your administrator if this problem persists");
-                            return;
-                        }
-
-                        display.setSequenceData(result, currentInfo);
-                        display.getDetailMenu().updateMenuCount(Menu.SEQ_ANALYSIS, result.size());
+                @Override
+                protected void callService(AsyncCallback<ArrayList<SequenceAnalysisInfo>> callback) {
+                    try {
+                        service.deleteEntryTraceSequences(AppController.sessionId, entryId, fileIds, callback);
+                    } catch (AuthenticationException e) {
+                        History.newItem(Page.LOGIN.getLink());
                     }
+                }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Window.alert("Could not delete trace sequence file");
-                    }
-                });
+                @Override
+                public void onSuccess(ArrayList<SequenceAnalysisInfo> result) {
+                    display.setSequenceData(result, currentInfo);
+                    display.getDetailMenu().updateMenuCount(Menu.SEQ_ANALYSIS, result.size());
+                }
+            }.go(eventBus);
         }
     }
-
 }

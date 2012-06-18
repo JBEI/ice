@@ -246,20 +246,24 @@ public class LoginPresenter extends AbstractPresenter {
 
     private void generateNewPasswordAndSend(String email) {
         String url = GWT.getHostPageBaseURL() + "#" + Page.PROFILE.getLink();
-        service.handleForgotPassword(email, url, new AsyncCallback<Boolean>() {
+        try {
+            service.handleForgotPassword(email, url, new AsyncCallback<Boolean>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-            }
-
-            @Override
-            public void onSuccess(Boolean result) {
-                if (result) {
-                    Window.alert("A new password has been emailed to you");
-                    display.switchToLoginMode();
+                @Override
+                public void onFailure(Throwable caught) {
                 }
-            }
-        });
+
+                @Override
+                public void onSuccess(Boolean result) {
+                    if (result) {
+                        Window.alert("A new password has been emailed to you");
+                        display.switchToLoginMode();
+                    }
+                }
+            });
+        } catch (org.jbei.ice.client.exception.AuthenticationException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
     }
 
     private class RegisterHandler implements ClickHandler {
