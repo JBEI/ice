@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.managers;
+package org.jbei.ice.lib.folder;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -15,6 +15,7 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Folder;
@@ -25,14 +26,14 @@ import org.jbei.ice.lib.models.Folder;
  * @author Hector Plahar
  * 
  */
-public class FolderManager {
+public class FolderDAO {
 
     /**
      * Retrieve {@link Folder} objects from the database by id.
      * 
      * @param id
      * @return Folder object.
-     * @throws ManagerException
+     * @throws org.jbei.ice.lib.managers.ManagerException
      */
     public static Folder get(long id) throws ManagerException {
         Folder result = null;
