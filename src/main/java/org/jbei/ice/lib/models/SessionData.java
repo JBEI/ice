@@ -16,10 +16,8 @@ import org.jbei.ice.lib.utils.Utils;
 
 /**
  * Store session information for a logged in user.
- * 
- * @see org.jbei.ice.web.IceSession
- * @author Timothy Ham, Zinovii Dmytriv
- * 
+ *
+ * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 @Entity
 @Table(name = "session_data")

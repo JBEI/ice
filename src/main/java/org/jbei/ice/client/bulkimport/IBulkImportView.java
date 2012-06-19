@@ -28,7 +28,7 @@ public interface IBulkImportView {
 
     SingleSelectionModel<EntryAddType> getImportCreateModel();
 
-    void setDraftMenuVisibility(boolean visible);
+    void setDraftMenuVisibility(boolean visible, boolean isToggleClick);
 
     void addToggleMenuHandler(ClickHandler handler);
 

@@ -60,7 +60,7 @@ public interface RegistryService extends RemoteService {
 
     EntryInfo retrieveEntryDetails(String sid, long id) throws AuthenticationException;
 
-    AccountInfo retrieveAccountInfoForSession(String sid) throws AuthenticationException;
+//    AccountInfo retrieveAccountInfoForSession(String sid) throws AuthenticationException;
 
     ArrayList<StorageInfo> retrieveChildren(String sid, long id) throws AuthenticationException;
 

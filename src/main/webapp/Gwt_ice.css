@@ -335,15 +335,6 @@ a.cell_mouseover:hover {
 }
 
 /* BULK IMPORT*/
-.bulk_import_draft_save_button {
-}
-
-.bulk_import_submit_button {
-}
-
-.bulk_import_reset_button {
-}
-
 .bulk_import_menu_toggle {
     border: 0;
     float: left;
@@ -354,7 +345,6 @@ a.cell_mouseover:hover {
 }
 
 .bulk_import_menu_toggle-down {
-
 }
 
 .bulk_import_draft_input {
@@ -373,11 +363,8 @@ a.cell_mouseover:hover {
 }
 
 .cell_error {
-    padding: 2px;
     border-right: 1px solid #ccc;
     border-top: 1px solid #ccc;
-    width: 130px;
-    height: 19px;
     background: #FCC;
 }
 

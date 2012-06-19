@@ -50,15 +50,11 @@ public class AccountController {
      * @throws ControllerException
      */
     public Account get(long id) throws ControllerException {
-        Account account = null;
-
         try {
-            account = dao.get(id);
+            return dao.get(id);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
-
-        return account;
     }
 
     /**

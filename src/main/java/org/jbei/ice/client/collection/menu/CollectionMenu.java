@@ -254,9 +254,6 @@ public class CollectionMenu extends Composite {
     /**
      * replaces current edit cell (in menu)
      * with new cell with folder
-     * 
-     * @param folder
-     *            new folder for cell
      */
     public void setMenuItem(MenuItem item, IDeleteMenuHandler deleteHandler) {
         if ((this.editIndex == -1 && this.editRow == -1) || (item == null))
@@ -323,8 +320,6 @@ public class CollectionMenu extends Composite {
     /**
      * sets the busy indicator where the folder counts are displayed
      * to indicate that some form of update is taking place
-     * 
-     * @param folders
      */
     public void setBusyIndicator(Set<Long> ids) {
         for (int i = 0; i < table.getRowCount(); i += 1) {

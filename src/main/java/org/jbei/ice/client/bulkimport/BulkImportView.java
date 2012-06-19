@@ -1,10 +1,10 @@
 package org.jbei.ice.client.bulkimport;
 
-import java.util.ArrayList;
-
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.view.client.SingleSelectionModel;
 import org.jbei.ice.client.admin.bulkimport.BulkImportMenuItem;
 import org.jbei.ice.client.admin.bulkimport.IDeleteMenuHandler;
 import org.jbei.ice.client.admin.bulkimport.SavedDraftsMenu;
@@ -16,11 +16,13 @@ import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.shared.EntryAddType;
 
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.view.client.SingleSelectionModel;
+import java.util.ArrayList;
 
+/**
+ * View for the bulk import page. Works with {@link BulkImportPresenter}
+ *
+ * @author Hector Plahar
+ */
 public class BulkImportView extends AbstractLayout implements IBulkImportView {
 
     private SavedDraftsMenu draftsMenu;
@@ -35,6 +37,8 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     private Button resetButton;
     private SaveDraftInput draftInput;
     private Image uploadCsv;
+    private HorizontalPanel headerPanel;
+    private NewBulkInput sheet;
 
     @Override
     protected void initComponents() {
@@ -104,11 +108,11 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         mainContent.setCellSpacing(0);
         mainContent.setWidth("100%");
 
-        HorizontalPanel headerPanel = new HorizontalPanel();
+        headerPanel = new HorizontalPanel();
         headerPanel.setWidth("140px");
         headerPanel.add(toggle);
         headerPanel.add(create);
-        headerPanel.setCellHorizontalAlignment(create, HasAlignment.ALIGN_CENTER);
+        headerPanel.setCellHorizontalAlignment(create, HasAlignment.ALIGN_LEFT);
         mainContent.setWidget(0, 0, headerPanel);
         mainContent.getFlexCellFormatter().setWidth(0, 0, "140px");
 
@@ -116,14 +120,17 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
                 .setHTML(
                         1,
                         0,
-                        "<br><div style=\"font-family: Arial; border: 1px solid #e4e4e4; padding: 10px; background-color: #f1f1f1\"><p>Select type the "
+                        "<br><div style=\"font-family: Arial; border: 1px solid #e4e4e4; padding: 10px; " +
+                                "background-color: #f1f1f1\"><p>Select type the "
                                 + "of entry you wish to bulk import.</p> <p>Please note that columns"
                                 + " with headers indicated by <span class=\"required\">*</span> "
                                 + "are required. You will not be able to submit the form until you enter a "
-                                + "value for those fields. However, you may save incomplete forms as a named draft and continue working on it at a later time. "
+                                + "value for those fields. However, you may save incomplete forms as a named draft " +
+                                "and continue working on it at a later time. "
                                 + "Saved drafts will not be submitted and are only visible to you.</p>"
                                 + "<p>After submitting, an administrator must approve your "
-                                + "submission before it will show up in the search listings. Contact them if you are in a "
+                                + "submission before it will show up in the search listings. Contact them if you are " +
+                                "in a "
                                 + "hurry.</p></div>");
         return mainContent;
     }
@@ -143,6 +150,8 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
 
         FlexTable panel = new FlexTable();
         panel.setWidth("100%");
+        sheet = bulkImport;
+
         if (!isNew) {
             panel.setWidget(0, 0, new HTML(bulkImport.getName()));
             panel.setWidget(0, 1, updateButton);
@@ -171,7 +180,8 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         mainContent.getFlexCellFormatter().setColSpan(1, 0, index);
 
         HTMLPanel bulkImportHeader = new HTMLPanel(
-                "<span id=\"bulk_import_header_title\"></span><span style=\"float: right\" id=\"upload_csv_icon\"></span>");
+                "<span id=\"bulk_import_header_title\"></span><span style=\"float: right\" " +
+                        "id=\"upload_csv_icon\"></span>");
         bulkImportHeader.add(contentHeader, "bulk_import_header_title");
         bulkImportHeader.add(uploadCsv, "upload_csv_icon");
 
@@ -220,6 +230,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
 
         toggle.setVisible(true);
         toggle.setDown(true);
+        headerPanel.setCellHorizontalAlignment(create, HasAlignment.ALIGN_CENTER);
     }
 
     @Override
@@ -227,12 +238,17 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         draftsMenu.addMenuItem(item, handler);
         toggle.setVisible(true);
         toggle.setDown(true);
+        headerPanel.setCellHorizontalAlignment(create, HasAlignment.ALIGN_CENTER);
     }
 
     @Override
-    public void setDraftMenuVisibility(boolean visible) {
+    public void setDraftMenuVisibility(boolean visible, boolean isToggleClick) {
         draftsMenu.setVisible(visible);
         toggle.setDown(visible);
+        if (visible)
+            headerPanel.setCellHorizontalAlignment(create, HasAlignment.ALIGN_CENTER);
+        else
+            headerPanel.setCellHorizontalAlignment(create, HasAlignment.ALIGN_LEFT);
 
         if (!visible) {
             layout.setHTML(0, 0, "");
@@ -240,12 +256,16 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
 
             layout.setHTML(0, 1, "");
             layout.getFlexCellFormatter().setWidth(0, 1, "0px");
+            if (isToggleClick)
+                sheet.getSheet().increaseWidthBy(230);
         } else {
             layout.setWidget(0, 0, draftsMenu);
             layout.getFlexCellFormatter().setWidth(0, 0, "220px");
 
             layout.setHTML(0, 1, "&nbsp;");
             layout.getFlexCellFormatter().setWidth(0, 1, "10px");
+            if (isToggleClick)
+                sheet.getSheet().decreaseWidthBy(230);
         }
     }
 

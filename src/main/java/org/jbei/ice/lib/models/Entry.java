@@ -1,5 +1,15 @@
 package org.jbei.ice.lib.models;
 
+import com.google.common.base.Objects;
+import org.hibernate.annotations.Cascade;
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.models.interfaces.IEntryValueObject;
+import org.jbei.ice.lib.utils.JbeiConstants;
+import org.jbei.ice.lib.utils.JbeirSettings;
+
+import javax.persistence.*;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -8,46 +18,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-
-import org.hibernate.annotations.Cascade;
-import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.models.interfaces.IEntryValueObject;
-import org.jbei.ice.lib.utils.JbeiConstants;
-import org.jbei.ice.lib.utils.JbeirSettings;
-
 /**
  * Entry class is the most important class in gd-ice. Other record types extend this class.
- * <p>
+ * <p/>
  * Entry class represent the unique handle for each record in the system. It provides the common
  * fields, such as the recordId (uuid), timestamps, owner and creator information, etc.
- * <p>
+ * <p/>
  * Many of the fields accept mediawiki style linking tags. For example,
  * "[[jbei:JBx_000001|Descriptive Name]]" will automatically generate a clickable link to the part
  * JBx_000001 with text "Descriptive Name". The wiki link prefix (jbei:) in this case can be
  * confgured in the configuration file. In the future, links to other registries can be specified
  * via the configuration, similar to other mediawiki links.
- * <p>
+ * <p/>
  * Description of Entry fields:
- * <p>
+ * <p/>
  * <ul>
  * <li><b>id:</b> database id of an entry.</li>
  * <li><b>recordId:</b> 36 character globally unique identifier. Implemented as UUIDv4.</li>
@@ -98,9 +82,8 @@ import org.jbei.ice.lib.utils.JbeirSettings;
  * <li><b>entryFundingSources</b> {@link EntryFundingSource}s for this entry.</li>
  * <li><b>parameters: {@link Parameter}s for this entry.</b></li>
  * </ul>
- * 
+ *
  * @author Timothy Ham, Zinovii Dmytriv
- * 
  */
 @Entity
 @Table(name = "entries")
@@ -111,22 +94,22 @@ public class Entry implements IEntryValueObject, IModel {
     private static final long serialVersionUID = 1L;
 
     //TODO actually use these types
+
     /**
      * Mark up types for longDescription.
-     * 
+     *
      * @author Timothy Ham
-     * 
      */
     public enum MarkupType {
         text, wiki, confluence
     }
 
     // TODO use these enums. Currently "in progress" with a space is used. 
+
     /**
      * Available status options.
-     * 
+     *
      * @author Timothy Ham
-     * 
      */
     public enum StatusOptions {
         complete, in_progress, planned
@@ -214,19 +197,19 @@ public class Entry implements IEntryValueObject, IModel {
     @OrderBy("id")
     private final Set<Name> names = new LinkedHashSet<Name>();
 
-    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER, mappedBy = "entry")
+    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "entry")
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @JoinColumn(name = "entries_id")
     @OrderBy("id")
     private final Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
 
-    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER, mappedBy = "entry")
+    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "entry")
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @JoinColumn(name = "entries_id")
     @OrderBy("id")
     private final Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
 
-    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER, mappedBy = "entry")
+    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "entry")
     @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     @JoinColumn(name = "entries_id")
     @OrderBy("id")
@@ -236,9 +219,9 @@ public class Entry implements IEntryValueObject, IModel {
     }
 
     public Entry(String recordId, String versionId, String recordType, String owner,
-            String ownerEmail, String creator, String creatorEmail, String status, String alias,
-            String keywords, String shortDescription, String longDescription,
-            String longDescriptionType, String references, Date creationTime, Date modificationTime) {
+                 String ownerEmail, String creator, String creatorEmail, String status, String alias,
+                 String keywords, String shortDescription, String longDescription,
+                 String longDescriptionType, String references, Date creationTime, Date modificationTime) {
         this.recordId = recordId;
         this.versionId = versionId;
         this.recordType = recordType;
@@ -351,7 +334,7 @@ public class Entry implements IEntryValueObject, IModel {
     /**
      * Generate the comma separated string representation of {@link PartNumber}s associated with
      * this entry.
-     * 
+     *
      * @return Comma separated part numbers.
      */
     public String getPartNumbersAsString() {
@@ -368,7 +351,7 @@ public class Entry implements IEntryValueObject, IModel {
     /**
      * Return the first {@link PartNumber} associated with this entry, preferring the PartNumber
      * local to this instance of gd-ice.
-     * 
+     *
      * @return PartNumber.
      */
     public PartNumber getOnePartNumber() {
@@ -377,7 +360,7 @@ public class Entry implements IEntryValueObject, IModel {
         if (partNumbers.size() > 0) {
             for (PartNumber partNumber : partNumbers) {
                 if (partNumber.getPartNumber().contains(
-                    JbeirSettings.getSetting("PART_NUMBER_PREFIX"))) {
+                        JbeirSettings.getSetting("PART_NUMBER_PREFIX"))) {
                     result = partNumber;
                 }
             }
@@ -470,7 +453,7 @@ public class Entry implements IEntryValueObject, IModel {
 
     /**
      * Generate a String representation of the {@link SelectionMarker}s associated with this entry.
-     * 
+     *
      * @return Comma separated selection markers.
      */
     public String getSelectionMarkersAsString() {
@@ -507,7 +490,7 @@ public class Entry implements IEntryValueObject, IModel {
 
     /**
      * String representation of {@link Link}s.
-     * 
+     *
      * @return Comma separated list of links.
      */
     public String getLinksAsString() {
@@ -658,7 +641,7 @@ public class Entry implements IEntryValueObject, IModel {
 
     /**
      * Get the principalInvestigator field of the entry's EntryFundingSource.
-     * 
+     *
      * @return principalInvestigator field as String.
      */
     public String principalInvestigatorToString() {
@@ -666,7 +649,7 @@ public class Entry implements IEntryValueObject, IModel {
 
         for (EntryFundingSource entryFundingSource : entryFundingSources) {
             principalInvestigator = entryFundingSource.getFundingSource()
-                    .getPrincipalInvestigator();
+                                                      .getPrincipalInvestigator();
         }
 
         if (principalInvestigator == null) {
@@ -678,7 +661,7 @@ public class Entry implements IEntryValueObject, IModel {
 
     /**
      * Get the funding source field of the entry's EntryFundingSource.
-     * 
+     *
      * @return funding source field as String.
      */
     public String fundingSourceToString() {
@@ -698,7 +681,7 @@ public class Entry implements IEntryValueObject, IModel {
     /**
      * Generate the options map of the bioSafetyLevel field containing friendly names for the
      * fields.
-     * 
+     *
      * @return Map of biosafety levels and names.
      */
     public static Map<String, String> getBioSafetyLevelOptionsMap() {
@@ -711,24 +694,8 @@ public class Entry implements IEntryValueObject, IModel {
     }
 
     /**
-     * Generate the options map of markupTypes containing friendly names for
-     * {@link Entry.MarkupType}.
-     * 
-     * @return Map of markup types and names.
-     */
-    public static Map<String, String> getMarkupTypeMap() {
-        Map<String, String> resultMap = new LinkedHashMap<String, String>();
-
-        resultMap.put(Entry.MarkupType.text.name(), "Text");
-        resultMap.put(Entry.MarkupType.wiki.name(), "Wiki");
-        resultMap.put(Entry.MarkupType.confluence.name(), "Confluence");
-
-        return resultMap;
-    }
-
-    /**
      * Generate the options map of status options containing friendly names for status field.
-     * 
+     *
      * @return Map of options and names.
      */
     public static Map<String, String> getStatusOptionsMap() {
@@ -741,4 +708,23 @@ public class Entry implements IEntryValueObject, IModel {
         return resultMap;
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getId(), getRecordId());
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == null)
+            return false;
+
+        if (getClass() != obj.getClass())
+            return false;
+
+        final Entry other = (Entry) obj;
+
+        return Objects.equal(this.recordId, other.getRecordId())
+                && Objects.equal(this.recordType, other.getRecordType())
+                && Objects.equal(this.getId(), other.getId());
+    }
 }

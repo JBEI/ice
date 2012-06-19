@@ -1,31 +1,29 @@
 package org.jbei.ice.lib.account;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.Moderator;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 /**
  * DAO to manipulate {@link Account} objects in the database.
- * 
+ *
  * @author Hector Plahar, Timothy Ham, Zinovii Dmytriv
- * 
  */
 class AccountDAO extends HibernateRepository {
 
     /**
      * Retrieve {@link Account} by id from the database.
-     * 
+     *
      * @param id
      * @return Account
      * @throws DAOException
@@ -40,7 +38,7 @@ class AccountDAO extends HibernateRepository {
 
         @SuppressWarnings("unchecked")
         ArrayList<Account> reports = (ArrayList<Account>) session.createCriteria(Account.class)
-                .list();
+                                                                 .list();
         //        Hibernate.initialize(reports);
 
         session.getTransaction().commit();
@@ -49,7 +47,7 @@ class AccountDAO extends HibernateRepository {
 
     /**
      * Retrieve all {@link Account}s sorted by the firstName field.
-     * 
+     *
      * @return Set of {@link Account}s.
      * @throws DAOException
      */
@@ -104,7 +102,7 @@ class AccountDAO extends HibernateRepository {
 
     /**
      * Retrieve an {@link Account} by the email field.
-     * 
+     *
      * @param email
      * @return Account
      * @throws DAOException
@@ -115,7 +113,7 @@ class AccountDAO extends HibernateRepository {
         Session session = newSession();
         try {
             Query query = session.createQuery("from " + Account.class.getName()
-                    + " where email = :email");
+                                                      + " where email = :email");
 
             query.setParameter("email", email);
 
@@ -137,7 +135,7 @@ class AccountDAO extends HibernateRepository {
 
     /**
      * Check if the given {@link Account} has moderator privileges.
-     * 
+     *
      * @param account
      * @return True if the {@link Account} is a moderator.
      * @throws DAOException
@@ -162,7 +160,7 @@ class AccountDAO extends HibernateRepository {
             }
         } catch (HibernateException e) {
             throw new DAOException("Failed to determine moderator for Account: "
-                    + account.getFullName());
+                                           + account.getFullName());
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -174,7 +172,7 @@ class AccountDAO extends HibernateRepository {
 
     /**
      * Save the given {@link Account} into the database.
-     * 
+     *
      * @param account
      * @return Saved account.
      * @throws DAOException
@@ -185,7 +183,7 @@ class AccountDAO extends HibernateRepository {
 
     /**
      * Delete the given {@link Account} in the database.
-     * 
+     *
      * @param account
      * @return True if successful.
      * @throws DAOException
@@ -203,7 +201,7 @@ class AccountDAO extends HibernateRepository {
 
     /**
      * Retrieve the {@link Account} by the authorization token.
-     * 
+     *
      * @param authToken
      * @return Account.
      * @throws DAOException
@@ -237,11 +235,10 @@ class AccountDAO extends HibernateRepository {
 
     /**
      * Save the given {@link Moderator} object into the database.
-     * 
+     *
      * @param moderator
      * @return Saved Moderator.
-     * @throws DAOException
-     *             TODO
+     * @throws DAOException TODO
      */
     public Moderator saveModerator(Moderator moderator) throws DAOException {
         if (moderator == null) {

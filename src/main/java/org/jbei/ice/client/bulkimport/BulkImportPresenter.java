@@ -1,9 +1,10 @@
 package org.jbei.ice.client.bulkimport;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map.Entry;
-
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.admin.bulkimport.BulkImportMenuItem;
@@ -22,15 +23,13 @@ import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SingleSelectionModel;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map.Entry;
 
 /**
  * Presenter for the bulk import page
- * 
+ *
  * @author Hector Plahar
  */
 public class BulkImportPresenter extends AbstractPresenter {
@@ -81,7 +80,7 @@ public class BulkImportPresenter extends AbstractPresenter {
 
             @Override
             public void onClick(ClickEvent event) {
-                view.setDraftMenuVisibility(!view.getMenuVisibility());
+                view.setDraftMenuVisibility(!view.getMenuVisibility(), true);
             }
         });
     }
@@ -117,7 +116,7 @@ public class BulkImportPresenter extends AbstractPresenter {
 
                         view.setSheet(currentInput, false);
                         view.setHeader(info.getType().getDisplay() + " Bulk Import");
-                        //                                                view.setMenuVisibility(false);
+                        view.setDraftMenuVisibility(false, false);
                     }
                 });
             }
@@ -146,7 +145,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                 }
                 view.setSheet(currentInput, true);
                 view.setHeader(selection.getDisplay() + " Bulk Import");
-                view.setDraftMenuVisibility(false);
+                view.setDraftMenuVisibility(false, false);
                 createSelection.setSelected(selection, false);
             }
         });
@@ -163,7 +162,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                     String dateTime = DateUtilities.formatShorterDate(info.getCreated());
                     BulkImportMenuItem item = new BulkImportMenuItem(info.getId(), name, info
                             .getCount(), dateTime, info.getType().toString(), info.getAccount()
-                            .getEmail());
+                                                                                  .getEmail());
                     data.add(item);
                 }
 
@@ -206,20 +205,20 @@ public class BulkImportPresenter extends AbstractPresenter {
             }
 
             model.submitBulkImport(currentInput.getImportType(), cellData,
-                new BulkImportSubmitEventHandler() {
+                                   new BulkImportSubmitEventHandler() {
 
-                    @Override
-                    public void onSubmit(BulkImportSubmitEvent event) {
-                        if (event.isSuccess()) {
-                            //
-                            // TODO : reset sheet to avoid re-submission
-                            view.showFeedback("Entries submitted successfully for verification.",
-                                false);
-                        } else {
-                            view.showFeedback("Error saving entries.", true);
-                        }
-                    }
-                });
+                                       @Override
+                                       public void onSubmit(BulkImportSubmitEvent event) {
+                                           if (event.isSuccess()) {
+                                               //
+                                               // TODO : reset sheet to avoid re-submission
+                                               view.showFeedback("Entries submitted successfully for verification.",
+                                                                 false);
+                                           } else {
+                                               view.showFeedback("Error saving entries.", true);
+                                           }
+                                       }
+                                   });
         }
     }
 
@@ -253,33 +252,41 @@ public class BulkImportPresenter extends AbstractPresenter {
             }
 
             model.saveBulkImportDraftData(currentInput.getImportType(), name, cellData,
-                new BulkImportDraftSubmitEventHandler() {
+                                          new BulkImportDraftSubmitEventHandler() {
 
-                    @Override
-                    public void onSubmit(BulkImportDraftSubmitEvent event) {
-                        if (event == null || event.getDraftInfo() == null)
-                            view.showFeedback("Error saving draft", true);
-                        else {
-                            BulkImportDraftInfo info = event.getDraftInfo();
-                            view.showFeedback(
-                                "Draft \"" + info.getName() + "\" with <b>" + info.getCount()
-                                        + "</b> entry/ies successfully saved", false);
-                            String dateTime = DateUtilities.formatShorterDate(info.getCreated());
-                            BulkImportMenuItem item = new BulkImportMenuItem(info.getId(), info
-                                    .getName(), info.getCount(), dateTime, info.getType()
-                                    .toString(), info.getAccount().getEmail());
+                                              @Override
+                                              public void onSubmit(BulkImportDraftSubmitEvent event) {
+                                                  if (event == null || event.getDraftInfo() == null)
+                                                      view.showFeedback("Error saving draft", true);
+                                                  else {
+                                                      BulkImportDraftInfo info = event.getDraftInfo();
+                                                      view.showFeedback(
+                                                              "Draft \"" + info.getName() + "\" with <b>" + info
+                                                                      .getCount()
+                                                                      + "</b> entry/ies successfully saved", false);
+                                                      String dateTime = DateUtilities.formatShorterDate(
+                                                              info.getCreated());
+                                                      BulkImportMenuItem item = new BulkImportMenuItem(info.getId(),
+                                                                                                       info.getName(),
+                                                                                                       info.getCount(),
+                                                                                                       dateTime,
+                                                                                                       info.getType()
+                                                                                                           .toString(),
+                                                                                                       info.getAccount()
+                                                                                                           .getEmail());
 
-                            view.addSavedDraftData(item,
-                                new DeleteBulkImportHandler(model.getService()));
-                            currentInput.setName(info.getName());
-                            currentInput.setId(info.getId());
+                                                      view.addSavedDraftData(item,
+                                                                             new DeleteBulkImportHandler(
+                                                                                     model.getService()));
+                                                      currentInput.setName(info.getName());
+                                                      currentInput.setId(info.getId());
 
-                            view.setSheet(currentInput, false);
-                            view.setHeader(currentInput.getImportType().getDisplay()
-                                    + " Bulk Import");
-                        }
-                    }
-                });
+                                                      view.setSheet(currentInput, false);
+                                                      view.setHeader(currentInput.getImportType().getDisplay()
+                                                                             + " Bulk Import");
+                                                  }
+                                              }
+                                          });
         }
     }
 
@@ -296,22 +303,24 @@ public class BulkImportPresenter extends AbstractPresenter {
             ArrayList<SheetFieldData[]> cellData = currentInput.getSheet().getCellData();
 
             model.updateBulkImportDraft(id, type, name, cellData,
-                new BulkImportDraftSubmitEventHandler() {
+                                        new BulkImportDraftSubmitEventHandler() {
 
-                    @Override
-                    public void onSubmit(BulkImportDraftSubmitEvent event) {
-                        if (event == null || event.getDraftInfo() == null)
-                            view.showFeedback("Error updating draft", true);
-                        else {
-                            BulkImportDraftInfo info = event.getDraftInfo();
-                            view.showFeedback("Update successful", false);
-                            // TODO : update menu with new counts
-                            //                            MenuItem item = new MenuItem(info.getId(), info.getName(), info
-                            //                                    .getCount(), false);
-                            //                            view.addSavedDraftData(item, null); // TODO : deleteHandler
-                        }
-                    }
-                });
+                                            @Override
+                                            public void onSubmit(BulkImportDraftSubmitEvent event) {
+                                                if (event == null || event.getDraftInfo() == null)
+                                                    view.showFeedback("Error updating draft", true);
+                                                else {
+                                                    BulkImportDraftInfo info = event.getDraftInfo();
+                                                    view.showFeedback("Update successful", false);
+                                                    // TODO : update menu with new counts
+                                                    //                            MenuItem item = new MenuItem(info
+                                                    // .getId(), info.getName(), info
+                                                    //                                    .getCount(), false);
+                                                    //                            view.addSavedDraftData(item,
+                                                    // null); // TODO : deleteHandler
+                                                }
+                                            }
+                                        });
         }
     }
 }

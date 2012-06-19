@@ -19,7 +19,7 @@ import org.jbei.ice.lib.utils.JbeirSettings;
  * sized cache for performance, at the risk of using a too small of a cache which will result in
  * strange session data errors.
  * 
- * @author Timothy Ham, Zinovii Dmytriv
+ * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  * 
  */
 public class PersistentSessionDataWrapper {
@@ -51,8 +51,7 @@ public class PersistentSessionDataWrapper {
      * @throws ManagerException
      */
     public synchronized SessionData getSessionData(String sessionKey) throws ManagerException {
-        SessionData sessionData = null;
-        sessionData = getCachedInstance(sessionKey);
+        SessionData sessionData = getCachedInstance(sessionKey);
 
         return sessionData;
     }

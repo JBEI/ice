@@ -80,7 +80,7 @@ public interface RegistryServiceAsync {
     void retrieveSampleInfo(String sid, LinkedList<Long> sampleIds, ColumnField sortField,
             boolean asc, AsyncCallback<LinkedList<SampleInfo>> callback);
 
-    void retrieveAccountInfoForSession(String sid, AsyncCallback<AccountInfo> callback) throws AuthenticationException;
+//    void retrieveAccountInfoForSession(String sid, AsyncCallback<AccountInfo> callback) throws AuthenticationException;
 
     void retrieveFolderDetails(String sid, long folderId, AsyncCallback<FolderDetails> callback)
             throws AuthenticationException;
@@ -150,8 +150,6 @@ public interface RegistryServiceAsync {
 
     void submitBulkImport(String sid, String email, ArrayList<EntryInfo> primary,
             ArrayList<EntryInfo> secondary, AsyncCallback<Boolean> callback) throws AuthenticationException;
-
-    FolderDetails removeFromUserCollection(String sessionId, long source, ArrayList<Long> ids) throws AuthenticationException;
 
     void retrieveBulkImport(String sid, long id, AsyncCallback<BulkImportDraftInfo> callback) throws AuthenticationException;
 

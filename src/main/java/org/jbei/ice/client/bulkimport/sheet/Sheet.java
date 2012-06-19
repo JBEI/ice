@@ -1,5 +1,13 @@
 package org.jbei.ice.client.bulkimport.sheet;
 
+import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HTMLTable.Cell;
 import gwtupload.client.IFileInput.FileInputType;
 import gwtupload.client.IUploadStatus.Status;
 import gwtupload.client.IUploader;
@@ -8,11 +16,6 @@ import gwtupload.client.IUploader.OnFinishUploaderHandler;
 import gwtupload.client.IUploader.OnStartUploaderHandler;
 import gwtupload.client.IUploader.UploadedInfo;
 import gwtupload.client.SingleUploader;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.TreeSet;
-
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.bulkimport.SheetPresenter;
 import org.jbei.ice.client.bulkimport.model.SheetFieldData;
@@ -23,37 +26,9 @@ import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.DoubleClickEvent;
-import com.google.gwt.event.dom.client.DoubleClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
-import com.google.gwt.event.dom.client.MouseUpEvent;
-import com.google.gwt.event.dom.client.MouseUpHandler;
-import com.google.gwt.event.dom.client.ScrollEvent;
-import com.google.gwt.event.dom.client.ScrollHandler;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FocusPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLTable.Cell;
-import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
-import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.SuggestBox;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.TreeSet;
 
 public class Sheet extends Composite implements SheetPresenter.View {
 
@@ -75,9 +50,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
     protected final FlexTable header;
     protected final ScrollPanel headerWrapper;
 
-    private final int WIDTH = 40; //300;
-    private final int HEIGHT = 340;
-
     private int headerCol;
 
     protected final SheetPresenter presenter;
@@ -89,7 +61,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
     private final HashMap<Integer, String> sequenceRowFileIds;
     private final BulkImportDraftInfo info;
 
-    private final static int ROW_COUNT = 5;
+    private final static int ROW_COUNT = 50;
 
     public Sheet(EntryAddType type) {
         this(type, null);
@@ -128,15 +100,15 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         // then wrap it in a scroll panel that expands to fill area given by browser
         wrapper = new ScrollPanel(panel);
-        wrapper.setWidth((Window.getClientWidth() - WIDTH - 10) + "px");
-        wrapper.setHeight((Window.getClientHeight() - HEIGHT - 25) + "px");
+        wrapper.setWidth((Window.getClientWidth() - 40) + "px");
+        wrapper.setHeight((Window.getClientHeight() - 340 - 25) + "px");
 
         colIndex = new FlexTable();
         colIndex.setCellPadding(0);
         colIndex.setCellSpacing(0);
         colIndex.setStyleName("sheet_col_index");
         colIndexWrapper = new ScrollPanel(colIndex);
-        colIndexWrapper.setHeight((Window.getClientHeight() - HEIGHT - 25) + "px");
+        colIndexWrapper.setHeight((Window.getClientHeight() - 340 - 25) + "px");
 
         addPanelHandlers();
         addWindowResizeHandler();
@@ -152,7 +124,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         // init
         headerWrapper = new ScrollPanel(header);
-        headerWrapper.setWidth((Window.getClientWidth() - 25) + "px");
+        headerWrapper.setWidth((Window.getClientWidth() - 15) + "px");
 
         addScrollHandlers();
 
@@ -161,25 +133,42 @@ public class Sheet extends Composite implements SheetPresenter.View {
         init();
     }
 
+    // experimental
+    public void decreaseWidthBy(int amount) {
+        wrapper.setWidth((wrapper.getOffsetWidth() - amount) + "px");
+        headerWrapper.setWidth((headerWrapper.getOffsetWidth() - amount) + "px");
+    }
+
+    public void increaseWidthBy(int amount) {
+        wrapper.setWidth((wrapper.getOffsetWidth() + amount) + "px");
+        headerWrapper.setWidth((headerWrapper.getOffsetWidth() + amount) + "px");
+    }
+
     private void addWindowResizeHandler() {
         Window.addResizeHandler(new ResizeHandler() {
 
+            private int previousWidth = Window.getClientWidth();
+
             @Override
             public void onResize(ResizeEvent event) {
+                int delta = event.getWidth() - previousWidth;
+                previousWidth = event.getWidth();
+                if (delta < 0) {
+                    delta *= -1;
+                    wrapper.setWidth((wrapper.getOffsetWidth() - delta) + "px");
+                    headerWrapper.setWidth((headerWrapper.getOffsetWidth() - delta) + "px");
+                } else   {
+                    wrapper.setWidth((wrapper.getOffsetWidth() + delta) + "px");
+                    headerWrapper.setWidth((headerWrapper.getOffsetWidth() + delta) + "px");
+                }
 
-                int wrapperWidth = (event.getWidth() - WIDTH) - 1;
-                if (wrapperWidth >= 0)
-                    wrapper.setWidth(wrapperWidth + "px");
-
-                int wrapperHeight = (event.getHeight() - HEIGHT - 30);
+                int wrapperHeight = (event.getHeight() - 340 - 30);
                 if (wrapperHeight >= 0)
                     wrapper.setHeight(wrapperHeight + "px");
 
-                int rowIndexHeight = (event.getHeight() - HEIGHT - 30 - 15);
+                int rowIndexHeight = (event.getHeight() - 340 - 30 - 15);
                 if (rowIndexHeight >= 0)
                     colIndexWrapper.setHeight(rowIndexHeight + "px");
-
-                headerWrapper.setWidth((event.getWidth() - 16) + "px");
             }
         });
     }
@@ -509,7 +498,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
                     @Override
                     public void onStart(IUploader uploader) {
                         uploader.setServletPath(uploader.getServletPath()
-                                + "?type=bulk_attachment&sid=" + AppController.sessionId);
+                                                        + "?type=bulk_attachment&sid=" + AppController.sessionId);
                         //                    sheetTable.setWidget(currentRow, currentIndex,
                         //                        uploaderStatus.getProgressWidget());
                     }
@@ -637,7 +626,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     private void selectCell(int row, int col, int newRow, int newCol) { // TODO : similar in functionality to cell click
         //        HTML corner = new HTML(
-        //                "<div style=\"position: relative; width: 5px; height: 5px; background-color: blue; top: 12px; right: -122px; border: 3px solid white\"></div>");
+        //                "<div style=\"position: relative; width: 5px; height: 5px; background-color: blue; top:
+        // 12px; right: -122px; border: 3px solid white\"></div>");
 
         if (lastReplaced != null) {
 
@@ -677,8 +667,9 @@ public class Sheet extends Composite implements SheetPresenter.View {
                     secondaryInfo = info.getSecondary().get(index);
 
                 String value = InfoValueExtractorFactory.extractValue(presenter.getType(),
-                        headers[i], primaryInfo, secondaryInfo, index, attachmentRowFileIds,
-                        sequenceRowFileIds);
+                                                                      headers[i], primaryInfo, secondaryInfo, index,
+                                                                      attachmentRowFileIds,
+                                                                      sequenceRowFileIds);
                 if (value == null)
                     value = "";
 
@@ -708,7 +699,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
      */
     private String getLastWidgetText() {
         Header currentHeader = presenter.getTypeHeaders()[inputIndex];
-        String ret = "";
+        String ret;
 
         switch (currentHeader) {
 
