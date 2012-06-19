@@ -1,26 +1,8 @@
 package org.jbei.ice.client.collection.menu;
 
-import java.util.ArrayList;
-import java.util.Set;
-
-import org.jbei.ice.client.Callback;
-import org.jbei.ice.client.common.util.ImageUtil;
-import org.jbei.ice.shared.FolderDetails;
-
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.FocusEvent;
-import com.google.gwt.event.dom.client.FocusHandler;
-import com.google.gwt.event.dom.client.HasClickHandlers;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.DOM;
@@ -34,11 +16,17 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
+import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.common.util.ImageUtil;
+import org.jbei.ice.shared.FolderDetails;
+
+import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Left bar menu for showing user collections. Also adds widgets such as
  * an icon for adding a new user collection and edit/delete
- * 
+ *
  * @author Hector Plahar
  */
 public class CollectionMenu extends Composite {
@@ -95,7 +83,8 @@ public class CollectionMenu extends Composite {
             });
 
             HTMLPanel menuHeaderPanel = new HTMLPanel("<span>" + header
-                    + "</span><span style=\"float: right\" id=\"quick_add\"></span>");
+                                                              + "</span><span style=\"float: right\" " +
+                                                              "id=\"quick_add\"></span>");
             menuHeaderPanel.add(quickAddButton, "quick_add");
             table.setWidget(row, 0, menuHeaderPanel);
             table.getFlexCellFormatter().setStyleName(row, 0, "collections_menu_header");
@@ -228,9 +217,8 @@ public class CollectionMenu extends Composite {
     /**
      * checks if the user clicked within the menu contents
      * and not, for eg. the header
-     * 
-     * @param event
-     *            user click event
+     *
+     * @param event user click event
      * @return true if a response is required for user selection
      */
     public boolean isValidClick(ClickEvent event) {
@@ -403,10 +391,10 @@ public class CollectionMenu extends Composite {
         }
 
         @Override
-        public void onSucess(MenuItem item) {
+        public void onSuccess(MenuItem item) {
             MenuHiderTimer timer = new MenuHiderTimer(table, editRow);
             DeletedCell deletedCell = new DeletedCell(currentEditSelection,
-                    deleteHandler.getUndoHandler(item, CollectionMenu.this, timer));
+                                                      deleteHandler.getUndoHandler(item, CollectionMenu.this, timer));
             table.setWidget(editRow, editIndex, deletedCell);
             timer.schedule(6000);
         }
@@ -519,23 +507,23 @@ public class CollectionMenu extends Composite {
                 return;
 
             switch (DOM.eventGetType(event)) {
-            case Event.ONMOUSEOVER:
-                setRightPanel(action);
-                break;
+                case Event.ONMOUSEOVER:
+                    setRightPanel(action);
+                    break;
 
-            case Event.ONMOUSEOUT:
-                EventTarget target = event.getRelatedEventTarget(); // image
+                case Event.ONMOUSEOUT:
+                    EventTarget target = event.getRelatedEventTarget(); // image
 
-                if (Element.is(target)) {
-                    Element element = Element.as(target);
-                    Element eDelete = action.getDelete().getElement();
-                    Element eEdit = action.getEdit().getElement();
+                    if (Element.is(target)) {
+                        Element element = Element.as(target);
+                        Element eDelete = action.getDelete().getElement();
+                        Element eEdit = action.getEdit().getElement();
 
-                    if (element.equals(eEdit) || element.equals(eDelete))
-                        break;
-                }
-                setRightPanel(count);
-                break;
+                        if (element.equals(eEdit) || element.equals(eDelete))
+                            break;
+                    }
+                    setRightPanel(count);
+                    break;
             }
         }
 

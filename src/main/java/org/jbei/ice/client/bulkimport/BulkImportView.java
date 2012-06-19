@@ -234,6 +234,11 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     }
 
     @Override
+    public void updateSavedDraftsMenu(BulkImportMenuItem item) {
+        draftsMenu.updateMenuItem(item);
+    }
+
+    @Override
     public void addSavedDraftData(BulkImportMenuItem item, IDeleteMenuHandler handler) {
         draftsMenu.addMenuItem(item, handler);
         toggle.setVisible(true);

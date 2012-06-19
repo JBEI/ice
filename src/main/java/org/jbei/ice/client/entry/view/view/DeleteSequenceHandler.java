@@ -1,12 +1,11 @@
 package org.jbei.ice.client.entry.view.view;
 
-import org.jbei.ice.client.AppController;
-import org.jbei.ice.client.Callback;
-import org.jbei.ice.client.RegistryServiceAsync;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.RegistryServiceAsync;
 
 public class DeleteSequenceHandler implements ClickHandler {
 
@@ -31,7 +30,7 @@ public class DeleteSequenceHandler implements ClickHandler {
                 @Override
                 public void onSuccess(Boolean result) {
                     if (callback != null)
-                        callback.onSucess(true);
+                        callback.onSuccess(true);
                 }
 
                 @Override

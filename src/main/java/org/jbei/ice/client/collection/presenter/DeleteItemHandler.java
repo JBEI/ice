@@ -1,10 +1,10 @@
 package org.jbei.ice.client.collection.presenter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.IceAsyncCallback;
@@ -18,9 +18,8 @@ import org.jbei.ice.client.collection.menu.MenuItem;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.FolderDetails;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class DeleteItemHandler implements IDeleteMenuHandler {
 
@@ -50,8 +49,9 @@ public class DeleteItemHandler implements IDeleteMenuHandler {
 
                 folder.put(result.getId(), result.getContents());
                 MenuItem item = new MenuItem(result.getId(), result.getName(), result.getCount()
-                        .longValue(), result.isSystemFolder());
-                deleteCallback.onSucess(item);
+                                                                                     .longValue(),
+                                             result.isSystemFolder());
+                deleteCallback.onSuccess(item);
                 view.removeSubMenuFolder(item);
             }
 

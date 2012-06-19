@@ -1,13 +1,5 @@
 package org.jbei.ice.client.common.table.cell;
 
-import org.jbei.ice.client.Callback;
-import org.jbei.ice.client.collection.menu.IHasEntryHandlers;
-import org.jbei.ice.client.collection.presenter.EntryContext;
-import org.jbei.ice.client.common.TipViewContentFactory;
-import org.jbei.ice.client.event.EntryViewEvent;
-import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
-import org.jbei.ice.shared.dto.EntryInfo;
-
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Element;
@@ -19,17 +11,25 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.collection.menu.IHasEntryHandlers;
+import org.jbei.ice.client.collection.presenter.EntryContext;
+import org.jbei.ice.client.common.TipViewContentFactory;
+import org.jbei.ice.client.event.EntryViewEvent;
+import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
+import org.jbei.ice.shared.dto.EntryInfo;
 
 /**
  * Cell for part Id column values. Renders a url
  * that has a popup on mouse over
- * 
+ *
  * @author Hector Plahar
  */
 
 public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements IHasEntryHandlers {
 
-    private static PopupPanel popup = new PopupPanel(true);;
+    private static PopupPanel popup = new PopupPanel(true);
+    ;
     private static final String MOUSEOVER_EVENT_NAME = "mouseover";
     private static final String MOUSEOUT_EVENT_NAME = "mouseout";
     private static final String MOUSE_CLICK = "click";
@@ -118,7 +118,7 @@ public class PartIDCell<T extends EntryInfo> extends AbstractCell<T> implements 
         TipViewContentFactory.getContents(value, new Callback<Widget>() {
 
             @Override
-            public void onSucess(Widget contents) {
+            public void onSuccess(Widget contents) {
                 if (hidden)
                     return;
 

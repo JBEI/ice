@@ -1,14 +1,13 @@
 package org.jbei.ice.client.entry.view.detail;
 
-import org.jbei.ice.client.Callback;
-import org.jbei.ice.client.entry.view.view.DeleteSequenceHandler;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.entry.view.view.DeleteSequenceHandler;
 
 public class DeleteSequenceData {
 
@@ -25,7 +24,8 @@ public class DeleteSequenceData {
 
     public Widget getLabelWidget() {
         HTMLPanel panel = new HTMLPanel(
-                "<span id=\"delete_sequence_data_label\"></span><span style=\"color: #262626; font-size: 0.75em;\">| </span>");
+                "<span id=\"delete_sequence_data_label\"></span><span style=\"color: #262626; font-size: 0.75em;\">| " +
+                        "</span>");
         panel.setStyleName("display-inline");
         panel.add(label, "delete_sequence_data_label");
         return panel;
@@ -52,7 +52,7 @@ public class DeleteSequenceData {
     private class DeleteCallback extends Callback<Boolean> {
 
         @Override
-        public void onSucess(Boolean t) {
+        public void onSuccess(Boolean t) {
             if (t.booleanValue()) {
                 sequencePanelPresenter.getEntry().setHasSequence(false);
                 sequencePanelPresenter.updateSequenceView();

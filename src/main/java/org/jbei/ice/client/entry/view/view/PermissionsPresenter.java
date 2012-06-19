@@ -1,19 +1,18 @@
 package org.jbei.ice.client.entry.view.view;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.SuggestOracle;
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.entry.view.DeletePermissionHandler;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.SuggestOracle;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class PermissionsPresenter {
 
@@ -81,11 +80,12 @@ public class PermissionsPresenter {
         DeletePermissionHandler handler = null;
         if (canEdit) {
             handler = new DeletePermissionHandler(service, info, entryId,
-                    new DeletePermissionCallback());
+                                                  new DeletePermissionCallback());
         }
 
         boolean isGroup = (info.getType() == PermissionType.READ_GROUP || info.getType() == PermissionType.WRITE_GROUP);
-        boolean isWrite = (info.getType() == PermissionType.WRITE_GROUP || info.getType() == PermissionType.WRITE_ACCOUNT);
+        boolean isWrite = (info.getType() == PermissionType.WRITE_GROUP || info
+                .getType() == PermissionType.WRITE_ACCOUNT);
         PermissionItem item = new PermissionItem(info.getId(), info.getDisplay(), isGroup, isWrite);
         view.addReadItem(item, handler);
         readList.add(info);
@@ -103,11 +103,12 @@ public class PermissionsPresenter {
         DeletePermissionHandler handler = null;
         if (canEdit) {
             handler = new DeletePermissionHandler(service, info, entryId,
-                    new DeletePermissionCallback());
+                                                  new DeletePermissionCallback());
         }
 
         boolean isGroup = (info.getType() == PermissionType.READ_GROUP || info.getType() == PermissionType.WRITE_GROUP);
-        boolean isWrite = (info.getType() == PermissionType.WRITE_GROUP || info.getType() == PermissionType.WRITE_ACCOUNT);
+        boolean isWrite = (info.getType() == PermissionType.WRITE_GROUP || info
+                .getType() == PermissionType.WRITE_ACCOUNT);
         PermissionItem item = new PermissionItem(info.getId(), info.getDisplay(), isGroup, isWrite);
         view.addWriteItem(item, handler);
         writeList.add(info);
@@ -144,32 +145,32 @@ public class PermissionsPresenter {
             DeletePermissionHandler handler = null;
             if (isCanEdit())
                 handler = new DeletePermissionHandler(service, info, entryId,
-                        new DeletePermissionCallback());
+                                                      new DeletePermissionCallback());
 
             switch (info.getType()) {
-            case READ_ACCOUNT:
-                item = new PermissionItem(info.getId(), info.getDisplay(), false, false);
-                view.addReadItem(item, handler);
-                readList.add(info);
-                break;
+                case READ_ACCOUNT:
+                    item = new PermissionItem(info.getId(), info.getDisplay(), false, false);
+                    view.addReadItem(item, handler);
+                    readList.add(info);
+                    break;
 
-            case READ_GROUP:
-                item = new PermissionItem(info.getId(), info.getDisplay(), true, false);
-                view.addReadItem(item, handler);
-                readList.add(info);
-                break;
+                case READ_GROUP:
+                    item = new PermissionItem(info.getId(), info.getDisplay(), true, false);
+                    view.addReadItem(item, handler);
+                    readList.add(info);
+                    break;
 
-            case WRITE_ACCOUNT:
-                item = new PermissionItem(info.getId(), info.getDisplay(), false, true);
-                view.addWriteItem(item, handler);
-                writeList.add(info);
-                break;
+                case WRITE_ACCOUNT:
+                    item = new PermissionItem(info.getId(), info.getDisplay(), false, true);
+                    view.addWriteItem(item, handler);
+                    writeList.add(info);
+                    break;
 
-            case WRITE_GROUP:
-                item = new PermissionItem(info.getId(), info.getDisplay(), true, true);
-                view.addWriteItem(item, handler);
-                writeList.add(info);
-                break;
+                case WRITE_GROUP:
+                    item = new PermissionItem(info.getId(), info.getDisplay(), true, true);
+                    view.addWriteItem(item, handler);
+                    writeList.add(info);
+                    break;
             }
 
             if (item != null)
@@ -193,34 +194,34 @@ public class PermissionsPresenter {
     private class DeletePermissionCallback extends Callback<PermissionInfo> {
 
         @Override
-        public void onSucess(PermissionInfo info) {
+        public void onSuccess(PermissionInfo info) {
 
             PermissionItem item = null;
 
             switch (info.getType()) {
-            case READ_ACCOUNT:
-                item = new PermissionItem(info.getId(), info.getDisplay(), false, false);
-                view.removeReadItem(item);
-                removeFromList(readList, info);
-                break;
+                case READ_ACCOUNT:
+                    item = new PermissionItem(info.getId(), info.getDisplay(), false, false);
+                    view.removeReadItem(item);
+                    removeFromList(readList, info);
+                    break;
 
-            case READ_GROUP:
-                item = new PermissionItem(info.getId(), info.getDisplay(), true, false);
-                view.removeReadItem(item);
-                removeFromList(readList, info);
-                break;
+                case READ_GROUP:
+                    item = new PermissionItem(info.getId(), info.getDisplay(), true, false);
+                    view.removeReadItem(item);
+                    removeFromList(readList, info);
+                    break;
 
-            case WRITE_ACCOUNT:
-                item = new PermissionItem(info.getId(), info.getDisplay(), false, true);
-                view.removeWriteItem(item);
-                removeFromList(writeList, info);
-                break;
+                case WRITE_ACCOUNT:
+                    item = new PermissionItem(info.getId(), info.getDisplay(), false, true);
+                    view.removeWriteItem(item);
+                    removeFromList(writeList, info);
+                    break;
 
-            case WRITE_GROUP:
-                item = new PermissionItem(info.getId(), info.getDisplay(), true, true);
-                view.removeWriteItem(item);
-                removeFromList(writeList, info);
-                break;
+                case WRITE_GROUP:
+                    item = new PermissionItem(info.getId(), info.getDisplay(), true, true);
+                    view.removeWriteItem(item);
+                    removeFromList(writeList, info);
+                    break;
             }
         }
 

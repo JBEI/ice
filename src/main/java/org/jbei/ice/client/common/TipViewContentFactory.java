@@ -1,7 +1,12 @@
 package org.jbei.ice.client.common;
 
-import java.util.Date;
-
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.Widget;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Callback;
 import org.jbei.ice.client.RegistryService;
@@ -13,17 +18,11 @@ import org.jbei.ice.shared.dto.PartInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.Widget;
+import java.util.Date;
 
 /**
  * Factory for generating a widget that is used as a tooltip for entrys
- * 
+ *
  * @author Hector Plahar
  */
 // TODO : need better separation of concerns
@@ -35,23 +34,23 @@ public class TipViewContentFactory {
 
         try {
             service.retrieveEntryTipDetails(AppController.sessionId, entry.getId(),
-                new AsyncCallback<EntryInfo>() {
+                                            new AsyncCallback<EntryInfo>() {
 
-                    @Override
-                    public void onSuccess(EntryInfo result) {
-                        if (result == null) {
-                            callback.onFailure();
-                            return;
-                        }
-                        Widget contents = getContents(result);
-                        callback.onSucess(contents);
-                    }
+                                                @Override
+                                                public void onSuccess(EntryInfo result) {
+                                                    if (result == null) {
+                                                        callback.onFailure();
+                                                        return;
+                                                    }
+                                                    Widget contents = getContents(result);
+                                                    callback.onSuccess(contents);
+                                                }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        callback.onFailure();
-                    }
-                });
+                                                @Override
+                                                public void onFailure(Throwable caught) {
+                                                    callback.onFailure();
+                                                }
+                                            });
         } catch (org.jbei.ice.client.exception.AuthenticationException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
@@ -70,28 +69,28 @@ public class TipViewContentFactory {
         setHeader(parent, entry);
 
         switch (entry.getType()) {
-        case STRAIN:
-            StrainInfo view = (StrainInfo) entry;
-            getStrainContent(parent, view);
-            break;
+            case STRAIN:
+                StrainInfo view = (StrainInfo) entry;
+                getStrainContent(parent, view);
+                break;
 
-        case PLASMID:
-            PlasmidInfo plasmidInfo = (PlasmidInfo) entry;
-            getPlasmidContent(parent, plasmidInfo);
-            break;
+            case PLASMID:
+                PlasmidInfo plasmidInfo = (PlasmidInfo) entry;
+                getPlasmidContent(parent, plasmidInfo);
+                break;
 
-        case ARABIDOPSIS:
-            ArabidopsisSeedInfo seedInfo = (ArabidopsisSeedInfo) entry;
-            getSeedContent(parent, seedInfo);
-            break;
+            case ARABIDOPSIS:
+                ArabidopsisSeedInfo seedInfo = (ArabidopsisSeedInfo) entry;
+                getSeedContent(parent, seedInfo);
+                break;
 
-        case PART:
-            PartInfo partInfo = (PartInfo) entry;
-            getPartContent(parent, partInfo);
-            break;
+            case PART:
+                PartInfo partInfo = (PartInfo) entry;
+                getPartContent(parent, partInfo);
+                break;
 
-        default:
-            return null;
+            default:
+                return null;
         }
 
         return parent;
@@ -108,7 +107,8 @@ public class TipViewContentFactory {
         layout.getFlexCellFormatter().setColSpan(0, 0, 3);
 
         HTMLPanel panel = new HTMLPanel(
-                "<span id=\"has_attachment_image\"></span><span id=\"has_sample_image\"></span><span id=\"has_sequence_image\"></span>");
+                "<span id=\"has_attachment_image\"></span><span id=\"has_sample_image\"></span><span " +
+                        "id=\"has_sequence_image\"></span>");
 
         if (hasAttachment)
             panel.add(ImageUtil.getAttachment(), "has_attachment_image");

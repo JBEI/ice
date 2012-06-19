@@ -1,10 +1,5 @@
 package org.jbei.ice.client.admin.bulkimport;
 
-import java.util.ArrayList;
-
-import org.jbei.ice.client.Callback;
-import org.jbei.ice.client.common.util.ImageUtil;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
@@ -25,6 +20,10 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
+import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.common.util.ImageUtil;
+
+import java.util.ArrayList;
 
 public class SavedDraftsMenu extends Composite {
 
@@ -81,32 +80,31 @@ public class SavedDraftsMenu extends Composite {
     /**
      * checks if the user clicked within the menu contents
      * and not, for eg. the header
-     * 
+     *
      * @param event
      *            user click event
      * @return true if a response is required for user selection
      */
-    public boolean isValidClick(ClickEvent event) {
-        if (event == null)
-            return false;
-
-        Cell cell = this.table.getCellForEvent(event);
-        if (cell == null)
-            return false;
-
-        boolean isValid = (cell.getCellIndex() != 0 || cell.getRowIndex() != 0);
-        if (!isValid)
-            return isValid;
-
-        return isValid;
-    }
+//    public boolean isValidClick(ClickEvent event) {
+//        if (event == null)
+//            return false;
+//
+//        Cell cell = this.table.getCellForEvent(event);
+//        if (cell == null)
+//            return false;
+//
+//        boolean isValid = (cell.getCellIndex() != 0 || cell.getRowIndex() != 0);
+//        if (!isValid)
+//            return isValid;
+//
+//        return isValid;
+//    }
 
     /**
      * replaces current edit cell (in menu)
      * with new cell with folder
-     * 
-     * @param folder
-     *            new folder for cell
+     * <p/>
+     * new folder for cell
      */
     //    public void setMenuItem(BulkImportMenuItem item, IDeleteMenuHandler deleteHandler) {
     //
@@ -114,7 +112,6 @@ public class SavedDraftsMenu extends Composite {
     //        cell.addClickHandler(new CellSelectionHandler(selectionModel, cell));
     //        table.setWidget(editRow, editIndex, cell); // TODO
     //    }
-
     public void addMenuItem(BulkImportMenuItem item, IDeleteMenuHandler deleteHandler) {
         if (item == null)
             return;
@@ -123,6 +120,21 @@ public class SavedDraftsMenu extends Composite {
         cell.addClickHandler(new CellSelectionHandler(selectionModel, cell));
         row += 1;
         table.setWidget(row, 0, cell);
+    }
+
+    public void updateMenuItem(BulkImportMenuItem item) {
+        for (int i = 0; i < table.getRowCount(); i += 1) {
+            Widget w = table.getWidget(i, 0);
+            if (!(w instanceof MenuCell))
+                continue;
+
+            MenuCell cell = (MenuCell) w;
+            if (cell.getMenuItem().getId() != item.getId())
+                continue;
+
+            cell.updateCount(item.getCount());
+            cell.updateDate(item.getDateTime());
+        }
     }
 
     public boolean removeMenuItem(BulkImportMenuItem item) {
@@ -146,23 +158,22 @@ public class SavedDraftsMenu extends Composite {
         return false;
     }
 
+
     /**
      * sets the busy indicator where the folder counts are displayed
      * to indicate that some form of update is taking place
-     * 
-     * @param folders
      */
 
-    public BulkImportMenuItem getCurrentEditSelection() {
-        return currentEditSelection;
-    }
+//    public BulkImportMenuItem getCurrentEditSelection() {
+//        return currentEditSelection;
+//    }
 
     // inner class
     // TODO : this needs to go into a presenter;
     class DeleteCallBack extends Callback<BulkImportMenuItem> {
 
         @Override
-        public void onSucess(BulkImportMenuItem item) {
+        public void onSuccess(BulkImportMenuItem item) {
             removeMenuItem(item);
         }
 
@@ -173,13 +184,16 @@ public class SavedDraftsMenu extends Composite {
     }
 
     class MenuCell extends Composite implements HasMouseOverHandlers, HasMouseOutHandlers,
-            HasClickHandlers {
+                                                HasClickHandlers {
 
         private final HTMLPanel panel;
         private final BulkImportMenuItem item;
         private final String html;
 
         private Label count;
+        private Label nameLabel;
+        private Label dateLabel;
+        private Label type;
         private final String folderId;
         private final Image delete;
 
@@ -208,21 +222,28 @@ public class SavedDraftsMenu extends Composite {
                 });
             }
 
-            String name = item.getName();
-            if (name.length() > 22)
-                name = (name.substring(0, 22) + "...");
+//            html = "<span class=\"collection_user_menu\">" + name
+//                    + "</span><span class=\"menu_count\" id=\"" + folderId
+//                    + "\"></span><br><span style=\"font-size: 10px; color: #999\">"
+//                    + item.getDateTime() + " | " + item.getType() + "</span>";
 
-            html = "<span class=\"collection_user_menu\">" + name
-                    + "</span><span class=\"menu_count\" id=\"" + folderId
-                    + "\"></span><br><span style=\"font-size: 10px; color: #999\">"
-                    + item.getDateTime() + " | " + item.getType() + "</span>";
+            html = "<span class=\"collection_user_menu\" id=\"" + folderId + "_name\"></span>"
+                    + "<span class=\"menu_count\" id=\"" + folderId + "\"></span> "
+                    + "<div style=\"font-size: 10px; color: #999\"><span id=\"" + folderId + "_date\"></span>" +
+                    "<span> | </span><span>" + item.getType() + "</span></div>";
 
             panel = new HTMLPanel(html);
             panel.setTitle(item.getEmail());
 
             count = new Label(formatNumber(item.getCount()));
+            nameLabel = new Label(generateName());
+            dateLabel = new Label(item.getDateTime());
+            dateLabel.setStyleName("display-inline");
 
             panel.add(count, folderId);
+            panel.add(nameLabel, folderId + "_name");
+            panel.add(dateLabel, folderId + "_date");
+
             panel.setStyleName("collection_user_menu_row");
             initWidget(panel);
 
@@ -230,7 +251,8 @@ public class SavedDraftsMenu extends Composite {
 
                 @Override
                 public void onMouseOver(MouseOverEvent event) {
-                    panel.clear();
+//                    panel.clear();
+                    panel.remove(count);
                     panel.add(delete, folderId);
 
                 }
@@ -240,10 +262,18 @@ public class SavedDraftsMenu extends Composite {
 
                 @Override
                 public void onMouseOut(MouseOutEvent event) {
-                    panel.clear();
+//                    panel.clear();
+                    panel.remove(delete);
                     panel.add(count, folderId);
                 }
             });
+        }
+
+        private String generateName() {
+            String name = item.getName();
+            if (name.length() > 22)
+                name = (name.substring(0, 22) + "...");
+            return name;
         }
 
         public void setSelected(boolean selected) {
@@ -256,6 +286,10 @@ public class SavedDraftsMenu extends Composite {
         public void updateCount(long newCount) {
             item.setCount(newCount);
             count = new Label(formatNumber(item.getCount()));
+        }
+
+        public void updateDate(String dateTime) {
+
         }
 
         public BulkImportMenuItem getMenuItem() {
