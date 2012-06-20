@@ -1800,7 +1800,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                                     + plasmid.getOnePartNumber().getPartNumber() + "|"
                                     + plasmid.getOneName().getName() + "]]";
                             strain.setPlasmids(plasmidPartNumberString);
-                            linked = true;
+                            try {
+                                controller.save(account, strain);
+                                linked = true;
+                            } catch (ControllerException e) {
+                                Logger.error(e);
+                            } catch (PermissionException e) {
+                                Logger.error(e);
+                            }
                         }
                         break;
 
