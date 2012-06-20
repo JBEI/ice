@@ -1,19 +1,16 @@
 package org.jbei.ice.client.collection.add;
 
-import org.jbei.ice.client.collection.add.form.EntryCreateWidget;
-
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.jbei.ice.client.collection.add.form.EntryCreateWidget;
 
 public class EntryAddView extends Composite {
     private Label contentHeader;
     private EntryCreateWidget currentForm;
     private VerticalPanel subContent;
-    private FlexTable mainContent;
 
     public EntryAddView() {
         FlexTable layout = new FlexTable();
@@ -30,7 +27,7 @@ public class EntryAddView extends Composite {
         subContent.setWidth("100%");
         contentHeader = new Label("Add New Entry");
 
-        mainContent = new FlexTable(); // wrapper
+        FlexTable mainContent = new FlexTable();
         mainContent.setCellPadding(3);
         mainContent.setWidth("100%");
         mainContent.setCellSpacing(0);
@@ -39,9 +36,6 @@ public class EntryAddView extends Composite {
         mainContent.getCellFormatter().setStyleName(0, 0, "add_new_entry_main_content_header");
 
         // sub content
-        subContent.add(new HTML("<p>Please select the type of entry you wish to add. "
-                + "<p>Fields indicated by <span class=\"required\">*</span> are required. "
-                + "Other instructions here. Lorem ipsum."));
         mainContent.setWidget(1, 0, subContent);
         mainContent.getFlexCellFormatter().setStyleName(1, 0, "add_new_entry_sub_content");
         mainContent.getFlexCellFormatter().setColSpan(1, 0, 2);

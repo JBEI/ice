@@ -44,7 +44,7 @@ public class EntryAddPresenter {
     private final CollectionsPresenter presenter;
 
     public EntryAddPresenter(CollectionsPresenter presenter, RegistryServiceAsync service,
-                             HandlerManager eventBus) {
+            HandlerManager eventBus) {
         this.service = service;
         this.eventBus = eventBus;
         this.display = new EntryAddView();
@@ -164,6 +164,7 @@ public class EntryAddPresenter {
                     items.add(item);
                     presenter.getView().updateMenuItemCounts(items);
                     display.setSubmitEnable(true);
+                    formsCache.clear();
                 }
             }.go(eventBus);
         } else {

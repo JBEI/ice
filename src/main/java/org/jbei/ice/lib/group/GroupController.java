@@ -1,12 +1,11 @@
 package org.jbei.ice.lib.group;
 
-import java.util.Set;
-
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.models.Group;
+
+import java.util.Set;
 
 public class GroupController {
 
@@ -48,7 +47,7 @@ public class GroupController {
 
     /**
      * Create new {@link Group} object in the database, using parameters.
-     * 
+     *
      * @param uuid
      * @param label
      * @param description

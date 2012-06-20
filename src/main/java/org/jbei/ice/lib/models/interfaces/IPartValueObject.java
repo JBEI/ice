@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.models.interfaces;
 
-import org.jbei.ice.lib.models.Part.AssemblyStandard;
+import org.jbei.ice.lib.entry.model.Part.AssemblyStandard;
 
 public interface IPartValueObject extends IEntryValueObject {
     AssemblyStandard getPackageFormat();

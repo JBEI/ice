@@ -1,6 +1,6 @@
 package org.jbei.ice.server;
 
-import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.entry.model.Entry;
 
 public class EntryFilterCallback extends FilterCallback {
 

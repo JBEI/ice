@@ -2,10 +2,9 @@ package org.jbei.ice.lib.folder;
 
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Folder;
+import org.jbei.ice.lib.entry.model.Entry;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -24,7 +23,7 @@ public class FolderController {
     }
 
     public Folder removeFolderContents(Account account, long folderId,
-                                       ArrayList<Long> entryIds) throws ControllerException {
+            ArrayList<Long> entryIds) throws ControllerException {
 
         AccountController controller = new AccountController();
         Account systemAccount = controller.getSystemAccount();

@@ -1,14 +1,13 @@
 package org.jbei.ice.controllers;
 
-import java.util.ArrayList;
-
 import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.EntryPermissionVerifier;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.Part.AssemblyStandard;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.BiobrickAUtils;
@@ -18,11 +17,12 @@ import org.jbei.ice.lib.utils.RawAssemblyUtils;
 import org.jbei.ice.lib.utils.SequenceFeatureCollection;
 import org.jbei.ice.lib.utils.UtilityException;
 
+import java.util.ArrayList;
+
 /**
  * ABI to manipulate DNA Assembly sequences (BioBricks).
- * 
- * @author Timothy Ham, Zinovii Dmytriv
- * 
+ *
+ * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 public class AssemblyController extends Controller {
     private ArrayList<IAssemblyUtils> assemblyUtils = new ArrayList<IAssemblyUtils>();
@@ -36,7 +36,7 @@ public class AssemblyController extends Controller {
 
     /**
      * Determine the {@link AssemblyStandard} of the given sequence.
-     * 
+     *
      * @param partSequence
      * @return assemblyStandard
      * @throws ControllerException
@@ -51,7 +51,7 @@ public class AssemblyController extends Controller {
 
     /**
      * Determine the {@link AssemblyStandard} of the given sequence String.
-     * 
+     *
      * @param partSequenceString
      * @return assemblyStandard
      * @throws ControllerException
@@ -63,7 +63,7 @@ public class AssemblyController extends Controller {
         while (result == null && counter < getAssemblyUtils().size()) {
             try {
                 result = getAssemblyUtils().get(counter).determineAssemblyStandard(
-                    partSequenceString);
+                        partSequenceString);
             } catch (UtilityException e) {
                 throw new ControllerException(e);
             }
@@ -75,7 +75,7 @@ public class AssemblyController extends Controller {
     /**
      * Test for different assembly standards, and return the assembly features appropriate for that
      * standard, if any.
-     * 
+     *
      * @param partSequence
      * @return SequenceFeatureCollection object.
      * @throws ControllerException
@@ -106,9 +106,9 @@ public class AssemblyController extends Controller {
 
     /**
      * Comparator for assembly basic sequence features.
-     * <p>
+     * <p/>
      * Uses Assembly Annotations the system knows about to compare identity.
-     * 
+     *
      * @param sequenceFeatures1
      * @param sequenceFeatures2
      * @return 0 if identical.
@@ -118,23 +118,23 @@ public class AssemblyController extends Controller {
         int result = -1;
         if (standard == AssemblyStandard.BIOBRICKA) {
             result = getAssemblyUtils().get(0).compareAssemblyAnnotations(sequenceFeatures1,
-                sequenceFeatures2);
+                                                                          sequenceFeatures2);
         } else if (standard == AssemblyStandard.BIOBRICKB) {
             result = getAssemblyUtils().get(1).compareAssemblyAnnotations(sequenceFeatures1,
-                sequenceFeatures2);
+                                                                          sequenceFeatures2);
         } else if (standard == AssemblyStandard.RAW) {
             result = getAssemblyUtils().get(2).compareAssemblyAnnotations(sequenceFeatures1,
-                sequenceFeatures2);
+                                                                          sequenceFeatures2);
         }
         return result;
     }
 
     /**
      * Automatically annotate BioBrick parts.
-     * <p>
+     * <p/>
      * Annotates prefixes, suffixes, and scar sequences by calling populateAssemblyFeatures for
      * assembly methods known to the system.
-     * 
+     *
      * @param partSequence
      * @return True if
      * @throws ControllerException
@@ -153,7 +153,7 @@ public class AssemblyController extends Controller {
         } catch (UtilityException e) {
             // If auto annotation fails, continue.
             Logger.warn("Error in annotating assembly features for "
-                    + partSequence.getEntry().getId());
+                                + partSequence.getEntry().getId());
             Logger.warn(e.toString());
         }
         if (result != null) {
@@ -165,10 +165,10 @@ public class AssemblyController extends Controller {
 
     /**
      * Join two BioBrick sequences together.
-     * <p>
+     * <p/>
      * Join using the proper BioBrick assembly algorithm and saves the result into the database as a
      * new {@link Entry}.
-     * 
+     *
      * @param sequence1
      * @param sequence2
      * @return New joined Sequence. Null if join failed.
@@ -203,112 +203,12 @@ public class AssemblyController extends Controller {
         entry.setOwnerEmail(getAccount().getEmail());
         SequenceController sequenceController = null;
         try {
-            sequenceController = new SequenceController(getAccount());
-            result = sequenceController.save(result);
+            sequenceController = new SequenceController();
+            result = sequenceController.save(getAccount(), result);
         } catch (PermissionException e) {
             throw new ControllerException(e);
         }
         return result;
-    }
-
-    //    public static void main(String[] args) {
-    //
-    //        mainRunBiobrickJoinTest();
-    //
-    //        //mainRunJoin();
-    //
-    //        /*
-    //        InnerFeature feature = (InnerFeature) SequenceManager.getFeature(1347);
-    //        System.out.println(feature.toString());
-    //        */
-    //    }
-
-    //    private static void mainRunBiobrickJoinTest() {
-    //        AssemblyController as = null;
-    //        try {
-    //            as = new AssemblyController(AccountDAO.get(86));
-    //        } catch (ManagerException e1) {
-    //            // TODO Auto-generated catch block
-    //            e1.printStackTrace();
-    //        }
-    //        try {
-    //
-    //            // bbb
-    //            //Part part1 = (Part) EntryManager.get(4431);
-    //            //Part part2 = (Part) EntryManager.get(4430);
-    //            // bba
-    //            Part part1 = (Part) EntryManager.get(4444);
-    //            Part part2 = (Part) EntryManager.get(4444);
-    //
-    //            Sequence sequence1 = SequenceManager.getByEntry(part1);
-    //            Sequence sequence2 = SequenceManager.getByEntry(part2);
-    //
-    //            Sequence result = as.joinBiobricks(sequence1, sequence2);
-    //            System.out.println(result.getEntry().getId());
-    //        } catch (ManagerException e) {
-    //            e.printStackTrace();
-    //        } catch (ControllerException e) {
-    //            // TODO Auto-generated catch block
-    //            e.printStackTrace();
-    //        }
-    //
-    //    }
-
-    //    private static void mainRunBiobrickBTest() throws PermissionException, ControllerException {
-    //        AssemblyController as = null;
-    //        try {
-    //            as = new AssemblyController(AccountDAO.get(86));
-    //        } catch (ManagerException e1) {
-    //            // TODO Auto-generated catch block
-    //            e1.printStackTrace();
-    //        }
-    //        try {
-    //            Part part2 = (Part) EntryManager.get(4394);
-    //            Sequence part2Sequence = SequenceManager.getByEntry(part2);
-    //
-    //            Set<SequenceFeature> sequenceFeatures = part2Sequence.getSequenceFeatures();
-    //
-    //            ////Part result = as.joinBiobrickB(part2, part2);
-    //
-    //            SequenceFeatureCollection temp = as.determineAssemblyFeatures(part2Sequence);
-    //            //sequenceFeatures.addAll(temp);
-    //            //SequenceManager.saveSequence(part2Sequence);
-    //
-    //            System.out.println("===\n" + part2.getOnePartNumber().getPartNumber() + ": "
-    //                    + part2Sequence.getSequence().length());
-    //            for (SequenceFeature item : temp) {
-    //
-    //                System.out.println(item.getName() + ": ");
-    //            }
-    //
-    //            //sequenceFeatures.addAll(determineAssemblyFeatures(part2));
-    //            // SequenceManager.saveSequence(part2Sequence);
-    //        } catch (ManagerException e) {
-    //            // TODO Auto-generated catch block
-    //            e.printStackTrace();
-    //        }
-    //
-    //    }
-
-    //    private static void mainRunJoin() {
-    //        try {
-    //            Part part1 = (Part) EntryManager.get(4394);
-    //            Sequence part1Sequence = SequenceManager.getByEntry(part1);
-    //            Set<SequenceFeature> sequenceFeatures = part1Sequence.getSequenceFeatures();
-    //            //sequenceFeatures.addAll(determineAssemblyFeatures(part1));
-    //            //SequenceManager.saveSequence(part1Sequence);
-    //            AssemblyController as = new AssemblyController(AccountDAO.get(86));
-    //            ////Part newPart = as.joinBiobrickA(part1, part1);
-    //
-    //            System.out.println(sequenceFeatures.size());
-    //        } catch (ManagerException e) {
-    //            // TODO Auto-generated catch block
-    //            e.printStackTrace();
-    //        }
-    //    }
-
-    public void setAssemblyUtils(ArrayList<IAssemblyUtils> assemblyUtils) {
-        this.assemblyUtils = assemblyUtils;
     }
 
     public ArrayList<IAssemblyUtils> getAssemblyUtils() {

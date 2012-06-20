@@ -1,11 +1,5 @@
 package org.jbei.ice.lib.search.lucene;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -23,35 +17,40 @@ import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.util.Version;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.Part;
+import org.jbei.ice.lib.entry.model.PartNumber;
+import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.entry.sample.SampleController;
+import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SampleManager;
-import org.jbei.ice.lib.managers.UtilsManager;
-import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.FundingSource;
-import org.jbei.ice.lib.models.Part;
-import org.jbei.ice.lib.models.PartNumber;
-import org.jbei.ice.lib.models.Plasmid;
-import org.jbei.ice.lib.models.Sample;
-import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Job;
 import org.jbei.ice.lib.utils.JobCue;
 import org.jbei.ice.lib.utils.ParameterGeneratorParser;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.lib.utils.UtilsDAO;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 
 /**
  * Full text search of the registry using Lucene search engine.
- * <p>
+ * <p/>
  * It uses a single instance of the IndexSearcher for efficiency, and most importantly to be able to
  * rebuild the underlying index transparently. When rebuildIndex() is called, the index is rebuilt,
  * after which a new IndexSearcher is instantiated with the updated index.
- * 
+ *
  * @author Timothy Ham, Zinovii Dmytriv
- * 
  */
 public class LuceneSearch {
     private IndexSearcher indexSearcher = null;
@@ -69,7 +68,7 @@ public class LuceneSearch {
 
     /**
      * Retrieve the singleton instance of this classe.
-     * 
+     *
      * @return LuceneSearch instance.
      */
     public static LuceneSearch getInstance() {
@@ -78,9 +77,9 @@ public class LuceneSearch {
 
     /**
      * Rebuild the lucene index.
-     * <p>
+     * <p/>
      * Serialize {@link Entry} and some associated classes such as {@link PartNumber},
-     * 
+     *
      * @throws SearchException
      */
     public void rebuildIndex() throws SearchException {
@@ -96,7 +95,7 @@ public class LuceneSearch {
         IndexWriter indexWriter = null;
         try {
             indexWriter = new IndexWriter(directory, new StandardAnalyzer(Version.LUCENE_CURRENT),
-                    true, IndexWriter.MaxFieldLength.UNLIMITED);
+                                          true, IndexWriter.MaxFieldLength.UNLIMITED);
 
             ArrayList<Entry> entries = new EntryController().getAllEntries();
 
@@ -122,11 +121,10 @@ public class LuceneSearch {
 
     /**
      * Search the lucene index for the queryString.
-     * <p>
+     * <p/>
      * If the database does not exist, create one.
-     * 
-     * @param queryString
-     *            query to be performed.
+     *
+     * @param queryString query to be performed.
      * @return ArrayList of {@link SearchResult}s.
      * @throws SearchException
      */
@@ -185,7 +183,7 @@ public class LuceneSearch {
 
     /**
      * Creates an empty index on disk.
-     * 
+     *
      * @return {@link IndexSearcher}.
      * @throws SearchException
      */
@@ -241,7 +239,7 @@ public class LuceneSearch {
 
     /**
      * Create a new empty index on disk.
-     * 
+     *
      * @throws IOException
      */
     private void createEmptyIndex() throws IOException {
@@ -264,10 +262,10 @@ public class LuceneSearch {
 
     /**
      * Create a new lucene {@link Document} from the given {@link Entry}.
-     * <p>
-     * Related objects, such as {@link PartNumber} or {@link org.jbei.ice.lib.models.Name Name}s or
+     * <p/>
+     * Related objects, such as {@link PartNumber} or {@link org.jbei.ice.lib.entry.model.Name Name}s or
      * {@link FundingSource}s are also put into the document.
-     * 
+     *
      * @param entry
      * @return Document.
      * @throws SearchException
@@ -290,14 +288,14 @@ public class LuceneSearch {
                 : "";
         String references = (entry.getReferences() != null) ? entry.getReferences() : "";
         String selectionMarkers = Utils.toCommaSeparatedStringFromSelectionMarkers(entry
-                .getSelectionMarkers());
+                                                                                           .getSelectionMarkers());
         String links = Utils.toCommaSeparatedStringFromLinks(entry.getLinks());
         String names = Utils.toCommaSeparatedStringFromNames(entry.getNames());
         String partNumbers = Utils.toCommaSeparatedStringFromPartNumbers(entry.getPartNumbers());
         String intellectualProperty = (entry.getIntellectualProperty() != null) ? entry
                 .getIntellectualProperty() : "";
         String fundingSources = Utils.toCommaSeparatedStringFromEntryFundingSources(entry
-                .getEntryFundingSources());
+                                                                                            .getEntryFundingSources());
         String parameters = ParameterGeneratorParser
                 .generateParametersString(entry.getParameters());
 
@@ -325,7 +323,7 @@ public class LuceneSearch {
         content = content + references + " ";
 
         document.add(new Field("Selection Markers", selectionMarkers, Field.Store.YES,
-                Field.Index.ANALYZED));
+                               Field.Index.ANALYZED));
         content = content + selectionMarkers + " ";
 
         document.add(new Field("Links", links, Field.Store.YES, Field.Index.ANALYZED));
@@ -338,11 +336,11 @@ public class LuceneSearch {
         content = content + partNumbers + " ";
 
         document.add(new Field("Intellectual Property", intellectualProperty, Field.Store.YES,
-                Field.Index.ANALYZED));
+                               Field.Index.ANALYZED));
         content = content + intellectualProperty + " ";
 
         document.add(new Field("Funding Source", fundingSources, Field.Store.YES,
-                Field.Index.ANALYZED));
+                               Field.Index.ANALYZED));
         content = content + fundingSources + " ";
 
         document.add(new Field("Parameters", parameters, Field.Store.YES, Field.Index.ANALYZED));
@@ -350,8 +348,9 @@ public class LuceneSearch {
 
         ArrayList<Sample> samples = null;
         try {
-            samples = SampleManager.getSamplesByEntry(entry);
-        } catch (ManagerException e) {
+            SampleController controller = new SampleController();
+            samples = controller.getSamplesByEntry(entry);
+        } catch (ControllerException e) {
             e.printStackTrace();
         }
 
@@ -380,13 +379,13 @@ public class LuceneSearch {
             document.add(new Field("Backbone", backbone, Field.Store.YES, Field.Index.ANALYZED));
             content = content + backbone + " ";
             document.add(new Field("Origin of Replication", origin, Field.Store.YES,
-                    Field.Index.ANALYZED));
+                                   Field.Index.ANALYZED));
             content = content + origin + " ";
             document.add(new Field("Promoters", promoters, Field.Store.YES, Field.Index.ANALYZED));
             content = content + promoters + " ";
             LinkedHashSet<Strain> strains = new LinkedHashSet<Strain>();
             try {
-                strains = UtilsManager.getStrainsForPlasmid(plasmid);
+                strains = UtilsDAO.getStrainsForPlasmid(plasmid);
             } catch (ManagerException e) {
                 throw new SearchException(e);
             }
@@ -396,7 +395,7 @@ public class LuceneSearch {
                 strainStringBuilder.append(" ");
             }
             document.add(new Field("Strains", strainStringBuilder.toString(), Field.Store.YES,
-                    Field.Index.ANALYZED));
+                                   Field.Index.ANALYZED));
             content = content + strainStringBuilder.toString() + " ";
 
         } else if (entry instanceof Strain) {
@@ -409,7 +408,7 @@ public class LuceneSearch {
             document.add(new Field("Host", host, Field.Store.YES, Field.Index.ANALYZED));
             content = content + host + " ";
             document.add(new Field("Genotype Phenotype", genotype, Field.Store.YES,
-                    Field.Index.ANALYZED));
+                                   Field.Index.ANALYZED));
             content = content + genotype + " ";
             document.add(new Field("Plasmids", plasmids, Field.Store.YES, Field.Index.ANALYZED));
             content = content + plasmids + " ";
@@ -417,7 +416,7 @@ public class LuceneSearch {
         } else if (entry instanceof Part) {
             Part part = (Part) entry;
             String format = (part.getPackageFormat().toString() != null) ? part.getPackageFormat()
-                    .toString() : "";
+                                                                               .toString() : "";
             document.add(new Field("Package Format", format, Field.Store.YES, Field.Index.ANALYZED));
             content = content + format + " ";
         }
@@ -425,20 +424,5 @@ public class LuceneSearch {
         document.add(new Field("content", content, Field.Store.NO, Field.Index.ANALYZED));
 
         return document;
-    }
-
-    public static void main(String[] args) {
-        /*try {
-            //Search.getInstance().rebuildIndex();
-            Search searcher = Search.getInstance();
-            ArrayList<SearchResult> results = searcher.query("thesis");
-            for (SearchResult result : results) {
-                System.out.println("Score " + result.getScore() + " RecordId "
-                        + Utils.toCommaSeparatedStringFromNames(result.getEntry().getNames()));
-            }
-            System.out.println("" + results.size());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
     }
 }

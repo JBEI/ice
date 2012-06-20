@@ -1,29 +1,28 @@
 package org.jbei.ice.server.servlet;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.composers.SequenceComposerException;
 import org.jbei.ice.lib.composers.formatters.FastaFormatter;
 import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.composers.formatters.SbolFormatter;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.permissions.PermissionException;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 // will eventually attempt to consolidate the servlets
 public class SequenceDownloadServlet extends HttpServlet {
@@ -34,7 +33,7 @@ public class SequenceDownloadServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         Logger.info(SequenceDownloadServlet.class.getSimpleName()
-                + ": attempt to download sequence");
+                            + ": attempt to download sequence");
         Account account;
         String entryId = request.getParameter("entry");
         String type = request.getParameter(TYPE);
@@ -58,7 +57,7 @@ public class SequenceDownloadServlet extends HttpServlet {
             url = url.substring(0, url.indexOf(path));
             response.sendRedirect(url);
             Logger.info(FileDownloadServlet.class.getSimpleName()
-                    + ": authenication failed. Redirecting user to " + url);
+                                + ": authentication failed. Redirecting user to " + url);
             return;
         }
 
@@ -83,7 +82,7 @@ public class SequenceDownloadServlet extends HttpServlet {
         }
 
         Logger.info(SequenceDownloadServlet.class.getSimpleName() + " " + account.getEmail() + ": "
-                + "entryid = " + entryId + ", type=" + type);
+                            + "entryid = " + entryId + ", type=" + type);
 
         if ("original".equals(type))
             getOriginal(response, entry, account);
@@ -116,7 +115,7 @@ public class SequenceDownloadServlet extends HttpServlet {
 
     private void getOriginal(HttpServletResponse response, Entry entry, Account account) {
 
-        SequenceController sequenceController = new SequenceController(account);
+        SequenceController sequenceController = new SequenceController();
         Sequence sequence = null;
 
         try {
@@ -133,7 +132,7 @@ public class SequenceDownloadServlet extends HttpServlet {
         String sequenceString = sequence.getSequenceUser();
         if (sequenceString == null || sequenceString.isEmpty()) {
             Logger.info("Sequence user parameter (sequence string) is empty for entry "
-                    + entry.getId() + " and sequence " + sequence.getId());
+                                + entry.getId() + " and sequence " + sequence.getId());
             return;
         }
 
@@ -165,10 +164,10 @@ public class SequenceDownloadServlet extends HttpServlet {
 
     private void getGenbank(HttpServletResponse response, Entry entry, Account account) {
 
-        SequenceController sequenceController = new SequenceController(account);
+        SequenceController sequenceController = new SequenceController();
         GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getNamesAsString());
         genbankFormatter.setCircular((entry instanceof Plasmid) ? ((Plasmid) entry).getCircular()
-                : false); // TODO
+                                             : false); // TODO
 
         Sequence sequence = null;
 
@@ -193,7 +192,7 @@ public class SequenceDownloadServlet extends HttpServlet {
 
         if (sequenceString == null || sequenceString.isEmpty()) {
             Logger.info("Sequence string is empty for entry " + entry.getId() + " and sequence "
-                    + sequence.getId());
+                                + sequence.getId());
             return;
         }
 
@@ -225,7 +224,7 @@ public class SequenceDownloadServlet extends HttpServlet {
     }
 
     private void getFasta(HttpServletResponse response, Entry entry, Account account) {
-        SequenceController sequenceController = new SequenceController(account);
+        SequenceController sequenceController = new SequenceController();
         Sequence sequence = null;
 
         try {
@@ -242,7 +241,8 @@ public class SequenceDownloadServlet extends HttpServlet {
         String sequenceString = null;
         try {
             sequenceString = SequenceController.compose(sequence, new FastaFormatter(sequence
-                    .getEntry().getNamesAsString()));
+                                                                                             .getEntry()
+                                                                                             .getNamesAsString()));
         } catch (SequenceComposerException e) {
             Logger.error("Failed to generate fasta file for download!", e);
             return;
@@ -275,7 +275,7 @@ public class SequenceDownloadServlet extends HttpServlet {
     }
 
     private void getSBOL(HttpServletResponse response, Entry entry, Account account) {
-        SequenceController sequenceController = new SequenceController(account);
+        SequenceController sequenceController = new SequenceController();
         Sequence sequence = null;
 
         try {

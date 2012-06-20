@@ -1,12 +1,12 @@
 package org.jbei.ice.lib.utils;
 
-import java.io.Serializable;
+import org.jbei.ice.lib.entry.model.Entry;
 
-import org.jbei.ice.lib.models.Entry;
+import java.io.Serializable;
 
 /**
  * A wrapper representing an entry, attachment and sequence file tuple
- * 
+ *
  * @author Hector Plahar
  */
 

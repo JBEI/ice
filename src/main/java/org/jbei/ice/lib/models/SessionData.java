@@ -1,7 +1,8 @@
 package org.jbei.ice.lib.models;
 
-import java.util.Calendar;
-import java.util.HashMap;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.utils.Utils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,9 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.utils.Utils;
+import java.util.Calendar;
+import java.util.HashMap;
 
 /**
  * Store session information for a logged in user.
@@ -76,16 +76,10 @@ public class SessionData implements IModel {
         return account;
     }
 
-    @Override
-    public Object clone() throws CloneNotSupportedException {
-        throw new CloneNotSupportedException();
-    }
-
     /**
      * Generate a new session key, and set the expiration time.
-     * 
-     * @param secret
-     *            salt used to generate the random sessionKey.
+     *
+     * @param secret salt used to generate the random sessionKey.
      */
     public SessionData(String secret) {
         String sha = generateSessionKey(secret);

@@ -2,15 +2,14 @@ package org.jbei.ice.services.blazeds;
 
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.logging.UsageLogger;
-import org.jbei.ice.lib.models.Account;
 
 /**
  * Base service for BlazeDS.
- * 
+ *
  * @author Zinovii Dmytriv
- * 
  */
 public class BaseService {
     public static final String BASE_SERVICE_NAME = "BlazeDS";

@@ -2,24 +2,22 @@ package org.jbei.ice.server.servlet;
 
 import gwtupload.server.UploadAction;
 import gwtupload.server.exceptions.UploadActionException;
-
-import java.util.List;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.fileupload.FileItem;
-import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.vo.IDNASequence;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 public class SequenceUploadServlet extends UploadAction {
 
@@ -65,7 +63,7 @@ public class SequenceUploadServlet extends UploadAction {
             String path = request.getServletPath();
             url = url.substring(0, url.indexOf(path));
             Logger.info(SequenceUploadServlet.class.getSimpleName()
-                    + ": authentication failed. Redirecting user to " + url);
+                                + ": authentication failed. Redirecting user to " + url);
             return "";
         }
 
@@ -108,7 +106,7 @@ public class SequenceUploadServlet extends UploadAction {
 
     private String saveSequence(Entry entry, Account account, String sequenceUser) {
 
-        SequenceController sequenceController = new SequenceController(account);
+        SequenceController sequenceController = new SequenceController();
         IDNASequence dnaSequence = SequenceController.parse(sequenceUser);
 
         if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
@@ -126,7 +124,7 @@ public class SequenceUploadServlet extends UploadAction {
             sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
             sequence.setSequenceUser(sequenceUser);
             sequence.setEntry(entry);
-            sequenceController.save(sequence);
+            sequenceController.save(account, sequence);
         } catch (ControllerException e) {
             Logger.error(e);
             return "Error saving sequence";

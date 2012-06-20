@@ -3,7 +3,25 @@ package org.jbei.ice.server.servlet;
 import gwtupload.server.UploadAction;
 import gwtupload.server.exceptions.UploadActionException;
 import gwtupload.shared.UConsts;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.io.IOUtils;
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.attachment.Attachment;
+import org.jbei.ice.lib.entry.attachment.AttachmentController;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.lib.vo.IDNASequence;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -15,27 +33,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.io.IOUtils;
-import org.jbei.ice.controllers.SequenceAnalysisController;
-import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.entry.EntryController;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.AttachmentManager;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.models.Attachment;
-import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.lib.vo.IDNASequence;
 
 // TODO : Robust exception handling
 public class FileUploadServlet extends UploadAction {
@@ -96,7 +93,7 @@ public class FileUploadServlet extends UploadAction {
             String path = request.getServletPath();
             url = url.substring(0, url.indexOf(path));
             Logger.info(FileUploadServlet.class.getSimpleName()
-                    + ": authenication failed. Redirecting user to " + url);
+                                + ": authenication failed. Redirecting user to " + url);
             return "";
         }
 
@@ -137,7 +134,7 @@ public class FileUploadServlet extends UploadAction {
             if (ATTACHMENT_TYPE.equalsIgnoreCase(type)) {
                 if (entryId == null || entryId.isEmpty())
                     return "No entry id specified for file upload";
-                result = uploadAttachment(entry, file, entryId, desc, saveName);
+                result = uploadAttachment(account, entry, file, entryId, desc, saveName);
             } else if (SEQUENCE_TYPE.equalsIgnoreCase(type)) {
                 if (entryId == null || entryId.isEmpty())
                     result = "No entry id specified for file upload";
@@ -172,8 +169,7 @@ public class FileUploadServlet extends UploadAction {
     private String uploadSequenceTraceFile(Entry entry, File file, String entryId, Account account,
             String uploadFileName) throws IOException {
 
-        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController(
-                account);
+        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
 
         IDNASequence dnaSequence = null;
 
@@ -225,27 +221,30 @@ public class FileUploadServlet extends UploadAction {
                 currentFileName = byteHolder.getName();
                 dnaSequence = sequenceAnalysisController.parse(byteHolder.getBytes());
                 if (dnaSequence == null || dnaSequence.getSequence() == null) {
-                    String errMsg = ("Could not parse file: " + currentFileName + ". Only Fasta, GenBank, or ABI files are supported.");
+                    String errMsg = ("Could not parse file: " + currentFileName + ". Only Fasta, GenBank, " +
+                            "or ABI files are supported.");
                     Logger.error(errMsg);
                     return errMsg;
                 }
 
                 sequenceAnalysisController.uploadTraceSequence(entry, byteHolder.getName(),
-                    account.getEmail(), dnaSequence.getSequence().toLowerCase(),
-                    new ByteArrayInputStream(byteHolder.getBytes()));
+                                                               account.getEmail(),
+                                                               dnaSequence.getSequence().toLowerCase(),
+                                                               new ByteArrayInputStream(byteHolder.getBytes()));
             }
             sequenceAnalysisController.rebuildAllAlignments(entry);
             return "ok";
 
         } catch (ControllerException e) { // 
-            String errMsg = ("Could not parse file: " + currentFileName + ". Only Fasta, GenBank, or ABI files are supported.");
+            String errMsg = ("Could not parse file: " + currentFileName + ". Only Fasta, GenBank, " +
+                    "or ABI files are supported.");
             Logger.error(errMsg);
             return errMsg;
         }
     }
 
     // TODO : check for path information in filename. safari includes it
-    private String uploadAttachment(Entry entry, File file, String entryId, String desc,
+    private String uploadAttachment(Account account, Entry entry, File file, String entryId, String desc,
             String filename) {
 
         try {
@@ -256,12 +255,15 @@ public class FileUploadServlet extends UploadAction {
 
             FileInputStream inputStream = new FileInputStream(file);
             // TODO : this save method also writes the attachment to file
-            Attachment saved = AttachmentManager.save(attachment, inputStream);
+            AttachmentController controller = new AttachmentController(account);
+            Attachment saved = controller.save(attachment, inputStream);
             if (saved != null)
                 return saved.getFileId();
-        } catch (ManagerException e) {
+        } catch (ControllerException e) {
             Logger.error(e);
         } catch (FileNotFoundException e) {
+            Logger.error(e);
+        } catch (PermissionException e) {
             Logger.error(e);
         }
 

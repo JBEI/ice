@@ -1,9 +1,9 @@
 package org.jbei.ice.lib.models.interfaces;
 
-import java.util.Set;
-
-import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.models.SequenceFeature;
+
+import java.util.Set;
 
 public interface ISequenceValueObject {
     long getId();

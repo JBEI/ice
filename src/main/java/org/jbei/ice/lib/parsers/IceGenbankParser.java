@@ -1,5 +1,14 @@
 package org.jbei.ice.lib.parsers;
 
+import org.jbei.ice.lib.utils.FileUtils;
+import org.jbei.ice.lib.utils.UtilityException;
+import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.lib.vo.DNAFeature;
+import org.jbei.ice.lib.vo.DNAFeatureLocation;
+import org.jbei.ice.lib.vo.DNAFeatureNote;
+import org.jbei.ice.lib.vo.FeaturedDNASequence;
+import org.jbei.ice.lib.vo.IDNASequence;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -16,25 +25,15 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jbei.ice.lib.utils.FileUtils;
-import org.jbei.ice.lib.utils.UtilityException;
-import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.lib.vo.DNAFeature;
-import org.jbei.ice.lib.vo.DNAFeatureLocation;
-import org.jbei.ice.lib.vo.DNAFeatureNote;
-import org.jbei.ice.lib.vo.FeaturedDNASequence;
-import org.jbei.ice.lib.vo.IDNASequence;
-
 /**
  * Genbank parser and generator.
  * The Genbank file format is defined in gbrel.txt located at
  * ftp://ftp.ncbi.nlm.nih.gov/genbank/gbrel.txt
- * 
+ * <p/>
  * This parser also handles some incorrectly formatted and obsolete genbank files.
- * 
+ *
  * @author Timothy Ham
- * 
- * */
+ */
 public class IceGenbankParser extends AbstractParser {
     private static final String ICE_GENBANK_PARSER = "IceGenbank";
 
@@ -67,13 +66,15 @@ public class IceGenbankParser extends AbstractParser {
     public static final String REMARK_TAG = "REMARK";
     // obsolete tags
     public static final String BASE_TAG = "BASE";
-    private static final String[] NORMAL_TAGS = { LOCUS_TAG, DEFINITION_TAG, ACCESSION_TAG,
+    private static final String[] NORMAL_TAGS = {LOCUS_TAG, DEFINITION_TAG, ACCESSION_TAG,
             VERSION_TAG, NID_TAG, PROJECT_TAG, DBLINK_TAG, KEYWORDS_TAG, SEGMENT_TAG, SOURCE_TAG,
             ORGANISM_TAG, REFERENCE_TAG, COMMENT_TAG, FEATURES_TAG, BASE_COUNT_TAG, CONTIG_TAG,
-            ORIGIN_TAG, END_TAG, BASE_TAG };
-    private static final String[] REFERENCE_TAGS = { AUTHORS_TAG, CONSRTM_TAG, TITLE_TAG,
-            JOURNAL_TAG, MEDLINE_TAG, PUBMED_TAG, REMARK_TAG };
-    private static final String[] IGNORE_TAGS = { BASE_TAG, };
+            ORIGIN_TAG, END_TAG, BASE_TAG
+    };
+    private static final String[] REFERENCE_TAGS = {AUTHORS_TAG, CONSRTM_TAG, TITLE_TAG,
+            JOURNAL_TAG, MEDLINE_TAG, PUBMED_TAG, REMARK_TAG
+    };
+    private static final String[] IGNORE_TAGS = {BASE_TAG,};
     private static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yyyy");
 
     private static final Pattern startStopPattern = Pattern.compile("[<>]*(\\d+)\\.\\.[<>]*(\\d+)");
@@ -159,7 +160,7 @@ public class IceGenbankParser extends AbstractParser {
 
     /**
      * If there is a parsing error of interest, write the file to disk, and send an email to admin.
-     * 
+     *
      * @param fileText
      * @param e
      * @throws UtilityException
@@ -198,7 +199,7 @@ public class IceGenbankParser extends AbstractParser {
             } else {
                 String putativeTag = lineChunks[0].trim();
                 if (Arrays.asList(acceptedTags).contains(putativeTag)) {
-                    if (currentTag != null) { // flush previous tag
+                    if (currentTag != null) { // deleteExpiredSessions previous tag
                         currentTag.setRawBody(rawBlock.toString());
                         if (!Arrays.asList(ignoredTags).contains(currentTag.getKey())) {
                             result.add(currentTag);
@@ -384,7 +385,7 @@ public class IceGenbankParser extends AbstractParser {
                         complement = true;
                         locationString = locationString.trim();
                         locationString = locationString.substring(11, locationString.length() - 1)
-                                .trim();
+                                                       .trim();
                     }
 
                     genbankLocations = parseGenbankLocation(locationString);
@@ -463,9 +464,8 @@ public class IceGenbankParser extends AbstractParser {
 
     /**
      * Represent a contiguous Genbank location, including a single base pair.
-     * 
+     *
      * @author Timothy Ham
-     * 
      */
     public class GenbankLocation {
         private int genbankStart = -1;
@@ -548,7 +548,7 @@ public class IceGenbankParser extends AbstractParser {
             line = line2;
 
             if ('/' == line.charAt(apparentQualifierColumn)) { // new tag starts
-                if (dnaFeatureNote != null) { // flush previous note
+                if (dnaFeatureNote != null) { // deleteExpiredSessions previous note
                     addQualifierItemToDnaFeatureNote(dnaFeatureNote, qualifierItem);
                     notes.add(dnaFeatureNote);
                 }
@@ -575,7 +575,7 @@ public class IceGenbankParser extends AbstractParser {
             }
         }
 
-        if (dnaFeatureNote != null) { // flush last one
+        if (dnaFeatureNote != null) { // deleteExpiredSessions last one
             addQualifierItemToDnaFeatureNote(dnaFeatureNote, qualifierItem);
             notes.add(dnaFeatureNote);
         }
@@ -587,7 +587,7 @@ public class IceGenbankParser extends AbstractParser {
 
     /**
      * Parse the given Qualifer Item and add to the given dnaFeatureNote.
-     * 
+     *
      * @param dnaFeatureNote
      * @param qualifierItem
      */
@@ -613,7 +613,7 @@ public class IceGenbankParser extends AbstractParser {
     /**
      * Tries to determine the feature name, from a list of possible qualifier keywords that might
      * contain it.
-     * 
+     *
      * @param dnaFeature
      * @return
      */
@@ -626,8 +626,9 @@ public class IceGenbankParser extends AbstractParser {
         String NAME_QUALIFIER = "name";
 
         ArrayList<DNAFeatureNote> notes = (ArrayList<DNAFeatureNote>) dnaFeature.getNotes();
-        String[] QUALIFIERS = { APE_LABEL_QUALIFIER, NOTE_QUALIFIER, GENE_QUALIFIER,
-                ORGANISM_QUALIFIER, NAME_QUALIFIER };
+        String[] QUALIFIERS = {APE_LABEL_QUALIFIER, NOTE_QUALIFIER, GENE_QUALIFIER,
+                ORGANISM_QUALIFIER, NAME_QUALIFIER
+        };
         String newLabel = null;
 
         if (dnaFeatureContains(notes, LABEL_QUALIFIER) == -1) {

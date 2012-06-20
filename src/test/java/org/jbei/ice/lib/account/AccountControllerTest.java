@@ -1,9 +1,7 @@
 /**
- * 
+ *
  */
 package org.jbei.ice.lib.account;
-
-import static org.junit.Assert.fail;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -11,9 +9,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static org.junit.Assert.fail;
+
 /**
  * @author Hector Plahar
- * 
  */
 public class AccountControllerTest {
 
@@ -83,7 +82,8 @@ public class AccountControllerTest {
 
     /**
      * Test method for
-     * {@link org.jbei.ice.lib.account.AccountController#createNewAccount(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)}
+     * {@link org.jbei.ice.lib.account.AccountController#createNewAccount(java.lang.String, java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.String)}
      * .
      */
     @Test
@@ -120,7 +120,7 @@ public class AccountControllerTest {
 
     /**
      * Test method for
-     * {@link org.jbei.ice.lib.account.AccountController#save(org.jbei.ice.lib.models.Account)}.
+     * {@link org.jbei.ice.lib.account.AccountController#save(org.jbei.ice.lib.account.model.Account)}.
      */
     @Test
     public void testSave() {
@@ -129,7 +129,7 @@ public class AccountControllerTest {
 
     /**
      * Test method for
-     * {@link org.jbei.ice.lib.account.AccountController#isModerator(org.jbei.ice.lib.models.Account)}
+     * {@link org.jbei.ice.lib.account.AccountController#isModerator(org.jbei.ice.lib.account.model.Account)}
      * .
      */
     @Test
@@ -139,7 +139,8 @@ public class AccountControllerTest {
 
     /**
      * Test method for
-     * {@link org.jbei.ice.lib.account.AccountController#isValidPassword(org.jbei.ice.lib.models.Account, java.lang.String)}
+     * {@link org.jbei.ice.lib.account.AccountController#isValidPassword(org.jbei.ice.lib.account.model.Account,
+     * java.lang.String)}
      * .
      */
     @Test
@@ -158,7 +159,7 @@ public class AccountControllerTest {
 
     /**
      * Test method for
-     * {@link org.jbei.ice.lib.account.AccountController#getAccountPreferences(org.jbei.ice.lib.models.Account)}
+     * {@link org.jbei.ice.lib.account.AccountController#getAccountPreferences(org.jbei.ice.lib.account.model.Account)}
      * .
      */
     @Test
@@ -168,7 +169,8 @@ public class AccountControllerTest {
 
     /**
      * Test method for
-     * {@link org.jbei.ice.lib.account.AccountController#authenticate(java.lang.String, java.lang.String, java.lang.String)}
+     * {@link org.jbei.ice.lib.account.AccountController#authenticate(java.lang.String, java.lang.String,
+     * java.lang.String)}
      * .
      */
     @Test
@@ -206,7 +208,8 @@ public class AccountControllerTest {
 
     /**
      * Test method for
-     * {@link org.jbei.ice.lib.account.AccountController#saveAccountPreferences(org.jbei.ice.lib.models.AccountPreferences)}
+     * {@link org.jbei.ice.lib.account.AccountController#saveAccountPreferences(org.jbei.ice.lib.account.model
+     * .AccountPreferences)}
      * .
      */
     @Test

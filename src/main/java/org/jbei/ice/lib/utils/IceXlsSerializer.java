@@ -1,24 +1,27 @@
 package org.jbei.ice.lib.utils;
 
+import org.apache.commons.lang.StringUtils;
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.Part;
+import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.entry.sample.SampleController;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.web.common.ViewException;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
-
-import org.apache.commons.lang.StringUtils;
-import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.entry.EntryController;
-import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Part;
-import org.jbei.ice.lib.models.Plasmid;
-import org.jbei.ice.lib.models.Strain;
-import org.jbei.ice.web.common.ViewException;
 
 public class IceXlsSerializer {
 
     protected static Object escapeCSVValue(Object value) {
         if (value != null) {
             String stringValue = StringUtils.trim(value.toString());
-            if (!StringUtils.containsNone(stringValue, new char[] { '\n', ',', '\t' })) {
+            if (!StringUtils.containsNone(stringValue, new char[]{'\n', ',', '\t'})) {
                 return "\"" + StringUtils.replace(stringValue, "\"", "\\\"") + "\"";
             }
 
@@ -65,7 +68,7 @@ public class IceXlsSerializer {
         stringBuilder.append("Created").append("\t");
         stringBuilder.append("Updated").append("\n");
 
-        for (Iterator<Entry> iterator = entries.iterator(); iterator.hasNext();) {
+        for (Iterator<Entry> iterator = entries.iterator(); iterator.hasNext(); ) {
             Entry entry = iterator.next();
 
             stringBuilder.append(index).append("\t");
@@ -86,7 +89,7 @@ public class IceXlsSerializer {
                 Plasmid plasmid = (Plasmid) entry;
 
                 stringBuilder.append(escapeCSVValue(plasmid.getSelectionMarkersAsString())).append(
-                    "\t");
+                        "\t");
                 stringBuilder.append(escapeCSVValue(plasmid.getBackbone())).append("\t");
                 stringBuilder.append(escapeCSVValue(plasmid.getOriginOfReplication())).append("\t");
                 stringBuilder.append(escapeCSVValue(plasmid.getPromoters())).append("\t");
@@ -99,7 +102,7 @@ public class IceXlsSerializer {
                 Strain strain = (Strain) entry;
 
                 stringBuilder.append(escapeCSVValue(strain.getSelectionMarkersAsString())).append(
-                    "\t");
+                        "\t");
                 stringBuilder.append("\t");
                 stringBuilder.append("\t");
                 stringBuilder.append("\t");
@@ -123,12 +126,16 @@ public class IceXlsSerializer {
             }
 
             try {
-                stringBuilder.append((entryController.hasAttachments(entry)) ? "Yes" : "No")
-                        .append("\t");
-                stringBuilder.append((entryController.hasSamples(entry)) ? "Yes" : "No").append(
-                    "\t");
-                stringBuilder.append((entryController.hasSequence(entry)) ? "Yes" : "No").append(
-                    "\t");
+                AccountController controller = new AccountController();
+                SampleController sampleController = new SampleController();
+                SequenceController sequenceController = new SequenceController();
+                stringBuilder.append((entryController.hasAttachments(controller.getSystemAccount(),
+                                                                     entry)) ? "Yes" : "No")
+                             .append("\t");
+                stringBuilder.append((sampleController.hasSample(entry)) ? "Yes" : "No").append(
+                        "\t");
+                stringBuilder.append((sequenceController.hasSequence(entry)) ? "Yes" : "No").append(
+                        "\t");
             } catch (ControllerException e) {
                 throw new ViewException(e);
             }
@@ -136,18 +143,20 @@ public class IceXlsSerializer {
             stringBuilder.append(escapeCSVValue(entry.getBioSafetyLevel())).append("\t");
             stringBuilder.append(escapeCSVValue(entry.getIntellectualProperty())).append("\t");
             stringBuilder.append(escapeCSVValue(entry.principalInvestigatorToString()))
-                    .append("\t");
+                         .append("\t");
             stringBuilder.append(escapeCSVValue(entry.fundingSourceToString())).append("\t");
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
 
             stringBuilder
                     .append(
-                        (entry.getCreationTime() == null) ? "" : dateFormat.format(entry
-                                .getCreationTime())).append("\t");
+                            (entry.getCreationTime() == null) ? "" : dateFormat.format(entry
+                                                                                               .getCreationTime()))
+                    .append("\t");
             stringBuilder.append(
-                (entry.getModificationTime() == null) ? "" : dateFormat.format(entry
-                        .getModificationTime())).append("\t");
+                    (entry.getModificationTime() == null) ? "" : dateFormat.format(entry
+                                                                                           .getModificationTime()))
+                         .append("\t");
             stringBuilder.append("\n");
 
             index++;

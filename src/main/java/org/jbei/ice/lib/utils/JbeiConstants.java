@@ -1,21 +1,20 @@
 package org.jbei.ice.lib.utils;
 
-import java.util.Map;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.Part;
 
-import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Part;
+import java.util.Map;
 
 /**
  * Constants used in gd-ice.
- * 
+ *
  * @author Timothy Ham
- * 
  */
 public class JbeiConstants {
 
     /**
      * Return friendly names for {@link Entry}.status field.
-     * 
+     *
      * @param key
      * @return friendly name.
      */
@@ -33,7 +32,7 @@ public class JbeiConstants {
 
     /**
      * Return friendly names for assembly format.
-     * 
+     *
      * @param key
      * @return friendly name.
      */

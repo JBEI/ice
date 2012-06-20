@@ -1,13 +1,12 @@
 package org.jbei.ice.controllers.common;
 
 import org.jbei.ice.controllers.permissionVerifiers.IPermissionVerifier;
-import org.jbei.ice.lib.models.Account;
+import org.jbei.ice.lib.account.model.Account;
 
 /**
  * Base class for all Controllers.
- * 
+ *
  * @author Zinovii Dmytriv
- * 
  */
 public class Controller {
     private final Account account;
@@ -15,7 +14,7 @@ public class Controller {
 
     /**
      * Constructor.
-     * 
+     *
      * @param account
      * @param permissionsVerifier
      */
@@ -26,7 +25,7 @@ public class Controller {
 
     /**
      * Retrieve {@link Account} associated with this controller object.
-     * 
+     *
      * @return Account
      */
     public Account getAccount() {
@@ -35,7 +34,7 @@ public class Controller {
 
     /**
      * Retrieve the {@link IPermissionVerifier} object associated with this controller.
-     * 
+     *
      * @return IPermissionVerifier.
      */
     public IPermissionVerifier getPermissionVerifier() {

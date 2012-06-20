@@ -1,8 +1,6 @@
 package org.jbei.ice.lib.utils;
 
-import java.util.List;
-
-import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.models.TraceSequenceAlignment;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqException;
@@ -13,18 +11,18 @@ import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.vo.TraceData;
 
+import java.util.List;
+
 /**
  * Utility methods for sequence trace alignments.
- * 
+ *
  * @author Zinovii Dmytriv
- * 
  */
 public class TraceAlignmentHelper {
     /**
      * Convert {@link TraceSequence} to {@link TraceData} value object.
-     * 
-     * @param traceSequence
-     *            TraceSequence to convert.
+     *
+     * @param traceSequence TraceSequence to convert.
      * @return TraceData object.
      */
     public static TraceData traceSequenceToTraceData(TraceSequence traceSequence) {
@@ -44,13 +42,13 @@ public class TraceAlignmentHelper {
                     .setQueryStart(traceSequence.getTraceSequenceAlignment().getQueryStart());
             resultTraceData.setQueryEnd(traceSequence.getTraceSequenceAlignment().getQueryEnd());
             resultTraceData.setSubjectStart(traceSequence.getTraceSequenceAlignment()
-                    .getSubjectStart());
+                                                         .getSubjectStart());
             resultTraceData
                     .setSubjectEnd(traceSequence.getTraceSequenceAlignment().getSubjectEnd());
             resultTraceData.setQueryAlignment(traceSequence.getTraceSequenceAlignment()
-                    .getQueryAlignment());
+                                                           .getQueryAlignment());
             resultTraceData.setSubjectAlignment(traceSequence.getTraceSequenceAlignment()
-                    .getSubjectAlignment());
+                                                             .getSubjectAlignment());
         }
 
         return resultTraceData;
@@ -59,13 +57,10 @@ public class TraceAlignmentHelper {
     /**
      * Convert {@link TraceData} value object into {@link TraceSequence} object with the given
      * depositor and {@link Entry}.
-     * 
-     * @param traceData
-     *            TraceData object to convert.
-     * @param depositor
-     *            Depositor email.
-     * @param entry
-     *            Entry to associate.
+     *
+     * @param traceData TraceData object to convert.
+     * @param depositor Depositor email.
+     * @param entry     Entry to associate.
      * @return TraceSequence object.
      */
     public static TraceSequence traceDataToTraceSequence(TraceData traceData, String depositor,
@@ -101,9 +96,8 @@ public class TraceAlignmentHelper {
     /**
      * Convert the given {@link TraceData} value object into {@link TraceSequence}. Set the
      * depositor to "" and {@link Entry} to null.
-     * 
-     * @param traceData
-     *            TraceData to convert.
+     *
+     * @param traceData TraceData to convert.
      * @return TraceSequence object.
      */
     public static TraceSequence traceDataToTraceSequence(TraceData traceData) {
@@ -112,15 +106,11 @@ public class TraceAlignmentHelper {
 
     /**
      * Align two sequences, querySequence and traceSequence.
-     * 
-     * @param querySequence
-     *            Reference sequence.
-     * @param traceSequence
-     *            Trace sequence.
-     * @param traceFileName
-     *            Trace file name, for identification.
-     * @param isCircular
-     *            True if circular.
+     *
+     * @param querySequence Reference sequence.
+     * @param traceSequence Trace sequence.
+     * @param traceFileName Trace file name, for identification.
+     * @param isCircular    True if circular.
      * @return {@link TraceData} object.
      */
     public static TraceData alignSequences(String querySequence, String traceSequence,
@@ -193,9 +183,10 @@ public class TraceAlignmentHelper {
                 }
 
                 TraceData resultTraceData = new TraceData(traceFileName, traceSequence,
-                        maxBl2SeqResult.getScore(), strand, queryStart, queryEnd, subjectStart,
-                        subjectEnd, maxBl2SeqResult.getQuerySequence(),
-                        maxBl2SeqResult.getSubjectSequence());
+                                                          maxBl2SeqResult.getScore(), strand, queryStart, queryEnd,
+                                                          subjectStart,
+                                                          subjectEnd, maxBl2SeqResult.getQuerySequence(),
+                                                          maxBl2SeqResult.getSubjectSequence());
 
                 return resultTraceData;
             } else {

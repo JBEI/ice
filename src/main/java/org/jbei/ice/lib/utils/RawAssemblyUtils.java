@@ -1,23 +1,22 @@
 package org.jbei.ice.lib.utils;
 
-import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.lang.NotImplementedException;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SequenceManager;
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.Part.AssemblyStandard;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.models.AnnotationLocation;
-import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
-import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 
+import java.util.List;
+import java.util.Set;
+
 /**
  * Assembly Utils for sequences without any assembly format.
- * 
+ *
  * @author Timothy Ham, Zinovii Dmytriv
- * 
  */
 public class RawAssemblyUtils implements IAssemblyUtils {
 
@@ -59,8 +58,9 @@ public class RawAssemblyUtils implements IAssemblyUtils {
             }
         }
         try {
-            SequenceManager.saveSequence(partSequence);
-        } catch (ManagerException e) {
+            SequenceController controller = new SequenceController();
+            controller.saveSequence(partSequence);
+        } catch (ControllerException e) {
             throw new UtilityException(e);
         }
         return partSequence;
@@ -101,7 +101,7 @@ public class RawAssemblyUtils implements IAssemblyUtils {
 
     /**
      * Assign the sequence itself as the inner feature.
-     * 
+     *
      * @param partSequence
      * @return
      */
@@ -113,12 +113,13 @@ public class RawAssemblyUtils implements IAssemblyUtils {
         String featureIdentification = part.getRecordId();
 
         Feature innerPartFeature = new Feature(featureName, featureIdentification,
-                partSequenceString, 0, "misc_feature");
+                                               partSequenceString, 0, "misc_feature");
         SequenceFeature sequenceFeature = new SequenceFeature(partSequence, innerPartFeature, +1,
-                innerPartFeature.getName(), innerPartFeature.getGenbankType(),
-                SequenceFeature.AnnotationType.INNER);
+                                                              innerPartFeature.getName(),
+                                                              innerPartFeature.getGenbankType(),
+                                                              SequenceFeature.AnnotationType.INNER);
         sequenceFeature.getAnnotationLocations().add(
-            new AnnotationLocation(1, partSequenceString.length(), sequenceFeature));
+                new AnnotationLocation(1, partSequenceString.length(), sequenceFeature));
 
         sequenceFeatures.add(sequenceFeature);
 

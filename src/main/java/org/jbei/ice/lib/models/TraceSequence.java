@@ -1,31 +1,17 @@
 package org.jbei.ice.lib.models;
 
-import java.util.Date;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.xml.bind.annotation.XmlTransient;
-
 import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.entry.model.Entry;
+
+import javax.persistence.*;
+import javax.xml.bind.annotation.XmlTransient;
+import java.util.Date;
 
 /**
  * Store sequence trace file information.
- * 
+ *
  * @author Zinovii Dmytriv, Timothy Ham
- * 
  */
 @Entity
 @Table(name = "trace_sequence")

@@ -1,5 +1,22 @@
 package org.jbei.ice.lib.search.blast;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.biojava.bio.seq.DNATools;
+import org.biojava.bio.seq.RNATools;
+import org.biojava.bio.symbol.IllegalSymbolException;
+import org.biojava.bio.symbol.SymbolList;
+import org.jbei.ice.controllers.ApplicationController;
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.models.Feature;
+import org.jbei.ice.lib.models.Sequence;
+import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.lib.utils.SequenceUtils;
+import org.jbei.ice.lib.utils.Utils;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -15,28 +32,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.biojava.bio.seq.DNATools;
-import org.biojava.bio.seq.RNATools;
-import org.biojava.bio.symbol.IllegalSymbolException;
-import org.biojava.bio.symbol.SymbolList;
-import org.jbei.ice.controllers.ApplicationController;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SequenceManager;
-import org.jbei.ice.lib.models.Feature;
-import org.jbei.ice.lib.models.Plasmid;
-import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.lib.utils.SequenceUtils;
-import org.jbei.ice.lib.utils.Utils;
-
 /**
  * Manage blast functions.
- * 
+ *
  * @author Zinovii Dmytriv, Timothy Ham
- * 
  */
 public class Blast {
     public static final String BLASTN_PROGRAM = "blastn";
@@ -74,7 +73,7 @@ public class Blast {
 
     /**
      * Rebuild blast database.
-     * 
+     *
      * @throws BlastException
      */
     public void rebuildDatabase() throws BlastException {
@@ -84,13 +83,11 @@ public class Blast {
 
     /**
      * Run a blast query.
-     * <p>
+     * <p/>
      * Get only the longest distinct matches. No partial matches for the same record.
-     * 
-     * @param queryString
-     *            Sequence to be queried
-     * @param blastProgram
-     *            blast program to use.
+     *
+     * @param queryString  Sequence to be queried
+     * @param blastProgram blast program to use.
      * @return List of {@link BlastResult}s.
      * @throws ProgramTookTooLongException
      * @throws BlastException
@@ -121,13 +118,11 @@ public class Blast {
 
     /**
      * Run the bl2seq program on multiple subjects.
-     * <p>
+     * <p/>
      * This method requires disk space write temporary files. It tries to clean up after itself.
-     * 
-     * @param query
-     *            reference sequence.
-     * @param subjects
-     *            query sequences.
+     *
+     * @param query    reference sequence.
+     * @param subjects query sequences.
      * @return List of output string from bl2seq program.
      * @throws BlastException
      * @throws ProgramTookTooLongException
@@ -152,7 +147,7 @@ public class Blast {
                 subjectFileWriter.close();
 
                 String commandString = String.format(BL2SEQ_COMMAND_PATTERN, BL2SEQ,
-                    queryFile.getPath(), subjectFile.getPath());
+                                                     queryFile.getPath(), subjectFile.getPath());
                 Logger.info("Bl2seq query: " + commandString);
 
                 String resultItem = runSimpleExternalProgram(commandString);
@@ -161,7 +156,7 @@ public class Blast {
 
                 if (!subjectFile.delete()) {
                     throw new BlastException("Could not delete subjectFile "
-                            + subjectFile.getName());
+                                                     + subjectFile.getName());
                 }
             }
             if (!queryFile.delete()) {
@@ -176,7 +171,7 @@ public class Blast {
 
     /**
      * Run bl2seq. Because bl2seq needs two inputs, it has to use external files.
-     * 
+     *
      * @param query
      * @param subject
      * @return Output of the bl2seq program as text String.
@@ -201,11 +196,10 @@ public class Blast {
 
     /**
      * Run Blast against the existing blast database.
-     * <p>
+     * <p/>
      * If the database does not exist, create it.
-     * 
-     * @param queryString
-     *            sequence to be blasted.
+     *
+     * @param queryString sequence to be blasted.
      * @return ArrayList of {@link BlastResult}s.
      * @throws ProgramTookTooLongException
      * @throws BlastException
@@ -228,7 +222,7 @@ public class Blast {
             }
 
             String commandString = String.format(BLASTALL_COMMAND_PATTERN, BLASTALL,
-                getProgram(blastProgram), BLAST_DATASE_NAME);
+                                                 getProgram(blastProgram), BLAST_DATASE_NAME);
 
             Logger.info("Blast query: " + commandString);
 
@@ -240,11 +234,10 @@ public class Blast {
 
     /**
      * Check that a valid blast program is specified.
-     * 
+     *
      * @param program
      * @return The validated program name.
-     * @throws BlastException
-     *             If the program is not valid.
+     * @throws BlastException If the program is not valid.
      */
     private String getProgram(String program) throws BlastException {
         if (program != null && (program.equals(BLASTN_PROGRAM) || program.equals(TBLASTX_PROGRAM))) {
@@ -256,7 +249,7 @@ public class Blast {
 
     /**
      * Check that the blast database exists on disk.
-     * 
+     *
      * @return True if blast database exists on disk.
      */
     private boolean isBlastDatabaseExists() {
@@ -267,7 +260,7 @@ public class Blast {
 
     /**
      * Rename the blast database on disk.
-     * 
+     *
      * @param newBigFastaFileDir
      * @param baseBlastDirName
      * @throws IOException
@@ -296,15 +289,11 @@ public class Blast {
 
     /**
      * Create a new blast database on disk using formatdb program.
-     * 
-     * @param fastaFileDir
-     *            directory where the fasta file is located.
-     * @param fastaFileName
-     *            name of the fasta file.
-     * @param logFileName
-     *            name of the log output file.
-     * @param databaseName
-     *            name of the blast database.
+     *
+     * @param fastaFileDir  directory where the fasta file is located.
+     * @param fastaFileName name of the fasta file.
+     * @param logFileName   name of the log output file.
+     * @param databaseName  name of the blast database.
      * @throws BlastException
      */
     private static void formatBlastDb(File fastaFileDir, String fastaFileName, String logFileName,
@@ -356,9 +345,8 @@ public class Blast {
 
     /**
      * Wrapper to run an external program, and collect its output.
-     * 
-     * @param commandString
-     *            command to run.
+     *
+     * @param commandString command to run.
      * @return Output string from the program.
      * @throws BlastException
      */
@@ -385,11 +373,9 @@ public class Blast {
 
     /**
      * Wrapper to run an external program, feeding it inputs and collecting its output.
-     * 
-     * @param inputString
-     *            input to the program.
-     * @param commandString
-     *            external command to run.
+     *
+     * @param inputString   input to the program.
+     * @param commandString external command to run.
      * @return Output from the program as string.
      * @throws ProgramTookTooLongException
      * @throws BlastException
@@ -489,7 +475,7 @@ public class Blast {
 
     /**
      * Process the raw blast output into an ArrayList of {@link BlastResult}s.
-     * 
+     *
      * @param blastOutput
      * @return ArrayList of BlastResults.
      */
@@ -531,7 +517,7 @@ public class Blast {
                 blastResult.seteValue(Float.parseFloat(columns[10]));
                 blastResult.setBitScore(Float.parseFloat(columns[11]));
                 blastResult.setRelativeScore(blastResult.getPercentId()
-                        * blastResult.getAlignmentLength() * blastResult.getBitScore());
+                                                     * blastResult.getAlignmentLength() * blastResult.getBitScore());
 
                 if (blastResult.getsStart() > sLength || blastResult.getsEnd() > sLength) {
                     if (circular) {
@@ -560,9 +546,9 @@ public class Blast {
 
     /**
      * Set the rebuilding flag.
-     * <p>
+     * <p/>
      * Setting this flag prevents another thread to run rebuildblast.
-     * 
+     *
      * @param rebuilding
      */
     private static synchronized void setRebuilding(boolean rebuilding) {
@@ -571,7 +557,7 @@ public class Blast {
 
     /**
      * Check the rebuilding flag.
-     * 
+     *
      * @return True if the rebuilding flag is set.
      */
     private static synchronized boolean isRebuilding() {
@@ -580,13 +566,13 @@ public class Blast {
 
     /**
      * Build the blast database.
-     * <p>
+     * <p/>
      * First dump the sequences from the sql database into a fasta file, than create the blast
      * database by calling formatBlastDb.
-     * <p>
+     * <p/>
      * It creates a new database in a separate directory, and if successful, replaces the existing
      * directory with the new one.
-     * 
+     *
      * @throws BlastException
      */
     private void rebuildSequenceDatabase() throws BlastException {
@@ -604,11 +590,11 @@ public class Blast {
                     throw new BlastException("Could not create " + BLAST_DIRECTORY + ".new");
                 }
                 File bigFastaFile = new File(newbigFastaFileDir.getPath() + File.separator
-                        + BIG_FASTA_FILE);
+                                                     + BIG_FASTA_FILE);
                 FileWriter bigFastaWriter = new FileWriter(bigFastaFile);
                 writeBigFastaFile(bigFastaWriter);
                 formatBlastDb(newbigFastaFileDir, BIG_FASTA_FILE, FORMAT_LOG_FILE,
-                    JbeirSettings.getSetting("BLAST_DATABASE_NAME"));
+                              JbeirSettings.getSetting("BLAST_DATABASE_NAME"));
                 setRebuilding(true);
                 renameBlastDb(newbigFastaFileDir, BLAST_DIRECTORY);
                 setRebuilding(false);
@@ -624,7 +610,7 @@ public class Blast {
 
     /**
      * Build a blast database consisting only of individual sequence features.
-     * 
+     *
      * @throws BlastException
      */
     private void rebuildFeatureBlastDatabase() throws BlastException {
@@ -638,7 +624,7 @@ public class Blast {
                 throw new BlastException("Could not create " + newFeatureFastaDirName);
             }
             File fastaFile = new File(newFeatureFastaDir.getPath() + File.separator
-                    + FEATURE_BLAST_FILE);
+                                              + FEATURE_BLAST_FILE);
             FileWriter fastaFileWriter = new FileWriter(fastaFile);
             writeFeatureFastaFile(fastaFileWriter);
             Blast.formatBlastDb(newFeatureFastaDir, fastaFile.getName(), FEATURE_BLAST_FILE
@@ -654,16 +640,16 @@ public class Blast {
 
     /**
      * Retrieve all the sequences from the database, and writes it out to a fasta file on disk.
-     * 
-     * @param bigFastaWriter
-     *            filewriter to write to.
+     *
+     * @param bigFastaWriter filewriter to write to.
      * @throws BlastException
      */
     private void writeBigFastaFile(FileWriter bigFastaWriter) throws BlastException {
         List<Sequence> sequencesList = null;
+        SequenceController sequenceController = new SequenceController();
         try {
-            sequencesList = SequenceManager.getAllSequences();
-        } catch (ManagerException e) {
+            sequencesList = sequenceController.getAllSequences();
+        } catch (ControllerException e) {
             throw new BlastException(e);
         }
         for (Sequence sequence : sequencesList) {
@@ -686,7 +672,7 @@ public class Blast {
                     } catch (IllegalSymbolException e2) {
                         // skip this sequence
                         Logger.debug("invalid characters in sequence for "
-                                + sequence.getEntry().getRecordId());
+                                             + sequence.getEntry().getRecordId());
                         Logger.debug(e2.toString());
                     }
                 }
@@ -718,16 +704,17 @@ public class Blast {
 
     /**
      * Retrieve all the feature sequences from the database, and write it out to disk.
-     * 
-     * @param fastaFileWriter
-     *            filewrite to write to.
+     *
+     * @param fastaFileWriter filewrite to write to.
      * @throws BlastException
      */
     private void writeFeatureFastaFile(FileWriter fastaFileWriter) throws BlastException {
         ArrayList<Feature> featureList = null;
+        SequenceController sequenceController = new SequenceController();
+
         try {
-            featureList = SequenceManager.getAllFeatures();
-        } catch (ManagerException e) {
+            featureList = sequenceController.getAllFeatures();
+        } catch (ControllerException e) {
             throw new BlastException(e);
         }
         for (Feature feature : featureList) {
@@ -761,39 +748,6 @@ public class Blast {
             fastaFileWriter.close();
         } catch (IOException e) {
             throw new BlastException(e);
-        }
-    }
-
-    public static void main(String[] args) {
-        Blast b = new Blast();
-
-        String reference = "ATGAGCAAAGGCGAAGAACTGTTTACCGGCGTGGTGCCGATTCTGGTGGAACTGGATGGCGATGTGAACGGCCATAAATTTAGCGTGAGCGGCGAAGGCGAAGGCGATGCGACCTATGGCAAACTGACCCTGAAATTTATTTGCACCACCGGCAAACTGCCGGTGCCGTGGCCGACCCTGGTGACCACCTTTACCTATGGCGTGCAGTGCTTTGCGCGCTATCCGGATCATATGAAACAGCATGATTTTTTTAAAAGCGCGATGCCGGAAGGCTATGTGCAGGAACGCACCATTTTTTTTAAAGATGATGGCAACTATAAAACCCGCGCGGAAGTGAAATTTGAAGGCGATACCCTGGTGAACCGCATTGAACTGAAAGGCATTGATTTTAAAGAAGATGGCAACATTCTGGGCCATAAACTGGAATATAACTATAACAGCCATAAAGTGTATATTACCGCGGATAAACAGAAAAACGGCATTAAAGTGAACTTTAAAACCCGCCATAACATTGAAGATGGCAGCGTGCAGCTGGCGGATCATTATCAGCAGAACACCCCGATTGGCGATGGCCCGGTGCTGCTGCCGGATAACCATTATCTGAGCACCCAGAGCGCGCTGAGCAAAGATCCGAACGAAAAACGCGATCATATGGTGCTGCTGGAATTTGTGACCGCGGCGGGCATTACCCATGGCATGGATGAACTGTATAAAa";
-        String subject = "ATGAGCAAAGGCGAAGAACTGTTTACCGGCGTGGTGCCGATTCTGGTGGAACTGGATGGCGATGTGAACGGCCATAAATTTAGCGTGCGCGGCGAAGGCGAAGGCGATGCGACCAACGGCAAACTGACCCTGAAATTTATTTGCACCACCGGCAAACTGCCGGTGCCGTGGCCGACCCTGGTGACCACCCTGACCTATGGCGTGCAGTGCTTTAGCCGCTATCCGGATCATATGAAACAGCATGATTTTTTTAAAAGCGCGATGCCGGAAGGCTATGTGCAGGAACGCACCATTAGCTTTAAAGATGATGGCACCTATAAAACCCGCGCGGAAGTGAAATTTGAAGGCGATACCCTGGTGAACCGCATTGAACTGAAAGGCATTGATTTTAAAGAAGATGGCAACATTCTGGGCCATAAACTGGAATATAACTTTAACAGCCATAACGTGTATATTACCGCGGATAAACAGAAAAACGGCATTAAAGCGAACTTTAAAATTCGCCATAACGTGGAAGATGGCAGCGTGCAGCTGGCGGATCATTATCAGCAGAACACCCCGATTGGCGATGGCCCGGTGCTGCTGCCGGATAACCATTATCTGAGCACCCAGAGCGTGCTGAGCAAAGATCCGAACGAAAAACGCGATCATATGGTGCTGCTGGAATTTGTGACCGCGGCGGGCATTACCCATGGCATGGATGAACTGTATAAA";
-        String subject2 = "ATGAGCAAAGGCGAAGAACTGTTTACCGGCGTGGTGCCGATTCTGGTGGAACTGGATGGCGATGTGAACGGCCATAAATTTAGCGTGAGCGGCGAAGGCGAAGGCGATGCGACCTATGGCAAACTGACCCTGAAATTTATTTGCACCACCGGCAAACTGCCGGTGCCGTGGCCGACCCTGGTGACCACCCTGACCTATGGCGTGCAGTGCTTTAGCCGCTATCCGGATCATATGAAACAGCATGATTTTTTTAAAAGCGCGATGCCGGAAGGCTATGTGCAGGAACGCACCATTTTTTTTAAAGATGATGGCAACTATAAAACCCGCGCGGAAGTGAAATTTGAAGGCGATACCCTGGTGAACCGCATTGAACTGAAAGGCATTGATTTTAAAGAAGATGGCAACATTCTGGGCCATAAACTGGAATATAACTATAACAGCCATAACGTGTATATTATGGCGGATAAACAGAAAAACGGCATTAAAGTGAACTTTAAAATTCGCCATAACATTGAAGATGGCAGCGTGCAGCTGGCGGATCATTATCAGCAGAACACCCCGATTGGCGATGGCCCGGTGCTGCTGCCGGATAACCATTATCTGAGCACCCAGAGCGCGCTGAGCAAAGATCCGAACGAAAAACGCGATCATATGGTGCTGCTGGAATTTGTGACCGCGGCGGGCATTACCCATGGCATGGATGAACTGTATAAA";
-
-        try {
-            String result = b.runBl2Seq(reference, subject);
-            System.out.println(result);
-        } catch (BlastException e) {
-            e.printStackTrace();
-        } catch (ProgramTookTooLongException e) {
-            e.printStackTrace();
-        }
-
-        ArrayList<String> list = new ArrayList<String>();
-        list.add(subject);
-        list.add(subject2);
-
-        try {
-            List<String> results = b.runBl2Seq(reference, list);
-            for (String result : results) {
-                System.out.println("###############");
-                System.out.println(result);
-            }
-        } catch (BlastException e) {
-            e.printStackTrace();
-        } catch (ProgramTookTooLongException e) {
-            e.printStackTrace();
         }
     }
 }

@@ -2,13 +2,12 @@ package org.jbei.ice.lib.authentication;
 
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.models.Account;
+import org.jbei.ice.lib.account.model.Account;
 
 /**
  * Backend for authentication using the database. This is the default backend.
- * 
+ *
  * @author Zinovii Dmytriv, Timothy Ham, Hector Plahar
- * 
  */
 public class LocalBackend implements IAuthenticationBackend {
 

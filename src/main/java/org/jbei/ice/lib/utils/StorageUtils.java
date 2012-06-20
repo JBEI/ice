@@ -1,24 +1,21 @@
 package org.jbei.ice.lib.utils;
 
-import org.jbei.ice.lib.models.Storage;
-import org.jbei.ice.lib.models.Storage.StorageType;
+import org.jbei.ice.lib.entry.sample.model.Storage;
+import org.jbei.ice.lib.entry.sample.model.Storage.StorageType;
 
 /**
  * Utility methods for manipulation of {@link Storage}.
- * 
+ *
  * @author Hector Plahar
- * 
  */
 public class StorageUtils {
 
     /**
      * Convert storage index to human readable index.
-     * <p>
-     * 
-     * @param index
-     *            numerical index.
-     * @param type
-     *            {@link StorageType}.
+     * <p/>
+     *
+     * @param index numerical index.
+     * @param type  {@link StorageType}.
      * @return String representation of the index.
      */
     public static String indexToWell(int index, StorageType type) {
@@ -26,41 +23,41 @@ public class StorageUtils {
         int factor;
 
         switch (type) {
-        case PLATE96:
-            factor = 12;
-            break;
+            case PLATE96:
+                factor = 12;
+                break;
 
-        default:
-            throw new IllegalArgumentException("No handler for " + type);
+            default:
+                throw new IllegalArgumentException("No handler for " + type);
         }
 
         String pos = "";
         int row = (index / factor);
         switch (row) {
-        case 0:
-            pos += "A";
-            break;
-        case 1:
-            pos += "B";
-            break;
-        case 2:
-            pos += "C";
-            break;
-        case 3:
-            pos += "D";
-            break;
-        case 4:
-            pos += "E";
-            break;
-        case 5:
-            pos += "F";
-            break;
-        case 6:
-            pos += "G";
-            break;
-        case 7:
-            pos += "H";
-            break;
+            case 0:
+                pos += "A";
+                break;
+            case 1:
+                pos += "B";
+                break;
+            case 2:
+                pos += "C";
+                break;
+            case 3:
+                pos += "D";
+                break;
+            case 4:
+                pos += "E";
+                break;
+            case 5:
+                pos += "F";
+                break;
+            case 6:
+                pos += "G";
+                break;
+            case 7:
+                pos += "H";
+                break;
         }
 
         int col = (index % factor) + 1;
@@ -70,9 +67,9 @@ public class StorageUtils {
 
     /**
      * Convert human readable storage index to a numerical index.
-     * <p>
+     * <p/>
      * Not yet implemented. TODO.
-     * 
+     *
      * @param well
      * @return -1
      */

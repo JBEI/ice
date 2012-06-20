@@ -1,26 +1,25 @@
 package org.jbei.ice.server.servlet;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.utils.IceXlsSerializer;
+import org.jbei.ice.lib.utils.IceXmlSerializer;
+import org.jbei.ice.lib.utils.UtilityException;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.entry.EntryController;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.utils.IceXlsSerializer;
-import org.jbei.ice.lib.utils.IceXmlSerializer;
-import org.jbei.ice.lib.utils.UtilityException;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
 
 public class EntryExportServlet extends HttpServlet {
 
@@ -32,7 +31,7 @@ public class EntryExportServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         Logger.info(EntryExportServlet.class.getSimpleName() + ": attempt to download file");
-        Account account = null;
+        Account account;
 
         try {
             account = isLoggedIn(request.getCookies());
@@ -43,7 +42,7 @@ public class EntryExportServlet extends HttpServlet {
             url = url.substring(0, url.indexOf(path));
             response.sendRedirect(url);
             Logger.info(EntryExportServlet.class.getSimpleName()
-                    + ": authenication failed. Redirecting user to " + url);
+                                + ": authentication failed. Redirecting user to " + url);
             return;
         }
 
@@ -53,7 +52,7 @@ public class EntryExportServlet extends HttpServlet {
         String type = request.getParameter("type");
         String commaSeparated = request.getParameter("entries");
         Logger.info(EntryExportServlet.class.getSimpleName() + ": user = " + account.getEmail()
-                + ", type = " + type + ", entries = " + commaSeparated);
+                            + ", type = " + type + ", entries = " + commaSeparated);
 
         EntryController controller = new EntryController();
         ArrayList<Entry> entries = retrieveEntries(account, commaSeparated, controller);
@@ -61,7 +60,7 @@ public class EntryExportServlet extends HttpServlet {
             return;
 
         if (XML_EXPORT.equalsIgnoreCase(type)) {
-            exportXML(entries, response);
+            exportXML(account, entries, response);
         } else if (EXCEL_EXPORT.equalsIgnoreCase(type)) {
             exportExcel(entries, response, controller);
         }
@@ -94,9 +93,9 @@ public class EntryExportServlet extends HttpServlet {
         return entries;
     }
 
-    private void exportXML(ArrayList<Entry> entries, HttpServletResponse response) {
+    private void exportXML(Account account, ArrayList<Entry> entries, HttpServletResponse response) {
         try {
-            String xmlDocument = IceXmlSerializer.serializeToJbeiXml(entries);
+            String xmlDocument = IceXmlSerializer.serializeToJbeiXml(account, entries);
 
             // write to file
             String saveName = "data.xml";

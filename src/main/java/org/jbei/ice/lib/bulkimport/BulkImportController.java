@@ -6,11 +6,10 @@ import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.EntryPermissionVerifier;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.models.BulkImport;
-import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.utils.BulkImportEntryData;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.server.InfoToModelFactory;
@@ -19,8 +18,18 @@ import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -36,7 +45,7 @@ public class BulkImportController extends Controller {
     }
 
     public BulkImport updateBulkImportDraft(long id, String name, Account account,
-                                            ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary)
+            ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary)
             throws ControllerException {
 
         try {
@@ -50,14 +59,14 @@ public class BulkImportController extends Controller {
             getDataForUpdate(savedDraft, primary, account, true);
             getDataForUpdate(savedDraft, secondary, account, false);
 
-           return dao.saveBulkImport(savedDraft);
+            return dao.saveBulkImport(savedDraft);
         } catch (DAOException me) {
             throw new ControllerException(me);
         }
     }
 
     private void getDataForUpdate(BulkImport bulkImport, ArrayList<EntryInfo> infoList,
-                                  Account account, boolean isPrimary) {
+            Account account, boolean isPrimary) {
 
         if (infoList == null || infoList.isEmpty())
             return;
@@ -82,7 +91,8 @@ public class BulkImportController extends Controller {
             // deal with attachment files
             if (info.getAttachments() != null && !info.getAttachments().isEmpty()) {
 
-                AttachmentInfo attachmentInfo = info.getAttachments().get(0); // only one attachment per bulk import entry
+                AttachmentInfo attachmentInfo = info.getAttachments().get(
+                        0); // only one attachment per bulk import entry
                 String fileId = attachmentInfo.getFileId();
                 String fileName = attachmentInfo.getFilename();
 
@@ -93,7 +103,8 @@ public class BulkImportController extends Controller {
                     }
                 } else {
                     // existing file
-                    // TODO : we are assuming that the user did not update the file. It could be that it was updated but with the same name
+                    // TODO : we are assuming that the user did not update the file. It could be that it was updated
+                    // but with the same name
                     // TODO : we need to validate this against the list of saved files 
                     data.setAttachmentFilename(fileName);
                 }
@@ -170,7 +181,7 @@ public class BulkImportController extends Controller {
      * @return the newly created bulk import object
      */
     public BulkImport createBulkImport(Account account, ArrayList<EntryInfo> primary,
-                                       ArrayList<EntryInfo> secondary, String email) {
+            ArrayList<EntryInfo> secondary, String email) {
 
         ArrayList<BulkImportEntryData> primaryDataList = new ArrayList<BulkImportEntryData>(
                 primary.size());
@@ -195,7 +206,7 @@ public class BulkImportController extends Controller {
                 // deal with attachment files
                 AttachmentInfo attachmentInfo = info.getAttachments().get(0);
                 File file = new File(TEMPORARY_DIRECTORY + File.separator
-                        + attachmentInfo.getFileId());
+                                             + attachmentInfo.getFileId());
                 if (file.exists()) {
                     attachmentFiles.put(attachmentInfo.getFilename(), file);
                     data.setAttachmentFilename(attachmentInfo.getFilename());
@@ -206,7 +217,7 @@ public class BulkImportController extends Controller {
                 // deal with sequence files
                 SequenceAnalysisInfo sequenceInfo = info.getSequenceAnalysis().get(0);
                 File file = new File(TEMPORARY_DIRECTORY + File.separator
-                        + sequenceInfo.getFileId());
+                                             + sequenceInfo.getFileId());
                 if (file.exists()) {
                     sequenceFiles.put(sequenceInfo.getName(), file);
                     data.setSequenceFilename(sequenceInfo.getName());
@@ -239,7 +250,7 @@ public class BulkImportController extends Controller {
                     // deal with attachment files
                     AttachmentInfo attachmentInfo = info.getAttachments().get(0);
                     File file = new File(TEMPORARY_DIRECTORY + File.separator
-                            + attachmentInfo.getFileId());
+                                                 + attachmentInfo.getFileId());
                     if (file.exists())
                         attachmentFiles.put(attachmentInfo.getFilename(), file);
                 }
@@ -248,7 +259,7 @@ public class BulkImportController extends Controller {
                     // deal with sequence files
                     SequenceAnalysisInfo sequenceInfo = info.getSequenceAnalysis().get(0);
                     File file = new File(TEMPORARY_DIRECTORY + File.separator
-                            + sequenceInfo.getFileId());
+                                                 + sequenceInfo.getFileId());
                     if (file.exists())
                         sequenceFiles.put(sequenceInfo.getName(), file);
                 }

@@ -2,19 +2,31 @@ package org.jbei.ice.client.entry.view.view;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.IceAsyncCallback;
+import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.exception.AuthenticationException;
 
+/**
+ * Handler for deleting sequence
+ *
+ * @author Hector Plahar
+ */
 public class DeleteSequenceHandler implements ClickHandler {
 
     private final RegistryServiceAsync service;
+    private final HandlerManager eventBus;
     private final long entryId;
     private Callback<Boolean> callback;
 
-    public DeleteSequenceHandler(RegistryServiceAsync service, long entryId) {
+    public DeleteSequenceHandler(RegistryServiceAsync service, HandlerManager eventBus, long entryId) {
         this.service = service;
+        this.eventBus = eventBus;
         this.entryId = entryId;
     }
 
@@ -24,23 +36,28 @@ public class DeleteSequenceHandler implements ClickHandler {
 
     @Override
     public void onClick(ClickEvent event) {
-        try {
-            service.removeSequence(AppController.sessionId, entryId, new AsyncCallback<Boolean>() {
+        new IceAsyncCallback<Boolean>() {
 
-                @Override
-                public void onSuccess(Boolean result) {
-                    if (callback != null)
-                        callback.onSuccess(true);
+            @Override
+            protected void callService(AsyncCallback<Boolean> serviceCallback) {
+                try {
+                    service.removeSequence(AppController.sessionId, entryId, serviceCallback);
+                } catch (AuthenticationException e) {
+                    History.newItem(Page.LOGIN.getLink());
                 }
+            }
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    if (callback != null)
-                        callback.onFailure();
-                }
-            });
-        } catch (org.jbei.ice.client.exception.AuthenticationException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
+            @Override
+            public void onSuccess(Boolean result) {
+                if (callback != null)
+                    callback.onSuccess(true);
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                if (callback != null)
+                    callback.onFailure();
+            }
+        }.go(eventBus);
     }
 }

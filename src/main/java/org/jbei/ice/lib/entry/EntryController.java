@@ -3,28 +3,36 @@ package org.jbei.ice.lib.entry;
 import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.EntryPermissionVerifier;
+import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.entry.attachment.AttachmentController;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.AttachmentManager;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SampleManager;
-import org.jbei.ice.lib.managers.SequenceManager;
-import org.jbei.ice.lib.models.*;
-import org.jbei.ice.lib.permissions.PermissionDAO;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.server.EntryViewFactory;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * ABI to manipulate {@link Entry}s.
+ * ABI to manipulate {@link org.jbei.ice.lib.entry.model.Entry}s.
  *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
@@ -32,10 +40,12 @@ public class EntryController {
 
     private final EntryDAO dao;
     private final EntryPermissionVerifier verifier;
+    private final PermissionsController permissionsController;
 
     public EntryController() {
         verifier = new EntryPermissionVerifier();
         dao = new EntryDAO();
+        permissionsController = new PermissionsController();
     }
 
     /**
@@ -104,19 +114,21 @@ public class EntryController {
             throws ControllerException {
         Entry createdEntry = null;
         GroupController controller = new GroupController();
+        AccountController accountController = new AccountController();
+        Account account = accountController.getSystemAccount();   // TODO : hack
 
         try {
             String nextPart = getNextPartNumber();
             createdEntry = EntryFactory.createEntry(nextPart, entry);
             if (makePublic) {
-                PermissionDAO.addReadGroup(createdEntry, controller.createOrRetrievePublicGroup());
+                permissionsController.addReadGroup(account, createdEntry, controller.createOrRetrievePublicGroup());
             }
 
             if (scheduleIndexRebuild) {
                 ApplicationController.scheduleBlastIndexRebuildJob();
                 ApplicationController.scheduleSearchIndexRebuildJob();
             }
-        } catch (ManagerException e) {
+        } catch (PermissionException e) {
             throw new ControllerException(e);
         }
 
@@ -257,48 +269,14 @@ public class EntryController {
     }
 
     /**
-     * Checks if the given entry has a {@link Sequence} associated with it.
-     *
-     * @param entry
-     * @return True if sequence is associated.
-     * @throws ControllerException
-     */
-    public boolean hasSequence(Entry entry) throws ControllerException {
-        try {
-            return SequenceManager.hasSequence(entry);
-        } catch (ManagerException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    /**
-     * Checks if the given entry has {@link Sample}s associated with it.
-     *
-     * @param entry
-     * @return True if there are associated samples.
-     * @throws ControllerException
-     */
-    public boolean hasSamples(Entry entry) throws ControllerException {
-        try {
-            return SampleManager.hasSample(entry);
-        } catch (ManagerException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    /**
-     * Checks if the given entry has {@link Attachment}s associated with it.
+     * Checks if the given entry has {@link org.jbei.ice.lib.entry.attachment.Attachment}s associated with it.
      *
      * @param entry
      * @return True if there are associated attachments.
      * @throws ControllerException
      */
-    public boolean hasAttachments(Entry entry) throws ControllerException {
-        try {
-            return AttachmentManager.hasAttachment(entry);
-        } catch (ManagerException e) {
-            throw new ControllerException(e);
-        }
+    public boolean hasAttachments(Account account, Entry entry) throws ControllerException {
+        return new AttachmentController(account).hasAttachment(entry);
     }
 
     public Set<Long> getAllVisibleEntryIDs(Account account) throws ControllerException {
@@ -381,8 +359,7 @@ public class EntryController {
 
         try {
             entry.setModificationTime(Calendar.getInstance().getTime());
-
-            savedEntry = EntryDAO.save(entry);
+            savedEntry = dao.save(entry);
 
             if (scheduleIndexRebuild) {
                 ApplicationController.scheduleSearchIndexRebuildJob();
@@ -428,18 +405,15 @@ public class EntryController {
         entry.setLongDescription(deletionString + entry.getLongDescription());
         entry.setOwnerEmail(PopulateInitialDatabase.systemAccountEmail);
         // save(entry, true); // Cannot use save, as owner has changed. Must call manager directly
-        try {
-            PermissionDAO.setReadGroup(entry, new HashSet<Group>());
-            PermissionDAO.setWriteGroup(entry, new HashSet<Group>());
-            PermissionDAO.setReadUser(entry, new HashSet<Account>());
-            PermissionDAO.setWriteUser(entry, new HashSet<Account>());
-        } catch (ManagerException e) {
-            throw new ControllerException("Failed to change permissions for deleted entry.", e);
-        }
+
+        permissionsController.setReadGroup(account, entry, new HashSet<Group>());
+        permissionsController.setWriteGroup(account, entry, new HashSet<Group>());
+        permissionsController.setReadUser(account, entry, new HashSet<Account>());
+        permissionsController.setWriteUser(account, entry, new HashSet<Account>());
         entry.setModificationTime(Calendar.getInstance().getTime());
 
         try {
-            EntryDAO.save(entry);
+            dao.save(entry);
         } catch (ManagerException e1) {
             throw new ControllerException("Failed to save entry deletion", e1);
         }
@@ -448,7 +422,6 @@ public class EntryController {
             ApplicationController.scheduleSearchIndexRebuildJob();
             ApplicationController.scheduleBlastIndexRebuildJob();
         }
-
     }
 
     /**
@@ -464,7 +437,15 @@ public class EntryController {
             throws ControllerException {
         ArrayList<Long> result = new ArrayList<Long>();
         for (Long id : ids) {
-            if (verifier.hasReadPermissionsById(id, account)) {
+            Entry entry = null;
+            try {
+                entry = dao.get(id);
+            } catch (DAOException e) {
+                Logger.error(e);
+                continue;
+            }
+
+            if (verifier.hasReadPermissions(entry, account)) {
                 result.add(id);
             }
         }
@@ -502,8 +483,8 @@ public class EntryController {
         return 0;
     }
 
-    public LinkedList<EntryInfo> retrieveEntriesByIdSetSort(LinkedList<Long> entryIds,
-                                                            ColumnField field, boolean asc) throws ControllerException {
+    public LinkedList<EntryInfo> retrieveEntriesByIdSetSort(Account account, LinkedList<Long> entryIds,
+            ColumnField field, boolean asc) throws ControllerException {
 
         List<Entry> entries;
 
@@ -542,7 +523,7 @@ public class EntryController {
         LinkedList<EntryInfo> results = new LinkedList<EntryInfo>();
 
         for (Entry entry : entries) {
-            EntryInfo view = EntryViewFactory.createTableViewData(entry);
+            EntryInfo view = EntryViewFactory.createTableViewData(account, entry);
             if (view == null)
                 continue;
 
@@ -578,6 +559,14 @@ public class EntryController {
             return dao.retrieveEntryByType(type);
         } catch (DAOException e) {
             Logger.error(e);
+            throw new ControllerException(e);
+        }
+    }
+
+    public HashSet<Long> retrieveStrainsForPlasmid(Plasmid plasmid) throws ControllerException {
+        try {
+            return dao.retrieveStrainsForPlasmid(plasmid);
+        } catch (DAOException e) {
             throw new ControllerException(e);
         }
     }

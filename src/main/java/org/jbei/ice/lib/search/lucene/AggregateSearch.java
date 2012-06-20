@@ -1,36 +1,32 @@
 package org.jbei.ice.lib.search.lucene;
 
+import edu.emory.mathcs.backport.java.util.Collections;
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.PartNumber;
+import org.jbei.ice.lib.search.Query;
+import org.jbei.ice.lib.search.QueryException;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
-
-import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.entry.EntryController;
-import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.PartNumber;
-import org.jbei.ice.lib.query.Query;
-import org.jbei.ice.lib.query.QueryException;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * Combine different searches into one interface, with heuristics built in to
  * give most relevant answers.
- * 
+ *
  * @author Timothy Ham, Zinovii Dmytriv
- * 
  */
 public class AggregateSearch {
     /**
      * Perform full text aggregated query on entries.
-     * <p>
+     * <p/>
      * This weighs positively on {@link Entry}.name or .alias fields, or matches in
      * {@link PartNumber}.partNumber.
-     * 
-     * @param queryString
-     *            string to query
-     * @param account
-     *            Account of the query
+     *
+     * @param queryString string to query
+     * @param account     Account of the query
      * @return - ArrayList of {@link SearchResult}s.
      * @throws SearchException
      */
@@ -45,18 +41,18 @@ public class AggregateSearch {
 
             LinkedHashSet<Entry> exactNameMatches = new LinkedHashSet<Entry>();
             ArrayList<SearchResult> exactNameResult = new ArrayList<SearchResult>();
-            queries.add(new String[] { "name_or_alias", "=" + queryString });
+            queries.add(new String[]{"name_or_alias", "=" + queryString});
             ArrayList<Long> queryResultIds = Query.getInstance().query(queries);
             Collections.reverse(queryResultIds);
             ArrayList<Entry> matchedEntries = entryController.getEntriesByIdSet(account,
-                queryResultIds);
+                                                                                queryResultIds);
 
             if (matchedEntries != null) {
                 exactNameMatches.addAll(matchedEntries);
             }
 
             queries = new ArrayList<String[]>();
-            queries.add(new String[] { "part_number", "=" + queryString });
+            queries.add(new String[]{"part_number", "=" + queryString});
             queryResultIds = Query.getInstance().query(queries);
             Collections.reverse(queryResultIds);
             matchedEntries = entryController.getEntriesByIdSet(account, queryResultIds);
@@ -71,17 +67,17 @@ public class AggregateSearch {
             LinkedHashSet<Entry> substringMatches = new LinkedHashSet<Entry>();
             ArrayList<SearchResult> substringResults = new ArrayList<SearchResult>();
             queries = new ArrayList<String[]>();
-            queries.add(new String[] { "name_or_alias", "~" + queryString });
+            queries.add(new String[]{"name_or_alias", "~" + queryString});
             queryResultIds = Query.getInstance().query(queries);
             Collections.reverse(queryResultIds);
             ArrayList<Entry> matchedSubstringEntries = entryController.getEntriesByIdSet(account,
-                queryResultIds);
+                                                                                         queryResultIds);
             if (matchedSubstringEntries != null) {
                 substringMatches.addAll(matchedSubstringEntries);
             }
 
             queries = new ArrayList<String[]>();
-            queries.add(new String[] { "part_number", "~" + queryString });
+            queries.add(new String[]{"part_number", "~" + queryString});
             queryResultIds = Query.getInstance().query(queries);
             Collections.reverse(queryResultIds);
             matchedSubstringEntries = entryController.getEntriesByIdSet(account, queryResultIds);

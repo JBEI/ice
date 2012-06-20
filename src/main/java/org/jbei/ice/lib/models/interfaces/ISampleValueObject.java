@@ -1,8 +1,8 @@
 package org.jbei.ice.lib.models.interfaces;
 
-import java.util.Date;
+import org.jbei.ice.lib.entry.model.Entry;
 
-import org.jbei.ice.lib.models.Entry;
+import java.util.Date;
 
 public interface ISampleValueObject {
     long getId();

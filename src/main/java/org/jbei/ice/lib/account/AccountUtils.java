@@ -1,25 +1,24 @@
 package org.jbei.ice.lib.account;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import org.jbei.ice.lib.models.Account;
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.shared.dto.AccountInfo;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Utility class for account management
- * 
+ *
  * @author Hector Plahar
  */
 class AccountUtils {
 
     /**
      * Return the encrypted version of the given password, using the salt from the settings file.
-     * 
-     * @param password
-     *            non-empty string
+     *
+     * @param password non-empty string
      * @return 40 character encrypted string.
      */
     public static String encryptPassword(String password) {

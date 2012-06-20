@@ -1,8 +1,8 @@
 package org.jbei.ice.lib.models.interfaces;
 
-import java.util.Date;
+import org.jbei.ice.lib.entry.sample.model.Sample;
 
-import org.jbei.ice.lib.models.Sample;
+import java.util.Date;
 
 public interface ILocationValueObject {
     long getId();

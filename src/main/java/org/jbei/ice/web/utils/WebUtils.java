@@ -1,5 +1,14 @@
 package org.jbei.ice.web.utils;
 
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.web.common.ViewException;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -7,29 +16,18 @@ import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.entry.EntryController;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.web.common.ViewException;
-
 /**
  * Utility methods for web pages.
- * 
+ *
  * @author Timothy Ham, Zinovii Dmytriv, Joanna Chen
- * 
  */
 public class WebUtils {
     /**
      * Generate a clickable &lt;a&gt; link from the given {@link IceLink}.
-     * <p>
+     * <p/>
      * If the partnumber referred in the link does not exist, it creates a non-clickable text.
-     * 
-     * @param iceLink
-     *            link to create.
+     *
+     * @param iceLink link to create.
      * @return Html of the link.
      */
     private static String makeEntryLink(Account account, IceLink iceLink) {
@@ -68,9 +66,8 @@ public class WebUtils {
 
     /**
      * Generate a clickable &lt;a&gt; link from the specified {@link Entry} id.
-     * 
-     * @param id
-     *            id of the Entry.
+     *
+     * @param id id of the Entry.
      * @return Html of the clickable link.
      */
     private static String makeEntryLink(Account account, long id) {
@@ -96,7 +93,7 @@ public class WebUtils {
 
     /**
      * Create a space separated html links from the given Collection of {@link Entry}s.
-     * 
+     *
      * @param entries
      * @return Space separate html links.
      */
@@ -112,9 +109,8 @@ public class WebUtils {
 
     /**
      * Generate an html &lt;a&gt; link from the given url.
-     * 
-     * @param text
-     *            Url to linkify.
+     *
+     * @param text Url to linkify.
      * @return Html &lt;a&gt; link.
      */
     public static String urlLinkifyText(String text) {
@@ -185,7 +181,7 @@ public class WebUtils {
         Matcher secureUrlMatcher = secureUrlPattern.matcher(text);
         while (secureUrlMatcher.find()) {
             urls.add(new UrlLinkText(secureUrlMatcher.group(0).trim(), secureUrlMatcher.start(),
-                    secureUrlMatcher.end()));
+                                     secureUrlMatcher.end()));
         }
         Collections.sort(urls, urlComparator);
         String newText = text;
@@ -208,9 +204,8 @@ public class WebUtils {
 
     /**
      * Generate an html &lt;a&gt; link from the given {@link IceLink} text.
-     * 
-     * @param text
-     *            IceLink text.
+     *
+     * @param text IceLink text.
      * @return Html &lt;a&gt; link.
      */
     private static String wikiLinkifyText(Account account, String text) {
@@ -221,11 +216,14 @@ public class WebUtils {
             EntryController entryController = new EntryController();
 
             Pattern basicWikiLinkPattern = Pattern.compile("\\[\\["
-                    + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":.*?\\]\\]");
+                                                                   + JbeirSettings.getSetting(
+                    "WIKILINK_PREFIX") + ":.*?\\]\\]");
             Pattern partNumberPattern = Pattern.compile("\\[\\["
-                    + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":(.*)\\]\\]");
+                                                                + JbeirSettings.getSetting(
+                    "WIKILINK_PREFIX") + ":(.*)\\]\\]");
             Pattern descriptivePattern = Pattern.compile("\\[\\["
-                    + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":(.*)\\|(.*)\\]\\]");
+                                                                 + JbeirSettings.getSetting(
+                    "WIKILINK_PREFIX") + ":(.*)\\|(.*)\\]\\]");
 
             if (text == null) {
                 return "";
@@ -242,7 +240,7 @@ public class WebUtils {
 
                 Matcher partNumberMatcher = partNumberPattern.matcher(basicWikiLinkMatcher.group());
                 Matcher descriptivePatternMatcher = descriptivePattern.matcher(basicWikiLinkMatcher
-                        .group());
+                                                                                       .group());
 
                 if (descriptivePatternMatcher.find()) {
                     partNumber = descriptivePatternMatcher.group(1).trim();
@@ -279,16 +277,15 @@ public class WebUtils {
 
     /**
      * Hold information about the ICE link.
-     * <p>
+     * <p/>
      * These links are modeled after wikipedia/mediawiki links. They are of the form
-     * <p>
+     * <p/>
      * [[jbei:JBx_000001]] or [[jbei:JBx_000001 | Descriptive label]] format, just like mediawiki
      * links.
-     * <p>
+     * <p/>
      * The prefix (for example "jbei") can be changed in the preferences file.
-     * 
+     *
      * @author Timothy Ham
-     * 
      */
     public static class IceLink {
         private String descriptiveLabel = "";
@@ -296,11 +293,9 @@ public class WebUtils {
 
         /**
          * Contructor.
-         * 
-         * @param partNumber
-         *            Part number.
-         * @param descriptiveLabel
-         *            Descriptive label.
+         *
+         * @param partNumber       Part number.
+         * @param descriptiveLabel Descriptive label.
          */
         public IceLink(String partNumber, String descriptiveLabel) {
             this.partNumber = partNumber;
@@ -309,9 +304,8 @@ public class WebUtils {
 
         /**
          * Set the descriptive label string.
-         * 
-         * @param descriptiveLabel
-         *            descriptive label.
+         *
+         * @param descriptiveLabel descriptive label.
          */
         public void setDescriptiveLabel(String descriptiveLabel) {
             this.descriptiveLabel = descriptiveLabel;
@@ -319,7 +313,7 @@ public class WebUtils {
 
         /**
          * Get the descriptive label.
-         * 
+         *
          * @return descriptive label.
          */
         public String getDescriptiveLabel() {
@@ -328,7 +322,7 @@ public class WebUtils {
 
         /**
          * Set the part number string.
-         * 
+         *
          * @param partNumber
          */
         public void setPartNumber(String partNumber) {
@@ -337,7 +331,7 @@ public class WebUtils {
 
         /**
          * Get the part number string.
-         * 
+         *
          * @return Part number.
          */
         public String getPartNumber() {

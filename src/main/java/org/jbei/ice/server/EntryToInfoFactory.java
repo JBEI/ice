@@ -1,50 +1,39 @@
 package org.jbei.ice.server;
 
+import org.jbei.ice.client.entry.view.model.SampleStorage;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.entry.attachment.Attachment;
+import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.EntryFundingSource;
+import org.jbei.ice.lib.entry.model.Parameter;
+import org.jbei.ice.lib.entry.model.Part;
+import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.entry.sample.model.Sample;
+import org.jbei.ice.lib.entry.sample.model.Storage;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.models.TraceSequence;
+import org.jbei.ice.lib.utils.JbeiConstants;
+import org.jbei.ice.lib.utils.UtilsDAO;
+import org.jbei.ice.shared.dto.*;
+import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.Generation;
+import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.PlantType;
+import org.jbei.ice.web.utils.WebUtils;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jbei.ice.client.entry.view.model.SampleStorage;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.UtilsManager;
-import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.models.ArabidopsisSeed;
-import org.jbei.ice.lib.models.Attachment;
-import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.EntryFundingSource;
-import org.jbei.ice.lib.models.Parameter;
-import org.jbei.ice.lib.models.Part;
-import org.jbei.ice.lib.models.Plasmid;
-import org.jbei.ice.lib.models.Sample;
-import org.jbei.ice.lib.models.Storage;
-import org.jbei.ice.lib.models.Strain;
-import org.jbei.ice.lib.models.TraceSequence;
-import org.jbei.ice.lib.utils.JbeiConstants;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
-import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.Generation;
-import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.PlantType;
-import org.jbei.ice.shared.dto.AttachmentInfo;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.EntryType;
-import org.jbei.ice.shared.dto.ParameterInfo;
-import org.jbei.ice.shared.dto.PartInfo;
-import org.jbei.ice.shared.dto.PlasmidInfo;
-import org.jbei.ice.shared.dto.SampleInfo;
-import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
-import org.jbei.ice.shared.dto.StorageInfo;
-import org.jbei.ice.shared.dto.StrainInfo;
-import org.jbei.ice.web.utils.WebUtils;
-
 /**
  * Factory for converting {@link Entry}s to their corresponding {@link EntryInfo} data transfer
  * objects
- * 
+ * <p/>
  * TODO : this duplicates some of the functionality of EntryViewFactory. Consolidate
- * 
+ *
  * @author Hector Plahar
  */
 public class EntryToInfoFactory {
@@ -58,25 +47,25 @@ public class EntryToInfoFactory {
             return null;
 
         switch (type) {
-        case PLASMID:
-            info = plasmidInfo(entry);
-            break;
+            case PLASMID:
+                info = plasmidInfo(entry);
+                break;
 
-        case STRAIN:
-            info = strainInfo(account, (Strain) entry);
-            break;
+            case STRAIN:
+                info = strainInfo(account, (Strain) entry);
+                break;
 
-        case ARABIDOPSIS:
-            info = seedInfo(entry);
-            break;
+            case ARABIDOPSIS:
+                info = seedInfo(entry);
+                break;
 
-        case PART:
-            info = partInfo(entry);
-            break;
+            case PART:
+                info = partInfo(entry);
+                break;
 
-        default:
-            Logger.error("Do not know how to handle entry type " + type);
-            return null;
+            default:
+                Logger.error("Do not know how to handle entry type " + type);
+                return null;
         }
 
         if (info == null)
@@ -100,7 +89,7 @@ public class EntryToInfoFactory {
 
                 LinkedList<Storage> storageList = samples.get(sample);
                 SampleStorage sampleStorage = new SampleStorage(key,
-                        getStorageListInfo(storageList));
+                                                                getStorageListInfo(storageList));
                 samplesList.add(sampleStorage);
             }
         }
@@ -263,11 +252,11 @@ public class EntryToInfoFactory {
 
         /// get strains for plasmid
         try {
-            Set<Strain> strains = UtilsManager.getStrainsForPlasmid(plasmid);
+            Set<Strain> strains = UtilsDAO.getStrainsForPlasmid(plasmid);
             if (strains != null) {
                 for (Strain strain : strains) {
                     info.getStrains()
-                            .put(strain.getId(), strain.getOnePartNumber().getPartNumber());
+                        .put(strain.getId(), strain.getOnePartNumber().getPartNumber());
                 }
             }
         } catch (ManagerException e) {
@@ -330,21 +319,21 @@ public class EntryToInfoFactory {
         EntryType type = EntryType.nameToType(entry.getRecordType());
 
         switch (type) {
-        case ARABIDOPSIS:
-            info = new ArabidopsisSeedInfo();
-            break;
+            case ARABIDOPSIS:
+                info = new ArabidopsisSeedInfo();
+                break;
 
-        case PART:
-            info = new PartInfo();
-            break;
+            case PART:
+                info = new PartInfo();
+                break;
 
-        case PLASMID:
-            info = new PlasmidInfo();
-            break;
+            case PLASMID:
+                info = new PlasmidInfo();
+                break;
 
-        case STRAIN:
-            info = new StrainInfo();
-            break;
+            case STRAIN:
+                info = new StrainInfo();
+                break;
         }
 
         info.setId(entry.getId());

@@ -40,7 +40,7 @@ public interface RegistryService extends RemoteService {
             throws AuthenticationException;
 
     LinkedList<EntryInfo> retrieveEntryData(String sid, ColumnField field, boolean ascending,
-                                            LinkedList<Long> entries) throws AuthenticationException;
+            LinkedList<Long> entries) throws AuthenticationException;
 
     /**
      * Returns list of folders as seen on the collections page
@@ -62,25 +62,21 @@ public interface RegistryService extends RemoteService {
 
 //    AccountInfo retrieveAccountInfoForSession(String sid) throws AuthenticationException;
 
-    ArrayList<StorageInfo> retrieveChildren(String sid, long id) throws AuthenticationException;
-
-    ArrayList<StorageInfo> retrieveStorageRoot(String sid) throws AuthenticationException;
-
     LinkedList<Long> retrieveSamplesByDepositor(String sid, String email, ColumnField field,
-                                                boolean asc) throws AuthenticationException;
+            boolean asc) throws AuthenticationException;
 
     LinkedList<SampleInfo> retrieveSampleInfo(String sid, LinkedList<Long> sampleIds,
-                                              ColumnField sortField, boolean asc) throws AuthenticationException;
+            ColumnField sortField, boolean asc) throws AuthenticationException;
 
     FolderDetails retrieveFolderDetails(String sid, long folderId) throws AuthenticationException;
 
     // collections
 
     FolderDetails createUserCollection(String sid, String name, String description,
-                                       ArrayList<Long> contents) throws AuthenticationException;
+            ArrayList<Long> contents) throws AuthenticationException;
 
     ArrayList<FolderDetails> moveToUserCollection(String sid, long source,
-                                                  ArrayList<Long> destination, ArrayList<Long> entryIds)
+            ArrayList<Long> destination, ArrayList<Long> entryIds)
             throws AuthenticationException;
 
     AccountInfo retrieveProfileInfo(String sid, String userId) throws AuthenticationException;
@@ -88,7 +84,7 @@ public interface RegistryService extends RemoteService {
     Long createEntry(String sid, EntryInfo info) throws AuthenticationException;
 
     ArrayList<FolderDetails> addEntriesToCollection(String sid, ArrayList<Long> destination,
-                                                    ArrayList<Long> entryIds) throws AuthenticationException;
+            ArrayList<Long> entryIds) throws AuthenticationException;
 
     HashMap<SampleInfo, ArrayList<String>> retrieveStorageSchemes(String sessionId, EntryType type)
             throws AuthenticationException;
@@ -107,12 +103,12 @@ public interface RegistryService extends RemoteService {
     boolean updateEntry(String sid, EntryInfo info) throws AuthenticationException;
 
     boolean submitBulkImport(String sid, String email, ArrayList<EntryInfo> primary,
-                             ArrayList<EntryInfo> secondary) throws AuthenticationException;
+            ArrayList<EntryInfo> secondary) throws AuthenticationException;
 
     ArrayList<BulkImportDraftInfo> retrieveImportDraftData(String sid, String email) throws AuthenticationException;
 
     BulkImportDraftInfo saveBulkImportDraft(String sid, String email, String name,
-                                            ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary)
+            ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary)
             throws AuthenticationException;
 
     BulkImportDraftInfo retrieveBulkImport(String sid, long id) throws AuthenticationException;
@@ -123,7 +119,7 @@ public interface RegistryService extends RemoteService {
             throws AuthenticationException;
 
     BulkImportDraftInfo updateBulkImportDraft(String sessionId, long id, String email, String name,
-                                              ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary)
+            ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary)
             throws AuthenticationException;
 
     SuggestOracle.Response getPermissionSuggestions(Request req);
@@ -136,7 +132,7 @@ public interface RegistryService extends RemoteService {
     boolean saveSequence(String sessionId, long entry, String sequenceUser) throws AuthenticationException;
 
     LinkedList<Long> sortEntryList(String sessionId, LinkedList<Long> ids, ColumnField field,
-                                   boolean asc) throws AuthenticationException;
+            boolean asc) throws AuthenticationException;
 
     boolean sendFeedback(String email, String msg);
 
@@ -162,7 +158,7 @@ public interface RegistryService extends RemoteService {
             throws AuthenticationException;
 
     ArrayList<SequenceAnalysisInfo> deleteEntryTraceSequences(String sid, long entryId,
-                                                              ArrayList<String> seqId) throws AuthenticationException;
+            ArrayList<String> seqId) throws AuthenticationException;
 
     ArrayList<BulkImportDraftInfo> retrieveDraftsPendingVerification(String sid) throws AuthenticationException;
 

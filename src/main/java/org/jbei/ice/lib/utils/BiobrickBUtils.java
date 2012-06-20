@@ -1,12 +1,5 @@
 package org.jbei.ice.lib.utils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.biojava.bio.molbio.RestrictionEnzyme;
 import org.biojava.bio.molbio.RestrictionMapper;
 import org.biojava.bio.seq.DNATools;
@@ -14,28 +7,32 @@ import org.biojava.bio.symbol.IllegalSymbolException;
 import org.biojava.utils.SimpleThreadPool;
 import org.jbei.ice.bio.enzymes.RestrictionEnzymesManager;
 import org.jbei.ice.bio.enzymes.RestrictionEnzymesManagerException;
-import org.jbei.ice.controllers.SequenceController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.entry.EntryController;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SequenceManager;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.Name;
+import org.jbei.ice.lib.entry.model.Part;
+import org.jbei.ice.lib.entry.model.Part.AssemblyStandard;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.models.AnnotationLocation;
-import org.jbei.ice.lib.models.Entry;
 import org.jbei.ice.lib.models.Feature;
-import org.jbei.ice.lib.models.Name;
-import org.jbei.ice.lib.models.Part;
-import org.jbei.ice.lib.models.Part.AssemblyStandard;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.models.SequenceFeature.AnnotationType;
 import org.jbei.ice.lib.permissions.PermissionException;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * BglBrick assembly standard.
- * 
- * @author Timothy Ham, Zinovii Dmytriv
- * 
+ *
+ * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 public class BiobrickBUtils implements IAssemblyUtils {
 
@@ -49,8 +46,7 @@ public class BiobrickBUtils implements IAssemblyUtils {
     @Override
     public AssemblyStandard determineAssemblyStandard(String partSequenceString)
             throws UtilityException {
-        AssemblyStandard result = null;
-        result = determineBiobrickBAssemblyStandard(partSequenceString);
+        AssemblyStandard result = determineBiobrickBAssemblyStandard(partSequenceString);
         return result;
     }
 
@@ -97,12 +93,15 @@ public class BiobrickBUtils implements IAssemblyUtils {
             }
         }
         try {
-            SequenceManager.saveSequence(partSequence);
-        } catch (ManagerException e) {
+            SequenceController controller = new SequenceController();
+            AccountController accountController = new AccountController();
+            controller.save(accountController.getSystemAccount(), partSequence);
+        } catch (ControllerException e) {
+            throw new UtilityException(e);
+        } catch (PermissionException e) {
             throw new UtilityException(e);
         }
         return partSequence;
-
     }
 
     @Override
@@ -171,11 +170,10 @@ public class BiobrickBUtils implements IAssemblyUtils {
 
     /**
      * Determine whether the given sequence string conforms to the proper BglBrick assembly format.
-     * <p>
+     * <p/>
      * It checks for prefix, suffix, and scans for incomaptible restriction sites.
-     * 
-     * @param partSequenceString
-     *            sequence string to test.
+     *
+     * @param partSequenceString sequence string to test.
      * @return {@link AssemblyStandard}.
      * @throws UtilityException
      */
@@ -199,7 +197,7 @@ public class BiobrickBUtils implements IAssemblyUtils {
     /**
      * Check if the given sequence string can be assembled as a BglBrick by having the correct
      * restriction sites.
-     * 
+     *
      * @param sequenceString
      * @return
      * @throws UtilityException
@@ -241,9 +239,8 @@ public class BiobrickBUtils implements IAssemblyUtils {
 
     /**
      * Search for BglBrick prefix in the given sequence string.
-     * 
-     * @param sequenceString
-     *            query sequence.
+     *
+     * @param sequenceString query sequence.
      * @return - {@link SimpleFeature}.
      * @throws ControllerException
      */
@@ -270,9 +267,8 @@ public class BiobrickBUtils implements IAssemblyUtils {
 
     /**
      * Search for BglBrick suffix in the given sequence string.
-     * 
-     * @param sequenceString
-     *            query sequence.
+     *
+     * @param sequenceString query sequence.
      * @return {@link SimpleFeature}.
      * @throws ControllerException
      */
@@ -300,7 +296,7 @@ public class BiobrickBUtils implements IAssemblyUtils {
     /**
      * Annotate the given sequence string with bglbrick format features, such as the prefix, suffix,
      * and the inner feature.
-     * 
+     *
      * @param partSequence
      * @return
      * @throws UtilityException
@@ -319,26 +315,26 @@ public class BiobrickBUtils implements IAssemblyUtils {
             SimpleFeature prefixMatch = findBiobrickBPrefix(partSequenceString);
             if (prefixMatch != null) {
                 Feature feature = new Feature(biobrickBPrefixFeatureName, "",
-                        prefixMatch.getSequence(), 0, "misc_feature");
+                                              prefixMatch.getSequence(), 0, "misc_feature");
                 SequenceFeature sequenceFeature = new SequenceFeature(partSequence, feature, +1,
-                        feature.getName(), feature.getGenbankType(),
-                        SequenceFeature.AnnotationType.PREFIX);
+                                                                      feature.getName(), feature.getGenbankType(),
+                                                                      SequenceFeature.AnnotationType.PREFIX);
                 sequenceFeature.getAnnotationLocations().add(
-                    new AnnotationLocation(prefixMatch.getStart() + 1, prefixMatch.getEnd() + 1,
-                            sequenceFeature));
+                        new AnnotationLocation(prefixMatch.getStart() + 1, prefixMatch.getEnd() + 1,
+                                               sequenceFeature));
                 sequenceFeatures.add(sequenceFeature);
             }
             // suffix
             SimpleFeature suffixMatch = findBiobrickBSuffix(partSequenceString);
             if (suffixMatch != null) {
                 Feature feature = new Feature(biobrickBSuffixFeatureName, "",
-                        suffixMatch.getSequence(), 0, "misc_feature");
+                                              suffixMatch.getSequence(), 0, "misc_feature");
                 SequenceFeature sequenceFeature = new SequenceFeature(partSequence, feature, +1,
-                        feature.getName(), feature.getGenbankType(),
-                        SequenceFeature.AnnotationType.SUFFIX);
+                                                                      feature.getName(), feature.getGenbankType(),
+                                                                      SequenceFeature.AnnotationType.SUFFIX);
                 sequenceFeature.getAnnotationLocations().add(
-                    new AnnotationLocation(suffixMatch.getStart() + 1, suffixMatch.getEnd() + 1,
-                            sequenceFeature));
+                        new AnnotationLocation(suffixMatch.getStart() + 1, suffixMatch.getEnd() + 1,
+                                               sequenceFeature));
                 sequenceFeatures.add(sequenceFeature);
             }
 
@@ -363,14 +359,16 @@ public class BiobrickBUtils implements IAssemblyUtils {
             String featureName = part.getRecordId(); // uuid of the given part
             String featureIdentification = part.getRecordId();
             Feature innerPartFeature = new Feature(featureName, featureIdentification,
-                    partSequenceString.substring(minimumFeatureStart, maximumFeatureEnd + 1), 0,
-                    "misc_feature");
+                                                   partSequenceString.substring(minimumFeatureStart,
+                                                                                maximumFeatureEnd + 1), 0,
+                                                   "misc_feature");
             SequenceFeature sequenceFeature = new SequenceFeature(partSequence, innerPartFeature,
-                    +1, innerPartFeature.getName(), innerPartFeature.getGenbankType(),
-                    SequenceFeature.AnnotationType.INNER);
+                                                                  +1, innerPartFeature.getName(),
+                                                                  innerPartFeature.getGenbankType(),
+                                                                  SequenceFeature.AnnotationType.INNER);
             sequenceFeature.getAnnotationLocations().add(
-                new AnnotationLocation(minimumFeatureStart + 1, maximumFeatureEnd + 1,
-                        sequenceFeature));
+                    new AnnotationLocation(minimumFeatureStart + 1, maximumFeatureEnd + 1,
+                                           sequenceFeature));
             sequenceFeatures.add(sequenceFeature);
             // check if part has at least prefix, suffix, and one inner feature
             //
@@ -405,11 +403,9 @@ public class BiobrickBUtils implements IAssemblyUtils {
 
     /**
      * Assemble two bglbrick sequences together.
-     * 
-     * @param part1Sequence
-     *            first sequence.
-     * @param part2Sequence
-     *            second sequence.
+     *
+     * @param part1Sequence first sequence.
+     * @param part2Sequence second sequence.
      * @return Assembled {@link Sequence}.
      * @throws UtilityException
      */
@@ -466,13 +462,14 @@ public class BiobrickBUtils implements IAssemblyUtils {
             } catch (ControllerException e) {
                 throw new UtilityException(e);
             }
-            SequenceController sequenceController = null;
+            SequenceController sequenceController = new SequenceController();
+            ;
             Sequence newPartSequence = new Sequence();
             newPartSequence.setEntry(newPart);
             newPartSequence.setSequence(joinedSequence);
             newPartSequence.setFwdHash(SequenceUtils.calculateSequenceHash(joinedSequence));
             newPartSequence.setRevHash(SequenceUtils
-                    .calculateReverseComplementSequenceHash(joinedSequence));
+                                               .calculateReverseComplementSequenceHash(joinedSequence));
 
             Set<SequenceFeature> newPartSequenceFeatures = newPartSequence.getSequenceFeatures();
             SequenceFeatureCollection newFeatures = new SequenceFeatureCollection();
@@ -481,11 +478,11 @@ public class BiobrickBUtils implements IAssemblyUtils {
             SequenceFeatureCollection part1SequenceFeatures = (SequenceFeatureCollection) part1Sequence
                     .getSequenceFeatures();
             SequenceFeature part1InnerFeature = part1SequenceFeatures.get(
-                SequenceFeature.AnnotationType.INNER).get(0);
+                    SequenceFeature.AnnotationType.INNER).get(0);
             SequenceFeatureCollection part2SequenceFeatures = (SequenceFeatureCollection) part2Sequence
                     .getSequenceFeatures();
             SequenceFeature part2InnerFeature = part2SequenceFeatures.get(
-                SequenceFeature.AnnotationType.INNER).get(0);
+                    SequenceFeature.AnnotationType.INNER).get(0);
             // part1 inner feature as subinner feature
             SequenceFeature temp = new SequenceFeature();
             temp.setSequence(newPartSequence);
@@ -494,8 +491,8 @@ public class BiobrickBUtils implements IAssemblyUtils {
             temp.setAnnotationType(SequenceFeature.AnnotationType.SUBINNER);
             temp.setGenbankType("misc_feature");
             temp.getAnnotationLocations().add(
-                new AnnotationLocation(part1InnerFeature.getUniqueGenbankStart(), part1InnerFeature
-                        .getUniqueEnd(), temp));
+                    new AnnotationLocation(part1InnerFeature.getUniqueGenbankStart(), part1InnerFeature
+                            .getUniqueEnd(), temp));
             temp.setStrand(part1InnerFeature.getStrand());
             newFeatures.add(temp);
             // part 2 inner feature as subinner feature
@@ -507,9 +504,9 @@ public class BiobrickBUtils implements IAssemblyUtils {
             temp.setGenbankType("misc_feature");
             int secondPartFeatureOffset = scarStartPosition - prefixChopPosition + 1;
             temp.getAnnotationLocations().add(
-                new AnnotationLocation(part2InnerFeature.getUniqueGenbankStart()
-                        + secondPartFeatureOffset, part2InnerFeature.getUniqueEnd()
-                        + secondPartFeatureOffset, temp));
+                    new AnnotationLocation(part2InnerFeature.getUniqueGenbankStart()
+                                                   + secondPartFeatureOffset, part2InnerFeature.getUniqueEnd()
+                            + secondPartFeatureOffset, temp));
             temp.setStrand(part2InnerFeature.getStrand());
             newFeatures.add(temp);
             // scar
@@ -518,12 +515,12 @@ public class BiobrickBUtils implements IAssemblyUtils {
             temp.setAnnotationType(SequenceFeature.AnnotationType.SCAR);
             temp.setGenbankType("misc_feature");
             temp.getAnnotationLocations()
-                    .add(
+                .add(
                         new AnnotationLocation(scarStartPosition + 1, scarStartPosition
                                 + scarLength, temp));
             temp.setStrand(1);
             try {
-                temp.setFeature(getBiobrickBScarFeature());
+                temp.setFeature(getBiobrickBScarFeature(sequenceController));
             } catch (ControllerException e) {
                 throw new UtilityException(e);
             }
@@ -531,8 +528,7 @@ public class BiobrickBUtils implements IAssemblyUtils {
             newFeatures.add(temp);
             newPartSequenceFeatures.addAll(newFeatures);
             try {
-                sequenceController = new SequenceController(controller.getSystemAccount());
-                newPartSequence = sequenceController.save(newPartSequence);
+                newPartSequence = sequenceController.save(controller.getSystemAccount(), newPartSequence);
             } catch (ControllerException e) {
                 throw new UtilityException(e);
             } catch (PermissionException e) {
@@ -545,18 +541,18 @@ public class BiobrickBUtils implements IAssemblyUtils {
 
     /**
      * Retrieve BglBrick scar {@link Feature}.
-     * 
+     *
      * @return {@link Feature}.
      * @throws ControllerException
      */
-    private static Feature getBiobrickBScarFeature() throws ControllerException {
+    private static Feature getBiobrickBScarFeature(SequenceController controller) throws ControllerException {
         Feature feature = new Feature();
         feature.setAutoFind(1);
         feature.setName(biobrickBScarFeatureName);
         feature.setGenbankType("misc_feature");
         feature.setSequence(biobrickBScar);
         feature.setHash(SequenceUtils.calculateSequenceHash(biobrickBScar));
-        feature = SequenceManager.getReferenceFeature(feature);
+        feature = controller.getReferenceFeature(feature);
         return feature;
     }
 

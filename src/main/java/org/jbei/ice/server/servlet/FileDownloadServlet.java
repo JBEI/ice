@@ -1,31 +1,30 @@
 package org.jbei.ice.server.servlet;
 
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.entry.attachment.Attachment;
+import org.jbei.ice.lib.entry.attachment.AttachmentController;
+import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.models.TraceSequence;
+import org.jbei.ice.lib.permissions.PermissionException;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.jbei.ice.controllers.AttachmentController;
-import org.jbei.ice.controllers.SequenceAnalysisController;
-import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.models.Attachment;
-import org.jbei.ice.lib.models.TraceSequence;
-import org.jbei.ice.lib.permissions.PermissionException;
-
 /**
  * Servlet for serving the different kinds of files
  * available on gd-ice. Requires a valid session id as
  * a parameter
- * 
+ *
  * @author Hector Plahar
  */
 public class FileDownloadServlet extends HttpServlet {
@@ -65,12 +64,12 @@ public class FileDownloadServlet extends HttpServlet {
             url = url.substring(0, url.indexOf(path));
             response.sendRedirect(url);
             Logger.info(FileDownloadServlet.class.getSimpleName()
-                    + ": authenication failed. Redirecting user to " + url);
+                                + ": authenication failed. Redirecting user to " + url);
             return;
         }
 
         Logger.info(FileDownloadServlet.class.getSimpleName() + ": user = " + account.getEmail()
-                + ", file type = " + type + ", name = " + name + ", file id = " + fileId);
+                            + ", file type = " + type + ", name = " + name + ", file id = " + fileId);
 
         File file = null;
 
@@ -105,7 +104,7 @@ public class FileDownloadServlet extends HttpServlet {
     }
 
     private File getTraceSequenceFile(Account account, String fileId) {
-        SequenceAnalysisController controller = new SequenceAnalysisController(account);
+        SequenceAnalysisController controller = new SequenceAnalysisController();
 
         try {
             TraceSequence sequence = controller.getTraceSequenceByFileId(fileId);
@@ -135,7 +134,7 @@ public class FileDownloadServlet extends HttpServlet {
             return null;
         } catch (PermissionException e) {
             Logger.error("User " + account.getEmail()
-                    + " does not have appropriate permissions to view file");
+                                 + " does not have appropriate permissions to view file");
             Logger.error(e);
             return null;
         }

@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.models.interfaces;
 
-import org.jbei.ice.lib.models.Entry;
+import org.jbei.ice.lib.entry.model.Entry;
 
 public interface ISelectionMarkerValueObject {
     long getId();

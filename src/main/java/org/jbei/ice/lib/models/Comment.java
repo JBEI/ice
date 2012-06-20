@@ -1,29 +1,18 @@
 package org.jbei.ice.lib.models;
 
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.entry.model.Entry;
+
+import javax.persistence.*;
 import java.util.Calendar;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
-import org.jbei.ice.lib.dao.IModel;
-
 /**
- * Store comments about an {@link Entry} object, with the associated {@link Account}.
- * 
+ * Store comments about an {@link org.jbei.ice.lib.entry.model.Entry} object, with the associated {@link org.jbei.ice
+ * .lib.account.model.Account}.
+ *
  * @author Timothy Ham, Zinovii Dmytriv
- * 
  */
 @Entity
 @Table(name = "comments")

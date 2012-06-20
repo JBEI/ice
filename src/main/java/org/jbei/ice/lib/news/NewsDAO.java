@@ -3,15 +3,11 @@ package org.jbei.ice.lib.news;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.jbei.ice.lib.dao.DAO;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.News;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
  * DAO for managing {@link News}

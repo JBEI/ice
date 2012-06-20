@@ -1,24 +1,22 @@
 package org.jbei.ice.lib.utils;
 
+import org.jbei.ice.lib.entry.model.Parameter;
+import org.jbei.ice.lib.entry.model.Parameter.ParameterType;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jbei.ice.lib.models.Parameter;
-import org.jbei.ice.lib.models.Parameter.ParameterType;
-
 /**
  * Converts {@link Parameter} to and from text.
- * 
+ *
  * @author Timothy ham
- * 
  */
 public class ParameterGeneratorParser {
 
     /**
      * Generate a List of {@link Parameter}s from string.
-     * 
-     * @param input
-     *            string input.
+     *
+     * @param input string input.
      * @return List of Parameters.
      */
     public static List<Parameter> parseParameterString(String input) {
@@ -79,7 +77,7 @@ public class ParameterGeneratorParser {
 
     /**
      * Generate string representation of {@link Parameter}s.
-     * 
+     *
      * @param parameters
      * @return parameters as string.
      */

@@ -2,14 +2,13 @@ package org.jbei.ice.lib.authentication;
 
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.models.Account;
+import org.jbei.ice.lib.account.model.Account;
 
 /**
  * No password backend for testing. This backend accepts any password as long as the user exists in
  * the system.
- * 
+ *
  * @author Zinovii Dmytriv, Timothy Ham
- * 
  */
 public class NullAuthenticationBackend implements IAuthenticationBackend {
     @Override

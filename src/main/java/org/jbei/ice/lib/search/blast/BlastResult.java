@@ -1,14 +1,13 @@
 package org.jbei.ice.lib.search.blast;
 
-import java.io.Serializable;
+import org.jbei.ice.lib.entry.model.Entry;
 
-import org.jbei.ice.lib.models.Entry;
+import java.io.Serializable;
 
 /**
  * Store blast output result.
- * 
+ *
  * @author Zinovii Dmytriv
- * 
  */
 public class BlastResult implements Serializable, Comparable<BlastResult> {
 

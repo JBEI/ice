@@ -1,20 +1,19 @@
 package org.jbei.ice.lib.search.lucene;
 
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.logging.Logger;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Entry;
-
 /**
  * Hold search results.
- * <p>
+ * <p/>
  * Holds the score and the {@link Entry}.
- * 
+ *
  * @author Zinovii Dmytriv
- * 
  */
 public class SearchResult implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -102,7 +101,7 @@ public class SearchResult implements Serializable {
                 SearchResult objectResult = object.get(objectIndex);
 
                 if (targetResult.getEntry().getRecordId()
-                        .equals(objectResult.getEntry().getRecordId())) {
+                                .equals(objectResult.getEntry().getRecordId())) {
                     targetResult.setScore(targetResult.getScore() + objectResult.getScore());
                 } else {
                     String msg = "Algorithm Error in SearchResult.sumSearchResults!";

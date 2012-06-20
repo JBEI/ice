@@ -1,16 +1,16 @@
 package org.jbei.ice.lib.entry;
 
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.PartNumber;
+import org.jbei.ice.lib.utils.Utils;
+
 import java.util.Calendar;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.PartNumber;
-import org.jbei.ice.lib.utils.Utils;
-
 /**
  * Factory for creating entry objects in the database
- * 
+ *
  * @author Hector Plahar
  */
 public class EntryFactory {

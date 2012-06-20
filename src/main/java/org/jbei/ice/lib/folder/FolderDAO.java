@@ -4,11 +4,10 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Folder;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
 import java.math.BigInteger;

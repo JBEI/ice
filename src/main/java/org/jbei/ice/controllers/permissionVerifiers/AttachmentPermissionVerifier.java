@@ -1,14 +1,13 @@
 package org.jbei.ice.controllers.permissionVerifiers;
 
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.models.Attachment;
+import org.jbei.ice.lib.entry.attachment.Attachment;
 
 /**
  * Permission Verifier for {@link Attachment}s.
- * 
+ *
  * @author Zinovii Dmytriv
- * 
  */
 public class AttachmentPermissionVerifier extends EntryPermissionVerifier {
     @Override

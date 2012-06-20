@@ -1,8 +1,5 @@
 package org.jbei.ice.lib.utils;
 
-import java.util.HashSet;
-import java.util.List;
-
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
@@ -10,10 +7,10 @@ import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
 import org.dom4j.tree.DefaultElement;
-import org.jbei.ice.controllers.SequenceController;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.models.AnnotationLocation;
-import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.models.SequenceFeatureAttribute;
@@ -22,13 +19,15 @@ import org.jbei.ice.lib.vo.DNAFeatureLocation;
 import org.jbei.ice.lib.vo.DNAFeatureNote;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
+import java.util.HashSet;
+import java.util.List;
+
 /**
  * SeqXML serializer/deserializer.
- * <p>
+ * <p/>
  * See seq.xsd in the /docs directory for xml schema.
- * 
+ *
  * @author Timothy Ham
- * 
  */
 public class SeqXmlSerializer {
 
@@ -47,13 +46,12 @@ public class SeqXmlSerializer {
     private static final String COMPLEMENT = "complement";
     public static Namespace seqNamespace = new Namespace("seq", "http://jbei.org/sequence");
     public static Namespace xsiNamespace = new Namespace("xsi",
-            "http://www.w3.org/2001/XMLSchema-instance");
+                                                         "http://www.w3.org/2001/XMLSchema-instance");
 
     /**
      * Generate seq-xml from the given {@link Sequence}.
-     * 
-     * @param sequence
-     *            Sequence to sereialize.
+     *
+     * @param sequence Sequence to sereialize.
      * @return Xml document.
      * @throws UtilityException
      */
@@ -67,9 +65,8 @@ public class SeqXmlSerializer {
 
     /**
      * Generate seq xml {@link Element} from the give {@link Sequence}.
-     * 
-     * @param sequence
-     *            Sequence to serialize.
+     *
+     * @param sequence Sequence to serialize.
      * @return Xml Element.
      * @throws UtilityException
      */
@@ -82,7 +79,7 @@ public class SeqXmlSerializer {
         seq.add(seqNamespace);
         seq.add(xsiNamespace);
         seq.addAttribute(new QName("schemaLocation", xsiNamespace),
-            "http://jbei.org/sequence seq.xsd");
+                         "http://jbei.org/sequence seq.xsd");
         Entry entry = sequence.getEntry();
 
         seq.add(new DefaultElement(NAME, seqNamespace).addText(entry.getNamesAsString()));
@@ -103,7 +100,7 @@ public class SeqXmlSerializer {
             for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
                 DefaultElement feature = new DefaultElement(FEATURE, seqNamespace);
                 feature.add(new DefaultElement(LABEL, seqNamespace).addText(sequenceFeature
-                        .getName()));
+                                                                                    .getName()));
                 String complement;
                 if (sequenceFeature.getStrand() == -1) {
                     complement = "true";
@@ -113,7 +110,7 @@ public class SeqXmlSerializer {
                 feature.add(new DefaultElement(COMPLEMENT, seqNamespace).addText(complement));
                 if (validGenbankTypes.contains(sequenceFeature.getGenbankType())) {
                     feature.add(new DefaultElement("type", seqNamespace).addText(sequenceFeature
-                            .getGenbankType()));
+                                                                                         .getGenbankType()));
                 } else {
                     feature.add(new DefaultElement("type", seqNamespace).addText("misc_feature"));
                 }
@@ -121,9 +118,83 @@ public class SeqXmlSerializer {
                 for (AnnotationLocation location : sequenceFeature.getAnnotationLocations()) {
                     DefaultElement locations = new DefaultElement(LOCATION, seqNamespace);
                     locations.add(new DefaultElement(GENBANK_START, seqNamespace).addText(String
-                            .valueOf(location.getGenbankStart())));
+                                                                                                  .valueOf(
+                                                                                                          location
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                                                                  .getGenbankStart())));
                     locations.add(new DefaultElement(END, seqNamespace).addText(String
-                            .valueOf(location.getEnd())));
+                                                                                        .valueOf(location.getEnd())));
                     feature.add(locations);
                 }
                 for (SequenceFeatureAttribute sequenceFeatureAttribute : sequenceFeature
@@ -132,7 +203,7 @@ public class SeqXmlSerializer {
                     newAttribute.addText(sequenceFeatureAttribute.getValue());
                     newAttribute.addAttribute(NAME, sequenceFeatureAttribute.getKey());
                     newAttribute.addAttribute(QUOTED, sequenceFeatureAttribute.getQuoted()
-                            .toString());
+                                                                              .toString());
                     feature.add(newAttribute);
                 }
                 sequence.getSequence();
@@ -144,7 +215,7 @@ public class SeqXmlSerializer {
                 // is the reverse complement of what's being exported, and thus must be recalculated.
                 if (genbankStart > end) {
                     tempSequence = sequence.getSequence().trim()
-                            .substring(genbankStart - 1, sequence.getSequence().length());
+                                           .substring(genbankStart - 1, sequence.getSequence().length());
                     tempSequence += sequence.getSequence().trim().substring(0, end);
                 } else {
                     tempSequence = sequence.getSequence().trim().substring(genbankStart - 1, end);
@@ -164,9 +235,8 @@ public class SeqXmlSerializer {
 
     /**
      * Deserialize given xml to {@link Sequence} object.
-     * 
-     * @param xml
-     *            xml to parse.
+     *
+     * @param xml xml to parse.
      * @return Sequence object.
      * @throws UtilityException
      */
@@ -187,9 +257,8 @@ public class SeqXmlSerializer {
 
     /**
      * Deserialize given seq xml {@link Element} to {@link Sequence} object.
-     * 
-     * @param seqElement
-     *            xml Element to parse.
+     *
+     * @param seqElement xml Element to parse.
      * @return Sequence object.
      * @throws UtilityException
      */
@@ -255,7 +324,7 @@ public class SeqXmlSerializer {
 
     /**
      * Add valid Genbank feature type keywords to the given HashSet.
-     * 
+     *
      * @param validGenbankTypes
      */
     private static void initializeValidGenbankTypes(HashSet<String> validGenbankTypes) {

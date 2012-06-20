@@ -1,13 +1,19 @@
 package org.jbei.ice.client.entry.view;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import gwtupload.client.IUploadStatus.Status;
 import gwtupload.client.IUploader;
 import gwtupload.client.IUploader.OnFinishUploaderHandler;
 import gwtupload.client.IUploader.UploadedInfo;
-
-import java.util.ArrayList;
-import java.util.Set;
-
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.IceAsyncCallback;
@@ -38,20 +44,12 @@ import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.HasWidgets;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
+import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Presenter for entry view
- * 
+ *
  * @author Hector Plahar
  */
 public class EntryPresenter extends AbstractPresenter {
@@ -76,7 +74,7 @@ public class EntryPresenter extends AbstractPresenter {
 
         addEntryViewHandler();
         display.getDetailMenu().addSelectionChangeHandler(
-            new MenuSelectionHandler(display.getDetailMenu()));
+                new MenuSelectionHandler(display.getDetailMenu()));
 
         setContextNavHandlers();
         showCurrentEntryView();
@@ -259,7 +257,9 @@ public class EntryPresenter extends AbstractPresenter {
             public void onClick(ClickEvent event) {
 
                 IHasNavigableData nav = currentContext.getNav();
-                EntryInfo currentInfo = nav.getCachedData(currentContext.getCurrent()); // TODO : how is this current info different from EntryPresenter.this.currentInfo
+                EntryInfo currentInfo = nav.getCachedData(currentContext
+                                                                  .getCurrent()); // TODO : how is this current info
+                                                                  // different from EntryPresenter.this.currentInfo
                 int idx = nav.indexOfCached(currentInfo);
 
                 if (idx == -1) {
@@ -273,7 +273,9 @@ public class EntryPresenter extends AbstractPresenter {
                 if (next + 1 == size)
                     display.enableNext(false);
 
-                EntryInfo nextInfo = nav.getNext(currentInfo); // TODO : nextInfo can be null. look at the implementation of getNext for more info
+                EntryInfo nextInfo = nav.getNext(
+                        currentInfo); // TODO : nextInfo can be null. look at the implementation of getNext for more
+                        // info
 
                 // TODO :this needs to be folded into a single "Retrieve"
                 long currentId = nextInfo.getId();
@@ -358,99 +360,182 @@ public class EntryPresenter extends AbstractPresenter {
 
         final long entryId = currentContext.getCurrent();
         service.retrieveEntryDetails(AppController.sessionId, entryId,
-            new AsyncCallback<EntryInfo>() {
+                                     new AsyncCallback<EntryInfo>() {
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    FeedbackEvent event = new FeedbackEvent(true,
-                            "There was an error retrieving the entry. Please try again later.");
-                    eventBus.fireEvent(event);
-                    // TODO : cancel loading indicator show
-                }
+                                         @Override
+                                         public void onFailure(Throwable caught) {
+                                             FeedbackEvent event = new FeedbackEvent(true,
+                                                                                     "There was an error retrieving " +
+                                                                                             "the entry. Please try " +
+                                                                                             "again later.");
+                                             eventBus.fireEvent(event);
+                                             // TODO : cancel loading indicator show
+                                         }
 
-                @Override
-                public void onSuccess(EntryInfo result) {
+                                         @Override
+                                         public void onSuccess(EntryInfo result) {
 
-                    if (result == null) {
-                        FeedbackEvent event = new FeedbackEvent(true,
-                                "Could not retrieve entry with id \"" + entryId + "\"");
-                        eventBus.fireEvent(event);
-                        return;
-                    }
+                                             if (result == null) {
+                                                 FeedbackEvent event = new FeedbackEvent(true,
+                                                                                         "Could not retrieve entry " +
+                                                                                                 "with id \"" +
+                                                                                                 entryId + "\"");
+                                                 eventBus.fireEvent(event);
+                                                 return;
+                                             }
 
-                    currentInfo = result;
-                    String name = result.getType().getDisplay().toUpperCase() + ": "
-                            + result.getName();
-                    display.setEntryName(name);
+                                             currentInfo = result;
+                                             String name = result.getType().getDisplay().toUpperCase() + ": "
+                                                     + result.getName();
+                                             display.setEntryName(name);
 
-                    // can user edit ?
-                    boolean canEdit = (AppController.accountInfo.isModerator() || result
-                            .isCanEdit());
-                    display.getPermissionsWidget().setCanEdit(canEdit);
-                    if (canEdit) {
-                        display.setSequenceDeleteHandler(new DeleteSequenceTraceHandler());
-                    }
+                                             // can user edit ?
+                                             boolean canEdit = (AppController.accountInfo.isModerator() || result
+                                                     .isCanEdit());
+                                             display.getPermissionsWidget().setCanEdit(canEdit);
+                                             if (canEdit) {
+                                                 display.setSequenceDeleteHandler(new DeleteSequenceTraceHandler());
+                                             }
 
-                    // attachments
-                    ArrayList<AttachmentInfo> attachments = result.getAttachments();
-                    ArrayList<AttachmentItem> items = new ArrayList<AttachmentItem>();
-                    if (attachments != null) {
-                        for (AttachmentInfo info : attachments) {
-                            AttachmentItem item = new AttachmentItem(info.getId(), info
-                                    .getFilename(), info.getDescription());
-                            item.setFileId(info.getFileId());
-                            items.add(item);
-                        }
-                    }
+                                             // attachments
+                                             ArrayList<AttachmentInfo> attachments = result.getAttachments();
+                                             ArrayList<AttachmentItem> items = new ArrayList<AttachmentItem>();
+                                             if (attachments != null) {
+                                                 for (AttachmentInfo info : attachments) {
+                                                     AttachmentItem item = new AttachmentItem(info.getId(), info
+                                                             .getFilename(), info.getDescription());
+                                                     item.setFileId(info.getFileId());
+                                                     items.add(item);
+                                                 }
+                                             }
 
-                    display.setAttachments(items, entryId);
+                                             display.setAttachments(items, entryId);
 
-                    // menu views
-                    display.getDetailMenu().updateMenuCount(Menu.SEQ_ANALYSIS,
-                        result.getSequenceAnalysis().size());
-                    display.getDetailMenu().updateMenuCount(Menu.SAMPLES,
-                        result.getSampleStorage().size());
+                                             // menu views
+                                             display.getDetailMenu().updateMenuCount(Menu.SEQ_ANALYSIS,
+                                                                                     result.getSequenceAnalysis()
+                                                                                           .size());
+                                             display.getDetailMenu().updateMenuCount(Menu.SAMPLES,
+                                                                                     result.getSampleStorage().size());
 
-                    display.setSampleData(result.getSampleStorage());
-                    display.setSequenceData(result.getSequenceAnalysis(), result);
+                                             display.setSampleData(result.getSampleStorage());
+                                             display.setSequenceData(result.getSequenceAnalysis(), result);
 
-                    MenuItem selection = display.getDetailMenu().getCurrentSelection();
-                    Menu menu;
-                    if (selection == null) {
-                        menu = Menu.GENERAL;
-                    } else {
-                        menu = selection.getMenu();
-                    }
+                                             MenuItem selection = display.getDetailMenu().getCurrentSelection();
+                                             Menu menu;
+                                             if (selection == null) {
+                                                 menu = Menu.GENERAL;
+                                             } else {
+                                                 menu = selection.getMenu();
+                                             }
 
-                    switch (menu) {
+                                             switch (menu) {
 
-                    case GENERAL:
-                        sequencePresenter = display.showEntryDetailView(currentInfo, canEdit,
-                            new DeleteSequenceHandler(service, entryId));
-                        sequencePresenter.addSequencePasteHandler(new UploadPasteSequenceHandler(
-                                service, sequencePresenter));
-                        sequencePresenter
-                                .addSequenceFileUploadHandler(new SequenceFileUploadHandler(
-                                        sequencePresenter));
-                        break;
+                                                 case GENERAL:
+                                                     sequencePresenter = display.showEntryDetailView(currentInfo,
+                                                                                                     canEdit,
+                                                                                                     new
 
-                    case SEQ_ANALYSIS:
-                        boolean showFlash = false;
-                        if (selection != null) {
-                            showFlash = (selection.getCount() > 0);
-                        }
-                        display.showSequenceView(currentInfo, showFlash);
-                        break;
 
-                    case SAMPLES:
-                        display.showSampleView();
-                        break;
-                    }
 
-                    // retrieve associated permission
-                    retrievePermissionData();
-                }
-            });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                                                     DeleteSequenceHandler(
+                                                                                                             service,
+                                                                                                             eventBus,
+                                                                                                             entryId));
+                                                     sequencePresenter.addSequencePasteHandler(
+                                                             new UploadPasteSequenceHandler(
+                                                                     service, sequencePresenter));
+                                                     sequencePresenter
+                                                             .addSequenceFileUploadHandler(
+                                                                     new SequenceFileUploadHandler(
+                                                                             sequencePresenter));
+                                                     break;
+
+                                                 case SEQ_ANALYSIS:
+                                                     boolean showFlash = false;
+                                                     if (selection != null) {
+                                                         showFlash = (selection.getCount() > 0);
+                                                     }
+                                                     display.showSequenceView(currentInfo, showFlash);
+                                                     break;
+
+                                                 case SAMPLES:
+                                                     display.showSampleView();
+                                                     break;
+                                             }
+
+                                             // retrieve associated permission
+                                             retrievePermissionData();
+                                         }
+                                     });
     }
 
     @Override
@@ -498,12 +583,12 @@ public class EntryPresenter extends AbstractPresenter {
             final long id = currentInfo.getId();
             if (isWrite) {
                 switch (info.getType()) {
-                case READ_ACCOUNT:
-                    info.setType(PermissionType.WRITE_ACCOUNT);
-                    break;
-                case READ_GROUP:
-                    info.setType(PermissionType.WRITE_GROUP);
-                    break;
+                    case READ_ACCOUNT:
+                        info.setType(PermissionType.WRITE_ACCOUNT);
+                        break;
+                    case READ_GROUP:
+                        info.setType(PermissionType.WRITE_GROUP);
+                        break;
                 }
             }
 
@@ -552,25 +637,26 @@ public class EntryPresenter extends AbstractPresenter {
 
             switch (selection.getMenu()) {
 
-            case GENERAL:
-                boolean canEdit = (AppController.accountInfo.isModerator() || currentInfo
-                        .isCanEdit());
-                sequencePresenter = display.showEntryDetailView(currentInfo, canEdit,
-                    new DeleteSequenceHandler(service, currentInfo.getId()));
-                sequencePresenter.addSequencePasteHandler(new UploadPasteSequenceHandler(service,
-                        sequencePresenter));
-                sequencePresenter.addSequenceFileUploadHandler(new SequenceFileUploadHandler(
-                        sequencePresenter));
-                break;
+                case GENERAL:
+                    boolean canEdit = (AppController.accountInfo.isModerator() || currentInfo
+                            .isCanEdit());
+                    sequencePresenter = display.showEntryDetailView(currentInfo, canEdit,
+                                                                    new DeleteSequenceHandler(service, eventBus,
+                                                                                              currentInfo.getId()));
+                    sequencePresenter.addSequencePasteHandler(new UploadPasteSequenceHandler(service,
+                                                                                             sequencePresenter));
+                    sequencePresenter.addSequenceFileUploadHandler(new SequenceFileUploadHandler(
+                            sequencePresenter));
+                    break;
 
-            case SEQ_ANALYSIS:
-                boolean showFlash = (menu.getCurrentSelection().getCount() > 0);
-                display.showSequenceView(currentInfo, showFlash);
-                break;
+                case SEQ_ANALYSIS:
+                    boolean showFlash = (menu.getCurrentSelection().getCount() > 0);
+                    display.showSequenceView(currentInfo, showFlash);
+                    break;
 
-            case SAMPLES:
-                display.showSampleView();
-                break;
+                case SAMPLES:
+                    display.showSampleView();
+                    break;
             }
         }
     }
@@ -598,7 +684,7 @@ public class EntryPresenter extends AbstractPresenter {
             if (focus != null) {
                 focus.setFocus(true);
                 FeedbackEvent feedback = new FeedbackEvent(true,
-                        "Please fill out all required fields");
+                                                           "Please fill out all required fields");
                 eventBus.fireEvent(feedback);
                 return;
             }
@@ -653,7 +739,8 @@ public class EntryPresenter extends AbstractPresenter {
             } else {
                 UploadedInfo info = uploader.getServerInfo();
                 if (uploader.getStatus() == Status.ERROR) {
-                    Window.alert("There was a problem uploading your file.\n\nPlease contact your administrator if this problem persists");
+                    Window.alert(
+                            "There was a problem uploading your file.\n\nPlease contact your administrator if this problem persists");
                 }
             }
             uploader.reset();
@@ -667,7 +754,7 @@ public class EntryPresenter extends AbstractPresenter {
         public void onClick(ClickEvent event) {
             final long entryId = currentInfo.getId();
             Set<SequenceAnalysisInfo> selected = display.getSequenceTableSelectionModel()
-                    .getSelectedSet();
+                                                        .getSelectedSet();
             if (selected == null || selected.isEmpty())
                 return;
 

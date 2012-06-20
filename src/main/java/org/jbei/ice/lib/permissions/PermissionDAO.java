@@ -1,192 +1,48 @@
 package org.jbei.ice.lib.permissions;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.dao.DAO;
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.Group;
+import org.jbei.ice.lib.permissions.model.ReadGroup;
+import org.jbei.ice.lib.permissions.model.ReadUser;
+import org.jbei.ice.lib.permissions.model.WriteGroup;
+import org.jbei.ice.lib.permissions.model.WriteUser;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
- * DAO to manipulate Permissions.
- * 
- * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
- * 
+ * DAO to manipulate {@link org.jbei.ice.lib.permissions.model.ReadGroup}, {@link org.jbei.ice.lib.permissions.model
+ * .ReadUser}, {@link org.jbei.ice.lib.permissions.model.WriteGroup}
+ * & {@link org.jbei.ice.lib.permissions.model.WriteUser} objects in the database
+ *
+ * @author Hector Plahar, Timothy Ham, Zinovii Dmytriv
  */
 public class PermissionDAO extends HibernateRepository {
 
     /**
-     * Check if the {@link Account} associated with the given sessionKey has read permission to the
-     * given {@link Entry} by recordId.
-     * 
-     * @param recordId
-     *            recordId of the Entry.
-     * @param sessionKey
-     *            session key.
-     * @return True if the given session account has read permission to the specified entry.
-     */
-    public static boolean hasReadPermission(String recordId, String sessionKey) {
-        boolean result = false;
-
-        Account account = null;
-        AccountController controller = new AccountController();
-
-        try {
-            account = controller.getAccountByAuthToken(sessionKey);
-
-            if (account != null) {
-                result = hasReadPermission(recordId, account)
-                        || groupHasReadPermission(recordId, account);
-            }
-        } catch (ControllerException e) {
-            // if lookup fails, doesn't have permission
-            String msg = "manager exception during permission lookup: " + e.toString();
-            Logger.warn(msg);
-        }
-
-        return result;
-    }
-
-    /**
-     * Check if the {@link Account} has read permission to the specified {@link Entry} by entryId.
-     * 
-     * @param recordId
-     *            recordId of the Entry.
-     * @param account
-     *            Account
-     * @return True if the given Account has read permission to the specified Entry.
-     */
-    public static boolean hasReadPermission(String recordId, Account account) {
-        boolean result = false;
-        AccountController controller = new AccountController();
-
-        if (recordId != null && !recordId.isEmpty() && account != null) {
-            try {
-                if (controller.isModerator(account)) {
-                    result = true;
-                } else {
-                    result = groupHasReadPermission(recordId, account)
-                            || userHasReadPermission(recordId, account);
-                }
-            } catch (ControllerException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Check if the {@link Account} has read permission to the specified {@link Entry}.
-     * 
-     * @param entryId
-     *            id of the specified Entry.
-     * @param account
-     *            Account
-     * @return True if given Account has read permission to the specified Entry.
-     */
-    public static boolean hasReadPermission(long entryId, Account account) {
-        boolean result = false;
-        AccountController controller = new AccountController();
-
-        if (entryId > 0 && account != null) {
-            try {
-                if (controller.isModerator(account)) {
-                    result = true;
-                } else {
-                    result = groupHasReadPermission(entryId, account)
-                            || userHasReadPermission(entryId, account);
-                }
-            } catch (ControllerException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Checks if the current {@link Account} logged in has read permission to the given
-     * {@link Entry}.
-     * 
-     * @param entry
-     *            Entry to be queried.
-     * @return True if the current user has read permission.
-     */
-
-    public static boolean hasReadPermission(Entry entry, Account account) {
-        boolean result = false;
-        if (entry != null && account != null) {
-            AccountController controller = new AccountController();
-
-            try {
-                if (controller.isModerator(account)) {
-                    result = true;
-                } else {
-                    result = userHasReadPermission(entry, account)
-                            | groupHasReadPermission(entry, account);
-                }
-            } catch (ControllerException e) {
-                e.printStackTrace();
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Checks if the given {@link Account} has write permission to the given {@link Entry}.
-     * 
-     * @param entry
-     *            Entry to be queried.
-     * @param account
-     *            Account to be queried.
-     * @return True if the given account has write permission to the given Entry.
-     */
-    public static boolean hasWritePermission(Entry entry, Account account) {
-        boolean result = false;
-        if (entry != null && account != null) {
-            AccountController controller = new AccountController();
-
-            try {
-                if (controller.isModerator(account)) {
-                    result = true;
-                } else {
-                    result = userHasWritePermission(entry, account)
-                            | groupHasWritePermission(entry, account);
-                }
-            } catch (ControllerException e) {
-                e.printStackTrace();
-            }
-        }
-        return result;
-    }
-
-    /**
      * Set read permissions for specified user {@link Account}s to the given {@link Entry}.
-     * <p>
-     * This method creates new {@link ReadUser} objects using the given {@link Account}s.
-     * 
-     * @param entry
-     *            Entry to give read permission to.
-     * @param accounts
-     *            Accounts to give read permission to.
-     * @throws ManagerException
+     * <p/>
+     * This method creates new {@link org.jbei.ice.lib.permissions.model.ReadUser} objects using the given {@link
+     * Account}s.
+     *
+     * @param entry    Entry to give read permission to.
+     * @param accounts Accounts to give read permission to.
+     * @throws DAOException
      */
-    public static void setReadUser(Entry entry, Set<Account> accounts) throws ManagerException {
-        String queryString = "delete  ReadUser readUser where readUser.entry = :entry";
-        Session session = DAO.newSession();
+    public void setReadUser(Entry entry, Set<Account> accounts) throws DAOException {
+        String queryString = "delete ReadUser readUser where readUser.entry = :entry";
+        Session session = newSession();
 
         try {
             session.getTransaction().begin();
@@ -196,20 +52,21 @@ public class PermissionDAO extends HibernateRepository {
             session.getTransaction().commit();
             for (Account account : accounts) {
                 ReadUser readUser = new ReadUser(entry, account);
-                DAO.save(readUser);
+                super.saveOrUpdate(readUser);
             }
         } catch (HibernateException e) {
             session.getTransaction().rollback();
             String msg = "Could not set Read User to " + entry.getRecordId();
-            throw new ManagerException(msg, e);
-        } catch (DAOException e) {
-            throw new ManagerException(e);
+            throw new DAOException(msg, e);
+        } finally {
+            if (session != null)
+                session.close();
         }
     }
 
-    public static void removeReadUser(Entry entry, Account account) throws ManagerException {
-        String queryString = "delete  ReadUser readUser where readUser.entry = :entry and readUser.account = :account";
-        Session session = DAO.newSession();
+    public void removeReadUser(Entry entry, Account account) throws DAOException {
+        String queryString = "delete ReadUser readUser where readUser.entry = :entry and readUser.account = :account";
+        Session session = newSession();
 
         try {
             session.getTransaction().begin();
@@ -222,16 +79,16 @@ public class PermissionDAO extends HibernateRepository {
             session.getTransaction().rollback();
             String msg = "Could not remove read user \"" + account.getEmail() + "\" for entry \""
                     + entry.getId() + "\"";
-            throw new ManagerException(msg, e);
+            throw new DAOException(msg, e);
         } finally {
             if (session != null)
-                session.disconnect();
+                session.close();
         }
     }
 
-    public static void removeReadGroup(Entry entry, Group group) throws ManagerException {
+    public void removeReadGroup(Entry entry, Group group) throws DAOException {
         String queryString = "delete  ReadGroup readGroup where readGroup.entry = :entry and readGroup.group = :group";
-        Session session = DAO.newSession();
+        Session session = newSession();
 
         try {
             session.getTransaction().begin();
@@ -244,16 +101,17 @@ public class PermissionDAO extends HibernateRepository {
             session.getTransaction().rollback();
             String msg = "Could not remove read group \"" + group.getLabel() + "\" for entry \""
                     + entry.getId() + "\"";
-            throw new ManagerException(msg, e);
+            throw new DAOException(msg, e);
         } finally {
             if (session != null)
-                session.disconnect();
+                session.close();
         }
     }
 
-    public static void removeWriteUser(Entry entry, Account account) throws ManagerException {
-        String queryString = "delete  WriteUser writeUser where writeUser.entry = :entry and writeUser.account = :account";
-        Session session = DAO.newSession();
+    public void removeWriteUser(Entry entry, Account account) throws DAOException {
+        String queryString = "delete WriteUser writeUser where writeUser.entry = :entry and writeUser.account = " +
+                ":account";
+        Session session = newSession();
 
         try {
             session.getTransaction().begin();
@@ -266,16 +124,17 @@ public class PermissionDAO extends HibernateRepository {
             session.getTransaction().rollback();
             String msg = "Could not remove write user \"" + account.getEmail() + "\" for entry \""
                     + entry.getId() + "\"";
-            throw new ManagerException(msg, e);
+            throw new DAOException(msg, e);
         } finally {
             if (session != null)
-                session.disconnect();
+                session.close();
         }
     }
 
-    public static void removeWriteGroup(Entry entry, Group group) throws ManagerException {
-        String queryString = "delete  WriteGroup writeGroup where writeGroup.entry = :entry and writeGroup.group = :group";
-        Session session = DAO.newSession();
+    public void removeWriteGroup(Entry entry, Group group) throws DAOException {
+        String queryString = "delete  WriteGroup writeGroup where writeGroup.entry = :entry and writeGroup.group = " +
+                ":group";
+        Session session = newSession();
 
         try {
             session.getTransaction().begin();
@@ -288,23 +147,23 @@ public class PermissionDAO extends HibernateRepository {
             session.getTransaction().rollback();
             String msg = "Could not remove write group \"" + group.getLabel() + "\" for entry \""
                     + entry.getId() + "\"";
-            throw new ManagerException(msg, e);
+            throw new DAOException(msg, e);
         } finally {
             if (session != null)
-                session.disconnect();
+                session.close();
         }
     }
 
     /**
      * Add read permission for the specified {@link Account} to the specified {@link Entry}.
-     * <p>
+     * <p/>
      * This method adds a new {@link ReadUser} object to the database..
-     * 
+     *
      * @param entry
      * @param account
-     * @throws ManagerException
+     * @throws DAOException
      */
-    public static void addReadUser(Entry entry, Account account) throws ManagerException {
+    public void addReadUser(Entry entry, Account account) throws DAOException {
         Set<Account> accounts = getReadUser(entry);
         boolean alreadyAdded = false;
         for (Account oldAccount : accounts) {
@@ -321,14 +180,13 @@ public class PermissionDAO extends HibernateRepository {
 
     /**
      * Retrieve {@link Account}s with read permissions set for the specified {@link Entry}.
-     * 
-     * @param entry
-     *            Entry to get ReadUsers about.
+     *
+     * @param entry Entry to get ReadUsers about.
      * @return Set of Accounts with read permission for the given Entry.
-     * @throws ManagerException
+     * @throws DAOException
      */
-    public static Set<Account> getReadUser(Entry entry) throws ManagerException {
-        Session session = DAO.newSession();
+    public Set<Account> getReadUser(Entry entry) throws DAOException {
+        Session session = newSession();
         try {
             String queryString = "select readUser.account from ReadUser readUser where readUser.entry = :entry";
             Query query = session.createQuery(queryString);
@@ -342,7 +200,7 @@ public class PermissionDAO extends HibernateRepository {
             e.printStackTrace();
             String msg = "Could not read ReadUser of " + entry.getRecordId();
             Logger.error(msg, e);
-            throw new ManagerException(msg, e);
+            throw new DAOException(msg, e);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -352,18 +210,17 @@ public class PermissionDAO extends HibernateRepository {
 
     /**
      * Set read permissions for specified user {@link Group}s to the given {@link Entry}.
-     * <p>
-     * This method creates new {@link ReadGroup} objects using the given {@link Group}s.
-     * 
-     * @param entry
-     *            Entry to give permission to.
-     * @param groups
-     *            Groups to give read permission to.
-     * @throws ManagerException
+     * <p/>
+     * This method creates new {@link org.jbei.ice.lib.permissions.model.ReadGroup} objects using the given {@link
+     * Group}s.
+     *
+     * @param entry  Entry to give permission to.
+     * @param groups Groups to give read permission to.
+     * @throws DAOException
      */
-    public static void setReadGroup(Entry entry, Set<Group> groups) throws ManagerException {
+    public void setReadGroup(Entry entry, Set<Group> groups) throws DAOException {
         String queryString = "delete  ReadGroup readGroup where readGroup.entry = :entry";
-        Session session = DAO.newSession();
+        Session session = newSession();
         session.getTransaction().begin();
         Query query = session.createQuery(queryString);
         query.setEntity("entry", entry);
@@ -372,12 +229,12 @@ public class PermissionDAO extends HibernateRepository {
         try {
             for (Group group : groups) {
                 ReadGroup readGroup = new ReadGroup(entry, group);
-                DAO.save(readGroup);
+                super.saveOrUpdate(readGroup);
             }
         } catch (Exception e) {
             session.getTransaction().rollback();
             String msg = "Could not set Read Group of " + entry.getRecordId();
-            throw new ManagerException(msg, e);
+            throw new DAOException(msg, e);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -387,16 +244,14 @@ public class PermissionDAO extends HibernateRepository {
 
     /**
      * Add read permission for the specified {@link Group} to the specified {@link Entry}.
-     * <p>
+     * <p/>
      * This method adds a new {@link ReadGroup} object to the database..
-     * 
-     * @param entry
-     *            Entry to give read permission to.
-     * @param group
-     *            Group to give read permission to.
-     * @throws ManagerException
+     *
+     * @param entry Entry to give read permission to.
+     * @param group Group to give read permission to.
+     * @throws DAOException
      */
-    public static void addReadGroup(Entry entry, Group group) throws ManagerException {
+    public void addReadGroup(Entry entry, Group group) throws DAOException {
         Set<Group> groups = getReadGroup(entry);
         boolean alreadyAdded = false;
         for (Group existingGroup : groups) {
@@ -413,14 +268,13 @@ public class PermissionDAO extends HibernateRepository {
 
     /**
      * Retrieve {@link Group}s with read permissions set for the specified {@link Entry}.
-     * 
-     * @param entry
-     *            Entry to query on.
+     *
+     * @param entry Entry to query on.
      * @return Set of Groups.
-     * @throws ManagerException
+     * @throws DAOException
      */
-    public static Set<Group> getReadGroup(Entry entry) throws ManagerException {
-        Session session = DAO.newSession();
+    public Set<Group> getReadGroup(Entry entry) throws DAOException {
+        Session session = newSession();
         try {
             String queryString = "select readGroup.group from ReadGroup readGroup where readGroup.entry = :entry";
 
@@ -435,7 +289,7 @@ public class PermissionDAO extends HibernateRepository {
             e.printStackTrace();
             String msg = "Could not get Read Group of " + entry.getRecordId();
             Logger.error(msg, e);
-            throw new ManagerException(msg, e);
+            throw new DAOException(msg, e);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -445,19 +299,18 @@ public class PermissionDAO extends HibernateRepository {
 
     /**
      * Set write permissions for specified user {@link Account}s to the given {@link Entry}.
-     * <p>
-     * This method creates new {@link WriteUser} objects using the given {@link Account}s.
-     * 
-     * @param entry
-     *            Entry to give permission to.
-     * @param accounts
-     *            Accounts to give write permission to.
-     * @throws ManagerException
+     * <p/>
+     * This method creates new {@link org.jbei.ice.lib.permissions.model.WriteUser} objects using the given {@link
+     * Account}s.
+     *
+     * @param entry    Entry to give permission to.
+     * @param accounts Accounts to give write permission to.
+     * @throws DAOException
      */
-    public static void setWriteUser(Entry entry, Set<Account> accounts) throws ManagerException {
+    public void setWriteUser(Entry entry, Set<Account> accounts) throws DAOException {
         String queryString = "delete  WriteUser writeUser where writeUser.entry = :entry";
 
-        Session session = DAO.newSession();
+        Session session = newSession();
         try {
             Query query = session.createQuery(queryString);
             query.setEntity("entry", entry);
@@ -466,14 +319,12 @@ public class PermissionDAO extends HibernateRepository {
             session.getTransaction().commit();
             for (Account account : accounts) {
                 WriteUser writeUser = new WriteUser(entry, account);
-                DAO.save(writeUser);
+                super.saveOrUpdate(writeUser);
             }
         } catch (HibernateException e) {
             session.getTransaction().rollback();
             String msg = "Could not set Write User of " + entry.getRecordId();
-            throw new ManagerException(msg, e);
-        } catch (DAOException e) {
-            throw new ManagerException(e);
+            throw new DAOException(msg, e);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -483,16 +334,14 @@ public class PermissionDAO extends HibernateRepository {
 
     /**
      * Add write permission for the specified {@link Account} to the specified {@link Entry}.
-     * <p>
+     * <p/>
      * This method adds a new {@link WriteUser} object to the database..
-     * 
-     * @param entry
-     *            Entry to give write permission to.
-     * @param account
-     *            Account to give write permission to.
-     * @throws ManagerException
+     *
+     * @param entry   Entry to give write permission to.
+     * @param account Account to give write permission to.
+     * @throws DAOException
      */
-    public static void addWriteUser(Entry entry, Account account) throws ManagerException {
+    public void addWriteUser(Entry entry, Account account) throws DAOException {
         Set<Account> accounts = getWriteUser(entry);
         boolean alreadyAdded = false;
         for (Account existingAccount : accounts) {
@@ -509,14 +358,13 @@ public class PermissionDAO extends HibernateRepository {
 
     /**
      * Retrieve {@link Account}s with write permissions set for the specified {@link Entry}.
-     * 
-     * @param entry
-     *            entry to query on.
+     *
+     * @param entry entry to query on.
      * @return Set of Accounts.
-     * @throws ManagerException
+     * @throws DAOException
      */
-    public static Set<Account> getWriteUser(Entry entry) throws ManagerException {
-        Session session = DAO.newSession();
+    public Set<Account> getWriteUser(Entry entry) throws DAOException {
+        Session session = newSession();
         try {
             String queryString = "select writeUser.account from WriteUser writeUser where writeUser.entry = :entry";
             Query query = session.createQuery(queryString);
@@ -527,10 +375,9 @@ public class PermissionDAO extends HibernateRepository {
             return result;
 
         } catch (Exception e) {
-            e.printStackTrace();
             String msg = "Could not get Write User of " + entry.getRecordId();
             Logger.error(msg, e);
-            throw new ManagerException(msg, e);
+            throw new DAOException(msg, e);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -541,18 +388,17 @@ public class PermissionDAO extends HibernateRepository {
 
     /**
      * Set write permissions for specified user {@link Group}s to the given {@link Entry}.
-     * <p>
-     * This method creates new {@link WriteGroup} objects using the given {@link Group}s.
-     * 
-     * @param entry
-     *            Entry to give permission to.
-     * @param groups
-     *            Groups to give write permission to.
-     * @throws ManagerException
+     * <p/>
+     * This method creates new {@link org.jbei.ice.lib.permissions.model.WriteGroup} objects using the given {@link
+     * Group}s.
+     *
+     * @param entry  Entry to give permission to.
+     * @param groups Groups to give write permission to.
+     * @throws DAOException
      */
-    public static void setWriteGroup(Entry entry, Set<Group> groups) throws ManagerException {
+    public void setWriteGroup(Entry entry, Set<Group> groups) throws DAOException {
         String queryString = "delete  WriteGroup writeGroup where writeGroup.entry = :entry";
-        Session session = DAO.newSession();
+        Session session = newSession();
 
         try {
             session.getTransaction().begin();
@@ -563,27 +409,28 @@ public class PermissionDAO extends HibernateRepository {
 
             for (Group group : groups) {
                 WriteGroup writeGroup = new WriteGroup(entry, group);
-                DAO.save(writeGroup);
+                super.saveOrUpdate(writeGroup);
             }
         } catch (Exception e) {
             session.getTransaction().rollback();
             String msg = "Could not set WriteGroup of " + entry.getRecordId();
-            throw new ManagerException(msg, e);
+            throw new DAOException(msg, e);
+        } finally {
+            if (session != null)
+                session.close();
         }
     }
 
     /**
      * Add write permission for the specified {@link Group} to the specified {@link Entry}.
-     * <p>
+     * <p/>
      * This method adds a new {@link WriteGroup} object to the database..
-     * 
-     * @param entry
-     *            Entry to give write permission to.
-     * @param group
-     *            Group to give write permission to.
-     * @throws ManagerException
+     *
+     * @param entry Entry to give write permission to.
+     * @param group Group to give write permission to.
+     * @throws DAOException
      */
-    public static void addWriteGroup(Entry entry, Group group) throws ManagerException {
+    public void addWriteGroup(Entry entry, Group group) throws DAOException {
         Set<Group> groups = getWriteGroup(entry);
         boolean alreadyAdded = false;
         for (Group existingGroup : groups) {
@@ -600,14 +447,13 @@ public class PermissionDAO extends HibernateRepository {
 
     /**
      * Retrieve {@link Group}s with write permissions set for the specified {@link Entry}.
-     * 
-     * @param entry
-     *            Entry to query on.
+     *
+     * @param entry Entry to query on.
      * @return Set of Groups.
-     * @throws ManagerException
+     * @throws DAOException
      */
-    public static Set<Group> getWriteGroup(Entry entry) throws ManagerException {
-        Session session = DAO.newSession();
+    public Set<Group> getWriteGroup(Entry entry) throws DAOException {
+        Session session = newSession();
         try {
             String queryString = "select writeGroup.group from WriteGroup writeGroup where writeGroup.entry = :entry";
 
@@ -620,7 +466,7 @@ public class PermissionDAO extends HibernateRepository {
 
         } catch (Exception e) {
             String msg = "Could not get Write Group of " + entry.getRecordId();
-            throw new ManagerException(msg, e);
+            throw new DAOException(msg, e);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -630,54 +476,82 @@ public class PermissionDAO extends HibernateRepository {
 
     /**
      * Check if the given {@link Account} has read permission to the given {@link Entry}.
-     * 
-     * @param entry
-     *            Entry to query on.
-     * @param account
-     *            Account to query on.
+     *
+     * @param entry Entry to query on.
      * @return True if given Account has read permission to the given Entry.
      */
-    @SuppressWarnings("unchecked")
-    protected static boolean userHasReadPermission(Entry entry, Account account) {
-        boolean result = false;
+    public List<Long> getEntryReadAccounts(Entry entry) throws DAOException {
         String queryString = "select readUser.account.id from ReadUser as readUser where readUser.entry = :entry";
-        Session session = DAO.newSession();
+        Session session = newSession();
         Query query = session.createQuery(queryString);
         query.setEntity("entry", entry);
         List<Long> accounts = null;
         try {
-            accounts = query.list();
+            accounts = new ArrayList<Long>(query.list());
         } catch (HibernateException e) {
-            throw e;
+            throw new DAOException(e);
         } finally {
             if (session.isOpen()) {
                 session.close();
             }
         }
-        if (account.getEmail().equals(entry.getOwnerEmail())) {
-            result = true;
-        } else if (accounts.contains(account.getId())) {
-            result = true;
+
+        return accounts;
+    }
+
+    public List<Long> getEntryWriteAccounts(Entry entry) throws DAOException {
+        String queryString = "select writeUser.account.id from WriteUser as writeUser where writeUser.entry = :entry";
+        Session session = newSession();
+        Query query = session.createQuery(queryString);
+        query.setEntity("entry", entry);
+        List<Long> accounts = null;
+        try {
+            accounts = new ArrayList<Long>(query.list());
+        } catch (HibernateException e) {
+            throw new DAOException(e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
         }
-        return result;
+
+        return accounts;
+    }
+
+    public List<Long> getEntryReadGroupIds(Entry entry) throws DAOException {
+        String queryString = "select readGroup.group.id from " + ReadGroup.class.getName() + " as readGroup where " +
+                "readGroup.entry = :entry";
+        Session session = newSession();
+        Query query = session.createQuery(queryString);
+        query.setEntity("entry", entry);
+        List<Long> groupIds = null;
+        try {
+            groupIds = new ArrayList<Long>(query.list());
+        } catch (HibernateException e) {
+            throw new DAOException(e);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+
+        return groupIds;
     }
 
     /**
      * Check if the given {@link Account} has read permission to the specified {@link Entry}.
-     * 
-     * @param entryId
-     *            id of Entry to query on.
-     * @param account
-     *            Account to query on.
+     *
+     * @param entryId id of Entry to query on.
+     * @param account Account to query on.
      * @return True if given Account has read permission to the specified Entry.
      */
     @SuppressWarnings("unchecked")
-    protected static boolean userHasReadPermission(long entryId, Account account) {
+    protected boolean userHasReadPermission(long entryId, Account account) throws DAOException {
         boolean result = false;
 
         String queryString1 = "select count(id) from Entry as entry where entry.ownerEmail = '"
                 + account.getEmail() + "' AND " + " entry.id = " + entryId;
-        Session session = DAO.newSession();
+        Session session = newSession();
         Long numberOfEntries = null;
         try {
             Query query1 = session.createQuery(queryString1);
@@ -697,7 +571,7 @@ public class PermissionDAO extends HibernateRepository {
         if (!result) {
             String queryString2 = "select readUser.account.id from ReadUser as readUser where readUser.entry.id = "
                     + entryId;
-            session = DAO.newSession();
+            session = newSession();
             Query query2 = session.createQuery(queryString2);
             List<Long> accounts = null;
             try {
@@ -721,20 +595,18 @@ public class PermissionDAO extends HibernateRepository {
 
     /**
      * Check if the given {@link Account} has read permission to the specified {@link Entry}.
-     * 
-     * @param recordId
-     *            id of Entry to query on.
-     * @param account
-     *            Account to query on.
+     *
+     * @param recordId id of Entry to query on.
+     * @param account  Account to query on.
      * @return True if given Account has read permission to the specified Entry.
      */
     @SuppressWarnings("unchecked")
-    protected static boolean userHasReadPermission(String recordId, Account account) {
+    protected boolean userHasReadPermission(String recordId, Account account) throws DAOException {
         boolean result = false;
 
         String queryString1 = "select count(id) from Entry as entry where entry.ownerEmail = '"
                 + account.getEmail() + "' AND " + " entry.recordId = '" + recordId + "'";
-        Session session = DAO.newSession();
+        Session session = newSession();
         Long numberOfEntries = null;
         try {
             Query query1 = session.createQuery(queryString1);
@@ -752,9 +624,10 @@ public class PermissionDAO extends HibernateRepository {
         }
 
         if (!result) {
-            String queryString2 = "select readUser.account.id from ReadUser as readUser where readUser.entry.recordId = '"
+            String queryString2 = "select readUser.account.id from ReadUser as readUser where readUser.entry.recordId" +
+                    " = '"
                     + recordId + "'";
-            session = DAO.newSession();
+            session = newSession();
             Query query2 = session.createQuery(queryString2);
             List<Long> accounts = null;
             try {
@@ -778,18 +651,16 @@ public class PermissionDAO extends HibernateRepository {
 
     /**
      * Check if the given {@link Account} has write permission to the given {@link Entry}.
-     * 
-     * @param entry
-     *            Entry to query on.
-     * @param account
-     *            Account to query on.
+     *
+     * @param entry   Entry to query on.
+     * @param account Account to query on.
      * @return True if given Account has write permission to the given Entry.
      */
-    protected static boolean userHasWritePermission(Entry entry, Account account) {
+    protected boolean userHasWritePermission(Entry entry, Account account) throws DAOException {
         boolean result = false;
         String queryString = "select writeUser.account.id from WriteUser as writeUser where writeUser.entry = :entry";
 
-        Session session = DAO.newSession();
+        Session session = newSession();
         try {
             Query query = session.createQuery(queryString);
 
@@ -817,18 +688,16 @@ public class PermissionDAO extends HibernateRepository {
     /**
      * Check if the given {@link Account} has read permission to the given {@link Entry} by
      * comparing the permissible {@link Group} hierarchy with groups the user belongs to.
-     * 
-     * @param entry
-     *            Entry to query on.
-     * @param account
-     *            Account to query on.
+     *
+     * @param entry   Entry to query on.
+     * @param account Account to query on.
      * @return True if the Account has read permission to the Entry.
      */
     @SuppressWarnings("unchecked")
-    protected static boolean groupHasReadPermission(Entry entry, Account account) {
+    public boolean groupHasReadPermission(Entry entry, Account account) throws DAOException {
         boolean result = false;
         String queryString = "select readGroup.group.id from ReadGroup as readGroup where readGroup.entry = :entry";
-        Session session = DAO.newSession();
+        Session session = newSession();
         List<Long> readGroups = null;
         try {
             Query query = session.createQuery(queryString);
@@ -854,20 +723,18 @@ public class PermissionDAO extends HibernateRepository {
     /**
      * Check if the given {@link Account} has read permission to the specified {@link Entry} by
      * comparing the permissible {@link Group} hierarchy with groups the user belongs to.
-     * 
-     * @param entryId
-     *            id of the Entry.
-     * @param account
-     *            Account to be queried.
+     *
+     * @param entryId id of the Entry.
+     * @param account Account to be queried.
      * @return True if the Account has read permission to the Entry.
      */
     @SuppressWarnings("unchecked")
-    protected static boolean groupHasReadPermission(long entryId, Account account) {
+    protected boolean groupHasReadPermission(long entryId, Account account) throws DAOException {
         boolean result = false;
 
         String queryString = "select readGroup.group.id from ReadGroup as readGroup where readGroup.entry.id = "
                 + entryId;
-        Session session = DAO.newSession();
+        Session session = newSession();
         List<Long> readGroups = null;
         try {
             Query query = session.createQuery(queryString);
@@ -892,20 +759,18 @@ public class PermissionDAO extends HibernateRepository {
     /**
      * Check if the given {@link Account} has read permission to the specified {@link Entry} by
      * comparing the permissible {@link Group} hierarchy with groups the user belongs to.
-     * 
-     * @param recordId
-     *            recordId of Entry.
-     * @param account
-     *            Account to query on.
+     *
+     * @param recordId recordId of Entry.
+     * @param account  Account to query on.
      * @return True if the Account has read permission to the Entry.
      */
     @SuppressWarnings("unchecked")
-    protected static boolean groupHasReadPermission(String recordId, Account account) {
+    protected boolean groupHasReadPermission(String recordId, Account account) throws DAOException {
         boolean result = false;
 
         String queryString = "select readGroup.group.id from ReadGroup as readGroup where readGroup.entry.recordId = '"
                 + recordId + "'";
-        Session session = DAO.newSession();
+        Session session = newSession();
         List<Long> readGroups = null;
         try {
             Query query = session.createQuery(queryString);
@@ -931,18 +796,16 @@ public class PermissionDAO extends HibernateRepository {
      * Check if the given {@link Account} has write permission to the specified {@link Entry} by
      * comparing the permissible {@link Group} hierarchy with groups the user belongs to.
      * *
-     * 
-     * @param entry
-     *            Entry to query on.
-     * @param account
-     *            Account to query on.
+     *
+     * @param entry   Entry to query on.
+     * @param account Account to query on.
      * @return True if the Account has write permission to the Entry.
      */
     @SuppressWarnings("unchecked")
-    protected static boolean groupHasWritePermission(Entry entry, Account account) {
+    protected boolean groupHasWritePermission(Entry entry, Account account) throws DAOException {
         boolean result = false;
         String queryString = "select writeGroup.group.id from WriteGroup as writeGroup where writeGroup.entry = :entry";
-        Session session = DAO.newSession();
+        Session session = newSession();
         Query query = session.createQuery(queryString);
         query.setEntity("entry", entry);
         List<Long> readGroups = null;
@@ -968,14 +831,12 @@ public class PermissionDAO extends HibernateRepository {
 
     /**
      * Retrieve all parent {@link Group}s of a given group.
-     * 
-     * @param group
-     *            Group to query on.
-     * @param groupIds
-     *            optional set of group ids. Can be empty.
+     *
+     * @param group    Group to query on.
+     * @param groupIds optional set of group ids. Can be empty.
      * @return Set of Parent group ids.
      */
-    protected static HashSet<Long> getParentGroups(Group group, HashSet<Long> groupIds) {
+    protected HashSet<Long> getParentGroups(Group group, HashSet<Long> groupIds) throws DAOException {
         if (groupIds.contains(group.getId())) {
             return groupIds;
         } else {
@@ -991,12 +852,11 @@ public class PermissionDAO extends HibernateRepository {
 
     /**
      * Retrieve all parent {@link Group}s of a given {@link Account}.
-     * 
-     * @param account
-     *            Account to query on.
+     *
+     * @param account Account to query on.
      * @return Set of Group ids.
      */
-    protected static Set<Long> getAllAccountGroups(Account account) {
+    protected Set<Long> getAllAccountGroups(Account account) throws DAOException {
         HashSet<Long> accountGroups = new HashSet<Long>();
 
         for (Group group : account.getGroups()) {
@@ -1013,5 +873,4 @@ public class PermissionDAO extends HibernateRepository {
         }
         return accountGroups;
     }
-
 }

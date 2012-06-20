@@ -1,12 +1,12 @@
 package org.jbei.ice.lib.models.interfaces;
 
+import org.jbei.ice.lib.entry.model.Link;
+import org.jbei.ice.lib.entry.model.Name;
+import org.jbei.ice.lib.entry.model.PartNumber;
+import org.jbei.ice.lib.models.SelectionMarker;
+
 import java.util.Date;
 import java.util.Set;
-
-import org.jbei.ice.lib.models.Link;
-import org.jbei.ice.lib.models.Name;
-import org.jbei.ice.lib.models.PartNumber;
-import org.jbei.ice.lib.models.SelectionMarker;
 
 public interface IEntryValueObject {
     long getId();

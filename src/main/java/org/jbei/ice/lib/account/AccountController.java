@@ -1,7 +1,8 @@
 package org.jbei.ice.lib.account;
 
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.account.preferences.AccountPreferencesManager;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.account.model.AccountPreferences;
 import org.jbei.ice.lib.authentication.AuthenticationBackendException;
 import org.jbei.ice.lib.authentication.AuthenticationBackendManager;
 import org.jbei.ice.lib.authentication.AuthenticationBackendManager.AuthenticationBackendManagerException;
@@ -10,8 +11,6 @@ import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.models.Account;
-import org.jbei.ice.lib.models.AccountPreferences;
 import org.jbei.ice.lib.models.Moderator;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.utils.Emailer;
@@ -36,9 +35,11 @@ public class AccountController {
 
     private static String SYSTEM_ACCOUNT_EMAIL = "system";
     private final AccountDAO dao; // TODO : setter injection
+    private final PreferencesDAO preferencesDAO;
 
     public AccountController() {
         dao = new AccountDAO();
+        preferencesDAO = new PreferencesDAO();
     }
 
     /**
@@ -306,13 +307,13 @@ public class AccountController {
      * @return accountPreference
      * @throws ControllerException
      */
-    public static AccountPreferences getAccountPreferences(Account account)
+    public AccountPreferences getAccountPreferences(Account account)
             throws ControllerException {
         AccountPreferences accountPreferences;
 
         try {
-            accountPreferences = AccountPreferencesManager.getAccountPreferences(account);
-        } catch (ManagerException e) {
+            accountPreferences = preferencesDAO.getAccountPreferences(account);
+        } catch (DAOException e) {
             throw new ControllerException(e);
         }
 
@@ -357,12 +358,10 @@ public class AccountController {
         }
 
         if (account != null) {
-            AccountPreferences accountPreferences = AccountController
-                    .getAccountPreferences(account);
+            AccountPreferences accountPreferences = getAccountPreferences(account);
 
             if (accountPreferences == null) {
                 accountPreferences = new AccountPreferences();
-
                 accountPreferences.setAccount(account);
                 saveAccountPreferences(accountPreferences);
             }
@@ -438,11 +437,7 @@ public class AccountController {
      */
     public static void deauthenticate(String sessionKey) throws ControllerException {
         if (isAuthenticated(sessionKey)) {
-            try {
-                PersistentSessionDataWrapper.getInstance().delete(sessionKey);
-            } catch (ManagerException e) {
-                throw new ControllerException(e);
-            }
+            PersistentSessionDataWrapper.getInstance().delete(sessionKey);
         }
     }
 
@@ -455,8 +450,8 @@ public class AccountController {
     public void saveAccountPreferences(AccountPreferences accountPreferences)
             throws ControllerException {
         try {
-            AccountPreferencesManager.save(accountPreferences);
-        } catch (ManagerException e) {
+            preferencesDAO.save(accountPreferences);
+        } catch (DAOException e) {
             throw new ControllerException(e);
         }
     }

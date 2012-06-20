@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.models;
 
+import org.jbei.ice.lib.dao.IModel;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,14 +10,11 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import org.jbei.ice.lib.dao.IModel;
-
 /**
- * Represent the relationship as to how an {@link Entry} relates to another. For example,
+ * Represent the relationship as to how an {@link org.jbei.ice.lib.entry.model.Entry} relates to another. For example,
  * "derived from" would be an AssemblyRelationship.
- * 
+ *
  * @author Timothy Ham, Zinovii Dmytriv
- * 
  */
 @Entity
 @Table(name = "assembly_relationship")

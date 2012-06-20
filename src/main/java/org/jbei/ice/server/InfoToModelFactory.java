@@ -1,48 +1,44 @@
 package org.jbei.ice.server;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.jbei.ice.lib.models.ArabidopsisSeed;
-import org.jbei.ice.lib.models.Entry;
-import org.jbei.ice.lib.models.EntryFundingSource;
+import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.EntryFundingSource;
+import org.jbei.ice.lib.entry.model.Link;
+import org.jbei.ice.lib.entry.model.Name;
+import org.jbei.ice.lib.entry.model.Parameter;
+import org.jbei.ice.lib.entry.model.Part;
+import org.jbei.ice.lib.entry.model.Part.AssemblyStandard;
+import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.models.FundingSource;
-import org.jbei.ice.lib.models.Link;
-import org.jbei.ice.lib.models.Name;
-import org.jbei.ice.lib.models.Parameter;
-import org.jbei.ice.lib.models.Part;
-import org.jbei.ice.lib.models.Part.AssemblyStandard;
-import org.jbei.ice.lib.models.Plasmid;
 import org.jbei.ice.lib.models.SelectionMarker;
-import org.jbei.ice.lib.models.Strain;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.ParameterInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
-import org.jbei.ice.web.common.CommaSeparatedField;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Factory object for converting data transfer objects to model
- * 
+ *
  * @author Hector Plahar
- * 
  */
 public class InfoToModelFactory {
 
     public static Entry infoToEntry(EntryInfo info) {
-        return infoToEntry(info, null) ;
+        return infoToEntry(info, null);
     }
 
     /**
-     * 
      * @param info
-     * @param entry
-     *            if null, a new entry is created otherwise entry is used
+     * @param entry if null, a new entry is created otherwise entry is used
      * @return
      */
     public static Entry infoToEntry(EntryInfo info, Entry entry) {
@@ -50,90 +46,92 @@ public class InfoToModelFactory {
         EntryType type = info.getType();
 
         switch (type) {
-        case PLASMID:
-            Plasmid plasmid;
-            if (entry == null) {
-                plasmid = new Plasmid();
-                entry = plasmid;
-            } else
-                plasmid = (Plasmid) entry;
+            case PLASMID:
+                Plasmid plasmid;
+                if (entry == null) {
+                    plasmid = new Plasmid();
+                    entry = plasmid;
+                } else
+                    plasmid = (Plasmid) entry;
 
-            plasmid.setRecordType(EntryType.PLASMID.getName());
-            PlasmidInfo plasmidInfo = (PlasmidInfo) info;
+                plasmid.setRecordType(EntryType.PLASMID.getName());
+                PlasmidInfo plasmidInfo = (PlasmidInfo) info;
 
-            plasmid.setBackbone(plasmidInfo.getBackbone());
-            plasmid.setOriginOfReplication(plasmidInfo.getOriginOfReplication());
-            plasmid.setPromoters(plasmidInfo.getPromoters());
-            plasmid.setCircular(plasmidInfo.getCircular());
+                plasmid.setBackbone(plasmidInfo.getBackbone());
+                plasmid.setOriginOfReplication(plasmidInfo.getOriginOfReplication());
+                plasmid.setPromoters(plasmidInfo.getPromoters());
+                plasmid.setCircular(plasmidInfo.getCircular());
 
-            break;
+                break;
 
-        case STRAIN:
-            Strain strain;
-            if (entry == null) {
-                strain = new Strain();
+            case STRAIN:
+                Strain strain;
+                if (entry == null) {
+                    strain = new Strain();
+                    entry = strain;
+                } else
+                    strain = (Strain) entry;
+
+                strain.setRecordType(EntryType.STRAIN.getName());
+                StrainInfo strainInfo = (StrainInfo) info;
+
+                strain.setHost(strainInfo.getHost());
+                strain.setGenotypePhenotype(strain.getGenotypePhenotype());
+                strain.setPlasmids(strainInfo.getPlasmids());
+
                 entry = strain;
-            } else
-                strain = (Strain) entry;
+                break;
 
-            strain.setRecordType(EntryType.STRAIN.getName());
-            StrainInfo strainInfo = (StrainInfo) info;
+            case PART:
+                Part part;
+                if (entry == null) {
+                    part = new Part();
+                    entry = part;
+                } else
+                    part = (Part) entry;
+                part.setRecordType(EntryType.PART.getName());
 
-            strain.setHost(strainInfo.getHost());
-            strain.setGenotypePhenotype(strainInfo.getGenotypePhenotype());
-            strain.setPlasmids(strainInfo.getPlasmids());
+                // default is RAW until sequence is supplied.
+                part.setPackageFormat(AssemblyStandard.RAW);
 
-            entry = strain;
-            break;
-
-        case PART:
-            Part part;
-            if (entry == null) {
-                part = new Part();
                 entry = part;
-            } else
-                part = (Part) entry;
-            part.setRecordType(EntryType.PART.getName());
+                break;
 
-            // default is RAW until sequence is supplied.
-            part.setPackageFormat(AssemblyStandard.RAW);
+            case ARABIDOPSIS:
+                ArabidopsisSeed seed;
+                if (entry == null) {
+                    seed = new ArabidopsisSeed();
+                    entry = seed;
+                } else
+                    seed = (ArabidopsisSeed) entry;
 
-            entry = part;
-            break;
+                seed.setRecordType(EntryType.ARABIDOPSIS.getName());
+                ArabidopsisSeedInfo seedInfo = (ArabidopsisSeedInfo) info;
 
-        case ARABIDOPSIS:
-            ArabidopsisSeed seed;
-            if (entry == null) {
-                seed = new ArabidopsisSeed();
+                seed.setHomozygosity(seedInfo.getHomozygosity());
+                seed.setHarvestDate(seedInfo.getHarvestDate());
+                seed.setEcotype(seedInfo.getEcotype());
+                seed.setParents(seedInfo.getParents());
+
+                if (seedInfo.getGeneration() != null) {
+                    ArabidopsisSeed.Generation generation = ArabidopsisSeed.Generation.valueOf(seedInfo
+                                                                                                       .getGeneration()
+                                                                                                       .name());
+                    seed.setGeneration(generation);
+                }
+
+                if (seedInfo.getPlantType() != null) {
+                    ArabidopsisSeed.PlantType plantType = ArabidopsisSeed.PlantType.valueOf(seedInfo
+                                                                                                    .getPlantType()
+                                                                                                    .name());
+                    seed.setPlantType(plantType);
+                }
+
                 entry = seed;
-            } else
-                seed = (ArabidopsisSeed) entry;
+                break;
 
-            seed.setRecordType(EntryType.ARABIDOPSIS.getName());
-            ArabidopsisSeedInfo seedInfo = (ArabidopsisSeedInfo) info;
-
-            seed.setHomozygosity(seedInfo.getHomozygosity());
-            seed.setHarvestDate(seedInfo.getHarvestDate());
-            seed.setEcotype(seedInfo.getEcotype());
-            seed.setParents(seedInfo.getParents());
-
-            if (seedInfo.getGeneration() != null) {
-                ArabidopsisSeed.Generation generation = ArabidopsisSeed.Generation.valueOf(seedInfo
-                        .getGeneration().name());
-                seed.setGeneration(generation);
-            }
-
-            if (seedInfo.getPlantType() != null) {
-                ArabidopsisSeed.PlantType plantType = ArabidopsisSeed.PlantType.valueOf(seedInfo
-                        .getPlantType().name());
-                seed.setPlantType(plantType);
-            }
-
-            entry = seed;
-            break;
-
-        default:
-            return null;
+            default:
+                return null;
         }
 
         entry = setCommon(entry, info);
@@ -162,14 +160,12 @@ public class InfoToModelFactory {
         entry.setLongDescriptionType(info.getLongDescriptionType());
         entry.setIntellectualProperty(info.getIntellectualProperty());
         entry.setVersionId(info.getVersionId());
-        CommaSeparatedField<Link> linksField = new CommaSeparatedField<Link>(Link.class, "getLink",
-                "setLink");
-        linksField.setString(info.getLinks());
-        entry.setLinks(linksField.getItemsAsSet());
+        HashSet<Link> links = getLinks(info.getLinks(), entry);
+        entry.setLinks(links);
 
         FundingSource fundingSource = new FundingSource();
         fundingSource.setFundingSource((info.getFundingSource() != null) ? info.getFundingSource()
-                : "");
+                                               : "");
         fundingSource.setPrincipalInvestigator(info.getPrincipalInvestigator());
         EntryFundingSource newEntryFundingSource = new EntryFundingSource();
         newEntryFundingSource.setEntry(entry);
@@ -222,6 +218,26 @@ public class InfoToModelFactory {
         }
 
         return markers;
+    }
+
+    private static HashSet<Link> getLinks(String linkString, Entry entry) {
+        HashSet<Link> links = new HashSet<Link>();
+
+        if (linkString != null && !linkString.isEmpty()) {
+            String[] itemsAsString = linkString.split("\\s*,+\\s*");
+
+            for (int i = 0; i < itemsAsString.length; i++) {
+                String currentItem = itemsAsString[i];
+                if (!currentItem.trim().isEmpty()) {
+                    Link link = new Link();
+                    link.setLink(currentItem);
+                    link.setEntry(entry);
+                    links.add(link);
+                }
+            }
+        }
+
+        return links;
     }
 
     private static HashSet<Name> getNames(String nameStr, Entry entry) {

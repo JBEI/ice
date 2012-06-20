@@ -1,26 +1,27 @@
 package org.jbei.ice.web;
 
-import java.util.Calendar;
-import java.util.HashMap;
-
+import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.managers.SessionManager;
-import org.jbei.ice.lib.models.Account;
 import org.jbei.ice.lib.models.SessionData;
+import org.jbei.ice.lib.session.SessionDAO;
 import org.jbei.ice.lib.utils.JbeirSettings;
+
+import java.util.Calendar;
+import java.util.HashMap;
 
 /**
  * Cache {@link SessionData} information in a memory cache, as well as in the database. Hide this
  * fact from the outside.
- * <p>
+ * <p/>
  * SessionData is kept in a cache in memory to prevent getting of multiple instances from hibernate,
  * creating a race condition. Instead of keeping a dynamically sized cache, consider using a fix
  * sized cache for performance, at the risk of using a too small of a cache which will result in
  * strange session data errors.
- * 
+ *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
- * 
  */
 public class PersistentSessionDataWrapper {
 
@@ -28,13 +29,19 @@ public class PersistentSessionDataWrapper {
     private static HashMap<String, Long> timeStampCache = new HashMap<String, Long>();
     private static Long CACHE_TIMEOUT = 60000L; // 1 minute = 60000 ms
 
+    private final SessionDAO dao;
+
+    private PersistentSessionDataWrapper() {
+        dao = new SessionDAO();
+    }
+
     private static class SingletonHolder {
         private static final PersistentSessionDataWrapper INSTANCE = new PersistentSessionDataWrapper();
     }
 
     /**
      * Retrieve singleton instance.
-     * 
+     *
      * @return Singleton instance.
      */
     public static PersistentSessionDataWrapper getInstance() {
@@ -43,9 +50,9 @@ public class PersistentSessionDataWrapper {
 
     /**
      * Get {@link SessionData}, either in memory or from the disk.
-     * <p>
+     * <p/>
      * Synchronized.
-     * 
+     *
      * @param sessionKey
      * @return SessionData object.
      * @throws ManagerException
@@ -58,9 +65,9 @@ public class PersistentSessionDataWrapper {
 
     /**
      * Create a new {@link SessionData}.
-     * <p>
+     * <p/>
      * Save into the database and put into the cache.
-     * 
+     *
      * @return Saved SessionData object.
      * @throws ManagerException
      */
@@ -77,9 +84,8 @@ public class PersistentSessionDataWrapper {
 
     /**
      * Create a new {@link SessionData} with the given {@link Account}.
-     * 
-     * @param account
-     *            Account to associate with the new SessionData.
+     *
+     * @param account Account to associate with the new SessionData.
      * @return SessionData.
      * @throws ManagerException
      */
@@ -93,41 +99,44 @@ public class PersistentSessionDataWrapper {
 
     /**
      * Save the given {@link SessionData} into the database.
-     * <p>
+     * <p/>
      * This method is synchronized. Also performs cache cleaning.
-     * 
+     *
      * @param sessionData
      * @throws ManagerException
      */
     public synchronized void persist(SessionData sessionData) throws ManagerException {
         pruneCache();
 
-        SessionManager.save(sessionData);
+        dao.save(sessionData);
     }
 
     /**
      * Delete the given session key from the cache and database.
-     * <p>
+     * <p/>
      * Synchronized.
-     * 
-     * @param sessionKey
-     *            Session key to delete.
+     *
+     * @param sessionKey Session key to delete.
      * @throws ManagerException
      */
-    public synchronized void delete(String sessionKey) throws ManagerException {
+    public synchronized void delete(String sessionKey) throws ControllerException {
         SessionData sessionData = getSessionDataCache().get(sessionKey);
         if (sessionData != null) {
             getSessionDataCache().remove(sessionKey);
             getTimeStampCache().remove(sessionKey);
         } else {
             try {
-                sessionData = SessionManager.get(sessionKey);
-            } catch (ManagerException e) {
+                sessionData = dao.get(sessionKey);
+            } catch (DAOException e) {
                 // safe to pass
             }
         }
         if (sessionData != null) {
-            SessionManager.delete(sessionData);
+            try {
+                dao.delete(sessionData);
+            } catch (DAOException e) {
+                throw new ControllerException(e);
+            }
         }
     }
 
@@ -143,12 +152,12 @@ public class PersistentSessionDataWrapper {
             }
         }
         Logger.debug("SessionData cache went from " + before + " to "
-                + getSessionDataCache().size() + " elements");
+                             + getSessionDataCache().size() + " elements");
     }
 
     /**
      * Get the data cache.
-     * 
+     *
      * @return data cache.
      */
     private HashMap<String, SessionData> getSessionDataCache() {
@@ -157,10 +166,10 @@ public class PersistentSessionDataWrapper {
 
     /**
      * Retrieve {@link SessionData}. Blocking.
-     * <p>
+     * <p/>
      * If the SessionData was in the cache, retrieve and increase the expiration time. If not in the
      * cache, retrieve from the database, and put into the cache.
-     * 
+     *
      * @param sessionKey
      * @return SessionData object.
      */
@@ -173,8 +182,8 @@ public class PersistentSessionDataWrapper {
         } else {
             // Not in cache, get from database, then put into cache
             try {
-                sessionData = SessionManager.get(sessionKey);
-            } catch (ManagerException e) {
+                sessionData = dao.get(sessionKey);
+            } catch (DAOException e) {
                 sessionData = null;
             }
             if (sessionData != null) {
@@ -187,7 +196,7 @@ public class PersistentSessionDataWrapper {
 
     /**
      * Calculate the expiration time. Current time + timeout.
-     * 
+     *
      * @return Expiration time.
      */
     private long getCacheExpirationTime() {
@@ -196,7 +205,7 @@ public class PersistentSessionDataWrapper {
 
     /**
      * Set the time stamp cache.
-     * 
+     *
      * @param timeStamp
      */
     public void setTimeStampCache(HashMap<String, Long> timeStamp) {
@@ -205,7 +214,7 @@ public class PersistentSessionDataWrapper {
 
     /**
      * Get the time stamp cache.
-     * 
+     *
      * @return time stamp cache.
      */
     public HashMap<String, Long> getTimeStampCache() {
