@@ -8,15 +8,10 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
-import gwtupload.client.IFileInput.FileInputType;
 import gwtupload.client.IUploadStatus.Status;
 import gwtupload.client.IUploader;
-import gwtupload.client.IUploader.OnCancelUploaderHandler;
 import gwtupload.client.IUploader.OnFinishUploaderHandler;
-import gwtupload.client.IUploader.OnStartUploaderHandler;
 import gwtupload.client.IUploader.UploadedInfo;
-import gwtupload.client.SingleUploader;
-import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.bulkimport.SheetPresenter;
 import org.jbei.ice.client.bulkimport.model.SheetFieldData;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
@@ -157,7 +152,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
                     delta *= -1;
                     wrapper.setWidth((wrapper.getOffsetWidth() - delta) + "px");
                     headerWrapper.setWidth((headerWrapper.getOffsetWidth() - delta) + "px");
-                } else   {
+                } else {
                     wrapper.setWidth((wrapper.getOffsetWidth() + delta) + "px");
                     headerWrapper.setWidth((headerWrapper.getOffsetWidth() + delta) + "px");
                 }
@@ -486,33 +481,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
             case ATT_FILENAME:
             case SEQ_FILENAME:
-                Label label = new Label("Upload file"); // TODO : style
-
-                final FileUploadStatus uploaderStatus = new FileUploadStatus();
-                SingleUploader uploader = new SingleUploader(FileInputType.CUSTOM.with(label), uploaderStatus);
-                uploader.setAutoSubmit(true);
-                uploader.getWidget().setStyleName("uploader_cell");
-
-                uploader.addOnStartUploadHandler(new OnStartUploaderHandler() {
-
-                    @Override
-                    public void onStart(IUploader uploader) {
-                        uploader.setServletPath(uploader.getServletPath()
-                                                        + "?type=bulk_attachment&sid=" + AppController.sessionId);
-                        //                    sheetTable.setWidget(currentRow, currentIndex,
-                        //                        uploaderStatus.getProgressWidget());
-                    }
-                });
-
-                uploader.addOnCancelUploadHandler(new OnCancelUploaderHandler() {
-
-                    @Override
-                    public void onCancel(IUploader uploader) {
-                        uploader.cancel();
-                        uploader.reset();
-                    }
-                });
-
+                CellUploader uploader = new CellUploader();
                 uploader.addOnFinishUploadHandler(new OnFinishUploaderHandler() {
                     @Override
                     public void onFinish(IUploader uploader) {
@@ -529,13 +498,14 @@ public class Sheet extends Composite implements SheetPresenter.View {
                             }
 
                             filename = info.name;
-                            selectCell(currentRow, currentIndex, currentRow, currentIndex);
+                            selectCell(currentRow, currentIndex);
                         } else {
                             // TODO : notify user of error
                         }
                     }
                 });
-                sheetTable.setWidget(currentRow, currentIndex, uploader.getWidget());
+
+                sheetTable.setWidget(currentRow, currentIndex, uploader.asWidget());
                 break;
 
             default:
@@ -561,7 +531,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         if (currentHeader.hasAutoComplete())
             return;
 
-        selectCell(currentRow, currentIndex, currentRow - 1, currentIndex);
+        selectCell(currentRow - 1, currentIndex);
     }
 
     private void dealWithDownArrowPress() {
@@ -576,7 +546,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         if (currentHeader.hasAutoComplete())
             return;
 
-        selectCell(currentRow, currentIndex, currentRow + 1, currentIndex);
+        selectCell(currentRow + 1, currentIndex);
     }
 
     private void dealWithRightArrowPress() {
@@ -600,7 +570,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
             wrapper.setHorizontalScrollPosition(nextScrollPosition);
         }
 
-        selectCell(currentRow, currentIndex, currentRow, currentIndex + 1);
+        selectCell(currentRow, currentIndex + 1);
     }
 
     private void dealWithLeftArrowPress() {
@@ -621,29 +591,41 @@ public class Sheet extends Composite implements SheetPresenter.View {
                 nextScrollPosition = min;
             wrapper.setHorizontalScrollPosition(nextScrollPosition);
         }
-        selectCell(currentRow, currentIndex, currentRow, nextIndex);
+        selectCell(currentRow, nextIndex);
     }
 
-    private void selectCell(int row, int col, int newRow, int newCol) { // TODO : similar in functionality to cell click
+    /**
+     * cell selection via click or arrow press
+     *
+     * @param newRow user selected row
+     * @param newCol user selected column
+     */
+    private void selectCell(int newRow, int newCol) {
         //        HTML corner = new HTML(
         //                "<div style=\"position: relative; width: 5px; height: 5px; background-color: blue; top:
         // 12px; right: -122px; border: 3px solid white\"></div>");
+
+        if (currentRow == newRow && currentIndex == newCol)
+            return;
+
+        if (currentRow >= 0 && currentIndex >= 0) {
+            Widget widget = sheetTable.getWidget(currentRow, currentIndex);
+            if (widget != null)
+                widget.removeStyleName("cell_selected");
+        }
 
         if (lastReplaced != null) {
 
             String inputText = getLastWidgetText();
             lastReplaced.setTitle(inputText);
-            if (inputText.length() > 15)
+            if (inputText != null && inputText.length() > 15)
                 inputText = (inputText.substring(0, 13) + "...");
             lastReplaced.setText(inputText);
 
             sheetTable.setWidget(inputRow, inputIndex, lastReplaced);
             inputRow = inputIndex = -1; // lastReplaced not visible
             lastReplaced = null;
-            panel.setFocus(true);
-        } else {
-            Widget widget = sheetTable.getWidget(row, col);
-            widget.removeStyleName("cell_selected");
+            panel.setFocus(true);          // not in click
         }
 
         sheetTable.getWidget(newRow, newCol).addStyleName("cell_selected");
@@ -733,33 +715,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
             if (cell == null)
                 return;
 
-            // if we are clicking on the same cell, do nothing
-            if (cell.getRowIndex() == currentRow && cell.getCellIndex() == currentIndex) {
-                return;
-            }
-
-            // clear previously selected cell, if any
-            if (currentRow >= 0 && currentIndex >= 0) {
-                sheetTable.getWidget(currentRow, currentIndex).removeStyleName("cell_selected");
-            }
-
-            // reset and remove input
-            if (lastReplaced != null) {
-                String inputText = getLastWidgetText();
-                lastReplaced.setTitle(inputText);
-                if (inputText != null && inputText.length() > 15)
-                    inputText = (inputText.substring(0, 13) + "...");
-                lastReplaced.setText(inputText);
-
-                sheetTable.setWidget(inputRow, inputIndex, lastReplaced);
-                inputRow = inputIndex = -1; // lastReplaced not visible
-                lastReplaced = null;
-            }
-
-            // highlight currently clicked cell
-            currentRow = cell.getRowIndex();
-            currentIndex = cell.getCellIndex();
-            sheetTable.getWidget(currentRow, currentIndex).addStyleName("cell_selected");
+            selectCell(cell.getRowIndex(), cell.getCellIndex());
         }
     }
 
