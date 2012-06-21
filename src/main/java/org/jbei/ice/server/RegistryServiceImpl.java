@@ -1202,7 +1202,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 details.setContents(contents);
                 BigInteger size = BigInteger.valueOf(contents.size());
                 details.setCount(size);
-            }
+            } else {
+              details.setCount(BigInteger.valueOf(0));
+              }
 
             return details;
         } catch (ControllerException e) {
