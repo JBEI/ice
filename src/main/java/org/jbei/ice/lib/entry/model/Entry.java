@@ -28,7 +28,7 @@ import java.util.Set;
  * Many of the fields accept mediawiki style linking tags. For example,
  * "[[jbei:JBx_000001|Descriptive Name]]" will automatically generate a clickable link to the part
  * JBx_000001 with text "Descriptive Name". The wiki link prefix (jbei:) in this case can be
- * confgured in the configuration file. In the future, links to other registries can be specified
+ * configured in the configuration file. In the future, links to other registries can be specified
  * via the configuration, similar to other mediawiki links.
  * <p/>
  * Description of Entry fields:
@@ -78,7 +78,7 @@ import java.util.Set;
  * etc) for this entry.</li>
  * <li><b>selectionMarkers:</b> {@link org.jbei.ice.lib.models.SelectionMarker}s for this entry. In the future,
  * this field
- * will propagate to other entries based on inheritence.</li>
+ * will propagate to other entries based on inheritance.</li>
  * <li><b>links:</b> URL or other links that point outside of this instance of gd-ice.</li>
  * <lli><b>names: </b> {@link Name}s for this entry.</li>
  * <li><b>partNumbers: </b> {@link PartNumber}s for this entry.</li>
@@ -86,7 +86,7 @@ import java.util.Set;
  * <li><b>parameters: {@link Parameter}s for this entry.</b></li>
  * </ul>
  *
- * @author Timothy Ham, Zinovii Dmytriv
+ * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 @Entity
 @Table(name = "entries")
@@ -105,17 +105,6 @@ public class Entry implements IEntryValueObject, IModel {
      */
     public enum MarkupType {
         text, wiki, confluence
-    }
-
-    // TODO use these enums. Currently "in progress" with a space is used. 
-
-    /**
-     * Available status options.
-     *
-     * @author Timothy Ham
-     */
-    public enum StatusOptions {
-        complete, in_progress, planned
     }
 
     @Id

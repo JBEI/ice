@@ -6,6 +6,7 @@ import org.hibernate.Session;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
 import java.util.HashSet;
@@ -13,14 +14,14 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * Manager to manipulate {@link Group} objects.
+ * Manager to manipulate {@link org.jbei.ice.lib.models.Group} objects.
  *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 class GroupDAO extends HibernateRepository {
 
     /**
-     * Retrieve {@link Group} object from the database by its uuid.
+     * Retrieve {@link org.jbei.ice.lib.models.Group} object from the database by its uuid.
      *
      * @param uuid
      * @return Group object.
@@ -83,7 +84,7 @@ class GroupDAO extends HibernateRepository {
             session.getTransaction().commit();
             return result;
 
-        } catch (Exception e) {
+        } catch (HibernateException e) {
             Logger.error(e);
             session.getTransaction().rollback();
             throw new DAOException("Error retrieving matching groups", e);

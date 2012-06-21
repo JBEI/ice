@@ -8,14 +8,14 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.StorageController;
-import org.jbei.ice.lib.entry.sample.model.Storage;
-import org.jbei.ice.lib.entry.sample.model.Storage.StorageType;
-import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Configuration;
 import org.jbei.ice.lib.models.Configuration.ConfigurationKey;
+import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.models.SequenceFeatureAttribute;
+import org.jbei.ice.lib.models.Storage;
+import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 

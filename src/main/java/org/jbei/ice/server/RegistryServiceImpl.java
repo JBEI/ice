@@ -23,18 +23,18 @@ import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sample.StorageController;
 import org.jbei.ice.lib.entry.sample.StorageDAO;
 import org.jbei.ice.lib.entry.sample.model.Sample;
-import org.jbei.ice.lib.entry.sample.model.Storage;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.TraceSequenceDAO;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.folder.FolderController;
-import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.models.News;
 import org.jbei.ice.lib.models.Sequence;
+import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.news.NewsController;
 import org.jbei.ice.lib.parsers.GeneralParser;
@@ -310,7 +310,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (AccountController.isAuthenticated(sid)) {
                 Account account = controller.getAccountBySessionKey(sid);
                 AccountInfo info = this.accountToInfo(account);
-                int entryCount = entryController.getOwnerEntryCountBy(info.getEmail());
+                long entryCount = entryController.getOwnerEntryCount(account);
                 info.setUserEntryCount(entryCount);
 
                 boolean isModerator = controller.isModerator(account);
@@ -542,7 +542,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public FolderDetails retrieveAllVisibleEntryIDs(String sid) throws AuthenticationException {
         Account account;
         AccountController controller = new AccountController();
-
         try {
             account = retrieveAccountForSid(sid);
             Logger.info(account.getEmail() + ": retrieving all visible entry ids");
@@ -1205,7 +1204,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             else
                 visibleEntryCount = entryController.getNumberOfVisibleEntries(account);
             accountInfo.setVisibleEntryCount(visibleEntryCount);
-            int entryCount = entryController.getOwnerEntryCountBy(accountInfo.getEmail());
+            long entryCount = entryController.getOwnerEntryCount(account);
             accountInfo.setUserEntryCount(entryCount);
 
             return accountInfo;
@@ -2234,7 +2233,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         for (EntryType type : EntryType.values()) {
             long count;
             try {
-                count = entryController.retrieveEntryByType(account, type.getName());
+                count = entryController.retrieveEntryByType(type.getName());
                 counts.put(type, count);
             } catch (ControllerException e) {
                 Logger.error("Could not retrieve counts for " + type.getName(), e);

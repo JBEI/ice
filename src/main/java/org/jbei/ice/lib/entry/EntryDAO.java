@@ -16,12 +16,14 @@ import org.jbei.ice.lib.entry.model.Link;
 import org.jbei.ice.lib.entry.model.Name;
 import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.FundingSource;
+import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.models.SelectionMarker;
+import org.jbei.ice.lib.permissions.model.ReadGroup;
+import org.jbei.ice.lib.permissions.model.ReadUser;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 import org.jbei.ice.shared.ColumnField;
@@ -41,7 +43,7 @@ import java.util.Set;
  */
 class EntryDAO extends HibernateRepository {
 
-    public long retrieveEntryByType(String type) throws DAOException {
+    public long retrieveCountEntryByType(String type) throws DAOException {
         Session session = newSession();
         try {
             Criteria criteria = session.createCriteria(Entry.class.getName()).add(
@@ -128,7 +130,7 @@ class EntryDAO extends HibernateRepository {
      *
      * @param partNumber
      * @return Entry.
-     * @throws ManagerException
+     * @throws DAOException
      */
     public Entry getByPartNumber(String partNumber) throws DAOException {
         Entry entry = null;
@@ -137,8 +139,7 @@ class EntryDAO extends HibernateRepository {
 
         try {
             session.getTransaction().begin();
-            Query query = session.createQuery("from " + PartNumber.class.getName()
-                                                      + " where partNumber = :partNumber");
+            Query query = session.createQuery("from " + PartNumber.class.getName() + " where partNumber = :partNumber");
             query.setParameter("partNumber", partNumber);
             Object queryResult = query.uniqueResult();
 
@@ -191,17 +192,20 @@ class EntryDAO extends HibernateRepository {
         return entry;
     }
 
-    public int getOwnerEntryCount(String owner) throws ManagerException {
+    public int getOwnerEntryCount(String ownerEmail) throws DAOException {
         Session session = newSession();
         try {
+            session.getTransaction().begin();
             Criteria criteria = session.createCriteria(Entry.class.getName()).add(
-                    Restrictions.eq("owner", owner));
+                    Restrictions.eq("ownerEmail", ownerEmail));
             Integer result = (Integer) criteria.setProjection(Projections.rowCount())
                                                .uniqueResult();
 
+            session.getTransaction().commit();
             return result.intValue();
         } catch (HibernateException e) {
-            throw new ManagerException("Failed to retrieve entry count by owner " + owner, e);
+            session.getTransaction().rollback();
+            throw new DAOException("Failed to retrieve entry count by owner " + ownerEmail, e);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -213,13 +217,12 @@ class EntryDAO extends HibernateRepository {
      * Retrieve the number of {@link Entry Entries} visible to everyone.
      *
      * @return Number of visible entries.
-     * @throws ManagerException
+     * @throws DAOException
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public static long getNumberOfVisibleEntries(Account account) throws ManagerException {
+    public long getNumberOfVisibleEntries(Account account) throws DAOException {
         Group everybodyGroup = null;
 
-        long result = 0;
         Session session = null;
 
         try {
@@ -227,73 +230,76 @@ class EntryDAO extends HibernateRepository {
             try {
                 everybodyGroup = controller.createOrRetrievePublicGroup();
             } catch (ControllerException e) {
-                e.printStackTrace();
+                throw new DAOException(e);
             }
             session = newSession();
-            String queryString = "select id from ReadGroup readGroup where readGroup.group = :group";
 
-            Query query = session.createQuery(queryString);
-
-            query.setParameter("group", everybodyGroup);
-
-            List<Object> results = query.list();
-
-            if (results == null) {
-                result = 0;
-            } else {
-                result = results.size();
-            }
+            Criteria criteria = session.createCriteria(ReadGroup.class.getName()).add(
+                    Restrictions.eq("group", everybodyGroup));
+            Integer result = (Integer) criteria.setProjection(Projections.rowCount())
+                                               .uniqueResult();
 
             if (account == null)
-                return result;
+                return result.longValue();
 
-            // get all visible entries
-            queryString = "select id from ReadUser readUser where readUser.account = :account";
-            query = session.createQuery(queryString);
-            query.setParameter("account", account);
-            List accountResults = query.list();
-            if (accountResults != null) {
-                result += accountResults.size();
-            }
+            long groupVisibleCount = result.longValue();
+
+            criteria = session.createCriteria(ReadUser.class.getName()).add(
+                    Restrictions.eq("account", account));
+            result = (Integer) criteria.setProjection(Projections.rowCount())
+                                       .uniqueResult();
+            return (groupVisibleCount + result.longValue());
 
         } catch (HibernateException e) {
-            throw new ManagerException("Failed to retrieve number of visible entries!", e);
+            throw new DAOException("Failed to retrieve number of visible entries!", e);
         } finally {
             if (session.isOpen()) {
                 session.close();
             }
         }
 
-        return result;
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public Set<Long> getAllVisibleEntries(Group everybodyGroup, Account account)
+    public Set<Long> getAllVisibleEntries(Set<Group> accountGroups, Account account)
             throws DAOException {
 
         Session session = null;
         Set<Long> visibleEntries = new HashSet<Long>();
 
+        GroupController controller = new GroupController();
         try {
+            Group everybodyGroup = controller.createOrRetrievePublicGroup();
+            accountGroups.add(everybodyGroup);
+        } catch (ControllerException e) {
+            throw new DAOException(e);
+        }
+
+        try {
+
             session = newSession();
             session.getTransaction().begin();
-            String queryString = "select entry_id from permission_read_groups where group_id = "
-                    + everybodyGroup.getId();
-            Query query = session.createSQLQuery(queryString);
-            //            query.setParameter("group", everybodyGroup);
-            List results = query.list();
-            visibleEntries.addAll(((ArrayList<Long>) results));
 
-            if (account == null) {
-                session.getTransaction().commit();
-                return visibleEntries;
+            if (!accountGroups.isEmpty()) {
+                String queryString = " select readGroup.entry.id from " + ReadGroup.class
+                        .getName() + " readGroup where readGroup.group in (:groups) ";
+                Query query = session.createQuery(queryString);
+                query.setParameterList("groups", accountGroups);
+                List results = query.list();
+                visibleEntries.addAll(((ArrayList<Long>) results));
+
+                if (account == null) {
+                    session.getTransaction().commit();
+                    return visibleEntries;
+                }
             }
 
-            // get all visible entries
-            queryString = "select entry_id from permission_read_users where account_id = "
-                    + account.getId();
-            query = session.createSQLQuery(queryString);
-            //            query.setParameter("account", account);
+            // get all entries visible to the account
+            String queryString = "select readUser.entry.id from " + ReadUser.class.getName() +
+                    " readUser where readUser.account = :account";
+
+            Query query = session.createQuery(queryString);
+            query.setParameter("account", account);
             List accountResults = query.list();
             visibleEntries.addAll(((ArrayList<Long>) accountResults));
             session.getTransaction().commit();
@@ -342,7 +348,7 @@ class EntryDAO extends HibernateRepository {
      * @param field     The field to sort on.
      * @param ascending True if ascending
      * @return ArrayList of ids.
-     * @throws ManagerException
+     * @throws DAOException
      */
     @SuppressWarnings("unchecked")
     public ArrayList<Long> getEntries(String field, boolean ascending) throws DAOException {
@@ -409,49 +415,6 @@ class EntryDAO extends HibernateRepository {
     }
 
     /**
-     * Retrieve {@link Entry} ids of the given ownerEmail sorted by field.
-     *
-     * @param owner
-     * @param field
-     * @param ascending True if ascending.
-     * @return ArrayList of ids.
-     * @throws ManagerException
-     */
-    @SuppressWarnings("unchecked")
-    public static ArrayList<Long> getEntriesByOwnerSort(String owner, String field,
-            boolean ascending) throws ManagerException {
-        ArrayList<Long> entries = null;
-
-        Session session = newSession();
-        try {
-            String orderSuffix = (field == null) ? ""
-                    : (" ORDER BY e." + field + " " + (ascending ? "ASC" : "DESC"));
-
-            String queryString = "select id from " + Entry.class.getName()
-                    + " e where ownerEmail = :ownerEmail" + orderSuffix;
-
-            Query query = session.createQuery(queryString);
-
-            query.setParameter("ownerEmail", owner);
-
-            @SuppressWarnings("rawtypes")
-            List list = query.list();
-
-            if (list != null) {
-                entries = (ArrayList<Long>) list;
-            }
-        } catch (HibernateException e) {
-            throw new ManagerException("Failed to retrieve entries by owner: " + owner, e);
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
-        }
-
-        return entries;
-    }
-
-    /**
      * Retrieve {@link Entry} objects from the database given a list of id's, sorted by the given
      * field.
      *
@@ -459,7 +422,7 @@ class EntryDAO extends HibernateRepository {
      * @param field
      * @param ascending
      * @return List of Entry objects
-     * @throws ManagerException
+     * @throws DAOException
      */
     @SuppressWarnings("unchecked")
     public List<Entry> getEntriesByIdSetSort(List<Long> ids, String field, boolean ascending)

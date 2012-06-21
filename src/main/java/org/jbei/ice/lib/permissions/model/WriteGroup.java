@@ -2,7 +2,7 @@ package org.jbei.ice.lib.permissions.model;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.lib.models.Group;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

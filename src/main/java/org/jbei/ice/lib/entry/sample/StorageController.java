@@ -2,8 +2,8 @@ package org.jbei.ice.lib.entry.sample;
 
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.entry.sample.model.Storage;
-import org.jbei.ice.lib.entry.sample.model.Storage.StorageType;
+import org.jbei.ice.lib.models.Storage;
+import org.jbei.ice.lib.models.Storage.StorageType;
 
 import java.util.List;
 

@@ -10,10 +10,10 @@ import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
-import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.utils.JbeirSettings;
@@ -281,9 +281,10 @@ public class EntryController {
 
     public Set<Long> getAllVisibleEntryIDs(Account account) throws ControllerException {
         try {
-            GroupController controller = new GroupController();
-            Group publicGroup = controller.createOrRetrievePublicGroup();
-            return dao.getAllVisibleEntries(publicGroup, account);
+//            GroupController controller = new GroupController();
+//            Group publicGroup = controller.createOrRetrievePublicGroup();
+//            // TODO : get the groups that the user belongs to
+            return dao.getAllVisibleEntries(account.getGroups(), account);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -305,11 +306,11 @@ public class EntryController {
      * @throws ControllerException
      */
     public long getNumberOfVisibleEntries(Account account) throws ControllerException {
-        long numberOfVisibleEntries = 0;
+        long numberOfVisibleEntries;
 
         try {
-            numberOfVisibleEntries = EntryDAO.getNumberOfVisibleEntries(account);
-        } catch (ManagerException e) {
+            numberOfVisibleEntries = dao.getNumberOfVisibleEntries(account);
+        } catch (DAOException e) {
             throw new ControllerException(e);
         }
 
@@ -464,7 +465,7 @@ public class EntryController {
     public long getOwnerEntryCount(Account account) throws ControllerException {
         try {
             return dao.getOwnerEntryCount(account.getEmail());
-        } catch (ManagerException e) {
+        } catch (DAOException e) {
             Logger.error(e);
             throw new ControllerException(e);
         }
@@ -477,10 +478,6 @@ public class EntryController {
             Logger.error(e);
             throw new ControllerException(e);
         }
-    }
-
-    public int getOwnerEntryCountBy(String email) {
-        return 0;
     }
 
     public LinkedList<EntryInfo> retrieveEntriesByIdSetSort(Account account, LinkedList<Long> entryIds,
@@ -554,9 +551,9 @@ public class EntryController {
         }
     }
 
-    public long retrieveEntryByType(Account account, String type) throws ControllerException {
+    public long retrieveEntryByType(String type) throws ControllerException {
         try {
-            return dao.retrieveEntryByType(type);
+            return dao.retrieveCountEntryByType(type);
         } catch (DAOException e) {
             Logger.error(e);
             throw new ControllerException(e);

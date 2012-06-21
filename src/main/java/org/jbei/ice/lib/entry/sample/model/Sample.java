@@ -2,6 +2,7 @@ package org.jbei.ice.lib.entry.sample.model;
 
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.interfaces.ISampleValueObject;
 
 import javax.persistence.*;
@@ -11,7 +12,7 @@ import java.util.Date;
  * Store Sample information.
  * <p/>
  * Each sample is a uniquely identified (via UUIDv4) object representing a physical sample. Storage
- * locations are handled by {@link Storage} objects.
+ * locations are handled by {@link org.jbei.ice.lib.models.Storage} objects.
  *
  * @author Timothy Ham, Zinovii Dmytriv
  */
@@ -54,6 +55,9 @@ public class Sample implements ISampleValueObject, IModel {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "location_id")
     private Storage storage;
+
+    public Sample() {
+    }
 
     @Override
     public long getId() {

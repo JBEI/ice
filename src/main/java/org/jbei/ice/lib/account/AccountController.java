@@ -88,8 +88,11 @@ public class AccountController {
     }
 
     /**
-     * @param email
-     * @param password
+     * Updates account password associated the account email. It encrypts it before associating it with
+     * the account
+     *
+     * @param email    user unique identifier
+     * @param password new password
      * @throws ControllerException
      */
     public void updatePassword(String email, String password) throws ControllerException {
@@ -110,8 +113,8 @@ public class AccountController {
      * @param initials    account initials
      * @param email       unique identifier for account
      * @param institution account institution affiliation
-     * @param description
-     * @return
+     * @param description account description
+     * @return generated password
      * @throws ControllerException in the event email is already assigned to another user or is empty
      */
     public String createNewAccount(String firstName, String lastName, String initials,
@@ -149,8 +152,7 @@ public class AccountController {
     public Account createAdminAccount(String adminAccountEmail, String adminPassword)
             throws ControllerException {
         if (getByEmail(adminAccountEmail) != null) {
-            throw new ControllerException("Account with email \"" + adminAccountEmail
-                                                  + "\" already exists");
+            throw new ControllerException("Account with email \"" + adminAccountEmail + "\" already exists");
         }
 
         Account adminAccount = new Account();
@@ -190,15 +192,12 @@ public class AccountController {
      * @throws ControllerException
      */
     public Set<Account> getAllByFirstName() throws ControllerException {
-        Set<Account> accounts = null;
 
         try {
-            accounts = dao.getAllByFirstName();
+            return dao.getAllByFirstName();
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
-
-        return accounts;
     }
 
     /**
@@ -209,15 +208,11 @@ public class AccountController {
      * @throws ControllerException
      */
     public Account getByEmail(String email) throws ControllerException {
-        Account account = null;
-
         try {
-            account = dao.getByEmail(email);
+            return dao.getByEmail(email);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
-
-        return account;
     }
 
     /**
@@ -430,7 +425,7 @@ public class AccountController {
     }
 
     /**
-     * Deauthentcate the given sessionKey. The user is logged out from the system.
+     * De-authenticate the given sessionKey. The user is logged out from the system.
      *
      * @param sessionKey
      * @throws ControllerException

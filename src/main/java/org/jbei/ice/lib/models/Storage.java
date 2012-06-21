@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.entry.sample.model;
+package org.jbei.ice.lib.models;
 
 import org.hibernate.annotations.Cascade;
 import org.jbei.ice.lib.dao.IModel;
@@ -21,7 +21,8 @@ import java.util.Set;
  * of children this storage unit can have.
  * <p/>
  * The children of Plate-42 will be 96 wells, with name="Well" and index numbered from "A1" to
- * "H12". When a {@link Sample} is associated with a location, it may in this case point to the
+ * "H12". When a {@link org.jbei.ice.lib.entry.sample.model.Sample} is associated with a location,
+ * it may in this case point to the
  * Storage object Well-A1. In turn, Well-A1 is held in Plate-42. Conveniently, the name and index
  * can be concatenated to give the user a friendly name, such as Plate-42 and Well-A1.
  * <p/>

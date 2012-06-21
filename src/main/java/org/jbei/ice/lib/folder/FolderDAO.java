@@ -7,7 +7,6 @@ import org.hibernate.Session;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
 import java.math.BigInteger;
@@ -98,7 +97,7 @@ class FolderDAO extends HibernateRepository {
      *
      * @param id folder id.
      * @return List of Entry ids.
-     * @throws ManagerException
+     * @throws DAOException
      */
     @SuppressWarnings("unchecked")
     public ArrayList<Long> getFolderContents(long id) throws DAOException {

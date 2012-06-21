@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.account.model;
 
 import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.lib.models.Group;
 
 import javax.persistence.*;
 import java.util.Date;

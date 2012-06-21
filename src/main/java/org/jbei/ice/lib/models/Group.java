@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.group;
+package org.jbei.ice.lib.models;
 
 import org.jbei.ice.lib.dao.IModel;
 

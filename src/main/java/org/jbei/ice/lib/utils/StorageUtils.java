@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.utils;
 
-import org.jbei.ice.lib.entry.sample.model.Storage;
-import org.jbei.ice.lib.entry.sample.model.Storage.StorageType;
+import org.jbei.ice.lib.models.Storage;
+import org.jbei.ice.lib.models.Storage.StorageType;
 
 /**
  * Utility methods for manipulation of {@link Storage}.

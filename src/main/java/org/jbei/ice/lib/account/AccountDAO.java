@@ -24,7 +24,7 @@ class AccountDAO extends HibernateRepository {
     /**
      * Retrieve {@link Account} by id from the database.
      *
-     * @param id
+     * @param id unique local identifier for object
      * @return Account
      * @throws DAOException
      */
@@ -32,16 +32,25 @@ class AccountDAO extends HibernateRepository {
         return (Account) super.get(Account.class, id);
     }
 
-    public ArrayList<Account> getAllAccounts() {
+    @SuppressWarnings("unchecked")
+    public ArrayList<Account> getAllAccounts() throws DAOException {
+
+        ArrayList<Account> reports;
         Session session = newSession();
-        session.beginTransaction();
 
-        @SuppressWarnings("unchecked")
-        ArrayList<Account> reports = (ArrayList<Account>) session.createCriteria(Account.class)
-                                                                 .list();
-        //        Hibernate.initialize(reports);
+        try {
+            session.beginTransaction();
+            reports = (ArrayList<Account>) session.createCriteria(Account.class).list();
+            session.getTransaction().commit();
+        } catch (HibernateException he) {
+            session.getTransaction().rollback();
+            throw new DAOException(he);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
 
-        session.getTransaction().commit();
         return reports;
     }
 
@@ -112,11 +121,8 @@ class AccountDAO extends HibernateRepository {
 
         Session session = newSession();
         try {
-            Query query = session.createQuery("from " + Account.class.getName()
-                                                      + " where email = :email");
-
+            Query query = session.createQuery("from " + Account.class.getName() + " where email = :email");
             query.setParameter("email", email);
-
             Object result = query.uniqueResult();
 
             if (result != null) {
