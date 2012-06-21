@@ -76,7 +76,7 @@ public class InfoToModelFactory {
             StrainInfo strainInfo = (StrainInfo) info;
 
             strain.setHost(strainInfo.getHost());
-            strain.setGenotypePhenotype(strain.getGenotypePhenotype());
+            strain.setGenotypePhenotype(strainInfo.getGenotypePhenotype());
             strain.setPlasmids(strainInfo.getPlasmids());
 
             entry = strain;
