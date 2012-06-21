@@ -11,7 +11,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,20 +51,6 @@ public class Part extends Entry implements IPartValueObject, IModel {
 
     public Part() {
         setRecordType(EntryType.PART.getName());
-    }
-
-    public Part(String recordId, String versionId, String recordType, String owner,
-            String ownerEmail, String creator, String creatorEmail, String status, String alias,
-            String keywords, String shortDescription, String longDescription,
-            String longDescriptionType, String references, Date creationTime,
-            Date modificationTime, AssemblyStandard packageFormat, String pkgdDnaFwdHash,
-            String pkgdDnaRevHash) {
-        super(recordId, versionId, recordType, owner, ownerEmail, creator, creatorEmail, status,
-              alias, keywords, shortDescription, longDescription, longDescriptionType,
-              references, creationTime, modificationTime);
-        this.packageFormat = packageFormat;
-        this.pkgdDnaFwdHash = pkgdDnaFwdHash;
-        this.pkgdDnaRevHash = pkgdDnaRevHash;
     }
 
     @Override

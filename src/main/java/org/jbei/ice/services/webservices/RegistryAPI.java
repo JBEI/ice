@@ -28,6 +28,7 @@ import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.SearchController;
 import org.jbei.ice.lib.search.blast.BlastResult;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
@@ -396,13 +397,14 @@ public class RegistryAPI {
             @WebParam(name = "entryId") String entryId) throws SessionException, ServiceException,
             ServicePermissionException {
         log(sessionId, "hasReadPermission: " + entryId);
-        boolean result = false;
+        boolean result;
         Account account = validateAccount(sessionId);
 
         try {
             EntryController entryController = new EntryController();
+            PermissionsController permissionsController = new PermissionsController();
             Entry entry = entryController.getByRecordId(account, entryId);
-            result = entryController.hasReadPermission(account, entry);
+            result = permissionsController.hasReadPermission(account, entry);
         } catch (ControllerException e) {
             Logger.error(e);
             throw new ServiceException("Registry Service Internal Error!");
@@ -431,8 +433,9 @@ public class RegistryAPI {
 
         try {
             EntryController entryController = new EntryController();
+            PermissionsController permissionsController = new PermissionsController();
             Entry entry = entryController.getByRecordId(account, entryId);
-            result = entryController.hasWritePermission(account, entry);
+            result = permissionsController.hasWritePermission(account, entry);
         } catch (ControllerException e) {
             Logger.error(e);
             throw new ServiceException("Registry Service Internal Error!");
@@ -799,6 +802,7 @@ public class RegistryAPI {
         Entry currentEntry = null;
         try {
             EntryController entryController = new EntryController();
+            PermissionsController permissionsController = new PermissionsController();
 
             try {
                 currentEntry = entryController.getByRecordId(account, entry.getRecordId());
@@ -810,7 +814,7 @@ public class RegistryAPI {
                 throw new ServiceException("Invalid recordId for entry!");
             }
 
-            if (!entryController.hasWritePermission(account, currentEntry)) {
+            if (!permissionsController.hasWritePermission(account, currentEntry)) {
                 throw new ServicePermissionException("No permissions to change this entry!");
             }
         } catch (ControllerException e) {

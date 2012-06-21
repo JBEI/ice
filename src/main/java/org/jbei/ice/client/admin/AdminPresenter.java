@@ -1,29 +1,32 @@
 package org.jbei.ice.client.admin;
 
-import java.util.ArrayList;
-
-import org.jbei.ice.client.AbstractPresenter;
-import org.jbei.ice.client.AppController;
-import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.admin.bulkimport.BulkImportMenuItem;
-import org.jbei.ice.client.admin.bulkimport.DeleteBulkImportHandler;
-import org.jbei.ice.client.admin.group.GroupPresenter;
-import org.jbei.ice.client.admin.usermanagement.UserPresenter;
-import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.shared.dto.BulkImportDraftInfo;
-
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
+import org.jbei.ice.client.AbstractPresenter;
+import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.IceAsyncCallback;
+import org.jbei.ice.client.Page;
+import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.admin.bulkimport.BulkImportMenuItem;
+import org.jbei.ice.client.admin.bulkimport.DeleteBulkImportHandler;
+import org.jbei.ice.client.admin.group.GroupPresenter;
+import org.jbei.ice.client.admin.usermanagement.UserPresenter;
+import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.client.util.DateUtilities;
+import org.jbei.ice.shared.dto.BulkImportDraftInfo;
+
+import java.util.ArrayList;
 
 /**
  * Presenter for the admin page
- * 
+ *
  * @author Hector Plahar
  */
 public class AdminPresenter extends AbstractPresenter {
@@ -59,18 +62,18 @@ public class AdminPresenter extends AbstractPresenter {
 
                 switch (event.getSelectedItem()) {
 
-                case 1:
-                    if (userPresenter == null)
-                        userPresenter = new UserPresenter(service);
-                    view.setTabPresenter(1, userPresenter);
-                    break;
+                    case 1:
+                        if (userPresenter == null)
+                            userPresenter = new UserPresenter(service);
+                        view.setTabPresenter(1, userPresenter);
+                        break;
 
-                case 2:
-                    view.setTabPresenter(2, groupPresenter);
-                    break;
+                    case 2:
+                        view.setTabPresenter(2, groupPresenter);
+                        break;
 
-                default:
-                    return;
+                    default:
+                        return;
                 }
             }
         });
@@ -79,30 +82,36 @@ public class AdminPresenter extends AbstractPresenter {
     private void retrieveSavedDrafts() {
         try {
             service.retrieveDraftsPendingVerification(AppController.sessionId,
-                new AsyncCallback<ArrayList<BulkImportDraftInfo>>() {
+                                                      new AsyncCallback<ArrayList<BulkImportDraftInfo>>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Window.alert("Error retrieving saved drafts");
-                    }
+                                                          @Override
+                                                          public void onFailure(Throwable caught) {
+                                                              Window.alert("Error retrieving saved drafts");
+                                                          }
 
-                    @Override
-                    public void onSuccess(ArrayList<BulkImportDraftInfo> result) {
-                        ArrayList<BulkImportMenuItem> data = new ArrayList<BulkImportMenuItem>();
-                        for (BulkImportDraftInfo info : result) {
-                            String name = info.getName();
-                            String dateTime = DateUtilities.formatShorterDate(info.getCreated());
-                            BulkImportMenuItem item = new BulkImportMenuItem(info.getId(), name, info
-                                    .getCount(), dateTime, info.getType().toString(), info.getAccount()
-                                    .getEmail());
-                            data.add(item);
-                        }
+                                                          @Override
+                                                          public void onSuccess(ArrayList<BulkImportDraftInfo> result) {
+                                                              ArrayList<BulkImportMenuItem> data = new
+                                                                      ArrayList<BulkImportMenuItem>();
+                                                              for (BulkImportDraftInfo info : result) {
+                                                                  String name = info.getName();
+                                                                  String dateTime = DateUtilities.formatShorterDate(
+                                                                          info.getCreated());
+                                                                  BulkImportMenuItem item = new BulkImportMenuItem(
+                                                                          info.getId(), name, info
+                                                                          .getCount(), dateTime,
+                                                                          info.getType().toString(), info.getAccount()
+                                                                                                         .getEmail());
+                                                                  data.add(item);
+                                                              }
 
-                        if (!data.isEmpty()) {
-                            view.setSavedDraftsData(data, new DeleteBulkImportHandler(service));
-                        }
-                    }
-                });
+                                                              if (!data.isEmpty()) {
+                                                                  view.setSavedDraftsData(data,
+                                                                                          new DeleteBulkImportHandler(
+                                                                                                  service));
+                                                              }
+                                                          }
+                                                      });
         } catch (org.jbei.ice.client.exception.AuthenticationException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
@@ -116,28 +125,22 @@ public class AdminPresenter extends AbstractPresenter {
             public void onSelectionChange(SelectionChangeEvent event) {
                 final BulkImportMenuItem item = draftSelection.getSelectedObject();
 
-                try {
-                    service.retrieveBulkImport(AppController.sessionId, item.getId(),
-                        new AsyncCallback<BulkImportDraftInfo>() {
+                new IceAsyncCallback<BulkImportDraftInfo>() {
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                Window.alert("Could not retrieve your saved drafts.");
-                            }
+                    @Override
+                    protected void callService(AsyncCallback<BulkImportDraftInfo> callback) {
+                        try {
+                            service.retrieveBulkImport(AppController.sessionId, item.getId(), callback);
+                        } catch (AuthenticationException e) {
+                            History.newItem(Page.LOGIN.getLink());
+                        }
+                    }
 
-                            @Override
-                            public void onSuccess(BulkImportDraftInfo result) {
-                                if (result == null) {
-                                    Window.alert("Could not retrieve your saved drafts.");
-                                    return;
-                                }
-
-                                view.setSheet(result, false);
-                            }
-                        });
-                } catch (org.jbei.ice.client.exception.AuthenticationException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                }
+                    @Override
+                    public void onSuccess(BulkImportDraftInfo result) {
+                        view.setSheet(result, false);
+                    }
+                }.go(eventBus);
             }
         });
     }

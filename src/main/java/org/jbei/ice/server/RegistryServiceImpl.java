@@ -1074,8 +1074,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 BigInteger size = BigInteger.valueOf(contents.size());
                 details.setCount(size);
             } else {
-              details.setCount(BigInteger.valueOf(0));
-              }
+                details.setCount(BigInteger.valueOf(0));
+            }
 
             return details;
         } catch (ControllerException e) {
@@ -1262,10 +1262,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             String email) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
 
-            BulkImportController biController = new BulkImportController(account);
+            BulkImportController biController = new BulkImportController();
             ArrayList<BulkImport> results = biController.retrieveByUser(account);
             ArrayList<BulkImportDraftInfo> info = new ArrayList<BulkImportDraftInfo>();
 
@@ -1313,7 +1311,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (!controller.isModerator(account))
                 return null;
 
-            BulkImportController biController = new BulkImportController(account);
+            BulkImportController biController = new BulkImportController();
 
             ArrayList<BulkImport> results = new ArrayList<BulkImport>(biController.retrieveAll());
             ArrayList<BulkImportDraftInfo> info = new ArrayList<BulkImportDraftInfo>();
@@ -1359,13 +1357,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (!controller.isModerator(account))
                 return null;
 
-            BulkImportController biController = new BulkImportController(account);
+            BulkImportController biController = new BulkImportController();
             BulkImport draft = biController.retrieveById(draftId);
             if (draft == null)
                 return null;
 
-            Logger.info(account.getEmail() + ": deleting bulk import draft with id "
-                                + draft.getId());
+            Logger.info(account.getEmail() + ": deleting bulk import draft with id " + draft.getId());
 
             biController.deleteDraft(draft);
 
@@ -1404,10 +1401,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         try {
             account = retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
-            BulkImportController biController = new BulkImportController(account);
+            BulkImportController biController = new BulkImportController();
             bi = biController.retrieveById(id);
         } catch (ControllerException e) {
             Logger.error(e);
@@ -1431,7 +1425,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         for (BulkImportEntryData datum : data) {
             Entry entry = datum.getEntry();
             entry.setOwnerEmail(ownerEmail);
-
             EntryInfo info = EntryToInfoFactory.getInfo(account, entry, null, null, null, false);
             byte[] array = ArrayUtils.toPrimitive(bi.getAttachmentFile());
 
@@ -1538,7 +1531,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            BulkImportController controller = new BulkImportController(account);
+            BulkImportController controller = new BulkImportController();
             BulkImport result = controller.updateBulkImportDraft(id, name, account, primary,
                                                                  secondary);
 
@@ -1570,12 +1563,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (primary.isEmpty())
                 return null;
 
-            BulkImportController controller = new BulkImportController(account);
+            BulkImportController controller = new BulkImportController();
             BulkImport draft = controller.createBulkImport(account, primary, secondary, email);
             draft.setName(name);
 
-            BulkImportController biController = new BulkImportController(account);
-            BulkImport result = biController.createBulkImportRecord(draft);
+            BulkImport result = controller.createBulkImportRecord(draft);
 
             // result to DTO
             BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
@@ -1602,7 +1594,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (primary.isEmpty())
                 return false;
 
-            BulkImportController controller = new BulkImportController(account);
+            BulkImportController controller = new BulkImportController();
             BulkImport bulkImport = controller.createBulkImport(account, primary, secondary, email);
             controller.submitBulkImportForVerification(bulkImport);
             return true;
@@ -1802,10 +1794,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         Logger.info("Creating sample with locations " + sb.toString());
 
-        Storage storage = null;
         try {
             Storage scheme = storageController.get(Long.parseLong(sampleInfo.getLocationId()), false);
-            storage = storageController.getLocation(scheme, labels);
+            Storage storage = storageController.getLocation(scheme, labels);
             storage = storageController.update(storage);
             sample.setStorage(storage);
             sample = sampleController.saveSample(account, sample);
@@ -1849,7 +1840,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public HashMap<SampleInfo, ArrayList<String>> retrieveStorageSchemes(String sessionId,
             EntryType type) throws AuthenticationException {
 
-        Account account = retrieveAccountForSid(sessionId);
+        retrieveAccountForSid(sessionId);
         HashMap<SampleInfo, ArrayList<String>> schemeMap = new HashMap<SampleInfo, ArrayList<String>>();
         StorageController storageController = new StorageController();
         List<Storage> schemes;
@@ -2180,10 +2171,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             return false;
         }
 
-        Sequence sequence = null;
-
         try {
-            sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+            Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
             sequence.setSequenceUser(sequenceUser);
             sequence.setEntry(entry);
             return sequenceController.save(account, sequence) != null;

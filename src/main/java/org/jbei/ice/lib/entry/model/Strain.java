@@ -8,7 +8,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
-import java.util.Date;
 
 /**
  * Store Strain specific fields.
@@ -39,19 +38,6 @@ public class Strain extends Entry implements IStrainValueObject, IModel {
 
     public Strain() {
         setRecordType(EntryType.STRAIN.getName());
-    }
-
-    public Strain(String recordId, String versionId, String recordType, String owner,
-            String ownerEmail, String creator, String creatorEmail, String status, String alias,
-            String keywords, String shortDescription, String longDescription,
-            String longDescriptionType, String references, Date creationTime,
-            Date modificationTime, String host, String genotypePhenotype, String plasmids) {
-        super(recordId, versionId, recordType, owner, ownerEmail, creator, creatorEmail, status,
-              alias, keywords, shortDescription, longDescription, longDescriptionType,
-              references, creationTime, modificationTime);
-        this.host = host;
-        this.genotypePhenotype = genotypePhenotype;
-        this.plasmids = plasmids;
     }
 
     @Override

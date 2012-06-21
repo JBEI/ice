@@ -9,6 +9,8 @@ import org.jbei.ice.lib.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.composers.formatters.SbolFormatter;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.Name;
+import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
@@ -23,6 +25,8 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Set;
+import java.util.UUID;
 
 // will eventually attempt to consolidate the servlets
 public class SequenceDownloadServlet extends HttpServlet {
@@ -62,7 +66,7 @@ public class SequenceDownloadServlet extends HttpServlet {
         }
 
         EntryController entryController = new EntryController();
-        Entry entry = null;
+        Entry entry;
         try {
             entry = entryController.get(account, Long.parseLong(entryId));
         } catch (NumberFormatException e) {
@@ -116,7 +120,7 @@ public class SequenceDownloadServlet extends HttpServlet {
     private void getOriginal(HttpServletResponse response, Entry entry, Account account) {
 
         SequenceController sequenceController = new SequenceController();
-        Sequence sequence = null;
+        Sequence sequence;
 
         try {
             sequence = sequenceController.getByEntry(entry);
@@ -136,8 +140,7 @@ public class SequenceDownloadServlet extends HttpServlet {
             return;
         }
 
-        String filename = entry.getPartNumbersAsString() + ".seq";
-
+        String filename = getFileName(entry) + ".seq";
         try {
             byte[] bytes = sequenceString.getBytes();
             ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
@@ -196,7 +199,7 @@ public class SequenceDownloadServlet extends HttpServlet {
             return;
         }
 
-        String filename = entry.getPartNumbersAsString() + ".gb";
+        String filename = getFileName(entry) + ".gb";
 
         try {
             byte[] bytes = sequenceString.getBytes();
@@ -248,7 +251,7 @@ public class SequenceDownloadServlet extends HttpServlet {
             return;
         }
 
-        String filename = entry.getPartNumbersAsString() + ".fasta";
+        String filename = getFileName(entry) + ".fasta";
 
         try {
             byte[] bytes = sequenceString.getBytes();
@@ -297,7 +300,7 @@ public class SequenceDownloadServlet extends HttpServlet {
             return;
         }
 
-        String filename = entry.getPartNumbersAsString() + ".xml";
+        String filename = getFileName(entry) + ".xml";
 
         try {
             byte[] bytes = sequenceString.getBytes();
@@ -321,5 +324,25 @@ public class SequenceDownloadServlet extends HttpServlet {
         } catch (IOException e) {
             Logger.error(e);
         }
+    }
+
+    /**
+     * Retrieves the first partnumber of first name of the entry. If one
+     * is not available, a random string is returned
+     *
+     * @param entry entry whose partNumber or name is desired to be used as the filename
+     * @return string to be used as a filename
+     */
+    private String getFileName(Entry entry) {
+        Set<PartNumber> partNumberSet = entry.getPartNumbers();
+
+        if (partNumberSet != null && partNumberSet.size() > 0)
+            return (partNumberSet.toArray()[0].toString());
+
+        Set<Name> nameSet = entry.getNames();
+        if (nameSet != null && nameSet.size() > 0)
+            return nameSet.toArray()[0].toString();
+
+        return UUID.randomUUID().toString().split("-")[0];
     }
 }

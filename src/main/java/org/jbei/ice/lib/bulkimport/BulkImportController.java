@@ -2,9 +2,7 @@ package org.jbei.ice.lib.bulkimport;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
-import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.controllers.permissionVerifiers.EntryPermissionVerifier;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
@@ -34,13 +32,12 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-public class BulkImportController extends Controller {
+public class BulkImportController {
 
     private final String TEMPORARY_DIRECTORY = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
     private final BulkImportDAO dao;
 
-    public BulkImportController(Account account) {
-        super(account, new EntryPermissionVerifier());
+    public BulkImportController() {
         dao = new BulkImportDAO();
     }
 

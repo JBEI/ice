@@ -70,4 +70,9 @@ public class PartNumber implements IPartNumberValueObject, IModel {
     public void setEntry(Entry entry) {
         this.entry = entry;
     }
+
+    @Override
+    public String toString() {
+        return this.partNumber;
+    }
 }

@@ -19,6 +19,7 @@ import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.PartNumber;
@@ -391,7 +392,7 @@ public class LuceneSearch {
             }
             StringBuilder strainStringBuilder = new StringBuilder();
             for (Strain strain : strains) {
-                strainStringBuilder.append(strain.getPartNumbersAsString());
+                strainStringBuilder.append(EntryUtil.getPartNumbersAsString(strain));
                 strainStringBuilder.append(" ");
             }
             document.add(new Field("Strains", strainStringBuilder.toString(), Field.Store.YES,

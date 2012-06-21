@@ -67,4 +67,9 @@ public class Name implements INameValueObject, IModel {
     public void setEntry(Entry entry) {
         this.entry = entry;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

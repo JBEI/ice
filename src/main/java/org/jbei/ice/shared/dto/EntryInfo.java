@@ -1,11 +1,10 @@
 package org.jbei.ice.shared.dto;
 
-import java.util.ArrayList;
-import java.util.Date;
-
+import com.google.gwt.user.client.rpc.IsSerializable;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class EntryInfo implements IsSerializable {
 
@@ -40,11 +39,13 @@ public class EntryInfo implements IsSerializable {
     private boolean hasAttachment;
     private boolean hasSample;
     private boolean hasSequence;
-    private ArrayList<AttachmentInfo> attachments; // TODO : create another object that HAS A EntryInfo and contains these as well
+    private ArrayList<AttachmentInfo> attachments; // TODO : create another object that HAS A EntryInfo and contains
+    // these as well
     private ArrayList<SampleStorage> sampleStorage;
     private ArrayList<SequenceAnalysisInfo> sequenceAnalysis;
     private ArrayList<ParameterInfo> parameters;
     private boolean canEdit; // whether current user that requested this entry info has write privs
+    private boolean visible;
 
     public EntryInfo() {
     }
@@ -337,5 +338,13 @@ public class EntryInfo implements IsSerializable {
 
     public void setLinkifiedShortDescription(String linkifiedShortDescription) {
         this.linkifiedShortDescription = linkifiedShortDescription;
+    }
+
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
     }
 }

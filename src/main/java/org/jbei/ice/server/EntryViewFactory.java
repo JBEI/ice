@@ -3,6 +3,7 @@ package org.jbei.ice.server;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -40,7 +41,7 @@ public class EntryViewFactory {
 
         view.setId(entry.getId());
         view.setRecordId(entry.getRecordId());
-        view.setPartId(entry.getPartNumbersAsString());
+        view.setPartId(EntryUtil.getPartNumbersAsString(entry));
         view.setName(entry.getNamesAsString());
         view.setAlias(entry.getAlias());
         view.setCreator(entry.getCreator());
@@ -145,7 +146,7 @@ public class EntryViewFactory {
         EntryInfo view = new EntryInfo(type);
         view.setId(entry.getId());
         view.setRecordId(entry.getRecordId());
-        view.setPartId(entry.getPartNumbersAsString());
+        view.setPartId(EntryUtil.getPartNumbersAsString(entry));
         view.setName(entry.getNamesAsString());
         view.setShortDescription(entry.getShortDescription());
         view.setCreationTime(entry.getCreationTime());

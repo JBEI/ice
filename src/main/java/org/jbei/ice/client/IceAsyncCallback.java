@@ -35,7 +35,7 @@ public abstract class IceAsyncCallback<T> implements AsyncCallback<T> {
 
     private void execute(final int retryCount, final HandlerManager eventBus) {
         if (timeoutTimer != null) {
-            Window.alert("Command execution already in progress!");
+            Window.alert("Server is executing a command!");
             return;
         }
 

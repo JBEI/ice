@@ -2,6 +2,7 @@ package org.jbei.ice.server;
 
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -41,7 +42,7 @@ public class EntryToInfoFactory {
     public static EntryInfo getInfo(Account account, Entry entry, List<Attachment> attachments,
             Map<Sample, LinkedList<Storage>> samples, List<TraceSequence> sequences,
             boolean hasSequence) {
-        EntryInfo info = null;
+        EntryInfo info;
         EntryType type = EntryType.nameToType(entry.getRecordType());
         if (type == null)
             return null;
@@ -289,7 +290,7 @@ public class EntryToInfoFactory {
         info.setCreationTime(entry.getCreationTime());
         info.setModificationTime(entry.getModificationTime());
         info.setBioSafetyLevel(entry.getBioSafetyLevel());
-        info.setPartId(entry.getPartNumbersAsString());
+        info.setPartId(EntryUtil.getPartNumbersAsString(entry));
         info.setIntellectualProperty(entry.getIntellectualProperty());
         if (!entry.getEntryFundingSources().isEmpty()) {
             EntryFundingSource source = entry.getEntryFundingSources().iterator().next();
@@ -337,7 +338,7 @@ public class EntryToInfoFactory {
         }
 
         info.setId(entry.getId());
-        info.setPartId(entry.getPartNumbersAsString());
+        info.setPartId(EntryUtil.getPartNumbersAsString(entry));
         info.setName(info.getName());
         return info;
     }

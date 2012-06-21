@@ -141,6 +141,9 @@ public class Entry implements IEntryValueObject, IModel {
     @Column(name = "status", length = 127)
     private String status;
 
+    @Column(name = "visibility")
+    private int visibility = 1;
+
     @Column(name = "short_description")
     @Lob
     private String shortDescription;
@@ -208,28 +211,6 @@ public class Entry implements IEntryValueObject, IModel {
     private final List<Parameter> parameters = new ArrayList<Parameter>();
 
     public Entry() {
-    }
-
-    public Entry(String recordId, String versionId, String recordType, String owner,
-            String ownerEmail, String creator, String creatorEmail, String status, String alias,
-            String keywords, String shortDescription, String longDescription,
-            String longDescriptionType, String references, Date creationTime, Date modificationTime) {
-        this.recordId = recordId;
-        this.versionId = versionId;
-        this.recordType = recordType;
-        this.owner = owner;
-        this.ownerEmail = ownerEmail;
-        this.creator = creator;
-        this.creatorEmail = creatorEmail;
-        this.status = status;
-        this.alias = alias;
-        this.keywords = keywords;
-        this.shortDescription = shortDescription;
-        this.longDescription = longDescription;
-        this.longDescriptionType = longDescriptionType;
-        this.references = references;
-        this.creationTime = creationTime;
-        this.modificationTime = modificationTime;
     }
 
     @Override
@@ -321,23 +302,6 @@ public class Entry implements IEntryValueObject, IModel {
     @Override
     public Set<PartNumber> getPartNumbers() {
         return partNumbers;
-    }
-
-    /**
-     * Generate the comma separated string representation of {@link PartNumber}s associated with
-     * this entry.
-     *
-     * @return Comma separated part numbers.
-     */
-    public String getPartNumbersAsString() {
-        String result = "";
-        ArrayList<String> numbers = new ArrayList<String>();
-        for (PartNumber number : partNumbers) {
-            numbers.add(number.getPartNumber());
-        }
-        result = org.jbei.ice.lib.utils.Utils.join(", ", numbers);
-
-        return result;
     }
 
     /**
@@ -590,6 +554,14 @@ public class Entry implements IEntryValueObject, IModel {
 
     public void setIntellectualProperty(String intellectualProperty) {
         this.intellectualProperty = intellectualProperty;
+    }
+
+    public int getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(int visibility) {
+        this.visibility = visibility;
     }
 
     public String getIntellectualProperty() {

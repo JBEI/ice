@@ -1,7 +1,5 @@
 package org.jbei.ice.server.dao.hibernate;
 
-import java.util.List;
-
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -10,9 +8,11 @@ import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.server.dao.IRepository;
 
+import java.util.List;
+
 /**
  * Hibernate Persistence
- * 
+ *
  * @author Hector Plahar, Zinovii Dmytriv, Timothy Ham
  */
 
@@ -20,7 +20,7 @@ public class HibernateRepository implements IRepository {
 
     /**
      * Start a new Hibernate {@link Session}.
-     * 
+     *
      * @return {@link Session}
      */
     public static Session newSession() {
@@ -29,7 +29,7 @@ public class HibernateRepository implements IRepository {
 
     /**
      * Delete an {@link IModel} object from the database.
-     * 
+     *
      * @param model
      * @throws DAOException
      */
@@ -69,12 +69,10 @@ public class HibernateRepository implements IRepository {
 
     /**
      * Saves or updates an {@link IModel} object into the database.
-     * 
-     * @param model
-     *            {@link IModel} object to save
+     *
+     * @param model {@link IModel} object to save
      * @return Object saved object
-     * @throws DAOException
-     *             in the event of a problem saving or null model parameter
+     * @throws DAOException in the event of a problem saving or null model parameter
      */
     public Object saveOrUpdate(IModel model) throws DAOException {
         if (model == null) {
@@ -114,7 +112,7 @@ public class HibernateRepository implements IRepository {
 
     /**
      * Retrieve an {@link IModel} object from the database by Class and database id.
-     * 
+     *
      * @param theClass
      * @param id
      * @return IModel object from the database.
@@ -125,17 +123,17 @@ public class HibernateRepository implements IRepository {
         Session session = newSession();
 
         try {
-            session.getTransaction().begin(); // Do not assign transaction to value
+            session.getTransaction().begin();
             result = session.get(theClass, id);
         } catch (HibernateException e) {
             throw new DAOException("dbGet failed for " + theClass.getCanonicalName() + " and id="
-                    + id, e);
+                                           + id, e);
         } catch (Exception e1) {
             // Something really bad happened.
             session.getTransaction().rollback();
             Logger.error(e1);
             resetSessionFactory(session);
-            throw new DAOException("Unkown database exception ", e1);
+            throw new DAOException("Unknown database exception ", e1);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -159,7 +157,7 @@ public class HibernateRepository implements IRepository {
 
         } catch (HibernateException e) {
             throw new DAOException("dbGet failed for " + theClass.getCanonicalName() + " and uuid="
-                    + uuid, e);
+                                           + uuid, e);
         } catch (Exception e1) {
             // Something really bad happened.
             session.getTransaction().rollback();
@@ -197,7 +195,7 @@ public class HibernateRepository implements IRepository {
 
     /**
      * Disconnect the session and reset the SessionFactory.
-     * 
+     *
      * @param session
      */
     private static void resetSessionFactory(Session session) {

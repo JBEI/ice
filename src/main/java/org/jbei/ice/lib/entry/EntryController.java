@@ -2,15 +2,12 @@ package org.jbei.ice.lib.entry;
 
 import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.controllers.permissionVerifiers.EntryPermissionVerifier;
-import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
-import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Group;
@@ -38,12 +35,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class EntryController {
 
-    private final EntryDAO dao;
-    private final EntryPermissionVerifier verifier;
-    private final PermissionsController permissionsController;
+    private EntryDAO dao;
+    private PermissionsController permissionsController;
 
     public EntryController() {
-        verifier = new EntryPermissionVerifier();
         dao = new EntryDAO();
         permissionsController = new PermissionsController();
     }
@@ -59,7 +54,7 @@ public class EntryController {
      * @throws ControllerException
      */
     public Entry createEntry(Entry entry) throws ControllerException {
-        return createEntry(entry, true, true);
+        return createEntry(entry, true);
     }
 
     public HashSet<Entry> createStrainWithPlasmid(Strain strain, Plasmid plasmid) throws ControllerException {
@@ -106,30 +101,19 @@ public class EntryController {
      *
      * @param entry
      * @param scheduleIndexRebuild Set true to schedule search index rebuild.
-     * @param makePublic           Set true to make record globally visible.
      * @return entry that was saved in the database.
      * @throws ControllerException
      */
-    public Entry createEntry(Entry entry, boolean scheduleIndexRebuild, boolean makePublic)
+    public Entry createEntry(Entry entry, boolean scheduleIndexRebuild)
             throws ControllerException {
-        Entry createdEntry = null;
-        GroupController controller = new GroupController();
-        AccountController accountController = new AccountController();
-        Account account = accountController.getSystemAccount();   // TODO : hack
+        Entry createdEntry;
 
-        try {
-            String nextPart = getNextPartNumber();
-            createdEntry = EntryFactory.createEntry(nextPart, entry);
-            if (makePublic) {
-                permissionsController.addReadGroup(account, createdEntry, controller.createOrRetrievePublicGroup());
-            }
+        String nextPart = getNextPartNumber();
+        createdEntry = EntryFactory.createEntry(nextPart, entry);
 
-            if (scheduleIndexRebuild) {
-                ApplicationController.scheduleBlastIndexRebuildJob();
-                ApplicationController.scheduleSearchIndexRebuildJob();
-            }
-        } catch (PermissionException e) {
-            throw new ControllerException(e);
+        if (scheduleIndexRebuild) {
+            ApplicationController.scheduleBlastIndexRebuildJob();
+            ApplicationController.scheduleSearchIndexRebuildJob();
         }
 
         return createdEntry;
@@ -152,7 +136,7 @@ public class EntryController {
             throw new ControllerException(e);
         }
 
-        if (entry != null && !hasReadPermission(account, entry)) {
+        if (entry != null && !permissionsController.hasReadPermission(account, entry)) {
             throw new PermissionException("No read permission for entry!");
         }
 
@@ -177,7 +161,7 @@ public class EntryController {
             throw new ControllerException(e);
         }
 
-        if (entry != null && !hasReadPermission(account, entry)) {
+        if (entry != null && !permissionsController.hasReadPermission(account, entry)) {
             throw new PermissionException("No read permission for entry!");
         }
 
@@ -204,7 +188,7 @@ public class EntryController {
             throw new ControllerException(e);
         }
 
-        if (entry != null && !hasReadPermission(account, entry)) {
+        if (entry != null && !permissionsController.hasReadPermission(account, entry)) {
             throw new PermissionException("No read permission for entry!");
         }
 
@@ -232,40 +216,11 @@ public class EntryController {
             throw new ControllerException(e);
         }
 
-        if (entry != null && !hasReadPermission(account, entry)) {
+        if (entry != null && !permissionsController.hasReadPermission(account, entry)) {
             throw new PermissionException("No read permission for entry!");
         }
 
         return entry;
-    }
-
-    /**
-     * Checks if the user has read permission to the given {@link Entry}.
-     *
-     * @param entry
-     * @return True if user has read permission.
-     * @throws ControllerException
-     */
-    public boolean hasReadPermission(Account account, Entry entry) throws ControllerException {
-        if (entry == null) {
-            throw new ControllerException("Failed to check read permissions for null entry!");
-        }
-
-        return verifier.hasReadPermissions(entry, account);
-    }
-
-    /**
-     * Checks if the user has write permission to the given {@link Entry}
-     *
-     * @param entry
-     * @return True if user has write permission.
-     * @throws ControllerException
-     */
-    public boolean hasWritePermission(Account account, Entry entry) throws ControllerException {
-        if (entry == null) {
-            throw new ControllerException("Failed to check write permissions for null entry!");
-        }
-        return verifier.hasWritePermissions(entry, account);
     }
 
     /**
@@ -352,7 +307,7 @@ public class EntryController {
             throw new ControllerException("Failed to save null entry!");
         }
 
-        if (!hasWritePermission(account, entry)) {
+        if (!permissionsController.hasWritePermission(account, entry)) {
             throw new PermissionException("No write permission for entry!");
         }
 
@@ -398,7 +353,7 @@ public class EntryController {
         if (entry == null) {
             throw new ControllerException("Failed to save null entry");
         }
-        if (!hasWritePermission(account, entry)) {
+        if (!permissionsController.hasWritePermission(account, entry)) {
             throw new PermissionException("No write permission for entry");
         }
         String deletionString = "This entry is deleted. It was owned by " + entry.getOwnerEmail()
@@ -446,7 +401,7 @@ public class EntryController {
                 continue;
             }
 
-            if (verifier.hasReadPermissions(entry, account)) {
+            if (permissionsController.hasReadPermission(account, entry)) {
                 result.add(id);
             }
         }
@@ -566,5 +521,13 @@ public class EntryController {
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
+    }
+
+    public void setDAO(EntryDAO dao) {
+        this.dao = dao;
+    }
+
+    public void setPermissionsController(PermissionsController permissionsController) {
+        this.permissionsController = permissionsController;
     }
 }

@@ -3,7 +3,6 @@ package org.jbei.ice.lib.group;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Group;
 
 import java.util.Set;
@@ -49,12 +48,11 @@ public class GroupController {
     /**
      * Create new {@link Group} object in the database, using parameters.
      *
-     * @param uuid
      * @param label
      * @param description
      * @param parent
      * @return Saved Group object.
-     * @throws ManagerException
+     * @throws ControllerException
      */
     public Group create(String label, String description, Group parent) throws ControllerException {
 
@@ -68,7 +66,6 @@ public class GroupController {
     }
 
     public Group createOrRetrievePublicGroup() throws ControllerException {
-        //        String uuid = java.util.UUID.fromString(publicGroupName).toString();
         Group publicGroup = this.getGroupByUUID(publicGroupUUID);
         if (publicGroup != null)
             return publicGroup;

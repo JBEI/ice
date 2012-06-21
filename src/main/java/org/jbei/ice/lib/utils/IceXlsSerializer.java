@@ -4,6 +4,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.Plasmid;
@@ -73,7 +74,7 @@ public class IceXlsSerializer {
 
             stringBuilder.append(index).append("\t");
             stringBuilder.append(escapeCSVValue(entry.getRecordType())).append("\t");
-            stringBuilder.append(escapeCSVValue(entry.getPartNumbersAsString())).append("\t");
+            stringBuilder.append(escapeCSVValue(EntryUtil.getPartNumbersAsString(entry))).append("\t");
             stringBuilder.append(escapeCSVValue(entry.getNamesAsString())).append("\t");
             stringBuilder.append(escapeCSVValue(entry.getOwner())).append("\t");
             stringBuilder.append(escapeCSVValue(entry.getCreator())).append("\t");

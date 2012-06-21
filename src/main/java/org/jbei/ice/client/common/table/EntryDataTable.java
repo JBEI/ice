@@ -1,18 +1,5 @@
 package org.jbei.ice.client.common.table;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.jbei.ice.client.collection.menu.IHasEntryHandlers;
-import org.jbei.ice.client.common.entry.IHasEntryId;
-import org.jbei.ice.client.common.table.cell.EntryOwnerCell;
-import org.jbei.ice.client.common.table.cell.PartIDCell;
-import org.jbei.ice.client.common.table.column.ImageColumn;
-import org.jbei.ice.client.event.EntryViewEvent;
-import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.EntryInfo;
-
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.TextCell;
@@ -31,18 +18,29 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
+import org.jbei.ice.client.collection.menu.IHasEntryHandlers;
+import org.jbei.ice.client.common.entry.IHasEntryId;
+import org.jbei.ice.client.common.table.cell.EntryOwnerCell;
+import org.jbei.ice.client.common.table.cell.PartIDCell;
+import org.jbei.ice.client.common.table.column.ImageColumn;
+import org.jbei.ice.client.event.EntryViewEvent;
+import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
+import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.shared.dto.EntryInfo;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * DataTable for view entities that are EntryDatas. Provides selection support via space bar,
  * mouse click, and additional support for range selection using the shift key
- * 
- * @author Hector Plahar
- * 
+ *
  * @param <T>
+ * @author Hector Plahar
  */
 
 public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> implements
-        IHasEntryId {
+                                                                               IHasEntryId {
 
     private final EntrySelectionModel<T> selectionModel;
 
@@ -50,7 +48,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         super();
         selectionModel = new EntrySelectionModel<T>();
         this.setSelectionModel(selectionModel,
-            DefaultSelectionEventManager.<T> createCheckboxManager());
+                               DefaultSelectionEventManager.<T>createCheckboxManager());
     }
 
     protected DataTableColumn<Boolean> addSelectionColumn() {
@@ -74,7 +72,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         };
 
         DataTableColumn<Boolean> selectionColumn = new DataTableColumn<Boolean>(columnCell,
-                ColumnField.SELECTION) {
+                                                                                ColumnField.SELECTION) {
 
             @Override
             public Boolean getValue(T object) {
@@ -100,7 +98,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
     protected DataTableColumn<String> addTypeColumn(boolean sortable, double width, Unit unit) {
         DataTableColumn<String> typeCol = new DataTableColumn<String>(new TextCell(),
-                ColumnField.TYPE) {
+                                                                      ColumnField.TYPE) {
 
             @Override
             public String getValue(T entry) {
@@ -114,7 +112,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
     }
 
     public class PartIdColumn extends DataTable<T>.DataTableColumn<EntryInfo> implements
-            IHasEntryHandlers {
+                                                                              IHasEntryHandlers {
 
         private HandlerManager handlerManager;
 
@@ -144,7 +142,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
     protected DataTableColumn<String> addNameColumn(double width, Unit unit) {
 
         DataTableColumn<String> nameColumn = new DataTableColumn<String>(new TextCell(),
-                ColumnField.NAME) {
+                                                                         ColumnField.NAME) {
 
             @Override
             public String getValue(T object) {
@@ -163,7 +161,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
     protected DataTableColumn<SafeHtml> addSummaryColumn() {
         DataTableColumn<SafeHtml> summaryColumn = new DataTableColumn<SafeHtml>(new SafeHtmlCell(),
-                ColumnField.SUMMARY) {
+                                                                                ColumnField.SUMMARY) {
 
             @Override
             public SafeHtml getValue(T object) {
@@ -171,16 +169,17 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
                 if (description == null)
                     return SafeHtmlUtils.EMPTY_SAFE_HTML;
 
-                int size = (int) (Window.getClientWidth() - 850);
+                int size = (Window.getClientWidth() - 850);
                 if (size <= 0)
                     size = 50;
 
                 return SafeHtmlUtils
                         .fromSafeConstant("<div style=\"width: "
-                                + size
-                                + "px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;\" title=\""
-                                + object.getShortDescription().replaceAll("\"", "'") + "\">"
-                                + object.getShortDescription() + "</div>");
+                                                  + size
+                                                  + "px; white-space: nowrap; overflow: hidden; text-overflow: " +
+                                                  "ellipsis;\" title=\""
+                                                  + object.getShortDescription().replaceAll("\"", "'") + "\">"
+                                                  + object.getShortDescription() + "</div>");
             }
         };
 
@@ -192,7 +191,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
         EntryOwnerCell<EntryInfo> cell = new EntryOwnerCell<EntryInfo>();
 
         DataTableColumn<EntryInfo> ownerColumn = new DataTableColumn<EntryInfo>(cell,
-                ColumnField.OWNER) {
+                                                                                ColumnField.OWNER) {
 
             @Override
             public EntryInfo getValue(T object) {
@@ -208,7 +207,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
     protected DataTableColumn<String> addStatusColumn() {
         DataTableColumn<String> statusColumn = new DataTableColumn<String>(new TextCell(),
-                ColumnField.STATUS) {
+                                                                           ColumnField.STATUS) {
 
             @Override
             public String getValue(T object) {
@@ -248,7 +247,7 @@ public abstract class EntryDataTable<T extends EntryInfo> extends DataTable<T> i
 
     protected DataTableColumn<String> addCreatedColumn() {
         DataTableColumn<String> createdColumn = new DataTableColumn<String>(new TextCell(),
-                ColumnField.CREATED) {
+                                                                            ColumnField.CREATED) {
 
             @Override
             public String getValue(EntryInfo object) {

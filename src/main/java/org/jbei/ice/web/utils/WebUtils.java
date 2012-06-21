@@ -36,7 +36,7 @@ public class WebUtils {
         EntryController entryController = new EntryController();
 
         long id = 0;
-        Entry entry = null;
+        Entry entry;
 
         try {
             entry = entryController.getByPartNumber(account, iceLink.getPartNumber());

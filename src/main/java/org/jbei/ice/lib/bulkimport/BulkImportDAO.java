@@ -24,8 +24,7 @@ class BulkImportDAO extends HibernateRepository {
 
         Session session = newSession();
         session.getTransaction().begin();
-        Query query = session.createQuery("from " + BulkImport.class.getName()
-                                                  + " where account = :account");
+        Query query = session.createQuery("from " + BulkImport.class.getName() + " where account = :account");
         query.setEntity("account", account);
 
         try {
@@ -113,7 +112,25 @@ class BulkImportDAO extends HibernateRepository {
      * @throws DAOException
      */
     public BulkImport retrieveById(long importId) throws DAOException {
-        return (BulkImport) super.get(BulkImport.class, importId);
+        Session session = newSession();
+        session.getTransaction().begin();
+        Query query = session.createQuery("from " + BulkImport.class.getName() + " where id = :id");
+        query.setParameter("id", importId);
+
+        try {
+            BulkImport result = (BulkImport) query.uniqueResult();
+            session.getTransaction().commit();
+            return result;
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            throw new DAOException("Error retrieving bulk import record", e);
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+
+//        return (BulkImport) super.get(BulkImport.class, importId);
     }
 
     /**

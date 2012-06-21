@@ -7,6 +7,7 @@ import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.blast.Blast;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastResult;
@@ -31,9 +32,11 @@ import java.util.Set;
  */
 public class SearchController {
     private final SearchDAO dao;
+    private final PermissionsController permissionsController;
 
     public SearchController() {
         dao = new SearchDAO();
+        permissionsController = new PermissionsController();
     }
 
     public Set<Long> runSearch(Account account, ArrayList<QueryFilter> filters) throws ControllerException {
@@ -105,7 +108,7 @@ public class SearchController {
                         Logger.error(e);
                         continue;
                     }
-                    if (!entryController.hasReadPermission(account, nextEntry))
+                    if (!permissionsController.hasReadPermission(account, nextEntry))
                         resultsIter.remove();
                 } catch (ControllerException ce) {
                     Logger.error("Error retrieving permission for entry Id " + next);
@@ -138,7 +141,7 @@ public class SearchController {
                 for (SearchResult searchResult : searchResults) {
                     Entry entry = searchResult.getEntry();
 
-                    if (entryController.hasReadPermission(account, entry)) {
+                    if (permissionsController.hasReadPermission(account, entry)) {
                         results.add(searchResult);
                     }
                 }
@@ -235,7 +238,7 @@ public class SearchController {
                         Logger.error(e);
                         continue;
                     }
-                    if (entry != null && entryController.hasReadPermission(account, entry)) {
+                    if (entry != null && permissionsController.hasReadPermission(account, entry)) {
                         blastResult.setEntry(entry);
                         results.add(blastResult);
                     }
@@ -286,7 +289,7 @@ public class SearchController {
                         continue;
                     }
 
-                    if (entry != null && entryController.hasReadPermission(account, entry)) {
+                    if (entry != null && permissionsController.hasReadPermission(account, entry)) {
                         blastResult.setEntry(entry);
 
                         // slowness here

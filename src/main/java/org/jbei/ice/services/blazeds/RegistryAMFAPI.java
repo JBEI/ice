@@ -29,6 +29,7 @@ import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.project.ProjectController;
 import org.jbei.ice.lib.utils.BulkImportEntryData;
 import org.jbei.ice.lib.utils.JbeirSettings;
@@ -112,12 +113,13 @@ public class RegistryAMFAPI extends BaseService {
         }
 
         EntryController entryController = new EntryController();
+        PermissionsController permissionsController = new PermissionsController();
 
         try {
             Entry entry = entryController.getByRecordId(account, entryId);
 
             if (entry != null) {
-                result = entryController.hasWritePermission(account, entry);
+                result = permissionsController.hasWritePermission(account, entry);
             }
         } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
@@ -1049,7 +1051,7 @@ public class RegistryAMFAPI extends BaseService {
         Logger.info("RetrieveBulkImportEntryType: " + importId);
         long id = Long.decode(importId);
         try {
-            BulkImportController controller = new BulkImportController(account);
+            BulkImportController controller = new BulkImportController();
             return controller.retrieveType(id);
         } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
@@ -1078,7 +1080,7 @@ public class RegistryAMFAPI extends BaseService {
 
         try {
             ASObject results = new ASObject();
-            BulkImportController controller = new BulkImportController(account);
+            BulkImportController controller = new BulkImportController();
             BulkImport bi = controller.retrieveById(id);
             String ownerEmail = bi.getAccount().getEmail();
             results.put("type", bi.getType());
@@ -1196,7 +1198,7 @@ public class RegistryAMFAPI extends BaseService {
                 bulkImport.setType(type);
             }
 
-            BulkImportController controller = new BulkImportController(account);
+            BulkImportController controller = new BulkImportController();
             BulkImport savedImport = controller.createBulkImportRecord(bulkImport);
             return savedImport.getPrimaryData().size();
         } catch (Exception e) {
@@ -1226,7 +1228,7 @@ public class RegistryAMFAPI extends BaseService {
         }
 
         try {
-            BulkImportController controller = new BulkImportController(account);
+            BulkImportController controller = new BulkImportController();
             BulkImport bi = controller.retrieveById(Integer.decode(importId));
             String email = bi.getAccount().getEmail();
             entry.setOwnerEmail(email);
@@ -1292,7 +1294,7 @@ public class RegistryAMFAPI extends BaseService {
 
         // set accounts
         try {
-            BulkImportController controller = new BulkImportController(account);
+            BulkImportController controller = new BulkImportController();
             BulkImport bi = controller.retrieveById(Integer.decode(importId));
             String email = bi.getAccount().getEmail();
             String owner = bi.getAccount().getFullName();
