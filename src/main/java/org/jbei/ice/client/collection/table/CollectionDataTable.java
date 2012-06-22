@@ -1,7 +1,9 @@
 package org.jbei.ice.client.collection.table;
 
-import java.util.ArrayList;
-
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.shared.GwtEvent;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.HandlerRegistration;
 import org.jbei.ice.client.collection.menu.IHasEntryHandlers;
 import org.jbei.ice.client.collection.presenter.EntryContext;
 import org.jbei.ice.client.common.table.DataTable;
@@ -13,14 +15,11 @@ import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
 
-import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.shared.GwtEvent;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.event.shared.HandlerRegistration;
+import java.util.ArrayList;
 
 /**
  * Data table for displaying the details of entries in a specified collection
- * 
+ *
  * @author Hector Plahar
  */
 
@@ -68,7 +67,7 @@ public abstract class CollectionDataTable extends EntryDataTable<EntryInfo> {
     protected abstract EntryViewEventHandler getHandler();
 
     public class PartIdColumn extends DataTable<EntryInfo>.DataTableColumn<EntryInfo> implements
-            IHasEntryHandlers {
+                                                                                      IHasEntryHandlers {
 
         private HandlerManager handlerManager;
 
@@ -97,5 +96,11 @@ public abstract class CollectionDataTable extends EntryDataTable<EntryInfo> {
 
     public EntryTablePager getPager() {
         return this.pager;
+    }
+
+    @Override
+    public void clearSelection() {
+        super.clearSelection();
+        this.pager.goToFirstPage();
     }
 }
