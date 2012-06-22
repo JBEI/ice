@@ -23,7 +23,7 @@ public class HibernateRepository implements IRepository {
      *
      * @return {@link Session}
      */
-    public static Session newSession() {
+    protected static Session newSession() {
         return HibernateHelper.newSession();
     }
 
@@ -33,7 +33,7 @@ public class HibernateRepository implements IRepository {
      * @param model
      * @throws DAOException
      */
-    public void delete(IModel model) throws DAOException {
+    protected void delete(IModel model) throws DAOException {
         if (model == null) {
             throw new DAOException("Failed to delete null model!");
         }
@@ -74,7 +74,7 @@ public class HibernateRepository implements IRepository {
      * @return Object saved object
      * @throws DAOException in the event of a problem saving or null model parameter
      */
-    public Object saveOrUpdate(IModel model) throws DAOException {
+    protected Object saveOrUpdate(IModel model) throws DAOException {
         if (model == null) {
             throw new DAOException("Failed to save null model!");
         }
@@ -118,7 +118,7 @@ public class HibernateRepository implements IRepository {
      * @return IModel object from the database.
      * @throws DAOException
      */
-    public Object get(Class<? extends IModel> theClass, long id) throws DAOException {
+    protected Object get(Class<? extends IModel> theClass, long id) throws DAOException {
         Object result = null;
         Session session = newSession();
 
@@ -143,7 +143,7 @@ public class HibernateRepository implements IRepository {
         return result;
     }
 
-    public Object getByUUID(Class<? extends IModel> theClass, String uuid) throws DAOException {
+    protected Object getByUUID(Class<? extends IModel> theClass, String uuid) throws DAOException {
         Object result;
 
         Session session = newSession();
@@ -173,7 +173,7 @@ public class HibernateRepository implements IRepository {
     }
 
     @SuppressWarnings("rawtypes")
-    public List retrieveAll(Class<? extends IModel> theClass) throws DAOException {
+    protected List retrieveAll(Class<? extends IModel> theClass) throws DAOException {
         Session session = newSession();
 
         try {

@@ -2,10 +2,8 @@ package org.jbei.ice.lib.news;
 
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.News;
 
-import javax.lang.model.element.NestingKind;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -19,10 +17,10 @@ public class NewsController {
         this.dao = new NewsDAO();
     }
 
-    public News update( News news ) throws ControllerException {
+    public News update(News news) throws ControllerException {
         news.setModificationTime(new Date(System.currentTimeMillis()));
         try {
-            return (News) dao.saveOrUpdate(news);
+            return dao.save(news);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -31,7 +29,7 @@ public class NewsController {
     public News save(News news) throws ControllerException {
         news.setCreationTime(new Date(System.currentTimeMillis()));
         try {
-            return (News )dao.saveOrUpdate(news);
+            return dao.save(news);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

@@ -46,6 +46,7 @@ public class EntryInfo implements IsSerializable {
     private ArrayList<ParameterInfo> parameters;
     private boolean canEdit; // whether current user that requested this entry info has write privs
     private boolean visible;
+    private EntryInfo info; // typically used with strain with plasmid
 
     public EntryInfo() {
     }
@@ -346,5 +347,13 @@ public class EntryInfo implements IsSerializable {
 
     public void setVisible(boolean visible) {
         this.visible = visible;
+    }
+
+    public EntryInfo getInfo() {
+        return info;
+    }
+
+    public void setInfo(EntryInfo info) {
+        this.info = info;
     }
 }

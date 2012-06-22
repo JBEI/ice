@@ -8,6 +8,7 @@ import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.dto.*;
@@ -102,14 +103,9 @@ public interface RegistryService extends RemoteService {
 
     boolean updateEntry(String sid, EntryInfo info) throws AuthenticationException;
 
-    boolean submitBulkImport(String sid, String email, ArrayList<EntryInfo> primary,
-            ArrayList<EntryInfo> secondary) throws AuthenticationException;
+    boolean submitBulkImport(String sid, String email, ArrayList<EntryInfo> primary) throws AuthenticationException;
 
-    ArrayList<BulkImportDraftInfo> retrieveImportDraftData(String sid, String email) throws AuthenticationException;
-
-    BulkImportDraftInfo saveBulkImportDraft(String sid, String email, String name,
-            ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary)
-            throws AuthenticationException;
+    ArrayList<BulkImportDraftInfo> retrieveUserSavedDrafts(String sid) throws AuthenticationException;
 
     BulkImportDraftInfo retrieveBulkImport(String sid, long id) throws AuthenticationException;
 
@@ -174,4 +170,7 @@ public interface RegistryService extends RemoteService {
 
     ArrayList<Long> createStrainWithPlasmid(String sid, HashSet<EntryInfo> infoSet) throws
             AuthenticationException;
+
+    BulkImportDraftInfo saveBulkImportDraft(String sid, String email, String name, EntryAddType importType,
+            ArrayList<EntryInfo> entryList) throws AuthenticationException;
 }

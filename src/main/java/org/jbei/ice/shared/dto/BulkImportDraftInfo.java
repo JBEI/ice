@@ -1,25 +1,25 @@
 package org.jbei.ice.shared.dto;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+import org.jbei.ice.shared.EntryAddType;
+
 import java.util.ArrayList;
 import java.util.Date;
 
-import org.jbei.ice.shared.EntryAddType;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
-
-public class BulkImportDraftInfo implements IsSerializable {
+public class BulkImportDraftInfo implements IsSerializable { //ITransferModel<BulkImportDraft> {
 
     private long id;
     private String name;
     private EntryAddType type;
     private int count;
     private Date created;
-
-    // when retrieving the data for menu
-    // these are empty
-    private ArrayList<EntryInfo> primary;
-    private ArrayList<EntryInfo> secondary;
+    private Date lastUpdate;
     private AccountInfo account;
+    private ArrayList<EntryInfo> entryList;
+
+    public BulkImportDraftInfo() {
+        entryList = new ArrayList<EntryInfo>();
+    }
 
     public long getId() {
         return id;
@@ -61,27 +61,28 @@ public class BulkImportDraftInfo implements IsSerializable {
         this.created = created;
     }
 
-    public ArrayList<EntryInfo> getPrimary() {
-        return primary;
-    }
-
-    public void setPrimary(ArrayList<EntryInfo> primary) {
-        this.primary = primary;
-    }
-
-    public ArrayList<EntryInfo> getSecondary() {
-        return secondary;
-    }
-
-    public void setSecondary(ArrayList<EntryInfo> secondary) {
-        this.secondary = secondary;
-    }
-
     public AccountInfo getAccount() {
         return account;
     }
 
     public void setAccount(AccountInfo account) {
         this.account = account;
+    }
+
+    public Date getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+
+    public ArrayList<EntryInfo> getEntryList() {
+        return entryList;
+    }
+
+    public void setEntryList(ArrayList<EntryInfo> entryList) {
+        this.entryList.clear();
+        this.entryList.addAll(entryList);
     }
 }

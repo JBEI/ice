@@ -7,6 +7,7 @@ import org.hibernate.Session;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
 import java.math.BigInteger;
@@ -43,12 +44,12 @@ class FolderDAO extends HibernateRepository {
         super.delete(folder);
     }
 
-    public Folder removeFolderEntries(Folder folder, ArrayList<Long> entries) {
+    public Folder removeFolderEntries(Folder folder, ArrayList<Long> entries) throws DAOException {
 
         Session session = newSession();
         try {
             session.getTransaction().begin();
-            folder.getContents().size();
+            folder = (Folder) session.get(Folder.class, folder.getId());
             Iterator<Entry> it = folder.getContents().iterator();
 
             while (it.hasNext()) {
@@ -56,8 +57,15 @@ class FolderDAO extends HibernateRepository {
                 if (entries.contains(entry.getId()))
                     it.remove();
             }
+
+            folder.setModificationTime(new Date(System.currentTimeMillis()));
+            session.saveOrUpdate(folder);
             session.getTransaction().commit();
             return folder;
+        } catch (HibernateException he) {
+            Logger.error(he);
+            session.getTransaction().rollback();
+            throw new DAOException(he);
         } finally {
             if (session != null)
                 session.close();

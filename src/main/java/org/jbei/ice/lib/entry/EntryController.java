@@ -110,6 +110,11 @@ public class EntryController {
 
         String nextPart = getNextPartNumber();
         createdEntry = EntryFactory.createEntry(nextPart, entry);
+        try {
+            dao.save(entry);
+        } catch (ManagerException e) {
+            throw new ControllerException(e);
+        }
 
         if (scheduleIndexRebuild) {
             ApplicationController.scheduleBlastIndexRebuildJob();

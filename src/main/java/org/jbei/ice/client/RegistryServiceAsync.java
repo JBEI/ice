@@ -6,6 +6,7 @@ import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.dto.*;
@@ -68,14 +69,11 @@ public interface RegistryServiceAsync {
     void retrieveSampleInfo(String sid, LinkedList<Long> sampleIds, ColumnField sortField,
             boolean asc, AsyncCallback<LinkedList<SampleInfo>> callback);
 
-//    void retrieveAccountInfoForSession(String sid, AsyncCallback<AccountInfo> callback) throws
-// AuthenticationException;
-
     void retrieveFolderDetails(String sid, long folderId, AsyncCallback<FolderDetails> callback)
             throws AuthenticationException;
 
-    void retrieveImportDraftData(String sid, String email,
-            AsyncCallback<ArrayList<BulkImportDraftInfo>> callback) throws AuthenticationException;
+    void retrieveUserSavedDrafts(String sid, AsyncCallback<ArrayList<BulkImportDraftInfo>> callback)
+            throws AuthenticationException;
 
     void retrieveDraftsPendingVerification(String sid,
             AsyncCallback<ArrayList<BulkImportDraftInfo>> callback) throws AuthenticationException;
@@ -131,12 +129,6 @@ public interface RegistryServiceAsync {
             throws AuthenticationException;
 
     // bulk import and draft
-
-    void saveBulkImportDraft(String sid, String email, String name, ArrayList<EntryInfo> primary,
-            ArrayList<EntryInfo> secondary, AsyncCallback<BulkImportDraftInfo> callback) throws AuthenticationException;
-
-    void submitBulkImport(String sid, String email, ArrayList<EntryInfo> primary,
-            ArrayList<EntryInfo> secondary, AsyncCallback<Boolean> callback) throws AuthenticationException;
 
     void retrieveBulkImport(String sid, long id, AsyncCallback<BulkImportDraftInfo> callback)
             throws AuthenticationException;
@@ -203,4 +195,8 @@ public interface RegistryServiceAsync {
     void removeFromUserCollection(String sessionId, long source, ArrayList<Long> ids, AsyncCallback<FolderDetails>
             async) throws AuthenticationException;
 
+    void saveBulkImportDraft(String sid, String email, String name, EntryAddType importType,
+            ArrayList<EntryInfo> entryList, AsyncCallback<BulkImportDraftInfo> async) throws AuthenticationException;
+
+    void submitBulkImport(String sid, String email, ArrayList<EntryInfo> primary, AsyncCallback<Boolean> async);
 }

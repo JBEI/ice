@@ -142,7 +142,7 @@ public class Entry implements IEntryValueObject, IModel {
     private String status;
 
     @Column(name = "visibility")
-    private int visibility = 1;
+    private Integer visibility = 1;
 
     @Column(name = "short_description")
     @Lob
@@ -556,11 +556,11 @@ public class Entry implements IEntryValueObject, IModel {
         this.intellectualProperty = intellectualProperty;
     }
 
-    public int getVisibility() {
-        return visibility;
+    public Integer getVisibility() {
+        return visibility.intValue();
     }
 
-    public void setVisibility(int visibility) {
+    public void setVisibility(Integer visibility) {
         this.visibility = visibility;
     }
 
@@ -571,7 +571,6 @@ public class Entry implements IEntryValueObject, IModel {
     public void setEntryFundingSources(Set<EntryFundingSource> inputEntryFundingSources) {
         if (inputEntryFundingSources == null) {
             entryFundingSources.clear();
-
             return;
         }
 

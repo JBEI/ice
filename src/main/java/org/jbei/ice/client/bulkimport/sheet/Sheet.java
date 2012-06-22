@@ -643,13 +643,13 @@ public class Sheet extends Composite implements SheetPresenter.View {
         for (int i = 0; i < headersSize; i += 1) {
             Widget widget;
             if (info != null && info.getCount() >= row) {
-                EntryInfo primaryInfo = info.getPrimary().get(index);
-                EntryInfo secondaryInfo = null;
-                if (info.getSecondary() != null)
-                    secondaryInfo = info.getSecondary().get(index);
 
+                EntryInfo primaryInfo = info.getEntryList().get(index);
                 String value = InfoValueExtractorFactory.extractValue(presenter.getType(),
-                                                                      headers[i], primaryInfo, secondaryInfo, index,
+                                                                      headers[i],
+                                                                      primaryInfo,
+                                                                      primaryInfo.getInfo(),
+                                                                      index,
                                                                       attachmentRowFileIds,
                                                                       sequenceRowFileIds);
                 if (value == null)

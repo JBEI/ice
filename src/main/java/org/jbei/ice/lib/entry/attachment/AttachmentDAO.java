@@ -48,7 +48,7 @@ public class AttachmentDAO extends HibernateRepository {
             attachment.setFileId(fileId);
         }
 
-        Attachment result = null;
+        Attachment result;
 
         try {
             writeAttachmentToFile(attachment.getFileId(), inputStream);

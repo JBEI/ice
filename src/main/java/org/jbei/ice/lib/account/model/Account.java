@@ -257,4 +257,14 @@ public class Account implements IModel {
     public String getFullName() {
         return firstName + " " + lastName;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj.getClass() != Account.class)
+            return false;
+
+        Account account = (Account) obj;
+        return account.getId() == this.getId() && account.getEmail().equals(this.getEmail());
+
+    }
 }

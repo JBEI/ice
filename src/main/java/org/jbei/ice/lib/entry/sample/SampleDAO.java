@@ -54,6 +54,10 @@ public class SampleDAO extends HibernateRepository {
         }
     }
 
+    public void delete(Storage storage) throws DAOException {
+        super.delete(storage);
+    }
+
     /**
      * Delete the give {@link Sample} object in the database.
      *

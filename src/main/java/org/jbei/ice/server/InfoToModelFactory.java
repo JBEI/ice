@@ -114,15 +114,13 @@ public class InfoToModelFactory {
                 seed.setParents(seedInfo.getParents());
 
                 if (seedInfo.getGeneration() != null) {
-                    ArabidopsisSeed.Generation generation = ArabidopsisSeed.Generation.valueOf(seedInfo
-                                                                                                       .getGeneration()
+                    ArabidopsisSeed.Generation generation = ArabidopsisSeed.Generation.valueOf(seedInfo.getGeneration()
                                                                                                        .name());
                     seed.setGeneration(generation);
                 }
 
                 if (seedInfo.getPlantType() != null) {
-                    ArabidopsisSeed.PlantType plantType = ArabidopsisSeed.PlantType.valueOf(seedInfo
-                                                                                                    .getPlantType()
+                    ArabidopsisSeed.PlantType plantType = ArabidopsisSeed.PlantType.valueOf(seedInfo.getPlantType()
                                                                                                     .name());
                     seed.setPlantType(plantType);
                 }
@@ -152,12 +150,12 @@ public class InfoToModelFactory {
         entry.setOwnerEmail(info.getOwnerEmail());
         entry.setCreator(info.getCreator());
         entry.setCreatorEmail(info.getCreatorEmail());
-        entry.setStatus(info.getStatus());
+        entry.setStatus(info.getStatus() == null ? "" : info.getStatus());
         entry.setAlias(info.getAlias());
-        entry.setBioSafetyLevel(info.getBioSafetyLevel());
+        entry.setBioSafetyLevel(info.getBioSafetyLevel() == null ? new Integer(0) : info.getBioSafetyLevel());
         entry.setShortDescription(info.getShortDescription());
         entry.setLongDescription(info.getLongDescription());
-        entry.setLongDescriptionType(info.getLongDescriptionType());
+        entry.setLongDescriptionType(info.getLongDescriptionType() != null ? info.getLongDescriptionType() : "text");
         entry.setIntellectualProperty(info.getIntellectualProperty());
         entry.setVersionId(info.getVersionId());
         HashSet<Link> links = getLinks(info.getLinks(), entry);

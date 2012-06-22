@@ -43,8 +43,11 @@ public class FolderController {
             throw new ControllerException("Cannot modify non user folder " + folder.getName());
         }
 
-        folder.setModificationTime(new Date(System.currentTimeMillis()));
-        dao.removeFolderEntries(folder, entryIds);
+        try {
+            dao.removeFolderEntries(folder, entryIds);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
         return folder;
     }
 

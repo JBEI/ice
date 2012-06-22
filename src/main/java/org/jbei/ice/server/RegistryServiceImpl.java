@@ -4,7 +4,6 @@ import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.SuggestOracle.Request;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import org.apache.commons.lang.ArrayUtils;
 import org.jbei.ice.client.RegistryService;
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.exception.AuthenticationException;
@@ -13,6 +12,7 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.bulkimport.BulkImport;
 import org.jbei.ice.lib.bulkimport.BulkImportController;
+import org.jbei.ice.lib.bulkimport.BulkImportDraftController;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
@@ -60,7 +60,6 @@ import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 import org.jbei.ice.shared.dto.permission.PermissionSuggestion;
 import org.jbei.ice.web.utils.WebUtils;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1258,42 +1257,13 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<BulkImportDraftInfo> retrieveImportDraftData(String sid,
-            String email) throws AuthenticationException {
+    public ArrayList<BulkImportDraftInfo> retrieveUserSavedDrafts(String sid) throws AuthenticationException {
+
+        Account account = retrieveAccountForSid(sid);
+        BulkImportDraftController controller = new BulkImportDraftController();
+
         try {
-            Account account = retrieveAccountForSid(sid);
-
-            BulkImportController biController = new BulkImportController();
-            ArrayList<BulkImport> results = biController.retrieveByUser(account);
-            ArrayList<BulkImportDraftInfo> info = new ArrayList<BulkImportDraftInfo>();
-
-            if (results != null) {
-                for (BulkImport draft : results) {
-                    BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
-                    List<BulkImportEntryData> primary = draft.getPrimaryData();
-                    if (primary != null)
-                        draftInfo.setCount(draft.getPrimaryData().size());
-                    else
-                        draftInfo.setCount(-1);
-                    draftInfo.setCreated(draft.getCreationTime());
-                    draftInfo.setId(draft.getId());
-
-                    Account draftAccount = draft.getAccount();
-                    draftInfo.setName(draft.getName());
-                    draftInfo.setType(EntryAddType.stringToType(draft.getType()));
-
-                    // set the account info
-                    AccountInfo accountInfo = new AccountInfo();
-                    accountInfo.setEmail(draftAccount.getEmail());
-                    accountInfo.setFirstName(draftAccount.getFirstName());
-                    accountInfo.setLastName(draftAccount.getLastName());
-                    draftInfo.setAccount(accountInfo);
-                    info.add(draftInfo);
-                }
-            }
-
-            return info;
-
+            return controller.retrieveByUser(account, account);
         } catch (ControllerException ce) {
             Logger.error(ce);
             return null;
@@ -1396,129 +1366,18 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     @Override
     public BulkImportDraftInfo retrieveBulkImport(String sid, long id) throws AuthenticationException {
 
-        BulkImport bi;
-        Account account;
+        Account account = retrieveAccountForSid(sid);
+        BulkImportDraftController controller = new BulkImportDraftController();
 
         try {
-            account = retrieveAccountForSid(sid);
-            BulkImportController biController = new BulkImportController();
-            bi = biController.retrieveById(id);
+            return controller.retrieveById(account, id);
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
+        } catch (PermissionException e) {
+            Logger.error(e);
+            return null;
         }
-
-        BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
-        draftInfo.setCount(bi.getPrimaryData().size());
-        draftInfo.setCreated(bi.getCreationTime());
-        draftInfo.setId(bi.getId());
-        draftInfo.setName(bi.getName());
-        EntryAddType type = EntryAddType.stringToType(bi.getType());
-        if (type != null)
-            draftInfo.setType(type);
-
-        // primary data
-        ArrayList<EntryInfo> primary = new ArrayList<EntryInfo>();
-        String ownerEmail = bi.getAccount().getEmail();
-
-        List<BulkImportEntryData> data = bi.getPrimaryData();
-        for (BulkImportEntryData datum : data) {
-            Entry entry = datum.getEntry();
-            entry.setOwnerEmail(ownerEmail);
-            EntryInfo info = EntryToInfoFactory.getInfo(account, entry, null, null, null, false);
-            byte[] array = ArrayUtils.toPrimitive(bi.getAttachmentFile());
-
-            // check for attachments
-            if (array != null) {
-                ArrayList<AttachmentInfo> attInfos = new ArrayList<AttachmentInfo>();
-                try {
-                    LinkedList<String> fileNames = BulkImportController.extractZip(array);
-                    for (String name : fileNames) {
-                        AttachmentInfo attachment = new AttachmentInfo();
-                        attachment.setFilename(name);
-                        attInfos.add(attachment);
-                    }
-
-                } catch (IOException e) {
-                    Logger.error(e);
-                }
-                info.setAttachments(attInfos);
-            }
-
-            // check for sequences
-            array = ArrayUtils.toPrimitive(bi.getSequenceFile());
-            if (array != null) {
-                ArrayList<SequenceAnalysisInfo> seqInfos = new ArrayList<SequenceAnalysisInfo>();
-                try {
-                    LinkedList<String> fileNames = BulkImportController.extractZip(array);
-                    for (String name : fileNames) {
-                        SequenceAnalysisInfo sequence = new SequenceAnalysisInfo();
-                        sequence.setName(name);
-                        seqInfos.add(sequence);
-                    }
-
-                } catch (IOException e) {
-                    Logger.error(e);
-                }
-                info.setSequenceAnalysis(seqInfos);
-            }
-
-            primary.add(info);
-        }
-        draftInfo.setPrimary(primary);
-
-        // secondary data (if any)
-        List<BulkImportEntryData> data2 = bi.getSecondaryData();
-        if (data2 != null && !data2.isEmpty()) {
-            ArrayList<EntryInfo> secondary = new ArrayList<EntryInfo>();
-            for (BulkImportEntryData datum : data2) {
-                Entry entry2 = datum.getEntry();
-                entry2.setOwnerEmail(ownerEmail);
-
-                EntryInfo info = EntryToInfoFactory.getInfo(account, entry2, null, null, null,
-                                                            false);
-                byte[] array = ArrayUtils.toPrimitive(bi.getAttachmentFile());
-
-                // check for attachments
-                if (array != null) {
-                    ArrayList<AttachmentInfo> attInfos = new ArrayList<AttachmentInfo>();
-                    try {
-                        LinkedList<String> fileNames = BulkImportController.extractZip(array);
-                        for (String name : fileNames) {
-                            AttachmentInfo attachment = new AttachmentInfo();
-                            attachment.setFilename(name);
-                            attInfos.add(attachment);
-                        }
-
-                    } catch (IOException e) {
-                        Logger.error(e);
-                    }
-                    info.setAttachments(attInfos);
-                }
-
-                // check for sequences
-                array = ArrayUtils.toPrimitive(bi.getSequenceFile());
-                if (array != null) {
-                    ArrayList<SequenceAnalysisInfo> seqInfos = new ArrayList<SequenceAnalysisInfo>();
-                    try {
-                        LinkedList<String> fileNames = BulkImportController.extractZip(array);
-                        for (String name : fileNames) {
-                            SequenceAnalysisInfo sequence = new SequenceAnalysisInfo();
-                            sequence.setName(name);
-                            seqInfos.add(sequence);
-                        }
-
-                    } catch (IOException e) {
-                        Logger.error(e);
-                    }
-                    info.setSequenceAnalysis(seqInfos);
-                }
-                secondary.add(info);
-            }
-            draftInfo.setSecondary(secondary);
-        }
-
-        return draftInfo;
     }
 
     @Override
@@ -1528,8 +1387,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         Account account;
         try {
             account = retrieveAccountForSid(sessionId);
-            if (account == null)
-                return null;
 
             BulkImportController controller = new BulkImportController();
             BulkImport result = controller.updateBulkImportDraft(id, name, account, primary,
@@ -1550,33 +1407,17 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public BulkImportDraftInfo saveBulkImportDraft(String sid, String email, String name,
-            ArrayList<EntryInfo> primary,
-            ArrayList<EntryInfo> secondary) throws AuthenticationException {
+    public BulkImportDraftInfo saveBulkImportDraft(String sid, String email, String name, EntryAddType importType,
+            ArrayList<EntryInfo> entryList) throws AuthenticationException {
 
         Account account;
         try {
             account = retrieveAccountForSid(sid);
-            if (account == null)
+            if (entryList.isEmpty())
                 return null;
 
-            if (primary.isEmpty())
-                return null;
-
-            BulkImportController controller = new BulkImportController();
-            BulkImport draft = controller.createBulkImport(account, primary, secondary, email);
-            draft.setName(name);
-
-            BulkImport result = controller.createBulkImportRecord(draft);
-
-            // result to DTO
-            BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
-            draftInfo.setId(result.getId());
-            draftInfo.setCount(result.getPrimaryData().size());
-            draftInfo.setCreated(result.getCreationTime());
-            draftInfo.setName(result.getName());
-            return draftInfo;
-
+            BulkImportDraftController controller = new BulkImportDraftController();
+            return controller.createBulkImportDraft(account, importType, name, entryList);
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
@@ -1584,25 +1425,28 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public boolean submitBulkImport(String sid, String email, ArrayList<EntryInfo> primary,
-            ArrayList<EntryInfo> secondary) throws AuthenticationException {
-        try {
-            Account account = retrieveAccountForSid(sid);
-            if (account == null)
-                return false;
-
-            if (primary.isEmpty())
-                return false;
-
-            BulkImportController controller = new BulkImportController();
-            BulkImport bulkImport = controller.createBulkImport(account, primary, secondary, email);
-            controller.submitBulkImportForVerification(bulkImport);
-            return true;
-
-        } catch (ControllerException ce) {
-            Logger.error(ce);
-            return false;
-        }
+    // submits
+    public boolean submitBulkImport(String sid, String email, ArrayList<EntryInfo> entryList)
+            throws AuthenticationException {
+//        try {
+//            Account account = retrieveAccountForSid(sid);
+//            if (account == null)
+//                return false;
+//
+//            if (entryList.isEmpty())
+//                return false;
+//
+//            BulkImportController controller = new BulkImportController();
+//            BulkImport bulkImport = controller.createBulkImport(account, primary, secondary, email);
+//            controller.submitBulkImportForVerification(bulkImport);
+//            return true;
+//
+//        } catch (ControllerException ce) {
+//            Logger.error(ce);
+//            return false;
+//        }
+        // tODO
+        return false;
     }
 
 

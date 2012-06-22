@@ -383,7 +383,8 @@ public class PermissionsController {
             return true;
         }
 
-        return false;
+        // TODO : adding system account also but this needs to be handled in a better way
+        return (controller.getSystemAccount().equals(account));
     }
 
     /**

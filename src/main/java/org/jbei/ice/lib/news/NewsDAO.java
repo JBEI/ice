@@ -39,4 +39,12 @@ class NewsDAO extends HibernateRepository {
             }
         }
     }
+
+    public News save(News news) throws DAOException {
+        return (News) super.saveOrUpdate(news);
+    }
+
+    public void update(News news) throws DAOException {
+        super.saveOrUpdate(news);
+    }
 }
