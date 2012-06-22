@@ -2,6 +2,8 @@ package org.jbei.ice.client.common.widget;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -11,6 +13,7 @@ public class PopupHandler implements ClickHandler {
     private final PopupPanel popup;
     private final int xOffset;
     private final int yOffset;
+    private HandlerRegistration closeHandlerRegistration;
 
     public PopupHandler(Widget widget, Element autoHide, int xoffset, int yoffset,
             boolean enableGlass) {
@@ -23,6 +26,12 @@ public class PopupHandler implements ClickHandler {
         this.popup.setGlassEnabled(enableGlass);
         this.xOffset = xoffset;
         this.yOffset = yoffset;
+    }
+
+    public void setCloseHandler(CloseHandler<PopupPanel> handler) {
+        if (closeHandlerRegistration != null)
+            closeHandlerRegistration.removeHandler();
+        closeHandlerRegistration = this.popup.addCloseHandler(handler);
     }
 
     @Override

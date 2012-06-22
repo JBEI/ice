@@ -1,11 +1,5 @@
 package org.jbei.ice.client.collection.menu;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.jbei.ice.client.collection.view.OptionSelect;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.view.client.CellPreviewEvent;
@@ -16,11 +10,16 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
+import org.jbei.ice.client.collection.view.OptionSelect;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Presenter for menus that provide options on click.
  * e.g. Add To menu in the collection
- * 
+ *
  * @author Hector Plahar
  */
 
@@ -55,7 +54,7 @@ public class SubMenuOptionsPresenter<T extends OptionSelect> {
         model = new MultiSelectionModel<T>();
 
         this.view
-                .setSelectionModel(model, DefaultSelectionEventManager.<T> createCheckboxManager());
+                .setSelectionModel(model, DefaultSelectionEventManager.<T>createCheckboxManager());
         view.setSubmitEnable(false);
         view.setClearEnable(false);
 
@@ -134,5 +133,9 @@ public class SubMenuOptionsPresenter<T extends OptionSelect> {
 
     public List<T> getSelectedItems() {
         return new ArrayList<T>(model.getSelectedSet());
+    }
+
+    public void clearAllSelected() {
+        model.clear();
     }
 }

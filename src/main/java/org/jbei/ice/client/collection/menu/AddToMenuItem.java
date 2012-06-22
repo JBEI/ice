@@ -1,10 +1,5 @@
 package org.jbei.ice.client.collection.menu;
 
-import java.util.List;
-
-import org.jbei.ice.client.collection.view.OptionSelect;
-import org.jbei.ice.client.common.widget.PopupHandler;
-
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -12,6 +7,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
@@ -24,13 +21,18 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.CellPreviewEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
+import org.jbei.ice.client.collection.view.OptionSelect;
+import org.jbei.ice.client.common.widget.PopupHandler;
+
+import java.util.List;
 
 public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implements
-        SubMenuOptionsPresenter.View<T> {
+                                                                       SubMenuOptionsPresenter.View<T> {
 
     /**
      * Resources to access images and styles
@@ -89,7 +91,9 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
         addWidget = createAddWidget(label);
         initWidget(addWidget);
 
-        table = new CellTable<T>(30, SelectionResource.INSTANCE); // TODO : a pager is needed for when the list size exceeds 30
+        table = new CellTable<T>(30,
+                                 SelectionResource.INSTANCE); // TODO : a pager is needed for when the list size
+                                 // exceeds 30
         addSelectionColumn();
         addNameColumn();
 
@@ -129,9 +133,15 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
         clearButton.setStyleName("saved_draft_button");
         clearButton.addKeyPressHandler(new EnterClickHandler(submitButton));
 
-        Widget popup = createPopupWidget();
+        final Widget popup = createPopupWidget();
         addToHandler = new PopupHandler(popup, addWidget.getElement(), -1, 1, false);
         addWidget.addClickHandler(addToHandler);
+        addToHandler.setCloseHandler(new CloseHandler<PopupPanel>() {
+            @Override
+            public void onClose(CloseEvent<PopupPanel> popupPanelCloseEvent) {
+                presenter.clearAllSelected();
+            }
+        });
 
         Resources.INSTANCE.subMenuStyle().ensureInjected();
 
@@ -232,10 +242,7 @@ public class AddToMenuItem<T extends OptionSelect> extends SubMenuBase implement
     @Override
     public void hideOptions() {
         addToHandler.hidePopup();
-    }
-
-    public SubMenuOptionsPresenter<T> getPresenter() {
-        return this.presenter;
+        presenter.clearAllSelected();
     }
 
     public List<T> getSelectedItems() {
