@@ -42,7 +42,7 @@
 		<mapping class="org.jbei.ice.lib.entry.model.Part" />
 		<mapping class="org.jbei.ice.lib.entry.model.ArabidopsisSeed" />
 		<mapping class="org.jbei.ice.lib.entry.model.Name" />
-        <mapping class="org.jbei.ice.lib.entry.model.PartNumber"/>
+        	<mapping class="org.jbei.ice.lib.entry.model.PartNumber"/>
 		<mapping class="org.jbei.ice.lib.entry.model.Link" />
 		<mapping class="org.jbei.ice.lib.models.SelectionMarker" />
 		<mapping class="org.jbei.ice.lib.models.Sequence" />
@@ -61,12 +61,12 @@
 		<mapping class="org.jbei.ice.lib.entry.sample.model.Sample" />
 		<mapping class="org.jbei.ice.lib.models.Label" />
 		<mapping class="org.jbei.ice.lib.entry.model.EntryLabel" />
-        <mapping class="org.jbei.ice.lib.account.model.AccountPreferences"/>
+        	<mapping class="org.jbei.ice.lib.account.model.AccountPreferences"/>
 		<mapping class="org.jbei.ice.lib.models.Group" />
-        <mapping class="org.jbei.ice.lib.permissions.model.ReadUser"/>
-        <mapping class="org.jbei.ice.lib.permissions.model.WriteUser"/>
-        <mapping class="org.jbei.ice.lib.permissions.model.ReadGroup"/>
-        <mapping class="org.jbei.ice.lib.permissions.model.WriteGroup"/>
+        	<mapping class="org.jbei.ice.lib.permissions.model.ReadUser"/>
+        	<mapping class="org.jbei.ice.lib.permissions.model.WriteUser"/>
+       	 	<mapping class="org.jbei.ice.lib.permissions.model.ReadGroup"/>
+        	<mapping class="org.jbei.ice.lib.permissions.model.WriteGroup"/>
 		<mapping class="org.jbei.ice.lib.models.FundingSource" />
 		<mapping class="org.jbei.ice.lib.entry.model.EntryFundingSource" />
 		<mapping class="org.jbei.ice.lib.account.model.AccountFundingSource" />
@@ -80,8 +80,8 @@
 		<mapping class="org.jbei.ice.lib.models.Storage" />
 		<mapping class="org.jbei.ice.lib.folder.Folder" />
 		<mapping class="org.jbei.ice.lib.entry.model.Parameter" />
-        <mapping class="org.jbei.ice.lib.bulkimport.BulkImport"/>
+        	<mapping class="org.jbei.ice.lib.bulkimport.BulkImport"/>
 		<mapping class="org.jbei.ice.lib.models.AnnotationLocation" />
-        <mapping class="org.jbei.ice.lib.bulkimport.BulkImportDraft"/>
+        	<mapping class="org.jbei.ice.lib.bulkimport.BulkImportDraft"/>
 	</session-factory>
 </hibernate-configuration>
