@@ -384,10 +384,11 @@ public class EntryPresenter extends AbstractPresenter {
                                                  return;
                                              }
 
-                                             currentInfo = result;
-                                             String name = result.getType().getDisplay().toUpperCase() + ": "
-                                                     + result.getName();
-                                             display.setEntryName(name);
+			                    currentInfo = result;
+                    			    currentContext.setCurrent(currentInfo.getId());
+                    			    String name = result.getType().getDisplay().toUpperCase() + ": "
+                            				+ result.getName();
+                    			    display.setEntryName(name);
 
                                              // can user edit ?
                                              boolean canEdit = (AppController.accountInfo.isModerator() || result
@@ -409,7 +410,11 @@ public class EntryPresenter extends AbstractPresenter {
                                                  }
                                              }
 
+<<<<<<< HEAD
                                              display.setAttachments(items, entryId);
+=======
+                    display.setAttachments(items, currentInfo.getId());
+>>>>>>> 0c5d7f7... update currently viewed entry id
 
                                              // menu views
                                              display.getDetailMenu().updateMenuCount(Menu.SEQ_ANALYSIS,
@@ -436,6 +441,13 @@ public class EntryPresenter extends AbstractPresenter {
                                                                                                      canEdit,
                                                                                                      new
 
+<<<<<<< HEAD
+=======
+                    case SEQ_ANALYSIS:
+                        boolean showFlash = (selection != null && selection.getCount() > 0);
+                        display.showSequenceView(currentInfo, showFlash);
+                        break;
+>>>>>>> 0c5d7f7... update currently viewed entry id
 
 
 
