@@ -265,6 +265,5 @@ public class Account implements IModel {
 
         Account account = (Account) obj;
         return account.getId() == this.getId() && account.getEmail().equals(this.getEmail());
-
     }
 }
