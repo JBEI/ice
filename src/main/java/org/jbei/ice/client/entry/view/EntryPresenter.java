@@ -259,7 +259,7 @@ public class EntryPresenter extends AbstractPresenter {
                 IHasNavigableData nav = currentContext.getNav();
                 EntryInfo currentInfo = nav.getCachedData(currentContext
                                                                   .getCurrent()); // TODO : how is this current info
-                                                                  // different from EntryPresenter.this.currentInfo
+                // different from EntryPresenter.this.currentInfo
                 int idx = nav.indexOfCached(currentInfo);
 
                 if (idx == -1) {
@@ -275,7 +275,7 @@ public class EntryPresenter extends AbstractPresenter {
 
                 EntryInfo nextInfo = nav.getNext(
                         currentInfo); // TODO : nextInfo can be null. look at the implementation of getNext for more
-                        // info
+                // info
 
                 // TODO :this needs to be folded into a single "Retrieve"
                 long currentId = nextInfo.getId();
@@ -384,11 +384,11 @@ public class EntryPresenter extends AbstractPresenter {
                                                  return;
                                              }
 
-			                    currentInfo = result;
-                    			    currentContext.setCurrent(currentInfo.getId());
-                    			    String name = result.getType().getDisplay().toUpperCase() + ": "
-                            				+ result.getName();
-                    			    display.setEntryName(name);
+                                             currentInfo = result;
+                                             currentContext.setCurrent(currentInfo.getId());
+                                             String name = result.getType().getDisplay().toUpperCase() + ": "
+                                                     + result.getName();
+                                             display.setEntryName(name);
 
                                              // can user edit ?
                                              boolean canEdit = (AppController.accountInfo.isModerator() || result
@@ -410,11 +410,7 @@ public class EntryPresenter extends AbstractPresenter {
                                                  }
                                              }
 
-<<<<<<< HEAD
-                                             display.setAttachments(items, entryId);
-=======
-                    display.setAttachments(items, currentInfo.getId());
->>>>>>> 0c5d7f7... update currently viewed entry id
+                                             display.setAttachments(items, currentInfo.getId());
 
                                              // menu views
                                              display.getDetailMenu().updateMenuCount(Menu.SEQ_ANALYSIS,
@@ -437,91 +433,13 @@ public class EntryPresenter extends AbstractPresenter {
                                              switch (menu) {
 
                                                  case GENERAL:
-                                                     sequencePresenter = display.showEntryDetailView(currentInfo,
-                                                                                                     canEdit,
-                                                                                                     new
-
-<<<<<<< HEAD
-=======
-                    case SEQ_ANALYSIS:
-                        boolean showFlash = (selection != null && selection.getCount() > 0);
-                        display.showSequenceView(currentInfo, showFlash);
-                        break;
->>>>>>> 0c5d7f7... update currently viewed entry id
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                                                                                     DeleteSequenceHandler(
-                                                                                                             service,
-                                                                                                             eventBus,
-                                                                                                             entryId));
+                                                     sequencePresenter = display.showEntryDetailView(
+                                                             currentInfo,
+                                                             canEdit,
+                                                             new DeleteSequenceHandler(
+                                                                     service,
+                                                                     eventBus,
+                                                                     entryId));
                                                      sequencePresenter.addSequencePasteHandler(
                                                              new UploadPasteSequenceHandler(
                                                                      service, sequencePresenter));
@@ -531,11 +449,10 @@ public class EntryPresenter extends AbstractPresenter {
                                                                              sequencePresenter));
                                                      break;
 
+
                                                  case SEQ_ANALYSIS:
-                                                     boolean showFlash = false;
-                                                     if (selection != null) {
-                                                         showFlash = (selection.getCount() > 0);
-                                                     }
+                                                     boolean showFlash = (selection != null && selection
+                                                             .getCount() > 0);
                                                      display.showSequenceView(currentInfo, showFlash);
                                                      break;
 
@@ -752,7 +669,8 @@ public class EntryPresenter extends AbstractPresenter {
                 UploadedInfo info = uploader.getServerInfo();
                 if (uploader.getStatus() == Status.ERROR) {
                     Window.alert(
-                            "There was a problem uploading your file.\n\nPlease contact your administrator if this problem persists");
+                            "There was a problem uploading your file.\n\nPlease contact your administrator if this " +
+                                    "problem persists");
                 }
             }
             uploader.reset();
