@@ -41,6 +41,7 @@ import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
+import org.jbei.ice.shared.dto.Visibility;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo.PermissionType;
 
@@ -313,6 +314,7 @@ public class EntryPresenter extends AbstractPresenter {
                 EntryInfo prevInfo = nav.getPrev(currentInfo);
 
                 long currentId = prevInfo.getId();
+                History.newItem(Page.ENTRY_VIEW.getLink() + ";id=" + currentId, false);
                 currentContext.setCurrent(currentId);
                 retrieveEntryDetails();
                 display.enableNext(true);
@@ -370,6 +372,7 @@ public class EntryPresenter extends AbstractPresenter {
                                                                                              "again later.");
                                              eventBus.fireEvent(event);
                                              // TODO : cancel loading indicator show
+                                             // display.showLoadingIndicator(false);
                                          }
 
                                          @Override
@@ -393,10 +396,15 @@ public class EntryPresenter extends AbstractPresenter {
                                              // can user edit ?
                                              boolean canEdit = (AppController.accountInfo.isModerator() || result
                                                      .isCanEdit());
+                                             canEdit = (canEdit && result.getVisibility() == Visibility.OK);
                                              display.getPermissionsWidget().setCanEdit(canEdit);
                                              if (canEdit) {
                                                  display.setSequenceDeleteHandler(new DeleteSequenceTraceHandler());
                                              }
+
+                                             // visibility
+                                             display.getVisibilityWidget().setVisibility(result.getVisibility());
+
 
                                              // attachments
                                              ArrayList<AttachmentInfo> attachments = result.getAttachments();
@@ -663,7 +671,7 @@ public class EntryPresenter extends AbstractPresenter {
             if (uploader.getStatus() == Status.SUCCESS) {
                 UploadedInfo info = uploader.getServerInfo();
                 //                    uploader.reset();
-                //                    uploadPanel.setVisible(false);
+                //                    uploadPanel.setVisibility(false);
                 retrieveEntrySequenceDetails();
             } else {
                 UploadedInfo info = uploader.getServerInfo();

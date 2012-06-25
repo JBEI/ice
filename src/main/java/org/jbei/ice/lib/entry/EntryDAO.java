@@ -267,16 +267,7 @@ class EntryDAO extends HibernateRepository {
         Session session = null;
         Set<Long> visibleEntries = new HashSet<Long>();
 
-        GroupController controller = new GroupController();
         try {
-            Group everybodyGroup = controller.createOrRetrievePublicGroup();
-            accountGroups.add(everybodyGroup);
-        } catch (ControllerException e) {
-            throw new DAOException(e);
-        }
-
-        try {
-
             session = newSession();
             session.getTransaction().begin();
 
@@ -287,11 +278,11 @@ class EntryDAO extends HibernateRepository {
                 query.setParameterList("groups", accountGroups);
                 List results = query.list();
                 visibleEntries.addAll(((ArrayList<Long>) results));
+            }
 
-                if (account == null) {
-                    session.getTransaction().commit();
-                    return visibleEntries;
-                }
+            if (account == null) {
+                session.getTransaction().commit();
+                return visibleEntries;
             }
 
             // get all entries visible to the account
@@ -302,6 +293,14 @@ class EntryDAO extends HibernateRepository {
             query.setParameter("account", account);
             List accountResults = query.list();
             visibleEntries.addAll(((ArrayList<Long>) accountResults));
+
+            // get drafts
+            Criteria c = session.createCriteria(Entry.class).add(Restrictions.isNotNull("visibility")).add(
+                    Restrictions.eq(
+                            "visibility", new Integer(0))).setProjection(Projections.id());
+            ArrayList<Long> results = new ArrayList<Long>(c.list());
+            visibleEntries.removeAll(results);
+
             session.getTransaction().commit();
             return visibleEntries;
 

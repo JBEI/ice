@@ -311,6 +311,9 @@ public class EntryToInfoFactory {
         }
         info.setParameters(params);
 
+        // get visibility
+        info.setVisibility(Visibility.valueToEnum(entry.getVisibility()));
+
         return info;
     }
 

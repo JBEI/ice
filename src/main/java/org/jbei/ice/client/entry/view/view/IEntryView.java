@@ -1,9 +1,9 @@
 package org.jbei.ice.client.entry.view.view;
 
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.MultiSelectionModel;
 import gwtupload.client.IUploader.OnFinishUploaderHandler;
-
-import java.util.ArrayList;
-
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.entry.view.HasAttachmentDeleteHandler;
 import org.jbei.ice.client.entry.view.detail.SequenceViewPanelPresenter;
@@ -12,9 +12,7 @@ import org.jbei.ice.client.entry.view.update.IEntryFormUpdateSubmit;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.MultiSelectionModel;
+import java.util.ArrayList;
 
 public interface IEntryView {
 
@@ -90,4 +88,6 @@ public interface IEntryView {
     void setAttachments(ArrayList<AttachmentItem> items, long entryId);
 
     void addDeleteEntryHandler(ClickHandler handler);
+
+    VisibilityWidgetPresenter getVisibilityWidget();
 }

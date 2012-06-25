@@ -8,6 +8,7 @@ import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.server.EntryToInfoFactory;
 import org.jbei.ice.server.InfoToModelFactory;
@@ -67,6 +68,7 @@ public class BulkImportDraftController {
         draftInfo.setLastUpdate(draft.getLastUpdateTime());
         draftInfo.setId(draft.getId());
         draftInfo.setType(EntryAddType.stringToType(draft.getImportType()));
+        draftInfo.setName(draft.getName());
 
         AccountInfo accountInfo = new AccountInfo();
         Account draftAccount = draft.getAccount();
@@ -116,7 +118,14 @@ public class BulkImportDraftController {
             draftInfo.setName(draft.getName());
             draftInfo.setType(EntryAddType.stringToType(draft.getImportType()));
 
-            // TODO : count
+            try {
+                int count = dao.retrieveSavedDraftCount(draft.getId());
+                draftInfo.setCount(count);
+            } catch (DAOException e) {
+                draftInfo.setCount(-1);
+                Logger.error(e);
+                continue;
+            }
 
             // set the account info
             AccountInfo accountInfo = new AccountInfo();

@@ -3,6 +3,11 @@ package org.jbei.ice.client.bulkimport.sheet;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 
+/**
+ * Column Header for the bulk import sheet
+ *
+ * @author Hector Plahar
+ */
 public class SheetHeader {
 
     int headerCol;

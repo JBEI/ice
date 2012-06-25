@@ -9,6 +9,7 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 
 /**
@@ -41,9 +42,7 @@ class BulkImportDraftDAO extends HibernateRepository {
             session.getTransaction().rollback();
             throw new DAOException(e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
     }
 
@@ -81,9 +80,7 @@ class BulkImportDraftDAO extends HibernateRepository {
             session.getTransaction().rollback();
             throw new DAOException(e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
     }
 
@@ -107,9 +104,30 @@ class BulkImportDraftDAO extends HibernateRepository {
             Logger.error(he);
             throw new DAOException(he);
         } finally {
-            if (session != null && session.isOpen())
-                session.close();
+            closeSession(session);
         }
     }
 
+    public int retrieveSavedDraftCount(long draftId) throws DAOException {
+        Session session = null;
+
+        try {
+            session = newSession();
+            session.getTransaction().begin();
+            Query query = session.createSQLQuery(
+                    "select count(*) from bulk_import_draft_entry where bulk_import_draft_id = " + draftId);
+            int count = ((BigInteger) query.uniqueResult()).intValue();
+            session.getTransaction().commit();
+            return count;
+
+        } catch (HibernateException he) {
+            Logger.error(he);
+            if (session != null) {
+                session.getTransaction().rollback();
+            }
+            throw new DAOException(he);
+        } finally {
+            closeSession(session);
+        }
+    }
 }

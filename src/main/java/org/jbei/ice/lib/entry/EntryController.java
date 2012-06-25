@@ -8,6 +8,7 @@ import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Group;
@@ -240,11 +241,14 @@ public class EntryController {
     }
 
     public Set<Long> getAllVisibleEntryIDs(Account account) throws ControllerException {
+
+        Set<Group> accountGroups = new HashSet<Group>(account.getGroups());
+        GroupController controller = new GroupController();
+        Group everybodyGroup = controller.createOrRetrievePublicGroup();
+        accountGroups.add(everybodyGroup);
+
         try {
-//            GroupController controller = new GroupController();
-//            Group publicGroup = controller.createOrRetrievePublicGroup();
-//            // TODO : get the groups that the user belongs to
-            return dao.getAllVisibleEntries(account.getGroups(), account);
+            return dao.getAllVisibleEntries(accountGroups, account);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

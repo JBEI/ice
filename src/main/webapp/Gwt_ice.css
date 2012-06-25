@@ -260,6 +260,16 @@ body {
     padding: 8px;
 }
 
+.entry_pending_visibility {
+    width: 180px;
+    font-size: 0.80em;
+    padding: 4px;
+    color: #f5f5f5;
+    background-color: #ff4500;
+    font-weight: bold;
+    border: 1px solid #aa0000;
+}
+
 .entry_add_sub_label {
     text-align: right;
     padding-right: 10px;
@@ -561,10 +571,6 @@ a.cell_mouseover:hover {
     font-weight: bold;
     color: #233559;
     border-bottom: 1px solid #c1c1c1;
-}
-
-.entry_view_right_menu {
-    float: right;
 }
 
 .entry_view_sub_menu_header {

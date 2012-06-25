@@ -1,13 +1,15 @@
 package org.jbei.ice.client.entry.view.view;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.ui.*;
+import com.google.gwt.view.client.MultiSelectionModel;
 import gwtupload.client.IUploader;
 import gwtupload.client.IUploader.OnFinishUploaderHandler;
 import gwtupload.client.IUploader.OnStartUploaderHandler;
 import gwtupload.client.SingleUploader;
-
-import java.util.ArrayList;
-import java.util.Date;
-
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.common.util.ImageUtil;
@@ -25,21 +27,8 @@ import org.jbei.ice.client.entry.view.update.UpdateEntryForm;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.MultiSelectionModel;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class EntryView extends Composite implements IEntryView {
 
@@ -63,6 +52,9 @@ public class EntryView extends Composite implements IEntryView {
 
     // permissions
     private final PermissionsWidget permissions;
+
+    // visibility
+    private final VisibilityWidget visibility;
 
     private final Widget uploadPanel;
     private FlexTable entryDetailMenuWrapper; // left side of the page with menu
@@ -89,6 +81,7 @@ public class EntryView extends Composite implements IEntryView {
 
     public EntryView() {
         permissions = new PermissionsWidget();
+        visibility = new VisibilityWidget();
         headerLabel = new Label();
         goBack = ImageUtil.getPrevIcon();
         goBack.setTitle("Back");
@@ -155,7 +148,8 @@ public class EntryView extends Composite implements IEntryView {
 
     private void initSequencePanel() {
         seqPanel = new HTMLPanel(
-                "<span class=\"entry_general_info_header\">Sequence Analysis</span> <span id=\"add_trace_button\"></span>");
+                "<span class=\"entry_general_info_header\">Sequence Analysis</span> <span " +
+                        "id=\"add_trace_button\"></span>");
         addSeqButton = new Button("Add");
         addSeqButton.setStyleName("top_menu");
         seqPanel.add(addSeqButton, "add_trace_button");
@@ -163,7 +157,8 @@ public class EntryView extends Composite implements IEntryView {
 
     private void initGeneralPanel() {
         //        generalHeaderPanel = new HTMLPanel(
-        //                "<span id=\"go_back_button\"></span> <span class=\"entry_general_info_header\" id=\"entry_header\"></span> &nbsp; <span id=\"edit_button\"></span>");
+        //                "<span id=\"go_back_button\"></span> <span class=\"entry_general_info_header\"
+        // id=\"entry_header\"></span> &nbsp; <span id=\"edit_button\"></span>");
         generalHeaderPanel = new HorizontalPanel();
         generalHeaderPanel.setVerticalAlignment(HasAlignment.ALIGN_MIDDLE);
         editGeneralButton = new Button("Edit");
@@ -179,7 +174,8 @@ public class EntryView extends Composite implements IEntryView {
 
     private void initSamplePanel() {
         samplesPanel = new HTMLPanel(
-                "<span class=\"entry_general_info_header\">Samples</span> &nbsp; <span id=\"add_sample_button\"></span>");
+                "<span class=\"entry_general_info_header\">Samples</span> &nbsp; <span " +
+                        "id=\"add_sample_button\"></span>");
         addSampleButton = new Button("Add");
         addSampleButton.setStyleName("top_menu");
         samplesPanel.add(addSampleButton, "add_sample_button");
@@ -198,7 +194,7 @@ public class EntryView extends Composite implements IEntryView {
     @Override
     public IEntryFormUpdateSubmit showUpdateForm(EntryInfo info) {
         UpdateEntryForm<? extends EntryInfo> form = ViewFactory.getUpdateForm(info,
-            AppController.autoCompleteData);
+                                                                              AppController.autoCompleteData);
         if (form == null)
             return form;
 
@@ -242,11 +238,14 @@ public class EntryView extends Composite implements IEntryView {
         HTMLPanel panel = new HTMLPanel(
                 "<div class=\"entry_view_right_menu\" id=\"entry_sub_header_div\"></div>&nbsp;"
                         + "<div class=\"entry_view_right_menu\" id=\"attachments_div\"></div>"
-                        + "<div style=\"padding-top: 20px\" class=\"entry_view_right_menu\" id=\"permissions_div\"></div>&nbsp;");
+                        + "<div style=\"padding-top: 20px\" class=\"entry_view_right_menu\" " +
+                        "id=\"permissions_div\"></div>"
+                        + "<div class=\"entry_view_right_menu\" id=\"visibility_div\"></div>&nbsp;");
 
         panel.add(entryDetailMenuWrapper, "entry_sub_header_div");
         panel.add(attachmentMenu, "attachments_div");
         panel.add(permissions, "permissions_div");
+        panel.add(visibility, "visibility_div");
 
         mainContent.setWidget(1, 1, panel);
         mainContent.getFlexCellFormatter().setVerticalAlignment(1, 1, HasAlignment.ALIGN_TOP);
@@ -302,14 +301,15 @@ public class EntryView extends Composite implements IEntryView {
     public void showContextNav(boolean show) {
         if (show) {
             HTMLPanel panel = new HTMLPanel(
-                    "<span id=\"leftBtn\"></span> <span id=\"navText\" class=\"font-bold\"></span><span id=\"rightBtn\"></span>");
+                    "<span id=\"leftBtn\"></span> <span id=\"navText\" class=\"font-bold\"></span><span " +
+                            "id=\"rightBtn\"></span>");
             panel.add(leftBtn, "leftBtn");
             panel.add(navText, "navText");
             panel.add(rightBtn, "rightBtn");
 
             entryDetailMenuWrapper.setWidget(0, 0, panel);
             entryDetailMenuWrapper.getFlexCellFormatter().setHorizontalAlignment(0, 0,
-                HasAlignment.ALIGN_CENTER);
+                                                                                 HasAlignment.ALIGN_CENTER);
             entryDetailMenuWrapper.getFlexCellFormatter().setStyleName(0, 0, "pad-6");
         } else {
             entryDetailMenuWrapper.setHTML(0, 0, "");
@@ -335,11 +335,12 @@ public class EntryView extends Composite implements IEntryView {
             @Override
             public void onStart(IUploader uploader) {
                 uploader.setServletPath(uploader.getServletPath() + "?eid=" + entryId
-                        + "&type=sequence&sid=" + AppController.sessionId);
+                                                + "&type=sequence&sid=" + AppController.sessionId);
             }
         });
 
-        String html = "<div style=\"outline:none; padding: 4px\"><span id=\"upload\"></span><span style=\"color: #777777;font-size: 9px;\">Fasta, GenBank, or ABI formats, optionally in zip file.</span></div>";
+        String html = "<div style=\"outline:none; padding: 4px\"><span id=\"upload\"></span><span style=\"color: " +
+                "#777777;font-size: 9px;\">Fasta, GenBank, or ABI formats, optionally in zip file.</span></div>";
         HTMLPanel panel = new HTMLPanel(html);
         panel.add(sequenceUploader, "upload");
 
@@ -490,6 +491,11 @@ public class EntryView extends Composite implements IEntryView {
     @Override
     public PermissionsPresenter getPermissionsWidget() {
         return this.permissions.getPresenter();
+    }
+
+    @Override
+    public VisibilityWidgetPresenter getVisibilityWidget() {
+        return this.visibility.getPresenter();
     }
 
     @Override

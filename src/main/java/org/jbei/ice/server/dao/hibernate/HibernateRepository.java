@@ -204,4 +204,9 @@ public class HibernateRepository implements IRepository {
         session.close();
         session.getSessionFactory().close();
     }
+
+    protected void closeSession(Session session) {
+        if (session != null && session.isOpen())
+            session.close();
+    }
 }

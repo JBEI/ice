@@ -557,6 +557,8 @@ public class Entry implements IEntryValueObject, IModel {
     }
 
     public Integer getVisibility() {
+        if (visibility == null)
+            return null;
         return visibility.intValue();
     }
 

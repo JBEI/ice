@@ -1,5 +1,15 @@
 package org.jbei.ice.client.entry.view.view;
 
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.HasMouseOutHandlers;
+import com.google.gwt.event.dom.client.HasMouseOverHandlers;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.*;
 import gwtupload.client.BaseUploadStatus;
 import gwtupload.client.IFileInput.FileInputType;
 import gwtupload.client.IUploadStatus.Status;
@@ -10,41 +20,17 @@ import gwtupload.client.IUploader.OnStartUploaderHandler;
 import gwtupload.client.IUploader.OnStatusChangedHandler;
 import gwtupload.client.IUploader.UploadedInfo;
 import gwtupload.client.SingleUploader;
-
-import java.util.ArrayList;
-
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.client.entry.view.HasAttachmentDeleteHandler;
 import org.jbei.ice.client.entry.view.view.AttachmentListMenuPresenter.IAttachmentListMenuView;
 
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.HasMouseOutHandlers;
-import com.google.gwt.event.dom.client.HasMouseOverHandlers;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.TextArea;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import java.util.ArrayList;
 
 /**
  * Widget that displays list of entry attachments in the entry detail view.
  * Allows user to download and also upload an attachment
- * 
+ *
  * @author Hector Plahar
  */
 public class AttachmentListMenu extends Composite implements IAttachmentListMenuView {
@@ -150,7 +136,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
 
     /**
      * Add attachment item to the menu
-     * 
+     *
      * @param item
      */
     @Override
@@ -175,7 +161,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
         vPanel.setWidth("180px");
 
         SingleUploader uploader = new SingleUploader(FileInputType.BROWSER_INPUT,
-                new AttachmentUploadStatus(), saveAttachment) {
+                                                     new AttachmentUploadStatus(), saveAttachment) {
             @Override
             public Panel getUploaderPanel() {
                 return vPanel;
@@ -197,7 +183,8 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
             public void onStart(IUploader uploader) {
                 String attDesc = attachmentDescription.getText().trim();
                 uploader.setServletPath(uploader.getServletPath() + "?desc=" + attDesc + "&eid="
-                        + entryId + "&type=attachment&sid=" + AppController.sessionId); // TODO : accessing session id directly from controller
+                                                + entryId + "&type=attachment&sid=" + AppController.sessionId); //
+                                                // TODO : accessing session id directly from controller
                 attachmentDescription.setVisible(false);
             }
         });
@@ -207,14 +194,14 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
             @Override
             public void onStatusChanged(IUploader uploader) {
                 switch (uploader.getStatus()) {
-                case ERROR:
-                    Window.alert(uploader.getServerResponse());
-                    saveAttachment.setEnabled(false);
-                    break;
+                    case ERROR:
+                        Window.alert(uploader.getServerResponse());
+                        saveAttachment.setEnabled(false);
+                        break;
 
-                case CHANGED:
-                    saveAttachment.setEnabled(true);
-                    break;
+                    case CHANGED:
+                        saveAttachment.setEnabled(true);
+                        break;
                 }
             }
         });
@@ -246,7 +233,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
             @Override
             public void onCancel(IUploader uploader) {
                 uploader.cancel();
-                //                attachmentDescription.setVisible(true);
+                //                attachmentDescription.setVisibility(true);
             }
         });
 
@@ -273,7 +260,8 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
             delete = ImageUtil.getDeleteIcon();
             delete.setVisible(false);
 
-            String description = (item.getDescription() == null || item.getDescription().isEmpty()) ? "No description provided"
+            String description = (item.getDescription() == null || item.getDescription()
+                                                                       .isEmpty()) ? "No description provided"
                     : item.getDescription();
             String html = "<span class=\"collection_user_menu\"><span id=\"attachment_file_name\"></style>"
                     + "<span id=\"delete_link\" style=\"cursor: pointer; float: right\"></span></span><br>";

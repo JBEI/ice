@@ -28,6 +28,11 @@ public class BulkImportDraftDAOTest {
     }
 
     @Test
+    public void testRetrieveCount() throws Exception {
+        int id = dao.retrieveSavedDraftCount(31);
+    }
+
+    @Test
     public void testRetrieveById() throws Exception {
         Account account = controller.getSystemAccount();
         controller.save(account);

@@ -269,8 +269,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         try {
             account = retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
 
             // require a user is a moderator or updating self account
             if (!controller.isModerator(account) && !email.equals(account.getEmail()))
@@ -332,7 +330,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     public boolean logout(String sessionId) {
-        Logger.info("Deauthenticating session \"" + sessionId + "\"");
+        Logger.info("De-authenticating session \"" + sessionId + "\"");
         try {
             AccountController.deauthenticate(sessionId);
             return true;
@@ -616,8 +614,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
 
             Entry entry = new EntryController().get(account, entryId);
             if (entry == null)
@@ -674,7 +670,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public EntryInfo retrieveEntryDetails(String sid, long id) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
-            Logger.info(account.getEmail() + ": retrieving entry details for " + id);
+            Logger.info(account.getEmail() + ": retrieving details for entry with id \"" + id + "\"");
             Entry entry;
             try {
                 entry = new EntryController().get(account, id);
@@ -851,21 +847,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         return buffer.toString();
 
     }
-
-//    @Override
-//    public AccountInfo retrieveAccountInfoForSession(String sid) {
-//        Account account;
-//        try {
-//            account = retrieveAccountForSid(sid);
-//            return accountToInfo(account);
-//        } catch (ControllerException e) {
-//            Logger.error(e);
-//        } catch (AuthenticationException e) {
-//            Logger.error(e);
-//        }
-//
-//        return null;
-//    }
 
     private AccountInfo accountToInfo(Account account) {
         if (account == null)
@@ -1360,7 +1341,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.error(ce);
             return null;
         }
-
     }
 
     @Override

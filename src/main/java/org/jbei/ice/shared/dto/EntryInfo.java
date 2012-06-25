@@ -45,7 +45,7 @@ public class EntryInfo implements IsSerializable {
     private ArrayList<SequenceAnalysisInfo> sequenceAnalysis;
     private ArrayList<ParameterInfo> parameters;
     private boolean canEdit; // whether current user that requested this entry info has write privs
-    private boolean visible;
+    private Visibility visible;
     private EntryInfo info; // typically used with strain with plasmid
 
     public EntryInfo() {
@@ -341,11 +341,11 @@ public class EntryInfo implements IsSerializable {
         this.linkifiedShortDescription = linkifiedShortDescription;
     }
 
-    public boolean isVisible() {
+    public Visibility getVisibility() {
         return visible;
     }
 
-    public void setVisible(boolean visible) {
+    public void setVisibility(Visibility visible) {
         this.visible = visible;
     }
 

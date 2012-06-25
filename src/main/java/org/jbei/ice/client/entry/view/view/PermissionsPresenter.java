@@ -191,6 +191,9 @@ public class PermissionsPresenter {
         this.view.setWidgetVisibility(canEdit);
     }
 
+    //
+    // Inner classes
+    //
     private class DeletePermissionCallback extends Callback<PermissionInfo> {
 
         @Override
