@@ -3,15 +3,14 @@ package org.jbei.ice.lib.account;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountPreferences;
+import org.jbei.ice.lib.account.model.AccountType;
 import org.jbei.ice.lib.authentication.AuthenticationBackendException;
 import org.jbei.ice.lib.authentication.AuthenticationBackendManager;
 import org.jbei.ice.lib.authentication.AuthenticationBackendManager.AuthenticationBackendManagerException;
 import org.jbei.ice.lib.authentication.IAuthenticationBackend;
 import org.jbei.ice.lib.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.models.Moderator;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.JbeirSettings;
@@ -171,16 +170,18 @@ public class AccountController {
         adminAccount.setModificationTime(currentTime);
         adminAccount.setLastLoginTime(currentTime);
 
-        try {
-            save(adminAccount);
-            Moderator adminModerator = new Moderator();
-            adminModerator.setAccount(adminAccount);
-            dao.saveModerator(adminModerator);
-        } catch (DAOException e) {
-            String msg = "Could not create administrator account";
-            Logger.error(msg, e);
-            throw new ControllerException(e);
-        }
+        // TODO
+
+//        try {
+//            save(adminAccount);
+//            Moderator adminModerator = new Moderator();
+//            adminModerator.setAccount(adminAccount);
+//            dao.saveModerator(adminModerator);
+//        } catch (DAOException e) {
+//            String msg = "Could not create administrator account";
+//            Logger.error(msg, e);
+//            throw new ControllerException(e);
+//        }
 
         return adminAccount;
     }
@@ -242,16 +243,11 @@ public class AccountController {
      * @return True, if the account is a moderator.
      * @throws ControllerException
      */
-    public Boolean isModerator(Account account) throws ControllerException {
-        Boolean result = false;
+    public Boolean isAdministrator(Account account) throws ControllerException {
+        if (account == null)
+            return false;
 
-        try {
-            result = dao.isModerator(account);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
-        return result;
+        return account.getType() == AccountType.ADMIN;
     }
 
     /**
@@ -397,7 +393,7 @@ public class AccountController {
         if (info == null)
             return info;
 
-        boolean isModerator = isModerator(account);
+        boolean isModerator = isAdministrator(account);
         info.setModerator(isModerator);
         info.setSessionId(sessionData.getSessionKey());
         return info;

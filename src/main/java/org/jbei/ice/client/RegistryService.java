@@ -114,8 +114,7 @@ public interface RegistryService extends RemoteService {
     SampleStorage createSample(String sessionId, SampleStorage sampleStorage, long entryId)
             throws AuthenticationException;
 
-    BulkImportDraftInfo updateBulkImportDraft(String sessionId, long id, String email, String name,
-            ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary)
+    BulkImportDraftInfo updateBulkImportDraft(String sessionId, long id, ArrayList<EntryInfo> list)
             throws AuthenticationException;
 
     SuggestOracle.Response getPermissionSuggestions(Request req);

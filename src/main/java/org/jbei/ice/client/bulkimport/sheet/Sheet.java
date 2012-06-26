@@ -13,7 +13,6 @@ import gwtupload.client.IUploader;
 import gwtupload.client.IUploader.OnFinishUploaderHandler;
 import gwtupload.client.IUploader.UploadedInfo;
 import org.jbei.ice.client.bulkimport.SheetPresenter;
-import org.jbei.ice.client.bulkimport.model.SheetFieldData;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.BioSafetyOptions;
@@ -54,7 +53,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
     private String filename;
     private final HashMap<Integer, String> attachmentRowFileIds;
     private final HashMap<Integer, String> sequenceRowFileIds;
-    private final BulkImportDraftInfo info;
 
     private final static int ROW_COUNT = 50;
 
@@ -63,8 +61,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
     }
 
     public Sheet(EntryAddType type, BulkImportDraftInfo info) {
-
-        this.info = info;
 
         headerCol = 0;
         attachmentRowFileIds = new HashMap<Integer, String>();
@@ -124,7 +120,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         addScrollHandlers();
 
         // presenter
-        presenter = new SheetPresenter(this, type);
+        presenter = new SheetPresenter(this, type, info);
         init();
     }
 
@@ -202,7 +198,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         while (count > 0) {
 
-            this.addRow();
+            presenter.addRow();
 
             // index col
             HTML indexCell = new HTML(i + "");
@@ -325,42 +321,54 @@ public class Sheet extends Composite implements SheetPresenter.View {
         }
     }
 
+    public ArrayList<EntryInfo> getCellData() {
+        return presenter.getCellEntryList();
+
+//        ArrayList<SheetFieldData[]> cellData = new ArrayList<SheetFieldData[]>();
+//
+//        Header[] headers = presenter.getTypeHeaders();
+//        SheetFieldData[] row;
+//
+//        for (int i = 0; i < sheetTable.getRowCount(); i += 1) {
+//            if (isEmptyRow(i))
+//                continue;
+//
+//            row = new SheetFieldData[headers.length];
+//
+//            int y = 0;
+//            for (Header header : headers) {
+//
+//                String id = "";
+//                switch (header) {
+//                    case ATT_FILENAME:
+//                        id = attachmentRowFileIds.get(i);
+//                        break;
+//
+//                    case SEQ_FILENAME:
+//                        id = sequenceRowFileIds.get(i);
+//                        break;
+//                }
+//
+//                HasText widget = (HasText) sheetTable.getWidget(i, y);
+//                row[y] = new SheetFieldData(header, id, widget.getText());
+//                y += 1;
+//            }
+//
+//            cellData.add(row);
+//        }
+//
+//        return cellData;
+    }
+
     @Override
-    public ArrayList<SheetFieldData[]> getCellData() {
-        ArrayList<SheetFieldData[]> cellData = new ArrayList<SheetFieldData[]>();
+    public int getSheetRowCount() {
+        return sheetTable.getRowCount();
+    }
 
-        Header[] headers = presenter.getTypeHeaders();
-        SheetFieldData[] row;
-
-        for (int i = 0; i < sheetTable.getRowCount(); i += 1) {
-            if (isEmptyRow(i))
-                continue;
-
-            row = new SheetFieldData[headers.length];
-
-            int y = 0;
-            for (Header header : headers) {
-
-                String id = "";
-                switch (header) {
-                    case ATT_FILENAME:
-                        id = attachmentRowFileIds.get(i);
-                        break;
-
-                    case SEQ_FILENAME:
-                        id = sequenceRowFileIds.get(i);
-                        break;
-                }
-
-                HasText widget = (HasText) sheetTable.getWidget(i, y);
-                row[y] = new SheetFieldData(header, id, widget.getText());
-                y += 1;
-            }
-
-            cellData.add(row);
-        }
-
-        return cellData;
+    @Override
+    public String getCellText(int row, int col) {
+        HasText widget = (HasText) sheetTable.getWidget(row, col);
+        return widget.getText().trim();
     }
 
     @Override
@@ -368,7 +376,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
         // TODO Auto-generated method stub
     }
 
-    // TODO : use a bit map or bit arrays to track user entered values for more efficient lookup
     // currently goes through each row and cell and checks to cell value
     @Override
     public boolean isEmptyRow(int row) {
@@ -633,41 +640,30 @@ public class Sheet extends Composite implements SheetPresenter.View {
         currentIndex = newCol;
     }
 
-    public void addRow() {
-        int index = row - 1; // row includes the headers but this is 0-indexed
+    public int getRow() {
+        return this.row;
+    }
 
-        // type is already set in the constructor 
-        Header[] headers = presenter.getTypeHeaders();
-        int headersSize = headers.length;
+    @Override
+    public HashMap<Integer, String> getAttachmentRowFileIds() {
+        return this.attachmentRowFileIds;
+    }
 
-        for (int i = 0; i < headersSize; i += 1) {
-            Widget widget;
-            if (info != null && info.getCount() >= row) {
+    @Override
+    public HashMap<Integer, String> getSequenceRowFileIds() {
+        return this.sequenceRowFileIds;
+    }
 
-                EntryInfo primaryInfo = info.getEntryList().get(index);
-                String value = InfoValueExtractorFactory.extractValue(presenter.getType(),
-                                                                      headers[i],
-                                                                      primaryInfo,
-                                                                      primaryInfo.getInfo(),
-                                                                      index,
-                                                                      attachmentRowFileIds,
-                                                                      sequenceRowFileIds);
-                if (value == null)
-                    value = "";
+    @Override
+    public void setCellWidgetForCurrentRow(Header header, String display, String title, int col) {
+        Widget widget = new HTML(display);
+        widget.setTitle(title);
+        widget.setStyleName("cell");
+        sheetTable.setWidget(row, col, widget);
+    }
 
-                String display = value;
-                if (value.length() > 15)
-                    display = (value.substring(0, 13) + "...");
-                widget = new HTML(display);
-                widget.setTitle(value);
-            } else
-                widget = new HTML("");
-            widget.setStyleName("cell");
-
-            sheetTable.setWidget(row, i, widget);
-//            sheetTable.getFlexCellFormatter().setStyleName(row, i, "td_cell");
-        }
-        row += 1;
+    public void setRow(int row) {
+        this.row = row;
     }
 
     /**
@@ -709,6 +705,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
     //
 
     protected class CellClick implements ClickHandler {
+
         @Override
         public void onClick(ClickEvent event) {
             Cell cell = sheetTable.getCellForEvent(event);

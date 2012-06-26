@@ -4,7 +4,6 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -80,41 +79,39 @@ public class AdminPresenter extends AbstractPresenter {
     }
 
     private void retrieveSavedDrafts() {
-        try {
-            service.retrieveDraftsPendingVerification(AppController.sessionId,
-                                                      new AsyncCallback<ArrayList<BulkImportDraftInfo>>() {
+        new IceAsyncCallback<ArrayList<BulkImportDraftInfo>>() {
 
-                                                          @Override
-                                                          public void onFailure(Throwable caught) {
-                                                              Window.alert("Error retrieving saved drafts");
-                                                          }
+            @Override
+            protected void callService(AsyncCallback<ArrayList<BulkImportDraftInfo>> callback) {
+                try {
+                    service.retrieveDraftsPendingVerification(AppController.sessionId, callback);
+                } catch (AuthenticationException e) {
+                    History.newItem(Page.LOGIN.getLink());
+                }
+            }
 
-                                                          @Override
-                                                          public void onSuccess(ArrayList<BulkImportDraftInfo> result) {
-                                                              ArrayList<BulkImportMenuItem> data = new
-                                                                      ArrayList<BulkImportMenuItem>();
-                                                              for (BulkImportDraftInfo info : result) {
-                                                                  String name = info.getName();
-                                                                  String dateTime = DateUtilities.formatShorterDate(
-                                                                          info.getCreated());
-                                                                  BulkImportMenuItem item = new BulkImportMenuItem(
-                                                                          info.getId(), name, info
-                                                                          .getCount(), dateTime,
-                                                                          info.getType().toString(), info.getAccount()
-                                                                                                         .getEmail());
-                                                                  data.add(item);
-                                                              }
+            @Override
+            public void onSuccess(ArrayList<BulkImportDraftInfo> result) {
+                ArrayList<BulkImportMenuItem> data = new
+                        ArrayList<BulkImportMenuItem>();
+                for (BulkImportDraftInfo info : result) {
+                    String name = info.getName();
+                    String dateTime = DateUtilities.formatShorterDate(info.getCreated());
+                    BulkImportMenuItem item = new BulkImportMenuItem(
+                            info.getId(),
+                            name,
+                            info.getCount(),
+                            dateTime,
+                            info.getType().toString(),
+                            info.getAccount().getEmail());
+                    data.add(item);
+                }
 
-                                                              if (!data.isEmpty()) {
-                                                                  view.setSavedDraftsData(data,
-                                                                                          new DeleteBulkImportHandler(
-                                                                                                  service));
-                                                              }
-                                                          }
-                                                      });
-        } catch (org.jbei.ice.client.exception.AuthenticationException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
+                if (!data.isEmpty()) {
+                    view.setSavedDraftsData(data, new DeleteBulkImportHandler(service, eventBus));
+                }
+            }
+        }.go(eventBus);
     }
 
     private void setMenuSelectionModel() {

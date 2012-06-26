@@ -225,7 +225,7 @@ public class SavedDraftsMenu extends Composite {
 //            html = "<span class=\"collection_user_menu\">" + name
 //                    + "</span><span class=\"menu_count\" id=\"" + folderId
 //                    + "\"></span><br><span style=\"font-size: 10px; color: #999\">"
-//                    + item.getDateTime() + " | " + item.getType() + "</span>";
+//                    + item.getDateTime() + " | " + item.getTypeHeader() + "</span>";
 
             html = "<span class=\"collection_user_menu\" id=\"" + folderId + "_name\"></span>"
                     + "<span class=\"menu_count\" id=\"" + folderId + "\"></span> "

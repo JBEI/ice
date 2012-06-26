@@ -379,7 +379,7 @@ public class PermissionsController {
 
         // then check if moderator
         AccountController controller = new AccountController();
-        if (controller.isModerator(account)) {
+        if (controller.isAdministrator(account)) {
             return true;
         }
 
@@ -423,7 +423,7 @@ public class PermissionsController {
 //        AccountController controller = new AccountController();
 //
 //        if (recordId != null && !recordId.isEmpty() && account != null) {
-//            if (controller.isModerator(account)) {
+//            if (controller.isAdministrator(account)) {
 //                result = true;
 //            } else {
 //                result = groupHasReadPermission(recordId, account)
@@ -447,7 +447,7 @@ public class PermissionsController {
 //
 //        if (entryId > 0 && account != null) {
 //            try {
-//                if (controller.isModerator(account)) {
+//                if (controller.isAdministrator(account)) {
 //                    result = true;
 //                } else {
 //                    result = groupHasReadPermission(entryId, account)
@@ -474,7 +474,7 @@ public class PermissionsController {
 //        if (entry != null && account != null) {
 //            AccountController controller = new AccountController();
 //
-//            if (controller.isModerator(account)) {
+//            if (controller.isAdministrator(account)) {
 //                result = true;
 //            } else {
 //                result = userHasReadPermission(entry, account)

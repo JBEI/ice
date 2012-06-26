@@ -17,11 +17,11 @@ import org.jbei.ice.client.bulkimport.events.SavedDraftsEvent;
 import org.jbei.ice.client.bulkimport.events.SavedDraftsEventHandler;
 import org.jbei.ice.client.bulkimport.model.BulkImportModel;
 import org.jbei.ice.client.bulkimport.model.NewBulkInput;
-import org.jbei.ice.client.bulkimport.model.SheetFieldData;
 import org.jbei.ice.client.bulkimport.sheet.Sheet;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
+import org.jbei.ice.shared.dto.EntryInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -168,7 +168,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                 }
 
                 if (!data.isEmpty()) {
-                    view.setSavedDraftsData(data, new DeleteBulkImportHandler(model.getService()));
+                    view.setSavedDraftsData(data, new DeleteBulkImportHandler(model.getService(), model.getEventBus()));
                 } else
                     view.setToggleMenuVisibility(false);
             }
@@ -199,7 +199,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                 return;
             }
 
-            ArrayList<SheetFieldData[]> cellData = currentInput.getSheet().getCellData();
+            ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData();
             if (cellData == null || cellData.isEmpty()) {
                 view.showFeedback("Please enter data into the sheet before saving.", true);
                 return;
@@ -238,15 +238,8 @@ public class BulkImportPresenter extends AbstractPresenter {
         public void onClick(ClickEvent event) {
             String name = view.getDraftName();
             currentInput.setName(name);
-            // TODO : validation for draft save
-            //            if (name == null || name.isEmpty()) {
-            //                panel.getDraftInput().setStyleName("bulk_import_draft_input_error");
-            //                return;
-            //            }
-            //
-            //            // save draft
-            //            panel.getDraftInput().setStyleName("bulk_import_draft_input");
-            ArrayList<SheetFieldData[]> cellData = currentInput.getSheet().getCellData();
+
+            ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData();
             if (cellData == null || cellData.isEmpty()) {
                 view.showFeedback("Please enter data into the sheet before saving draft", true);
                 return;
@@ -271,9 +264,11 @@ public class BulkImportPresenter extends AbstractPresenter {
                                                               info.getId(), info.getName(), info.getCount(), dateTime,
                                                               info.getType().toString(), info.getAccount().getEmail());
 
-                                                      view.addSavedDraftData(item,
-                                                                             new DeleteBulkImportHandler(
-                                                                                     model.getService()));
+                                                      view.addSavedDraftData(
+                                                              item,
+                                                              new DeleteBulkImportHandler(
+                                                                      model.getService(),
+                                                                      model.getEventBus()));
                                                       currentInput.setName(info.getName());
                                                       currentInput.setId(info.getId());
 
@@ -295,10 +290,9 @@ public class BulkImportPresenter extends AbstractPresenter {
 
             long id = currentInput.getId();
             final EntryAddType type = currentInput.getImportType();
-            String name = currentInput.getName();
-            ArrayList<SheetFieldData[]> cellData = currentInput.getSheet().getCellData();
+            ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData();
 
-            model.updateBulkImportDraft(id, type, name, cellData,
+            model.updateBulkImportDraft(id, type, cellData,
                                         new BulkImportDraftSubmitEventHandler() {
 
                                             @Override

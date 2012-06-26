@@ -70,6 +70,9 @@ public class Account implements IModel {
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastLoginTime;
 
+    @Enumerated(EnumType.STRING)
+    private AccountType type = AccountType.NORMAL;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "account_group", joinColumns = @JoinColumn(name = "account_id"),
                inverseJoinColumns = @JoinColumn(name = "group_id"))
@@ -265,5 +268,16 @@ public class Account implements IModel {
 
         Account account = (Account) obj;
         return account.getId() == this.getId() && account.getEmail().equals(this.getEmail());
+    }
+
+    public AccountType getType() {
+        return type;
+    }
+
+    public void setType(AccountType type) {
+        if (type == null)
+            this.type = AccountType.NORMAL;
+        else
+            this.type = type;
     }
 }

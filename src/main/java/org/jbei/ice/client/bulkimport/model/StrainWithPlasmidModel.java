@@ -3,44 +3,31 @@ package org.jbei.ice.client.bulkimport.model;
 import org.jbei.ice.client.bulkimport.sheet.Header;
 import org.jbei.ice.shared.BioSafetyOptions;
 import org.jbei.ice.shared.dto.AttachmentInfo;
-import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
 
 import java.util.ArrayList;
 
-public class StrainWithPlasmidModel extends SheetModel {
+public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
 
     @Override
-    public void createInfo(ArrayList<SheetFieldData[]> data, ArrayList<EntryInfo> entryList) {
-        if (entryList == null)
-            entryList = new ArrayList<EntryInfo>();
-        else
-            entryList.clear();
+    public StrainInfo setInfoField(SheetFieldData datum, StrainInfo info) {
+        PlasmidInfo plasmid = new PlasmidInfo();
+        StrainInfo strain = new StrainInfo();
 
-        // for each row
-        for (SheetFieldData[] datumArray : data) {
+        setPlasmidInfo(plasmid, datum);
+        setStrainInfo(strain, datum);
 
-            // each each field
-            PlasmidInfo plasmid = new PlasmidInfo();
-            StrainInfo strain = new StrainInfo();
-
-            for (SheetFieldData datum : datumArray) {
-                setPlasmidInfo(plasmid, datum);
-                setStrainInfo(strain, datum);
-            }
-
-            strain.setInfo(plasmid);
-            entryList.add(strain);
-        }
+        strain.setInfo(plasmid);
+        return strain;
     }
 
     private void setStrainInfo(StrainInfo strain, SheetFieldData datum) {
         if (datum == null)
             return;
 
-        Header header = datum.getType();
+        Header header = datum.getTypeHeader();
         String value = datum.getValue();
 
         if (header == null || value == null || value.isEmpty())
@@ -148,7 +135,7 @@ public class StrainWithPlasmidModel extends SheetModel {
         if (datum == null)
             return;
 
-        Header header = datum.getType();
+        Header header = datum.getTypeHeader();
         String value = datum.getValue();
 
         if (header == null || value == null || value.isEmpty())

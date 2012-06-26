@@ -93,7 +93,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.info("User by login '" + name + "' successfully logged in");
             Account account = controller.getByEmail(info.getEmail());
             EntryController entryController = new EntryController();
-            boolean isModerator = controller.isModerator(account);
+            boolean isModerator = controller.isAdministrator(account);
 
             long visibleEntryCount;
             if (isModerator)
@@ -121,7 +121,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         try {
             Account account = retrieveAccountForSid(sid);
-            boolean isModerator = controller.isModerator(account);
+            boolean isModerator = controller.isAdministrator(account);
             if (!isModerator) {
                 Logger.warn(account.getEmail()
                                     + " attempting to retrieve all user accounts without moderation privileges");
@@ -149,7 +149,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 }
 
                 info.setEmail(userAccount.getEmail());
-                info.setModerator(controller.isModerator(userAccount));
+                info.setModerator(controller.isAdministrator(userAccount));
                 info.setFirstName(userAccount.getFirstName());
                 info.setLastName(userAccount.getLastName());
                 infos.add(info);
@@ -271,7 +271,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             account = retrieveAccountForSid(sid);
 
             // require a user is a moderator or updating self account
-            if (!controller.isModerator(account) && !email.equals(account.getEmail()))
+            if (!controller.isAdministrator(account) && !email.equals(account.getEmail()))
                 return null;
 
             account = controller.getByEmail(email);
@@ -310,7 +310,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 long entryCount = entryController.getOwnerEntryCount(account);
                 info.setUserEntryCount(entryCount);
 
-                boolean isModerator = controller.isModerator(account);
+                boolean isModerator = controller.isAdministrator(account);
                 info.setModerator(isModerator);
 
                 long visibleEntryCount;
@@ -545,7 +545,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             EntryController entryController = new EntryController();
 
             ArrayList<Long> entries;
-            if (controller.isModerator(account))
+            if (controller.isAdministrator(account))
                 entries = entryController.getAllEntryIDs();
             else {
                 entries = new ArrayList<Long>();
@@ -1177,7 +1177,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             SampleController sampleController = new SampleController();
             int sampleCount = sampleController.getSampleCountBy(accountInfo.getEmail());
             accountInfo.setUserSampleCount(sampleCount);
-            boolean isModerator = controller.isModerator(account);
+            boolean isModerator = controller.isAdministrator(account);
             long visibleEntryCount;
             if (isModerator)
                 visibleEntryCount = entryController.getAllEntryCount();
@@ -1259,7 +1259,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             AccountController controller = new AccountController();
-            if (!controller.isModerator(account))
+            if (!controller.isAdministrator(account))
                 return null;
 
             BulkImportController biController = new BulkImportController();
@@ -1301,44 +1301,18 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public BulkImportDraftInfo deleteDraftPendingVerification(String sid, long draftId) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
-
             AccountController controller = new AccountController();
-            if (!controller.isModerator(account))
+            if (!controller.isAdministrator(account))
                 return null;
 
-            BulkImportController biController = new BulkImportController();
-            BulkImport draft = biController.retrieveById(draftId);
-            if (draft == null)
-                return null;
-
-            Logger.info(account.getEmail() + ": deleting bulk import draft with id " + draft.getId());
-
-            biController.deleteDraft(draft);
-
-            BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
-            List<BulkImportEntryData> primary = draft.getPrimaryData();
-            if (primary != null)
-                draftInfo.setCount(draft.getPrimaryData().size());
-            else
-                draftInfo.setCount(-1);
-            draftInfo.setCreated(draft.getCreationTime());
-            draftInfo.setId(draft.getId());
-            Account draftAccount = draft.getAccount();
-            draftInfo.setName(draftAccount.getFullName());
-            draftInfo.setType(EntryAddType.stringToType(draft.getType()));
-
-            // set the account info
-            AccountInfo accountInfo = new AccountInfo();
-            accountInfo.setEmail(draftAccount.getEmail());
-            accountInfo.setFirstName(draftAccount.getFirstName());
-            accountInfo.setLastName(draftAccount.getLastName());
-            draftInfo.setAccount(accountInfo);
-            return draftInfo;
-
+            Logger.info(account.getEmail() + ": deleting bulk import draft with id " + draftId);
+            BulkImportDraftController draftController = new BulkImportDraftController();
+            return draftController.deleteDraftById(account, draftId);
         } catch (ControllerException ce) {
             Logger.error(ce);
+            return null;
+        } catch (PermissionException e) {
+            Logger.error(e);
             return null;
         }
     }
@@ -1361,25 +1335,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public BulkImportDraftInfo updateBulkImportDraft(String sessionId, long id, String email,
-            String name, ArrayList<EntryInfo> primary,
-            ArrayList<EntryInfo> secondary) throws AuthenticationException {
+    public BulkImportDraftInfo updateBulkImportDraft(String sessionId, long draftId, ArrayList<EntryInfo> list)
+            throws AuthenticationException {
+
         Account account;
         try {
             account = retrieveAccountForSid(sessionId);
-
-            BulkImportController controller = new BulkImportController();
-            BulkImport result = controller.updateBulkImportDraft(id, name, account, primary,
-                                                                 secondary);
-
-            // result to DTO
-            BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
-            draftInfo.setId(result.getId());
-            draftInfo.setCount(result.getPrimaryData().size());
-            draftInfo.setCreated(result.getCreationTime());
-            draftInfo.setName(result.getName());
-            return draftInfo;
-
+            BulkImportDraftController controller = new BulkImportDraftController();
+            return controller.updateBulkImportDraft(account, draftId, list);
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
@@ -2032,7 +1995,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         try {
             account = retrieveAccountForSid(sessionId);
-            if (!controller.isModerator(account)) {
+            if (!controller.isAdministrator(account)) {
                 Logger.warn(account.getEmail()
                                     + ": attempting to retrieve admin only feature (entry Counts)");
                 return null;
@@ -2069,7 +2032,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return null;
 
-            if (!controller.isModerator(account)) {
+            if (!controller.isAdministrator(account)) {
                 Logger.warn(account.getEmail()
                                     + ": attempting to retrieve admin only feature (groups)");
                 return null;

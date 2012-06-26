@@ -18,6 +18,8 @@ import javax.persistence.Table;
  *
  * @author Timothy Ham, Zinovii Dmytriv
  */
+
+@Deprecated
 @Entity
 @Table(name = "moderator")
 @SequenceGenerator(name = "sequence", sequenceName = "moderator_id_seq", allocationSize = 1)

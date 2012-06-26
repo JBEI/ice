@@ -50,17 +50,7 @@ public class BulkImportModel {
     }
 
     public void saveBulkImportDraftData(final EntryAddType type, final String name,
-            ArrayList<SheetFieldData[]> data, final BulkImportDraftSubmitEventHandler handler) {
-        SheetModel model = ModelFactory.getModelForType(type);
-        if (model == null) {
-            handler.onSubmit(null);
-            return;
-        }
-
-        final ArrayList<EntryInfo> entryList = new ArrayList<EntryInfo>();
-
-        // arrays get filled out here
-        model.createInfo(data, entryList);
+            final ArrayList<EntryInfo> entryList, final BulkImportDraftSubmitEventHandler handler) {
 
         // creator info does not appear to be filled out anywhere
         String creator = AppController.accountInfo.getFullName();
@@ -92,40 +82,28 @@ public class BulkImportModel {
         }.go(eventBus);
     }
 
-    public void updateBulkImportDraft(final long id, final EntryAddType type, final String name,
-            ArrayList<SheetFieldData[]> data, final BulkImportDraftSubmitEventHandler handler) {
-//        SheetModel model = ModelFactory.getModelForType(type);
-//        if (model == null) {
-//            handler.onSubmit(null);
-//            return;
-//        }
-//
-//        final ArrayList<EntryInfo> entryList = new ArrayList<EntryInfo>();
-//
-//        // arrays get filled out here
-//        model.createInfo(data, entryList);
-//
-//        new IceAsyncCallback<BulkImportDraftInfo>() {
-//
-//            @Override
-//            protected void callService(AsyncCallback<BulkImportDraftInfo> callback) {
-//                try {
-//                    service.updateBulkImportDraft(AppController.sessionId, id, AppController.accountInfo.getEmail(),
-//                                                  name, type, entryList, callback);
-//                } catch (AuthenticationException e) {
-//                    History.newItem(Page.LOGIN.getLink());
-//                }
-//            }
-//
-//            @Override
-//            public void onSuccess(BulkImportDraftInfo result) {
-//                handler.onSubmit(new BulkImportDraftSubmitEvent(result));
-//            }
-//        }.go(eventBus);
-        Window.alert("Not implemented yet. Should be automatic");
+    public void updateBulkImportDraft(final long id, final EntryAddType type,
+            final ArrayList<EntryInfo> entryList, final BulkImportDraftSubmitEventHandler handler) {
+
+        new IceAsyncCallback<BulkImportDraftInfo>() {
+
+            @Override
+            protected void callService(AsyncCallback<BulkImportDraftInfo> callback) {
+                try {
+                    service.updateBulkImportDraft(AppController.sessionId, id, entryList, callback);
+                } catch (AuthenticationException e) {
+                    History.newItem(Page.LOGIN.getLink());
+                }
+            }
+
+            @Override
+            public void onSuccess(BulkImportDraftInfo result) {
+                handler.onSubmit(new BulkImportDraftSubmitEvent(result));
+            }
+        }.go(eventBus);
     }
 
-    public void submitBulkImport(final EntryAddType type, ArrayList<SheetFieldData[]> data,
+    public void submitBulkImport(final EntryAddType type, ArrayList<EntryInfo> data,
             final BulkImportSubmitEventHandler handler) {
 
 //        SheetModel model = ModelFactory.getModelForType(type);
@@ -180,5 +158,9 @@ public class BulkImportModel {
 
     public RegistryServiceAsync getService() {
         return this.service;
+    }
+
+    public HandlerManager getEventBus() {
+        return this.eventBus;
     }
 }

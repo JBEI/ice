@@ -156,7 +156,7 @@ public class RegistryAPI {
         AccountController controller = new AccountController();
 
         try {
-            return controller.isModerator(account);
+            return controller.isAdministrator(account);
         } catch (ControllerException e) {
             Logger.error(e);
             throw new ServiceException("Error accessing account for " + login);
@@ -1595,7 +1595,7 @@ public class RegistryAPI {
         }
 
         try {
-            if (!controller.isModerator(account)) {
+            if (!controller.isAdministrator(account)) {
                 log("Account " + account.getEmail() + " attempting to access createStrainSample()");
                 throw new PermissionException("Account does not have permissions");
             }

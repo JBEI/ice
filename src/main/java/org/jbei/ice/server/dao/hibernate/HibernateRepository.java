@@ -8,6 +8,7 @@ import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.server.dao.IRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,7 +17,7 @@ import java.util.List;
  * @author Hector Plahar, Zinovii Dmytriv, Timothy Ham
  */
 
-public class HibernateRepository implements IRepository {
+public class HibernateRepository<T extends IModel> implements IRepository {
 
     /**
      * Start a new Hibernate {@link Session}.
@@ -33,7 +34,7 @@ public class HibernateRepository implements IRepository {
      * @param model
      * @throws DAOException
      */
-    protected void delete(IModel model) throws DAOException {
+    protected void delete(T model) throws DAOException {
         if (model == null) {
             throw new DAOException("Failed to delete null model!");
         }
@@ -41,29 +42,20 @@ public class HibernateRepository implements IRepository {
         Session session = newSession();
 
         try {
-            session.getTransaction().begin(); // Do not assign transaction to value
-
-            try {
-                session.delete(model);
-                session.getTransaction().commit();
-            } catch (org.hibernate.NonUniqueObjectException e) {
-                model = (IModel) session.merge(model);
-                session.delete(model);
-                session.getTransaction().commit();
-            }
+            session.getTransaction().begin();
+            session.delete(model);
+            session.getTransaction().commit();
         } catch (HibernateException e) {
             session.getTransaction().rollback();
             throw new DAOException("dbDelete failed!", e);
-        } catch (Exception e1) {
+        } catch (Exception e) {
             // Something really bad happened.
             session.getTransaction().rollback();
-            e1.printStackTrace();
+            Logger.error(e);
             resetSessionFactory(session);
-            throw new DAOException("Unkown database exception ", e1);
+            throw new DAOException("Unknown database exception ", e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
     }
 
@@ -74,25 +66,16 @@ public class HibernateRepository implements IRepository {
      * @return Object saved object
      * @throws DAOException in the event of a problem saving or null model parameter
      */
-    protected Object saveOrUpdate(IModel model) throws DAOException {
+    protected T saveOrUpdate(T model) throws DAOException {
         if (model == null) {
             throw new DAOException("Failed to save null model!");
         }
 
-        Object result = null;
-
         Session session = newSession();
         try {
-            session.getTransaction().begin(); // Do not assign transaction to value
-            try {
-                session.saveOrUpdate(model);
-                session.getTransaction().commit();
-            } catch (org.hibernate.NonUniqueObjectException e) {
-                session.merge(model);
-                session.getTransaction().commit();
-            }
-
-            result = model;
+            session.getTransaction().begin();
+            session.saveOrUpdate(model);
+            session.getTransaction().commit();
         } catch (HibernateException e) {
             session.getTransaction().rollback();
             throw new DAOException("dbSave failed!", e);
@@ -102,12 +85,10 @@ public class HibernateRepository implements IRepository {
             resetSessionFactory(session);
             throw new DAOException("Unknown database exception ", e1);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
-        return result;
+        return model;
     }
 
     /**
@@ -118,13 +99,14 @@ public class HibernateRepository implements IRepository {
      * @return IModel object from the database.
      * @throws DAOException
      */
-    protected Object get(Class<? extends IModel> theClass, long id) throws DAOException {
-        Object result = null;
+    @SuppressWarnings("unchecked")
+    protected T get(Class<T> theClass, long id) throws DAOException {
+        T result = null;
         Session session = newSession();
 
         try {
             session.getTransaction().begin();
-            result = session.get(theClass, id);
+            result = (T) session.get(theClass, id);
         } catch (HibernateException e) {
             throw new DAOException("dbGet failed for " + theClass.getCanonicalName() + " and id="
                                            + id, e);
@@ -172,15 +154,15 @@ public class HibernateRepository implements IRepository {
         return result;
     }
 
-    @SuppressWarnings("rawtypes")
-    protected List retrieveAll(Class<? extends IModel> theClass) throws DAOException {
+    @SuppressWarnings("rawtypes, unchecked")
+    protected List<T> retrieveAll(Class<T> theClass) throws DAOException {
         Session session = newSession();
 
         try {
-            List results = null;
+            List<T> results;
             session.getTransaction().begin();
             Query query = session.createQuery("from " + theClass.getName());
-            results = query.list();
+            results = new ArrayList<T>(query.list());
             session.getTransaction().commit();
             return results;
         } catch (HibernateException he) {
@@ -196,7 +178,7 @@ public class HibernateRepository implements IRepository {
     /**
      * Disconnect the session and reset the SessionFactory.
      *
-     * @param session
+     * @param session reference to session being disconnected and closed
      */
     private static void resetSessionFactory(Session session) {
         Logger.error("Closing session factory in DAO.java.");

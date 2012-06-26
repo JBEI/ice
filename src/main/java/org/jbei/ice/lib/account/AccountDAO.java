@@ -5,7 +5,6 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.models.Moderator;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
@@ -19,7 +18,7 @@ import java.util.Set;
  *
  * @author Hector Plahar, Timothy Ham, Zinovii Dmytriv
  */
-class AccountDAO extends HibernateRepository {
+class AccountDAO extends HibernateRepository<Account> {
 
     /**
      * Retrieve {@link Account} by id from the database.
@@ -29,7 +28,7 @@ class AccountDAO extends HibernateRepository {
      * @throws DAOException
      */
     public Account get(long id) throws DAOException {
-        return (Account) super.get(Account.class, id);
+        return super.get(Account.class, id);
     }
 
     @SuppressWarnings("unchecked")
@@ -140,43 +139,6 @@ class AccountDAO extends HibernateRepository {
     }
 
     /**
-     * Check if the given {@link Account} has moderator privileges.
-     *
-     * @param account
-     * @return True if the {@link Account} is a moderator.
-     * @throws DAOException
-     */
-    public Boolean isModerator(Account account) throws DAOException {
-        if (account == null) {
-            throw new DAOException("Failed to determine moderator for null Account!");
-        }
-
-        Boolean result = false;
-
-        Session session = newSession();
-        try {
-            String queryString = "from " + Moderator.class.getName()
-                    + " moderator where moderator.account = :account";
-            Query query = session.createQuery(queryString);
-            query.setParameter("account", account);
-
-            Moderator moderator = (Moderator) query.uniqueResult();
-            if (moderator != null) {
-                result = true;
-            }
-        } catch (HibernateException e) {
-            throw new DAOException("Failed to determine moderator for Account: "
-                                           + account.getFullName());
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
-        }
-
-        return result;
-    }
-
-    /**
      * Save the given {@link Account} into the database.
      *
      * @param account
@@ -184,25 +146,7 @@ class AccountDAO extends HibernateRepository {
      * @throws DAOException
      */
     public Account save(Account account) throws DAOException {
-        return (Account) super.saveOrUpdate(account);
-    }
-
-    /**
-     * Delete the given {@link Account} in the database.
-     *
-     * @param account
-     * @return True if successful.
-     * @throws DAOException
-     */
-    public Boolean delete(Account account) throws DAOException {
-        if (account == null) {
-            throw new DAOException("Failed to delete null Account!");
-        }
-
-        Boolean result = false;
-        delete(account);
-        result = true;
-        return result;
+        return super.saveOrUpdate(account);
     }
 
     /**
@@ -237,20 +181,5 @@ class AccountDAO extends HibernateRepository {
         }
 
         return account;
-    }
-
-    /**
-     * Save the given {@link Moderator} object into the database.
-     *
-     * @param moderator
-     * @return Saved Moderator.
-     * @throws DAOException TODO
-     */
-    public Moderator saveModerator(Moderator moderator) throws DAOException {
-        if (moderator == null) {
-            throw new DAOException("Cannot to save null Moderator");
-        }
-
-        return (Moderator) saveOrUpdate(moderator);
     }
 }

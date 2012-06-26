@@ -135,8 +135,7 @@ public interface RegistryServiceAsync {
 
     void deleteFolder(String sessionId, long folderId, AsyncCallback<FolderDetails> callback);
 
-    void updateBulkImportDraft(String sessionId, long id, String email, String name,
-            ArrayList<EntryInfo> primary, ArrayList<EntryInfo> secondary,
+    void updateBulkImportDraft(String sessionId, long id, ArrayList<EntryInfo> list,
             AsyncCallback<BulkImportDraftInfo> asyncCallback) throws AuthenticationException;
 
     void addPermission(String sessionId, long entryId, PermissionInfo permission,

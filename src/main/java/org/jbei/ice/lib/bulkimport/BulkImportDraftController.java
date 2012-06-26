@@ -53,7 +53,7 @@ public class BulkImportDraftController {
         if (draft == null)
             throw new ControllerException("Could not retrieve bulk import draft for id " + id);
 
-        boolean isModerator = accountController.isModerator(account);
+        boolean isModerator = accountController.isAdministrator(account);
         boolean isOwner = account.equals(draft.getAccount());
 
         // check for permissions to retrieve this bulk import
@@ -98,7 +98,6 @@ public class BulkImportDraftController {
     public ArrayList<BulkImportDraftInfo> retrieveByUser(Account account, Account userAccount)
             throws ControllerException {
 
-        // TODO : check for appropriate privileges with account
         ArrayList<BulkImportDraft> results;
 
         try {
@@ -110,11 +109,16 @@ public class BulkImportDraftController {
         ArrayList<BulkImportDraftInfo> infoArrayList = new ArrayList<BulkImportDraftInfo>();
 
         for (BulkImportDraft draft : results) {
+            Account draftAccount = draft.getAccount();
+
+            if (!account.equals(draftAccount) || !accountController.isAdministrator(account))
+                continue;
+
             BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
             draftInfo.setCreated(draft.getCreationTime());
             draftInfo.setId(draft.getId());
 
-            Account draftAccount = draft.getAccount();
+
             draftInfo.setName(draft.getName());
             draftInfo.setType(EntryAddType.stringToType(draft.getImportType()));
 
@@ -137,6 +141,47 @@ public class BulkImportDraftController {
         }
 
         return infoArrayList;
+    }
+
+    public BulkImportDraftInfo deleteDraftById(Account requesting, long draftId)
+            throws ControllerException, PermissionException {
+        BulkImportDraft draft;
+        try {
+            draft = dao.retrieveById(draftId);
+            if (draft == null)
+                throw new ControllerException("Could not retrieve draft with id \"" + draftId + "\"");
+
+            Account draftAccount = draft.getAccount();
+            if (!requesting.equals(draftAccount) || !accountController.isAdministrator(requesting))
+                throw new PermissionException("No permissions to delete draft " + draftId);
+
+            dao.delete(draft);
+
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+
+        BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
+        try {
+            int count = dao.retrieveSavedDraftCount(draft.getId());
+            draftInfo.setCount(count);
+        } catch (DAOException e) {
+            draftInfo.setCount(-1);
+            Logger.error(e);
+        }
+        draftInfo.setCreated(draft.getCreationTime());
+        draftInfo.setId(draft.getId());
+        Account draftAccount = draft.getAccount();
+        draftInfo.setName(draftAccount.getFullName());
+        draftInfo.setType(EntryAddType.stringToType(draft.getImportType()));
+
+        // set the account info
+        AccountInfo accountInfo = new AccountInfo();
+        accountInfo.setEmail(draftAccount.getEmail());
+        accountInfo.setFirstName(draftAccount.getFirstName());
+        accountInfo.setLastName(draftAccount.getLastName());
+        draftInfo.setAccount(accountInfo);
+        return draftInfo;
     }
 
     public BulkImportDraftInfo createBulkImportDraft(Account account, EntryAddType type,
@@ -198,5 +243,10 @@ public class BulkImportDraftController {
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
+    }
+
+    public BulkImportDraftInfo updateBulkImportDraft(Account account, long draftId, ArrayList<EntryInfo> list)
+            throws ControllerException {
+        return null;
     }
 }

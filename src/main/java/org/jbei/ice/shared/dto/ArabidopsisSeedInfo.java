@@ -1,10 +1,10 @@
 package org.jbei.ice.shared.dto;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class ArabidopsisSeedInfo extends EntryInfo {
 
@@ -17,6 +17,9 @@ public class ArabidopsisSeedInfo extends EntryInfo {
                 "T-DNA"), OTHER("Other");
 
         private String display;
+
+        PlantType() {
+        }
 
         PlantType(String display) {
             this.display = display;
@@ -109,5 +112,4 @@ public class ArabidopsisSeedInfo extends EntryInfo {
     public PlantType getPlantType() {
         return plantType;
     }
-
 }

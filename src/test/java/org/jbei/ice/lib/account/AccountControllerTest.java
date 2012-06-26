@@ -129,7 +129,7 @@ public class AccountControllerTest {
 
     /**
      * Test method for
-     * {@link org.jbei.ice.lib.account.AccountController#isModerator(org.jbei.ice.lib.account.model.Account)}
+     * {@link org.jbei.ice.lib.account.AccountController#isAdministrator(org.jbei.ice.lib.account.model.Account)}
      * .
      */
     @Test

@@ -1,123 +1,54 @@
 package org.jbei.ice.client.bulkimport.model;
 
+import com.google.gwt.user.client.Window;
 import org.jbei.ice.client.bulkimport.sheet.Header;
-import org.jbei.ice.shared.BioSafetyOptions;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
-import org.jbei.ice.shared.dto.AttachmentInfo;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 
-import java.util.ArrayList;
-
-public class ArabidopsisSheetModel extends SingleInfoSheetModel {
+public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedInfo> {
 
     @Override
-    public void createInfo(ArrayList<SheetFieldData[]> data, ArrayList<EntryInfo> entryList) {
-        if (entryList == null)
-            entryList = new ArrayList<EntryInfo>();
-        else
-            entryList.clear();
-
-        // for each row
-        for (SheetFieldData[] datumArray : data) {
-
-            // each each field
-            ArabidopsisSeedInfo info = new ArabidopsisSeedInfo();
-            for (SheetFieldData datum : datumArray)
-                setField(info, datum);
-            entryList.add(info);
-        }
-    }
-
-    public void setField(ArabidopsisSeedInfo info, SheetFieldData datum) {
+    public ArabidopsisSeedInfo setField(ArabidopsisSeedInfo info, SheetFieldData datum) {
         if (datum == null)
-            return;
+            return info;
 
-        Header header = datum.getType();
+        Header header = datum.getTypeHeader();
         String value = datum.getValue();
 
         if (header == null || value == null || value.isEmpty())
-            return;
+            return info;
 
+        // arabidopsis seed specific fields
         switch (header) {
-            case PI:
-                info.setPrincipalInvestigator(value);
+            case PLANT_TYPE:
+                ArabidopsisSeedInfo.PlantType type = ArabidopsisSeedInfo.PlantType.valueOf(value);
+                info.setPlantType(type);
                 break;
 
-            case FUNDING_SOURCE:
-                info.setFundingSource(value);
-                break;
-            case IP:
-                info.setIntellectualProperty(value);
+            case GENERATION:
+                ArabidopsisSeedInfo.Generation generation = ArabidopsisSeedInfo.Generation.valueOf(value);
+                info.setGeneration(generation);
                 break;
 
-            case BIOSAFETY:
-                Integer optionValue = BioSafetyOptions.intValue(value);
-                if (optionValue != null)
-                    info.setBioSafetyLevel(optionValue);
+            case HARVEST_DATE:
+                Window.alert("Harvest date not implemented: ArabidopsisSheetModel.java:38");
+                // Need a string to date util
+//                  info.setHarvestDate();
                 break;
 
-            case NAME:
-                info.setName(value);
+            case PARENTS:
+                info.setParents(value);
                 break;
 
-            case ALIAS:
-                info.setAlias(value);
-                break;
-
-            case KEYWORDS:
-                info.setKeywords(value);
-                break;
-
-            case SUMMARY:
-                info.setShortDescription(value);
-                break;
-
-            case NOTES:
-                info.setLongDescription(value);
-                info.setLongDescriptionType("text");
-                break;
-
-            case REFERENCES:
-                info.setReferences(value);
-                break;
-
-            case LINKS:
-                info.setLinks(value);
-                break;
-
-            case STATUS:
-                info.setStatus(value);
-                break;
-
-            case SEQ_FILENAME:
-                ArrayList<SequenceAnalysisInfo> seq = info.getSequenceAnalysis();
-                if (seq == null) {
-                    seq = new ArrayList<SequenceAnalysisInfo>();
-                    info.setSequenceAnalysis(seq);
-                }
-                SequenceAnalysisInfo analysisInfo = new SequenceAnalysisInfo();
-                analysisInfo.setName(value);
-                analysisInfo.setFileId(datum.getId());
-                seq.add(analysisInfo);
-                info.setHasSequence(true);
-                info.setSequenceAnalysis(seq);
-                break;
-
-            case ATT_FILENAME:
-                ArrayList<AttachmentInfo> attInfo = info.getAttachments();
-                if (attInfo == null) {
-                    attInfo = new ArrayList<AttachmentInfo>();
-                    info.setAttachments(attInfo);
-                }
-
-                AttachmentInfo att = new AttachmentInfo();
-                att.setFilename(value);
-                att.setFileId(datum.getId());
-                attInfo.add(att);
-                info.setHasAttachment(true);
-                info.setAttachments(attInfo);
+            case ECOTYPE:
+                info.setEcotype(value);
                 break;
         }
+
+        return info;
+    }
+
+    @Override
+    protected ArabidopsisSeedInfo createInfo() {
+        return new ArabidopsisSeedInfo();
     }
 }

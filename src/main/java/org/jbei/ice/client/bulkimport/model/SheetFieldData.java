@@ -18,7 +18,7 @@ public class SheetFieldData {
         this.value = value;
     }
 
-    public Header getType() {
+    public Header getTypeHeader() {
         return type;
     }
 

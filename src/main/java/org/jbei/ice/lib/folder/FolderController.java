@@ -27,7 +27,7 @@ public class FolderController {
 
         AccountController controller = new AccountController();
         Account systemAccount = controller.getSystemAccount();
-        boolean isModerator = controller.isModerator(account);
+        boolean isModerator = controller.isAdministrator(account);
 
         Folder folder;
         try {
