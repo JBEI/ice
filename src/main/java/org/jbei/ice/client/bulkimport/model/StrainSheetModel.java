@@ -5,35 +5,36 @@ import org.jbei.ice.shared.dto.StrainInfo;
 
 public class StrainSheetModel extends SingleInfoSheetModel<StrainInfo> {
 
-    public StrainInfo setField(StrainInfo info, SheetFieldData datum) {
+    public StrainInfo setField(StrainInfo strain, SheetFieldData datum) {
+
         if (datum == null)
-            return info;
+            return strain;
 
         Header header = datum.getTypeHeader();
         String value = datum.getValue();
 
         if (header == null || value == null || value.isEmpty())
-            return info;
+            return strain;
 
         switch (header) {
             case SELECTION_MARKERS:
-                info.setSelectionMarkers(value);
+                strain.setSelectionMarkers(value);
                 break;
 
             case PARENTAL_STRAIN:
-                info.setHost(value);
+                strain.setHost(value);
                 break;
 
             case GEN_PHEN:
-                info.setGenotypePhenotype(value);
+                strain.setGenotypePhenotype(value);
                 break;
 
             case PLASMIDS:
-                info.setPlasmids(value);
+                strain.setPlasmids(value);
                 break;
         }
 
-        return info;
+        return strain;
     }
 
     @Override

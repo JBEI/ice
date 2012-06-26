@@ -373,36 +373,36 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
     }
 
-    @Override
-    public ArrayList<FolderDetails> retrieveUserCollections(String sessionId, String userId)
-            throws AuthenticationException {
-        ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
-
-        try {
-            Account account = retrieveAccountForSid(sessionId);
-            Logger.info(account.getEmail() + ": retrieving user collections for user " + userId);
-            AccountController controller = new AccountController();
-            FolderController folderController = new FolderController();
-            Account userAccount = controller.getByEmail(userId);
-
-            // get user folder
-            List<Folder> userFolders = folderController.getFoldersByOwner(userAccount);
-            if (userFolders != null) {
-                for (Folder folder : userFolders) {
-                    long id = folder.getId();
-                    FolderDetails details = new FolderDetails(id, folder.getName(), false);
-                    BigInteger folderSize = folderController.getFolderSize(id);
-                    details.setCount(folderSize);
-                    details.setDescription(folder.getDescription());
-                    results.add(details);
-                }
-            }
-            return results;
-        } catch (ControllerException ce) {
-            Logger.error(ce);
-            return null;
-        }
-    }
+//    @Override
+//    public ArrayList<FolderDetails> retrieveUserCollections(String sessionId, String userId)
+//            throws AuthenticationException {
+//        ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
+//
+//        try {
+//            Account account = retrieveAccountForSid(sessionId);
+//            Logger.info(account.getEmail() + ": retrieving user collections for user " + userId);
+//            AccountController controller = new AccountController();
+//            FolderController folderController = new FolderController();
+//            Account userAccount = controller.getByEmail(userId);
+//
+//            // get user folder
+//            List<Folder> userFolders = folderController.getFoldersByOwner(userAccount);
+//            if (userFolders != null) {
+//                for (Folder folder : userFolders) {
+//                    long id = folder.getId();
+//                    FolderDetails details = new FolderDetails(id, folder.getName(), false);
+//                    BigInteger folderSize = folderController.getFolderSize(id);
+//                    details.setCount(folderSize);
+//                    details.setDescription(folder.getDescription());
+//                    results.add(details);
+//                }
+//            }
+//            return results;
+//        } catch (ControllerException ce) {
+//            Logger.error(ce);
+//            return null;
+//        }
+//    }
 
     @Override
     public ArrayList<FolderDetails> retrieveCollections(String sessionId) throws AuthenticationException {
@@ -1000,36 +1000,36 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
     }
 
-    @Override
-    public FolderDetails retrieveFolderDetails(String sid, long folderId) throws AuthenticationException {
-        Account account;
-        AccountController controller = new AccountController();
-
-        try {
-            account = this.retrieveAccountForSid(sid);
-            FolderController folderController = new FolderController();
-            Folder folder = folderController.getFolderById(folderId);
-            if (folder == null)
-                return null;
-
-            Logger.info(account.getEmail() + ": retrieving folder details for folder "
-                                + folder.getName());
-
-            long id = folder.getId();
-            boolean isSystemFolder = folder.getOwnerEmail().equals(
-                    controller.getSystemAccount().getEmail());
-            FolderDetails details = new FolderDetails(id, folder.getName(), isSystemFolder);
-            BigInteger folderSize = folderController.getFolderSize(id);
-            details.setCount(folderSize);
-            details.setDescription(folder.getDescription());
-            return details;
-
-        } catch (ControllerException e) {
-            Logger.error(e);
-        }
-
-        return null;
-    }
+//    @Override
+//    public FolderDetails retrieveFolderDetails(String sid, long folderId) throws AuthenticationException {
+//        Account account;
+//        AccountController controller = new AccountController();
+//
+//        try {
+//            account = this.retrieveAccountForSid(sid);
+//            FolderController folderController = new FolderController();
+//            Folder folder = folderController.getFolderById(folderId);
+//            if (folder == null)
+//                return null;
+//
+//            Logger.info(account.getEmail() + ": retrieving folder details for folder "
+//                                + folder.getName());
+//
+//            long id = folder.getId();
+//            boolean isSystemFolder = folder.getOwnerEmail().equals(
+//                    controller.getSystemAccount().getEmail());
+//            FolderDetails details = new FolderDetails(id, folder.getName(), isSystemFolder);
+//            BigInteger folderSize = folderController.getFolderSize(id);
+//            details.setCount(folderSize);
+//            details.setDescription(folder.getDescription());
+//            return details;
+//
+//        } catch (ControllerException e) {
+//            Logger.error(e);
+//        }
+//
+//        return null;
+//    }
 
     @Override
     public FolderDetails createUserCollection(String sid, String name, String description,
@@ -1369,27 +1369,23 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
     @Override
     // submits
-    public boolean submitBulkImport(String sid, String email, ArrayList<EntryInfo> entryList)
+    public boolean submitBulkImport(String sid, EntryAddType importType, ArrayList<EntryInfo> entryList)
             throws AuthenticationException {
-//        try {
-//            Account account = retrieveAccountForSid(sid);
-//            if (account == null)
-//                return false;
-//
-//            if (entryList.isEmpty())
-//                return false;
-//
-//            BulkImportController controller = new BulkImportController();
-//            BulkImport bulkImport = controller.createBulkImport(account, primary, secondary, email);
-//            controller.submitBulkImportForVerification(bulkImport);
-//            return true;
-//
-//        } catch (ControllerException ce) {
-//            Logger.error(ce);
-//            return false;
-//        }
-        // tODO
-        return false;
+        try {
+            Account account = retrieveAccountForSid(sid);
+            if (account == null)
+                return false;
+
+            if (entryList.isEmpty())
+                return false;
+
+            BulkImportDraftController controller = new BulkImportDraftController();
+            return controller.submitBulkImportForVerification(account, importType, entryList);
+
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+            return false;
+        }
     }
 
 
@@ -1986,38 +1982,38 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         return true;
     }
 
-    @Override
-    public HashMap<EntryType, Long> retrieveEntryCounts(String sessionId) throws AuthenticationException {
-        // admin only 
-        Account account = null;
-        AccountController controller = new AccountController();
-        EntryController entryController = new EntryController();
-
-        try {
-            account = retrieveAccountForSid(sessionId);
-            if (!controller.isAdministrator(account)) {
-                Logger.warn(account.getEmail()
-                                    + ": attempting to retrieve admin only feature (entry Counts)");
-                return null;
-            }
-        } catch (ControllerException ce) {
-            Logger.error(ce);
-        }
-
-        Logger.info(account.getEmail() + ": retrieving entry type counts");
-        HashMap<EntryType, Long> counts = new HashMap<EntryType, Long>();
-        for (EntryType type : EntryType.values()) {
-            long count;
-            try {
-                count = entryController.retrieveEntryByType(type.getName());
-                counts.put(type, count);
-            } catch (ControllerException e) {
-                Logger.error("Could not retrieve counts for " + type.getName(), e);
-            }
-        }
-
-        return counts;
-    }
+//    @Override
+//    public HashMap<EntryType, Long> retrieveEntryCounts(String sessionId) throws AuthenticationException {
+//        // admin only
+//        Account account = null;
+//        AccountController controller = new AccountController();
+//        EntryController entryController = new EntryController();
+//
+//        try {
+//            account = retrieveAccountForSid(sessionId);
+//            if (!controller.isAdministrator(account)) {
+//                Logger.warn(account.getEmail()
+//                                    + ": attempting to retrieve admin only feature (entry Counts)");
+//                return null;
+//            }
+//        } catch (ControllerException ce) {
+//            Logger.error(ce);
+//        }
+//
+//        Logger.info(account.getEmail() + ": retrieving entry type counts");
+//        HashMap<EntryType, Long> counts = new HashMap<EntryType, Long>();
+//        for (EntryType type : EntryType.values()) {
+//            long count;
+//            try {
+//                count = entryController.retrieveEntryByType(type.getName());
+//                counts.put(type, count);
+//            } catch (ControllerException e) {
+//                Logger.error("Could not retrieve counts for " + type.getName(), e);
+//            }
+//        }
+//
+//        return counts;
+//    }
 
     // Groups //
     @Override

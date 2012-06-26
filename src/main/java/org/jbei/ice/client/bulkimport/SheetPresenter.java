@@ -88,21 +88,26 @@ public class SheetPresenter {
         Header[] headers = getTypeHeaders();
         int rowCount = view.getSheetRowCount();
         ArrayList<EntryInfo> toRemove = new ArrayList<EntryInfo>();
-        SheetModel model = ModelFactory.getModelForType(type);
+        SheetModel<? extends EntryInfo> model = ModelFactory.getModelForType(type);
         if (model == null)
             return null;
+
         ArrayList<EntryInfo> infoList = new ArrayList<EntryInfo>();
 
         // for each row
         for (int i = 0; i < rowCount; i += 1) {
 
             if (view.isEmptyRow(i)) {
-                toRemove.add(currentInfo.getEntryList().remove(i));
+//                EntryInfo info = currentInfo.getEntryList().get(i);
+//                if (info != null)
+//                    toRemove.add(currentInfo.getEntryList().remove(i));
                 continue;
             }
 
             // is row associated with a saved entry?
-            EntryInfo existing = currentInfo.getEntryList().get(i);
+            EntryInfo existing = null;
+            if (currentInfo != null)
+                existing = currentInfo.getEntryList().get(i);
 
 //            for each header
             int y = 0;
@@ -120,15 +125,17 @@ public class SheetPresenter {
                 }
 
                 String text = view.getCellText(i, y);
-                model.setInfoField(new SheetFieldData(header, id, text), existing);
+                existing = model.setInfoField(new SheetFieldData(header, id, text), existing);
                 y += 1;
             }
 
             infoList.add(existing);
         }
 
-        currentInfo.getEntryList().clear();
-        currentInfo.getEntryList().addAll(infoList);
+        if (currentInfo != null) {
+            currentInfo.getEntryList().clear();
+            currentInfo.getEntryList().addAll(infoList);
+        }
         return infoList;
     }
 

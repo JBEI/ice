@@ -49,7 +49,7 @@ public interface RegistryService extends RemoteService {
      */
     ArrayList<FolderDetails> retrieveCollections(String sessionId) throws AuthenticationException;
 
-    ArrayList<FolderDetails> retrieveUserCollections(String sessionId, String userId) throws AuthenticationException;
+//    ArrayList<FolderDetails> retrieveUserCollections(String sessionId, String userId) throws AuthenticationException;
 
     FolderDetails retrieveEntriesForFolder(String sessionId, long folderId) throws AuthenticationException;
 
@@ -69,7 +69,7 @@ public interface RegistryService extends RemoteService {
     LinkedList<SampleInfo> retrieveSampleInfo(String sid, LinkedList<Long> sampleIds,
             ColumnField sortField, boolean asc) throws AuthenticationException;
 
-    FolderDetails retrieveFolderDetails(String sid, long folderId) throws AuthenticationException;
+//    FolderDetails retrieveFolderDetails(String sid, long folderId) throws AuthenticationException;
 
     // collections
 
@@ -102,8 +102,6 @@ public interface RegistryService extends RemoteService {
             throws AuthenticationException;
 
     boolean updateEntry(String sid, EntryInfo info) throws AuthenticationException;
-
-    boolean submitBulkImport(String sid, String email, ArrayList<EntryInfo> primary) throws AuthenticationException;
 
     ArrayList<BulkImportDraftInfo> retrieveUserSavedDrafts(String sid) throws AuthenticationException;
 
@@ -145,7 +143,7 @@ public interface RegistryService extends RemoteService {
 
     ArrayList<AccountInfo> retrieveAllUserAccounts(String sid) throws AuthenticationException;
 
-    HashMap<EntryType, Long> retrieveEntryCounts(String sessionId) throws AuthenticationException;
+//    HashMap<EntryType, Long> retrieveEntryCounts(String sessionId) throws AuthenticationException;
 
     boolean removeSequence(String sid, long entryId) throws AuthenticationException;
 
@@ -172,4 +170,7 @@ public interface RegistryService extends RemoteService {
 
     BulkImportDraftInfo saveBulkImportDraft(String sid, String email, String name, EntryAddType importType,
             ArrayList<EntryInfo> entryList) throws AuthenticationException;
+
+    boolean submitBulkImport(String sid, EntryAddType importType, ArrayList<EntryInfo> entryList)
+            throws AuthenticationException;
 }

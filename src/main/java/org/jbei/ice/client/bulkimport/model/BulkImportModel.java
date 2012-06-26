@@ -2,7 +2,6 @@ package org.jbei.ice.client.bulkimport.model;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.IceAsyncCallback;
@@ -10,6 +9,7 @@ import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.bulkimport.events.BulkImportDraftSubmitEvent;
 import org.jbei.ice.client.bulkimport.events.BulkImportDraftSubmitEvent.BulkImportDraftSubmitEventHandler;
+import org.jbei.ice.client.bulkimport.events.BulkImportSubmitEvent;
 import org.jbei.ice.client.bulkimport.events.BulkImportSubmitEventHandler;
 import org.jbei.ice.client.bulkimport.events.SavedDraftsEvent;
 import org.jbei.ice.client.bulkimport.events.SavedDraftsEventHandler;
@@ -103,36 +103,21 @@ public class BulkImportModel {
         }.go(eventBus);
     }
 
-    public void submitBulkImport(final EntryAddType type, ArrayList<EntryInfo> data,
+    public void submitBulkImport(final EntryAddType type, final ArrayList<EntryInfo> data,
             final BulkImportSubmitEventHandler handler) {
 
-//        SheetModel model = ModelFactory.getModelForType(type);
-//        if (model != null) {
-//
-//            final ArrayList<EntryInfo> entryList = new ArrayList<EntryInfo>();
-//
-//            // arrays get filled out here
-//            model.createInfo(data, entryList);
-//
-//            new IceAsyncCallback<Boolean>() {
-//
-//                @Override
-//                protected void callService(AsyncCallback<Boolean> callback) {
-//                    try {
-//                        service.submitBulkImport(AppController.sessionId, AppController.accountInfo.getEmail(),
-//                                                 type, entryList, callback);
-//                    } catch (AuthenticationException e) {
-//                        History.newItem(Page.LOGIN.getLink());
-//                    }
-//                }
-//
-//                @Override
-//                public void onSuccess(Boolean result) {
-//                    handler.onSubmit(new BulkImportSubmitEvent(result));
-//                }
-//            }.go(eventBus);
-//        }
-        Window.alert("Not implemented yet");
+        new IceAsyncCallback<Boolean>() {
+
+            @Override
+            protected void callService(AsyncCallback<Boolean> callback) {
+                service.submitBulkImport(AppController.sessionId, type, data, callback);
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+                handler.onSubmit(new BulkImportSubmitEvent(result));
+            }
+        }.go(eventBus);
     }
 
     public void retrieveBulkImport(final long id, final SavedDraftsEventHandler handler) {

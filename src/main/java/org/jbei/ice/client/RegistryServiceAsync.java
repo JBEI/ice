@@ -69,8 +69,8 @@ public interface RegistryServiceAsync {
     void retrieveSampleInfo(String sid, LinkedList<Long> sampleIds, ColumnField sortField,
             boolean asc, AsyncCallback<LinkedList<SampleInfo>> callback);
 
-    void retrieveFolderDetails(String sid, long folderId, AsyncCallback<FolderDetails> callback)
-            throws AuthenticationException;
+//    void retrieveFolderDetails(String sid, long folderId, AsyncCallback<FolderDetails> callback)
+//            throws AuthenticationException;
 
     void retrieveUserSavedDrafts(String sid, AsyncCallback<ArrayList<BulkImportDraftInfo>> callback)
             throws AuthenticationException;
@@ -99,8 +99,8 @@ public interface RegistryServiceAsync {
     void createUserCollection(String sid, String name, String description,
             ArrayList<Long> arrayList, AsyncCallback<FolderDetails> callback) throws AuthenticationException;
 
-    void retrieveUserCollections(String sessionId, String userId,
-            AsyncCallback<ArrayList<FolderDetails>> callback) throws AuthenticationException;
+//    void retrieveUserCollections(String sessionId, String userId,
+//            AsyncCallback<ArrayList<FolderDetails>> callback) throws AuthenticationException;
 
     void moveToUserCollection(String sid, long source, ArrayList<Long> destination,
             ArrayList<Long> entryIds, AsyncCallback<ArrayList<FolderDetails>> callback) throws AuthenticationException;
@@ -166,8 +166,8 @@ public interface RegistryServiceAsync {
     void retrieveAllUserAccounts(String sid, AsyncCallback<ArrayList<AccountInfo>> callback)
             throws AuthenticationException;
 
-    void retrieveEntryCounts(String sessionId, AsyncCallback<HashMap<EntryType, Long>> callback)
-            throws AuthenticationException;
+//    void retrieveEntryCounts(String sessionId, AsyncCallback<HashMap<EntryType, Long>> callback)
+//            throws AuthenticationException;
 
     void removeSequence(String sid, long entryId, AsyncCallback<Boolean> callback) throws AuthenticationException;
 
@@ -197,5 +197,6 @@ public interface RegistryServiceAsync {
     void saveBulkImportDraft(String sid, String email, String name, EntryAddType importType,
             ArrayList<EntryInfo> entryList, AsyncCallback<BulkImportDraftInfo> async) throws AuthenticationException;
 
-    void submitBulkImport(String sid, String email, ArrayList<EntryInfo> primary, AsyncCallback<Boolean> async);
+    void submitBulkImport(String sid, EntryAddType importType, ArrayList<EntryInfo> entryList,
+            AsyncCallback<Boolean> async);
 }

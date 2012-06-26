@@ -249,4 +249,10 @@ public class BulkImportDraftController {
             throws ControllerException {
         return null;
     }
+
+    public boolean submitBulkImportForVerification(Account account, EntryAddType type, ArrayList<EntryInfo> entryList)
+            throws ControllerException {
+        Account systemAccount = accountController.getSystemAccount();
+        return createBulkImportDraft(systemAccount, type, "Pending", entryList) != null;
+    }
 }

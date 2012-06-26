@@ -195,13 +195,13 @@ public class BulkImportPresenter extends AbstractPresenter {
         public void onClick(ClickEvent event) {
             boolean isValid = currentInput.getSheet().validate();
             if (!isValid) {
-                view.showFeedback("Please correct validation errors.", true);
+                view.showFeedback("Please correct validation errors", true);
                 return;
             }
 
             ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData();
             if (cellData == null || cellData.isEmpty()) {
-                view.showFeedback("Please enter data into the sheet before saving.", true);
+                view.showFeedback("Please enter data into the sheet before submitting", true);
                 return;
             }
 
@@ -212,7 +212,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                                        public void onSubmit(BulkImportSubmitEvent event) {
                                            if (event.isSuccess()) {
                                                //
-                                               // TODO : reset sheet to avoid re-submission
+                                               // TODO : reset sheet to avoid re-submission, delete?
                                                view.showFeedback("Entries submitted successfully for verification.",
                                                                  false);
                                            } else {

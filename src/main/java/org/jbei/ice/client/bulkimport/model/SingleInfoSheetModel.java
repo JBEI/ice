@@ -15,7 +15,8 @@ public abstract class SingleInfoSheetModel<T extends EntryInfo> extends SheetMod
 
     public abstract T setField(T info, SheetFieldData datum);
 
-    public T setInfoField(SheetFieldData datum, T info) {
+    public T setInfoField(SheetFieldData datum, EntryInfo info) {
+
         if (info == null)
             info = createInfo();
 
@@ -104,6 +105,6 @@ public abstract class SingleInfoSheetModel<T extends EntryInfo> extends SheetMod
                 break;
         }
 
-        return info;
+        return (T) info;
     }
 }

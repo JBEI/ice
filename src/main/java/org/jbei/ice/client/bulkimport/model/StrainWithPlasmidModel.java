@@ -3,6 +3,7 @@ package org.jbei.ice.client.bulkimport.model;
 import org.jbei.ice.client.bulkimport.sheet.Header;
 import org.jbei.ice.shared.BioSafetyOptions;
 import org.jbei.ice.shared.dto.AttachmentInfo;
+import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
@@ -12,15 +13,21 @@ import java.util.ArrayList;
 public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
 
     @Override
-    public StrainInfo setInfoField(SheetFieldData datum, StrainInfo info) {
-        PlasmidInfo plasmid = new PlasmidInfo();
-        StrainInfo strain = new StrainInfo();
+    public StrainInfo setInfoField(SheetFieldData datum, EntryInfo strain) {
+        PlasmidInfo plasmid;
+
+        if (strain == null) {
+            plasmid = new PlasmidInfo();
+            strain = new StrainInfo();
+        } else {
+            plasmid = (strain.getInfo() == null) ? (new PlasmidInfo()) : (PlasmidInfo) strain.getInfo();
+        }
 
         setPlasmidInfo(plasmid, datum);
-        setStrainInfo(strain, datum);
+        setStrainInfo((StrainInfo) strain, datum);
 
         strain.setInfo(plasmid);
-        return strain;
+        return (StrainInfo) strain;
     }
 
     private void setStrainInfo(StrainInfo strain, SheetFieldData datum) {
