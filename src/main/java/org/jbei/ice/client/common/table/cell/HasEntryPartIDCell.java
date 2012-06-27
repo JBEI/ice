@@ -114,7 +114,7 @@ public class HasEntryPartIDCell<T extends HasEntryInfo> extends AbstractCell<T> 
         TipViewContentFactory.getContents(value.getEntryInfo(), new Callback<Widget>() {
 
             @Override
-            public void onSucess(Widget contents) {
+            public void onSuccess(Widget contents) {
                 if (hidden)
                     return;
 
