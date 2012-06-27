@@ -1,26 +1,23 @@
 package org.jbei.ice.client.search.advanced;
 
-import java.util.ArrayList;
-
-import org.jbei.ice.client.common.header.BlastSearchFilter;
-import org.jbei.ice.client.common.table.EntryTablePager;
-import org.jbei.ice.client.search.blast.BlastResultsTable;
-import org.jbei.ice.shared.QueryOperator;
-import org.jbei.ice.shared.dto.SearchFilterInfo;
-
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import org.jbei.ice.client.common.header.BlastSearchFilter;
+import org.jbei.ice.client.common.table.EntryTablePager;
+import org.jbei.ice.client.search.blast.BlastResultsTable;
+import org.jbei.ice.shared.QueryOperator;
+import org.jbei.ice.shared.dto.SearchFilterInfo;
+
+import java.util.ArrayList;
 
 public class AdvancedSearchView extends Composite implements IAdvancedSearchView {
 
     private FlowPanel filterPanel;
-    private BlastResultsTable blastTable;
     private EntryTablePager pager;
-    private EntryTablePager blastPager;
     private final FlexTable layout;
 
     public AdvancedSearchView() {
@@ -49,11 +46,6 @@ public class AdvancedSearchView extends Composite implements IAdvancedSearchView
     protected void initComponents() {
         filterPanel = new FlowPanel();
         filterPanel.setWidth("100%");
-
-        blastTable = new BlastResultsTable();
-
-        blastPager = new EntryTablePager();
-        blastPager.setDisplay(blastTable);
     }
 
     @Override
@@ -118,18 +110,13 @@ public class AdvancedSearchView extends Composite implements IAdvancedSearchView
     }
 
     @Override
-    public void setBlastVisibility(boolean visible) {
-        blastPager.setVisible(visible);
+    public void setBlastVisibility(BlastResultsTable blastTable, boolean visible) {
         blastTable.setVisible(visible);
+        blastTable.getPager().setVisible(visible);
 
         if (visible) {
             layout.setWidget(2, 0, blastTable);
-            layout.setWidget(3, 0, blastPager);
+            layout.setWidget(3, 0, blastTable.getPager());
         }
-    }
-
-    @Override
-    public BlastResultsTable getBlastResultTable() {
-        return blastTable;
     }
 }

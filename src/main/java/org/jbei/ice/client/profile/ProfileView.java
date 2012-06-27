@@ -1,14 +1,5 @@
 package org.jbei.ice.client.profile;
 
-import org.jbei.ice.client.collection.table.CollectionDataTable;
-import org.jbei.ice.client.collection.table.SamplesDataTable;
-import org.jbei.ice.client.common.AbstractLayout;
-import org.jbei.ice.client.common.table.EntryTablePager;
-import org.jbei.ice.client.common.table.HasEntryDataTable;
-import org.jbei.ice.client.login.RegistrationDetails;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.SampleInfo;
-
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -17,10 +8,15 @@ import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.jbei.ice.client.collection.table.CollectionDataTable;
+import org.jbei.ice.client.collection.table.SamplesDataTable;
+import org.jbei.ice.client.common.AbstractLayout;
+import org.jbei.ice.client.common.table.EntryTablePager;
+import org.jbei.ice.client.login.RegistrationDetails;
+import org.jbei.ice.shared.dto.AccountInfo;
 
 public class ProfileView extends AbstractLayout implements IProfileView {
 
-    private SamplesDataTable samplesTable;
     private Widget sampleView;
 
     private Label contentHeader;
@@ -40,10 +36,10 @@ public class ProfileView extends AbstractLayout implements IProfileView {
 
         mainContent = new FlexTable();
         //        createEntriesTablePanel();
-        sampleView = this.createSamplesTablePanel();
 
         profileHeader = new HTMLPanel(
-                "<span id=\"profile_header_text\"></span><div style=\"float: right\"><span id=\"edit_profile_link\"></span>"
+                "<span id=\"profile_header_text\"></span><div style=\"float: right\"><span " +
+                        "id=\"edit_profile_link\"></span>"
                         + "<span style=\"color: #262626; font-size: 0.75em;\">|</span>"
                         + " <span id=\"change_password_link\"></span></div>");
         profileHeader.add(contentHeader, "profile_header_text");
@@ -113,9 +109,8 @@ public class ProfileView extends AbstractLayout implements IProfileView {
         return this.menu;
     }
 
-    private Widget createSamplesTablePanel() {
+    private Widget createSamplesTablePanel(SamplesDataTable samplesTable) {
 
-        samplesTable = new SamplesDataTable();
         FlexTable table = new FlexTable();
         table.setWidth("100%");
         table.setCellPadding(0);
@@ -131,12 +126,9 @@ public class ProfileView extends AbstractLayout implements IProfileView {
     }
 
     @Override
-    public HasEntryDataTable<SampleInfo> getSamplesTable() {
-        return this.samplesTable;
-    }
-
-    @Override
-    public void setSampleView() {
+    public void setSampleView(SamplesDataTable table) {
+        if (sampleView == null)
+            sampleView = createSamplesTablePanel(table);
         mainContent.setWidget(1, 0, sampleView);
     }
 

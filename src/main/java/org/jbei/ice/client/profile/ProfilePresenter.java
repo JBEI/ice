@@ -4,7 +4,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import org.jbei.ice.client.AbstractPresenter;
@@ -14,6 +13,7 @@ import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.collection.SamplesDataProvider;
 import org.jbei.ice.client.collection.table.CollectionDataTable;
+import org.jbei.ice.client.collection.table.SamplesDataTable;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.event.EntryViewEvent;
@@ -36,6 +36,7 @@ public class ProfilePresenter extends AbstractPresenter {
 
     private final String sid = AppController.sessionId;
     private final SamplesDataProvider samplesDataProvider;
+    private final SamplesDataTable samplesDataTable;
 
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
@@ -47,7 +48,7 @@ public class ProfilePresenter extends AbstractPresenter {
     private final String userId;
 
     public ProfilePresenter(final RegistryServiceAsync service, final HandlerManager eventBus,
-                            final IProfileView display, final String userId) {
+            final IProfileView display, final String userId) {
 
         this.userId = userId;
         this.service = service;
@@ -103,7 +104,20 @@ public class ProfilePresenter extends AbstractPresenter {
         }.go(eventBus);
 
 
-        samplesDataProvider = new SamplesDataProvider(display.getSamplesTable(), service);
+        samplesDataTable = new SamplesDataTable() {
+            @Override
+            protected EntryViewEventHandler getHandler() {
+                return new EntryViewEventHandler() {
+                    @Override
+                    public void onEntryView(EntryViewEvent event) {
+                        event.setNavigable(samplesDataProvider);
+                        eventBus.fireEvent(event);
+                    }
+                };
+            }
+        };
+
+        samplesDataProvider = new SamplesDataProvider(samplesDataTable, service);
 
         this.collectionsDataTable = new CollectionDataTable(new EntryTablePager()) {
 
@@ -159,7 +173,7 @@ public class ProfilePresenter extends AbstractPresenter {
             @Override
             public void onSuccess(LinkedList<Long> result) {
                 samplesDataProvider.setValues(new ArrayList<Long>(result));
-                display.setSampleView();
+                display.setSampleView(samplesDataTable);
             }
         });
     }
@@ -233,24 +247,23 @@ public class ProfilePresenter extends AbstractPresenter {
             currentInfo.setInitials(details.getInitials());
             currentInfo.setInstitution(details.getInstitution());
 
-            try {
-                service.updateAccount(AppController.sessionId, currentInfo.getEmail(), currentInfo,
-                                      new AsyncCallback<AccountInfo>() {
+            new IceAsyncCallback<AccountInfo>() {
 
-                                          @Override
-                                          public void onSuccess(AccountInfo result) {
-                                              currentInfo = result;
-                                              display.setContents(currentInfo);
-                                          }
+                @Override
+                protected void callService(AsyncCallback<AccountInfo> callback) {
+                    try {
+                        service.updateAccount(AppController.sessionId, currentInfo.getEmail(), currentInfo, callback);
+                    } catch (AuthenticationException e) {
+                        History.newItem(Page.LOGIN.getLink());
+                    }
+                }
 
-                                          @Override
-                                          public void onFailure(Throwable caught) {
-                                              Window.alert("Could not connect to the server for update");
-                                          }
-                                      });
-            } catch (org.jbei.ice.client.exception.AuthenticationException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            }
+                @Override
+                public void onSuccess(AccountInfo result) {
+                    currentInfo = result;
+                    display.setContents(currentInfo);
+                }
+            }.go(eventBus);
         }
     }
 
@@ -274,27 +287,28 @@ public class ProfilePresenter extends AbstractPresenter {
 
         @Override
         public void onClick(ClickEvent event) {
-            String password = display.getUpdatedPassword();
+            final String password = display.getUpdatedPassword();
             if (password.isEmpty())
                 return;
 
-            try {
-                service.updateAccountPassword(AppController.sessionId, currentInfo.getEmail(),
-                                              password, new AsyncCallback<Boolean>() {
+            new IceAsyncCallback<Boolean>() {
 
-                    @Override
-                    public void onSuccess(Boolean result) {
-                        if (result)
-                            display.setContents(currentInfo);
+                @Override
+                protected void callService(AsyncCallback<Boolean> callback) {
+                    try {
+                        service.updateAccountPassword(AppController.sessionId, currentInfo.getEmail(),
+                                                      password, callback);
+                    } catch (AuthenticationException e) {
+                        History.newItem(Page.LOGIN.getLink());
                     }
+                }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                    }
-                });
-            } catch (org.jbei.ice.client.exception.AuthenticationException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            }
+                @Override
+                public void onSuccess(Boolean result) {
+                    if (result)
+                        display.setContents(currentInfo);
+                }
+            }.go(eventBus);
         }
     }
 }

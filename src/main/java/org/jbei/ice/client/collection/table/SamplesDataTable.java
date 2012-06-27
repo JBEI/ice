@@ -1,23 +1,29 @@
 package org.jbei.ice.client.collection.table;
 
-import java.util.ArrayList;
-
-import org.jbei.ice.client.collection.presenter.EntryContext;
+import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.dom.client.Style.Unit;
+import org.jbei.ice.client.common.table.EntryTablePager;
 import org.jbei.ice.client.common.table.HasEntryDataTable;
 import org.jbei.ice.client.common.table.cell.UrlCell;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.SampleInfo;
 
-import com.google.gwt.cell.client.TextCell;
-import com.google.gwt.dom.client.Style.Unit;
+import java.util.ArrayList;
 
-public class SamplesDataTable extends HasEntryDataTable<SampleInfo> {
+public abstract class SamplesDataTable extends HasEntryDataTable<SampleInfo> {
 
     final int WIDTH = 120;
+    private final EntryTablePager pager;
 
     public SamplesDataTable() {
         super();
+        this.pager = new EntryTablePager();
+        pager.setDisplay(this);
+    }
+
+    public EntryTablePager getEntryTablePager() {
+        return this.pager;
     }
 
     @Override
@@ -26,7 +32,7 @@ public class SamplesDataTable extends HasEntryDataTable<SampleInfo> {
         ArrayList<DataTableColumn<?>> columns = new ArrayList<DataTableColumn<?>>();
 
         columns.add(super.addTypeColumn(true));
-        columns.add(super.addPartIdColumn(true, null, EntryContext.Type.SAMPLES));
+//        columns.add(super.addPartIdColumn(true, null, EntryContext.Type.SAMPLES));
         columns.add(super.addNameColumn());
         columns.add(this.addLabelColumn());
         columns.add(this.addNotesColumn());
@@ -39,7 +45,7 @@ public class SamplesDataTable extends HasEntryDataTable<SampleInfo> {
     @Override
     protected DataTableColumn<String> addCreatedColumn() {
         DataTableColumn<String> createdColumn = new DataTableColumn<String>(new TextCell(),
-                ColumnField.CREATED) {
+                                                                            ColumnField.CREATED) {
 
             @Override
             public String getValue(SampleInfo object) {
@@ -55,7 +61,7 @@ public class SamplesDataTable extends HasEntryDataTable<SampleInfo> {
 
     protected DataTableColumn<String> addLabelColumn() {
         DataTableColumn<String> labelColumn = new DataTableColumn<String>(new TextCell(),
-                ColumnField.LABEL) {
+                                                                          ColumnField.LABEL) {
 
             @Override
             public String getValue(SampleInfo object) {
@@ -71,7 +77,7 @@ public class SamplesDataTable extends HasEntryDataTable<SampleInfo> {
 
     protected DataTableColumn<String> addNotesColumn() {
         DataTableColumn<String> notesCol = new DataTableColumn<String>(new TextCell(),
-                ColumnField.NOTES) {
+                                                                       ColumnField.NOTES) {
 
             @Override
             public String getValue(SampleInfo info) {
@@ -100,7 +106,7 @@ public class SamplesDataTable extends HasEntryDataTable<SampleInfo> {
         };
 
         DataTableColumn<SampleInfo> locationColumn = new DataTableColumn<SampleInfo>(cell,
-                ColumnField.LOCATION) {
+                                                                                     ColumnField.LOCATION) {
 
             @Override
             public SampleInfo getValue(SampleInfo object) {

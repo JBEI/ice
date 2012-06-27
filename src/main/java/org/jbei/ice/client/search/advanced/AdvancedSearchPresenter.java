@@ -1,27 +1,26 @@
 package org.jbei.ice.client.search.advanced;
 
-import java.util.ArrayList;
-import java.util.Set;
-
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.common.EntryDataViewDataProvider;
 import org.jbei.ice.client.common.table.EntrySelectionModel;
 import org.jbei.ice.client.event.EntryViewEvent;
 import org.jbei.ice.client.event.EntryViewEvent.EntryViewEventHandler;
+import org.jbei.ice.client.search.blast.BlastResultsTable;
 import org.jbei.ice.client.search.blast.BlastSearchDataProvider;
 import org.jbei.ice.client.search.event.AdvancedSearchEvent;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Presenter for searches
- * 
+ *
  * @author Hector Plahar
- * 
  */
 public class AdvancedSearchPresenter {
 
@@ -34,6 +33,7 @@ public class AdvancedSearchPresenter {
     private final BlastSearchDataProvider blastProvider;
     private final AdvancedSearchModel model;
     private AdvancedSearchResultsTable table;
+    private BlastResultsTable blastTable;
     private Mode mode;
 
     public AdvancedSearchPresenter(RegistryServiceAsync rpcService, HandlerManager eventBus) {
@@ -53,9 +53,22 @@ public class AdvancedSearchPresenter {
             }
         };
 
+        blastTable = new BlastResultsTable() {
+            @Override
+            protected EntryViewEventHandler getHandler() {
+                return new EntryViewEventHandler() {
+                    @Override
+                    public void onEntryView(EntryViewEvent event) {
+                        event.setNavigable(blastProvider);
+                        model.getEventBus().fireEvent(event);
+                    }
+                };
+            }
+        };
+
         // hide the results table
         dataProvider = new EntryDataViewDataProvider(table, rpcService);
-        blastProvider = new BlastSearchDataProvider(display.getBlastResultTable(), rpcService);
+        blastProvider = new BlastSearchDataProvider(blastTable, rpcService);
 
         this.model = new AdvancedSearchModel(rpcService, eventBus);
     }
@@ -94,9 +107,9 @@ public class AdvancedSearchPresenter {
 
             // show blast table loading
             blastProvider.updateRowCount(0, false);
-            display.setBlastVisibility(true);
-            display.getBlastResultTable().setVisibleRangeAndClearData(
-                display.getBlastResultTable().getVisibleRange(), false);
+            display.setBlastVisibility(blastTable, true);
+            blastTable.setVisibleRangeAndClearData(
+                    blastTable.getVisibleRange(), false);
 
             // get blast results and filter 
             QueryOperator program = QueryOperator.operatorValueOf(blastInfo.getOperator());
@@ -113,15 +126,15 @@ public class AdvancedSearchPresenter {
 
     public Set<Long> getEntrySet() {
         switch (mode) {
-        case SEARCH:
-        default:
-            if (table.getSelectionModel().isAllSelected()) {
-                return dataProvider.getData();
-            }
-            return table.getSelectedEntrySet();
+            case SEARCH:
+            default:
+                if (table.getSelectionModel().isAllSelected()) {
+                    return dataProvider.getData();
+                }
+                return table.getSelectedEntrySet();
 
-        case BLAST:
-            return display.getBlastResultTable().getSelectedEntrySet();
+            case BLAST:
+                return blastTable.getSelectedEntrySet();
         }
 
     }

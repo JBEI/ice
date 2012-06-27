@@ -1,23 +1,17 @@
 package org.jbei.ice.client.profile;
 
-import org.jbei.ice.client.collection.table.CollectionDataTable;
-import org.jbei.ice.client.common.table.HasEntryDataTable;
-import org.jbei.ice.client.login.RegistrationDetails;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.SampleInfo;
-
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
+import org.jbei.ice.client.collection.table.CollectionDataTable;
+import org.jbei.ice.client.collection.table.SamplesDataTable;
+import org.jbei.ice.client.login.RegistrationDetails;
+import org.jbei.ice.shared.dto.AccountInfo;
 
 public interface IProfileView {
 
     Widget asWidget();
 
     ProfileViewMenu getMenu();
-
-    HasEntryDataTable<SampleInfo> getSamplesTable();
-
-    void setSampleView();
 
     void addEditProfileLinkHandler(ClickHandler editProfileHandler);
 
@@ -35,4 +29,6 @@ public interface IProfileView {
     void editProfile(AccountInfo currentInfo, ClickHandler submitHandler, ClickHandler cancelHandler);
 
     void setEntryContent(CollectionDataTable collectionsDataTable);
+
+    void setSampleView(SamplesDataTable table);
 }

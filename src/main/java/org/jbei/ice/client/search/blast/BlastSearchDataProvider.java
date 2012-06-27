@@ -1,21 +1,24 @@
 package org.jbei.ice.client.search.blast;
 
+import com.google.gwt.user.cellview.client.ColumnSortList;
+import com.google.gwt.view.client.HasData;
+import com.google.gwt.view.client.Range;
+import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.common.HasEntryDataViewDataProvider;
+import org.jbei.ice.client.common.IHasNavigableData;
+import org.jbei.ice.client.common.table.HasEntryDataTable;
+import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.shared.dto.BlastResultInfo;
+import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.HasEntryInfo;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 
-import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.common.HasEntryDataViewDataProvider;
-import org.jbei.ice.client.common.table.HasEntryDataTable;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.BlastResultInfo;
-
-import com.google.gwt.user.cellview.client.ColumnSortList;
-import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.Range;
-
-public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastResultInfo> {
+public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastResultInfo>
+        implements IHasNavigableData {
 
     public BlastSearchDataProvider(HasEntryDataTable<BlastResultInfo> view,
             RegistryServiceAsync service) {
@@ -42,7 +45,9 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastR
     @Override
     protected void onRangeChanged(HasData<BlastResultInfo> display) {
 
-        if (results.isEmpty()) // problem here is that when the display is added to the dataProvider, onRangeChanged() is triggered
+        if (results
+                .isEmpty()) // problem here is that when the display is added to the dataProvider,
+            // onRangeChanged() is triggered
             return;
 
         final Range range = display.getVisibleRange();
@@ -68,34 +73,34 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastR
                 int diff = -1;
 
                 switch (field) {
-                case TYPE:
-                    diff = o1.getEntryInfo().getType().toString()
-                            .compareToIgnoreCase(o2.getEntryInfo().getType().toString());
-                    break;
+                    case TYPE:
+                        diff = o1.getEntryInfo().getType().toString()
+                                 .compareToIgnoreCase(o2.getEntryInfo().getType().toString());
+                        break;
 
-                case PART_ID:
-                    diff = o1.getEntryInfo().getPartId().compareTo(o2.getEntryInfo().getPartId());
-                    break;
+                    case PART_ID:
+                        diff = o1.getEntryInfo().getPartId().compareTo(o2.getEntryInfo().getPartId());
+                        break;
 
-                case NAME:
-                    diff = o1.getEntryInfo().getName().compareTo(o2.getEntryInfo().getName());
-                    break;
+                    case NAME:
+                        diff = o1.getEntryInfo().getName().compareTo(o2.getEntryInfo().getName());
+                        break;
 
-                case ALIGNED_BP:
-                    diff = (o1.getAlignmentLength() < o2.getAlignmentLength()) ? -1 : 1;
-                    break;
+                    case ALIGNED_BP:
+                        diff = (o1.getAlignmentLength() < o2.getAlignmentLength()) ? -1 : 1;
+                        break;
 
-                case ALIGNED_IDENTITY:
-                    diff = (o1.getPercentId() < o2.getPercentId()) ? -1 : 1;
-                    break;
+                    case ALIGNED_IDENTITY:
+                        diff = (o1.getPercentId() < o2.getPercentId()) ? -1 : 1;
+                        break;
 
-                case BIT_SCORE:
-                    diff = (o1.getBitScore() < o2.getBitScore()) ? -1 : 1;
-                    break;
+                    case BIT_SCORE:
+                        diff = (o1.getBitScore() < o2.getBitScore()) ? -1 : 1;
+                        break;
 
-                case E_VALUE:
-                    diff = (o1.geteValue() < o2.geteValue()) ? -1 : 1;
-                    break;
+                    case E_VALUE:
+                        diff = (o1.geteValue() < o2.geteValue()) ? -1 : 1;
+                        break;
                 }
 
                 return asc ? diff : -diff;
@@ -133,5 +138,48 @@ public class BlastSearchDataProvider extends HasEntryDataViewDataProvider<BlastR
         // TODO : this goes with the above todo. if we clear all the sort info then we use default else use the top sort
         // TODO : look at the sort method for an example of how to do this
         fetchHasEntryData(this.getSortField(), true, rangeStart, rangeEnd);
+    }
+
+    @Override
+    public EntryInfo getCachedData(long entryId) {
+        for (HasEntryInfo result : results) {
+
+            if (result.getEntryInfo().getId() == entryId)
+                return result.getEntryInfo();
+        }
+        return null;
+    }
+
+    @Override
+    public int indexOfCached(EntryInfo info) {
+        int i = 0;
+        for (HasEntryInfo result : results) {
+
+            if (result.getEntryInfo().getId() == info.getId())
+                return i;
+            i += 1;
+        }
+        return -1;
+    }
+
+    @Override
+    public int getSize() {
+        return valueIds.size();
+    }
+
+    @Override
+    public EntryInfo getNext(EntryInfo info) {
+        int idx = indexOfCached(info);
+        if (idx == -1)
+            return null;
+        return results.get(idx + 1).getEntryInfo();
+    }
+
+    @Override
+    public EntryInfo getPrev(EntryInfo info) {
+        int idx = indexOfCached(info);
+        if (idx == -1)
+            return null;
+        return results.get(idx - 1).getEntryInfo();
     }
 }

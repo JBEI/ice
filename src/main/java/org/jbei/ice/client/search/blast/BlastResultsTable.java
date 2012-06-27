@@ -1,19 +1,25 @@
 package org.jbei.ice.client.search.blast;
 
-import java.util.ArrayList;
-
-import org.jbei.ice.client.collection.presenter.EntryContext;
-import org.jbei.ice.client.common.table.HasEntryDataTable;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.BlastResultInfo;
-
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.dom.client.Style.Unit;
+import org.jbei.ice.client.collection.presenter.EntryContext;
+import org.jbei.ice.client.common.table.EntryTablePager;
+import org.jbei.ice.client.common.table.HasEntryDataTable;
+import org.jbei.ice.client.common.table.cell.HasEntryPartIDCell;
+import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.shared.dto.BlastResultInfo;
+import org.jbei.ice.shared.dto.HasEntryInfo;
 
-public class BlastResultsTable extends HasEntryDataTable<BlastResultInfo> {
+import java.util.ArrayList;
+
+public abstract class BlastResultsTable extends HasEntryDataTable<BlastResultInfo> {
+
+    private final EntryTablePager pager;
 
     public BlastResultsTable() {
         super();
+        this.pager = new EntryTablePager();
+        pager.setDisplay(this);
     }
 
     @Override
@@ -23,7 +29,9 @@ public class BlastResultsTable extends HasEntryDataTable<BlastResultInfo> {
 
         columns.add(super.addSelectionColumn());
         columns.add(super.addTypeColumn(true));
-        columns.add(super.addPartIdColumn(true, null, EntryContext.Type.SEARCH));
+        DataTableColumn<HasEntryInfo> partIdCol = addPartIdColumn(false, 120, Unit.PX);
+        columns.add(partIdCol);
+//        columns.add(super.addPartIdColumn(true, null, EntryContext.Type.SEARCH));
         columns.add(super.addNameColumn());
         columns.add(addAlignedColumn());
         columns.add(addAlignedIdentityColumn());
@@ -33,10 +41,21 @@ public class BlastResultsTable extends HasEntryDataTable<BlastResultInfo> {
         return columns;
     }
 
+    protected DataTableColumn<HasEntryInfo> addPartIdColumn(boolean sortable, double width, Unit unit) {
+
+        HasEntryPartIDCell<HasEntryInfo> cell = new HasEntryPartIDCell<HasEntryInfo>(EntryContext.Type.SEARCH);
+        cell.addEntryHandler(getHandler());
+        DataTableColumn<HasEntryInfo> partIdColumn = new HasEntryDataTable.PartIdColumn(cell);
+        this.setColumnWidth(partIdColumn, width, unit);
+        partIdColumn.setSortable(sortable);
+        this.addColumn(partIdColumn, "Part ID");
+        return partIdColumn;
+    }
+
     protected DataTableColumn<String> addAlignedColumn() {
 
         DataTableColumn<String> alignedCol = new DataTableColumn<String>(new TextCell(),
-                ColumnField.ALIGNED_BP) {
+                                                                         ColumnField.ALIGNED_BP) {
 
             @Override
             public String getValue(BlastResultInfo info) {
@@ -51,7 +70,7 @@ public class BlastResultsTable extends HasEntryDataTable<BlastResultInfo> {
 
     protected DataTableColumn<String> addAlignedIdentityColumn() {
         DataTableColumn<String> alignedCol = new DataTableColumn<String>(new TextCell(),
-                ColumnField.ALIGNED_IDENTITY) {
+                                                                         ColumnField.ALIGNED_IDENTITY) {
 
             @Override
             public String getValue(BlastResultInfo info) {
@@ -66,7 +85,7 @@ public class BlastResultsTable extends HasEntryDataTable<BlastResultInfo> {
 
     protected DataTableColumn<String> addBitScoreColumn() {
         DataTableColumn<String> col = new DataTableColumn<String>(new TextCell(),
-                ColumnField.BIT_SCORE) {
+                                                                  ColumnField.BIT_SCORE) {
 
             @Override
             public String getValue(BlastResultInfo info) {
@@ -81,7 +100,7 @@ public class BlastResultsTable extends HasEntryDataTable<BlastResultInfo> {
 
     protected DataTableColumn<String> addEValueColumn() {
         DataTableColumn<String> col = new DataTableColumn<String>(new TextCell(),
-                ColumnField.E_VALUE) {
+                                                                  ColumnField.E_VALUE) {
 
             @Override
             public String getValue(BlastResultInfo info) {
@@ -92,5 +111,9 @@ public class BlastResultsTable extends HasEntryDataTable<BlastResultInfo> {
         this.addColumn(col, ColumnField.E_VALUE.getName());
         this.setColumnWidth(col, 200, Unit.PX);
         return col;
+    }
+
+    public EntryTablePager getPager() {
+        return pager;
     }
 }
