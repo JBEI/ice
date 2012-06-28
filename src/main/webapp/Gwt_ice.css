@@ -391,6 +391,8 @@ a.cell_mouseover:hover {
     border-right: 1px solid #ccc;
     border-top: 1px solid #ccc;
     background: #FCC;
+    width: 130px;
+    height: 19px;
 }
 
 .uploader_cell {
