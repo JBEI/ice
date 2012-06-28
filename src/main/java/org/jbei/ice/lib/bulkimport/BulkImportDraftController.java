@@ -360,15 +360,8 @@ public class BulkImportDraftController {
                 // perform update
                 InfoToModelFactory.infoToEntry(info, entry);
                 entryController.save(account, entry);
-                // need to update funding sources because it is not automatically updated
-                // see EntryFundingSource class for details
-//                if( entry.getEntryFundingSources() != null ) {
-//                    for (EntryFundingSource entryFundingSource : entry.getEntryFundingSources()) {
-//                        entryController.saveFundingSource(entryFundingSource.getFundingSource());
-//                    }
-//                }
+                return true;
             }
-            return true;
         }
 
         return false;

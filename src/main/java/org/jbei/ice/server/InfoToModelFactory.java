@@ -216,6 +216,16 @@ public class InfoToModelFactory {
                     entryFundingSource.setEntry(entry);
                 }
             }
+        } else if (pI != null && !pI.trim().isEmpty()) {
+
+            FundingSource fundingSource = new FundingSource();
+            EntryFundingSource entryFundingSource = new EntryFundingSource();
+            fundingSources.add(entryFundingSource);
+            entryFundingSource.setFundingSource(fundingSource);
+
+            fundingSource.setFundingSource("");
+            fundingSource.setPrincipalInvestigator(pI);
+            entryFundingSource.setEntry(entry);
         }
 
         return fundingSources;

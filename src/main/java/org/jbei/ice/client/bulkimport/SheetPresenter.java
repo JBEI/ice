@@ -79,15 +79,19 @@ public class SheetPresenter {
         return this.type;
     }
 
+    public void setCurrentInfo(BulkImportDraftInfo info) {
+        this.currentInfo = info;
+    }
+
     public Header[] getTypeHeaders() {
         return ImportTypeHeaders.getHeadersForType(type);
     }
 
-    public ArrayList<EntryInfo> getCellEntryList() {
+    public ArrayList<EntryInfo> getCellEntryList(String ownerEmail, String owner) {
 
         Header[] headers = getTypeHeaders();
         int rowCount = view.getSheetRowCount();
-        ArrayList<EntryInfo> toRemove = new ArrayList<EntryInfo>();
+//        ArrayList<EntryInfo> toRemove = new ArrayList<EntryInfo>();
         SheetModel<? extends EntryInfo> model = ModelFactory.getModelForType(type);
         if (model == null)
             return null;
@@ -98,9 +102,11 @@ public class SheetPresenter {
         for (int i = 0; i < rowCount; i += 1) {
 
             if (view.isEmptyRow(i)) {
-//                EntryInfo info = currentInfo.getEntryList().get(i);
-//                if (info != null)
-//                    toRemove.add(currentInfo.getEntryList().remove(i));
+//                if (currentInfo.getEntryList().size() > i) {
+//                    EntryInfo info = currentInfo.getEntryList().get(i);
+//                    if (info != null)
+//                        toRemove.add(currentInfo.getEntryList().remove(i));
+//                }
                 continue;
             }
 
@@ -109,10 +115,10 @@ public class SheetPresenter {
 
             // is row associated with a saved entry?
             EntryInfo existing = null;
-            if (currentInfo != null)
+            if (currentInfo != null && currentInfo.getEntryList().size() > index)
                 existing = currentInfo.getEntryList().get(index);
 
-//            for each header
+            // for each header
             int y = 0;
             for (Header header : headers) {
 
@@ -132,7 +138,13 @@ public class SheetPresenter {
                 y += 1;
             }
 
-            infoList.add(existing);
+            if (existing != null) {
+                existing.setOwnerEmail(ownerEmail);
+                existing.setOwner(owner);
+                existing.setCreator(owner);
+                existing.setCreatorEmail(ownerEmail);
+                infoList.add(existing);
+            }
         }
 
         if (currentInfo != null) {

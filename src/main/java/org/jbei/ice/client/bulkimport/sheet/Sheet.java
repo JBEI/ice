@@ -124,6 +124,10 @@ public class Sheet extends Composite implements SheetPresenter.View {
         init();
     }
 
+    public void setCurrentInfo(BulkImportDraftInfo info) {
+        presenter.setCurrentInfo(info);
+    }
+
     // experimental
     public void decreaseWidthBy(int amount) {
         wrapper.setWidth((wrapper.getOffsetWidth() - amount) + "px");
@@ -321,43 +325,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
         }
     }
 
-    public ArrayList<EntryInfo> getCellData() {
-        return presenter.getCellEntryList();
-
-//        ArrayList<SheetFieldData[]> cellData = new ArrayList<SheetFieldData[]>();
-//
-//        Header[] headers = presenter.getTypeHeaders();
-//        SheetFieldData[] row;
-//
-//        for (int i = 0; i < sheetTable.getRowCount(); i += 1) {
-//            if (isEmptyRow(i))
-//                continue;
-//
-//            row = new SheetFieldData[headers.length];
-//
-//            int y = 0;
-//            for (Header header : headers) {
-//
-//                String id = "";
-//                switch (header) {
-//                    case ATT_FILENAME:
-//                        id = attachmentRowFileIds.get(i);
-//                        break;
-//
-//                    case SEQ_FILENAME:
-//                        id = sequenceRowFileIds.get(i);
-//                        break;
-//                }
-//
-//                HasText widget = (HasText) sheetTable.getWidget(i, y);
-//                row[y] = new SheetFieldData(header, id, widget.getText());
-//                y += 1;
-//            }
-//
-//            cellData.add(row);
-//        }
-//
-//        return cellData;
+    public ArrayList<EntryInfo> getCellData(String ownerEmail, String owner) {
+        return presenter.getCellEntryList(ownerEmail, owner);
     }
 
     @Override

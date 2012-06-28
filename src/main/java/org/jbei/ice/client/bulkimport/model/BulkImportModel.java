@@ -52,14 +52,6 @@ public class BulkImportModel {
     public void saveBulkImportDraftData(final EntryAddType type, final String name,
             final ArrayList<EntryInfo> entryList, final BulkImportDraftSubmitEventHandler handler) {
 
-        // creator info does not appear to be filled out anywhere
-        String creator = AppController.accountInfo.getFullName();
-        String creatorEmail = AppController.accountInfo.getEmail();
-        for (EntryInfo info : entryList) {
-            info.setCreator(creator);
-            info.setCreatorEmail(creatorEmail);
-        }
-
         new IceAsyncCallback<BulkImportDraftInfo>() {
 
             @Override

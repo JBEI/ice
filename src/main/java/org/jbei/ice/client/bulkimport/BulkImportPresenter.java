@@ -85,6 +85,10 @@ public class BulkImportPresenter extends AbstractPresenter {
         });
     }
 
+    /**
+     * Sets selection model handler for draft menu. Obtains user selection,
+     * retrieves information about it from the server and then displays the data to the user
+     */
     private void setMenuSelectionModel() {
         final SingleSelectionModel<BulkImportMenuItem> draftSelection = view.getDraftMenuModel();
         draftSelection.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -199,7 +203,9 @@ public class BulkImportPresenter extends AbstractPresenter {
                 return;
             }
 
-            ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData();
+            ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(AppController.accountInfo.getEmail(),
+                                                                                AppController.accountInfo
+                                                                                             .getFullName());
             if (cellData == null || cellData.isEmpty()) {
                 view.showFeedback("Please enter data into the sheet before submitting", true);
                 return;
@@ -239,7 +245,9 @@ public class BulkImportPresenter extends AbstractPresenter {
             String name = view.getDraftName();
             currentInput.setName(name);
 
-            ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData();
+            ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(AppController.accountInfo.getEmail(),
+                                                                                AppController.accountInfo
+                                                                                             .getFullName());
             if (cellData == null || cellData.isEmpty()) {
                 view.showFeedback("Please enter data into the sheet before saving draft", true);
                 return;
@@ -271,6 +279,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                                                                       model.getEventBus()));
                                                       currentInput.setName(info.getName());
                                                       currentInput.setId(info.getId());
+                                                      currentInput.getSheet().setCurrentInfo(info);
 
                                                       view.setSheet(currentInput, false);
                                                       view.setHeader(currentInput.getImportType().getDisplay()
@@ -290,7 +299,9 @@ public class BulkImportPresenter extends AbstractPresenter {
 
             long id = currentInput.getId();
             final EntryAddType type = currentInput.getImportType();
-            ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData();
+            ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(AppController.accountInfo.getEmail(),
+                                                                                AppController.accountInfo
+                                                                                             .getFullName());
 
             model.updateBulkImportDraft(id, type, cellData,
                                         new BulkImportDraftSubmitEventHandler() {

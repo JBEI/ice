@@ -77,41 +77,6 @@ public class SavedDraftsMenu extends Composite {
         }
     }
 
-    /**
-     * checks if the user clicked within the menu contents
-     * and not, for eg. the header
-     *
-     * @param event
-     *            user click event
-     * @return true if a response is required for user selection
-     */
-//    public boolean isValidClick(ClickEvent event) {
-//        if (event == null)
-//            return false;
-//
-//        Cell cell = this.table.getCellForEvent(event);
-//        if (cell == null)
-//            return false;
-//
-//        boolean isValid = (cell.getCellIndex() != 0 || cell.getRowIndex() != 0);
-//        if (!isValid)
-//            return isValid;
-//
-//        return isValid;
-//    }
-
-    /**
-     * replaces current edit cell (in menu)
-     * with new cell with folder
-     * <p/>
-     * new folder for cell
-     */
-    //    public void setMenuItem(BulkImportMenuItem item, IDeleteMenuHandler deleteHandler) {
-    //
-    //        final MenuCell cell = new MenuCell(item, deleteHandler);
-    //        cell.addClickHandler(new CellSelectionHandler(selectionModel, cell));
-    //        table.setWidget(editRow, editIndex, cell); // TODO
-    //    }
     public void addMenuItem(BulkImportMenuItem item, IDeleteMenuHandler deleteHandler) {
         if (item == null)
             return;
