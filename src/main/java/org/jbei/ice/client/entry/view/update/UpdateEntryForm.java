@@ -1,10 +1,8 @@
 package org.jbei.ice.client.entry.view.update;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.TreeSet;
-
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.*;
 import org.jbei.ice.client.collection.add.form.ParametersPanel;
 import org.jbei.ice.client.collection.add.form.ParametersPanel.Parameter;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
@@ -14,30 +12,18 @@ import org.jbei.ice.shared.StatusType;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.ParameterInfo;
 
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
-import com.google.gwt.user.client.ui.SuggestBox;
-import com.google.gwt.user.client.ui.TextArea;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.TreeSet;
 
 /**
  * Parent class for forms used to create new entries
- * 
+ *
  * @author Hector Plahar
  */
 public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite implements
-        IEntryFormUpdateSubmit {
+                                                                             IEntryFormUpdateSubmit {
 
     protected final FlexTable layout;
     protected final HashMap<AutoCompleteField, ArrayList<String>> data;
@@ -83,7 +69,7 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
         this.alias.setText(entryInfo.getAlias());
         this.principalInvestigator.setText(entryInfo.getPrincipalInvestigator());
         this.summary.setText(entryInfo.getShortDescription());
-
+        this.references.setText(entryInfo.getReferences());
         this.fundingSource.setText(entryInfo.getFundingSource());
         status.setVisibleItemCount(1);
         for (StatusType type : StatusType.values()) {
@@ -296,7 +282,7 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
     public SuggestBox createAutoCompleteForSelectionMarkers(String width) {
 
         SuggestBox box = this.createSuggestBox(new TreeSet<String>(data
-                .get(AutoCompleteField.SELECTION_MARKERS)));
+                                                                           .get(AutoCompleteField.SELECTION_MARKERS)));
         box.setWidth(width);
         return box;
     }
@@ -304,7 +290,7 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
     public Widget createAutoCompleteForPlasmidNames(String width) {
 
         SuggestBox box = this.createSuggestBox(new TreeSet<String>(data
-                .get(AutoCompleteField.PLASMID_NAME)));
+                                                                           .get(AutoCompleteField.PLASMID_NAME)));
         box.setWidth(width);
         return box;
     }
@@ -312,7 +298,8 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
     public Widget createAutoCompleteForOriginOfReplication(String width) {
 
         SuggestBox box = this.createSuggestBox(new TreeSet<String>(data
-                .get(AutoCompleteField.ORIGIN_OF_REPLICATION)));
+                                                                           .get(AutoCompleteField
+                                                                                        .ORIGIN_OF_REPLICATION)));
         box.setWidth(width);
         return box;
     }
