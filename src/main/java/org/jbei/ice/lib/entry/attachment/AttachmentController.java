@@ -1,13 +1,13 @@
 package org.jbei.ice.lib.entry.attachment;
 
 import org.jbei.ice.controllers.ApplicationController;
-import org.jbei.ice.controllers.common.Controller;
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.controllers.permissionVerifiers.AttachmentPermissionVerifier;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.permissions.PermissionsController;
+import org.jbei.ice.lib.utils.Utils;
 
 import java.io.File;
 import java.io.InputStream;
@@ -16,45 +16,49 @@ import java.util.ArrayList;
 /**
  * ABI to manipulate {@link Attachment}s.
  *
- * @author Timothy Ham, Zinovii Dmytriv.
+ * @author Hector Plahar, Timothy Ham, Zinovii Dmytriv.
  */
-public class AttachmentController extends Controller {
+public class AttachmentController {
 
     private final AttachmentDAO dao;
+    private final PermissionsController permissionsController;
 
-    public AttachmentController(Account account) {
-        super(account, new AttachmentPermissionVerifier());
+
+    public AttachmentController() {
+        permissionsController = new PermissionsController();
         dao = new AttachmentDAO();
     }
 
     /**
      * Determine if the user has read permission to the attachment.
      *
-     * @param attachment
+     * @param account    account of requesting user
+     * @param attachment entry attachment
      * @return True if user has read permission to the attachment.
      * @throws ControllerException
      */
-    public boolean hasReadPermission(Attachment attachment) throws ControllerException {
+    public boolean hasReadPermission(Account account, Attachment attachment) throws ControllerException {
         if (attachment == null) {
             throw new ControllerException("Failed to check read permissions for null attachment!");
         }
 
-        return getAttachmentPermissionVerifier().hasReadPermissions(attachment, getAccount());
+        return permissionsController.hasReadPermission(account, attachment.getEntry());
     }
 
     /**
      * Determine if the user has write permission to the attachment.
      *
-     * @param attachment
+     * @param account    account of requesting user
+     * @param attachment entry attachment
      * @return True if user has write permission to the attachment.
      * @throws ControllerException
      */
-    public boolean hasWritePermission(Attachment attachment) throws ControllerException {
+    public boolean hasWritePermission(Account account, Attachment attachment) throws ControllerException {
         if (attachment == null) {
             throw new ControllerException("Failed to check write permissions for null attachment!");
         }
 
-        return getAttachmentPermissionVerifier().hasWritePermissions(attachment, getAccount());
+        return permissionsController.hasWritePermission(account, attachment.getEntry());
     }
 
     /**
@@ -66,9 +70,9 @@ public class AttachmentController extends Controller {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public Attachment save(Attachment attachment, InputStream inputStream)
+    public Attachment save(Account account, Attachment attachment, InputStream inputStream)
             throws ControllerException, PermissionException {
-        return save(attachment, inputStream, true);
+        return save(account, attachment, inputStream, true);
     }
 
     /**
@@ -81,26 +85,33 @@ public class AttachmentController extends Controller {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public Attachment save(Attachment attachment, InputStream inputStream,
+    public Attachment save(Account account, Attachment attachment, InputStream inputStream,
             boolean scheduleIndexRebuild) throws ControllerException, PermissionException {
-        if (!hasWritePermission(attachment)) {
+
+        if (!hasWritePermission(account, attachment)) {
             throw new PermissionException("No permissions to save attachment!");
         }
 
-        Attachment savedAttachment = null;
-
-        try {
-            savedAttachment = dao.save(attachment, inputStream);
-
-            if (scheduleIndexRebuild) {
-                ApplicationController.scheduleSearchIndexRebuildJob();
-            }
-        } catch (DAOException e) {
-            throw new ControllerException(e);
+        if (attachment.getFileId() == null || attachment.getFileId() == "") {
+            String fileId = Utils.generateUUID();
+            attachment.setFileId(fileId);
         }
 
-        return savedAttachment;
+        Attachment result;
+
+        try {
+            result = dao.save(attachment, inputStream);
+        } catch (DAOException e) {
+            throw new ControllerException("Failed to save attachment!", e);
+        }
+
+        if (scheduleIndexRebuild) {
+            ApplicationController.scheduleSearchIndexRebuildJob();
+        }
+
+        return result;
     }
+
 
     /**
      * Delete the attachment from the database and the disk. Rebuild the search index.
@@ -109,8 +120,8 @@ public class AttachmentController extends Controller {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public void delete(Attachment attachment) throws ControllerException, PermissionException {
-        delete(attachment, true);
+    public void delete(Account account, Attachment attachment) throws ControllerException, PermissionException {
+        delete(account, attachment, true);
     }
 
     /**
@@ -121,15 +132,14 @@ public class AttachmentController extends Controller {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public void delete(Attachment attachment, boolean scheduleIndexRebuild)
+    public void delete(Account account, Attachment attachment, boolean scheduleIndexRebuild)
             throws ControllerException, PermissionException {
-        if (!hasWritePermission(attachment)) {
+        if (!hasWritePermission(account, attachment)) {
             throw new PermissionException("No permissions to delete attachment!");
         }
 
         try {
             dao.delete(attachment);
-
             if (scheduleIndexRebuild) {
                 ApplicationController.scheduleSearchIndexRebuildJob();
             }
@@ -146,36 +156,12 @@ public class AttachmentController extends Controller {
      * @throws ControllerException
      */
     public ArrayList<Attachment> getAttachments(Entry entry) throws ControllerException {
-        ArrayList<Attachment> attachments = null;
 
         try {
-            attachments = dao.getByEntry(entry);
+            return dao.getByEntry(entry);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
-
-        return attachments;
-    }
-
-    /**
-     * Retrieve the number of attachments associated with the given {@link Entry entry}.
-     *
-     * @param entry
-     * @return number of attachments.
-     * @throws ControllerException
-     */
-    public long getNumberOfAttachments(Entry entry) throws ControllerException {
-        long result = 0;
-
-        try {
-            ArrayList<Attachment> attachments = dao.getByEntry(entry);
-
-            result = (attachments == null) ? 0 : attachments.size();
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
-        return result;
     }
 
     /**
@@ -186,20 +172,16 @@ public class AttachmentController extends Controller {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public File getFile(Attachment attachment) throws ControllerException, PermissionException {
-        if (!hasReadPermission(attachment)) {
+    public File getFile(Account account, Attachment attachment) throws ControllerException, PermissionException {
+        if (!hasReadPermission(account, attachment)) {
             throw new PermissionException("No permissions to read attachment file!");
         }
 
-        File result = null;
-
         try {
-            result = dao.getFile(attachment);
+            return dao.getFile(attachment);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
-
-        return result;
     }
 
     /**
@@ -210,7 +192,7 @@ public class AttachmentController extends Controller {
      * @throws ControllerException
      */
     public Attachment getAttachmentByFileId(String fileId) throws ControllerException {
-        Attachment attachment = null;
+        Attachment attachment;
         try {
             attachment = dao.getByFileId(fileId);
         } catch (DAOException e) {
@@ -220,16 +202,11 @@ public class AttachmentController extends Controller {
         return attachment;
     }
 
-    /**
-     * Return the {@link AttachmentPermissionVerifier}.
-     *
-     * @return permssionVerifier
-     */
-    protected AttachmentPermissionVerifier getAttachmentPermissionVerifier() {
-        return (AttachmentPermissionVerifier) getPermissionVerifier();
-    }
+    public ArrayList<Attachment> getByEntry(Account account, Entry entry) throws ControllerException {
+        if (!permissionsController.hasReadPermission(account, entry))
+            throw new ControllerException(account.getEmail() + " does not have read permission for entry "
+                                                  + entry.getRecordId());
 
-    public ArrayList<Attachment> getByEntry(Entry entry) throws ControllerException {
         try {
             return dao.getByEntry(entry);
         } catch (DAOException e) {
@@ -237,7 +214,10 @@ public class AttachmentController extends Controller {
         }
     }
 
-    public boolean hasAttachment(Entry entry) throws ControllerException {
+    public boolean hasAttachment(Account account, Entry entry) throws ControllerException {
+        if (!permissionsController.hasReadPermission(account, entry))
+            throw new ControllerException(account.getEmail() + " does not have read permission for entry "
+                                                  + entry.getRecordId());
         try {
             return dao.hasAttachment(entry);
         } catch (DAOException e) {

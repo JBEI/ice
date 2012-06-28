@@ -121,13 +121,13 @@ public class FileDownloadServlet extends HttpServlet {
     }
 
     private File getAttachmentFile(Account account, String fileId) {
-        AttachmentController controller = new AttachmentController(account);
+        AttachmentController controller = new AttachmentController();
         try {
             Attachment attachment = controller.getAttachmentByFileId(fileId);
             if (attachment == null)
                 return null;
 
-            return controller.getFile(attachment);
+            return controller.getFile(account, attachment);
         } catch (ControllerException ce) {
             Logger.error("Error retrieving attachment file with id " + fileId + ". Details...");
             Logger.error(ce);

@@ -464,7 +464,7 @@ public class RegistryAPI {
         try {
             EntryController entryController = new EntryController();
             Entry remoteEntry = createEntry(sessionId, plasmid);
-            newEntry = entryController.createEntry(remoteEntry);
+            newEntry = entryController.createEntry(account, remoteEntry);
             log("User '" + account.getEmail() + "' created plasmid: '" + plasmid.getRecordId()
                         + "', " + plasmid.getId());
         } catch (ControllerException e) {
@@ -496,7 +496,7 @@ public class RegistryAPI {
         try {
             EntryController entryController = new EntryController();
             Entry remoteEntry = createEntry(sessionId, strain);
-            newEntry = entryController.createEntry(remoteEntry);
+            newEntry = entryController.createEntry(account, remoteEntry);
             log("User '" + account.getEmail() + "' created strain: '" + strain.getRecordId()
                         + "', " + strain.getId());
         } catch (ControllerException e) {
@@ -527,7 +527,7 @@ public class RegistryAPI {
         try {
             EntryController entryController = new EntryController();
             Entry remoteEntry = createEntry(sessionId, part);
-            newEntry = entryController.createEntry(remoteEntry);
+            newEntry = entryController.createEntry(account, remoteEntry);
             log("User '" + account.getEmail() + "' created part: '" + part.getRecordId() + "', "
                         + part.getId());
         } catch (ControllerException e) {

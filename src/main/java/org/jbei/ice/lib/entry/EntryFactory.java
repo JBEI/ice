@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.entry;
 
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.utils.Utils;
@@ -15,7 +16,7 @@ import java.util.Set;
  */
 public class EntryFactory {
 
-    public static Entry createEntry(String number, Entry newEntry) {
+    public static Entry createEntry(Account account, String number, Entry newEntry) {
         PartNumber partNumber = new PartNumber();
         partNumber.setPartNumber(number);
         Set<PartNumber> partNumbers = new LinkedHashSet<PartNumber>();
@@ -32,6 +33,9 @@ public class EntryFactory {
         } else {
             newEntry.setModificationTime(Calendar.getInstance().getTime());
         }
+
+        newEntry.setCreator(account.getFullName());
+        newEntry.setCreatorEmail(account.getEmail());
 
         return newEntry;
     }

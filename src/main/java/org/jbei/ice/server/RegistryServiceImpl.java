@@ -679,10 +679,10 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
             }
 
-            AttachmentController attachmentController = new AttachmentController(account);
+            AttachmentController attachmentController = new AttachmentController();
             SampleController sampleController = new SampleController();
 
-            ArrayList<Attachment> attachments = attachmentController.getByEntry(entry);
+            ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
             ArrayList<Sample> samples = sampleController.getSamplesByEntry(entry);
             List<TraceSequence> sequences = TraceSequenceDAO.getByEntry(entry);
 
@@ -750,9 +750,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             Logger.info(account.getEmail() + ": retrieving entry details for " + id);
 
-            AttachmentController attachmentController = new AttachmentController(account);
+            AttachmentController attachmentController = new AttachmentController();
             SampleController sampleController = new SampleController();
-            ArrayList<Attachment> attachments = attachmentController.getByEntry(entry);
+            ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
             ArrayList<Sample> samples = sampleController.getSamplesByEntry(entry);
             List<TraceSequence> sequences = TraceSequenceDAO.getByEntry(entry);
 
@@ -1467,7 +1467,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 }
             }
 
-            return controller.createEntry(entry).getId();
+            return controller.createEntry(account, entry).getId();
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
@@ -1503,7 +1503,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                         break;
                 }
             }
-            HashSet<Entry> results = controller.createStrainWithPlasmid(strain, plasmid);
+            HashSet<Entry> results = controller.createStrainWithPlasmid(account, strain, plasmid);
             ArrayList<Long> ids = new ArrayList<Long>();
 
             for (Entry result : results) {
@@ -2077,12 +2077,12 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return false;
 
-            AttachmentController controller = new AttachmentController(account);
+            AttachmentController controller = new AttachmentController();
             Attachment attachment = controller.getAttachmentByFileId(fileId);
             if (attachment == null)
                 return false;
 
-            controller.delete(attachment);
+            controller.delete(account, attachment);
             return true;
         } catch (ControllerException ce) {
             Logger.error(ce);

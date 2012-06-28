@@ -1249,7 +1249,7 @@ public class RegistryAMFAPI extends BaseService {
         EntryController entryController = new EntryController();
         Entry saved = null;
         try {
-            saved = entryController.createEntry(entry);
+            saved = entryController.createEntry(account, entry);
         } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
             return null;
@@ -1328,21 +1328,19 @@ public class RegistryAMFAPI extends BaseService {
         Strain newStrain = null;
 
         try {
-            newPlasmid = (Plasmid) entryController.createEntry(plasmid);
+            newPlasmid = (Plasmid) entryController.createEntry(account, plasmid);
             String plasmidPartNumberString = "[[" + JbeirSettings.getSetting("WIKILINK_PREFIX")
                     + ":" + newPlasmid.getOnePartNumber().getPartNumber() + "|"
                     + newPlasmid.getOneName().getName() + "]]";
             strain.setPlasmids(plasmidPartNumberString);
-            newStrain = (Strain) entryController.createEntry(strain);
+            newStrain = (Strain) entryController.createEntry(account, strain);
         } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
             return null;
         }
 
         List<Entry> saved = new LinkedList<Entry>();
-        if (newPlasmid != null) {
-            saved.add(newPlasmid);
-        }
+        saved.add(newPlasmid);
         if (newStrain != null) {
             saved.add(newStrain);
         }
@@ -1410,7 +1408,7 @@ public class RegistryAMFAPI extends BaseService {
             inputBytes[i] = fileBytes[i].byteValue();
         }
 
-        AttachmentController controller = new AttachmentController(account);
+        AttachmentController controller = new AttachmentController();
         ByteArrayInputStream bais = new ByteArrayInputStream(inputBytes);
         Attachment attachment = new Attachment();
         attachment.setFileName(filename);
@@ -1418,7 +1416,7 @@ public class RegistryAMFAPI extends BaseService {
         attachment.setEntry(entry);
 
         try {
-            controller.save(attachment, bais);
+            controller.save(account, attachment, bais);
         } catch (ControllerException e) {
             Logger.error(getLoggerPrefix(), e);
         } catch (PermissionException e) {

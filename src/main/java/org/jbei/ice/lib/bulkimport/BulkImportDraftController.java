@@ -226,7 +226,7 @@ public class BulkImportDraftController {
                     plasmid.setOwnerEmail(account.getEmail());
 
                     // save entries
-                    HashSet<Entry> results = entryController.createStrainWithPlasmid(strain, plasmid);
+                    HashSet<Entry> results = entryController.createStrainWithPlasmid(account, strain, plasmid);
                     contents.addAll(results);
                     break;
 
@@ -238,7 +238,7 @@ public class BulkImportDraftController {
                     entry.setOwnerEmail(account.getEmail());
 
                     // save entry
-                    entry = entryController.createEntry(entry);
+                    entry = entryController.createEntry(account, entry);
                     contents.add(entry);
                     break;
             }
@@ -298,7 +298,7 @@ public class BulkImportDraftController {
                         Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(plasmidInfo);
                         strain.setVisibility(new Integer(0));
                         plasmid.setVisibility(new Integer(0));
-                        HashSet<Entry> results = entryController.createStrainWithPlasmid(strain, plasmid);
+                        HashSet<Entry> results = entryController.createStrainWithPlasmid(account, strain, plasmid);
                         contents.addAll(results);
                         break;
                     }
@@ -315,7 +315,7 @@ public class BulkImportDraftController {
                     if (!updated) {
                         Entry entry = InfoToModelFactory.infoToEntry(info);
                         entry.setVisibility(new Integer(0));
-                        entry = entryController.createEntry(entry);
+                        entry = entryController.createEntry(account, entry);
                         contents.add(entry);
                     }
                     break;

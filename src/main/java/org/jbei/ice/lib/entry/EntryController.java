@@ -38,10 +38,12 @@ public class EntryController {
 
     private EntryDAO dao;
     private PermissionsController permissionsController;
+    private AttachmentController attachmentController;
 
     public EntryController() {
         dao = new EntryDAO();
         permissionsController = new PermissionsController();
+        attachmentController = new AttachmentController();
     }
 
     /**
@@ -50,23 +52,23 @@ public class EntryController {
      * Generates a new Part Number, the record id (UUID), version id, and timestamps as necessary.
      * Sets the record globally visible and schedule an index rebuild.
      *
-     * @param entry
+     * @param account account of user creating the record
+     * @param entry   entry record being created
      * @return entry that was saved in the database.
      * @throws ControllerException
      */
-    // TODO : this needs to take an account param and set the owner and owner email so it does not have to
-    // TODO : be done outside of the class
-    public Entry createEntry(Entry entry) throws ControllerException {
-        return createEntry(entry, true);
+    public Entry createEntry(Account account, Entry entry) throws ControllerException {
+        return createEntry(account, entry, true);
     }
 
-    public HashSet<Entry> createStrainWithPlasmid(Strain strain, Plasmid plasmid) throws ControllerException {
+    public HashSet<Entry> createStrainWithPlasmid(Account account, Strain strain, Plasmid plasmid)
+            throws ControllerException {
         checkNotNull(strain);
         checkNotNull(plasmid);
 
         HashSet<Entry> results = new HashSet<Entry>();
 
-        plasmid = (Plasmid) createEntry(plasmid);
+        plasmid = (Plasmid) createEntry(account, plasmid);
         results.add(plasmid);
 
         String plasmidPartNumberString = "[["
@@ -74,7 +76,7 @@ public class EntryController {
                 + plasmid.getOnePartNumber().getPartNumber() + "|"
                 + plasmid.getOneName().getName() + "]]";
         strain.setPlasmids(plasmidPartNumberString);
-        strain = (Strain) createEntry(strain);
+        strain = (Strain) createEntry(account, strain);
         results.add(strain);
         return results;
     }
@@ -102,20 +104,21 @@ public class EntryController {
      * Generates a new Part Number, the record id (UUID), version id, and timestamps as necessary.
      * Optionally set the record globally visible or schedule an index rebuild.
      *
-     * @param entry
+     * @param account              account of user creating entry
+     * @param entry                entry record being created
      * @param scheduleIndexRebuild Set true to schedule search index rebuild.
      * @return entry that was saved in the database.
      * @throws ControllerException
      */
-    public Entry createEntry(Entry entry, boolean scheduleIndexRebuild)
+    public Entry createEntry(Account account, Entry entry, boolean scheduleIndexRebuild)
             throws ControllerException {
         Entry createdEntry;
 
         String nextPart = getNextPartNumber();
-        createdEntry = EntryFactory.createEntry(nextPart, entry);
+        createdEntry = EntryFactory.createEntry(account, nextPart, entry);
         try {
             dao.save(entry);
-        } catch (ManagerException e) {
+        } catch (DAOException e) {
             throw new ControllerException(e);
         }
 
@@ -136,7 +139,7 @@ public class EntryController {
      * @throws PermissionException
      */
     public Entry get(Account account, long id) throws ControllerException, PermissionException {
-        Entry entry = null;
+        Entry entry;
 
         try {
             entry = dao.get(id);
@@ -154,14 +157,14 @@ public class EntryController {
     /**
      * Retrieve {@link Entry} from the database by recordId (uuid).
      *
-     * @param recordId
+     * @param recordId universally unique identifier that was assigned to entry on create
      * @return entry retrieved from the database.
      * @throws ControllerException
      * @throws PermissionException
      */
     public Entry getByRecordId(Account account, String recordId) throws ControllerException,
             PermissionException {
-        Entry entry = null;
+        Entry entry;
 
         try {
             entry = dao.getByRecordId(recordId);
@@ -188,7 +191,7 @@ public class EntryController {
      */
     public Entry getByPartNumber(Account account, String partNumber) throws ControllerException,
             PermissionException {
-        Entry entry = null;
+        Entry entry;
 
         try {
             entry = dao.getByPartNumber(partNumber);
@@ -216,7 +219,7 @@ public class EntryController {
     public Entry getByName(Account account, String name) throws ControllerException,
             PermissionException {
 
-        Entry entry = null;
+        Entry entry;
 
         try {
             entry = dao.getByName(name);
@@ -239,7 +242,7 @@ public class EntryController {
      * @throws ControllerException
      */
     public boolean hasAttachments(Account account, Entry entry) throws ControllerException {
-        return new AttachmentController(account).hasAttachment(entry);
+        return attachmentController.hasAttachment(account, entry);
     }
 
     public Set<Long> getAllVisibleEntryIDs(Account account) throws ControllerException {
@@ -332,7 +335,7 @@ public class EntryController {
                 ApplicationController.scheduleSearchIndexRebuildJob();
                 ApplicationController.scheduleBlastIndexRebuildJob();
             }
-        } catch (ManagerException e) {
+        } catch (DAOException e) {
             throw new ControllerException(e);
         }
 
@@ -381,7 +384,7 @@ public class EntryController {
 
         try {
             dao.save(entry);
-        } catch (ManagerException e1) {
+        } catch (DAOException e1) {
             throw new ControllerException("Failed to save entry deletion", e1);
         }
 

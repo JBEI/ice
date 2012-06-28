@@ -742,59 +742,53 @@ class EntryDAO extends HibernateRepository {
      * @return Saved Entry object.
      * @throws ManagerException
      */
-    public Entry save(Entry entry) throws ManagerException {
+    public Entry save(Entry entry) throws DAOException {
         if (entry == null) {
-            throw new ManagerException("Failed to save null entry!");
+            throw new DAOException("Failed to save null entry!");
         }
 
-        Entry savedEntry = null;
+        Entry savedEntry;
         // deal with associated objects here instead of making individual forms
         // deal with foreign key checks. Deletion of old values happen through
         // Set.clear() and
         // hibernate cascade delete-orphaned in the model.Entry
 
-        try {
-            if (entry.getSelectionMarkers() != null) {
-                for (SelectionMarker selectionMarker : entry.getSelectionMarkers()) {
-                    selectionMarker.setEntry(entry);
-                }
+        if (entry.getSelectionMarkers() != null) {
+            for (SelectionMarker selectionMarker : entry.getSelectionMarkers()) {
+                selectionMarker.setEntry(entry);
             }
-
-            if (entry.getLinks() != null) {
-                for (Link link : entry.getLinks()) {
-                    link.setEntry(entry);
-                }
-            }
-
-            if (entry.getNames() != null) {
-                for (Name name : entry.getNames()) {
-                    name.setEntry(entry);
-                }
-            }
-
-            if (entry.getPartNumbers() != null) {
-                for (PartNumber partNumber : entry.getPartNumbers()) {
-                    partNumber.setEntry(entry);
-                }
-            }
-
-            entry.setModificationTime(Calendar.getInstance().getTime());
-
-            if (entry.getEntryFundingSources() != null) {
-                // Manual cascade of EntryFundingSource. Guarantees unique FundingSource
-                for (EntryFundingSource entryFundingSource : entry.getEntryFundingSources()) {
-                    FundingSource saveFundingSource = saveFundingSource(entryFundingSource
-                                                                                .getFundingSource());
-                    entryFundingSource.setFundingSource(saveFundingSource);
-                }
-            }
-
-            savedEntry = (Entry) super.saveOrUpdate(entry);
-        } catch (DAOException e) {
-            throw new ManagerException("Failed to save entry!", e);
         }
 
-        return savedEntry;
+        if (entry.getLinks() != null) {
+            for (Link link : entry.getLinks()) {
+                link.setEntry(entry);
+            }
+        }
+
+        if (entry.getNames() != null) {
+            for (Name name : entry.getNames()) {
+                name.setEntry(entry);
+            }
+        }
+
+        if (entry.getPartNumbers() != null) {
+            for (PartNumber partNumber : entry.getPartNumbers()) {
+                partNumber.setEntry(entry);
+            }
+        }
+
+        entry.setModificationTime(Calendar.getInstance().getTime());
+
+        if (entry.getEntryFundingSources() != null) {
+            // Manual cascade of EntryFundingSource. Guarantees unique FundingSource
+            for (EntryFundingSource entryFundingSource : entry.getEntryFundingSources()) {
+                FundingSource saveFundingSource = saveFundingSource(entryFundingSource
+                                                                            .getFundingSource());
+                entryFundingSource.setFundingSource(saveFundingSource);
+            }
+        }
+
+        return (Entry) super.saveOrUpdate(entry);
     }
 
     /**

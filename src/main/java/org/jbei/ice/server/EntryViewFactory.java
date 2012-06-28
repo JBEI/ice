@@ -55,8 +55,8 @@ public class EntryViewFactory {
         view.setBioSafetyLevel(entry.getBioSafetyLevel());
 
         try {
-            AttachmentController attachmentController = new AttachmentController(account);
-            boolean hasAttachment = attachmentController.hasAttachment(entry);
+            AttachmentController attachmentController = new AttachmentController();
+            boolean hasAttachment = attachmentController.hasAttachment(account, entry);
             view.setHasAttachment(hasAttachment);
 
             SampleController sampleController = new SampleController();
@@ -157,8 +157,8 @@ public class EntryViewFactory {
         // attachments
         boolean hasAttachment = false;
         try {
-            AttachmentController attachmentController = new AttachmentController(account);
-            hasAttachment = attachmentController.hasAttachment(entry);
+            AttachmentController attachmentController = new AttachmentController();
+            hasAttachment = attachmentController.hasAttachment(account, entry);
         } catch (ControllerException e) {
             Logger.error(e);
         }

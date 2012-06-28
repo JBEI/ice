@@ -501,6 +501,9 @@ public class IceXmlSerializer {
 
 
 
+
+
+
                                                                                                                   .getFundingSource()
                                                                                                                   .getPrincipalInvestigator())));
             }
@@ -512,10 +515,10 @@ public class IceXmlSerializer {
         }
 
         ArrayList<Attachment> attachments = null;
-        AttachmentController attachmentController = new AttachmentController(account);
+        AttachmentController attachmentController = new AttachmentController();
 
         try {
-            attachments = attachmentController.getByEntry(entry);
+            attachments = attachmentController.getByEntry(account, entry);
         } catch (ControllerException e) {
             throw new UtilityException(e);
         }
@@ -525,7 +528,7 @@ public class IceXmlSerializer {
                 File file;
                 String fileString;
                 try {
-                    file = attachmentController.getFile(attachment);
+                    file = attachmentController.getFile(account, attachment);
                     fileString = SerializationUtils
                             .serializeBytesToBase64String(org.apache.commons.io.FileUtils
                                                                                .readFileToByteArray(file));

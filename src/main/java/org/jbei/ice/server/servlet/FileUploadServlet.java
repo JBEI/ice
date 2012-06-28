@@ -255,8 +255,8 @@ public class FileUploadServlet extends UploadAction {
 
             FileInputStream inputStream = new FileInputStream(file);
             // TODO : this save method also writes the attachment to file
-            AttachmentController controller = new AttachmentController(account);
-            Attachment saved = controller.save(attachment, inputStream);
+            AttachmentController controller = new AttachmentController();
+            Attachment saved = controller.save(account, attachment, inputStream);
             if (saved != null)
                 return saved.getFileId();
         } catch (ControllerException e) {
