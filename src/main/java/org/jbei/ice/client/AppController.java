@@ -1,9 +1,14 @@
 package org.jbei.ice.client;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.Cookies;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HasWidgets;
 import org.jbei.ice.client.admin.AdminPresenter;
 import org.jbei.ice.client.admin.AdminView;
 import org.jbei.ice.client.bulkimport.BulkImportPresenter;
@@ -35,15 +40,9 @@ import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.Cookies;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HasWidgets;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 
 // TODO : this class is due for a makeover
 public class AppController extends AbstractPresenter implements ValueChangeHandler<String> {
@@ -82,7 +81,6 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
     //            }
     //        });
     //    }
-
     private void bind() {
         History.addValueChangeHandler(this);
 
@@ -131,17 +129,19 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
 
         // retrieve autocomplete data
         service.retrieveAutoCompleteData(AppController.sessionId,
-            new AsyncCallback<HashMap<AutoCompleteField, ArrayList<String>>>() {
+                                         new AsyncCallback<HashMap<AutoCompleteField, ArrayList<String>>>() {
 
-                @Override
-                public void onFailure(Throwable caught) {
-                }
+                                             @Override
+                                             public void onFailure(Throwable caught) {
+                                             }
 
-                @Override
-                public void onSuccess(HashMap<AutoCompleteField, ArrayList<String>> result) {
-                    autoCompleteData = new HashMap<AutoCompleteField, ArrayList<String>>(result);
-                }
-            });
+                                             @Override
+                                             public void onSuccess(HashMap<AutoCompleteField,
+                                                     ArrayList<String>> result) {
+                                                 autoCompleteData = new HashMap<AutoCompleteField, ArrayList<String>>(
+                                                         result);
+                                             }
+                                         });
     }
 
     private void showSearchResults(ArrayList<SearchFilterInfo> operands) {
@@ -222,61 +222,62 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
 
         switch (page) {
 
-        // TODO : cache the views and call reset() in the presenter when displaying them. they are apparently expensive to create or sum such
-        // TODO : presenters are cheap however
-        case MAIN:
-            HomePageView homePageView = new HomePageView();
-            addHeaderSearchHandler(homePageView);
-            presenter = new HomePagePresenter(this.service, this.eventBus, homePageView);
-            break;
+            // TODO : cache the views and call reset() in the presenter when displaying them. they are apparently
+            // expensive to create or sum such
+            // TODO : presenters are cheap however
+            case MAIN:
+                HomePageView homePageView = new HomePageView();
+                addHeaderSearchHandler(homePageView);
+                presenter = new HomePagePresenter(this.service, this.eventBus, homePageView);
+                break;
 
-        case ENTRY_VIEW:
-            CollectionsView cView = new CollectionsView();
-            addHeaderSearchHandler(cView); // TODO : not sure if this is needed
-            long id = Long.decode(param);
-            EntryContext context = new EntryContext(EntryContext.Type.COLLECTION);
-            context.setCurrent(id);
+            case ENTRY_VIEW:
+                CollectionsView cView = new CollectionsView();
+                addHeaderSearchHandler(cView); // TODO : not sure if this is needed
+                long id = Long.decode(param);
+                EntryContext context = new EntryContext(EntryContext.Type.COLLECTION);
+                context.setCurrent(id);
 
-            presenter = new CollectionsPresenter(new CollectionsModel(this.service, this.eventBus),
-                    cView, context);
-            break;
+                presenter = new CollectionsPresenter(new CollectionsModel(this.service, this.eventBus),
+                                                     cView, context);
+                break;
 
-        case PROFILE:
-            ProfileView pView = new ProfileView();
-            presenter = new ProfilePresenter(this.service, this.eventBus, pView, param);
-            addHeaderSearchHandler(pView);
-            break;
+            case PROFILE:
+                ProfileView pView = new ProfileView();
+                presenter = new ProfilePresenter(this.service, this.eventBus, pView, param);
+                addHeaderSearchHandler(pView);
+                break;
 
-        case COLLECTIONS:
-            CollectionsView collectionsView = new CollectionsView();
-            addHeaderSearchHandler(collectionsView);
-            presenter = new CollectionsPresenter(new CollectionsModel(this.service, this.eventBus),
-                    collectionsView, param);
-            break;
+            case COLLECTIONS:
+                CollectionsView collectionsView = new CollectionsView();
+                addHeaderSearchHandler(collectionsView);
+                presenter = new CollectionsPresenter(new CollectionsModel(this.service, this.eventBus),
+                                                     collectionsView, param);
+                break;
 
-        case BULK_IMPORT:
-            BulkImportModel model = new BulkImportModel(this.service, this.eventBus);
-            BulkImportView importView = new BulkImportView();
-            addHeaderSearchHandler(importView);
-            presenter = new BulkImportPresenter(model, importView);
-            break;
+            case BULK_IMPORT:
+                BulkImportModel model = new BulkImportModel(this.service, this.eventBus);
+                BulkImportView importView = new BulkImportView();
+                addHeaderSearchHandler(importView);
+                presenter = new BulkImportPresenter(model, importView);
+                break;
 
-        case NEWS:
-            NewsView nView = new NewsView();
-            addHeaderSearchHandler(nView);
-            presenter = new NewsPresenter(this.service, this.eventBus, nView);
-            break;
+            case NEWS:
+                NewsView nView = new NewsView();
+                addHeaderSearchHandler(nView);
+                presenter = new NewsPresenter(this.service, this.eventBus, nView);
+                break;
 
-        case ADMIN:
-            AdminView aView = new AdminView();
-            addHeaderSearchHandler(aView);
-            presenter = new AdminPresenter(this.service, this.eventBus, aView);
-            break;
+            case ADMIN:
+                AdminView aView = new AdminView();
+                addHeaderSearchHandler(aView);
+                presenter = new AdminPresenter(this.service, this.eventBus, aView);
+                break;
 
-        case LOGIN:
-        default:
-            presenter = new LoginPresenter(this.service, this.eventBus, new LoginView());
-            break;
+            case LOGIN:
+            default:
+                presenter = new LoginPresenter(this.service, this.eventBus, new LoginView());
+                break;
         }
 
         presenter.go(this.container);
@@ -293,7 +294,7 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
             public void onClick(ClickEvent event) {
                 view.getHeader().setSearchButtonEnable(false);
                 ArrayList<SearchFilterInfo> parse = QuickSearchParser.parse(view.getHeader()
-                        .getSearchInput());
+                                                                                .getSearchInput());
                 SearchFilterInfo blastInfo = view.getHeader().getBlastInfo();
                 if (blastInfo != null)
                     parse.add(blastInfo);

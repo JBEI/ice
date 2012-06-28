@@ -28,16 +28,17 @@ public abstract class IceAsyncCallback<T> implements AsyncCallback<T> {
     }
 
     public void go(HandlerManager eventBus) {
+        if (timeoutTimer != null) {
+            Window.alert("Server is in the middle of executing a command. Please wait!");
+            return;
+        }
+
         int retryCount = 3;
         showBusyIndicator();
         execute(retryCount, eventBus);
     }
 
     private void execute(final int retryCount, final HandlerManager eventBus) {
-        if (timeoutTimer != null) {
-            Window.alert("Server is executing a command!");
-            return;
-        }
 
         // Create a timer to abort if the RPC takes too long
         timeoutTimer = new Timer() {

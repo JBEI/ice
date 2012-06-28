@@ -18,10 +18,10 @@ import java.util.ArrayList;
  *
  * @author Hector Plahar
  */
-class BulkImportDraftDAO extends HibernateRepository {
+class BulkImportDraftDAO extends HibernateRepository<BulkImportDraft> {
 
     public BulkImportDraft retrieveById(long id) throws DAOException {
-        return (BulkImportDraft) super.get(BulkImportDraft.class, id);
+        return super.get(BulkImportDraft.class, id);
     }
 
     public BulkImportDraft retrieveByIdWithContents(long id) throws DAOException {
@@ -47,7 +47,7 @@ class BulkImportDraftDAO extends HibernateRepository {
     }
 
     public BulkImportDraft save(BulkImportDraft draft) throws DAOException {
-        return (BulkImportDraft) super.saveOrUpdate(draft);
+        return super.saveOrUpdate(draft);
     }
 
     public void delete(BulkImportDraft draft) throws DAOException {

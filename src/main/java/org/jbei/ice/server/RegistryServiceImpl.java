@@ -1346,6 +1346,9 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
+        } catch (PermissionException e) {
+            Logger.error(e);
+            return null;
         }
     }
 

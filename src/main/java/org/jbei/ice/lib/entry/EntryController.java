@@ -54,6 +54,8 @@ public class EntryController {
      * @return entry that was saved in the database.
      * @throws ControllerException
      */
+    // TODO : this needs to take an account param and set the owner and owner email so it does not have to
+    // TODO : be done outside of the class
     public Entry createEntry(Entry entry) throws ControllerException {
         return createEntry(entry, true);
     }

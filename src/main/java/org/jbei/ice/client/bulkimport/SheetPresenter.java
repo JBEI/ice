@@ -104,10 +104,13 @@ public class SheetPresenter {
                 continue;
             }
 
+            // sheet includes the headers so the actual rows start from 1
+            int index = i - 1;
+
             // is row associated with a saved entry?
             EntryInfo existing = null;
             if (currentInfo != null)
-                existing = currentInfo.getEntryList().get(i);
+                existing = currentInfo.getEntryList().get(index);
 
 //            for each header
             int y = 0;
@@ -116,11 +119,11 @@ public class SheetPresenter {
                 String id = "";
                 switch (header) {
                     case ATT_FILENAME:
-                        id = view.getAttachmentRowFileIds().get(i);
+                        id = view.getAttachmentRowFileIds().get(index);
                         break;
 
                     case SEQ_FILENAME:
-                        id = view.getSequenceRowFileIds().get(i);
+                        id = view.getSequenceRowFileIds().get(index);
                         break;
                 }
 

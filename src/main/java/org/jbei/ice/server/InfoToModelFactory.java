@@ -21,7 +21,6 @@ import org.jbei.ice.shared.dto.StrainInfo;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -60,7 +59,7 @@ public class InfoToModelFactory {
                 plasmid.setBackbone(plasmidInfo.getBackbone());
                 plasmid.setOriginOfReplication(plasmidInfo.getOriginOfReplication());
                 plasmid.setPromoters(plasmidInfo.getPromoters());
-                plasmid.setCircular(plasmidInfo.getCircular());
+                plasmid.setCircular(plasmidInfo.getCircular() == null ? false : plasmidInfo.getCircular());
 
                 break;
 
@@ -78,8 +77,6 @@ public class InfoToModelFactory {
                 strain.setHost(strainInfo.getHost());
                 strain.setGenotypePhenotype(strainInfo.getGenotypePhenotype());
                 strain.setPlasmids(strainInfo.getPlasmids());
-
-                entry = strain;
                 break;
 
             case PART:
@@ -93,8 +90,6 @@ public class InfoToModelFactory {
 
                 // default is RAW until sequence is supplied.
                 part.setPackageFormat(AssemblyStandard.RAW);
-
-                entry = part;
                 break;
 
             case ARABIDOPSIS:
@@ -124,8 +119,6 @@ public class InfoToModelFactory {
                                                                                                     .name());
                     seed.setPlantType(plantType);
                 }
-
-                entry = seed;
                 break;
 
             default:
@@ -140,9 +133,9 @@ public class InfoToModelFactory {
         if (entry == null || info == null)
             return null;
 
-        HashSet<Name> names = getNames(info.getName(), entry);
+        Set<Name> names = getNames(info.getName(), entry);
         entry.setNames(names);
-        HashSet<SelectionMarker> markers = getSelectionMarkers(info.getSelectionMarkers(), entry);
+        Set<SelectionMarker> markers = getSelectionMarkers(info.getSelectionMarkers(), entry);
         entry.setSelectionMarkers(markers);
         entry.setOwner(info.getOwner());
         entry.setReferences(info.getReferences());
@@ -158,19 +151,13 @@ public class InfoToModelFactory {
         entry.setLongDescriptionType(info.getLongDescriptionType() != null ? info.getLongDescriptionType() : "text");
         entry.setIntellectualProperty(info.getIntellectualProperty());
         entry.setVersionId(info.getVersionId());
-        HashSet<Link> links = getLinks(info.getLinks(), entry);
+        Set<Link> links = getLinks(info.getLinks(), entry);
         entry.setLinks(links);
 
-        FundingSource fundingSource = new FundingSource();
-        fundingSource.setFundingSource((info.getFundingSource() != null) ? info.getFundingSource()
-                                               : "");
-        fundingSource.setPrincipalInvestigator(info.getPrincipalInvestigator());
-        EntryFundingSource newEntryFundingSource = new EntryFundingSource();
-        newEntryFundingSource.setEntry(entry);
-        newEntryFundingSource.setFundingSource(fundingSource);
-        Set<EntryFundingSource> entryFundingSources = new LinkedHashSet<EntryFundingSource>();
-        entryFundingSources.add(newEntryFundingSource);
+        Set<EntryFundingSource> entryFundingSources = getFundingSources(info.getFundingSource(),
+                                                                        info.getPrincipalInvestigator(), entry);
         entry.setEntryFundingSources(entryFundingSources);
+        entry.setKeywords(info.getKeywords());
 
         // parameters 
         List<Parameter> parameters = getParameters(info.getParameters(), entry);
@@ -197,9 +184,48 @@ public class InfoToModelFactory {
         return parameters;
     }
 
-    private static HashSet<SelectionMarker> getSelectionMarkers(String markerStr, Entry entry) {
+    private static Set<EntryFundingSource> getFundingSources(String fundingSourcesStr, String pI, Entry entry) {
 
-        HashSet<SelectionMarker> markers = new HashSet<SelectionMarker>();
+        Set<EntryFundingSource> fundingSources = entry.getEntryFundingSources();
+        if (fundingSources == null) {
+            fundingSources = new HashSet<EntryFundingSource>();
+            entry.setEntryFundingSources(fundingSources);
+        }
+
+        if (fundingSourcesStr != null && !fundingSourcesStr.isEmpty()) {
+            String[] itemsAsString = fundingSourcesStr.split("\\s*,+\\s*");
+
+            for (int i = 0; i < itemsAsString.length; i++) {
+                String currentItem = itemsAsString[i];
+                if (!currentItem.trim().isEmpty()) {
+                    EntryFundingSource entryFundingSource;
+                    FundingSource fundingSource;
+
+                    if (fundingSources.size() > i) {
+                        entryFundingSource = (EntryFundingSource) fundingSources.toArray()[i];
+                        fundingSource = entryFundingSource.getFundingSource();
+                    } else {
+                        fundingSource = new FundingSource();
+                        entryFundingSource = new EntryFundingSource();
+                        fundingSources.add(entryFundingSource);
+                        entryFundingSource.setFundingSource(fundingSource);
+                    }
+
+                    fundingSource.setFundingSource(currentItem);
+                    fundingSource.setPrincipalInvestigator(pI);
+                    entryFundingSource.setEntry(entry);
+                }
+            }
+        }
+
+        return fundingSources;
+    }
+
+    private static Set<SelectionMarker> getSelectionMarkers(String markerStr, Entry entry) {
+
+        Set<SelectionMarker> markers = entry.getSelectionMarkers();
+        if (markers == null)
+            markers = new HashSet<SelectionMarker>();
 
         if (markerStr != null && !markerStr.isEmpty()) {
             String[] itemsAsString = markerStr.split("\\s*,+\\s*");
@@ -207,10 +233,17 @@ public class InfoToModelFactory {
             for (int i = 0; i < itemsAsString.length; i++) {
                 String currentItem = itemsAsString[i];
                 if (!currentItem.trim().isEmpty()) {
-                    SelectionMarker marker = new SelectionMarker();
+                    SelectionMarker marker;
+
+                    if (markers.size() > i) {
+                        marker = (SelectionMarker) markers.toArray()[i];
+                    } else {
+                        marker = new SelectionMarker();
+                        markers.add(marker);
+                    }
+
                     marker.setName(currentItem);
                     marker.setEntry(entry);
-                    markers.add(marker);
                 }
             }
         }
@@ -218,8 +251,10 @@ public class InfoToModelFactory {
         return markers;
     }
 
-    private static HashSet<Link> getLinks(String linkString, Entry entry) {
-        HashSet<Link> links = new HashSet<Link>();
+    private static Set<Link> getLinks(String linkString, Entry entry) {
+        Set<Link> links = entry.getLinks();
+        if (links == null)
+            links = new HashSet<Link>();
 
         if (linkString != null && !linkString.isEmpty()) {
             String[] itemsAsString = linkString.split("\\s*,+\\s*");
@@ -227,10 +262,16 @@ public class InfoToModelFactory {
             for (int i = 0; i < itemsAsString.length; i++) {
                 String currentItem = itemsAsString[i];
                 if (!currentItem.trim().isEmpty()) {
-                    Link link = new Link();
+                    Link link;
+
+                    if (links.size() > i) {
+                        link = (Link) links.toArray()[i];
+                    } else {
+                        link = new Link();
+                        links.add(link);
+                    }
                     link.setLink(currentItem);
                     link.setEntry(entry);
-                    links.add(link);
                 }
             }
         }
@@ -238,18 +279,28 @@ public class InfoToModelFactory {
         return links;
     }
 
-    private static HashSet<Name> getNames(String nameStr, Entry entry) {
-        HashSet<Name> names = new HashSet<Name>();
+    private static Set<Name> getNames(String nameStr, Entry entry) {
+        Set<Name> names = entry.getNames();
+        if (names == null)
+            names = new HashSet<Name>();
+
         if (nameStr == null || nameStr.isEmpty())
             return names;
 
         String[] items = nameStr.split("\\s*,+\\s*");
-        for (String item : items) {
-            if (!item.isEmpty()) {
-                Name name = new Name();
+        for (int i = 0; i < items.length; i++) {
+            String item = items[i];
+            if (!item.trim().isEmpty()) {
+                Name name;
+
+                if (names.size() > i) {
+                    name = (Name) names.toArray()[i];
+                } else {
+                    name = new Name();
+                    names.add(name);
+                }
                 name.setName(item);
                 name.setEntry(entry);
-                names.add(name);
             }
         }
 

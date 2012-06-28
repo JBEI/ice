@@ -374,7 +374,7 @@ public class PermissionsController {
      */
     protected boolean isOwnerOrModerator(Account account, Entry entry) throws ControllerException {
         // first check entry ownership
-        if (account.getEmail().equals(entry.getOwner()))
+        if (account.getEmail().equals(entry.getOwnerEmail()))
             return true;
 
         // then check if moderator
