@@ -1,11 +1,5 @@
 package org.jbei.ice.client.entry.view.table;
 
-import java.util.ArrayList;
-
-import org.jbei.ice.client.Page;
-import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
-
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
@@ -28,10 +22,15 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
+import org.jbei.ice.client.Page;
+import org.jbei.ice.client.util.DateUtilities;
+import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
+
+import java.util.ArrayList;
 
 /**
  * Table for displaying sequence trace files
- * 
+ *
  * @author Hector Plahar
  */
 public class EntrySequenceTable extends Composite {
@@ -92,7 +91,7 @@ public class EntrySequenceTable extends Composite {
                 });
 
         table.setSelectionModel(selectionModel,
-            DefaultSelectionEventManager.<SequenceAnalysisInfo> createCheckboxManager());
+                                DefaultSelectionEventManager.<SequenceAnalysisInfo>createCheckboxManager());
     }
 
     private void addColumns() {
@@ -123,8 +122,9 @@ public class EntrySequenceTable extends Composite {
             @Override
             public SafeHtml getValue(SequenceAnalysisInfo info) {
                 return SafeHtmlUtils.fromSafeConstant("<a href=\"/download?type=sequence&id="
-                        + info.getFileId() + "&name=" + info.getName() + "\">" + info.getName()
-                        + "</a>");
+                                                              + info.getFileId() + "&name=" + info
+                        .getName() + "\">" + info.getName()
+                                                              + "</a>");
             }
         };
 
@@ -173,8 +173,7 @@ public class EntrySequenceTable extends Composite {
     public void setData(ArrayList<SequenceAnalysisInfo> data) {
         dataProvider.setList(data);
         table.setRowCount(data.size(), true);
-        if (data.size() == 0)
-            pager.setVisible(false);
+        pager.setVisible(data.size() > 0);
     }
 
     /**
