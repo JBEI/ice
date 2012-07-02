@@ -47,7 +47,7 @@ class BulkImportDraftDAO extends HibernateRepository<BulkImportDraft> {
     }
 
     public BulkImportDraft save(BulkImportDraft draft) throws DAOException {
-        return super.saveOrUpdate(draft);
+        return super.save(draft);
     }
 
     public void delete(BulkImportDraft draft) throws DAOException {

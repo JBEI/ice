@@ -19,6 +19,7 @@ import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.server.EntryViewFactory;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -26,8 +27,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * ABI to manipulate {@link org.jbei.ice.lib.entry.model.Entry}s.
@@ -63,8 +62,6 @@ public class EntryController {
 
     public HashSet<Entry> createStrainWithPlasmid(Account account, Strain strain, Plasmid plasmid)
             throws ControllerException {
-        checkNotNull(strain);
-        checkNotNull(plasmid);
 
         HashSet<Entry> results = new HashSet<Entry>();
 
@@ -92,7 +89,7 @@ public class EntryController {
             return dao.generateNextPartNumber(JbeirSettings.getSetting("PART_NUMBER_PREFIX"),
                                               JbeirSettings.getSetting("PART_NUMBER_DELIMITER"),
                                               JbeirSettings.getSetting("PART_NUMBER_DIGITAL_SUFFIX"));
-        } catch (ManagerException e) {
+        } catch (DAOException e) {
             Logger.error(e);
             throw new ControllerException(e);
         }
@@ -133,7 +130,8 @@ public class EntryController {
     /**
      * Retrieve {@link Entry} from the database by id.
      *
-     * @param id
+     * @param account account of user performing action
+     * @param id      unique local identifier for entry
      * @return entry retrieved from the database.
      * @throws ControllerException
      * @throws PermissionException
@@ -152,6 +150,38 @@ public class EntryController {
         }
 
         return entry;
+    }
+
+    public ArrayList<PermissionInfo> retrievePermissions(Account account, Entry entry)
+            throws ControllerException, PermissionException {
+
+        ArrayList<PermissionInfo> permissionInfos = new ArrayList<PermissionInfo>();
+
+        Set<Account> readAccounts = permissionsController.getReadUser(account, entry);
+        for (Account readAccount : readAccounts) {
+            permissionInfos.add(new PermissionInfo(PermissionInfo.PermissionType.READ_ACCOUNT, readAccount.getId(),
+                                                   readAccount.getFullName()));
+        }
+
+        Set<Account> writeAccounts = permissionsController.getWriteUser(account, entry);
+        for (Account writeAccount : writeAccounts) {
+            permissionInfos.add(new PermissionInfo(PermissionInfo.PermissionType.WRITE_ACCOUNT, writeAccount.getId(),
+                                                   writeAccount.getFullName()));
+        }
+
+        Set<Group> readGroups = permissionsController.getReadGroup(account, entry);
+        for (Group group : readGroups) {
+            permissionInfos.add(new PermissionInfo(PermissionInfo.PermissionType.READ_GROUP, group.getId(), group
+                    .getLabel()));
+        }
+
+        Set<Group> writeGroups = permissionsController.getWriteGroup(account, entry);
+        for (Group group : writeGroups) {
+            permissionInfos.add(new PermissionInfo(PermissionInfo.PermissionType.WRITE_GROUP, group.getId(), group
+                    .getLabel()));
+        }
+
+        return permissionInfos;
     }
 
     /**
@@ -288,7 +318,7 @@ public class EntryController {
 
     public ArrayList<Long> getEntryIdsByOwner(String ownerEmail) throws ControllerException {
         try {
-            return dao.getEntriesByOwner(ownerEmail);
+            return dao.getEntriesByOwner(ownerEmail, new Integer(0));
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -431,9 +461,15 @@ public class EntryController {
         }
     }
 
-    public long getOwnerEntryCount(Account account) throws ControllerException {
+    public long getOwnerEntryCount(Account account, Visibility... exclude) throws ControllerException {
         try {
-            return dao.getOwnerEntryCount(account.getEmail());
+            if (exclude.length == 0)
+                return dao.getOwnerEntryCount(account.getEmail());
+
+            Integer[] excludeInt = new Integer[exclude.length];
+            for (int i = 0; i < exclude.length; i += 1)
+                excludeInt[i] = exclude[i].getVisibilityInt();
+            return dao.getOwnerEntryCount(account.getEmail(), excludeInt);
         } catch (DAOException e) {
             Logger.error(e);
             throw new ControllerException(e);
@@ -455,7 +491,6 @@ public class EntryController {
         List<Entry> entries;
 
         try {
-
             switch (field) {
                 case TYPE:
                     entries = dao.getEntriesByIdSetSortByType(entryIds, asc);
@@ -516,15 +551,6 @@ public class EntryController {
 
             return dao.sortList(ids, field, asc);
         } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    public long retrieveEntryByType(String type) throws ControllerException {
-        try {
-            return dao.retrieveCountEntryByType(type);
-        } catch (DAOException e) {
-            Logger.error(e);
             throw new ControllerException(e);
         }
     }

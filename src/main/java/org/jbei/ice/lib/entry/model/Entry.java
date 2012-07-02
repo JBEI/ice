@@ -153,7 +153,7 @@ public class Entry implements IEntryValueObject, IModel {
     private String longDescription;
 
     @Column(name = "long_description_type", length = 31, nullable = false)
-    private String longDescriptionType;
+    private String longDescriptionType = "text";
 
     @Column(name = "literature_references")
     @Lob

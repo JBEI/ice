@@ -45,9 +45,7 @@ class AccountDAO extends HibernateRepository<Account> {
             session.getTransaction().rollback();
             throw new DAOException(he);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return reports;
@@ -74,9 +72,7 @@ class AccountDAO extends HibernateRepository<Account> {
             session.getTransaction().rollback();
             throw new DAOException("Failed to retrieve all accounts", e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return accounts;
@@ -102,16 +98,14 @@ class AccountDAO extends HibernateRepository<Account> {
             session.getTransaction().rollback();
             throw new DAOException(e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
     }
 
     /**
      * Retrieve an {@link Account} by the email field.
      *
-     * @param email
+     * @param email unique email identifier for account
      * @return Account
      * @throws DAOException
      */
@@ -130,9 +124,7 @@ class AccountDAO extends HibernateRepository<Account> {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve Account by email: " + email);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return account;
@@ -141,7 +133,7 @@ class AccountDAO extends HibernateRepository<Account> {
     /**
      * Save the given {@link Account} into the database.
      *
-     * @param account
+     * @param account account object to save
      * @return Saved account.
      * @throws DAOException
      */
@@ -152,7 +144,7 @@ class AccountDAO extends HibernateRepository<Account> {
     /**
      * Retrieve the {@link Account} by the authorization token.
      *
-     * @param authToken
+     * @param authToken token
      * @return Account.
      * @throws DAOException
      */
@@ -175,9 +167,7 @@ class AccountDAO extends HibernateRepository<Account> {
             session.getTransaction().rollback();
             throw new DAOException("Failed to get Account by token: " + authToken);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return account;

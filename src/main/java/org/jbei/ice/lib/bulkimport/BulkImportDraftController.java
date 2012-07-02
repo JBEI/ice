@@ -189,15 +189,15 @@ public class BulkImportDraftController {
         return draftInfo;
     }
 
-    public BulkImportDraftInfo createBulkImportDraft(Account account, EntryAddType type,
+    public BulkImportDraftInfo createBulkImportDraft(Account draftOwner, Account entryAccount, EntryAddType type,
             String name, ArrayList<EntryInfo> entryList) throws ControllerException {
 
         BulkImportDraft draft = new BulkImportDraft();
         draft.setName(name);
-        draft.setAccount(account);
+        draft.setAccount(draftOwner);
         draft.setImportType(type.toString());
 
-        ArrayList<Entry> contents = new ArrayList<Entry>();
+        ArrayList<Long> contents = new ArrayList<Long>();
 
         // convert info contents to Entry
         for (EntryInfo info : entryList) {
@@ -220,31 +220,34 @@ public class BulkImportDraftController {
                     Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(plasmidInfo);
                     strain.setVisibility(new Integer(0));
                     plasmid.setVisibility(new Integer(0));
-                    strain.setOwner(account.getFullName());
-                    strain.setOwnerEmail(account.getEmail());
-                    plasmid.setOwner(account.getFullName());
-                    plasmid.setOwnerEmail(account.getEmail());
+                    strain.setOwner(entryAccount.getFullName());
+                    strain.setOwnerEmail(entryAccount.getEmail());
+                    plasmid.setOwner(entryAccount.getFullName());
+                    plasmid.setOwnerEmail(entryAccount.getEmail());
 
                     // save entries
-                    HashSet<Entry> results = entryController.createStrainWithPlasmid(account, strain, plasmid);
-                    contents.addAll(results);
+                    HashSet<Entry> results = entryController.createStrainWithPlasmid(entryAccount, strain, plasmid);
+                    for (Entry entry : results) {
+                        contents.add(entry.getId());
+                    }
                     break;
 
                 // all others
                 default:
                     Entry entry = InfoToModelFactory.infoToEntry(info);
                     entry.setVisibility(new Integer(0));
-                    entry.setOwner(account.getFullName());
-                    entry.setOwnerEmail(account.getEmail());
+                    entry.setOwner(entryAccount.getFullName());
+                    entry.setOwnerEmail(entryAccount.getEmail());
 
                     // save entry
-                    entry = entryController.createEntry(account, entry);
-                    contents.add(entry);
+                    entry = entryController.createEntry(entryAccount, entry);
+                    contents.add(entry.getId());
                     break;
             }
         }
 
-        draft.setContents(contents);
+        ArrayList<Entry> entries = entryController.getEntriesByIdSet(entryAccount, contents);
+        draft.setContents(entries);
         draft.setCreationTime(new Date(System.currentTimeMillis()));
         draft.setLastUpdateTime(draft.getCreationTime());
 
@@ -370,6 +373,6 @@ public class BulkImportDraftController {
     public boolean submitBulkImportForVerification(Account account, EntryAddType type, ArrayList<EntryInfo> entryList)
             throws ControllerException {
         Account systemAccount = accountController.getSystemAccount();
-        return createBulkImportDraft(systemAccount, type, "Pending", entryList) != null;
+        return createBulkImportDraft(systemAccount, account, type, "Pending", entryList) != null;
     }
 }

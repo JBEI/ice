@@ -31,7 +31,7 @@ public class HibernateRepository<T extends IModel> implements IRepository {
     /**
      * Delete an {@link IModel} object from the database.
      *
-     * @param model
+     * @param model model to delete
      * @throws DAOException
      */
     protected void delete(T model) throws DAOException {
@@ -92,6 +92,38 @@ public class HibernateRepository<T extends IModel> implements IRepository {
     }
 
     /**
+     * Saves or updates an {@link IModel} object into the database.
+     *
+     * @param model {@link IModel} object to save
+     * @return Object saved object
+     * @throws DAOException in the event of a problem saving or null model parameter
+     */
+    protected T save(T model) throws DAOException {
+        if (model == null) {
+            throw new DAOException("Failed to save null model!");
+        }
+
+        Session session = newSession();
+        try {
+            session.getTransaction().begin();
+            session.save(model);
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            throw new DAOException("dbSave failed!", e);
+        } catch (Exception e1) {
+            session.getTransaction().rollback();
+            Logger.error(e1);
+            resetSessionFactory(session);
+            throw new DAOException("Unknown database exception ", e1);
+        } finally {
+            closeSession(session);
+        }
+
+        return model;
+    }
+
+    /**
      * Retrieve an {@link IModel} object from the database by Class and database id.
      *
      * @param theClass
@@ -107,9 +139,10 @@ public class HibernateRepository<T extends IModel> implements IRepository {
         try {
             session.getTransaction().begin();
             result = (T) session.get(theClass, id);
+            session.getTransaction().commit();
         } catch (HibernateException e) {
-            throw new DAOException("dbGet failed for " + theClass.getCanonicalName() + " and id="
-                                           + id, e);
+            session.getTransaction().rollback();
+            throw new DAOException("dbGet failed for " + theClass.getCanonicalName() + " and id=" + id, e);
         } catch (Exception e1) {
             // Something really bad happened.
             session.getTransaction().rollback();
@@ -117,9 +150,7 @@ public class HibernateRepository<T extends IModel> implements IRepository {
             resetSessionFactory(session);
             throw new DAOException("Unknown database exception ", e1);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return result;

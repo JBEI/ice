@@ -14,6 +14,7 @@ import org.jbei.ice.lib.bulkimport.BulkImport;
 import org.jbei.ice.lib.bulkimport.BulkImportController;
 import org.jbei.ice.lib.bulkimport.BulkImportDraftController;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.Visibility;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -104,7 +105,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             info.setVisibleEntryCount(visibleEntryCount);
 
             // get the count of the user's entries
-            long ownerEntryCount = entryController.getOwnerEntryCount(account);
+            long ownerEntryCount = entryController.getOwnerEntryCount(account, Visibility.DRAFT);
             info.setUserEntryCount(ownerEntryCount);
             return info;
         } catch (ControllerException e) {
@@ -141,7 +142,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 AccountInfo info = new AccountInfo();
                 long count;
                 try {
-                    count = entryController.getOwnerEntryCount(userAccount);
+                    count = entryController.getOwnerEntryCount(userAccount, Visibility.DRAFT);
                     info.setUserEntryCount(count);
                 } catch (ControllerException e) {
                     Logger.error("Error retrieving entry count for user " + userAccount.getEmail());
@@ -307,7 +308,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (AccountController.isAuthenticated(sid)) {
                 Account account = controller.getAccountBySessionKey(sid);
                 AccountInfo info = this.accountToInfo(account);
-                long entryCount = entryController.getOwnerEntryCount(account);
+                long entryCount = entryController.getOwnerEntryCount(account, Visibility.DRAFT);
                 info.setUserEntryCount(entryCount);
 
                 boolean isModerator = controller.isAdministrator(account);
@@ -372,37 +373,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             return null;
         }
     }
-
-//    @Override
-//    public ArrayList<FolderDetails> retrieveUserCollections(String sessionId, String userId)
-//            throws AuthenticationException {
-//        ArrayList<FolderDetails> results = new ArrayList<FolderDetails>();
-//
-//        try {
-//            Account account = retrieveAccountForSid(sessionId);
-//            Logger.info(account.getEmail() + ": retrieving user collections for user " + userId);
-//            AccountController controller = new AccountController();
-//            FolderController folderController = new FolderController();
-//            Account userAccount = controller.getByEmail(userId);
-//
-//            // get user folder
-//            List<Folder> userFolders = folderController.getFoldersByOwner(userAccount);
-//            if (userFolders != null) {
-//                for (Folder folder : userFolders) {
-//                    long id = folder.getId();
-//                    FolderDetails details = new FolderDetails(id, folder.getName(), false);
-//                    BigInteger folderSize = folderController.getFolderSize(id);
-//                    details.setCount(folderSize);
-//                    details.setDescription(folder.getDescription());
-//                    results.add(details);
-//                }
-//            }
-//            return results;
-//        } catch (ControllerException ce) {
-//            Logger.error(ce);
-//            return null;
-//        }
-//    }
 
     @Override
     public ArrayList<FolderDetails> retrieveCollections(String sessionId) throws AuthenticationException {
@@ -1000,37 +970,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
     }
 
-//    @Override
-//    public FolderDetails retrieveFolderDetails(String sid, long folderId) throws AuthenticationException {
-//        Account account;
-//        AccountController controller = new AccountController();
-//
-//        try {
-//            account = this.retrieveAccountForSid(sid);
-//            FolderController folderController = new FolderController();
-//            Folder folder = folderController.getFolderById(folderId);
-//            if (folder == null)
-//                return null;
-//
-//            Logger.info(account.getEmail() + ": retrieving folder details for folder "
-//                                + folder.getName());
-//
-//            long id = folder.getId();
-//            boolean isSystemFolder = folder.getOwnerEmail().equals(
-//                    controller.getSystemAccount().getEmail());
-//            FolderDetails details = new FolderDetails(id, folder.getName(), isSystemFolder);
-//            BigInteger folderSize = folderController.getFolderSize(id);
-//            details.setCount(folderSize);
-//            details.setDescription(folder.getDescription());
-//            return details;
-//
-//        } catch (ControllerException e) {
-//            Logger.error(e);
-//        }
-//
-//        return null;
-//    }
-
     @Override
     public FolderDetails createUserCollection(String sid, String name, String description,
             ArrayList<Long> contents) throws AuthenticationException {
@@ -1184,7 +1123,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             else
                 visibleEntryCount = entryController.getNumberOfVisibleEntries(account);
             accountInfo.setVisibleEntryCount(visibleEntryCount);
-            long entryCount = entryController.getOwnerEntryCount(account);
+            long entryCount = entryController.getOwnerEntryCount(account, Visibility.DRAFT);
             accountInfo.setUserEntryCount(entryCount);
 
             return accountInfo;
@@ -1363,7 +1302,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             BulkImportDraftController controller = new BulkImportDraftController();
-            return controller.createBulkImportDraft(account, importType, name, entryList);
+            return controller.createBulkImportDraft(account, account, importType, name, entryList);
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
@@ -1376,9 +1315,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
-            if (account == null)
-                return false;
-
             if (entryList.isEmpty())
                 return false;
 
@@ -1390,7 +1326,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             return false;
         }
     }
-
 
     @Override
     public Long createEntry(String sid, EntryInfo info) throws AuthenticationException {
@@ -1482,11 +1417,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
         try {
             account = retrieveAccountForSid(sid);
-
-
             Logger.info(account.getEmail() + ": creating strain with plasmid");
             EntryController controller = new EntryController();
-
 
             Strain strain = null;
             Plasmid plasmid = null;
@@ -1715,19 +1647,15 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public ArrayList<PermissionInfo> retrievePermissionData(String sessionId, Long entryId)
             throws AuthenticationException {
 
-        ArrayList<PermissionInfo> results;
-        Entry entry;
-
-        // TODO : problem here is that we keep checking for permissions for everything
-        // TODO : there needs to be a single call that returns all about the entry
-
         final Account account;
         try {
             account = retrieveAccountForSid(sessionId);
             EntryController controller = new EntryController();
-            entry = controller.get(account, entryId);
+            Entry entry = controller.get(account, entryId);
             if (entry == null)
                 return null;
+
+            return controller.retrievePermissions(account, entry);
 
         } catch (ControllerException e) {
             Logger.error(e);
@@ -1736,59 +1664,6 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Logger.error(e);
             return null;
         }
-
-        results = new ArrayList<PermissionInfo>();
-        PermissionsController permissionsController = new PermissionsController();
-
-        try {
-            Set<Account> readAccounts = permissionsController.getReadUser(account, entry);
-            for (Account readAccount : readAccounts) {
-                results.add(new PermissionInfo(PermissionType.READ_ACCOUNT, readAccount.getId(),
-                                               readAccount.getFullName()));
-            }
-        } catch (ControllerException me) {
-            Logger.error(me);
-        } catch (PermissionException e) {
-            Logger.error(e);
-        }
-
-        try {
-            Set<Account> writeAccounts = permissionsController.getWriteUser(account, entry);
-            for (Account writeAccount : writeAccounts) {
-                results.add(new PermissionInfo(PermissionType.WRITE_ACCOUNT, writeAccount.getId(),
-                                               writeAccount.getFullName()));
-            }
-        } catch (ControllerException me) {
-            Logger.error(me);
-        } catch (PermissionException e) {
-            Logger.error(e);
-        }
-
-        try {
-            Set<Group> readGroups = permissionsController.getReadGroup(account, entry);
-            for (Group group : readGroups) {
-                results.add(new PermissionInfo(PermissionType.READ_GROUP, group.getId(), group
-                        .getLabel()));
-            }
-        } catch (ControllerException me) {
-            Logger.error(me);
-        } catch (PermissionException e) {
-            Logger.error(e);
-        }
-
-        try {
-            Set<Group> writeGroups = permissionsController.getWriteGroup(account, entry);
-            for (Group group : writeGroups) {
-                results.add(new PermissionInfo(PermissionType.WRITE_GROUP, group.getId(), group
-                        .getLabel()));
-            }
-        } catch (ControllerException me) {
-            Logger.error(me);
-        } catch (PermissionException e) {
-            Logger.error(e);
-        }
-
-        return results;
     }
 
     @Override
@@ -1867,8 +1742,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (account == null)
                 return false;
 
-            Logger.info(account.getEmail() + ": updating permissions for entry with id \""
-                                + entryId + "\"");
+            Logger.info(account.getEmail() + ": updating permissions for entry with id \"" + entryId + "\"");
             EntryController entryController = new EntryController();
             PermissionsController permissionController = new PermissionsController();
             Entry entry = entryController.get(account, entryId);
@@ -1894,19 +1768,14 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         Account account;
         try {
             account = retrieveAccountForSid(sessionId);
-            if (account == null)
-                return false;
-
-            Logger.info(account.getEmail() + ": removing permissions for entry with id \""
-                                + entryId + "\"");
+            Logger.info(account.getEmail() + ": removing permissions for entry with id \"" + entryId + "\"");
             EntryController entryController = new EntryController();
             Entry entry = entryController.get(account, entryId);
             if (entry == null)
                 return false;
 
             PermissionsController permissionController = new PermissionsController();
-            permissionController.removePermission(account, permissionInfo.getType(), entry,
-                                                  permissionInfo.getId());
+            permissionController.removePermission(account, permissionInfo.getType(), entry, permissionInfo.getId());
             return true;
 
         } catch (ControllerException e) {
@@ -1976,8 +1845,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                      "Thank you for sending your feedback.\n\nBest regards,\nRegistry Team");
 
         Emailer.send(JbeirSettings.getSetting("ADMIN_EMAIL"), "Registry site feedback", message);
-        if (!JbeirSettings.getSetting("ADMIN_EMAIL").equals(
-                JbeirSettings.getSetting("MODERATOR_EMAIL"))) {
+        if (!JbeirSettings.getSetting("ADMIN_EMAIL").equals(JbeirSettings.getSetting("MODERATOR_EMAIL"))) {
             Emailer.send(JbeirSettings.getSetting("MODERATOR_EMAIL"), "Registry site feedback",
                          message);
         }
@@ -1985,59 +1853,23 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         return true;
     }
 
-//    @Override
-//    public HashMap<EntryType, Long> retrieveEntryCounts(String sessionId) throws AuthenticationException {
-//        // admin only
-//        Account account = null;
-//        AccountController controller = new AccountController();
-//        EntryController entryController = new EntryController();
-//
-//        try {
-//            account = retrieveAccountForSid(sessionId);
-//            if (!controller.isAdministrator(account)) {
-//                Logger.warn(account.getEmail()
-//                                    + ": attempting to retrieve admin only feature (entry Counts)");
-//                return null;
-//            }
-//        } catch (ControllerException ce) {
-//            Logger.error(ce);
-//        }
-//
-//        Logger.info(account.getEmail() + ": retrieving entry type counts");
-//        HashMap<EntryType, Long> counts = new HashMap<EntryType, Long>();
-//        for (EntryType type : EntryType.values()) {
-//            long count;
-//            try {
-//                count = entryController.retrieveEntryByType(type.getName());
-//                counts.put(type, count);
-//            } catch (ControllerException e) {
-//                Logger.error("Could not retrieve counts for " + type.getName(), e);
-//            }
-//        }
-//
-//        return counts;
-//    }
-
     // Groups //
     @Override
     public ArrayList<GroupInfo> retrieveAllGroups(String sessionId) throws AuthenticationException {
 
-        Account account = null;
+        Account account;
         AccountController controller = new AccountController();
         GroupController groupController = new GroupController();
 
         try {
             account = retrieveAccountForSid(sessionId);
-            if (account == null)
-                return null;
-
             if (!controller.isAdministrator(account)) {
-                Logger.warn(account.getEmail()
-                                    + ": attempting to retrieve admin only feature (groups)");
+                Logger.warn(account.getEmail() + ": attempting to retrieve admin only feature (groups)");
                 return null;
             }
         } catch (ControllerException ce) {
             Logger.error(ce);
+            return null;
         }
 
         // retrieve all groups

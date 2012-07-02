@@ -9,17 +9,20 @@ these great software and for making them available as open source.
 * Apache Lucene: Apache License Version 2.0
 * Apache log4j: Apache License Version 2.0
 * BioJava: LGPL Version 2.1
+* Google Guice: Apache License Version 2.0
+* Google Web Toolkit (GWT): Apache License Version 2.0
+* GwtUpload: Apache License Version 2.0
 * hibernate: LGPL
 * JAMWiki: LGPL Version 2.1
 * javassist: MPL 1.1
 * jetty: Apache License version 2.0
 * junit: CPL Version 1.0
+* Mockito: MIT License
 * opencvs: Apache License Version 2.0
 * Postgresql: Postgres License
 * Simple Logging Facade for Java (SLF4J): MIT License
-* Mockito: MIT License
-* GwtUpload: Apache License Version 2.0
-* Google Web Toolkit (GWT): Apache License Version 2.0
+* UrlRewriteFilter: New BSD License
+
 
 =====
 Text of Licenses:

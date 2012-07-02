@@ -41,40 +41,28 @@ import java.util.Set;
  *
  * @author Hector Plahar, Timothy Ham, Zinovii Dmytriv,
  */
-class EntryDAO extends HibernateRepository {
+class EntryDAO extends HibernateRepository<Entry> {
 
-    public long retrieveCountEntryByType(String type) throws DAOException {
-        Session session = newSession();
-        try {
-            Criteria criteria = session.createCriteria(Entry.class.getName()).add(
-                    Restrictions.eq("recordType", type));
-            Integer result = (Integer) criteria.setProjection(Projections.rowCount())
-                                               .uniqueResult();
-            return result.longValue();
-        } finally {
-            if (session.isOpen())
-                session.close();
-        }
-    }
-
+    @SuppressWarnings("unchecked")
     public HashSet<Long> retrieveStrainsForPlasmid(Plasmid plasmid) throws DAOException {
 
         Set<PartNumber> plasmidPartNumbers = plasmid.getPartNumbers();
         Session session = newSession();
         HashSet<Long> strainIds = null;
         try {
+            session.beginTransaction();
             for (PartNumber plasmidPartNumber : plasmidPartNumbers) {
                 Query query = session
                         .createQuery("select strain.id from Strain strain where strain.plasmids like :partNumber");
                 query.setString("partNumber", "%" + plasmidPartNumber.getPartNumber() + "%");
                 strainIds = new HashSet<Long>(query.list());
             }
+            session.getTransaction().commit();
         } catch (HibernateException e) {
             Logger.error("Could not get strains for plasmid " + e.toString(), e);
+            session.getTransaction().rollback();
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
         return strainIds;
     }
@@ -82,20 +70,20 @@ class EntryDAO extends HibernateRepository {
     /**
      * Retrieve an {@link Entry} object from the database by id.
      *
-     * @param id
-     * @return Entry.
-     * @throws ManagerException
+     * @param id unique local identifier for entry record (typically synthetic database id)
+     * @return Entry entry record associated with id
+     * @throws DAOException
      */
     public Entry get(long id) throws DAOException {
-        return (Entry) super.get(Entry.class, id);
+        return super.get(Entry.class, id);
     }
 
     /**
      * Retrieve an {@link Entry} object in the database by recordId field.
      *
-     * @param recordId
-     * @return Entry.
-     * @throws ManagerException
+     * @param recordId unique global identifier for entry record (typically UUID)
+     * @return Entry entry record associated with recordId
+     * @throws DAOException
      */
     public Entry getByRecordId(String recordId) throws DAOException {
         Entry entry = null;
@@ -103,8 +91,7 @@ class EntryDAO extends HibernateRepository {
         Session session = newSession();
         try {
             session.getTransaction().begin();
-            Query query = session.createQuery("from " + Entry.class.getName()
-                                                      + " where recordId = :recordId");
+            Query query = session.createQuery("from " + Entry.class.getName() + " where recordId = :recordId");
             query.setString("recordId", recordId);
             Object queryResult = query.uniqueResult();
             session.getTransaction().commit();
@@ -113,11 +100,11 @@ class EntryDAO extends HibernateRepository {
                 entry = (Entry) queryResult;
             }
         } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            Logger.error(e);
             throw new DAOException("Failed to retrieve entry by recordId: " + recordId, e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return entry;
@@ -128,8 +115,8 @@ class EntryDAO extends HibernateRepository {
      * <p/>
      * If multiple Entries exist with the same part number, this method throws an exception.
      *
-     * @param partNumber
-     * @return Entry.
+     * @param partNumber part number associated with entry
+     * @return Entry
      * @throws DAOException
      */
     public Entry getByPartNumber(String partNumber) throws DAOException {
@@ -148,11 +135,11 @@ class EntryDAO extends HibernateRepository {
             }
             session.getTransaction().commit();
         } catch (HibernateException e) {
+            Logger.error(e);
+            session.getTransaction().rollback();
             throw new DAOException("Failed to retrieve entry by partNumber: " + partNumber, e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return entry;
@@ -161,9 +148,9 @@ class EntryDAO extends HibernateRepository {
     /**
      * Retrieve an {@link Entry} by it's name.
      *
-     * @param name
+     * @param name name associated with entry
      * @return Entry.
-     * @throws ManagerException
+     * @throws DAOException
      */
     public Entry getByName(String name) throws DAOException {
         Entry entry = null;
@@ -171,8 +158,7 @@ class EntryDAO extends HibernateRepository {
 
         try {
             session.getTransaction().begin();
-            Query query = session.createQuery("from " + Name.class.getName()
-                                                      + " where name = :name");
+            Query query = session.createQuery("from " + Name.class.getName() + " where name = :name");
             query.setParameter("name", name);
             Object queryResult = query.uniqueResult();
             if (queryResult == null) {
@@ -182,34 +168,37 @@ class EntryDAO extends HibernateRepository {
             entry = ((Name) queryResult).getEntry();
             session.getTransaction().commit();
         } catch (HibernateException e) {
+            Logger.error("Failed to retrieve entry by JBEI name: " + name, e);
+            session.getTransaction().rollback();
             throw new DAOException("Failed to retrieve entry by JBEI name: " + name, e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return entry;
     }
 
-    public int getOwnerEntryCount(String ownerEmail) throws DAOException {
+    public int getOwnerEntryCount(String ownerEmail, Integer... visibilities) throws DAOException {
         Session session = newSession();
         try {
             session.getTransaction().begin();
             Criteria criteria = session.createCriteria(Entry.class.getName()).add(
                     Restrictions.eq("ownerEmail", ownerEmail));
-            Integer result = (Integer) criteria.setProjection(Projections.rowCount())
-                                               .uniqueResult();
+
+            // add no restrictions if no visibilities
+            if (visibilities.length > 0) {
+                criteria.add(Restrictions.or(Restrictions.not(Restrictions.in("visibility", visibilities)),
+                                             Restrictions.isNull("visibility")));
+            }
+            Integer result = (Integer) criteria.setProjection(Projections.rowCount()).uniqueResult();
 
             session.getTransaction().commit();
             return result.intValue();
         } catch (HibernateException e) {
             session.getTransaction().rollback();
-            throw new DAOException("Failed to retrieve entry count by owner " + ownerEmail, e);
+            throw new DAOException("Failed to retrieve entry count by owner \"" + ownerEmail + "\"", e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
     }
 
@@ -221,7 +210,7 @@ class EntryDAO extends HibernateRepository {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public long getNumberOfVisibleEntries(Account account) throws DAOException {
-        Group everybodyGroup = null;
+        Group everybodyGroup;
 
         Session session = null;
 
@@ -236,28 +225,22 @@ class EntryDAO extends HibernateRepository {
 
             Criteria criteria = session.createCriteria(ReadGroup.class.getName()).add(
                     Restrictions.eq("group", everybodyGroup));
-            Integer result = (Integer) criteria.setProjection(Projections.rowCount())
-                                               .uniqueResult();
+            Integer result = (Integer) criteria.setProjection(Projections.rowCount()).uniqueResult();
 
             if (account == null)
                 return result.longValue();
 
             long groupVisibleCount = result.longValue();
 
-            criteria = session.createCriteria(ReadUser.class.getName()).add(
-                    Restrictions.eq("account", account));
-            result = (Integer) criteria.setProjection(Projections.rowCount())
-                                       .uniqueResult();
+            criteria = session.createCriteria(ReadUser.class.getName()).add(Restrictions.eq("account", account));
+            result = (Integer) criteria.setProjection(Projections.rowCount()).uniqueResult();
             return (groupVisibleCount + result.longValue());
 
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve number of visible entries!", e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
-
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -308,9 +291,7 @@ class EntryDAO extends HibernateRepository {
             session.getTransaction().rollback();
             throw new DAOException("Failed to retrieve number of visible entries!", e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
     }
 
@@ -336,8 +317,7 @@ class EntryDAO extends HibernateRepository {
                                                .uniqueResult();
             return result.longValue();
         } finally {
-            if (session.isOpen())
-                session.close();
+            closeSession(session);
         }
     }
 
@@ -369,9 +349,7 @@ class EntryDAO extends HibernateRepository {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve entries!", e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return entries;
@@ -380,12 +358,12 @@ class EntryDAO extends HibernateRepository {
     /**
      * Retrieve {@link Entry} ids of the given owner email.
      *
-     * @param owner
+     * @param ownerEmail owner email
      * @return ArrayList of ids.
-     * @throws ManagerException
+     * @throws DAOException
      */
     @SuppressWarnings("unchecked")
-    public ArrayList<Long> getEntriesByOwner(String owner) throws DAOException {
+    public ArrayList<Long> getEntriesByOwner(String ownerEmail, Integer... excludeVisibilities) throws DAOException {
         ArrayList<Long> entries = null;
 
         Session session = newSession();
@@ -393,8 +371,15 @@ class EntryDAO extends HibernateRepository {
             String queryString = "select id from " + Entry.class.getName()
                     + " where ownerEmail = :ownerEmail";
 
+            if (excludeVisibilities.length > 0) {
+                queryString += " AND visibility not in (:visibilities)";
+            }
+
             Query query = session.createQuery(queryString);
-            query.setParameter("ownerEmail", owner);
+            query.setParameter("ownerEmail", ownerEmail);
+            if (excludeVisibilities.length > 0) {
+                query.setParameterList("visibilities", excludeVisibilities);
+            }
 
             @SuppressWarnings("rawtypes")
             List list = query.list();
@@ -403,7 +388,7 @@ class EntryDAO extends HibernateRepository {
                 entries = (ArrayList<Long>) list;
             }
         } catch (HibernateException e) {
-            throw new DAOException("Failed to retrieve entries by owner: " + owner, e);
+            throw new DAOException("Failed to retrieve entries by owner: " + ownerEmail, e);
         } finally {
             if (session.isOpen()) {
                 session.close();
@@ -417,9 +402,9 @@ class EntryDAO extends HibernateRepository {
      * Retrieve {@link Entry} objects from the database given a list of id's, sorted by the given
      * field.
      *
-     * @param ids
-     * @param field
-     * @param ascending
+     * @param ids       list of ids to retrieve
+     * @param field     database field to sort on
+     * @param ascending order of retrieval
      * @return List of Entry objects
      * @throws DAOException
      */
@@ -454,9 +439,7 @@ class EntryDAO extends HibernateRepository {
             session.getTransaction().rollback();
             throw new DAOException("Failed to retrieve entries!", e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return entries;
@@ -465,9 +448,9 @@ class EntryDAO extends HibernateRepository {
     /**
      * Retrieve {@link Entry} ids sorted by name.
      *
-     * @param ascending
+     * @param ascending order of retrieval
      * @return List of Entry ids.
-     * @throws ManagerException
+     * @throws DAOException
      */
     @SuppressWarnings("unchecked")
     public List<Long> getEntriesSortByName(boolean ascending) throws DAOException {
@@ -493,9 +476,7 @@ class EntryDAO extends HibernateRepository {
             session.getTransaction().rollback();
             throw new DAOException(he);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return entries;
@@ -504,7 +485,7 @@ class EntryDAO extends HibernateRepository {
     /**
      * Retrieve {@link Entry} ids sorted by their {@link PartNumber}.
      *
-     * @param ascending
+     * @param ascending order of retrieval
      * @return List of Entry ids.
      * @throws DAOException
      */
@@ -528,14 +509,12 @@ class EntryDAO extends HibernateRepository {
                 }
             }
             session.getTransaction().commit();
-        } catch (Exception e) {
+        } catch (HibernateException he) {
             session.getTransaction().rollback();
-            Logger.error(e);
-            throw new DAOException(e);
+            Logger.error(he);
+            throw new DAOException(he);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return entries;
@@ -544,9 +523,9 @@ class EntryDAO extends HibernateRepository {
     /**
      * Retrieve {@link Entry} objects of the given list of ids.
      *
-     * @param ids
+     * @param ids list of ids to retrieve
      * @return ArrayList of Entry objects.
-     * @throws ManagerException
+     * @throws DAOException
      */
     @SuppressWarnings("unchecked")
     public LinkedList<Entry> getEntriesByIdSet(List<Long> ids) throws DAOException {
@@ -660,7 +639,7 @@ class EntryDAO extends HibernateRepository {
         if (field == null)
             field = ColumnField.CREATED;
 
-        String fieldName = "";
+        String fieldName;
         switch (field) {
 
             case TYPE:
@@ -719,17 +698,15 @@ class EntryDAO extends HibernateRepository {
             session.getTransaction().rollback();
             throw new DAOException("Failed to retrieve entries!", e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
     }
 
     /**
      * Delete an {@link Entry} object in the database.
      *
-     * @param entry
-     * @throws ManagerException
+     * @param entry entry to delete
+     * @throws DAOException
      */
     public void delete(Entry entry) throws DAOException {
         super.delete(entry);
@@ -738,77 +715,87 @@ class EntryDAO extends HibernateRepository {
     /**
      * Save the {@link Entry} object into the database.
      *
-     * @param entry
+     * @param entry entry to save
      * @return Saved Entry object.
-     * @throws ManagerException
+     * @throws DAOException
      */
     public Entry save(Entry entry) throws DAOException {
         if (entry == null) {
             throw new DAOException("Failed to save null entry!");
         }
 
-        Entry savedEntry;
         // deal with associated objects here instead of making individual forms
         // deal with foreign key checks. Deletion of old values happen through
         // Set.clear() and
         // hibernate cascade delete-orphaned in the model.Entry
 
-        if (entry.getSelectionMarkers() != null) {
-            for (SelectionMarker selectionMarker : entry.getSelectionMarkers()) {
-                selectionMarker.setEntry(entry);
+        Session session = newSession();
+        session.beginTransaction();
+
+        try {
+            if (entry.getSelectionMarkers() != null) {
+                for (SelectionMarker selectionMarker : entry.getSelectionMarkers()) {
+                    selectionMarker.setEntry(entry);
+                }
             }
+
+            if (entry.getLinks() != null) {
+                for (Link link : entry.getLinks()) {
+                    link.setEntry(entry);
+                }
+            }
+
+            if (entry.getNames() != null) {
+                for (Name name : entry.getNames()) {
+                    name.setEntry(entry);
+                }
+            }
+
+            if (entry.getPartNumbers() != null) {
+                for (PartNumber partNumber : entry.getPartNumbers()) {
+                    partNumber.setEntry(entry);
+                }
+            }
+
+            entry.setModificationTime(Calendar.getInstance().getTime());
+
+            if (entry.getEntryFundingSources() != null) {
+                // Manual cascade of EntryFundingSource. Guarantees unique FundingSource
+                for (EntryFundingSource entryFundingSource : entry.getEntryFundingSources()) {
+                    FundingSource saveFundingSource = saveFundingSource(session, entryFundingSource.getFundingSource());
+                    entryFundingSource.setFundingSource(saveFundingSource);
+                }
+            }
+
+            session.saveOrUpdate(entry);
+            session.getTransaction().commit();
+            return entry;
+
+        } catch (HibernateException he) {
+            Logger.error(he);
+            session.getTransaction().rollback();
+            throw new DAOException(he);
         }
 
-        if (entry.getLinks() != null) {
-            for (Link link : entry.getLinks()) {
-                link.setEntry(entry);
-            }
-        }
-
-        if (entry.getNames() != null) {
-            for (Name name : entry.getNames()) {
-                name.setEntry(entry);
-            }
-        }
-
-        if (entry.getPartNumbers() != null) {
-            for (PartNumber partNumber : entry.getPartNumbers()) {
-                partNumber.setEntry(entry);
-            }
-        }
-
-        entry.setModificationTime(Calendar.getInstance().getTime());
-
-        if (entry.getEntryFundingSources() != null) {
-            // Manual cascade of EntryFundingSource. Guarantees unique FundingSource
-            for (EntryFundingSource entryFundingSource : entry.getEntryFundingSources()) {
-                FundingSource saveFundingSource = saveFundingSource(entryFundingSource
-                                                                            .getFundingSource());
-                entryFundingSource.setFundingSource(saveFundingSource);
-            }
-        }
-
-        return (Entry) super.saveOrUpdate(entry);
     }
 
     /**
      * Save {@link FundingSource} object into the database.
      *
-     * @param fundingSource
+     * @param fundingSource funding source to save
      * @return Saved FundingSource object.
      * @throws DAOException
      */
-    private FundingSource saveFundingSource(FundingSource fundingSource) throws DAOException {
+    private FundingSource saveFundingSource(Session session, FundingSource fundingSource) throws DAOException {
         FundingSource result;
 
-        Session session = newSession();
         String queryString = "from " + FundingSource.class.getName()
                 + " where fundingSource=:fundingSource AND"
                 + " principalInvestigator=:principalInvestigator";
         Query query = session.createQuery(queryString);
         query.setParameter("fundingSource", fundingSource.getFundingSource());
         query.setParameter("principalInvestigator", fundingSource.getPrincipalInvestigator());
-        FundingSource existingFundingSource = null;
+        FundingSource existingFundingSource;
 
         try {
             existingFundingSource = (FundingSource) query.uniqueResult();
@@ -816,14 +803,11 @@ class EntryDAO extends HibernateRepository {
             // dirty funding source. There are multiple of these. Clean up.
             FundingSource duplicateFundingSource = (FundingSource) query.list().get(0);
             existingFundingSource = duplicateFundingSource;
-        } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
         }
 
         if (existingFundingSource == null) {
-            result = (FundingSource) super.saveOrUpdate(fundingSource);
+            session.saveOrUpdate(fundingSource);
+            result = fundingSource;
         } else {
             result = existingFundingSource;
         }
@@ -838,11 +822,11 @@ class EntryDAO extends HibernateRepository {
      * @param delimiter Character between the prefix and the part number, For example, "_".
      * @param suffix    Example digits, for example "000000" to represent a six digit part number.
      * @return New part umber string, for example "JBx_000001".
-     * @throws ManagerException
+     * @throws DAOException
      */
     @SuppressWarnings("unchecked")
     String generateNextPartNumber(String prefix, String delimiter, String suffix)
-            throws ManagerException {
+            throws DAOException {
         Session session = newSession();
         try {
             String queryString = "from " + PartNumber.class.getName() + " where partNumber LIKE '"
@@ -856,7 +840,7 @@ class EntryDAO extends HibernateRepository {
                 entryPartNumber = tempList.get(0);
             }
 
-            String nextPartNumber = null;
+            String nextPartNumber;
             if (entryPartNumber == null) {
                 nextPartNumber = prefix + delimiter + suffix;
             } else {
@@ -871,21 +855,18 @@ class EntryDAO extends HibernateRepository {
                         nextPartNumber = prefix + delimiter
                                 + String.format("%0" + suffix.length() + "d", value);
                     } catch (Exception e) {
-                        throw new ManagerException("Couldn't parse partNumber", e);
+                        throw new DAOException("Couldn't parse partNumber", e);
                     }
                 } else {
-                    throw new ManagerException("Couldn't parse partNumber");
+                    throw new DAOException("Couldn't parse partNumber");
                 }
             }
 
             return nextPartNumber;
         } catch (HibernateException e) {
-            throw new ManagerException("Couldn't retrieve Entry by partNumber", e);
+            throw new DAOException("Couldn't retrieve Entry by partNumber", e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
     }
-
 }

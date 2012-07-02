@@ -280,15 +280,11 @@ public class AccountController {
      * @throws ControllerException
      */
     public Account getAccountBySessionKey(String sessionKey) throws ControllerException {
-        Account account = null;
-
         try {
-            account = dao.getAccountByAuthToken(sessionKey);
+            return dao.getAccountByAuthToken(sessionKey);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
-
-        return account;
     }
 
     /**
