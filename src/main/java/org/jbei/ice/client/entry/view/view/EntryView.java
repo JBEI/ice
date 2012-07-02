@@ -509,6 +509,11 @@ public class EntryView extends Composite implements IEntryView {
     }
 
     @Override
+    public void setTraceSequenceStartUploader(OnStartUploaderHandler handler) {
+        sequenceUploader.addOnStartUploadHandler(handler);
+    }
+
+    @Override
     public void setSequenceData(ArrayList<SequenceAnalysisInfo> data, EntryInfo info) {
         sequenceTable.setData(data);
         this.entryId = info.getId();

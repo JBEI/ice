@@ -80,6 +80,9 @@ public class EntryPresenter extends AbstractPresenter {
         setContextNavHandlers();
         showCurrentEntryView();
 
+        // trace sequence upload handler
+        display.setTraceSequenceStartUploader(new TraceSequenceStartUploaderHandler());
+
         // SAMPLE
         // add sample button handler
         display.addSampleButtonHandler(new ClickHandler() {
@@ -123,7 +126,7 @@ public class EntryPresenter extends AbstractPresenter {
         pPresenter.setWriteAddSelectionHandler(new PermissionReadBoxHandler(true));
 
         // sequence upload handler
-        display.setSequenceFinishUploadHandler(new SequenceUploaderFinishHandler());
+        display.setSequenceFinishUploadHandler(new TraceSequenceUploaderFinishHandler());
 
         // attachment delete handler
         display.setAttachmentDeleteHandler(new HasAttachmentDeleteHandler() {
@@ -334,7 +337,7 @@ public class EntryPresenter extends AbstractPresenter {
         });
     }
 
-    private void retrieveEntrySequenceDetails() {
+    private void retrieveEntryTraceSequenceDetails() {
 
         final long entryId = currentContext.getCurrent();
         new IceAsyncCallback<ArrayList<SequenceAnalysisInfo>>() {
@@ -664,7 +667,16 @@ public class EntryPresenter extends AbstractPresenter {
         }
     }
 
-    private class SequenceUploaderFinishHandler implements OnFinishUploaderHandler {
+    public class TraceSequenceStartUploaderHandler implements IUploader.OnStartUploaderHandler {
+
+        public void onStart(IUploader uploader) {
+            String servletPath = "servlet.gupld?eid=" + currentInfo.getId()
+                    + "&type=sequence&sid=" + AppController.sessionId;
+            uploader.setServletPath(servletPath);
+        }
+    }
+
+    private class TraceSequenceUploaderFinishHandler implements OnFinishUploaderHandler {
 
         @Override
         public void onFinish(IUploader uploader) {
@@ -672,7 +684,7 @@ public class EntryPresenter extends AbstractPresenter {
                 UploadedInfo info = uploader.getServerInfo();
                 //                    uploader.reset();
                 //                    uploadPanel.setVisibility(false);
-                retrieveEntrySequenceDetails();
+                retrieveEntryTraceSequenceDetails();
             } else {
                 UploadedInfo info = uploader.getServerInfo();
                 if (uploader.getStatus() == Status.ERROR) {
@@ -685,6 +697,7 @@ public class EntryPresenter extends AbstractPresenter {
             display.setSequenceFormVisibility(false);
         }
     }
+
 
     public class DeleteSequenceTraceHandler implements ClickHandler {
 

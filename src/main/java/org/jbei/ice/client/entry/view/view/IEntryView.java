@@ -3,6 +3,7 @@ package org.jbei.ice.client.entry.view.view;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.MultiSelectionModel;
+import gwtupload.client.IUploader;
 import gwtupload.client.IUploader.OnFinishUploaderHandler;
 import org.jbei.ice.client.collection.add.form.SampleLocation;
 import org.jbei.ice.client.entry.view.HasAttachmentDeleteHandler;
@@ -90,4 +91,6 @@ public interface IEntryView {
     void addDeleteEntryHandler(ClickHandler handler);
 
     VisibilityWidgetPresenter getVisibilityWidget();
+
+    void setTraceSequenceStartUploader(IUploader.OnStartUploaderHandler handler);
 }
