@@ -28,8 +28,8 @@ import org.jbei.ice.client.entry.view.view.AttachmentListMenuPresenter.IAttachme
 import java.util.ArrayList;
 
 /**
- * Widget that displays list of entry attachments in the entry detail view.
- * Allows user to download and also upload an attachment
+ * Widget that displays list of entry attachments in the entry detail view. Allows user to download and also upload an
+ * attachment
  *
  * @author Hector Plahar
  */
@@ -87,8 +87,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
     }
 
     /**
-     * sets the attachment upload form visibility and the
-     * corresponding button user clicks to enable/disable it
+     * sets the attachment upload form visibility and the corresponding button user clicks to enable/disable it
      */
     @Override
     public void switchAttachmentAddButton() {
@@ -182,9 +181,8 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
             @Override
             public void onStart(IUploader uploader) {
                 String attDesc = attachmentDescription.getText().trim();
-                uploader.setServletPath(uploader.getServletPath() + "?desc=" + attDesc + "&eid="
-                                                + entryId + "&type=attachment&sid=" + AppController.sessionId); //
-                                                // TODO : accessing session id directly from controller
+                uploader.setServletPath("servlet.gupld?desc=" + attDesc + "&eid="
+                                                + entryId + "&type=attachment&sid=" + AppController.sessionId);
                 attachmentDescription.setVisible(false);
             }
         });
