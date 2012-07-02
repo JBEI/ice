@@ -1,12 +1,11 @@
-JBEIR uses and or includes the following software, according to their
-licensing terms. The JBEIR Team would like to thank the developers of
+JBEI-ICE uses and or includes the following software, according to their
+licensing terms. The JBEI-ICE Team would like to thank the developers of
 these great software and for making them available as open source.
 
 * Adobe BlazeDS: BlazeDS License (LGPL3)
 * Adobe Flex sDK: MPL 1.1
 * Apache Commons: Apache License Version 2.0
 * Apache Maven: Apache License Version 2.0
-* Apache Wicket: Apache License Version 2.0
 * Apache Lucene: Apache License Version 2.0
 * Apache log4j: Apache License Version 2.0
 * BioJava: LGPL Version 2.1
@@ -18,6 +17,9 @@ these great software and for making them available as open source.
 * opencvs: Apache License Version 2.0
 * Postgresql: Postgres License
 * Simple Logging Facade for Java (SLF4J): MIT License
+* Mockito: MIT License
+* GwtUpload: Apache License Version 2.0
+* Google Web Toolkit (GWT): Apache License Version 2.0
 
 =====
 Text of Licenses:
