@@ -41,9 +41,6 @@ public class AdminPresenter extends AbstractPresenter {
         this.view = view;
         this.eventBus = eventBus;
 
-        if (!AppController.accountInfo.isModerator())
-            History.newItem(Page.MAIN.getLink());
-
         retrieveSavedDrafts();
         setMenuSelectionModel();
         addSelectionChangeHandler();

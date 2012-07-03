@@ -69,8 +69,8 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
     }
 
     /**
-     * Adds a window close event that clears the cookies when the user
-     * closes the window and has not selected "remember me"
+     * Adds a window close event that clears the cookies when the user closes the window and has not selected "remember
+     * me"
      */
     //    private void addCookieClearOnWindowClose() {
     //        Window.addCloseHandler(new CloseHandler<Window>() {
@@ -186,9 +186,8 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
     }
 
     /**
-     * Required override from ValueChange Handler interface.
-     * newItem and fireCurrentHistoryState method calls of History, causes
-     * this to be evaluated
+     * Required override from ValueChange Handler interface. newItem and fireCurrentHistoryState method calls of
+     * History, causes this to be evaluated
      */
     @Override
     public void onValueChange(ValueChangeEvent<String> event) {
@@ -269,6 +268,10 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
                 break;
 
             case ADMIN:
+                if (!AppController.accountInfo.isModerator()) {
+                    History.newItem(Page.MAIN.getLink());
+                    return;
+                }
                 AdminView aView = new AdminView();
                 addHeaderSearchHandler(aView);
                 presenter = new AdminPresenter(this.service, this.eventBus, aView);
@@ -391,8 +394,7 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
     //
 
     /**
-     * Logout handler implementation. Clears cookies and session id
-     * and redirects user to login page
+     * Logout handler implementation. Clears cookies and session id and redirects user to login page
      */
     private final class AppLogoutHandler implements ILogoutEventHandler {
 
