@@ -14,7 +14,6 @@ import org.jbei.ice.lib.bulkimport.BulkImport;
 import org.jbei.ice.lib.bulkimport.BulkImportController;
 import org.jbei.ice.lib.bulkimport.BulkImportDraftController;
 import org.jbei.ice.lib.entry.EntryController;
-import org.jbei.ice.lib.entry.Visibility;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;

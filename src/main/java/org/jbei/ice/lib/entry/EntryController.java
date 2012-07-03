@@ -19,6 +19,7 @@ import org.jbei.ice.lib.utils.PopulateInitialDatabase;
 import org.jbei.ice.server.EntryViewFactory;
 import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.Visibility;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import java.util.ArrayList;
@@ -48,8 +49,8 @@ public class EntryController {
     /**
      * Create an entry in the database.
      * <p/>
-     * Generates a new Part Number, the record id (UUID), version id, and timestamps as necessary.
-     * Sets the record globally visible and schedule an index rebuild.
+     * Generates a new Part Number, the record id (UUID), version id, and timestamps as necessary. Sets the record
+     * globally visible and schedule an index rebuild.
      *
      * @param account account of user creating the record
      * @param entry   entry record being created
@@ -98,8 +99,8 @@ public class EntryController {
     /**
      * Create an entry in the database.
      * <p/>
-     * Generates a new Part Number, the record id (UUID), version id, and timestamps as necessary.
-     * Optionally set the record globally visible or schedule an index rebuild.
+     * Generates a new Part Number, the record id (UUID), version id, and timestamps as necessary. Optionally set the
+     * record globally visible or schedule an index rebuild.
      *
      * @param account              account of user creating entry
      * @param entry                entry record being created
@@ -468,7 +469,7 @@ public class EntryController {
 
             Integer[] excludeInt = new Integer[exclude.length];
             for (int i = 0; i < exclude.length; i += 1)
-                excludeInt[i] = exclude[i].getVisibilityInt();
+                excludeInt[i] = exclude[i].getValue();
             return dao.getOwnerEntryCount(account.getEmail(), excludeInt);
         } catch (DAOException e) {
             Logger.error(e);
