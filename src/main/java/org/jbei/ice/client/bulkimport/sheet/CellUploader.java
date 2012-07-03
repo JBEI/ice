@@ -1,12 +1,13 @@
 package org.jbei.ice.client.bulkimport.sheet;
 
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import gwtupload.client.IFileInput;
 import gwtupload.client.IUploader;
 import gwtupload.client.SingleUploader;
 import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.common.util.ImageUtil;
 
 /**
  * @author Hector Plahar
@@ -16,10 +17,11 @@ public class CellUploader implements IsWidget {
     private final SingleUploader uploader;
 
     public CellUploader() {
-        Label label = new Label("Upload file"); // TODO : style
+//        Label label = new Label("Upload file");
+        Image fileUploadImg = ImageUtil.getFileUpload();
 
         final FileUploadStatus uploaderStatus = new FileUploadStatus();
-        uploader = new SingleUploader(IFileInput.FileInputType.CUSTOM.with(label), uploaderStatus);
+        uploader = new SingleUploader(IFileInput.FileInputType.CUSTOM.with(fileUploadImg), uploaderStatus);
         uploader.setAutoSubmit(true);
         uploader.getWidget().setStyleName("uploader_cell");
 
@@ -27,10 +29,7 @@ public class CellUploader implements IsWidget {
 
             @Override
             public void onStart(IUploader uploader) {
-                uploader.setServletPath(uploader.getServletPath()
-                                                + "?type=bulk_attachment&sid=" + AppController.sessionId);
-                //                    sheetTable.setWidget(currentRow, currentIndex,
-                //                        uploaderStatus.getProgressWidget());
+                uploader.setServletPath("servlet.gupld?type=bulk_attachment&sid=" + AppController.sessionId);
             }
         });
 
@@ -45,6 +44,7 @@ public class CellUploader implements IsWidget {
     }
 
     public void addOnFinishUploadHandler(IUploader.OnFinishUploaderHandler onFinishUploaderHandler) {
+        uploader.addOnFinishUploadHandler(onFinishUploaderHandler);
     }
 
     @Override

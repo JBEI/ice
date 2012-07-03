@@ -13,8 +13,8 @@ public enum Header {
     REFERENCES("References", false, "", new InputSheetCell()),
     LINKS("Links", false, "", new InputSheetCell()),
     STATUS("Status", true, "", new StatusSheetCell()),
-    SEQ_FILENAME("Sequence Filename", false, "", new InputSheetCell()),
-    ATT_FILENAME("Attachments Filename", false, "", new InputSheetCell()),
+    SEQ_FILENAME("Sequence File", false, "", new SequenceFileCell()),
+    ATT_FILENAME("Attachment File", false, "", new AttachmentFileCell()),
     SELECTION_MARKERS("Selection Markers", false, "", new SelectionMarkerInputCell()),
     PARENTAL_STRAIN("Parental Strain", false, "", new InputSheetCell()),
     GEN_PHEN("Genotype or Phenotype", false, "", new InputSheetCell()),
@@ -40,8 +40,8 @@ public enum Header {
     PLASMID_BACKBONE("Backbone", false, "", new InputSheetCell()),
     PLASMID_PROMOTERS("Promoters", false, "", new InputSheetCell()),
     PLASMID_ORIGIN_OF_REPLICATION("Origin of Replication", false, "", new InputSheetCell()),
-    PLASMID_SEQ_FILENAME("Sequence Filename", false, "", new InputSheetCell()),
-    PLASMID_ATT_FILENAME("Attachments Filename", false, "", new InputSheetCell()),
+    PLASMID_SEQ_FILENAME("Sequence File", false, "", new SequenceFileCell()),
+    PLASMID_ATT_FILENAME("Attachment File", false, "", new AttachmentFileCell()),
     PLASMID_SELECTION_MARKERS("Selection Markers", false, "", new InputSheetCell()),
     STRAIN_NAME("Name", true, "", new InputSheetCell()),
     STRAIN_ALIAS("Alias", false, "", new InputSheetCell()),
@@ -55,8 +55,8 @@ public enum Header {
     STRAIN_PARENTAL_STRAIN("Parental Strain", false, "", new InputSheetCell()),
     STRAIN_GEN_PHEN("Genotype or Phenotype", false, "", new InputSheetCell()),
     STRAIN_PLASMIDS("Plasmids", false, "", new InputSheetCell()),
-    STRAIN_SEQ_FILENAME("Sequence Filename", false, "", new InputSheetCell()),
-    STRAIN_ATT_FILENAME("Attachments Filename", false, "", new InputSheetCell());
+    STRAIN_SEQ_FILENAME("Sequence File", false, "", new SequenceFileCell()),
+    STRAIN_ATT_FILENAME("Attachment File", false, "", new AttachmentFileCell());
 
     private String label;
     private boolean required;

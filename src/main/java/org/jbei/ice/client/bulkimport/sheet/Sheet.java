@@ -575,27 +575,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
     private String getLastWidgetText() {
         Header currentHeader = presenter.getTypeHeaders()[inputIndex];
         return currentHeader.getCell().getWidgetText();
-//        String ret;
-//
-//        switch (currentHeader) {
-//
-//            case SELECTION_MARKERS:
-//            case BIOSAFETY:
-//                ret = ((MultipleTextBox) box.getTextBox()).getWholeText();
-//                box.setText("");
-//                return ret;
-//
-//            case ATT_FILENAME:
-//            case SEQ_FILENAME:
-//                ret = filename;
-//                filename = "";
-//                return ret;
-//
-//            default:
-//                ret = input.getText();
-//                input.setText("");
-//                return ret;
-//        }
     }
 
     //

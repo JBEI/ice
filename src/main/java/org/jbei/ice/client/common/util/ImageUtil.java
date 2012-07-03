@@ -50,6 +50,9 @@ public class ImageUtil {
         @Source("org/jbei/ice/client/resource/image/upload_file.png")
         ImageResource uploadImage();
 
+        @Source("org/jbei/ice/client/resource/image/file_upload.png")
+        ImageResource fileUpload();
+
     }
 
     public static Image getSampleIcon() {
@@ -102,5 +105,9 @@ public class ImageUtil {
 
     public static Image getUploadImage() {
         return new Image(Resources.INSTANCE.uploadImage());
+    }
+
+    public static Image getFileUpload() {
+        return new Image(Resources.INSTANCE.fileUpload());
     }
 }

@@ -63,8 +63,7 @@ public class FileUploadServlet extends UploadAction {
     }
 
     /**
-     * Override executeAction to save the received files in a custom place
-     * and delete this items from session.
+     * Override executeAction to save the received files in a custom place and delete this items from session.
      */
     @Override
     public String executeAction(HttpServletRequest request, List<FileItem> sessionFiles)
@@ -93,27 +92,14 @@ public class FileUploadServlet extends UploadAction {
             String path = request.getServletPath();
             url = url.substring(0, url.indexOf(path));
             Logger.info(FileUploadServlet.class.getSimpleName()
-                                + ": authenication failed. Redirecting user to " + url);
+                                + ": authentication failed. Redirecting user to " + url);
             return "";
         }
 
         String result = "";
         String tmpDir = JbeirSettings.getSetting("TEMPORARY_DIRECTORY");
-        EntryController controller = new EntryController();
-        Entry entry = null;
-        try {
-            entry = controller.get(account, Long.decode(entryId));
-        } catch (NumberFormatException e) {
-            Logger.error(e);
-        } catch (ControllerException e) {
-            Logger.error(e);
-        } catch (PermissionException e) {
-            Logger.error(e);
-        }
 
-        if (entry == null)
-            return "Could not retrieve entry with id : " + entryId;
-
+        // retrieve file
         for (FileItem item : sessionFiles) {
             if (item.isFormField())
                 continue;
@@ -134,12 +120,12 @@ public class FileUploadServlet extends UploadAction {
             if (ATTACHMENT_TYPE.equalsIgnoreCase(type)) {
                 if (entryId == null || entryId.isEmpty())
                     return "No entry id specified for file upload";
-                result = uploadAttachment(account, entry, file, entryId, desc, saveName);
+                result = uploadAttachment(account, file, entryId, desc, saveName);
             } else if (SEQUENCE_TYPE.equalsIgnoreCase(type)) {
                 if (entryId == null || entryId.isEmpty())
                     result = "No entry id specified for file upload";
                 try {
-                    result = uploadSequenceTraceFile(entry, file, entryId, account, saveName);
+                    result = uploadSequenceTraceFile(file, entryId, account, saveName);
                 } catch (IOException e) {
                     Logger.error(e);
                 }
@@ -155,7 +141,6 @@ public class FileUploadServlet extends UploadAction {
 
         removeSessionFileItems(request);
         return result;
-
     }
 
     public String uploadBulkAttachment(File file, String saveName) {
@@ -166,8 +151,23 @@ public class FileUploadServlet extends UploadAction {
     }
 
     // TODO : this needs to go to manager/controller
-    private String uploadSequenceTraceFile(Entry entry, File file, String entryId, Account account,
+    private String uploadSequenceTraceFile(File file, String entryId, Account account,
             String uploadFileName) throws IOException {
+
+        EntryController controller = new EntryController();
+        Entry entry = null;
+        try {
+            entry = controller.get(account, Long.decode(entryId));
+        } catch (NumberFormatException e) {
+            Logger.error(e);
+        } catch (ControllerException e) {
+            Logger.error(e);
+        } catch (PermissionException e) {
+            Logger.error(e);
+        }
+
+        if (entry == null)
+            return "Could not retrieve entry with id : " + entryId;
 
         SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
 
@@ -180,7 +180,7 @@ public class FileUploadServlet extends UploadAction {
             try {
 
                 ZipInputStream zis = new ZipInputStream(inputStream);
-                ZipEntry zipEntry = null;
+                ZipEntry zipEntry;
 
                 while (true) {
                     zipEntry = zis.getNextEntry();
@@ -244,8 +244,23 @@ public class FileUploadServlet extends UploadAction {
     }
 
     // TODO : check for path information in filename. safari includes it
-    private String uploadAttachment(Account account, Entry entry, File file, String entryId, String desc,
+    private String uploadAttachment(Account account, File file, String entryId, String desc,
             String filename) {
+
+        EntryController controller = new EntryController();
+        Entry entry = null;
+        try {
+            entry = controller.get(account, Long.decode(entryId));
+        } catch (NumberFormatException e) {
+            Logger.error(e);
+        } catch (ControllerException e) {
+            Logger.error(e);
+        } catch (PermissionException e) {
+            Logger.error(e);
+        }
+
+        if (entry == null)
+            return "Could not retrieve entry with id : " + entryId;
 
         try {
             Attachment attachment = new Attachment();
@@ -255,8 +270,8 @@ public class FileUploadServlet extends UploadAction {
 
             FileInputStream inputStream = new FileInputStream(file);
             // TODO : this save method also writes the attachment to file
-            AttachmentController controller = new AttachmentController();
-            Attachment saved = controller.save(account, attachment, inputStream);
+            AttachmentController attachmentController = new AttachmentController();
+            Attachment saved = attachmentController.save(account, attachment, inputStream);
             if (saved != null)
                 return saved.getFileId();
         } catch (ControllerException e) {

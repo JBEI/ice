@@ -11,7 +11,8 @@ public abstract class SheetCell extends Composite {
     }
 
     /**
-     * Set text value of input widget; typicall text box base
+     * Set text value of input widget; typically text box base. This is used when focus shifts from displaying the label
+     * to the actual widget. This gives the widget the chance to set their text (which is the existing)
      *
      * @param text value to set
      */
