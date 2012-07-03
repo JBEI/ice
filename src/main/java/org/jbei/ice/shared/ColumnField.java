@@ -16,6 +16,9 @@ public enum ColumnField implements IsSerializable {
         this.name = name;
     }
 
+    private ColumnField() {
+    }
+
     public String getName() {
         return this.name;
     }

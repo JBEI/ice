@@ -1,5 +1,7 @@
 package org.jbei.ice.shared;
 
+import java.util.ArrayList;
+
 public enum StatusType {
 
     COMPLETE("Complete"), IN_PROGRESS("In Progress"), PLANNED("Planned");
@@ -25,5 +27,13 @@ public enum StatusType {
                 return type.toString();
         }
         return "";
+    }
+
+    public static ArrayList<String> getDisplayList() {
+        ArrayList<String> displayList = new ArrayList<String>();
+        for (StatusType type : StatusType.values()) {
+            displayList.add(type.toString());
+        }
+        return displayList;
     }
 }

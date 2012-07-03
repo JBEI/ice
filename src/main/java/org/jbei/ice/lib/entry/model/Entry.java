@@ -7,6 +7,7 @@ import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.interfaces.IEntryValueObject;
 import org.jbei.ice.lib.utils.JbeiConstants;
 import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.shared.dto.Visibility;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -22,69 +23,49 @@ import java.util.Set;
 /**
  * Entry class is the most important class in gd-ice. Other record types extend this class.
  * <p/>
- * Entry class represent the unique handle for each record in the system. It provides the common
- * fields, such as the recordId (uuid), timestamps, owner and creator information, etc.
+ * Entry class represent the unique handle for each record in the system. It provides the common fields, such as the
+ * recordId (uuid), timestamps, owner and creator information, etc.
  * <p/>
- * Many of the fields accept mediawiki style linking tags. For example,
- * "[[jbei:JBx_000001|Descriptive Name]]" will automatically generate a clickable link to the part
- * JBx_000001 with text "Descriptive Name". The wiki link prefix (jbei:) in this case can be
- * configured in the configuration file. In the future, links to other registries can be specified
- * via the configuration, similar to other mediawiki links.
+ * Many of the fields accept mediawiki style linking tags. For example, "[[jbei:JBx_000001|Descriptive Name]]" will
+ * automatically generate a clickable link to the part JBx_000001 with text "Descriptive Name". The wiki link prefix
+ * (jbei:) in this case can be configured in the configuration file. In the future, links to other registries can be
+ * specified via the configuration, similar to other mediawiki links.
  * <p/>
  * Description of Entry fields:
  * <p/>
- * <ul>
- * <li><b>id:</b> database id of an entry.</li>
- * <li><b>recordId:</b> 36 character globally unique identifier. Implemented as UUIDv4.</li>
- * <li><b>versionId:</b> 36 character globally unique identifier.</li>
- * <li><b>recordType:</b> The type of record. Currently there are plasmids, strains, arabidopsis
- * seeds, and parts. Parts represent linear DNA in a packaging format, such as Biobricks, or raw DNA
- * for ligationless assembly.</li>
- * <li><b>owner:</b> Owner is the person that has complete read and write access to a part. This
- * field is the user friendly string, such as their full name, and is not used by the system for
- * identification and association. See ownerEmail for that functionality. This field is also
- * distinct from the creator field.</li>
- * <li><b>ownerEmail:</b> Email address of the owner. Because an entry can be exchanged between
- * different registries, without having the corresponding account records be exchanged along with
- * it, association of entry with a user is done through this field, instead of the database id of
- * {@link org.jbei.ice.lib.account.model.Account}. This means that other classes (such as {@link org.jbei.ice.lib
- * .entry.sample.model.Sample}) also associate via the
- * email address. Consequently, email address must be unique to a gd-ice instance.</li>
- * <li><b>creator:</b> Creator is the person that has created this entry. If the entry came from
- * somewhere else, or was entered into this instance of gd-ice by someone other than the creator,
- * then the owner and the creator fields would be different. This field is the user friendly string,
- * such as their full name, and is not used by the system for identification and association.</li>
- * <li><b>creatorEmail:</b> Email address of the creator. For some very old entries, or entries that
- * came from a third party, email address maybe empty.</li>
- * <li><b>alias:</b> Comma separated list of alias names.</li>
- * <li><b>keywords:</b> Comma separated list of keywords.</li>
- * <li><b>status:</b> Status of this entry. Currently the options are complete, in progress, or
- * planned. This field in the future should be used to filter search results.</li>
- * <li><b>shortDescription:</b> A summary of the entry in a few words. This is what is displayed in
- * the search result summaries, and brevity is best.</li>
- * <li><b>longDescription:</b> Longer description for the entry. Details that are not part of the
- * summary description should be placed in this field. This field accepts markup text of different
- * styles. see longDescriptionType</li>
- * <li><b>longDescriptionType: Markup syntax used for long description. Currently plain text,
- * mediawiki, and confluence markup syntax is supported.</b>/
- * <li>
- * <li><b>references:</b> References for this entry.</li>
- * <li><b>creationTime:</b> Timestamp of creation of this entry.</li>
- * <li><b>modificationTime:</b> Timestamp of last modification of this entry.</li>
- * <li><b>bioSafetyLevel:</b> The biosafety level of this entry. In the future, this field will
- * propagate to other entries, so that a strain entry holding a higher level bioSafetyLevel plasmid
- * entry will inherit the higher bioSafetyLevel.</li>
- * <li><b>intellectualProperty:</b> Information about intellectual property (patent filing numbers,
- * etc) for this entry.</li>
- * <li><b>selectionMarkers:</b> {@link org.jbei.ice.lib.models.SelectionMarker}s for this entry. In the future,
- * this field
- * will propagate to other entries based on inheritance.</li>
- * <li><b>links:</b> URL or other links that point outside of this instance of gd-ice.</li>
- * <lli><b>names: </b> {@link Name}s for this entry.</li>
- * <li><b>partNumbers: </b> {@link PartNumber}s for this entry.</li>
- * <li><b>entryFundingSources</b> {@link EntryFundingSource}s for this entry.</li>
- * <li><b>parameters: {@link Parameter}s for this entry.</b></li>
- * </ul>
+ * <ul> <li><b>id:</b> database id of an entry.</li> <li><b>recordId:</b> 36 character globally unique identifier.
+ * Implemented as UUIDv4.</li> <li><b>versionId:</b> 36 character globally unique identifier.</li>
+ * <li><b>recordType:</b> The type of record. Currently there are plasmids, strains, arabidopsis seeds, and parts. Parts
+ * represent linear DNA in a packaging format, such as Biobricks, or raw DNA for ligationless assembly.</li>
+ * <li><b>owner:</b> Owner is the person that has complete read and write access to a part. This field is the user
+ * friendly string, such as their full name, and is not used by the system for identification and association. See
+ * ownerEmail for that functionality. This field is also distinct from the creator field.</li> <li><b>ownerEmail:</b>
+ * Email address of the owner. Because an entry can be exchanged between different registries, without having the
+ * corresponding account records be exchanged along with it, association of entry with a user is done through this
+ * field, instead of the database id of {@link org.jbei.ice.lib.account.model.Account}. This means that other classes
+ * (such as {@link org.jbei.ice.lib .entry.sample.model.Sample}) also associate via the email address. Consequently,
+ * email address must be unique to a gd-ice instance.</li> <li><b>creator:</b> Creator is the person that has created
+ * this entry. If the entry came from somewhere else, or was entered into this instance of gd-ice by someone other than
+ * the creator, then the owner and the creator fields would be different. This field is the user friendly string, such
+ * as their full name, and is not used by the system for identification and association.</li> <li><b>creatorEmail:</b>
+ * Email address of the creator. For some very old entries, or entries that came from a third party, email address maybe
+ * empty.</li> <li><b>alias:</b> Comma separated list of alias names.</li> <li><b>keywords:</b> Comma separated list of
+ * keywords.</li> <li><b>status:</b> Status of this entry. Currently the options are complete, in progress, or planned.
+ * This field in the future should be used to filter search results.</li> <li><b>shortDescription:</b> A summary of the
+ * entry in a few words. This is what is displayed in the search result summaries, and brevity is best.</li>
+ * <li><b>longDescription:</b> Longer description for the entry. Details that are not part of the summary description
+ * should be placed in this field. This field accepts markup text of different styles. see longDescriptionType</li>
+ * <li><b>longDescriptionType: Markup syntax used for long description. Currently plain text, mediawiki, and confluence
+ * markup syntax is supported.</b>/ <li> <li><b>references:</b> References for this entry.</li> <li><b>creationTime:</b>
+ * Timestamp of creation of this entry.</li> <li><b>modificationTime:</b> Timestamp of last modification of this
+ * entry.</li> <li><b>bioSafetyLevel:</b> The biosafety level of this entry. In the future, this field will propagate to
+ * other entries, so that a strain entry holding a higher level bioSafetyLevel plasmid entry will inherit the higher
+ * bioSafetyLevel.</li> <li><b>intellectualProperty:</b> Information about intellectual property (patent filing numbers,
+ * etc) for this entry.</li> <li><b>selectionMarkers:</b> {@link org.jbei.ice.lib.models.SelectionMarker}s for this
+ * entry. In the future, this field will propagate to other entries based on inheritance.</li> <li><b>links:</b> URL or
+ * other links that point outside of this instance of gd-ice.</li> <lli><b>names: </b> {@link Name}s for this
+ * entry.</li> <li><b>partNumbers: </b> {@link PartNumber}s for this entry.</li> <li><b>entryFundingSources</b> {@link
+ * EntryFundingSource}s for this entry.</li> <li><b>parameters: {@link Parameter}s for this entry.</b></li> </ul>
  *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
@@ -142,7 +123,7 @@ public class Entry implements IEntryValueObject, IModel {
     private String status;
 
     @Column(name = "visibility")
-    private Integer visibility = 1;
+    private Integer visibility = Visibility.OK.getValue();
 
     @Column(name = "short_description")
     @Lob
@@ -289,7 +270,7 @@ public class Entry implements IEntryValueObject, IModel {
     }
 
     public String getNamesAsString() {
-        String result = "";
+        String result;
         ArrayList<String> names = new ArrayList<String>();
         for (Name name : this.names) {
             names.add(name.getName());
@@ -305,8 +286,8 @@ public class Entry implements IEntryValueObject, IModel {
     }
 
     /**
-     * Return the first {@link PartNumber} associated with this entry, preferring the PartNumber
-     * local to this instance of gd-ice.
+     * Return the first {@link PartNumber} associated with this entry, preferring the PartNumber local to this instance
+     * of gd-ice.
      *
      * @return PartNumber.
      */
@@ -413,7 +394,7 @@ public class Entry implements IEntryValueObject, IModel {
      * @return Comma separated selection markers.
      */
     public String getSelectionMarkersAsString() {
-        String result = "";
+        String result;
         ArrayList<String> markers = new ArrayList<String>();
         for (SelectionMarker marker : selectionMarkers) {
             markers.add(marker.getName());
@@ -450,7 +431,7 @@ public class Entry implements IEntryValueObject, IModel {
      * @return Comma separated list of links.
      */
     public String getLinksAsString() {
-        String result = "";
+        String result;
         ArrayList<String> links = new ArrayList<String>();
         for (Link link : this.links) {
             links.add(link.getLink());
@@ -558,12 +539,15 @@ public class Entry implements IEntryValueObject, IModel {
 
     public Integer getVisibility() {
         if (visibility == null)
-            return null;
-        return visibility.intValue();
+            return Visibility.OK.getValue();
+        return visibility;
     }
 
     public void setVisibility(Integer visibility) {
-        this.visibility = visibility;
+        if (visibility == null)
+            this.visibility = Visibility.OK.getValue();
+        else
+            this.visibility = visibility;
     }
 
     public String getIntellectualProperty() {
@@ -644,8 +628,7 @@ public class Entry implements IEntryValueObject, IModel {
     }
 
     /**
-     * Generate the options map of the bioSafetyLevel field containing friendly names for the
-     * fields.
+     * Generate the options map of the bioSafetyLevel field containing friendly names for the fields.
      *
      * @return Map of biosafety levels and names.
      */

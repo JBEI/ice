@@ -4,7 +4,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * Operators for filtered search
- * 
+ *
  * @author Hector Plahar
  */
 public enum QueryOperator implements IsSerializable {
@@ -19,14 +19,15 @@ public enum QueryOperator implements IsSerializable {
     private String value;
 
     /**
-     * @param operator
-     *            String value of operator
-     * @param value
-     *            operator char symbol
+     * @param operator String value of operator
+     * @param value    operator char symbol
      */
     QueryOperator(String operator, String value) {
         this.operator = operator;
         this.value = value;
+    }
+
+    private QueryOperator() {
     }
 
     public String operator() {

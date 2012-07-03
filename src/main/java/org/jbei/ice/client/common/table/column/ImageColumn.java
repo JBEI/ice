@@ -1,19 +1,17 @@
 package org.jbei.ice.client.common.table.column;
 
-import org.jbei.ice.shared.dto.EntryInfo;
-
 import com.google.gwt.cell.client.ImageResourceCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
+import org.jbei.ice.shared.dto.EntryInfo;
 
 /**
- * Column which has a static image as a header and the
- * same image as content. A boolean condition determines
- * where to display the image or not
- * 
+ * Column which has a static image as a header and the same image as content. A boolean condition determines where to
+ * display the image or not
+ *
  * @author Hector Plahar
  */
 
@@ -26,9 +24,9 @@ public class ImageColumn<T extends EntryInfo> extends Column<T, ImageResource> {
      */
     public enum Type {
         SAMPLE(resources.sample()), ATTACHMENT(resources.attachment()), SEQUENCE(resources
-                .sequence());
+                                                                                         .sequence());
 
-        private ImageResource image;
+        private transient ImageResource image;
 
         Type(ImageResource resource) {
             this.image = resource;
@@ -54,17 +52,17 @@ public class ImageColumn<T extends EntryInfo> extends Column<T, ImageResource> {
         boolean showImage;
 
         switch (type) {
-        case SAMPLE:
-            showImage = object.isHasSample();
-            break;
-        case ATTACHMENT:
-            showImage = object.isHasAttachment();
-            break;
-        case SEQUENCE:
-            showImage = object.isHasSequence();
-            break;
-        default:
-            showImage = false;
+            case SAMPLE:
+                showImage = object.isHasSample();
+                break;
+            case ATTACHMENT:
+                showImage = object.isHasAttachment();
+                break;
+            case SEQUENCE:
+                showImage = object.isHasSequence();
+                break;
+            default:
+                showImage = false;
         }
 
         if (showImage)

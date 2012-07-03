@@ -8,21 +8,14 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
-import gwtupload.client.IUploadStatus.Status;
-import gwtupload.client.IUploader;
-import gwtupload.client.IUploader.OnFinishUploaderHandler;
-import gwtupload.client.IUploader.UploadedInfo;
 import org.jbei.ice.client.bulkimport.SheetPresenter;
-import org.jbei.ice.client.common.widget.MultipleTextBox;
 import org.jbei.ice.shared.AutoCompleteField;
-import org.jbei.ice.shared.BioSafetyOptions;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.TreeSet;
 
 public class Sheet extends Composite implements SheetPresenter.View {
 
@@ -49,8 +42,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
     protected final SheetPresenter presenter;
 
     private final TextBox input;
-    private SuggestBox box;
-    private String filename;
     private final HashMap<Integer, String> attachmentRowFileIds;
     private final HashMap<Integer, String> sequenceRowFileIds;
 
@@ -424,71 +415,9 @@ public class Sheet extends Composite implements SheetPresenter.View {
         // replace
         final Header currentHeader = presenter.getTypeHeaders()[currentIndex];
         String text = sheetTable.getText(currentRow, currentIndex);
-
-        // TODO : cache. this is called repeatedly for each click, resulting in the objects in here being created 
-        switch (currentHeader) {
-            case BIOSAFETY:
-                MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
-
-                oracle.addAll(BioSafetyOptions.getDisplayList());
-                MultipleTextBox textBox = new MultipleTextBox();
-                box = new SuggestBox(oracle, textBox);
-                box.setStyleName("cell_input");
-                box.setWidth("129px");
-                box.setText(text);
-                sheetTable.setWidget(currentRow, currentIndex, box);
-                textBox.setFocus(true);
-                break;
-
-            case SELECTION_MARKERS:
-                AutoCompleteField field = AutoCompleteField.fieldValue(currentHeader.name());
-                ArrayList<String> list = presenter.getAutoCompleteData(field);
-
-                oracle = new MultiWordSuggestOracle();
-                oracle.addAll(new TreeSet<String>(list));
-                textBox = new MultipleTextBox();
-                box = new SuggestBox(oracle, textBox);
-                box.setStyleName("cell_input");
-                box.setWidth("129px");
-                box.setText(text);
-                sheetTable.setWidget(currentRow, currentIndex, box);
-                textBox.setFocus(true);
-                break;
-
-            case ATT_FILENAME:
-            case SEQ_FILENAME:
-                CellUploader uploader = new CellUploader();
-                uploader.addOnFinishUploadHandler(new OnFinishUploaderHandler() {
-                    @Override
-                    public void onFinish(IUploader uploader) {
-                        if (uploader.getStatus() == Status.SUCCESS) {
-                            UploadedInfo info = uploader.getServerInfo();
-                            if (info.message.isEmpty())
-                                return; // TODO : hook into error message
-
-                            // attachment or
-                            if (currentHeader == Header.ATT_FILENAME) {
-                                attachmentRowFileIds.put(currentRow, info.message);
-                            } else if (currentHeader == Header.SEQ_FILENAME) {
-                                sequenceRowFileIds.put(currentRow, info.message);
-                            }
-
-                            filename = info.name;
-                            selectCell(currentRow, currentIndex);
-                        } else {
-                            // TODO : notify user of error
-                        }
-                    }
-                });
-
-                sheetTable.setWidget(currentRow, currentIndex, uploader.asWidget());
-                break;
-
-            default:
-                input.setText(text);
-                sheetTable.setWidget(currentRow, currentIndex, input);
-                input.setFocus(true);
-        }
+        currentHeader.getCell().setText(text);
+        sheetTable.setWidget(currentRow, currentIndex, currentHeader.getCell());
+        currentHeader.getCell().setFocus();
     }
 
     private boolean isRowInBounds(int row) {
@@ -504,7 +433,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         // exit for up arrow press in auto complete box
         Header currentHeader = presenter.getTypeHeaders()[currentIndex];
-        if (currentHeader.hasAutoComplete())
+        if (currentHeader.getCell().hasMultiSuggestions())
             return;
 
         selectCell(currentRow - 1, currentIndex);
@@ -519,7 +448,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         // exit for down arrow press in auto complete box
         Header currentHeader = presenter.getTypeHeaders()[currentIndex];
-        if (currentHeader.hasAutoComplete())
+        if (currentHeader.getCell().hasMultiSuggestions())
             return;
 
         selectCell(currentRow + 1, currentIndex);
@@ -636,37 +565,37 @@ public class Sheet extends Composite implements SheetPresenter.View {
     }
 
     /**
-     * poor method name. what this attempts to do is
-     * determine what the last widget was that the user interacted with
-     * and return the text for that. E.g. if the user entered a value in the suggest
-     * box (for auto complete boxes), this method determines that and returns the value
-     * for the box instead of the value for the input (Textbox), which is for regular fields.
+     * poor method name. what this attempts to do is determine what the last widget was that the user interacted with
+     * and return the text for that. E.g. if the user entered a value in the suggest box (for auto complete boxes), this
+     * method determines that and returns the value for the box instead of the value for the input (Textbox), which is
+     * for regular fields.
      *
      * @return text of last widget user interacted with
      */
     private String getLastWidgetText() {
         Header currentHeader = presenter.getTypeHeaders()[inputIndex];
-        String ret;
-
-        switch (currentHeader) {
-
-            case SELECTION_MARKERS:
-            case BIOSAFETY:
-                ret = ((MultipleTextBox) box.getTextBox()).getWholeText();
-                box.setText("");
-                return ret;
-
-            case ATT_FILENAME:
-            case SEQ_FILENAME:
-                ret = filename;
-                filename = "";
-                return ret;
-
-            default:
-                ret = input.getText();
-                input.setText("");
-                return ret;
-        }
+        return currentHeader.getCell().getWidgetText();
+//        String ret;
+//
+//        switch (currentHeader) {
+//
+//            case SELECTION_MARKERS:
+//            case BIOSAFETY:
+//                ret = ((MultipleTextBox) box.getTextBox()).getWholeText();
+//                box.setText("");
+//                return ret;
+//
+//            case ATT_FILENAME:
+//            case SEQ_FILENAME:
+//                ret = filename;
+//                filename = "";
+//                return ret;
+//
+//            default:
+//                ret = input.getText();
+//                input.setText("");
+//                return ret;
+//        }
     }
 
     //

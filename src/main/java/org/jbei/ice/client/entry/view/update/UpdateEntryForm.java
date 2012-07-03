@@ -198,7 +198,7 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
         markupOptions.addItem("Text");
         //        markupOptions.addItem("Wiki");
         //        markupOptions.addItem("Confluence");
-        markupOptions.setStyleName("entry_add_standard_input_box");
+        markupOptions.setStyleName("pull_down");
         notes.setWidget(2, 1, markupOptions);
 
         // input
@@ -373,9 +373,8 @@ public abstract class UpdateEntryForm<T extends EntryInfo> extends Composite imp
     }
 
     /**
-     * populates the entry info fields that are common to all. this is meant to be sub-classed so
-     * that the specializations can
-     * input their class specific fields.
+     * populates the entry info fields that are common to all. this is meant to be sub-classed so that the
+     * specializations can input their class specific fields.
      */
     @Override
     public void populateEntry() {

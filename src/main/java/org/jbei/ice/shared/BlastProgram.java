@@ -14,6 +14,9 @@ public enum BlastProgram implements IsSerializable {
         this.details = details;
     }
 
+    private BlastProgram() {
+    }
+
     public String getName() {
         return this.name;
     }

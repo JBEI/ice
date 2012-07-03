@@ -1,54 +1,73 @@
 package org.jbei.ice.client.bulkimport.sheet;
 
 public enum Header {
-    PI("Principal Investigator", true, ""), FUNDING_SOURCE("Funding Source", false, ""), IP(
-            "Intellectual Property", false, ""), BIOSAFETY("BioSafety Level", true, ""), NAME(
-            "Name", true, ""), ALIAS("Alias", false, ""), KEYWORDS("Keywords", false, ""), SUMMARY(
-            "Summary", true, ""), NOTES("Notes", false, ""), REFERENCES("References", false, ""), LINKS(
-            "Links", false, ""), STATUS("Status", true, ""), SEQ_FILENAME("Sequence Filename",
-                                                                          false, ""), ATT_FILENAME(
-            "Attachments Filename", false, ""), SELECTION_MARKERS(
-            "Selection Markers", false, ""), PARENTAL_STRAIN("Parental Strain", false, ""), GEN_PHEN(
-            "Genotype or Phenotype", false, ""), PLASMIDS("Plasmids", false, ""), CIRCULAR(
-            "Circular", false, ""), BACKBONE("Backbone", false, ""), PROMOTERS("Promoters", false,
-                                                                               ""), ORIGIN_OF_REPLICATION(
-            "Origin of Replication", false, ""), HOMOZYGOSITY(
-            "Homozygosity", false, ""), ECOTYPE("Ecotype", false, ""), HARVEST_DATE("Harvest Data",
-                                                                                    false, ""), GENERATION("Generation",
-                                                                                                           true,
-                                                                                                           ""),
-    PLANT_TYPE(
-            "Plant Type", true, ""), PARENTS(
-            "Parents", false, ""), PLASMID_NAME("Plasmid Name", true, "e.g. pTSH117"), PLASMID_ALIAS(
-            "Plasmid Alias", false, ""), PLASMID_KEYWORDS("Keywords", false, ""), PLASMID_SUMMARY(
-            "Summary", true, ""), PLASMID_NOTES("Notes", false, ""), PLASMID_REFERENCES(
-            "References", false, ""), PLASMID_LINKS("Links", false, ""), PLASMID_STATUS("Status",
-                                                                                        true, ""), PLASMID_BACKBONE(
-            "Backbone", false, ""), PLASMID_PROMOTERS("Promoters",
-                                                      false, ""), PLASMID_ORIGIN_OF_REPLICATION("Origin of Replication",
-                                                                                                false,
-                                                                                                ""),
-    PLASMID_SEQ_FILENAME(
-            "Sequence Filename", false, ""), PLASMID_ATT_FILENAME("Attachments Filename", false,
-                                                                  ""), PLASMID_SELECTION_MARKERS(
-            "Selection Markers", false, ""), STRAIN_NAME("Name", true, ""), STRAIN_ALIAS("Alias",
-                                                                                         false, ""), STRAIN_KEYWORDS(
-            "Keywords", false, ""), STRAIN_SUMMARY("Summary", true, ""), STRAIN_NOTES(
-            "Notes", false, ""), STRAIN_REFERENCES("References", false, ""), STRAIN_LINKS("Links",
-                                                                                          false, ""), STRAIN_STATUS(
-            "Status", true, ""), STRAIN_SELECTION_MARKERS(
-            "Selection Markers", false, ""), STRAIN_PARENTAL_STRAIN("Parental Strain", false, ""), STRAIN_GEN_PHEN(
-            "Genotype or Phenotype", false, ""), STRAIN_PLASMIDS("Plasmids", false, ""), STRAIN_SEQ_FILENAME(
-            "Sequence Filename", false, ""), STRAIN_ATT_FILENAME("Attachments Filename", false, "");
+    PI("Principal Investigator", true, "", new InputSheetCell()),
+    FUNDING_SOURCE("Funding Source", false, "", new InputSheetCell()),
+    IP("Intellectual Property", false, "", new InputSheetCell()),
+    BIOSAFETY("BioSafety Level", true, "", new BioSafetySheetCell()),
+    NAME("Name", true, "", new InputSheetCell()),
+    ALIAS("Alias", false, "", new InputSheetCell()),
+    KEYWORDS("Keywords", false, "", new InputSheetCell()),
+    SUMMARY("Summary", true, "", new InputSheetCell()),
+    NOTES("Notes", false, "", new InputSheetCell()),
+    REFERENCES("References", false, "", new InputSheetCell()),
+    LINKS("Links", false, "", new InputSheetCell()),
+    STATUS("Status", true, "", new StatusSheetCell()),
+    SEQ_FILENAME("Sequence Filename", false, "", new InputSheetCell()),
+    ATT_FILENAME("Attachments Filename", false, "", new InputSheetCell()),
+    SELECTION_MARKERS("Selection Markers", false, "", new SelectionMarkerInputCell()),
+    PARENTAL_STRAIN("Parental Strain", false, "", new InputSheetCell()),
+    GEN_PHEN("Genotype or Phenotype", false, "", new InputSheetCell()),
+    PLASMIDS("Plasmids", false, "", new InputSheetCell()),
+    CIRCULAR("Circular", false, "", new InputSheetCell()),
+    BACKBONE("Backbone", false, "", new InputSheetCell()),
+    PROMOTERS("Promoters", false, "", new InputSheetCell()),
+    ORIGIN_OF_REPLICATION("Origin of Replication", false, "", new InputSheetCell()),
+    HOMOZYGOSITY("Homozygosity", false, "", new InputSheetCell()),
+    ECOTYPE("Ecotype", false, "", new InputSheetCell()),
+    HARVEST_DATE("Harvest Data", false, "", new InputSheetCell()),
+    GENERATION("Generation", true, "", new InputSheetCell()),
+    PLANT_TYPE("Plant Type", true, "", new InputSheetCell()),
+    PARENTS("Parents", false, "", new InputSheetCell()),
+    PLASMID_NAME("Plasmid Name", true, "e.g. pTSH117", new InputSheetCell()),
+    PLASMID_ALIAS("Plasmid Alias", false, "", new InputSheetCell()),
+    PLASMID_KEYWORDS("Keywords", false, "", new InputSheetCell()),
+    PLASMID_SUMMARY("Summary", true, "", new InputSheetCell()),
+    PLASMID_NOTES("Notes", false, "", new InputSheetCell()),
+    PLASMID_REFERENCES("References", false, "", new InputSheetCell()),
+    PLASMID_LINKS("Links", false, "", new InputSheetCell()),
+    PLASMID_STATUS("Status", true, "", new StatusSheetCell()),
+    PLASMID_BACKBONE("Backbone", false, "", new InputSheetCell()),
+    PLASMID_PROMOTERS("Promoters", false, "", new InputSheetCell()),
+    PLASMID_ORIGIN_OF_REPLICATION("Origin of Replication", false, "", new InputSheetCell()),
+    PLASMID_SEQ_FILENAME("Sequence Filename", false, "", new InputSheetCell()),
+    PLASMID_ATT_FILENAME("Attachments Filename", false, "", new InputSheetCell()),
+    PLASMID_SELECTION_MARKERS("Selection Markers", false, "", new InputSheetCell()),
+    STRAIN_NAME("Name", true, "", new InputSheetCell()),
+    STRAIN_ALIAS("Alias", false, "", new InputSheetCell()),
+    STRAIN_KEYWORDS("Keywords", false, "", new InputSheetCell()),
+    STRAIN_SUMMARY("Summary", true, "", new InputSheetCell()),
+    STRAIN_NOTES("Notes", false, "", new InputSheetCell()),
+    STRAIN_REFERENCES("References", false, "", new InputSheetCell()),
+    STRAIN_LINKS("Links", false, "", new InputSheetCell()),
+    STRAIN_STATUS("Status", true, "", new StatusSheetCell()),
+    STRAIN_SELECTION_MARKERS("Selection Markers", false, "", new InputSheetCell()),
+    STRAIN_PARENTAL_STRAIN("Parental Strain", false, "", new InputSheetCell()),
+    STRAIN_GEN_PHEN("Genotype or Phenotype", false, "", new InputSheetCell()),
+    STRAIN_PLASMIDS("Plasmids", false, "", new InputSheetCell()),
+    STRAIN_SEQ_FILENAME("Sequence Filename", false, "", new InputSheetCell()),
+    STRAIN_ATT_FILENAME("Attachments Filename", false, "", new InputSheetCell());
 
     private String label;
     private boolean required;
     private String description;
+    private transient SheetCell cell;
 
-    Header(String label, boolean required, String description) {
+    Header(String label, boolean required, String description, SheetCell sheetCell) {
         this.label = label;
         this.required = required;
         this.description = description;
+        this.cell = sheetCell;
     }
 
     public boolean isRequired() {
@@ -64,21 +83,7 @@ public enum Header {
         return this.description;
     }
 
-    /**
-     * @return true for headers that have fields that
-     *         are autocomplete. false otherwise
-     */
-    public boolean hasAutoComplete() {
-        switch (this) {
-            case BIOSAFETY:
-            case SELECTION_MARKERS:
-            case STRAIN_SELECTION_MARKERS:
-            case PLASMID_SELECTION_MARKERS:
-                return true;
-
-            default:
-                return false;
-        }
-
+    public SheetCell getCell() {
+        return this.cell;
     }
 }
