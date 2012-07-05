@@ -1,5 +1,13 @@
 package org.jbei.ice.lib.entry;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import javax.persistence.NonUniqueResultException;
+
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -27,14 +35,6 @@ import org.jbei.ice.lib.permissions.model.ReadUser;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 import org.jbei.ice.shared.ColumnField;
-
-import javax.persistence.NonUniqueResultException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * DAO to manipulate {@link Entry} objects in the database.
@@ -279,8 +279,7 @@ class EntryDAO extends HibernateRepository<Entry> {
 
             // get drafts
             Criteria c = session.createCriteria(Entry.class).add(Restrictions.isNotNull("visibility")).add(
-                    Restrictions.eq(
-                            "visibility", new Integer(0))).setProjection(Projections.id());
+                    Restrictions.eq("visibility", new Integer(0))).setProjection(Projections.id());
             ArrayList<Long> results = new ArrayList<Long>(c.list());
             visibleEntries.removeAll(results);
 
@@ -368,31 +367,30 @@ class EntryDAO extends HibernateRepository<Entry> {
 
         Session session = newSession();
         try {
-            String queryString = "select id from " + Entry.class.getName()
-                    + " where ownerEmail = :ownerEmail";
 
-            if (excludeVisibilities.length > 0) {
-                queryString += " AND visibility not in (:visibilities)";
-            }
+            session.getTransaction().begin();
+            Criteria criteria = session.createCriteria(Entry.class.getName()).add(
+                    Restrictions.eq("ownerEmail", ownerEmail));
 
-            Query query = session.createQuery(queryString);
-            query.setParameter("ownerEmail", ownerEmail);
+            // add no restrictions if no visibilities
             if (excludeVisibilities.length > 0) {
-                query.setParameterList("visibilities", excludeVisibilities);
+                criteria.add(Restrictions.or(Restrictions.not(Restrictions.in("visibility", excludeVisibilities)),
+                                             Restrictions.isNull("visibility")));
             }
 
             @SuppressWarnings("rawtypes")
-            List list = query.list();
+            List list = criteria.setProjection(Projections.id()).list();
 
             if (list != null) {
                 entries = (ArrayList<Long>) list;
             }
+            session.getTransaction().commit();
         } catch (HibernateException e) {
+            Logger.error(e);
+            session.getTransaction().rollback();
             throw new DAOException("Failed to retrieve entries by owner: " + ownerEmail, e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return entries;
@@ -654,7 +652,6 @@ class EntryDAO extends HibernateRepository<Entry> {
             default:
                 fieldName = "creation_time";
                 break;
-
         }
 
         String filter = Utils.join(", ", ids);
@@ -673,8 +670,7 @@ class EntryDAO extends HibernateRepository<Entry> {
         } catch (RuntimeException e) {
             throw new DAOException(e);
         } finally {
-            if (session != null)
-                session.close();
+            closeSession(session);
         }
     }
 
@@ -775,8 +771,9 @@ class EntryDAO extends HibernateRepository<Entry> {
             Logger.error(he);
             session.getTransaction().rollback();
             throw new DAOException(he);
+        } finally {
+            closeSession(session);
         }
-
     }
 
     /**
