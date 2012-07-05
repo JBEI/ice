@@ -1,5 +1,14 @@
 package org.jbei.ice.client.common.table;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.jbei.ice.client.common.entry.IHasEntryId;
+import org.jbei.ice.client.common.table.cell.EntryOwnerCell;
+import org.jbei.ice.client.common.table.column.ImageColumn;
+import org.jbei.ice.shared.ColumnField;
+import org.jbei.ice.shared.dto.EntryInfo;
+
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.TextCell;
@@ -15,14 +24,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
-import org.jbei.ice.client.common.entry.IHasEntryId;
-import org.jbei.ice.client.common.table.cell.EntryOwnerCell;
-import org.jbei.ice.client.common.table.column.ImageColumn;
-import org.jbei.ice.shared.ColumnField;
-import org.jbei.ice.shared.dto.EntryInfo;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * DataTable for view entities that are EntryDatas. Provides selection support via space bar,

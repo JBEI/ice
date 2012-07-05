@@ -1,5 +1,12 @@
 package org.jbei.ice.lib.entry;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
 import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
@@ -21,13 +28,6 @@ import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.Visibility;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * ABI to manipulate {@link org.jbei.ice.lib.entry.model.Entry}s.
@@ -497,16 +497,8 @@ public class EntryController {
                     entries = dao.getEntriesByIdSetSortByType(entryIds, asc);
                     break;
 
-                case PART_ID:
-                    entries = dao.getEntriesByIdSetSortByPartNumber(entryIds, asc);
-                    break;
-
                 case STATUS:
                     entries = dao.getEntriesByIdSetSortByStatus(entryIds, asc);
-                    break;
-
-                case NAME:
-                    entries = dao.getEntriesByIdSetSortByName(entryIds, asc);
                     break;
 
                 case CREATED:

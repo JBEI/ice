@@ -8,13 +8,6 @@ import java.util.List;
 import java.util.Set;
 import javax.persistence.NonUniqueResultException;
 
-import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
@@ -35,6 +28,14 @@ import org.jbei.ice.lib.permissions.model.ReadUser;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 import org.jbei.ice.shared.ColumnField;
+
+import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.SQLQuery;
+import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * DAO to manipulate {@link Entry} objects in the database.
@@ -397,128 +398,6 @@ class EntryDAO extends HibernateRepository<Entry> {
     }
 
     /**
-     * Retrieve {@link Entry} objects from the database given a list of id's, sorted by the given
-     * field.
-     *
-     * @param ids       list of ids to retrieve
-     * @param field     database field to sort on
-     * @param ascending order of retrieval
-     * @return List of Entry objects
-     * @throws DAOException
-     */
-    @SuppressWarnings("unchecked")
-    public List<Entry> getEntriesByIdSetSort(List<Long> ids, String field, boolean ascending)
-            throws DAOException {
-        ArrayList<Entry> entries = new ArrayList<Entry>();
-
-        if (ids.size() == 0) {
-            return entries;
-        }
-
-        String filter = Utils.join(", ", ids);
-
-        Session session = newSession();
-        try {
-            String orderSuffix = (field == null) ? ""
-                    : (" ORDER BY e." + field + " " + (ascending ? "ASC" : "DESC"));
-
-            session.getTransaction().begin();
-            Query query = session.createQuery("from " + Entry.class.getName() + " e WHERE id in ("
-                                                      + filter + ")" + orderSuffix);
-
-            @SuppressWarnings("rawtypes")
-            ArrayList list = (ArrayList) query.list();
-
-            if (list != null) {
-                entries.addAll(list);
-            }
-            session.getTransaction().commit();
-        } catch (HibernateException e) {
-            session.getTransaction().rollback();
-            throw new DAOException("Failed to retrieve entries!", e);
-        } finally {
-            closeSession(session);
-        }
-
-        return entries;
-    }
-
-    /**
-     * Retrieve {@link Entry} ids sorted by name.
-     *
-     * @param ascending order of retrieval
-     * @return List of Entry ids.
-     * @throws DAOException
-     */
-    @SuppressWarnings("unchecked")
-    public List<Long> getEntriesSortByName(boolean ascending) throws DAOException {
-        ArrayList<Long> entries = new ArrayList<Long>();
-
-        Session session = newSession();
-        try {
-
-            String queryString = "SELECT entries_id FROM names ORDER BY name "
-                    + (ascending ? "ASC" : "DESC");
-
-            session.getTransaction().begin();
-            Query query = session.createSQLQuery(queryString);
-            List<Integer> list = query.list();
-
-            if (list != null) {
-                for (Integer val : list) {
-                    entries.add(val.longValue());
-                }
-            }
-            session.getTransaction().commit();
-        } catch (HibernateException he) {
-            session.getTransaction().rollback();
-            throw new DAOException(he);
-        } finally {
-            closeSession(session);
-        }
-
-        return entries;
-    }
-
-    /**
-     * Retrieve {@link Entry} ids sorted by their {@link PartNumber}.
-     *
-     * @param ascending order of retrieval
-     * @return List of Entry ids.
-     * @throws DAOException
-     */
-    @SuppressWarnings("unchecked")
-    public List<Long> getEntriesSortByPartNumber(boolean ascending) throws DAOException {
-        ArrayList<Long> entries = new ArrayList<Long>();
-
-        Session session = newSession();
-        try {
-
-            String queryString = "SELECT entries_id FROM part_numbers ORDER BY part_number "
-                    + (ascending ? "ASC" : "DESC");
-
-            session.getTransaction().begin();
-            Query query = session.createSQLQuery(queryString);
-            List<Integer> list = query.list();
-
-            if (list != null) {
-                for (Integer val : list) {
-                    entries.add(val.longValue());
-                }
-            }
-            session.getTransaction().commit();
-        } catch (HibernateException he) {
-            session.getTransaction().rollback();
-            Logger.error(he);
-            throw new DAOException(he);
-        } finally {
-            closeSession(session);
-        }
-
-        return entries;
-    }
-
-    /**
      * Retrieve {@link Entry} objects of the given list of ids.
      *
      * @param ids list of ids to retrieve
@@ -567,21 +446,6 @@ class EntryDAO extends HibernateRepository<Entry> {
         return retrieveEntriesByQuery(queryString);
     }
 
-    public List<Entry> getEntriesByIdSetSortByName(List<Long> ids, boolean ascending)
-            throws DAOException {
-        ArrayList<Entry> entries = new ArrayList<Entry>();
-
-        if (ids.size() == 0) {
-            return entries;
-        }
-
-        //        String filter = Utils.join(", ", ids);
-        // TODO : add the filter to filter in the database and not here
-        List<Long> sortedEntries = getEntriesSortByName(ascending);
-        sortedEntries.retainAll(ids);
-        return getEntriesByIdSetSort(sortedEntries, "id", ascending);
-    }
-
     public List<Entry> getEntriesByIdSetSortByCreated(List<Long> ids, boolean ascending)
             throws DAOException {
         ArrayList<Entry> entries = new ArrayList<Entry>();
@@ -594,21 +458,6 @@ class EntryDAO extends HibernateRepository<Entry> {
         String queryString = "from " + Entry.class.getName() + " WHERE id in (" + filter + ")"
                 + orderSuffix;
         return retrieveEntriesByQuery(queryString);
-    }
-
-    public List<Entry> getEntriesByIdSetSortByPartNumber(List<Long> ids, boolean ascending)
-            throws DAOException {
-        ArrayList<Entry> entries = new ArrayList<Entry>();
-
-        if (ids.size() == 0) {
-            return entries;
-        }
-
-        //        String filter = Utils.join(", ", ids);
-        // TODO : add the filter to filter in the database and not here
-        List<Long> sortedEntries = getEntriesSortByPartNumber(ascending);
-        sortedEntries.retainAll(ids);
-        return getEntriesByIdSetSort(sortedEntries, "id", ascending);
     }
 
     public List<Entry> getEntriesByIdSetSortByStatus(List<Long> ids, boolean ascending)
