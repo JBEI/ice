@@ -1,5 +1,7 @@
 package org.jbei.ice.client.bulkimport;
 
+import java.util.ArrayList;
+
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Widget;
@@ -8,8 +10,6 @@ import org.jbei.ice.client.admin.bulkimport.BulkImportMenuItem;
 import org.jbei.ice.client.admin.bulkimport.IDeleteMenuHandler;
 import org.jbei.ice.client.bulkimport.model.NewBulkInput;
 import org.jbei.ice.shared.EntryAddType;
-
-import java.util.ArrayList;
 
 public interface IBulkImportView {
 
@@ -50,4 +50,6 @@ public interface IBulkImportView {
     void setDraftSaveHandler(ClickHandler draftSaveHandler);
 
     void updateSavedDraftsMenu(BulkImportMenuItem item);
+
+    SingleSelectionModel<BulkImportMenuItem> getPendingMenuModel();
 }

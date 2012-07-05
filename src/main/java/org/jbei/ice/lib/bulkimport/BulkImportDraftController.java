@@ -1,5 +1,11 @@
 package org.jbei.ice.lib.bulkimport;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -20,12 +26,6 @@ import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
 import org.jbei.ice.shared.dto.Visibility;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Controller for dealing with bulk import drafts
@@ -87,8 +87,6 @@ public class BulkImportDraftController {
         }
 
         return infoList;
-
-
     }
 
     public BulkImportDraftInfo retrieveById(Account account, long id)
@@ -204,7 +202,7 @@ public class BulkImportDraftController {
                 throw new ControllerException("Could not retrieve draft with id \"" + draftId + "\"");
 
             Account draftAccount = draft.getAccount();
-            if (!requesting.equals(draftAccount) || !accountController.isAdministrator(requesting))
+            if (!requesting.equals(draftAccount) && !accountController.isAdministrator(requesting))
                 throw new PermissionException("No permissions to delete draft " + draftId);
 
             dao.delete(draft);

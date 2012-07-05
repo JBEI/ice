@@ -1,5 +1,7 @@
 package org.jbei.ice.client.bulkimport;
 
+import java.util.ArrayList;
+
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Timer;
@@ -15,8 +17,6 @@ import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.shared.EntryAddType;
-
-import java.util.ArrayList;
 
 /**
  * View for the bulk import page. Works with {@link BulkImportPresenter}
@@ -229,7 +229,6 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         menuPanel.add(draftsMenu);
         menuPanel.add(new HTML("&nbsp;"));
 
-//        layout.setWidget(0, 0, draftsMenu);
         layout.getFlexCellFormatter().setWidth(0, 0, "220px");
 
         layout.setHTML(0, 1, "&nbsp;");
@@ -270,7 +269,11 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
 
     @Override
     public void setDraftMenuVisibility(boolean visible, boolean isToggleClick) {
-        draftsMenu.setVisible(visible);
+
+
+//        draftsMenu.setVisible(visible);
+//        pendingDraftsMenu.setVisible(visible);
+        menuPanel.setVisible(visible);
         toggle.setDown(visible);
         if (visible)
             headerPanel.setCellHorizontalAlignment(create, HasAlignment.ALIGN_CENTER);
@@ -278,18 +281,17 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
             headerPanel.setCellHorizontalAlignment(create, HasAlignment.ALIGN_LEFT);
 
         if (!visible) {
-            layout.setHTML(0, 0, "");
+//            layout.setHTML(0, 0, "");
             layout.getFlexCellFormatter().setWidth(0, 0, "0px");
-
             layout.setHTML(0, 1, "");
             layout.getFlexCellFormatter().setWidth(0, 1, "0px");
             if (isToggleClick)
                 sheet.getSheet().increaseWidthBy(230);
         } else {
-            layout.setWidget(0, 0, draftsMenu);
+//            layout.setWidget(0, 0, menuPanel);
             layout.getFlexCellFormatter().setWidth(0, 0, "220px");
 
-            layout.setHTML(0, 1, "&nbsp;");
+//            layout.setHTML(0, 1, "&nbsp;");
             layout.getFlexCellFormatter().setWidth(0, 1, "10px");
             if (isToggleClick)
                 sheet.getSheet().decreaseWidthBy(230);
@@ -307,12 +309,17 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     }
 
     @Override
+    public SingleSelectionModel<BulkImportMenuItem> getPendingMenuModel() {
+        return this.pendingDraftsMenu.getSelectionModel();
+    }
+
+    @Override
     public SingleSelectionModel<EntryAddType> getImportCreateModel() {
         return create.getSelectionModel();
     }
 
     @Override
     public boolean getMenuVisibility() {
-        return draftsMenu.isVisible();
+        return menuPanel.isVisible();
     }
 }

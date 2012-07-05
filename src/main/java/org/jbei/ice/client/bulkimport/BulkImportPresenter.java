@@ -1,5 +1,9 @@
 package org.jbei.ice.client.bulkimport;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map.Entry;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -22,10 +26,6 @@ import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map.Entry;
 
 /**
  * Presenter for the bulk import page
@@ -91,41 +91,8 @@ public class BulkImportPresenter extends AbstractPresenter {
      * server and then displays the data to the user
      */
     private void setMenuSelectionModel() {
-        final SingleSelectionModel<BulkImportMenuItem> draftSelection = view.getDraftMenuModel();
-        draftSelection.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                final BulkImportMenuItem item = draftSelection.getSelectedObject();
-                model.retrieveBulkImport(item.getId(), new SavedDraftsEventHandler() {
-
-                    @Override
-                    public void onDataRetrieval(SavedDraftsEvent event) {
-                        if (event == null) {
-                            view.showFeedback("Could not retrieve your saved drafts.", true);
-                            return;
-                        }
-
-                        BulkImportDraftInfo info = event.getData().get(0);
-                        Sheet sheet = new Sheet(info.getType(), info);
-
-                        sheet.setAutoCompleteData(AppController.autoCompleteData);
-                        currentInput = new NewBulkInput(info.getType(), sheet);
-                        currentInput.setId(info.getId());
-                        String name = info.getName();
-                        if (name == null) {
-                            name = DateUtilities.formatDate(info.getCreated());
-                            info.setName(name);
-                        }
-                        currentInput.setName(name);
-
-                        view.setSheet(currentInput, false);
-                        view.setHeader(info.getType().getDisplay() + " Bulk Import");
-                        view.setDraftMenuVisibility(false, false);
-                    }
-                });
-            }
-        });
+        view.getDraftMenuModel().addSelectionChangeHandler(new MenuSelectionHandler(view.getDraftMenuModel()));
+        view.getPendingMenuModel().addSelectionChangeHandler(new MenuSelectionHandler(view.getPendingMenuModel()));
     }
 
     private void setCreateSelectionModel() {
@@ -352,6 +319,48 @@ public class BulkImportPresenter extends AbstractPresenter {
                                                 }
                                             }
                                         });
+        }
+    }
+
+    // inner classes
+    private class MenuSelectionHandler implements SelectionChangeEvent.Handler {
+
+        private final SingleSelectionModel<BulkImportMenuItem> selection;
+
+        public MenuSelectionHandler(SingleSelectionModel<BulkImportMenuItem> selection) {
+            this.selection = selection;
+        }
+
+        @Override
+        public void onSelectionChange(SelectionChangeEvent event) {
+            final BulkImportMenuItem item = selection.getSelectedObject();
+            model.retrieveBulkImport(item.getId(), new SavedDraftsEventHandler() {
+
+                @Override
+                public void onDataRetrieval(SavedDraftsEvent event) {
+                    if (event == null) {
+                        view.showFeedback("Could not retrieve your saved drafts.", true);
+                        return;
+                    }
+
+                    BulkImportDraftInfo info = event.getData().get(0);
+                    Sheet sheet = new Sheet(info.getType(), info);
+
+                    sheet.setAutoCompleteData(AppController.autoCompleteData);
+                    currentInput = new NewBulkInput(info.getType(), sheet);
+                    currentInput.setId(info.getId());
+                    String name = info.getName();
+                    if (name == null) {
+                        name = DateUtilities.formatDate(info.getCreated());
+                        info.setName(name);
+                    }
+                    currentInput.setName(name);
+
+                    view.setSheet(currentInput, false);
+                    view.setHeader(info.getType().getDisplay() + " Bulk Import");
+                    view.setDraftMenuVisibility(false, false);
+                }
+            });
         }
     }
 }

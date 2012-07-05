@@ -1,5 +1,10 @@
 package org.jbei.ice.server;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryFundingSource;
@@ -19,11 +24,6 @@ import org.jbei.ice.shared.dto.ParameterInfo;
 import org.jbei.ice.shared.dto.PlasmidInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 /**
  * Factory object for converting data transfer objects to model
  *
@@ -36,9 +36,9 @@ public class InfoToModelFactory {
     }
 
     /**
-     * @param info
+     * @param info  EntryInfo object to converted to Entry
      * @param entry if null, a new entry is created otherwise entry is used
-     * @return
+     * @return converted EntryInfo object
      */
     public static Entry infoToEntry(EntryInfo info, Entry entry) {
 

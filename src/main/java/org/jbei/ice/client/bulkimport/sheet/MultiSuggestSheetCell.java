@@ -1,10 +1,10 @@
 package org.jbei.ice.client.bulkimport.sheet;
 
+import java.util.ArrayList;
+
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import org.jbei.ice.client.common.widget.MultipleTextBox;
-
-import java.util.ArrayList;
 
 /**
  * @author Hector Plahar
@@ -52,5 +52,9 @@ public class MultiSuggestSheetCell extends SheetCell {
     public void addOracleData(ArrayList<String> data) {
         oracle.clear();
         oracle.addAll(data);
+    }
+
+    public boolean hasMultiSuggestions() {
+        return true;
     }
 }
