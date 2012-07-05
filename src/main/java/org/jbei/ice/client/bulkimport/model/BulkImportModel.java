@@ -140,4 +140,22 @@ public class BulkImportModel {
     public HandlerManager getEventBus() {
         return this.eventBus;
     }
+
+    public void retrieveDraftsPendingVerification(final SavedDraftsEventHandler handler) {
+        new IceAsyncCallback<ArrayList<BulkImportDraftInfo>>() {
+            @Override
+            protected void callService(AsyncCallback<ArrayList<BulkImportDraftInfo>> callback) {
+                try {
+                    service.retrieveDraftsPendingVerification(AppController.sessionId, callback);
+                } catch (AuthenticationException e) {
+                    History.newItem(Page.LOGIN.getLink());
+                }
+            }
+
+            @Override
+            public void onSuccess(ArrayList<BulkImportDraftInfo> result) {
+                handler.onDataRetrieval(new SavedDraftsEvent(result));
+            }
+        }.go(eventBus);
+    }
 }

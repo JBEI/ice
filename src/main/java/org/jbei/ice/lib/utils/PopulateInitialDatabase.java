@@ -3,6 +3,7 @@ package org.jbei.ice.lib.utils;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.account.model.AccountType;
 import org.jbei.ice.lib.config.ConfigurationDAO;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.EntryController;
@@ -43,8 +44,9 @@ public class PopulateInitialDatabase {
     // naming scheme "custom-[your institute]-[your version]", as
     // the system will try to upgrade schemas of known older versions.
     // Setting the correct parent schema version may help you in the future.
-    public static final String DATABASE_SCHEMA_VERSION = "0.9.0";
-    public static final String PARENT_DATABASE_SCHEMA_VERSION = "0.8.1";
+    public static final String DATABASE_SCHEMA_VERSION = "3.1.0";
+    public static final String PARENT_DATABASE_SCHEMA_VERSION = "0.9.0";
+    private static final String ICE_2_DATABASE_SCHEMA_VERSION = "0.8.1";
 
     // This is a global "everyone" uuid
     public static String everyoneGroup = "8746a64b-abd5-4838-a332-02c356bbeac0";
@@ -57,13 +59,8 @@ public class PopulateInitialDatabase {
     /**
      * Populate an empty database with necessary objects and values.
      * <p/>
-     * <ul>
-     * <li>Create the everyone group.</li>
-     * <li>Create the System account.</li>
-     * <li>Create the Admin account.</li>
-     * <li>Create default storage schemes.</li>
-     * <li>Update the database schema, if necessary.</li>
-     * </ul>
+     * <ul> <li>Create the everyone group.</li> <li>Create the System account.</li> <li>Create the Admin account.</li>
+     * <li>Create default storage schemes.</li> <li>Update the database schema, if necessary.</li> </ul>
      *
      * @throws UtilityException
      */
@@ -82,8 +79,8 @@ public class PopulateInitialDatabase {
                 createAdminAccount();
 
                 populateDefaultStorageLocationsAndSchemes();
-                updateDatabaseSchema(dao);
             }
+            updateDatabaseSchema(dao);
 
         } catch (ControllerException e) {
             throw new UtilityException(e);
@@ -227,8 +224,12 @@ public class PopulateInitialDatabase {
 
             // TODO
             if (databaseSchema.getValue().equals(PARENT_DATABASE_SCHEMA_VERSION)) {
-                // do schema upgrade
-                Logger.error("Could not upgrade database schema. No Code");
+                // do schema upgrade from version 3.0 to 3.1, does not capture upgrading from ice2 to ice3.1
+                // (ICE_2_DATABASE_SCHEMA_VERSION)
+                migrateFrom090To310();
+                databaseSchema.setValue(DATABASE_SCHEMA_VERSION);
+                dao.save(databaseSchema);
+//                Logger.error("Could not upgrade database schema. No Code");
 //                boolean error = migrateFrom081To090();
 //                if (!error) {
 //                    databaseSchema.setValue(DATABASE_SCHEMA_VERSION);
@@ -237,6 +238,14 @@ public class PopulateInitialDatabase {
             }
 
         } catch (DAOException e) {
+            throw new UtilityException(e);
+        }
+    }
+
+    private static void migrateFrom090To310() throws UtilityException {
+        try {
+            new AccountController().updateModeratorAccounts();
+        } catch (ControllerException e) {
             throw new UtilityException(e);
         }
     }
@@ -251,8 +260,7 @@ public class PopulateInitialDatabase {
             AccountController controller = new AccountController();
             Account adminAccount = controller.createAdminAccount(adminAccountEmail,
                                                                  adminAccountDefaultPassword);
-            if (adminAccount == null)
-                throw new UtilityException("Could not create admin account");
+            adminAccount.setType(AccountType.ADMIN);
         } catch (ControllerException e) {
             throw new UtilityException(e);
         }
@@ -350,6 +358,7 @@ public class PopulateInitialDatabase {
         }
     }
 
+    // TODO
     /**
      * Process funding sources. For schema update.
      *

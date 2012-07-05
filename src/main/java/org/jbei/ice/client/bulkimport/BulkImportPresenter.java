@@ -56,6 +56,7 @@ public class BulkImportPresenter extends AbstractPresenter {
         // retrieveData
         retrieveSavedDrafts();
         retrieveAutoCompleteData();
+        retrievePendingIfAdmin();
     }
 
     private void setClickHandlers() {
@@ -86,8 +87,8 @@ public class BulkImportPresenter extends AbstractPresenter {
     }
 
     /**
-     * Sets selection model handler for draft menu. Obtains user selection,
-     * retrieves information about it from the server and then displays the data to the user
+     * Sets selection model handler for draft menu. Obtains user selection, retrieves information about it from the
+     * server and then displays the data to the user
      */
     private void setMenuSelectionModel() {
         final SingleSelectionModel<BulkImportMenuItem> draftSelection = view.getDraftMenuModel();
@@ -175,6 +176,34 @@ public class BulkImportPresenter extends AbstractPresenter {
                     view.setSavedDraftsData(data, new DeleteBulkImportHandler(model.getService(), model.getEventBus()));
                 } else
                     view.setToggleMenuVisibility(false);
+            }
+        });
+    }
+
+    private void retrievePendingIfAdmin() {
+        if (!AppController.accountInfo.isModerator())
+            return;
+
+        this.model.retrieveDraftsPendingVerification(new SavedDraftsEventHandler() {
+
+            @Override
+            public void onDataRetrieval(SavedDraftsEvent event) {
+                ArrayList<BulkImportMenuItem> data = new ArrayList<BulkImportMenuItem>();
+                for (BulkImportDraftInfo info : event.getData()) {
+                    String name = info.getName();
+                    String dateTime = DateUtilities.formatShorterDate(info.getCreated());
+                    BulkImportMenuItem item = new BulkImportMenuItem(info.getId(), name, info.getCount(),
+                                                                     dateTime,
+                                                                     info.getType().toString(),
+                                                                     info.getAccount().getEmail());
+                    data.add(item);
+                }
+
+                if (!data.isEmpty())
+                    view.setPendingDraftsData(data, new DeleteBulkImportHandler(model.getService(),
+                                                                                model.getEventBus()));
+//                } else
+//                    view.setToggleMenuVisibility(false);
             }
         });
     }

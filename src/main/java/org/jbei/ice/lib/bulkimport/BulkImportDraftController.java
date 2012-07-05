@@ -44,6 +44,53 @@ public class BulkImportDraftController {
         entryController = new EntryController();
     }
 
+    public ArrayList<BulkImportDraftInfo> retrievePendingImports(Account account)
+            throws ControllerException, PermissionException {
+        if (!accountController.isAdministrator(account))
+            throw new PermissionException("Administrative privileges are required!");
+
+        ArrayList<BulkImportDraftInfo> infoList = new ArrayList<BulkImportDraftInfo>();
+
+        ArrayList<BulkImportDraft> results;
+        try {
+            results = dao.retrieveByAccount(accountController.getSystemAccount());
+            if (results == null)
+                return infoList;
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+
+        for (BulkImportDraft draft : results) {
+
+            BulkImportDraftInfo info = new BulkImportDraftInfo();
+            Account draftAccount = draft.getAccount();
+            AccountInfo accountInfo = new AccountInfo();
+            accountInfo.setEmail(draftAccount.getEmail());
+            accountInfo.setFirstName(draftAccount.getFirstName());
+            accountInfo.setLastName(draftAccount.getLastName());
+            info.setAccount(accountInfo);
+
+            info.setId(draft.getId());
+            info.setLastUpdate(draft.getLastUpdateTime());
+            int count = -1;
+            try {
+                count = dao.retrieveSavedDraftCount(draft.getId());
+            } catch (DAOException e) {
+                Logger.error(e); // we care about the data more than the count
+            }
+            info.setCount(count);
+            info.setType(EntryAddType.stringToType(draft.getImportType()));
+            info.setCreated(draft.getCreationTime());
+            info.setName(draft.getName());
+
+            infoList.add(info);
+        }
+
+        return infoList;
+
+
+    }
+
     public BulkImportDraftInfo retrieveById(Account account, long id)
             throws ControllerException, PermissionException {
 
@@ -134,7 +181,6 @@ public class BulkImportDraftController {
             } catch (DAOException e) {
                 draftInfo.setCount(-1);
                 Logger.error(e);
-                continue;
             }
 
             // set the account info
@@ -374,7 +420,7 @@ public class BulkImportDraftController {
         Account draftOwner = accountController.getSystemAccount();
 
         BulkImportDraft draft = new BulkImportDraft();
-        draft.setName("Pending");
+        draft.setName(entryAccount.getEmail());
         draft.setAccount(draftOwner);
         draft.setImportType(type.toString());
 

@@ -10,8 +10,6 @@ import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.bulkimport.BulkImport;
-import org.jbei.ice.lib.bulkimport.BulkImportController;
 import org.jbei.ice.lib.bulkimport.BulkImportDraftController;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.attachment.Attachment;
@@ -42,7 +40,6 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.SearchController;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
-import org.jbei.ice.lib.utils.BulkImportEntryData;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.PopulateInitialDatabase;
@@ -1193,46 +1190,16 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     public ArrayList<BulkImportDraftInfo> retrieveDraftsPendingVerification(String sid) throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
-            if (account == null)
-                return null;
 
-            AccountController controller = new AccountController();
-            if (!controller.isAdministrator(account))
-                return null;
-
-            BulkImportController biController = new BulkImportController();
-
-            ArrayList<BulkImport> results = new ArrayList<BulkImport>(biController.retrieveAll());
-            ArrayList<BulkImportDraftInfo> info = new ArrayList<BulkImportDraftInfo>();
-
-            for (BulkImport draft : results) {
-                BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
-                List<BulkImportEntryData> primary = draft.getPrimaryData();
-                if (primary != null)
-                    draftInfo.setCount(draft.getPrimaryData().size());
-                else
-                    draftInfo.setCount(-1);
-                draftInfo.setCreated(draft.getCreationTime());
-                draftInfo.setId(draft.getId());
-                Account draftAccount = draft.getAccount();
-                draftInfo.setName(draftAccount.getFullName());
-                draftInfo.setType(EntryAddType.stringToType(draft.getType()));
-
-                // set the account info
-                AccountInfo accountInfo = new AccountInfo();
-                accountInfo.setEmail(draftAccount.getEmail());
-                accountInfo.setFirstName(draftAccount.getFirstName());
-                accountInfo.setLastName(draftAccount.getLastName());
-                draftInfo.setAccount(accountInfo);
-                info.add(draftInfo);
-            }
-
-            return info;
+            BulkImportDraftController controller = new BulkImportDraftController();
+            return controller.retrievePendingImports(account);
 
         } catch (ControllerException ce) {
             Logger.error(ce);
-            return null;
+        } catch (PermissionException e) {
+            Logger.error(e);
         }
+        return null;
     }
 
     @Override

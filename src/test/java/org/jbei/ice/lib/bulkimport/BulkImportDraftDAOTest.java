@@ -5,6 +5,7 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.server.dao.hibernate.HibernateHelper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,8 +13,10 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Date;
 
+import static org.mockito.Mockito.mock;
+
 /**
- * @auther Hector Plahar
+ * @author r Hector Plahar
  */
 public class BulkImportDraftDAOTest {
 
@@ -22,20 +25,19 @@ public class BulkImportDraftDAOTest {
 
     @Before
     public void setUp() throws Exception {
-//        HibernateHelper.initializeMock();
+        HibernateHelper.initializeMock();
         dao = new BulkImportDraftDAO();
-        controller = new AccountController();
+        controller = mock(AccountController.class);
     }
 
     @Test
     public void testRetrieveCount() throws Exception {
-        int id = dao.retrieveSavedDraftCount(31);
     }
 
     @Test
     public void testRetrieveById() throws Exception {
-        Account account = controller.getSystemAccount();
-        controller.save(account);
+        Account account = mock(Account.class);
+
         BulkImportDraft draft = new BulkImportDraft();
         draft.setCreationTime(new Date());
         draft.setLastUpdateTime(new Date());

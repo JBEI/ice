@@ -28,8 +28,12 @@ public class BulkImportUtil {
         info.setCreated(model.getCreationTime());
         info.setName(model.getName());
 
-        // TODO
-//        this.setEntryList();
+//        // retrieve the entries
+//        for (Entry entry : model.getContents()) {
+//            EntryInfo entryInfo = EntryToInfoFactory.getInfo(draftAccount, entry, null, null, null, false);
+//            if (entryInfo != null)
+//                info.getEntryList().add(entryInfo);
+//        }
 
         return info;
     }

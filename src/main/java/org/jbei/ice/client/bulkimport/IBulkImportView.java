@@ -21,6 +21,8 @@ public interface IBulkImportView {
 
     void setSavedDraftsData(ArrayList<BulkImportMenuItem> data, IDeleteMenuHandler handler);
 
+    void setPendingDraftsData(ArrayList<BulkImportMenuItem> data, IDeleteMenuHandler handler);
+
     void addSavedDraftData(BulkImportMenuItem item, IDeleteMenuHandler handler);
 
     SingleSelectionModel<BulkImportMenuItem> getDraftMenuModel();

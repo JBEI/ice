@@ -87,8 +87,7 @@ public class AccountController {
     }
 
     /**
-     * Updates account password associated the account email. It encrypts it before associating it with
-     * the account
+     * Updates account password associated the account email. It encrypts it before associating it with the account
      *
      * @param email    user unique identifier
      * @param password new password
@@ -104,8 +103,8 @@ public class AccountController {
     }
 
     /**
-     * Creates a new account using the parameters passed.
-     * A random password is initially generated , encrypted and assigned to the account
+     * Creates a new account using the parameters passed. A random password is initially generated , encrypted and
+     * assigned to the account
      *
      * @param firstName   account first name
      * @param lastName    account last name
@@ -310,8 +309,8 @@ public class AccountController {
     /**
      * Authenticate a user in the database.
      * <p/>
-     * Using the {@link IAuthenticationBackend} specified in the settings file, authenticate the
-     * user, and return the sessionData
+     * Using the {@link IAuthenticationBackend} specified in the settings file, authenticate the user, and return the
+     * sessionData
      *
      * @param login
      * @param password
@@ -369,8 +368,8 @@ public class AccountController {
     /**
      * Authenticate a user in the database.
      * <p/>
-     * Using the {@link IAuthenticationBackend} specified in the settings file, authenticate the
-     * user, and return the sessionData
+     * Using the {@link IAuthenticationBackend} specified in the settings file, authenticate the user, and return the
+     * sessionData
      *
      * @param login
      * @param password
@@ -450,7 +449,7 @@ public class AccountController {
      * @throws ControllerException
      */
     public Account getSystemAccount() throws ControllerException {
-        Account account = null;
+        Account account;
         try {
             account = dao.getByEmail(SYSTEM_ACCOUNT_EMAIL);
         } catch (DAOException e) {
@@ -492,6 +491,14 @@ public class AccountController {
     public Account getAccountByAuthToken(String sessionKey) throws ControllerException {
         try {
             return dao.getAccountByAuthToken(sessionKey);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+    }
+
+    public void updateModeratorAccounts() throws ControllerException {
+        try {
+            dao.updateModeratorAccounts();
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

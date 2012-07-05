@@ -26,11 +26,13 @@ import java.util.ArrayList;
 public class BulkImportView extends AbstractLayout implements IBulkImportView {
 
     private SavedDraftsMenu draftsMenu;
+    private SavedDraftsMenu pendingDraftsMenu;
     private Label contentHeader;
     private FlexTable mainContent;
     private SelectTypeMenu create;
     private FeedbackPanel feedback;
     private FlexTable layout;
+    private VerticalPanel menuPanel;
     private ToggleButton toggle;
     private Button updateButton;
     private Button saveButton;
@@ -44,6 +46,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     protected void initComponents() {
         super.initComponents();
         draftsMenu = new SavedDraftsMenu("SAVED DRAFTS");
+        pendingDraftsMenu = new SavedDraftsMenu("PENDING");
         create = new SelectTypeMenu();
         feedback = new FeedbackPanel("450px");
         contentHeader = new Label("");
@@ -71,7 +74,8 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         layout.setCellSpacing(0);
 
         // placeholder for saved drafts menu
-        layout.setHTML(0, 0, "");
+        menuPanel = new VerticalPanel();
+        layout.setWidget(0, 0, menuPanel);
         layout.getFlexCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
 
         // right content. fills entire space when there are no drafts
@@ -222,7 +226,25 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     @Override
     public void setSavedDraftsData(ArrayList<BulkImportMenuItem> data, IDeleteMenuHandler handler) {
         draftsMenu.setMenuItems(data, handler);
-        layout.setWidget(0, 0, draftsMenu);
+        menuPanel.add(draftsMenu);
+        menuPanel.add(new HTML("&nbsp;"));
+
+//        layout.setWidget(0, 0, draftsMenu);
+        layout.getFlexCellFormatter().setWidth(0, 0, "220px");
+
+        layout.setHTML(0, 1, "&nbsp;");
+        layout.getFlexCellFormatter().setWidth(0, 1, "10px");
+
+        toggle.setVisible(true);
+        toggle.setDown(true);
+        headerPanel.setCellHorizontalAlignment(create, HasAlignment.ALIGN_CENTER);
+    }
+
+    @Override
+    public void setPendingDraftsData(ArrayList<BulkImportMenuItem> data, IDeleteMenuHandler handler) {
+        pendingDraftsMenu.setMenuItems(data, handler);
+        menuPanel.add(pendingDraftsMenu);
+
         layout.getFlexCellFormatter().setWidth(0, 0, "220px");
 
         layout.setHTML(0, 1, "&nbsp;");

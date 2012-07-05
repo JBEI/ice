@@ -4,13 +4,16 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.account.model.AccountType;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.models.Moderator;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -171,5 +174,29 @@ class AccountDAO extends HibernateRepository<Account> {
         }
 
         return account;
+    }
+
+    public void updateModeratorAccounts() throws DAOException {
+        Session session = newSession();
+
+        try {
+            session.getTransaction().begin();
+            Query query = session.createQuery("from " + Moderator.class.getName());
+            List<Moderator> results = new ArrayList<Moderator>(query.list());
+            for (Moderator moderator : results) {
+                Account account = moderator.getAccount();
+                account.setType(AccountType.ADMIN);
+                session.update(account);
+            }
+            session.getTransaction().commit();
+        } catch (HibernateException he) {
+            session.getTransaction().rollback();
+            throw new DAOException(he);
+        } finally {
+            if (session.isOpen()) {
+                session.close();
+            }
+        }
+
     }
 }
