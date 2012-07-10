@@ -19,8 +19,7 @@ import com.google.gwt.user.client.Window;
 public class SheetPresenter {
 
     /**
-     * interface that the equivalent view
-     * for this presenter must interface
+     * View interface for sheet
      */
     public static interface View {
 
