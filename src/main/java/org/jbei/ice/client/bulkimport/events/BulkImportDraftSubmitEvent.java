@@ -1,7 +1,7 @@
 package org.jbei.ice.client.bulkimport.events;
 
 import org.jbei.ice.client.bulkimport.events.BulkImportDraftSubmitEvent.BulkImportDraftSubmitEventHandler;
-import org.jbei.ice.shared.dto.BulkImportDraftInfo;
+import org.jbei.ice.shared.dto.BulkImportInfo;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
@@ -9,9 +9,9 @@ import com.google.gwt.event.shared.GwtEvent;
 public class BulkImportDraftSubmitEvent extends GwtEvent<BulkImportDraftSubmitEventHandler> {
 
     public static Type<BulkImportDraftSubmitEventHandler> TYPE = new Type<BulkImportDraftSubmitEventHandler>();
-    private final BulkImportDraftInfo info;
+    private final BulkImportInfo info;
 
-    public BulkImportDraftSubmitEvent(BulkImportDraftInfo info) {
+    public BulkImportDraftSubmitEvent(BulkImportInfo info) {
         this.info = info;
     }
 
@@ -25,7 +25,7 @@ public class BulkImportDraftSubmitEvent extends GwtEvent<BulkImportDraftSubmitEv
         handler.onSubmit(this);
     }
 
-    public BulkImportDraftInfo getDraftInfo() {
+    public BulkImportInfo getDraftInfo() {
         return this.info;
     }
 

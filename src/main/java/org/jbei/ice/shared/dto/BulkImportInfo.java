@@ -6,7 +6,7 @@ import org.jbei.ice.shared.EntryAddType;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class BulkImportDraftInfo implements IsSerializable { //ITransferModel<BulkImportDraft> {
+public class BulkImportInfo implements IsSerializable { //ITransferModel<BulkImportDraft> {
 
     private long id;
     private String name;
@@ -17,7 +17,7 @@ public class BulkImportDraftInfo implements IsSerializable { //ITransferModel<Bu
     private AccountInfo account;
     private ArrayList<EntryInfo> entryList;
 
-    public BulkImportDraftInfo() {
+    public BulkImportInfo() {
         entryList = new ArrayList<EntryInfo>();
     }
 

@@ -103,16 +103,16 @@ public interface RegistryService extends RemoteService {
 
     boolean updateEntry(String sid, EntryInfo info) throws AuthenticationException;
 
-    ArrayList<BulkImportDraftInfo> retrieveUserSavedDrafts(String sid) throws AuthenticationException;
+    ArrayList<BulkImportInfo> retrieveUserSavedDrafts(String sid) throws AuthenticationException;
 
-    BulkImportDraftInfo retrieveBulkImport(String sid, long id) throws AuthenticationException;
+    BulkImportInfo retrieveBulkImport(String sid, long id) throws AuthenticationException;
 
     FolderDetails deleteFolder(String sessionId, long folderId) throws AuthenticationException;
 
     SampleStorage createSample(String sessionId, SampleStorage sampleStorage, long entryId)
             throws AuthenticationException;
 
-    BulkImportDraftInfo updateBulkImportDraft(String sessionId, long id, ArrayList<EntryInfo> list)
+    BulkImportInfo updateBulkImportDraft(String sessionId, long id, ArrayList<EntryInfo> list)
             throws AuthenticationException;
 
     SuggestOracle.Response getPermissionSuggestions(Request req);
@@ -153,7 +153,7 @@ public interface RegistryService extends RemoteService {
     ArrayList<SequenceAnalysisInfo> deleteEntryTraceSequences(String sid, long entryId,
             ArrayList<String> seqId) throws AuthenticationException;
 
-    ArrayList<BulkImportDraftInfo> retrieveDraftsPendingVerification(String sid) throws AuthenticationException;
+    ArrayList<BulkImportInfo> retrieveDraftsPendingVerification(String sid) throws AuthenticationException;
 
     ArrayList<GroupInfo> retrieveAllGroups(String sessionId) throws AuthenticationException;
 
@@ -161,14 +161,14 @@ public interface RegistryService extends RemoteService {
 
     EntryInfo retrieveEntryTipDetails(String sessionId, long id) throws AuthenticationException;
 
-    BulkImportDraftInfo deleteDraftPendingVerification(String sid, long draftId) throws AuthenticationException;
+    BulkImportInfo deleteDraftPendingVerification(String sid, long draftId) throws AuthenticationException;
 
     ArrayList<FolderDetails> deleteEntry(String sessionId, EntryInfo info) throws AuthenticationException;
 
     ArrayList<Long> createStrainWithPlasmid(String sid, HashSet<EntryInfo> infoSet) throws
             AuthenticationException;
 
-    BulkImportDraftInfo saveBulkImportDraft(String sid, String email, String name, EntryAddType importType,
+    BulkImportInfo saveBulkImportDraft(String sid, String email, String name, EntryAddType importType,
             ArrayList<EntryInfo> entryList) throws AuthenticationException;
 
     boolean submitBulkImport(String sid, EntryAddType importType, ArrayList<EntryInfo> entryList)

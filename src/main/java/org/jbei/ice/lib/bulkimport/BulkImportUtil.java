@@ -3,7 +3,7 @@ package org.jbei.ice.lib.bulkimport;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.BulkImportDraftInfo;
+import org.jbei.ice.shared.dto.BulkImportInfo;
 
 /**
  * Utility class for Bulk Import
@@ -12,8 +12,8 @@ import org.jbei.ice.shared.dto.BulkImportDraftInfo;
  */
 public class BulkImportUtil {
 
-    public static BulkImportDraftInfo modelToInfo(BulkImportDraft model) {
-        BulkImportDraftInfo info = new BulkImportDraftInfo();
+    public static BulkImportInfo modelToInfo(BulkImportDraft model) {
+        BulkImportInfo info = new BulkImportInfo();
         Account draftAccount = model.getAccount();
         AccountInfo accountInfo = new AccountInfo();
         accountInfo.setEmail(draftAccount.getEmail());

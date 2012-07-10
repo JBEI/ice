@@ -72,14 +72,14 @@ public interface RegistryServiceAsync {
 //    void retrieveFolderDetails(String sid, long folderId, AsyncCallback<FolderDetails> callback)
 //            throws AuthenticationException;
 
-    void retrieveUserSavedDrafts(String sid, AsyncCallback<ArrayList<BulkImportDraftInfo>> callback)
+    void retrieveUserSavedDrafts(String sid, AsyncCallback<ArrayList<BulkImportInfo>> callback)
             throws AuthenticationException;
 
     void retrieveDraftsPendingVerification(String sid,
-            AsyncCallback<ArrayList<BulkImportDraftInfo>> callback) throws AuthenticationException;
+            AsyncCallback<ArrayList<BulkImportInfo>> callback) throws AuthenticationException;
 
     void deleteDraftPendingVerification(String sid, long draftId,
-            AsyncCallback<BulkImportDraftInfo> callback) throws AuthenticationException;
+            AsyncCallback<BulkImportInfo> callback) throws AuthenticationException;
 
     void createSample(String sessionId, SampleStorage sampleStorage, long entryId,
             AsyncCallback<SampleStorage> callback) throws AuthenticationException;
@@ -130,13 +130,13 @@ public interface RegistryServiceAsync {
 
     // bulk import and draft
 
-    void retrieveBulkImport(String sid, long id, AsyncCallback<BulkImportDraftInfo> callback)
+    void retrieveBulkImport(String sid, long id, AsyncCallback<BulkImportInfo> callback)
             throws AuthenticationException;
 
     void deleteFolder(String sessionId, long folderId, AsyncCallback<FolderDetails> callback);
 
     void updateBulkImportDraft(String sessionId, long id, ArrayList<EntryInfo> list,
-            AsyncCallback<BulkImportDraftInfo> asyncCallback) throws AuthenticationException;
+            AsyncCallback<BulkImportInfo> asyncCallback) throws AuthenticationException;
 
     void addPermission(String sessionId, long entryId, PermissionInfo permission,
             AsyncCallback<Boolean> callback) throws AuthenticationException;
@@ -195,7 +195,7 @@ public interface RegistryServiceAsync {
             async) throws AuthenticationException;
 
     void saveBulkImportDraft(String sid, String email, String name, EntryAddType importType,
-            ArrayList<EntryInfo> entryList, AsyncCallback<BulkImportDraftInfo> async) throws AuthenticationException;
+            ArrayList<EntryInfo> entryList, AsyncCallback<BulkImportInfo> async) throws AuthenticationException;
 
     void submitBulkImport(String sid, EntryAddType importType, ArrayList<EntryInfo> entryList,
             AsyncCallback<Boolean> async);

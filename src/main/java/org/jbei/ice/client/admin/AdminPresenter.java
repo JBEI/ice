@@ -19,7 +19,7 @@ import org.jbei.ice.client.admin.group.GroupPresenter;
 import org.jbei.ice.client.admin.usermanagement.UserPresenter;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.shared.dto.BulkImportDraftInfo;
+import org.jbei.ice.shared.dto.BulkImportInfo;
 
 import java.util.ArrayList;
 
@@ -79,10 +79,10 @@ public class AdminPresenter extends AbstractPresenter {
     }
 
     private void retrieveSavedDrafts() {
-        new IceAsyncCallback<ArrayList<BulkImportDraftInfo>>() {
+        new IceAsyncCallback<ArrayList<BulkImportInfo>>() {
 
             @Override
-            protected void callService(AsyncCallback<ArrayList<BulkImportDraftInfo>> callback) {
+            protected void callService(AsyncCallback<ArrayList<BulkImportInfo>> callback) {
                 try {
                     service.retrieveDraftsPendingVerification(AppController.sessionId, callback);
                 } catch (AuthenticationException e) {
@@ -91,10 +91,10 @@ public class AdminPresenter extends AbstractPresenter {
             }
 
             @Override
-            public void onSuccess(ArrayList<BulkImportDraftInfo> result) {
+            public void onSuccess(ArrayList<BulkImportInfo> result) {
                 ArrayList<BulkImportMenuItem> data = new
                         ArrayList<BulkImportMenuItem>();
-                for (BulkImportDraftInfo info : result) {
+                for (BulkImportInfo info : result) {
                     String name = info.getName();
                     String dateTime = DateUtilities.formatShorterDate(info.getCreated());
                     BulkImportMenuItem item = new BulkImportMenuItem(
@@ -122,10 +122,10 @@ public class AdminPresenter extends AbstractPresenter {
             public void onSelectionChange(SelectionChangeEvent event) {
                 final BulkImportMenuItem item = draftSelection.getSelectedObject();
 
-                new IceAsyncCallback<BulkImportDraftInfo>() {
+                new IceAsyncCallback<BulkImportInfo>() {
 
                     @Override
-                    protected void callService(AsyncCallback<BulkImportDraftInfo> callback) {
+                    protected void callService(AsyncCallback<BulkImportInfo> callback) {
                         try {
                             service.retrieveBulkImport(AppController.sessionId, item.getId(), callback);
                         } catch (AuthenticationException e) {
@@ -134,7 +134,7 @@ public class AdminPresenter extends AbstractPresenter {
                     }
 
                     @Override
-                    public void onSuccess(BulkImportDraftInfo result) {
+                    public void onSuccess(BulkImportInfo result) {
                         view.setSheet(result, false);
                     }
                 }.go(eventBus);

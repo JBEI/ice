@@ -7,7 +7,7 @@ import org.jbei.ice.client.bulkimport.SheetPresenter;
 import org.jbei.ice.client.bulkimport.model.SheetFieldData;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.BulkImportDraftInfo;
+import org.jbei.ice.shared.dto.BulkImportInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -69,7 +69,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         this(type, null);
     }
 
-    public Sheet(EntryAddType type, BulkImportDraftInfo info) {
+    public Sheet(EntryAddType type, BulkImportInfo info) {
 
         headerCol = 0;
 
@@ -131,7 +131,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         init();
     }
 
-    public void setCurrentInfo(BulkImportDraftInfo info) {
+    public void setCurrentInfo(BulkImportInfo info) {
         presenter.setCurrentInfo(info);
     }
 

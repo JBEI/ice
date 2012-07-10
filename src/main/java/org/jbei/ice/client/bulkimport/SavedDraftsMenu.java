@@ -2,7 +2,7 @@ package org.jbei.ice.client.bulkimport;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.shared.dto.BulkImportDraftInfo;
+import org.jbei.ice.shared.dto.BulkImportInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -18,7 +18,7 @@ import com.google.gwt.user.client.ui.Label;
 public class SavedDraftsMenu extends Composite implements HasClickHandlers {
 
     private final FlexTable table;
-    private BulkImportDraftInfo currentSelected;
+    private BulkImportInfo currentSelected;
     private int row = 1;
 
     public SavedDraftsMenu() {
@@ -32,10 +32,10 @@ public class SavedDraftsMenu extends Composite implements HasClickHandlers {
         table.getFlexCellFormatter().setStyleName(0, 0, "collections_menu_header");
     }
 
-    public void setData(ArrayList<BulkImportDraftInfo> data) { // TODO : use some sort of delegate instead of passing the model since this is part of the view
+    public void setData(ArrayList<BulkImportInfo> data) { // TODO : use some sort of delegate instead of passing the model since this is part of the view
 
         // set menu options
-        for (BulkImportDraftInfo info : data) {
+        for (BulkImportInfo info : data) {
             final MenuCell cell = new MenuCell(info);
             cell.addClickHandler(new ClickHandler() {
 
@@ -49,7 +49,7 @@ public class SavedDraftsMenu extends Composite implements HasClickHandlers {
         }
     }
 
-    public void addMenuData(BulkImportDraftInfo info) {
+    public void addMenuData(BulkImportInfo info) {
         final MenuCell cell = new MenuCell(info);
         cell.addClickHandler(new ClickHandler() {
 
@@ -62,7 +62,7 @@ public class SavedDraftsMenu extends Composite implements HasClickHandlers {
         row += 1;
     }
 
-    public BulkImportDraftInfo getCurrentSelection() {
+    public BulkImportInfo getCurrentSelection() {
         return this.currentSelected;
     }
 
@@ -85,11 +85,11 @@ public class SavedDraftsMenu extends Composite implements HasClickHandlers {
     private class MenuCell extends Composite implements HasClickHandlers {
 
         private final HTMLPanel panel;
-        private final BulkImportDraftInfo draftInfo;
+        private final BulkImportInfo draftInfo;
         private Label count;
         private String countElementId;
 
-        public MenuCell(BulkImportDraftInfo draftInfo) {
+        public MenuCell(BulkImportInfo draftInfo) {
 
             this.draftInfo = draftInfo;
             countElementId = "draft_count_" + draftInfo.getId();
@@ -111,7 +111,7 @@ public class SavedDraftsMenu extends Composite implements HasClickHandlers {
             return format.format(l);
         }
 
-        public BulkImportDraftInfo getDraftInfo() {
+        public BulkImportInfo getDraftInfo() {
             return this.draftInfo;
         }
 

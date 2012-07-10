@@ -10,7 +10,7 @@ import org.jbei.ice.client.admin.group.EditGroupsPanel;
 import org.jbei.ice.client.admin.reports.ReportPanel;
 import org.jbei.ice.client.admin.usermanagement.EditUserPanel;
 import org.jbei.ice.client.common.AbstractLayout;
-import org.jbei.ice.shared.dto.BulkImportDraftInfo;
+import org.jbei.ice.shared.dto.BulkImportInfo;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -87,7 +87,7 @@ public class AdminView extends AbstractLayout {
         return draftsMenu.getSelectionModel();
     }
 
-    public void setSheet(BulkImportDraftInfo result, boolean b) {
+    public void setSheet(BulkImportInfo result, boolean b) {
 
         String url = GWT.getHostPageBaseURL();
         String html = "<object classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540002\" id=\"VectorEditor\" width=\"100%\" height=\"100%\" codebase=\"https://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab\"> "

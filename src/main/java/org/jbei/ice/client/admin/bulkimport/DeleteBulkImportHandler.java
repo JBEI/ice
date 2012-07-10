@@ -10,7 +10,7 @@ import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.shared.dto.BulkImportDraftInfo;
+import org.jbei.ice.shared.dto.BulkImportInfo;
 
 public class DeleteBulkImportHandler implements IDeleteMenuHandler {
 
@@ -25,10 +25,10 @@ public class DeleteBulkImportHandler implements IDeleteMenuHandler {
     @Override
     public void delete(final long draftId, final Callback<BulkImportMenuItem> deleteCallback) {
 
-        new IceAsyncCallback<BulkImportDraftInfo>() {
+        new IceAsyncCallback<BulkImportInfo>() {
 
             @Override
-            protected void callService(AsyncCallback<BulkImportDraftInfo> callback) {
+            protected void callService(AsyncCallback<BulkImportInfo> callback) {
                 try {
                     service.deleteDraftPendingVerification(AppController.sessionId, draftId, callback);
                 } catch (AuthenticationException e) {
@@ -37,7 +37,7 @@ public class DeleteBulkImportHandler implements IDeleteMenuHandler {
             }
 
             @Override
-            public void onSuccess(BulkImportDraftInfo result) {
+            public void onSuccess(BulkImportInfo result) {
                 if (result == null) {
                     deleteCallback.onFailure();
                     return;

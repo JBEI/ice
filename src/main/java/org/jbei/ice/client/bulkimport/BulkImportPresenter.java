@@ -26,7 +26,7 @@ import org.jbei.ice.client.bulkimport.model.NewBulkInput;
 import org.jbei.ice.client.bulkimport.sheet.Sheet;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.BulkImportDraftInfo;
+import org.jbei.ice.shared.dto.BulkImportInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 
 /**
@@ -131,7 +131,7 @@ public class BulkImportPresenter extends AbstractPresenter {
             @Override
             public void onDataRetrieval(SavedDraftsEvent event) {
                 ArrayList<BulkImportMenuItem> data = new ArrayList<BulkImportMenuItem>();
-                for (BulkImportDraftInfo info : event.getData()) {
+                for (BulkImportInfo info : event.getData()) {
                     String name = info.getName();
                     String dateTime = DateUtilities.formatShorterDate(info.getCreated());
                     BulkImportMenuItem item = new BulkImportMenuItem(info.getId(), name, info.getCount(),
@@ -158,7 +158,7 @@ public class BulkImportPresenter extends AbstractPresenter {
             @Override
             public void onDataRetrieval(SavedDraftsEvent event) {
                 ArrayList<BulkImportMenuItem> data = new ArrayList<BulkImportMenuItem>();
-                for (BulkImportDraftInfo info : event.getData()) {
+                for (BulkImportInfo info : event.getData()) {
                     String name = info.getName();
                     String dateTime = DateUtilities.formatShorterDate(info.getCreated());
                     BulkImportMenuItem item = new BulkImportMenuItem(info.getId(), name, info.getCount(),
@@ -258,7 +258,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                                                   if (event == null || event.getDraftInfo() == null)
                                                       view.showFeedback("Error saving draft", true);
                                                   else {
-                                                      BulkImportDraftInfo info = event.getDraftInfo();
+                                                      BulkImportInfo info = event.getDraftInfo();
                                                       view.showFeedback(
                                                               "Draft \"" + info.getName() + "\" with <b>" + info
                                                                       .getCount()
@@ -308,7 +308,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                                                 if (event == null || event.getDraftInfo() == null)
                                                     view.showFeedback("Error updating draft", true);
                                                 else {
-                                                    BulkImportDraftInfo info = event.getDraftInfo();
+                                                    BulkImportInfo info = event.getDraftInfo();
                                                     view.showFeedback("Update successful", false);
                                                     String dateTime = DateUtilities.formatShorterDate(
                                                             info.getCreated());
@@ -344,7 +344,7 @@ public class BulkImportPresenter extends AbstractPresenter {
                         return;
                     }
 
-                    BulkImportDraftInfo info = event.getData().get(0);
+                    BulkImportInfo info = event.getData().get(0);
                     Sheet sheet = new Sheet(info.getType(), info);
 
                     sheet.setAutoCompleteData(AppController.autoCompleteData);

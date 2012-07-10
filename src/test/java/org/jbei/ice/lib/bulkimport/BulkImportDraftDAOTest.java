@@ -21,13 +21,13 @@ import org.junit.Test;
  */
 public class BulkImportDraftDAOTest {
 
-    private BulkImportDraftDAO dao;
+    private BulkImportDAO dao;
     private AccountController controller;
 
     @Before
     public void setUp() throws Exception {
         HibernateHelper.initializeMock();
-        dao = new BulkImportDraftDAO();
+        dao = new BulkImportDAO();
         controller = mock(AccountController.class);
     }
 

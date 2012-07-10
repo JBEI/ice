@@ -18,7 +18,7 @@ import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.bulkimport.BulkImportDraftController;
+import org.jbei.ice.lib.bulkimport.BulkImportController;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
@@ -61,7 +61,7 @@ import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.BlastResultInfo;
-import org.jbei.ice.shared.dto.BulkImportDraftInfo;
+import org.jbei.ice.shared.dto.BulkImportInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.GroupInfo;
@@ -1191,11 +1191,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<BulkImportDraftInfo> retrieveUserSavedDrafts(String sid)
+    public ArrayList<BulkImportInfo> retrieveUserSavedDrafts(String sid)
             throws AuthenticationException {
 
         Account account = retrieveAccountForSid(sid);
-        BulkImportDraftController controller = new BulkImportDraftController();
+        BulkImportController controller = new BulkImportController();
 
         try {
             return controller.retrieveByUser(account, account);
@@ -1206,11 +1206,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public ArrayList<BulkImportDraftInfo> retrieveDraftsPendingVerification(String sid)
+    public ArrayList<BulkImportInfo> retrieveDraftsPendingVerification(String sid)
             throws AuthenticationException {
         try {
             Account account = retrieveAccountForSid(sid);
-            BulkImportDraftController controller = new BulkImportDraftController();
+            BulkImportController controller = new BulkImportController();
             return controller.retrievePendingImports(account);
 
         } catch (ControllerException ce) {
@@ -1222,7 +1222,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public BulkImportDraftInfo deleteDraftPendingVerification(String sid, long draftId)
+    public BulkImportInfo deleteDraftPendingVerification(String sid, long draftId)
             throws AuthenticationException {
 
         try {
@@ -1232,7 +1232,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             Logger.info(account.getEmail() + ": deleting bulk import draft with id " + draftId);
-            BulkImportDraftController draftController = new BulkImportDraftController();
+            BulkImportController draftController = new BulkImportController();
             return draftController.deleteDraftById(account, draftId);
         } catch (ControllerException ce) {
             Logger.error(ce);
@@ -1244,11 +1244,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public BulkImportDraftInfo retrieveBulkImport(String sid, long id)
+    public BulkImportInfo retrieveBulkImport(String sid, long id)
             throws AuthenticationException {
 
         Account account = retrieveAccountForSid(sid);
-        BulkImportDraftController controller = new BulkImportDraftController();
+        BulkImportController controller = new BulkImportController();
 
         try {
             return controller.retrieveById(account, id);
@@ -1262,11 +1262,11 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public BulkImportDraftInfo updateBulkImportDraft(String sessionId, long draftId,
+    public BulkImportInfo updateBulkImportDraft(String sessionId, long draftId,
             ArrayList<EntryInfo> list) throws AuthenticationException {
 
         Account account = retrieveAccountForSid(sessionId);
-        BulkImportDraftController controller = new BulkImportDraftController();
+        BulkImportController controller = new BulkImportController();
 
         try {
             return controller.updateBulkImportDraft(account, draftId, list);
@@ -1280,7 +1280,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public BulkImportDraftInfo saveBulkImportDraft(String sid, String email, String name,
+    public BulkImportInfo saveBulkImportDraft(String sid, String email, String name,
             EntryAddType importType, ArrayList<EntryInfo> entryList) throws AuthenticationException {
 
         try {
@@ -1288,7 +1288,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             if (entryList.isEmpty())
                 return null;
 
-            BulkImportDraftController controller = new BulkImportDraftController();
+            BulkImportController controller = new BulkImportController();
             return controller.createBulkImportDraft(account, account, importType, name, entryList);
         } catch (ControllerException e) {
             Logger.error(e);
@@ -1307,7 +1307,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
 
             Logger.info(account.getEmail() + ": submitting bulk import of type "
                     + importType.toString() + " & size " + entryList.size());
-            BulkImportDraftController controller = new BulkImportDraftController();
+            BulkImportController controller = new BulkImportController();
             return controller.submitBulkImport(account, importType, entryList);
 
         } catch (ControllerException ce) {

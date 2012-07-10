@@ -11,7 +11,7 @@ import org.jbei.ice.client.bulkimport.sheet.ImportTypeHeaders;
 import org.jbei.ice.client.bulkimport.sheet.InfoValueExtractorFactory;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.EntryAddType;
-import org.jbei.ice.shared.dto.BulkImportDraftInfo;
+import org.jbei.ice.shared.dto.BulkImportInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 
 import com.google.gwt.user.client.Window;
@@ -41,7 +41,7 @@ public class SheetPresenter {
     private final View view;
     private HashMap<AutoCompleteField, ArrayList<String>> data;
     private final EntryAddType type;
-    private BulkImportDraftInfo currentInfo; // used to maintain saved drafts that are loaded
+    private BulkImportInfo currentInfo; // used to maintain saved drafts that are loaded
     private final Header[] headers;
 
     public SheetPresenter(View view, EntryAddType type) {
@@ -54,7 +54,7 @@ public class SheetPresenter {
         }
     }
 
-    public SheetPresenter(View view, EntryAddType type, BulkImportDraftInfo info) {
+    public SheetPresenter(View view, EntryAddType type, BulkImportInfo info) {
         this(view, type);
         this.currentInfo = info;
     }
@@ -81,7 +81,7 @@ public class SheetPresenter {
         return this.type;
     }
 
-    public void setCurrentInfo(BulkImportDraftInfo info) {
+    public void setCurrentInfo(BulkImportInfo info) {
         this.currentInfo = info;
     }
 

@@ -18,7 +18,7 @@ import org.jbei.ice.server.dao.hibernate.HibernateRepository;
  * 
  * @author Hector Plahar
  */
-class BulkImportDraftDAO extends HibernateRepository<BulkImportDraft> {
+class BulkImportDAO extends HibernateRepository<BulkImportDraft> {
 
     public BulkImportDraft retrieveById(long id) throws DAOException {
         return super.get(BulkImportDraft.class, id);

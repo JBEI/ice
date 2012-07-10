@@ -2,17 +2,17 @@ package org.jbei.ice.client.bulkimport.events;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.shared.dto.BulkImportDraftInfo;
+import org.jbei.ice.shared.dto.BulkImportInfo;
 
 import com.google.gwt.event.shared.GwtEvent;
 
 public class SavedDraftsEvent extends GwtEvent<SavedDraftsEventHandler> {
 
     public static Type<SavedDraftsEventHandler> TYPE = new Type<SavedDraftsEventHandler>();
-    private final ArrayList<BulkImportDraftInfo> data;
+    private final ArrayList<BulkImportInfo> data;
 
-    public SavedDraftsEvent(ArrayList<BulkImportDraftInfo> data) {
-        this.data = new ArrayList<BulkImportDraftInfo>(data);
+    public SavedDraftsEvent(ArrayList<BulkImportInfo> data) {
+        this.data = new ArrayList<BulkImportInfo>(data);
     }
 
     @Override
@@ -25,7 +25,7 @@ public class SavedDraftsEvent extends GwtEvent<SavedDraftsEventHandler> {
         handler.onDataRetrieval(this);
     }
 
-    public ArrayList<BulkImportDraftInfo> getData() {
+    public ArrayList<BulkImportInfo> getData() {
         return data;
     }
 }

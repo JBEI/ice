@@ -30,7 +30,7 @@ import org.jbei.ice.server.InfoToModelFactory;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.AttachmentInfo;
-import org.jbei.ice.shared.dto.BulkImportDraftInfo;
+import org.jbei.ice.shared.dto.BulkImportInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.EntryType;
 import org.jbei.ice.shared.dto.PlasmidInfo;
@@ -43,24 +43,24 @@ import org.jbei.ice.shared.dto.Visibility;
  * 
  * @author Hector Plahar
  */
-public class BulkImportDraftController {
+public class BulkImportController {
 
-    private final BulkImportDraftDAO dao;
+    private final BulkImportDAO dao;
     private final AccountController accountController;
     private final EntryController entryController;
 
-    public BulkImportDraftController() {
-        dao = new BulkImportDraftDAO();
+    public BulkImportController() {
+        dao = new BulkImportDAO();
         accountController = new AccountController();
         entryController = new EntryController();
     }
 
-    public ArrayList<BulkImportDraftInfo> retrievePendingImports(Account account)
+    public ArrayList<BulkImportInfo> retrievePendingImports(Account account)
             throws ControllerException, PermissionException {
         if (!accountController.isAdministrator(account))
             throw new PermissionException("Administrative privileges are required!");
 
-        ArrayList<BulkImportDraftInfo> infoList = new ArrayList<BulkImportDraftInfo>();
+        ArrayList<BulkImportInfo> infoList = new ArrayList<BulkImportInfo>();
 
         ArrayList<BulkImportDraft> results;
         try {
@@ -73,7 +73,7 @@ public class BulkImportDraftController {
 
         for (BulkImportDraft draft : results) {
 
-            BulkImportDraftInfo info = new BulkImportDraftInfo();
+            BulkImportInfo info = new BulkImportInfo();
             Account draftAccount = draft.getAccount();
             AccountInfo accountInfo = new AccountInfo();
             accountInfo.setEmail(draftAccount.getEmail());
@@ -100,7 +100,7 @@ public class BulkImportDraftController {
         return infoList;
     }
 
-    public BulkImportDraftInfo retrieveById(Account account, long id) throws ControllerException,
+    public BulkImportInfo retrieveById(Account account, long id) throws ControllerException,
             PermissionException {
 
         BulkImportDraft draft;
@@ -123,7 +123,7 @@ public class BulkImportDraftController {
                     + " to view bulk import for " + draft.getAccount().getEmail());
         }
 
-        BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
+        BulkImportInfo draftInfo = new BulkImportInfo();
         draftInfo.setCount(draft.getContents().size());
         draftInfo.setCreated(draft.getCreationTime());
         draftInfo.setLastUpdate(draft.getLastUpdateTime());
@@ -158,7 +158,7 @@ public class BulkImportDraftController {
      * @return list of draft infos representing saved drafts.
      * @throws ControllerException
      */
-    public ArrayList<BulkImportDraftInfo> retrieveByUser(Account account, Account userAccount)
+    public ArrayList<BulkImportInfo> retrieveByUser(Account account, Account userAccount)
             throws ControllerException {
 
         ArrayList<BulkImportDraft> results;
@@ -169,7 +169,7 @@ public class BulkImportDraftController {
             throw new ControllerException(e);
         }
 
-        ArrayList<BulkImportDraftInfo> infoArrayList = new ArrayList<BulkImportDraftInfo>();
+        ArrayList<BulkImportInfo> infoArrayList = new ArrayList<BulkImportInfo>();
 
         for (BulkImportDraft draft : results) {
             Account draftAccount = draft.getAccount();
@@ -179,7 +179,7 @@ public class BulkImportDraftController {
             if (!isOwner && !isAdmin)
                 continue;
 
-            BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
+            BulkImportInfo draftInfo = new BulkImportInfo();
             draftInfo.setCreated(draft.getCreationTime());
             draftInfo.setId(draft.getId());
 
@@ -206,7 +206,7 @@ public class BulkImportDraftController {
         return infoArrayList;
     }
 
-    public BulkImportDraftInfo deleteDraftById(Account requesting, long draftId)
+    public BulkImportInfo deleteDraftById(Account requesting, long draftId)
             throws ControllerException, PermissionException {
         BulkImportDraft draft;
         try {
@@ -225,7 +225,7 @@ public class BulkImportDraftController {
             throw new ControllerException(e);
         }
 
-        BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
+        BulkImportInfo draftInfo = new BulkImportInfo();
         try {
             int count = dao.retrieveSavedDraftCount(draft.getId());
             draftInfo.setCount(count);
@@ -248,7 +248,7 @@ public class BulkImportDraftController {
         return draftInfo;
     }
 
-    public BulkImportDraftInfo createBulkImportDraft(Account draftOwner, Account entryAccount,
+    public BulkImportInfo createBulkImportDraft(Account draftOwner, Account entryAccount,
             EntryAddType type, String name, ArrayList<EntryInfo> entryList)
             throws ControllerException {
 
@@ -319,7 +319,7 @@ public class BulkImportDraftController {
         }
     }
 
-    public BulkImportDraftInfo updateBulkImportDraft(Account account, long draftId,
+    public BulkImportInfo updateBulkImportDraft(Account account, long draftId,
             ArrayList<EntryInfo> entryList) throws ControllerException, PermissionException {
 
         BulkImportDraft draft;
@@ -398,7 +398,7 @@ public class BulkImportDraftController {
         }
 
         // convert draft to info
-        BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
+        BulkImportInfo draftInfo = new BulkImportInfo();
         draftInfo.setCount(contents.size());
         draftInfo.setCreated(draft.getCreationTime());
         draftInfo.setLastUpdate(draft.getLastUpdateTime());
