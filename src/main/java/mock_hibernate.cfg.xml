@@ -65,7 +65,6 @@
         <mapping class="org.jbei.ice.lib.models.Storage"/>
         <mapping class="org.jbei.ice.lib.folder.Folder"/>
         <mapping class="org.jbei.ice.lib.entry.model.Parameter"/>
-        <mapping class="org.jbei.ice.lib.bulkimport.BulkImport"/>
         <mapping class="org.jbei.ice.lib.models.AnnotationLocation"/>
         <mapping class="org.jbei.ice.lib.bulkimport.BulkImportDraft"/>
     </session-factory>
