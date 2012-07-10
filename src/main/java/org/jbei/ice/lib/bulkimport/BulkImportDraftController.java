@@ -443,6 +443,11 @@ public class BulkImportDraftController {
             ArrayList<EntryInfo> entryList) throws ControllerException {
 
         boolean isAdmin = accountController.isAdministrator(entryAccount);
+        Visibility visibility;
+        if (!isAdmin)
+            visibility = Visibility.PENDING;
+        else
+            visibility = Visibility.OK;
 
         ArrayList<Long> contents = new ArrayList<Long>();
 
@@ -466,8 +471,9 @@ public class BulkImportDraftController {
                 Strain strain = (Strain) InfoToModelFactory.infoToEntry(strainInfo);
                 Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(plasmidInfo);
 
-                strain.setVisibility(Visibility.PENDING.getValue());
-                plasmid.setVisibility(Visibility.PENDING.getValue());
+                strain.setVisibility(visibility.getValue());
+                plasmid.setVisibility(visibility.getValue());
+
                 strain.setOwner(entryAccount.getFullName());
                 strain.setOwnerEmail(entryAccount.getEmail());
                 plasmid.setOwner(entryAccount.getFullName());
@@ -479,12 +485,14 @@ public class BulkImportDraftController {
                 for (Entry entry : results) {
                     contents.add(entry.getId());
                 }
+
+                // TODO : sequence and attachments 
                 break;
 
             // all others
             default:
                 Entry entry = InfoToModelFactory.infoToEntry(info);
-                entry.setVisibility(Visibility.PENDING.getValue());
+                entry.setVisibility(visibility.getValue());
                 entry.setOwner(entryAccount.getFullName());
                 entry.setOwnerEmail(entryAccount.getEmail());
 
@@ -511,6 +519,9 @@ public class BulkImportDraftController {
             }
         }
 
+        if (isAdmin)
+            return true;
+
         Account draftOwner = accountController.getSystemAccount();
 
         BulkImportDraft draft = new BulkImportDraft();
@@ -530,17 +541,17 @@ public class BulkImportDraftController {
         }
     }
 
-    protected void saveSequence(Account account, SequenceAnalysisInfo sequenceInfo, Entry entry) {
+    protected void saveSequence(Account account, SequenceAnalysisInfo sequenceInfo, Entry entry)
+            throws ControllerException {
         if (sequenceInfo == null)
             return;
 
         String fileId = sequenceInfo.getFileId();
-        File file = new File(JbeirSettings.getSetting("ATTACHMENTS_DIRECTORY") + File.separatorChar
+        File file = new File(JbeirSettings.getSetting("TEMPORARY_DIRECTORY") + File.separatorChar
                 + fileId);
 
         if (!file.exists()) {
-            Logger.error("Could not find sequence file \"" + fileId + "\" in "
-                    + file.getAbsolutePath());
+            Logger.error("Could not find sequence file \"" + file.getAbsolutePath() + "\"");
             return;
         }
 
@@ -550,10 +561,7 @@ public class BulkImportDraftController {
             controller.parseAndSaveSequence(account, entry, sequenceString);
         } catch (IOException e) {
             Logger.error(e);
-            return;
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return;
+            throw new ControllerException(e);
         }
     }
 
@@ -564,7 +572,7 @@ public class BulkImportDraftController {
 
         String fileId = info.getFileId();
 
-        File file = new File(JbeirSettings.getSetting("ATTACHMENTS_DIRECTORY") + File.separatorChar
+        File file = new File(JbeirSettings.getSetting("TEMPORARY_DIRECTORY") + File.separatorChar
                 + fileId);
 
         Attachment attachment = new Attachment();
@@ -575,6 +583,5 @@ public class BulkImportDraftController {
 
         AttachmentController controller = new AttachmentController();
         controller.save(entryAccount, attachment, inputStream);
-
     }
 }

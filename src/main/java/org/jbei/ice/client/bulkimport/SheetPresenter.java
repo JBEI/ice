@@ -1,6 +1,8 @@
 package org.jbei.ice.client.bulkimport;
 
-import com.google.gwt.user.client.Window;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.jbei.ice.client.bulkimport.model.ModelFactory;
 import org.jbei.ice.client.bulkimport.model.SheetFieldData;
 import org.jbei.ice.client.bulkimport.model.SheetModel;
@@ -12,8 +14,7 @@ import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.google.gwt.user.client.Window;
 
 public class SheetPresenter {
 
@@ -41,11 +42,17 @@ public class SheetPresenter {
     private final View view;
     private HashMap<AutoCompleteField, ArrayList<String>> data;
     private final EntryAddType type;
-    private BulkImportDraftInfo currentInfo;      // used to maintain saved drafts that are loaded
+    private BulkImportDraftInfo currentInfo; // used to maintain saved drafts that are loaded
+    private final Header[] headers;
 
     public SheetPresenter(View view, EntryAddType type) {
         this.view = view;
         this.type = type;
+        this.headers = ImportTypeHeaders.getHeadersForType(type);
+
+        for (Header header : headers) {
+            header.getCell().reset();
+        }
     }
 
     public SheetPresenter(View view, EntryAddType type, BulkImportDraftInfo info) {
@@ -54,7 +61,7 @@ public class SheetPresenter {
     }
 
     public void reset() {
-        if (Window.confirm("Clear all data?"))   {
+        if (Window.confirm("Clear all data?")) {
             this.currentInfo.getEntryList().clear();
             view.clear();
         }
@@ -80,7 +87,7 @@ public class SheetPresenter {
     }
 
     public Header[] getTypeHeaders() {
-        return ImportTypeHeaders.getHeadersForType(type);
+        return headers;
     }
 
     public ArrayList<EntryInfo> getCellEntryList(String ownerEmail, String owner) {
@@ -156,11 +163,8 @@ public class SheetPresenter {
             if (currentInfo != null && currentInfo.getCount() >= view.getRow()) {
 
                 EntryInfo primaryInfo = currentInfo.getEntryList().get(index);
-                String value = InfoValueExtractorFactory.extractValue(getType(),
-                                                                      headers[i],
-                                                                      primaryInfo,
-                                                                      primaryInfo.getInfo(),
-                                                                      index);
+                String value = InfoValueExtractorFactory.extractValue(getType(), headers[i],
+                    primaryInfo, primaryInfo.getInfo(), index);
                 if (value == null)
                     value = "";
 

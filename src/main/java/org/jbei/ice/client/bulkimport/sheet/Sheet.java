@@ -63,7 +63,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     private final TextBox input;
 
-    private final static int ROW_COUNT = 50;
+    private final static int ROW_COUNT = 5;
 
     public Sheet(EntryAddType type) {
         this(type, null);

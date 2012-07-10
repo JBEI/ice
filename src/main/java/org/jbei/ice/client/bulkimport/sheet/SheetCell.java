@@ -82,4 +82,8 @@ public abstract class SheetCell extends Composite {
     public SheetFieldData getDataForRow(int row) {
         return rowValues.get(row);
     }
+
+    public void reset() {
+        this.rowValues.clear();
+    }
 }
