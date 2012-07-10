@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -13,7 +12,6 @@ public class Utils {
     public static void showWaitCursor(Element element) {
 
         if (element == null) {
-            GWT.log("element was null");
             element = RootPanel.getBodyElement();
         }
 
@@ -23,7 +21,6 @@ public class Utils {
     public static void showDefaultCursor(Element element) {
 
         if (element == null) {
-            GWT.log("element was null");
             element = RootPanel.getBodyElement();
         }
 

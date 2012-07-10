@@ -33,21 +33,15 @@ public class SheetPresenter {
 
         int getRow();
 
-        HashMap<Integer, String> getAttachmentRowFileIds();
-
-        HashMap<Integer, String> getSequenceRowFileIds();
-
         void setCellWidgetForCurrentRow(Header header, String display, String title, int col);
 
         int getSheetRowCount();
-
-        String getCellText(int row, int col);
     }
 
     private final View view;
     private HashMap<AutoCompleteField, ArrayList<String>> data;
     private final EntryAddType type;
-    private BulkImportDraftInfo currentInfo;
+    private BulkImportDraftInfo currentInfo;      // used to maintain saved drafts that are loaded
 
     public SheetPresenter(View view, EntryAddType type) {
         this.view = view;
@@ -60,8 +54,10 @@ public class SheetPresenter {
     }
 
     public void reset() {
-        if (Window.confirm("Clear all data?"))
+        if (Window.confirm("Clear all data?"))   {
+            this.currentInfo.getEntryList().clear();
             view.clear();
+        }
     }
 
     public void setAutoCompleteData(HashMap<AutoCompleteField, ArrayList<String>> data) {
@@ -91,7 +87,6 @@ public class SheetPresenter {
 
         Header[] headers = getTypeHeaders();
         int rowCount = view.getSheetRowCount();
-//        ArrayList<EntryInfo> toRemove = new ArrayList<EntryInfo>();
         SheetModel<? extends EntryInfo> model = ModelFactory.getModelForType(type);
         if (model == null)
             return null;
@@ -102,11 +97,6 @@ public class SheetPresenter {
         for (int i = 0; i < rowCount; i += 1) {
 
             if (view.isEmptyRow(i)) {
-//                if (currentInfo.getEntryList().size() > i) {
-//                    EntryInfo info = currentInfo.getEntryList().get(i);
-//                    if (info != null)
-//                        toRemove.add(currentInfo.getEntryList().remove(i));
-//                }
                 continue;
             }
 
@@ -114,28 +104,17 @@ public class SheetPresenter {
             int index = i - 1;
 
             // is row associated with a saved entry?
-            EntryInfo existing = null;
+            EntryInfo existing;
             if (currentInfo != null && currentInfo.getEntryList().size() > index)
                 existing = currentInfo.getEntryList().get(index);
+            else
+                existing = model.createInfo();
 
             // for each header
-            int y = 0;
             for (Header header : headers) {
-
-                String id = "";
-                switch (header) {
-                    case ATT_FILENAME:
-                        id = view.getAttachmentRowFileIds().get(index);
-                        break;
-
-                    case SEQ_FILENAME:
-                        id = view.getSequenceRowFileIds().get(index);
-                        break;
-                }
-
-                String text = view.getCellText(i, y);
+                String text = header.getCell().getValueForRow(index);
+                String id = header.getCell().getIdForRow(index);
                 existing = model.setInfoField(new SheetFieldData(header, id, text), existing);
-                y += 1;
             }
 
             if (existing != null) {
@@ -181,9 +160,7 @@ public class SheetPresenter {
                                                                       headers[i],
                                                                       primaryInfo,
                                                                       primaryInfo.getInfo(),
-                                                                      index,
-                                                                      view.getAttachmentRowFileIds(),
-                                                                      view.getSequenceRowFileIds());
+                                                                      index);
                 if (value == null)
                     value = "";
 

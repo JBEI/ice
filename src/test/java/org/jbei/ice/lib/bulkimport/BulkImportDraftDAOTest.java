@@ -1,6 +1,12 @@
 package org.jbei.ice.lib.bulkimport;
 
+import static org.mockito.Mockito.mock;
+
+import java.util.ArrayList;
+import java.util.Date;
+
 import junit.framework.Assert;
+
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.EntryController;
@@ -10,13 +16,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Date;
-
-import static org.mockito.Mockito.mock;
-
 /**
- * @author r Hector Plahar
+ * @author Hector Plahar
  */
 public class BulkImportDraftDAOTest {
 

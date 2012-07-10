@@ -38,7 +38,7 @@ public class StrainSheetModel extends SingleInfoSheetModel<StrainInfo> {
     }
 
     @Override
-    protected StrainInfo createInfo() {
+    public StrainInfo createInfo() {
         return new StrainInfo();
     }
 }

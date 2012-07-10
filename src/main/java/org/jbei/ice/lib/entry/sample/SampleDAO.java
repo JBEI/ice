@@ -1,5 +1,10 @@
 package org.jbei.ice.lib.entry.sample;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
@@ -15,25 +20,20 @@ import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
 /**
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
-public class SampleDAO extends HibernateRepository {
+public class SampleDAO extends HibernateRepository<Sample> {
 
     /**
      * Save the given {@link Sample} object in the database.
-     *
+     * 
      * @param sample
      * @return Saved Sample object.
      * @throws DAOException
      */
     public Sample save(Sample sample) throws DAOException {
-        return (Sample) super.saveOrUpdate(sample);
+        return super.saveOrUpdate(sample);
     }
 
     public boolean hasSample(Entry entry) throws DAOException {
@@ -41,26 +41,20 @@ public class SampleDAO extends HibernateRepository {
         try {
 
             Integer itemCount = (Integer) session.createCriteria(Sample.class)
-                                                 .setProjection(Projections.countDistinct("id"))
-                                                 .add(Restrictions.eq("entry", entry)).uniqueResult();
+                    .setProjection(Projections.countDistinct("id"))
+                    .add(Restrictions.eq("entry", entry)).uniqueResult();
 
             return itemCount.intValue() > 0;
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve sample by entry: " + entry.getId(), e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
-    }
-
-    public void delete(Storage storage) throws DAOException {
-        super.delete(storage);
     }
 
     /**
      * Delete the give {@link Sample} object in the database.
-     *
+     * 
      * @param sample
      * @throws ManagerException
      */
@@ -70,7 +64,7 @@ public class SampleDAO extends HibernateRepository {
 
     /**
      * Retrieve {@link Sample} object associated with the given {@link Entry} object.
-     *
+     * 
      * @return ArrayList of Sample objects.
      * @throws ManagerException
      */
@@ -98,8 +92,7 @@ public class SampleDAO extends HibernateRepository {
         } catch (HibernateException he) {
             throw new DAOException("Failed to retrieve samples for owner " + ownerId, he);
         } finally {
-            if (session.isOpen())
-                session.close();
+            closeSession(session);
         }
 
         return results;
@@ -127,9 +120,7 @@ public class SampleDAO extends HibernateRepository {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve sample by entry: " + entry.getId(), e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return samples;
@@ -137,7 +128,7 @@ public class SampleDAO extends HibernateRepository {
 
     /**
      * Retrieve {@link Sample} objects associated with the given {@link Storage} object.
-     *
+     * 
      * @param storage
      * @return ArrayList of Sample objects.
      * @throws DAOException
@@ -161,19 +152,16 @@ public class SampleDAO extends HibernateRepository {
             }
 
         } catch (HibernateException e) {
-            throw new DAOException("Failed to retrieve sample by storage: " + storage.getId(),
-                                   e);
+            throw new DAOException("Failed to retrieve sample by storage: " + storage.getId(), e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
         return samples;
     }
 
     /**
      * Retrieve {@link Sample} objects by its index field.
-     *
+     * 
      * @param code
      * @return ArrayList of Sample objects.
      * @throws DAOException
@@ -196,7 +184,7 @@ public class SampleDAO extends HibernateRepository {
 
     /**
      * Retrieve {@link Sample} objects by its depositor field.
-     *
+     * 
      * @param depositor
      * @param offset
      * @param limit
@@ -230,9 +218,7 @@ public class SampleDAO extends HibernateRepository {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve sample by depositor: " + depositor, e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return samples;
@@ -240,7 +226,7 @@ public class SampleDAO extends HibernateRepository {
 
     /**
      * Retrieve the number of samples associated the given depositor (email) string.
-     *
+     * 
      * @param depositor
      * @return Number of samples.
      * @throws DAOException
@@ -280,9 +266,7 @@ public class SampleDAO extends HibernateRepository {
             return results;
 
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
     }
 
@@ -302,7 +286,7 @@ public class SampleDAO extends HibernateRepository {
         try {
 
             Query query = session.createQuery("from " + Sample.class.getName() + " e WHERE id in ("
-                                                      + filter + ") " + suffix);
+                    + filter + ") " + suffix);
 
             @SuppressWarnings("rawtypes")
             ArrayList list = (ArrayList) query.list();
@@ -313,9 +297,7 @@ public class SampleDAO extends HibernateRepository {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve samples!", e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return samples;

@@ -7,6 +7,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Feature;
@@ -23,13 +24,13 @@ import java.util.Set;
 /**
  * Manipulate {@link Sequence} and associated objects in the database.
  *
- * @author Timothy Ham, Zinovii Dmytriv
+ * @author Hector Plahar, Timothy Ham, Zinovii Dmytriv
  */
-public class SequenceDAO extends HibernateRepository {
+public class SequenceDAO extends HibernateRepository<Sequence> {
     /**
      * Save the given {@link Sequence} object in the database.
      *
-     * @param sequence
+     * @param sequence sequence to save
      * @return Saved Sequence object
      * @throws DAOException
      */
@@ -63,7 +64,7 @@ public class SequenceDAO extends HibernateRepository {
             }
         }
 
-        sequence = (Sequence) super.saveOrUpdate(sequence);
+        sequence = super.saveOrUpdate(sequence);
 
         return sequence;
     }
@@ -71,8 +72,8 @@ public class SequenceDAO extends HibernateRepository {
     /**
      * Delete the given {@link Sequence} object in the database.
      *
-     * @param sequence
-     * @throws ManagerException
+     * @param sequence sequence to delete
+     * @throws DAOException
      */
     public void deleteSequence(Sequence sequence) throws DAOException {
         sequence.setEntry(null);
@@ -82,49 +83,61 @@ public class SequenceDAO extends HibernateRepository {
     /**
      * Save the given {@link Feature} object in the database.
      *
-     * @param feature
+     * @param feature feature to save
      * @return Saved Feature object.
      * @throws DAOException
      */
     public Feature saveFeature(Feature feature) throws DAOException {
-        return (Feature) super.saveOrUpdate(feature);
-    }
+        if (feature == null) {
+            throw new DAOException("Failed to save null model!");
+        }
 
-    /**
-     * Delete the give {@link Feature} object in the database.
-     *
-     * @param feature
-     * @throws ManagerException
-     */
-    public void deleteFeature(Feature feature) throws DAOException {
-        super.delete(feature);
+        Session session = newSession();
+        try {
+            session.getTransaction().begin();
+            session.saveOrUpdate(feature);
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            throw new DAOException("dbSave failed!", e);
+        } catch (Exception e1) {
+            session.getTransaction().rollback();
+            Logger.error(e1);
+            throw new DAOException("Unknown database exception ", e1);
+        } finally {
+            closeSession(session);
+        }
+
+        return feature;
     }
 
     /**
      * Retrieve the {@link Sequence} object associated with the given {@link Entry} object.
      *
-     * @param entry
+     * @param entry entry associated with sequence
      * @return Sequence object.
-     * @throws ManagerException
+     * @throws DAOException
      */
     public Sequence getByEntry(Entry entry) throws DAOException {
         Sequence sequence = null;
 
         Session session = newSession();
         try {
+            session.beginTransaction();
             String queryString = "from " + Sequence.class.getName()
                     + " as sequence where sequence.entry = :entry";
 
             Query query = session.createQuery(queryString);
-
             query.setEntity("entry", entry);
-
             Object queryResult = query.uniqueResult();
 
             if (queryResult != null) {
                 sequence = (Sequence) queryResult;
             }
+            session.getTransaction().commit();
         } catch (HibernateException e) {
+            Logger.error(e);
+            session.getTransaction().rollback();
             throw new DAOException("Failed to retrieve sequence by entry: " + entry.getId(), e);
         } finally {
             if (session.isOpen()) {
@@ -157,7 +170,7 @@ public class SequenceDAO extends HibernateRepository {
      * Retrieve all {@link Sequence} objects in the database.
      *
      * @return ArrayList of Sequence objects.
-     * @throws ManagerException
+     * @throws DAOException
      */
     @SuppressWarnings("unchecked")
     public ArrayList<Sequence> getAllSequences() throws DAOException {
@@ -174,9 +187,7 @@ public class SequenceDAO extends HibernateRepository {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve entries!", e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return sequences;
@@ -207,30 +218,6 @@ public class SequenceDAO extends HibernateRepository {
     }
 
     /**
-     * Retrieve a {@link Feature} object by its id.
-     *
-     * @param id
-     * @return Feature object.
-     */
-    public Feature getFeature(long id) throws DAOException {
-        Feature result = null;
-        Session session = newSession();
-        try {
-            String queryString = "from " + Feature.class.getName() + " where id = :id";
-            Query query = session.createQuery(queryString);
-            query.setParameter("id", id);
-            Object queryResult = query.uniqueResult();
-            if (true) {
-                result = (Feature) queryResult;
-            }
-        } catch (HibernateException e) {
-            throw new DAOException(e);
-        }
-        return result;
-
-    }
-
-    /**
      * Retrieve all {@link Feature} objects in the database.
      *
      * @return ArrayList of Feature objects.
@@ -251,9 +238,7 @@ public class SequenceDAO extends HibernateRepository {
         } catch (HibernateException e) {
             throw new ManagerException(e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return features;
@@ -264,7 +249,7 @@ public class SequenceDAO extends HibernateRepository {
      *
      * @param featureDnaSequence
      * @return Feature object.
-     * @throws ManagerException
+     * @throws DAOException
      */
     private Feature getFeatureBySequence(String featureDnaSequence) throws DAOException {
         featureDnaSequence = featureDnaSequence.toLowerCase();

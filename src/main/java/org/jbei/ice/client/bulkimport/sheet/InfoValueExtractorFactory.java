@@ -2,7 +2,6 @@ package org.jbei.ice.client.bulkimport.sheet;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.EntryAddType;
@@ -24,14 +23,12 @@ import org.jbei.ice.shared.dto.StrainInfo;
 public class InfoValueExtractorFactory {
 
     public static String extractValue(EntryAddType type, Header header, EntryInfo primary,
-            EntryInfo secondary, int index, HashMap<Integer, String> attachmentRowFileIds,
-            HashMap<Integer, String> sequenceRowFileIds) {
+            EntryInfo secondary, int index) {
 
         if (header == null)
             return "";
 
-        String value = InfoValueExtractor.extractCommon(header, primary, index,
-                                                        attachmentRowFileIds, sequenceRowFileIds);
+        String value = InfoValueExtractor.extractCommon(header, primary, index);
 
         if (value != null)
             return value;
@@ -108,7 +105,6 @@ public class InfoValueExtractorFactory {
                         if (seqInfo == null)
                             return "";
 
-                        //                attachmentRowFileIds.put(index, seqInfo.getFileId()); TODO
                         return seqInfo.getName();
 
                     case STRAIN_ATT_FILENAME:
@@ -121,7 +117,6 @@ public class InfoValueExtractorFactory {
                         if (attInfo == null)
                             return "";
 
-                        //                attachmentRowFileIds.put(index, attInfo.getFileId()); TODO
                         return attInfo.getFilename();
                     case STRAIN_SELECTION_MARKERS:
                         return strain.getSelectionMarkers();
@@ -159,7 +154,6 @@ public class InfoValueExtractorFactory {
                         if (plasmidSequence == null)
                             return "";
 
-                        //                attachmentRowFileIds.put(index, seqInfo.getFileId()); TODO
                         return plasmidSequence.getName();
 
                     case PLASMID_ATT_FILENAME:
@@ -172,7 +166,6 @@ public class InfoValueExtractorFactory {
                         if (plasmidAttachment == null)
                             return "";
 
-                        //                attachmentRowFileIds.put(index, attInfo.getFileId()); // tODO
                         return plasmidAttachment.getFilename();
 
                     case PLASMID_SELECTION_MARKERS:

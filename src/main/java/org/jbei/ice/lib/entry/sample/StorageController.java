@@ -1,15 +1,15 @@
 package org.jbei.ice.lib.entry.sample;
 
+import java.util.List;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.models.Storage.StorageType;
 
-import java.util.List;
-
 /**
  * ABI to manipulate {@link Storage}.
- *
+ * 
  * @author Hector Plahar
  */
 public class StorageController {
@@ -22,7 +22,7 @@ public class StorageController {
 
     /**
      * Retrieve {@link Storage} object by its name, index, type and the parent id from the database.
-     *
+     * 
      * @param name
      * @param index
      * @param type
@@ -41,7 +41,7 @@ public class StorageController {
 
     /**
      * Retrieve {@link Storage} that are schemas from the database.
-     *
+     * 
      * @return List of {@link Storage} objects that are schemas.
      * @throws ControllerException
      */
@@ -55,7 +55,7 @@ public class StorageController {
 
     /**
      * Retrieve a {@link Storage} object from the database by the bar code from the database.
-     *
+     * 
      * @param barcode
      * @return Storage.
      * @throws ControllerException
@@ -70,7 +70,7 @@ public class StorageController {
 
     /**
      * Update the {@link Storage} object in the database.
-     *
+     * 
      * @param storage
      * @return Saved storage.
      * @throws ControllerException
@@ -85,7 +85,7 @@ public class StorageController {
 
     /**
      * Save the {@link Storage} object in the database.
-     *
+     * 
      * @param storage
      * @return Saved storage.
      * @throws ControllerException
@@ -117,6 +117,14 @@ public class StorageController {
     public List<Storage> getStorageSchemesForEntryType(String entryType) throws ControllerException {
         try {
             return dao.getStorageSchemesForEntryType(entryType);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+    }
+
+    void delete(Storage storage) throws ControllerException {
+        try {
+            dao.delete(storage);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }

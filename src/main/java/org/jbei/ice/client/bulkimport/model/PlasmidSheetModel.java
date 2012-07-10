@@ -42,7 +42,7 @@ public class PlasmidSheetModel extends SingleInfoSheetModel<PlasmidInfo> {
     }
 
     @Override
-    protected PlasmidInfo createInfo() {
+    public PlasmidInfo createInfo() {
         return new PlasmidInfo();
     }
 }

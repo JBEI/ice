@@ -11,8 +11,6 @@ import java.util.ArrayList;
 // model for strain, plasmid, seed, part to avoid code duplication
 public abstract class SingleInfoSheetModel<T extends EntryInfo> extends SheetModel<T> {
 
-    protected abstract T createInfo();
-
     public abstract T setField(T info, SheetFieldData datum);
 
     public T setInfoField(SheetFieldData datum, EntryInfo info) {

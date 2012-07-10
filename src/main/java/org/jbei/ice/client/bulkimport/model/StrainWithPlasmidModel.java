@@ -14,20 +14,26 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
 
     @Override
     public StrainInfo setInfoField(SheetFieldData datum, EntryInfo strain) {
-        PlasmidInfo plasmid;
 
         if (strain == null) {
-            plasmid = new PlasmidInfo();
-            strain = new StrainInfo();
-        } else {
-            plasmid = (strain.getInfo() == null) ? (new PlasmidInfo()) : (PlasmidInfo) strain.getInfo();
+            strain = createInfo();
         }
+
+        PlasmidInfo plasmid = (PlasmidInfo) strain.getInfo();
 
         setPlasmidInfo(plasmid, datum);
         setStrainInfo((StrainInfo) strain, datum);
 
         strain.setInfo(plasmid);
         return (StrainInfo) strain;
+    }
+
+    @Override
+    public StrainInfo createInfo() {
+        PlasmidInfo plasmid = new PlasmidInfo();
+        StrainInfo strain = new StrainInfo();
+        strain.setInfo(plasmid);
+        return strain;
     }
 
     private void setStrainInfo(StrainInfo strain, SheetFieldData datum) {

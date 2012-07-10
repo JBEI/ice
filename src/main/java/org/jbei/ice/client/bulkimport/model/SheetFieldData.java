@@ -8,14 +8,17 @@ import org.jbei.ice.client.bulkimport.sheet.Header;
 
 public class SheetFieldData {
 
-    private final Header type;
-    private final String id;
-    private final String value;
+    private Header type;
+    private String id;
+    private String value;
 
     public SheetFieldData(Header type, String id, String value) {
         this.type = type;
         this.id = id;
         this.value = value;
+    }
+
+    public SheetFieldData() {
     }
 
     public Header getTypeHeader() {
@@ -28,5 +31,17 @@ public class SheetFieldData {
 
     public String getValue() {
         return value;
+    }
+
+    public void setType(Header type) {
+        this.type = type;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 }

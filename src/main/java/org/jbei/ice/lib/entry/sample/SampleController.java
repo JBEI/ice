@@ -1,5 +1,10 @@
 package org.jbei.ice.lib.entry.sample;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.LinkedList;
+
 import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
@@ -13,30 +18,27 @@ import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.shared.ColumnField;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.LinkedList;
-
 /**
  * ABI to manipulate {@link Sample}s.
- *
+ * 
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 public class SampleController {
     private final SampleDAO dao;
     private final PermissionsController permissionsController;
+    private final StorageController storageController;
 
     public SampleController() {
         dao = new SampleDAO();
         permissionsController = new PermissionsController();
+        storageController = new StorageController();
     }
 
     /**
      * Create a {@link Sample} object.
      * <p/>
      * Generates the UUID and the time stamps.
-     *
+     * 
      * @param label
      * @param depositor
      * @param notes
@@ -44,12 +46,12 @@ public class SampleController {
      */
     public Sample createSample(String label, String depositor, String notes) {
         return createSample(label, depositor, notes, Utils.generateUUID(), Calendar.getInstance()
-                                                                                   .getTime(), null);
+                .getTime(), null);
     }
 
     /**
      * Create a {@link Sample} object.
-     *
+     * 
      * @param label
      * @param depositor
      * @param notes
@@ -74,7 +76,7 @@ public class SampleController {
 
     /**
      * Checks if the user has write permission of the {@link Sample}.
-     *
+     * 
      * @param sample
      * @return True if user has write permission.
      * @throws ControllerException
@@ -89,19 +91,20 @@ public class SampleController {
 
     /**
      * Save the {@link Sample} into the database, then rebuilds the search index.
-     *
+     * 
      * @param sample
      * @return Saved sample.
      * @throws ControllerException
      * @throws PermissionException
      */
-    public Sample saveSample(Account account, Sample sample) throws ControllerException, PermissionException {
+    public Sample saveSample(Account account, Sample sample) throws ControllerException,
+            PermissionException {
         return saveSample(account, sample, true);
     }
 
     /**
      * Save the {@link Sample} into the database, with the option to rebuild the search index.
-     *
+     * 
      * @param sample
      * @param scheduleIndexRebuild
      * @return saved sample.
@@ -132,19 +135,20 @@ public class SampleController {
     /**
      * Delete the {@link Sample} in the database, then rebuild the search index. Also deletes the
      * associated {@link Storage}, if it is a tube.
-     *
+     * 
      * @param sample
      * @throws ControllerException
      * @throws PermissionException
      */
-    public void deleteSample(Account account, Sample sample) throws ControllerException, PermissionException {
+    public void deleteSample(Account account, Sample sample) throws ControllerException,
+            PermissionException {
         deleteSample(account, sample, true);
     }
 
     /**
      * Delete the {@link Sample} in the database, with the option to rebuild the search index. Also
      * deletes the associated {@link Storage}, if it is a tube.
-     *
+     * 
      * @param sample
      * @param scheduleIndexRebuild
      * @throws ControllerException
@@ -162,7 +166,7 @@ public class SampleController {
             dao.deleteSample(sample);
 
             if (storage.getStorageType() == Storage.StorageType.TUBE) {
-                dao.delete(storage);
+                storageController.delete(storage);
             }
 
             if (scheduleIndexRebuild) {
@@ -175,7 +179,7 @@ public class SampleController {
 
     /**
      * Retrieve the number of {@link Sample}s associated with the {@link Entry}.
-     *
+     * 
      * @param entry
      * @return Number of samples associated with the entry.
      * @throws ControllerException
@@ -195,7 +199,7 @@ public class SampleController {
 
     /**
      * Retrieve the {@link Sample}s associated with the {@link Entry}.
-     *
+     * 
      * @param entry
      * @return ArrayList of {@link Sample}s.
      * @throws ControllerException
@@ -214,7 +218,7 @@ public class SampleController {
 
     /**
      * Retrieve the {@link Sample}s associated with the given depositor's email.
-     *
+     * 
      * @param depositorEmail
      * @param offset
      * @param limit
@@ -236,7 +240,7 @@ public class SampleController {
 
     /**
      * Retrieve the {@link Sample}s associated with the given {@link Storage}.
-     *
+     * 
      * @param storage
      * @return ArrayList of {@link Sample}s.
      * @throws ControllerException
@@ -252,7 +256,7 @@ public class SampleController {
 
     /**
      * Retrieve the number of {@link Sample}s by the given depositor's email.
-     *
+     * 
      * @param depositorEmail
      * @return Number of {@link Sample}s.
      * @throws ControllerException
@@ -273,11 +277,11 @@ public class SampleController {
         try {
             switch (field) {
 
-                default:
-                case CREATED:
-                    results = dao.retrieveSamplesByDepositorSortByCreated(email, asc);
-                    //                getSamplePermissionVerifier().hasReadPermissions(model, account) // TODO
-                    break;
+            default:
+            case CREATED:
+                results = dao.retrieveSamplesByDepositorSortByCreated(email, asc);
+                //                getSamplePermissionVerifier().hasReadPermissions(model, account) // TODO
+                break;
             }
         } catch (DAOException e) {
             throw new ControllerException(e);

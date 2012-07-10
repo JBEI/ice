@@ -5,7 +5,7 @@ import org.jbei.ice.shared.dto.PartInfo;
 public class PartSheetModel extends SingleInfoSheetModel<PartInfo> {
 
     @Override
-    protected PartInfo createInfo() {
+    public PartInfo createInfo() {
         return new PartInfo();
     }
 

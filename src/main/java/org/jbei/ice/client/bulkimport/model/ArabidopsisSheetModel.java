@@ -48,7 +48,7 @@ public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedI
     }
 
     @Override
-    protected ArabidopsisSeedInfo createInfo() {
+    public ArabidopsisSeedInfo createInfo() {
         return new ArabidopsisSeedInfo();
     }
 }

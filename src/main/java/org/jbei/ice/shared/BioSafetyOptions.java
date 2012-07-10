@@ -42,7 +42,7 @@ public enum BioSafetyOptions implements IsSerializable {
 
     public static Integer intValue(String value) {
         for (BioSafetyOptions option : BioSafetyOptions.values()) {
-            if (option.displayName.equals(value) || option.getValue().equals(value)) {
+            if (option.displayName.equalsIgnoreCase(value) || option.getValue().equals(value)) {
                 return Integer.valueOf(option.getValue());
 
             }

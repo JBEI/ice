@@ -1,21 +1,41 @@
 package org.jbei.ice.client.bulkimport.sheet;
 
-import com.google.gwt.event.dom.client.*;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.client.ui.HTMLTable.Cell;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.jbei.ice.client.bulkimport.SheetPresenter;
+import org.jbei.ice.client.bulkimport.model.SheetFieldData;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkImportDraftInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.ScrollEvent;
+import com.google.gwt.event.dom.client.ScrollHandler;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FocusPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLTable.Cell;
+import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.HasText;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 
 public class Sheet extends Composite implements SheetPresenter.View {
 
@@ -24,7 +44,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
     protected FlexTable sheetTable; // table used to represent the spreadsheet
     protected int row; // current row in the spreadsheet
 
-    private Label lastReplaced; // cache of the last widget that was replaced
+    private Label lastReplaced; // cache of the last widget that was replaced. it is set when a switch to input occurs
     private int currentRow;
     private int currentIndex;
 
@@ -42,8 +62,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
     protected final SheetPresenter presenter;
 
     private final TextBox input;
-    private final HashMap<Integer, String> attachmentRowFileIds;
-    private final HashMap<Integer, String> sequenceRowFileIds;
 
     private final static int ROW_COUNT = 50;
 
@@ -54,8 +72,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
     public Sheet(EntryAddType type, BulkImportDraftInfo info) {
 
         headerCol = 0;
-        attachmentRowFileIds = new HashMap<Integer, String>();
-        sequenceRowFileIds = new HashMap<Integer, String>();
 
         layout = new FlexTable();
         layout.setCellPadding(0);
@@ -257,16 +273,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
                 }
             }
         });
-
-        panel.addMouseUpHandler(new MouseUpHandler() {
-
-            @Override
-            public void onMouseUp(MouseUpEvent event) {
-                if (event.getNativeButton() == Event.BUTTON_RIGHT) {
-
-                }
-            }
-        });
     }
 
     protected Widget createHeaderCells() {
@@ -296,7 +302,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         HTML cell = new HTML("&nbsp;");
         cell.setStyleName("tail_cell_column_header");
         header.setWidget(row, headerCol, cell);
-//        header.getFlexCellFormatter().setStyleName(row, headerCol, "tail_cell_column_header_td");
+        //        header.getFlexCellFormatter().setStyleName(row, headerCol, "tail_cell_column_header_td");
         headerCol += 1;
     }
 
@@ -323,12 +329,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
     @Override
     public int getSheetRowCount() {
         return sheetTable.getRowCount();
-    }
-
-    @Override
-    public String getCellText(int row, int col) {
-        HasText widget = (HasText) sheetTable.getWidget(row, col);
-        return widget.getText().trim();
     }
 
     @Override
@@ -371,11 +371,11 @@ public class Sheet extends Composite implements SheetPresenter.View {
                     Label label = (Label) widget;
                     boolean isEmpty = label.getText().trim().isEmpty();
                     if (isEmpty && header.isRequired()) {
-                        label.setStyleName("cell_error");
+                        label.addStyleName("cell_error");
                         label.setTitle("Required field");
                         validates = false;
                     } else {
-                        label.setStyleName("cell");
+                        label.removeStyleName("cell_error");
                         label.setTitle("");
                     }
                 }
@@ -391,20 +391,11 @@ public class Sheet extends Composite implements SheetPresenter.View {
      */
     private void switchToInput() {
 
-        // get widget at current position. expect it to be a label
+        // the key handler for "panel" keeps calling switchToInput() even though input
+        // has the focus. 
         Widget widget = sheetTable.getWidget(currentRow, currentIndex);
         if (!(widget instanceof Label))
             return;
-
-        // if a switch has occurred, then set the text for it
-        if (lastReplaced != null) {
-            String lastText = input.getText(); // TODO : problem here. this is not always input
-            sheetTable.setWidget(inputRow, inputIndex, lastReplaced);
-            if (lastText != null && !lastText.isEmpty()) {
-                Label replaced = lastReplaced;
-                replaced.setText(lastText);
-            }
-        }
 
         // cache the current label we are replacing 
         lastReplaced = (Label) sheetTable.getWidget(currentRow, currentIndex);
@@ -414,9 +405,14 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         // replace
         final Header currentHeader = presenter.getTypeHeaders()[currentIndex];
-        String text = sheetTable.getText(currentRow, currentIndex);
-        currentHeader.getCell().setText(text);
-        sheetTable.setWidget(currentRow, currentIndex, currentHeader.getCell());
+        SheetCell sheetCell = currentHeader.getCell();
+        String text = "";
+        SheetFieldData data = sheetCell.getDataForRow(currentRow - 1);
+        if (data != null)
+            text = data.getValue();
+
+        sheetCell.setText(text);
+        sheetTable.setWidget(currentRow, currentIndex, sheetCell);
         currentHeader.getCell().setFocus();
     }
 
@@ -501,14 +497,16 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     /**
      * cell selection via click or arrow press
-     *
-     * @param newRow user selected row
-     * @param newCol user selected column
+     * 
+     * @param newRow
+     *            user selected row
+     * @param newCol
+     *            user selected column
      */
     private void selectCell(int newRow, int newCol) {
-        //        HTML corner = new HTML(
-        //                "<div style=\"position: relative; width: 5px; height: 5px; background-color: blue; top:
-        // 12px; right: -122px; border: 3px solid white\"></div>");
+        HTML corner = new HTML(
+                "<div style=\"position: relative; width: 5px; height: 5px; background-color: blue; top: "
+                        + "12px; right: -122px; border: 3px solid white\"></div>");
 
         if (currentRow == newRow && currentIndex == newCol)
             return;
@@ -519,37 +517,51 @@ public class Sheet extends Composite implements SheetPresenter.View {
                 widget.removeStyleName("cell_selected");
         }
 
+        // determine if user interacted with a cell prior to this cell
         if (lastReplaced != null) {
 
-            String inputText = getLastWidgetText();
+            Header currentHeader = presenter.getTypeHeaders()[inputIndex];
+            SheetCell cell = currentHeader.getCell();
+            String inputText = cell.setDataForRow(inputRow - 1); // converting to 0-index
             lastReplaced.setTitle(inputText);
-            if (inputText != null && inputText.length() > 15)
-                inputText = (inputText.substring(0, 13) + "...");
+
+            if (inputText != null && inputText.length() > 26)
+                inputText = (inputText.substring(0, 24) + "...");
             lastReplaced.setText(inputText);
 
             sheetTable.setWidget(inputRow, inputIndex, lastReplaced);
             inputRow = inputIndex = -1; // lastReplaced not visible
             lastReplaced = null;
-            panel.setFocus(true);          // not in click
+            panel.setFocus(true); // not in click
         }
 
-        sheetTable.getWidget(newRow, newCol).addStyleName("cell_selected");
+        Widget cellWidget = sheetTable.getWidget(newRow, newCol);
+        //        if (cellWidget instanceof Label) {
+        //            Label label = (Label) cellWidget;
+        //
+        //            HTMLPanel panel;
+        //            if (label.getText().isEmpty())
+        //                panel = new HTMLPanel(
+        //                        "<div class=\"cell cell_selected\"><div style=\"position: relative; width: 5px; height: 5px; background-color: #0082C0; top: "
+        //                                + "12px; right: -122px; border: 3px solid white\"></div></div>");
+        //            else
+        //                panel = new HTMLPanel(
+        //                        "<div class=\"cell cell_selected\">"
+        //                                + label.getText()
+        //                                + "<div style=\"position: relative; width: 5px; height: 5px; background-color: #0082C0; top: "
+        //                                + "-2px; right: -124px; border: 3px solid white\"></div></div>");
+        //            sheetTable.setWidget(newRow, newCol, panel);
+        //
+        //        } else {
+        cellWidget.addStyleName("cell_selected");
+        //        }
+
         currentRow = newRow;
         currentIndex = newCol;
     }
 
     public int getRow() {
         return this.row;
-    }
-
-    @Override
-    public HashMap<Integer, String> getAttachmentRowFileIds() {
-        return this.attachmentRowFileIds;
-    }
-
-    @Override
-    public HashMap<Integer, String> getSequenceRowFileIds() {
-        return this.sequenceRowFileIds;
     }
 
     @Override
@@ -562,19 +574,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     public void setRow(int row) {
         this.row = row;
-    }
-
-    /**
-     * poor method name. what this attempts to do is determine what the last widget was that the user interacted with
-     * and return the text for that. E.g. if the user entered a value in the suggest box (for auto complete boxes), this
-     * method determines that and returns the value for the box instead of the value for the input (Textbox), which is
-     * for regular fields.
-     *
-     * @return text of last widget user interacted with
-     */
-    private String getLastWidgetText() {
-        Header currentHeader = presenter.getTypeHeaders()[inputIndex];
-        return currentHeader.getCell().getWidgetText();
     }
 
     //

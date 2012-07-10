@@ -6,11 +6,13 @@ import java.util.Map.Entry;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import org.jbei.ice.client.AbstractPresenter;
 import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.Page;
 import org.jbei.ice.client.admin.bulkimport.BulkImportMenuItem;
 import org.jbei.ice.client.admin.bulkimport.DeleteBulkImportHandler;
 import org.jbei.ice.client.bulkimport.events.BulkImportDraftSubmitEvent;
@@ -213,10 +215,9 @@ public class BulkImportPresenter extends AbstractPresenter {
                                        @Override
                                        public void onSubmit(BulkImportSubmitEvent event) {
                                            if (event.isSuccess()) {
-                                               //
-                                               // TODO : reset sheet to avoid re-submission, delete?
                                                view.showFeedback("Entries submitted successfully for verification.",
                                                                  false);
+                                               History.newItem(Page.COLLECTIONS.getLink());
                                            } else {
                                                view.showFeedback("Error saving entries.", true);
                                            }

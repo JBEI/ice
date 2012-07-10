@@ -1,5 +1,10 @@
 package org.jbei.ice.lib.entry.sequence;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
 import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.controllers.permissionVerifiers.SequencePermissionVerifier;
@@ -10,6 +15,7 @@ import org.jbei.ice.lib.composers.formatters.IFormatter;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Feature;
@@ -27,11 +33,6 @@ import org.jbei.ice.lib.vo.DNAFeatureNote;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
 /**
  * ABI to manipulate {@link Sequence}s.
  *
@@ -46,15 +47,6 @@ public class SequenceController {
         dao = new SequenceDAO();
     }
 
-    /**
-     * Check if the user has read permission to the given {@link Sequence}.
-     *
-     * @param sequence
-     * @return True if user has read permission.
-     */
-    public boolean hasReadPermission(Account account, Sequence sequence) {
-        return verifier.hasReadPermissions(sequence, account);
-    }
 
     /**
      * Check if the user has write permission to the given {@link Sequence}.
@@ -83,6 +75,31 @@ public class SequenceController {
         }
 
         return sequence;
+    }
+
+    public void parseAndSaveSequence(Account account, Entry entry, String sequenceString) throws ControllerException {
+        IDNASequence dnaSequence = SequenceController.parse(sequenceString);
+
+        if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
+            String errorMsg = "Couldn't parse sequence file! Supported formats: "
+                    + GeneralParser.getInstance().availableParsersToString()
+                    + ". "
+                    + "If you believe this is an error, please contact the administrator with your file";
+
+            throw new ControllerException(errorMsg);
+        }
+
+        Sequence sequence;
+
+        try {
+            sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+            sequence.setSequenceUser(sequenceString);
+            sequence.setEntry(entry);
+            save(account, sequence);
+        } catch (PermissionException e) {
+            Logger.error(e);
+            throw new ControllerException("User does not have permissions to save sequence");
+        }
     }
 
     /**
@@ -120,19 +137,6 @@ public class SequenceController {
         }
 
         try {
-            // TODO : not sure what the intent of this is and it is causing problems so
-            // TODO : commenting this out for now until it is sorted out 
-
-            //            if (sequence.getEntry() instanceof Part) {
-            //                Part part = (Part) sequence.getEntry();
-            //                AssemblyController assemblyController = new AssemblyController(getAccount());
-            //                AssemblyStandard assemblyType = assemblyController
-            //                        .determineAssemblyStandard(sequence);
-            //                part.setPackageFormat(assemblyType);
-            //
-            //                assemblyController.populateAssemblyAnnotations(sequence);
-            //
-            //            }
             result = dao.saveSequence(sequence);
             if (scheduleIndexRebuild) {
                 ApplicationController.scheduleBlastIndexRebuildJob();
@@ -314,14 +318,12 @@ public class SequenceController {
             }
         }
 
-        FeaturedDNASequence featuredDNASequence = new FeaturedDNASequence(sequence.getSequence(),
-                                                                          sequence.getEntry().getNamesAsString(),
-                                                                          (sequence
-                                                                                  .getEntry() instanceof Plasmid) ? (
-                                                                                  (Plasmid) sequence
-                                                                                          .getEntry())
-                                                                                  .getCircular() : false, features, "",
-                                                                          "");
+        FeaturedDNASequence featuredDNASequence = new FeaturedDNASequence(
+                sequence.getSequence(),
+                sequence.getEntry().getNamesAsString(),
+                (sequence.getEntry() instanceof Plasmid) ? ((Plasmid) sequence.getEntry()).getCircular() : false,
+                features, "",
+                "");
 
         return featuredDNASequence;
     }
@@ -441,14 +443,6 @@ public class SequenceController {
         }
 
         return sequence;
-    }
-
-    public Feature getReferenceFeature(Feature feature) throws ControllerException {
-        try {
-            return dao.getReferenceFeature(feature);
-        } catch (DAOException e) {
-            throw new ControllerException();
-        }
     }
 
     public boolean hasSequence(Entry entry) throws ControllerException {

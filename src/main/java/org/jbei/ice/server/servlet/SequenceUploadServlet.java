@@ -1,8 +1,9 @@
 package org.jbei.ice.server.servlet;
 
-import gwtupload.server.UploadAction;
-import gwtupload.server.exceptions.UploadActionException;
-import org.apache.commons.fileupload.FileItem;
+import java.util.List;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -10,14 +11,11 @@ import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.vo.IDNASequence;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import java.util.List;
+import gwtupload.server.UploadAction;
+import gwtupload.server.exceptions.UploadActionException;
+import org.apache.commons.fileupload.FileItem;
 
 public class SequenceUploadServlet extends UploadAction {
 
@@ -93,6 +91,7 @@ public class SequenceUploadServlet extends UploadAction {
                 if (item.isFormField())
                     continue;
 
+                // get contents of file
                 sequenceUser = item.getString();
                 if (sequenceUser != null && !sequenceUser.isEmpty()) {
                     removeSessionFileItems(request);
@@ -107,32 +106,12 @@ public class SequenceUploadServlet extends UploadAction {
     private String saveSequence(Entry entry, Account account, String sequenceUser) {
 
         SequenceController sequenceController = new SequenceController();
-        IDNASequence dnaSequence = SequenceController.parse(sequenceUser);
-
-        if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
-            String errorMsg = "Couldn't parse sequence file! Supported formats: "
-                    + GeneralParser.getInstance().availableParsersToString()
-                    + ". "
-                    + "If you believe this is an error, please contact the administrator with your file";
-
-            return errorMsg;
-        }
-
-        Sequence sequence = null;
-
         try {
-            sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
-            sequence.setSequenceUser(sequenceUser);
-            sequence.setEntry(entry);
-            sequenceController.save(account, sequence);
+            sequenceController.parseAndSaveSequence(account, entry, sequenceUser);
+            return "";
         } catch (ControllerException e) {
             Logger.error(e);
-            return "Error saving sequence";
-        } catch (PermissionException e) {
-            Logger.error(e);
-            return "User does not have permissions to save sequence";
+            return e.getMessage();
         }
-
-        return "";
     }
 }

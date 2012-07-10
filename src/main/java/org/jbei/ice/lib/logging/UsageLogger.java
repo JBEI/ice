@@ -13,15 +13,6 @@ public class UsageLogger {
             .getLogger("org.jbei.ice.usage");
 
     /**
-     * Log a message at the TRACE level.
-     * 
-     * @param msg
-     */
-    public static void trace(String msg) {
-        logger.trace(msg);
-    }
-
-    /**
      * Log a message at the DEBUG level.
      * 
      * @param msg

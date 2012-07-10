@@ -4,7 +4,7 @@ import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * Default cell for the import sheet
- *
+ * 
  * @author Hector Plahar
  */
 public class InputSheetCell extends SheetCell {
@@ -22,9 +22,17 @@ public class InputSheetCell extends SheetCell {
         input.setText(text);
     }
 
+    /**
+     * Sets data for row specified in the param
+     * 
+     * @param row
+     *            current row user is working on
+     * @return display for user entered value
+     */
     @Override
-    public String getWidgetText() {
+    public String setDataForRow(int row) {
         String ret = input.getText();
+        setWidgetValue(row, ret, ret);
         input.setText("");
         return ret;
     }

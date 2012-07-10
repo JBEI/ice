@@ -1,18 +1,21 @@
 package org.jbei.ice.lib.utils;
 
-import com.ibm.icu.util.Calendar;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-import org.dom4j.ElementHandler;
-import org.dom4j.ElementPath;
-import org.dom4j.Namespace;
-import org.dom4j.QName;
-import org.dom4j.io.OutputFormat;
-import org.dom4j.io.SAXReader;
-import org.dom4j.io.XMLWriter;
-import org.dom4j.tree.DefaultElement;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
@@ -42,20 +45,18 @@ import org.jbei.ice.lib.vo.AttachmentData;
 import org.jbei.ice.lib.vo.CompleteEntry;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.dom4j.ElementHandler;
+import org.dom4j.ElementPath;
+import org.dom4j.Namespace;
+import org.dom4j.QName;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.SAXReader;
+import org.dom4j.io.XMLWriter;
+import org.dom4j.tree.DefaultElement;
 
 /**
  * IceXML serializer/deserializer.
@@ -290,222 +291,12 @@ public class IceXmlSerializer {
         if (entry.getEntryFundingSources().size() > 0) {
             DefaultElement fundingSources = new DefaultElement(FUNDING_SOURCES, iceNamespace);
             for (EntryFundingSource fundingSource : entry.getEntryFundingSources()) {
-                fundingSources.add(new DefaultElement(FUNDING_SOURCE, iceNamespace).addText(
-                        emptyStringify(fundingSource.getFundingSource().getFundingSource()))
-                                                                                   .addAttribute(
-                                                                                           PRINCIPAL_INVESTIGATOR,
-                                                                                           emptyStringify(fundingSource
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                                                                                                  .getFundingSource()
-                                                                                                                  .getPrincipalInvestigator())));
+                fundingSources.add(
+                        new DefaultElement(FUNDING_SOURCE, iceNamespace)
+                                .addText(emptyStringify(fundingSource.getFundingSource().getFundingSource()))
+                                .addAttribute(
+                                        PRINCIPAL_INVESTIGATOR,
+                                        emptyStringify(fundingSource.getFundingSource().getPrincipalInvestigator())));
             }
             entryRoot.add(fundingSources);
         }
@@ -605,6 +396,184 @@ public class IceXmlSerializer {
         } else if (entry.getRecordType().equals(PART)) {
             Part part = (Part) entry;
             fields.add(new DefaultElement(PACKAGE_FORMAT, iceNamespace).addText(emptyStringify(part
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                                                                                                        .getPackageFormat()
                                                                                                        .toString())));
         } else if (entry.getRecordType().equals(ARABIDOPSIS)) {

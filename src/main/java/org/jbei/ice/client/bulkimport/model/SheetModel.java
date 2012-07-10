@@ -6,4 +6,6 @@ import org.jbei.ice.shared.dto.EntryInfo;
 public abstract class SheetModel<T extends EntryInfo> {
 
     public abstract T setInfoField(SheetFieldData datum, EntryInfo info);
+
+    public abstract T createInfo();
 }

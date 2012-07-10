@@ -25,15 +25,6 @@ public class Logger {
             .getLogger("org.jbei.ice.system");
 
     /**
-     * Log a message at the TRACE level.
-     * 
-     * @param msg
-     */
-    public static void trace(String msg) {
-        logger.trace(msg);
-    }
-
-    /**
      * Log a message at the DEBUG level.
      * 
      * @param msg
