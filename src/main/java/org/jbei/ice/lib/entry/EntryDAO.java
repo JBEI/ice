@@ -728,4 +728,8 @@ class EntryDAO extends HibernateRepository<Entry> {
             closeSession(session);
         }
     }
+
+    public Entry update(Entry entry) throws DAOException {
+        return super.saveOrUpdate(entry);
+    }
 }

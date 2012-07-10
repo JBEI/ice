@@ -360,6 +360,9 @@ public class BulkImportDraftController {
                 if (!updated) {
                     Strain strain = (Strain) InfoToModelFactory.infoToEntry(strainInfo);
                     Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(plasmidInfo);
+                    strain.setVisibility(Visibility.DRAFT.getValue());
+                    plasmid.setVisibility(Visibility.DRAFT.getValue());
+
                     HashSet<Entry> results = entryController.createStrainWithPlasmid(account,
                         strain, plasmid);
                     contents.addAll(results);
@@ -377,6 +380,7 @@ public class BulkImportDraftController {
                 updated = updateIfExists(account, contents, info);
                 if (!updated) {
                     Entry entry = InfoToModelFactory.infoToEntry(info);
+                    entry.setVisibility(Visibility.DRAFT.getValue());
                     entry = entryController.createEntry(account, entry);
                     contents.add(entry);
                 }
@@ -393,9 +397,11 @@ public class BulkImportDraftController {
             throw new ControllerException(e);
         }
 
+        // convert draft to info
         BulkImportDraftInfo draftInfo = new BulkImportDraftInfo();
         draftInfo.setCount(contents.size());
         draftInfo.setCreated(draft.getCreationTime());
+        draftInfo.setLastUpdate(draft.getLastUpdateTime());
         draftInfo.setId(draft.getId());
         Account draftAccount = draft.getAccount();
         draftInfo.setName(draftAccount.getFullName());
@@ -421,7 +427,8 @@ public class BulkImportDraftController {
             if (info.getId() == entry.getId()) {
                 // perform update
                 InfoToModelFactory.infoToEntry(info, entry);
-                entryController.save(account, entry);
+                entry.setVisibility(Visibility.DRAFT.getValue());
+                entryController.update(account, entry);
                 return true;
             }
         }

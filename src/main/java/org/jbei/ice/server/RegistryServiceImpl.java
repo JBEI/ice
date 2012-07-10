@@ -1533,7 +1533,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             Entry existing = controller.getByRecordId(account, info.getRecordId());
 
             Entry entry = InfoToModelFactory.infoToEntry(info, existing);
-            controller.save(account, entry);
+            controller.update(account, entry);
             return true;
 
         } catch (ControllerException e) {
