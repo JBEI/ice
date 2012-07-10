@@ -1,5 +1,11 @@
 package org.jbei.ice.lib.account;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -10,22 +16,16 @@ import org.jbei.ice.lib.models.Moderator;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
 /**
  * DAO to manipulate {@link Account} objects in the database.
- *
+ * 
  * @author Hector Plahar, Timothy Ham, Zinovii Dmytriv
  */
 class AccountDAO extends HibernateRepository<Account> {
 
     /**
      * Retrieve {@link Account} by id from the database.
-     *
+     * 
      * @param id unique local identifier for object
      * @return Account
      * @throws DAOException
@@ -56,7 +56,7 @@ class AccountDAO extends HibernateRepository<Account> {
 
     /**
      * Retrieve all {@link Account}s sorted by the firstName field.
-     *
+     * 
      * @return Set of {@link Account}s.
      * @throws DAOException
      */
@@ -107,7 +107,7 @@ class AccountDAO extends HibernateRepository<Account> {
 
     /**
      * Retrieve an {@link Account} by the email field.
-     *
+     * 
      * @param email unique email identifier for account
      * @return Account
      * @throws DAOException
@@ -117,7 +117,8 @@ class AccountDAO extends HibernateRepository<Account> {
 
         Session session = newSession();
         try {
-            Query query = session.createQuery("from " + Account.class.getName() + " where email = :email");
+            Query query = session.createQuery("from " + Account.class.getName()
+                    + " where email = :email");
             query.setParameter("email", email);
             Object result = query.uniqueResult();
 
@@ -135,7 +136,7 @@ class AccountDAO extends HibernateRepository<Account> {
 
     /**
      * Save the given {@link Account} into the database.
-     *
+     * 
      * @param account account object to save
      * @return Saved account.
      * @throws DAOException
@@ -146,7 +147,7 @@ class AccountDAO extends HibernateRepository<Account> {
 
     /**
      * Retrieve the {@link Account} by the authorization token.
-     *
+     * 
      * @param authToken token
      * @return Account.
      * @throws DAOException
@@ -176,12 +177,14 @@ class AccountDAO extends HibernateRepository<Account> {
         return account;
     }
 
+    @SuppressWarnings("deprecation")
     public void updateModeratorAccounts() throws DAOException {
         Session session = newSession();
 
         try {
             session.getTransaction().begin();
             Query query = session.createQuery("from " + Moderator.class.getName());
+            @SuppressWarnings("unchecked")
             List<Moderator> results = new ArrayList<Moderator>(query.list());
             for (Moderator moderator : results) {
                 Account account = moderator.getAccount();

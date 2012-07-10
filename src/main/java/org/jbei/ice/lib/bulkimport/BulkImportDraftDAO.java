@@ -1,5 +1,8 @@
 package org.jbei.ice.lib.bulkimport;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -9,13 +12,10 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-
 /**
  * Hibernate Data accessor object for retrieving {@link BulkImportDraft} objects
  * from the database
- *
+ * 
  * @author Hector Plahar
  */
 class BulkImportDraftDAO extends HibernateRepository<BulkImportDraft> {
@@ -50,6 +50,11 @@ class BulkImportDraftDAO extends HibernateRepository<BulkImportDraft> {
         return super.save(draft);
     }
 
+    public BulkImportDraft update(BulkImportDraft draft) throws DAOException {
+        return super.saveOrUpdate(draft);
+
+    }
+
     public void delete(BulkImportDraft draft) throws DAOException {
         super.delete(draft);
     }
@@ -60,7 +65,8 @@ class BulkImportDraftDAO extends HibernateRepository<BulkImportDraft> {
 
         try {
             session.getTransaction().begin();
-            BulkImportDraft result = (BulkImportDraft) session.get(BulkImportDraft.class, draft.getId());
+            BulkImportDraft result = (BulkImportDraft) session.get(BulkImportDraft.class,
+                draft.getId());
             if (result == null) {
                 session.getTransaction().rollback();
                 throw new DAOException("Could not locate draft with id \"" + draft.getId() + "\"");
@@ -92,7 +98,8 @@ class BulkImportDraftDAO extends HibernateRepository<BulkImportDraft> {
         try {
             session = newSession();
             session.getTransaction().begin();
-            Query query = session.createQuery("from " + BulkImportDraft.class.getName() + " where account = :account");
+            Query query = session.createQuery("from " + BulkImportDraft.class.getName()
+                    + " where account = :account");
             query.setParameter("account", account);
             result = new ArrayList<BulkImportDraft>(query.list());
             session.getTransaction().commit();
@@ -114,8 +121,9 @@ class BulkImportDraftDAO extends HibernateRepository<BulkImportDraft> {
         try {
             session = newSession();
             session.getTransaction().begin();
-            Query query = session.createSQLQuery(
-                    "select count(*) from bulk_import_draft_entry where bulk_import_draft_id = " + draftId);
+            Query query = session
+                    .createSQLQuery("select count(*) from bulk_import_draft_entry where bulk_import_draft_id = "
+                            + draftId);
             int count = ((BigInteger) query.uniqueResult()).intValue();
             session.getTransaction().commit();
             return count;
@@ -130,4 +138,5 @@ class BulkImportDraftDAO extends HibernateRepository<BulkImportDraft> {
             closeSession(session);
         }
     }
+
 }

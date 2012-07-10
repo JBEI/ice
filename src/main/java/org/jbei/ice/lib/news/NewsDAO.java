@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.news;
 
+import java.util.ArrayList;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -7,26 +9,25 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.models.News;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
-import java.util.ArrayList;
-
 /**
  * DAO for managing {@link News}
- *
+ * 
  * @author Hector Plahar
  */
-class NewsDAO extends HibernateRepository {
+class NewsDAO extends HibernateRepository<News> {
 
     public News get(long id) throws DAOException {
         return (News) super.get(News.class, id);
     }
 
+    @SuppressWarnings("unchecked")
     public ArrayList<News> retrieveAll() throws DAOException {
         Session session = newSession();
         try {
             ArrayList<News> results = new ArrayList<News>();
 
             Query query = session.createQuery("from " + News.class.getName()
-                                                      + " order by creationTime DESC ");
+                    + " order by creationTime DESC ");
 
             results.addAll(query.list());
             return results;
@@ -41,7 +42,7 @@ class NewsDAO extends HibernateRepository {
     }
 
     public News save(News news) throws DAOException {
-        return (News) super.saveOrUpdate(news);
+        return super.saveOrUpdate(news);
     }
 
     public void update(News news) throws DAOException {

@@ -8,7 +8,13 @@ import org.jbei.ice.shared.dto.AttachmentInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 
-// model for strain, plasmid, seed, part to avoid code duplication
+/**
+ * Extracts common elements of entries from sheet
+ * 
+ * @author Hector Plahar
+ * 
+ * @param <T>
+ */
 public abstract class SingleInfoSheetModel<T extends EntryInfo> extends SheetModel<T> {
 
     public abstract T setField(T info, SheetFieldData datum);

@@ -1,5 +1,9 @@
 package org.jbei.ice.lib.account;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Set;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountPreferences;
@@ -18,15 +22,11 @@ import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.web.PersistentSessionDataWrapper;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Set;
-
 /**
  * ABI to manipulate {@link Account} objects.
  * <p/>
  * This class contains methods that wrap {@link AccountDAO} to manipulate {@link Account} objects.
- *
+ * 
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 
@@ -43,7 +43,7 @@ public class AccountController {
 
     /**
      * Retrieve account from the database by database id.
-     *
+     * 
      * @param id Database id of account
      * @return Account for the id
      * @throws ControllerException
@@ -58,10 +58,10 @@ public class AccountController {
 
     /**
      * Changes user's password
-     *
-     * @param email     unique account identifier
+     * 
+     * @param email unique account identifier
      * @param sendEmail whether to notify user of password change
-     * @param url       current site url
+     * @param url current site url
      * @throws ControllerException if account could not be retrieved using unique identifier
      */
     public void resetPassword(String email, boolean sendEmail, String url)
@@ -87,9 +87,10 @@ public class AccountController {
     }
 
     /**
-     * Updates account password associated the account email. It encrypts it before associating it with the account
-     *
-     * @param email    user unique identifier
+     * Updates account password associated the account email. It encrypts it before associating it
+     * with the account
+     * 
+     * @param email user unique identifier
      * @param password new password
      * @throws ControllerException
      */
@@ -103,17 +104,19 @@ public class AccountController {
     }
 
     /**
-     * Creates a new account using the parameters passed. A random password is initially generated , encrypted and
+     * Creates a new account using the parameters passed. A random password is initially generated ,
+     * encrypted and
      * assigned to the account
-     *
-     * @param firstName   account first name
-     * @param lastName    account last name
-     * @param initials    account initials
-     * @param email       unique identifier for account
+     * 
+     * @param firstName account first name
+     * @param lastName account last name
+     * @param initials account initials
+     * @param email unique identifier for account
      * @param institution account institution affiliation
      * @param description account description
      * @return generated password
-     * @throws ControllerException in the event email is already assigned to another user or is empty
+     * @throws ControllerException in the event email is already assigned to another user or is
+     *             empty
      */
     public String createNewAccount(String firstName, String lastName, String initials,
             String email, String institution, String description) throws ControllerException {
@@ -138,7 +141,7 @@ public class AccountController {
         String newPassword = Utils.generateUUID().substring(24);
         String encryptedPassword = AccountUtils.encryptPassword(newPassword);
         Account account = new Account(firstName, lastName, initials, email, encryptedPassword,
-                                      institution, description);
+                institution, description);
         account.setIp("");
         account.setIsSubscribed(1);
         account.setCreationTime(Calendar.getInstance().getTime());
@@ -150,7 +153,8 @@ public class AccountController {
     public Account createAdminAccount(String adminAccountEmail, String adminPassword)
             throws ControllerException {
         if (getByEmail(adminAccountEmail) != null) {
-            throw new ControllerException("Account with email \"" + adminAccountEmail + "\" already exists");
+            throw new ControllerException("Account with email \"" + adminAccountEmail
+                    + "\" already exists");
         }
 
         Account adminAccount = new Account();
@@ -168,26 +172,13 @@ public class AccountController {
         adminAccount.setCreationTime(currentTime);
         adminAccount.setModificationTime(currentTime);
         adminAccount.setLastLoginTime(currentTime);
-
-        // TODO
-
-//        try {
-//            save(adminAccount);
-//            Moderator adminModerator = new Moderator();
-//            adminModerator.setAccount(adminAccount);
-//            dao.saveModerator(adminModerator);
-//        } catch (DAOException e) {
-//            String msg = "Could not create administrator account";
-//            Logger.error(msg, e);
-//            throw new ControllerException(e);
-//        }
-
+        adminAccount.setType(AccountType.ADMIN);
         return adminAccount;
     }
 
     /**
      * Retrieve all account from the database, sorted by Given (First) Name.
-     *
+     * 
      * @return Accounts
      * @throws ControllerException
      */
@@ -202,7 +193,7 @@ public class AccountController {
 
     /**
      * Retrieve {@link Account} by email.
-     *
+     * 
      * @param email of the account
      * @return {@link Account}
      * @throws ControllerException
@@ -217,7 +208,7 @@ public class AccountController {
 
     /**
      * Store {@link Account} into the database.
-     *
+     * 
      * @param account
      * @return {@link Account} that has been saved.
      * @throws ControllerException
@@ -237,7 +228,7 @@ public class AccountController {
 
     /**
      * Check in the database if an account is a moderator.
-     *
+     * 
      * @param account
      * @return True, if the account is a moderator.
      * @throws ControllerException
@@ -251,7 +242,7 @@ public class AccountController {
 
     /**
      * Check if the given password is valid for the account.
-     *
+     * 
      * @param account
      * @param password
      * @return True if correct password.
@@ -273,7 +264,7 @@ public class AccountController {
 
     /**
      * Retrieve the {@link Account} by session key.
-     *
+     * 
      * @param sessionKey
      * @return Account associated with the session key.
      * @throws ControllerException
@@ -288,13 +279,12 @@ public class AccountController {
 
     /**
      * Return the {@link AccountPreferences} of the given account.
-     *
+     * 
      * @param account
      * @return accountPreference
      * @throws ControllerException
      */
-    public AccountPreferences getAccountPreferences(Account account)
-            throws ControllerException {
+    public AccountPreferences getAccountPreferences(Account account) throws ControllerException {
         AccountPreferences accountPreferences;
 
         try {
@@ -309,12 +299,12 @@ public class AccountController {
     /**
      * Authenticate a user in the database.
      * <p/>
-     * Using the {@link IAuthenticationBackend} specified in the settings file, authenticate the user, and return the
-     * sessionData
-     *
+     * Using the {@link IAuthenticationBackend} specified in the settings file, authenticate the
+     * user, and return the sessionData
+     * 
      * @param login
      * @param password
-     * @param ip       IP Address of the user.
+     * @param ip IP Address of the user.
      * @return {@link SessionData}
      * @throws InvalidCredentialsException
      * @throws ControllerException
@@ -368,9 +358,9 @@ public class AccountController {
     /**
      * Authenticate a user in the database.
      * <p/>
-     * Using the {@link IAuthenticationBackend} specified in the settings file, authenticate the user, and return the
-     * sessionData
-     *
+     * Using the {@link IAuthenticationBackend} specified in the settings file, authenticate the
+     * user, and return the sessionData
+     * 
      * @param login
      * @param password
      * @return {@link AccountInfo}
@@ -396,7 +386,7 @@ public class AccountController {
 
     /**
      * See if the given sessionKey is still authenticated with the system.
-     *
+     * 
      * @param sessionKey
      * @return True if sessionKey is still authenticated (active) to the system.
      * @throws ControllerException
@@ -405,7 +395,7 @@ public class AccountController {
         boolean result = false;
         try {
             SessionData sessionData = PersistentSessionDataWrapper.getInstance().getSessionData(
-                    sessionKey);
+                sessionKey);
             if (sessionData != null) {
                 result = true;
             }
@@ -417,7 +407,7 @@ public class AccountController {
 
     /**
      * De-authenticate the given sessionKey. The user is logged out from the system.
-     *
+     * 
      * @param sessionKey
      * @throws ControllerException
      */
@@ -429,7 +419,7 @@ public class AccountController {
 
     /**
      * Save {@link AccountPreferences} to the database.
-     *
+     * 
      * @param accountPreferences
      * @throws ControllerException
      */
@@ -444,7 +434,7 @@ public class AccountController {
 
     /**
      * Retrieve the System account from the database.
-     *
+     * 
      * @return Account for the system account.
      * @throws ControllerException
      */

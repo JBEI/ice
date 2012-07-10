@@ -1,34 +1,35 @@
 package org.jbei.ice.lib.entry.sequence;
 
-import org.apache.commons.io.IOUtils;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.managers.ManagerException;
-import org.jbei.ice.lib.models.TraceSequence;
-import org.jbei.ice.lib.models.TraceSequenceAlignment;
-import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.server.dao.hibernate.HibernateRepository;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.managers.ManagerException;
+import org.jbei.ice.lib.models.TraceSequence;
+import org.jbei.ice.lib.models.TraceSequenceAlignment;
+import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.server.dao.hibernate.HibernateRepository;
+
 /**
  * TraceSequence to manipulate {@link TraceSequence} objects.
- *
+ * 
  * @author Zinovii Dmytriv, Timothy Ham
  */
-public class TraceSequenceDAO extends HibernateRepository {
+public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
     private static String traceFilesDirectory = JbeirSettings.getSetting("TRACE_FILES_DIRECTORY");
 
     /**
      * Create a new {@link TraceSequence} object in the database, and write the file data to disk.
-     *
+     * 
      * @param traceSequence
      * @param inputStream
      * @return Saved TraceSequence object.
@@ -66,25 +67,37 @@ public class TraceSequenceDAO extends HibernateRepository {
 
     /**
      * Save the given {@link TraceSequence} object in the database.
-     *
+     * 
      * @param traceSequence
      * @return Saved TraceSequence object.
      * @throws ManagerException
      */
     public TraceSequence save(TraceSequence traceSequence) throws DAOException {
-        TraceSequenceAlignment traceSequenceAlignment = (TraceSequenceAlignment) super
-                .saveOrUpdate(traceSequence.getTraceSequenceAlignment());
 
-        traceSequence.setTraceSequenceAlignment(traceSequenceAlignment);
-
-        TraceSequence result = (TraceSequence) super.saveOrUpdate(traceSequence);
-
-        return result;
+        TraceSequenceAlignment traceSequenceAlignment = traceSequence.getTraceSequenceAlignment();
+        Session session = newSession();
+        try {
+            session.getTransaction().begin();
+            session.saveOrUpdate(traceSequenceAlignment);
+            traceSequence.setTraceSequenceAlignment(traceSequenceAlignment);
+            session.saveOrUpdate(traceSequence);
+            session.getTransaction().commit();
+            return traceSequence;
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            throw new DAOException("dbSave failed!", e);
+        } catch (Exception e1) {
+            session.getTransaction().rollback();
+            Logger.error(e1);
+            throw new DAOException("Unknown database exception ", e1);
+        } finally {
+            closeSession(session);
+        }
     }
 
     /**
      * Retrieve the {@link TraceSequence} object by its fileId.
-     *
+     * 
      * @param fileId
      * @return TraceSequence object.
      * @throws ManagerException
@@ -95,7 +108,7 @@ public class TraceSequenceDAO extends HibernateRepository {
         Session session = newSession();
         try {
             Query query = session.createQuery("from " + TraceSequence.class.getName()
-                                                      + " where fileId = :fileId");
+                    + " where fileId = :fileId");
 
             query.setParameter("fileId", fileId);
 
@@ -118,7 +131,7 @@ public class TraceSequenceDAO extends HibernateRepository {
     /**
      * Delete the given {@link TraceSequence} object in the database, and remove the file data from
      * disk.
-     *
+     * 
      * @param traceSequence
      * @throws ManagerException
      */
@@ -137,8 +150,8 @@ public class TraceSequenceDAO extends HibernateRepository {
 
     /**
      * Write the given file data to disk.
-     *
-     * @param fileName    Name of file written to disk.
+     * 
+     * @param fileName Name of file written to disk.
      * @param inputStream File data.
      * @throws IOException
      * @throws ManagerException
@@ -176,7 +189,7 @@ public class TraceSequenceDAO extends HibernateRepository {
 
     /**
      * Delete the file data on disk associated with the {@link TraceSequence} object given.
-     *
+     * 
      * @param traceSequence
      * @throws IOException
      * @throws ManagerException
@@ -194,7 +207,7 @@ public class TraceSequenceDAO extends HibernateRepository {
 
     /**
      * Retrieve all {@link TraceSequence} objects associated with the given {@link Entry} object.
-     *
+     * 
      * @param entry
      * @return List of TraceSequence objects.
      * @throws ManagerException
@@ -209,8 +222,8 @@ public class TraceSequenceDAO extends HibernateRepository {
 
         Session session = newSession();
         try {
-            String queryString = "from TraceSequence as traceSequence where traceSequence.entry = :entry order by " +
-                    "traceSequence.creationTime asc";
+            String queryString = "from TraceSequence as traceSequence where traceSequence.entry = :entry order by "
+                    + "traceSequence.creationTime asc";
             Query query = session.createQuery(queryString);
 
             query.setEntity("entry", entry);
@@ -235,7 +248,7 @@ public class TraceSequenceDAO extends HibernateRepository {
      * // TODO : move to a common file manager
      * Retrieve the {@link File} object from disk associated with the given {@link TraceSequence}
      * object.
-     *
+     * 
      * @param traceSequence
      * @return Trace file.
      * @throws ManagerException
@@ -253,7 +266,7 @@ public class TraceSequenceDAO extends HibernateRepository {
     /**
      * Retrieve the number of {@link TraceSequence} object associated with the given {@link Entry}
      * object.
-     *
+     * 
      * @param entry
      * @return Number of TraceSequence objects.
      * @throws ManagerException

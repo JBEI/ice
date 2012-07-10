@@ -1,5 +1,8 @@
 package org.jbei.ice.lib.bulkimport;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -9,22 +12,20 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * DAO to manage {@link BulkImport} objects in the database.
- *
+ * 
  * @author Hector Plahar
  */
-class BulkImportDAO extends HibernateRepository {
+class BulkImportDAO extends HibernateRepository<BulkImport> {
 
     @SuppressWarnings("unchecked")
     public ArrayList<BulkImport> retrieveByUser(Account account) throws DAOException {
 
         Session session = newSession();
         session.getTransaction().begin();
-        Query query = session.createQuery("from " + BulkImport.class.getName() + " where account = :account");
+        Query query = session.createQuery("from " + BulkImport.class.getName()
+                + " where account = :account");
         query.setEntity("account", account);
 
         try {
@@ -35,15 +36,13 @@ class BulkImportDAO extends HibernateRepository {
             session.getTransaction().rollback();
             throw new DAOException("Error retrieving bulk import record", e);
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
     }
 
     /**
      * Create a new {@link BulkImport} object in the database.
-     *
+     * 
      * @param data
      * @return Saved BulkImport
      * @throws DAOException
@@ -63,7 +62,7 @@ class BulkImportDAO extends HibernateRepository {
 
     /**
      * Saves bulk import in preparation for verification
-     *
+     * 
      * @param data bulk import data to save
      * @throws DAOException
      */
@@ -83,7 +82,7 @@ class BulkImportDAO extends HibernateRepository {
 
     /**
      * Delete the given {@link BulkImport} object in the database.
-     *
+     * 
      * @param bulkImport {@link BulkImport} to delete
      * @throws DAOException
      */
@@ -93,11 +92,10 @@ class BulkImportDAO extends HibernateRepository {
 
     /**
      * Retrieve all {@link BulkImport} objects in the database.
-     *
+     * 
      * @return List of BulkImport objects.
      * @throws DAOException
      */
-    @SuppressWarnings("unchecked")
     public List<BulkImport> retrieveAll() throws DAOException {
         List<BulkImport> list = new ArrayList<BulkImport>();
         list.addAll(super.retrieveAll(BulkImport.class));
@@ -106,7 +104,7 @@ class BulkImportDAO extends HibernateRepository {
 
     /**
      * Retrieve a {@link BulkImport} object by its id.
-     *
+     * 
      * @param importId unique identifier (typically synthetic id) for bulk import object
      * @return BulkImport object.
      * @throws DAOException
@@ -125,23 +123,19 @@ class BulkImportDAO extends HibernateRepository {
             session.getTransaction().rollback();
             throw new DAOException("Error retrieving bulk import record", e);
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
-
-//        return (BulkImport) super.get(BulkImport.class, importId);
     }
 
     /**
      * Retrieve a {@link BulkImport} type by its id.
-     *
+     * 
      * @param id unique identifier (typically synthetic id) for bulk import object
      * @return Type
      * @throws DAOException
      */
     public String retrieveType(long id) throws DAOException {
-        BulkImport record = (BulkImport) super.get(BulkImport.class, id);
+        BulkImport record = super.get(BulkImport.class, id);
         if (record == null)
             throw new DAOException("Could not retrieve bulk import record with id " + id);
 

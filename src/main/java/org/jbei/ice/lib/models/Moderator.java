@@ -1,8 +1,5 @@
 package org.jbei.ice.lib.models;
 
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.IModel;
-
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -13,9 +10,12 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.dao.IModel;
+
 /**
  * Tag an account as a moderator.
- *
+ * 
  * @author Timothy Ham, Zinovii Dmytriv
  */
 

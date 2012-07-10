@@ -388,7 +388,7 @@ public class BulkImportDraftController {
         try {
             draft.setContents(contents);
             draft.setLastUpdateTime(new Date(System.currentTimeMillis()));
-            dao.save(draft);
+            dao.update(draft);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -510,7 +510,7 @@ public class BulkImportDraftController {
                     try {
                         saveAttachment(entryAccount, info.getAttachments().get(0), entry);
                     } catch (Exception e) {
-                        Logger.error(e.getMessage());
+                        Logger.error(e);
                     }
                 }
 
@@ -574,6 +574,11 @@ public class BulkImportDraftController {
 
         File file = new File(JbeirSettings.getSetting("TEMPORARY_DIRECTORY") + File.separatorChar
                 + fileId);
+
+        if (!file.exists()) {
+            Logger.error("Could not find attachment file \"" + file.getAbsolutePath() + "\"");
+            return;
+        }
 
         Attachment attachment = new Attachment();
         attachment.setEntry(entry);

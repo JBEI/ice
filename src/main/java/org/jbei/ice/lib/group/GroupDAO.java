@@ -1,5 +1,9 @@
 package org.jbei.ice.lib.group;
 
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -9,20 +13,16 @@ import org.jbei.ice.lib.managers.ManagerException;
 import org.jbei.ice.lib.models.Group;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 /**
  * Manager to manipulate {@link org.jbei.ice.lib.models.Group} objects.
- *
+ * 
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
-class GroupDAO extends HibernateRepository {
+class GroupDAO extends HibernateRepository<Group> {
 
     /**
      * Retrieve {@link org.jbei.ice.lib.models.Group} object from the database by its uuid.
-     *
+     * 
      * @param uuid
      * @return Group object.
      * @throws ManagerException
@@ -33,7 +33,7 @@ class GroupDAO extends HibernateRepository {
 
     /**
      * Retrieve {@link Group} object from the database by its id.
-     *
+     * 
      * @param id
      * @return Group object.
      * @throws ManagerException
@@ -44,7 +44,7 @@ class GroupDAO extends HibernateRepository {
 
     /**
      * Retrieve all the {@link Group} objects in the database.
-     *
+     * 
      * @return SEt of Groups.
      * @throws ManagerException
      */
@@ -97,7 +97,7 @@ class GroupDAO extends HibernateRepository {
 
     /**
      * Update the given {@link Group} object in the database.
-     *
+     * 
      * @param group
      * @return Saved Group object.
      * @throws ManagerException
@@ -108,7 +108,7 @@ class GroupDAO extends HibernateRepository {
 
     /**
      * Delete the given {@link Group} object in the database.
-     *
+     * 
      * @param group
      * @throws ManagerException
      */
@@ -118,7 +118,7 @@ class GroupDAO extends HibernateRepository {
 
     /**
      * Save the given {@link Group} object in the database.
-     *
+     * 
      * @param group
      * @return Saved Group object.
      * @throws ManagerException
