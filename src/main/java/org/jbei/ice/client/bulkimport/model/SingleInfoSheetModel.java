@@ -17,9 +17,9 @@ import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
  */
 public abstract class SingleInfoSheetModel<T extends EntryInfo> extends SheetModel<T> {
 
-    public abstract T setField(T info, SheetFieldData datum);
+    public abstract T setField(T info, SheetCellData datum);
 
-    public T setInfoField(SheetFieldData datum, EntryInfo info) {
+    public T setInfoField(SheetCellData datum, EntryInfo info) {
 
         if (info == null)
             info = createInfo();

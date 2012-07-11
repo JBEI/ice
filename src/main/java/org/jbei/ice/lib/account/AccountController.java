@@ -237,6 +237,7 @@ public class AccountController {
         if (account == null)
             return false;
 
+        account = this.get(account.getId());
         return account.getType() == AccountType.ADMIN;
     }
 

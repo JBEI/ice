@@ -26,7 +26,7 @@ import org.jbei.ice.shared.dto.StrainInfo;
 
 /**
  * Factory object for converting data transfer objects to model
- *
+ * 
  * @author Hector Plahar
  */
 public class InfoToModelFactory {
@@ -36,7 +36,7 @@ public class InfoToModelFactory {
     }
 
     /**
-     * @param info  EntryInfo object to converted to Entry
+     * @param info EntryInfo object to converted to Entry
      * @param entry if null, a new entry is created otherwise entry is used
      * @return converted EntryInfo object
      */
@@ -45,84 +45,85 @@ public class InfoToModelFactory {
         EntryType type = info.getType();
 
         switch (type) {
-            case PLASMID:
-                Plasmid plasmid;
-                if (entry == null) {
-                    plasmid = new Plasmid();
-                    entry = plasmid;
-                } else
-                    plasmid = (Plasmid) entry;
+        case PLASMID:
+            Plasmid plasmid;
+            if (entry == null) {
+                plasmid = new Plasmid();
+                entry = plasmid;
+            } else
+                plasmid = (Plasmid) entry;
 
-                plasmid.setRecordType(EntryType.PLASMID.getName());
-                PlasmidInfo plasmidInfo = (PlasmidInfo) info;
+            plasmid.setRecordType(EntryType.PLASMID.getName());
+            PlasmidInfo plasmidInfo = (PlasmidInfo) info;
 
-                plasmid.setBackbone(plasmidInfo.getBackbone());
-                plasmid.setOriginOfReplication(plasmidInfo.getOriginOfReplication());
-                plasmid.setPromoters(plasmidInfo.getPromoters());
-                plasmid.setCircular(plasmidInfo.getCircular() == null ? false : plasmidInfo.getCircular());
+            plasmid.setBackbone(plasmidInfo.getBackbone());
+            plasmid.setOriginOfReplication(plasmidInfo.getOriginOfReplication());
+            plasmid.setPromoters(plasmidInfo.getPromoters());
+            plasmid.setCircular(plasmidInfo.getCircular() == null ? false : plasmidInfo
+                    .getCircular());
 
-                break;
+            break;
 
-            case STRAIN:
-                Strain strain;
-                if (entry == null) {
-                    strain = new Strain();
-                    entry = strain;
-                } else
-                    strain = (Strain) entry;
+        case STRAIN:
+            Strain strain;
+            if (entry == null) {
+                strain = new Strain();
+                entry = strain;
+            } else
+                strain = (Strain) entry;
 
-                strain.setRecordType(EntryType.STRAIN.getName());
-                StrainInfo strainInfo = (StrainInfo) info;
+            strain.setRecordType(EntryType.STRAIN.getName());
+            StrainInfo strainInfo = (StrainInfo) info;
 
-                strain.setHost(strainInfo.getHost());
-                strain.setGenotypePhenotype(strainInfo.getGenotypePhenotype());
-                strain.setPlasmids(strainInfo.getPlasmids());
-                break;
+            strain.setHost(strainInfo.getHost());
+            strain.setGenotypePhenotype(strainInfo.getGenotypePhenotype());
+            strain.setPlasmids(strainInfo.getPlasmids());
+            break;
 
-            case PART:
-                Part part;
-                if (entry == null) {
-                    part = new Part();
-                    entry = part;
-                } else
-                    part = (Part) entry;
-                part.setRecordType(EntryType.PART.getName());
+        case PART:
+            Part part;
+            if (entry == null) {
+                part = new Part();
+                entry = part;
+            } else
+                part = (Part) entry;
+            part.setRecordType(EntryType.PART.getName());
 
-                // default is RAW until sequence is supplied.
-                part.setPackageFormat(AssemblyStandard.RAW);
-                break;
+            // default is RAW until sequence is supplied.
+            part.setPackageFormat(AssemblyStandard.RAW);
+            break;
 
-            case ARABIDOPSIS:
-                ArabidopsisSeed seed;
-                if (entry == null) {
-                    seed = new ArabidopsisSeed();
-                    entry = seed;
-                } else
-                    seed = (ArabidopsisSeed) entry;
+        case ARABIDOPSIS:
+            ArabidopsisSeed seed;
+            if (entry == null) {
+                seed = new ArabidopsisSeed();
+                entry = seed;
+            } else
+                seed = (ArabidopsisSeed) entry;
 
-                seed.setRecordType(EntryType.ARABIDOPSIS.getName());
-                ArabidopsisSeedInfo seedInfo = (ArabidopsisSeedInfo) info;
+            seed.setRecordType(EntryType.ARABIDOPSIS.getName());
+            ArabidopsisSeedInfo seedInfo = (ArabidopsisSeedInfo) info;
 
-                seed.setHomozygosity(seedInfo.getHomozygosity());
-                seed.setHarvestDate(seedInfo.getHarvestDate());
-                seed.setEcotype(seedInfo.getEcotype());
-                seed.setParents(seedInfo.getParents());
+            seed.setHomozygosity(seedInfo.getHomozygosity());
+            seed.setHarvestDate(seedInfo.getHarvestDate());
+            seed.setEcotype(seedInfo.getEcotype());
+            seed.setParents(seedInfo.getParents());
 
-                if (seedInfo.getGeneration() != null) {
-                    ArabidopsisSeed.Generation generation = ArabidopsisSeed.Generation.valueOf(seedInfo.getGeneration()
-                                                                                                       .name());
-                    seed.setGeneration(generation);
-                }
+            if (seedInfo.getGeneration() != null) {
+                ArabidopsisSeed.Generation generation = ArabidopsisSeed.Generation.valueOf(seedInfo
+                        .getGeneration().name());
+                seed.setGeneration(generation);
+            }
 
-                if (seedInfo.getPlantType() != null) {
-                    ArabidopsisSeed.PlantType plantType = ArabidopsisSeed.PlantType.valueOf(seedInfo.getPlantType()
-                                                                                                    .name());
-                    seed.setPlantType(plantType);
-                }
-                break;
+            if (seedInfo.getPlantType() != null) {
+                ArabidopsisSeed.PlantType plantType = ArabidopsisSeed.PlantType.valueOf(seedInfo
+                        .getPlantType().name());
+                seed.setPlantType(plantType);
+            }
+            break;
 
-            default:
-                return null;
+        default:
+            return null;
         }
 
         entry = setCommon(entry, info);
@@ -145,17 +146,19 @@ public class InfoToModelFactory {
         entry.setCreatorEmail(info.getCreatorEmail());
         entry.setStatus(info.getStatus() == null ? "" : info.getStatus());
         entry.setAlias(info.getAlias());
-        entry.setBioSafetyLevel(info.getBioSafetyLevel() == null ? new Integer(0) : info.getBioSafetyLevel());
+        entry.setBioSafetyLevel(info.getBioSafetyLevel() == null ? new Integer(0) : info
+                .getBioSafetyLevel());
         entry.setShortDescription(info.getShortDescription());
         entry.setLongDescription(info.getLongDescription());
-        entry.setLongDescriptionType(info.getLongDescriptionType() != null ? info.getLongDescriptionType() : "text");
+        entry.setLongDescriptionType(info.getLongDescriptionType() != null ? info
+                .getLongDescriptionType() : "text");
         entry.setIntellectualProperty(info.getIntellectualProperty());
         entry.setVersionId(info.getVersionId());
         Set<Link> links = getLinks(info.getLinks(), entry);
         entry.setLinks(links);
 
         Set<EntryFundingSource> entryFundingSources = getFundingSources(info.getFundingSource(),
-                                                                        info.getPrincipalInvestigator(), entry);
+            info.getPrincipalInvestigator(), entry);
         entry.setEntryFundingSources(entryFundingSources);
         entry.setKeywords(info.getKeywords());
 
@@ -184,7 +187,8 @@ public class InfoToModelFactory {
         return parameters;
     }
 
-    private static Set<EntryFundingSource> getFundingSources(String fundingSourcesStr, String pI, Entry entry) {
+    private static Set<EntryFundingSource> getFundingSources(String fundingSourcesStr, String pI,
+            Entry entry) {
 
         Set<EntryFundingSource> fundingSources = entry.getEntryFundingSources();
         if (fundingSources == null) {
@@ -218,12 +222,20 @@ public class InfoToModelFactory {
             }
         } else if (pI != null && !pI.trim().isEmpty()) {
 
-            FundingSource fundingSource = new FundingSource();
-            EntryFundingSource entryFundingSource = new EntryFundingSource();
-            fundingSources.add(entryFundingSource);
-            entryFundingSource.setFundingSource(fundingSource);
+            EntryFundingSource entryFundingSource;
+            FundingSource fundingSource;
 
-            fundingSource.setFundingSource("");
+            if (!fundingSources.isEmpty()) {
+                entryFundingSource = (EntryFundingSource) fundingSources.toArray()[0];
+                fundingSource = entryFundingSource.getFundingSource();
+            } else {
+                fundingSource = new FundingSource();
+                entryFundingSource = new EntryFundingSource();
+                fundingSources.add(entryFundingSource);
+                entryFundingSource.setFundingSource(fundingSource);
+            }
+
+            fundingSource.setFundingSource(fundingSourcesStr); // funding source string is expected to be empty
             fundingSource.setPrincipalInvestigator(pI);
             entryFundingSource.setEntry(entry);
         }

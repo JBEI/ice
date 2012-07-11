@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
 
     @Override
-    public StrainInfo setInfoField(SheetFieldData datum, EntryInfo strain) {
+    public StrainInfo setInfoField(SheetCellData datum, EntryInfo strain) {
 
         if (strain == null) {
             strain = createInfo();
@@ -36,7 +36,7 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
         return strain;
     }
 
-    private void setStrainInfo(StrainInfo strain, SheetFieldData datum) {
+    private void setStrainInfo(StrainInfo strain, SheetCellData datum) {
         if (datum == null)
             return;
 
@@ -144,7 +144,7 @@ public class StrainWithPlasmidModel extends SheetModel<StrainInfo> {
         }
     }
 
-    public void setPlasmidInfo(PlasmidInfo info, SheetFieldData datum) {
+    public void setPlasmidInfo(PlasmidInfo info, SheetCellData datum) {
         if (datum == null)
             return;
 

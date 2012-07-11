@@ -2,11 +2,6 @@ package org.jbei.ice.client.bulkimport;
 
 import java.util.ArrayList;
 
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.SingleSelectionModel;
 import org.jbei.ice.client.admin.bulkimport.BulkImportMenuItem;
 import org.jbei.ice.client.admin.bulkimport.IDeleteMenuHandler;
 import org.jbei.ice.client.admin.bulkimport.SavedDraftsMenu;
@@ -18,9 +13,25 @@ import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.shared.EntryAddType;
 
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ToggleButton;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SingleSelectionModel;
+
 /**
  * View for the bulk import page. Works with {@link BulkImportPresenter}
- *
+ * 
  * @author Hector Plahar
  */
 public class BulkImportView extends AbstractLayout implements IBulkImportView {
@@ -122,20 +133,19 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
 
         mainContent
                 .setHTML(
-                        1,
-                        0,
-                        "<br><div style=\"font-family: Arial; border: 1px solid #e4e4e4; padding: 10px; " +
-                                "background-color: #f1f1f1\"><p>Select type the "
-                                + "of entry you wish to bulk import.</p> <p>Please note that columns"
-                                + " with headers indicated by <span class=\"required\">*</span> "
-                                + "are required. You will not be able to submit the form until you enter a "
-                                + "value for those fields. However, you may save incomplete forms as a named draft " +
-                                "and continue working on it at a later time. "
-                                + "Saved drafts will not be submitted and are only visible to you.</p>"
-                                + "<p>After submitting, an administrator must approve your "
-                                + "submission before it will show up in the search listings. Contact them if you are " +
-                                "in a "
-                                + "hurry.</p></div>");
+                    1,
+                    0,
+                    "<br><div style=\"font-family: Arial; border: 1px solid #e4e4e4; padding: 10px; "
+                            + "background-color: #f1f1f1\"><p>Select type the "
+                            + "of entry you wish to bulk import.</p> <p>Please note that columns"
+                            + " with headers indicated by <span class=\"required\">*</span> "
+                            + "are required. You will not be able to submit the form until you enter a "
+                            + "value for those fields. However, you may save incomplete forms as a named draft "
+                            + "and continue working on it at a later time. "
+                            + "Saved drafts will not be submitted and are only visible to you.</p>"
+                            + "<p>After submitting, an administrator must approve your "
+                            + "submission before it will show up in the search listings. Contact them if you are "
+                            + "in a " + "hurry.</p></div>");
         return mainContent;
     }
 
@@ -184,8 +194,8 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         mainContent.getFlexCellFormatter().setColSpan(1, 0, index);
 
         HTMLPanel bulkImportHeader = new HTMLPanel(
-                "<span id=\"bulk_import_header_title\"></span><span style=\"float: right\" " +
-                        "id=\"upload_csv_icon\"></span>");
+                "<span id=\"bulk_import_header_title\"></span><span style=\"float: right\" "
+                        + "id=\"upload_csv_icon\"></span>");
         bulkImportHeader.add(contentHeader, "bulk_import_header_title");
         bulkImportHeader.add(uploadCsv, "upload_csv_icon");
 
@@ -270,9 +280,6 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     @Override
     public void setDraftMenuVisibility(boolean visible, boolean isToggleClick) {
 
-
-//        draftsMenu.setVisible(visible);
-//        pendingDraftsMenu.setVisible(visible);
         menuPanel.setVisible(visible);
         toggle.setDown(visible);
         if (visible)
@@ -281,17 +288,14 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
             headerPanel.setCellHorizontalAlignment(create, HasAlignment.ALIGN_LEFT);
 
         if (!visible) {
-//            layout.setHTML(0, 0, "");
             layout.getFlexCellFormatter().setWidth(0, 0, "0px");
             layout.setHTML(0, 1, "");
             layout.getFlexCellFormatter().setWidth(0, 1, "0px");
             if (isToggleClick)
                 sheet.getSheet().increaseWidthBy(230);
         } else {
-//            layout.setWidget(0, 0, menuPanel);
             layout.getFlexCellFormatter().setWidth(0, 0, "220px");
 
-//            layout.setHTML(0, 1, "&nbsp;");
             layout.getFlexCellFormatter().setWidth(0, 1, "10px");
             if (isToggleClick)
                 sheet.getSheet().decreaseWidthBy(230);

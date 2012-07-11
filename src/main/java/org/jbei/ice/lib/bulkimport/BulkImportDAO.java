@@ -138,5 +138,4 @@ class BulkImportDAO extends HibernateRepository<BulkImportDraft> {
             closeSession(session);
         }
     }
-
 }

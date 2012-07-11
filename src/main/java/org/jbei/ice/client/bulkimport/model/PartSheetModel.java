@@ -10,7 +10,7 @@ public class PartSheetModel extends SingleInfoSheetModel<PartInfo> {
     }
 
     @Override
-    public PartInfo setField(PartInfo info, SheetFieldData datum) {
+    public PartInfo setField(PartInfo info, SheetCellData datum) {
         // nothing part specific
         return info;
     }

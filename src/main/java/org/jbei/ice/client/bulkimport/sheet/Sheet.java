@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.jbei.ice.client.bulkimport.SheetPresenter;
-import org.jbei.ice.client.bulkimport.model.SheetFieldData;
+import org.jbei.ice.client.bulkimport.model.SheetCellData;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkImportInfo;
@@ -63,7 +63,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     private final TextBox input;
 
-    private final static int ROW_COUNT = 5;
+    private final static int ROW_COUNT = 50;
 
     public Sheet(EntryAddType type) {
         this(type, null);
@@ -213,6 +213,9 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
             // index col
             HTML indexCell = new HTML(i + "");
+
+            // TODO : right click menu here
+
             colIndex.setWidget(row, 0, indexCell);
             indexCell.setStyleName("index_cell");
             colIndex.getFlexCellFormatter().setStyleName(row, 0, "index_td_cell");
@@ -313,11 +316,13 @@ public class Sheet extends Composite implements SheetPresenter.View {
                 continue;
 
             final int FIELDS = presenter.getFieldSize();
+            Header[] headers = presenter.getTypeHeaders();
 
             for (int j = 0; j < FIELDS; j += 1) {
                 HasText widget = (HasText) sheetTable.getWidget(row, i);
                 widget.setText("");
                 ((Widget) widget).setStyleName("cell");
+                headers[j].getCell().reset();
             }
         }
     }
@@ -337,18 +342,15 @@ public class Sheet extends Composite implements SheetPresenter.View {
     }
 
     // currently goes through each row and cell and checks to cell value
-    @Override
     public boolean isEmptyRow(int row) {
-        int cellCount = sheetTable.getCellCount(row);
+
+        Header[] headers = presenter.getTypeHeaders();
+        int cellCount = headers.length;
 
         for (int i = 0; i < cellCount; i += 1) {
-            HasText widget = (HasText) sheetTable.getWidget(row, i);
-            if (widget == null)
-                continue;
+            Header header = headers[i];
 
-            String text = widget.getText();
-
-            if (text != null && !text.trim().isEmpty())
+            if (header.getCell().getDataForRow(row) != null)
                 return false;
         }
 
@@ -407,7 +409,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         final Header currentHeader = presenter.getTypeHeaders()[currentIndex];
         SheetCell sheetCell = currentHeader.getCell();
         String text = "";
-        SheetFieldData data = sheetCell.getDataForRow(currentRow - 1);
+        SheetCellData data = sheetCell.getDataForRow(currentRow - 1);
         if (data != null)
             text = data.getValue();
 
@@ -451,6 +453,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
     }
 
     private void dealWithRightArrowPress() {
+
         if ((currentRow == -1 && currentIndex == -1))
             return;
 
@@ -504,9 +507,9 @@ public class Sheet extends Composite implements SheetPresenter.View {
      *            user selected column
      */
     private void selectCell(int newRow, int newCol) {
-        HTML corner = new HTML(
-                "<div style=\"position: relative; width: 5px; height: 5px; background-color: blue; top: "
-                        + "12px; right: -122px; border: 3px solid white\"></div>");
+        //        HTML corner = new HTML(
+        //                "<div style=\"position: relative; width: 5px; height: 5px; background-color: blue; top: "
+        //                        + "12px; right: -122px; border: 3px solid white\"></div>");
 
         if (currentRow == newRow && currentIndex == newCol)
             return;
@@ -565,7 +568,15 @@ public class Sheet extends Composite implements SheetPresenter.View {
     }
 
     @Override
-    public void setCellWidgetForCurrentRow(Header header, String display, String title, int col) {
+    public void setCellWidgetForCurrentRow(Header header, String value, int col) {
+        if (value == null)
+            value = "";
+
+        String display = value;
+        String title = value;
+        if (value.length() > 20)
+            display = (value.substring(0, 18) + "...");
+
         Widget widget = new HTML(display);
         widget.setTitle(title);
         widget.setStyleName("cell");

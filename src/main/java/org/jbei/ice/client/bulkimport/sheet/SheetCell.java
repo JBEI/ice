@@ -2,7 +2,7 @@ package org.jbei.ice.client.bulkimport.sheet;
 
 import java.util.HashMap;
 
-import org.jbei.ice.client.bulkimport.model.SheetFieldData;
+import org.jbei.ice.client.bulkimport.model.SheetCellData;
 
 import com.google.gwt.user.client.ui.Composite;
 
@@ -14,10 +14,10 @@ import com.google.gwt.user.client.ui.Composite;
  */
 public abstract class SheetCell extends Composite {
 
-    private final HashMap<Integer, SheetFieldData> rowValues;
+    private final HashMap<Integer, SheetCellData> rowValues;
 
     public SheetCell() {
-        rowValues = new HashMap<Integer, SheetFieldData>();
+        rowValues = new HashMap<Integer, SheetCellData>();
     }
 
     /**
@@ -31,7 +31,7 @@ public abstract class SheetCell extends Composite {
     public abstract void setText(String text);
 
     /**
-     * Sets data for row specified in the param
+     * Sets data for row specified in the param, using the user entered value in the input widget
      * 
      * @param row current row user is working on
      * 
@@ -55,9 +55,9 @@ public abstract class SheetCell extends Composite {
     }
 
     protected void setWidgetValue(int inputRow, String value, String id) {
-        SheetFieldData data = rowValues.get(inputRow);
+        SheetCellData data = rowValues.get(inputRow);
         if (data == null) {
-            data = new SheetFieldData();
+            data = new SheetCellData();
             rowValues.put(inputRow, data);
         }
 
@@ -66,20 +66,20 @@ public abstract class SheetCell extends Composite {
     }
 
     public String getValueForRow(int inputRow) {
-        SheetFieldData data = rowValues.get(inputRow);
+        SheetCellData data = rowValues.get(inputRow);
         if (data == null)
             return "";
         return data.getValue();
     }
 
     public String getIdForRow(int inputRow) {
-        SheetFieldData data = rowValues.get(inputRow);
+        SheetCellData data = rowValues.get(inputRow);
         if (data == null)
             return "";
         return data.getId();
     }
 
-    public SheetFieldData getDataForRow(int row) {
+    public SheetCellData getDataForRow(int row) {
         return rowValues.get(row);
     }
 

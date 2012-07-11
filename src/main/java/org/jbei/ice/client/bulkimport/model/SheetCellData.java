@@ -6,19 +6,19 @@ import org.jbei.ice.client.bulkimport.sheet.Header;
 // from the sheet. e.g. file input has the uploaded id
 // and the display name
 
-public class SheetFieldData {
+public class SheetCellData {
 
     private Header type;
     private String id;
     private String value;
 
-    public SheetFieldData(Header type, String id, String value) {
+    public SheetCellData(Header type, String id, String value) {
         this.type = type;
         this.id = id;
         this.value = value;
     }
 
-    public SheetFieldData() {
+    public SheetCellData() {
     }
 
     public Header getTypeHeader() {

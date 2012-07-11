@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.jbei.ice.client.bulkimport.model.ModelFactory;
-import org.jbei.ice.client.bulkimport.model.SheetFieldData;
+import org.jbei.ice.client.bulkimport.model.SheetCellData;
 import org.jbei.ice.client.bulkimport.model.SheetModel;
 import org.jbei.ice.client.bulkimport.sheet.Header;
 import org.jbei.ice.client.bulkimport.sheet.ImportTypeHeaders;
@@ -27,13 +27,11 @@ public class SheetPresenter {
 
         void clear();
 
-        boolean isEmptyRow(int row);
-
         void setRow(int row);
 
         int getRow();
 
-        void setCellWidgetForCurrentRow(Header header, String display, String title, int col);
+        void setCellWidgetForCurrentRow(Header header, String value, int col);
 
         int getSheetRowCount();
     }
@@ -102,26 +100,31 @@ public class SheetPresenter {
         // for each row
         for (int i = 0; i < rowCount; i += 1) {
 
-            if (view.isEmptyRow(i)) {
-                continue;
-            }
-
-            // sheet includes the headers so the actual rows start from 1
-            int index = i - 1;
-
             // is row associated with a saved entry?
             EntryInfo existing;
-            if (currentInfo != null && currentInfo.getEntryList().size() > index)
-                existing = currentInfo.getEntryList().get(index);
+            if (currentInfo != null && currentInfo.getEntryList().size() > i)
+                existing = currentInfo.getEntryList().get(i);
             else
                 existing = model.createInfo();
 
             // for each header
+            SheetCellData data = null;
+            boolean rowHasData = false;
+
+            // go through headers (column) for data
             for (Header header : headers) {
-                String text = header.getCell().getValueForRow(index);
-                String id = header.getCell().getIdForRow(index);
-                existing = model.setInfoField(new SheetFieldData(header, id, text), existing);
+                data = header.getCell().getDataForRow(i);
+                if (data == null)
+                    continue;
+
+                rowHasData = true;
+                data.setType(header);
+                existing = model.setInfoField(data, existing);
             }
+
+            // skip no data rows
+            if (!rowHasData)
+                continue;
 
             if (existing != null) {
                 existing.setOwnerEmail(ownerEmail);
@@ -157,23 +160,16 @@ public class SheetPresenter {
 
         for (int i = 0; i < headersSize; i += 1) {
 
-            String display = "";
-            String title = "";
+            String value = "";
+
             if (currentInfo != null && currentInfo.getCount() >= view.getRow()) {
+                EntryInfo info = currentInfo.getEntryList().get(index);
 
-                EntryInfo primaryInfo = currentInfo.getEntryList().get(index);
-                String value = InfoValueExtractorFactory.extractValue(getType(), headers[i],
-                    primaryInfo, primaryInfo.getInfo(), index);
-                if (value == null)
-                    value = "";
-
-                display = value;
-                title = value;
-                if (value.length() > 15)
-                    display = (value.substring(0, 13) + "...");
+                // extractor also sets the header data structure
+                value = InfoValueExtractorFactory.extractValue(getType(), headers[i], info, index);
             }
 
-            view.setCellWidgetForCurrentRow(headers[i], display, title, i);
+            view.setCellWidgetForCurrentRow(headers[i], value, i);
         }
         view.setRow(view.getRow() + 1);
     }

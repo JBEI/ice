@@ -19,7 +19,7 @@ import org.junit.Test;
 /**
  * @author Hector Plahar
  */
-public class BulkImportDraftDAOTest {
+public class BulkImportDAOTest {
 
     private BulkImportDAO dao;
     private AccountController controller;
@@ -29,10 +29,6 @@ public class BulkImportDraftDAOTest {
         HibernateHelper.initializeMock();
         dao = new BulkImportDAO();
         controller = mock(AccountController.class);
-    }
-
-    @Test
-    public void testRetrieveCount() throws Exception {
     }
 
     @Test

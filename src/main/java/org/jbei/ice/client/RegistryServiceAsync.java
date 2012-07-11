@@ -1,7 +1,10 @@
 package org.jbei.ice.client;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.SuggestOracle;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.AutoCompleteField;
@@ -9,13 +12,20 @@ import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.QueryOperator;
-import org.jbei.ice.shared.dto.*;
+import org.jbei.ice.shared.dto.AccountInfo;
+import org.jbei.ice.shared.dto.BlastResultInfo;
+import org.jbei.ice.shared.dto.BulkImportInfo;
+import org.jbei.ice.shared.dto.EntryInfo;
+import org.jbei.ice.shared.dto.EntryType;
+import org.jbei.ice.shared.dto.GroupInfo;
+import org.jbei.ice.shared.dto.NewsItem;
+import org.jbei.ice.shared.dto.SampleInfo;
+import org.jbei.ice.shared.dto.SearchFilterInfo;
+import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.SuggestOracle;
 
 public interface RegistryServiceAsync {
 
@@ -69,9 +79,6 @@ public interface RegistryServiceAsync {
     void retrieveSampleInfo(String sid, LinkedList<Long> sampleIds, ColumnField sortField,
             boolean asc, AsyncCallback<LinkedList<SampleInfo>> callback);
 
-//    void retrieveFolderDetails(String sid, long folderId, AsyncCallback<FolderDetails> callback)
-//            throws AuthenticationException;
-
     void retrieveUserSavedDrafts(String sid, AsyncCallback<ArrayList<BulkImportInfo>> callback)
             throws AuthenticationException;
 
@@ -97,13 +104,12 @@ public interface RegistryServiceAsync {
             AsyncCallback<FolderDetails> callback) throws AuthenticationException;
 
     void createUserCollection(String sid, String name, String description,
-            ArrayList<Long> arrayList, AsyncCallback<FolderDetails> callback) throws AuthenticationException;
-
-//    void retrieveUserCollections(String sessionId, String userId,
-//            AsyncCallback<ArrayList<FolderDetails>> callback) throws AuthenticationException;
+            ArrayList<Long> arrayList, AsyncCallback<FolderDetails> callback)
+            throws AuthenticationException;
 
     void moveToUserCollection(String sid, long source, ArrayList<Long> destination,
-            ArrayList<Long> entryIds, AsyncCallback<ArrayList<FolderDetails>> callback) throws AuthenticationException;
+            ArrayList<Long> entryIds, AsyncCallback<ArrayList<FolderDetails>> callback)
+            throws AuthenticationException;
 
     void addEntriesToCollection(String sid, ArrayList<Long> destination, ArrayList<Long> entryIds,
             AsyncCallback<ArrayList<FolderDetails>> callback) throws AuthenticationException;
@@ -112,7 +118,8 @@ public interface RegistryServiceAsync {
     // end collections
     //
 
-    void updateEntry(String sid, EntryInfo info, AsyncCallback<Boolean> callback) throws AuthenticationException;
+    void updateEntry(String sid, EntryInfo info, AsyncCallback<Boolean> callback)
+            throws AuthenticationException;
 
     void retrieveStorageSchemes(String sessionId, EntryType type,
             AsyncCallback<HashMap<SampleInfo, ArrayList<String>>> callback);
@@ -161,15 +168,14 @@ public interface RegistryServiceAsync {
     void updateAccountPassword(String sid, String email, String password,
             AsyncCallback<Boolean> callback) throws AuthenticationException;
 
-    void handleForgotPassword(String email, String url, AsyncCallback<Boolean> callback) throws AuthenticationException;
+    void handleForgotPassword(String email, String url, AsyncCallback<Boolean> callback)
+            throws AuthenticationException;
 
     void retrieveAllUserAccounts(String sid, AsyncCallback<ArrayList<AccountInfo>> callback)
             throws AuthenticationException;
 
-//    void retrieveEntryCounts(String sessionId, AsyncCallback<HashMap<EntryType, Long>> callback)
-//            throws AuthenticationException;
-
-    void removeSequence(String sid, long entryId, AsyncCallback<Boolean> callback) throws AuthenticationException;
+    void removeSequence(String sid, long entryId, AsyncCallback<Boolean> callback)
+            throws AuthenticationException;
 
     void retrieveEntryTraceSequences(String sid, long entryId,
             AsyncCallback<ArrayList<SequenceAnalysisInfo>> callback) throws AuthenticationException;
@@ -186,16 +192,18 @@ public interface RegistryServiceAsync {
     void deleteEntry(String sessionId, EntryInfo info,
             AsyncCallback<ArrayList<FolderDetails>> callback) throws AuthenticationException;
 
-    void createEntry(String sid, EntryInfo info, AsyncCallback<Long> async) throws AuthenticationException;
-
-    void createStrainWithPlasmid(String sid, HashSet<EntryInfo> infoSet, AsyncCallback<ArrayList<Long>> async)
+    void createEntry(String sid, EntryInfo info, AsyncCallback<Long> async)
             throws AuthenticationException;
 
-    void removeFromUserCollection(String sessionId, long source, ArrayList<Long> ids, AsyncCallback<FolderDetails>
-            async) throws AuthenticationException;
+    void createStrainWithPlasmid(String sid, HashSet<EntryInfo> infoSet,
+            AsyncCallback<ArrayList<Long>> async) throws AuthenticationException;
+
+    void removeFromUserCollection(String sessionId, long source, ArrayList<Long> ids,
+            AsyncCallback<FolderDetails> async) throws AuthenticationException;
 
     void saveBulkImportDraft(String sid, String email, String name, EntryAddType importType,
-            ArrayList<EntryInfo> entryList, AsyncCallback<BulkImportInfo> async) throws AuthenticationException;
+            ArrayList<EntryInfo> entryList, AsyncCallback<BulkImportInfo> async)
+            throws AuthenticationException;
 
     void submitBulkImport(String sid, EntryAddType importType, ArrayList<EntryInfo> entryList,
             AsyncCallback<Boolean> async);

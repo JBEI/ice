@@ -55,14 +55,26 @@ public class BulkImportController {
         entryController = new EntryController();
     }
 
+    /**
+     * Retrieves list of bulk imports that are owned by the system. System ownership is assigned to
+     * all bulk imports that are submitted by non-admins. Administrative privileges are required
+     * for making this call
+     * 
+     * @param account account for user making call
+     * @return list of bulk imports pending verification
+     * @throws ControllerException
+     * @throws PermissionException
+     */
     public ArrayList<BulkImportInfo> retrievePendingImports(Account account)
             throws ControllerException, PermissionException {
+
+        // check for admin privileges
         if (!accountController.isAdministrator(account))
             throw new PermissionException("Administrative privileges are required!");
 
         ArrayList<BulkImportInfo> infoList = new ArrayList<BulkImportInfo>();
-
         ArrayList<BulkImportDraft> results;
+
         try {
             results = dao.retrieveByAccount(accountController.getSystemAccount());
             if (results == null)
@@ -151,8 +163,7 @@ public class BulkImportController {
     /**
      * Retrieves list of user saved drafts
      * 
-     * @param account
-     *            account of requesting user
+     * @param account account of requesting user
      * @param userAccount
      *            account whose saved drafts are being requested
      * @return list of draft infos representing saved drafts.
@@ -181,6 +192,7 @@ public class BulkImportController {
 
             BulkImportInfo draftInfo = new BulkImportInfo();
             draftInfo.setCreated(draft.getCreationTime());
+            draftInfo.setLastUpdate(draft.getLastUpdateTime());
             draftInfo.setId(draft.getId());
 
             draftInfo.setName(draft.getName());
@@ -333,7 +345,10 @@ public class BulkImportController {
         if (!draft.getAccount().equals(account) && !accountController.isAdministrator(account))
             throw new PermissionException("User " + account.getEmail()
                     + " does not have permission to update draft " + draftId);
-        List<Entry> contents = new ArrayList<Entry>(draft.getContents());
+
+        List<Entry> draftContents = new ArrayList<Entry>(draft.getContents());
+        List<Entry> newContents = new ArrayList<Entry>();
+
         EntryAddType type = EntryAddType.stringToType(draft.getImportType());
         if (type == null)
             throw new ControllerException("Could not determine type for draft " + draftId);
@@ -344,45 +359,35 @@ public class BulkImportController {
             switch (type) {
             // special treatment for strain with plasmid
             case STRAIN_WITH_PLASMID:
-                StrainInfo strainInfo;
-                PlasmidInfo plasmidInfo;
-
-                if (info.getType() == EntryType.STRAIN) { // this is the typically case but cannot be too careful
-                    strainInfo = (StrainInfo) info;
-                    plasmidInfo = (PlasmidInfo) info.getInfo();
-                } else {
-                    plasmidInfo = (PlasmidInfo) info;
-                    strainInfo = (StrainInfo) info.getInfo();
-                }
+                StrainInfo strainInfo = (StrainInfo) info;
+                PlasmidInfo plasmidInfo = (PlasmidInfo) info.getInfo();
 
                 // save entries
-                boolean updated = updateIfExists(account, contents, info);
+                boolean updated = updateIfExists(account, draftContents, newContents, info);
                 if (!updated) {
                     Strain strain = (Strain) InfoToModelFactory.infoToEntry(strainInfo);
                     Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(plasmidInfo);
                     strain.setVisibility(Visibility.DRAFT.getValue());
                     plasmid.setVisibility(Visibility.DRAFT.getValue());
-
                     HashSet<Entry> results = entryController.createStrainWithPlasmid(account,
                         strain, plasmid);
-                    contents.addAll(results);
+                    newContents.addAll(results);
                     break;
                 }
 
                 // if strain exists, then plasmid has to also
-                updateIfExists(account, contents, plasmidInfo);
+                updateIfExists(account, draftContents, newContents, plasmidInfo);
                 break;
 
             // all others
             default:
-
                 // save entry
-                updated = updateIfExists(account, contents, info);
+                updated = updateIfExists(account, draftContents, newContents, info);
                 if (!updated) {
                     Entry entry = InfoToModelFactory.infoToEntry(info);
                     entry.setVisibility(Visibility.DRAFT.getValue());
                     entry = entryController.createEntry(account, entry);
-                    contents.add(entry);
+                    newContents.add(entry);
                 }
                 break;
             }
@@ -390,7 +395,7 @@ public class BulkImportController {
 
         // update the draft
         try {
-            draft.setContents(contents);
+            draft.setContents(newContents);
             draft.setLastUpdateTime(new Date(System.currentTimeMillis()));
             dao.update(draft);
         } catch (DAOException e) {
@@ -399,7 +404,7 @@ public class BulkImportController {
 
         // convert draft to info
         BulkImportInfo draftInfo = new BulkImportInfo();
-        draftInfo.setCount(contents.size());
+        draftInfo.setCount(newContents.size());
         draftInfo.setCreated(draft.getCreationTime());
         draftInfo.setLastUpdate(draft.getLastUpdateTime());
         draftInfo.setId(draft.getId());
@@ -416,8 +421,8 @@ public class BulkImportController {
         return draftInfo;
     }
 
-    private boolean updateIfExists(Account account, List<Entry> entryList, EntryInfo info)
-            throws ControllerException, PermissionException {
+    private boolean updateIfExists(Account account, List<Entry> entryList, List<Entry> newContents,
+            EntryInfo info) throws ControllerException, PermissionException {
         if (entryList == null || entryList.isEmpty())
             return false;
 
@@ -429,6 +434,7 @@ public class BulkImportController {
                 InfoToModelFactory.infoToEntry(info, entry);
                 entry.setVisibility(Visibility.DRAFT.getValue());
                 entryController.update(account, entry);
+                newContents.add(entry);
                 return true;
             }
         }

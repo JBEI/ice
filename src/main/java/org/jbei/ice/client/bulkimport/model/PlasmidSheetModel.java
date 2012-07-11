@@ -5,7 +5,7 @@ import org.jbei.ice.shared.dto.PlasmidInfo;
 
 public class PlasmidSheetModel extends SingleInfoSheetModel<PlasmidInfo> {
 
-    public PlasmidInfo setField(PlasmidInfo info, SheetFieldData datum) {
+    public PlasmidInfo setField(PlasmidInfo info, SheetCellData datum) {
         if (datum == null)
             return info;
 

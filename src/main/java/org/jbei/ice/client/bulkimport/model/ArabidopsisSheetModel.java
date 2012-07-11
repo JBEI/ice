@@ -7,7 +7,7 @@ import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
 public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedInfo> {
 
     @Override
-    public ArabidopsisSeedInfo setField(ArabidopsisSeedInfo info, SheetFieldData datum) {
+    public ArabidopsisSeedInfo setField(ArabidopsisSeedInfo info, SheetCellData datum) {
         if (datum == null)
             return info;
 

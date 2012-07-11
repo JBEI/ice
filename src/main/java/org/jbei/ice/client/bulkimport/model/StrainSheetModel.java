@@ -5,7 +5,7 @@ import org.jbei.ice.shared.dto.StrainInfo;
 
 public class StrainSheetModel extends SingleInfoSheetModel<StrainInfo> {
 
-    public StrainInfo setField(StrainInfo strain, SheetFieldData datum) {
+    public StrainInfo setField(StrainInfo strain, SheetCellData datum) {
 
         if (datum == null)
             return strain;
