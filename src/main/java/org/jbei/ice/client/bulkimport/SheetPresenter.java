@@ -9,6 +9,7 @@ import org.jbei.ice.client.bulkimport.model.SheetModel;
 import org.jbei.ice.client.bulkimport.sheet.Header;
 import org.jbei.ice.client.bulkimport.sheet.ImportTypeHeaders;
 import org.jbei.ice.client.bulkimport.sheet.InfoValueExtractorFactory;
+import org.jbei.ice.client.bulkimport.sheet.SheetCell;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkImportInfo;
@@ -27,13 +28,13 @@ public class SheetPresenter {
 
         void clear();
 
-        void setRow(int row);
-
-        int getRow();
-
-        void setCellWidgetForCurrentRow(Header header, String value, int col);
+        void setCellWidgetForCurrentRow(Header header, String value, int row, int col);
 
         int getSheetRowCount();
+
+        void clearErrorCell(int row, int col);
+
+        void setErrorCell(int row, int col, String errMsg);
     }
 
     private final View view;
@@ -108,12 +109,11 @@ public class SheetPresenter {
                 existing = model.createInfo();
 
             // for each header
-            SheetCellData data = null;
             boolean rowHasData = false;
 
             // go through headers (column) for data
             for (Header header : headers) {
-                data = header.getCell().getDataForRow(i);
+                SheetCellData data = header.getCell().getDataForRow(i);
                 if (data == null)
                     continue;
 
@@ -151,8 +151,8 @@ public class SheetPresenter {
         return getTypeHeaders().length;
     }
 
-    public void addRow() {
-        int index = view.getRow() - 1; // row includes the headers but this is 0-indexed
+    public void addRow(int row) {
+        int index = row; // row includes the headers but this is 0-indexed
 
         // type is already set in the constructor
         Header[] headers = getTypeHeaders();
@@ -162,15 +162,53 @@ public class SheetPresenter {
 
             String value = "";
 
-            if (currentInfo != null && currentInfo.getCount() >= view.getRow()) {
+            if (currentInfo != null && currentInfo.getCount() >= index) {
                 EntryInfo info = currentInfo.getEntryList().get(index);
 
                 // extractor also sets the header data structure
-                value = InfoValueExtractorFactory.extractValue(getType(), headers[i], info, index);
+                value = InfoValueExtractorFactory.extractEntryValue(getType(), headers[i], info,
+                                                                    index);
             }
 
-            view.setCellWidgetForCurrentRow(headers[i], value, i);
+            view.setCellWidgetForCurrentRow(headers[i], value, row, i);
         }
-        view.setRow(view.getRow() + 1);
+    }
+
+    /**
+     * @return true if all cells validate, false otherwise
+     */
+    public boolean validateCells() {
+
+        boolean isValid = true;
+
+        // for each row
+        for (int row = 0; row < view.getSheetRowCount(); row += 1) {
+
+            boolean atLeastOneCellHasRowData = false;
+
+            for (int col = 0; col < headers.length; col += 1) {
+                SheetCell cell = headers[col].getCell();
+                if (!atLeastOneCellHasRowData)
+                    atLeastOneCellHasRowData = (cell.getDataForRow(row) != null);
+            }
+
+            if (!atLeastOneCellHasRowData)
+                continue;
+
+            // for each header (col)
+            for (int col = 0; col < headers.length; col += 1) {
+                SheetCell cell = headers[col].getCell();
+                String errMsg = cell.inputIsValid(row);
+                if (errMsg.isEmpty()) {
+                    view.clearErrorCell(row, col);
+                    continue;
+                }
+
+                isValid = false;
+                view.setErrorCell(row, col, errMsg);
+            }
+        }
+
+        return isValid;
     }
 }

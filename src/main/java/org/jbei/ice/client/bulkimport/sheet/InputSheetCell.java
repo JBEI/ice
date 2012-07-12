@@ -4,7 +4,7 @@ import com.google.gwt.user.client.ui.TextBox;
 
 /**
  * Default cell for the import sheet
- * 
+ *
  * @author Hector Plahar
  */
 public class InputSheetCell extends SheetCell {
@@ -12,6 +12,7 @@ public class InputSheetCell extends SheetCell {
     private final TextBox input;
 
     public InputSheetCell() {
+        super();
         input = new TextBox();
         input.setStyleName("cell_input");
         initWidget(input);
@@ -24,9 +25,8 @@ public class InputSheetCell extends SheetCell {
 
     /**
      * Sets data for row specified in the param
-     * 
-     * @param row
-     *            current row user is working on
+     *
+     * @param row current row user is working on
      * @return display for user entered value
      */
     @Override

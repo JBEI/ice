@@ -2,13 +2,9 @@ package org.jbei.ice.lib.account;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountType;
 import org.jbei.ice.lib.dao.DAOException;
@@ -16,16 +12,20 @@ import org.jbei.ice.lib.models.Moderator;
 import org.jbei.ice.lib.models.SessionData;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+
 /**
  * DAO to manipulate {@link Account} objects in the database.
- * 
+ *
  * @author Hector Plahar, Timothy Ham, Zinovii Dmytriv
  */
 class AccountDAO extends HibernateRepository<Account> {
 
     /**
      * Retrieve {@link Account} by id from the database.
-     * 
+     *
      * @param id unique local identifier for object
      * @return Account
      * @throws DAOException
@@ -34,51 +34,9 @@ class AccountDAO extends HibernateRepository<Account> {
         return super.get(Account.class, id);
     }
 
-    @SuppressWarnings("unchecked")
     public ArrayList<Account> getAllAccounts() throws DAOException {
-
-        ArrayList<Account> reports;
-        Session session = newSession();
-
-        try {
-            session.beginTransaction();
-            reports = (ArrayList<Account>) session.createCriteria(Account.class).list();
-            session.getTransaction().commit();
-        } catch (HibernateException he) {
-            session.getTransaction().rollback();
-            throw new DAOException(he);
-        } finally {
-            closeSession(session);
-        }
-
-        return reports;
-    }
-
-    /**
-     * Retrieve all {@link Account}s sorted by the firstName field.
-     * 
-     * @return Set of {@link Account}s.
-     * @throws DAOException
-     */
-    @SuppressWarnings("unchecked")
-    public Set<Account> getAllByFirstName() throws DAOException {
-        LinkedHashSet<Account> accounts = new LinkedHashSet<Account>();
-        Session session = newSession();
-
-        session.beginTransaction();
-        try {
-            String queryString = "from " + Account.class.getName() + " order by firstName";
-            Query query = session.createQuery(queryString);
-            accounts.addAll(query.list());
-            session.getTransaction().commit();
-        } catch (HibernateException e) {
-            session.getTransaction().rollback();
-            throw new DAOException("Failed to retrieve all accounts", e);
-        } finally {
-            closeSession(session);
-        }
-
-        return accounts;
+        ArrayList<Account> result = new ArrayList<Account>(super.retrieveAll(Account.class));
+        return result;
     }
 
     public Set<Account> getMatchingAccounts(String token, int limit) throws DAOException {
@@ -107,7 +65,7 @@ class AccountDAO extends HibernateRepository<Account> {
 
     /**
      * Retrieve an {@link Account} by the email field.
-     * 
+     *
      * @param email unique email identifier for account
      * @return Account
      * @throws DAOException
@@ -118,7 +76,7 @@ class AccountDAO extends HibernateRepository<Account> {
         Session session = newSession();
         try {
             Query query = session.createQuery("from " + Account.class.getName()
-                    + " where email = :email");
+                                                      + " where email = :email");
             query.setParameter("email", email);
             Object result = query.uniqueResult();
 
@@ -136,7 +94,7 @@ class AccountDAO extends HibernateRepository<Account> {
 
     /**
      * Save the given {@link Account} into the database.
-     * 
+     *
      * @param account account object to save
      * @return Saved account.
      * @throws DAOException
@@ -147,7 +105,7 @@ class AccountDAO extends HibernateRepository<Account> {
 
     /**
      * Retrieve the {@link Account} by the authorization token.
-     * 
+     *
      * @param authToken token
      * @return Account.
      * @throws DAOException
@@ -200,6 +158,5 @@ class AccountDAO extends HibernateRepository<Account> {
                 session.close();
             }
         }
-
     }
 }

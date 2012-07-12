@@ -29,6 +29,15 @@ public enum StatusType {
         return "";
     }
 
+    public static StatusType displayToEnum(String displayName) {
+        for (StatusType type : StatusType.values()) {
+            if (type.toString().equalsIgnoreCase(displayName))
+                return type;
+        }
+
+        return null;
+    }
+
     public static ArrayList<String> getDisplayList() {
         ArrayList<String> displayList = new ArrayList<String>();
         for (StatusType type : StatusType.values()) {

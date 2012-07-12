@@ -68,6 +68,7 @@ public enum Header {
         this.required = required;
         this.description = description;
         this.cell = sheetCell;
+        this.cell.setRequired(required);
     }
 
     public boolean isRequired() {

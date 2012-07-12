@@ -10,17 +10,7 @@ import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkImportInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.DoubleClickEvent;
-import com.google.gwt.event.dom.client.DoubleClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
-import com.google.gwt.event.dom.client.ScrollEvent;
-import com.google.gwt.event.dom.client.ScrollHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.DOM;
@@ -34,7 +24,6 @@ import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 public class Sheet extends Composite implements SheetPresenter.View {
@@ -61,9 +50,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     protected final SheetPresenter presenter;
 
-    private final TextBox input;
-
-    private final static int ROW_COUNT = 50;
+    public final static int ROW_COUNT = 50;
 
     public Sheet(EntryAddType type) {
         this(type, null);
@@ -113,9 +100,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         currentRow = inputRow = -1;
         currentIndex = inputIndex = -1;
-
-        input = new TextBox();
-        input.setStyleName("cell_input");
 
         sheetTable.addDoubleClickHandler(new CellDoubleClick());
         sheetTable.addClickHandler(new CellClick());
@@ -193,7 +177,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
         DOM.setStyleAttribute(colIndexWrapper.getElement(), "overflowY", "hidden");
         DOM.setStyleAttribute(colIndexWrapper.getElement(), "overflowX", "hidden");
 
-        createHeaderCells();
 
         // get header
         layout.setWidget(0, 0, headerWrapper);
@@ -203,13 +186,16 @@ public class Sheet extends Composite implements SheetPresenter.View {
         layout.setWidget(1, 1, wrapper);
         layout.getFlexCellFormatter().setVerticalAlignment(1, 1, HasAlignment.ALIGN_TOP);
 
+        createHeaderCells();
+
         // add rows
         int count = ROW_COUNT;
         int i = 1;
+        row = 0;
 
         while (count > 0) {
 
-            presenter.addRow();
+            presenter.addRow(row);
 
             // index col
             HTML indexCell = new HTML(i + "");
@@ -222,6 +208,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
             count -= 1;
             i += 1;
+            row += 1;
         }
     }
 
@@ -358,34 +345,31 @@ public class Sheet extends Composite implements SheetPresenter.View {
     }
 
     public boolean validate() {
+        return presenter.validateCells();
+    }
 
-        boolean validates = true;
-
-        for (int i = 0; i < sheetTable.getRowCount(); i += 1) {
-            if (isEmptyRow(i))
-                continue;
-
-            // TODO : sometimes input box is active and user clicks submit
-            int y = 0;
-            for (Header header : presenter.getTypeHeaders()) {
-                Widget widget = sheetTable.getWidget(i, y);
-                if (widget instanceof Label) {
-                    Label label = (Label) widget;
-                    boolean isEmpty = label.getText().trim().isEmpty();
-                    if (isEmpty && header.isRequired()) {
-                        label.addStyleName("cell_error");
-                        label.setTitle("Required field");
-                        validates = false;
-                    } else {
-                        label.removeStyleName("cell_error");
-                        label.setTitle("");
-                    }
-                }
-                y += 1;
-            }
+    @Override
+    public void clearErrorCell(int row, int col) {
+        Widget widget = sheetTable.getWidget(row, col);
+        if (widget != null && widget instanceof Label) {
+            Label label = (Label) widget;
+            label.removeStyleName("cell_error");
+            label.setTitle("");
         }
+    }
 
-        return validates;
+    @Override
+    public void setErrorCell(int row, int col, String errMsg) {
+
+        int rowCount = sheetTable.getRowCount();
+        int cellCount = sheetTable.getCellCount(row);
+
+        Widget widget = sheetTable.getWidget(row, col);
+        if (widget != null && widget instanceof Label) {
+            Label label = (Label) widget;
+            label.addStyleName("cell_error");
+            label.setTitle(errMsg);
+        }
     }
 
     /**
@@ -500,17 +484,16 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     /**
      * cell selection via click or arrow press
-     * 
-     * @param newRow
-     *            user selected row
-     * @param newCol
-     *            user selected column
+     *
+     * @param newRow user selected row
+     * @param newCol user selected column
      */
     private void selectCell(int newRow, int newCol) {
         //        HTML corner = new HTML(
         //                "<div style=\"position: relative; width: 5px; height: 5px; background-color: blue; top: "
         //                        + "12px; right: -122px; border: 3px solid white\"></div>");
 
+        // if user is clicking on the same cell
         if (currentRow == newRow && currentIndex == newCol)
             return;
 
@@ -525,7 +508,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
             Header currentHeader = presenter.getTypeHeaders()[inputIndex];
             SheetCell cell = currentHeader.getCell();
-            String inputText = cell.setDataForRow(inputRow - 1); // converting to 0-index
+            String inputText = cell.setDataForRow(inputRow);
             lastReplaced.setTitle(inputText);
 
             if (inputText != null && inputText.length() > 26)
@@ -545,13 +528,15 @@ public class Sheet extends Composite implements SheetPresenter.View {
         //            HTMLPanel panel;
         //            if (label.getText().isEmpty())
         //                panel = new HTMLPanel(
-        //                        "<div class=\"cell cell_selected\"><div style=\"position: relative; width: 5px; height: 5px; background-color: #0082C0; top: "
+        //                        "<div class=\"cell cell_selected\"><div style=\"position: relative; width: 5px;
+        // height: 5px; background-color: #0082C0; top: "
         //                                + "12px; right: -122px; border: 3px solid white\"></div></div>");
         //            else
         //                panel = new HTMLPanel(
         //                        "<div class=\"cell cell_selected\">"
         //                                + label.getText()
-        //                                + "<div style=\"position: relative; width: 5px; height: 5px; background-color: #0082C0; top: "
+        //                                + "<div style=\"position: relative; width: 5px; height: 5px;
+        // background-color: #0082C0; top: "
         //                                + "-2px; right: -124px; border: 3px solid white\"></div></div>");
         //            sheetTable.setWidget(newRow, newCol, panel);
         //
@@ -563,12 +548,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
         currentIndex = newCol;
     }
 
-    public int getRow() {
-        return this.row;
-    }
-
     @Override
-    public void setCellWidgetForCurrentRow(Header header, String value, int col) {
+    public void setCellWidgetForCurrentRow(Header header, String value, int row, int col) {
         if (value == null)
             value = "";
 
@@ -581,10 +562,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
         widget.setTitle(title);
         widget.setStyleName("cell");
         sheetTable.setWidget(row, col, widget);
-    }
-
-    public void setRow(int row) {
-        this.row = row;
     }
 
     //
