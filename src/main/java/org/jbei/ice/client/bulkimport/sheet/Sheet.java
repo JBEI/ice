@@ -37,8 +37,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
     private int currentRow;
     private int currentIndex;
 
-    private int inputRow;
-    private int inputIndex;
+    private int inputRow;     // row of last cell that was switch to input
+    private int inputIndex;   // index of last cell that was switched to input
 
     protected final FlexTable colIndex;
     protected final ScrollPanel wrapper;
@@ -49,6 +49,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
     private int headerCol;
 
     protected final SheetPresenter presenter;
+    private SheetCell newCellSelection;
+    private boolean cellHasFocus;
 
     public final static int ROW_COUNT = 50;
 
@@ -243,7 +245,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
                         event.preventDefault();
                         return;
                     }
-
                     switchToInput();
                 }
             }
@@ -374,29 +375,23 @@ public class Sheet extends Composite implements SheetPresenter.View {
      */
     private void switchToInput() {
 
-        // the key handler for "panel" keeps calling switchToInput() even though input
-        // has the focus. 
-        Widget widget = sheetTable.getWidget(currentRow, currentIndex);
-        if (!(widget instanceof Label))
+        if (cellHasFocus)
             return;
 
-        // cache the current label we are replacing 
+        // cache the current label we are replacing
         lastReplaced = (Label) sheetTable.getWidget(currentRow, currentIndex);
         lastReplaced.removeStyleName("cell_selected");
         inputIndex = currentIndex;
         inputRow = currentRow;
 
-        // replace
-        final Header currentHeader = presenter.getTypeHeaders()[currentIndex];
-        SheetCell sheetCell = currentHeader.getCell();
-        String text = "";
-        SheetCellData data = sheetCell.getDataForRow(currentRow - 1);
-        if (data != null)
-            text = data.getValue();
+        newCellSelection = presenter.setCellInputFocus(currentRow, currentIndex);
+        if (newCellSelection == null)
+            return;
 
-        sheetCell.setText(text);
-        sheetTable.setWidget(currentRow, currentIndex, sheetCell);
-        currentHeader.getCell().setFocus();
+        sheetTable.setWidget(currentRow, currentIndex, newCellSelection);
+        // all cell to set focus to whatever their input mechanism is. e.g. if an input box, allow focus on that box
+        newCellSelection.setFocus();
+        cellHasFocus = true;
     }
 
     private boolean isRowInBounds(int row) {
@@ -494,22 +489,29 @@ public class Sheet extends Composite implements SheetPresenter.View {
         if (currentRow == newRow && currentIndex == newCol)
             return;
 
+        SheetCell prevSelection = newCellSelection;
+        newCellSelection = presenter.getTypeHeaders()[newCol].getCell();
+        cellHasFocus = false;
+
         if (currentRow >= 0 && currentIndex >= 0) {
+            // remove the blue border around the cell
             Widget widget = sheetTable.getWidget(currentRow, currentIndex);
             if (widget != null)
                 widget.removeStyleName("cell_selected");
         }
 
         // determine if user interacted with a cell prior to this cell
+        // if so then retrieve the text for the data and set it to the
+        // label widget, and display that label widget
         if (lastReplaced != null) {
-
-            Header currentHeader = presenter.getTypeHeaders()[inputIndex];
-            SheetCell cell = currentHeader.getCell();
-            String inputText = cell.setDataForRow(inputRow);
+            String inputText = "";
+            SheetCellData data = prevSelection.getDataForRow(inputRow);
+            if (data != null)
+                inputText = data.getValue();
             lastReplaced.setTitle(inputText);
 
-            if (inputText != null && inputText.length() > 26)
-                inputText = (inputText.substring(0, 24) + "...");
+            if (inputText != null && inputText.length() > 18)
+                inputText = (inputText.substring(0, 16) + "...");
             lastReplaced.setText(inputText);
 
             sheetTable.setWidget(inputRow, inputIndex, lastReplaced);
@@ -518,7 +520,22 @@ public class Sheet extends Composite implements SheetPresenter.View {
             panel.setFocus(true); // not in click
         }
 
-        Widget cellWidget = sheetTable.getWidget(newRow, newCol);
+        // now deal with current selection
+        if (newCellSelection.cellSelected(newRow, newCol)) {
+            lastReplaced = (Label) sheetTable.getWidget(newRow, newCol);
+            lastReplaced.removeStyleName("cell_selected");
+            inputIndex = newCol;
+            inputRow = newRow;
+            sheetTable.setWidget(newRow, newCol, newCellSelection);
+
+        } else {
+            Widget cellWidget = sheetTable.getWidget(newRow, newCol);
+            cellWidget.addStyleName("cell_selected");
+        }
+
+        currentRow = newRow;
+        currentIndex = newCol;
+
         //        if (cellWidget instanceof Label) {
         //            Label label = (Label) cellWidget;
         //
@@ -538,11 +555,9 @@ public class Sheet extends Composite implements SheetPresenter.View {
         //            sheetTable.setWidget(newRow, newCol, panel);
         //
         //        } else {
-        cellWidget.addStyleName("cell_selected");
+
         //        }
 
-        currentRow = newRow;
-        currentIndex = newCol;
     }
 
     @Override

@@ -1,13 +1,13 @@
 package org.jbei.ice.client.bulkimport.sheet;
 
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.FlexTable;
 import gwtupload.client.IUploadStatus;
 import gwtupload.client.IUploader;
 
-import com.google.gwt.user.client.ui.FlexTable;
-
 /**
  * Sheet Cell for file inputs
- * 
+ *
  * @author Hector Plahar
  */
 public class FileInputCell extends SheetCell {
@@ -15,17 +15,19 @@ public class FileInputCell extends SheetCell {
     private String fileName = "";
     private String fileId = "";
     private final FlexTable table;
+    private int setDataRow = -1;
+    private final CellUploader cellUploader;
 
     public FileInputCell() {
         super();
-        CellUploader uploader = new CellUploader();
-        uploader.addOnFinishUploadHandler(new FileFinishHandler());
+        cellUploader = new CellUploader();
+        cellUploader.addOnFinishUploadHandler(new FileFinishHandler());
         table = new FlexTable();
         table.setWidth("100%");
         table.setCellPadding(0);
         table.setCellSpacing(0);
 
-        table.setWidget(0, 0, uploader.asWidget());
+        table.setWidget(0, 0, cellUploader.asWidget());
         initWidget(table);
     }
 
@@ -46,18 +48,32 @@ public class FileInputCell extends SheetCell {
     public void setFocus() {
     }
 
+    @Override
+    public boolean cellSelected(int row, int col) {
+        setDataRow = row;
+        return true;
+    }
+
     private class FileFinishHandler implements IUploader.OnFinishUploaderHandler {
         @Override
         public void onFinish(IUploader uploader) {
             if (uploader.getStatus() == IUploadStatus.Status.SUCCESS) {
                 IUploader.UploadedInfo info = uploader.getServerInfo();
                 fileId = info.message;
-                if (fileId.isEmpty())
-                    return; // TODO : hook into error message
+                if (fileId.isEmpty()) {
+                    Window.alert("Could not save file");
+                    return;
+                }
 
                 fileName = info.name;
+                if (setDataRow != -1) {
+                    setDataForRow(setDataRow);
+                    setDataRow = -1;
+                }
+
+//                table.setWidget(0, 0, ImageUtil.getAttachment());
             } else {
-                // TODO : notify user of error
+                Window.alert("Error uploading file");
             }
         }
     }

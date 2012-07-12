@@ -1,13 +1,14 @@
 package org.jbei.ice.client.bulkimport.sheet;
 
+import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.common.util.ImageUtil;
+
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import gwtupload.client.IFileInput;
 import gwtupload.client.IUploader;
 import gwtupload.client.SingleUploader;
-import org.jbei.ice.client.AppController;
-import org.jbei.ice.client.common.util.ImageUtil;
 
 /**
  * @author Hector Plahar
@@ -19,6 +20,7 @@ public class CellUploader implements IsWidget {
     public CellUploader() {
 //        Label label = new Label("Upload file");
         Image fileUploadImg = ImageUtil.getFileUpload();
+        fileUploadImg.setStyleName("cursor_pointer");
 
         final FileUploadStatus uploaderStatus = new FileUploadStatus();
         uploader = new SingleUploader(IFileInput.FileInputType.CUSTOM.with(fileUploadImg), uploaderStatus);

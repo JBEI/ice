@@ -3,8 +3,6 @@ package org.jbei.ice.client.bulkimport.sheet;
 import org.jbei.ice.client.bulkimport.model.SheetCellData;
 import org.jbei.ice.shared.StatusType;
 
-import com.google.common.base.Joiner;
-
 /**
  * Sheet cell for status column
  *
@@ -24,9 +22,22 @@ public class StatusSheetCell extends MultiSuggestSheetCell {
 
         SheetCellData data = getDataForRow(row);
         if (StatusType.displayToEnum(data.getValue()) == null) {
-            return "Status must be one of [" + Joiner.on(", ").join(StatusType.getDisplayList()) + "]";
+            return "Status must be one of [" + getStatusOptions() + "]";
         }
 
         return "";
+    }
+
+    public String getStatusOptions() {
+        StringBuilder builder = new StringBuilder();
+        int size = StatusType.getDisplayList().size();
+        for (int i = 0; i < size; i += 1) {
+            String item = StatusType.getDisplayList().get(i);
+            builder.append(item);
+            if (i < size - 1)
+                builder.append(", ");
+        }
+
+        return builder.toString();
     }
 }

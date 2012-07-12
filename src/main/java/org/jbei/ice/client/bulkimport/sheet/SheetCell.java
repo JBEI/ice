@@ -68,6 +68,19 @@ public abstract class SheetCell extends Composite {
         return rowValues.get(row);
     }
 
+    /**
+     * cell notification for selection. in parent class
+     * it does not do anything. subclasses that wish to do some something special
+     * when a user selects a cell should sub-class and return true after specialization code
+     *
+     * @param row selection row
+     * @param col selection column
+     * @return true if cell handles selection, false otherwise
+     */
+    public boolean cellSelected(int row, int col) {
+        return false;
+    }
+
     public void reset() {
         this.rowValues.clear();
     }

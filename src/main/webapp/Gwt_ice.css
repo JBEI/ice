@@ -1641,10 +1641,7 @@ td.datePickerMonth {
     border: 2px groove #F6A828;
     padding: 10px;
     background: #bf984c;
-    -moz-border-radius-bottomleft: 6px;
-    -moz-border-radius-bottomright: 6px;
-    -moz-border-radius-topleft: 6px;
-    -moz-border-radius-topright: 6px;
+    -moz-border-radius: 6px;
 }
 
 .GWTUpld .DecoratedFileUpload {
