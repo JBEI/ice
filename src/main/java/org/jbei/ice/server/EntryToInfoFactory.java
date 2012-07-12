@@ -1,5 +1,11 @@
 package org.jbei.ice.server;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.EntryUtil;
@@ -22,12 +28,6 @@ import org.jbei.ice.shared.dto.*;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.Generation;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo.PlantType;
 import org.jbei.ice.web.utils.WebUtils;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Factory for converting {@link Entry}s to their corresponding {@link EntryInfo} data transfer
@@ -342,7 +342,7 @@ public class EntryToInfoFactory {
 
         info.setId(entry.getId());
         info.setPartId(EntryUtil.getPartNumbersAsString(entry));
-        info.setName(info.getName());
+        info.setName(entry.getNamesAsString());
         return info;
     }
 }
