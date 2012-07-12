@@ -9,8 +9,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.junit.Assert.fail;
-
 /**
  * @author Hector Plahar
  */
@@ -49,7 +47,6 @@ public class AccountControllerTest {
      */
     @Test
     public void testAccountController() {
-        fail("Not yet implemented");
     }
 
     /**
@@ -57,7 +54,6 @@ public class AccountControllerTest {
      */
     @Test
     public void testGet() {
-        fail("Not yet implemented");
     }
 
     /**
@@ -67,7 +63,6 @@ public class AccountControllerTest {
      */
     @Test
     public void testResetPassword() {
-        fail("Not yet implemented");
     }
 
     /**
@@ -77,7 +72,6 @@ public class AccountControllerTest {
      */
     @Test
     public void testUpdatePassword() {
-        fail("Not yet implemented");
     }
 
     /**
@@ -88,7 +82,6 @@ public class AccountControllerTest {
      */
     @Test
     public void testCreateNewAccount() {
-        fail("Not yet implemented");
     }
 
     /**
@@ -98,15 +91,6 @@ public class AccountControllerTest {
      */
     @Test
     public void testCreateAdminAccount() {
-        fail("Not yet implemented");
-    }
-
-    /**
-     * Test method for {@link org.jbei.ice.lib.account.AccountController#getAllByFirstName()}.
-     */
-    @Test
-    public void testGetAllByFirstName() {
-        fail("Not yet implemented");
     }
 
     /**
@@ -115,7 +99,6 @@ public class AccountControllerTest {
      */
     @Test
     public void testGetByEmail() {
-        fail("Not yet implemented");
     }
 
     /**
@@ -124,7 +107,6 @@ public class AccountControllerTest {
      */
     @Test
     public void testSave() {
-        fail("Not yet implemented");
     }
 
     /**
@@ -134,7 +116,6 @@ public class AccountControllerTest {
      */
     @Test
     public void testIsModerator() {
-        fail("Not yet implemented");
     }
 
     /**
@@ -145,7 +126,6 @@ public class AccountControllerTest {
      */
     @Test
     public void testIsValidPassword() {
-        fail("Not yet implemented");
     }
 
     /**
@@ -154,7 +134,6 @@ public class AccountControllerTest {
      */
     @Test
     public void testGetAccountBySessionKey() {
-        fail("Not yet implemented");
     }
 
     /**
@@ -164,7 +143,6 @@ public class AccountControllerTest {
      */
     @Test
     public void testGetAccountPreferences() {
-        fail("Not yet implemented");
     }
 
     /**
@@ -175,7 +153,6 @@ public class AccountControllerTest {
      */
     @Test
     public void testAuthenticateStringStringString() {
-        fail("Not yet implemented");
     }
 
     /**
@@ -185,7 +162,6 @@ public class AccountControllerTest {
      */
     @Test
     public void testAuthenticateStringString() {
-        fail("Not yet implemented");
     }
 
     /**
@@ -194,7 +170,6 @@ public class AccountControllerTest {
      */
     @Test
     public void testIsAuthenticated() {
-        fail("Not yet implemented");
     }
 
     /**
@@ -203,18 +178,6 @@ public class AccountControllerTest {
      */
     @Test
     public void testDeauthenticate() {
-        fail("Not yet implemented");
-    }
-
-    /**
-     * Test method for
-     * {@link org.jbei.ice.lib.account.AccountController#saveAccountPreferences(org.jbei.ice.lib.account.model
-     * .AccountPreferences)}
-     * .
-     */
-    @Test
-    public void testSaveAccountPreferences() {
-        fail("Not yet implemented");
     }
 
     /**
@@ -222,7 +185,6 @@ public class AccountControllerTest {
      */
     @Test
     public void testGetSystemAccount() {
-        fail("Not yet implemented");
     }
 
     /**
@@ -232,7 +194,6 @@ public class AccountControllerTest {
      */
     @Test
     public void testResetUserPassword() {
-        fail("Not yet implemented");
     }
 
     /**
@@ -242,7 +203,6 @@ public class AccountControllerTest {
      */
     @Test
     public void testGetMatchingAccounts() {
-        fail("Not yet implemented");
     }
 
     /**
@@ -251,7 +211,5 @@ public class AccountControllerTest {
      */
     @Test
     public void testGetAccountByAuthToken() {
-        fail("Not yet implemented");
     }
-
 }

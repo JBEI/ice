@@ -361,9 +361,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
     @Override
     public void setErrorCell(int row, int col, String errMsg) {
 
-        int rowCount = sheetTable.getRowCount();
-        int cellCount = sheetTable.getCellCount(row);
-
         Widget widget = sheetTable.getWidget(row, col);
         if (widget != null && widget instanceof Label) {
             Label label = (Label) widget;
