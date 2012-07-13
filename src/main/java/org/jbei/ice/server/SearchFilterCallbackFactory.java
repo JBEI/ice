@@ -1,11 +1,12 @@
 package org.jbei.ice.server;
 
-import org.jbei.ice.lib.entry.model.EntryFundingSource;
-import org.jbei.ice.shared.QueryOperator;
-import org.jbei.ice.shared.SearchFilterType;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.jbei.ice.lib.entry.model.EntryFundingSource;
+import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.shared.QueryOperator;
+import org.jbei.ice.shared.SearchFilterType;
 
 /**
  * A search filter is represented by the filter type (e.g. NAME_OR_ALIAS),
@@ -216,6 +217,42 @@ public class SearchFilterCallbackFactory {
 
             case RECORD_ID:
                 return new EntryFilterCallback("lower(entry.recordId)");
+
+            case ORIGIN:
+                return new FilterCallback() {
+                    @Override
+                    public String getField() {
+                        return "lower(plasmid.originOfReplication)";
+                    }
+
+                    @Override
+                    public String getSelection() {
+                        return "id";
+                    }
+
+                    @Override
+                    public String getFrom() {
+                        return Plasmid.class.getName() + " plasmid";
+                    }
+                };
+
+            case BACKBONE:
+                return new FilterCallback() {
+                    @Override
+                    public String getField() {
+                        return "lower(plasmid.backbone)";
+                    }
+
+                    @Override
+                    public String getSelection() {
+                        return "id";
+                    }
+
+                    @Override
+                    public String getFrom() {
+                        return Plasmid.class.getName() + " plasmid";
+                    }
+                };
 
             default:
                 return null;
