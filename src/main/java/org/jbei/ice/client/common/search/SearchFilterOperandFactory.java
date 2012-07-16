@@ -16,7 +16,7 @@ import org.jbei.ice.shared.dto.EntryType;
 /**
  * Factory for retrieving the operands and operations for
  * Search filter types
- * 
+ *
  * @author Hector Plahar
  */
 
@@ -29,87 +29,90 @@ public class SearchFilterOperandFactory {
 
         switch (type) {
 
-        case NAME_OR_ALIAS:
-            return textInputOperand;
+            case NAME_OR_ALIAS:
+                return textInputOperand;
 
-        case PART_NUMBER:
-            return textInputOperand;
+            case PART_NUMBER:
+                return textInputOperand;
 
-        case TYPE:
-            operands.clear();
-            for (EntryType value : EntryType.values())
-                operands.add(new OperandValue(value.getDisplay(), value.getName()));
-            return new TypeOperand(type, operands, QueryOperator.IS, QueryOperator.IS_NOT);
+            case TYPE:
+                operands.clear();
+                for (EntryType value : EntryType.values())
+                    operands.add(new OperandValue(value.getDisplay(), value.getName()));
+                return new TypeOperand(type, operands, QueryOperator.IS, QueryOperator.IS_NOT);
 
-        case STATUS:
-            operands.clear();
-            for (StatusType statusType : StatusType.values())
-                operands.add(new OperandValue(statusType.getDisplayName(), statusType
-                        .getDisplayName()));
-            return new TypeOperand(type, operands, QueryOperator.IS, QueryOperator.IS_NOT);
+            case STATUS:
+                operands.clear();
+                for (StatusType statusType : StatusType.values())
+                    operands.add(new OperandValue(statusType.getDisplayName(), statusType
+                            .getDisplayName()));
+                return new TypeOperand(type, operands, QueryOperator.IS, QueryOperator.IS_NOT);
 
-        case OWNER:
-            return textInputOperand;
+            case OWNER:
+                return textInputOperand;
 
-        case CREATOR:
-            return textInputOperand;
+            case CREATOR:
+                return textInputOperand;
 
-        case KEYWORDS:
-            return textInputOperand;
+            case KEYWORDS:
+                return textInputOperand;
 
-        case DESCRIPTION:
-            return textInputOperand;
+            case DESCRIPTION:
+                return textInputOperand;
 
-        case HAS_ATTACHMENT:
-        case HAS_SEQUENCE:
-        case HAS_SAMPLE:
-            return new BooleanFilterOperand(type);
+            case HAS_ATTACHMENT:
+            case HAS_SEQUENCE:
+            case HAS_SAMPLE:
+                return new BooleanFilterOperand(type);
 
-        case BIO_SAFETY_LEVEL:
-            operands.clear();
-            for (BioSafetyOptions option : BioSafetyOptions.values())
-                operands.add(new OperandValue(option.getDisplayName(), option.getValue()));
-            return new TypeOperand(type, operands, QueryOperator.IS, QueryOperator.IS_NOT);
+            case BIO_SAFETY_LEVEL:
+                operands.clear();
+                for (BioSafetyOptions option : BioSafetyOptions.values())
+                    operands.add(new OperandValue(option.getDisplayName(), option.getValue()));
+                return new TypeOperand(type, operands, QueryOperator.IS, QueryOperator.IS_NOT);
 
-        case INTELLECTUAL_PROPERTY:
-            return textInputOperand;
+            case INTELLECTUAL_PROPERTY:
+                return textInputOperand;
 
-        case PRINCIPAL_INVESTIGATOR:
-            return textInputOperand;
+            case PRINCIPAL_INVESTIGATOR:
+                return textInputOperand;
 
-        case FUNDING_SOURCE:
-            return textInputOperand;
+            case FUNDING_SOURCE:
+                return textInputOperand;
 
-        case SELECTION_MARKER:
-            // TODOs
+            case SELECTION_MARKER:
+                // TODOs
+                return textInputOperand;
 
-        case BACKBONE:
-            // TODO : plasmids only
-            return textInputOperand;
+            case BACKBONE:
+                // TODO : plasmids only
+                return textInputOperand;
 
-        case PROMOTERS:
-            // TODO : Plasmids only (is, long list) 
+            case PROMOTERS:
+                // TODO : Plasmids only (is, long list)
+                return textInputOperand;
 
-        case ORIGIN:
-            // TODO : same as above
+            case ORIGIN:
+                // TODO : same as above
+                return textInputOperand;
 
-        case HOST:
-            return textInputOperand;
+            case HOST:
+                return textInputOperand;
 
-        case STRAIN_PLASMIDS:
-            return textInputOperand;
+            case STRAIN_PLASMIDS:
+                return textInputOperand;
 
-        case GEN_PHEN:
-            return textInputOperand;
+            case GEN_PHEN:
+                return textInputOperand;
 
-        case RECORD_ID:
-            return textInputOperand;
+            case RECORD_ID:
+                return textInputOperand;
 
-        case BLAST:
-            return new BlastFilterOperand();
+            case BLAST:
+                return new BlastFilterOperand();
 
-        default:
-            throw new IllegalArgumentException("Could not handle case for type " + type);
+            default:
+                throw new IllegalArgumentException("Could not handle case for type " + type);
         }
     }
 }

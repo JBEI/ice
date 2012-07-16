@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.jbei.ice.lib.entry.model.EntryFundingSource;
 import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.SearchFilterType;
 
@@ -196,6 +197,25 @@ public class SearchFilterCallbackFactory {
                     }
                 };
 
+            case SELECTION_MARKER:
+                return new FilterCallback() {
+
+                    @Override
+                    public String getSelection() {
+                        return "entry.id";
+                    }
+
+                    @Override
+                    public String getFrom() {
+                        return SelectionMarker.class.getName() + " marker";
+                    }
+
+                    @Override
+                    public String getField() {
+                        return "lower(marker.name)";
+                    }
+                };
+
             case FUNDING_SOURCE:
                 return new FilterCallback() {
 
@@ -253,6 +273,7 @@ public class SearchFilterCallbackFactory {
                         return Plasmid.class.getName() + " plasmid";
                     }
                 };
+
 
             default:
                 return null;
