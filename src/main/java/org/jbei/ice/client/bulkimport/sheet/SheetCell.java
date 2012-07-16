@@ -69,6 +69,16 @@ public abstract class SheetCell extends Composite {
     }
 
     /**
+     * This attempts to get around the issue of fileinput setting their own data
+     * on file upload and inputcell relying on Sheet.java to set the data when a user clicks on another cell
+     *
+     * @return true if sub-classes handle setting their data, false otherwise
+     */
+    public boolean handlesDataSet() {
+        return false;
+    }
+
+    /**
      * cell notification for selection. in parent class
      * it does not do anything. subclasses that wish to do some something special
      * when a user selects a cell should sub-class and return true after specialization code

@@ -1,5 +1,6 @@
 package org.jbei.ice.client.bulkimport.sheet;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlexTable;
 import gwtupload.client.IUploadStatus;
@@ -31,8 +32,13 @@ public class FileInputCell extends SheetCell {
         initWidget(table);
     }
 
+    public boolean handlesDataSet() {
+        return true;
+    }
+
     @Override
     public void setText(String text) {
+        GWT.log(text);
     }
 
     @Override
@@ -46,6 +52,7 @@ public class FileInputCell extends SheetCell {
 
     @Override
     public void setFocus() {
+        cellUploader.submitClick();
     }
 
     @Override

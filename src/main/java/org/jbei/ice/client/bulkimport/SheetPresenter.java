@@ -213,6 +213,13 @@ public class SheetPresenter {
         return isValid;
     }
 
+    /**
+     * sets the text for the current cell
+     *
+     * @param currentRow   row of cell
+     * @param currentIndex index of current cell
+     * @return the current cell for the row being interacted with or null if non exist
+     */
     public SheetCell setCellInputFocus(int currentRow, int currentIndex) {
         // get cell for selection and set it to existing
         newSelection = headers[currentIndex].getCell();
@@ -225,7 +232,6 @@ public class SheetPresenter {
         if (data != null)
             text = data.getValue();
         newSelection.setText(text);
-
 
         return newSelection;
     }

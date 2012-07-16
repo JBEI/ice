@@ -374,22 +374,26 @@ public class Sheet extends Composite implements SheetPresenter.View {
      * Replaces the cell with an input widget that is determined by the type of header
      */
     private void switchToInput() {
-
         if (cellHasFocus)
             return;
 
-        // cache the current label we are replacing
-        lastReplaced = (Label) sheetTable.getWidget(currentRow, currentIndex);
-        lastReplaced.removeStyleName("cell_selected");
-        inputIndex = currentIndex;
-        inputRow = currentRow;
+        Widget widget = sheetTable.getWidget(currentRow, currentIndex);
+        if ((widget instanceof Label)) {
+
+            // cache the current label we are replacing
+            lastReplaced = (Label) widget;
+            lastReplaced.removeStyleName("cell_selected");
+            inputIndex = currentIndex;
+            inputRow = currentRow;
+        }
 
         newCellSelection = presenter.setCellInputFocus(currentRow, currentIndex);
         if (newCellSelection == null)
             return;
 
         sheetTable.setWidget(currentRow, currentIndex, newCellSelection);
-        // all cell to set focus to whatever their input mechanism is. e.g. if an input box, allow focus on that box
+        // all cell to set focus to whatever their input mechanism is.
+        // e.g. if an input box, allow focus on that box
         newCellSelection.setFocus();
         cellHasFocus = true;
     }
@@ -485,7 +489,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         //                "<div style=\"position: relative; width: 5px; height: 5px; background-color: blue; top: "
         //                        + "12px; right: -122px; border: 3px solid white\"></div>");
 
-        // if user is clicking on the same cell
+        // check if user is clicking on the same cell
         if (currentRow == newRow && currentIndex == newCol)
             return;
 
@@ -505,9 +509,15 @@ public class Sheet extends Composite implements SheetPresenter.View {
         // label widget, and display that label widget
         if (lastReplaced != null) {
             String inputText = "";
-            SheetCellData data = prevSelection.getDataForRow(inputRow);
-            if (data != null)
-                inputText = data.getValue();
+
+            if (prevSelection.handlesDataSet()) {
+                SheetCellData data = prevSelection.getDataForRow(inputRow);
+                if (data != null)
+                    inputText = data.getValue();
+            } else {
+                inputText = prevSelection.setDataForRow(inputRow);
+            }
+
             lastReplaced.setTitle(inputText);
 
             if (inputText != null && inputText.length() > 18)
@@ -521,7 +531,10 @@ public class Sheet extends Composite implements SheetPresenter.View {
         }
 
         // now deal with current selection
+        // check if cell handles selection
         if (newCellSelection.cellSelected(newRow, newCol)) {
+
+            // cell handles selection
             lastReplaced = (Label) sheetTable.getWidget(newRow, newCol);
             lastReplaced.removeStyleName("cell_selected");
             inputIndex = newCol;

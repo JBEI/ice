@@ -3,6 +3,8 @@ package org.jbei.ice.client.bulkimport.sheet;
 import org.jbei.ice.client.AppController;
 import org.jbei.ice.client.common.util.ImageUtil;
 
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
@@ -16,10 +18,12 @@ import gwtupload.client.SingleUploader;
 public class CellUploader implements IsWidget {
 
     private final SingleUploader uploader;
+    private final Image fileUploadImg;
 
     public CellUploader() {
 //        Label label = new Label("Upload file");
-        Image fileUploadImg = ImageUtil.getFileUpload();
+        fileUploadImg = ImageUtil.getFileUpload();
+        fileUploadImg.setHeight((fileUploadImg.getHeight() - 2) + "px");
         fileUploadImg.setStyleName("cursor_pointer");
 
         final FileUploadStatus uploaderStatus = new FileUploadStatus();
@@ -43,6 +47,11 @@ public class CellUploader implements IsWidget {
                 uploader.reset();
             }
         });
+    }
+
+    public void submitClick() {
+        DomEvent.fireNativeEvent(Document.get().createClickEvent(0, 0, 0, 0, 0, false, false, false, false),
+                                 fileUploadImg);
     }
 
     public void addOnFinishUploadHandler(IUploader.OnFinishUploaderHandler onFinishUploaderHandler) {

@@ -397,8 +397,9 @@ a.cell_mouseover:hover {
 
 .uploader_cell {
     font-size: 0.75em;
-    border-right: 1px solid #CCC;
-    border-top: 1px solid #CCC;
+    /*border-right: 1px solid #CCC;*/
+    /*border-top: 1px solid #CCC;*/
+    border: 2px solid #0082C0;
     height: 20px;
     width: 131px;
 }
