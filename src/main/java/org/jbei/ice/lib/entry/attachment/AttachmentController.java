@@ -1,5 +1,9 @@
 package org.jbei.ice.lib.entry.attachment;
 
+import java.io.File;
+import java.io.InputStream;
+import java.util.ArrayList;
+
 import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
@@ -8,10 +12,6 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.utils.Utils;
-
-import java.io.File;
-import java.io.InputStream;
-import java.util.ArrayList;
 
 /**
  * ABI to manipulate {@link Attachment}s.
@@ -96,6 +96,9 @@ public class AttachmentController {
             String fileId = Utils.generateUUID();
             attachment.setFileId(fileId);
         }
+
+        if (attachment.getDescription() == null)
+            attachment.setDescription("");
 
         Attachment result;
 
