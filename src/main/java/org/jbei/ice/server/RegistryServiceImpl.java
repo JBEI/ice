@@ -1380,7 +1380,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 }
             }
 
-            return controller.createEntry(account, entry).getId();
+            return controller.createEntry(account, entry, true).getId();
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
@@ -1413,7 +1413,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                         break;
                 }
             }
-            HashSet<Entry> results = controller.createStrainWithPlasmid(account, strain, plasmid);
+            HashSet<Entry> results = controller.createStrainWithPlasmid(account, strain, plasmid, true);
             ArrayList<Long> ids = new ArrayList<Long>();
 
             for (Entry result : results) {

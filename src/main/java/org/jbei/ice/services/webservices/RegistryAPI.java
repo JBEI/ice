@@ -5,12 +5,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -50,9 +48,11 @@ import org.jbei.ice.lib.vo.SequenceTraceFile;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.web.common.ViewException;
 
+import org.apache.commons.lang.NotImplementedException;
+
 /**
  * SOAP API methods.
- * 
+ *
  * @author Zinovii Dmytriv, Hector Plahar, Timothy Ham
  */
 @WebService(targetNamespace = "https://api.registry.jbei.org/")
@@ -60,8 +60,8 @@ public class RegistryAPI {
     /**
      * Login to the ICE SOAP service, with the given login and password. Returns a session key for
      * future authentication.
-     * 
-     * @param login Login.
+     *
+     * @param login    Login.
      * @param password Password.
      * @return Session key.
      * @throws SessionException
@@ -97,7 +97,7 @@ public class RegistryAPI {
 
     /**
      * Logout out of the ICE SOAP service.
-     * 
+     *
      * @param sessionId Session key to log out.
      * @throws ServiceException
      */
@@ -118,7 +118,7 @@ public class RegistryAPI {
 
     /**
      * Check if the session key is still authenticated.
-     * 
+     *
      * @param sessionId Session key to check.
      * @return True if still authenticated.
      * @throws ServiceException
@@ -146,9 +146,9 @@ public class RegistryAPI {
      * Check if the Account associated with the session key is a moderator.
      * <p/>
      * Ideally this must be folded into login() by using an extra param
-     * 
+     *
      * @param sessionId valid session id to ensure user successfully logged in.
-     * @param login user login being checked for moderator status
+     * @param login     user login being checked for moderator status
      * @return true if user is a designated moderator, false otherwise
      */
     public boolean isModerator(@WebParam(name = "sessionId") String sessionId,
@@ -166,9 +166,9 @@ public class RegistryAPI {
 
     /**
      * Retrieve an {@link Entry} by its name.
-     * 
+     *
      * @param sessionId Session key.
-     * @param name Name of the Entry to retrieve.
+     * @param name      Name of the Entry to retrieve.
      * @return Entry object.
      * @throws ServiceException
      */
@@ -193,7 +193,7 @@ public class RegistryAPI {
 
     /**
      * Retrieve the number of publicly viewable entries.
-     * 
+     *
      * @return Number of publicly viewable entries on the server.
      * @throws ServiceException
      */
@@ -213,9 +213,9 @@ public class RegistryAPI {
 
     /**
      * Perform full text search on the server.
-     * 
+     *
      * @param sessionId Session key.
-     * @param query Query string.
+     * @param query     Query string.
      * @return List of {@link SearchResult}s.
      * @throws ServiceException
      * @throws SessionException
@@ -245,8 +245,8 @@ public class RegistryAPI {
 
     /**
      * Perform blastn search on the server.
-     * 
-     * @param sessionId Session key.
+     *
+     * @param sessionId     Session key.
      * @param querySequence Sequence to query.
      * @return List of {@link BlastResult}s.
      * @throws SessionException
@@ -283,8 +283,8 @@ public class RegistryAPI {
 
     /**
      * Perform tblastx on the server.
-     * 
-     * @param sessionId Session key.
+     *
+     * @param sessionId     Session key.
      * @param querySequence Sequence to query.
      * @return List of {@link BlastResult}s.
      * @throws SessionException
@@ -317,9 +317,9 @@ public class RegistryAPI {
 
     /**
      * Retrieve {@link Entry} by its recordId.
-     * 
+     *
      * @param sessionId Session key.
-     * @param entryId recordId of the Entry.
+     * @param entryId   recordId of the Entry.
      * @return Entry object.
      * @throws SessionException
      * @throws ServiceException
@@ -340,7 +340,7 @@ public class RegistryAPI {
             throw new ServiceException("Registry Service Internal Error!");
         } catch (PermissionException e) {
             throw new ServicePermissionException("No permissions to read this entry by entryId: "
-                    + entryId);
+                                                         + entryId);
         } catch (Exception e) {
             Logger.error(e);
 
@@ -352,8 +352,8 @@ public class RegistryAPI {
 
     /**
      * Retrieve an {@link Entry} by its part number.
-     * 
-     * @param sessionId Session key.
+     *
+     * @param sessionId  Session key.
      * @param partNumber Part number of the desired Entry.
      * @return Entry object.
      * @throws SessionException
@@ -386,9 +386,9 @@ public class RegistryAPI {
 
     /**
      * Check if the session user has read permission to the specified {@link Entry}.
-     * 
+     *
      * @param sessionId Session key.
-     * @param entryId recordId of the Entry.
+     * @param entryId   recordId of the Entry.
      * @return True if the session user has read permission.
      * @throws SessionException
      * @throws ServiceException
@@ -419,9 +419,9 @@ public class RegistryAPI {
 
     /**
      * Check if the session user has write permission to the specified {@link Entry}.
-     * 
+     *
      * @param sessionId Session key.
-     * @param entryId recordId of the Entry.
+     * @param entryId   recordId of the Entry.
      * @return True if the session user has write permission.
      * @throws SessionException
      * @throws ServiceException
@@ -450,9 +450,9 @@ public class RegistryAPI {
 
     /**
      * Create a new {@link Plasmid} on the server.
-     * 
+     *
      * @param sessionId Session key.
-     * @param plasmid Plasmid to create.
+     * @param plasmid   Plasmid to create.
      * @return New Plasmid object from the database.
      * @throws SessionException
      * @throws ServiceException
@@ -465,9 +465,9 @@ public class RegistryAPI {
         try {
             EntryController entryController = new EntryController();
             Entry remoteEntry = createEntry(sessionId, plasmid);
-            newEntry = entryController.createEntry(account, remoteEntry);
+            newEntry = entryController.createEntry(account, remoteEntry, true);
             log("User '" + account.getEmail() + "' created plasmid: '" + plasmid.getRecordId()
-                    + "', " + plasmid.getId());
+                        + "', " + plasmid.getId());
         } catch (ControllerException e) {
             Logger.error(e);
             throw new ServiceException("Registry Service Internal Error!");
@@ -481,9 +481,9 @@ public class RegistryAPI {
 
     /**
      * Create a new {@link Strain} on the server.
-     * 
+     *
      * @param sessionId Session key.
-     * @param strain Strain to create.
+     * @param strain    Strain to create.
      * @return New Strain object from the database.
      * @throws SessionException
      * @throws ServiceException
@@ -497,9 +497,9 @@ public class RegistryAPI {
         try {
             EntryController entryController = new EntryController();
             Entry remoteEntry = createEntry(sessionId, strain);
-            newEntry = entryController.createEntry(account, remoteEntry);
+            newEntry = entryController.createEntry(account, remoteEntry, true);
             log("User '" + account.getEmail() + "' created strain: '" + strain.getRecordId()
-                    + "', " + strain.getId());
+                        + "', " + strain.getId());
         } catch (ControllerException e) {
             Logger.error(e);
             throw new ServiceException("Registry Service Internal Error!");
@@ -513,9 +513,9 @@ public class RegistryAPI {
 
     /**
      * Create a new {@link Part} on the server.
-     * 
+     *
      * @param sessionId Session key.
-     * @param part Part to create.
+     * @param part      Part to create.
      * @return New Part object from the database.
      * @throws SessionException
      * @throws ServiceException
@@ -528,9 +528,9 @@ public class RegistryAPI {
         try {
             EntryController entryController = new EntryController();
             Entry remoteEntry = createEntry(sessionId, part);
-            newEntry = entryController.createEntry(account, remoteEntry);
+            newEntry = entryController.createEntry(account, remoteEntry, true);
             log("User '" + account.getEmail() + "' created part: '" + part.getRecordId() + "', "
-                    + part.getId());
+                        + part.getId());
         } catch (ControllerException e) {
             Logger.error(e);
             throw new ServiceException("Registry Service Internal Error!");
@@ -544,9 +544,9 @@ public class RegistryAPI {
 
     /**
      * Save the given {@link Plasmid} on the server.
-     * 
+     *
      * @param sessionId Session key.
-     * @param plasmid Plasmid to save.
+     * @param plasmid   Plasmid to save.
      * @return Saved Plasmid object.
      * @throws SessionException
      * @throws ServiceException
@@ -565,7 +565,7 @@ public class RegistryAPI {
             savedEntry = entryController.update(account, updateEntry(account, plasmid));
 
             log("User '" + account.getEmail() + "' update plasmid: '" + savedEntry.getRecordId()
-                    + "', " + savedEntry.getId());
+                        + "', " + savedEntry.getId());
         } catch (ControllerException e) {
             Logger.error(e);
 
@@ -583,9 +583,9 @@ public class RegistryAPI {
 
     /**
      * Save the given {@link Strain} on the server.
-     * 
+     *
      * @param sessionId Session key.
-     * @param strain Strain to save.
+     * @param strain    Strain to save.
      * @return Saved Strain object.
      * @throws SessionException
      * @throws ServiceException
@@ -604,7 +604,7 @@ public class RegistryAPI {
             savedEntry = entryController.update(account, updateEntry(account, strain));
 
             log("User '" + account.getEmail() + "' update strain: '" + savedEntry.getRecordId()
-                    + "', " + savedEntry.getId());
+                        + "', " + savedEntry.getId());
         } catch (ControllerException e) {
             Logger.error(e);
 
@@ -622,9 +622,9 @@ public class RegistryAPI {
 
     /**
      * Save the given {@link Part} on the server.
-     * 
+     *
      * @param sessionId Session key.
-     * @param part Part to save.
+     * @param part      Part to save.
      * @return Saved Part object.
      * @throws SessionException
      * @throws ServiceException
@@ -642,7 +642,7 @@ public class RegistryAPI {
             savedEntry = entryController.update(account, updateEntry(account, part));
 
             log("User '" + account.getEmail() + "' update part: '" + savedEntry.getRecordId()
-                    + "', " + savedEntry.getId());
+                        + "', " + savedEntry.getId());
         } catch (ControllerException e) {
             Logger.error(e);
 
@@ -662,9 +662,9 @@ public class RegistryAPI {
      * Create a generic {@link Entry} on the server.
      * <p/>
      * Perform validation for a generic Entry.
-     * 
+     *
      * @param sessionId Session key.
-     * @param entry Entry to save.
+     * @param entry     Entry to save.
      * @return Saved Entry object.
      * @throws SessionException
      * @throws ServiceException
@@ -770,7 +770,7 @@ public class RegistryAPI {
 
                 if (entryFundingSource.getFundingSource().getPrincipalInvestigator() == null
                         || entryFundingSource.getFundingSource().getPrincipalInvestigator()
-                                .isEmpty()) {
+                                             .isEmpty()) {
                     throw new ServiceException("PrincipalInvestigator can't be null or empty!");
                 }
 
@@ -783,9 +783,9 @@ public class RegistryAPI {
 
     /**
      * Save a generic {@link Entry} on the server.
-     * 
+     *
      * @param sessionId Session key.
-     * @param entry Entry to save.
+     * @param entry     Entry to save.
      * @return Saved Entry object.
      * @throws SessionException
      * @throws ServiceException
@@ -880,7 +880,7 @@ public class RegistryAPI {
             ((Plasmid) currentEntry).setBackbone(((Plasmid) entry).getBackbone());
             ((Plasmid) currentEntry).setCircular(((Plasmid) entry).getCircular());
             ((Plasmid) currentEntry).setOriginOfReplication(((Plasmid) entry)
-                    .getOriginOfReplication());
+                                                                    .getOriginOfReplication());
             ((Plasmid) currentEntry).setPromoters(((Plasmid) entry).getPromoters());
         } else if (entry instanceof Strain) {
             ((Strain) currentEntry).setHost(((Strain) entry).getHost());
@@ -986,7 +986,7 @@ public class RegistryAPI {
 
                 if (entryFundingSource.getFundingSource().getPrincipalInvestigator() == null
                         || entryFundingSource.getFundingSource().getPrincipalInvestigator()
-                                .isEmpty()) {
+                                             .isEmpty()) {
                     throw new ServiceException("PrincipalInvestigator can't be null or empty!");
                 }
 
@@ -995,13 +995,13 @@ public class RegistryAPI {
                         .getEntryFundingSources()) {
 
                     if (currentEntryEntryFundingSource.getFundingSource().getFundingSource()
-                            .equals(entryFundingSource.getFundingSource().getFundingSource())
+                                                      .equals(entryFundingSource.getFundingSource().getFundingSource())
                             && currentEntryEntryFundingSource
-                                    .getFundingSource()
-                                    .getPrincipalInvestigator()
-                                    .equals(
-                                        entryFundingSource.getFundingSource()
-                                                .getPrincipalInvestigator())) {
+                            .getFundingSource()
+                            .getPrincipalInvestigator()
+                            .equals(
+                                    entryFundingSource.getFundingSource()
+                                                      .getPrincipalInvestigator())) {
                         existEntryFundingSource = true;
 
                         break;
@@ -1024,9 +1024,9 @@ public class RegistryAPI {
 
     /**
      * Delete the specified {@link Entry} from the server.
-     * 
+     *
      * @param sessionId Session key.
-     * @param entryId RecordId of the Entry.
+     * @param entryId   RecordId of the Entry.
      * @throws SessionException
      * @throws ServiceException
      * @throws ServicePermissionException
@@ -1057,9 +1057,9 @@ public class RegistryAPI {
 
     /**
      * Get the {@link FeaturedDNASequence} of the specified {@link Entry}.
-     * 
+     *
      * @param sessionId Session key.
-     * @param entryId RecordId of the desired Entry.
+     * @param entryId   RecordId of the desired Entry.
      * @return FeaturedDNASequence object.
      * @throws SessionException
      * @throws ServiceException
@@ -1077,7 +1077,7 @@ public class RegistryAPI {
             EntryController entryController = new EntryController();
             Entry entry = entryController.getByRecordId(account, entryId);
             sequence = SequenceController.sequenceToDNASequence(sequenceController
-                    .getByEntry(entry));
+                                                                        .getByEntry(entry));
 
             log("User '" + account.getEmail() + "' pulled sequence: '" + entryId + "'");
         } catch (PermissionException e) {
@@ -1098,9 +1098,9 @@ public class RegistryAPI {
     /**
      * Retrieve the original uploaded sequence (Sequence.sequenceUser) of the specified
      * {@link Entry}.
-     * 
+     *
      * @param sessionId Session key.
-     * @param entryId RecordId of the desired Entry.
+     * @param entryId   RecordId of the desired Entry.
      * @return Content of the original uploaded sequence file as String.
      * @throws SessionException
      * @throws ServiceException
@@ -1124,7 +1124,7 @@ public class RegistryAPI {
             }
 
             log("User '" + account.getEmail() + "' pulled original genbank sequence: '" + entryId
-                    + "'");
+                        + "'");
         } catch (PermissionException e) {
             throw new ServicePermissionException("No permission to read this entry");
         } catch (ControllerException e) {
@@ -1142,9 +1142,9 @@ public class RegistryAPI {
 
     /**
      * Genbank formatted {@link Sequence} of the specified {@link Entry}.
-     * 
+     *
      * @param sessionId Session key.
-     * @param entryId RecordId of the desired Entry.
+     * @param entryId   RecordId of the desired Entry.
      * @return Genbank file formatted string.
      * @throws SessionException
      * @throws ServiceException
@@ -1173,7 +1173,7 @@ public class RegistryAPI {
             }
 
             log("User '" + account.getEmail() + "' pulled generated genbank sequence: '" + entryId
-                    + "'");
+                        + "'");
         } catch (PermissionException e) {
             throw new ServicePermissionException("No permission to read this entry");
         } catch (ControllerException e) {
@@ -1191,9 +1191,9 @@ public class RegistryAPI {
 
     /**
      * Fasta formatted {@link Sequence} for the specified {@link Entry}.
-     * 
+     *
      * @param sessionId Session key.
-     * @param entryId RecordId of the desired Entry.
+     * @param entryId   RecordId of the desired Entry.
      * @return Fasta formatted sequence.
      * @throws SessionException
      * @throws ServiceException
@@ -1216,11 +1216,11 @@ public class RegistryAPI {
 
             if (sequence != null) {
                 fastaSequence = SequenceController.compose(sequence,
-                    new FastaFormatter(entry.getNamesAsString()));
+                                                           new FastaFormatter(entry.getNamesAsString()));
             }
 
             log("User '" + account.getEmail() + "' pulled generated fasta sequence: '" + entryId
-                    + "'");
+                        + "'");
         } catch (PermissionException e) {
             throw new ServicePermissionException("No permission to read this entry");
         } catch (ControllerException e) {
@@ -1238,9 +1238,9 @@ public class RegistryAPI {
 
     /**
      * Assign the specified {@link Entry} a new {@link Sequence} object.
-     * 
-     * @param sessionId Session key.
-     * @param entryId RecordId of the desired Entry.
+     *
+     * @param sessionId           Session key.
+     * @param entryId             RecordId of the desired Entry.
      * @param featuredDNASequence Annotated DNA Sequence.
      * @return {@link FeaturedDNASequence} as saved on the server.
      * @throws SessionException
@@ -1302,7 +1302,7 @@ public class RegistryAPI {
 
     /**
      * Update Sequence. Not implemented on purpose: Remove and create a new one.
-     * 
+     *
      * @param sequence
      * @return Always throws Exception.
      */
@@ -1314,9 +1314,9 @@ public class RegistryAPI {
 
     /**
      * Remove the {@link Sequence} object associated with the specified {@link Entry}.
-     * 
+     *
      * @param sessionId Session key.
-     * @param entryId RecordId of the entry.
+     * @param entryId   RecordId of the entry.
      * @throws SessionException
      * @throws ServiceException
      * @throws ServicePermissionException
@@ -1362,10 +1362,10 @@ public class RegistryAPI {
 
     /**
      * Upload a sequence file (genbank, fasta, etc) and associate with the specified {@link Entry}.
-     * 
+     *
      * @param sessionId Session key.
-     * @param entryId RecordId of the desired Entry.
-     * @param sequence Text of sequence file to parse.
+     * @param entryId   RecordId of the desired Entry.
+     * @param sequence  Text of sequence file to parse.
      * @return {@link FeaturedDNASequence} object.
      * @throws SessionException
      * @throws ServiceException
@@ -1383,7 +1383,7 @@ public class RegistryAPI {
 
         if (dnaSequence == null) {
             throw new ServiceException("Couldn't parse sequence file! Supported formats: "
-                    + GeneralParser.getInstance().availableParsersToString());
+                                               + GeneralParser.getInstance().availableParsersToString());
         }
 
         Entry entry = null;
@@ -1429,9 +1429,9 @@ public class RegistryAPI {
 
     /**
      * Retrieve all the {@link Sample}s of the specified {@link Entry}.
-     * 
+     *
      * @param sessionId Session key.
-     * @param entryId RecordId of the Entry.
+     * @param entryId   RecordId of the Entry.
      * @return List of Samples.
      * @throws SessionException
      * @throws ServiceException
@@ -1459,9 +1459,9 @@ public class RegistryAPI {
 
     /**
      * Retrieve the {@link Sample} object associated with a barcode.
-     * 
+     *
      * @param sessionId Session key.
-     * @param barcode Barcode string.
+     * @param barcode   Barcode string.
      * @return List of Samples.
      * @throws SessionException
      * @throws ServiceException
@@ -1488,9 +1488,9 @@ public class RegistryAPI {
     /**
      * Checks if all samples have a common plate. If not, it determines which plate
      * is the most likely.
-     * 
+     *
      * @param sessionId
-     * @param samples samples containing tube storage location with well parent
+     * @param samples   samples containing tube storage location with well parent
      * @return null if samples have a common plate, if not plate id (storage index) of most likely
      *         plate is returned
      * @throws SessionException
@@ -1511,7 +1511,7 @@ public class RegistryAPI {
         } catch (ControllerException e) {
             Logger.error(e.getMessage());
             throw new ServiceException("Error retrieving storage location for tube "
-                    + tube.getIndex());
+                                               + tube.getIndex());
         }
         if (tube == null) {
             throw new ServiceException("Error retrieving storage location for tube");
@@ -1568,13 +1568,13 @@ public class RegistryAPI {
      * Create a {@link Sample} object for the specified {@link Strain}.
      * <p/>
      * This assumes a plate->well->tube storage scheme.
-     * 
+     *
      * @param sessionId Session key.
-     * @param recordId RecordId of the Strain.
-     * @param rack -Rack number.
-     * @param location Location number.
-     * @param barcode Barcode number.
-     * @param label Label.
+     * @param recordId  RecordId of the Strain.
+     * @param rack      -Rack number.
+     * @param location  Location number.
+     * @param barcode   Barcode number.
+     * @param label     Label.
      * @throws ServiceException
      * @throws PermissionException
      * @throws SessionException
@@ -1640,8 +1640,9 @@ public class RegistryAPI {
                 throw new ServiceException("Registry Service Internal Error!");
             }
 
-            Storage newLocation = storageController.getLocation(strainScheme, new String[] { rack,
-                    location, barcode });
+            Storage newLocation = storageController.getLocation(strainScheme, new String[]{rack,
+                    location, barcode
+            });
 
             Entry entry = new EntryController().getByRecordId(account, recordId);
             if (entry == null) {
@@ -1663,10 +1664,10 @@ public class RegistryAPI {
 
     /**
      * Check and automagically update sample storage for the given
-     * 
+     *
      * @param sessionId Session key.
-     * @param samples Samples
-     * @param plateId plateId
+     * @param samples   Samples
+     * @param plateId   plateId
      * @return List of {@link Sample}s.
      * @throws SessionException
      * @throws ServiceException
@@ -1717,7 +1718,7 @@ public class RegistryAPI {
                     } else {
                         // same plate but different well                        
                         Storage well = storageController.retrieveStorageBy("Well", location,
-                            StorageType.WELL, recordedPlate.getId());
+                                                                           StorageType.WELL, recordedPlate.getId());
                         if (well == null) {
                             throw new ServiceException(
                                     "Could not retrieve new location for storage");
@@ -1728,7 +1729,7 @@ public class RegistryAPI {
                 } else {
                     // different plate (update using the passed parameter)
                     Storage newPlate = storageController.retrieveStorageBy("Plate", plateId,
-                        StorageType.PLATE96, parentScheme.getId());
+                                                                           StorageType.PLATE96, parentScheme.getId());
                     if (sameWell) {
                         // update plate only
                         recordedWell.setParent(newPlate);
@@ -1737,7 +1738,7 @@ public class RegistryAPI {
                     } else {
                         // update plate and well
                         Storage well = storageController.retrieveStorageBy("Well", location,
-                            StorageType.WELL, newPlate.getId());
+                                                                           StorageType.WELL, newPlate.getId());
                         recordedTube.setParent(well);
                         storageController.update(recordedTube);
                     }
@@ -1766,9 +1767,9 @@ public class RegistryAPI {
 
     /**
      * Retrieve a list of {@link TraceSequence}s associated with the specified entry.
-     * 
+     *
      * @param sessionId Session key.
-     * @param recordId RecordId of the desired Entry.
+     * @param recordId  RecordId of the desired Entry.
      * @return List of TraceSequences.
      * @throws ServiceException
      * @throws SessionException
@@ -1817,10 +1818,10 @@ public class RegistryAPI {
 
     /**
      * Upload a sequence trace (abi) file.
-     * 
-     * @param sessionId Session key.
-     * @param recordId RecordId of the desired {@link Entry}.
-     * @param fileName Name of the trace file.
+     *
+     * @param sessionId      Session key.
+     * @param recordId       RecordId of the desired {@link Entry}.
+     * @param fileName       Name of the trace file.
      * @param base64FileData Base64 encoded content of the file.
      * @return File ID as saved on the server.
      * @throws ServiceException
@@ -1871,7 +1872,7 @@ public class RegistryAPI {
         }
         try {
             result = sequenceAnalysisController.uploadTraceSequence(entry, fileName, depositor,
-                sequence, inputStream);
+                                                                    sequence, inputStream);
             sequenceAnalysisController.rebuildAllAlignments(entry);
         } catch (ControllerException e) {
             log(e.getMessage());
@@ -1883,9 +1884,9 @@ public class RegistryAPI {
 
     /**
      * Retrieve the specified trace sequence file.
-     * 
+     *
      * @param sessionId Session Key.
-     * @param fileId File ID to retrieve.
+     * @param fileId    File ID to retrieve.
      * @return {@link SequenceTraceFile} object.
      * @throws ServiceException
      * @throws SessionException
@@ -1913,9 +1914,9 @@ public class RegistryAPI {
 
     /**
      * Delete the specified trace sequence file.
-     * 
+     *
      * @param sessionId Session key.
-     * @param fileId ID of the file to delete.
+     * @param fileId    ID of the file to delete.
      * @throws ServiceException
      * @throws SessionException
      */
@@ -1947,7 +1948,7 @@ public class RegistryAPI {
     /**
      * Retrieve the user {@link Account} associated with the given session key, if user is logged
      * in.
-     * 
+     *
      * @param sessionId Session key.
      * @return {@link Account} if user is logged in.
      * @throws ServiceException
@@ -1979,7 +1980,7 @@ public class RegistryAPI {
 
     /**
      * Write into the log at the INFO level, using the RegistryAPI prefix.
-     * 
+     *
      * @param message Log message.
      */
     private void log(String message) {
@@ -1989,9 +1990,9 @@ public class RegistryAPI {
     /**
      * Write into the log at the INFO level, using the RegistryAPI prefix and the account email
      * associated with the given session key.
-     * 
+     *
      * @param sessionId Session key.
-     * @param message Log message.
+     * @param message   Log message.
      */
     private void log(String sessionId, String message) {
         Account account = null;

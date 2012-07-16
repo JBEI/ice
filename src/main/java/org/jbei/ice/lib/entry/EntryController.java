@@ -31,7 +31,7 @@ import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 /**
  * ABI to manipulate {@link org.jbei.ice.lib.entry.model.Entry}s.
- * 
+ *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 public class EntryController {
@@ -39,11 +39,13 @@ public class EntryController {
     private EntryDAO dao;
     private PermissionsController permissionsController;
     private AttachmentController attachmentController;
+    private GroupController groupController;
 
     public EntryController() {
         dao = new EntryDAO();
         permissionsController = new PermissionsController();
         attachmentController = new AttachmentController();
+        groupController = new GroupController();
     }
 
     /**
@@ -51,44 +53,46 @@ public class EntryController {
      * <p/>
      * Generates a new Part Number, the record id (UUID), version id, and timestamps as necessary.
      * Sets the record globally visible and schedule an index rebuild.
-     * 
-     * @param account account of user creating the record
-     * @param entry entry record being created
+     *
+     * @param account       account of user creating the record
+     * @param entry         entry record being created
+     * @param addPublicRead make entry readable by the public. The current notion of public is a single per-site group.
+     *                      This is currently maintained for legacy reasons but will be changed in the near future
      * @return entry that was saved in the database.
      * @throws ControllerException
      */
-    public Entry createEntry(Account account, Entry entry) throws ControllerException {
-        return createEntry(account, entry, true);
+    public Entry createEntry(Account account, Entry entry, boolean addPublicRead) throws ControllerException {
+        return createEntry(account, entry, true, addPublicRead);
     }
 
-    public HashSet<Entry> createStrainWithPlasmid(Account account, Strain strain, Plasmid plasmid)
+    public HashSet<Entry> createStrainWithPlasmid(Account account, Strain strain, Plasmid plasmid, boolean makePublic)
             throws ControllerException {
 
         HashSet<Entry> results = new HashSet<Entry>();
 
-        plasmid = (Plasmid) createEntry(account, plasmid);
+        plasmid = (Plasmid) createEntry(account, plasmid, makePublic);
         results.add(plasmid);
 
         String plasmidPartNumberString = "[[" + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":"
                 + plasmid.getOnePartNumber().getPartNumber() + "|" + plasmid.getOneName().getName()
                 + "]]";
         strain.setPlasmids(plasmidPartNumberString);
-        strain = (Strain) createEntry(account, strain);
+        strain = (Strain) createEntry(account, strain, makePublic);
         results.add(strain);
         return results;
     }
 
     /**
      * Generate the next part number string using system settings.
-     * 
+     *
      * @return The next part number.
      * @throws ControllerException
      */
     private String getNextPartNumber() throws ControllerException {
         try {
             return dao.generateNextPartNumber(JbeirSettings.getSetting("PART_NUMBER_PREFIX"),
-                JbeirSettings.getSetting("PART_NUMBER_DELIMITER"),
-                JbeirSettings.getSetting("PART_NUMBER_DIGITAL_SUFFIX"));
+                                              JbeirSettings.getSetting("PART_NUMBER_DELIMITER"),
+                                              JbeirSettings.getSetting("PART_NUMBER_DIGITAL_SUFFIX"));
         } catch (DAOException e) {
             Logger.error(e);
             throw new ControllerException(e);
@@ -100,19 +104,27 @@ public class EntryController {
      * <p/>
      * Generates a new Part Number, the record id (UUID), version id, and timestamps as necessary.
      * Optionally set the record globally visible or schedule an index rebuild.
-     * 
-     * @param account account of user creating entry
-     * @param entry entry record being created
+     *
+     * @param account              account of user creating entry
+     * @param entry                entry record being created
      * @param scheduleIndexRebuild Set true to schedule search index rebuild.
      * @return entry that was saved in the database.
      * @throws ControllerException
      */
-    public Entry createEntry(Account account, Entry entry, boolean scheduleIndexRebuild)
+    public Entry createEntry(Account account, Entry entry, boolean scheduleIndexRebuild, boolean addPublicRead)
             throws ControllerException {
         Entry createdEntry;
 
         String nextPart = getNextPartNumber();
         createdEntry = EntryFactory.createEntry(account, nextPart, entry);
+
+        Group publicGroup = groupController.createOrRetrievePublicGroup();
+        try {
+            permissionsController.addReadGroup(account, createdEntry, publicGroup);
+        } catch (PermissionException pe) {
+            Logger.error("Could not make entry " + createdEntry.getId() + " public ", pe);
+        }
+
         try {
             dao.save(entry);
         } catch (DAOException e) {
@@ -129,9 +141,9 @@ public class EntryController {
 
     /**
      * Retrieve {@link Entry} from the database by id.
-     * 
+     *
      * @param account account of user performing action
-     * @param id unique local identifier for entry
+     * @param id      unique local identifier for entry
      * @return entry retrieved from the database.
      * @throws ControllerException
      * @throws PermissionException
@@ -160,13 +172,13 @@ public class EntryController {
         Set<Account> readAccounts = permissionsController.getReadUser(account, entry);
         for (Account readAccount : readAccounts) {
             permissionInfos.add(new PermissionInfo(PermissionInfo.PermissionType.READ_ACCOUNT,
-                    readAccount.getId(), readAccount.getFullName()));
+                                                   readAccount.getId(), readAccount.getFullName()));
         }
 
         Set<Account> writeAccounts = permissionsController.getWriteUser(account, entry);
         for (Account writeAccount : writeAccounts) {
             permissionInfos.add(new PermissionInfo(PermissionInfo.PermissionType.WRITE_ACCOUNT,
-                    writeAccount.getId(), writeAccount.getFullName()));
+                                                   writeAccount.getId(), writeAccount.getFullName()));
         }
 
         Set<Group> readGroups = permissionsController.getReadGroup(account, entry);
@@ -186,7 +198,7 @@ public class EntryController {
 
     /**
      * Retrieve {@link Entry} from the database by recordId (uuid).
-     * 
+     *
      * @param recordId universally unique identifier that was assigned to entry on create
      * @return entry retrieved from the database.
      * @throws ControllerException
@@ -213,7 +225,7 @@ public class EntryController {
      * Retrieve {@link Entry} from the database by part number.
      * <p/>
      * Throws exception if multiple entries have the same part number.
-     * 
+     *
      * @param partNumber
      * @return entry retrieved from the database.
      * @throws ControllerException
@@ -240,7 +252,7 @@ public class EntryController {
      * Retrieve {@link Entry} from the database by name.
      * <p/>
      * Throws exception if multiple entries have the same name.
-     * 
+     *
      * @param name
      * @return entry retrieved from the database.
      * @throws ControllerException
@@ -267,7 +279,7 @@ public class EntryController {
     /**
      * Checks if the given entry has {@link org.jbei.ice.lib.entry.attachment.Attachment}s
      * associated with it.
-     * 
+     *
      * @param entry
      * @return True if there are associated attachments.
      * @throws ControllerException
@@ -300,7 +312,7 @@ public class EntryController {
 
     /**
      * Retrieve the number of publicly visible entries (Entries visible to the Everybody group).
-     * 
+     *
      * @param account
      * @return Number of entries.
      * @throws ControllerException
@@ -327,7 +339,7 @@ public class EntryController {
 
     /**
      * Save the entry into the database. Then schedule index rebuild.
-     * 
+     *
      * @param entry
      * @return Saved entry.
      * @throws ControllerException
@@ -339,7 +351,7 @@ public class EntryController {
 
     /**
      * Save the entry into the database. Optionally schedule an index rebuild.
-     * 
+     *
      * @param entry
      * @param scheduleIndexRebuild Set True to schedule index rebuild.
      * @return Entry saved into the database.
@@ -397,7 +409,7 @@ public class EntryController {
 
     /**
      * Delete the entry in the database. Schedule an index rebuild.
-     * 
+     *
      * @param entry
      * @throws ControllerException
      * @throws PermissionException
@@ -409,7 +421,7 @@ public class EntryController {
 
     /**
      * Delete the entry in the database. Optionally schedule an index rebuild.
-     * 
+     *
      * @param entry
      * @param scheduleIndexRebuild True if index rebuild is scheduled.
      * @throws ControllerException
@@ -451,7 +463,7 @@ public class EntryController {
      * Filter {@link Entry} id's for display.
      * <p/>
      * Given a List of entry id's, keep only id's that user has read access to.
-     * 
+     *
      * @param ids
      * @return List of Entry ids.
      * @throws ControllerException
@@ -516,20 +528,20 @@ public class EntryController {
 
         try {
             switch (field) {
-            case TYPE:
-                entries = dao.getEntriesByIdSetSortByType(entryIds, asc);
-                break;
+                case TYPE:
+                    entries = dao.getEntriesByIdSetSortByType(entryIds, asc);
+                    break;
 
-            case STATUS:
-                entries = dao.getEntriesByIdSetSortByStatus(entryIds, asc);
-                break;
+                case STATUS:
+                    entries = dao.getEntriesByIdSetSortByStatus(entryIds, asc);
+                    break;
 
-            case CREATED:
-                entries = dao.getEntriesByIdSetSortByCreated(entryIds, asc);
-                break;
+                case CREATED:
+                    entries = dao.getEntriesByIdSetSortByCreated(entryIds, asc);
+                    break;
 
-            default:
-                entries = dao.getEntriesByIdSet(entryIds);
+                default:
+                    entries = dao.getEntriesByIdSet(entryIds);
             }
         } catch (DAOException ce) {
             throw new ControllerException("Could not retrieve entries by sort ", ce);

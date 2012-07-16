@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -38,9 +37,11 @@ import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
 import org.jbei.ice.shared.dto.StrainInfo;
 import org.jbei.ice.shared.dto.Visibility;
 
+import org.apache.commons.io.FileUtils;
+
 /**
  * Controller for dealing with bulk import drafts
- * 
+ *
  * @author Hector Plahar
  */
 public class BulkImportController {
@@ -59,7 +60,7 @@ public class BulkImportController {
      * Retrieves list of bulk imports that are owned by the system. System ownership is assigned to
      * all bulk imports that are submitted by non-admins. Administrative privileges are required
      * for making this call
-     * 
+     *
      * @param account account for user making call
      * @return list of bulk imports pending verification
      * @throws ControllerException
@@ -132,7 +133,7 @@ public class BulkImportController {
         // check for permissions to retrieve this bulk import
         if (!isModerator && !isOwner) {
             throw new PermissionException("Insufficient privileges by " + account.getEmail()
-                    + " to view bulk import for " + draft.getAccount().getEmail());
+                                                  + " to view bulk import for " + draft.getAccount().getEmail());
         }
 
         BulkImportInfo draftInfo = new BulkImportInfo();
@@ -162,10 +163,9 @@ public class BulkImportController {
 
     /**
      * Retrieves list of user saved drafts
-     * 
-     * @param account account of requesting user
-     * @param userAccount
-     *            account whose saved drafts are being requested
+     *
+     * @param account     account of requesting user
+     * @param userAccount account whose saved drafts are being requested
      * @return list of draft infos representing saved drafts.
      * @throws ControllerException
      */
@@ -225,7 +225,7 @@ public class BulkImportController {
             draft = dao.retrieveById(draftId);
             if (draft == null)
                 throw new ControllerException("Could not retrieve draft with id \"" + draftId
-                        + "\"");
+                                                      + "\"");
 
             Account draftAccount = draft.getAccount();
             if (!requesting.equals(draftAccount) && !accountController.isAdministrator(requesting))
@@ -275,47 +275,47 @@ public class BulkImportController {
         for (EntryInfo info : entryList) {
 
             switch (type) {
-            // special treatment for strain with plasmid
-            case STRAIN_WITH_PLASMID:
-                StrainInfo strainInfo;
-                PlasmidInfo plasmidInfo;
+                // special treatment for strain with plasmid
+                case STRAIN_WITH_PLASMID:
+                    StrainInfo strainInfo;
+                    PlasmidInfo plasmidInfo;
 
-                if (info.getType() == EntryType.STRAIN) { // this is the typically case but cannot be too careful
-                    strainInfo = (StrainInfo) info;
-                    plasmidInfo = (PlasmidInfo) info.getInfo();
-                } else {
-                    plasmidInfo = (PlasmidInfo) info;
-                    strainInfo = (StrainInfo) info.getInfo();
-                }
+                    if (info.getType() == EntryType.STRAIN) { // this is the typically case but cannot be too careful
+                        strainInfo = (StrainInfo) info;
+                        plasmidInfo = (PlasmidInfo) info.getInfo();
+                    } else {
+                        plasmidInfo = (PlasmidInfo) info;
+                        strainInfo = (StrainInfo) info.getInfo();
+                    }
 
-                Strain strain = (Strain) InfoToModelFactory.infoToEntry(strainInfo);
-                Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(plasmidInfo);
-                strain.setVisibility(Visibility.DRAFT.getValue());
-                plasmid.setVisibility(Visibility.DRAFT.getValue());
-                strain.setOwner(entryAccount.getFullName());
-                strain.setOwnerEmail(entryAccount.getEmail());
-                plasmid.setOwner(entryAccount.getFullName());
-                plasmid.setOwnerEmail(entryAccount.getEmail());
+                    Strain strain = (Strain) InfoToModelFactory.infoToEntry(strainInfo);
+                    Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(plasmidInfo);
+                    strain.setVisibility(Visibility.DRAFT.getValue());
+                    plasmid.setVisibility(Visibility.DRAFT.getValue());
+                    strain.setOwner(entryAccount.getFullName());
+                    strain.setOwnerEmail(entryAccount.getEmail());
+                    plasmid.setOwner(entryAccount.getFullName());
+                    plasmid.setOwnerEmail(entryAccount.getEmail());
 
-                // save entries
-                HashSet<Entry> results = entryController.createStrainWithPlasmid(entryAccount,
-                    strain, plasmid);
-                for (Entry entry : results) {
+                    // save entries
+                    HashSet<Entry> results = entryController.createStrainWithPlasmid(entryAccount,
+                                                                                     strain, plasmid, false);
+                    for (Entry entry : results) {
+                        contents.add(entry.getId());
+                    }
+                    break;
+
+                // all others
+                default:
+                    Entry entry = InfoToModelFactory.infoToEntry(info);
+                    entry.setVisibility(Visibility.DRAFT.getValue());
+                    entry.setOwner(entryAccount.getFullName());
+                    entry.setOwnerEmail(entryAccount.getEmail());
+
+                    // save entry
+                    entry = entryController.createEntry(entryAccount, entry, false);
                     contents.add(entry.getId());
-                }
-                break;
-
-            // all others
-            default:
-                Entry entry = InfoToModelFactory.infoToEntry(info);
-                entry.setVisibility(Visibility.DRAFT.getValue());
-                entry.setOwner(entryAccount.getFullName());
-                entry.setOwnerEmail(entryAccount.getEmail());
-
-                // save entry
-                entry = entryController.createEntry(entryAccount, entry);
-                contents.add(entry.getId());
-                break;
+                    break;
             }
         }
 
@@ -344,7 +344,7 @@ public class BulkImportController {
         // check permissions
         if (!draft.getAccount().equals(account) && !accountController.isAdministrator(account))
             throw new PermissionException("User " + account.getEmail()
-                    + " does not have permission to update draft " + draftId);
+                                                  + " does not have permission to update draft " + draftId);
 
         List<Entry> draftContents = new ArrayList<Entry>(draft.getContents());
         List<Entry> newContents = new ArrayList<Entry>();
@@ -357,39 +357,39 @@ public class BulkImportController {
         for (EntryInfo info : entryList) {
 
             switch (type) {
-            // special treatment for strain with plasmid
-            case STRAIN_WITH_PLASMID:
-                StrainInfo strainInfo = (StrainInfo) info;
-                PlasmidInfo plasmidInfo = (PlasmidInfo) info.getInfo();
+                // special treatment for strain with plasmid
+                case STRAIN_WITH_PLASMID:
+                    StrainInfo strainInfo = (StrainInfo) info;
+                    PlasmidInfo plasmidInfo = (PlasmidInfo) info.getInfo();
 
-                // save entries
-                boolean updated = updateIfExists(account, draftContents, newContents, info);
-                if (!updated) {
-                    Strain strain = (Strain) InfoToModelFactory.infoToEntry(strainInfo);
-                    Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(plasmidInfo);
-                    strain.setVisibility(Visibility.DRAFT.getValue());
-                    plasmid.setVisibility(Visibility.DRAFT.getValue());
-                    HashSet<Entry> results = entryController.createStrainWithPlasmid(account,
-                        strain, plasmid);
-                    newContents.addAll(results);
+                    // save entries
+                    boolean updated = updateIfExists(account, draftContents, newContents, info);
+                    if (!updated) {
+                        Strain strain = (Strain) InfoToModelFactory.infoToEntry(strainInfo);
+                        Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(plasmidInfo);
+                        strain.setVisibility(Visibility.DRAFT.getValue());
+                        plasmid.setVisibility(Visibility.DRAFT.getValue());
+                        HashSet<Entry> results = entryController.createStrainWithPlasmid(account,
+                                                                                         strain, plasmid, false);
+                        newContents.addAll(results);
+                        break;
+                    }
+
+                    // if strain exists, then plasmid has to also
+                    updateIfExists(account, draftContents, newContents, plasmidInfo);
                     break;
-                }
 
-                // if strain exists, then plasmid has to also
-                updateIfExists(account, draftContents, newContents, plasmidInfo);
-                break;
-
-            // all others
-            default:
-                // save entry
-                updated = updateIfExists(account, draftContents, newContents, info);
-                if (!updated) {
-                    Entry entry = InfoToModelFactory.infoToEntry(info);
-                    entry.setVisibility(Visibility.DRAFT.getValue());
-                    entry = entryController.createEntry(account, entry);
-                    newContents.add(entry);
-                }
-                break;
+                // all others
+                default:
+                    // save entry
+                    updated = updateIfExists(account, draftContents, newContents, info);
+                    if (!updated) {
+                        Entry entry = InfoToModelFactory.infoToEntry(info);
+                        entry.setVisibility(Visibility.DRAFT.getValue());
+                        entry = entryController.createEntry(account, entry, false);
+                        newContents.add(entry);
+                    }
+                    break;
             }
         }
 
@@ -445,10 +445,10 @@ public class BulkImportController {
     /**
      * Submits bulk import. If user performing the submission is not an administrator
      * then it is submitted for verification.
-     * 
+     *
      * @param entryAccount account of user performing the submission
-     * @param type type of bulk import
-     * @param entryList list of entries contained in this bulk import
+     * @param type         type of bulk import
+     * @param entryList    list of entries contained in this bulk import
      * @return true is import was submitted successfully, false otherwise
      * @throws ControllerException
      */
@@ -468,67 +468,67 @@ public class BulkImportController {
         for (EntryInfo info : entryList) {
 
             switch (type) {
-            // special treatment for strain with plasmid
-            case STRAIN_WITH_PLASMID:
-                StrainInfo strainInfo;
-                PlasmidInfo plasmidInfo;
+                // special treatment for strain with plasmid
+                case STRAIN_WITH_PLASMID:
+                    StrainInfo strainInfo;
+                    PlasmidInfo plasmidInfo;
 
-                if (info.getType() == EntryType.STRAIN) { // this is the typically case but cannot be too careful
-                    strainInfo = (StrainInfo) info;
-                    plasmidInfo = (PlasmidInfo) info.getInfo();
-                } else {
-                    plasmidInfo = (PlasmidInfo) info;
-                    strainInfo = (StrainInfo) info.getInfo();
-                }
-
-                Strain strain = (Strain) InfoToModelFactory.infoToEntry(strainInfo);
-                Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(plasmidInfo);
-
-                strain.setVisibility(visibility.getValue());
-                plasmid.setVisibility(visibility.getValue());
-
-                strain.setOwner(entryAccount.getFullName());
-                strain.setOwnerEmail(entryAccount.getEmail());
-                plasmid.setOwner(entryAccount.getFullName());
-                plasmid.setOwnerEmail(entryAccount.getEmail());
-
-                // save entries
-                HashSet<Entry> results = entryController.createStrainWithPlasmid(entryAccount,
-                    strain, plasmid);
-                for (Entry entry : results) {
-                    contents.add(entry.getId());
-                }
-
-                // TODO : sequence and attachments 
-                break;
-
-            // all others
-            default:
-                Entry entry = InfoToModelFactory.infoToEntry(info);
-                entry.setVisibility(visibility.getValue());
-                entry.setOwner(entryAccount.getFullName());
-                entry.setOwnerEmail(entryAccount.getEmail());
-
-                // save entry
-                entry = entryController.createEntry(entryAccount, entry);
-
-                // check sequence
-                if (info.isHasSequence()) {
-                    // support for only one in bulk import upload
-                    saveSequence(entryAccount, info.getSequenceAnalysis().get(0), entry);
-                }
-
-                // check attachment 
-                if (info.isHasAttachment()) {
-                    try {
-                        saveAttachment(entryAccount, info.getAttachments().get(0), entry);
-                    } catch (Exception e) {
-                        Logger.error(e);
+                    if (info.getType() == EntryType.STRAIN) { // this is the typically case but cannot be too careful
+                        strainInfo = (StrainInfo) info;
+                        plasmidInfo = (PlasmidInfo) info.getInfo();
+                    } else {
+                        plasmidInfo = (PlasmidInfo) info;
+                        strainInfo = (StrainInfo) info.getInfo();
                     }
-                }
 
-                contents.add(entry.getId());
-                break;
+                    Strain strain = (Strain) InfoToModelFactory.infoToEntry(strainInfo);
+                    Plasmid plasmid = (Plasmid) InfoToModelFactory.infoToEntry(plasmidInfo);
+
+                    strain.setVisibility(visibility.getValue());
+                    plasmid.setVisibility(visibility.getValue());
+
+                    strain.setOwner(entryAccount.getFullName());
+                    strain.setOwnerEmail(entryAccount.getEmail());
+                    plasmid.setOwner(entryAccount.getFullName());
+                    plasmid.setOwnerEmail(entryAccount.getEmail());
+
+                    // save entries
+                    HashSet<Entry> results = entryController.createStrainWithPlasmid(entryAccount,
+                                                                                     strain, plasmid, isAdmin);
+                    for (Entry entry : results) {
+                        contents.add(entry.getId());
+                    }
+
+                    // TODO : sequence and attachments
+                    break;
+
+                // all others
+                default:
+                    Entry entry = InfoToModelFactory.infoToEntry(info);
+                    entry.setVisibility(visibility.getValue());
+                    entry.setOwner(entryAccount.getFullName());
+                    entry.setOwnerEmail(entryAccount.getEmail());
+
+                    // save entry
+                    entry = entryController.createEntry(entryAccount, entry, isAdmin);
+
+                    // check sequence
+                    if (info.isHasSequence()) {
+                        // support for only one in bulk import upload
+                        saveSequence(entryAccount, info.getSequenceAnalysis().get(0), entry);
+                    }
+
+                    // check attachment
+                    if (info.isHasAttachment()) {
+                        try {
+                            saveAttachment(entryAccount, info.getAttachments().get(0), entry);
+                        } catch (Exception e) {
+                            Logger.error(e);
+                        }
+                    }
+
+                    contents.add(entry.getId());
+                    break;
             }
         }
 
@@ -561,7 +561,7 @@ public class BulkImportController {
 
         String fileId = sequenceInfo.getFileId();
         File file = new File(JbeirSettings.getSetting("TEMPORARY_DIRECTORY") + File.separatorChar
-                + fileId);
+                                     + fileId);
 
         if (!file.exists()) {
             Logger.error("Could not find sequence file \"" + file.getAbsolutePath() + "\"");
@@ -586,7 +586,7 @@ public class BulkImportController {
         String fileId = info.getFileId();
 
         File file = new File(JbeirSettings.getSetting("TEMPORARY_DIRECTORY") + File.separatorChar
-                + fileId);
+                                     + fileId);
 
         if (!file.exists()) {
             Logger.error("Could not find attachment file \"" + file.getAbsolutePath() + "\"");
