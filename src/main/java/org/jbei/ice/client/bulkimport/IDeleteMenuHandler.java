@@ -1,4 +1,4 @@
-package org.jbei.ice.client.admin.bulkimport;
+package org.jbei.ice.client.bulkimport;
 
 import org.jbei.ice.client.Callback;
 

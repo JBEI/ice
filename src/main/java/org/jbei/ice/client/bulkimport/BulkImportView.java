@@ -2,11 +2,9 @@ package org.jbei.ice.client.bulkimport;
 
 import java.util.ArrayList;
 
-import org.jbei.ice.client.admin.bulkimport.BulkImportMenuItem;
-import org.jbei.ice.client.admin.bulkimport.IDeleteMenuHandler;
-import org.jbei.ice.client.admin.bulkimport.SavedDraftsMenu;
 import org.jbei.ice.client.bulkimport.model.NewBulkInput;
 import org.jbei.ice.client.bulkimport.widget.SaveDraftInput;
+import org.jbei.ice.client.bulkimport.widget.SavedDraftsMenu;
 import org.jbei.ice.client.bulkimport.widget.SelectTypeMenu;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.FeedbackPanel;
@@ -16,22 +14,12 @@ import org.jbei.ice.shared.EntryAddType;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ToggleButton;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 /**
  * View for the bulk import page. Works with {@link BulkImportPresenter}
- * 
+ *
  * @author Hector Plahar
  */
 public class BulkImportView extends AbstractLayout implements IBulkImportView {
@@ -133,19 +121,19 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
 
         mainContent
                 .setHTML(
-                    1,
-                    0,
-                    "<br><div style=\"font-family: Arial; border: 1px solid #e4e4e4; padding: 10px; "
-                            + "background-color: #f1f1f1\"><p>Select type the "
-                            + "of entry you wish to bulk import.</p> <p>Please note that columns"
-                            + " with headers indicated by <span class=\"required\">*</span> "
-                            + "are required. You will not be able to submit the form until you enter a "
-                            + "value for those fields. However, you may save incomplete forms as a named draft "
-                            + "and continue working on it at a later time. "
-                            + "Saved drafts will not be submitted and are only visible to you.</p>"
-                            + "<p>After submitting, an administrator must approve your "
-                            + "submission before it will show up in the search listings. Contact them if you are "
-                            + "in a " + "hurry.</p></div>");
+                        1,
+                        0,
+                        "<br><div style=\"font-family: Arial; border: 1px solid #e4e4e4; padding: 10px; "
+                                + "background-color: #f1f1f1\"><p>Select type the "
+                                + "of entry you wish to bulk import.</p> <p>Please note that columns"
+                                + " with headers indicated by <span class=\"required\">*</span> "
+                                + "are required. You will not be able to submit the form until you enter a "
+                                + "value for those fields. However, you may save incomplete forms as a named draft "
+                                + "and continue working on it at a later time. "
+                                + "Saved drafts will not be submitted and are only visible to you.</p>"
+                                + "<p>After submitting, an administrator must approve your "
+                                + "submission before it will show up in the search listings. Contact them if you are "
+                                + "in a " + "hurry.</p></div>");
         return mainContent;
     }
 

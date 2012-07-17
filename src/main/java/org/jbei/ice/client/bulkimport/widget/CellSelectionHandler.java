@@ -1,6 +1,6 @@
-package org.jbei.ice.client.admin.bulkimport;
+package org.jbei.ice.client.bulkimport.widget;
 
-import org.jbei.ice.client.admin.bulkimport.SavedDraftsMenu.MenuCell;
+import org.jbei.ice.client.bulkimport.BulkImportMenuItem;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -10,9 +10,9 @@ import com.google.gwt.view.client.SingleSelectionModel;
 class CellSelectionHandler implements ClickHandler {
 
     private SingleSelectionModel<BulkImportMenuItem> model;
-    private MenuCell cell;
+    private SavedDraftsMenu.MenuCell cell;
 
-    public CellSelectionHandler(SingleSelectionModel<BulkImportMenuItem> model, MenuCell cell) {
+    public CellSelectionHandler(SingleSelectionModel<BulkImportMenuItem> model, SavedDraftsMenu.MenuCell cell) {
         this.model = model;
         this.cell = cell;
     }

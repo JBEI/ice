@@ -164,7 +164,7 @@ public class SheetPresenter {
 
             String value = "";
 
-            if (currentInfo != null && currentInfo.getCount() >= index) {
+            if (currentInfo != null && currentInfo.getCount() > index) {
                 EntryInfo info = currentInfo.getEntryList().get(index);
 
                 // extractor also sets the header data structure

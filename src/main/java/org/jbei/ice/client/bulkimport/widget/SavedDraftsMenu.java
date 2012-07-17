@@ -1,4 +1,11 @@
-package org.jbei.ice.client.admin.bulkimport;
+package org.jbei.ice.client.bulkimport.widget;
+
+import java.util.ArrayList;
+
+import org.jbei.ice.client.Callback;
+import org.jbei.ice.client.bulkimport.BulkImportMenuItem;
+import org.jbei.ice.client.bulkimport.IDeleteMenuHandler;
+import org.jbei.ice.client.common.util.ImageUtil;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -20,10 +27,6 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
-import org.jbei.ice.client.Callback;
-import org.jbei.ice.client.common.util.ImageUtil;
-
-import java.util.ArrayList;
 
 public class SavedDraftsMenu extends Composite {
 

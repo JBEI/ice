@@ -3,12 +3,12 @@ package org.jbei.ice.client.admin;
 import java.util.ArrayList;
 
 import org.jbei.ice.client.AppController;
-import org.jbei.ice.client.admin.bulkimport.SavedDraftsMenu;
-import org.jbei.ice.client.admin.bulkimport.BulkImportMenuItem;
-import org.jbei.ice.client.admin.bulkimport.IDeleteMenuHandler;
 import org.jbei.ice.client.admin.group.EditGroupsPanel;
 import org.jbei.ice.client.admin.reports.ReportPanel;
 import org.jbei.ice.client.admin.usermanagement.EditUserPanel;
+import org.jbei.ice.client.bulkimport.BulkImportMenuItem;
+import org.jbei.ice.client.bulkimport.IDeleteMenuHandler;
+import org.jbei.ice.client.bulkimport.widget.SavedDraftsMenu;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.shared.dto.BulkImportInfo;
 
@@ -90,7 +90,9 @@ public class AdminView extends AbstractLayout {
     public void setSheet(BulkImportInfo result, boolean b) {
 
         String url = GWT.getHostPageBaseURL();
-        String html = "<object classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540002\" id=\"VectorEditor\" width=\"100%\" height=\"100%\" codebase=\"https://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab\"> "
+        String html = "<object classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540002\" id=\"VectorEditor\" " +
+                "width=\"100%\" height=\"100%\" codebase=\"https://fpdownload.macromedia" +
+                ".com/get/flashplayer/current/swflash.cab\"> "
                 + "<param name=\"movie\" value=\"EntryBulkImport.swf\">"
                 + "<param name=\"quality\" value=\"high\">"
                 + "<param name=\"bgcolor\" value=\"#869ca7\">"
@@ -105,7 +107,10 @@ public class AdminView extends AbstractLayout {
                 + AppController.sessionId
                 + "&importId="
                 + result.getId()
-                + "\" quality=\"high\" bgcolor=\"#869ca7\" width=\"100%\" wmode=\"opaque\" height=\"100%\" name=\"VectorEditor\" align=\"middle\" play=\"true\" loop=\"false\" type=\"application/x-shockwave-flash\" pluginspage=\"http://www.adobe.com/go/getflashplayer\"></object>";
+                + "\" quality=\"high\" bgcolor=\"#869ca7\" width=\"100%\" wmode=\"opaque\" height=\"100%\" " +
+                "name=\"VectorEditor\" align=\"middle\" play=\"true\" loop=\"false\" " +
+                "type=\"application/x-shockwave-flash\" pluginspage=\"http://www.adobe" +
+                ".com/go/getflashplayer\"></object>";
         HTML widget = new HTML(html);
         widget.setStyleName("z-index-low");
         widget.setHeight("100%");

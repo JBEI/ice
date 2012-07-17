@@ -1,5 +1,20 @@
 package org.jbei.ice.client.admin;
 
+import java.util.ArrayList;
+
+import org.jbei.ice.client.AbstractPresenter;
+import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.IceAsyncCallback;
+import org.jbei.ice.client.Page;
+import org.jbei.ice.client.RegistryServiceAsync;
+import org.jbei.ice.client.admin.group.GroupPresenter;
+import org.jbei.ice.client.admin.usermanagement.UserPresenter;
+import org.jbei.ice.client.bulkimport.BulkImportMenuItem;
+import org.jbei.ice.client.bulkimport.DeleteBulkImportHandler;
+import org.jbei.ice.client.exception.AuthenticationException;
+import org.jbei.ice.client.util.DateUtilities;
+import org.jbei.ice.shared.dto.BulkImportInfo;
+
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerManager;
@@ -8,20 +23,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
-import org.jbei.ice.client.AbstractPresenter;
-import org.jbei.ice.client.AppController;
-import org.jbei.ice.client.IceAsyncCallback;
-import org.jbei.ice.client.Page;
-import org.jbei.ice.client.RegistryServiceAsync;
-import org.jbei.ice.client.admin.bulkimport.BulkImportMenuItem;
-import org.jbei.ice.client.admin.bulkimport.DeleteBulkImportHandler;
-import org.jbei.ice.client.admin.group.GroupPresenter;
-import org.jbei.ice.client.admin.usermanagement.UserPresenter;
-import org.jbei.ice.client.exception.AuthenticationException;
-import org.jbei.ice.client.util.DateUtilities;
-import org.jbei.ice.shared.dto.BulkImportInfo;
-
-import java.util.ArrayList;
 
 /**
  * Presenter for the admin page
