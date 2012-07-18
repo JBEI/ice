@@ -118,17 +118,17 @@ public class EntryController {
         String nextPart = getNextPartNumber();
         createdEntry = EntryFactory.createEntry(account, nextPart, entry);
 
+        try {
+            dao.save(entry);
+        } catch (DAOException e) {
+            throw new ControllerException(e);
+        }
+
         Group publicGroup = groupController.createOrRetrievePublicGroup();
         try {
             permissionsController.addReadGroup(account, createdEntry, publicGroup);
         } catch (PermissionException pe) {
             Logger.error("Could not make entry " + createdEntry.getId() + " public ", pe);
-        }
-
-        try {
-            dao.save(entry);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
         }
 
         if (scheduleIndexRebuild) {
