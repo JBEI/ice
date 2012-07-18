@@ -1856,7 +1856,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         }
 
         // retrieve all groups
-        Logger.info(account.getEmail() + ": retrieving all entries");
+        Logger.info(account.getEmail() + ": retrieving all groups");
         Set<Group> groups;
         try {
             groups = groupController.getAllGroups();
@@ -1871,6 +1871,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
         ArrayList<GroupInfo> infos = new ArrayList<GroupInfo>();
         for (Group group : groups) {
             GroupInfo info = new GroupInfo();
+            info.setUuid(group.getUuid());
             info.setId(group.getId());
             info.setLabel(group.getLabel());
             info.setDescription(group.getDescription());

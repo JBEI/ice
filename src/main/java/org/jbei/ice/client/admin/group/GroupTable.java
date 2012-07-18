@@ -5,6 +5,7 @@ import org.jbei.ice.shared.dto.GroupInfo;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -18,7 +19,7 @@ import com.google.gwt.view.client.SelectionModel;
 
 /**
  * Table for displaying Group details
- * 
+ *
  * @author Hector Plahar
  */
 class GroupTable extends CellTable<GroupInfo> {
@@ -66,13 +67,30 @@ class GroupTable extends CellTable<GroupInfo> {
         });
 
         setSelectionModel(selectionModel,
-            DefaultSelectionEventManager.<GroupInfo> createCheckboxManager());
+                          DefaultSelectionEventManager.<GroupInfo>createCheckboxManager());
     }
 
     private void createColumns() {
-        createSelectionColumn();
+//        createSelectionColumn();
+        createIDColumn();
         createLabelColumn();
         createDescriptionColumn();
+        createParentColumn();
+        createUUIDColumn();
+    }
+
+    private void createIDColumn() {
+        Column<GroupInfo, String> column = new Column<GroupInfo, String>(new TextCell()) {
+            @Override
+            public String getValue(GroupInfo object) {
+                return object.getId() + "";
+            }
+        };
+
+        column.setSortable(false);
+        addColumn(column, "ID");
+//        setColumnWidth(column, 30, Unit.PCT);
+
     }
 
     private void createSelectionColumn() {
@@ -130,4 +148,23 @@ class GroupTable extends CellTable<GroupInfo> {
         });
     }
 
+    private void createUUIDColumn() {
+        Column<GroupInfo, String> column = new Column<GroupInfo, String>(new TextCell()) {
+            @Override
+            public String getValue(GroupInfo object) {
+                return object.getUuid();
+            }
+        };
+        addColumn(column, "UUID");
+    }
+
+    private void createParentColumn() {
+        Column<GroupInfo, String> column = new Column<GroupInfo, String>(new TextCell()) {
+            @Override
+            public String getValue(GroupInfo object) {
+                return object.getParentId() + "";
+            }
+        };
+        addColumn(column, "Parent ID");
+    }
 }

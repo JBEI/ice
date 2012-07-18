@@ -1,6 +1,7 @@
 package org.jbei.ice.client.admin.usermanagement;
 
 import org.jbei.ice.client.admin.AdminPanel;
+import org.jbei.ice.client.admin.AdminTab;
 import org.jbei.ice.shared.dto.AccountInfo;
 
 import com.google.gwt.core.client.GWT;
@@ -53,5 +54,10 @@ public class EditUserPanel extends Composite implements AdminPanel<AccountInfo> 
     @Override
     public HasData<AccountInfo> getDisplay() {
         return this.grid;
+    }
+
+    @Override
+    public AdminTab getTab() {
+        return AdminTab.USERS;
     }
 }

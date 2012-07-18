@@ -48,6 +48,20 @@
         <param-value>WEB-INF/cxf/beans.xml</param-value>
     </context-param>
 
+    <!-- file upload -->
+    <context-param>
+        <!-- max size of the upload request -->
+        <param-name>maxSize</param-name>
+        <param-value>3145728</param-value>
+    </context-param>
+    <context-param>
+        <!-- Useful in development mode to slow down the uploads in fast networks.
+Put the number of milliseconds to sleep in each block received in the server.
+false or 0, means don't use slow uploads  -->
+        <param-name>slowUploads</param-name>
+        <param-value>0</param-value>
+    </context-param>
+
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
@@ -77,21 +91,6 @@
         <servlet-name>gwtIceServlet</servlet-name>
         <url-pattern>/gwt_ice/ice</url-pattern>
     </servlet-mapping>
-
-    <!-- file upload -->
-
-    <context-param>
-        <!-- max size of the upload request -->
-        <param-name>maxSize</param-name>
-        <param-value>3145728</param-value>
-    </context-param>
-    <context-param>
-        <!-- Useful in development mode to slow down the uploads in fast networks.
-Put the number of milliseconds to sleep in each block received in the server.
-false or 0, means don't use slow uploads  -->
-        <param-name>slowUploads</param-name>
-        <param-value>0</param-value>
-    </context-param>
 
     <servlet>
         <servlet-name>FileUploadServlet</servlet-name>

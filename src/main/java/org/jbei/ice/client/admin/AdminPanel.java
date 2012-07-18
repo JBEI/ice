@@ -5,9 +5,8 @@ import com.google.gwt.view.client.HasData;
 
 /**
  * Panel for display on the admin page
- * 
+ *
  * @author Hector Plahar
- * 
  */
 public interface AdminPanel<T> extends IsWidget {
 
@@ -17,4 +16,6 @@ public interface AdminPanel<T> extends IsWidget {
     String getTabTitle();
 
     HasData<T> getDisplay();
+
+    AdminTab getTab();
 }
