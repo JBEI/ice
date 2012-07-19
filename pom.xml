@@ -275,18 +275,18 @@
         <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
-            <version>2.4.0</version>
+            <version>${gwtVersion}</version>
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt</artifactId>
-            <version>2.4.0</version>
+            <version>${gwtVersion}</version>
             <type>pom</type>
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-servlet</artifactId>
-            <version>2.4.0</version>
+            <version>${gwtVersion}</version>
         </dependency>
         <dependency>
             <groupId>com.googlecode.gwtupload</groupId>
@@ -441,6 +441,19 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <version>${gwtVersion}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>test</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
         <pluginManagement>
             <plugins>
@@ -491,5 +504,6 @@
     </reporting>
     <properties>
         <jetty.version>6.1.26</jetty.version>
+        <gwtVersion>2.4.0</gwtVersion>
     </properties>
 </project>
