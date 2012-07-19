@@ -12,9 +12,8 @@ import org.jbei.ice.lib.search.lucene.SearchException;
 
 /**
  * Job cue that wakes up, checks for pending jobs, and runs them.
- * 
+ *
  * @author Timothy Ham, Zinovii Dmytriv
- * 
  */
 public class JobCue implements Runnable {
     private final Hashtable<Integer, Long> cue = new Hashtable<Integer, Long>();
@@ -39,7 +38,7 @@ public class JobCue implements Runnable {
 
     /**
      * Get an instance of the singleton.
-     * 
+     *
      * @return JobCue object.
      */
     public static JobCue getInstance() {
@@ -48,7 +47,7 @@ public class JobCue implements Runnable {
 
     /**
      * Add a job to the cue.
-     * 
+     *
      * @param job
      */
     public void addJob(Job job) {
@@ -58,7 +57,7 @@ public class JobCue implements Runnable {
 
     /**
      * Retrieve the job cue.
-     * 
+     *
      * @return Hashtable of Integer and Long.
      */
     public Hashtable<Integer, Long> getCue() {
@@ -67,7 +66,7 @@ public class JobCue implements Runnable {
 
     /**
      * Look through the job cue and process them.
-     * <p>
+     * <p/>
      * Aggregate duplicate jobs. For example, two scheduled blast rebuild will be run only once.
      */
     @SuppressWarnings("unchecked")
@@ -110,16 +109,9 @@ public class JobCue implements Runnable {
     }
 
     /**
-     * Process the job cue RIGHT NOW. I hope you know what you are doing.
-     */
-    public void processNow() {
-        getInstance().setCounter(wakeupInterval);
-    }
-
-    /**
      * Process the cue in fixed milliseconds instead of waiting for
      * the next job cue interval
-     * 
+     *
      * @param interval
      */
     public void processIn(long interval) {
@@ -151,7 +143,7 @@ public class JobCue implements Runnable {
 
     /**
      * Set the job cue delay counter.
-     * 
+     *
      * @param counter
      */
     public void setCounter(long counter) {
@@ -160,7 +152,7 @@ public class JobCue implements Runnable {
 
     /**
      * Retrieve the job cue delay counter.
-     * 
+     *
      * @return Delay counter.
      */
     public long getCounter() {
