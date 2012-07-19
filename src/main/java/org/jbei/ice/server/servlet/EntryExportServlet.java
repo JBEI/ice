@@ -1,5 +1,15 @@
 package org.jbei.ice.server.servlet;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -10,16 +20,6 @@ import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.IceXlsSerializer;
 import org.jbei.ice.lib.utils.IceXmlSerializer;
 import org.jbei.ice.lib.utils.UtilityException;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
 
 public class EntryExportServlet extends HttpServlet {
 
@@ -72,7 +72,7 @@ public class EntryExportServlet extends HttpServlet {
         String[] idStrs = commaSeparated.split(",");
 
         for (String idStr : idStrs) {
-            Entry entry = null;
+            Entry entry;
             try {
                 long id = Long.decode(idStr.trim());
                 entry = controller.get(account, id);
@@ -128,7 +128,13 @@ public class EntryExportServlet extends HttpServlet {
     private void exportExcel(ArrayList<Entry> entries, HttpServletResponse response,
             EntryController controller) {
         try {
-            String data = IceXlsSerializer.serialize(controller, entries);
+            String data;
+            try {
+                data = IceXlsSerializer.serialize(controller, entries);
+            } catch (ControllerException e) {
+                Logger.error(e);
+                return;
+            }
 
             // write to file
             String saveName = "data.xls";

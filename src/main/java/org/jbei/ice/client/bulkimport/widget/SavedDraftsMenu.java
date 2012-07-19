@@ -253,7 +253,7 @@ public class SavedDraftsMenu extends Composite {
 
         public void updateCount(long newCount) {
             item.setCount(newCount);
-            count = new Label(formatNumber(item.getCount()));
+            count.setText(formatNumber(item.getCount()));
         }
 
         public void updateDate(String dateTime) {

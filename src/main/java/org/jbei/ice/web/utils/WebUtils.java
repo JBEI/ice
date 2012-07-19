@@ -1,5 +1,11 @@
 package org.jbei.ice.web.utils;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.EntryController;
@@ -7,14 +13,6 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
 import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.web.common.ViewException;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Utility methods for web pages.
@@ -30,8 +28,8 @@ public class WebUtils {
      * @param iceLink link to create.
      * @return Html of the link.
      */
-    private static String makeEntryLink(Account account, IceLink iceLink) {
-        String result = null;
+    private static String makeEntryLink(Account account, IceLink iceLink) throws ControllerException {
+        String result;
 
         EntryController entryController = new EntryController();
 
@@ -40,10 +38,8 @@ public class WebUtils {
 
         try {
             entry = entryController.getByPartNumber(account, iceLink.getPartNumber());
-        } catch (ControllerException e) {
-            throw new ViewException(e);
         } catch (PermissionException e) {
-            throw new ViewException(e);
+            throw new ControllerException(e);
         }
 
         if (entry != null) {
@@ -62,49 +58,6 @@ public class WebUtils {
         result = "<a href=/entry/view/" + id + ">" + descriptiveLabel + "</a>";
 
         return result;
-    }
-
-    /**
-     * Generate a clickable &lt;a&gt; link from the specified {@link Entry} id.
-     *
-     * @param id id of the Entry.
-     * @return Html of the clickable link.
-     */
-    private static String makeEntryLink(Account account, long id) {
-        String result = "";
-
-        EntryController entryController = new EntryController();
-
-        //        CharSequence relativePath = WebRequestCycle.get().urlFor(EntryViewPage.class,
-        //            new PageParameters());
-        // TODO: Tim; this is not very elegant at all. Is there a better way than to generate <a> tag manually?
-        try {
-            Entry entry = entryController.get(account, id);
-            result = "<a href=/entry/view/" + id + ">" + entry.getOnePartNumber().getPartNumber()
-                    + "</a>";
-        } catch (ControllerException e) {
-            throw new ViewException(e);
-        } catch (PermissionException e) {
-            throw new ViewException(e);
-        }
-
-        return result;
-    }
-
-    /**
-     * Create a space separated html links from the given Collection of {@link Entry}s.
-     *
-     * @param entries
-     * @return Space separate html links.
-     */
-    public static String makeEntryLinks(Account account, Collection<? extends Entry> entries) {
-        StringBuilder result = new StringBuilder();
-
-        for (Entry entry : entries) {
-            result.append(makeEntryLink(account, entry.getId()));
-            result.append(" ");
-        }
-        return result.toString();
     }
 
     /**
@@ -210,7 +163,7 @@ public class WebUtils {
      */
     private static String wikiLinkifyText(Account account, String text) {
 
-        String newText = "";
+        String newText;
 
         try {
             EntryController entryController = new EntryController();
@@ -303,30 +256,12 @@ public class WebUtils {
         }
 
         /**
-         * Set the descriptive label string.
-         *
-         * @param descriptiveLabel descriptive label.
-         */
-        public void setDescriptiveLabel(String descriptiveLabel) {
-            this.descriptiveLabel = descriptiveLabel;
-        }
-
-        /**
          * Get the descriptive label.
          *
          * @return descriptive label.
          */
         public String getDescriptiveLabel() {
             return descriptiveLabel;
-        }
-
-        /**
-         * Set the part number string.
-         *
-         * @param partNumber
-         */
-        public void setPartNumber(String partNumber) {
-            this.partNumber = partNumber;
         }
 
         /**

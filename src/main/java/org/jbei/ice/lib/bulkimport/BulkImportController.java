@@ -153,7 +153,10 @@ public class BulkImportController {
 
         // retrieve the entries
         for (Entry entry : draft.getContents()) {
-            EntryInfo info = EntryToInfoFactory.getInfo(account, entry, null, null, null, false);
+            AttachmentController attachmentController = new AttachmentController();
+            ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
+
+            EntryInfo info = EntryToInfoFactory.getInfo(account, entry, attachments, null, null, false);
             if (info != null)
                 draftInfo.getEntryList().add(info);
         }

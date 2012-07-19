@@ -46,7 +46,6 @@ import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.lib.vo.IDNASequence;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
 import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.web.common.ViewException;
 
 import org.apache.commons.lang.NotImplementedException;
 
@@ -1417,7 +1416,9 @@ public class RegistryAPI {
                 throw new ServicePermissionException("No permissions to save sequence to entry!", e);
             }
         } catch (ControllerException e) {
-            throw new ViewException(e);
+            Logger.error(e);
+
+            throw new ServiceException("Registry Service Internal Error!");
         } catch (Exception e) {
             Logger.error(e);
 

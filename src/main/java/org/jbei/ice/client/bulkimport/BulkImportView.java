@@ -150,6 +150,8 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     public void setSheet(NewBulkInput bulkImport, boolean isNew) {
 
         FlexTable panel = new FlexTable();
+        panel.setCellPadding(0);
+        panel.setCellSpacing(0);
         panel.setWidth("100%");
         sheet = bulkImport;
 
