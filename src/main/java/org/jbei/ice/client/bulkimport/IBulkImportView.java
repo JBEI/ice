@@ -6,7 +6,6 @@ import org.jbei.ice.client.bulkimport.model.NewBulkInput;
 import org.jbei.ice.shared.EntryAddType;
 
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 
@@ -38,7 +37,7 @@ public interface IBulkImportView {
 
     void setSheet(NewBulkInput input, boolean isNew);
 
-    HandlerRegistration setDraftUpdateHandler(ClickHandler handler);
+    void setDraftUpdateHandler(ClickHandler handler);
 
     String getDraftName();
 

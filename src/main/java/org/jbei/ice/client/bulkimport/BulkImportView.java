@@ -6,13 +6,13 @@ import org.jbei.ice.client.bulkimport.model.NewBulkInput;
 import org.jbei.ice.client.bulkimport.widget.SaveDraftInput;
 import org.jbei.ice.client.bulkimport.widget.SavedDraftsMenu;
 import org.jbei.ice.client.bulkimport.widget.SelectTypeMenu;
+import org.jbei.ice.client.bulkimport.widget.UpdateDraftInput;
 import org.jbei.ice.client.common.AbstractLayout;
 import org.jbei.ice.client.common.FeedbackPanel;
 import org.jbei.ice.client.common.util.ImageUtil;
 import org.jbei.ice.shared.EntryAddType;
 
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -33,10 +33,11 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     private FlexTable layout;
     private VerticalPanel menuPanel;
     private ToggleButton toggle;
-    private Button updateButton;
     private Button saveButton;
     private Button resetButton;
     private SaveDraftInput draftInput;
+    private UpdateDraftInput updateDraftInput;
+
     private Image uploadCsv;
     private HorizontalPanel headerPanel;
     private NewBulkInput sheet;
@@ -54,14 +55,12 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         toggle.setStyleName("bulk_import_menu_toggle");
         toggle.setVisible(false);
 
-        // bulk import draft update button
-        updateButton = new Button("Update");
-        updateButton.setStyleName("saved_draft_button");
         saveButton = new Button("Submit");
         saveButton.setStyleName("saved_draft_button");
         resetButton = new Button("Reset");
         resetButton.setStyleName("saved_draft_button");
         draftInput = new SaveDraftInput();
+        updateDraftInput = new UpdateDraftInput();
         uploadCsv = ImageUtil.getUploadImage();
     }
 
@@ -155,13 +154,14 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         sheet = bulkImport;
 
         if (!isNew) {
-            panel.setWidget(0, 0, new HTML(bulkImport.getName()));
-            panel.setWidget(0, 1, updateButton);
-            panel.setWidget(0, 2, feedback);
-            panel.setWidget(0, 3, resetButton);
+            updateDraftInput.setDraftName(bulkImport.getName());
+            panel.setWidget(0, 0, updateDraftInput);
+            panel.setWidget(0, 1, feedback);
+
+            panel.setWidget(0, 2, resetButton);
             panel.getFlexCellFormatter().setWidth(0, 2, "40px");
 
-            panel.setWidget(0, 4, saveButton);
+            panel.setWidget(0, 3, saveButton);
             panel.getFlexCellFormatter().setWidth(0, 3, "70px");
         } else {
 
@@ -201,8 +201,8 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     }
 
     @Override
-    public HandlerRegistration setDraftUpdateHandler(ClickHandler handler) {
-        return updateButton.addClickHandler(handler);
+    public void setDraftUpdateHandler(ClickHandler handler) {
+        updateDraftInput.setUpdateDraftHandler(handler);
     }
 
     @Override

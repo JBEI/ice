@@ -9,7 +9,6 @@ import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasAlignment;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.HasData;
@@ -23,7 +22,6 @@ public class EditGroupsPanel extends Composite implements AdminPanel<GroupInfo> 
 
     private ScrollPanel scrollPanel;
     private GroupTable grid;
-    private Label label;
     private VerticalPanel vPanel;
     private final AdminTab tab;
 
@@ -34,7 +32,6 @@ public class EditGroupsPanel extends Composite implements AdminPanel<GroupInfo> 
         this.tab = AdminTab.GROUPS;
         initComponents();
 
-        vPanel.add(label);
         vPanel.add(grid);
         SimplePager.Resources pagerResources = GWT.create(SimplePager.Resources.class);
         SimplePager pager = new SimplePager(TextLocation.CENTER, pagerResources, false, 0, true);
@@ -48,8 +45,6 @@ public class EditGroupsPanel extends Composite implements AdminPanel<GroupInfo> 
     protected void initComponents() {
         grid = new GroupTable();
         grid.setWidth("100%");
-
-        label = new Label("Add New Group");
 
         vPanel = new VerticalPanel();
         vPanel.setWidth("100%");
