@@ -451,6 +451,9 @@
                             <goal>compile</goal>
                             <goal>test</goal>
                         </goals>
+                        <configuration>
+                            <inplace>true</inplace>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
