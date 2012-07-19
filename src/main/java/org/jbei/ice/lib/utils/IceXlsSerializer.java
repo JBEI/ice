@@ -1,6 +1,9 @@
 package org.jbei.ice.lib.utils;
 
-import org.apache.commons.lang.StringUtils;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.entry.EntryController;
@@ -11,11 +14,8 @@ import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.web.common.ViewException;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Iterator;
+import org.apache.commons.lang.StringUtils;
 
 public class IceXlsSerializer {
 
@@ -32,7 +32,8 @@ public class IceXlsSerializer {
         return "";
     }
 
-    public static String serialize(EntryController entryController, ArrayList<Entry> entries) {
+    public static String serialize(EntryController entryController, ArrayList<Entry> entries)
+            throws ControllerException {
         int index = 1;
 
         StringBuilder stringBuilder = new StringBuilder();
@@ -126,20 +127,16 @@ public class IceXlsSerializer {
                 stringBuilder.append(escapeCSVValue(part.getPackageFormat())).append("\t");
             }
 
-            try {
-                AccountController controller = new AccountController();
-                SampleController sampleController = new SampleController();
-                SequenceController sequenceController = new SequenceController();
-                stringBuilder.append((entryController.hasAttachments(controller.getSystemAccount(),
-                                                                     entry)) ? "Yes" : "No")
-                             .append("\t");
-                stringBuilder.append((sampleController.hasSample(entry)) ? "Yes" : "No").append(
-                        "\t");
-                stringBuilder.append((sequenceController.hasSequence(entry)) ? "Yes" : "No").append(
-                        "\t");
-            } catch (ControllerException e) {
-                throw new ViewException(e);
-            }
+            AccountController controller = new AccountController();
+            SampleController sampleController = new SampleController();
+            SequenceController sequenceController = new SequenceController();
+            stringBuilder.append((entryController.hasAttachments(controller.getSystemAccount(),
+                                                                 entry)) ? "Yes" : "No")
+                         .append("\t");
+            stringBuilder.append((sampleController.hasSample(entry)) ? "Yes" : "No").append(
+                    "\t");
+            stringBuilder.append((sequenceController.hasSequence(entry)) ? "Yes" : "No").append(
+                    "\t");
 
             stringBuilder.append(escapeCSVValue(entry.getBioSafetyLevel())).append("\t");
             stringBuilder.append(escapeCSVValue(entry.getIntellectualProperty())).append("\t");
