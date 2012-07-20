@@ -34,7 +34,7 @@ public class SheetHeader {
                     + "font-weight: bold; background-color: #f8f8f0; cursor: pointer\">?</div>";
         }
         html += label;
-        if (h.isRequired())
+        if (h.getCell().isRequired())
             html += (" <span class=\"required\">*</span>");
         HTML cell = new HTML(html);
         cell.setStyleName("cell_column_header");

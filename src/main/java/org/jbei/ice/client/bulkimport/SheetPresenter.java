@@ -42,8 +42,6 @@ public class SheetPresenter {
     private final EntryAddType type;
     private BulkImportInfo currentInfo; // used to maintain saved drafts that are loaded
     private final Header[] headers;
-    private SheetCell prevSelection;
-    private SheetCell newSelection;
 
     public SheetPresenter(View view, EntryAddType type) {
         this.view = view;
@@ -190,7 +188,7 @@ public class SheetPresenter {
             for (int col = 0; col < headers.length; col += 1) {
                 SheetCell cell = headers[col].getCell();
                 if (!atLeastOneCellHasRowData)
-                    atLeastOneCellHasRowData = (cell.getDataForRow(row) != null);
+                    atLeastOneCellHasRowData = (cell.getDataForRow(row) != null); // TODO : break on cell data seen
             }
 
             if (!atLeastOneCellHasRowData)
@@ -222,7 +220,7 @@ public class SheetPresenter {
      */
     public SheetCell setCellInputFocus(int currentRow, int currentIndex) {
         // get cell for selection and set it to existing
-        newSelection = headers[currentIndex].getCell();
+        SheetCell newSelection = headers[currentIndex].getCell();
         if (newSelection == null)
             return null;
 

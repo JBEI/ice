@@ -1,10 +1,20 @@
 package org.jbei.ice.server.servlet;
 
-import gwtupload.server.UploadAction;
-import gwtupload.server.exceptions.UploadActionException;
-import gwtupload.shared.UConsts;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.io.IOUtils;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -19,20 +29,11 @@ import org.jbei.ice.lib.utils.JbeirSettings;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.IDNASequence;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import gwtupload.server.UploadAction;
+import gwtupload.server.exceptions.UploadActionException;
+import gwtupload.shared.UConsts;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.io.IOUtils;
 
 // TODO : Robust exception handling
 public class FileUploadServlet extends UploadAction {
@@ -40,8 +41,7 @@ public class FileUploadServlet extends UploadAction {
     private static final long serialVersionUID = 1L;
     private static final String SEQUENCE_TYPE = "sequence";
     private static final String ATTACHMENT_TYPE = "attachment";
-    private static final String BULK_ATTACHMENT_TYPE = "bulk_attachment";
-    private static final String BULK_SEQUENCE_TYPE = "bulk_sequence";
+    private static final String BULK_UPLOAD_FILE_TYPE = "bulk_file_upload";
 
     Hashtable<String, String> receivedContentTypes = new Hashtable<String, String>();
     Hashtable<String, File> receivedFiles = new Hashtable<String, File>(); // received files list and content types
@@ -129,11 +129,8 @@ public class FileUploadServlet extends UploadAction {
                 } catch (IOException e) {
                     Logger.error(e);
                 }
-            } else if (BULK_ATTACHMENT_TYPE.equalsIgnoreCase(type)) {
-
-                result = uploadBulkAttachment(file, saveName);
-            } else if (BULK_SEQUENCE_TYPE.equalsIgnoreCase(type)) {
-                // TODO : ??
+            } else if (BULK_UPLOAD_FILE_TYPE.equalsIgnoreCase(type)) {
+                result = uploadFileToTemp(file, saveName);
             }
 
             break;
@@ -143,7 +140,7 @@ public class FileUploadServlet extends UploadAction {
         return result;
     }
 
-    public String uploadBulkAttachment(File file, String saveName) {
+    public String uploadFileToTemp(File file, String saveName) {
         String fileId = Utils.generateUUID();
         if (file.renameTo(new File(file.getParentFile() + File.separator + fileId)))
             return fileId;

@@ -59,20 +59,14 @@ public enum Header {
     STRAIN_ATT_FILENAME("Attachment File", false, "", new FileInputCell());
 
     private String label;
-    private boolean required;
     private String description;
     private transient SheetCell cell;
 
     Header(String label, boolean required, String description, SheetCell sheetCell) {
         this.label = label;
-        this.required = required;
         this.description = description;
         this.cell = sheetCell;
         this.cell.setRequired(required);
-    }
-
-    public boolean isRequired() {
-        return this.required;
     }
 
     @Override

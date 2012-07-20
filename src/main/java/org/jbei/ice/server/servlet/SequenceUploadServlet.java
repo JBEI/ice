@@ -12,6 +12,7 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.utils.JbeirSettings;
 
 import gwtupload.server.UploadAction;
 import gwtupload.server.exceptions.UploadActionException;
@@ -20,12 +21,13 @@ import org.apache.commons.fileupload.FileItem;
 public class SequenceUploadServlet extends UploadAction {
 
     private static final long serialVersionUID = 1L;
+    private final String COOKIE_NAME = JbeirSettings.getSetting("COOKIE_NAME");
 
     private Account isLoggedIn(AccountController controller, Cookie[] cookies)
             throws ControllerException {
 
         for (Cookie cookie : cookies) {
-            if ("gd-ice".equals(cookie.getName())) {
+            if (COOKIE_NAME.equals(cookie.getName())) {
                 String sid = cookie.getValue();
                 if (sid == null || sid.isEmpty())
                     return null;

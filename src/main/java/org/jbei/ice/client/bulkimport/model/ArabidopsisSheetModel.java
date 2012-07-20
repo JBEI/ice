@@ -1,8 +1,9 @@
 package org.jbei.ice.client.bulkimport.model;
 
-import com.google.gwt.user.client.Window;
 import org.jbei.ice.client.bulkimport.sheet.Header;
 import org.jbei.ice.shared.dto.ArabidopsisSeedInfo;
+
+import com.google.gwt.user.client.Window;
 
 public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedInfo> {
 
@@ -30,7 +31,7 @@ public class ArabidopsisSheetModel extends SingleInfoSheetModel<ArabidopsisSeedI
                 break;
 
             case HARVEST_DATE:
-                Window.alert("Harvest date not implemented: ArabidopsisSheetModel.java:38");
+                Window.alert("Harvest date not implemented: ArabidopsisSheetModel.java:33");
                 // Need a string to date util
 //                  info.setHarvestDate();
                 break;

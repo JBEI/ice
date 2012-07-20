@@ -99,6 +99,10 @@ public abstract class SheetCell extends Composite {
         this.required = required;
     }
 
+    public boolean isRequired() {
+        return this.required;
+    }
+
     /**
      * Checks if there is data for required fields. Sub-classes should override
      * this and validate their content

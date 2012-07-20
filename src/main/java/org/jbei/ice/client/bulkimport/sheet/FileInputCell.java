@@ -78,7 +78,8 @@ public class FileInputCell extends SheetCell {
                     setDataRow = -1;
                 }
 
-//                table.setWidget(0, 0, ImageUtil.getAttachment());
+                // indicate visually that there is an existing file
+                cellUploader.setHasFile(true);
             } else {
                 Window.alert("Error uploading file");
             }

@@ -1,10 +1,9 @@
 package org.jbei.ice.lib.entry.sequence;
 
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.logging.Logger;
@@ -17,9 +16,11 @@ import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.server.dao.hibernate.HibernateRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * Manipulate {@link Sequence} and associated objects in the database.
@@ -140,9 +141,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
             session.getTransaction().rollback();
             throw new DAOException("Failed to retrieve sequence by entry: " + entry.getId(), e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
         normalizeAnnotationLocations(sequence);
         return sequence;
@@ -160,9 +159,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve sequence by entry: " + entry.getId(), e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
     }
 
@@ -283,9 +280,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         } catch (UtilityException e) {
             throw new DAOException("Failed to get Feature by sequence!", e);
         } finally {
-            if (session.isOpen()) {
-                session.close();
-            }
+            closeSession(session);
         }
 
         return result;
@@ -305,7 +300,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
             return null;
         }
         int length = sequence.getSequence().length();
-        boolean wholeSequence = false;
+        boolean wholeSequence;
         for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
             wholeSequence = false;
             Set<AnnotationLocation> locations = sequenceFeature.getAnnotationLocations();

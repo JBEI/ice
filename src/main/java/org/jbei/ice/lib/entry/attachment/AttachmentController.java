@@ -115,6 +115,28 @@ public class AttachmentController {
         return result;
     }
 
+    /**
+     * Saves an existing attachment
+     *
+     * @param account    account performing action
+     * @param attachment contains information about attachment to save. Specifically, fileName and fileId.
+     *                   The file should exist in the attachments directory with the name "fileId"
+     * @return saved attachment object
+     * @throws ControllerException
+     */
+    public Attachment saveExistingFile(Account account, Attachment attachment) throws ControllerException {
+
+        if (!hasWritePermission(account, attachment)) {
+            throw new ControllerException("No permissions to save attachment!");
+        }
+
+        try {
+            return dao.save(attachment, null);
+        } catch (DAOException e) {
+            throw new ControllerException("Failed to save attachment!", e);
+        }
+    }
+
 
     /**
      * Delete the attachment from the database and the disk. Rebuild the search index.
@@ -149,6 +171,13 @@ public class AttachmentController {
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
+    }
+
+    public void delete(Account account, String fileId) throws ControllerException, PermissionException {
+
+        Attachment attachment = getAttachmentByFileId(fileId);
+        if (attachment != null)
+            delete(account, attachment);
     }
 
     /**

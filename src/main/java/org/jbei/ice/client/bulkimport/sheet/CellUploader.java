@@ -18,10 +18,9 @@ import gwtupload.client.SingleUploader;
 public class CellUploader implements IsWidget {
 
     private final SingleUploader uploader;
-    private final Image fileUploadImg;
+    private Image fileUploadImg;
 
     public CellUploader() {
-//        Label label = new Label("Upload file");
         fileUploadImg = ImageUtil.getFileUpload();
         fileUploadImg.setHeight((fileUploadImg.getHeight() - 2) + "px");
         fileUploadImg.setStyleName("cursor_pointer");
@@ -35,7 +34,7 @@ public class CellUploader implements IsWidget {
 
             @Override
             public void onStart(IUploader uploader) {
-                uploader.setServletPath("servlet.gupld?type=bulk_attachment&sid=" + AppController.sessionId);
+                uploader.setServletPath("servlet.gupld?type=bulk_file_upload&sid=" + AppController.sessionId);
             }
         });
 
@@ -61,5 +60,13 @@ public class CellUploader implements IsWidget {
     @Override
     public Widget asWidget() {
         return uploader.getWidget();
+    }
+
+    public void setHasFile(boolean hasFile) {
+        // TODO
+        //To change body of created methods use File | Settings | File Templates.
+        fileUploadImg = ImageUtil.getUploadImage();
+        fileUploadImg.setHeight((fileUploadImg.getHeight() - 2) + "px");
+        fileUploadImg.setStyleName("cursor_pointer");
     }
 }

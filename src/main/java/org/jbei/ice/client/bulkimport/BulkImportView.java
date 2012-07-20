@@ -243,6 +243,7 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     public void setPendingDraftsData(ArrayList<BulkImportMenuItem> data, IDeleteMenuHandler handler) {
         pendingDraftsMenu.setMenuItems(data, handler);
         menuPanel.add(pendingDraftsMenu);
+        menuPanel.add(new HTML("&nbsp;"));
 
         layout.getFlexCellFormatter().setWidth(0, 0, "220px");
 

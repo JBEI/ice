@@ -1,23 +1,24 @@
 package org.jbei.ice.lib.entry.attachment;
 
-import org.apache.commons.io.IOUtils;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.server.dao.hibernate.HibernateRepository;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.server.dao.hibernate.HibernateRepository;
+
+import org.apache.commons.io.IOUtils;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * Manager to manipulate {@link Attachment} objects in the database.
@@ -33,7 +34,8 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
         try {
             session.getTransaction().begin();
             session.saveOrUpdate(attachment);
-            writeFile(attachment.getFileId(), inputStream);
+            if (inputStream != null)
+                writeFile(attachment.getFileId(), inputStream);
             session.getTransaction().commit();
         } catch (HibernateException e) {
             session.getTransaction().rollback();

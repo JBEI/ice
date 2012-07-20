@@ -247,70 +247,41 @@ public class BulkImportPresenter extends AbstractPresenter {
                 return;
             }
 
-            model.saveBulkImportDraftData(currentInput.getImportType(), name, cellData,
-                                          new BulkImportDraftSubmitEventHandler() {
+            model.saveBulkImportDraftData(
+                    currentInput.getImportType(),
+                    name, cellData,
+                    new BulkImportDraftSubmitEventHandler() {
 
-                                              @Override
-                                              public void onSubmit(BulkImportDraftSubmitEvent event) {
-                                                  if (event == null || event.getDraftInfo() == null)
-                                                      view.showFeedback("Error saving draft", true);
-                                                  else {
-                                                      BulkImportInfo info = event.getDraftInfo();
-                                                      view.showFeedback("Draft successfully saved", false);
-                                                      String dateTime = DateUtilities.formatShorterDate(
-                                                              info.getCreated());
-                                                      BulkImportMenuItem item = new BulkImportMenuItem(info.getId(),
-                                                                                                       info
+                        @Override
+                        public void onSubmit(BulkImportDraftSubmitEvent event) {
+                            if (event == null || event.getDraftInfo() == null)
+                                view.showFeedback("Error saving draft", true);
+                            else {
+                                BulkImportInfo info = event.getDraftInfo();
+                                view.showFeedback("Draft successfully saved", false);
+                                String dateTime = DateUtilities.formatShorterDate(
+                                        info.getCreated());
+                                BulkImportMenuItem item = new BulkImportMenuItem(info.getId(),
+                                                                                 info.getName(),
+                                                                                 info.getCount(),
+                                                                                 dateTime,
+                                                                                 info.getType().toString(),
+                                                                                 info.getAccount().getEmail());
 
+                                view.addSavedDraftData(
+                                        item,
+                                        new DeleteBulkImportHandler(model.getService(),
+                                                                    model.getEventBus()));
+                                currentInput.setName(info.getName());
+                                currentInput.setId(info.getId());
+                                currentInput.getSheet().setCurrentInfo(info);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                                                                                               .getName(),
-                                                                                                       info.getCount(),
-                                                                                                       dateTime,
-                                                                                                       info.getType()
-                                                                                                           .toString(),
-                                                                                                       info.getAccount()
-                                                                                                           .getEmail());
-
-                                                      view.addSavedDraftData(
-                                                              item,
-                                                              new DeleteBulkImportHandler(model.getService(),
-                                                                                          model.getEventBus()));
-                                                      currentInput.setName(info.getName());
-                                                      currentInput.setId(info.getId());
-                                                      currentInput.getSheet().setCurrentInfo(info);
-
-                                                      view.setSheet(currentInput, false);
-                                                      view.setHeader(currentInput.getImportType().getDisplay()
-                                                                             + " Bulk Import");
-                                                  }
-                                              }
-                                          });
+                                view.setSheet(currentInput, false);
+                                view.setHeader(currentInput.getImportType().getDisplay()
+                                                       + " Bulk Import");
+                            }
+                        }
+                    });
         }
     }
 
@@ -336,17 +307,14 @@ public class BulkImportPresenter extends AbstractPresenter {
                                                 else {
                                                     BulkImportInfo info = event.getDraftInfo();
                                                     view.showFeedback("Update successful", false);
-                                                    String dateTime = DateUtilities.formatShorterDate(
-                                                            info.getCreated());
-                                                    BulkImportMenuItem menuItem = new BulkImportMenuItem(info.getId(),
-                                                                                                         info
-                                                                                                                 .getName(),
-                                                                                                         info.getCount(),
-                                                                                                         dateTime,
-                                                                                                         type.getDisplay(),
-                                                                                                         AppController
-                                                                                                                 .accountInfo
-                                                                                                                 .getEmail());
+                                                    String time = DateUtilities.formatShorterDate(info.getCreated());
+                                                    BulkImportMenuItem menuItem = new BulkImportMenuItem(
+                                                            info.getId(),
+                                                            info.getName(),
+                                                            info.getCount(),
+                                                            time,
+                                                            type.getDisplay(),
+                                                            AppController.accountInfo.getEmail());
                                                     view.updateSavedDraftsMenu(menuItem);
                                                 }
                                             }

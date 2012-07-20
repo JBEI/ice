@@ -1,8 +1,6 @@
 package org.jbei.ice.lib.bulkimport;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -49,11 +47,13 @@ public class BulkImportController {
     private final BulkImportDAO dao;
     private final AccountController accountController;
     private final EntryController entryController;
+    private final AttachmentController attachmentController;
 
     public BulkImportController() {
         dao = new BulkImportDAO();
         accountController = new AccountController();
         entryController = new EntryController();
+        attachmentController = new AttachmentController();
     }
 
     /**
@@ -156,7 +156,8 @@ public class BulkImportController {
             AttachmentController attachmentController = new AttachmentController();
             ArrayList<Attachment> attachments = attachmentController.getByEntry(account, entry);
 
-            EntryInfo info = EntryToInfoFactory.getInfo(account, entry, attachments, null, null, false);
+            EntryInfo info = EntryToInfoFactory.getInfo(account, entry, attachments, null, null,
+                                                        false);  // TODO sequences
             if (info != null)
                 draftInfo.getEntryList().add(info);
         }
@@ -227,13 +228,13 @@ public class BulkImportController {
         try {
             draft = dao.retrieveById(draftId);
             if (draft == null)
-                throw new ControllerException("Could not retrieve draft with id \"" + draftId
-                                                      + "\"");
+                throw new ControllerException("Could not retrieve draft with id \"" + draftId + "\"");
 
             Account draftAccount = draft.getAccount();
             if (!requesting.equals(draftAccount) && !accountController.isAdministrator(requesting))
                 throw new PermissionException("No permissions to delete draft " + draftId);
 
+            draft.setContents(null);
             dao.delete(draft);
 
         } catch (DAOException e) {
@@ -374,6 +375,8 @@ public class BulkImportController {
                         plasmid.setVisibility(Visibility.DRAFT.getValue());
                         HashSet<Entry> results = entryController.createStrainWithPlasmid(account,
                                                                                          strain, plasmid, false);
+
+                        // TODO :
                         newContents.addAll(results);
                         break;
                     }
@@ -390,6 +393,15 @@ public class BulkImportController {
                         Entry entry = InfoToModelFactory.infoToEntry(info);
                         entry.setVisibility(Visibility.DRAFT.getValue());
                         entry = entryController.createEntry(account, entry, false);
+
+                        if (info.isHasAttachment() && info.getAttachments() != null) {
+                            saveAttachments(account, info.getAttachments(), entry);
+                        }
+
+                        if (info.isHasSequence()) {
+                            saveSequence(account, info.getSequenceAnalysis().get(0), entry);
+                        }
+
                         newContents.add(entry);
                     }
                     break;
@@ -424,6 +436,55 @@ public class BulkImportController {
         return draftInfo;
     }
 
+    protected void saveAttachments(Account account, ArrayList<AttachmentInfo> attachmentInfoArrayList, Entry entry)
+            throws ControllerException {
+
+        if (attachmentInfoArrayList == null)
+            return;
+
+        // retrieve attachments that are associated with entry and clear
+        ArrayList<Attachment> list = attachmentController.getAttachments(entry);
+        HashSet<String> existingIds = new HashSet<String>();
+
+        if (list != null) {
+            for (Attachment attachment : list) {
+                existingIds.add(attachment.getFileId());
+            }
+        }
+
+        // cycle through list of new attachments
+        for (AttachmentInfo attachmentInfo : attachmentInfoArrayList) {
+            if (existingIds.remove(attachmentInfo.getFileId()))
+                continue;
+
+            // create and save attachment
+            Attachment attachment = new Attachment();
+            attachment.setEntry(entry);
+            attachment.setDescription(""); // no way of entering description in bulk import
+            attachment.setFileName(attachmentInfo.getFilename());
+            attachment.setFileId(attachmentInfo.getFileId());
+            attachmentController.saveExistingFile(account, attachment);
+        }
+
+        // delete whatever files are remaining
+        for (String fileId : existingIds) {
+            try {
+                attachmentController.delete(account, fileId);
+            } catch (PermissionException e) {
+                Logger.error(e);
+            }
+        }
+    }
+
+    /**
+     * @param account     user account
+     * @param entryList   existing list of entries associated with draft
+     * @param newContents list of entries submitted
+     * @param info        current info being updated
+     * @return true if entry exists and is being updated, false otherwise
+     * @throws ControllerException
+     * @throws PermissionException
+     */
     private boolean updateIfExists(Account account, List<Entry> entryList, List<Entry> newContents,
             EntryInfo info) throws ControllerException, PermissionException {
         if (entryList == null || entryList.isEmpty())
@@ -437,6 +498,7 @@ public class BulkImportController {
                 InfoToModelFactory.infoToEntry(info, entry);
                 entry.setVisibility(Visibility.DRAFT.getValue());
                 entryController.update(account, entry);
+                saveAttachments(account, info.getAttachments(), entry);
                 newContents.add(entry);
                 return true;
             }
@@ -507,28 +569,36 @@ public class BulkImportController {
 
                 // all others
                 default:
-                    Entry entry = InfoToModelFactory.infoToEntry(info);
-                    entry.setVisibility(visibility.getValue());
-                    entry.setOwner(entryAccount.getFullName());
-                    entry.setOwnerEmail(entryAccount.getEmail());
+                    Entry entry;
 
-                    // save entry
-                    entry = entryController.createEntry(entryAccount, entry, isAdmin);
+                    try {
+                        entry = entryController.get(entryAccount, info.getId());
 
-                    // check sequence
-                    if (info.isHasSequence()) {
-                        // support for only one in bulk import upload
+                        if (entry != null) {
+                            InfoToModelFactory.infoToEntry(info, entry);
+                            entry.setVisibility(visibility.getValue());
+                            entry.setOwner(entryAccount.getFullName());
+                            entry.setOwnerEmail(entryAccount.getEmail());
+                            entry = entryController.update(entryAccount, entry);
+                        } else {
+                            entry = InfoToModelFactory.infoToEntry(info);
+                            entry.setVisibility(visibility.getValue());
+                            entry.setOwner(entryAccount.getFullName());
+                            entry.setOwnerEmail(entryAccount.getEmail());
+                            entry = entryController.createEntry(entryAccount, entry, isAdmin);
+                        }
+                    } catch (PermissionException pe) {
+                        Logger.error(pe);
+                        break;
+                    }
+
+                    // save sequence if any
+                    if (info.isHasSequence() && !info.getSequenceAnalysis().isEmpty()) {
                         saveSequence(entryAccount, info.getSequenceAnalysis().get(0), entry);
                     }
 
                     // check attachment
-                    if (info.isHasAttachment()) {
-                        try {
-                            saveAttachment(entryAccount, info.getAttachments().get(0), entry);
-                        } catch (Exception e) {
-                            Logger.error(e);
-                        }
-                    }
+                    saveAttachments(entryAccount, info.getAttachments(), entry);
 
                     contents.add(entry.getId());
                     break;
@@ -579,30 +649,5 @@ public class BulkImportController {
             Logger.error(e);
             throw new ControllerException(e);
         }
-    }
-
-    protected void saveAttachment(Account entryAccount, AttachmentInfo info, Entry entry)
-            throws FileNotFoundException, PermissionException, ControllerException {
-        if (info == null)
-            return;
-
-        String fileId = info.getFileId();
-
-        File file = new File(JbeirSettings.getSetting("TEMPORARY_DIRECTORY") + File.separatorChar
-                                     + fileId);
-
-        if (!file.exists()) {
-            Logger.error("Could not find attachment file \"" + file.getAbsolutePath() + "\"");
-            return;
-        }
-
-        Attachment attachment = new Attachment();
-        attachment.setEntry(entry);
-        attachment.setFileName(info.getFilename());
-
-        FileInputStream inputStream = new FileInputStream(file);
-
-        AttachmentController controller = new AttachmentController();
-        controller.save(entryAccount, attachment, inputStream);
     }
 }

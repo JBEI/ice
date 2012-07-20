@@ -1299,6 +1299,8 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             BulkImportController controller = new BulkImportController();
             return controller.submitBulkImport(account, importType, entryList);
 
+            // TODO : delete bulk import draft
+
         } catch (ControllerException ce) {
             Logger.error(ce);
             return false;

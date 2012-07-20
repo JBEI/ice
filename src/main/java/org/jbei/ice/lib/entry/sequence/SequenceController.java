@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.jbei.ice.controllers.ApplicationController;
 import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.controllers.permissionVerifiers.SequencePermissionVerifier;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.composers.SequenceComposer;
 import org.jbei.ice.lib.composers.SequenceComposerException;
@@ -25,6 +24,7 @@ import org.jbei.ice.lib.models.SequenceFeature.AnnotationType;
 import org.jbei.ice.lib.models.SequenceFeatureAttribute;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.permissions.PermissionException;
+import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.vo.DNAFeature;
@@ -36,37 +36,27 @@ import org.jbei.ice.lib.vo.IDNASequence;
 /**
  * ABI to manipulate {@link Sequence}s.
  *
- * @author Timothy Ham, Zinovii Dmytriv
+ * @author Hector Plahar, Timothy Ham, Zinovii Dmytriv
  */
 public class SequenceController {
-    private final SequencePermissionVerifier verifier;
     private final SequenceDAO dao;
+    private final PermissionsController permissionsController;
+
 
     public SequenceController() {
-        verifier = new SequencePermissionVerifier();
         dao = new SequenceDAO();
-    }
-
-
-    /**
-     * Check if the user has write permission to the given {@link Sequence}.
-     *
-     * @param sequence
-     * @return True if user has write permission.
-     */
-    public boolean hasWritePermission(Account account, Sequence sequence) {
-        return verifier.hasWritePermissions(sequence, account);
+        permissionsController = new PermissionsController();
     }
 
     /**
      * Retrieve the {@link Sequence} associated with the given {@link Entry} from the database.
      *
-     * @param entry
+     * @param entry entry whose sequence is being retrieved
      * @return Sequence
      * @throws ControllerException
      */
     public Sequence getByEntry(Entry entry) throws ControllerException {
-        Sequence sequence = null;
+        Sequence sequence;
 
         try {
             sequence = dao.getByEntry(entry);
@@ -124,15 +114,15 @@ public class SequenceController {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public Sequence save(Account account, Sequence sequence, boolean scheduleIndexRebuild)
+    protected Sequence save(Account account, Sequence sequence, boolean scheduleIndexRebuild)
             throws ControllerException, PermissionException {
-        Sequence result = null;
+        Sequence result;
 
         if (sequence == null) {
             throw new ControllerException("Failed to save null sequence!");
         }
 
-        if (!hasWritePermission(account, sequence)) {
+        if (!permissionsController.hasWritePermission(account, sequence.getEntry())) {
             throw new PermissionException("No write permission for sequence!");
         }
 
@@ -179,7 +169,7 @@ public class SequenceController {
             throw new ControllerException("Failed to save null sequence!");
         }
 
-        if (!hasWritePermission(account, sequence)) {
+        if (!permissionsController.hasWritePermission(account, sequence.getEntry())) {
             throw new PermissionException("No write permission for sequence!");
         }
 
@@ -236,7 +226,7 @@ public class SequenceController {
             throw new ControllerException("Failed to save null sequence!");
         }
 
-        if (!hasWritePermission(account, sequence)) {
+        if (!permissionsController.hasWritePermission(account, sequence.getEntry())) {
             throw new PermissionException("No write permission for sequence!");
         }
 
