@@ -19,7 +19,8 @@ Learn more about Flex at http://flex.org
 <!--  END Browser History required section -->
 
 <title></title>
-<script src="AC_OETags.js" language="javascript"></script>
+<!-- Commented in order to make extMouseWheel.js working on Mac -->
+<!-- <script src="AC_OETags.js" language="javascript"></script> -->
 
 <!--  BEGIN Browser History required section -->
 <script src="history/history.js" language="javascript"></script>
@@ -44,6 +45,7 @@ var requiredRevision = 0;
 </head>
 
 <body scroll="no">
+<script type="text/javascript" src="extMouseWheel.js"></script>
 <script language="JavaScript" type="text/javascript">
 <!--
 // Version check for the Flash Player that has the ability to start Player Product Install (6.0r65)
@@ -56,7 +58,7 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 	// DO NOT MODIFY THE FOLLOWING FOUR LINES
 	// Location visited after installation is complete if installation is required
 	var MMPlayerType = (isIE == true) ? "ActiveX" : "PlugIn";
-	var MMredirectURL = window.location;
+	var MMredirectURL = encodeURI(window.location);
     document.title = document.title.slice(0, 47) + " - Flash Player Installation";
     var MMdoctitle = document.title;
 
@@ -98,24 +100,37 @@ if ( hasProductInstall && !hasRequestedVersion ) {
   }
 // -->
 </script>
-<noscript>
-  	<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
-			id="VectorEditor" width="100%" height="100%"
-			codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
-			<param name="movie" value="VectorEditor.swf" />
-			<param name="quality" value="high" />
-			<param name="bgcolor" value="#869ca7" />
-			<param name="allowScriptAccess" value="sameDomain" />
-			<embed src="VectorEditor.swf" quality="high" bgcolor="#869ca7"
-				width="100%" height="100%" name="VectorEditor" align="middle"
-				play="true"
-				loop="false"
-				quality="high"
-				allowScriptAccess="sameDomain"
-				type="application/x-shockwave-flash"
-				pluginspage="http://www.adobe.com/go/getflashplayer">
-			</embed>
-	</object>
-</noscript>
+
+<!-- Commented in order to make extMouseWheel.js working on Mac -->
+<!-- <noscript> -->
+
+<table width="100%" height="100%">
+	<tr>
+		<td width="100%">
+			<div style="width: 100%; height:100%" id="flashContainerDiv">
+	  			<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540002"
+					id="VectorEditor" width="100%" height="100%"
+					codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
+					<param name="movie" value="VectorEditor.swf" />
+					<param name="quality" value="high" />
+					<param name="bgcolor" value="#869ca7" />
+					<param name="wmode" value="window" /> 
+					<param name="allowScriptAccess" value="sameDomain" />
+					<embed src="VectorEditor.swf" quality="high" bgcolor="#869ca7"
+						width="100%" height="100%" name="VectorEditor" align="middle"
+						wmode="window" 
+						play="true"
+						loop="false"
+						quality="high"
+						allowScriptAccess="sameDomain"
+						type="application/x-shockwave-flash"
+						pluginspage="http://www.adobe.com/go/getflashplayer">
+					</embed>
+				</object>
+			</div>
+		</td>
+	</tr>
+</table>
+<!-- </noscript> -->
 </body>
 </html>
