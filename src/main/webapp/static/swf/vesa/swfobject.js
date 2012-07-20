@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 /*!	SWFObject v2.2 <http://code.google.com/p/swfobject/> 
  is released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
  */
@@ -817,6 +818,8 @@ var swfobject = function () {
     };
 }();
 =======
+=======
+>>>>>>> d1f29f4... VectorEditor standalone binaries
 /*!	SWFObject v2.2 <http://code.google.com/p/swfobject/> 
 	is released under the MIT License <http://www.opensource.org/licenses/mit-license.php> 
 */
@@ -1594,4 +1597,7 @@ var swfobject = function() {
 		}
 	};
 }();
+<<<<<<< HEAD
+>>>>>>> d1f29f4... VectorEditor standalone binaries
+=======
 >>>>>>> d1f29f4... VectorEditor standalone binaries
