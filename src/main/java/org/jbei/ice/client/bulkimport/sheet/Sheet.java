@@ -41,7 +41,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
     private int inputIndex;   // index of last cell that was switched to input
 
     protected final FlexTable colIndex;
-    protected final ScrollPanel sheetTableFocusPanelwrapper;
+    protected final ScrollPanel sheetTableFocusPanelWrapper;
     protected final ScrollPanel colIndexWrapper;
     protected final FlexTable header;
     protected final ScrollPanel headerWrapper;
@@ -86,9 +86,9 @@ public class Sheet extends Composite implements SheetPresenter.View {
         focusPanel.setStyleName("focus_panel");
 
         // then wrap it in a scroll focusPanel that expands to fill area given by browser
-        sheetTableFocusPanelwrapper = new ScrollPanel(focusPanel);
-        sheetTableFocusPanelwrapper.setWidth((Window.getClientWidth() - 40) + "px");
-        sheetTableFocusPanelwrapper.setHeight((Window.getClientHeight() - 340 - 30) + "px");
+        sheetTableFocusPanelWrapper = new ScrollPanel(focusPanel);
+        sheetTableFocusPanelWrapper.setWidth((Window.getClientWidth() - 40) + "px");
+        sheetTableFocusPanelWrapper.setHeight((Window.getClientHeight() - 340 - 30) + "px");
 
         colIndex = new FlexTable();
         colIndex.setCellPadding(0);
@@ -123,12 +123,12 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     // experimental
     public void decreaseWidthBy(int amount) {
-        sheetTableFocusPanelwrapper.setWidth((sheetTableFocusPanelwrapper.getOffsetWidth() - amount) + "px");
+        sheetTableFocusPanelWrapper.setWidth((sheetTableFocusPanelWrapper.getOffsetWidth() - amount) + "px");
         headerWrapper.setWidth((headerWrapper.getOffsetWidth() - amount) + "px");
     }
 
     public void increaseWidthBy(int amount) {
-        sheetTableFocusPanelwrapper.setWidth((sheetTableFocusPanelwrapper.getOffsetWidth() + amount) + "px");
+        sheetTableFocusPanelWrapper.setWidth((sheetTableFocusPanelWrapper.getOffsetWidth() + amount) + "px");
         headerWrapper.setWidth((headerWrapper.getOffsetWidth() + amount) + "px");
     }
 
@@ -141,12 +141,12 @@ public class Sheet extends Composite implements SheetPresenter.View {
             public void onResize(ResizeEvent event) {
                 int delta = event.getWidth() - previousWidth;
                 previousWidth = event.getWidth();
-                sheetTableFocusPanelwrapper.setWidth((sheetTableFocusPanelwrapper.getOffsetWidth() + delta) + "px");
+                sheetTableFocusPanelWrapper.setWidth((sheetTableFocusPanelWrapper.getOffsetWidth() + delta) + "px");
                 headerWrapper.setWidth((headerWrapper.getOffsetWidth() + delta) + "px");
 
                 int wrapperHeight = (event.getHeight() - 340 - 30);
                 if (wrapperHeight >= 0)
-                    sheetTableFocusPanelwrapper.setHeight(wrapperHeight + "px");
+                    sheetTableFocusPanelWrapper.setHeight(wrapperHeight + "px");
 
                 int rowIndexHeight = (event.getHeight() - 340 - 30 - 15);
                 if (rowIndexHeight >= 0)
@@ -156,12 +156,12 @@ public class Sheet extends Composite implements SheetPresenter.View {
     }
 
     private void addScrollHandlers() {
-        sheetTableFocusPanelwrapper.addScrollHandler(new ScrollHandler() {
+        sheetTableFocusPanelWrapper.addScrollHandler(new ScrollHandler() {
 
             @Override
             public void onScroll(ScrollEvent event) {
-                headerWrapper.setHorizontalScrollPosition(sheetTableFocusPanelwrapper.getHorizontalScrollPosition());
-                colIndexWrapper.setVerticalScrollPosition(sheetTableFocusPanelwrapper.getVerticalScrollPosition());
+                headerWrapper.setHorizontalScrollPosition(sheetTableFocusPanelWrapper.getHorizontalScrollPosition());
+                colIndexWrapper.setVerticalScrollPosition(sheetTableFocusPanelWrapper.getVerticalScrollPosition());
             }
         });
     }
@@ -179,7 +179,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         layout.getFlexCellFormatter().setColSpan(0, 0, 2);
         layout.setWidget(1, 0, colIndexWrapper);
         layout.getFlexCellFormatter().setVerticalAlignment(1, 0, HasAlignment.ALIGN_TOP);
-        layout.setWidget(1, 1, sheetTableFocusPanelwrapper);
+        layout.setWidget(1, 1, sheetTableFocusPanelWrapper);
         layout.getFlexCellFormatter().setVerticalAlignment(1, 1, HasAlignment.ALIGN_TOP);
 
         createHeaderCells();
@@ -195,6 +195,12 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
             // index col
             HTML indexCell = new HTML(i + "");
+//            indexCell.addMouseDownHandler(new MouseDownHandler() {
+//                @Override
+//                public void onMouseDown(MouseDownEvent event) {
+//                    int event.getClientX();
+//                }
+//            });
 
             // TODO : right click menu here
 
@@ -264,7 +270,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         addLeadHeader();
 
         Header[] headers = presenter.getTypeHeaders();
-        new SheetHeader(headers, headerCol, row, header);
+        SheetHeader.createHeaders(headers, headerCol, row, header);
 
         headerCol += headers.length;
         addTailHeader();
@@ -318,9 +324,16 @@ public class Sheet extends Composite implements SheetPresenter.View {
         return sheetTable.getRowCount();
     }
 
-    @Override
     public void highlightHeaders(int row, int col) {
-        // TODO Auto-generated method stub
+        SheetHeader.highlightHeader(col, header);
+
+        int count = colIndex.getRowCount();
+        for (int i = 0; i < count; i += 1) {
+            if (i == row)
+                colIndex.getFlexCellFormatter().setStyleName(i, 0, "index_td_selected_cell");
+            else
+                colIndex.getFlexCellFormatter().setStyleName(i, 0, "index_td_cell");
+        }
     }
 
     // currently goes through each row and cell and checks to cell value
@@ -436,16 +449,16 @@ public class Sheet extends Composite implements SheetPresenter.View {
             return;
 
         // auto scroll wrapper
-        int max = sheetTableFocusPanelwrapper.getMaximumHorizontalScrollPosition();
-        int width = sheetTableFocusPanelwrapper.getOffsetWidth();
+        int max = sheetTableFocusPanelWrapper.getMaximumHorizontalScrollPosition();
+        int width = sheetTableFocusPanelWrapper.getOffsetWidth();
         int nextIndex = currentIndex + 1;
 
         // 130 is the width of the cell
         if (130 * (nextIndex + 1) > width) {
-            int nextScrollPosition = sheetTableFocusPanelwrapper.getHorizontalScrollPosition() + 130;
+            int nextScrollPosition = sheetTableFocusPanelWrapper.getHorizontalScrollPosition() + 130;
             if (nextScrollPosition > max)
                 nextScrollPosition = max;
-            sheetTableFocusPanelwrapper.setHorizontalScrollPosition(nextScrollPosition);
+            sheetTableFocusPanelWrapper.setHorizontalScrollPosition(nextScrollPosition);
         }
 
         selectCell(currentRow, currentIndex + 1);
@@ -460,14 +473,14 @@ public class Sheet extends Composite implements SheetPresenter.View {
         if (nextIndex < 0)
             return;
 
-        int min = sheetTableFocusPanelwrapper.getMinimumHorizontalScrollPosition();
-        int current = sheetTableFocusPanelwrapper.getHorizontalScrollPosition();
+        int min = sheetTableFocusPanelWrapper.getMinimumHorizontalScrollPosition();
+        int current = sheetTableFocusPanelWrapper.getHorizontalScrollPosition();
 
         if (130 * (nextIndex - 1) < current) {
-            int nextScrollPosition = sheetTableFocusPanelwrapper.getHorizontalScrollPosition() - 130;
+            int nextScrollPosition = sheetTableFocusPanelWrapper.getHorizontalScrollPosition() - 130;
             if (nextScrollPosition < min)
                 nextScrollPosition = min;
-            sheetTableFocusPanelwrapper.setHorizontalScrollPosition(nextScrollPosition);
+            sheetTableFocusPanelWrapper.setHorizontalScrollPosition(nextScrollPosition);
         }
         selectCell(currentRow, nextIndex);
     }
@@ -486,6 +499,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
         // check if user is clicking on the same cell
         if (currentRow == newRow && currentIndex == newCol)
             return;
+
+        highlightHeaders(newRow, newCol);
 
         SheetCell prevSelection = newCellSelection;
         newCellSelection = presenter.getTypeHeaders()[newCol].getCell();

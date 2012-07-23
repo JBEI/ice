@@ -422,6 +422,13 @@ a.cell_mouseover:hover {
     border-left: 1px solid #CCC;
 }
 
+.cell_column_header_selected_td {
+    text-align: center;
+    height: 40px;
+    background-color: #CCCCCC;
+    border-left: 1px solid #CCC;
+}
+
 .sheet_header_table {
     border-bottom: 1px solid #CCC;
     border-top: 1px solid #CCC;
@@ -521,6 +528,14 @@ a.cell_mouseover:hover {
     text-align: center;
     border-bottom: 1px solid #CCC;
     height: 19px;
+    background-color: #F1F1F1;
+}
+
+.index_td_selected_cell {
+    text-align: center;
+    border-bottom: 1px solid #CCC;
+    height: 19px;
+    background-color: #CCCCCC;
 }
 
 .index_cell {
@@ -534,7 +549,6 @@ a.cell_mouseover:hover {
     border-left: 1px solid #CCC;
     border-top: 1px solid #CCC;
     border-right: 1px solid #CCC;
-    background-color: #F1F1F1;
 }
 
 .leader_cell_column_header_td {

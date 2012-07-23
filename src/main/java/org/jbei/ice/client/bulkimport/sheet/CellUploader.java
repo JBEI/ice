@@ -64,8 +64,7 @@ public class CellUploader implements IsWidget {
 
     public void setHasFile(boolean hasFile) {
         // TODO
-        //To change body of created methods use File | Settings | File Templates.
-        fileUploadImg = ImageUtil.getUploadImage();
+        fileUploadImg = ImageUtil.getFileUpload();
         fileUploadImg.setHeight((fileUploadImg.getHeight() - 2) + "px");
         fileUploadImg.setStyleName("cursor_pointer");
     }

@@ -38,7 +38,6 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
     private SaveDraftInput draftInput;
     private UpdateDraftInput updateDraftInput;
 
-    private Image uploadCsv;
     private HorizontalPanel headerPanel;
     private NewBulkInput sheet;
 
@@ -61,7 +60,6 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         resetButton.setStyleName("saved_draft_button");
         draftInput = new SaveDraftInput();
         updateDraftInput = new UpdateDraftInput();
-        uploadCsv = ImageUtil.getUploadImage();
     }
 
     @Override
@@ -183,11 +181,8 @@ public class BulkImportView extends AbstractLayout implements IBulkImportView {
         int index = mainContent.getCellCount(0);
         mainContent.getFlexCellFormatter().setColSpan(1, 0, index);
 
-        HTMLPanel bulkImportHeader = new HTMLPanel(
-                "<span id=\"bulk_import_header_title\"></span><span style=\"float: right\" "
-                        + "id=\"upload_csv_icon\"></span>");
+        HTMLPanel bulkImportHeader = new HTMLPanel("<span id=\"bulk_import_header_title\"></span>");
         bulkImportHeader.add(contentHeader, "bulk_import_header_title");
-        bulkImportHeader.add(uploadCsv, "upload_csv_icon");
 
         mainContent.setWidget(2, 0, bulkImportHeader);
         mainContent.getCellFormatter().setStyleName(2, 0, "bulk_import_header");

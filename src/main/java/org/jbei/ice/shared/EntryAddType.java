@@ -16,7 +16,7 @@ public enum EntryAddType implements IsSerializable {
     private EntryAddType() {
     }
 
-    // TODO : 
+    // TODO :
     public static EntryAddType stringToType(String str) {
         if (str == null)
             return null;

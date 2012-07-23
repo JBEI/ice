@@ -39,9 +39,11 @@ import org.apache.commons.io.IOUtils;
 public class FileUploadServlet extends UploadAction {
 
     private static final long serialVersionUID = 1L;
+
     private static final String SEQUENCE_TYPE = "sequence";
     private static final String ATTACHMENT_TYPE = "attachment";
     private static final String BULK_UPLOAD_FILE_TYPE = "bulk_file_upload";
+    private static final String BULK_CSV_UPLOAD = "bulk_csv";
 
     Hashtable<String, String> receivedContentTypes = new Hashtable<String, String>();
     Hashtable<String, File> receivedFiles = new Hashtable<String, File>(); // received files list and content types

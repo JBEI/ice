@@ -24,8 +24,6 @@ public class SheetPresenter {
      */
     public static interface View {
 
-        void highlightHeaders(int row, int col);
-
         void clear();
 
         void setCellWidgetForCurrentRow(Header header, String value, int row, int col);
@@ -187,8 +185,9 @@ public class SheetPresenter {
 
             for (int col = 0; col < headers.length; col += 1) {
                 SheetCell cell = headers[col].getCell();
-                if (!atLeastOneCellHasRowData)
-                    atLeastOneCellHasRowData = (cell.getDataForRow(row) != null); // TODO : break on cell data seen
+                atLeastOneCellHasRowData = (cell.getDataForRow(row) != null);
+                if (atLeastOneCellHasRowData)
+                    break;
             }
 
             if (!atLeastOneCellHasRowData)
