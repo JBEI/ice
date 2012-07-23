@@ -1,12 +1,13 @@
 package org.jbei.ice.shared.dto;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-import org.jbei.ice.shared.EntryAddType;
-
 import java.util.ArrayList;
 import java.util.Date;
 
-public class BulkImportInfo implements IsSerializable { //ITransferModel<BulkImportDraft> {
+import org.jbei.ice.shared.EntryAddType;
+
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+public class BulkImportInfo implements IsSerializable {
 
     private long id;
     private String name;

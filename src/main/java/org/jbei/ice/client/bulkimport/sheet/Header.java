@@ -5,7 +5,7 @@ public enum Header {
     FUNDING_SOURCE("Funding Source", false, "", new InputSheetCell()),
     IP("Intellectual Property", false, "", new InputSheetCell()),
     BIOSAFETY("BioSafety Level", true, "", new BioSafetySheetCell()),
-    NAME("Name", true, "", new InputSheetCell()),
+    NAME("Name", true, "e.g. JBEI-0001", new InputSheetCell()),
     ALIAS("Alias", false, "", new InputSheetCell()),
     KEYWORDS("Keywords", false, "", new InputSheetCell()),
     SUMMARY("Summary", true, "", new InputSheetCell()),
