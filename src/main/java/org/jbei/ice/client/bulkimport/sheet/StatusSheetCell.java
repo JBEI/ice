@@ -15,6 +15,7 @@ public class StatusSheetCell extends MultiSuggestSheetCell {
         this.addOracleData(StatusType.getDisplayList());
     }
 
+    @Override
     public String inputIsValid(int row) {
         String errMsg = super.inputIsValid(row);
         if (errMsg != null && !errMsg.isEmpty())

@@ -28,11 +28,14 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
 
+/**
+ * Menu for bulk import drafts and pending imports
+ *
+ * @author Hector Plahar
+ */
 public class SavedDraftsMenu extends Composite {
 
     private final FlexTable table;
-    private BulkImportMenuItem currentEditSelection;
-
     private int row;
     private final SingleSelectionModel<BulkImportMenuItem> selectionModel;
 
@@ -55,20 +58,6 @@ public class SavedDraftsMenu extends Composite {
 
     public SingleSelectionModel<BulkImportMenuItem> getSelectionModel() {
         return this.selectionModel;
-    }
-
-    public void setSelection(long id) {
-        for (int i = 0; i < table.getRowCount(); i += 1) {
-            Widget w = table.getWidget(i, 0);
-            if (!(w instanceof MenuCell))
-                continue;
-
-            MenuCell cell = (MenuCell) w;
-            if (id == cell.getMenuItem().getId())
-                cell.setSelected(true);
-            else
-                cell.setSelected(false);
-        }
     }
 
     public void setMenuItems(ArrayList<BulkImportMenuItem> items, IDeleteMenuHandler handler) {
@@ -126,16 +115,6 @@ public class SavedDraftsMenu extends Composite {
         return false;
     }
 
-
-    /**
-     * sets the busy indicator where the folder counts are displayed
-     * to indicate that some form of update is taking place
-     */
-
-//    public BulkImportMenuItem getCurrentEditSelection() {
-//        return currentEditSelection;
-//    }
-
     // inner class
     // TODO : this needs to go into a presenter;
     class DeleteCallBack extends Callback<BulkImportMenuItem> {
@@ -161,7 +140,6 @@ public class SavedDraftsMenu extends Composite {
         private Label count;
         private Label nameLabel;
         private Label dateLabel;
-        private Label type;
         private final String folderId;
         private final Image delete;
 
@@ -183,17 +161,12 @@ public class SavedDraftsMenu extends Composite {
                             return;
 
                         if (Window.confirm("This action cannot be undone. Continue?")) {
-                            currentEditSelection = getMenuItem();
+//                            currentEditSelection = getMenuItem();
                             deleteHandler.delete(item.getId(), new DeleteCallBack());
                         }
                     }
                 });
             }
-
-//            html = "<span class=\"collection_user_menu\">" + name
-//                    + "</span><span class=\"menu_count\" id=\"" + folderId
-//                    + "\"></span><br><span style=\"font-size: 10px; color: #999\">"
-//                    + item.getDateTime() + " | " + item.getTypeHeader() + "</span>";
 
             html = "<span class=\"collection_user_menu\" id=\"" + folderId + "_name\"></span>"
                     + "<span class=\"menu_count\" id=\"" + folderId + "\"></span> "
@@ -201,7 +174,7 @@ public class SavedDraftsMenu extends Composite {
                     "<span> | </span><span>" + item.getType() + "</span></div>";
 
             panel = new HTMLPanel(html);
-            panel.setTitle(item.getEmail());
+            panel.setTitle(item.getName());
 
             count = new Label(formatNumber(item.getCount()));
             nameLabel = new Label(generateName());

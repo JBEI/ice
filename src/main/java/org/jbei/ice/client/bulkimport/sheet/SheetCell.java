@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import org.jbei.ice.client.bulkimport.model.SheetCellData;
 
-import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Represents cell in a sheet. Not that a single instance is associated with each header (column)
@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.Composite;
  *
  * @author Hector Plahar
  */
-public abstract class SheetCell extends Composite {
+public abstract class SheetCell {
 
     private final HashMap<Integer, SheetCellData> rowValues;
     protected boolean required;
@@ -40,8 +40,10 @@ public abstract class SheetCell extends Composite {
 
     /**
      * Give focus to the widget that is wrapped by this cell
+     *
+     * @param row index of row for focus
      */
-    public abstract void setFocus();
+    public abstract void setFocus(int row);
 
     /**
      * This is meant to be overridden in subclasses that have input boxes with multi suggestions
@@ -115,4 +117,7 @@ public abstract class SheetCell extends Composite {
             return "Required field";
         return "";
     }
+
+    // get widget for row
+    public abstract Widget getWidget(int row, boolean isCurrentSelection);
 }

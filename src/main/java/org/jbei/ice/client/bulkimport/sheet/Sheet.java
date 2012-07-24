@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.jbei.ice.client.bulkimport.SheetPresenter;
-import org.jbei.ice.client.bulkimport.model.SheetCellData;
 import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkImportInfo;
@@ -259,7 +258,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
                 if (currentIndex >= 0 && currentRow >= 0) {
                     Widget widget = sheetTable.getWidget(currentRow, currentIndex);
-                    widget.removeStyleName("cell_selected");
+                    if (widget != null)
+                        widget.removeStyleName("cell_selected");
                     currentRow = currentIndex = -1;
                 }
             }
@@ -398,10 +398,10 @@ public class Sheet extends Composite implements SheetPresenter.View {
         if (newCellSelection == null)
             return;
 
-        sheetTable.setWidget(currentRow, currentIndex, newCellSelection);
+        sheetTable.setWidget(currentRow, currentIndex, newCellSelection.getWidget(currentRow, true));
         // all cell to set focus to whatever their input mechanism is.
         // e.g. if an input box, allow focus on that box
-        newCellSelection.setFocus();
+        newCellSelection.setFocus(currentRow);
         cellHasFocus = true;
     }
 
@@ -492,9 +492,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
      * @param newCol user selected column
      */
     private void selectCell(int newRow, int newCol) {
-        //        HTML corner = new HTML(
-        //                "<div style=\"position: relative; width: 5px; height: 5px; background-color: blue; top: "
-        //                        + "12px; right: -122px; border: 3px solid white\"></div>");
 
         // check if user is clicking on the same cell
         if (currentRow == newRow && currentIndex == newCol)
@@ -511,29 +508,26 @@ public class Sheet extends Composite implements SheetPresenter.View {
             Widget widget = sheetTable.getWidget(currentRow, currentIndex);
             if (widget != null)
                 widget.removeStyleName("cell_selected");
+
+            if (prevSelection.handlesDataSet()) {
+                widget = prevSelection.getWidget(inputRow, false);
+                sheetTable.setWidget(inputRow, inputIndex, widget);
+            }
         }
 
         // determine if user interacted with a cell prior to this cell
         // if so then retrieve the text for the data and set it to the
         // label widget, and display that label widget
         if (lastReplaced != null) {
-            String inputText = "";
-
-            if (prevSelection.handlesDataSet()) {
-                SheetCellData data = prevSelection.getDataForRow(inputRow);
-                if (data != null)
-                    inputText = data.getValue();
-            } else {
-                inputText = prevSelection.setDataForRow(inputRow);
-            }
+            String inputText;
+            inputText = prevSelection.setDataForRow(inputRow);
 
             lastReplaced.setTitle(inputText);
-
             if (inputText != null && inputText.length() > 18)
                 inputText = (inputText.substring(0, 16) + "...");
             lastReplaced.setText(inputText);
-
             sheetTable.setWidget(inputRow, inputIndex, lastReplaced);
+
             inputRow = inputIndex = -1; // lastReplaced not visible
             lastReplaced = null;
             focusPanel.setFocus(true); // not in click
@@ -542,44 +536,41 @@ public class Sheet extends Composite implements SheetPresenter.View {
         // now deal with current selection
         // check if cell handles selection
         if (newCellSelection.cellSelected(newRow, newCol)) {
-
-            // cell handles selection
-            lastReplaced = (Label) sheetTable.getWidget(newRow, newCol);
-            lastReplaced.removeStyleName("cell_selected");
             inputIndex = newCol;
             inputRow = newRow;
-            sheetTable.setWidget(newRow, newCol, newCellSelection);
+            Widget widget = newCellSelection.getWidget(newRow, true);
+            sheetTable.setWidget(newRow, newCol, widget);
 
         } else {
             Widget cellWidget = sheetTable.getWidget(newRow, newCol);
             cellWidget.addStyleName("cell_selected");
+
+//            if (cellWidget instanceof Label) {
+//                Label label = (Label) cellWidget;
+//
+//                HTMLPanel panel;
+//                if (label.getText().isEmpty())
+//                    panel = new HTMLPanel(
+//                            "<div class=\"cell cell_selected\"><div style=\"position: relative; width: 5px; height:
+// " +
+//                                    "5px; background-color: #0082C0; top: "
+//                                    + "12px; right: -122px; border: 3px solid white\"></div></div>");
+//                else
+//                    panel = new HTMLPanel(
+//                            "<div class=\"cell cell_selected\">"
+//                                    + label.getText()
+//                                    + "<div style=\"position: relative; width: 5px; height: 5px; background-color: " +
+//                                    "#0082C0; top: "
+//                                    + "-2px; right: -124px; border: 3px solid white\"></div></div>");
+//                sheetTable.setWidget(newRow, newCol, panel);
+//
+//            } else {
+//
+//            }
         }
 
         currentRow = newRow;
         currentIndex = newCol;
-
-        //        if (cellWidget instanceof Label) {
-        //            Label label = (Label) cellWidget;
-        //
-        //            HTMLPanel panel;
-        //            if (label.getText().isEmpty())
-        //                panel = new HTMLPanel(
-        //                        "<div class=\"cell cell_selected\"><div style=\"position: relative; width: 5px;
-        // height: 5px; background-color: #0082C0; top: "
-        //                                + "12px; right: -122px; border: 3px solid white\"></div></div>");
-        //            else
-        //                panel = new HTMLPanel(
-        //                        "<div class=\"cell cell_selected\">"
-        //                                + label.getText()
-        //                                + "<div style=\"position: relative; width: 5px; height: 5px;
-        // background-color: #0082C0; top: "
-        //                                + "-2px; right: -124px; border: 3px solid white\"></div></div>");
-        //            sheetTable.setWidget(newRow, newCol, panel);
-        //
-        //        } else {
-
-        //        }
-
     }
 
     @Override

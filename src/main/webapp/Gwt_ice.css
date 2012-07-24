@@ -395,11 +395,17 @@ a.cell_mouseover:hover {
     height: 19px;
 }
 
+.uploader_cell_selected {
+    font-size: 0.75em;
+    border: 2px solid #0082C0;
+    height: 20px;
+    width: 131px;
+}
+
 .uploader_cell {
     font-size: 0.75em;
-    /*border-right: 1px solid #CCC;*/
-    /*border-top: 1px solid #CCC;*/
-    border: 2px solid #0082C0;
+    border-right: 1px solid #CCC;
+    border-top: 1px solid #CCC;
     height: 20px;
     width: 131px;
 }

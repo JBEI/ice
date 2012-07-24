@@ -6,6 +6,7 @@ import org.jbei.ice.client.common.widget.MultipleTextBox;
 
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * @author Hector Plahar
@@ -23,8 +24,6 @@ public class MultiSuggestSheetCell extends SheetCell {
         textBox = new MultipleTextBox();
         box = new SuggestBox(oracle, textBox);
         box.setStyleName("cell_input");
-
-        initWidget(box);
     }
 
     @Override
@@ -34,7 +33,7 @@ public class MultiSuggestSheetCell extends SheetCell {
 
     /**
      * Sets data for row specified in the param
-     * 
+     *
      * @param row current row user is working on
      * @return display for user entered value
      */
@@ -47,13 +46,13 @@ public class MultiSuggestSheetCell extends SheetCell {
     }
 
     @Override
-    public void setFocus() {
+    public void setFocus(int row) {
         textBox.setFocus(true);
     }
 
     /**
      * Adds the suggestions that will be presented to user to oracle
-     * 
+     *
      * @param data list of strings presented to user
      */
     public void addOracleData(ArrayList<String> data) {
@@ -63,5 +62,10 @@ public class MultiSuggestSheetCell extends SheetCell {
 
     public boolean hasMultiSuggestions() {
         return true;
+    }
+
+    @Override
+    public Widget getWidget(int row, boolean isCurrentSelection) {
+        return box;
     }
 }

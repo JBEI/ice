@@ -1,6 +1,7 @@
 package org.jbei.ice.client.bulkimport.sheet;
 
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Default cell for the import sheet
@@ -15,7 +16,6 @@ public class InputSheetCell extends SheetCell {
         super();
         input = new TextBox();
         input.setStyleName("cell_input");
-        initWidget(input);
     }
 
     @Override
@@ -37,7 +37,12 @@ public class InputSheetCell extends SheetCell {
         return ret;
     }
 
-    public void setFocus() {
+    public void setFocus(int row) {
         input.setFocus(true);
+    }
+
+    @Override
+    public Widget getWidget(int row, boolean isCurrentSelection) {
+        return input;
     }
 }
