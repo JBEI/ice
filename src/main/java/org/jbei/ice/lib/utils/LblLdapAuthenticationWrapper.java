@@ -3,7 +3,6 @@ package org.jbei.ice.lib.utils;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Hashtable;
-
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -17,12 +16,11 @@ import org.jbei.ice.lib.logging.Logger;
 
 /**
  * Little wrapper for lbl ldap.
- * <p>
+ * <p/>
  * Simple usage: LdapAuthl = new LdapAuth(); if (l.isWikiUser(String Username)) { try {
  * l.authenticate(Username, password); } except { //auth failed } }
- * 
+ *
  * @author Zinovii Dmytriv, Timothy Ham, Hector Plahar
- * 
  */
 public class LblLdapAuthenticationWrapper {
     protected DirContext dirContext = null;
@@ -46,11 +44,12 @@ public class LblLdapAuthenticationWrapper {
 
     /**
      * Authenticate user to the ldap server.
-     * 
+     *
      * @param userName
      * @param passWord
      * @return True if successfully authenticated.
      * @throws LblLdapAuthenticationWrapperException
+     *
      */
     public boolean authenticate(String userName, String passWord)
             throws LblLdapAuthenticationWrapperException {
@@ -117,10 +116,11 @@ public class LblLdapAuthenticationWrapper {
 
     /**
      * Check if the user is in the settings file specified ldap group before authenticating.
-     * 
+     *
      * @param loginName
      * @return True if user is in the specified ldap group.
      * @throws LblLdapAuthenticationWrapperException
+     *
      */
     public boolean isWikiUser(String loginName) throws LblLdapAuthenticationWrapperException {
         boolean result = false;
@@ -206,7 +206,7 @@ public class LblLdapAuthenticationWrapper {
 
     /**
      * Get unauthenticated ldap context.
-     * 
+     *
      * @return {@link DirContext} object.
      * @throws NamingException
      */
@@ -235,7 +235,7 @@ public class LblLdapAuthenticationWrapper {
 
     /**
      * Get authenticated context from the ldap server. Failure means bad user or password.
-     * 
+     *
      * @param lblEmployeeNumber
      * @param passWord
      * @return {@link DirContext} object.
@@ -275,27 +275,14 @@ public class LblLdapAuthenticationWrapper {
 
     /**
      * Exception
-     * 
+     *
      * @author Zinovii Dmytriv
-     * 
      */
     public class LblLdapAuthenticationWrapperException extends Exception {
         private static final long serialVersionUID = 1L;
 
-        public LblLdapAuthenticationWrapperException() {
-            super();
-        }
-
         public LblLdapAuthenticationWrapperException(String message, Throwable cause) {
             super(message, cause);
-        }
-
-        public LblLdapAuthenticationWrapperException(String message) {
-            super(message);
-        }
-
-        public LblLdapAuthenticationWrapperException(Throwable cause) {
-            super(cause);
         }
     }
 }
