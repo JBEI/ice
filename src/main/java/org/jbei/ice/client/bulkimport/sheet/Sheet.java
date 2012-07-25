@@ -9,7 +9,15 @@ import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkImportInfo;
 import org.jbei.ice.shared.dto.EntryInfo;
 
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.ScrollEvent;
+import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.DOM;
@@ -245,22 +253,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
                         return;
                     }
                     switchToInput();
-                }
-            }
-        });
-
-        focusPanel.addBlurHandler(new BlurHandler() {
-
-            @Override
-            public void onBlur(BlurEvent event) {
-                if (lastReplaced != null)
-                    return;
-
-                if (currentIndex >= 0 && currentRow >= 0) {
-                    Widget widget = sheetTable.getWidget(currentRow, currentIndex);
-                    if (widget != null)
-                        widget.removeStyleName("cell_selected");
-                    currentRow = currentIndex = -1;
                 }
             }
         });
@@ -519,8 +511,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
         // if so then retrieve the text for the data and set it to the
         // label widget, and display that label widget
         if (lastReplaced != null) {
-            String inputText;
-            inputText = prevSelection.setDataForRow(inputRow);
+            String inputText = prevSelection.setDataForRow(inputRow);
 
             lastReplaced.setTitle(inputText);
             if (inputText != null && inputText.length() > 18)

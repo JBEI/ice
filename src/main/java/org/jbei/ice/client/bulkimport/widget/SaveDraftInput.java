@@ -17,10 +17,12 @@ public class SaveDraftInput extends Composite {
         saveDraftButton = new Button("Save Draft");
         saveDraftButton.setStyleName("saved_draft_button");
         inputName = new TextBox();
+        inputName.setMaxLength(36);
         inputName.setStyleName("saved_draft_input");
         FlexTable layout = new FlexTable();
         layout.setStyleName("display-inline");
-        String html = "<span id=\"save_draft_inputbox\"></span>&nbsp;<span id=\"save_draft_button\" style=\"float: right\"></span>";
+        String html = "<span id=\"save_draft_inputbox\"></span>&nbsp;<span id=\"save_draft_button\" style=\"float: " +
+                "right\"></span>";
         HTMLPanel panel = new HTMLPanel(html);
         panel.setStyleName("display-inline");
         initWidget(layout);
