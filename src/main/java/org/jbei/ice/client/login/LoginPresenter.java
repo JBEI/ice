@@ -1,9 +1,11 @@
 package org.jbei.ice.client.login;
 
 import org.jbei.ice.client.AbstractPresenter;
+import org.jbei.ice.client.IceAsyncCallback;
 import org.jbei.ice.client.Page;
 import org.jbei.ice.client.RegistryServiceAsync;
 import org.jbei.ice.client.event.LoginEvent;
+import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.client.util.Utils;
 import org.jbei.ice.shared.dto.AccountInfo;
 
@@ -14,6 +16,7 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -21,7 +24,7 @@ import com.google.gwt.user.client.ui.HasWidgets;
 /**
  * Presenter for the login page
  * Submits user entered login credentials to the server for validation
- * 
+ *
  * @author Hector Plahar
  */
 
@@ -30,7 +33,6 @@ public class LoginPresenter extends AbstractPresenter {
     private final RegistryServiceAsync service;
     private final HandlerManager eventBus;
     private final ILoginView display;
-    private Mode mode;
 
     public LoginPresenter(RegistryServiceAsync service, HandlerManager eventBus, ILoginView display) {
         this.service = service;
@@ -177,8 +179,8 @@ public class LoginPresenter extends AbstractPresenter {
     /**
      * actual creation of account when it has been determined that the unique aspect of the account
      * details (email) will remain unique
-     * 
-     * @param details
+     *
+     * @param details user registration information
      */
     private void saveNewAccount(RegistrationDetails details) {
         AccountInfo info = new AccountInfo();
@@ -194,7 +196,9 @@ public class LoginPresenter extends AbstractPresenter {
 
             @Override
             public void onFailure(Throwable caught) {
-                Window.alert("There was an error communicating with the server.\n\nPlease contact the site administrator if you repeatedly see this message");
+                Window.alert(
+                        "There was an error communicating with the server.\n\nPlease contact the site administrator " +
+                                "if you repeatedly see this message");
             }
 
             @Override
@@ -211,7 +215,6 @@ public class LoginPresenter extends AbstractPresenter {
 
         @Override
         public void onClick(ClickEvent event) {
-            mode = Mode.FORGOT_PASSWORD;
             display.switchToForgotPasswordMode();
             display.setSubmitClickHandler(new ClickHandler() {
 
@@ -244,45 +247,47 @@ public class LoginPresenter extends AbstractPresenter {
         });
     }
 
-    private void generateNewPasswordAndSend(String email) {
-        String url = GWT.getHostPageBaseURL() + "#" + Page.PROFILE.getLink();
-        try {
-            service.handleForgotPassword(email, url, new AsyncCallback<Boolean>() {
+    private void generateNewPasswordAndSend(final String email) {
+        final String url = GWT.getHostPageBaseURL() + "#" + Page.PROFILE.getLink();
 
-                @Override
-                public void onFailure(Throwable caught) {
-                }
+        new IceAsyncCallback<Boolean>() {
 
-                @Override
-                public void onSuccess(Boolean result) {
-                    if (result) {
-                        Window.alert("A new password has been emailed to you");
-                        display.switchToLoginMode();
-                    }
+            @Override
+            protected void callService(AsyncCallback<Boolean> callback) {
+                try {
+                    service.handleForgotPassword(email, url, callback);
+                } catch (AuthenticationException e) {
+                    History.newItem(Page.LOGIN.getLink());
                 }
-            });
-        } catch (org.jbei.ice.client.exception.AuthenticationException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+                if (result.booleanValue()) {
+                    Window.alert("A new password has been emailed to you");
+                    display.switchToLoginMode();
+                }
+            }
+        }.go(eventBus);
     }
 
     private class RegisterHandler implements ClickHandler {
         @Override
         public void onClick(ClickEvent event) {
-            mode = Mode.REGISTER;
             display.switchToRegisterMode(new ClickHandler() {
 
-                @Override
-                public void onClick(ClickEvent event) {
-                    createNewAccount(display.getRegistrationDetails());
-                }
-            }, new ClickHandler() {
+                                             @Override
+                                             public void onClick(ClickEvent event) {
+                                                 createNewAccount(display.getRegistrationDetails());
+                                             }
+                                         }, new ClickHandler() {
 
-                @Override
-                public void onClick(ClickEvent event) {
-                    display.switchToLoginMode();
-                }
-            });
+                                             @Override
+                                             public void onClick(ClickEvent event) {
+                                                 display.switchToLoginMode();
+                                             }
+                                         }
+                                        );
         }
     }
 
@@ -300,9 +305,5 @@ public class LoginPresenter extends AbstractPresenter {
         public void onClick(ClickEvent event) {
             login();
         }
-    }
-
-    private enum Mode {
-        FORGOT_PASSWORD, REGISTER;
     }
 }
