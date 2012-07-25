@@ -228,7 +228,6 @@ public class BulkImportPresenter extends AbstractPresenter {
 
         @Override
         public void onClick(ClickEvent event) {
-            // TODO : ask for confirmation
             currentInput.getSheet().clear();
         }
     }

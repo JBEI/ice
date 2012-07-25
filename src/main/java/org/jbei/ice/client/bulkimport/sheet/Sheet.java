@@ -291,6 +291,9 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
     @Override
     public void clear() {
+        if (!Window.confirm("This will clear all data. Continue?"))
+            return;
+
         for (int i = 0; i < sheetTable.getRowCount(); i += 1) {
             if (isEmptyRow(i))
                 continue;
@@ -299,7 +302,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
             Header[] headers = presenter.getTypeHeaders();
 
             for (int j = 0; j < FIELDS; j += 1) {
-                HasText widget = (HasText) sheetTable.getWidget(row, i);
+                HasText widget = (HasText) sheetTable.getWidget(i, j);
                 widget.setText("");
                 ((Widget) widget).setStyleName("cell");
                 headers[j].getCell().reset();
