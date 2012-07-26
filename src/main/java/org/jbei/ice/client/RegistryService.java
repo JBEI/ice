@@ -1,9 +1,10 @@
 package org.jbei.ice.client;
 
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.google.gwt.user.client.ui.SuggestOracle;
-import com.google.gwt.user.client.ui.SuggestOracle.Request;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+
 import org.jbei.ice.client.entry.view.model.SampleStorage;
 import org.jbei.ice.client.exception.AuthenticationException;
 import org.jbei.ice.shared.AutoCompleteField;
@@ -14,10 +15,10 @@ import org.jbei.ice.shared.QueryOperator;
 import org.jbei.ice.shared.dto.*;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
+import com.google.gwt.user.client.rpc.RemoteService;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.client.ui.SuggestOracle;
+import com.google.gwt.user.client.ui.SuggestOracle.Request;
 
 /**
  * The client side stub for the RPC service.
@@ -103,16 +104,16 @@ public interface RegistryService extends RemoteService {
 
     boolean updateEntry(String sid, EntryInfo info) throws AuthenticationException;
 
-    ArrayList<BulkImportInfo> retrieveUserSavedDrafts(String sid) throws AuthenticationException;
+    ArrayList<BulkUploadInfo> retrieveUserSavedDrafts(String sid) throws AuthenticationException;
 
-    BulkImportInfo retrieveBulkImport(String sid, long id) throws AuthenticationException;
+    BulkUploadInfo retrieveBulkImport(String sid, long id) throws AuthenticationException;
 
     FolderDetails deleteFolder(String sessionId, long folderId) throws AuthenticationException;
 
     SampleStorage createSample(String sessionId, SampleStorage sampleStorage, long entryId)
             throws AuthenticationException;
 
-    BulkImportInfo updateBulkImportDraft(String sessionId, long id, ArrayList<EntryInfo> list)
+    BulkUploadInfo updateBulkImportDraft(String sessionId, long id, ArrayList<EntryInfo> list)
             throws AuthenticationException;
 
     SuggestOracle.Response getPermissionSuggestions(Request req);
@@ -153,7 +154,7 @@ public interface RegistryService extends RemoteService {
     ArrayList<SequenceAnalysisInfo> deleteEntryTraceSequences(String sid, long entryId,
             ArrayList<String> seqId) throws AuthenticationException;
 
-    ArrayList<BulkImportInfo> retrieveDraftsPendingVerification(String sid) throws AuthenticationException;
+    ArrayList<BulkUploadInfo> retrieveDraftsPendingVerification(String sid) throws AuthenticationException;
 
     ArrayList<GroupInfo> retrieveAllGroups(String sessionId) throws AuthenticationException;
 
@@ -161,14 +162,14 @@ public interface RegistryService extends RemoteService {
 
     EntryInfo retrieveEntryTipDetails(String sessionId, long id) throws AuthenticationException;
 
-    BulkImportInfo deleteDraftPendingVerification(String sid, long draftId) throws AuthenticationException;
+    BulkUploadInfo deleteDraftPendingVerification(String sid, long draftId) throws AuthenticationException;
 
     ArrayList<FolderDetails> deleteEntry(String sessionId, EntryInfo info) throws AuthenticationException;
 
     ArrayList<Long> createStrainWithPlasmid(String sid, HashSet<EntryInfo> infoSet) throws
             AuthenticationException;
 
-    BulkImportInfo saveBulkImportDraft(String sid, String email, String name, EntryAddType importType,
+    BulkUploadInfo saveBulkImportDraft(String sid, String email, String name, EntryAddType importType,
             ArrayList<EntryInfo> entryList) throws AuthenticationException;
 
     boolean submitBulkImport(String sid, EntryAddType importType, ArrayList<EntryInfo> entryList)

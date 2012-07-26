@@ -12,16 +12,7 @@ import org.jbei.ice.shared.ColumnField;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.FolderDetails;
 import org.jbei.ice.shared.QueryOperator;
-import org.jbei.ice.shared.dto.AccountInfo;
-import org.jbei.ice.shared.dto.BlastResultInfo;
-import org.jbei.ice.shared.dto.BulkImportInfo;
-import org.jbei.ice.shared.dto.EntryInfo;
-import org.jbei.ice.shared.dto.EntryType;
-import org.jbei.ice.shared.dto.GroupInfo;
-import org.jbei.ice.shared.dto.NewsItem;
-import org.jbei.ice.shared.dto.SampleInfo;
-import org.jbei.ice.shared.dto.SearchFilterInfo;
-import org.jbei.ice.shared.dto.SequenceAnalysisInfo;
+import org.jbei.ice.shared.dto.*;
 import org.jbei.ice.shared.dto.permission.PermissionInfo;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -79,14 +70,14 @@ public interface RegistryServiceAsync {
     void retrieveSampleInfo(String sid, LinkedList<Long> sampleIds, ColumnField sortField,
             boolean asc, AsyncCallback<LinkedList<SampleInfo>> callback);
 
-    void retrieveUserSavedDrafts(String sid, AsyncCallback<ArrayList<BulkImportInfo>> callback)
+    void retrieveUserSavedDrafts(String sid, AsyncCallback<ArrayList<BulkUploadInfo>> callback)
             throws AuthenticationException;
 
     void retrieveDraftsPendingVerification(String sid,
-            AsyncCallback<ArrayList<BulkImportInfo>> callback) throws AuthenticationException;
+            AsyncCallback<ArrayList<BulkUploadInfo>> callback) throws AuthenticationException;
 
     void deleteDraftPendingVerification(String sid, long draftId,
-            AsyncCallback<BulkImportInfo> callback) throws AuthenticationException;
+            AsyncCallback<BulkUploadInfo> callback) throws AuthenticationException;
 
     void createSample(String sessionId, SampleStorage sampleStorage, long entryId,
             AsyncCallback<SampleStorage> callback) throws AuthenticationException;
@@ -137,13 +128,13 @@ public interface RegistryServiceAsync {
 
     // bulk import and draft
 
-    void retrieveBulkImport(String sid, long id, AsyncCallback<BulkImportInfo> callback)
+    void retrieveBulkImport(String sid, long id, AsyncCallback<BulkUploadInfo> callback)
             throws AuthenticationException;
 
     void deleteFolder(String sessionId, long folderId, AsyncCallback<FolderDetails> callback);
 
     void updateBulkImportDraft(String sessionId, long id, ArrayList<EntryInfo> list,
-            AsyncCallback<BulkImportInfo> asyncCallback) throws AuthenticationException;
+            AsyncCallback<BulkUploadInfo> asyncCallback) throws AuthenticationException;
 
     void addPermission(String sessionId, long entryId, PermissionInfo permission,
             AsyncCallback<Boolean> callback) throws AuthenticationException;
@@ -202,7 +193,7 @@ public interface RegistryServiceAsync {
             AsyncCallback<FolderDetails> async) throws AuthenticationException;
 
     void saveBulkImportDraft(String sid, String email, String name, EntryAddType importType,
-            ArrayList<EntryInfo> entryList, AsyncCallback<BulkImportInfo> async)
+            ArrayList<EntryInfo> entryList, AsyncCallback<BulkUploadInfo> async)
             throws AuthenticationException;
 
     void submitBulkImport(String sid, EntryAddType importType, ArrayList<EntryInfo> entryList,

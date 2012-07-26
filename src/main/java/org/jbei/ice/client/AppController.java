@@ -1,19 +1,14 @@
 package org.jbei.ice.client;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.user.client.Cookies;
-import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HasWidgets;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+
 import org.jbei.ice.client.admin.AdminPresenter;
 import org.jbei.ice.client.admin.AdminView;
-import org.jbei.ice.client.bulkimport.BulkImportPresenter;
-import org.jbei.ice.client.bulkimport.BulkImportView;
-import org.jbei.ice.client.bulkimport.model.BulkImportModel;
+import org.jbei.ice.client.bulkupload.BulkUploadPresenter;
+import org.jbei.ice.client.bulkupload.BulkUploadView;
+import org.jbei.ice.client.bulkupload.model.BulkUploadModel;
 import org.jbei.ice.client.collection.model.CollectionsModel;
 import org.jbei.ice.client.collection.presenter.CollectionsPresenter;
 import org.jbei.ice.client.collection.presenter.EntryContext;
@@ -40,9 +35,15 @@ import org.jbei.ice.shared.AutoCompleteField;
 import org.jbei.ice.shared.dto.AccountInfo;
 import org.jbei.ice.shared.dto.SearchFilterInfo;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.Cookies;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HasWidgets;
 
 // TODO : this class is due for a makeover
 public class AppController extends AbstractPresenter implements ValueChangeHandler<String> {
@@ -255,10 +256,10 @@ public class AppController extends AbstractPresenter implements ValueChangeHandl
                 break;
 
             case BULK_IMPORT:
-                BulkImportModel model = new BulkImportModel(this.service, this.eventBus);
-                BulkImportView importView = new BulkImportView();
-                addHeaderSearchHandler(importView);
-                presenter = new BulkImportPresenter(model, importView);
+                BulkUploadModel model = new BulkUploadModel(this.service, this.eventBus);
+                BulkUploadView uploadView = new BulkUploadView();
+                addHeaderSearchHandler(uploadView);
+                presenter = new BulkUploadPresenter(model, uploadView);
                 break;
 
             case NEWS:

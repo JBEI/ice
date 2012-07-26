@@ -1,86 +1,86 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
         "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
-	<hibernate-configuration>
-		<session-factory>
-        	<property name="hibernate.connection.url">jdbc:postgresql://localhost/test_registry</property>
-        	<property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
-        	<property name="hibernate.connection.username">test_user</property>
-        	<property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
-        	<property name="hibernate.connection.password">t@stuz@r</property>
-		
-		<!-- The settings below uses a file based database with some example test data. 
-		<property name="hibernate.connection.url">jdbc:hsqldb:file:src/test/java/example_db/example_db</property>
-		<property name="hibernate.connection.driver_class">org.hsqldb.jdbcDriver</property>
-		<property name="hibernate.connection.username">sa</property>
-		<property name="hibernate.dialect">org.hibernate.dialect.HSQLDialect</property>
-		 -->
-		 
-		<!-- The setting below uses a memory based database. 
-		 <property name="hibernate.connection.url">jdbc:hsqldb:mem:ice</property>
-		<property name="hibernate.connection.driver_class">org.hsqldb.jdbcDriver</property>
-		<property name="hibernate.connection.username">sa</property>
-		<property name="hibernate.dialect">org.hibernate.dialect.HSQLDialect</property>
-		-->
-		<property name="hibernate.connection.pool_size">3</property>
-		<property name="hibernate.c3p0.min_size">3</property>
-		<property name="hibernate.c3p0.max_size">15</property>
-		<property name="hibernate.c3p0.timeout">20</property>
-		<property name="hibernate.c3p0.max_statements">10</property>
-		
-		<!--
-			Use below when table rearrangement is needed:  "create" or "update".
-			Normally, it should be "validate"
-		-->
-		<property name="hbm2ddl.auto">update</property>
-		<!-- this will show us all sql statements -->
-		<property name="hibernate.show_sql">false</property>
-		<!-- mapping files -->
-		<mapping class="org.jbei.ice.lib.entry.model.Entry" />
-		<mapping class="org.jbei.ice.lib.entry.model.Plasmid" />
-		<mapping class="org.jbei.ice.lib.entry.model.Strain" />
-		<mapping class="org.jbei.ice.lib.entry.model.Part" />
-		<mapping class="org.jbei.ice.lib.entry.model.ArabidopsisSeed" />
-		<mapping class="org.jbei.ice.lib.entry.model.Name" />
-        	<mapping class="org.jbei.ice.lib.entry.model.PartNumber"/>
-		<mapping class="org.jbei.ice.lib.entry.model.Link" />
-		<mapping class="org.jbei.ice.lib.models.SelectionMarker" />
-		<mapping class="org.jbei.ice.lib.models.Sequence" />
-		<mapping class="org.jbei.ice.lib.models.Feature" />
-		<mapping class="org.jbei.ice.lib.models.FeatureFeatureRelationship" />
-		<mapping class="org.jbei.ice.lib.models.FeatureRelationship" />
-		<mapping class="org.jbei.ice.lib.models.SequenceFeature" />
-		<mapping class="org.jbei.ice.lib.models.SequenceFeatureAttribute" />
-		<mapping class="org.jbei.ice.lib.models.AssemblyRelationship" />
-		<mapping class="org.jbei.ice.lib.entry.model.EntryAssemblyRelationship" />
-		<mapping class="org.jbei.ice.lib.models.Comment" />
-		<mapping class="org.jbei.ice.lib.models.News" />
-		<mapping class="org.jbei.ice.lib.account.model.Account" />
-		<mapping class="org.jbei.ice.lib.account.model.AccountEntryRelationship" />
-		<mapping class="org.jbei.ice.lib.entry.attachment.Attachment" />
-		<mapping class="org.jbei.ice.lib.entry.sample.model.Sample" />
-		<mapping class="org.jbei.ice.lib.models.Label" />
-		<mapping class="org.jbei.ice.lib.entry.model.EntryLabel" />
-        	<mapping class="org.jbei.ice.lib.account.model.AccountPreferences"/>
-		<mapping class="org.jbei.ice.lib.models.Group" />
-        	<mapping class="org.jbei.ice.lib.permissions.model.ReadUser"/>
-        	<mapping class="org.jbei.ice.lib.permissions.model.WriteUser"/>
-       	 	<mapping class="org.jbei.ice.lib.permissions.model.ReadGroup"/>
-        	<mapping class="org.jbei.ice.lib.permissions.model.WriteGroup"/>
-		<mapping class="org.jbei.ice.lib.models.FundingSource" />
-		<mapping class="org.jbei.ice.lib.entry.model.EntryFundingSource" />
-		<mapping class="org.jbei.ice.lib.account.model.AccountFundingSource" />
-		<mapping class="org.jbei.ice.lib.models.SessionData" />
-		<mapping class="org.jbei.ice.lib.models.Moderator" />
-		<mapping class="org.jbei.ice.lib.models.TraceSequence" />
-		<mapping class="org.jbei.ice.lib.models.TraceSequenceAlignment" />
-		<mapping class="org.jbei.ice.lib.models.Workspace" />
-		<mapping class="org.jbei.ice.lib.models.Project" />
-		<mapping class="org.jbei.ice.lib.models.Configuration" />
-		<mapping class="org.jbei.ice.lib.models.Storage" />
-		<mapping class="org.jbei.ice.lib.folder.Folder" />
-		<mapping class="org.jbei.ice.lib.entry.model.Parameter" />
-		<mapping class="org.jbei.ice.lib.models.AnnotationLocation" />
-        	<mapping class="org.jbei.ice.lib.bulkimport.BulkImportDraft"/>
-	</session-factory>
+<hibernate-configuration>
+    <session-factory>
+        <property name="hibernate.connection.url">jdbc:postgresql://localhost/test_registry</property>
+        <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+        <property name="hibernate.connection.username">test_user</property>
+        <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+        <property name="hibernate.connection.password">t@stuz@r</property>
+
+        <!-- The settings below uses a file based database with some example test data.
+          <property name="hibernate.connection.url">jdbc:hsqldb:file:src/test/java/example_db/example_db</property>
+          <property name="hibernate.connection.driver_class">org.hsqldb.jdbcDriver</property>
+          <property name="hibernate.connection.username">sa</property>
+          <property name="hibernate.dialect">org.hibernate.dialect.HSQLDialect</property>
+           -->
+
+        <!-- The setting below uses a memory based database.
+           <property name="hibernate.connection.url">jdbc:hsqldb:mem:ice</property>
+          <property name="hibernate.connection.driver_class">org.hsqldb.jdbcDriver</property>
+          <property name="hibernate.connection.username">sa</property>
+          <property name="hibernate.dialect">org.hibernate.dialect.HSQLDialect</property>
+          -->
+        <property name="hibernate.connection.pool_size">3</property>
+        <property name="hibernate.c3p0.min_size">3</property>
+        <property name="hibernate.c3p0.max_size">15</property>
+        <property name="hibernate.c3p0.timeout">20</property>
+        <property name="hibernate.c3p0.max_statements">10</property>
+
+        <!--
+              Use below when table rearrangement is needed:  "create" or "update".
+              Normally, it should be "validate"
+          -->
+        <property name="hbm2ddl.auto">update</property>
+        <!-- this will show us all sql statements -->
+        <property name="hibernate.show_sql">false</property>
+        <!-- mapping files -->
+        <mapping class="org.jbei.ice.lib.entry.model.Entry"/>
+        <mapping class="org.jbei.ice.lib.entry.model.Plasmid"/>
+        <mapping class="org.jbei.ice.lib.entry.model.Strain"/>
+        <mapping class="org.jbei.ice.lib.entry.model.Part"/>
+        <mapping class="org.jbei.ice.lib.entry.model.ArabidopsisSeed"/>
+        <mapping class="org.jbei.ice.lib.entry.model.Name"/>
+        <mapping class="org.jbei.ice.lib.entry.model.PartNumber"/>
+        <mapping class="org.jbei.ice.lib.entry.model.Link"/>
+        <mapping class="org.jbei.ice.lib.models.SelectionMarker"/>
+        <mapping class="org.jbei.ice.lib.models.Sequence"/>
+        <mapping class="org.jbei.ice.lib.models.Feature"/>
+        <mapping class="org.jbei.ice.lib.models.FeatureFeatureRelationship"/>
+        <mapping class="org.jbei.ice.lib.models.FeatureRelationship"/>
+        <mapping class="org.jbei.ice.lib.models.SequenceFeature"/>
+        <mapping class="org.jbei.ice.lib.models.SequenceFeatureAttribute"/>
+        <mapping class="org.jbei.ice.lib.models.AssemblyRelationship"/>
+        <mapping class="org.jbei.ice.lib.entry.model.EntryAssemblyRelationship"/>
+        <mapping class="org.jbei.ice.lib.models.Comment"/>
+        <mapping class="org.jbei.ice.lib.models.News"/>
+        <mapping class="org.jbei.ice.lib.account.model.Account"/>
+        <mapping class="org.jbei.ice.lib.account.model.AccountEntryRelationship"/>
+        <mapping class="org.jbei.ice.lib.entry.attachment.Attachment"/>
+        <mapping class="org.jbei.ice.lib.entry.sample.model.Sample"/>
+        <mapping class="org.jbei.ice.lib.models.Label"/>
+        <mapping class="org.jbei.ice.lib.entry.model.EntryLabel"/>
+        <mapping class="org.jbei.ice.lib.account.model.AccountPreferences"/>
+        <mapping class="org.jbei.ice.lib.models.Group"/>
+        <mapping class="org.jbei.ice.lib.permissions.model.ReadUser"/>
+        <mapping class="org.jbei.ice.lib.permissions.model.WriteUser"/>
+        <mapping class="org.jbei.ice.lib.permissions.model.ReadGroup"/>
+        <mapping class="org.jbei.ice.lib.permissions.model.WriteGroup"/>
+        <mapping class="org.jbei.ice.lib.models.FundingSource"/>
+        <mapping class="org.jbei.ice.lib.entry.model.EntryFundingSource"/>
+        <mapping class="org.jbei.ice.lib.account.model.AccountFundingSource"/>
+        <mapping class="org.jbei.ice.lib.models.SessionData"/>
+        <mapping class="org.jbei.ice.lib.models.Moderator"/>
+        <mapping class="org.jbei.ice.lib.models.TraceSequence"/>
+        <mapping class="org.jbei.ice.lib.models.TraceSequenceAlignment"/>
+        <mapping class="org.jbei.ice.lib.models.Workspace"/>
+        <mapping class="org.jbei.ice.lib.models.Project"/>
+        <mapping class="org.jbei.ice.lib.models.Configuration"/>
+        <mapping class="org.jbei.ice.lib.models.Storage"/>
+        <mapping class="org.jbei.ice.lib.folder.Folder"/>
+        <mapping class="org.jbei.ice.lib.entry.model.Parameter"/>
+        <mapping class="org.jbei.ice.lib.models.AnnotationLocation"/>
+        <mapping class="org.jbei.ice.lib.bulkupload.BulkUpload"/>
+    </session-factory>
 </hibernate-configuration>
