@@ -1,17 +1,5 @@
 package org.jbei.ice.lib.entry.model;
 
-import com.google.common.base.Objects;
-import org.hibernate.annotations.Cascade;
-import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.models.SelectionMarker;
-import org.jbei.ice.lib.models.interfaces.IEntryValueObject;
-import org.jbei.ice.lib.utils.JbeiConstants;
-import org.jbei.ice.lib.utils.JbeirSettings;
-import org.jbei.ice.shared.dto.Visibility;
-
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -19,6 +7,19 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.persistence.*;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
+import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.models.SelectionMarker;
+import org.jbei.ice.lib.models.interfaces.IEntryValueObject;
+import org.jbei.ice.lib.utils.JbeiConstants;
+import org.jbei.ice.lib.utils.JbeirSettings;
+import org.jbei.ice.shared.dto.Visibility;
+
+import com.google.common.base.Objects;
+import org.hibernate.annotations.Cascade;
 
 /**
  * Entry class is the most important class in gd-ice. Other record types extend this class.
@@ -35,7 +36,8 @@ import java.util.Set;
  * <p/>
  * <ul> <li><b>id:</b> database id of an entry.</li> <li><b>recordId:</b> 36 character globally unique identifier.
  * Implemented as UUIDv4.</li> <li><b>versionId:</b> 36 character globally unique identifier.</li>
- * <li><b>recordType:</b> The type of record. Currently there are plasmids, strains, arabidopsis seeds, and parts. Parts
+ * <li><b>recordType:</b> The type of record. Currently there are plasmids, strains, arabidopsis seeds, and parts.
+ * Parts
  * represent linear DNA in a packaging format, such as Biobricks, or raw DNA for ligationless assembly.</li>
  * <li><b>owner:</b> Owner is the person that has complete read and write access to a part. This field is the user
  * friendly string, such as their full name, and is not used by the system for identification and association. See
@@ -48,7 +50,8 @@ import java.util.Set;
  * this entry. If the entry came from somewhere else, or was entered into this instance of gd-ice by someone other than
  * the creator, then the owner and the creator fields would be different. This field is the user friendly string, such
  * as their full name, and is not used by the system for identification and association.</li> <li><b>creatorEmail:</b>
- * Email address of the creator. For some very old entries, or entries that came from a third party, email address maybe
+ * Email address of the creator. For some very old entries, or entries that came from a third party, email address
+ * maybe
  * empty.</li> <li><b>alias:</b> Comma separated list of alias names.</li> <li><b>keywords:</b> Comma separated list of
  * keywords.</li> <li><b>status:</b> Status of this entry. Currently the options are complete, in progress, or planned.
  * This field in the future should be used to filter search results.</li> <li><b>shortDescription:</b> A summary of the
@@ -56,11 +59,14 @@ import java.util.Set;
  * <li><b>longDescription:</b> Longer description for the entry. Details that are not part of the summary description
  * should be placed in this field. This field accepts markup text of different styles. see longDescriptionType</li>
  * <li><b>longDescriptionType: Markup syntax used for long description. Currently plain text, mediawiki, and confluence
- * markup syntax is supported.</b>/ <li> <li><b>references:</b> References for this entry.</li> <li><b>creationTime:</b>
+ * markup syntax is supported.</b>/ <li> <li><b>references:</b> References for this entry.</li>
+ * <li><b>creationTime:</b>
  * Timestamp of creation of this entry.</li> <li><b>modificationTime:</b> Timestamp of last modification of this
- * entry.</li> <li><b>bioSafetyLevel:</b> The biosafety level of this entry. In the future, this field will propagate to
+ * entry.</li> <li><b>bioSafetyLevel:</b> The biosafety level of this entry. In the future, this field will propagate
+ * to
  * other entries, so that a strain entry holding a higher level bioSafetyLevel plasmid entry will inherit the higher
- * bioSafetyLevel.</li> <li><b>intellectualProperty:</b> Information about intellectual property (patent filing numbers,
+ * bioSafetyLevel.</li> <li><b>intellectualProperty:</b> Information about intellectual property (patent filing
+ * numbers,
  * etc) for this entry.</li> <li><b>selectionMarkers:</b> {@link org.jbei.ice.lib.models.SelectionMarker}s for this
  * entry. In the future, this field will propagate to other entries based on inheritance.</li> <li><b>links:</b> URL or
  * other links that point outside of this instance of gd-ice.</li> <lli><b>names: </b> {@link Name}s for this
@@ -76,17 +82,6 @@ import java.util.Set;
 @XmlRootElement
 public class Entry implements IEntryValueObject, IModel {
     private static final long serialVersionUID = 1L;
-
-    //TODO actually use these types
-
-    /**
-     * Mark up types for longDescription.
-     *
-     * @author Timothy Ham
-     */
-    public enum MarkupType {
-        text, wiki, confluence
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence")
