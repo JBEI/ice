@@ -203,6 +203,25 @@ body {
     cursor: pointer;
 }
 
+.x-delete {
+    font-size: 10px;
+    font-family: Arial, sans-serif;
+    color: #CC3333;
+    font-weight: bold;
+    padding: 0 5px;
+}
+
+.x-delete:hover {
+    font-size: 10px;
+    font-family: Arial, sans-serif;
+    border-radius: 1em 1em 1em 1em;
+    color: #ffffff;
+    padding: 0 5px;
+    font-weight: bold;
+    background-color: #CC3333;
+    cursor: pointer;
+}
+
 .entry_delete_link:hover {
     color: #9EC068;
 }

@@ -70,6 +70,10 @@ public abstract class SheetCell {
         return rowValues.get(row);
     }
 
+    public SheetCellData removeDataForRow(int row) {
+        return rowValues.remove(row);
+    }
+
     /**
      * This attempts to get around the issue of fileinput setting their own data
      * on file upload and inputcell relying on Sheet.java to set the data when a user clicks on another cell
@@ -85,11 +89,9 @@ public abstract class SheetCell {
      * it does not do anything. subclasses that wish to do some something special
      * when a user selects a cell should sub-class and return true after specialization code
      *
-     * @param row selection row
-     * @param col selection column
      * @return true if cell handles selection, false otherwise
      */
-    public boolean cellSelected(int row, int col) {
+    public boolean handlesSelection() {
         return false;
     }
 

@@ -59,7 +59,7 @@ public class Sheet extends Composite implements SheetPresenter.View {
     private SheetCell newCellSelection;
     private boolean cellHasFocus;
 
-    public final static int ROW_COUNT = 50;
+    public final static int ROW_COUNT = 5;
 
     public Sheet(EntryAddType type) {
         this(type, null);
@@ -180,7 +180,6 @@ public class Sheet extends Composite implements SheetPresenter.View {
         DOM.setStyleAttribute(colIndexWrapper.getElement(), "overflowY", "hidden");
         DOM.setStyleAttribute(colIndexWrapper.getElement(), "overflowX", "hidden");
 
-
         // get header
         layout.setWidget(0, 0, headerWrapper);
         layout.getFlexCellFormatter().setColSpan(0, 0, 2);
@@ -199,18 +198,8 @@ public class Sheet extends Composite implements SheetPresenter.View {
         while (count > 0) {
 
             presenter.addRow(row);
-
             // index col
             HTML indexCell = new HTML(i + "");
-//            indexCell.addMouseDownHandler(new MouseDownHandler() {
-//                @Override
-//                public void onMouseDown(MouseDownEvent event) {
-//                    int event.getClientX();
-//                }
-//            });
-
-            // TODO : right click menu here
-
             colIndex.setWidget(row, 0, indexCell);
             indexCell.setStyleName("index_cell");
             colIndex.getFlexCellFormatter().setStyleName(row, 0, "index_td_cell");
@@ -529,12 +518,11 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         // now deal with current selection
         // check if cell handles selection
-        if (newCellSelection.cellSelected(newRow, newCol)) {
+        if (newCellSelection.handlesSelection()) {
             inputIndex = newCol;
             inputRow = newRow;
             Widget widget = newCellSelection.getWidget(newRow, true);
             sheetTable.setWidget(newRow, newCol, widget);
-
         } else {
             Widget cellWidget = sheetTable.getWidget(newRow, newCol);
             cellWidget.addStyleName("cell_selected");

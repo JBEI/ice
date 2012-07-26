@@ -5,8 +5,11 @@ import org.jbei.ice.client.common.util.ImageUtil;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.DomEvent;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import gwtupload.client.IFileInput;
 import gwtupload.client.IUploadStatus;
@@ -20,14 +23,25 @@ public class CellUploader implements IsWidget {
 
     private final SingleUploader uploader;
     private Image fileUploadImg;
+    private HorizontalPanel panel;
+    private HandlerRegistration finishUploadRegistration;
 
     public CellUploader() {
         fileUploadImg = ImageUtil.getFileUpload();
         fileUploadImg.setHeight((fileUploadImg.getHeight() - 2) + "px");
         fileUploadImg.setStyleName("cursor_pointer");
 
+        panel = new HorizontalPanel();
+        panel.setWidth("100%");
+
         final FileUploadStatus uploaderStatus = new FileUploadStatus();
-        uploader = new SingleUploader(IFileInput.FileInputType.CUSTOM.with(fileUploadImg), uploaderStatus);
+        uploader = new SingleUploader(IFileInput.FileInputType.CUSTOM.with(fileUploadImg), uploaderStatus) {
+            @Override
+            public Panel getUploaderPanel() {
+                return panel;
+            }
+        };
+
         uploader.setAutoSubmit(true);
         uploader.getWidget().setStyleName("uploader_cell_selected");
 
@@ -59,11 +73,32 @@ public class CellUploader implements IsWidget {
     }
 
     public void addOnFinishUploadHandler(IUploader.OnFinishUploaderHandler onFinishUploaderHandler) {
-        uploader.addOnFinishUploadHandler(onFinishUploaderHandler);
+        if (finishUploadRegistration != null)
+            finishUploadRegistration.removeHandler();
+        finishUploadRegistration = uploader.addOnFinishUploadHandler(onFinishUploaderHandler);
     }
 
     @Override
     public Widget asWidget() {
         return uploader.getWidget();
+    }
+
+    public void setPanelWidget(final Widget widget) {
+        panel.clear();
+        panel.add(uploader.getForm());
+        panel.add(widget);
+    }
+
+    public void resetPanelWidget() {
+        panel.clear();
+        panel.add(uploader.getForm());
+    }
+
+    public void reset() {
+        uploader.reset();
+    }
+
+    public HorizontalPanel getPanel() {
+        return this.panel;
     }
 }

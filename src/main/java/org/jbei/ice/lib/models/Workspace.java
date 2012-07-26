@@ -1,10 +1,10 @@
 package org.jbei.ice.lib.models;
 
+import javax.persistence.*;
+
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.IModel;
 import org.jbei.ice.lib.entry.model.Entry;
-
-import javax.persistence.*;
 
 /**
  * Store view history information about an {@link org.jbei.ice.lib.entry.model.Entry}.
@@ -14,6 +14,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "workspace")
 @SequenceGenerator(name = "sequence", sequenceName = "workspace_id_seq", allocationSize = 1)
+@Deprecated
 public class Workspace implements IModel {
 
     private static final long serialVersionUID = 1L;

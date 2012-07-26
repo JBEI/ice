@@ -1,5 +1,12 @@
 package org.jbei.ice.client.entry.view.view;
 
+import java.util.ArrayList;
+
+import org.jbei.ice.client.AppController;
+import org.jbei.ice.client.common.util.ImageUtil;
+import org.jbei.ice.client.entry.view.HasAttachmentDeleteHandler;
+import org.jbei.ice.client.entry.view.view.AttachmentListMenuPresenter.IAttachmentListMenuView;
+
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasMouseOutHandlers;
 import com.google.gwt.event.dom.client.HasMouseOverHandlers;
@@ -20,12 +27,6 @@ import gwtupload.client.IUploader.OnStartUploaderHandler;
 import gwtupload.client.IUploader.OnStatusChangedHandler;
 import gwtupload.client.IUploader.UploadedInfo;
 import gwtupload.client.SingleUploader;
-import org.jbei.ice.client.AppController;
-import org.jbei.ice.client.common.util.ImageUtil;
-import org.jbei.ice.client.entry.view.HasAttachmentDeleteHandler;
-import org.jbei.ice.client.entry.view.view.AttachmentListMenuPresenter.IAttachmentListMenuView;
-
-import java.util.ArrayList;
 
 /**
  * Widget that displays list of entry attachments in the entry detail view. Allows user to download and also upload an
@@ -219,7 +220,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
                     attachmentDescription.setVisible(true);
                     uploader.reset();
                 } else {
-                    // TODO : notify user of error
+                    Window.alert("Upload failed");
                 }
 
                 attachmentDescription.setVisible(true);
@@ -261,7 +262,7 @@ public class AttachmentListMenu extends Composite implements IAttachmentListMenu
             String description = (item.getDescription() == null || item.getDescription()
                                                                        .isEmpty()) ? "No description provided"
                     : item.getDescription();
-            String html = "<span class=\"collection_user_menu\"><span id=\"attachment_file_name\"></style>"
+            String html = "<span class=\"collection_user_menu\"><span id=\"attachment_file_name\"></span>"
                     + "<span id=\"delete_link\" style=\"cursor: pointer; float: right\"></span></span><br>";
 
             if (description.length() > 163)
