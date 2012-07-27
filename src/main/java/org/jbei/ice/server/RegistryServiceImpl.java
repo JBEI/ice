@@ -1269,7 +1269,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public BulkUploadInfo saveBulkImportDraft(String sid, String email, String name,
+    public BulkUploadInfo saveBulkImportDraft(String sid, String name,
             EntryAddType importType, ArrayList<EntryInfo> entryList) throws AuthenticationException {
 
         try {
@@ -1278,7 +1278,7 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
                 return null;
 
             BulkUploadController controller = new BulkUploadController();
-            return controller.createBulkImportDraft(account, account, importType, name, entryList);
+            return controller.createBulkImportDraft(account, importType, name, entryList);
         } catch (ControllerException e) {
             Logger.error(e);
             return null;
@@ -1299,9 +1299,34 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
             BulkUploadController controller = new BulkUploadController();
             return controller.submitBulkImport(account, importType, entryList);
 
-            // TODO : delete bulk import draft
+        } catch (ControllerException ce) {
+            Logger.error(ce);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean approvePendingBulkImport(String sessionId, long id, ArrayList<EntryInfo> entryList)
+            throws AuthenticationException {
+        try {
+            Account account = retrieveAccountForSid(sessionId);
+            if (entryList.isEmpty())
+                return false;
+
+            AccountController accountController = new AccountController();
+            if (!accountController.isAdministrator(account)) {
+                Logger.error(account.getEmail() + ": non-admin attempt to approve bulk upload");
+                return false;
+            }
+
+            Logger.info(account.getEmail() + ": approving bulk import with id \"" + id + "\"");
+            BulkUploadController controller = new BulkUploadController();
+            return controller.approveBulkImport(account, id, entryList);
 
         } catch (ControllerException ce) {
+            Logger.error(ce);
+            return false;
+        } catch (PermissionException ce) {
             Logger.error(ce);
             return false;
         }

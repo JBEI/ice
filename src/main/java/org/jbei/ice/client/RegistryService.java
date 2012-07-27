@@ -169,9 +169,12 @@ public interface RegistryService extends RemoteService {
     ArrayList<Long> createStrainWithPlasmid(String sid, HashSet<EntryInfo> infoSet) throws
             AuthenticationException;
 
-    BulkUploadInfo saveBulkImportDraft(String sid, String email, String name, EntryAddType importType,
+    BulkUploadInfo saveBulkImportDraft(String sid, String name, EntryAddType importType,
             ArrayList<EntryInfo> entryList) throws AuthenticationException;
 
     boolean submitBulkImport(String sid, EntryAddType importType, ArrayList<EntryInfo> entryList)
+            throws AuthenticationException;
+
+    boolean approvePendingBulkImport(String sessionId, long id, ArrayList<EntryInfo> entryList)
             throws AuthenticationException;
 }

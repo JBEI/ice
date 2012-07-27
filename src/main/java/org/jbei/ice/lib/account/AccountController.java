@@ -154,8 +154,7 @@ public class AccountController {
     public Account createAdminAccount(String adminAccountEmail, String adminPassword)
             throws ControllerException {
         if (getByEmail(adminAccountEmail) != null) {
-            throw new ControllerException("Account with email \"" + adminAccountEmail
-                                                  + "\" already exists");
+            throw new ControllerException("Account with email \"" + adminAccountEmail + "\" already exists");
         }
 
         Account adminAccount = new Account();
@@ -174,7 +173,7 @@ public class AccountController {
         adminAccount.setModificationTime(currentTime);
         adminAccount.setLastLoginTime(currentTime);
         adminAccount.setType(AccountType.ADMIN);
-        return adminAccount;
+        return save(adminAccount);
     }
 
     /**

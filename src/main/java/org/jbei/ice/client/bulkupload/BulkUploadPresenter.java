@@ -60,6 +60,8 @@ public class BulkUploadPresenter extends AbstractPresenter {
     }
 
     private void setClickHandlers() {
+
+        // draft update
         SheetDraftUpdateHandler handler = new SheetDraftUpdateHandler();
         view.setDraftUpdateHandler(handler);
 
@@ -74,6 +76,10 @@ public class BulkUploadPresenter extends AbstractPresenter {
         // draft save
         SheetDraftSaveHandler draftSaveHandler = new SheetDraftSaveHandler();
         view.setDraftSaveHandler(draftSaveHandler);
+
+        // approve
+        BulkUploadApproveHandler approveHandler = new BulkUploadApproveHandler();
+        view.setApproveHandler(approveHandler);
     }
 
     private void addToggleMenuHandler() {
@@ -118,7 +124,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     // header Panel 
                     sheetCache.put(selection, currentInput);
                 }
-                view.setSheet(currentInput, true);
+                view.setSheet(currentInput, true, false);
                 view.setHeader(selection.getDisplay() + " Bulk Import");
                 view.setDraftMenuVisibility(false, false);
                 createSelection.setSelected(selection, false);
@@ -223,6 +229,39 @@ public class BulkUploadPresenter extends AbstractPresenter {
         }
     }
 
+    private class BulkUploadApproveHandler implements ClickHandler {
+
+        @Override
+        public void onClick(ClickEvent event) {
+            boolean isValid = currentInput.getSheet().validate();
+            if (!isValid) {
+                view.showFeedback("Please correct validation errors", true);
+                return;
+            }
+
+            ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(
+                    AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName());
+            if (cellData == null || cellData.isEmpty()) {
+                view.showFeedback("Please enter data into the sheet before submitting", true);
+                return;
+            }
+
+            model.approvePendingBulkImport(currentInput.getId(), cellData,
+                                           new BulkUploadSubmitEventHandler() {
+
+                                               @Override
+                                               public void onSubmit(BulkUploadSubmitEvent event) {
+                                                   if (event.isSuccess()) {
+                                                       view.showFeedback("Entries approved successfully", false);
+                                                       History.newItem(Page.COLLECTIONS.getLink());
+                                                   } else {
+                                                       view.showFeedback("Error approve bulk import.", true);
+                                                   }
+                                               }
+                                           });
+        }
+    }
+
     private class SheetResetHandler implements ClickHandler {
 
         @Override
@@ -274,7 +313,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                                 currentInput.setId(info.getId());
                                 currentInput.getSheet().setCurrentInfo(info);
 
-                                view.setSheet(currentInput, false);
+                                view.setSheet(currentInput, false, false);
                                 view.setHeader(currentInput.getImportType().getDisplay()
                                                        + " Bulk Import");
                             }
@@ -354,7 +393,7 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     }
                     currentInput.setName(name);
 
-                    view.setSheet(currentInput, false);
+                    view.setSheet(currentInput, false, true);
                     view.setHeader(info.getType().getDisplay() + " Bulk Import");
                     view.setDraftMenuVisibility(false, false);
                 }

@@ -59,25 +59,25 @@ public class EntryController {
      * @param addPublicRead make entry readable by the public. The current notion of public is a single per-site group.
      *                      This is currently maintained for legacy reasons but will be changed in the near future
      * @return entry that was saved in the database.
-     * @throws ControllerException
+     * @throws ControllerException // TODO : visibility should be a parameter
      */
     public Entry createEntry(Account account, Entry entry, boolean addPublicRead) throws ControllerException {
         return createEntry(account, entry, true, addPublicRead);
     }
 
-    public HashSet<Entry> createStrainWithPlasmid(Account account, Strain strain, Plasmid plasmid, boolean makePublic)
+    public HashSet<Entry> createStrainWithPlasmid(Account account, Entry strain, Entry plasmid, boolean makePublic)
             throws ControllerException {
 
         HashSet<Entry> results = new HashSet<Entry>();
 
-        plasmid = (Plasmid) createEntry(account, plasmid, makePublic);
+        plasmid = createEntry(account, plasmid, makePublic);
         results.add(plasmid);
 
         String plasmidPartNumberString = "[[" + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":"
                 + plasmid.getOnePartNumber().getPartNumber() + "|" + plasmid.getOneName().getName()
                 + "]]";
-        strain.setPlasmids(plasmidPartNumberString);
-        strain = (Strain) createEntry(account, strain, makePublic);
+        ((Strain) strain).setPlasmids(plasmidPartNumberString);
+        strain = createEntry(account, strain, makePublic);
         results.add(strain);
         return results;
     }
@@ -391,7 +391,7 @@ public class EntryController {
             throw new PermissionException("No write permission for entry!");
         }
 
-        Entry savedEntry = null;
+        Entry savedEntry;
 
         try {
             entry.setModificationTime(Calendar.getInstance().getTime());

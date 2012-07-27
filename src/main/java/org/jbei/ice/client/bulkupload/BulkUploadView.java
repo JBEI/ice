@@ -34,6 +34,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     private VerticalPanel menuPanel;
     private ToggleButton toggle;
     private Button saveButton;
+    private Button approveButton;
     private Button resetButton;
     private SaveDraftInput draftInput;
     private UpdateDraftInput updateDraftInput;
@@ -58,6 +59,8 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         saveButton.setStyleName("saved_draft_button");
         resetButton = new Button("Reset");
         resetButton.setStyleName("saved_draft_button");
+        approveButton = new Button("Approve");
+        approveButton.setStyleName("saved_draft_button");
         draftInput = new SaveDraftInput();
         updateDraftInput = new UpdateDraftInput();
     }
@@ -89,6 +92,11 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     @Override
     public void setSubmitHandler(ClickHandler submitHandler) {
         this.saveButton.addClickHandler(submitHandler);
+    }
+
+    @Override
+    public void setApproveHandler(ClickHandler handler) {
+        this.approveButton.addClickHandler(handler);
     }
 
     @Override
@@ -145,7 +153,7 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
     }
 
     @Override
-    public void setSheet(NewBulkInput bulkImport, boolean isNew) {
+    public void setSheet(NewBulkInput bulkImport, boolean isNew, boolean isValidation) {
 
         FlexTable panel = new FlexTable();
         panel.setCellPadding(0);
@@ -154,17 +162,24 @@ public class BulkUploadView extends AbstractLayout implements IBulkUploadView {
         sheet = bulkImport;
 
         if (!isNew) {
-            updateDraftInput.setDraftName(bulkImport.getName());
-            panel.setWidget(0, 0, updateDraftInput);
-            panel.setWidget(0, 1, feedback);
+            if (isValidation) {
+                // if validating, only show a "validate" button
+                panel.setWidget(0, 0, new Label(bulkImport.getName()));
+                panel.setWidget(0, 1, feedback);
+                panel.setWidget(0, 2, approveButton);
+                panel.getFlexCellFormatter().setWidth(0, 2, "70px");
+            } else {
+                updateDraftInput.setDraftName(bulkImport.getName());
+                panel.setWidget(0, 0, updateDraftInput);
+                panel.setWidget(0, 1, feedback);
 
-            panel.setWidget(0, 2, resetButton);
-            panel.getFlexCellFormatter().setWidth(0, 2, "40px");
+                panel.setWidget(0, 2, resetButton);
+                panel.getFlexCellFormatter().setWidth(0, 2, "40px");
 
-            panel.setWidget(0, 3, saveButton);
-            panel.getFlexCellFormatter().setWidth(0, 3, "70px");
+                panel.setWidget(0, 3, saveButton);
+                panel.getFlexCellFormatter().setWidth(0, 3, "70px");
+            }
         } else {
-
             panel.setWidget(0, 0, draftInput);
             panel.setWidget(0, 1, feedback);
 

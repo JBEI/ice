@@ -1,13 +1,13 @@
 package org.jbei.ice.lib.entry;
 
+import java.util.Calendar;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.PartNumber;
 import org.jbei.ice.lib.utils.Utils;
-
-import java.util.Calendar;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 /**
  * Factory for creating entry objects in the database
@@ -34,8 +34,8 @@ public class EntryFactory {
             newEntry.setModificationTime(Calendar.getInstance().getTime());
         }
 
-        newEntry.setCreator(account.getFullName());
-        newEntry.setCreatorEmail(account.getEmail());
+        newEntry.setOwner(account.getFullName());
+        newEntry.setOwnerEmail(account.getEmail());
 
         return newEntry;
     }

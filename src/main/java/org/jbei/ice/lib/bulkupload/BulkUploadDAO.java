@@ -123,7 +123,7 @@ class BulkUploadDAO extends HibernateRepository<BulkUpload> {
             session = newSession();
             session.getTransaction().begin();
             Query query = session
-                    .createSQLQuery("select count(*) from bulk_import_draft_entry where bulk_import_draft_id = "
+                    .createSQLQuery("select count(*) from bulk_upload_entry where bulk_upload_id = "
                                             + draftId);
             int count = ((BigInteger) query.uniqueResult()).intValue();
             session.getTransaction().commit();

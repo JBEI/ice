@@ -59,7 +59,6 @@ public class BulkUploadModel {
             protected void callService(AsyncCallback<BulkUploadInfo> callback) {
                 try {
                     service.saveBulkImportDraft(AppController.sessionId,
-                                                AppController.accountInfo.getEmail(),
                                                 name,
                                                 type,
                                                 entryList, callback);
@@ -71,6 +70,27 @@ public class BulkUploadModel {
             @Override
             public void onSuccess(BulkUploadInfo result) {
                 handler.onSubmit(new BulkUploadDraftSubmitEvent(result));
+            }
+        }.go(eventBus);
+    }
+
+    public void approvePendingBulkImport(final long draftId, final ArrayList<EntryInfo> entryList,
+            final BulkUploadSubmitEventHandler handler) {
+
+        new IceAsyncCallback<Boolean>() {
+
+            @Override
+            protected void callService(AsyncCallback<Boolean> callback) {
+                try {
+                    service.approvePendingBulkImport(AppController.sessionId, draftId, entryList, callback);
+                } catch (AuthenticationException e) {
+                    History.newItem(Page.LOGIN.getLink());
+                }
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+                handler.onSubmit(new BulkUploadSubmitEvent(result));
             }
         }.go(eventBus);
     }

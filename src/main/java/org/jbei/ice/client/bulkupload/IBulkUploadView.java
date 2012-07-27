@@ -35,7 +35,7 @@ public interface IBulkUploadView {
 
     void setToggleMenuVisibility(boolean visible);
 
-    void setSheet(NewBulkInput input, boolean isNew);
+    void setSheet(NewBulkInput input, boolean isNew, boolean isValidation);
 
     void setDraftUpdateHandler(ClickHandler handler);
 
@@ -50,4 +50,6 @@ public interface IBulkUploadView {
     void updateSavedDraftsMenu(BulkUploadMenuItem item);
 
     SingleSelectionModel<BulkUploadMenuItem> getPendingMenuModel();
+
+    void setApproveHandler(ClickHandler handler);
 }

@@ -192,10 +192,12 @@ public interface RegistryServiceAsync {
     void removeFromUserCollection(String sessionId, long source, ArrayList<Long> ids,
             AsyncCallback<FolderDetails> async) throws AuthenticationException;
 
-    void saveBulkImportDraft(String sid, String email, String name, EntryAddType importType,
-            ArrayList<EntryInfo> entryList, AsyncCallback<BulkUploadInfo> async)
-            throws AuthenticationException;
+    void saveBulkImportDraft(String sid, String name, EntryAddType importType, ArrayList<EntryInfo> entryList,
+            AsyncCallback<BulkUploadInfo> async) throws AuthenticationException;
 
     void submitBulkImport(String sid, EntryAddType importType, ArrayList<EntryInfo> entryList,
             AsyncCallback<Boolean> async);
+
+    void approvePendingBulkImport(String sessionId, long id, ArrayList<EntryInfo> entryList,
+            AsyncCallback<Boolean> callback) throws AuthenticationException;
 }
