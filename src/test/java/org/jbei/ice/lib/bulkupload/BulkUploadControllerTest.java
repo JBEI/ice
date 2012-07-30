@@ -148,6 +148,7 @@ public class BulkUploadControllerTest {
         Assert.assertNotNull(updatedDraft);
 
         ArrayList<Entry> allEntries = entryController.getAllEntries();
+        Assert.assertNotNull(allEntries);
         int count = 0;
         for (Entry entry : allEntries) {
             if (entry.getOwnerEmail().equals(account.getEmail()))
@@ -206,7 +207,7 @@ public class BulkUploadControllerTest {
         // should be owned by system
         user = controller.retrieveByUser(adminAccount, accountController.getSystemAccount());
         int systemSize = user.size();
-        Assert.assertTrue(systemSize > 1);
+        Assert.assertTrue(systemSize >= 1);
 
         // now approve
         Assert.assertTrue(controller.approveBulkImport(adminAccount, verify.getId(), verify.getEntryList()));

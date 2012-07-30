@@ -18,8 +18,6 @@ public class FolderDAOTest {
 
     @Test
     public void testGet() throws Exception {
-        Folder folder = dao.get(1);
-        Assert.assertNotNull(folder);
     }
 
     @Test
