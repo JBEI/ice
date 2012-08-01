@@ -372,7 +372,7 @@ class EntryDAO extends HibernateRepository<Entry> {
      * @throws DAOException
      */
     @SuppressWarnings("unchecked")
-    public ArrayList<Long> getEntriesByOwner(String ownerEmail, Integer... excludeVisibilities)
+    public ArrayList<Long> getEntriesByOwner(String ownerEmail, Integer... visibility)
             throws DAOException {
         ArrayList<Long> entries = null;
 
@@ -383,10 +383,10 @@ class EntryDAO extends HibernateRepository<Entry> {
             Criteria criteria = session.createCriteria(Entry.class.getName()).add(
                     Restrictions.eq("ownerEmail", ownerEmail));
 
-            // add no restrictions if no visibilities
-            if (excludeVisibilities.length > 0) {
+            if (visibility != null) {
+                // retrieve visibilities that are null (legacy) or specified in param
                 criteria.add(Restrictions.or(
-                        Restrictions.not(Restrictions.in("visibility", excludeVisibilities)),
+                        Restrictions.in("visibility", visibility),
                         Restrictions.isNull("visibility")));
             }
 

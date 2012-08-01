@@ -149,14 +149,9 @@ public class BulkUploadControllerTest {
         updatedDraft = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList);
         Assert.assertNotNull(updatedDraft);
 
-        ArrayList<Entry> allEntries = entryController.getAllEntries();
+        ArrayList<Long> allEntries = entryController.getEntryIdsByOwner(account.getEmail(), Visibility.DRAFT);
         Assert.assertNotNull(allEntries);
-        int count = 0;
-        for (Entry entry : allEntries) {
-            if (entry.getOwnerEmail().equals(account.getEmail()))
-                count += 1;
-        }
-        Assert.assertEquals(2, count);
+        Assert.assertEquals(2, allEntries.size());
 
         // verify
         BulkUploadInfo verify = controller.retrieveById(account, createdDraft.getId());

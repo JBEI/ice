@@ -331,9 +331,15 @@ public class EntryController {
         return numberOfVisibleEntries;
     }
 
-    public ArrayList<Long> getEntryIdsByOwner(String ownerEmail) throws ControllerException {
+    public ArrayList<Long> getEntryIdsByOwner(String ownerEmail, Visibility... visibilityList)
+            throws ControllerException {
         try {
-            return dao.getEntriesByOwner(ownerEmail, new Integer(0));
+            Integer[] list = new Integer[visibilityList.length];
+            int i = 0;
+            for (Visibility visibility : visibilityList)
+                list[i] = visibility.getValue();
+
+            return dao.getEntriesByOwner(ownerEmail, list);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -342,10 +348,9 @@ public class EntryController {
     /**
      * Save the entry into the database. Then schedule index rebuild.
      *
-     * @param entry
+     * @param entry entry object to save
      * @return Saved entry.
      * @throws ControllerException
-     * @throws PermissionException
      */
     public Entry save(Entry entry) throws ControllerException {
         return save(entry, true);
