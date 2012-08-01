@@ -15,6 +15,7 @@ import org.jbei.ice.client.bulkupload.events.SavedDraftsEventHandler;
 import org.jbei.ice.client.bulkupload.model.BulkUploadModel;
 import org.jbei.ice.client.bulkupload.model.NewBulkInput;
 import org.jbei.ice.client.bulkupload.sheet.Sheet;
+import org.jbei.ice.client.event.FeedbackEvent;
 import org.jbei.ice.client.util.DateUtilities;
 import org.jbei.ice.shared.EntryAddType;
 import org.jbei.ice.shared.dto.BulkUploadInfo;
@@ -29,7 +30,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 /**
  * Presenter for the bulk import page
- *
+ * 
  * @author Hector Plahar
  */
 public class BulkUploadPresenter extends AbstractPresenter {
@@ -57,6 +58,14 @@ public class BulkUploadPresenter extends AbstractPresenter {
         retrieveSavedDrafts();
         retrieveAutoCompleteData();
         retrievePendingIfAdmin();
+
+        model.getEventBus().addHandler(FeedbackEvent.TYPE,
+            new FeedbackEvent.IFeedbackEventHandler() {
+                @Override
+                public void onFeedbackAvailable(FeedbackEvent event) {
+                    display.showFeedback(event.getMessage(), event.isError());
+                }
+            });
     }
 
     private void setClickHandlers() {
@@ -99,9 +108,9 @@ public class BulkUploadPresenter extends AbstractPresenter {
      */
     private void setMenuSelectionModel() {
         view.getDraftMenuModel().addSelectionChangeHandler(
-                new MenuSelectionHandler(view.getDraftMenuModel()));
+            new MenuSelectionHandler(view.getDraftMenuModel()));
         view.getPendingMenuModel().addSelectionChangeHandler(
-                new MenuSelectionHandler(view.getPendingMenuModel()));
+            new MenuSelectionHandler(view.getPendingMenuModel()));
     }
 
     private void setCreateSelectionModel() {
@@ -143,13 +152,13 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     String dateTime = DateUtilities.formatShorterDate(info.getCreated());
                     BulkUploadMenuItem item = new BulkUploadMenuItem(info.getId(), name, info
                             .getCount(), dateTime, info.getType().toString(), info.getAccount()
-                                                                                  .getEmail());
+                            .getEmail());
                     data.add(item);
                 }
 
                 if (!data.isEmpty()) {
                     view.setSavedDraftsData(data, new DeleteBulkUploadHandler(model.getService(),
-                                                                              model.getEventBus()));
+                            model.getEventBus()));
                 } else
                     view.setToggleMenuVisibility(false);
             }
@@ -170,13 +179,13 @@ public class BulkUploadPresenter extends AbstractPresenter {
                     String dateTime = DateUtilities.formatShorterDate(info.getCreated());
                     BulkUploadMenuItem item = new BulkUploadMenuItem(info.getId(), name, info
                             .getCount(), dateTime, info.getType().toString(), info.getAccount()
-                                                                                  .getEmail());
+                            .getEmail());
                     data.add(item);
                 }
 
                 if (!data.isEmpty())
                     view.setPendingDraftsData(data, new DeleteBulkUploadHandler(model.getService(),
-                                                                                model.getEventBus()));
+                            model.getEventBus()));
             }
         });
     }
@@ -206,26 +215,26 @@ public class BulkUploadPresenter extends AbstractPresenter {
             }
 
             ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(
-                    AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName());
+                AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName());
             if (cellData == null || cellData.isEmpty()) {
                 view.showFeedback("Please enter data into the sheet before submitting", true);
                 return;
             }
 
             model.submitBulkImport(currentInput.getImportType(), cellData,
-                                   new BulkUploadSubmitEventHandler() {
+                new BulkUploadSubmitEventHandler() {
 
-                                       @Override
-                                       public void onSubmit(BulkUploadSubmitEvent event) {
-                                           if (event.isSuccess()) {
-                                               view.showFeedback("Entries submitted successfully for verification.",
-                                                                 false);
-                                               History.newItem(Page.COLLECTIONS.getLink());
-                                           } else {
-                                               view.showFeedback("Error saving entries.", true);
-                                           }
-                                       }
-                                   });
+                    @Override
+                    public void onSubmit(BulkUploadSubmitEvent event) {
+                        if (event.isSuccess()) {
+                            view.showFeedback("Entries submitted successfully for verification.",
+                                false);
+                            History.newItem(Page.COLLECTIONS.getLink());
+                        } else {
+                            view.showFeedback("Error saving entries.", true);
+                        }
+                    }
+                });
         }
     }
 
@@ -240,25 +249,25 @@ public class BulkUploadPresenter extends AbstractPresenter {
             }
 
             ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(
-                    AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName());
+                AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName());
             if (cellData == null || cellData.isEmpty()) {
                 view.showFeedback("Please enter data into the sheet before submitting", true);
                 return;
             }
 
             model.approvePendingBulkImport(currentInput.getId(), cellData,
-                                           new BulkUploadSubmitEventHandler() {
+                new BulkUploadSubmitEventHandler() {
 
-                                               @Override
-                                               public void onSubmit(BulkUploadSubmitEvent event) {
-                                                   if (event.isSuccess()) {
-                                                       view.showFeedback("Entries approved successfully", false);
-                                                       History.newItem(Page.COLLECTIONS.getLink());
-                                                   } else {
-                                                       view.showFeedback("Error approve bulk import.", true);
-                                                   }
-                                               }
-                                           });
+                    @Override
+                    public void onSubmit(BulkUploadSubmitEvent event) {
+                        if (event.isSuccess()) {
+                            view.showFeedback("Entries approved successfully", false);
+                            History.newItem(Page.COLLECTIONS.getLink());
+                        } else {
+                            view.showFeedback("Error approve bulk import.", true);
+                        }
+                    }
+                });
         }
     }
 
@@ -278,47 +287,40 @@ public class BulkUploadPresenter extends AbstractPresenter {
             currentInput.setName(name);
 
             ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(
-                    AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName());
+                AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName());
             if (cellData == null || cellData.isEmpty()) {
                 view.showFeedback("Please enter data before saving draft", true);
                 return;
             }
 
-            model.saveBulkImportDraftData(
-                    currentInput.getImportType(),
-                    name, cellData,
-                    new BulkUploadDraftSubmitEvent.BulkUploadDraftSubmitEventHandler() {
+            model.saveBulkImportDraftData(currentInput.getImportType(), name, cellData,
+                new BulkUploadDraftSubmitEvent.BulkUploadDraftSubmitEventHandler() {
 
-                        @Override
-                        public void onSubmit(BulkUploadDraftSubmitEvent event) {
-                            if (event == null || event.getDraftInfo() == null)
-                                view.showFeedback("Error saving draft", true);
-                            else {
-                                BulkUploadInfo info = event.getDraftInfo();
-                                view.showFeedback("Draft successfully saved", false);
-                                String dateTime = DateUtilities.formatShorterDate(
-                                        info.getCreated());
-                                BulkUploadMenuItem item = new BulkUploadMenuItem(info.getId(),
-                                                                                 info.getName(),
-                                                                                 info.getCount(),
-                                                                                 dateTime,
-                                                                                 info.getType().toString(),
-                                                                                 info.getAccount().getEmail());
+                    @Override
+                    public void onSubmit(BulkUploadDraftSubmitEvent event) {
+                        if (event == null || event.getDraftInfo() == null)
+                            view.showFeedback("Error saving draft", true);
+                        else {
+                            BulkUploadInfo info = event.getDraftInfo();
+                            view.showFeedback("Draft successfully saved", false);
+                            String dateTime = DateUtilities.formatShorterDate(info.getCreated());
+                            BulkUploadMenuItem item = new BulkUploadMenuItem(info.getId(), info
+                                    .getName(), info.getCount(), dateTime, info.getType()
+                                    .toString(), info.getAccount().getEmail());
 
-                                view.addSavedDraftData(
-                                        item,
-                                        new DeleteBulkUploadHandler(model.getService(),
-                                                                    model.getEventBus()));
-                                currentInput.setName(info.getName());
-                                currentInput.setId(info.getId());
-                                currentInput.getSheet().setCurrentInfo(info);
+                            view.addSavedDraftData(
+                                item,
+                                new DeleteBulkUploadHandler(model.getService(), model.getEventBus()));
+                            currentInput.setName(info.getName());
+                            currentInput.setId(info.getId());
+                            currentInput.getSheet().setCurrentInfo(info);
 
-                                view.setSheet(currentInput, false, false);
-                                view.setHeader(currentInput.getImportType().getDisplay()
-                                                       + " Bulk Import");
-                            }
+                            view.setSheet(currentInput, false, false);
+                            view.setHeader(currentInput.getImportType().getDisplay()
+                                    + " Bulk Import");
                         }
-                    });
+                    }
+                });
         }
     }
 
@@ -332,30 +334,26 @@ public class BulkUploadPresenter extends AbstractPresenter {
             long id = currentInput.getId();
             final EntryAddType type = currentInput.getImportType();
             ArrayList<EntryInfo> cellData = currentInput.getSheet().getCellData(
-                    AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName());
+                AppController.accountInfo.getEmail(), AppController.accountInfo.getFullName());
 
             model.updateBulkImportDraft(id, type, cellData,
-                                        new BulkUploadDraftSubmitEvent.BulkUploadDraftSubmitEventHandler() {
+                new BulkUploadDraftSubmitEvent.BulkUploadDraftSubmitEventHandler() {
 
-                                            @Override
-                                            public void onSubmit(BulkUploadDraftSubmitEvent event) {
-                                                if (event == null || event.getDraftInfo() == null)
-                                                    view.showFeedback("Error updating draft", true);
-                                                else {
-                                                    BulkUploadInfo info = event.getDraftInfo();
-                                                    view.showFeedback("Update successful", false);
-                                                    String time = DateUtilities.formatShorterDate(info.getCreated());
-                                                    BulkUploadMenuItem menuItem = new BulkUploadMenuItem(
-                                                            info.getId(),
-                                                            info.getName(),
-                                                            info.getCount(),
-                                                            time,
-                                                            type.getDisplay(),
-                                                            AppController.accountInfo.getEmail());
-                                                    view.updateSavedDraftsMenu(menuItem);
-                                                }
-                                            }
-                                        });
+                    @Override
+                    public void onSubmit(BulkUploadDraftSubmitEvent event) {
+                        if (event == null || event.getDraftInfo() == null)
+                            view.showFeedback("Error updating draft", true);
+                        else {
+                            BulkUploadInfo info = event.getDraftInfo();
+                            view.showFeedback("Update successful", false);
+                            String time = DateUtilities.formatShorterDate(info.getCreated());
+                            BulkUploadMenuItem menuItem = new BulkUploadMenuItem(info.getId(), info
+                                    .getName(), info.getCount(), time, type.getDisplay(),
+                                    AppController.accountInfo.getEmail());
+                            view.updateSavedDraftsMenu(menuItem);
+                        }
+                    }
+                });
         }
     }
 
