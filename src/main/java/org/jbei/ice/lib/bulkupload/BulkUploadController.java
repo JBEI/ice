@@ -251,7 +251,7 @@ public class BulkUploadController {
             throws ControllerException, PermissionException {
         BulkUpload draft;
         try {
-            draft = dao.retrieveById(draftId);
+            draft = dao.retrieveByIdWithContents(draftId);
             if (draft == null)
                 throw new ControllerException("Could not retrieve draft with id \"" + draftId + "\"");
 
@@ -259,7 +259,17 @@ public class BulkUploadController {
             if (!requesting.equals(draftAccount) && !accountController.isAdministrator(requesting))
                 throw new PermissionException("No permissions to delete draft " + draftId);
 
-            draft.setContents(null);
+            boolean maintainContents = false;
+
+            for (Entry entry : draft.getContents()) {
+                if (entry.getVisibility() != Visibility.DRAFT.getValue()) {
+                    maintainContents = true;
+                    break;
+                }
+            }
+
+            if (maintainContents)
+                draft.setContents(null);
             dao.delete(draft);
 
         } catch (DAOException e) {
@@ -299,9 +309,8 @@ public class BulkUploadController {
      * @return created BulkUpload object converted to data transfer equivalent
      * @throws ControllerException
      */
-    public BulkUploadInfo createBulkImportDraft(Account draftOwner,
-            EntryAddType type, String name, ArrayList<EntryInfo> entryList)
-            throws ControllerException {
+    public BulkUploadInfo createBulkImportDraft(Account draftOwner, EntryAddType type, String name,
+            ArrayList<EntryInfo> entryList) throws ControllerException {
 
         BulkUpload draft = new BulkUpload();
         draft.setName(name);
@@ -334,10 +343,10 @@ public class BulkUploadController {
                 if (info.getInfo() != null) {
                     enclosedEntry = InfoToModelFactory.infoToEntry(info.getInfo());
                     enclosedEntry = entryController.createEntry(draftOwner, enclosedEntry, isAdmin);
-                    String plasmidPartNumberString = "[[" + JbeirSettings.getSetting("WIKILINK_PREFIX")
-                            + ":" + enclosedEntry.getOnePartNumber().getPartNumber()
-                            + "|" + enclosedEntry.getOneName().getName()
-                            + "]]";
+                    String plasmidPartNumberString = "[["
+                            + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":"
+                            + enclosedEntry.getOnePartNumber().getPartNumber() + "|"
+                            + enclosedEntry.getOneName().getName() + "]]";
                     ((Strain) entry).setPlasmids(plasmidPartNumberString);
                     entry = entryController.createEntry(draftOwner, entry, isAdmin);
                 }
@@ -414,10 +423,10 @@ public class BulkUploadController {
                 if (info.getInfo() != null) {
                     enclosedEntry = InfoToModelFactory.infoToEntry(info.getInfo());
                     enclosedEntry = entryController.createEntry(account, enclosedEntry, isAdmin);
-                    String plasmidPartNumberString = "[[" + JbeirSettings.getSetting("WIKILINK_PREFIX")
-                            + ":" + enclosedEntry.getOnePartNumber().getPartNumber()
-                            + "|" + enclosedEntry.getOneName().getName()
-                            + "]]";
+                    String plasmidPartNumberString = "[["
+                            + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":"
+                            + enclosedEntry.getOnePartNumber().getPartNumber() + "|"
+                            + enclosedEntry.getOneName().getName() + "]]";
                     ((Strain) entry).setPlasmids(plasmidPartNumberString);
                     entry = entryController.createEntry(account, entry, isAdmin);
                 }
@@ -449,7 +458,8 @@ public class BulkUploadController {
         return BulkUploadUtil.modelToInfo(attachmentController, draft);
     }
 
-    protected void saveAttachments(Account account, ArrayList<AttachmentInfo> attachmentInfoArrayList, Entry entry)
+    protected void saveAttachments(Account account,
+            ArrayList<AttachmentInfo> attachmentInfoArrayList, Entry entry)
             throws ControllerException {
 
         if (attachmentInfoArrayList == null)
@@ -521,9 +531,8 @@ public class BulkUploadController {
                 // update enclosing and get the part number
                 enclosingEntry = entryController.update(account, enclosingEntry);
                 String plasmidPartNumberString = "[[" + JbeirSettings.getSetting("WIKILINK_PREFIX")
-                        + ":" + enclosingEntry.getOnePartNumber().getPartNumber()
-                        + "|" + enclosingEntry.getOneName().getName()
-                        + "]]";
+                        + ":" + enclosingEntry.getOnePartNumber().getPartNumber() + "|"
+                        + enclosingEntry.getOneName().getName() + "]]";
                 ((Strain) entry).setPlasmids(plasmidPartNumberString);
 
                 // update sequence and attachment
@@ -545,15 +554,16 @@ public class BulkUploadController {
     }
 
     /**
-     * Submits a bulk import that has been saved. This action is restricted to the owner of the draft
+     * Submits a bulk import that has been saved. This action is restricted to the owner of the
+     * draft
      * or to administrators.
      *
      * @param account Account of user performing save
      * @param draftId unique identifier for saved bulk import
      * @return true, if draft was sa
      */
-    public boolean submitBulkImportDraft(Account account, long draftId, ArrayList<EntryInfo> entryList)
-            throws ControllerException, PermissionException {
+    public boolean submitBulkImportDraft(Account account, long draftId,
+            ArrayList<EntryInfo> entryList) throws ControllerException, PermissionException {
 
         // retrieve draft
         BulkUpload draft;
@@ -597,10 +607,10 @@ public class BulkUploadController {
                 if (info.getInfo() != null) {
                     enclosedEntry = InfoToModelFactory.infoToEntry(info.getInfo());
                     enclosedEntry = entryController.createEntry(account, enclosedEntry, isAdmin);
-                    String plasmidPartNumberString = "[[" + JbeirSettings.getSetting("WIKILINK_PREFIX")
-                            + ":" + enclosedEntry.getOnePartNumber().getPartNumber()
-                            + "|" + enclosedEntry.getOneName().getName()
-                            + "]]";
+                    String plasmidPartNumberString = "[["
+                            + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":"
+                            + enclosedEntry.getOnePartNumber().getPartNumber() + "|"
+                            + enclosedEntry.getOneName().getName() + "]]";
                     ((Strain) entry).setPlasmids(plasmidPartNumberString);
                     entry = entryController.createEntry(account, entry, isAdmin);
                 }
@@ -626,7 +636,8 @@ public class BulkUploadController {
                 draft.setContents(null);
                 dao.delete(draft);
             } catch (DAOException e) {
-                throw new ControllerException("Could not delete draft " + draft.getId() + ". Delete manually.", e);
+                throw new ControllerException("Could not delete draft " + draft.getId()
+                                                      + ". Delete manually.", e);
             }
             return true;
         }
@@ -686,11 +697,12 @@ public class BulkUploadController {
 
                 if (info.getInfo() != null) {
                     enclosedEntry = InfoToModelFactory.infoToEntry(info.getInfo());
-                    enclosedEntry = entryController.createEntry(entryAccount, enclosedEntry, isAdmin);
-                    String plasmidPartNumberString = "[[" + JbeirSettings.getSetting("WIKILINK_PREFIX")
-                            + ":" + enclosedEntry.getOnePartNumber().getPartNumber()
-                            + "|" + enclosedEntry.getOneName().getName()
-                            + "]]";
+                    enclosedEntry = entryController.createEntry(entryAccount, enclosedEntry,
+                                                                isAdmin);
+                    String plasmidPartNumberString = "[["
+                            + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":"
+                            + enclosedEntry.getOnePartNumber().getPartNumber() + "|"
+                            + enclosedEntry.getOneName().getName() + "]]";
                     ((Strain) entry).setPlasmids(plasmidPartNumberString);
                     entry = entryController.createEntry(entryAccount, entry, isAdmin);
                 }
@@ -741,7 +753,8 @@ public class BulkUploadController {
         try {
             bulkUpload = dao.retrieveByIdWithContents(id);
             if (bulkUpload == null)
-                throw new ControllerException("Could not retrieve bulk upload with id \"" + id + "\" for approval");
+                throw new ControllerException("Could not retrieve bulk upload with id \"" + id
+                                                      + "\" for approval");
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
@@ -766,10 +779,10 @@ public class BulkUploadController {
                     info.getInfo().setVisibility(Visibility.OK);
                     enclosedEntry = InfoToModelFactory.infoToEntry(info.getInfo());
                     enclosedEntry = entryController.createEntry(account, enclosedEntry, true);
-                    String plasmidPartNumberString = "[[" + JbeirSettings.getSetting("WIKILINK_PREFIX")
-                            + ":" + enclosedEntry.getOnePartNumber().getPartNumber()
-                            + "|" + enclosedEntry.getOneName().getName()
-                            + "]]";
+                    String plasmidPartNumberString = "[["
+                            + JbeirSettings.getSetting("WIKILINK_PREFIX") + ":"
+                            + enclosedEntry.getOnePartNumber().getPartNumber() + "|"
+                            + enclosedEntry.getOneName().getName() + "]]";
                     ((Strain) entry).setPlasmids(plasmidPartNumberString);
                     entry = entryController.createEntry(account, entry, true);
                 }
@@ -791,16 +804,16 @@ public class BulkUploadController {
         // when done approving, delete the bulk upload record but not the entries associated with it.
         try {
             bulkUpload.setContents(null);
-            dao.delete(bulkUpload);   // TODO: update to clear join table first??
+            dao.delete(bulkUpload); // TODO: update to clear join table first??
             return true;
         } catch (DAOException e) {
-            throw new ControllerException("Could not delete bulk upload " + bulkUpload
-                    .getId() + ". Contents were approved so please delete manually.", e);
+            throw new ControllerException("Could not delete bulk upload " + bulkUpload.getId()
+                                                  + ". Contents were approved so please delete manually.", e);
         }
     }
 
-    protected void saveSequence(Account account, ArrayList<SequenceAnalysisInfo> sequenceInfoList, Entry entry)
-            throws ControllerException {
+    protected void saveSequence(Account account, ArrayList<SequenceAnalysisInfo> sequenceInfoList,
+            Entry entry) throws ControllerException {
         if (sequenceInfoList == null || sequenceInfoList.isEmpty())
             return;
 

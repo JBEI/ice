@@ -84,11 +84,13 @@ public class BulkUploadControllerTest {
     @Test
     public void comprehensiveTest() throws Exception {
 
+        final String email = "test_Comprehensive@test.org";
+
         // create accounts
         AccountController accountController = new AccountController();
-        String password = accountController.createNewAccount("", "TESTER", "", "tester@test.org", "LBL", "");
+        String password = accountController.createNewAccount("", "TESTER", "", email, "LBL", "");
         Assert.assertNotNull(password);
-        Account account = accountController.getByEmail("tester@test.org");
+        Account account = accountController.getByEmail(email);
         Assert.assertNotNull(account);
         Account adminAccount = accountController.createAdminAccount("tester+admin@test.org", "popop");
         Assert.assertNotNull(adminAccount);
@@ -304,16 +306,53 @@ public class BulkUploadControllerTest {
     @Test
     public void testDeleteDraftById() throws Exception {
 
+        final String email = "tester@test_DeleteDraftById.org";
+
+        // create accounts
+        AccountController accountController = new AccountController();
+        String password = accountController.createNewAccount("", "TESTER", "", email, "LBL", "");
+        Assert.assertNotNull(password);
+        Account account = accountController.getByEmail(email);
+        Assert.assertNotNull(account);
+
+        // starting with clean slate now
+        ArrayList<EntryInfo> entryList = new ArrayList<EntryInfo>();
+
+        // create draft with no entries
+        BulkUploadInfo createdDraft = controller.createBulkImportDraft(account, EntryAddType.ARABIDOPSIS, "Test",
+                                                                       entryList);
+        Assert.assertNotNull(createdDraft);
+
+        // save entry with draft
+        ArabidopsisSeedInfo info = new ArabidopsisSeedInfo();
+        info.setGeneration(ArabidopsisSeedInfo.Generation.M1);
+        info.setName("Name");
+        info.setAlias("Alias");
+        info.setEcotype("Ecotype");
+        info.setHomozygosity("homozygot");
+        info.setParents("parent");
+        info.setPlantType(ArabidopsisSeedInfo.PlantType.OTHER);
+        entryList.add(info);
+        BulkUploadInfo updatedBulk = controller.updateBulkImportDraft(account, createdDraft.getId(), entryList);
+        Assert.assertNotNull(updatedBulk);
+        Assert.assertEquals(1, updatedBulk.getCount());
+
+        // delete draft
+        Assert.assertNotNull(controller.deleteDraftById(account, updatedBulk.getId()));
+
+        // ensure contents are deleted
     }
 
     @Test
     public void testCreateBulkImportDraft() throws Exception {
+
+        final String email = "tester@test_CreateBulkImportDraft.org";
+
         // create accounts
         AccountController accountController = new AccountController();
-        String password = accountController.createNewAccount("", "TESTER", "", "tester@test_CreateBulkImportDraft.org",
-                                                             "LBL", "");
+        String password = accountController.createNewAccount("", "TESTER", "", email, "LBL", "");
         Assert.assertNotNull(password);
-        Account account = accountController.getByEmail("tester@test.org");
+        Account account = accountController.getByEmail(email);
         Assert.assertNotNull(account);
         Account adminAccount = accountController.createAdminAccount("tester+admin@test_CreateBulkImportDraft.org",
                                                                     "popop");

@@ -162,7 +162,7 @@ public interface RegistryService extends RemoteService {
 
     EntryInfo retrieveEntryTipDetails(String sessionId, long id) throws AuthenticationException;
 
-    BulkUploadInfo deleteDraftPendingVerification(String sid, long draftId) throws AuthenticationException;
+    BulkUploadInfo deleteSavedDraft(String sid, long draftId) throws AuthenticationException;
 
     ArrayList<FolderDetails> deleteEntry(String sessionId, EntryInfo info) throws AuthenticationException;
 

@@ -124,11 +124,13 @@ public class EntryController {
             throw new ControllerException(e);
         }
 
-        Group publicGroup = groupController.createOrRetrievePublicGroup();
-        try {
-            permissionsController.addReadGroup(account, createdEntry, publicGroup);
-        } catch (PermissionException pe) {
-            Logger.error("Could not make entry " + createdEntry.getId() + " public ", pe);
+        if (addPublicRead) {
+            Group publicGroup = groupController.createOrRetrievePublicGroup();
+            try {
+                permissionsController.addReadGroup(account, createdEntry, publicGroup);
+            } catch (PermissionException pe) {
+                Logger.error("Could not make entry " + createdEntry.getId() + " public ", pe);
+            }
         }
 
         if (scheduleIndexRebuild) {

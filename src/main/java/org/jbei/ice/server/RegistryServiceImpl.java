@@ -1212,17 +1212,21 @@ public class RegistryServiceImpl extends RemoteServiceServlet implements Registr
     }
 
     @Override
-    public BulkUploadInfo deleteDraftPendingVerification(String sid, long draftId)
+    public BulkUploadInfo deleteSavedDraft(String sid, long draftId)
             throws AuthenticationException {
 
         try {
             Account account = retrieveAccountForSid(sid);
             AccountController controller = new AccountController();
-            if (!controller.isAdministrator(account))
-                return null;
-
-            Logger.info(account.getEmail() + ": deleting bulk import draft with id " + draftId);
             BulkUploadController draftController = new BulkUploadController();
+            Logger.info(account.getEmail() + ": deleting bulk import draft with id " + draftId);
+
+            BulkUploadInfo info = draftController.retrieveById(account, draftId);
+            if (info == null) {
+                Logger.info(account.getEmail() + ": could not locate draft with id " + draftId);
+                return null;
+            }
+
             return draftController.deleteDraftById(account, draftId);
         } catch (ControllerException ce) {
             Logger.error(ce);

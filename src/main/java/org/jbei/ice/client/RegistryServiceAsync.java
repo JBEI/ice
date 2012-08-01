@@ -76,7 +76,7 @@ public interface RegistryServiceAsync {
     void retrieveDraftsPendingVerification(String sid,
             AsyncCallback<ArrayList<BulkUploadInfo>> callback) throws AuthenticationException;
 
-    void deleteDraftPendingVerification(String sid, long draftId,
+    void deleteSavedDraft(String sid, long draftId,
             AsyncCallback<BulkUploadInfo> callback) throws AuthenticationException;
 
     void createSample(String sessionId, SampleStorage sampleStorage, long entryId,

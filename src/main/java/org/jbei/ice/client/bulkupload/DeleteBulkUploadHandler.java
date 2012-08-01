@@ -31,7 +31,7 @@ public class DeleteBulkUploadHandler implements IDeleteMenuHandler {
             @Override
             protected void callService(AsyncCallback<BulkUploadInfo> callback) {
                 try {
-                    service.deleteDraftPendingVerification(AppController.sessionId, draftId, callback);
+                    service.deleteSavedDraft(AppController.sessionId, draftId, callback);
                 } catch (AuthenticationException e) {
                     History.newItem(Page.LOGIN.getLink());
                 }
