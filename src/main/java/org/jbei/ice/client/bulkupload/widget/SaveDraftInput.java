@@ -18,6 +18,7 @@ public class SaveDraftInput extends Composite {
         saveDraftButton.setStyleName("saved_draft_button");
         inputName = new TextBox();
         inputName.setMaxLength(36);
+        inputName.getElement().setAttribute("placeholder", "Enter draft name");
         inputName.setStyleName("saved_draft_input");
         FlexTable layout = new FlexTable();
         layout.setStyleName("display-inline");

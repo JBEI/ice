@@ -169,6 +169,23 @@ public class Sheet extends Composite implements SheetPresenter.View {
             public void onScroll(ScrollEvent event) {
                 headerWrapper.setHorizontalScrollPosition(sheetTableFocusPanelWrapper.getHorizontalScrollPosition());
                 colIndexWrapper.setVerticalScrollPosition(sheetTableFocusPanelWrapper.getVerticalScrollPosition());
+
+                if (row >= 1000)
+                    return;
+
+                int vScrollPosition = sheetTableFocusPanelWrapper.getVerticalScrollPosition();
+                int maxVscrollPosition = sheetTableFocusPanelWrapper.getMaximumVerticalScrollPosition();
+
+                if (vScrollPosition >= maxVscrollPosition - 100) {
+                    presenter.addRow(row);
+                    // index col
+                    HTML indexCell = new HTML((row + 1) + "");
+                    colIndex.setWidget(row, 0, indexCell);
+                    indexCell.setStyleName("index_cell");
+                    colIndex.getFlexCellFormatter().setStyleName(row, 0, "index_td_cell");
+                    row += 1;
+                }
+
             }
         });
     }
@@ -192,20 +209,18 @@ public class Sheet extends Composite implements SheetPresenter.View {
 
         // add rows
         int count = ROW_COUNT;
-        int i = 1;
         row = 0;
 
         while (count > 0) {
 
             presenter.addRow(row);
             // index col
-            HTML indexCell = new HTML(i + "");
+            HTML indexCell = new HTML((row + 1) + "");
             colIndex.setWidget(row, 0, indexCell);
             indexCell.setStyleName("index_cell");
             colIndex.getFlexCellFormatter().setStyleName(row, 0, "index_td_cell");
 
             count -= 1;
-            i += 1;
             row += 1;
         }
     }
